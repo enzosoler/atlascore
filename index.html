@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link id="app-favicon" rel="icon" type="image/x-icon" href="/branding/light/favicon.ico" sizes="any" />
+    <link id="app-apple-touch-icon" rel="apple-touch-icon" href="/branding/dark/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta id="app-theme-color" name="theme-color" content="#FFFFFF" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Atlas Core</title>
+    <script>
+      (function () {
+        var theme = localStorage.getItem('atlas-theme') || 'light';
+        var isDark = theme === 'dark';
+        var favicon = document.getElementById('app-favicon');
+        var themeColor = document.getElementById('app-theme-color');
+
+        if (favicon) favicon.setAttribute('href', isDark ? '/branding/dark/favicon.ico' : '/branding/light/favicon.ico');
+        if (themeColor) themeColor.setAttribute('content', isDark ? '#1B3A6B' : '#FFFFFF');
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
