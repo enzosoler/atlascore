@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import {
-  getActiveWorkoutPlans,
-  createWorkoutPlan,
-  deactivateAllWorkoutPlans,
-} from '@/services/workoutPlanService';
+// Supabase workout plan services removed — base44 is now the single source of truth
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
@@ -152,14 +148,11 @@ export default function MyWorkout() {
     queryKey: ['workout-plans', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
+      // base44 is the single source of truth for workout plans
       try {
-        return await getActiveWorkoutPlans(user.id);
+        return await base44.entities.WorkoutPlan.filter({ active: true }, '-created_date');
       } catch {
-        try {
-          return await base44.entities.WorkoutPlan.filter({ active: true }, '-created_date');
-        } catch {
-          return [];
-        }
+        return [];
       }
     },
     enabled: !!user?.id,
@@ -220,33 +213,20 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
       clearTimeout(timeoutId);
 
       if (res?.name) {
-        try {
-          await deactivateAllWorkoutPlans(user.id);
-        } catch {
-          for (const p of plans) {
-            try { await base44.entities.WorkoutPlan.update(p.id, { active: false }); } catch { /* noop */ }
-          }
+        // Deactivate previous plans in base44 (single source of truth)
+        for (const p of plans) {
+          try { await base44.entities.WorkoutPlan.update(p.id, { active: false }); } catch { /* noop */ }
         }
-        try {
-          await createWorkoutPlan(user.id, {
-            ...res,
-            created_by_type: 'ai',
-            active: true,
-            version: 1,
-            start_date: new Date().toISOString().split('T')[0],
-          });
-        } catch {
-          try {
-            await base44.entities.WorkoutPlan.create({
-              ...res,
-              created_by_type: 'ai',
-              active: true,
-              version: 1,
-              start_date: new Date().toISOString().split('T')[0],
-            });
-          } catch { /* noop */ }
-        }
+        await base44.entities.WorkoutPlan.create({
+          ...res,
+          source: 'ai',
+          created_by_type: 'ai',
+          active: true,
+          version: 1,
+          start_date: new Date().toISOString().split('T')[0],
+        });
         qc.invalidateQueries({ queryKey: ['workout-plans'] });
+        qc.invalidateQueries({ queryKey: ['workout-plans-active'] });
         toast.success('Plano de treino gerado com sucesso!');
       } else {
         setGenError('A resposta da IA não continha um plano válido. Tente novamente.');

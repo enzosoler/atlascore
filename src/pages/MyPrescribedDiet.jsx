@@ -60,21 +60,22 @@ export default function MyPrescribedDiet() {
   const [form, setForm] = useState(emptyForm());
 
   // Athletes see only their plans; staff sees all they created
+  // Both flows now use DietPlan entity with source: 'nutritionist'
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ['prescribed-diet', user?.email],
     queryFn: () => isStaff
-      ? base44.entities.PrescribedDiet.filter({ coach_email: user.email }, '-created_date')
-      : base44.entities.PrescribedDiet.filter({ athlete_email: user.email }, '-created_date'),
+      ? base44.entities.DietPlan.filter({ source: 'nutritionist', coach_email: user.email }, '-created_date')
+      : base44.entities.DietPlan.filter({ source: 'nutritionist', athlete_email: user.email }, '-created_date'),
     enabled: !!user,
   });
 
   const createM = useMutation({
-    mutationFn: (d) => base44.entities.PrescribedDiet.create(d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['prescribed-diet'] }); setShowCreate(false); setForm(emptyForm()); toast.success('Plano criado'); },
+    mutationFn: (d) => base44.entities.DietPlan.create(d),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['prescribed-diet'] }); qc.invalidateQueries({ queryKey: ['diet-plans-active'] }); setShowCreate(false); setForm(emptyForm()); toast.success('Plano criado'); },
   });
   const deleteM = useMutation({
-    mutationFn: (id) => base44.entities.PrescribedDiet.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['prescribed-diet'] }),
+    mutationFn: (id) => base44.entities.DietPlan.delete(id),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['prescribed-diet'] }); qc.invalidateQueries({ queryKey: ['diet-plans-active'] }); },
   });
 
   const addMeal = () => setForm(f => ({ ...f, meals: [...f.meals, emptyMeal()] }));
@@ -90,8 +91,13 @@ export default function MyPrescribedDiet() {
     if (isStaff && !form.athlete_email) { toast.error('Email do atleta obrigatório'); return; }
     createM.mutate({
       ...form,
+      source: 'nutritionist',
+      created_by_type: 'coach',
       coach_email: user.email,
       athlete_email: isStaff ? form.athlete_email : user.email,
+      active: true,
+      version: 1,
+      start_date: form.start_date || new Date().toISOString().split('T')[0],
       total_calories: form.total_calories ? +form.total_calories : undefined,
       total_protein:  form.total_protein  ? +form.total_protein  : undefined,
       total_carbs:    form.total_carbs    ? +form.total_carbs    : undefined,

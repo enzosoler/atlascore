@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import {
   Clock3,
   Flame,
@@ -649,6 +651,34 @@ function NutritionContent() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [mealFilter, setMealFilter] = useState('all');
+
+  // ── Active diet plan ──────────────────────────────────────────────────────
+  const { data: activePlans = [] } = useQuery({
+    queryKey: ['diet-plans-active'],
+    queryFn: () => base44.entities.DietPlan.filter({ active: true }),
+    staleTime: 5 * 60 * 1000,
+  });
+  const activeDietPlan = activePlans[0] || null;
+
+  // Resolve macro targets: plan first, then DEFAULT_PROFILE fallback
+  const nutritionProfile = useMemo(() => ({
+    calories_target:
+      activeDietPlan?.target_calories ??
+      activeDietPlan?.daily_calories ??
+      DEFAULT_PROFILE.calories_target,
+    protein_target:
+      activeDietPlan?.target_protein ??
+      activeDietPlan?.daily_protein ??
+      DEFAULT_PROFILE.protein_target,
+    carbs_target:
+      activeDietPlan?.target_carbs ??
+      activeDietPlan?.daily_carbs ??
+      DEFAULT_PROFILE.carbs_target,
+    fat_target:
+      activeDietPlan?.target_fat ??
+      activeDietPlan?.daily_fat ??
+      DEFAULT_PROFILE.fat_target,
+  }), [activeDietPlan]);
   const [notice, setNotice] = useState(null);
   const [meals, setMeals] = useState(MOCK_MEALS);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -776,19 +806,20 @@ function NutritionContent() {
   }, [mealsForDate]);
 
   const remainingCalories = getRemainingValue(
-    DEFAULT_PROFILE.calories_target,
+    nutritionProfile.calories_target,
     nutritionTotals.calories
   );
   const remainingProtein = getRemainingValue(
-    DEFAULT_PROFILE.protein_target,
+    nutritionProfile.protein_target,
     nutritionTotals.protein
   );
   const calorieProgress = getProgressPercent(
     nutritionTotals.calories,
-    DEFAULT_PROFILE.calories_target
+    nutritionProfile.calories_target
   );
+  const planMealCount = activeDietPlan?.meals?.length || MOCK_PRESCRIBED_DIET.meals.length;
   const mealCoverage = Math.round(
-    getProgressPercent(mealsForDate.length, MOCK_PRESCRIBED_DIET.meals.length)
+    getProgressPercent(mealsForDate.length, planMealCount)
   );
 
   const handleCreate = () => {
@@ -1044,7 +1075,7 @@ function NutritionContent() {
             <p className="mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
               {Math.round(nutritionTotals.calories)}
               <span className="ml-1 text-[15px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-                / {DEFAULT_PROFILE.calories_target} kcal
+                / {nutritionProfile.calories_target} kcal
               </span>
             </p>
             <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
@@ -1065,21 +1096,21 @@ function NutritionContent() {
             <MacroTrack
               label="Proteína"
               consumed={nutritionTotals.protein}
-              target={DEFAULT_PROFILE.protein_target}
+              target={nutritionProfile.protein_target}
               unit="g"
               tone="protein"
             />
             <MacroTrack
               label="Carboidratos"
               consumed={nutritionTotals.carbs}
-              target={DEFAULT_PROFILE.carbs_target}
+              target={nutritionProfile.carbs_target}
               unit="g"
               tone="carbs"
             />
             <MacroTrack
               label="Gordura"
               consumed={nutritionTotals.fat}
-              target={DEFAULT_PROFILE.fat_target}
+              target={nutritionProfile.fat_target}
               unit="g"
               tone="fat"
             />
@@ -1149,46 +1180,75 @@ function NutritionContent() {
       >
         <div className="space-y-3">
           <Card className="px-5 py-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="atlas-overline">Plano do dia</p>
-                <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                  {MOCK_PRESCRIBED_DIET.name}
-                </p>
-                <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                  {MOCK_PRESCRIBED_DIET.description}
-                </p>
-              </div>
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.78)] text-[hsl(var(--fg-2))]">
-                <UtensilsCrossed className="h-4 w-4" strokeWidth={1.9} />
-              </div>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {MOCK_PRESCRIBED_DIET.meals.map((meal, index) => (
-                <div
-                  key={`${meal.name}-${meal.time}`}
-                  className="flex items-start gap-3 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4"
-                >
-                  <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg-2))]">
-                    <Clock3 className="h-4 w-4" strokeWidth={1.8} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-                        Meal {index + 1}
-                      </p>
-                      <span className="text-[12px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                        {meal.time}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                      {meal.name}
+            {activeDietPlan ? (
+              <>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="atlas-overline">Plano ativo</p>
+                    <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                      {activeDietPlan.name}
                     </p>
+                    {(activeDietPlan.description || activeDietPlan.objective) && (
+                      <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                        {activeDietPlan.description || activeDietPlan.objective}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.78)] text-[hsl(var(--fg-2))]">
+                    <UtensilsCrossed className="h-4 w-4" strokeWidth={1.9} />
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {(activeDietPlan.meals || []).length > 0 && (
+                  <div className="mt-5 space-y-3">
+                    {activeDietPlan.meals.map((meal, index) => (
+                      <div
+                        key={`${meal.name}-${index}`}
+                        className="flex items-start gap-3 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4"
+                      >
+                        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg-2))]">
+                          <Clock3 className="h-4 w-4" strokeWidth={1.8} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+                              Refeição {index + 1}
+                            </p>
+                            {meal.time && (
+                              <span className="text-[12px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                                {meal.time}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                            {meal.name}
+                          </p>
+                          {(meal.calories || meal.protein) ? (
+                            <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
+                              {meal.calories ? `${meal.calories} kcal` : ''}
+                              {meal.protein ? ` · ${meal.protein}g prot` : ''}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.78)] text-[hsl(var(--fg-2))]">
+                  <UtensilsCrossed className="h-4 w-4" strokeWidth={1.9} />
+                </div>
+                <div>
+                  <p className="atlas-overline">Plano do dia</p>
+                  <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+                    Nenhum plano alimentar ativo. Crie um em{' '}
+                    <span className="font-semibold text-[hsl(var(--fg))]">Minha Dieta</span>.
+                  </p>
+                </div>
+              </div>
+            )}
           </Card>
 
           <Card className="px-5 py-5">
@@ -1199,7 +1259,7 @@ function NutritionContent() {
                   Refeicoes registradas
                 </p>
                 <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                  {mealsForDate.length} hoje · {MOCK_PRESCRIBED_DIET.meals.length} previstas no plano.
+                  {mealsForDate.length} hoje · {planMealCount} previstas no plano.
                 </p>
               </div>
               <div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Check, Pencil, Trash2 } from 'lucide-react';
 
 function getStatusLabel(status) {
   if (status === 'paused') return 'Pausado';
@@ -41,6 +41,8 @@ export default function ProtocolCard({
   onResume,
   onFinish,
   onDelete,
+  onLogDose,
+  isLogDosePending = false,
 }) {
   const protocolId = protocol?.id;
   const isPausePending = Boolean(protocolId) && busyActionKey === `${protocolId}-paused`;
@@ -113,6 +115,17 @@ export default function ProtocolCard({
         </div>
 
         <div className="flex flex-wrap gap-2 lg:max-w-[240px] lg:justify-end">
+          {onLogDose && status === 'active' ? (
+            <ActionButton
+              onClick={onLogDose}
+              disabled={isLogDosePending || isAnyPending}
+              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-100"
+            >
+              <Check className="h-4 w-4" strokeWidth={2} />
+              {isLogDosePending ? 'Registrando…' : 'Log dose'}
+            </ActionButton>
+          ) : null}
+
           <ActionButton
             onClick={onEdit}
             disabled={isAnyPending}

@@ -18,7 +18,7 @@ import Landing from '@/pages/Landing.jsx';
 import Onboarding from '@/pages/Onboarding';
 import Today from '@/pages/Today';
 import Nutrition from '@/pages/Nutrition';
-import Workouts from '@/pages/Workouts';
+import WorkoutsV2 from '@/pages/WorkoutsV2';
 import Routines from '@/pages/Routines';
 import Protocols from '@/pages/Protocols';
 import Measurements from '@/pages/Measurements';
@@ -150,7 +150,7 @@ VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
       <Route element={<AppLayout />}>
         <Route path={ROUTES.today} element={<Today />} />
         <Route path={ROUTES.nutrition} element={<Nutrition />} />
-        <Route path={ROUTES.workouts} element={<Workouts />} />
+        <Route path={ROUTES.workouts} element={<WorkoutsV2 />} />
         <Route path={ROUTES.routines} element={<Routines />} />
         <Route path={ROUTES.protocols} element={<Protocols />} />
         <Route path={ROUTES.measurements} element={<Measurements />} />

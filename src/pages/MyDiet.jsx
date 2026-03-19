@@ -6,11 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
 import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, Bot, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  getActiveDietPlans,
-  createDietPlan,
-  deactivateAllDietPlans,
-} from '@/services/dietPlanService';
+// Supabase diet plan services removed — base44 is now the single source of truth
 
 const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'Você' };
 const CREATOR_BADGE  = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutral' };
@@ -92,16 +88,11 @@ export default function MyDiet() {
     queryKey: ['diet-plans', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
+      // base44 is the single source of truth for diet plans
       try {
-        // Tenta Supabase primeiro
-        return await getActiveDietPlans(user.id);
+        return await base44.entities.DietPlan.filter({ active: true, source: 'ai' }, '-created_date');
       } catch {
-        // Fallback para Base44 se Supabase falhar
-        try {
-          return await base44.entities.DietPlan.filter({ active: true }, '-created_date');
-        } catch {
-          return [];
-        }
+        return [];
       }
     },
     enabled: !!user?.id,
@@ -172,37 +163,21 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
       clearTimeout(timeoutId);
 
       if (res?.name) {
-        // Desativa planos anteriores no Supabase
-        try {
-          await deactivateAllDietPlans(user.id);
-        } catch {
-          // Fallback para Base44
-          for (const p of plans) {
-            try { await base44.entities.DietPlan.update(p.id, { active: false }); } catch { /* noop */ }
-          }
+        // Deactivate previous AI plans in base44
+        for (const p of plans) {
+          try { await base44.entities.DietPlan.update(p.id, { active: false }); } catch { /* noop */ }
         }
-        // Cria novo plano no Supabase
-        try {
-          await createDietPlan(user.id, {
-            ...res,
-            created_by_type: 'ai',
-            active: true,
-            version: 1,
-            start_date: new Date().toISOString().split('T')[0],
-          });
-        } catch {
-          // Fallback para Base44
-          try {
-            await base44.entities.DietPlan.create({
-              ...res,
-              created_by_type: 'ai',
-              active: true,
-              version: 1,
-              start_date: new Date().toISOString().split('T')[0],
-            });
-          } catch { /* noop */ }
-        }
+        // Create new plan in base44 (single source of truth)
+        await base44.entities.DietPlan.create({
+          ...res,
+          source: 'ai',
+          created_by_type: 'ai',
+          active: true,
+          version: 1,
+          start_date: new Date().toISOString().split('T')[0],
+        });
         qc.invalidateQueries({ queryKey: ['diet-plans'] });
+        qc.invalidateQueries({ queryKey: ['diet-plans-active'] });
         toast.success('Plano alimentar gerado!');
       } else {
         setGenError('A resposta da IA não continha um plano válido. Tente novamente.');
@@ -282,10 +257,10 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
           <div>
             <p className="t-label mb-3">Totais diários</p>
             <div className="grid grid-cols-4 gap-2">
-              <MacroChip label="Calorias" value={plan.total_calories} unit="kcal" color="hsl(var(--brand))" />
-              <MacroChip label="Proteína" value={plan.total_protein} unit="g" color="#4F8CFF" />
-              <MacroChip label="Carboidr." value={plan.total_carbs} unit="g" color="#8B7CFF" />
-              <MacroChip label="Gordura" value={plan.total_fat} unit="g" color="#F5A83A" />
+              <MacroChip label="Calorias" value={plan.total_calories ?? plan.target_calories} unit="kcal" color="hsl(var(--brand))" />
+              <MacroChip label="Proteína" value={plan.total_protein ?? plan.target_protein} unit="g" color="#4F8CFF" />
+              <MacroChip label="Carboidr." value={plan.total_carbs ?? plan.target_carbs} unit="g" color="#8B7CFF" />
+              <MacroChip label="Gordura" value={plan.total_fat ?? plan.target_fat} unit="g" color="#F5A83A" />
             </div>
           </div>
 

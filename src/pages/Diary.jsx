@@ -196,10 +196,14 @@ function DiaryContent() {
     },
   });
 
+  // Show doses logged for the selected date (protocol_id links log → plan)
   const { data: supplements = [] } = useQuery({
-    queryKey: ['diary-supplements-active'],
+    queryKey: ['diary-supplements', date],
     queryFn: async () => {
       try {
+        const byDate = await base44.entities.Supplement.filter({ date });
+        if (byDate.length > 0) return byDate;
+        // Fallback: show active supplements if none logged for this date
         return await base44.entities.Supplement.filter({ active: true });
       } catch {
         return [];
@@ -528,10 +532,15 @@ function DiaryContent() {
               {supplements.map((s) => (
                 <span
                   key={s.id}
-                  className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.6)] px-3.5 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.6)] px-3.5 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))]"
                 >
                   {s.name}
                   {s.dose ? ` · ${s.dose}` : ''}
+                  {s.protocol_id && (
+                    <span className="rounded-full bg-[hsl(var(--brand)/0.12)] px-1.5 py-0.5 text-[10px] text-[hsl(var(--brand))]">
+                      protocolo
+                    </span>
+                  )}
                 </span>
               ))}
             </div>

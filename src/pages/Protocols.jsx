@@ -160,6 +160,36 @@ function ProtocolsContent() {
     },
   });
 
+  // Log today's dose — creates a Supplement record linked to the protocol via protocol_id
+  const [loggingDoseId, setLoggingDoseId] = useState(null);
+  const logDoseMutation = useMutation({
+    mutationFn: ({ protocol }) =>
+      base44.entities.Supplement.create({
+        protocol_id: protocol.id,
+        name: protocol.substance_name || protocol.name,
+        dose: protocol.dose,
+        category: protocol.category,
+        date: getToday(),
+        active: true,
+        notes: `Dose registrada via protocolo "${protocol.substance_name || protocol.name}"`,
+      }),
+    onMutate: ({ protocol }) => setLoggingDoseId(protocol.id),
+    onSuccess: (_, { protocol }) => {
+      setLoggingDoseId(null);
+      setNotice({
+        tone: 'success',
+        message: `Dose de ${protocol.substance_name || protocol.name} registrada para hoje.`,
+      });
+    },
+    onError: () => {
+      setLoggingDoseId(null);
+      setNotice({
+        tone: 'warning',
+        message: 'Não foi possível registrar a dose. Tente novamente.',
+      });
+    },
+  });
+
   const protocols = toArray(protocolsQuery.data);
   const isLoading = protocolsQuery.isPending;
   const hasLoadError = protocolsQuery.isError;
@@ -384,6 +414,8 @@ function ProtocolsContent() {
                     status !== 'finished' ? () => handleStatusChange(protocol, 'finished') : null
                   }
                   onDelete={() => handleDelete(protocol)}
+                  onLogDose={status === 'active' ? () => logDoseMutation.mutate({ protocol }) : null}
+                  isLogDosePending={loggingDoseId === protocol?.id}
                 />
               );
             })}
