@@ -1,11 +1,8 @@
-import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
-import { appParams, hasBase44Config } from '@/lib/app-params';
-import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 
-const AuthContext = createContext();
-const LOCAL_AUTH_STORAGE_KEY = 'atlas_local_auth_user';
+const AuthContext = createContext(null);
 
 // Auth state machine: 'loading' | 'authenticated' | 'unauthenticated' | 'error'
 const AUTH_STATES = {
@@ -15,69 +12,212 @@ const AUTH_STATES = {
   ERROR: 'error',
 };
 
-const AUTH_CHECK_TIMEOUT = 5000; // 5s max for auth check
-const CROSS_TAB_CHANNEL = 'atlas_auth_channel';
+const AUTH_CHECK_TIMEOUT = 5000;
 
-function readLocalAuthUser() {
-  if (typeof window === 'undefined') return null;
-
-  try {
-    const raw = window.localStorage.getItem(LOCAL_AUTH_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+function withTimeout(promise, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error(`${label} timeout`)), AUTH_CHECK_TIMEOUT);
+    }),
+  ]);
 }
 
-function writeLocalAuthUser(user) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(LOCAL_AUTH_STORAGE_KEY, JSON.stringify(user));
+function firstNonEmptyString(...values) {
+  return values.find((value) => typeof value === 'string' && value.trim().length > 0) || null;
 }
 
-function clearLocalAuthUser() {
-  if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(LOCAL_AUTH_STORAGE_KEY);
+function normalizeBoolean(value) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') return value.toLowerCase() === 'true';
+  return false;
+}
+
+function normalizeSupabaseUser(authUser) {
+  if (!authUser) return null;
+
+  const userMetadata = authUser.user_metadata ?? {};
+  const appMetadata = authUser.app_metadata ?? {};
+  const email = authUser.email || firstNonEmptyString(userMetadata.email, appMetadata.email) || '';
+  const fallbackName = email ? email.split('@')[0] : 'Athlete';
+
+  return {
+    id: authUser.id,
+    email,
+    full_name:
+      firstNonEmptyString(
+        userMetadata.full_name,
+        userMetadata.name,
+        userMetadata.display_name,
+        appMetadata.full_name
+      ) || fallbackName,
+    atlas_role:
+      firstNonEmptyString(
+        userMetadata.atlas_role,
+        appMetadata.atlas_role,
+        userMetadata.role
+      ) || 'athlete',
+    onboarding_completed: normalizeBoolean(userMetadata.onboarding_completed),
+    role: firstNonEmptyString(appMetadata.role, userMetadata.role) || 'user',
+    phone: authUser.phone || firstNonEmptyString(userMetadata.phone) || null,
+    user_metadata: userMetadata,
+    app_metadata: appMetadata,
+    raw_user: authUser,
+  };
+}
+
+function buildAuthError(type, message) {
+  return {
+    type,
+    message: message || 'Authentication error',
+  };
 }
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authState, setAuthState] = useState(AUTH_STATES.LOADING);
   const [authError, setAuthError] = useState(null);
-  const [appPublicSettings, setAppPublicSettings] = useState(null);
-  
-  const broadcastChannelRef = useRef(null);
-  const timeoutRef = useRef(null);
-  const isInitializedRef = useRef(false);
-  const lastRevalidateRef = useRef(0); // throttle timestamp
+  const [appPublicSettings] = useState(null);
 
-  // ─────────────────────────────────────────────────────────────────
-  // Initialize BroadcastChannel for cross-tab auth sync
-  // ─────────────────────────────────────────────────────────────────
-  useEffect(() => {
+  const hadAuthenticatedSessionRef = useRef(false);
+  const logoutInProgressRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  const clearAuthState = useCallback(() => {
+    setUser(null);
+
     try {
-      broadcastChannelRef.current = new BroadcastChannel(CROSS_TAB_CHANNEL);
-      broadcastChannelRef.current.onmessage = handleCrossTabMessage;
-    } catch (e) {
-      console.warn('BroadcastChannel not supported, falling back to storage events');
-      window.addEventListener('storage', handleStorageChange);
+      const queryClient = window.__queryClient;
+      if (queryClient) {
+        queryClient.removeQueries();
+      }
+    } catch (error) {
+      console.log('Query cache clear skipped');
     }
 
-    return () => {
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.close();
-      } else {
-        window.removeEventListener('storage', handleStorageChange);
-      }
-    };
+    if (typeof window === 'undefined') return;
+
+    window.localStorage.removeItem('atlas_locale');
+    window.localStorage.removeItem('atlas_region');
+    window.localStorage.removeItem('pending_plan');
+    window.sessionStorage.clear();
   }, []);
 
-  // ─────────────────────────────────────────────────────────────────
-  // Listen to visibility/focus changes to revalidate session
-  // ─────────────────────────────────────────────────────────────────
+  const applyAuthenticatedUser = useCallback((authUser) => {
+    const normalizedUser = normalizeSupabaseUser(authUser);
+
+    hadAuthenticatedSessionRef.current = true;
+    setUser(normalizedUser);
+    setAuthState(AUTH_STATES.AUTHENTICATED);
+    setAuthError(null);
+
+    return normalizedUser;
+  }, []);
+
+  const applyUnauthenticatedState = useCallback(
+    ({ markAuthRequired = false, clearClientState = false } = {}) => {
+      if (clearClientState) {
+        clearAuthState();
+      } else {
+        setUser(null);
+      }
+
+      hadAuthenticatedSessionRef.current = false;
+      setAuthState(AUTH_STATES.UNAUTHENTICATED);
+      setAuthError(
+        markAuthRequired
+          ? buildAuthError('auth_required', 'Session expired or invalid')
+          : null
+      );
+    },
+    [clearAuthState]
+  );
+
+  const handleAuthError = useCallback((error, { markAuthRequired = false } = {}) => {
+    console.error('Auth flow failed:', error);
+
+    if (markAuthRequired) {
+      clearAuthState();
+      hadAuthenticatedSessionRef.current = false;
+      setAuthState(AUTH_STATES.UNAUTHENTICATED);
+      setAuthError(buildAuthError('auth_required', error?.message || 'Session expired or invalid'));
+      return;
+    }
+
+    setUser(null);
+    setAuthState(AUTH_STATES.ERROR);
+    setAuthError(buildAuthError('unknown', error?.message));
+  }, [clearAuthState]);
+
+  const checkAppState = useCallback(async () => {
+    setAuthState(AUTH_STATES.LOADING);
+    setAuthError(null);
+
+    try {
+      const { data, error } = await withTimeout(supabase.auth.getSession(), 'Auth check');
+      if (error) throw error;
+
+      const sessionUser = data?.session?.user;
+      if (sessionUser) {
+        return applyAuthenticatedUser(sessionUser);
+      }
+
+      applyUnauthenticatedState();
+      return null;
+    } catch (error) {
+      handleAuthError(error);
+      return null;
+    }
+  }, [applyAuthenticatedUser, applyUnauthenticatedState, handleAuthError]);
+
+  const revalidateSession = useCallback(async () => {
+    try {
+      const { data, error } = await withTimeout(supabase.auth.getSession(), 'Session revalidation');
+      if (error) throw error;
+
+      const sessionUser = data?.session?.user;
+      if (sessionUser) {
+        return applyAuthenticatedUser(sessionUser);
+      }
+
+      applyUnauthenticatedState({
+        markAuthRequired: hadAuthenticatedSessionRef.current,
+        clearClientState: hadAuthenticatedSessionRef.current,
+      });
+      return null;
+    } catch (error) {
+      handleAuthError(error, { markAuthRequired: hadAuthenticatedSessionRef.current });
+      return null;
+    }
+  }, [applyAuthenticatedUser, applyUnauthenticatedState, handleAuthError]);
+
   useEffect(() => {
+    mountedRef.current = true;
+
+    checkAppState();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mountedRef.current) return;
+
+      if (event === 'SIGNED_OUT') {
+        const shouldRedirectToLogin = hadAuthenticatedSessionRef.current && !logoutInProgressRef.current;
+        applyUnauthenticatedState({
+          markAuthRequired: shouldRedirectToLogin,
+          clearClientState: shouldRedirectToLogin,
+        });
+        logoutInProgressRef.current = false;
+        return;
+      }
+
+      if (session?.user) {
+        applyAuthenticatedUser(session.user);
+      }
+    });
+
     const handleVisibilityChange = () => {
-      if (!document.hidden && isInitializedRef.current) {
-        // Tab came into focus, revalidate session
+      if (!document.hidden) {
         revalidateSession();
       }
     };
@@ -86,288 +226,79 @@ export const AuthProvider = ({ children }) => {
     window.addEventListener('focus', revalidateSession);
 
     return () => {
+      mountedRef.current = false;
+      subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', revalidateSession);
     };
-  }, []);
+  }, [applyAuthenticatedUser, applyUnauthenticatedState, checkAppState, revalidateSession]);
 
-  // ─────────────────────────────────────────────────────────────────
-  // Initial auth check on mount
-  // ─────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!isInitializedRef.current) {
-      isInitializedRef.current = true;
-      checkAppState();
-    }
+  const signIn = useCallback(async ({ email, password }) => {
+    const normalizedEmail = email.trim().toLowerCase();
 
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  // ─────────────────────────────────────────────────────────────────
-  // Cross-tab message handler
-  // ─────────────────────────────────────────────────────────────────
-  const handleCrossTabMessage = (event) => {
-    if (event.data.type === 'LOGOUT') {
-      // Another tab logged out
-      clearAuthState();
-      setAuthState(AUTH_STATES.UNAUTHENTICATED);
-      window.location.href = ROUTES.home;
-    } else if (event.data.type === 'LOGIN') {
-      // Another tab logged in, revalidate
-      revalidateSession();
-    }
-  };
-
-  // ─────────────────────────────────────────────────────────────────
-  // Storage fallback for cross-tab sync (for browsers without BroadcastChannel)
-  // ─────────────────────────────────────────────────────────────────
-  const handleStorageChange = (e) => {
-    if (e.key === 'atlas_auth_logout') {
-      clearAuthState();
-      setAuthState(AUTH_STATES.UNAUTHENTICATED);
-      window.location.href = ROUTES.home;
-    }
-  };
-
-  // ─────────────────────────────────────────────────────────────────
-  // Clear all auth-related state and caches
-  // ─────────────────────────────────────────────────────────────────
-  const clearAuthState = () => {
-    // Clear React state
-    setUser(null);
-    setAuthError(null);
-    clearLocalAuthUser();
-
-    // Clear query cache
-    try {
-      const queryClient = window.__queryClient;
-      if (queryClient) {
-        queryClient.removeQueries();
-      }
-    } catch (e) {
-      console.log('Query cache clear skipped');
-    }
-
-    // Clear localStorage
-    localStorage.removeItem('atlas_locale');
-    localStorage.removeItem('atlas_region');
-    localStorage.removeItem('pending_plan');
-
-    // Clear sessionStorage
-    sessionStorage.clear();
-  };
-
-  // ─────────────────────────────────────────────────────────────────
-  // Check app public settings (always needed)
-  // ─────────────────────────────────────────────────────────────────
-  const checkAppState = async () => {
-    setAuthState(AUTH_STATES.LOADING);
-    setAuthError(null);
-
-    const localUser = readLocalAuthUser();
-    if (localUser) {
-      setUser(localUser);
-      setAuthState(AUTH_STATES.AUTHENTICATED);
-      return;
-    }
-
-    if (!hasBase44Config) {
-      setUser(null);
-      setAuthError({
-        type: 'missing_config',
-        message: 'Missing Base44 environment configuration',
-      });
-      setAuthState(AUTH_STATES.ERROR);
-      return;
-    }
-
-    // Safety timeout
-    const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Auth check timeout')), AUTH_CHECK_TIMEOUT)
-    );
-
-    try {
-      const appClient = createAxiosClient({
-        baseURL: `/api/apps/public`,
-        headers: { 'X-App-Id': appParams.appId },
-        token: appParams.token,
-        interceptResponses: true,
-      });
-
-      await Promise.race([
-        appClient.get(`/prod/public-settings/by-id/${appParams.appId}`).then((settings) => {
-          setAppPublicSettings(settings);
-        }),
-        timeout,
-      ]);
-
-      // If we have a token, check user auth; otherwise, unauthenticated
-      if (appParams.token) {
-        await checkUserAuth();
-      } else {
-        setAuthState(AUTH_STATES.UNAUTHENTICATED);
-      }
-    } catch (error) {
-      console.error('App state check failed:', error);
-      handleAuthError(error);
-    }
-  };
-
-  // ─────────────────────────────────────────────────────────────────
-  // Validate user authentication (call base44.auth.me())
-  // ─────────────────────────────────────────────────────────────────
-  const checkUserAuth = async () => {
-    const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('User auth check timeout')), AUTH_CHECK_TIMEOUT)
-    );
-
-    try {
-      const currentUser = await Promise.race([base44.auth.me(), timeout]);
-
-      setUser(currentUser);
-      setAuthState(AUTH_STATES.AUTHENTICATED);
-      setAuthError(null);
-    } catch (error) {
-      console.error('User auth check failed:', error);
-      setUser(null);
-      setAuthState(AUTH_STATES.UNAUTHENTICATED);
-
-      if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Session expired or invalid',
-        });
-      }
-    }
-  };
-
-  // ─────────────────────────────────────────────────────────────────
-  // Revalidate session (e.g., on tab focus)
-  // ─────────────────────────────────────────────────────────────────
-  const revalidateSession = async () => {
-    if (authState === AUTH_STATES.LOADING) return; // Already checking
-    const localUser = readLocalAuthUser();
-
-    if (localUser) {
-      setUser(localUser);
-      setAuthState(AUTH_STATES.AUTHENTICATED);
-      setAuthError(null);
-      return;
-    }
-
-    if (!appParams.token) return; // No token, nothing to revalidate
-
-    // Throttle: no more than once every 30s
-    const now = Date.now();
-    if (now - lastRevalidateRef.current < 30_000) return;
-    lastRevalidateRef.current = now;
-
-    try {
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
-      setAuthState(AUTH_STATES.AUTHENTICATED);
-      setAuthError(null);
-    } catch (error) {
-      // Session invalid
-      clearAuthState();
-      setAuthState(AUTH_STATES.UNAUTHENTICATED);
-    }
-  };
-
-  // ─────────────────────────────────────────────────────────────────
-  // Handle auth errors with proper state transition
-  // ─────────────────────────────────────────────────────────────────
-  const handleAuthError = (error) => {
-    const errorType = error.status === 403 && error.data?.extra_data?.reason
-      ? error.data.extra_data.reason
-      : error.status === 401 || error.status === 403
-        ? 'auth_required'
-        : 'unknown';
-
-    setAuthError({
-      type: errorType,
-      message: error.message || 'Authentication error',
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
     });
 
-    if (errorType === 'auth_required' || errorType === 'user_not_registered') {
-      setAuthState(AUTH_STATES.ERROR);
-    } else {
-      setAuthState(AUTH_STATES.UNAUTHENTICATED);
-    }
-  };
+    if (error) throw error;
 
-  // ─────────────────────────────────────────────────────────────────
-  // Logout with cross-tab synchronization
-  // ─────────────────────────────────────────────────────────────────
-  const logout = async () => {
-    // Broadcast logout to other tabs
-    try {
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({ type: 'LOGOUT' });
-      } else {
-        localStorage.setItem('atlas_auth_logout', Date.now().toString());
-      }
-    } catch (e) {
-      console.log('Cross-tab logout notification failed');
-    }
+    return applyAuthenticatedUser(data.user ?? data.session?.user);
+  }, [applyAuthenticatedUser]);
 
-    // Clear local state
-    clearAuthState();
-    setAuthState(AUTH_STATES.UNAUTHENTICATED);
+  const signUp = useCallback(async ({ email, password, fullName }) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedName = fullName.trim();
 
-    // Call base44 logout (handles token cleanup)
-    try {
-      if (appParams.token) {
-        await base44.auth.logout();
-      }
-    } catch (e) {
-      console.error('Logout error:', e);
+    const { data, error } = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: {
+          full_name: trimmedName || normalizedEmail.split('@')[0],
+          atlas_role: 'athlete',
+          onboarding_completed: false,
+        },
+      },
+    });
+
+    if (error) throw error;
+
+    if (data.session?.user) {
+      return {
+        user: applyAuthenticatedUser(data.session.user),
+        needsEmailConfirmation: false,
+      };
     }
 
-    // Hard redirect to landing
-    window.location.href = ROUTES.home;
-  };
-
-  // ─────────────────────────────────────────────────────────────────
-  // Redirect to login
-  // ─────────────────────────────────────────────────────────────────
-  const navigateToLogin = () => {
-    const nextUrl = `${window.location.origin}${window.location.pathname}${window.location.search}${window.location.hash}`;
-    window.location.href = `/auth?mode=login&next=${encodeURIComponent(nextUrl)}`;
-  };
-
-  const loginLocally = async (overrides = {}) => {
-    const mockUser = {
-      id: 'local-athlete',
-      email: 'athlete@local.dev',
-      full_name: 'Local Athlete',
-      atlas_role: 'athlete',
-      ...overrides,
+    return {
+      user: normalizeSupabaseUser(data.user),
+      needsEmailConfirmation: true,
     };
+  }, [applyAuthenticatedUser]);
 
-    writeLocalAuthUser(mockUser);
-    setUser(mockUser);
-    setAuthState(AUTH_STATES.AUTHENTICATED);
+  const logout = useCallback(async () => {
+    logoutInProgressRef.current = true;
+    clearAuthState();
+    hadAuthenticatedSessionRef.current = false;
+    setAuthState(AUTH_STATES.UNAUTHENTICATED);
     setAuthError(null);
 
     try {
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({ type: 'LOGIN' });
-      }
-    } catch (e) {
-      console.log('Cross-tab login notification failed');
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      logoutInProgressRef.current = false;
+      window.location.href = ROUTES.home;
     }
+  }, [clearAuthState]);
 
-    return mockUser;
-  };
+  const navigateToLogin = useCallback(() => {
+    const nextUrl = `${window.location.origin}${window.location.pathname}${window.location.search}${window.location.hash}`;
+    window.location.href = `/auth?mode=login&next=${encodeURIComponent(nextUrl)}`;
+  }, []);
 
-  // ─────────────────────────────────────────────────────────────────
-  // Provide convenience booleans
-  // ─────────────────────────────────────────────────────────────────
   const isLoadingAuth = authState === AUTH_STATES.LOADING;
   const isAuthenticated = authState === AUTH_STATES.AUTHENTICATED;
 
@@ -380,8 +311,9 @@ export const AuthProvider = ({ children }) => {
         authState,
         authError,
         appPublicSettings,
+        signIn,
+        signUp,
         logout,
-        loginLocally,
         navigateToLogin,
         checkAppState,
         revalidateSession,
