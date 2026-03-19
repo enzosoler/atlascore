@@ -2,18 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAuth } from '@/lib/AuthContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
-import { FilterChip, StatusBanner } from '@/components/shared/StablePage';
+import { FilterChip } from '@/components/shared/StablePage';
 import {
-  Activity,
   ArrowUpRight,
   Brain,
   Clock3,
   Loader2,
-  MessageSquare,
   Plus,
   Send,
   Sparkles,
-  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MessageBubble from '@/components/ai/MessageBubble';
@@ -365,23 +362,6 @@ function buildProfileContext(profile) {
   return pills.slice(0, 4);
 }
 
-function ChatSignalCard({ icon: Icon, label, value, detail }) {
-  return (
-    <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.72)] px-4 py-4 shadow-[var(--shadow-xs)] backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3">
-        <p className="atlas-metric-label">{label}</p>
-        <div className="flex h-9 w-9 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.86)] text-[hsl(var(--fg-2))]">
-          <Icon className="h-4 w-4" strokeWidth={1.9} />
-        </div>
-      </div>
-      <p className="mt-3 text-[1.05rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-        {value}
-      </p>
-      <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
-    </div>
-  );
-}
-
 function ConversationListItem({ conversation, active, onClick, compact = false }) {
   const messageCount = conversation?.messages?.length || 0;
 
@@ -503,7 +483,6 @@ export default function AtlasAI() {
   const localProfile = useMemo(() => readLocalProfile(user), [user]);
   const profileContext = useMemo(() => buildProfileContext(localProfile), [localProfile]);
 
-  // Load free prompt count from storage
   useEffect(() => {
     setFreePromptsUsed(readFreePromptCount(user));
   }, [user]);
@@ -563,11 +542,10 @@ export default function AtlasAI() {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeId, messages.length, sending]);
 
-  // Hard block only when paid access is missing AND free prompts are exhausted
   if (!hasPaidAccess && freePromptsRemaining === 0) {
     return (
-      <div className="h-[calc(100vh-3rem)] lg:h-screen flex items-center justify-center p-5">
-        <div className="max-w-sm w-full space-y-4 text-center">
+      <div className="flex h-[calc(100dvh-3rem)] items-center justify-center p-5 lg:h-screen">
+        <div className="w-full max-w-sm space-y-4 text-center">
           <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-2))]">
             Atlas AI
           </p>
@@ -603,13 +581,11 @@ export default function AtlasAI() {
     const content = (text || input).trim();
     if (!content || sending) return;
 
-    // Block if free limit exceeded and no paid access
     if (!hasPaidAccess && freePromptsRemaining <= 0) return;
 
     setInput('');
     setSending(true);
 
-    // Track free prompt usage
     if (!hasPaidAccess) {
       const newCount = freePromptsUsed + 1;
       setFreePromptsUsed(newCount);
@@ -651,9 +627,11 @@ export default function AtlasAI() {
 
   return (
     <div className="atlas-page-shell">
-      <div className="mx-auto max-w-[1560px] px-4 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
-        <div className="atlas-chat-shell flex min-h-[76vh] flex-col overflow-hidden lg:h-[calc(100vh-4rem)] lg:flex-row">
-          <aside className="atlas-chat-sidebar hidden w-[320px] shrink-0 border-r border-[hsl(var(--border)/0.82)] lg:flex lg:flex-col">
+      <div className="mx-auto max-w-[1560px] px-3 py-3 lg:px-6 lg:py-4">
+        <div className="atlas-chat-shell flex min-h-[80vh] flex-col overflow-hidden lg:h-[calc(100dvh-2rem)] lg:flex-row">
+
+          {/* ── SIDEBAR ── */}
+          <aside className="atlas-chat-sidebar hidden w-[300px] shrink-0 border-r border-[hsl(var(--border)/0.82)] lg:flex lg:flex-col">
             <div className="border-b border-[hsl(var(--border)/0.78)] px-5 py-5">
               <div className="relative overflow-hidden rounded-[30px] border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card)/0.92)_0%,hsl(var(--fill)/0.58)_100%)] px-5 py-5 shadow-[var(--shadow-sm)]">
                 <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand-ai)/0.14)] blur-3xl atlas-chat-orb" />
@@ -666,27 +644,26 @@ export default function AtlasAI() {
 
                     <div className="min-w-0">
                       <p className="atlas-overline">Atlas AI</p>
-                      <h2 className="mt-3 text-[1.25rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+                      <h2 className="mt-3 text-[1.125rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
                         Assistant contextual
                       </h2>
                       <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                        Conversas premium com linguagem visual do produto e contexto vindo do
-                        profile local.
+                        Conversas premium com contexto do profile local.
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-2">
-                    <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-3 shadow-[var(--shadow-xs)]">
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-2.5 shadow-[var(--shadow-xs)]">
                       <p className="atlas-metric-label">Modo</p>
-                      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        Modo IA local
+                      <p className="mt-1.5 text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                        IA local
                       </p>
                     </div>
-                    <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-3 shadow-[var(--shadow-xs)]">
+                    <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-2.5 shadow-[var(--shadow-xs)]">
                       <p className="atlas-metric-label">Contexto</p>
-                      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        {hasProfileContext ? 'Profile conectado' : 'Profile pendente'}
+                      <p className="mt-1.5 text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                        {hasProfileContext ? 'Conectado' : 'Pendente'}
                       </p>
                     </div>
                   </div>
@@ -716,7 +693,7 @@ export default function AtlasAI() {
                   {Array.from({ length: 4 }).map((_, index) => (
                     <div
                       key={index}
-                      className="h-[118px] rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.72)] shadow-[var(--shadow-xs)]"
+                      className="h-[100px] rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.72)] shadow-[var(--shadow-xs)]"
                     />
                   ))}
                 </div>
@@ -733,134 +710,92 @@ export default function AtlasAI() {
                 </div>
               ) : (
                 <div className="rounded-[28px] border border-dashed border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card)/0.66)] px-4 py-5 text-center shadow-[var(--shadow-xs)]">
-                  <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                  <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
                     Sua primeira conversa aparece aqui
                   </p>
-                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                    Abra uma leitura rápida sobre aderência, progresso ou exames e mantenha o
-                    histórico organizado.
+                  <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+                    Inicie um prompt para criar o histórico local.
                   </p>
                 </div>
               )}
             </div>
           </aside>
 
+          {/* ── MAIN SECTION ── */}
           <section className="flex min-h-0 flex-1 flex-col">
-            <header className="relative border-b border-[hsl(var(--border)/0.78)] px-4 py-4 lg:px-6 lg:py-5">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.08)] to-transparent" />
 
-              <div className="relative flex flex-col gap-5">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="atlas-overline">Atlas AI</span>
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-                        <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                        IA Atlas
-                      </span>
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-                        <Clock3 className="h-3.5 w-3.5" strokeWidth={1.9} />
-                        {activeConversation
-                          ? formatConversationTimestamp(activeConversation.updated_at)
-                          : 'Pronto para iniciar'}
-                      </span>
-                    </div>
+            {/* ── COMPACT HEADER ── */}
+            <header className="relative shrink-0 border-b border-[hsl(var(--border)/0.78)] px-4 py-3 lg:px-6 lg:py-4">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.07)] to-transparent" />
 
-                    <div className="mt-4">
-                      <h1 className="text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))] lg:text-[1.7rem]">
-                        {activeConversationLabel}
-                      </h1>
-                      <p className="mt-2 max-w-3xl text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                        {activeConversation
-                          ? getConversationPreview(activeConversation)
-                          : 'Uma experiência de assistant premium para revisar treino, nutrição, progresso e sinais do profile sem parecer um chat generico.'}
-                      </p>
-                    </div>
+              <div className="relative flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="atlas-overline">Atlas AI</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-2))]">
+                      <Sparkles className="h-3 w-3 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+                      IA Atlas
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-2.5 py-0.5 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
+                      <Clock3 className="h-3 w-3" strokeWidth={1.9} />
+                      {activeConversation
+                        ? formatConversationTimestamp(activeConversation.updated_at)
+                        : 'Pronto para iniciar'}
+                    </span>
+                    {!hasPaidAccess && freePromptsRemaining > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--brand-ai)/0.1)] px-2.5 py-0.5 text-[11px] font-semibold text-[hsl(var(--brand-ai))]">
+                        {freePromptsRemaining} prompt{freePromptsRemaining !== 1 ? 's' : ''} grátis
+                      </span>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={newConv}
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full px-4"
-                    >
-                      <Plus className="h-4 w-4" strokeWidth={2} />
-                      Nova conversa
-                    </Button>
-                  </div>
+                  <p className="mt-2 line-clamp-1 text-[1.0625rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
+                    {activeConversationLabel}
+                  </p>
+
+                  {hasProfileContext ? (
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {profileContext.map(item => (
+                        <div
+                          key={`${item.label}-${item.value}-header`}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] px-2.5 py-1 text-[11px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]"
+                        >
+                          <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
+                          <span className="text-[hsl(var(--fg))]">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-3">
-                  <ChatSignalCard
-                    icon={Target}
-                    label="Contexto"
-                    value={hasProfileContext ? 'Profile conectado' : 'Adicionar profile'}
-                    detail={
-                      hasProfileContext
-                        ? 'Metas e sinais locais ajudam a resposta a soar mais pessoal.'
-                        : 'Adicione objetivo, calorias e peso no Profile para respostas mais profundas.'
-                    }
-                  />
-                  <ChatSignalCard
-                    icon={MessageSquare}
-                    label="Conversa"
-                    value={
-                      activeConversation
-                        ? getMessageCountLabel(messages.length)
-                        : 'Sessao pronta para abrir'
-                    }
-                    detail={
-                      activeConversation
-                        ? 'O histórico local fica salvo e reaparece na sidebar.'
-                        : 'Comece com um prompt objetivo para dar contexto desde a primeira troca.'
-                    }
-                  />
-                  <ChatSignalCard
-                    icon={Activity}
-                    label="Modo"
-                    value="Mock local estável"
-                    detail="A experiência continua sem backend remoto, mantendo o fluxo de chat atual."
-                  />
-                </div>
-
-                <StatusBanner tone={hasProfileContext ? 'success' : 'neutral'}>
-                  {hasProfileContext
-                    ? 'O Profile local esta conectado e ja alimenta objetivo, peso e metas nas respostas desta conversa.'
-                    : 'Conecte metas e peso no Profile para deixar o Atlas AI mais contextual sem mudar a lógica local desta fase.'}
-                </StatusBanner>
-
-                {hasProfileContext ? (
-                  <div className="flex flex-wrap gap-2">
-                    {profileContext.map(item => (
-                      <div
-                        key={`${item.label}-${item.value}`}
-                        className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.78)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]"
-                      >
-                        <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
-                        <span className="text-[hsl(var(--fg))]">{item.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
+                <Button
+                  onClick={newConv}
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 rounded-full px-4"
+                >
+                  <Plus className="h-4 w-4" strokeWidth={2} />
+                  <span className="hidden sm:inline">Nova conversa</span>
+                </Button>
               </div>
             </header>
 
-            <div className="border-b border-[hsl(var(--border)/0.72)] px-4 py-4 lg:hidden">
+            {/* ── MOBILE CONVERSATIONS STRIP ── */}
+            <div className="border-b border-[hsl(var(--border)/0.72)] px-4 py-3 lg:hidden">
               <div className="flex gap-3 overflow-x-auto pb-1">
                 <button
                   onClick={newConv}
-                  className="flex min-w-[220px] items-center gap-3 rounded-[24px] border border-dashed border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card)/0.72)] px-4 py-4 text-left shadow-[var(--shadow-xs)]"
+                  className="flex min-w-[200px] items-center gap-3 rounded-[22px] border border-dashed border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card)/0.72)] px-4 py-3 text-left shadow-[var(--shadow-xs)]"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
                     <Plus className="h-4 w-4" strokeWidth={2} />
                   </div>
                   <div>
-                    <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                    <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
                       Nova conversa
                     </p>
-                    <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-                      Abrir um novo fio contextual
+                    <p className="mt-0.5 text-[11px] leading-5 text-[hsl(var(--fg-2))]">
+                      Novo fio contextual
                     </p>
                   </div>
                 </button>
@@ -878,14 +813,16 @@ export default function AtlasAI() {
               </div>
             </div>
 
-            <div className="relative flex-1 min-h-0 overflow-hidden">
-              <div className="pointer-events-none absolute left-[8%] top-10 h-48 w-48 rounded-full bg-[hsl(var(--brand-ai)/0.1)] blur-3xl atlas-chat-orb" />
-              <div className="pointer-events-none absolute bottom-10 right-[10%] h-48 w-48 rounded-full bg-[hsl(var(--tint)/0.08)] blur-3xl atlas-chat-orb" />
+            {/* ── MESSAGES AREA ── */}
+            <div className="relative min-h-0 flex-1 overflow-hidden">
+              <div className="pointer-events-none absolute left-[8%] top-10 h-48 w-48 rounded-full bg-[hsl(var(--brand-ai)/0.08)] blur-3xl atlas-chat-orb" />
+              <div className="pointer-events-none absolute bottom-10 right-[10%] h-48 w-48 rounded-full bg-[hsl(var(--tint)/0.06)] blur-3xl atlas-chat-orb" />
 
-              <div className="h-full overflow-y-auto px-4 py-4 lg:px-6 lg:py-6">
+              <div className="h-full overflow-y-auto">
                 {loading ? (
-                  <div className="mx-auto flex h-full max-w-3xl items-center justify-center">
-                    <div className="atlas-chat-panel w-full rounded-[32px] border border-[hsl(var(--border)/0.92)] px-6 py-8 text-center shadow-[var(--shadow-md)]">
+                  /* ── LOADING ── */
+                  <div className="flex h-full items-center justify-center px-4 py-6">
+                    <div className="atlas-chat-panel w-full max-w-sm rounded-[32px] border border-[hsl(var(--border)/0.92)] px-6 py-8 text-center shadow-[var(--shadow-md)]">
                       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--brand-ai))] shadow-[var(--shadow-xs)]">
                         <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.9} />
                       </div>
@@ -893,78 +830,36 @@ export default function AtlasAI() {
                         Carregando suas conversas
                       </p>
                       <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                        Restaurando o histórico local e preparando a interface contextual do Atlas
-                        AI.
+                        Restaurando o histórico local do Atlas AI.
                       </p>
                     </div>
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="mx-auto flex h-full max-w-6xl items-center">
-                    <div className="grid w-full gap-4 xl:grid-cols-[minmax(0,1.18fr)_380px]">
-                      <section className="relative overflow-hidden rounded-[34px] border border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card)/0.96)_0%,hsl(var(--fill)/0.62)_100%)] px-6 py-6 shadow-[var(--shadow-lg)] lg:px-8 lg:py-8">
-                        <div className="pointer-events-none absolute -right-8 top-0 h-48 w-48 rounded-full bg-[hsl(var(--brand-ai)/0.14)] blur-3xl atlas-chat-orb" />
-                        <div className="pointer-events-none absolute bottom-0 left-0 h-40 w-40 rounded-full bg-[hsl(var(--tint)/0.08)] blur-3xl atlas-chat-orb" />
+                  /* ── EMPTY STATE ── */
+                  <div className="px-4 py-5 lg:px-6 lg:py-6">
+                    <div className="mx-auto max-w-3xl space-y-5">
+                      {/* Welcome panel */}
+                      <section className="relative overflow-hidden rounded-[32px] border border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card)/0.96)_0%,hsl(var(--fill)/0.62)_100%)] px-6 py-6 shadow-[var(--shadow-lg)] lg:px-7 lg:py-7">
+                        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[hsl(var(--brand-ai)/0.14)] blur-3xl atlas-chat-orb" />
+                        <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-32 rounded-full bg-[hsl(var(--tint)/0.07)] blur-3xl atlas-chat-orb" />
 
-                        <div className="relative space-y-6">
+                        <div className="relative space-y-4">
                           <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
                             <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
                             Contextual assistant
                           </div>
 
-                          <div className="max-w-3xl">
-                            <h2 className="text-[clamp(2rem,1.55rem+1.2vw,3rem)] font-semibold tracking-[-0.075em] text-[hsl(var(--fg))]">
-                              Converse com o contexto do Atlas, não com um chat genérico.
-                            </h2>
-                            <p className="mt-4 max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
-                              Abra uma leitura rápida sobre progresso, aderência ou próximo passo.
-                              A camada visual já é nativa do produto, enquanto a lógica continua
-                              usando o mock local desta fase.
-                            </p>
-                          </div>
+                          <h2 className="text-[clamp(1.75rem,1.4rem+0.8vw,2.25rem)] font-semibold leading-[1.15] tracking-[-0.065em] text-[hsl(var(--fg))]">
+                            Converse com o contexto do Atlas, não com um chat genérico.
+                          </h2>
+                          <p className="max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))]">
+                            Abra uma leitura sobre progresso, aderência ou próximo passo. O histórico fica salvo e reaparece na sidebar.
+                          </p>
 
-                          <div className="grid gap-3 sm:grid-cols-3">
-                            <ChatSignalCard
-                              icon={Brain}
-                              label="Assistente"
-                              value="Premium e contextual"
-                              detail="Mais próximo de uma camada estratégica do produto do que de um chat utilitário."
-                            />
-                            <ChatSignalCard
-                              icon={Clock3}
-                              label="Persistência"
-                              value="Histórico local salvo"
-                              detail="Cada conversa criada aqui reaparece organizada na sidebar."
-                            />
-                            <ChatSignalCard
-                              icon={Target}
-                              label="Leitura"
-                              value={hasProfileContext ? 'Pronta para contexto' : 'Pronta para iniciar'}
-                              detail={
-                                hasProfileContext
-                                  ? 'O profile local já adiciona sinais úteis para a resposta.'
-                                  : 'Mesmo sem profile completo, o fluxo do chat já está pronto.'
-                              }
-                            />
-                          </div>
-
-                          <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.74)] px-5 py-5 shadow-[var(--shadow-sm)]">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                              <div>
-                                <p className="atlas-metric-label">Contexto visivel agora</p>
-                                <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                                  {hasProfileContext
-                                    ? 'Seu profile local já informa parte da conversa.'
-                                    : 'Ainda não há sinais suficientes do Profile nesta rota.'}
-                                </p>
-                              </div>
-                              <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-                                <Activity className="h-3.5 w-3.5" strokeWidth={1.9} />
-                                Sem backend remoto
-                              </span>
-                            </div>
-
-                            {hasProfileContext ? (
-                              <div className="mt-4 flex flex-wrap gap-2">
+                          {hasProfileContext ? (
+                            <div className="rounded-[22px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.74)] px-4 py-4 shadow-[var(--shadow-xs)]">
+                              <p className="atlas-metric-label">Contexto visível agora</p>
+                              <div className="mt-3 flex flex-wrap gap-2">
                                 {profileContext.map(item => (
                                   <div
                                     key={`${item.label}-${item.value}-empty`}
@@ -975,53 +870,42 @@ export default function AtlasAI() {
                                   </div>
                                 ))}
                               </div>
-                            ) : (
-                              <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                                Preencha metas, peso ou objetivo no Profile para deixar o assistant
-                                ainda mais específico ao seu contexto.
+                            </div>
+                          ) : (
+                            <div className="rounded-[22px] border border-dashed border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.4)] px-4 py-3">
+                              <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                                Preencha metas e peso no Profile para respostas ainda mais contextuais.
                               </p>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       </section>
 
-                      <section className="atlas-card flex flex-col px-5 py-5 lg:px-6 lg:py-6">
-                        <div>
-                          <p className="atlas-overline">Quick starts</p>
-                          <h3 className="mt-3 text-[1.2rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                            Comece por uma decisao concreta
-                          </h3>
-                          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                            Os prompts abaixo abrem a conversa mantendo a mesma lógica local já
-                            existente na rota.
-                          </p>
-                        </div>
-
-                        <div className="mt-5 space-y-3">
+                      {/* Quick starts */}
+                      <div>
+                        <p className="atlas-overline px-1">Quick starts</p>
+                        <p className="mt-2 px-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                          Comece com um prompt objetivo para dar contexto desde a primeira troca.
+                        </p>
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
                           {PROMPTS.map(item => (
                             <PromptCard key={item.id} item={item} onSelect={send} />
                           ))}
                         </div>
-                      </section>
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="mx-auto flex h-full w-full max-w-4xl flex-col">
-                    <div className="mb-6 flex justify-center">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-                        <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                        {hasProfileContext ? 'Perfil conectado' : 'Pronto para iniciar'}
-                      </div>
-                    </div>
-
-                    <div className="space-y-5 pb-2">
+                  /* ── CHAT MESSAGES ── */
+                  <div className="px-4 py-4 lg:px-6 lg:py-5">
+                    <div className="mx-auto max-w-3xl space-y-5 pb-2">
                       {messages.map((message, index) => (
                         <MessageBubble key={index} message={message} />
                       ))}
 
                       {sending && activeId === pendingConversationId && (
                         <div className="flex items-start gap-4">
-                          <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand-ai))] shadow-[var(--shadow-xs)]">
+                          <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand-ai))] shadow-[var(--shadow-xs)]">
                             <Brain className="h-4 w-4" strokeWidth={1.8} />
                           </div>
 
@@ -1030,10 +914,10 @@ export default function AtlasAI() {
                               <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
                               <div>
                                 <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                                  Atlas AI esta estruturando a resposta
+                                  Atlas AI estruturando a resposta
                                 </p>
                                 <p className="mt-1 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-                                  Lendo o profile local e montando um retorno contextual.
+                                  Lendo o profile local e montando retorno contextual.
                                 </p>
                               </div>
                             </div>
@@ -1048,8 +932,9 @@ export default function AtlasAI() {
               </div>
             </div>
 
-            <div className="border-t border-[hsl(var(--border)/0.78)] px-4 py-4 lg:px-6 lg:py-5">
-              <div className="mx-auto max-w-4xl space-y-3">
+            {/* ── COMPOSER ── */}
+            <div className="shrink-0 border-t border-[hsl(var(--border)/0.78)] px-4 py-4 lg:px-6 lg:py-4">
+              <div className="mx-auto max-w-3xl space-y-3">
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {PROMPTS.slice(0, 3).map(item => (
                     <FilterChip
@@ -1063,11 +948,11 @@ export default function AtlasAI() {
                   ))}
                 </div>
 
-                <div className="atlas-chat-panel relative overflow-hidden rounded-[30px] border border-[hsl(var(--border)/0.92)] px-3 py-3 shadow-[var(--shadow-md)] lg:px-4">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.08)] to-transparent" />
+                <div className="atlas-chat-panel relative overflow-hidden rounded-[28px] border border-[hsl(var(--border)/0.92)] px-3 py-3 shadow-[var(--shadow-md)] lg:px-4">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.06)] to-transparent" />
 
                   <div className="relative flex items-end gap-3">
-                    <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.82)] text-[hsl(var(--brand-ai))] sm:flex">
+                    <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.82)] text-[hsl(var(--brand-ai))] sm:flex">
                       <Sparkles className="h-4 w-4" strokeWidth={1.9} />
                     </div>
 
@@ -1081,29 +966,29 @@ export default function AtlasAI() {
                             send();
                           }
                         }}
-                        rows={1}
+                        rows={3}
                         placeholder="Pergunte algo sobre seus dados, progresso ou próxima decisão..."
-                        className="min-h-[88px] w-full resize-none bg-transparent px-1 py-1 text-[15px] leading-7 text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
+                        className="w-full resize-none bg-transparent px-1 py-1 text-[15px] leading-7 text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
                       />
 
-                      <div className="mt-3 flex flex-col gap-2 border-t border-[hsl(var(--border)/0.72)] pt-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex flex-wrap items-center gap-2 text-[12px] text-[hsl(var(--fg-2))]">
-                          <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-3 py-1.5 font-semibold tracking-[-0.01em]">
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-[hsl(var(--border)/0.72)] pt-2">
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[hsl(var(--fg-3))]">
+                          <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-2.5 py-1 font-semibold">
                             Enter envia
                           </span>
-                          <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-3 py-1.5 font-semibold tracking-[-0.01em]">
-                            Shift + Enter quebra linha
+                          <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-2.5 py-1 font-semibold">
+                            Shift+Enter quebra linha
                           </span>
                         </div>
 
-                        <p className="text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+                        <p className="text-[11px] leading-6 text-[hsl(var(--fg-2))]">
                           {!hasPaidAccess && freePromptsRemaining > 0 ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--brand-ai)/0.10)] px-2.5 py-1 text-[11px] font-semibold text-[hsl(var(--brand-ai))]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--brand-ai)/0.10)] px-2.5 py-1 font-semibold text-[hsl(var(--brand-ai))]">
                               {freePromptsRemaining} prompt{freePromptsRemaining !== 1 ? 's' : ''} gratuito{freePromptsRemaining !== 1 ? 's' : ''} restante{freePromptsRemaining !== 1 ? 's' : ''}
                             </span>
                           ) : hasProfileContext
-                            ? 'Contexto do Profile ativo nesta conversa.'
-                            : 'Adicione metas no Profile para respostas ainda mais precisas.'}
+                            ? 'Contexto do Profile ativo.'
+                            : 'Adicione metas no Profile para respostas precisas.'}
                         </p>
                       </div>
                     </div>
@@ -1112,7 +997,7 @@ export default function AtlasAI() {
                       onClick={() => send()}
                       disabled={!input.trim() || sending || (!hasPaidAccess && freePromptsRemaining <= 0)}
                       size="lg"
-                      className="h-12 shrink-0 rounded-[20px] px-5"
+                      className="h-11 shrink-0 rounded-[18px] px-5"
                     >
                       {sending ? (
                         <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
@@ -1125,6 +1010,7 @@ export default function AtlasAI() {
                 </div>
               </div>
             </div>
+
           </section>
         </div>
       </div>
