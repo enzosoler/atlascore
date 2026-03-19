@@ -33,7 +33,7 @@ export default function RegionSelector({ onRegionChange }) {
       <select
         value={region}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full cursor-pointer bg-transparent text-[13px] font-medium text-[hsl(var(--fg))] outline-none"
+        className="w-full cursor-pointer bg-transparent text-base font-medium text-[hsl(var(--fg))] outline-none"
       >
         <option value="BR">Brasil (R$)</option>
         <option value="US">USA ($)</option>

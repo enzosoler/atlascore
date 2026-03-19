@@ -56,7 +56,7 @@ export default function QuickMealLog({ date, mealType, onClose }) {
                 setFoods(updated);
               }}
               placeholder="Food name"
-              className="atlas-input h-9 flex-1 rounded-lg text-[12px]"
+              className="atlas-input h-9 flex-1 rounded-lg text-base"
             />
             <input
               type="number"
@@ -67,7 +67,7 @@ export default function QuickMealLog({ date, mealType, onClose }) {
                 setFoods(updated);
               }}
               placeholder="Amount"
-              className="atlas-input h-9 w-16 rounded-lg text-[12px]"
+              className="atlas-input h-9 w-16 rounded-lg text-base"
             />
             <input
               type="text"
@@ -78,7 +78,7 @@ export default function QuickMealLog({ date, mealType, onClose }) {
                 setFoods(updated);
               }}
               placeholder="g"
-              className="atlas-input h-9 w-12 rounded-lg text-[12px]"
+              className="atlas-input h-9 w-12 rounded-lg text-base"
             />
             <input
               type="number"
@@ -89,7 +89,7 @@ export default function QuickMealLog({ date, mealType, onClose }) {
                 setFoods(updated);
               }}
               placeholder="kcal"
-              className="atlas-input h-9 w-16 rounded-lg text-[12px]"
+              className="atlas-input h-9 w-16 rounded-lg text-base"
             />
             <button
               onClick={() => handleRemoveFood(idx)}

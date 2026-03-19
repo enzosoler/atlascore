@@ -45,7 +45,7 @@ export default function WorkoutsV2() {
           type="date"
           value={selectedDate}
           onChange={e => setSelectedDate(e.target.value)}
-          className="atlas-input h-10 rounded-lg text-[13px]"
+          className="atlas-input h-10 rounded-lg text-base"
         />
 
         {/* Workouts list */}

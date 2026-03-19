@@ -179,16 +179,16 @@ function StepGoalAndBasics({ form, set, toggle }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>Altura (cm)</FieldLabel>
-            <Input type="number" value={form.height} onChange={e => set('height', e.target.value)} placeholder="175" className="h-10 rounded-lg text-[13px]" />
+            <Input type="number" value={form.height} onChange={e => set('height', e.target.value)} placeholder="175" className="h-10 rounded-lg text-base" />
           </div>
           <div>
             <FieldLabel>Peso atual (kg)</FieldLabel>
-            <Input type="number" step="0.1" value={form.current_weight} onChange={e => set('current_weight', e.target.value)} placeholder="80" className="h-10 rounded-lg text-[13px]" />
+            <Input type="number" step="0.1" value={form.current_weight} onChange={e => set('current_weight', e.target.value)} placeholder="80" className="h-10 rounded-lg text-base" />
           </div>
           <div>
             <FieldLabel>Sexo biológico</FieldLabel>
             <Select value={form.sex} onValueChange={v => set('sex', v)}>
-              <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="male">Masculino</SelectItem>
                 <SelectItem value="female">Feminino</SelectItem>
@@ -198,7 +198,7 @@ function StepGoalAndBasics({ form, set, toggle }) {
           </div>
           <div>
             <FieldLabel>Idade</FieldLabel>
-            <Input type="number" value={form.age} onChange={e => set('age', e.target.value)} placeholder="30" className="h-10 rounded-lg text-[13px]" />
+            <Input type="number" value={form.age} onChange={e => set('age', e.target.value)} placeholder="30" className="h-10 rounded-lg text-base" />
           </div>
         </div>
       </div>
@@ -229,7 +229,7 @@ function StepRoutineAndExperience({ form, set }) {
         <div>
           <FieldLabel>Treinos / semana</FieldLabel>
           <Select value={String(form.training_days_per_week || '')} onValueChange={v => set('training_days_per_week', Number(v))}>
-            <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue placeholder="Selecione" /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
             <SelectContent>
               {[1, 2, 3, 4, 5, 6, 7].map(n => <SelectItem key={n} value={String(n)}>{n}× / semana</SelectItem>)}
             </SelectContent>
@@ -238,7 +238,7 @@ function StepRoutineAndExperience({ form, set }) {
         <div>
           <FieldLabel>Experiência</FieldLabel>
           <Select value={form.training_experience || ''} onValueChange={v => set('training_experience', v)}>
-            <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue placeholder="Selecione" /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="beginner">Iniciante (&lt;1 ano)</SelectItem>
               <SelectItem value="intermediate">Intermediário (1–3 anos)</SelectItem>
@@ -256,17 +256,17 @@ function StepRoutineAndExperience({ form, set }) {
           <div>
             <FieldLabel>Equipamentos disponíveis</FieldLabel>
             <Input value={form.training_equipment} onChange={e => set('training_equipment', e.target.value)}
-              placeholder="Ex: Academia completa, halteres, barra..." className="h-10 rounded-lg text-[13px]" />
+              placeholder="Ex: Academia completa, halteres, barra..." className="h-10 rounded-lg text-base" />
           </div>
           <div>
             <FieldLabel>Lesões ou limitações</FieldLabel>
             <Input value={form.injuries} onChange={e => set('injuries', e.target.value)}
-              placeholder="Ex: Joelho, hérnia lombar, ombro..." className="h-10 rounded-lg text-[13px]" />
+              placeholder="Ex: Joelho, hérnia lombar, ombro..." className="h-10 rounded-lg text-base" />
           </div>
           <div>
             <FieldLabel>Estilo alimentar</FieldLabel>
             <Input value={form.dietary_style} onChange={e => set('dietary_style', e.target.value)}
-              placeholder="Ex: Low-carb, carnívoro, mediterrâneo..." className="h-10 rounded-lg text-[13px]" />
+              placeholder="Ex: Low-carb, carnívoro, mediterrâneo..." className="h-10 rounded-lg text-base" />
           </div>
         </div>
       )}
@@ -307,18 +307,18 @@ function StepPreferences({ form, set }) {
       <div className="space-y-3 border-t border-[hsl(var(--border-h))] pt-4">
         <div>
           <FieldLabel>Peso alvo (kg)</FieldLabel>
-          <Input type="number" step="0.1" value={form.target_weight} onChange={e => set('target_weight', e.target.value)} placeholder="75" className="h-10 rounded-lg text-[13px]" />
+          <Input type="number" step="0.1" value={form.target_weight} onChange={e => set('target_weight', e.target.value)} placeholder="75" className="h-10 rounded-lg text-base" />
         </div>
         <div>
           <FieldLabel>Objetivo de treino</FieldLabel>
-          <Input value={form.training_goal} onChange={e => set('training_goal', e.target.value)} placeholder="Ex: Hipertrofia, emagrecimento, performance…" className="h-10 rounded-lg text-[13px]" />
+          <Input value={form.training_goal} onChange={e => set('training_goal', e.target.value)} placeholder="Ex: Hipertrofia, emagrecimento, performance…" className="h-10 rounded-lg text-base" />
         </div>
       </div>
 
       <div className="space-y-3 border-t border-[hsl(var(--border-h))] pt-4">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">Tom da IA</p>
         <Select value={form.ai_tone_preference} onValueChange={v => set('ai_tone_preference', v)}>
-          <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="friendly">Amigável e encorajador</SelectItem>
             <SelectItem value="direct">Direto e objetivo</SelectItem>
@@ -331,7 +331,7 @@ function StepPreferences({ form, set }) {
       <div className="space-y-3 border-t border-[hsl(var(--border-h))] pt-4">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">Tema</p>
         <Select value={form.theme_preference} onValueChange={v => set('theme_preference', v)}>
-          <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="light">Claro (padrão)</SelectItem>
             <SelectItem value="dark">Escuro</SelectItem>
@@ -584,7 +584,7 @@ export default function Onboarding() {
 
         {!showGeneration && !showSuccess && (
           <div className="flex justify-between items-center mb-1">
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="px-2 py-1 text-[12px] rounded border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] text-[hsl(var(--fg))]">
+            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="px-2 py-1 text-base rounded border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] text-[hsl(var(--fg))]">
               <option value="pt-BR">PT</option>
               <option value="en-US">EN</option>
             </select>

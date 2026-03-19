@@ -55,13 +55,13 @@ export default function QuickWorkoutCreate({ date, onClose }) {
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="Workout name (e.g., Upper A)"
-        className="atlas-input h-10 rounded-lg text-[13px] w-full"
+        className="atlas-input h-10 rounded-lg text-base w-full"
       />
 
       <select
         value={type}
         onChange={e => setType(e.target.value)}
-        className="atlas-input h-10 rounded-lg text-[13px] w-full"
+        className="atlas-input h-10 rounded-lg text-base w-full"
       >
         <option value="strength">Strength</option>
         <option value="cardio">Cardio</option>
@@ -81,7 +81,7 @@ export default function QuickWorkoutCreate({ date, onClose }) {
                 setExercises(updated);
               }}
               placeholder="Exercise"
-              className="atlas-input h-9 flex-1 rounded-lg text-[12px]"
+              className="atlas-input h-9 flex-1 rounded-lg text-base"
             />
             <input
               type="number"
@@ -92,7 +92,7 @@ export default function QuickWorkoutCreate({ date, onClose }) {
                 setExercises(updated);
               }}
               placeholder="Sets"
-              className="atlas-input h-9 w-16 rounded-lg text-[12px]"
+              className="atlas-input h-9 w-16 rounded-lg text-base"
             />
             <input
               type="text"
@@ -103,7 +103,7 @@ export default function QuickWorkoutCreate({ date, onClose }) {
                 setExercises(updated);
               }}
               placeholder="Reps"
-              className="atlas-input h-9 w-16 rounded-lg text-[12px]"
+              className="atlas-input h-9 w-16 rounded-lg text-base"
             />
             <button
               onClick={() => handleRemoveExercise(idx)}

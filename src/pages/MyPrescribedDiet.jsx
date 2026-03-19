@@ -175,27 +175,27 @@ export default function MyPrescribedDiet() {
           <div className="space-y-3">
             <div>
               <label className="t-label block mb-1.5">Email do atleta *</label>
-              <Input value={form.athlete_email} onChange={e => setForm(f => ({ ...f, athlete_email: e.target.value }))} placeholder="atleta@email.com" className="h-9 rounded-lg text-[13px]" />
+              <Input value={form.athlete_email} onChange={e => setForm(f => ({ ...f, athlete_email: e.target.value }))} placeholder="atleta@email.com" className="h-9 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="t-label block mb-1.5">Nome do plano *</label>
-                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Bulking Fase 1" className="h-9 rounded-lg text-[13px]" />
+                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Bulking Fase 1" className="h-9 rounded-lg text-base" />
               </div>
               <div>
                 <label className="t-label block mb-1.5">Data início</label>
-                <Input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="h-9 rounded-lg text-[13px]" />
+                <Input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="h-9 rounded-lg text-base" />
               </div>
             </div>
             <div>
               <label className="t-label block mb-1.5">Objetivo</label>
-              <Input value={form.objective} onChange={e => setForm(f => ({ ...f, objective: e.target.value }))} placeholder="Ex: Ganho de massa, emagrecimento" className="h-9 rounded-lg text-[13px]" />
+              <Input value={form.objective} onChange={e => setForm(f => ({ ...f, objective: e.target.value }))} placeholder="Ex: Ganho de massa, emagrecimento" className="h-9 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-4 gap-2">
               {[['Kcal', 'total_calories'], ['Proteína g', 'total_protein'], ['Carbos g', 'total_carbs'], ['Gordura g', 'total_fat']].map(([l, k]) => (
                 <div key={k}>
                   <label className="t-label block mb-1.5">{l}</label>
-                  <Input type="number" value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} className="h-9 rounded-lg text-[13px]" />
+                  <Input type="number" value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} className="h-9 rounded-lg text-base" />
                 </div>
               ))}
             </div>
@@ -208,8 +208,8 @@ export default function MyPrescribedDiet() {
               {form.meals.map((meal, i) => (
                 <div key={i} className="p-3 bg-[hsl(var(--shell))] rounded-xl space-y-2">
                   <div className="flex items-center gap-2">
-                    <Input value={meal.name} onChange={e => updateMeal(i, 'name', e.target.value)} placeholder={`Refeição ${i + 1}`} className="h-8 rounded-lg text-[12px] flex-1" />
-                    <Input value={meal.time} onChange={e => updateMeal(i, 'time', e.target.value)} placeholder="08:00" className="h-8 rounded-lg text-[12px] w-20" />
+                    <Input value={meal.name} onChange={e => updateMeal(i, 'name', e.target.value)} placeholder={`Refeição ${i + 1}`} className="h-8 rounded-lg text-base flex-1" />
+                    <Input value={meal.time} onChange={e => updateMeal(i, 'time', e.target.value)} placeholder="08:00" className="h-8 rounded-lg text-base w-20" />
                     <button onClick={() => removeMeal(i)} className="text-muted-foreground/40 hover:text-[hsl(var(--err))]"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
@@ -218,7 +218,7 @@ export default function MyPrescribedDiet() {
 
             <div>
               <label className="t-label block mb-1.5">Observações</label>
-              <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="rounded-lg resize-none h-16 text-[13px]" />
+              <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="rounded-lg resize-none h-16 text-base" />
             </div>
             <Button onClick={save} disabled={createM.isPending} className="w-full h-11 rounded-xl btn btn-primary">
               {createM.isPending ? 'Salvando…' : 'Salvar plano'}

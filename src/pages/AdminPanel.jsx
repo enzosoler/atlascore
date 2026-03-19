@@ -48,14 +48,14 @@ function InviteForm({ onDone }) {
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="usuario@email.com"
-            className="h-10 rounded-lg text-[13px]"
+            className="h-10 rounded-lg text-base"
             onKeyDown={e => e.key === 'Enter' && invite()}
           />
         </div>
         <div>
           <label className="t-label block mb-1.5">Papel</label>
           <Select value={atlasRole} onValueChange={setAtlasRole}>
-            <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
             <SelectContent>
               {Object.entries(ROLE_LABELS).map(([k, v]) => (
                 <SelectItem key={k} value={k}>{v}</SelectItem>
@@ -101,7 +101,7 @@ function UserRow({ u, onRoleChange }) {
           <Loader2 className="w-4 h-4 animate-spin text-[hsl(var(--fg-2))]" />
         ) : (
           <Select value={currentAtlasRole} onValueChange={changeRole}>
-            <SelectTrigger className="h-8 rounded-lg text-[12px] w-32 border-[hsl(var(--border-h))]">
+            <SelectTrigger className="h-8 rounded-lg text-base w-32 border-[hsl(var(--border-h))]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -365,7 +365,7 @@ export default function Auth() {
                         value={fullName}
                         onChange={(event) => setFullName(event.target.value)}
                         placeholder={ui.fullNamePlaceholder}
-                        className="atlas-field h-12 px-4 text-[14px]"
+                        className="atlas-field h-12 px-4 text-base"
                       />
                     </div>
                   ) : null}
@@ -381,7 +381,7 @@ export default function Auth() {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       placeholder={ui.emailPlaceholder}
-                      className="atlas-field h-12 px-4 text-[14px]"
+                      className="atlas-field h-12 px-4 text-base"
                     />
                   </div>
 
@@ -396,7 +396,7 @@ export default function Auth() {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder={ui.passwordPlaceholder}
-                      className="atlas-field h-12 px-4 text-[14px]"
+                      className="atlas-field h-12 px-4 text-base"
                     />
                   </div>
 

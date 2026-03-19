@@ -148,13 +148,13 @@ export default function SubscriptionManager() {
           <div className="space-y-3">
             <div>
               <label className="t-label block mb-1.5">Email do usuário</label>
-              <Input value={subForm.user_email} onChange={e => setSubForm(f => ({ ...f, user_email: e.target.value }))} placeholder="user@example.com" className="h-10 rounded-lg text-[13px]" />
+              <Input value={subForm.user_email} onChange={e => setSubForm(f => ({ ...f, user_email: e.target.value }))} placeholder="user@example.com" className="h-10 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="t-label block mb-1.5">Plano</label>
                 <Select value={subForm.plan_code} onValueChange={v => setSubForm(f => ({ ...f, plan_code: v }))}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(PLAN_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                   </SelectContent>
@@ -163,7 +163,7 @@ export default function SubscriptionManager() {
               <div>
                 <label className="t-label block mb-1.5">Status</label>
                 <Select value={subForm.status} onValueChange={v => setSubForm(f => ({ ...f, status: v }))}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {['active','trialing','past_due','canceled','expired'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
@@ -172,11 +172,11 @@ export default function SubscriptionManager() {
             </div>
             <div>
               <label className="t-label block mb-1.5">Expira em (opcional)</label>
-              <Input type="date" value={subForm.ends_at} onChange={e => setSubForm(f => ({ ...f, ends_at: e.target.value }))} className="h-10 rounded-lg text-[13px]" />
+              <Input type="date" value={subForm.ends_at} onChange={e => setSubForm(f => ({ ...f, ends_at: e.target.value }))} className="h-10 rounded-lg text-base" />
             </div>
             <div>
               <label className="t-label block mb-1.5">Observações</label>
-              <Input value={subForm.notes} onChange={e => setSubForm(f => ({ ...f, notes: e.target.value }))} placeholder="Ex: gift para parceiro, trial manual…" className="h-10 rounded-lg text-[13px]" />
+              <Input value={subForm.notes} onChange={e => setSubForm(f => ({ ...f, notes: e.target.value }))} placeholder="Ex: gift para parceiro, trial manual…" className="h-10 rounded-lg text-base" />
             </div>
             <button onClick={() => createSubM.mutate(subForm)} disabled={!subForm.user_email || createSubM.isPending} className="btn btn-primary w-full h-11 rounded-xl text-[14px]">
               {createSubM.isPending ? 'Criando…' : 'Criar assinatura'}
@@ -192,13 +192,13 @@ export default function SubscriptionManager() {
           <div className="space-y-3">
             <div>
               <label className="t-label block mb-1.5">Email do usuário</label>
-              <Input value={ovForm.user_email} onChange={e => setOvForm(f => ({ ...f, user_email: e.target.value }))} placeholder="user@example.com" className="h-10 rounded-lg text-[13px]" />
+              <Input value={ovForm.user_email} onChange={e => setOvForm(f => ({ ...f, user_email: e.target.value }))} placeholder="user@example.com" className="h-10 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="t-label block mb-1.5">Feature</label>
                 <Select value={ovForm.feature_key} onValueChange={v => setOvForm(f => ({ ...f, feature_key: v }))}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(FEATURE_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                   </SelectContent>
@@ -207,7 +207,7 @@ export default function SubscriptionManager() {
               <div>
                 <label className="t-label block mb-1.5">Ação</label>
                 <Select value={String(ovForm.enabled)} onValueChange={v => setOvForm(f => ({ ...f, enabled: v === 'true' }))}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="true">Liberar</SelectItem>
                     <SelectItem value="false">Bloquear</SelectItem>
@@ -217,11 +217,11 @@ export default function SubscriptionManager() {
             </div>
             <div>
               <label className="t-label block mb-1.5">Expira em (opcional)</label>
-              <Input type="date" value={ovForm.expires_at} onChange={e => setOvForm(f => ({ ...f, expires_at: e.target.value }))} className="h-10 rounded-lg text-[13px]" />
+              <Input type="date" value={ovForm.expires_at} onChange={e => setOvForm(f => ({ ...f, expires_at: e.target.value }))} className="h-10 rounded-lg text-base" />
             </div>
             <div>
               <label className="t-label block mb-1.5">Motivo</label>
-              <Input value={ovForm.reason} onChange={e => setOvForm(f => ({ ...f, reason: e.target.value }))} placeholder="Ex: gift, trial, compensação…" className="h-10 rounded-lg text-[13px]" />
+              <Input value={ovForm.reason} onChange={e => setOvForm(f => ({ ...f, reason: e.target.value }))} placeholder="Ex: gift, trial, compensação…" className="h-10 rounded-lg text-base" />
             </div>
             <button onClick={() => createOvM.mutate(ovForm)} disabled={!ovForm.user_email || createOvM.isPending} className="btn btn-primary w-full h-11 rounded-xl text-[14px]">
               {createOvM.isPending ? 'Criando…' : 'Criar override'}

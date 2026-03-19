@@ -132,7 +132,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                   Quantas refeições por dia?
                 </label>
                 <Select value={String(answers.meals_per_day || '')} onValueChange={v => set('meals_per_day', Number(v))}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {[3, 4, 5, 6].map(n => <SelectItem key={n} value={String(n)}>{n} refeições</SelectItem>)}
                   </SelectContent>
@@ -148,7 +148,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                   value={answers.restrictions || ''}
                   onChange={e => set('restrictions', e.target.value)}
                   placeholder="Ex: Sem lactose, low-carb, vegetariano..."
-                  className="h-10 rounded-lg text-[13px]"
+                  className="h-10 rounded-lg text-base"
                 />
               </div>
             )}
@@ -158,7 +158,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                   Nível de experiência no treino?
                 </label>
                 <Select value={answers.experience || ''} onValueChange={v => set('experience', v)}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="beginner">Iniciante (menos de 1 ano)</SelectItem>
                     <SelectItem value="intermediate">Intermediário (1-3 anos)</SelectItem>
@@ -174,7 +174,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                   Local de treino?
                 </label>
                 <Select value={answers.location || ''} onValueChange={v => set('location', v)}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="gym">Academia completa</SelectItem>
                     <SelectItem value="home">Casa (sem equipamentos)</SelectItem>
@@ -190,7 +190,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                   Duração da sessão?
                 </label>
                 <Select value={String(answers.session_minutes || '')} onValueChange={v => set('session_minutes', Number(v))}>
-                  <SelectTrigger className="h-10 rounded-lg text-[13px]"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {[30, 45, 60, 75, 90].map(n => <SelectItem key={n} value={String(n)}>{n} minutos</SelectItem>)}
                   </SelectContent>
@@ -208,7 +208,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                   value={answers.muscular_focus || ''}
                   onChange={e => set('muscular_focus', e.target.value)}
                   placeholder="Ex: Peito e tríceps, Costas, Pernas..."
-                  className="h-10 rounded-lg text-[13px]"
+                  className="h-10 rounded-lg text-base"
                 />
               </div>
             )}

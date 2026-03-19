@@ -177,6 +177,8 @@
     text-rendering: optimizeLegibility;
     height: 100%;
     overscroll-behavior-y: none;
+    /* Prevent horizontal overflow from triggering layout reflow / scale on iOS */
+    overflow-x: hidden;
   }
 
   body {
@@ -192,6 +194,8 @@
     overscroll-behavior-y: none;
     -webkit-user-select: text;
     user-select: text;
+    /* Prevent horizontal scroll from triggering iOS page scaling */
+    overflow-x: hidden;
   }
 
   #root {
@@ -245,6 +249,26 @@
     background: hsl(var(--tint));
     box-shadow: 0 8px 18px hsl(var(--tint) / 0.18);
     cursor: pointer;
+  }
+
+  /*
+   * iOS Safari auto-zoom prevention
+   * Any input/select/textarea with font-size < 16px causes Safari to zoom the viewport on focus.
+   * This rule acts as a safety net on top of per-component fixes.
+   */
+  input:not([type="range"]),
+  textarea,
+  select {
+    font-size: max(1rem, 16px);
+  }
+
+  /* Prevent 300ms tap delay and double-tap zoom on interactive elements */
+  button,
+  a,
+  [role="button"],
+  [role="link"],
+  label {
+    touch-action: manipulation;
   }
 }
 
@@ -426,6 +450,7 @@
   .atlas-public-shell {
     position: relative;
     min-height: 100vh;
+    min-height: 100dvh;
     background:
       radial-gradient(circle at top, hsl(var(--tint) / 0.055), transparent 24%),
       radial-gradient(circle at 100% 12%, hsl(var(--label) / 0.028), transparent 18%),

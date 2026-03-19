@@ -33,9 +33,9 @@ import { cn } from '@/lib/utils';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
-const INPUT_CLASS_NAME = 'atlas-field mt-2 h-11 px-4 py-2 text-sm';
+const INPUT_CLASS_NAME = 'atlas-field mt-2 h-11 px-4 py-2 text-base';
 const SELECT_CLASS_NAME = `${INPUT_CLASS_NAME} appearance-none`;
-const TEXTAREA_CLASS_NAME = 'atlas-field mt-2 min-h-[120px] resize-y px-4 py-3 text-sm';
+const TEXTAREA_CLASS_NAME = 'atlas-field mt-2 min-h-[120px] resize-y px-4 py-3 text-base';
 const WORKOUT_FILTERS = ['all', 'pending', 'completed'];
 
 const STATUS_META = {

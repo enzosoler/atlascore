@@ -113,7 +113,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
         <div className="space-y-4">
           {/* Meal type */}
           <Select value={mealType} onValueChange={setMealType}>
-            <SelectTrigger className="h-10 rounded-lg text-[13px]">
+            <SelectTrigger className="h-10 rounded-lg text-base">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

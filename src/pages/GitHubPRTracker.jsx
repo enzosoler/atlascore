@@ -103,7 +103,7 @@ export default function GitHubPRTracker() {
         <div className="flex items-center gap-3 flex-wrap">
           <label className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">Repositório</label>
           <Select value={selectedRepo || ''} onValueChange={setSelectedRepo}>
-            <SelectTrigger className="w-72 h-9 rounded-lg text-[13px]">
+            <SelectTrigger className="w-72 h-9 rounded-lg text-base">
               <SelectValue placeholder="Selecionar repositório…" />
             </SelectTrigger>
             <SelectContent>
@@ -153,7 +153,7 @@ export default function GitHubPRTracker() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por título, branch ou autor…"
-              className="pl-8 h-9 rounded-lg text-[13px]"
+              className="pl-8 h-9 rounded-lg text-base"
             />
           </div>
         </div>

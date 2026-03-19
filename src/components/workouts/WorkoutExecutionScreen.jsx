@@ -148,7 +148,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete }) {
                 value={formData.weight}
                 onChange={e => setFormData(f => ({ ...f, weight: e.target.value }))}
                 placeholder="0"
-                className="atlas-input h-10 rounded-lg text-center text-[14px]"
+                className="atlas-input h-10 rounded-lg text-center text-base"
               />
             </div>
             <div>
@@ -158,7 +158,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete }) {
                 value={formData.reps}
                 onChange={e => setFormData(f => ({ ...f, reps: e.target.value }))}
                 placeholder="0"
-                className="atlas-input h-10 rounded-lg text-center text-[14px]"
+                className="atlas-input h-10 rounded-lg text-center text-base"
               />
             </div>
             <div>
@@ -168,7 +168,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete }) {
                 value={formData.rir}
                 onChange={e => setFormData(f => ({ ...f, rir: e.target.value }))}
                 placeholder="0"
-                className="atlas-input h-10 rounded-lg text-center text-[14px]"
+                className="atlas-input h-10 rounded-lg text-center text-base"
               />
             </div>
           </div>

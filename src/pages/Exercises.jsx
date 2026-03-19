@@ -97,14 +97,14 @@ export default function Exercises() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nome ou aliases…"
-            className="h-10 pl-10 rounded-lg text-[13px]"
+            className="h-10 pl-10 rounded-lg text-base"
           />
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-2">
           <Select value={filterMuscle} onValueChange={setFilterMuscle}>
-            <SelectTrigger className="h-9 rounded-lg text-[12px] flex-1 min-w-[140px]">
+            <SelectTrigger className="h-9 rounded-lg text-base flex-1 min-w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +118,7 @@ export default function Exercises() {
           </Select>
 
           <Select value={filterPattern} onValueChange={setFilterPattern}>
-            <SelectTrigger className="h-9 rounded-lg text-[12px] flex-1 min-w-[140px]">
+            <SelectTrigger className="h-9 rounded-lg text-base flex-1 min-w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -130,7 +130,7 @@ export default function Exercises() {
           </Select>
 
           <Select value={filterEquipment} onValueChange={setFilterEquipment}>
-            <SelectTrigger className="h-9 rounded-lg text-[12px] flex-1 min-w-[140px]">
+            <SelectTrigger className="h-9 rounded-lg text-base flex-1 min-w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
