@@ -8,7 +8,6 @@ export function AppContainer({ children, className = '', maxWidth = 'max-w-5xl' 
   return (
     <div
       className="min-h-full bg-[hsl(var(--bg))] text-[hsl(var(--fg))]"
-      style={{ colorScheme: 'light' }}
     >
       <div
         className={cn(
@@ -46,7 +45,7 @@ export function PageHeader({
   actions,
   children,
   className = '',
-  accentClassName = 'from-[#EFF6FF]',
+  accentClassName = 'from-[hsl(var(--brand)/0.18)] via-[hsl(var(--brand-ai)/0.08)]',
 }) {
   return (
     <Card className={cn('atlas-page-header relative overflow-hidden px-5 py-6 sm:px-6', className)}>
@@ -119,7 +118,7 @@ export function StatCard({ label, value, detail, icon: Icon, className = '' }) {
         </div>
 
         {Icon ? (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.96)_0%,hsl(var(--card))_100%)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
             <Icon className="h-4 w-4" strokeWidth={1.9} />
           </div>
         ) : null}
@@ -140,7 +139,7 @@ export function TabBar({ items, className = '' }) {
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.88)] bg-[rgba(255,255,255,0.94)] backdrop-blur-xl lg:hidden',
+        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.88)] bg-[hsl(var(--bg)/0.88)] backdrop-blur-2xl lg:hidden',
         className
       )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}

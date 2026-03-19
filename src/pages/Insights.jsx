@@ -5,11 +5,11 @@ import { base44 } from '@/api/base44Client';
 import {
   EmptyState,
   ErrorState,
+  FilterChip,
   LoadingState,
   MetricCard,
   PageShell,
   SafePageBoundary,
-  SecondaryButton,
   SectionCard,
   StatusBanner,
   formatNumber,
@@ -168,16 +168,13 @@ function InsightsContent() {
       actions={
         <>
           {Object.keys(RANGE_DAYS).map((option) => (
-            <SecondaryButton
+            <FilterChip
               key={option}
-              type="button"
               onClick={() => setRange(option)}
-              className={
-                range === option ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-900' : ''
-              }
+              active={range === option}
             >
               {option}
-            </SecondaryButton>
+            </FilterChip>
           ))}
         </>
       }
@@ -240,20 +237,20 @@ function InsightsContent() {
             subtitle="Resumo textual do que o histórico recente está mostrando."
           >
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
-                <p className="font-semibold text-zinc-950">Peso</p>
+              <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
+                <p className="font-semibold text-[hsl(var(--fg))]">Peso</p>
                 <p className="mt-2">{summarizeWeight(measurements)}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
-                <p className="font-semibold text-zinc-950">Treino</p>
+              <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
+                <p className="font-semibold text-[hsl(var(--fg))]">Treino</p>
                 <p className="mt-2">{consistencyText}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
-                <p className="font-semibold text-zinc-950">Nutrição</p>
+              <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
+                <p className="font-semibold text-[hsl(var(--fg))]">Nutrição</p>
                 <p className="mt-2">{nutritionText}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
-                <p className="font-semibold text-zinc-950">Recuperação</p>
+              <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
+                <p className="font-semibold text-[hsl(var(--fg))]">Recuperação</p>
                 <p className="mt-2">{recoveryText}</p>
               </div>
             </div>
@@ -264,35 +261,35 @@ function InsightsContent() {
             subtitle="Visão simples do volume de dados disponíveis no período."
           >
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
                   Check-ins
                 </p>
-                <p className="mt-2 text-2xl font-bold text-zinc-950">
+                <p className="mt-2 text-2xl font-bold text-[hsl(var(--fg))]">
                   {formatNumber(checkins.length)}
                 </p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
                   Refeicoes
                 </p>
-                <p className="mt-2 text-2xl font-bold text-zinc-950">
+                <p className="mt-2 text-2xl font-bold text-[hsl(var(--fg))]">
                   {formatNumber(meals.length)}
                 </p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
                   Medicoes
                 </p>
-                <p className="mt-2 text-2xl font-bold text-zinc-950">
+                <p className="mt-2 text-2xl font-bold text-[hsl(var(--fg))]">
                   {formatNumber(measurements.length)}
                 </p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
                   Treinos
                 </p>
-                <p className="mt-2 text-2xl font-bold text-zinc-950">
+                <p className="mt-2 text-2xl font-bold text-[hsl(var(--fg))]">
                   {formatNumber(workouts.length)}
                 </p>
               </div>

@@ -155,7 +155,7 @@ export function ErrorState({
   return (
     <SectionCard title={title} subtitle={description}>
       <div className="atlas-banner flex items-start gap-3 px-4 py-4" data-tone="warning">
-        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[hsl(39_62%_80%)] bg-[hsl(var(--card)/0.82)]">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--warn))]">
           <AlertTriangle className="h-4 w-4" strokeWidth={2} />
         </div>
         <div>
@@ -197,15 +197,15 @@ export function StatusBanner({ children, tone = 'neutral' }) {
     },
     warning: {
       icon: AlertTriangle,
-      iconClass: 'border-[hsl(39_62%_80%)] bg-[hsl(var(--card)/0.9)] text-[hsl(34_68%_32%)]',
+      iconClass: 'border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--warn))]',
     },
     success: {
       icon: CheckCircle2,
-      iconClass: 'border-[hsl(152_38%_80%)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--ok))]',
+      iconClass: 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--ok))]',
     },
     error: {
       icon: XCircle,
-      iconClass: 'border-[hsl(0_56%_82%)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--err))]',
+      iconClass: 'border-[hsl(var(--err)/0.24)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--err))]',
     },
   };
   const meta = toneMeta[tone] || toneMeta.neutral;

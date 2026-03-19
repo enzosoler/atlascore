@@ -173,34 +173,34 @@ function TodayContent() {
     <TodayScreen>
       <header className="flex items-start justify-between gap-4 px-1">
         <div className="min-w-0">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
+          <p className="atlas-overline">
             {getDateLabel()}
           </p>
-          <h1 className="mt-2 text-[34px] font-bold tracking-[-0.07em] text-[#111827]">Hoje</h1>
+          <h1 className="mt-3 text-[34px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">Hoje</h1>
         </div>
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/80 text-[#0A84FF] shadow-[0_4px_20px_rgba(15,23,42,0.05)]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.9)_0%,hsl(var(--card))_100%)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
           <Sparkles className="h-5 w-5" strokeWidth={2} />
         </div>
       </header>
 
-      <TodayCard className="relative overflow-hidden border-[#93C5FD] bg-[linear-gradient(135deg,#0A84FF_0%,#38A3FF_55%,#79D6FF_100%)] text-white shadow-[0_14px_32px_rgba(10,132,255,0.24)]">
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[#BAE6FD]/35 blur-2xl" />
+      <TodayCard className="relative overflow-hidden border-[hsl(var(--brand)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.14),transparent_28%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.18),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_45%,hsl(var(--fill)/0.96)_100%)] shadow-[var(--shadow-md)]">
+        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.16)] blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[hsl(var(--accent-secondary)/0.16)] blur-2xl" />
 
         <div className="relative">
           {isAdmin && (
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white">
+              <span className="inline-flex rounded-full border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
                 Modo admin ativo
               </span>
             </div>
           )}
 
-          <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-white">
+          <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
             {greeting}, {preferredName}
           </p>
-          <p className="mt-2 max-w-[24rem] text-[15px] leading-6 text-white/84">
+          <p className="mt-2 max-w-[30rem] text-[15px] leading-6 text-[hsl(var(--fg-2))]">
             Seu centro de nutrição, treino e próxima decisão do dia.
           </p>
         </div>

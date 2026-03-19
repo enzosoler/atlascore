@@ -16,9 +16,9 @@ const buttonVariants = cva(
         outline:
           "atlas-button-secondary",
         secondary:
-          "atlas-button-secondary bg-[hsl(var(--fill)/0.72)]",
+          "atlas-button-secondary bg-[hsl(var(--fill)/0.9)]",
         ghost: "atlas-button-ghost",
-        link: "min-h-0 rounded-none border-0 bg-transparent p-0 shadow-none text-primary hover:translate-y-0 hover:underline",
+        link: "min-h-0 rounded-none border-0 bg-transparent p-0 text-[hsl(var(--brand))] shadow-none hover:translate-y-0 hover:bg-transparent hover:text-[hsl(var(--brand)/0.88)] hover:underline",
       },
       size: {
         default: "h-10 px-4",

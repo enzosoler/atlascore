@@ -5,8 +5,10 @@ import { base44 } from '@/api/base44Client';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
 import {
+  DialogPanelHeader,
   EmptyState,
   ErrorState,
+  FilterChip,
   LoadingState,
   PageShell,
   PrimaryButton,
@@ -39,19 +41,19 @@ function getProtocolStatus(protocol) {
 
 function SummaryTile({ label, value, hint, icon: Icon }) {
   return (
-    <article className="rounded-[28px] border border-zinc-200/90 bg-white px-5 py-5 shadow-[0_18px_48px_rgba(15,23,42,0.04)]">
+    <article className="atlas-card rounded-[28px] border-[hsl(var(--border)/0.92)] px-5 py-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+          <p className="atlas-overline">
             {label}
           </p>
-          <p className="mt-3 text-[30px] font-semibold tracking-[-0.04em] text-zinc-950">
+          <p className="mt-3 text-[30px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
             {value}
           </p>
-          <p className="mt-2 text-sm leading-6 text-zinc-600">{hint}</p>
+          <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">{hint}</p>
         </div>
         {Icon ? (
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-600">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.8)] text-[hsl(var(--brand))]">
             <Icon className="h-5 w-5" strokeWidth={2} />
           </div>
         ) : null}
@@ -333,18 +335,13 @@ function ProtocolsContent() {
                   : groupedProtocols[option]?.length || 0;
 
               return (
-                <button
+                <FilterChip
                   key={option}
-                  type="button"
                   onClick={() => setFilter(option)}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                    filter === option
-                      ? 'border-zinc-900 bg-zinc-900 text-white'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'
-                  }`}
+                  active={filter === option}
                 >
                   {FILTER_LABELS[option] || option} ({count})
-                </button>
+                </FilterChip>
               );
             })}
           </div>
@@ -355,12 +352,12 @@ function ProtocolsContent() {
             {[0, 1].map((index) => (
               <div
                 key={index}
-                className="animate-pulse rounded-[28px] border border-zinc-200 bg-zinc-50 p-5"
+                className="animate-pulse rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.72)] p-5"
               >
-                <div className="h-5 w-40 rounded-full bg-zinc-200" />
+                <div className="h-5 w-40 rounded-full bg-[hsl(var(--border))]" />
                 <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   {[0, 1, 2, 3].map((block) => (
-                    <div key={block} className="h-20 rounded-2xl bg-white" />
+                    <div key={block} className="h-20 rounded-2xl bg-[hsl(var(--card))]" />
                   ))}
                 </div>
               </div>
@@ -431,12 +428,16 @@ function ProtocolsContent() {
           if (!open) setEditingProtocol(null);
         }}
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[32px] border-zinc-200 bg-white p-0 shadow-[0_28px_90px_rgba(15,23,42,0.18)] sm:max-w-3xl">
-          <DialogHeader className="border-b border-zinc-200 px-6 pb-5 pt-6 text-left">
-            <DialogTitle className="text-[28px] font-semibold tracking-[-0.04em] text-zinc-950">
-              {editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
-            </DialogTitle>
-            <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+        <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-3xl">
+          <DialogPanelHeader
+            eyebrow="Protocolos"
+            title={editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
+            description="Registre os dados principais do protocolo: substância, categoria, dose, frequência, horário e status atual."
+            accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
+          />
+          <DialogHeader className="sr-only">
+            <DialogTitle>{editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}</DialogTitle>
+            <DialogDescription>
               Registre os dados principais do protocolo: substância, categoria, dose, frequência, horário e status atual.
             </DialogDescription>
           </DialogHeader>

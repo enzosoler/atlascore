@@ -1,90 +1,98 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { Activity } from 'lucide-react';
-import AdherenceComparison from '@/components/shared/AdherenceComparison';
-import {
-  flattenPrescribedWorkoutExercises,
-  getPrescribedWorkoutSessions,
-} from '@/lib/prescribedWorkout';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Search, Sparkles } from 'lucide-react';
+import substances from '@/lib/substances_seed.json';
+import { cn } from '@/lib/utils';
 
-/**
- * CoachStudentAdherence — Shows athlete's workout adherence vs prescribed
- */
-export default function CoachStudentAdherence({ studentEmail, weeks = 4 }) {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - weeks * 7);
-  const startDateStr = startDate.toISOString().split('T')[0];
+const SUGGESTION_LIMIT = 8;
+const DEFAULT_SUGGESTIONS = substances.slice(0, 6);
 
-  const { data: workouts = [] } = useQuery({
-    queryKey: ['student-workouts', studentEmail, startDateStr],
-    queryFn: () => base44.entities.Workout.filter({ created_by: studentEmail }),
-  });
+function matchesSubstance(item, query) {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return true;
 
-  const { data: prescribed = [] } = useQuery({
-    queryKey: ['prescribed-workouts', studentEmail],
-    queryFn: () => base44.entities.PrescribedWorkout.filter({ athlete_email: studentEmail, active: true }),
-  });
+  const haystack = [
+    item.canonical_name,
+    ...(Array.isArray(item.aliases) ? item.aliases : []),
+    item.category,
+    item.common_frequency_reference,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
 
-  // Count completed workouts (status = 'completed')
-  const completedCount = workouts.filter(w => w.status === 'completed').length;
+  return haystack.includes(normalizedQuery);
+}
 
-  // Calculate expected from prescribed
-  const expectedCount = prescribed.length > 0
-    ? prescribed.reduce((sum, p) => {
-        const inferredFromFrequency = p.frequency?.includes('2')
-          ? 2
-          : p.frequency?.includes('3')
-          ? 3
-          : null;
-        return sum + (inferredFromFrequency || getPrescribedWorkoutSessions(p).length || 1);
-      }, 0)
-    : 0;
+export default function SubstancePicker({
+  value = '',
+  onChange,
+  onSelect,
+  className = '',
+}) {
+  const [query, setQuery] = useState(value);
 
-  // Calculate total volume (sets × reps)
-  const actualVolume = workouts.reduce((sum, w) => {
-    const wVol = w.exercises?.reduce((s, ex) => s + ((ex.sets || 0) * (ex.reps || 0)), 0) || 0;
-    return sum + wVol;
-  }, 0);
+  useEffect(() => {
+    setQuery(value || '');
+  }, [value]);
 
-  const prescribedVolume = prescribed.reduce((sum, p) => {
-    const pVol = flattenPrescribedWorkoutExercises(p).reduce(
-      (s, ex) => s + (Number(ex.sets || 0) * (parseInt(ex.reps, 10) || 0)),
-      0
-    );
-    return sum + pVol;
-  }, 0);
+  const suggestions = useMemo(() => {
+    const source = query.trim() ? substances.filter((item) => matchesSubstance(item, query)) : DEFAULT_SUGGESTIONS;
+    return source.slice(0, SUGGESTION_LIMIT);
+  }, [query]);
+
+  const handleInputChange = (nextValue) => {
+    setQuery(nextValue);
+    onChange?.(nextValue);
+  };
+
+  const handleSelect = (item) => {
+    setQuery(item.canonical_name);
+    onChange?.(item.canonical_name);
+    onSelect?.(item);
+  };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="t-subtitle flex items-center gap-2 mb-3">
-          <Activity className="w-4 h-4" /> Aderência a Treinos
-        </p>
-      </div>
+    <div className={cn('space-y-3', className)}>
+      <label htmlFor="protocol-substance-picker" className="text-[12px] font-semibold text-[hsl(var(--fg))]">
+        Substância principal
+      </label>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <AdherenceComparison
-          label="Sessões completadas"
-          actual={completedCount}
-          prescribed={expectedCount}
-          unit="sessões"
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
+        <input
+          id="protocol-substance-picker"
+          type="text"
+          value={query}
+          onChange={(event) => handleInputChange(event.target.value)}
+          placeholder="Ex: Cipionato de Testosterona, Creatina, Vitamina D3"
+          className="atlas-field h-12 pl-11 pr-4 text-base"
         />
-        {prescribedVolume > 0 && (
-          <AdherenceComparison
-            label="Volume total (sets × reps)"
-            actual={actualVolume}
-            prescribed={prescribedVolume}
-            unit="reps"
-          />
-        )}
       </div>
 
-      {prescribed.length === 0 && (
-        <div className="p-4 rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] text-center">
-          <p className="t-small text-[hsl(var(--fg-2))]">Nenhum treino prescrito ainda</p>
+      <div className="rounded-[22px] border border-[hsl(var(--border)/0.88)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.72)_0%,hsl(var(--card))_100%)] p-3 shadow-[var(--shadow-xs)]">
+        <div className="flex items-center gap-2 pb-2">
+          <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={1.9} />
+          <p className="text-[12px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+            Sugestões clínicas
+          </p>
         </div>
-      )}
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          {suggestions.map((item) => (
+            <button
+              key={item.canonical_name}
+              type="button"
+              onClick={() => handleSelect(item)}
+              className="rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card))] px-3 py-3 text-left transition-all duration-200 hover:border-[hsl(var(--brand)/0.24)] hover:bg-[hsl(var(--fill)/0.68)]"
+            >
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{item.canonical_name}</p>
+              <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+                {item.category} · {item.common_frequency_reference || 'Sem referência'}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

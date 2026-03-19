@@ -6,34 +6,58 @@
   :root {
     color-scheme: light;
 
-    /* Core palette */
-    --tint: 213 92% 48%;
-    --tint-hover: 213 88% 44%;
-    --tint-soft: 213 100% 97%;
+    /* Semantic theme tokens */
+    --bg-app: 216 36% 97%;
+    --bg-surface: 214 31% 95%;
+    --bg-surface-2: 214 29% 93%;
+    --bg-card-semantic: 0 0% 100%;
+    --bg-card-elevated: 210 33% 99%;
 
-    --sys-bg: 220 23% 97%;
-    --sys-bg2: 220 22% 95.8%;
-    --sys-bg3: 220 20% 93.8%;
-    --card: 0 0% 100%;
-    --card-elevated: 0 0% 100%;
-    --glass-bg: rgba(250, 251, 253, 0.82);
+    --text-primary: 219 27% 14%;
+    --text-secondary: 218 16% 39%;
+    --text-muted: 217 14% 55%;
+    --text-subtle: 216 12% 72%;
+
+    --border-default: 216 23% 87%;
+    --border-strong: 216 16% 76%;
+
+    --accent-primary: 219 100% 65%;
+    --accent-primary-hover: 219 91% 58%;
+    --accent-secondary: 169 71% 46%;
+
+    --status-success: 148 71% 44%;
+    --status-warning: 40 89% 60%;
+    --status-danger: 352 100% 68%;
+    --status-ai: 191 69% 52%;
+
+    /* Legacy / compatibility aliases */
+    --tint: var(--accent-primary);
+    --tint-hover: var(--accent-primary-hover);
+    --tint-soft: 214 100% 98%;
+
+    --sys-bg: var(--bg-app);
+    --sys-bg2: var(--bg-surface);
+    --sys-bg3: var(--bg-surface-2);
+    --card: var(--bg-card-semantic);
+    --card-elevated: var(--bg-card-elevated);
+    --glass-bg: rgba(244, 247, 251, 0.78);
     --glass-border: rgba(20, 24, 33, 0.08);
 
-    --label: 222 24% 12%;
-    --label-secondary: 220 12% 38%;
-    --label-tertiary: 220 9% 54%;
-    --label-quaternary: 220 8% 72%;
+    --label: var(--text-primary);
+    --label-secondary: var(--text-secondary);
+    --label-tertiary: var(--text-muted);
+    --label-quaternary: var(--text-subtle);
 
-    --separator-opaque: 220 18% 88%;
-    --separator-strong: 220 16% 82%;
-    --fill: 220 20% 96%;
-    --fill-secondary: 220 18% 93%;
+    --separator-opaque: var(--border-default);
+    --separator-strong: var(--border-strong);
+    --fill: 214 31% 95%;
+    --fill-secondary: 214 25% 92%;
 
-    --sys-green: 152 45% 38%;
-    --sys-orange: 33 86% 48%;
-    --sys-red: 0 67% 52%;
-    --sys-yellow: 42 78% 49%;
-    --sys-purple: 255 58% 58%;
+    --sys-green: var(--status-success);
+    --sys-orange: var(--status-warning);
+    --sys-red: var(--status-danger);
+    --sys-yellow: var(--status-warning);
+    --sys-purple: var(--status-ai);
 
     /* Layout rhythm */
     --space-1: 4px;
@@ -58,15 +82,15 @@
     --r-pill: 999px;
 
     /* Shadows */
-    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.025), 0 6px 14px rgba(15, 23, 42, 0.025);
-    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.035), 0 12px 28px rgba(15, 23, 42, 0.045);
-    --shadow-md: 0 2px 4px rgba(15, 23, 42, 0.045), 0 18px 40px rgba(15, 23, 42, 0.07);
-    --shadow-lg: 0 8px 16px rgba(15, 23, 42, 0.07), 0 26px 64px rgba(15, 23, 42, 0.11);
-    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    --shadow-xs: 0 1px 2px rgba(9, 14, 24, 0.04), 0 10px 24px rgba(9, 14, 24, 0.045);
+    --shadow-sm: 0 1px 3px rgba(9, 14, 24, 0.05), 0 18px 36px rgba(9, 14, 24, 0.07);
+    --shadow-md: 0 8px 20px rgba(9, 14, 24, 0.08), 0 24px 64px rgba(9, 14, 24, 0.1);
+    --shadow-lg: 0 14px 32px rgba(9, 14, 24, 0.12), 0 34px 80px rgba(9, 14, 24, 0.14);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.82);
 
     /* Buttons */
-    --button-primary-bg: 222 24% 12%;
-    --button-primary-bg-hover: 222 24% 16%;
+    --button-primary-bg: var(--accent-primary);
+    --button-primary-bg-hover: var(--accent-primary-hover);
     --button-primary-foreground: 0 0% 100%;
 
     /* shadcn compat */
@@ -76,38 +100,38 @@
     --card-foreground: var(--label);
     --popover: var(--card);
     --popover-foreground: var(--label);
-    --primary: var(--tint);
+    --primary: var(--accent-primary);
     --primary-foreground: 0 0% 100%;
     --secondary: var(--fill);
     --secondary-foreground: var(--label);
     --muted: var(--fill);
     --muted-foreground: var(--label-secondary);
-    --accent: var(--fill);
+    --accent: var(--fill-secondary);
     --accent-foreground: var(--label);
-    --destructive: var(--sys-red);
+    --destructive: var(--status-danger);
     --destructive-foreground: 0 0% 100%;
-    --border: var(--separator-opaque);
-    --input: var(--separator-opaque);
-    --ring: var(--tint);
+    --border: var(--border-default);
+    --input: var(--border-default);
+    --ring: var(--accent-primary);
     --radius: 1.25rem;
 
-    --chart-1: 213 92% 48%;
-    --chart-2: 152 45% 38%;
-    --chart-3: 33 86% 48%;
-    --chart-4: 255 58% 58%;
-    --chart-5: 42 78% 49%;
+    --chart-1: var(--accent-primary);
+    --chart-2: var(--accent-secondary);
+    --chart-3: var(--status-warning);
+    --chart-4: var(--status-ai);
+    --chart-5: var(--status-success);
 
     --sidebar-background: var(--card);
     --sidebar-foreground: var(--label);
-    --sidebar-primary: var(--tint);
+    --sidebar-primary: var(--accent-primary);
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: var(--fill);
     --sidebar-accent-foreground: var(--label);
-    --sidebar-border: var(--separator-opaque);
-    --sidebar-ring: var(--tint);
+    --sidebar-border: var(--border-default);
+    --sidebar-ring: var(--accent-primary);
 
     /* Legacy compat */
-    --brand: var(--tint);
+    --brand: var(--accent-primary);
     --brand-ai: var(--sys-purple);
     --bg: var(--sys-bg);
     --shell: var(--sys-bg2);
@@ -125,34 +149,55 @@
   [data-theme="dark"] {
     color-scheme: dark;
 
-    --sys-bg: 222 22% 8%;
-    --sys-bg2: 222 18% 10%;
-    --sys-bg3: 222 16% 13%;
-    --card: 222 16% 11%;
-    --card-elevated: 222 16% 13%;
-    --glass-bg: rgba(18, 21, 27, 0.8);
+    --bg-app: 223 24% 6%;
+    --bg-surface: 218 23% 9%;
+    --bg-surface-2: 217 22% 12%;
+    --bg-card-semantic: 217 20% 13%;
+    --bg-card-elevated: 217 20% 15%;
+
+    --text-primary: 216 33% 97%;
+    --text-secondary: 218 16% 71%;
+    --text-muted: 217 10% 54%;
+    --text-subtle: 216 11% 36%;
+
+    --border-default: 217 20% 18%;
+    --border-strong: 217 18% 27%;
+
+    --sys-bg: var(--bg-app);
+    --sys-bg2: var(--bg-surface);
+    --sys-bg3: var(--bg-surface-2);
+    --card: var(--bg-card-semantic);
+    --card-elevated: var(--bg-card-elevated);
+    --glass-bg: rgba(13, 17, 24, 0.82);
     --glass-border: rgba(255, 255, 255, 0.08);
 
-    --label: 220 22% 94%;
-    --label-secondary: 220 12% 70%;
-    --label-tertiary: 220 10% 54%;
-    --label-quaternary: 220 9% 36%;
+    --label: var(--text-primary);
+    --label-secondary: var(--text-secondary);
+    --label-tertiary: var(--text-muted);
+    --label-quaternary: var(--text-subtle);
 
-    --separator-opaque: 220 14% 22%;
-    --separator-strong: 220 16% 28%;
-    --fill: 222 15% 15%;
-    --fill-secondary: 222 14% 18%;
+    --separator-opaque: var(--border-default);
+    --separator-strong: var(--border-strong);
+    --fill: 217 19% 15%;
+    --fill-secondary: 217 17% 18%;
 
-    --button-primary-bg: 0 0% 100%;
-    --button-primary-bg-hover: 220 18% 92%;
-    --button-primary-foreground: 222 24% 12%;
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.18);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18), 0 18px 40px rgba(0, 0, 0, 0.22);
+    --shadow-md: 0 10px 26px rgba(0, 0, 0, 0.24), 0 30px 80px rgba(0, 0, 0, 0.28);
+    --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.3), 0 40px 100px rgba(0, 0, 0, 0.34);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    --button-primary-bg: var(--accent-primary);
+    --button-primary-bg-hover: 219 100% 70%;
+    --button-primary-foreground: 0 0% 100%;
 
     --background: var(--sys-bg);
     --foreground: var(--label);
-    --border: var(--separator-opaque);
-    --input: var(--separator-opaque);
+    --border: var(--border-default);
+    --input: var(--border-default);
     --muted: var(--fill);
     --muted-foreground: var(--label-secondary);
+    --accent: var(--fill-secondary);
     --bg: var(--sys-bg);
     --shell: var(--sys-bg2);
     --fg: var(--label);
@@ -183,8 +228,9 @@
   body {
     min-height: 100%;
     background:
-      radial-gradient(circle at top, hsl(var(--tint) / 0.028), transparent 28%),
-      linear-gradient(180deg, hsl(var(--sys-bg)) 0%, hsl(var(--sys-bg2)) 100%);
+      radial-gradient(circle at top, hsl(var(--accent-primary) / 0.13), transparent 32%),
+      radial-gradient(circle at 88% 16%, hsl(var(--accent-secondary) / 0.08), transparent 26%),
+      linear-gradient(180deg, hsl(var(--sys-bg)) 0%, hsl(var(--sys-bg2)) 58%, hsl(var(--sys-bg)) 100%);
     background-attachment: fixed;
     color: hsl(var(--label));
     font-size: 16px;
@@ -209,7 +255,7 @@
   }
 
   ::selection {
-    background: hsl(var(--tint) / 0.16);
+    background: hsl(var(--accent-primary) / 0.2);
     color: hsl(var(--label));
   }
 
@@ -422,8 +468,8 @@
   /* Reusable surfaces */
   .glass {
     background: var(--glass-bg);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
     border: 1px solid var(--glass-border);
   }
 
@@ -431,16 +477,19 @@
   .surface,
   .card,
   .sys-card {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.28) 100%);
-    border: 1px solid hsl(var(--separator-opaque) / 0.9);
-    border-radius: var(--atlas-radius);
+    background:
+      radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 34%),
+      linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.94);
+    border-radius: 24px;
     box-shadow: var(--shadow-sm), var(--shadow-inset);
   }
 
   .atlas-card-muted {
-    background: hsl(var(--fill) / 0.8);
-    border: 1px solid hsl(var(--separator-opaque) / 0.92);
-    border-radius: var(--r-md);
+    background: linear-gradient(180deg, hsl(var(--fill) / 0.86) 0%, hsl(var(--card) / 0.94) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.9);
+    border-radius: 22px;
+    box-shadow: var(--shadow-xs);
   }
 
   .atlas-page-shell {
@@ -453,9 +502,9 @@
     min-height: 100vh;
     min-height: 100dvh;
     background:
-      radial-gradient(ellipse 80% 40% at 50% 0%, hsl(var(--tint) / 0.10), transparent 60%),
-      radial-gradient(circle at 92% 10%, hsl(var(--sys-purple) / 0.055), transparent 28%),
-      radial-gradient(circle at 8% 80%, hsl(var(--tint) / 0.04), transparent 32%),
+      radial-gradient(ellipse 80% 40% at 50% 0%, hsl(var(--tint) / 0.12), transparent 60%),
+      radial-gradient(circle at 92% 10%, hsl(var(--sys-purple) / 0.08), transparent 28%),
+      radial-gradient(circle at 8% 80%, hsl(var(--accent-secondary) / 0.06), transparent 32%),
       linear-gradient(180deg, hsl(var(--sys-bg)) 0%, hsl(var(--sys-bg2)) 56%, hsl(var(--sys-bg)) 100%);
     /* overflow-x only: prevents horizontal bleed from decorative circles without blocking vertical page scroll */
     overflow-x: clip;
@@ -473,14 +522,16 @@
   }
 
   .atlas-public-panel {
-    background: linear-gradient(160deg, hsl(var(--card) / 0.99) 0%, hsl(var(--card)) 100%);
-    border: 1px solid hsl(var(--separator-opaque) / 0.9);
+    background:
+      radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 32%),
+      linear-gradient(160deg, hsl(var(--card-elevated) / 0.99) 0%, hsl(var(--card)) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.92);
     border-radius: calc(var(--r-xl) + 2px);
-    box-shadow: var(--shadow-md), var(--shadow-inset), 0 0 0 0.5px hsl(var(--tint) / 0.03);
+    box-shadow: var(--shadow-md), var(--shadow-inset), 0 0 0 0.5px hsl(var(--tint) / 0.05);
   }
 
   .atlas-public-panel-muted {
-    background: linear-gradient(160deg, hsl(var(--fill) / 0.72) 0%, hsl(var(--card) / 0.92) 100%);
+    background: linear-gradient(160deg, hsl(var(--fill) / 0.76) 0%, hsl(var(--card) / 0.94) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.86);
     border-radius: var(--r-lg);
     box-shadow: var(--shadow-xs), var(--shadow-inset);
@@ -493,12 +544,12 @@
     gap: 8px;
     border-radius: var(--r-pill);
     border: 1px solid hsl(var(--tint) / 0.18);
-    background: linear-gradient(135deg, hsl(var(--tint) / 0.07) 0%, hsl(var(--card) / 0.9) 100%);
+    background: linear-gradient(135deg, hsl(var(--tint) / 0.1) 0%, hsl(var(--card) / 0.94) 100%);
     padding: 0.55rem 0.9rem;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: -0.014em;
-    color: hsl(var(--label-secondary));
+    color: hsl(var(--label));
     box-shadow: var(--shadow-xs), var(--shadow-inset), 0 0 12px hsl(var(--tint) / 0.06);
   }
 
@@ -511,9 +562,10 @@
 
   .atlas-page-header {
     background:
-      radial-gradient(ellipse 70% 60% at 50% 0%, hsl(var(--tint) / 0.06), transparent 70%),
-      linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.4) 100%);
-    border: 1px solid hsl(var(--separator-opaque) / 0.88);
+      radial-gradient(ellipse 72% 62% at 50% 0%, hsl(var(--accent-primary) / 0.12), transparent 72%),
+      radial-gradient(circle at 92% 12%, hsl(var(--accent-secondary) / 0.08), transparent 26%),
+      linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.9);
     border-radius: var(--atlas-radius);
     box-shadow: var(--shadow-sm), var(--shadow-inset);
   }
@@ -725,27 +777,27 @@
   .atlas-banner {
     border-radius: var(--atlas-radius);
     border: 1px solid hsl(var(--separator-opaque));
-    background: hsl(var(--fill) / 0.86);
+    background: linear-gradient(180deg, hsl(var(--fill) / 0.92) 0%, hsl(var(--card) / 0.94) 100%);
     box-shadow: var(--shadow-xs), var(--shadow-inset);
     color: hsl(var(--label-secondary));
   }
 
   .atlas-banner[data-tone="warning"] {
-    border-color: hsl(39 62% 80%);
-    background: hsl(42 82% 95%);
-    color: hsl(30 54% 26%);
+    border-color: hsl(var(--warn) / 0.28);
+    background: hsl(var(--warn) / 0.12);
+    color: hsl(var(--warn));
   }
 
   .atlas-banner[data-tone="success"] {
-    border-color: hsl(152 38% 80%);
-    background: hsl(152 36% 94%);
-    color: hsl(152 42% 24%);
+    border-color: hsl(var(--ok) / 0.24);
+    background: hsl(var(--ok) / 0.12);
+    color: hsl(var(--ok));
   }
 
   .atlas-banner[data-tone="error"] {
-    border-color: hsl(0 56% 82%);
-    background: hsl(0 74% 95%);
-    color: hsl(0 44% 34%);
+    border-color: hsl(var(--err) / 0.26);
+    background: hsl(var(--err) / 0.12);
+    color: hsl(var(--err));
   }
 
   .atlas-empty,
@@ -758,15 +810,17 @@
     padding: 56px 24px;
     border: 1px dashed hsl(var(--separator-strong));
     border-radius: var(--atlas-radius);
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.72) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    background:
+      radial-gradient(circle at top, hsl(var(--accent-primary) / 0.08), transparent 34%),
+      linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.76) 100%);
+    box-shadow: var(--shadow-xs), var(--shadow-inset);
   }
 
   .empty-state-icon {
     width: 48px;
     height: 48px;
     border-radius: var(--r-md);
-    background: hsl(var(--fill));
+    background: linear-gradient(180deg, hsl(var(--fill)) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque));
     display: flex;
     align-items: center;
@@ -807,7 +861,7 @@
   .btn-primary {
     background: hsl(var(--button-primary-bg));
     color: hsl(var(--button-primary-foreground));
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 12px 24px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12), 0 14px 32px hsl(var(--button-primary-bg) / 0.26);
   }
 
   .atlas-button-primary:hover:not(:disabled),
@@ -817,7 +871,7 @@
 
   .atlas-button-secondary,
   .btn-secondary {
-    background: hsl(var(--card));
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.6) 100%);
     color: hsl(var(--label));
     border-color: hsl(var(--separator-opaque));
     box-shadow: var(--shadow-xs), var(--shadow-inset);
@@ -837,27 +891,27 @@
 
   .atlas-button-ghost:hover:not(:disabled),
   .btn-ghost:hover:not(:disabled) {
-    background: hsl(var(--fill));
+    background: hsl(var(--fill) / 0.76);
     color: hsl(var(--label));
   }
 
   .atlas-button-danger {
     background: hsl(var(--sys-red));
     color: hsl(var(--destructive-foreground));
-    box-shadow: 0 1px 2px rgba(185, 28, 28, 0.12), 0 12px 24px rgba(185, 28, 28, 0.14);
+    box-shadow: 0 1px 2px rgba(185, 28, 28, 0.12), 0 14px 32px hsl(var(--sys-red) / 0.22);
   }
 
   .atlas-button-danger:hover:not(:disabled) {
-    background: hsl(0 67% 48%);
+    background: hsl(var(--sys-red) / 0.92);
   }
 
   .atlas-field {
     width: 100%;
     border-radius: var(--atlas-radius);
     border: 1px solid hsl(var(--input));
-    background: hsl(var(--card));
+    background: linear-gradient(180deg, hsl(var(--fill) / 0.84) 0%, hsl(var(--card)) 100%);
     color: hsl(var(--foreground));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    box-shadow: var(--shadow-xs), inset 0 1px 0 hsl(var(--label) / 0.02);
     transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
   }
 
@@ -871,25 +925,27 @@
 
   .atlas-field:focus-visible {
     border-color: hsl(var(--ring));
-    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.12), var(--shadow-xs), inset 0 1px 0 hsl(var(--label) / 0.02);
   }
 
   .atlas-dialog-panel {
-    background: linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
-    border: 1px solid hsl(var(--separator-opaque));
+    background:
+      radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 32%),
+      linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.92);
     border-radius: var(--r-xl);
     box-shadow: var(--shadow-lg), var(--shadow-inset);
   }
 
   .atlas-dialog-overlay {
-    background: rgba(10, 14, 22, 0.34);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    background: rgba(5, 8, 13, 0.54);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
   }
 
   .atlas-popover-panel {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card)) 100%);
-    border: 1px solid hsl(var(--separator-opaque));
+    background: linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.92);
     border-radius: var(--r-md);
     box-shadow: var(--shadow-md), var(--shadow-inset);
   }
@@ -985,9 +1041,9 @@
 
   .badge-primary,
   .badge-blue {
-    background: hsl(var(--tint) / 0.08);
-    border-color: hsl(var(--tint) / 0.12);
-    color: hsl(var(--tint-hover));
+    background: hsl(var(--tint) / 0.12);
+    border-color: hsl(var(--tint) / 0.18);
+    color: hsl(var(--tint));
   }
 
   .badge-green,
@@ -1007,8 +1063,8 @@
   .badge-orange,
   .badge-warn {
     background: hsl(var(--sys-yellow) / 0.12);
-    border-color: hsl(var(--sys-yellow) / 0.16);
-    color: hsl(34 78% 34%);
+    border-color: hsl(var(--sys-yellow) / 0.2);
+    color: hsl(var(--sys-yellow));
   }
 
   .badge-neutral {
@@ -1019,32 +1075,32 @@
 
   .badge-ai {
     background: hsl(var(--sys-purple) / 0.1);
-    border-color: hsl(var(--sys-purple) / 0.14);
+    border-color: hsl(var(--sys-purple) / 0.18);
     color: hsl(var(--sys-purple));
   }
 
   .macro-protein {
-    background: hsl(213 92% 48% / 0.1);
-    color: hsl(213 88% 42%);
+    background: hsl(var(--accent-primary) / 0.12);
+    color: hsl(var(--accent-primary));
   }
 
   .macro-carbs {
-    background: hsl(33 86% 48% / 0.1);
-    color: hsl(33 78% 40%);
+    background: hsl(var(--accent-secondary) / 0.12);
+    color: hsl(var(--accent-secondary));
   }
 
   .macro-fat {
-    background: hsl(42 78% 49% / 0.12);
-    color: hsl(38 70% 34%);
+    background: hsl(var(--status-warning) / 0.14);
+    color: hsl(var(--status-warning));
   }
 
   .macro-fiber {
-    background: hsl(152 45% 38% / 0.1);
-    color: hsl(152 42% 32%);
+    background: hsl(var(--status-success) / 0.12);
+    color: hsl(var(--status-success));
   }
 
   .tint-gradient {
-    background: linear-gradient(135deg, hsl(var(--tint)) 0%, hsl(216 85% 62%) 100%);
+    background: linear-gradient(135deg, hsl(var(--accent-primary)) 0%, hsl(var(--accent-secondary)) 100%);
   }
 
   .shell {

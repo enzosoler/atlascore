@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const ThemeContext = createContext({ theme: 'light', setTheme: () => {} });
-const LIGHT_THEME_COLOR = '#FFFFFF';
-const DARK_THEME_COLOR = '#1B3A6B';
+const ThemeContext = createContext({ theme: 'dark', setTheme: () => {} });
+const LIGHT_THEME_COLOR = '#F4F7FB';
+const DARK_THEME_COLOR = '#0B0D12';
 
 function syncBrandAssets(theme) {
   const isDark = theme === 'dark';
@@ -15,7 +15,7 @@ function syncBrandAssets(theme) {
   }
 
   if (appleTouchIcon) {
-    appleTouchIcon.setAttribute('href', '/branding/dark/apple-touch-icon.png');
+    appleTouchIcon.setAttribute('href', isDark ? '/branding/dark/apple-touch-icon.png' : '/branding/light/apple-touch-icon.png');
   }
 
   if (themeColor) {
@@ -25,14 +25,15 @@ function syncBrandAssets(theme) {
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    // Read from localStorage, default to 'light'
-    return localStorage.getItem('atlas-theme') || 'light';
+    if (typeof window === 'undefined') return 'dark';
+    return localStorage.getItem('atlas-theme') || 'dark';
   });
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove('dark', 'light');
-    if (theme === 'dark') root.classList.add('dark');
+    root.classList.add(theme);
+    root.dataset.theme = theme;
     localStorage.setItem('atlas-theme', theme);
     syncBrandAssets(theme);
   }, [theme]);

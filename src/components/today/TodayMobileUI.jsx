@@ -4,29 +4,40 @@ import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const surfaceClassName =
-  'rounded-[20px] border border-[#E5E7EB] bg-white shadow-[0_4px_20px_rgba(15,23,42,0.05)]';
+  'atlas-card rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)]';
 
 const toneStyles = {
   blue: {
-    accent: 'text-[#0A84FF]',
-    icon: 'border-[#BFDBFE] bg-[#EFF6FF] text-[#0A84FF]',
-    pill: 'bg-[#EFF6FF] text-[#0A84FF]',
+    icon: 'border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]',
+    pill: 'border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]',
+    glow: 'border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.16),transparent_36%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]',
   },
   orange: {
-    accent: 'text-[#FF9F0A]',
-    icon: 'border-[#FED7AA] bg-[#FFF7ED] text-[#FF9F0A]',
-    pill: 'bg-[#FFF7ED] text-[#C2410C]',
+    icon: 'border-[hsl(var(--warn)/0.22)] bg-[hsl(var(--warn)/0.14)] text-[hsl(var(--warn))]',
+    pill: 'border border-[hsl(var(--warn)/0.22)] bg-[hsl(var(--warn)/0.14)] text-[hsl(var(--warn))]',
+    glow: 'border-[hsl(var(--warn)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--warn)/0.16),transparent_36%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]',
   },
   green: {
-    accent: 'text-[#34C759]',
-    icon: 'border-[#BBF7D0] bg-[#ECFDF3] text-[#34C759]',
-    pill: 'bg-[#ECFDF3] text-[#15803D]',
+    icon: 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.14)] text-[hsl(var(--ok))]',
+    pill: 'border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.14)] text-[hsl(var(--ok))]',
+    glow: 'border-[hsl(var(--ok)/0.18)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.16),transparent_36%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]',
+  },
+  teal: {
+    icon: 'border-[hsl(var(--accent-secondary)/0.22)] bg-[hsl(var(--accent-secondary)/0.14)] text-[hsl(var(--accent-secondary))]',
+    pill: 'border border-[hsl(var(--accent-secondary)/0.18)] bg-[hsl(var(--accent-secondary)/0.14)] text-[hsl(var(--accent-secondary))]',
+    glow: 'border-[hsl(var(--accent-secondary)/0.18)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.14),transparent_36%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]',
   },
 };
 
+function getAdherenceTone(score) {
+  if (score >= 75) return 'green';
+  if (score >= 45) return 'orange';
+  return 'blue';
+}
+
 export function TodayScreen({ children }) {
   return (
-    <div className="min-h-full bg-[#F5F5F7] text-[#111827]" style={{ colorScheme: 'light' }}>
+    <div className="min-h-full bg-transparent text-[hsl(var(--fg))]">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-8 pt-[max(env(safe-area-inset-top),24px)] sm:px-6 lg:gap-8 lg:px-8 lg:py-10">
         {children}
       </div>
@@ -42,19 +53,15 @@ export function TodaySection({ eyebrow, title, description, children, className 
   return (
     <section className={cn('space-y-3', className)}>
       {(eyebrow || title || description) ? (
-        <div className="space-y-1.5 px-1">
-          {eyebrow ? (
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-              {eyebrow}
-            </p>
-          ) : null}
+        <div className="space-y-2 px-1">
+          {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
           {title ? (
-            <h2 className="text-[20px] font-semibold tracking-[-0.04em] text-[#111827]">
+            <h2 className="text-[20px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
               {title}
             </h2>
           ) : null}
           {description ? (
-            <p className="text-[14px] leading-6 text-[#6B7280]">{description}</p>
+            <p className="text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
           ) : null}
         </div>
       ) : null}
@@ -76,38 +83,32 @@ export function TodayActionCard({
       to={to}
       className={cn(
         surfaceClassName,
-        'group flex items-start gap-3 p-4 transition-transform duration-200 hover:-translate-y-0.5',
-        highlighted
-          ? 'border-[#BFDBFE] bg-[linear-gradient(135deg,#F8FBFF_0%,#FFFFFF_100%)]'
-          : ''
+        'group flex items-start gap-3 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+        highlighted ? toneStyles.blue.glow : ''
       )}
     >
       <div
         className={cn(
           'mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border',
           highlighted
-            ? 'border-[#BFDBFE] bg-[#EFF6FF] text-[#0A84FF]'
-            : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280]'
+            ? toneStyles.blue.icon
+            : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.74)] text-[hsl(var(--fg-2))]'
         )}
       >
         <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
       </div>
 
       <div className="min-w-0 flex-1">
-        {priority ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-            {priority}
-          </p>
-        ) : null}
+        {priority ? <p className="atlas-overline">{priority}</p> : null}
         <div className="mt-1.5 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[16px] font-semibold tracking-[-0.03em] text-[#111827]">
+            <p className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               {title}
             </p>
-            <p className="mt-1 text-[14px] leading-6 text-[#6B7280]">{description}</p>
+            <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
           </div>
           <ChevronRight
-            className="mt-1 h-4 w-4 shrink-0 text-[#9CA3AF] transition-transform duration-200 group-hover:translate-x-0.5"
+            className="mt-1 h-4 w-4 shrink-0 text-[hsl(var(--fg-3))] transition-transform duration-200 group-hover:translate-x-0.5"
             strokeWidth={2.2}
           />
         </div>
@@ -128,20 +129,25 @@ export function TodayStatCard({
   const styles = toneStyles[tone] || toneStyles.blue;
 
   return (
-    <Link to={to} className={cn(surfaceClassName, 'block p-4 transition-transform duration-200 hover:-translate-y-0.5')}>
+    <Link
+      to={to}
+      className={cn(
+        surfaceClassName,
+        'block p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+        styles.glow
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-            {label}
-          </p>
-          <p className="mt-3 text-[28px] font-bold tracking-[-0.06em] text-[#111827]">{value}</p>
+          <p className="atlas-overline">{label}</p>
+          <p className="mt-3 text-[28px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{value}</p>
         </div>
         <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border', styles.icon)}>
           <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
         </div>
       </div>
 
-      <p className="mt-3 text-[14px] leading-6 text-[#6B7280]">{description}</p>
+      <p className="mt-3 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
 
       {meta ? (
         <span className={cn('mt-4 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold', styles.pill)}>
@@ -155,19 +161,27 @@ export function TodayStatCard({
 export function TodayAdherenceCard({ score, summary, items = [] }) {
   const circumference = 2 * Math.PI * 26;
   const dashOffset = circumference - (score / 100) * circumference;
+  const tone = getAdherenceTone(score);
+  const styles = toneStyles[tone];
+  const scoreColor =
+    tone === 'green'
+      ? 'hsl(var(--ok))'
+      : tone === 'orange'
+        ? 'hsl(var(--warn))'
+        : 'hsl(var(--brand))';
 
   return (
-    <TodayCard>
+    <TodayCard className={styles.glow}>
       <div className="flex items-center gap-4">
         <div className="relative h-[72px] w-[72px] shrink-0">
           <svg width="72" height="72" className="-rotate-90">
-            <circle cx="36" cy="36" r="26" fill="none" stroke="#E5E7EB" strokeWidth="6" />
+            <circle cx="36" cy="36" r="26" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
             <circle
               cx="36"
               cy="36"
               r="26"
               fill="none"
-              stroke="#34C759"
+              stroke={scoreColor}
               strokeWidth="6"
               strokeLinecap="round"
               strokeDasharray={circumference}
@@ -175,36 +189,34 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[20px] font-bold tracking-[-0.05em] text-[#111827]">{score}</span>
+            <span className="text-[20px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{score}</span>
           </div>
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-                Aderência
-              </p>
-              <p className="mt-1 text-[18px] font-semibold tracking-[-0.04em] text-[#111827]">
-                Consistência em alta
+              <p className="atlas-overline">Aderência</p>
+              <p className="mt-1 text-[18px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+                Consistência do bloco atual
               </p>
             </div>
-            <span className="inline-flex shrink-0 rounded-full bg-[#ECFDF3] px-2.5 py-1 text-[11px] font-semibold text-[#15803D]">
-              Em dia
+            <span className={cn('inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', styles.pill)}>
+              {score >= 75 ? 'Em ritmo' : score >= 45 ? 'Ajustar' : 'Reforçar'}
             </span>
           </div>
-          <p className="mt-2 text-[14px] leading-6 text-[#6B7280]">{summary}</p>
+          <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{summary}</p>
         </div>
       </div>
 
       {items.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
           {items.map((item) => (
-            <div key={item.label} className="rounded-full bg-[#F9FAFB] px-3 py-1.5">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">
+            <div key={item.label} className="rounded-full border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.8)] px-3 py-1.5">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
                 {item.label}
               </span>
-              <span className="ml-2 text-[12px] font-semibold text-[#111827]">{item.value}%</span>
+              <span className="ml-2 text-[12px] font-semibold text-[hsl(var(--fg))]">{item.value}%</span>
             </div>
           ))}
         </div>
@@ -224,22 +236,24 @@ export function TodayInsightCard({
   return (
     <Link
       to={to}
-      className="block rounded-[20px] border border-[#BFDBFE] bg-[linear-gradient(135deg,#EFF6FF_0%,#FFFFFF_100%)] p-4 shadow-[0_4px_20px_rgba(15,23,42,0.05)] transition-transform duration-200 hover:-translate-y-0.5 sm:p-5"
+      className={cn(
+        surfaceClassName,
+        toneStyles.teal.glow,
+        'block p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] sm:p-5'
+      )}
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-[#BFDBFE] bg-white text-[#0A84FF]">
+        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border', toneStyles.teal.icon)}>
           <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#0A84FF]">
-            {eyebrow}
-          </p>
-          <p className="mt-2 text-[20px] font-semibold tracking-[-0.04em] text-[#111827]">
+          <p className="atlas-overline text-[hsl(var(--accent-secondary))]">{eyebrow}</p>
+          <p className="mt-2 text-[20px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
             {title}
           </p>
-          <p className="mt-2 text-[14px] leading-6 text-[#6B7280]">{description}</p>
-          <span className="mt-4 inline-flex items-center gap-1 text-[13px] font-semibold text-[#0A84FF]">
+          <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
+          <span className="mt-4 inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--accent-secondary))]">
             {cta}
             <ChevronRight className="h-4 w-4" strokeWidth={2.2} />
           </span>

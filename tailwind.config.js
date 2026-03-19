@@ -10,6 +10,20 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+        app: 'hsl(var(--bg-app))',
+        surface: 'hsl(var(--bg-surface))',
+        'surface-2': 'hsl(var(--bg-surface-2))',
+        'card-elevated': 'hsl(var(--bg-card-elevated))',
+        'border-default': 'hsl(var(--border-default))',
+        'border-strong': 'hsl(var(--border-strong))',
+        'fg-primary': 'hsl(var(--text-primary))',
+        'fg-secondary': 'hsl(var(--text-secondary))',
+        'fg-muted': 'hsl(var(--text-muted))',
+        'accent-primary': 'hsl(var(--accent-primary))',
+        'accent-secondary': 'hsl(var(--accent-secondary))',
+        'status-success': 'hsl(var(--status-success))',
+        'status-warning': 'hsl(var(--status-warning))',
+        'status-danger': 'hsl(var(--status-danger))',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
