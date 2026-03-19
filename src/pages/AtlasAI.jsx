@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils';
 
 const LOCAL_ATLAS_AI_STORAGE_KEY = 'atlas-ai-local-conversations';
 const LOCAL_PROFILE_STORAGE_KEY = 'atlas_local_profile_store';
+const LOCAL_FREE_PROMPTS_KEY = 'atlas-ai-free-prompts';
+const FREE_PROMPT_LIMIT = 3;
 
 const PROMPTS = [
   {
@@ -143,6 +145,17 @@ function readLocalProfile(user) {
   const profiles = readJsonStorage(LOCAL_PROFILE_STORAGE_KEY, {});
   const profile = profiles[getAtlasScope(user)];
   return profile && typeof profile === 'object' ? profile : null;
+}
+
+function readFreePromptCount(user) {
+  const store = readJsonStorage(LOCAL_FREE_PROMPTS_KEY, {});
+  return typeof store[getAtlasScope(user)] === 'number' ? store[getAtlasScope(user)] : 0;
+}
+
+function writeFreePromptCount(user, count) {
+  const store = readJsonStorage(LOCAL_FREE_PROMPTS_KEY, {});
+  store[getAtlasScope(user)] = count;
+  writeJsonStorage(LOCAL_FREE_PROMPTS_KEY, store);
 }
 
 function appendMessage(list, conversationId, message) {
@@ -479,11 +492,21 @@ export default function AtlasAI() {
   const [sending, setSending] = useState(false);
   const [pendingConversationId, setPendingConversationId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [freePromptsUsed, setFreePromptsUsed] = useState(0);
   const endRef = useRef(null);
   const replyTimeoutRef = useRef(null);
-  const hasAtlasAIAccess = can('atlas_ai') || isLocalMockUser(user);
+
+  const hasPaidAccess = can('atlas_ai') || isLocalMockUser(user);
+  const freePromptsRemaining = Math.max(0, FREE_PROMPT_LIMIT - freePromptsUsed);
+  const hasAtlasAIAccess = hasPaidAccess || freePromptsRemaining > 0;
+
   const localProfile = useMemo(() => readLocalProfile(user), [user]);
   const profileContext = useMemo(() => buildProfileContext(localProfile), [localProfile]);
+
+  // Load free prompt count from storage
+  useEffect(() => {
+    setFreePromptsUsed(readFreePromptCount(user));
+  }, [user]);
 
   useEffect(() => {
     let cancelled = false;
@@ -540,15 +563,27 @@ export default function AtlasAI() {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeId, messages.length, sending]);
 
-  if (!hasAtlasAIAccess) {
+  // Hard block only when paid access is missing AND free prompts are exhausted
+  if (!hasPaidAccess && freePromptsRemaining === 0) {
     return (
       <div className="h-[calc(100vh-3rem)] lg:h-screen flex items-center justify-center p-5">
-        <UpgradeGate
-          feature="atlas_ai"
-          plan="Pro"
-          title="Atlas AI — Plano Pro+"
-          description="Desbloqueie insights contextuais com inteligência artificial poderosa"
-        />
+        <div className="max-w-sm w-full space-y-4 text-center">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-2))]">
+            Atlas AI
+          </p>
+          <p className="text-[20px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
+            Você usou seus {FREE_PROMPT_LIMIT} prompts gratuitos
+          </p>
+          <p className="text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+            Faça upgrade para o Plano Pro e tenha acesso ilimitado a insights contextuais com IA.
+          </p>
+          <UpgradeGate
+            feature="atlas_ai"
+            plan="Pro"
+            title="Atlas AI — Plano Pro+"
+            description="Desbloqueie insights contextuais com inteligência artificial poderosa"
+          />
+        </div>
       </div>
     );
   }
@@ -568,8 +603,18 @@ export default function AtlasAI() {
     const content = (text || input).trim();
     if (!content || sending) return;
 
+    // Block if free limit exceeded and no paid access
+    if (!hasPaidAccess && freePromptsRemaining <= 0) return;
+
     setInput('');
     setSending(true);
+
+    // Track free prompt usage
+    if (!hasPaidAccess) {
+      const newCount = freePromptsUsed + 1;
+      setFreePromptsUsed(newCount);
+      writeFreePromptCount(user, newCount);
+    }
 
     let conversationId = activeId;
     let createdConversation = null;
@@ -1052,7 +1097,11 @@ export default function AtlasAI() {
                         </div>
 
                         <p className="text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-                          {hasProfileContext
+                          {!hasPaidAccess && freePromptsRemaining > 0 ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--brand-ai)/0.10)] px-2.5 py-1 text-[11px] font-semibold text-[hsl(var(--brand-ai))]">
+                              {freePromptsRemaining} prompt{freePromptsRemaining !== 1 ? 's' : ''} gratuito{freePromptsRemaining !== 1 ? 's' : ''} restante{freePromptsRemaining !== 1 ? 's' : ''}
+                            </span>
+                          ) : hasProfileContext
                             ? 'Contexto do Profile ativo nesta conversa.'
                             : 'Adicione metas no Profile para respostas ainda mais precisas.'}
                         </p>
@@ -1061,7 +1110,7 @@ export default function AtlasAI() {
 
                     <Button
                       onClick={() => send()}
-                      disabled={!input.trim() || sending}
+                      disabled={!input.trim() || sending || (!hasPaidAccess && freePromptsRemaining <= 0)}
                       size="lg"
                       className="h-12 shrink-0 rounded-[20px] px-5"
                     >

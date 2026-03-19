@@ -140,16 +140,13 @@ function TodayContent() {
         <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[#BAE6FD]/35 blur-2xl" />
 
         <div className="relative">
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex rounded-full bg-white/16 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white/92">
-              Pré-visualização local
-            </span>
-            {isAdmin && (
+          {isAdmin && (
+            <div className="flex flex-wrap gap-2">
               <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white">
                 Modo admin ativo
               </span>
-            )}
-          </div>
+            </div>
+          )}
 
           <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-white">
             {greeting}, {preferredName}

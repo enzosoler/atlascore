@@ -65,6 +65,7 @@ export default function MyDiet() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState(null);
 
   useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated) navigate(ROUTES.home, { replace: true });
@@ -84,8 +85,14 @@ export default function MyDiet() {
 
   const generate = async () => {
     setGenerating(true);
-    const res = await base44.integrations.Core.InvokeLLM({
-      prompt: `Crie um plano alimentar detalhado em português brasileiro para um usuário com o seguinte perfil:
+    setGenError(null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `Crie um plano alimentar detalhado em português brasileiro para um usuário com o seguinte perfil:
 - Objetivo: ${profile?.training_goal || 'saúde geral'}
 - Calorias alvo: ${profile?.calories_target || 2200} kcal
 - Proteína alvo: ${profile?.protein_target || 160}g
@@ -94,60 +101,77 @@ export default function MyDiet() {
 - Estilo alimentar: ${profile?.dietary_style || 'balanceado'}
 
 Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos reais e quantidades em gramas/unidades.`,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          name: { type: 'string' },
-          objective: { type: 'string' },
-          total_calories: { type: 'number' },
-          total_protein: { type: 'number' },
-          total_carbs: { type: 'number' },
-          total_fat: { type: 'number' },
-          meals: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                name: { type: 'string' },
-                time: { type: 'string' },
-                total_calories: { type: 'number' },
-                total_protein: { type: 'number' },
-                total_carbs: { type: 'number' },
-                total_fat: { type: 'number' },
-                foods: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      name: { type: 'string' }, amount: { type: 'number' },
-                      unit: { type: 'string' }, kcal: { type: 'number' },
-                      protein: { type: 'number' }, carbs: { type: 'number' }, fat: { type: 'number' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
-
-    if (res?.name) {
-      // Deactivate existing
-      for (const p of plans) await base44.entities.DietPlan.update(p.id, { active: false });
-      await base44.entities.DietPlan.create({
-        ...res,
-        created_by_type: 'ai',
-        active: true,
-        version: 1,
-        start_date: new Date().toISOString().split('T')[0],
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            objective: { type: 'string' },
+            total_calories: { type: 'number' },
+            total_protein: { type: 'number' },
+            total_carbs: { type: 'number' },
+            total_fat: { type: 'number' },
+            meals: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  time: { type: 'string' },
+                  total_calories: { type: 'number' },
+                  total_protein: { type: 'number' },
+                  total_carbs: { type: 'number' },
+                  total_fat: { type: 'number' },
+                  foods: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                        amount: { type: 'number' },
+                        unit: { type: 'string' },
+                        kcal: { type: 'number' },
+                        protein: { type: 'number' },
+                        carbs: { type: 'number' },
+                        fat: { type: 'number' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
-      qc.invalidateQueries({ queryKey: ['diet-plans'] });
-      toast.success('Plano alimentar gerado!');
-    } else {
-      toast.error('Erro ao gerar. Tente novamente.');
+
+      clearTimeout(timeoutId);
+
+      if (res?.name) {
+        for (const p of plans) await base44.entities.DietPlan.update(p.id, { active: false });
+        await base44.entities.DietPlan.create({
+          ...res,
+          created_by_type: 'ai',
+          active: true,
+          version: 1,
+          start_date: new Date().toISOString().split('T')[0],
+        });
+        qc.invalidateQueries({ queryKey: ['diet-plans'] });
+        toast.success('Plano alimentar gerado!');
+      } else {
+        setGenError('A resposta da IA não continha um plano válido. Tente novamente.');
+        toast.error('Erro ao gerar. Tente novamente.');
+      }
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err?.name === 'AbortError' || controller.signal.aborted) {
+        setGenError('A geração demorou muito (>15s). Verifique sua conexão e tente novamente.');
+        toast.error('Tempo limite atingido. Tente novamente.');
+      } else {
+        setGenError('Erro ao conectar com a IA. Tente novamente em alguns instantes.');
+        toast.error('Erro ao gerar plano.');
+      }
+    } finally {
+      setGenerating(false);
     }
-    setGenerating(false);
   };
 
   if (isLoading) return (
@@ -171,6 +195,12 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
           {plan ? 'Gerar novo plano' : 'Gerar plano por IA'}
         </button>
       </div>
+
+      {genError && (
+        <div className="rounded-xl border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.06)] px-4 py-3">
+          <p className="text-[13px] text-[hsl(var(--err))]">{genError}</p>
+        </div>
+      )}
 
       {!plan ? (
         <div className="empty-state">
