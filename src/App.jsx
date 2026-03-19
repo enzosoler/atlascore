@@ -60,6 +60,7 @@ import PlanVsExecutionGuide from '@/pages/guides/PlanVsExecutionGuide';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout.jsx';
+import RouteGuard from '@/components/rbac/RouteGuard';
 
 const AuthenticatedApp = () => {
   const { authError, user, isAuthenticated, authState } = useAuth();
@@ -162,7 +163,6 @@ VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
         <Route path={ROUTES.progress} element={<Progress />} />
         <Route path={ROUTES.profile} element={<Profile />} />
         <Route path={ROUTES.export} element={<Export />} />
-        <Route path={ROUTES.admin} element={<AdminPanel />} />
         <Route path={ROUTES.myDiet} element={<MyDiet />} />
         <Route path={ROUTES.myWorkout} element={<MyWorkout />} />
         <Route path={ROUTES.diary} element={<Diary />} />
@@ -170,17 +170,18 @@ VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
         <Route path={ROUTES.social} element={<Social />} />
         <Route path={ROUTES.prescribedDiet} element={<MyPrescribedDiet />} />
         <Route path={ROUTES.prescribedWorkout} element={<MyPrescribedWorkout />} />
-        <Route path={ROUTES.coachDashboard} element={<CoachDashboard />} />
-        <Route path={ROUTES.coachStudents} element={<CoachStudents />} />
-        <Route path="/coach/student/:id" element={<CoachStudentProfile />} />
-        <Route path="/coach/prescribe-workout/:studentId" element={<CoachPrescribeWorkout />} />
-        <Route path={ROUTES.nutritionistDashboard} element={<NutritionistDashboard />} />
-        <Route path={ROUTES.nutritionistClients} element={<NutritionistClients />} />
-        <Route path="/nutritionist/client/:id" element={<NutritionistClientProfile />} />
-        <Route path="/nutritionist/prescribe-diet/:clientId" element={<NutritionistPrescribeDiet />} />
-        <Route path={ROUTES.clinicianDashboard} element={<ClinicianDashboard />} />
-        <Route path={ROUTES.clinicianPatients} element={<ClinicianPatients />} />
-        <Route path="/clinician/patient/:id" element={<ClinicianPatientProfile />} />
+        <Route path={ROUTES.coachDashboard} element={<RouteGuard roles={['coach', 'admin']}><CoachDashboard /></RouteGuard>} />
+        <Route path={ROUTES.coachStudents} element={<RouteGuard roles={['coach', 'admin']}><CoachStudents /></RouteGuard>} />
+        <Route path="/coach/student/:id" element={<RouteGuard roles={['coach', 'admin']}><CoachStudentProfile /></RouteGuard>} />
+        <Route path="/coach/prescribe-workout/:studentId" element={<RouteGuard roles={['coach', 'admin']}><CoachPrescribeWorkout /></RouteGuard>} />
+        <Route path={ROUTES.nutritionistDashboard} element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistDashboard /></RouteGuard>} />
+        <Route path={ROUTES.nutritionistClients} element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistClients /></RouteGuard>} />
+        <Route path="/nutritionist/client/:id" element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistClientProfile /></RouteGuard>} />
+        <Route path="/nutritionist/prescribe-diet/:clientId" element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistPrescribeDiet /></RouteGuard>} />
+        <Route path={ROUTES.clinicianDashboard} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianDashboard /></RouteGuard>} />
+        <Route path={ROUTES.clinicianPatients} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatients /></RouteGuard>} />
+        <Route path="/clinician/patient/:id" element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard>} />
+        <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminPanel /></RouteGuard>} />
         <Route path={ROUTES.githubPRs} element={<GitHubPRTracker />} />
       </Route>
 

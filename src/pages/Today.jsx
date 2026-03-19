@@ -1,7 +1,9 @@
 import React from 'react';
-import { Brain, Dumbbell, Sparkles, User, UtensilsCrossed } from 'lucide-react';
+import { Brain, Dumbbell, Loader2, Sparkles, User, UtensilsCrossed } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useRole } from '@/hooks/useRole';
+import { base44 } from '@/api/base44Client';
 import { ROUTES } from '@/lib/routes';
 import { getGreeting } from '@/lib/atlas-theme';
 import { SafePageBoundary } from '@/components/shared/StablePage';
@@ -46,42 +48,6 @@ const NEXT_STEPS = [
   },
 ];
 
-const SNAPSHOT_CARDS = [
-  {
-    to: ROUTES.nutrition,
-    label: 'Nutrição',
-    value: 'Pronto',
-    description: 'Refeições e metas alinhadas para um começo limpo.',
-    meta: 'Plano diário',
-    icon: UtensilsCrossed,
-    tone: 'blue',
-  },
-  {
-    to: ROUTES.workouts,
-    label: 'Treino',
-    value: 'Pendente',
-    description: 'Sua sessão principal está preparada e aguardando execução.',
-    meta: 'Sessão de hoje',
-    icon: Dumbbell,
-    tone: 'orange',
-  },
-];
-
-const ADHERENCE_SIGNALS = [
-  {
-    label: 'Nutrição',
-    value: 82,
-  },
-  {
-    label: 'Treino',
-    value: 76,
-  },
-  {
-    label: 'Recuperação',
-    value: 88,
-  },
-];
-
 function getPreferredName(displayName) {
   if (!displayName) return 'Atleta';
   const [firstChunk] = displayName.split(/[ @]/).filter(Boolean);
@@ -116,9 +82,92 @@ function TodayContent() {
   const preferredName = getPreferredName(displayName);
   const greeting = getGreeting();
   const isAdmin = !isRoleLoading && role === 'admin';
-  const adherenceAverage = Math.round(
-    ADHERENCE_SIGNALS.reduce((total, item) => total + item.value, 0) / ADHERENCE_SIGNALS.length
-  );
+
+  // ── Real data queries ──────────────────────────────────────────────────────
+
+  const { data: activeDietPlans = [], isLoading: loadingDiet } = useQuery({
+    queryKey: ['today-diet-plan'],
+    queryFn: () => base44.entities.DietPlan.filter({ active: true }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: activeWorkoutPlans = [], isLoading: loadingWorkout } = useQuery({
+    queryKey: ['today-workout-plan'],
+    queryFn: () => base44.entities.WorkoutPlan.filter({ active: true }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: recentSessions = [], isLoading: loadingSessions } = useQuery({
+    queryKey: ['today-sessions'],
+    queryFn: () => base44.entities.Workout.list('-created_date', 5),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const activeDietPlan = activeDietPlans[0] || null;
+  const activeWorkoutPlan = activeWorkoutPlans[0] || null;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todaySession = recentSessions.find((s) => s.date === todayStr);
+  const isLoading = loadingDiet || loadingWorkout || loadingSessions;
+
+  // ── Snapshot cards — driven by real data ─────────────────────────────────
+
+  const nutritionValue = activeDietPlan
+    ? `${activeDietPlan.total_calories ?? activeDietPlan.target_calories ?? '—'} kcal`
+    : 'Sem plano';
+
+  const nutritionMeta = activeDietPlan
+    ? activeDietPlan.name || 'Plano ativo'
+    : 'Configure em Nutrição';
+
+  const workoutValue = todaySession
+    ? todaySession.status === 'completed' ? 'Concluído' : 'Em andamento'
+    : activeWorkoutPlan ? 'Pendente' : 'Sem plano';
+
+  const workoutMeta = activeWorkoutPlan
+    ? activeWorkoutPlan.name || 'Plano ativo'
+    : 'Configure em Treinos';
+
+  const snapshotCards = [
+    {
+      to: ROUTES.nutrition,
+      label: 'Nutrição',
+      value: isLoading ? '—' : nutritionValue,
+      description: activeDietPlan ? 'Meta calórica do plano ativo.' : 'Nenhum plano alimentar ativo.',
+      meta: isLoading ? '...' : nutritionMeta,
+      icon: UtensilsCrossed,
+      tone: 'blue',
+    },
+    {
+      to: ROUTES.workouts,
+      label: 'Treino',
+      value: isLoading ? '—' : workoutValue,
+      description: activeWorkoutPlan ? 'Plano de treino ativo.' : 'Nenhum plano de treino ativo.',
+      meta: isLoading ? '...' : workoutMeta,
+      icon: Dumbbell,
+      tone: 'orange',
+    },
+  ];
+
+  // ── Adherence — derived from real session data ─────────────────────────────
+  // Simple proxy: sessions in the last 7 days vs expected frequency.
+
+  const last7 = recentSessions.filter((s) => {
+    if (!s.date) return false;
+    const diff = (new Date(todayStr) - new Date(s.date)) / (1000 * 60 * 60 * 24);
+    return diff >= 0 && diff < 7;
+  });
+  const completedLast7 = last7.filter((s) => s.status === 'completed').length;
+  const workoutFreq = activeWorkoutPlan?.days?.length || 4;
+  const workoutAdherence = Math.min(100, Math.round((completedLast7 / workoutFreq) * 100));
+  const nutritionAdherence = activeDietPlan ? 100 : 0; // plan exists = baseline adherence
+  const adherenceSignals = [
+    { label: 'Nutrição', value: nutritionAdherence },
+    { label: 'Treino', value: workoutAdherence },
+  ];
+  const adherenceAverage = adherenceSignals.length
+    ? Math.round(adherenceSignals.reduce((t, i) => t + i.value, 0) / adherenceSignals.length)
+    : 0;
 
   return (
     <TodayScreen>
@@ -154,7 +203,6 @@ function TodayContent() {
           <p className="mt-2 max-w-[24rem] text-[15px] leading-6 text-white/84">
             Seu centro de nutrição, treino e próxima decisão do dia.
           </p>
-          <p className="mt-5 text-[13px] font-medium text-white/80">{displayName}</p>
         </div>
       </TodayCard>
 
@@ -179,28 +227,40 @@ function TodayContent() {
       </TodaySection>
 
       <TodaySection eyebrow="Resumo" title="Hoje em um olhar">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {SNAPSHOT_CARDS.map((item) => (
-            <TodayStatCard
-              key={item.label}
-              to={item.to}
-              label={item.label}
-              value={item.value}
-              description={item.description}
-              meta={item.meta}
-              icon={item.icon}
-              tone={item.tone}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))] py-4">
+            <Loader2 className="w-4 h-4 animate-spin" /> Carregando dados…
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {snapshotCards.map((item) => (
+              <TodayStatCard
+                key={item.label}
+                to={item.to}
+                label={item.label}
+                value={item.value}
+                description={item.description}
+                meta={item.meta}
+                icon={item.icon}
+                tone={item.tone}
+              />
+            ))}
+          </div>
+        )}
       </TodaySection>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TodaySection eyebrow="Aderência" title="Consistência diária">
+        <TodaySection eyebrow="Aderência" title="Consistência recente">
           <TodayAdherenceCard
-            score={adherenceAverage}
-            summary="Nutrição liderando o dia, treino na fila, e recuperação já dando base estável."
-            items={ADHERENCE_SIGNALS}
+            score={isLoading ? 0 : adherenceAverage}
+            summary={
+              isLoading
+                ? 'Calculando...'
+                : adherenceAverage >= 70
+                  ? 'Boa consistência nas últimas semanas.'
+                  : 'Configure seus planos para calcular a aderência.'
+            }
+            items={isLoading ? [] : adherenceSignals}
           />
         </TodaySection>
 

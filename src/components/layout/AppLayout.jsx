@@ -380,12 +380,8 @@ export default function AppLayout() {
           </AnimatePresence>
         </button>
 
-        <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
-          <AtlasCoreLogoSVG width={22} height={22} />
-          <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-            Atlas Core
-          </span>
-        </div>
+        {/* Logo mark only — no text, reduces visual noise */}
+        <AtlasCoreLogoSVG width={22} height={22} className="text-[hsl(var(--fg))]" color="hsl(var(--fg))" />
 
         <div className="w-9" />
       </header>

@@ -680,7 +680,7 @@ function NutritionContent() {
       DEFAULT_PROFILE.fat_target,
   }), [activeDietPlan]);
   const [notice, setNotice] = useState(null);
-  const [meals, setMeals] = useState(MOCK_MEALS);
+  const [meals, setMeals] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState(null);
   const [query, setQuery] = useState('');
@@ -695,7 +695,7 @@ function NutritionContent() {
 
     async function loadFoodLogs() {
       if (!user?.id) {
-        setMeals(MOCK_MEALS);
+        setMeals([]);
         return;
       }
 

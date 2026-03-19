@@ -1,3 +1,5 @@
+import { ROUTES } from '@/lib/routes';
+
 /**
  * Atlas Core — RBAC (Role-Based Access Control)
  *
@@ -91,21 +93,14 @@ export const PAGE_ACCESS = {
  */
 export const NAV_BY_ROLE = {
   athlete: [
-    { path: ROUTES.today,           label: 'Hoje',         icon: 'Home' },
-    { path: ROUTES.diary,           label: 'Diário',       icon: 'BookOpen' },
-    { path: ROUTES.nutrition,       label: 'Nutrição',     icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,        label: 'Treinos',      icon: 'Dumbbell' },
-    { path: ROUTES.myDiet,          label: 'Plano Alimentar',  icon: 'ChefHat' },
-    { path: ROUTES.myWorkout,       label: 'Plano de Treino',  icon: 'ClipboardList' },
-    { path: ROUTES.protocols,       label: 'Protocolos',   icon: 'FlaskConical' },
-    { path: ROUTES.measurements,    label: 'Medidas',      icon: 'BarChart3' },
-    { path: ROUTES.progressPhotos,  label: 'Fotos',        icon: 'Camera' },
-    { path: ROUTES.labExams,        label: 'Exames',       icon: 'Heart' },
-    { path: ROUTES.atlasAI,         label: 'Atlas AI',     icon: 'Brain' },
-    { path: ROUTES.insights,        label: 'Insights',     icon: 'TrendingUp' },
-    { path: ROUTES.social,          label: 'Social',       icon: 'Users' },
-    { path: ROUTES.export,          label: 'Exportar',     icon: 'Download' },
-    { path: ROUTES.profile,         label: 'Perfil',       icon: 'User' },
+    { path: ROUTES.today,        label: 'Hoje',       icon: 'Home' },
+    { path: ROUTES.nutrition,    label: 'Nutrição',   icon: 'UtensilsCrossed' },
+    { path: ROUTES.workouts,     label: 'Treinos',    icon: 'Dumbbell' },
+    { path: ROUTES.diary,        label: 'Diário',     icon: 'BookOpen' },
+    { path: ROUTES.protocols,    label: 'Protocolos', icon: 'FlaskConical' },
+    { path: ROUTES.measurements, label: 'Medidas',    icon: 'BarChart3' },
+    { path: ROUTES.atlasAI,      label: 'Atlas AI',   icon: 'Brain' },
+    { path: ROUTES.profile,      label: 'Perfil',     icon: 'User' },
   ],
   coach: [
     { path: ROUTES.today,              label: 'Início',         icon: 'Home' },
@@ -132,34 +127,15 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.profile,              label: 'Perfil',        icon: 'User' },
   ],
   admin: [
-    // ── Athlete area ────────────────────────────
-    { path: ROUTES.today,           label: 'Hoje',         icon: 'Home' },
-    { path: ROUTES.diary,           label: 'Diário',       icon: 'BookOpen' },
-    { path: ROUTES.nutrition,       label: 'Nutrição',     icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,        label: 'Treinos',      icon: 'Dumbbell' },
-    { path: ROUTES.myDiet,          label: 'Plano Alimentar',  icon: 'ChefHat' },
-    { path: ROUTES.myWorkout,       label: 'Plano de Treino',  icon: 'ClipboardList' },
-    { path: ROUTES.protocols,       label: 'Protocolos',   icon: 'FlaskConical' },
-    { path: ROUTES.measurements,    label: 'Medidas',      icon: 'BarChart3' },
-    { path: ROUTES.progressPhotos,  label: 'Fotos',        icon: 'Camera' },
-    { path: ROUTES.labExams,        label: 'Exames',       icon: 'Heart' },
-    { path: ROUTES.atlasAI,         label: 'Atlas AI',     icon: 'Brain' },
-    { path: ROUTES.insights,        label: 'Insights',     icon: 'TrendingUp' },
-    // ── Coach area ───────────────────────────────
-    { path: ROUTES.coachDashboard,    label: 'Dashboard Coach',    icon: 'LayoutDashboard' },
-    { path: ROUTES.coachStudents,     label: 'Alunos Coach',       icon: 'Users' },
-    // ── Nutritionist area ────────────────────────
-    { path: ROUTES.nutritionistDashboard,  label: 'Dashboard Nutricionista', icon: 'LayoutDashboard' },
-    { path: ROUTES.nutritionistClients,    label: 'Clientes Nutricionista',  icon: 'Users' },
-    // ── Clinician area ──────────────────────────
-    { path: ROUTES.clinicianDashboard,  label: 'Dashboard Clínico', icon: 'LayoutDashboard' },
-    { path: ROUTES.clinicianPatients,   label: 'Pacientes Clínico', icon: 'Users' },
-    // ── Admin area ───────────────────────────────
-    { path: ROUTES.admin,  label: 'Painel Admin',    icon: 'ShieldCheck' },
-    // ── Shared ──────────────────────────────────
-    { path: ROUTES.social,      label: 'Social',         icon: 'Users' },
-    { path: ROUTES.export,      label: 'Exportar',       icon: 'Download' },
-    { path: ROUTES.profile,     label: 'Perfil',         icon: 'User' },
+    { path: ROUTES.today,                  label: 'Hoje',              icon: 'Home' },
+    { path: ROUTES.nutrition,              label: 'Nutrição',          icon: 'UtensilsCrossed' },
+    { path: ROUTES.workouts,               label: 'Treinos',           icon: 'Dumbbell' },
+    { path: ROUTES.protocols,             label: 'Protocolos',        icon: 'FlaskConical' },
+    { path: ROUTES.coachDashboard,        label: 'Coach',             icon: 'LayoutDashboard' },
+    { path: ROUTES.nutritionistDashboard, label: 'Nutricionista',     icon: 'ChefHat' },
+    { path: ROUTES.clinicianDashboard,    label: 'Clínico',           icon: 'Heart' },
+    { path: ROUTES.admin,                 label: 'Admin',             icon: 'ShieldCheck' },
+    { path: ROUTES.profile,              label: 'Perfil',             icon: 'User' },
   ],
 };
 
@@ -202,4 +178,3 @@ export const useRBAC = (user) => {
     nav:            getNavForRole(role),
   };
 };
-import { ROUTES } from '@/lib/routes';
