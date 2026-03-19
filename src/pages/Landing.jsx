@@ -193,7 +193,7 @@ function GainCard({ item }) {
 
   return (
     <article className="atlas-card h-full px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex h-11 w-11 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+      <div className="flex h-11 w-11 items-center justify-center rounded-[20px] border border-[hsl(var(--tint)/0.18)] bg-[hsl(var(--tint)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
         <Icon className="h-5 w-5" strokeWidth={1.9} />
       </div>
       <p className="mt-5 text-[15px] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">
@@ -257,9 +257,12 @@ function PricingPreviewCard({ plan, popular, onSelect, periodLabel, popularLabel
     <article
       className={`relative flex h-full flex-col rounded-[28px] border px-5 py-5 lg:px-6 lg:py-6 ${
         popular
-          ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]'
+          ? 'border-[hsl(var(--brand)/0.28)] shadow-[var(--shadow-md),0_0_0_1px_hsl(var(--tint)/0.06),0_0_40px_hsl(var(--tint)/0.07)]'
           : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.84)] shadow-[var(--shadow-xs)]'
       }`}
+      style={popular ? {
+        background: 'linear-gradient(160deg, hsl(var(--card)) 0%, hsl(var(--tint)/0.04) 100%)',
+      } : undefined}
     >
       {popular ? (
         <span className="atlas-public-pill absolute right-5 top-5 border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]">
@@ -416,10 +419,10 @@ export default function Landing() {
       actions={(
         <>
           <PublicLanguageSwitcher />
-          <Button variant="ghost" className="hidden sm:inline-flex" onClick={handleLogin}>
+          <Button variant="ghost" size="sm" className="text-[13px]" onClick={handleLogin}>
             {t('landing.nav.login')}
           </Button>
-          <Button onClick={handleSignUp}>{t('landing.nav.signup')}</Button>
+          <Button size="sm" onClick={handleSignUp}>{t('landing.nav.signup')}</Button>
         </>
       )}
     >
@@ -438,7 +441,7 @@ export default function Landing() {
               </span>
 
               <div className="space-y-5">
-                <h1 className="atlas-display-title max-w-[11ch] whitespace-pre-line text-[clamp(3.1rem,2rem+3vw,5.3rem)]">
+                <h1 className="atlas-display-title atlas-hero-text max-w-[11ch] whitespace-pre-line text-[clamp(3.1rem,2rem+3vw,5.3rem)]">
                   {t('landing.hero.title')}
                 </h1>
                 <p className="atlas-public-copy max-w-xl text-[1rem] lg:text-[1.05rem]">
@@ -493,6 +496,10 @@ export default function Landing() {
           </motion.div>
         </motion.div>
       </section>
+
+      <div className="mx-auto max-w-4xl px-5 lg:px-8">
+        <hr className="atlas-brand-divider" />
+      </div>
 
       <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
@@ -655,7 +662,7 @@ export default function Landing() {
       </section>
 
       <section className="mx-auto max-w-4xl px-5 pb-6 lg:px-8">
-        <div className="atlas-page-header px-6 py-8 text-center lg:px-8 lg:py-10">
+        <div className="atlas-page-header atlas-cta-glow px-6 py-8 text-center lg:px-8 lg:py-10">
           <p className="atlas-overline justify-center">{ui.startLabel}</p>
           <h2 className="atlas-display-title mt-4 whitespace-pre-line text-[clamp(2.4rem,1.9rem+1.8vw,4rem)]">
             {t('landing.cta.title')}

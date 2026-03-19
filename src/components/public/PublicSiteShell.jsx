@@ -151,8 +151,12 @@ export default function PublicSiteShell({
 }) {
   return (
     <div className="atlas-public-shell">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_top,hsla(var(--tint),0.12),transparent_58%)]" />
-      <div className="pointer-events-none absolute right-[-12rem] top-24 h-80 w-80 rounded-full bg-[radial-gradient(circle,hsla(var(--label),0.045),transparent_62%)] blur-3xl" />
+      {/* Primary brand halo — top center */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,hsla(var(--tint),0.13),transparent_62%)]" />
+      {/* Secondary accent — top right corner */}
+      <div className="pointer-events-none absolute right-[-8rem] top-10 h-96 w-96 rounded-full bg-[radial-gradient(circle,hsla(var(--sys-purple),0.07),transparent_65%)] blur-3xl" />
+      {/* Tertiary warm accent — bottom left */}
+      <div className="pointer-events-none absolute left-[-6rem] top-[60vh] h-72 w-72 rounded-full bg-[radial-gradient(circle,hsla(var(--tint),0.06),transparent_70%)] blur-3xl" />
 
       <div className="relative z-10">
         <PublicNav links={navLinks} actions={actions} compact={compactNav} />
