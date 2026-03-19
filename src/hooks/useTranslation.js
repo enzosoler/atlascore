@@ -1,39 +1,20 @@
-import { useState, useCallback, useEffect } from 'react';
-import { t, getLanguage, setLanguage, supportedLanguages } from '@/lib/i18n';
+import { useCallback, useMemo } from 'react';
+import { supportedLanguages } from '@/lib/i18n';
+import { useI18n } from '@/lib/i18nContext';
 
 export const useTranslation = () => {
-  const [language, setLang] = useState(getLanguage());
+  const { locale, setLocale, t } = useI18n();
 
   const changeLanguage = useCallback((newLang) => {
     if (supportedLanguages.includes(newLang)) {
-      setLanguage(newLang);
-      setLang(getLanguage());
-      // Trigger re-render by updating document
-      window.dispatchEvent(new CustomEvent('languageChanged', { detail: getLanguage() }));
+      setLocale(newLang);
     }
-  }, []);
+  }, [setLocale]);
 
-  useEffect(() => {
-    const syncLanguage = () => setLang(getLanguage());
-    const syncFromStorage = (event) => {
-      if (event.key === 'atlas_locale' || event.key === 'language') syncLanguage();
-    };
-
-    window.addEventListener('languageChanged', syncLanguage);
-    window.addEventListener('storage', syncFromStorage);
-
-    return () => {
-      window.removeEventListener('languageChanged', syncLanguage);
-      window.removeEventListener('storage', syncFromStorage);
-    };
-  }, []);
-
-  const translate = useCallback((key) => t(key, language), [language]);
-
-  return {
-    t: translate,
-    language,
+  return useMemo(() => ({
+    t,
+    language: locale,
     setLanguage: changeLanguage,
     supportedLanguages,
-  };
+  }), [changeLanguage, locale, t]);
 };

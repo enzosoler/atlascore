@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Brain, Dumbbell, Sparkles, Target, UtensilsCrossed } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BookOpen, Dumbbell, Sparkles, Target } from 'lucide-react';
 import GuideCard from '@/components/content/GuideCard';
 import PublicSiteShell, {
   PublicLanguageSwitcher,
@@ -11,70 +10,35 @@ import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/routes';
 
-const GUIDES = {
-  'getting-started': [
-    {
-      title: 'Primeiros Passos',
-      excerpt: 'Criar conta, completar onboarding e entender como o Atlas Core organiza sua rotina desde o primeiro dia.',
-      readingTime: 5,
-      icon: BookOpen,
-      href: '/guides/getting-started',
-      category: 'Onboarding',
-    },
-    {
-      title: 'Tour do Dashboard',
-      excerpt: 'Um walkthrough completo da shell principal do produto e das áreas prioritárias do dia.',
-      readingTime: 6,
-      icon: Brain,
-      category: 'Onboarding',
-      disabled: true,
-    },
-  ],
-  tracking: [
-    {
-      title: 'Logging de Treinos',
-      excerpt: 'Como registrar exercícios, séries, reps, peso e progressão com precisão.',
-      readingTime: 8,
-      icon: Dumbbell,
-      href: '/guides/workout-logging',
-      category: 'Treino',
-    },
-    {
-      title: 'Plano vs Execução',
-      excerpt: 'Entenda aderência com clareza: o que foi prescrito, o que foi feito e onde ajustar.',
-      readingTime: 7,
-      icon: Target,
-      href: '/guides/plan-vs-execution',
-      category: 'Análise',
-    },
-    {
-      title: 'Rastreamento Nutricional',
-      excerpt: 'Registro de refeições, macros, contexto diário e aderência alimentar.',
-      readingTime: 9,
-      icon: UtensilsCrossed,
-      category: 'Nutrição',
-      disabled: true,
-    },
-  ],
-  features: [
-    {
-      title: 'Atlas AI',
-      excerpt: 'Como usar a IA contextual do produto para interpretar rotina, tendências e próximos passos.',
-      readingTime: 10,
-      icon: Brain,
-      category: 'IA',
-      disabled: true,
-    },
-    {
-      title: 'Medições e Progresso',
-      excerpt: 'Peso, composição e evolução corporal no mesmo histórico do resto do sistema.',
-      readingTime: 6,
-      icon: Target,
-      category: 'Tracking',
-      disabled: true,
-    },
-  ],
-};
+const START_GUIDES = [
+  {
+    title: 'Primeiros Passos',
+    excerpt: 'Criar conta, completar onboarding e entender como o Atlas Core organiza sua rotina desde o primeiro dia.',
+    readingTime: 5,
+    icon: BookOpen,
+    href: '/guides/getting-started',
+    category: 'Onboarding',
+  },
+];
+
+const TRACKING_GUIDES = [
+  {
+    title: 'Logging de Treinos',
+    excerpt: 'Como registrar exercícios, séries, reps, peso e progressão com precisão.',
+    readingTime: 8,
+    icon: Dumbbell,
+    href: '/guides/workout-logging',
+    category: 'Treino',
+  },
+  {
+    title: 'Plano vs Execução',
+    excerpt: 'Entenda aderência com clareza: o que foi prescrito, o que foi feito e onde ajustar.',
+    readingTime: 7,
+    icon: Target,
+    href: '/guides/plan-vs-execution',
+    category: 'Análise',
+  },
+];
 
 const FAQ_ITEMS = [
   {
@@ -123,71 +87,50 @@ export default function HelpCenter() {
 
       <section className="mx-auto max-w-6xl px-5 pb-6 pt-12 lg:px-8 lg:pt-16">
         <div className="atlas-page-header px-6 py-6 lg:px-8 lg:py-8">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-end">
-            <div>
-              <span className="atlas-public-pill">
-                <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
-                Help Center
-              </span>
-              <h1 className="atlas-display-title mt-5 text-[clamp(2.6rem,2rem+1.6vw,4rem)]">
-                Guides para usar o Atlas Core com clareza.
-              </h1>
-              <p className="atlas-public-copy mt-4 max-w-2xl">
-                Conteúdo objetivo para onboarding, tracking e leitura de aderência, sempre dentro da mesma lógica do produto.
-              </p>
-            </div>
-
-            <div className="atlas-public-panel-muted p-4">
-              <p className="atlas-metric-label">Fluxo</p>
-              <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                Leia um guide, abra o produto e continue do mesmo ponto sem mudar de linguagem visual.
-              </p>
-            </div>
-          </div>
+          <span className="atlas-public-pill">
+            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
+            Help Center
+          </span>
+          <h1 className="atlas-display-title mt-5 max-w-4xl text-[clamp(2.6rem,2rem+1.6vw,4rem)]">
+            Guias diretos para entrar, registrar e acompanhar com clareza.
+          </h1>
+          <p className="atlas-public-copy mt-4 max-w-2xl">
+            Conteúdo objetivo para abrir a conta, registrar treino e entender aderência sem precisar adivinhar o próximo passo.
+          </p>
         </div>
       </section>
 
       <section id="guides" className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
-          <Tabs defaultValue="getting-started" className="space-y-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-10">
+            <div className="space-y-6">
               <PublicSectionHeader
-                eyebrow="Guias"
-                title="Comece rápido, depois aprofunde."
-                description="Agrupamos os materiais por momento da jornada para manter a descoberta simples."
+                eyebrow="Comece Aqui"
+                title="Abra sua conta e entenda a base do produto."
+                description="O essencial para sair do zero e chegar ao primeiro uso com contexto."
               />
 
-              <TabsList className="grid w-full max-w-[420px] grid-cols-3 rounded-[22px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.66)] p-1 shadow-[var(--shadow-xs)]">
-                <TabsTrigger value="getting-started" className="rounded-[18px] text-[12px] font-medium">
-                  Início
-                </TabsTrigger>
-                <TabsTrigger value="tracking" className="rounded-[18px] text-[12px] font-medium">
-                  Tracking
-                </TabsTrigger>
-                <TabsTrigger value="features" className="rounded-[18px] text-[12px] font-medium">
-                  Recursos
-                </TabsTrigger>
-              </TabsList>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {START_GUIDES.map((guide) => (
+                  <GuideCard key={guide.title} {...guide} />
+                ))}
+              </div>
             </div>
 
-            <TabsContent value="getting-started" className="grid gap-4 lg:grid-cols-2">
-              {GUIDES['getting-started'].map((guide) => (
-                <GuideCard key={guide.title} {...guide} />
-              ))}
-            </TabsContent>
+            <div className="space-y-6 border-t border-[hsl(var(--border)/0.76)] pt-8">
+              <PublicSectionHeader
+                eyebrow="Tracking"
+                title="Registre execução e leia aderência com clareza."
+                description="Esses guias cobrem o núcleo do uso diário para treino e análise."
+              />
 
-            <TabsContent value="tracking" className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-              {GUIDES.tracking.map((guide) => (
-                <GuideCard key={guide.title} {...guide} />
-              ))}
-            </TabsContent>
-
-            <TabsContent value="features" className="grid gap-4 lg:grid-cols-2">
-              {GUIDES.features.map((guide) => (
-                <GuideCard key={guide.title} {...guide} />
-              ))}
-            </TabsContent>
-          </Tabs>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {TRACKING_GUIDES.map((guide) => (
+                  <GuideCard key={guide.title} {...guide} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -217,7 +160,7 @@ export default function HelpCenter() {
             Explore o produto com contexto.
           </h2>
           <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
-            Se quiser ver os planos ou abrir sua conta agora, você continua dentro da mesma linguagem do Atlas Core.
+            Se quiser ver os planos ou abrir sua conta agora, você entra direto no produto e continua daqui com contexto.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">

@@ -3,18 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  BarChart3,
-  Camera,
   Check,
   CheckCircle,
-  ChevronRight,
-  Clock,
-  Dumbbell,
-  FlaskConical,
   Layers,
-  SlidersHorizontal,
   TrendingUp,
-  UtensilsCrossed,
   X,
   Zap,
 } from 'lucide-react';
@@ -399,6 +391,149 @@ const COPY = {
   },
 };
 
+const HOME_MOCK_COPY = {
+  'pt-BR': {
+    workout: {
+      overline: 'Treino de hoje',
+      exerciseName: 'supino reto',
+      weight: '102,5 kg',
+      progress: '⬆ +2,5 kg desde a última sessão · PR',
+      bars: [
+        { label: 'Volume', pct: 82, val: '+18%' },
+        { label: 'Frequência', pct: 65, val: '3x/sem' },
+        { label: 'Consistência', pct: 91, val: '91%' },
+      ],
+      tags: ['Peito A', 'Superior', 'Semana 6'],
+    },
+    nutrition: {
+      overline: 'Nutrição do dia',
+      metricLabel: 'Calorias',
+      metricValue: '2.340',
+      metricMeta: 'Meta: 2.500 · 94% do objetivo',
+      bars: [
+        { label: 'Proteína', pct: 88, val: '176g' },
+        { label: 'Carbo', pct: 72, val: '248g' },
+        { label: 'Gordura', pct: 54, val: '62g' },
+      ],
+      summaryLabel: 'Média de 7 dias',
+      summaryText: 'Proteína média: 168g · 3 dias abaixo da meta',
+    },
+    progress: {
+      overline: 'Evolução corporal',
+      cards: [
+        { label: 'Peso', value: '84,2 kg', trend: '▼ −3,8 kg / 8 sem' },
+        { label: 'Gordura', value: '17,4%', trend: '▼ −2,1% / 8 sem' },
+      ],
+      bars: [
+        { label: 'Cintura', pct: 60, val: '−3 cm', accent: true },
+        { label: 'Braço', pct: 75, val: '+1,5 cm' },
+        { label: 'Peito', pct: 68, val: '+2 cm' },
+      ],
+    },
+    photos: {
+      overline: 'Progresso visual',
+      items: [
+        ['01 jan', '#1a1a2e'],
+        ['15 fev', '#1e2a1e'],
+        ['19 mar', '#2a1e1e'],
+      ],
+      summaryTitle: '📸 12 semanas de progresso',
+      summaryText: 'Compare quaisquer duas datas. A diferença que você não percebe no dia a dia.',
+    },
+    supplements: {
+      overline: 'Protocolo do dia',
+      items: [
+        { icon: '💊', name: 'Creatina', dose: '5g · Manhã', done: true },
+        { icon: '🌿', name: 'Vitamina D3', dose: '5000 IU · Manhã', done: true },
+        { icon: '🔥', name: 'Pré-treino', dose: '1 dose · Pré-treino', done: true },
+        { icon: '🌙', name: 'Magnésio', dose: '400mg · Noite', done: false },
+      ],
+      summaryLabel: 'Aderência em 30 dias',
+      summaryValue: '87%',
+      summarySuffix: 'de consistência',
+    },
+    timeline: {
+      overline: 'Sua linha do tempo',
+      items: [
+        { date: 'Hoje · 19 mar', label: 'Novo PR — agachamento 140 kg', detail: 'Treino registrado · 4 exercícios', active: true },
+        { date: '17 mar', label: 'Check-in — 84,2 kg', detail: '% de gordura: 17,4% · Foto de progresso', active: false },
+        { date: '15 mar', label: 'Protocolo atualizado', detail: 'Ômega-3 adicionado · 3g por dia', active: false },
+        { date: '12 mar', label: 'Nutrição — melhor semana', detail: 'Proteína média: 182g · 7/7 dias', active: false },
+      ],
+    },
+  },
+  'en-US': {
+    workout: {
+      overline: "Today's workout",
+      exerciseName: 'bench press',
+      weight: '102.5 kg',
+      progress: '⬆ +2.5 kg from last session · PR',
+      bars: [
+        { label: 'Volume', pct: 82, val: '+18%' },
+        { label: 'Frequency', pct: 65, val: '3x/wk' },
+        { label: 'Consistency', pct: 91, val: '91%' },
+      ],
+      tags: ['Push A', 'Upper', 'Week 6'],
+    },
+    nutrition: {
+      overline: "Today's nutrition",
+      metricLabel: 'Calories',
+      metricValue: '2,340',
+      metricMeta: 'Target: 2,500 · 94% of goal',
+      bars: [
+        { label: 'Protein', pct: 88, val: '176g' },
+        { label: 'Carbs', pct: 72, val: '248g' },
+        { label: 'Fat', pct: 54, val: '62g' },
+      ],
+      summaryLabel: '7-day average',
+      summaryText: 'Average protein: 168g · 3 days below target',
+    },
+    progress: {
+      overline: 'Body evolution',
+      cards: [
+        { label: 'Weight', value: '84.2 kg', trend: '▼ −3.8 kg / 8 wk' },
+        { label: 'Body fat', value: '17.4%', trend: '▼ −2.1% / 8 wk' },
+      ],
+      bars: [
+        { label: 'Waist', pct: 60, val: '−3 cm', accent: true },
+        { label: 'Arm', pct: 75, val: '+1.5 cm' },
+        { label: 'Chest', pct: 68, val: '+2 cm' },
+      ],
+    },
+    photos: {
+      overline: 'Visual progress',
+      items: [
+        ['Jan 01', '#1a1a2e'],
+        ['Feb 15', '#1e2a1e'],
+        ['Mar 19', '#2a1e1e'],
+      ],
+      summaryTitle: '📸 12 weeks of progress',
+      summaryText: "Compare any two dates. The difference you don't notice day to day.",
+    },
+    supplements: {
+      overline: "Today's protocol",
+      items: [
+        { icon: '💊', name: 'Creatine', dose: '5g · Morning', done: true },
+        { icon: '🌿', name: 'Vitamin D3', dose: '5000 IU · Morning', done: true },
+        { icon: '🔥', name: 'Pre-workout', dose: '1 scoop · Pre-workout', done: true },
+        { icon: '🌙', name: 'Magnesium', dose: '400mg · Night', done: false },
+      ],
+      summaryLabel: '30-day adherence',
+      summaryValue: '87%',
+      summarySuffix: 'consistency',
+    },
+    timeline: {
+      overline: 'Your timeline',
+      items: [
+        { date: 'Today · Mar 19', label: 'New PR — squat 140 kg', detail: 'Workout logged · 4 exercises', active: true },
+        { date: 'Mar 17', label: 'Check-in — 84.2 kg', detail: 'Body fat: 17.4% · Progress photo', active: false },
+        { date: 'Mar 15', label: 'Protocol updated', detail: 'Added omega-3 · 3g daily', active: false },
+        { date: 'Mar 12', label: 'Nutrition — best week', detail: 'Average protein: 182g · 7/7 days', active: false },
+      ],
+    },
+  },
+};
+
 /* ─────────────────────────────────────────
    SUB-COMPONENTS
 ───────────────────────────────────────── */
@@ -439,22 +574,22 @@ function BarRow({ label, pct, val, accent = false }) {
   );
 }
 
-function WorkoutMock() {
+function WorkoutMock({ copy }) {
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
-      <p className="atlas-overline">Treino de hoje / Today</p>
+      <p className="atlas-overline">{copy.overline}</p>
       <MockCard>
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Bench Press</p>
-        <p className="mt-1 text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">102.5 kg</p>
-        <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">⬆ +2.5 kg from last session · PR</p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">{copy.exerciseName}</p>
+        <p className="mt-1 text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{copy.weight}</p>
+        <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">{copy.progress}</p>
       </MockCard>
       <div className="space-y-2">
-        <BarRow label="Volume" pct={82} val="+18%" />
-        <BarRow label="Frequency" pct={65} val="3×/wk" />
-        <BarRow label="Consistency" pct={91} val="91%" />
+        {copy.bars.map((bar) => (
+          <BarRow key={bar.label} label={bar.label} pct={bar.pct} val={bar.val} />
+        ))}
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {['Push A', 'Upper', 'Week 6'].map(tag => (
+        {copy.tags.map((tag) => (
           <span key={tag} className="atlas-public-pill border-[hsl(var(--tint)/0.18)] bg-[hsl(var(--tint)/0.06)] text-[hsl(var(--brand))]">{tag}</span>
         ))}
       </div>
@@ -462,59 +597,56 @@ function WorkoutMock() {
   );
 }
 
-function NutritionMock() {
+function NutritionMock({ copy }) {
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
-      <p className="atlas-overline">Nutrição do dia / Today's Nutrition</p>
+      <p className="atlas-overline">{copy.overline}</p>
       <MockCard>
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Calorias</p>
-        <p className="mt-1 text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">2.340</p>
-        <p className="mt-0.5 text-[11px] text-[hsl(var(--fg-2))]">Meta: 2.500 · 94% do objetivo</p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">{copy.metricLabel}</p>
+        <p className="mt-1 text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{copy.metricValue}</p>
+        <p className="mt-0.5 text-[11px] text-[hsl(var(--fg-2))]">{copy.metricMeta}</p>
       </MockCard>
       <div className="space-y-2">
-        <BarRow label="Proteína" pct={88} val="176g" />
-        <BarRow label="Carbs" pct={72} val="248g" />
-        <BarRow label="Gordura" pct={54} val="62g" />
+        {copy.bars.map((bar) => (
+          <BarRow key={bar.label} label={bar.label} pct={bar.pct} val={bar.val} />
+        ))}
       </div>
       <MockCard>
-        <p className="text-[11px] text-[hsl(var(--fg-3))]">Média 7 dias</p>
-        <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">Proteína média: 168g · 3 dias abaixo da meta</p>
+        <p className="text-[11px] text-[hsl(var(--fg-3))]">{copy.summaryLabel}</p>
+        <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">{copy.summaryText}</p>
       </MockCard>
     </div>
   );
 }
 
-function ProgressMock() {
+function ProgressMock({ copy }) {
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
-      <p className="atlas-overline">Evolução corporal / Body Evolution</p>
+      <p className="atlas-overline">{copy.overline}</p>
       <div className="grid grid-cols-2 gap-2">
-        <MockCard>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Peso</p>
-          <p className="mt-1 text-[1.8rem] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">84.2 kg</p>
-          <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">▼ −3.8 kg / 8 sem</p>
-        </MockCard>
-        <MockCard>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Gordura</p>
-          <p className="mt-1 text-[1.8rem] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">17.4%</p>
-          <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">▼ −2.1% / 8 sem</p>
-        </MockCard>
+        {copy.cards.map((card) => (
+          <MockCard key={card.label}>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">{card.label}</p>
+            <p className="mt-1 text-[1.8rem] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{card.value}</p>
+            <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">{card.trend}</p>
+          </MockCard>
+        ))}
       </div>
       <div className="space-y-2">
-        <BarRow label="Cintura" pct={60} val="−3 cm" accent />
-        <BarRow label="Braço" pct={75} val="+1.5cm" />
-        <BarRow label="Peito" pct={68} val="+2 cm" />
+        {copy.bars.map((bar) => (
+          <BarRow key={bar.label} label={bar.label} pct={bar.pct} val={bar.val} accent={bar.accent} />
+        ))}
       </div>
     </div>
   );
 }
 
-function PhotosMock() {
+function PhotosMock({ copy }) {
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
-      <p className="atlas-overline">Progresso visual / Visual Progress</p>
+      <p className="atlas-overline">{copy.overline}</p>
       <div className="grid grid-cols-3 gap-2">
-        {[['Jan 01', '#1a1a2e'], ['Feb 15', '#1e2a1e'], ['Mar 19', '#2a1e1e']].map(([date, bg]) => (
+        {copy.items.map(([date, bg]) => (
           <div key={date} className="relative overflow-hidden rounded-[12px] border border-[hsl(var(--border)/0.7)]" style={{ aspectRatio: '3/4', background: bg }}>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <span className="absolute bottom-2 left-2 text-[10px] font-semibold text-white/80">{date}</span>
@@ -522,25 +654,19 @@ function PhotosMock() {
         ))}
       </div>
       <MockCard>
-        <p className="text-[11px] font-semibold text-[hsl(var(--brand))]">📸 12 semanas de progresso</p>
-        <p className="mt-1 text-[13px] text-[hsl(var(--fg))]">Compare qualquer duas datas. A diferença que você nunca vê no dia a dia.</p>
+        <p className="text-[11px] font-semibold text-[hsl(var(--brand))]">{copy.summaryTitle}</p>
+        <p className="mt-1 text-[13px] text-[hsl(var(--fg))]">{copy.summaryText}</p>
       </MockCard>
     </div>
   );
 }
 
-function SupplementsMock() {
-  const items = [
-    { icon: '💊', name: 'Creatina', dose: '5g · Manhã', done: true },
-    { icon: '🌿', name: 'Vitamina D3', dose: '5000 IU · Manhã', done: true },
-    { icon: '🔥', name: 'Pré-Treino', dose: '1 dose · Pré-treino', done: true },
-    { icon: '🌙', name: 'Magnésio', dose: '400mg · Noite', done: false },
-  ];
+function SupplementsMock({ copy }) {
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
-      <p className="atlas-overline">Protocolo do dia / Today's Protocol</p>
+      <p className="atlas-overline">{copy.overline}</p>
       <div className="space-y-2">
-        {items.map((item) => (
+        {copy.items.map((item) => (
           <div key={item.name} className="flex items-center justify-between rounded-[12px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5">
             <div className="flex items-center gap-2.5">
               <span className="text-base">{item.icon}</span>
@@ -556,27 +682,21 @@ function SupplementsMock() {
         ))}
       </div>
       <MockCard>
-        <p className="text-[11px] text-[hsl(var(--fg-3))]">Aderência 30 dias</p>
-        <p className="mt-0.5 text-[1.2rem] font-bold tracking-[-0.04em] text-[hsl(var(--brand))]">87% <span className="text-[11px] font-normal text-[hsl(var(--fg-3))]">consistência</span></p>
+        <p className="text-[11px] text-[hsl(var(--fg-3))]">{copy.summaryLabel}</p>
+        <p className="mt-0.5 text-[1.2rem] font-bold tracking-[-0.04em] text-[hsl(var(--brand))]">{copy.summaryValue} <span className="text-[11px] font-normal text-[hsl(var(--fg-3))]">{copy.summarySuffix}</span></p>
       </MockCard>
     </div>
   );
 }
 
-function TimelineMock() {
-  const items = [
-    { date: 'Hoje · Mar 19', label: 'Novo PR — Agachamento 140kg', detail: 'Treino registrado · 4 exercícios', active: true },
-    { date: 'Mar 17', label: 'Check-in — 84.2 kg', detail: '% gordura: 17.4% · Foto de progresso', active: false },
-    { date: 'Mar 15', label: 'Protocolo atualizado', detail: 'Adicionado Ômega-3 · 3g diário', active: false },
-    { date: 'Mar 12', label: 'Nutrição — melhor semana', detail: 'Proteína média: 182g · 7/7 dias', active: false },
-  ];
+function TimelineMock({ copy }) {
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
-      <p className="atlas-overline">Sua Linha do Tempo / Your Timeline</p>
+      <p className="atlas-overline">{copy.overline}</p>
       <div className="space-y-0">
-        {items.map((item, i) => (
+        {copy.items.map((item, i) => (
           <div key={i} className="relative flex gap-3 pb-5 last:pb-0">
-            {i < items.length - 1 && (
+            {i < copy.items.length - 1 && (
               <div className="absolute left-[7px] top-4 bottom-0 w-px bg-[hsl(var(--border)/0.7)]" />
             )}
             <div className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${item.active ? 'border-[hsl(var(--brand))] bg-[hsl(var(--card))]' : 'border-[hsl(var(--border))] bg-[hsl(var(--fill))]'}`} />
@@ -593,12 +713,12 @@ function TimelineMock() {
 }
 
 const FEATURE_BLOCKS = [
-  { key: 'workouts',    icon: Dumbbell,          Mock: WorkoutMock,      reverse: false },
-  { key: 'nutrition',   icon: UtensilsCrossed,   Mock: NutritionMock,    reverse: true  },
-  { key: 'progress',    icon: BarChart3,          Mock: ProgressMock,     reverse: false },
-  { key: 'photos',      icon: Camera,             Mock: PhotosMock,       reverse: true  },
-  { key: 'supplements', icon: FlaskConical,       Mock: SupplementsMock,  reverse: false },
-  { key: 'timeline',    icon: Clock,              Mock: TimelineMock,     reverse: true  },
+  { key: 'workouts', mockKey: 'workout', Mock: WorkoutMock, reverse: false },
+  { key: 'nutrition', mockKey: 'nutrition', Mock: NutritionMock, reverse: true },
+  { key: 'progress', mockKey: 'progress', Mock: ProgressMock, reverse: false },
+  { key: 'photos', mockKey: 'photos', Mock: PhotosMock, reverse: true },
+  { key: 'supplements', mockKey: 'supplements', Mock: SupplementsMock, reverse: false },
+  { key: 'timeline', mockKey: 'timeline', Mock: TimelineMock, reverse: true },
 ];
 
 /* ─────────────────────────────────────────
@@ -672,6 +792,7 @@ function PricingCard({ data, featured, showBR }) {
 export default function Landing() {
   const { language } = useTranslation();
   const c = COPY[language] || COPY['en-US'];
+  const homeMocks = HOME_MOCK_COPY[language] || HOME_MOCK_COPY['en-US'];
   const [showBR, setShowBR] = useState(language === 'pt-BR');
 
   return (
@@ -753,7 +874,7 @@ export default function Landing() {
 
             {/* Hero Visual */}
             <motion.div variants={fade} custom={2}>
-              <WorkoutMock />
+              <WorkoutMock copy={homeMocks.workout} />
             </motion.div>
           </div>
         </motion.div>
@@ -823,7 +944,7 @@ export default function Landing() {
 
       {/* ══ FEATURES ══════════════════════════════ */}
       <div id="features">
-        {FEATURE_BLOCKS.map(({ key, Mock, reverse }) => {
+        {FEATURE_BLOCKS.map(({ key, mockKey, Mock, reverse }) => {
           const f = c.features[key];
           return (
             <section
@@ -851,7 +972,7 @@ export default function Landing() {
                   {...fadeIn(0.15)}
                   className={reverse ? 'lg:order-1' : ''}
                 >
-                  <Mock />
+                  <Mock copy={homeMocks[mockKey]} />
                 </motion.div>
               </div>
             </section>
