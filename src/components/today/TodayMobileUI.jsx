@@ -183,14 +183,14 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-                Adherence
+                Aderência
               </p>
               <p className="mt-1 text-[18px] font-semibold tracking-[-0.04em] text-[#111827]">
-                Consistency is trending up
+                Consistência em alta
               </p>
             </div>
             <span className="inline-flex shrink-0 rounded-full bg-[#ECFDF3] px-2.5 py-1 text-[11px] font-semibold text-[#15803D]">
-              On track
+              Em dia
             </span>
           </div>
           <p className="mt-2 text-[14px] leading-6 text-[#6B7280]">{summary}</p>
@@ -218,7 +218,7 @@ export function TodayInsightCard({
   eyebrow = 'Atlas AI',
   title,
   description,
-  cta = 'Open Atlas AI',
+  cta = 'Abrir Atlas AI',
   icon: Icon,
 }) {
   return (

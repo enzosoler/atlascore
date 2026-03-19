@@ -165,7 +165,6 @@ export default function AppLayout() {
 
   const { user, logout } = useAuth();
   const { role, nav } = useRBAC(user);
-  const isImmersiveToday = pathname === ROUTES.today && role === 'athlete';
 
   const bottomPaths = BOTTOM_PATHS_BY_ROLE[role] || BOTTOM_PATHS_BY_ROLE.athlete;
   const bottomNav = useMemo(
@@ -270,13 +269,14 @@ export default function AppLayout() {
 
   return (
     <div className="flex min-h-screen bg-transparent">
+      {/* ── Sidebar desktop ─────────────────────────────────────── */}
       <aside
         className={cn(
-          'glass hidden shrink-0 flex-col fixed inset-y-0 left-0 z-40 border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.8)] transition-all duration-300 ease-out',
-          !isImmersiveToday && 'lg:flex',
-          collapsed ? 'w-[4.5rem]' : 'w-72'
+          'glass hidden shrink-0 flex-col fixed inset-y-0 left-0 z-40 border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.8)] transition-all duration-300 ease-out lg:flex',
+          collapsed ? 'w-[4.5rem]' : 'w-64'
         )}
       >
+        {/* Logo */}
         <div
           className={cn(
             'flex h-16 shrink-0 items-center border-b border-[hsl(var(--border)/0.72)] px-5',
@@ -291,7 +291,8 @@ export default function AppLayout() {
           ) : null}
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        {/* Nav links */}
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
           {nav.map(({ path, label, icon }) => {
             const Icon = ICON_MAP[icon] || Home;
             const active = isActive(path);
@@ -312,18 +313,19 @@ export default function AppLayout() {
           {role === 'admin' ? (
             <Link
               to={ROUTES.admin}
-              title={collapsed ? 'Admin Panel' : undefined}
+              title={collapsed ? 'Painel Admin' : undefined}
               className={getDesktopNavItemClass(isActive(ROUTES.admin), collapsed)}
             >
               <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-              {!collapsed ? <span className="truncate">Admin Panel</span> : null}
+              {!collapsed ? <span className="truncate">Painel Admin</span> : null}
             </Link>
           ) : null}
         </nav>
 
+        {/* Bottom: user card + actions */}
         <div className="border-t border-[hsl(var(--border)/0.72)] px-3 py-4">
           {!collapsed ? (
-            <div className="mx-1 mb-3 rounded-[22px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] px-4 py-3 shadow-[var(--shadow-xs)]">
+            <div className="mx-1 mb-3 rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] px-4 py-3 shadow-[var(--shadow-xs)]">
               <p className="truncate text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
                 {user?.full_name || user?.email}
               </p>
@@ -333,7 +335,7 @@ export default function AppLayout() {
             </div>
           ) : null}
 
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <button
               onClick={() => logout()}
               className={getDesktopNavItemClass(false, collapsed, true)}
@@ -358,12 +360,8 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      <header
-        className={cn(
-          'glass fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4 lg:hidden',
-          isImmersiveToday && 'hidden'
-        )}
-      >
+      {/* ── Mobile top bar ──────────────────────────────────────── */}
+      <header className="glass fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4 lg:hidden">
         <button
           onClick={() => setMobileOpen((value) => !value)}
           className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
@@ -392,6 +390,7 @@ export default function AppLayout() {
         <div className="w-9" />
       </header>
 
+      {/* ── Mobile drawer ───────────────────────────────────────── */}
       <AnimatePresence>
         {mobileOpen ? (
           <>
@@ -427,7 +426,7 @@ export default function AppLayout() {
                 </button>
               </div>
 
-              <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+              <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
                 {nav.map(({ path, label, icon }) => {
                   const Icon = ICON_MAP[icon] || Home;
                   const active = isActive(path);
@@ -447,13 +446,13 @@ export default function AppLayout() {
                 {role === 'admin' ? (
                   <Link to={ROUTES.admin} className={getMobileNavItemClass(isActive(ROUTES.admin))}>
                     <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-                    <span className="truncate">Admin Panel</span>
+                    <span className="truncate">Painel Admin</span>
                   </Link>
                 ) : null}
               </nav>
 
               <div className="border-t border-[hsl(var(--border)/0.72)] px-3 py-4">
-                <div className="mx-1 mb-3 rounded-[22px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] px-4 py-3 shadow-[var(--shadow-xs)]">
+                <div className="mx-1 mb-3 rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] px-4 py-3 shadow-[var(--shadow-xs)]">
                   <p className="truncate text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
                     {user?.full_name || user?.email}
                   </p>
@@ -474,8 +473,8 @@ export default function AppLayout() {
         ) : null}
       </AnimatePresence>
 
+      {/* ── Mobile bottom tab bar ───────────────────────────────── */}
       <TabBar
-        className={isImmersiveToday ? 'bg-[rgba(245,245,247,0.84)]' : ''}
         items={[
           ...bottomNav.map(({ path, label, icon }) => ({
             key: path,
@@ -495,11 +494,12 @@ export default function AppLayout() {
         ]}
       />
 
+      {/* ── Main content ────────────────────────────────────────── */}
       <main
         className={cn(
           'flex-1 min-h-screen overflow-x-hidden transition-all duration-300',
-          !isImmersiveToday && (collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-72'),
-          isImmersiveToday ? 'bg-[#F5F5F7] pt-0' : 'pt-14 lg:pt-0',
+          collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
+          'pt-14 lg:pt-0',
           'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
         )}
         onTouchStart={handlePullStart}
@@ -511,11 +511,7 @@ export default function AppLayout() {
 
         <motion.div
           className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2 lg:hidden"
-          style={{
-            top: isImmersiveToday
-              ? 'calc(env(safe-area-inset-top) + 12px)'
-              : 'calc(56px + env(safe-area-inset-top) + 10px)',
-          }}
+          style={{ top: 'calc(56px + env(safe-area-inset-top) + 10px)' }}
           animate={{
             y: isRefreshing || pullDistance > 0 ? 0 : -18,
             opacity: isRefreshing || pullDistance > 0 ? 1 : 0,
@@ -539,9 +535,6 @@ export default function AppLayout() {
           className="lg:min-h-screen"
           style={{
             transform: `translateY(${pullDistance}px)`,
-            minHeight: isImmersiveToday
-              ? 'calc(100vh - 90px - env(safe-area-inset-bottom))'
-              : 'calc(100vh - 56px - 90px - env(safe-area-inset-bottom))',
           }}
         >
           <AnimatePresence mode="wait" initial={false}>
