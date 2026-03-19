@@ -14,6 +14,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 const DEFAULT_FOOTER_LINKS = [
   { href: ROUTES.home, label: 'Home' },
+  { href: ROUTES.blog, label: 'Blog' },
   { href: ROUTES.pricing, label: 'Pricing' },
   { href: ROUTES.help, label: 'Help' },
   { href: `${ROUTES.auth}?mode=login`, label: 'Login' },
@@ -123,13 +124,23 @@ export function PublicNav({ links = [], actions, compact = false }) {
         {!compact && links.length > 0 ? (
           <nav className="hidden items-center gap-7 lg:flex">
             {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
-              >
-                {link.label}
-              </a>
+              link.href.startsWith('#') ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+                >
+                  {link.label}
+                </Link>
+              )
             ))}
           </nav>
         ) : null}

@@ -34,6 +34,7 @@ export const ROUTES = {
   clinicianPatients: '/clinician/patients',
   githubPRs: '/github-prs',
   help: '/help',
+  blog: '/blog',
 };
 
 export const ROLE_HOME = {

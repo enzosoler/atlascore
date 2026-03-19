@@ -28,6 +28,7 @@ export default function BlogPostLayout({
   readingTime,
   author,
   breadcrumb,
+  eyebrow = 'Guide',
   children,
 }) {
   return (
@@ -48,7 +49,7 @@ export default function BlogPostLayout({
             ) : null}
 
             <div className="space-y-4">
-              <p className="atlas-overline">Guide</p>
+              <p className="atlas-overline">{eyebrow}</p>
               <div className="space-y-3">
                 <h1 className="atlas-display-title">{title}</h1>
                 {excerpt ? (
@@ -63,7 +64,7 @@ export default function BlogPostLayout({
               {publishedAt ? (
                 <MetaItem icon={CalendarDays}>{formatPublishedDate(publishedAt)}</MetaItem>
               ) : null}
-              {readingTime ? <MetaItem icon={Clock3}>{readingTime} min de leitura</MetaItem> : null}
+              {readingTime ? <MetaItem icon={Clock3}>{readingTime} min read</MetaItem> : null}
               {author ? <MetaItem icon={User}>{author}</MetaItem> : null}
             </div>
           </div>

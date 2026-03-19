@@ -2,21 +2,18 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  AlertCircle,
   ArrowRight,
   BarChart3,
-  Brain,
+  Camera,
   Check,
   CheckCircle,
   ChevronRight,
+  Clock,
   Dumbbell,
   FlaskConical,
-  Package,
-  Sparkles,
-  Stethoscope,
+  Layers,
+  SlidersHorizontal,
   TrendingUp,
-  User,
-  Users,
   UtensilsCrossed,
   X,
   Zap,
@@ -25,663 +22,1006 @@ import { ROUTES } from '@/lib/routes';
 import { useTranslation } from '@/hooks/useTranslation';
 import PublicSiteShell, {
   PublicLanguageSwitcher,
-  PublicSectionHeader,
 } from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
 
+/* ─────────────────────────────────────────
+   ANIMATION VARIANTS
+───────────────────────────────────────── */
 const fade = {
-  hidden: { opacity: 0, y: 18 },
-  show: (index = 0) => ({
+  hidden: { opacity: 0, y: 20 },
+  show: (i = 0) => ({
     opacity: 1,
     y: 0,
-    transition: {
-      delay: index * 0.06,
-      duration: 0.55,
-      ease: [0.22, 1, 0.36, 1],
-    },
+    transition: { delay: i * 0.07, duration: 0.55, ease: [0.22, 1, 0.36, 1] },
   }),
 };
 
-const handleSignUp = () => {
-  window.location.href = `${ROUTES.auth}?mode=signup`;
-};
+const fadeIn = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '-60px' },
+  transition: { delay, duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+});
 
-const handleLogin = () => {
-  window.location.href = `${ROUTES.auth}?mode=login`;
-};
-
-const handlePlanClick = (planId) => {
-  if (planId === 'free' || !planId) {
-    window.location.href = `${ROUTES.auth}?mode=signup`;
-    return;
-  }
-
-  if (window.self !== window.top) {
-    alert('O checkout só funciona no app publicado. Acesse a URL pública para assinar.');
-    return;
-  }
-
-  sessionStorage.setItem('pending_plan', planId);
+/* ─────────────────────────────────────────
+   AUTH ACTIONS
+───────────────────────────────────────── */
+const handleSignUp = () => { window.location.href = `${ROUTES.auth}?mode=signup`; };
+const handleLogin  = () => { window.location.href = `${ROUTES.auth}?mode=login`; };
+const handlePlan   = (id) => {
+  if (!id || id === 'free') { handleSignUp(); return; }
+  if (window.self !== window.top) { alert('O checkout só funciona no app publicado.'); return; }
+  sessionStorage.setItem('pending_plan', id);
   window.location.href = `${ROUTES.auth}?mode=signup&next=${encodeURIComponent(ROUTES.pricing)}`;
 };
 
-function TodayPreview({ t, ui }) {
+/* ─────────────────────────────────────────
+   COPY (bilingual, inline)
+───────────────────────────────────────── */
+const COPY = {
+  'pt-BR': {
+    nav: { howItWorks: 'Como funciona', features: 'Funcionalidades', pricing: 'Planos', login: 'Entrar', signup: 'Criar conta' },
+    hero: {
+      badge: 'Acesso Antecipado',
+      h1a: 'Seu corpo está evoluindo.',
+      h1b: 'Você sabe exatamente como?',
+      sub: 'Um único lugar para treinos, nutrição, suplementos e progresso. Pare de gerenciar abas. Comece a entender sua evolução.',
+      cta1: 'Começar grátis',
+      cta2: 'Ver como funciona',
+      s1t: '1 sistema', s1d: 'em vez de 6 apps',
+      s2t: 'Clareza total', s2d: 'sobre seu progresso real',
+      s3t: 'Feito para', s3d: 'a vida real, não planos perfeitos',
+    },
+    problem: {
+      label: 'O Problema',
+      h2: 'Seus dados de saúde\nestão espalhados por toda parte.',
+      sub: 'Você leva a sério seu corpo — mas suas informações vivem em 5 lugares diferentes. Nenhum deles fala com o outro.',
+      items: [
+        { e: '🏋️', t: 'App de treino', d: 'Séries, repetições, PRs — mas nada mais' },
+        { e: '🥗', t: 'Contador de calorias', d: 'Calorias registradas, ignoradas pela manhã' },
+        { e: '📊', t: 'Planilha', d: 'Medidas que você atualiza duas vezes por ano' },
+        { e: '📱', t: 'Notas', d: 'Stack de suplementos anotado em 2022' },
+        { e: '📸', t: 'Galeria de fotos', d: 'Fotos de progresso soterradas no rolo da câmera' },
+        { e: '💬', t: 'WhatsApp', d: 'Feedback do coach que você nunca mais vai achar' },
+      ],
+      quote: '"O problema não é falta de esforço. É que você não tem uma visão real do que todo esse esforço está fazendo."',
+      quoteDesc: 'Sem uma visão unificada, você não sabe se está progredindo, estagnado ou regredindo. Você está trabalhando no escuro.',
+    },
+    solution: {
+      label: 'A Solução',
+      h2a: 'Tudo em um lugar.',
+      h2b: 'Finalmente.',
+      sub: 'O Atlas Core é seu sistema de performance pessoal. Não é mais um app de treino, não é um rastreador de dieta — é o único lugar onde todos os seus dados de saúde vivem, se conectam e fazem sentido.',
+      p1t: 'Centralizado', p1d: 'Treinos, nutrição, suplementos, medidas e fotos — tudo em um sistema. Sem mais troca de apps.',
+      p2t: 'Focado em progresso', p2d: 'O produto inteiro é construído em torno de uma pergunta: você está realmente melhorando?',
+      p3t: 'Pronto para a vida real', p3d: 'Planos não são perfeitos. O Atlas Core reflete como você realmente vive — não como pretendia viver.',
+    },
+    features: {
+      workouts: {
+        label: 'Treinos',
+        h2: 'Treine mais inteligente.\nRegistre tudo.',
+        desc: 'Registre qualquer treino, qualquer estilo. Acompanhe séries, reps, carga e descanso. Saiba exatamente o que fez na última sessão — e supere.',
+        pts: [
+          { t: 'Biblioteca completa de exercícios', d: '— ou adicione os seus. Musculação, funcional, cardio.' },
+          { t: 'Histórico de treinos em destaque', d: '— veja todas as sessões que já fez.' },
+          { t: 'Rastreamento de PR automático', d: '— recordes pessoais se atualizam sozinhos.' },
+          { t: 'Sem templates forçados', d: '— registre o que realmente fez, não o que foi planejado.' },
+        ],
+      },
+      nutrition: {
+        label: 'Nutrição',
+        h2: 'Registre a comida.\nEntenda os padrões.',
+        desc: 'Acompanhe o que come sem obsessão. O objetivo não é perfeição — é consciência. Veja o que realmente move seus resultados.',
+        pts: [
+          { t: 'Registro diário rápido', d: '— refeições, macros e calorias sem atrito.' },
+          { t: 'Padrões semanais', d: '— veja onde está atingindo metas e onde não está.' },
+          { t: 'Conectado aos resultados', d: '— nutrição fica ao lado dos dados de peso e performance.' },
+          { t: 'Não é uma prisão calórica', d: '— desenhado para consciência, não ansiedade.' },
+        ],
+      },
+      progress: {
+        label: 'Rastreamento de Progresso',
+        h2: 'Números não mentem.\nAgora você pode vê-los.',
+        desc: 'Peso, gordura corporal, circunferências — registrados em segundos, visíveis ao longo do tempo.',
+        pts: [
+          { t: 'Tendências de peso corporal', d: '— médias semanais cortam o ruído diário.' },
+          { t: 'Medidas completas', d: '— cintura, peito, braços, pernas, quadril, % gordura.' },
+          { t: 'Comparações antes/depois', d: '— escolha duas datas e veja a diferença.' },
+          { t: 'Detecção de tendência', d: '— saiba imediatamente se sua trajetória está correta.' },
+        ],
+      },
+      photos: {
+        label: 'Fotos de Progresso',
+        h2: 'Veja o que a balança\nnão consegue mostrar.',
+        desc: 'Seu corpo muda de formas que as medidas não capturam. Fotos de progresso são o registro mais honesto que você tem.',
+        pts: [
+          { t: 'Organizadas por data', d: '— sem mais cavar no rolo da câmera.' },
+          { t: 'Comparação lado a lado', d: '— escolha dois check-ins e veja a diferença.' },
+          { t: 'Privado e seguro', d: '— suas fotos são suas. Sem compartilhamento público.' },
+          { t: 'Sincronizado com métricas', d: '— veja seu peso e medidas ao lado da foto daquele dia.' },
+        ],
+      },
+      supplements: {
+        label: 'Suplementos & Protocolos',
+        h2: 'Seu stack registrado.\nFinalmente consistente.',
+        desc: 'Creatina, vitaminas, pré-treino — seja lá qual for o seu protocolo, o Atlas Core o mantém organizado e rastreável.',
+        pts: [
+          { t: 'Checklist diário', d: '— registre o que tomou e quando.' },
+          { t: 'Protocolos personalizados', d: '— stack matinal, noturno, dosagem por ciclo.' },
+          { t: 'Rastreamento de consistência', d: '— veja sua aderência nos últimos 30 dias.' },
+          { t: 'Sem julgamentos', d: '— registre o que quiser. São seus dados de saúde.' },
+        ],
+      },
+      timeline: {
+        label: 'Linha do Tempo Unificada',
+        h2: 'Tudo que aconteceu,\nem uma visão.',
+        desc: 'Treinos, check-ins, fotos, mudanças de protocolo — tudo visível em uma única linha do tempo cronológica.',
+        pts: [
+          { t: 'Log automático', d: '— cada ação vira parte do seu histórico.' },
+          { t: 'Cruze qualquer dado', d: '— veja como estava sua nutrição na semana que bateu o PR.' },
+          { t: 'Resumos mensais', d: '— entenda o que cada mês realmente entregou.' },
+          { t: 'Memória de longo prazo', d: '— volte 6, 12 meses, 2 anos. Seus dados não expiram.' },
+        ],
+      },
+    },
+    diff: {
+      label: 'Por que Atlas Core',
+      h2: 'Não é mais um app de fitness.',
+      sub: 'Cada outra ferramenta é construída em torno de uma única categoria. O Atlas Core é construído em torno de você.',
+      cols: ['Capacidade', 'Apps de treino', 'Rastreadores de comida', 'Apps genéricos', 'Atlas Core'],
+      rows: [
+        ['Rastreamento de treino', '✓', '—', 'Parcial', '✓ Completo'],
+        ['Nutrição & macros', '—', '✓', 'Parcial', '✓ Completo'],
+        ['Medidas corporais', '—', '—', 'Básico', '✓ Completo'],
+        ['Fotos de progresso', '—', '—', '—', '✓ Organizado'],
+        ['Suplementos', '—', '—', '—', '✓ Completo'],
+        ['Linha do tempo unificada', '—', '—', '—', '✓ Tudo'],
+        ['Análise entre métricas', '—', '—', '—', '✓ Integrado'],
+      ],
+      cards: [
+        { e: '🚫', t: 'Não força planos', d: 'O Atlas Core não diz o que fazer. Rastreia o que você realmente faz — e mostra se está funcionando.' },
+        { e: '🚫', t: 'Sem gamificação', d: 'Sem streaks, sem medalhas, sem motivação falsa. Seu progresso é real. Essa é a recompensa.' },
+        { e: '🚫', t: 'Não é clínico', d: 'Construído para pessoas sérias — não pacientes. Sem jargão, sem formulários, sem complexidade.' },
+      ],
+    },
+    pricing: {
+      label: 'Planos',
+      h2: 'Simples. Honesto.',
+      sub: 'Comece grátis. Faça upgrade quando quiser a visão completa.',
+      toggle: { intl: 'USD / Internacional', br: 'BRL / Brasil' },
+      free: {
+        name: 'Grátis', priceIntl: '$0', priceBR: 'R$ 0', period: '/mês', annualNote: 'Sempre grátis. Sem cartão.',
+        features: ['Registro de treinos', 'Nutrição básica', 'Checklist de suplementos', 'Histórico de 30 dias'],
+        absent: ['Comparações de progresso', 'Fotos de progresso', 'Histórico completo de medidas', 'Linha do tempo unificada'],
+        cta: 'Criar conta grátis', id: 'free',
+      },
+      pro: {
+        name: 'Pro', priceIntl: '$9.99', priceBR: 'R$ 29,90', period: '/mês',
+        annualIntl: 'Ou $79/ano — economize $40 (33%)', annualBR: 'Ou R$249/ano — economize R$110 (31%)',
+        popular: 'Mais escolhido',
+        features: [
+          'Tudo do plano Grátis', 'Histórico ilimitado', 'Comparações completas de progresso',
+          'Fotos de progresso & visualização lado a lado', 'Medidas corporais completas',
+          'Linha do tempo unificada', 'Funcionalidades avançadas de rastreamento', 'Suporte prioritário',
+        ],
+        cta: '14 dias grátis — sem cartão', id: 'pro_monthly',
+      },
+      founder: {
+        h3: '🔒 Preço Fundador — Bloqueado Para Sempre',
+        desc: 'Entrando no Acesso Antecipado? Seu preço nunca muda — mesmo quando aumentarmos. Você entra pelo preço de base.',
+        cta: 'Garantir preço fundador',
+      },
+    },
+    pros: {
+      label: 'Para Profissionais',
+      h2: 'Feito para o indivíduo.\nFunciona com seu time.',
+      sub: 'O Atlas Core não exige coach ou nutricionista. Mas se você trabalha com um, ele pode ver seus dados e colaborar direto no app.',
+      cards: [
+        { e: '🏃', t: 'Personal Trainers', d: 'Acompanhe treinos, fotos de progresso e medidas dos seus alunos em tempo real. Sem mais prints no WhatsApp.' },
+        { e: '🥦', t: 'Nutricionistas', d: 'Revise registros alimentares reais ao lado das métricas corporais. Veja se o plano está gerando resultados reais.' },
+      ],
+      note: 'A colaboração profissional é opcional. O Atlas Core funciona perfeitamente sem nenhum outro envolvido.',
+    },
+    closing: {
+      h2a: 'Você tem colocado esforço.',
+      h2b: 'Está na hora de ver.',
+      sub: 'O Atlas Core te dá o que nenhum app de fitness conseguiu — a visão completa da sua evolução física, em um lugar, sempre honesto.',
+      cta1: 'Começar grátis hoje', cta2: 'Ver todos os planos',
+      fine: 'Sem cartão de crédito. Plano grátis disponível. Cancele quando quiser.',
+    },
+  },
+  'en-US': {
+    nav: { howItWorks: 'How it works', features: 'Features', pricing: 'Pricing', login: 'Log In', signup: 'Get Started' },
+    hero: {
+      badge: 'Early Access',
+      h1a: 'Your body is changing.',
+      h1b: 'You should know exactly how.',
+      sub: 'One place for your workouts, nutrition, supplements, and progress. Stop juggling apps. Start understanding your evolution.',
+      cta1: 'Start Free — No Card Needed',
+      cta2: 'See How It Works',
+      s1t: '1 system', s1d: 'instead of 6 apps',
+      s2t: 'Full clarity', s2d: 'on your real progress',
+      s3t: 'Built for', s3d: 'real life, not perfect plans',
+    },
+    problem: {
+      label: 'The Problem',
+      h2: 'Your health data is\nscattered everywhere.',
+      sub: 'You\'re serious about your body — but your information lives in 5 different places. None of them talk to each other.',
+      items: [
+        { e: '🏋️', t: 'Workout App', d: 'Sets, reps, PRs — but nothing else' },
+        { e: '🥗', t: 'Food Tracker', d: 'Calories logged, ignored by morning' },
+        { e: '📊', t: 'Spreadsheet', d: 'Measurements you update twice a year' },
+        { e: '📱', t: 'Notes App', d: 'Supplement stack written in a note from 2022' },
+        { e: '📸', t: 'Photo Gallery', d: 'Progress photos buried in your camera roll' },
+        { e: '💬', t: 'WhatsApp', d: 'Coach feedback you\'ll never find again' },
+      ],
+      quote: '"The problem isn\'t that you\'re not putting in the effort. It\'s that you have no real picture of what all that effort is doing."',
+      quoteDesc: 'Without a unified view, you can\'t tell if you\'re progressing, plateauing, or going backwards. You\'re working blind.',
+    },
+    solution: {
+      label: 'The Solution',
+      h2a: 'Everything in one place.',
+      h2b: 'Finally.',
+      sub: 'Atlas Core is your personal performance system. Not a workout app, not a diet tracker — a single place where all your health data lives, connects, and makes sense.',
+      p1t: 'Centralized', p1d: 'Workouts, nutrition, supplements, measurements, and photos — all in one system. No more context-switching.',
+      p2t: 'Progress-Focused', p2d: 'The entire product is built around one question: are you actually improving?',
+      p3t: 'Real-Life Ready', p3d: 'Plans aren\'t perfect. Atlas Core reflects how you actually live — not how you intended to.',
+    },
+    features: {
+      workouts: {
+        label: 'Workouts', h2: 'Train smarter.\nRecord everything.',
+        desc: 'Log any workout, any style. Track sets, reps, weight, and rest. Know exactly what you did last time — and beat it.',
+        pts: [
+          { t: 'Full exercise library', d: '— or add your own. Bodybuilding, functional, cardio.' },
+          { t: 'Workout history at a glance', d: '— see every session you\'ve ever done.' },
+          { t: 'PR tracking built in', d: '— personal records update automatically.' },
+          { t: 'No forced templates', d: '— log what you actually did, not what was planned.' },
+        ],
+      },
+      nutrition: {
+        label: 'Nutrition', h2: 'Log food.\nUnderstand patterns.',
+        desc: 'Track what you eat without obsessing over it. The goal isn\'t perfection — it\'s awareness. See what\'s actually moving your results.',
+        pts: [
+          { t: 'Fast daily logging', d: '— meals, macros, and calories without friction.' },
+          { t: 'Weekly patterns', d: '— see where you\'re hitting targets and where you\'re not.' },
+          { t: 'Connected to results', d: '— nutrition sits next to body weight and performance data.' },
+          { t: 'Not a calorie prison', d: '— designed for awareness, not anxiety.' },
+        ],
+      },
+      progress: {
+        label: 'Progress Tracking', h2: 'Numbers don\'t lie.\nNow you can see them.',
+        desc: 'Weight, body fat, circumferences — logged in seconds, visible over time.',
+        pts: [
+          { t: 'Body weight trends', d: '— weekly averages cut through daily noise.' },
+          { t: 'Full measurements', d: '— waist, chest, arms, legs, hips, body fat %.' },
+          { t: 'Before/after comparisons', d: '— pick any two dates and see the difference.' },
+          { t: 'Trend detection', d: '— know immediately if your trajectory is going the right way.' },
+        ],
+      },
+      photos: {
+        label: 'Progress Photos', h2: 'See what the scale\ncan\'t show.',
+        desc: 'Your body changes in ways measurements miss. Progress photos are the most honest record you have.',
+        pts: [
+          { t: 'Organized by date', d: '— no more digging through your camera roll.' },
+          { t: 'Side-by-side comparison', d: '— pick any two check-ins and see the difference.' },
+          { t: 'Private and secure', d: '— your photos stay yours. No public sharing.' },
+          { t: 'Synced with metrics', d: '— see your weight and measurements alongside the photo from that day.' },
+        ],
+      },
+      supplements: {
+        label: 'Supplements & Protocols', h2: 'Your stack, tracked.\nFinally consistent.',
+        desc: 'Creatine, vitamins, pre-workout — whatever your protocol is, Atlas Core keeps it organized and trackable.',
+        pts: [
+          { t: 'Daily checklist', d: '— log what you took, when you took it.' },
+          { t: 'Custom protocols', d: '— morning stack, evening stack, cycle-based dosing.' },
+          { t: 'Consistency tracking', d: '— see your adherence over the past 30 days.' },
+          { t: 'No judgment', d: '— log whatever you want. It\'s your health data.' },
+        ],
+      },
+      timeline: {
+        label: 'Unified Timeline', h2: 'Everything that happened,\nin one view.',
+        desc: 'Workouts, check-ins, photos, protocol changes — all visible in a single chronological timeline.',
+        pts: [
+          { t: 'Automatic log', d: '— every action you take becomes part of your history.' },
+          { t: 'Cross-reference anything', d: '— see what your nutrition looked like the week you hit your PR.' },
+          { t: 'Monthly summaries', d: '— understand what each month actually delivered.' },
+          { t: 'Long-term memory', d: '— scroll back 6 months, 12 months, 2 years. Your data doesn\'t expire.' },
+        ],
+      },
+    },
+    diff: {
+      label: 'Why Atlas Core',
+      h2: 'Not another fitness app.',
+      sub: 'Every other tool is built around a single category. Atlas Core is built around you.',
+      cols: ['Capability', 'Workout Apps', 'Food Trackers', 'Generic Health Apps', 'Atlas Core'],
+      rows: [
+        ['Workout tracking', '✓', '—', 'Partial', '✓ Full'],
+        ['Nutrition & macros', '—', '✓', 'Partial', '✓ Full'],
+        ['Body measurements', '—', '—', 'Basic', '✓ Full'],
+        ['Progress photos', '—', '—', '—', '✓ Organized'],
+        ['Supplement tracking', '—', '—', '—', '✓ Full'],
+        ['Unified timeline', '—', '—', '—', '✓ Everything'],
+        ['Cross-metric analysis', '—', '—', '—', '✓ Built-in'],
+      ],
+      cards: [
+        { e: '🚫', t: 'Not a plan-pusher', d: 'Atlas Core doesn\'t tell you what to do. It tracks what you actually do — and shows you if it\'s working.' },
+        { e: '🚫', t: 'Not gamified', d: 'No streaks, no badges, no fake motivation. Your progress is real. That\'s the reward.' },
+        { e: '🚫', t: 'Not clinical', d: 'Built for serious people — not patients. No jargon, no forms, no complexity.' },
+      ],
+    },
+    pricing: {
+      label: 'Pricing',
+      h2: 'Simple. Honest.',
+      sub: 'Start free. Upgrade when you want the full picture.',
+      toggle: { intl: 'USD / International', br: 'BRL / Brasil' },
+      free: {
+        name: 'Free', priceIntl: '$0', priceBR: 'R$ 0', period: '/month', annualNote: 'Always free. No card required.',
+        features: ['Workout logging', 'Basic nutrition tracking', 'Supplement checklist', '30-day history'],
+        absent: ['Progress comparisons', 'Progress photos', 'Full measurement history', 'Unified timeline'],
+        cta: 'Get Started Free', id: 'free',
+      },
+      pro: {
+        name: 'Pro', priceIntl: '$9.99', priceBR: 'R$ 29,90', period: '/month',
+        annualIntl: 'Or $79/year — save $40 (33%)', annualBR: 'Or R$249/year — save $40 (33%)',
+        popular: 'Most Popular',
+        features: [
+          'Everything in Free', 'Unlimited history', 'Full progress comparisons',
+          'Progress photos & side-by-side view', 'Full body measurements',
+          'Unified timeline', 'Advanced tracking features', 'Priority support',
+        ],
+        cta: 'Start Pro Free for 14 Days', id: 'pro_monthly',
+      },
+      founder: {
+        h3: '🔒 Founder Price — Locked Forever',
+        desc: 'Joining during Early Access? Your price never changes — even when we raise rates. You\'re in at the ground level.',
+        cta: 'Claim Founder Price',
+      },
+    },
+    pros: {
+      label: 'For Professionals',
+      h2: 'Built for individuals.\nWorks with your team.',
+      sub: 'Atlas Core doesn\'t require a coach or nutritionist. But if you work with one, they can see your data and collaborate directly inside the app.',
+      cards: [
+        { e: '🏃', t: 'Personal Trainers', d: 'See your clients\' workout logs, progress photos, and measurements in real-time. No more WhatsApp screenshots.' },
+        { e: '🥦', t: 'Nutritionists', d: 'Review actual food logs alongside body metrics. See whether the plan is translating into real results.' },
+      ],
+      note: 'Professional collaboration is optional. Atlas Core works perfectly without anyone else involved.',
+    },
+    closing: {
+      h2a: 'You\'ve been putting in the work.',
+      h2b: 'It\'s time to see it.',
+      sub: 'Atlas Core gives you the one thing no single fitness app ever could — the full picture of your physical evolution, in one place, always honest.',
+      cta1: 'Start Free Today', cta2: 'See All Plans',
+      fine: 'No credit card needed. Free plan available. Cancel anytime.',
+    },
+  },
+};
+
+/* ─────────────────────────────────────────
+   SUB-COMPONENTS
+───────────────────────────────────────── */
+
+function FeaturePoint({ t, d }) {
   return (
-    <div className="atlas-public-panel relative overflow-hidden px-5 py-5 lg:px-6 lg:py-6">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[hsl(var(--brand)/0.08)] to-transparent" />
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--tint)/0.22)] bg-[hsl(var(--tint)/0.08)] text-[hsl(var(--brand))]">
+        <Check className="h-3 w-3" strokeWidth={2.6} />
+      </div>
+      <p className="text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+        <strong className="font-semibold text-[hsl(var(--fg))]">{t}</strong>{d}
+      </p>
+    </div>
+  );
+}
 
-      <div className="relative space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="atlas-overline">{ui.todayPreview}</p>
-            <p className="mt-3 text-[1.15rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-              {t('landing.mock.greeting')}
-            </p>
-            <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">{t('landing.mock.date')}</p>
-          </div>
+function MockCard({ children }) {
+  return (
+    <div className="rounded-[14px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.6)] p-3.5">
+      {children}
+    </div>
+  );
+}
 
-          <div className="atlas-public-panel-muted px-3 py-2">
-            <p className="atlas-metric-label">{ui.adherenceLabel}</p>
-            <p className="mt-2 text-[1.1rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-              78%
-            </p>
-          </div>
-        </div>
+function BarRow({ label, pct, val, accent = false }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="w-16 shrink-0 text-[11px] text-[hsl(var(--fg-3))]">{label}</span>
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${pct}%`, background: accent ? 'hsl(0 67% 52%)' : 'hsl(var(--brand))' }}
+        />
+      </div>
+      <span className="w-9 text-right text-[11px] text-[hsl(var(--fg-2))]">{val}</span>
+    </div>
+  );
+}
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="atlas-public-panel-muted p-4">
-            <p className="atlas-metric-label">{t('landing.mock.nutrition')}</p>
-            <p className="mt-3 text-[1.9rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
-              1.620
-            </p>
-            <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">/ 2.200 kcal</p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
-              <div className="h-full w-[74%] rounded-full bg-[hsl(var(--brand))]" />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-[hsl(var(--fg-2))]">
-              <span>P 138g</span>
-              <span>C 220g</span>
-              <span>G 48g</span>
-            </div>
-          </div>
-
-          <div className="atlas-public-panel-muted p-4">
-            <p className="atlas-metric-label">{t('landing.mock.training')}</p>
-            <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              {t('landing.mock.trainingTitle')}
-            </p>
-            <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
-              {t('landing.mock.trainingSubtitle')}
-            </p>
-            <span className="atlas-public-pill mt-4 border-[hsl(39_62%_80%)] bg-[hsl(42_82%_95%)] text-[hsl(30_54%_26%)]">
-              {t('landing.mock.pending')}
-            </span>
-          </div>
-        </div>
-
-        <div className="atlas-public-panel-muted p-4">
-          <p className="atlas-metric-label">{t('landing.mock.actionNeeded')}</p>
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center gap-3 rounded-[20px] border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.05)] px-3 py-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-[16px] bg-[hsl(var(--card))] text-[hsl(var(--err))]">
-                <AlertCircle className="h-4 w-4" strokeWidth={2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-                  {t('landing.mock.workoutTitle')}
-                </p>
-                <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                  {t('landing.mock.workoutMeta')}
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
-            </div>
-
-            <div className="flex items-center gap-3 rounded-[20px] border border-[hsl(var(--warn)/0.22)] bg-[hsl(var(--warn)/0.08)] px-3 py-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-[16px] bg-[hsl(var(--card))] text-[hsl(var(--warn))]">
-                <Package className="h-4 w-4" strokeWidth={2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-                  {t('landing.mock.stockTitle')}
-                </p>
-                <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                  {t('landing.mock.stockMeta')}
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[26px] border border-[hsl(var(--brand-ai)/0.16)] bg-[hsl(var(--brand-ai)/0.06)] px-4 py-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] bg-[hsl(var(--card))] text-[hsl(var(--brand-ai))] shadow-[var(--shadow-xs)]">
-              <Brain className="h-4 w-4" strokeWidth={2} />
-            </div>
-            <div>
-              <p className="atlas-metric-label text-[hsl(var(--brand-ai))]">{t('landing.mock.aiLabel')}</p>
-              <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                {t('landing.mock.aiInsight')}
-              </p>
-            </div>
-          </div>
-        </div>
+function WorkoutMock() {
+  return (
+    <div className="atlas-public-panel space-y-3 px-5 py-5">
+      <p className="atlas-overline">Treino de hoje / Today</p>
+      <MockCard>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Bench Press</p>
+        <p className="mt-1 text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">102.5 kg</p>
+        <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">⬆ +2.5 kg from last session · PR</p>
+      </MockCard>
+      <div className="space-y-2">
+        <BarRow label="Volume" pct={82} val="+18%" />
+        <BarRow label="Frequency" pct={65} val="3×/wk" />
+        <BarRow label="Consistency" pct={91} val="91%" />
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {['Push A', 'Upper', 'Week 6'].map(tag => (
+          <span key={tag} className="atlas-public-pill border-[hsl(var(--tint)/0.18)] bg-[hsl(var(--tint)/0.06)] text-[hsl(var(--brand))]">{tag}</span>
+        ))}
       </div>
     </div>
   );
 }
 
-function ProblemCard({ item }) {
-  const Icon = item.icon;
-
+function NutritionMock() {
   return (
-    <div className="atlas-public-panel-muted flex items-start gap-3 p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">
-        <Icon className="h-4 w-4" strokeWidth={1.9} />
+    <div className="atlas-public-panel space-y-3 px-5 py-5">
+      <p className="atlas-overline">Nutrição do dia / Today's Nutrition</p>
+      <MockCard>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Calorias</p>
+        <p className="mt-1 text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">2.340</p>
+        <p className="mt-0.5 text-[11px] text-[hsl(var(--fg-2))]">Meta: 2.500 · 94% do objetivo</p>
+      </MockCard>
+      <div className="space-y-2">
+        <BarRow label="Proteína" pct={88} val="176g" />
+        <BarRow label="Carbs" pct={72} val="248g" />
+        <BarRow label="Gordura" pct={54} val="62g" />
       </div>
-      <div>
-        <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{item.label}</p>
-        <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{item.where}</p>
+      <MockCard>
+        <p className="text-[11px] text-[hsl(var(--fg-3))]">Média 7 dias</p>
+        <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">Proteína média: 168g · 3 dias abaixo da meta</p>
+      </MockCard>
+    </div>
+  );
+}
+
+function ProgressMock() {
+  return (
+    <div className="atlas-public-panel space-y-3 px-5 py-5">
+      <p className="atlas-overline">Evolução corporal / Body Evolution</p>
+      <div className="grid grid-cols-2 gap-2">
+        <MockCard>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Peso</p>
+          <p className="mt-1 text-[1.8rem] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">84.2 kg</p>
+          <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">▼ −3.8 kg / 8 sem</p>
+        </MockCard>
+        <MockCard>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Gordura</p>
+          <p className="mt-1 text-[1.8rem] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">17.4%</p>
+          <p className="mt-0.5 text-[11px] text-[hsl(var(--brand))]">▼ −2.1% / 8 sem</p>
+        </MockCard>
+      </div>
+      <div className="space-y-2">
+        <BarRow label="Cintura" pct={60} val="−3 cm" accent />
+        <BarRow label="Braço" pct={75} val="+1.5cm" />
+        <BarRow label="Peito" pct={68} val="+2 cm" />
       </div>
     </div>
   );
 }
 
-function GainCard({ item }) {
-  const Icon = item.icon;
-
+function PhotosMock() {
   return (
-    <article className="atlas-card h-full px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex h-11 w-11 items-center justify-center rounded-[20px] border border-[hsl(var(--tint)/0.18)] bg-[hsl(var(--tint)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
-        <Icon className="h-5 w-5" strokeWidth={1.9} />
-      </div>
-      <p className="mt-5 text-[15px] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">
-        {item.title}
-      </p>
-      <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{item.desc}</p>
-    </article>
-  );
-}
-
-function AudienceCard({ audience, ui }) {
-  const Icon = audience.icon;
-
-  return (
-    <article className="atlas-card flex h-full flex-col px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex h-11 w-11 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-        <Icon className="h-5 w-5" strokeWidth={1.9} />
-      </div>
-
-      <p className="mt-5 text-[15px] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">
-        {audience.title}
-      </p>
-      <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{audience.desc}</p>
-
-      <div className="mt-5 space-y-2">
-        {audience.items.map((item) => (
-          <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--brand))]" strokeWidth={2.4} />
-            <span>{item}</span>
+    <div className="atlas-public-panel space-y-3 px-5 py-5">
+      <p className="atlas-overline">Progresso visual / Visual Progress</p>
+      <div className="grid grid-cols-3 gap-2">
+        {[['Jan 01', '#1a1a2e'], ['Feb 15', '#1e2a1e'], ['Mar 19', '#2a1e1e']].map(([date, bg]) => (
+          <div key={date} className="relative overflow-hidden rounded-[12px] border border-[hsl(var(--border)/0.7)]" style={{ aspectRatio: '3/4', background: bg }}>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <span className="absolute bottom-2 left-2 text-[10px] font-semibold text-white/80">{date}</span>
           </div>
         ))}
       </div>
-
-      <Button asChild variant="ghost" className="mt-6 justify-start px-0 text-[13px] text-[hsl(var(--fg))]">
-        <Link to={`/use-case/${audience.key}`}>
-          {ui.useCaseCta}
-          <ArrowRight className="h-4 w-4" strokeWidth={1.9} />
-        </Link>
-      </Button>
-    </article>
+      <MockCard>
+        <p className="text-[11px] font-semibold text-[hsl(var(--brand))]">📸 12 semanas de progresso</p>
+        <p className="mt-1 text-[13px] text-[hsl(var(--fg))]">Compare qualquer duas datas. A diferença que você nunca vê no dia a dia.</p>
+      </MockCard>
+    </div>
   );
 }
 
-function SystemCard({ item }) {
+function SupplementsMock() {
+  const items = [
+    { icon: '💊', name: 'Creatina', dose: '5g · Manhã', done: true },
+    { icon: '🌿', name: 'Vitamina D3', dose: '5000 IU · Manhã', done: true },
+    { icon: '🔥', name: 'Pré-Treino', dose: '1 dose · Pré-treino', done: true },
+    { icon: '🌙', name: 'Magnésio', dose: '400mg · Noite', done: false },
+  ];
   return (
-    <article className="atlas-public-panel-muted p-4">
-      <div className="flex items-start gap-2">
-        <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2.2} />
-        <p className="text-[12px] text-[hsl(var(--fg-3))] line-through">{item.before}</p>
+    <div className="atlas-public-panel space-y-3 px-5 py-5">
+      <p className="atlas-overline">Protocolo do dia / Today's Protocol</p>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.name} className="flex items-center justify-between rounded-[12px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5">
+            <div className="flex items-center gap-2.5">
+              <span className="text-base">{item.icon}</span>
+              <div>
+                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{item.name}</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">{item.dose}</p>
+              </div>
+            </div>
+            <div className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${item.done ? 'border border-[hsl(var(--tint)/0.22)] bg-[hsl(var(--tint)/0.08)] text-[hsl(var(--brand))]' : 'border border-[hsl(var(--border))] bg-transparent'}`}>
+              {item.done ? <Check className="h-3 w-3" strokeWidth={2.6} /> : null}
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="mt-3 flex items-start gap-2">
-        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--brand))]" strokeWidth={2.4} />
-        <p className="text-[13px] font-medium leading-6 text-[hsl(var(--fg))]">{item.after}</p>
-      </div>
-    </article>
+      <MockCard>
+        <p className="text-[11px] text-[hsl(var(--fg-3))]">Aderência 30 dias</p>
+        <p className="mt-0.5 text-[1.2rem] font-bold tracking-[-0.04em] text-[hsl(var(--brand))]">87% <span className="text-[11px] font-normal text-[hsl(var(--fg-3))]">consistência</span></p>
+      </MockCard>
+    </div>
   );
 }
 
-function PricingPreviewCard({ plan, popular, onSelect, periodLabel, popularLabel }) {
+function TimelineMock() {
+  const items = [
+    { date: 'Hoje · Mar 19', label: 'Novo PR — Agachamento 140kg', detail: 'Treino registrado · 4 exercícios', active: true },
+    { date: 'Mar 17', label: 'Check-in — 84.2 kg', detail: '% gordura: 17.4% · Foto de progresso', active: false },
+    { date: 'Mar 15', label: 'Protocolo atualizado', detail: 'Adicionado Ômega-3 · 3g diário', active: false },
+    { date: 'Mar 12', label: 'Nutrição — melhor semana', detail: 'Proteína média: 182g · 7/7 dias', active: false },
+  ];
+  return (
+    <div className="atlas-public-panel space-y-3 px-5 py-5">
+      <p className="atlas-overline">Sua Linha do Tempo / Your Timeline</p>
+      <div className="space-y-0">
+        {items.map((item, i) => (
+          <div key={i} className="relative flex gap-3 pb-5 last:pb-0">
+            {i < items.length - 1 && (
+              <div className="absolute left-[7px] top-4 bottom-0 w-px bg-[hsl(var(--border)/0.7)]" />
+            )}
+            <div className={`mt-0.5 h-3.5 w-3.5 shrink-0 rounded-full border-2 ${item.active ? 'border-[hsl(var(--brand))] bg-[hsl(var(--card))]' : 'border-[hsl(var(--border))] bg-[hsl(var(--fill))]'}`} />
+            <div>
+              <p className="text-[11px] text-[hsl(var(--fg-3))]">{item.date}</p>
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{item.label}</p>
+              <p className="text-[11px] text-[hsl(var(--fg-3))]">{item.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const FEATURE_BLOCKS = [
+  { key: 'workouts',    icon: Dumbbell,          Mock: WorkoutMock,      reverse: false },
+  { key: 'nutrition',   icon: UtensilsCrossed,   Mock: NutritionMock,    reverse: true  },
+  { key: 'progress',    icon: BarChart3,          Mock: ProgressMock,     reverse: false },
+  { key: 'photos',      icon: Camera,             Mock: PhotosMock,       reverse: true  },
+  { key: 'supplements', icon: FlaskConical,       Mock: SupplementsMock,  reverse: false },
+  { key: 'timeline',    icon: Clock,              Mock: TimelineMock,     reverse: true  },
+];
+
+/* ─────────────────────────────────────────
+   PRICING CARD
+───────────────────────────────────────── */
+function PricingCard({ data, featured, showBR }) {
+  const price = showBR ? data.priceBR : data.priceIntl;
+  const annual = showBR ? data.annualBR : data.annualIntl;
   return (
     <article
-      className={`relative flex h-full flex-col rounded-[28px] border px-5 py-5 lg:px-6 lg:py-6 ${
-        popular
-          ? 'border-[hsl(var(--brand)/0.28)] shadow-[var(--shadow-md),0_0_0_1px_hsl(var(--tint)/0.06),0_0_40px_hsl(var(--tint)/0.07)]'
+      className={`relative flex h-full flex-col rounded-[28px] border px-6 py-6 ${
+        featured
+          ? 'border-[hsl(var(--tint)/0.3)] shadow-[var(--shadow-md),0_0_0_1px_hsl(var(--tint)/0.06)]'
           : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.84)] shadow-[var(--shadow-xs)]'
       }`}
-      style={popular ? {
-        background: 'linear-gradient(160deg, hsl(var(--card)) 0%, hsl(var(--tint)/0.04) 100%)',
-      } : undefined}
+      style={featured ? { background: 'linear-gradient(160deg, hsl(var(--card)) 0%, hsl(var(--tint)/0.04) 100%)' } : undefined}
     >
-      {popular ? (
+      {featured && data.popular ? (
         <span className="atlas-public-pill absolute right-5 top-5 border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]">
-          {popularLabel}
+          {data.popular}
         </span>
       ) : null}
 
-      <div className="max-w-[80%]">
-        <p className="atlas-metric-label">{plan.name}</p>
-        <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{plan.pitch}</p>
+      <p className="atlas-overline">{data.name}</p>
+
+      <div className="mt-3 flex items-end gap-1">
+        <span className="text-[2.4rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{price}</span>
+        <span className="pb-1.5 text-[13px] text-[hsl(var(--fg-2))]">{data.period}</span>
       </div>
 
-      <div className="mt-6 flex items-end gap-1">
-        <span className="text-[2.2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
-          {plan.price}
-        </span>
-        {!plan.isFree ? (
-          <span className="pb-1 text-[13px] text-[hsl(var(--fg-2))]">{periodLabel}</span>
-        ) : null}
-      </div>
+      {annual ? (
+        <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
+          {annual.split('—')[0]}—
+          <span className="font-semibold text-[hsl(var(--brand))]">{annual.split('—')[1]}</span>
+        </p>
+      ) : (
+        <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">{data.annualNote}</p>
+      )}
 
-      <div className="mt-6 flex-1 space-y-2.5">
-        {plan.features.map((feature) => (
-          <div key={feature} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+      <div className="my-5 h-px bg-[hsl(var(--border)/0.7)]" />
+
+      <div className="flex-1 space-y-2.5">
+        {data.features?.map((f) => (
+          <div key={f} className="flex items-start gap-2 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
             <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.1} />
-            <span>{feature}</span>
+            <span>{f}</span>
+          </div>
+        ))}
+        {data.absent?.map((f) => (
+          <div key={f} className="flex items-start gap-2 text-[13px] leading-5 text-[hsl(var(--fg-3))]">
+            <X className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-40" strokeWidth={2} />
+            <span className="opacity-50">{f}</span>
           </div>
         ))}
       </div>
 
       <Button
-        onClick={() => onSelect(plan.id)}
-        variant={popular ? 'default' : 'outline'}
+        onClick={() => handlePlan(data.id)}
+        variant={featured ? 'default' : 'outline'}
         className="mt-6 h-11"
       >
-        {plan.cta}
+        {data.cta}
       </Button>
     </article>
   );
 }
 
-function FaqItem({ item, open, onToggle }) {
-  return (
-    <div className="atlas-card overflow-hidden">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left lg:px-6"
-      >
-        <span className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-          {item.q}
-        </span>
-        <ChevronRight
-          className={`h-4 w-4 shrink-0 text-[hsl(var(--fg-3))] transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
-          strokeWidth={1.9}
-        />
-      </button>
-      {open ? (
-        <div className="border-t border-[hsl(var(--border)/0.82)] px-5 py-4 lg:px-6">
-          <p className="text-[14px] leading-7 text-[hsl(var(--fg-2))]">{item.a}</p>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-const getContent = (t) => ({
-  chaos: [
-    { icon: Dumbbell, label: t('landing.problem.items.workout'), where: t('landing.problem.items.workoutWhere') },
-    { icon: UtensilsCrossed, label: t('landing.problem.items.diet'), where: t('landing.problem.items.dietWhere') },
-    { icon: FlaskConical, label: t('landing.problem.items.labs'), where: t('landing.problem.items.labsWhere') },
-    { icon: BarChart3, label: t('landing.problem.items.measurements'), where: t('landing.problem.items.measurementsWhere') },
-    { icon: Package, label: t('landing.problem.items.protocols'), where: t('landing.problem.items.protocolsWhere') },
-    { icon: Brain, label: t('landing.problem.items.history'), where: t('landing.problem.items.historyWhere') },
-  ],
-  gains: [
-    { icon: CheckCircle, key: 'dashboard' },
-    { icon: BarChart3, key: 'data' },
-    { icon: Zap, key: 'score' },
-    { icon: TrendingUp, key: 'trends' },
-    { icon: Brain, key: 'ai' },
-    { icon: Users, key: 'team' },
-  ].map((gain) => ({
-    icon: gain.icon,
-    title: t(`landing.solution.gains.${gain.key}.title`),
-    desc: t(`landing.solution.gains.${gain.key}.desc`),
-  })),
-  audiences: [
-    { key: 'athlete', icon: User },
-    { key: 'coach', icon: Users },
-    { key: 'nutritionist', icon: Users },
-    { key: 'clinician', icon: Stethoscope },
-  ].map((item) => ({
-    key: item.key,
-    icon: item.icon,
-    title: t(`landing.forWho.${item.key}.title`),
-    desc: t(`landing.forWho.${item.key}.desc`),
-    items: t(`landing.forWho.${item.key}.features`),
-  })),
-  system: t('landing.system.items'),
-  faq: t('landing.faq.items'),
-});
-
+/* ─────────────────────────────────────────
+   MAIN COMPONENT
+───────────────────────────────────────── */
 export default function Landing() {
-  const [openFaq, setOpenFaq] = useState(0);
-  const { t, language } = useTranslation();
-  const isPt = language === 'pt-BR';
-
-  const content = getContent(t);
-  const plans = t('landing.pricing.plans');
-  const ui = isPt
-    ? {
-        todayPreview: 'Preview do Today',
-        adherenceLabel: 'Aderência',
-        useCaseCta: 'Ver cenário',
-        planPopularLabel: 'Mais escolhido',
-        timelineLabel: 'Uma timeline',
-        timelineCopy: 'Treino, nutrição, exames e protocolos em uma visão calma e conectada.',
-        adherenceTitle: 'Aderência real',
-        adherenceCopy: 'O desvio entre plano e execução aparece de forma clara todos os dias.',
-        contextLabel: 'Contexto compartilhado',
-        contextCopy: 'Você e seus profissionais podem trabalhar sobre o mesmo sistema.',
-        guidesCta: 'Explorar guias',
-        systemEyebrow: 'Sistema',
-        systemDescription: 'A mesma clareza do produto logado, só que aplicada desde o primeiro contato.',
-        fullComparison: 'Ver comparação completa',
-        startLabel: 'Comece com calma',
-      }
-    : {
-        todayPreview: 'Today Preview',
-        adherenceLabel: 'Adherence',
-        useCaseCta: 'See use case',
-        planPopularLabel: 'Most chosen',
-        timelineLabel: 'One timeline',
-        timelineCopy: 'Training, nutrition, labs and protocols in one calm, connected view.',
-        adherenceTitle: 'Real adherence',
-        adherenceCopy: 'The gap between plan and execution becomes clear every day.',
-        contextLabel: 'Shared context',
-        contextCopy: 'You and your professionals can work from the same system.',
-        guidesCta: 'Explore guides',
-        systemEyebrow: 'System',
-        systemDescription: 'The same clarity from the logged-in product, now applied from the very first touchpoint.',
-        fullComparison: 'See full comparison',
-        startLabel: 'Start Calm',
-      };
+  const { language } = useTranslation();
+  const c = COPY[language] || COPY['en-US'];
+  const [showBR, setShowBR] = useState(language === 'pt-BR');
 
   return (
     <PublicSiteShell
       navLinks={[
-        { href: '#solution', label: t('landing.nav.howItWorks') },
-        { href: '#pricing', label: t('landing.nav.pricing') },
-        { href: '#faq', label: t('landing.nav.faq') },
+        { href: '#solution', label: c.nav.howItWorks },
+        { href: '#features', label: c.nav.features },
+        { href: '#pricing', label: c.nav.pricing },
       ]}
       actions={(
         <>
           <PublicLanguageSwitcher />
-          <Button variant="ghost" size="sm" className="text-[13px]" onClick={handleLogin}>
-            {t('landing.nav.login')}
-          </Button>
-          <Button size="sm" onClick={handleSignUp}>{t('landing.nav.signup')}</Button>
+          <Button variant="ghost" size="sm" className="text-[13px]" onClick={handleLogin}>{c.nav.login}</Button>
+          <Button size="sm" onClick={handleSignUp}>{c.nav.signup}</Button>
         </>
       )}
     >
+
+      {/* ══ HERO ══════════════════════════════════ */}
       <section className="mx-auto max-w-6xl px-5 pb-14 pt-12 lg:px-8 lg:pb-20 lg:pt-16">
         <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{ show: { transition: { staggerChildren: 0.08 } } }}
-          className="grid gap-8 lg:grid-cols-[minmax(0,1.04fr)_460px] lg:items-center"
+          initial="hidden" animate="show"
+          variants={{ show: { transition: { staggerChildren: 0.09 } } }}
+          className="space-y-10"
         >
-          <div className="space-y-8">
-            <motion.div variants={fade} className="space-y-5">
-              <span className="atlas-public-pill">
-                <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
-                {t('landing.hero.badge')}
-              </span>
+          {/* Badge */}
+          <motion.div variants={fade} custom={0} className="flex items-center gap-2.5">
+            <span className="atlas-public-pill border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.06)] text-[hsl(var(--brand))]">
+              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[hsl(var(--brand))]" />
+              {c.hero.badge}
+            </span>
+          </motion.div>
 
-              <div className="space-y-5">
-                <h1 className="atlas-display-title atlas-hero-text max-w-[11ch] whitespace-pre-line text-[clamp(3.1rem,2rem+3vw,5.3rem)]">
-                  {t('landing.hero.title')}
+          {/* Headline + sub + CTAs */}
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+            <div className="space-y-8">
+              <motion.div variants={fade} custom={1} className="space-y-2">
+                <h1 className="atlas-display-title text-[clamp(2.8rem,2rem+2.8vw,5rem)] leading-[1.08]">
+                  {c.hero.h1a}
                 </h1>
-                <p className="atlas-public-copy max-w-xl text-[1rem] lg:text-[1.05rem]">
-                  {t('landing.hero.subtitle')}
-                </p>
-              </div>
-            </motion.div>
+                <h1 className="atlas-display-title text-[clamp(2.8rem,2rem+2.8vw,5rem)] leading-[1.08] text-[hsl(var(--brand))]">
+                  {c.hero.h1b}
+                </h1>
+              </motion.div>
 
-            <motion.div variants={fade} className="flex flex-wrap gap-3">
-              <Button size="lg" onClick={handleSignUp}>
-                {t('landing.hero.cta')}
-                <ArrowRight className="h-4 w-4" strokeWidth={2} />
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <a href="#pricing">{t('landing.nav.pricing')}</a>
-              </Button>
-            </motion.div>
+              <motion.p variants={fade} custom={2} className="atlas-public-copy max-w-lg text-[1.05rem]">
+                {c.hero.sub}
+              </motion.p>
 
-            <motion.div variants={fade} className="flex flex-wrap gap-3">
-              {[t('landing.hero.benefit1'), t('landing.hero.benefit2'), t('landing.hero.benefit3')].map((benefit) => (
-                <span key={benefit} className="atlas-public-pill">
-                  <Check className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2.6} />
-                  {benefit}
-                </span>
-              ))}
-            </motion.div>
+              <motion.div variants={fade} custom={3} className="flex flex-wrap gap-3">
+                <Button size="lg" onClick={handleSignUp} className="gap-2">
+                  {c.hero.cta1}
+                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <a href="#features">{c.hero.cta2}</a>
+                </Button>
+              </motion.div>
 
-            <motion.div variants={fade} className="grid gap-3 sm:grid-cols-3">
-              <div className="atlas-public-panel-muted p-4">
-                <p className="atlas-metric-label">{ui.timelineLabel}</p>
-                <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  {ui.timelineCopy}
-                </p>
-              </div>
-              <div className="atlas-public-panel-muted p-4">
-                <p className="atlas-metric-label">{ui.adherenceTitle}</p>
-                <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  {ui.adherenceCopy}
-                </p>
-              </div>
-              <div className="atlas-public-panel-muted p-4">
-                <p className="atlas-metric-label">{ui.contextLabel}</p>
-                <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  {ui.contextCopy}
-                </p>
-              </div>
+              <motion.div variants={fade} custom={4} className="grid grid-cols-3 gap-3">
+                {[
+                  [c.hero.s1t, c.hero.s1d],
+                  [c.hero.s2t, c.hero.s2d],
+                  [c.hero.s3t, c.hero.s3d],
+                ].map(([strong, sub]) => (
+                  <div key={strong} className="atlas-public-panel-muted p-4">
+                    <p className="text-[15px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">{strong}</p>
+                    <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{sub}</p>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            {/* Hero Visual */}
+            <motion.div variants={fade} custom={2}>
+              <WorkoutMock />
             </motion.div>
           </div>
-
-          <motion.div variants={fade}>
-            <TodayPreview t={t} ui={ui} />
-          </motion.div>
         </motion.div>
       </section>
 
-      <div className="mx-auto max-w-4xl px-5 lg:px-8">
-        <hr className="atlas-brand-divider" />
-      </div>
-
+      {/* ══ PROBLEM ══════════════════════════════ */}
       <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
-        <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
-          <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-10">
-            <PublicSectionHeader
-              eyebrow={t('landing.problem.label')}
-              title={t('landing.problem.title')}
-              description={t('landing.problem.subtitle')}
-            />
+        <div className="atlas-public-panel px-6 py-8 lg:px-8 lg:py-10">
+          <motion.div {...fadeIn(0)} className="mb-8 max-w-2xl">
+            <p className="atlas-overline">{c.problem.label}</p>
+            <h2 className="atlas-display-title mt-4 whitespace-pre-line text-[clamp(1.9rem,1.3rem+1.2vw,2.8rem)]">
+              {c.problem.h2}
+            </h2>
+            <p className="atlas-public-copy mt-3">{c.problem.sub}</p>
+          </motion.div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {content.chaos.map((item, index) => (
-                <motion.div
-                  key={`${item.label}-${index}`}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, margin: '-80px' }}
-                  variants={fade}
-                  custom={index}
-                >
-                  <ProblemCard item={item} />
-                </motion.div>
-              ))}
-            </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {c.problem.items.map((item, i) => (
+              <motion.div key={item.t} {...fadeIn(i * 0.06)}>
+                <div className="atlas-public-panel-muted flex items-start gap-3 p-4">
+                  <span className="text-xl">{item.e}</span>
+                  <div>
+                    <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">{item.t}</p>
+                    <p className="mt-0.5 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{item.d}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
+
+          <motion.div {...fadeIn(0.2)} className="mt-8 max-w-2xl border-l-[3px] border-[hsl(var(--brand))] pl-5">
+            <p className="text-[1.05rem] font-semibold leading-7 text-[hsl(var(--fg))]">{c.problem.quote}</p>
+            <p className="mt-3 text-[14px] text-[hsl(var(--fg-2))]">{c.problem.quoteDesc}</p>
+          </motion.div>
         </div>
       </section>
 
+      {/* ══ SOLUTION ══════════════════════════════ */}
       <section id="solution" className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
-        <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-10">
-          <div className="space-y-5">
-            <PublicSectionHeader
-              eyebrow={t('landing.solution.label')}
-              title={t('landing.solution.title')}
-              description={t('landing.solution.subtitle')}
-            />
-            <Button asChild variant="outline">
-              <Link to={ROUTES.help}>{ui.guidesCta}</Link>
-            </Button>
-          </div>
+        <motion.div {...fadeIn(0)} className="mb-10 text-center">
+          <p className="atlas-overline justify-center">{c.solution.label}</p>
+          <h2 className="atlas-display-title mt-4 text-[clamp(1.9rem,1.3rem+1.2vw,2.8rem)]">
+            {c.solution.h2a}<br />
+            <span className="text-[hsl(var(--brand))]">{c.solution.h2b}</span>
+          </h2>
+          <p className="atlas-public-copy mx-auto mt-4 max-w-xl">{c.solution.sub}</p>
+        </motion.div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {content.gains.map((item, index) => (
-              <motion.div
-                key={`${item.title}-${index}`}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: '-80px' }}
-                variants={fade}
-                custom={index}
-              >
-                <GainCard item={item} />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
-        <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
-          <PublicSectionHeader
-            eyebrow={t('landing.forWho.label')}
-            title={t('landing.forWho.title')}
-            description={t('landing.forWho.subtitle')}
-            align="center"
-            className="mb-10"
-          />
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {content.audiences.map((audience, index) => (
-              <motion.div
-                key={audience.key}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: '-80px' }}
-                variants={fade}
-                custom={index}
-              >
-                <AudienceCard audience={audience} ui={ui} />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
-        <PublicSectionHeader
-          eyebrow={ui.systemEyebrow}
-          title={t('landing.system.title')}
-          description={ui.systemDescription}
-          align="center"
-          className="mb-10"
-        />
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {content.system.map((item, index) => (
-            <motion.div
-              key={`${item.before}-${index}`}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-80px' }}
-              variants={fade}
-              custom={index}
-            >
-              <SystemCard item={item} />
+        <div className="grid gap-px overflow-hidden rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--border)/0.7)] md:grid-cols-3">
+          {[
+            { t: c.solution.p1t, d: c.solution.p1d, icon: Layers },
+            { t: c.solution.p2t, d: c.solution.p2d, icon: TrendingUp },
+            { t: c.solution.p3t, d: c.solution.p3d, icon: Zap },
+          ].map(({ t, d, icon: Icon }, i) => (
+            <motion.div key={t} {...fadeIn(i * 0.08)}>
+              <div className="h-full bg-[hsl(var(--card))] px-6 py-7 transition-colors hover:bg-[hsl(var(--fill)/0.5)]">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--tint)/0.18)] bg-[hsl(var(--tint)/0.07)] text-[hsl(var(--brand))]">
+                  <Icon className="h-5 w-5" strokeWidth={1.9} />
+                </div>
+                <p className="text-[15px] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">{t}</p>
+                <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{d}</p>
+              </div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      <section id="pricing" className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
-        <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
-          <PublicSectionHeader
-            eyebrow={t('landing.pricing.label')}
-            title={t('landing.pricing.title')}
-            description={t('landing.pricing.subtitle')}
-            align="center"
-            className="mb-10"
-          />
+      {/* ══ FEATURES ══════════════════════════════ */}
+      <div id="features">
+        {FEATURE_BLOCKS.map(({ key, Mock, reverse }) => {
+          const f = c.features[key];
+          return (
+            <section
+              key={key}
+              className="border-t border-[hsl(var(--border)/0.6)] mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20"
+            >
+              <div className={`grid items-center gap-10 lg:grid-cols-2 ${reverse ? 'lg:direction-rtl' : ''}`}>
+                {/* Text side */}
+                <motion.div
+                  {...fadeIn(0)}
+                  className={`space-y-6 ${reverse ? 'lg:order-2' : ''}`}
+                >
+                  <p className="atlas-overline">{f.label}</p>
+                  <h2 className="atlas-display-title whitespace-pre-line text-[clamp(1.7rem,1.1rem+1.1vw,2.5rem)]">
+                    {f.h2}
+                  </h2>
+                  <p className="atlas-public-copy">{f.desc}</p>
+                  <div className="space-y-3.5">
+                    {f.pts.map((pt) => <FeaturePoint key={pt.t} t={pt.t} d={pt.d} />)}
+                  </div>
+                </motion.div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
-            {plans.map((plan) => (
-              <PricingPreviewCard
-                key={plan.id}
-                plan={plan}
-                popular={plan.popular}
-                onSelect={handlePlanClick}
-                periodLabel={t('landing.pricing.period')}
-                popularLabel={ui.planPopularLabel}
-              />
+                {/* Visual side */}
+                <motion.div
+                  {...fadeIn(0.15)}
+                  className={reverse ? 'lg:order-1' : ''}
+                >
+                  <Mock />
+                </motion.div>
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      {/* ══ DIFFERENTIATION ═══════════════════════ */}
+      <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
+        <div className="atlas-public-panel px-6 py-8 lg:px-8 lg:py-10">
+          <motion.div {...fadeIn(0)} className="mb-10 text-center">
+            <p className="atlas-overline justify-center">{c.diff.label}</p>
+            <h2 className="atlas-display-title mt-4 text-[clamp(1.9rem,1.3rem+1.2vw,2.8rem)]">{c.diff.h2}</h2>
+            <p className="atlas-public-copy mx-auto mt-3 max-w-xl">{c.diff.sub}</p>
+          </motion.div>
+
+          {/* Comparison table */}
+          <motion.div {...fadeIn(0.1)} className="mb-10 overflow-x-auto">
+            <table className="w-full min-w-[600px] border-collapse text-[13px]">
+              <thead>
+                <tr>
+                  {c.diff.cols.map((col, i) => (
+                    <th
+                      key={col}
+                      className={`border-b border-[hsl(var(--border)/0.7)] px-4 py-3 text-left font-semibold tracking-wider text-[11px] uppercase ${
+                        i === 4 ? 'text-[hsl(var(--brand))] bg-[hsl(var(--tint)/0.04)]' : 'text-[hsl(var(--fg-3))]'
+                      }`}
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {c.diff.rows.map((row) => (
+                  <tr
+                    key={row[0]}
+                    className="border-b border-[hsl(var(--border)/0.5)] transition-colors hover:bg-[hsl(var(--fill)/0.4)]"
+                  >
+                    {row.map((cell, ci) => (
+                      <td
+                        key={ci}
+                        className={`px-4 py-3.5 ${
+                          ci === 0 ? 'text-[hsl(var(--fg-2))]' :
+                          ci === 4 ? 'font-semibold text-[hsl(var(--brand))] bg-[hsl(var(--tint)/0.03)]' :
+                          cell === '—' ? 'text-[hsl(var(--fg-3))] opacity-40' : 'text-[hsl(var(--fg-2))]'
+                        }`}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </motion.div>
+
+          {/* Differentiator cards */}
+          <div className="grid gap-4 md:grid-cols-3">
+            {c.diff.cards.map((card, i) => (
+              <motion.div key={card.t} {...fadeIn(i * 0.07)}>
+                <div className="atlas-card h-full px-5 py-5">
+                  <span className="text-xl">{card.e}</span>
+                  <p className="mt-4 text-[15px] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">{card.t}</p>
+                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{card.d}</p>
+                </div>
+              </motion.div>
             ))}
           </div>
-
-          <div className="mt-8 flex justify-center">
-            <Button asChild variant="outline" size="lg">
-              <Link to={ROUTES.pricing}>{ui.fullComparison}</Link>
-            </Button>
-          </div>
         </div>
       </section>
 
-      <section id="faq" className="mx-auto max-w-4xl px-5 py-14 lg:px-8 lg:py-20">
-        <PublicSectionHeader
-          eyebrow={t('landing.faq.label')}
-          title={t('landing.faq.title')}
-          align="center"
-          className="mb-10"
-        />
+      {/* ══ PRICING ═══════════════════════════════ */}
+      <section id="pricing" className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
+        <motion.div {...fadeIn(0)} className="mb-4 text-center">
+          <p className="atlas-overline justify-center">{c.pricing.label}</p>
+          <h2 className="atlas-display-title mt-4 text-[clamp(1.9rem,1.3rem+1.2vw,2.8rem)]">{c.pricing.h2}</h2>
+          <p className="atlas-public-copy mx-auto mt-3 max-w-md">{c.pricing.sub}</p>
+        </motion.div>
 
-        <div className="space-y-3">
-          {content.faq.map((item, index) => (
-            <FaqItem
-              key={`${item.q}-${index}`}
-              item={item}
-              open={openFaq === index}
-              onToggle={() => setOpenFaq(openFaq === index ? null : index)}
-            />
+        {/* Currency toggle */}
+        <motion.div {...fadeIn(0.05)} className="mb-10 flex items-center justify-center gap-3">
+          <button
+            onClick={() => setShowBR(false)}
+            className={`text-[13px] font-medium transition-colors ${!showBR ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-3))]'}`}
+          >
+            {c.pricing.toggle.intl}
+          </button>
+          <button
+            onClick={() => setShowBR(!showBR)}
+            className={`relative h-6 w-11 rounded-full border transition-all ${
+              showBR
+                ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--tint)/0.1)]'
+                : 'border-[hsl(var(--border))] bg-[hsl(var(--fill))]'
+            }`}
+          >
+            <span className={`absolute top-0.5 h-5 w-5 rounded-full transition-all ${
+              showBR
+                ? 'left-[22px] bg-[hsl(var(--brand))]'
+                : 'left-0.5 bg-[hsl(var(--fg-3))]'
+            }`} />
+          </button>
+          <button
+            onClick={() => setShowBR(true)}
+            className={`text-[13px] font-medium transition-colors ${showBR ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-3))]'}`}
+          >
+            {c.pricing.toggle.br}
+          </button>
+        </motion.div>
+
+        {/* Cards */}
+        <motion.div {...fadeIn(0.1)} className="mx-auto grid max-w-3xl gap-5 md:grid-cols-2">
+          <PricingCard data={c.pricing.free} featured={false} showBR={showBR} />
+          <PricingCard data={c.pricing.pro}  featured={true}  showBR={showBR} />
+        </motion.div>
+
+        {/* Founder box */}
+        <motion.div {...fadeIn(0.15)} className="mx-auto mt-6 max-w-3xl">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-[hsl(var(--tint)/0.16)] bg-[hsl(var(--tint)/0.03)] px-6 py-5">
+            <div>
+              <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{c.pricing.founder.h3}</p>
+              <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">{c.pricing.founder.desc}</p>
+            </div>
+            <Button onClick={handleSignUp} variant="default" size="sm">{c.pricing.founder.cta}</Button>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ══ PROFESSIONALS ══════════════════════════ */}
+      <section className="mx-auto max-w-6xl border-t border-[hsl(var(--border)/0.6)] px-5 py-14 lg:px-8 lg:py-16">
+        <motion.div {...fadeIn(0)} className="mb-8 text-center">
+          <p className="atlas-overline justify-center">{c.pros.label}</p>
+          <h2 className="atlas-display-title mt-4 whitespace-pre-line text-[clamp(1.7rem,1.1rem+1.1vw,2.5rem)]">
+            {c.pros.h2}
+          </h2>
+          <p className="atlas-public-copy mx-auto mt-3 max-w-xl">{c.pros.sub}</p>
+        </motion.div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {c.pros.cards.map((card, i) => (
+            <motion.div key={card.t} {...fadeIn(i * 0.08)}>
+              <div className="atlas-card h-full px-6 py-6">
+                <span className="text-2xl">{card.e}</span>
+                <p className="mt-4 text-[15px] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">{card.t}</p>
+                <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{card.d}</p>
+              </div>
+            </motion.div>
           ))}
         </div>
+
+        <motion.p {...fadeIn(0.15)} className="mt-6 text-center text-[13px] text-[hsl(var(--fg-3))]">
+          {c.pros.note}
+        </motion.p>
       </section>
 
+      {/* ══ CLOSING CTA ═══════════════════════════ */}
       <section className="mx-auto max-w-4xl px-5 pb-6 lg:px-8">
-        <div className="atlas-page-header atlas-cta-glow px-6 py-8 text-center lg:px-8 lg:py-10">
-          <p className="atlas-overline justify-center">{ui.startLabel}</p>
-          <h2 className="atlas-display-title mt-4 whitespace-pre-line text-[clamp(2.4rem,1.9rem+1.8vw,4rem)]">
-            {t('landing.cta.title')}
+        <motion.div {...fadeIn(0)} className="atlas-page-header atlas-cta-glow px-6 py-10 text-center lg:px-10 lg:py-14">
+          <h2 className="atlas-display-title whitespace-pre-line text-[clamp(2.2rem,1.6rem+1.6vw,3.8rem)] leading-[1.1]">
+            {c.closing.h2a}
+            <br />
+            <span className="text-[hsl(var(--brand))]">{c.closing.h2b}</span>
           </h2>
-          <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
-            {t('landing.cta.subtitle')}
-          </p>
+          <p className="atlas-public-copy mx-auto mt-5 max-w-xl text-[1.05rem]">{c.closing.sub}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button size="lg" onClick={handleSignUp}>
-              {t('landing.hero.cta')}
+            <Button size="lg" onClick={handleSignUp} className="gap-2">
+              {c.closing.cta1}
               <ArrowRight className="h-4 w-4" strokeWidth={2} />
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to={ROUTES.pricing}>{t('landing.nav.pricing')}</Link>
+              <Link to={ROUTES.pricing}>{c.closing.cta2}</Link>
             </Button>
           </div>
-          <p className="mt-5 text-[13px] text-[hsl(var(--fg-3))]">{t('landing.cta.noCard')}</p>
-        </div>
+          <p className="mt-5 text-[13px] text-[hsl(var(--fg-3))]">{c.closing.fine}</p>
+        </motion.div>
       </section>
+
     </PublicSiteShell>
   );
 }
