@@ -1,21 +1,63 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAuth } from '@/lib/AuthContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
-import { Brain, Send, Plus, Sparkles, Loader2 } from 'lucide-react';
+import {
+  Activity,
+  ArrowUpRight,
+  Brain,
+  Clock3,
+  Loader2,
+  MessageSquare,
+  Plus,
+  Send,
+  Sparkles,
+  Target,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MessageBubble from '@/components/ai/MessageBubble';
+import { cn } from '@/lib/utils';
 
 const LOCAL_ATLAS_AI_STORAGE_KEY = 'atlas-ai-local-conversations';
 const LOCAL_PROFILE_STORAGE_KEY = 'atlas_local_profile_store';
 
 const PROMPTS = [
-  'Como está minha aderência nutricional?',
-  'Analise meu progresso de peso',
-  'O que meus exames indicam?',
-  'Quais suplementos combinam com meus objetivos?',
-  'Gere um resumo semanal',
-  'Compare meu plano vs execução',
+  {
+    id: 'nutrition',
+    title: 'Aderencia nutricional',
+    prompt: 'Como está minha aderência nutricional?',
+    description: 'Veja onde sua rotina alimentar está sustentando ou travando a semana.',
+  },
+  {
+    id: 'weight',
+    title: 'Progresso de peso',
+    prompt: 'Analise meu progresso de peso',
+    description: 'Leia tendência, distância até a meta e próximos ajustes com clareza.',
+  },
+  {
+    id: 'labs',
+    title: 'Leitura de exames',
+    prompt: 'O que meus exames indicam?',
+    description: 'Abra uma interpretação guiada e contextual do que merece atenção.',
+  },
+  {
+    id: 'supplements',
+    title: 'Suplementacao',
+    prompt: 'Quais suplementos combinam com meus objetivos?',
+    description: 'Priorize o que faz sentido para seu objetivo antes de empilhar intervenção.',
+  },
+  {
+    id: 'weekly',
+    title: 'Resumo semanal',
+    prompt: 'Gere um resumo semanal',
+    description: 'Condense a semana em uma leitura rápida, com foco na próxima decisão.',
+  },
+  {
+    id: 'plan',
+    title: 'Plano vs execucao',
+    prompt: 'Compare meu plano vs execução',
+    description: 'Entenda intenção versus consistência real sem abrir várias telas.',
+  },
 ];
 
 function createConversation(name) {
@@ -262,6 +304,171 @@ function buildMockReply(user, content) {
   ].join('\n');
 }
 
+function formatConversationTimestamp(value) {
+  if (!value) return 'Sem historico';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Sem historico';
+
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+
+  return new Intl.DateTimeFormat('pt-BR', isToday ? { hour: '2-digit', minute: '2-digit' } : { day: '2-digit', month: 'short' }).format(date);
+}
+
+function getConversationPreview(conversation) {
+  const lastMessage = conversation?.messages?.[conversation.messages.length - 1];
+  if (!lastMessage?.content) return 'Sem mensagens ainda. Abra uma nova leitura contextual.';
+
+  const preview = lastMessage.content.replace(/\s+/g, ' ').trim();
+  return preview.length > 110 ? `${preview.slice(0, 107)}...` : preview;
+}
+
+function getMessageCountLabel(count) {
+  if (!count) return 'Sem mensagens';
+  return `${count} ${count === 1 ? 'mensagem' : 'mensagens'}`;
+}
+
+function buildProfileContext(profile) {
+  const pills = [];
+
+  if (profile?.training_goal) {
+    pills.push({ label: 'Objetivo', value: profile.training_goal });
+  }
+
+  if (profile?.calories_target) {
+    pills.push({ label: 'Calorias', value: `${profile.calories_target} kcal` });
+  }
+
+  if (profile?.current_weight) {
+    pills.push({ label: 'Peso atual', value: `${profile.current_weight} kg` });
+  }
+
+  if (profile?.target_weight) {
+    pills.push({ label: 'Meta', value: `${profile.target_weight} kg` });
+  }
+
+  return pills.slice(0, 4);
+}
+
+function ChatSignalCard({ icon: Icon, label, value, detail }) {
+  return (
+    <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.72)] px-4 py-4 shadow-[var(--shadow-xs)] backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-3">
+        <p className="atlas-metric-label">{label}</p>
+        <div className="flex h-9 w-9 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.86)] text-[hsl(var(--fg-2))]">
+          <Icon className="h-4 w-4" strokeWidth={1.9} />
+        </div>
+      </div>
+      <p className="mt-3 text-[1.05rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+        {value}
+      </p>
+      <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
+    </div>
+  );
+}
+
+function ConversationListItem({ conversation, active, onClick, compact = false }) {
+  const messageCount = conversation?.messages?.length || 0;
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'group relative overflow-hidden rounded-[24px] border text-left transition-all duration-200',
+        compact ? 'min-w-[240px] px-4 py-4' : 'w-full px-4 py-4',
+        active
+          ? 'border-[hsl(var(--fg)/0.08)] bg-[hsl(var(--fg))] text-[hsl(var(--button-primary-foreground))] shadow-[var(--shadow-md)]'
+          : 'border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card)/0.74)] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)] hover:-translate-y-0.5 hover:border-[hsl(var(--separator-strong))] hover:bg-[hsl(var(--card)/0.92)] hover:shadow-[var(--shadow-sm)]'
+      )}
+    >
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-x-0 top-0 h-20',
+          active
+            ? 'bg-gradient-to-b from-white/10 to-transparent'
+            : 'bg-gradient-to-b from-[hsl(var(--brand-ai)/0.08)] to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100'
+        )}
+      />
+
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p
+              className={cn(
+                'text-[14px] font-semibold tracking-[-0.02em]',
+                active
+                  ? 'text-[hsl(var(--button-primary-foreground))]'
+                  : 'text-[hsl(var(--fg))]'
+              )}
+            >
+              {conversation.metadata?.name || 'Conversa'}
+            </p>
+            <p
+              className={cn(
+                'mt-1 text-[11px] font-semibold uppercase tracking-[0.16em]',
+                active
+                  ? 'text-[hsl(var(--button-primary-foreground)/0.64)]'
+                  : 'text-[hsl(var(--fg-3))]'
+              )}
+            >
+              {getMessageCountLabel(messageCount)}
+            </p>
+          </div>
+
+          <span
+            className={cn(
+              'rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]',
+              active
+                ? 'bg-white/10 text-[hsl(var(--button-primary-foreground)/0.82)]'
+                : 'bg-[hsl(var(--fill)/0.86)] text-[hsl(var(--fg-2))]'
+            )}
+          >
+            {formatConversationTimestamp(conversation.updated_at)}
+          </span>
+        </div>
+
+        <p
+          className={cn(
+            'mt-3 text-[13px] leading-6',
+            active
+              ? 'text-[hsl(var(--button-primary-foreground)/0.8)]'
+              : 'text-[hsl(var(--fg-2))]'
+          )}
+        >
+          {getConversationPreview(conversation)}
+        </p>
+      </div>
+    </button>
+  );
+}
+
+function PromptCard({ item, onSelect }) {
+  return (
+    <button
+      onClick={() => onSelect(item.prompt)}
+      className="atlas-chat-panel group relative overflow-hidden rounded-[26px] border border-[hsl(var(--border)/0.92)] px-4 py-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--separator-strong))] hover:shadow-[var(--shadow-sm)]"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.08)] to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+
+      <div className="relative">
+        <div className="flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))]">
+            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+            {item.title}
+          </span>
+          <ArrowUpRight className="h-4 w-4 text-[hsl(var(--fg-3))] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={1.8} />
+        </div>
+
+        <p className="mt-4 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+          {item.prompt}
+        </p>
+        <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{item.description}</p>
+      </div>
+    </button>
+  );
+}
+
 export default function AtlasAI() {
   const { can } = useSubscription();
   const { user } = useAuth();
@@ -274,6 +481,8 @@ export default function AtlasAI() {
   const endRef = useRef(null);
   const replyTimeoutRef = useRef(null);
   const hasAtlasAIAccess = can('atlas_ai') || isLocalMockUser(user);
+  const localProfile = useMemo(() => readLocalProfile(user), [user]);
+  const profileContext = useMemo(() => buildProfileContext(localProfile), [localProfile]);
 
   useEffect(() => {
     let cancelled = false;
@@ -286,6 +495,8 @@ export default function AtlasAI() {
         cancelled = true;
       };
     }
+
+    setLoading(true);
 
     const loadTimer = window.setTimeout(() => {
       if (cancelled) return;
@@ -317,8 +528,12 @@ export default function AtlasAI() {
     writeStoredConversations(user, conversations);
   }, [conversations, hasAtlasAIAccess, loading, user]);
 
-  const activeConversation = conversations.find(conversation => conversation.id === activeId) || null;
+  const activeConversation =
+    conversations.find(conversation => conversation.id === activeId) || null;
   const messages = activeConversation?.messages || [];
+  const hasProfileContext = profileContext.length > 0;
+  const activeConversationLabel =
+    activeConversation?.metadata?.name || 'Nova conversa contextual';
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -389,128 +604,472 @@ export default function AtlasAI() {
   };
 
   return (
-    <div className="h-[calc(100vh-3rem)] lg:h-screen flex overflow-hidden bg-background">
-      <div className="hidden lg:flex flex-col w-56 border-r border-border bg-[hsl(var(--shell))] shrink-0">
-        <div className="p-3 border-b border-border">
-          <Button
-            onClick={newConv}
-            variant="outline"
-            className="w-full h-9 rounded-lg text-[13px] gap-1.5 border-border"
-          >
-            <Plus className="w-3.5 h-3.5" /> Nova conversa
-          </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
-          {loading ? (
-            <div className="flex items-center justify-center py-6">
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            conversations.map(conversation => (
-              <button
-                key={conversation.id}
-                onClick={() => loadConv(conversation)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-[12px] truncate transition-colors
-                ${
-                  activeId === conversation.id
-                    ? 'bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))]'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--card))]'
-                }`}
-              >
-                {conversation.metadata?.name || 'Conversa'}
-              </button>
-            ))
-          )}
-        </div>
-      </div>
+    <div className="atlas-page-shell">
+      <div className="mx-auto max-w-[1560px] px-4 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+        <div className="atlas-chat-shell flex min-h-[76vh] flex-col overflow-hidden lg:h-[calc(100vh-4rem)] lg:flex-row">
+          <aside className="atlas-chat-sidebar hidden w-[320px] shrink-0 border-r border-[hsl(var(--border)/0.82)] lg:flex lg:flex-col">
+            <div className="border-b border-[hsl(var(--border)/0.78)] px-5 py-5">
+              <div className="relative overflow-hidden rounded-[30px] border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card)/0.92)_0%,hsl(var(--fill)/0.58)_100%)] px-5 py-5 shadow-[var(--shadow-sm)]">
+                <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand-ai)/0.14)] blur-3xl atlas-chat-orb" />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-center gap-3 px-5 h-14 border-b border-border bg-[hsl(var(--card))] shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-[hsl(var(--brand-ai)/0.1)] flex items-center justify-center shrink-0">
-            <Brain className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          </div>
-          <div>
-            <p className="text-[14px] font-semibold">Atlas AI</p>
-            <p className="text-[11px] text-muted-foreground">Coach de saúde e performance</p>
-          </div>
-          <div className="ml-auto lg:hidden">
-            <Button onClick={newConv} size="sm" variant="ghost">
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+                <div className="relative">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[22px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand-ai))] shadow-[var(--shadow-xs)]">
+                      <Brain className="h-5 w-5" strokeWidth={1.8} />
+                    </div>
 
-        <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-5 space-y-4">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-lg mx-auto">
-              <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--brand-ai)/0.1)] flex items-center justify-center">
-                <Brain className="w-7 h-7 text-[hsl(var(--brand-ai))]" strokeWidth={1.5} />
+                    <div className="min-w-0">
+                      <p className="atlas-overline">Atlas AI</p>
+                      <h2 className="mt-3 text-[1.25rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+                        Assistant contextual
+                      </h2>
+                      <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                        Conversas premium com linguagem visual do produto e contexto vindo do
+                        profile local.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-2">
+                    <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-3 shadow-[var(--shadow-xs)]">
+                      <p className="atlas-metric-label">Modo</p>
+                      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                        Local preview
+                      </p>
+                    </div>
+                    <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-3 shadow-[var(--shadow-xs)]">
+                      <p className="atlas-metric-label">Contexto</p>
+                      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                        {hasProfileContext ? 'Profile conectado' : 'Profile pendente'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              <Button onClick={newConv} size="lg" className="mt-4 w-full rounded-[20px]">
+                <Plus className="h-4 w-4" strokeWidth={2} />
+                Nova conversa
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between px-5 pb-3 pt-4">
               <div>
-                <h3 className="text-[17px] font-bold mb-1.5 tracking-tight">Olá! Sou o Atlas AI</h3>
-                <p className="text-[13px] text-muted-foreground leading-relaxed">
-                  Nesta versao local, eu simulo respostas e insights para manter a experiencia do
-                  chat enquanto a rota e desacoplada do Base44.
+                <p className="atlas-metric-label">Conversas</p>
+                <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+                  {conversations.length
+                    ? `${conversations.length} sessoes locais`
+                    : 'Nenhum historico salvo'}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-2 w-full">
-                {PROMPTS.map((prompt, index) => (
-                  <button
-                    key={index}
-                    onClick={() => send(prompt)}
-                    className="px-3.5 py-2.5 rounded-xl border border-border text-left text-[12px] text-muted-foreground hover:text-foreground hover:border-[hsl(var(--brand-ai)/0.3)] hover:bg-[hsl(var(--brand-ai)/0.04)] transition-all flex items-start gap-2"
-                  >
-                    <Sparkles
-                      className="w-3 h-3 text-[hsl(var(--brand-ai))] mt-0.5 shrink-0"
-                      strokeWidth={2}
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-3 pb-4">
+              {loading ? (
+                <div className="space-y-2.5">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="h-[118px] rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.72)] shadow-[var(--shadow-xs)]"
                     />
-                    {prompt}
-                  </button>
-                ))}
+                  ))}
+                </div>
+              ) : conversations.length ? (
+                <div className="space-y-2.5">
+                  {conversations.map(conversation => (
+                    <ConversationListItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      active={activeId === conversation.id}
+                      onClick={() => loadConv(conversation)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-[28px] border border-dashed border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card)/0.66)] px-4 py-5 text-center shadow-[var(--shadow-xs)]">
+                  <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                    Sua primeira conversa aparece aqui
+                  </p>
+                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                    Abra uma leitura rápida sobre aderência, progresso ou exames e mantenha o
+                    histórico organizado.
+                  </p>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          <section className="flex min-h-0 flex-1 flex-col">
+            <header className="relative border-b border-[hsl(var(--border)/0.78)] px-4 py-4 lg:px-6 lg:py-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.08)] to-transparent" />
+
+              <div className="relative flex flex-col gap-5">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="atlas-overline">Atlas AI</span>
+                      <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+                        <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+                        Local preview
+                      </span>
+                      <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+                        <Clock3 className="h-3.5 w-3.5" strokeWidth={1.9} />
+                        {activeConversation
+                          ? formatConversationTimestamp(activeConversation.updated_at)
+                          : 'Pronto para iniciar'}
+                      </span>
+                    </div>
+
+                    <div className="mt-4">
+                      <h1 className="text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))] lg:text-[1.7rem]">
+                        {activeConversationLabel}
+                      </h1>
+                      <p className="mt-2 max-w-3xl text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+                        {activeConversation
+                          ? getConversationPreview(activeConversation)
+                          : 'Uma experiencia de assistant premium para revisar treino, nutricao, progresso e sinais do profile sem parecer um chat generico.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={newConv}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full px-4"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={2} />
+                      Nova conversa
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-3">
+                  <ChatSignalCard
+                    icon={Target}
+                    label="Contexto"
+                    value={hasProfileContext ? 'Profile conectado' : 'Adicionar profile'}
+                    detail={
+                      hasProfileContext
+                        ? 'Metas e sinais locais ajudam a resposta a soar mais pessoal.'
+                        : 'Adicione objetivo, calorias e peso no Profile para respostas mais profundas.'
+                    }
+                  />
+                  <ChatSignalCard
+                    icon={MessageSquare}
+                    label="Conversa"
+                    value={
+                      activeConversation
+                        ? getMessageCountLabel(messages.length)
+                        : 'Sessao pronta para abrir'
+                    }
+                    detail={
+                      activeConversation
+                        ? 'O historico local fica salvo e reaparece na sidebar.'
+                        : 'Comece com um prompt objetivo para dar contexto desde a primeira troca.'
+                    }
+                  />
+                  <ChatSignalCard
+                    icon={Activity}
+                    label="Modo"
+                    value="Mock local estavel"
+                    detail="A experiencia continua sem backend remoto, mantendo o fluxo de chat atual."
+                  />
+                </div>
+
+                {hasProfileContext ? (
+                  <div className="flex flex-wrap gap-2">
+                    {profileContext.map(item => (
+                      <div
+                        key={`${item.label}-${item.value}`}
+                        className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.78)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]"
+                      >
+                        <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
+                        <span className="text-[hsl(var(--fg))]">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </header>
+
+            <div className="border-b border-[hsl(var(--border)/0.72)] px-4 py-4 lg:hidden">
+              <div className="flex gap-3 overflow-x-auto pb-1">
+                <button
+                  onClick={newConv}
+                  className="flex min-w-[220px] items-center gap-3 rounded-[24px] border border-dashed border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card)/0.72)] px-4 py-4 text-left shadow-[var(--shadow-xs)]"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
+                    <Plus className="h-4 w-4" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                      Nova conversa
+                    </p>
+                    <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+                      Abrir um novo fio contextual
+                    </p>
+                  </div>
+                </button>
+
+                {!loading &&
+                  conversations.map(conversation => (
+                    <ConversationListItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      active={activeId === conversation.id}
+                      onClick={() => loadConv(conversation)}
+                      compact
+                    />
+                  ))}
               </div>
             </div>
-          )}
 
-          {messages.map((message, index) => (
-            <MessageBubble key={index} message={message} />
-          ))}
+            <div className="relative flex-1 min-h-0 overflow-hidden">
+              <div className="pointer-events-none absolute left-[8%] top-10 h-48 w-48 rounded-full bg-[hsl(var(--brand-ai)/0.1)] blur-3xl atlas-chat-orb" />
+              <div className="pointer-events-none absolute bottom-10 right-[10%] h-48 w-48 rounded-full bg-[hsl(var(--tint)/0.08)] blur-3xl atlas-chat-orb" />
 
-          {sending && activeId === pendingConversationId && (
-            <div className="flex gap-3 justify-start">
-              <div className="w-7 h-7 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] flex items-center justify-center">
-                <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--brand-ai)/0.6)]" />
-              </div>
-              <div className="px-4 py-3 rounded-2xl bg-[hsl(var(--card))] border border-border">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+              <div className="h-full overflow-y-auto px-4 py-4 lg:px-6 lg:py-6">
+                {loading ? (
+                  <div className="mx-auto flex h-full max-w-3xl items-center justify-center">
+                    <div className="atlas-chat-panel w-full rounded-[32px] border border-[hsl(var(--border)/0.92)] px-6 py-8 text-center shadow-[var(--shadow-md)]">
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--brand-ai))] shadow-[var(--shadow-xs)]">
+                        <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.9} />
+                      </div>
+                      <p className="mt-4 text-[1.05rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                        Carregando suas conversas
+                      </p>
+                      <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+                        Restaurando o historico local e preparando a interface contextual do Atlas
+                        AI.
+                      </p>
+                    </div>
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="mx-auto flex h-full max-w-6xl items-center">
+                    <div className="grid w-full gap-4 xl:grid-cols-[minmax(0,1.18fr)_380px]">
+                      <section className="relative overflow-hidden rounded-[34px] border border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card)/0.96)_0%,hsl(var(--fill)/0.62)_100%)] px-6 py-6 shadow-[var(--shadow-lg)] lg:px-8 lg:py-8">
+                        <div className="pointer-events-none absolute -right-8 top-0 h-48 w-48 rounded-full bg-[hsl(var(--brand-ai)/0.14)] blur-3xl atlas-chat-orb" />
+                        <div className="pointer-events-none absolute bottom-0 left-0 h-40 w-40 rounded-full bg-[hsl(var(--tint)/0.08)] blur-3xl atlas-chat-orb" />
+
+                        <div className="relative space-y-6">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+                            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+                            Contextual assistant
+                          </div>
+
+                          <div className="max-w-3xl">
+                            <h2 className="text-[clamp(2rem,1.55rem+1.2vw,3rem)] font-semibold tracking-[-0.075em] text-[hsl(var(--fg))]">
+                              Converse com o contexto do Atlas, nao com um chat generico.
+                            </h2>
+                            <p className="mt-4 max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
+                              Abra uma leitura rápida sobre progresso, aderência ou próximo passo.
+                              A camada visual já é nativa do produto, enquanto a lógica continua
+                              usando o mock local desta fase.
+                            </p>
+                          </div>
+
+                          <div className="grid gap-3 sm:grid-cols-3">
+                            <ChatSignalCard
+                              icon={Brain}
+                              label="Assistant"
+                              value="Premium e contextual"
+                              detail="Mais próximo de uma camada estratégica do produto do que de um chat utilitário."
+                            />
+                            <ChatSignalCard
+                              icon={Clock3}
+                              label="Persistencia"
+                              value="Historico local salvo"
+                              detail="Cada conversa criada aqui reaparece organizada na sidebar."
+                            />
+                            <ChatSignalCard
+                              icon={Target}
+                              label="Leitura"
+                              value={hasProfileContext ? 'Pronta para contexto' : 'Pronta para iniciar'}
+                              detail={
+                                hasProfileContext
+                                  ? 'O profile local já adiciona sinais úteis para a resposta.'
+                                  : 'Mesmo sem profile completo, o fluxo do chat já está pronto.'
+                              }
+                            />
+                          </div>
+
+                          <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.74)] px-5 py-5 shadow-[var(--shadow-sm)]">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                              <div>
+                                <p className="atlas-metric-label">Contexto visivel agora</p>
+                                <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                                  {hasProfileContext
+                                    ? 'Seu profile local já informa parte da conversa.'
+                                    : 'Ainda não há sinais suficientes do Profile nesta rota.'}
+                                </p>
+                              </div>
+                              <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]">
+                                <Activity className="h-3.5 w-3.5" strokeWidth={1.9} />
+                                Sem backend remoto
+                              </span>
+                            </div>
+
+                            {hasProfileContext ? (
+                              <div className="mt-4 flex flex-wrap gap-2">
+                                {profileContext.map(item => (
+                                  <div
+                                    key={`${item.label}-${item.value}-empty`}
+                                    className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]"
+                                  >
+                                    <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
+                                    <span className="text-[hsl(var(--fg))]">{item.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                                Preencha metas, peso ou objetivo no Profile para deixar o assistant
+                                ainda mais específico ao seu contexto.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </section>
+
+                      <section className="atlas-card flex flex-col px-5 py-5 lg:px-6 lg:py-6">
+                        <div>
+                          <p className="atlas-overline">Quick starts</p>
+                          <h3 className="mt-3 text-[1.2rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+                            Comece por uma decisao concreta
+                          </h3>
+                          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                            Os prompts abaixo abrem a conversa mantendo a mesma lógica local já
+                            existente na rota.
+                          </p>
+                        </div>
+
+                        <div className="mt-5 space-y-3">
+                          {PROMPTS.map(item => (
+                            <PromptCard key={item.id} item={item} onSelect={send} />
+                          ))}
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mx-auto flex h-full w-full max-w-4xl flex-col">
+                    <div className="mb-6 flex justify-center">
+                      <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+                        <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+                        {hasProfileContext ? 'Profile context active' : 'Local preview active'}
+                      </div>
+                    </div>
+
+                    <div className="space-y-5 pb-2">
+                      {messages.map((message, index) => (
+                        <MessageBubble key={index} message={message} />
+                      ))}
+
+                      {sending && activeId === pendingConversationId && (
+                        <div className="flex items-start gap-4">
+                          <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand-ai))] shadow-[var(--shadow-xs)]">
+                            <Brain className="h-4 w-4" strokeWidth={1.8} />
+                          </div>
+
+                          <div className="rounded-[28px] border border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--fill)/0.52)_100%)] px-5 py-4 shadow-[var(--shadow-sm)]">
+                            <div className="flex items-center gap-3">
+                              <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+                              <div>
+                                <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                                  Atlas AI esta estruturando a resposta
+                                </p>
+                                <p className="mt-1 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+                                  Lendo o profile local e montando um retorno contextual.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div ref={endRef} />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          )}
 
-          <div ref={endRef} />
-        </div>
+            <div className="border-t border-[hsl(var(--border)/0.78)] px-4 py-4 lg:px-6 lg:py-5">
+              <div className="mx-auto max-w-4xl space-y-3">
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {PROMPTS.slice(0, 3).map(item => (
+                    <button
+                      key={`${item.id}-composer`}
+                      onClick={() => send(item.prompt)}
+                      className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.8)] px-3 py-2 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)] transition-colors hover:bg-[hsl(var(--fill)/0.9)] hover:text-[hsl(var(--fg))]"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+                      {item.title}
+                    </button>
+                  ))}
+                </div>
 
-        <div className="px-4 lg:px-6 pb-4 pt-3 border-t border-border bg-[hsl(var(--card))]">
-          <div className="flex gap-2 items-center max-w-3xl mx-auto">
-            <input
-              value={input}
-              onChange={event => setInput(event.target.value)}
-              onKeyDown={event => {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                  event.preventDefault();
-                  send();
-                }
-              }}
-              placeholder="Pergunte algo sobre seus dados…"
-              className="flex-1 h-11 rounded-xl bg-[hsl(var(--secondary))] border border-border px-4 text-[13px] text-foreground placeholder:text-muted-foreground outline-none focus:border-[hsl(var(--brand-ai)/0.5)] transition-colors"
-            />
-            <Button
-              onClick={() => send()}
-              disabled={!input.trim() || sending}
-              className="w-11 h-11 rounded-xl bg-[hsl(var(--brand-ai))] hover:bg-[hsl(var(--brand-ai)/0.85)] text-white shrink-0 p-0"
-            >
-              <Send className="w-4 h-4" strokeWidth={2} />
-            </Button>
-          </div>
+                <div className="atlas-chat-panel relative overflow-hidden rounded-[30px] border border-[hsl(var(--border)/0.92)] px-3 py-3 shadow-[var(--shadow-md)] lg:px-4">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.08)] to-transparent" />
+
+                  <div className="relative flex items-end gap-3">
+                    <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.82)] text-[hsl(var(--brand-ai))] sm:flex">
+                      <Sparkles className="h-4 w-4" strokeWidth={1.9} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <textarea
+                        value={input}
+                        onChange={event => setInput(event.target.value)}
+                        onKeyDown={event => {
+                          if (event.key === 'Enter' && !event.shiftKey) {
+                            event.preventDefault();
+                            send();
+                          }
+                        }}
+                        rows={1}
+                        placeholder="Pergunte algo sobre seus dados, progresso ou proxima decisao..."
+                        className="min-h-[88px] w-full resize-none bg-transparent px-1 py-1 text-[15px] leading-7 text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
+                      />
+
+                      <div className="mt-3 flex flex-col gap-2 border-t border-[hsl(var(--border)/0.72)] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-wrap items-center gap-2 text-[12px] text-[hsl(var(--fg-2))]">
+                          <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-3 py-1.5 font-semibold tracking-[-0.01em]">
+                            Enter envia
+                          </span>
+                          <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-3 py-1.5 font-semibold tracking-[-0.01em]">
+                            Shift + Enter quebra linha
+                          </span>
+                        </div>
+
+                        <p className="text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+                          {hasProfileContext
+                            ? 'Contexto do Profile ativo nesta conversa.'
+                            : 'Adicione metas no Profile para respostas ainda mais precisas.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => send()}
+                      disabled={!input.trim() || sending}
+                      size="lg"
+                      className="h-12 shrink-0 rounded-[20px] px-5"
+                    >
+                      {sending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
+                      ) : (
+                        <Send className="h-4 w-4" strokeWidth={2} />
+                      )}
+                      <span className="hidden sm:inline">Enviar</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>

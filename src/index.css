@@ -48,12 +48,13 @@
     --space-16: 64px;
 
     /* Radius */
+    --atlas-radius: 20px;
     --r-xs: 10px;
-    --r-sm: 14px;
-    --r-md: 18px;
-    --r-lg: 24px;
-    --r-xl: 30px;
-    --r-2xl: 36px;
+    --r-sm: 20px;
+    --r-md: 20px;
+    --r-lg: 20px;
+    --r-xl: 20px;
+    --r-2xl: 20px;
     --r-pill: 999px;
 
     /* Shadows */
@@ -407,7 +408,7 @@
   .sys-card {
     background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.92);
-    border-radius: var(--r-lg);
+    border-radius: var(--atlas-radius);
     box-shadow: var(--shadow-sm), var(--shadow-inset);
   }
 
@@ -422,12 +423,98 @@
     background: transparent;
   }
 
+  .atlas-public-shell {
+    position: relative;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top, hsl(var(--tint) / 0.055), transparent 24%),
+      radial-gradient(circle at 100% 12%, hsl(var(--label) / 0.028), transparent 18%),
+      linear-gradient(180deg, hsl(var(--sys-bg)) 0%, hsl(var(--sys-bg2)) 56%, hsl(var(--sys-bg)) 100%);
+    overflow: hidden;
+  }
+
+  .atlas-public-nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border-bottom: 1px solid hsl(var(--separator-opaque) / 0.72);
+  }
+
+  .atlas-public-panel {
+    background: linear-gradient(180deg, hsl(var(--card) / 0.98) 0%, hsl(var(--card)) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.9);
+    border-radius: calc(var(--r-xl) + 2px);
+    box-shadow: var(--shadow-md), var(--shadow-inset);
+  }
+
+  .atlas-public-panel-muted {
+    background: linear-gradient(180deg, hsl(var(--fill) / 0.9) 0%, hsl(var(--card) / 0.88) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.9);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-xs), var(--shadow-inset);
+  }
+
+  .atlas-public-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: var(--r-pill);
+    border: 1px solid hsl(var(--separator-opaque) / 0.88);
+    background: hsl(var(--card) / 0.84);
+    padding: 0.55rem 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: -0.014em;
+    color: hsl(var(--label-secondary));
+    box-shadow: var(--shadow-xs), var(--shadow-inset);
+  }
+
+  .atlas-public-copy {
+    color: hsl(var(--label-secondary));
+    font-size: 0.9375rem;
+    line-height: 1.72;
+    letter-spacing: -0.016em;
+  }
+
   .atlas-page-header {
     background:
       linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.92);
-    border-radius: var(--r-xl);
+    border-radius: var(--atlas-radius);
     box-shadow: var(--shadow-sm), var(--shadow-inset);
+  }
+
+  .atlas-chat-shell {
+    position: relative;
+    background:
+      radial-gradient(circle at top right, hsl(var(--brand-ai) / 0.14), transparent 30%),
+      radial-gradient(circle at bottom left, hsl(var(--tint) / 0.08), transparent 34%),
+      linear-gradient(180deg, hsl(var(--card) / 0.96) 0%, hsl(var(--sys-bg2) / 0.88) 100%);
+    border: 1px solid hsl(var(--separator-opaque) / 0.92);
+    border-radius: calc(var(--atlas-radius) + 4px);
+    box-shadow: var(--shadow-lg), var(--shadow-inset);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+  }
+
+  .atlas-chat-sidebar {
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.88) 0%, hsl(var(--fill) / 0.64) 100%);
+  }
+
+  .atlas-chat-panel {
+    background:
+      linear-gradient(180deg, hsl(var(--card) / 0.92) 0%, hsl(var(--card) / 0.76) 100%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+    backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  .atlas-chat-orb {
+    animation: atlas-chat-orb 16s ease-in-out infinite;
+    will-change: transform;
   }
 
   .atlas-overline {
@@ -487,8 +574,91 @@
     line-height: 1.55;
   }
 
-  .atlas-banner {
+  .atlas-public-article {
+    color: hsl(var(--label));
+  }
+
+  .atlas-public-article > * + * {
+    margin-top: 1rem;
+  }
+
+  .atlas-public-article h2 {
+    margin-top: 2.75rem;
+    font-size: 1.375rem;
+    font-weight: 650;
+    letter-spacing: -0.032em;
+    line-height: 1.18;
+    color: hsl(var(--label));
+  }
+
+  .atlas-public-article h3 {
+    margin-top: 2rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.24;
+    color: hsl(var(--label));
+  }
+
+  .atlas-public-article p,
+  .atlas-public-article li {
+    color: hsl(var(--label-secondary));
+    font-size: 0.9375rem;
+    line-height: 1.72;
+    letter-spacing: -0.016em;
+  }
+
+  .atlas-public-article ul,
+  .atlas-public-article ol {
+    padding-left: 1.2rem;
+  }
+
+  .atlas-public-article li + li {
+    margin-top: 0.45rem;
+  }
+
+  .atlas-public-article strong {
+    color: hsl(var(--label));
+    font-weight: 600;
+  }
+
+  .atlas-public-article a {
+    color: hsl(var(--tint));
+  }
+
+  .atlas-public-article blockquote {
+    margin-top: 2rem;
+    border-left: 3px solid hsl(var(--separator-strong));
+    background: hsl(var(--fill) / 0.82);
+    padding: 1rem 1.1rem;
+    border-radius: 0 var(--r-md) var(--r-md) 0;
+  }
+
+  .atlas-public-article code {
+    border-radius: 8px;
+    background: hsl(var(--fill));
+    padding: 0.15rem 0.35rem;
+    font-size: 0.8125rem;
+  }
+
+  .atlas-public-article pre {
+    margin-top: 1.4rem;
+    overflow-x: auto;
     border-radius: var(--r-md);
+    border: 1px solid hsl(var(--separator-opaque));
+    background: hsl(var(--fill));
+    padding: 1rem;
+    font-size: 0.8125rem;
+    line-height: 1.65;
+  }
+
+  .atlas-public-article pre code {
+    background: transparent;
+    padding: 0;
+  }
+
+  .atlas-banner {
+    border-radius: var(--atlas-radius);
     border: 1px solid hsl(var(--separator-opaque));
     background: hsl(var(--fill) / 0.86);
     box-shadow: var(--shadow-xs), var(--shadow-inset);
@@ -522,7 +692,7 @@
     text-align: center;
     padding: 56px 24px;
     border: 1px dashed hsl(var(--separator-strong));
-    border-radius: var(--r-xl);
+    border-radius: var(--atlas-radius);
     background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.72) 100%);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
@@ -550,7 +720,7 @@
     gap: 8px;
     min-height: 40px;
     padding: 0 18px;
-    border-radius: calc(var(--r-md) - 2px);
+    border-radius: var(--atlas-radius);
     border: 1px solid transparent;
     font-size: 0.875rem;
     font-weight: 600;
@@ -618,7 +788,7 @@
 
   .atlas-field {
     width: 100%;
-    border-radius: calc(var(--r-md) - 4px);
+    border-radius: var(--atlas-radius);
     border: 1px solid hsl(var(--input));
     background: hsl(var(--card));
     color: hsl(var(--foreground));
@@ -657,6 +827,17 @@
     border: 1px solid hsl(var(--separator-opaque));
     border-radius: var(--r-md);
     box-shadow: var(--shadow-md), var(--shadow-inset);
+  }
+
+  @keyframes atlas-chat-orb {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    50% {
+      transform: translate3d(0, 18px, 0) scale(1.06);
+    }
   }
 
   /* Legacy helpers */

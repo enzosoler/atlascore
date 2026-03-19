@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, AlertCircle, Loader2, ChevronRight, Clock } from 'lucide-react';
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import {
+  AlertCircle,
+  Brain,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Loader2,
+  User,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const FunctionDisplay = ({ toolCall }) => {
+function FunctionDisplay({ toolCall }) {
   const [expanded, setExpanded] = useState(false);
   const name = toolCall?.name || 'Function';
   const status = toolCall?.status || 'pending';
@@ -13,92 +19,200 @@ const FunctionDisplay = ({ toolCall }) => {
 
   const parsedResults = (() => {
     if (!results) return null;
-    try { return typeof results === 'string' ? JSON.parse(results) : results; }
-    catch { return results; }
+    try {
+      return typeof results === 'string' ? JSON.parse(results) : results;
+    } catch {
+      return results;
+    }
   })();
 
-  const isError = results && (
-    (typeof results === 'string' && /error|failed/i.test(results)) ||
-    (parsedResults?.success === false)
-  );
+  const isError =
+    results &&
+    ((typeof results === 'string' && /error|failed/i.test(results)) ||
+      parsedResults?.success === false);
 
-  const statusConfig = {
-    pending: { icon: Clock, color: 'text-slate-400', text: 'Pendente' },
-    running: { icon: Loader2, color: 'text-slate-500', text: 'Executando...', spin: true },
-    in_progress: { icon: Loader2, color: 'text-slate-500', text: 'Executando...', spin: true },
-    completed: isError ? { icon: AlertCircle, color: 'text-red-500', text: 'Falhou' } : { icon: CheckCircle2, color: 'text-green-600', text: 'Sucesso' },
-    success: { icon: CheckCircle2, color: 'text-green-600', text: 'Sucesso' },
-    failed: { icon: AlertCircle, color: 'text-red-500', text: 'Falhou' },
-    error: { icon: AlertCircle, color: 'text-red-500', text: 'Falhou' },
-  }[status] || { icon: Clock, color: 'text-slate-500', text: '' };
+  const statusConfig =
+    {
+      pending: { icon: Clock, color: 'text-[hsl(var(--fg-3))]', text: 'Pendente' },
+      running: {
+        icon: Loader2,
+        color: 'text-[hsl(var(--brand-ai))]',
+        text: 'Executando...',
+        spin: true,
+      },
+      in_progress: {
+        icon: Loader2,
+        color: 'text-[hsl(var(--brand-ai))]',
+        text: 'Executando...',
+        spin: true,
+      },
+      completed: isError
+        ? { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Falhou' }
+        : { icon: CheckCircle2, color: 'text-[hsl(var(--ok))]', text: 'Sucesso' },
+      success: { icon: CheckCircle2, color: 'text-[hsl(var(--ok))]', text: 'Sucesso' },
+      failed: { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Falhou' },
+      error: { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Falhou' },
+    }[status] || { icon: Clock, color: 'text-[hsl(var(--fg-3))]', text: '' };
 
   const Icon = statusConfig.icon;
   const formattedName = name.split('.').reverse().join(' ').toLowerCase();
 
   return (
-    <div className="mt-2 text-xs">
-      <button onClick={() => setExpanded(!expanded)}
-        className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all hover:bg-white/5", expanded ? "bg-white/5 border-white/20" : "bg-transparent border-white/10")}>
-        <Icon className={cn("h-3 w-3", statusConfig.color, statusConfig.spin && "animate-spin")} />
-        <span className="text-slate-400">{formattedName}</span>
-        {statusConfig.text && <span className={cn("text-slate-500", isError && "text-red-600")}>• {statusConfig.text}</span>}
-        {!statusConfig.spin && (toolCall.arguments_string || results) && (
-          <ChevronRight className={cn("h-3 w-3 text-slate-400 transition-transform ml-auto", expanded && "rotate-90")} />
+    <div className="mt-3 text-xs">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className={cn(
+          'flex w-full items-center gap-2 rounded-[18px] border px-3 py-2 text-left transition-all',
+          expanded
+            ? 'border-[hsl(var(--border)/0.92)] bg-[hsl(var(--fill)/0.86)]'
+            : 'border-[hsl(var(--border)/0.78)] bg-[hsl(var(--card)/0.8)] hover:bg-[hsl(var(--fill)/0.72)]'
         )}
+      >
+        <Icon
+          className={cn('h-3.5 w-3.5 shrink-0', statusConfig.color, statusConfig.spin && 'animate-spin')}
+        />
+        <span className="truncate text-[12px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
+          {formattedName}
+        </span>
+        {statusConfig.text ? (
+          <span
+            className={cn(
+              'shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]',
+              isError && 'text-[hsl(var(--err))]'
+            )}
+          >
+            {statusConfig.text}
+          </span>
+        ) : null}
+        {!statusConfig.spin && (toolCall.arguments_string || results) ? (
+          <ChevronRight
+            className={cn(
+              'ml-auto h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))] transition-transform',
+              expanded && 'rotate-90'
+            )}
+          />
+        ) : null}
       </button>
-      {expanded && !statusConfig.spin && (
-        <div className="mt-1.5 ml-3 pl-3 border-l-2 border-white/10 space-y-2">
-          {parsedResults && (
-            <pre className="bg-white/5 rounded-md p-2 text-xs text-slate-400 whitespace-pre-wrap max-h-48 overflow-auto">
-              {typeof parsedResults === 'object' ? JSON.stringify(parsedResults, null, 2) : parsedResults}
+
+      {expanded && !statusConfig.spin ? (
+        <div className="mt-2 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] p-3 shadow-[var(--shadow-xs)]">
+          {parsedResults ? (
+            <pre className="whitespace-pre-wrap text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+              {typeof parsedResults === 'object'
+                ? JSON.stringify(parsedResults, null, 2)
+                : parsedResults}
             </pre>
+          ) : (
+            <p className="text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+              Nenhum resultado disponivel.
+            </p>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
+}
+
+const assistantMarkdownComponents = {
+  p: ({ children }) => <p className="my-2 leading-7 text-[hsl(var(--fg-2))]">{children}</p>,
+  ul: ({ children }) => <ul className="my-3 ml-4 list-disc space-y-1.5">{children}</ul>,
+  ol: ({ children }) => <ol className="my-3 ml-4 list-decimal space-y-1.5">{children}</ol>,
+  li: ({ children }) => <li className="pl-1 leading-7 text-[hsl(var(--fg-2))]">{children}</li>,
+  h1: ({ children }) => (
+    <h1 className="my-3 text-[1rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+      {children}
+    </h1>
+  ),
+  h2: ({ children }) => (
+    <h2 className="my-3 text-[0.95rem] font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="my-2 text-[0.9rem] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+      {children}
+    </h3>
+  ),
+  strong: ({ children }) => <strong className="font-semibold text-[hsl(var(--fg))]">{children}</strong>,
+  code: ({ children }) => (
+    <code className="rounded-md bg-[hsl(var(--fill))] px-1.5 py-0.5 text-[12px] text-[hsl(var(--fg))]">
+      {children}
+    </code>
+  ),
 };
 
 export default function MessageBubble({ message }) {
   const isUser = message.role === 'user';
+
   return (
-    <div className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}>
-      {!isUser && (
-        <div className="h-7 w-7 rounded-lg bg-violet-500/20 flex items-center justify-center mt-0.5 shrink-0">
-          <div className="h-1.5 w-1.5 rounded-full bg-violet-400" />
-        </div>
-      )}
-      <div className={cn("max-w-[85%]", isUser && "flex flex-col items-end")}>
-        {message.content && (
-          <div className={cn("rounded-2xl px-4 py-2.5", isUser ? "bg-teal-500/20 text-white border border-teal-500/20" : "bg-white/5 border border-white/10")}>
+    <article className={cn('flex items-start gap-4', isUser && 'flex-row-reverse')}>
+      <div
+        className={cn(
+          'mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border shadow-[var(--shadow-xs)]',
+          isUser
+            ? 'border-[hsl(var(--fg)/0.08)] bg-[hsl(var(--fg))] text-[hsl(var(--button-primary-foreground))]'
+            : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand-ai))]'
+        )}
+      >
+        {isUser ? <User className="h-4 w-4" strokeWidth={1.9} /> : <Brain className="h-4 w-4" strokeWidth={1.9} />}
+      </div>
+
+      <div className={cn('max-w-3xl space-y-2', isUser && 'items-end text-right')}>
+        <div
+          className={cn(
+            'rounded-[28px] border px-5 py-4 shadow-[var(--shadow-sm)]',
+            isUser
+              ? 'border-[hsl(var(--fg)/0.06)] bg-[hsl(var(--fg))] text-[hsl(var(--button-primary-foreground))]'
+              : 'border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--fill)/0.5)_100%)] text-[hsl(var(--fg))]'
+          )}
+        >
+          <div
+            className={cn(
+              'mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em]',
+              isUser
+                ? 'justify-end text-[hsl(var(--button-primary-foreground)/0.68)]'
+                : 'text-[hsl(var(--fg-3))]'
+            )}
+          >
             {isUser ? (
-              <p className="text-sm leading-relaxed">{message.content}</p>
+              <>
+                <span>Voce</span>
+                <span className="h-1 w-1 rounded-full bg-current" />
+                <span>Prompt</span>
+              </>
+            ) : (
+              <>
+                <span>Atlas AI</span>
+                <span className="h-1 w-1 rounded-full bg-current" />
+                <span>Local reply</span>
+              </>
+            )}
+          </div>
+
+          {message.content ? (
+            isUser ? (
+              <p className="text-[14px] leading-7 text-[hsl(var(--button-primary-foreground))]">
+                {message.content}
+              </p>
             ) : (
               <ReactMarkdown
-                className="text-sm prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
-                components={{
-                  p: ({ children }) => <p className="my-1 leading-relaxed">{children}</p>,
-                  ul: ({ children }) => <ul className="my-1 ml-4 list-disc">{children}</ul>,
-                  ol: ({ children }) => <ol className="my-1 ml-4 list-decimal">{children}</ol>,
-                  li: ({ children }) => <li className="my-0.5">{children}</li>,
-                  h1: ({ children }) => <h1 className="text-base font-bold my-2">{children}</h1>,
-                  h2: ({ children }) => <h2 className="text-sm font-bold my-2">{children}</h2>,
-                  h3: ({ children }) => <h3 className="text-sm font-semibold my-1">{children}</h3>,
-                  strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
-                  code: ({ children }) => <code className="px-1 py-0.5 rounded bg-white/10 text-xs">{children}</code>,
-                }}
+                className="max-w-none text-[14px] leading-7 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+                components={assistantMarkdownComponents}
               >
                 {message.content}
               </ReactMarkdown>
-            )}
-          </div>
-        )}
-        {message.tool_calls?.length > 0 && (
+            )
+          ) : null}
+        </div>
+
+        {message.tool_calls?.length > 0 ? (
           <div className="space-y-1">
-            {message.tool_calls.map((tc, i) => <FunctionDisplay key={i} toolCall={tc} />)}
+            {message.tool_calls.map((toolCall, index) => (
+              <FunctionDisplay key={index} toolCall={toolCall} />
+            ))}
           </div>
-        )}
+        ) : null}
       </div>
-    </div>
+    </article>
   );
 }

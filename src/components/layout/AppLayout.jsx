@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import TrialBanner from '@/components/shared/TrialBanner';
 import SupportWidget from '@/components/shared/SupportWidget';
+import { TabBar } from '@/components/shared/AppContainer';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import { useAuth } from '@/lib/AuthContext';
 import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
@@ -146,15 +147,6 @@ function getMobileNavItemClass(active, destructive = false) {
   );
 }
 
-function getBottomNavItemClass(active) {
-  return cn(
-    'flex flex-1 min-w-0 flex-col items-center gap-1 rounded-[20px] px-2 py-2 transition-all duration-200',
-    active
-      ? 'border border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
-      : 'text-[hsl(var(--fg-2))]'
-  );
-}
-
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -173,6 +165,7 @@ export default function AppLayout() {
 
   const { user, logout } = useAuth();
   const { role, nav } = useRBAC(user);
+  const isImmersiveToday = pathname === ROUTES.today && role === 'athlete';
 
   const bottomPaths = BOTTOM_PATHS_BY_ROLE[role] || BOTTOM_PATHS_BY_ROLE.athlete;
   const bottomNav = useMemo(
@@ -279,7 +272,8 @@ export default function AppLayout() {
     <div className="flex min-h-screen bg-transparent">
       <aside
         className={cn(
-          'glass hidden shrink-0 flex-col fixed inset-y-0 left-0 z-40 border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.8)] transition-all duration-300 ease-out lg:flex',
+          'glass hidden shrink-0 flex-col fixed inset-y-0 left-0 z-40 border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.8)] transition-all duration-300 ease-out',
+          !isImmersiveToday && 'lg:flex',
           collapsed ? 'w-[4.5rem]' : 'w-72'
         )}
       >
@@ -364,7 +358,12 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      <header className="glass fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4 lg:hidden">
+      <header
+        className={cn(
+          'glass fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4 lg:hidden',
+          isImmersiveToday && 'hidden'
+        )}
+      >
         <button
           onClick={() => setMobileOpen((value) => !value)}
           className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
@@ -475,38 +474,33 @@ export default function AppLayout() {
         ) : null}
       </AnimatePresence>
 
-      <nav className="glass fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.72)] lg:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex items-center gap-2 px-3 py-3">
-          {bottomNav.map(({ path, label, icon }) => {
-            const Icon = ICON_MAP[icon] || Home;
-            const active = currentTabRoot === path;
-
-            return (
-              <Link
-                key={path}
-                to={getBottomTabTarget(path)}
-                onClick={(event) => handleBottomTabPress(event, path)}
-                className={getBottomNavItemClass(active)}
-              >
-                <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.25 : 1.9} />
-                <span className="max-w-[56px] truncate text-center text-[10px] font-semibold tracking-[-0.01em] leading-none">
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-          <button onClick={() => setMobileOpen(true)} className={getBottomNavItemClass(false)}>
-            <Menu className="h-5 w-5 shrink-0" strokeWidth={1.9} />
-            <span className="text-[10px] font-semibold tracking-[-0.01em] leading-none">Menu</span>
-          </button>
-        </div>
-      </nav>
+      <TabBar
+        className={isImmersiveToday ? 'bg-[rgba(245,245,247,0.84)]' : ''}
+        items={[
+          ...bottomNav.map(({ path, label, icon }) => ({
+            key: path,
+            to: getBottomTabTarget(path),
+            onClick: (event) => handleBottomTabPress(event, path),
+            label,
+            icon: ICON_MAP[icon] || Home,
+            active: currentTabRoot === path,
+          })),
+          {
+            key: 'menu',
+            label: 'Menu',
+            icon: Menu,
+            onClick: () => setMobileOpen(true),
+            active: false,
+          },
+        ]}
+      />
 
       <main
         className={cn(
           'flex-1 min-h-screen overflow-x-hidden transition-all duration-300',
-          collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-72',
-          'pt-14 lg:pt-0 pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
+          !isImmersiveToday && (collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-72'),
+          isImmersiveToday ? 'bg-[#F5F5F7] pt-0' : 'pt-14 lg:pt-0',
+          'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
         )}
         onTouchStart={handlePullStart}
         onTouchMove={handlePullMove}
@@ -517,7 +511,11 @@ export default function AppLayout() {
 
         <motion.div
           className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2 lg:hidden"
-          style={{ top: 'calc(56px + env(safe-area-inset-top) + 10px)' }}
+          style={{
+            top: isImmersiveToday
+              ? 'calc(env(safe-area-inset-top) + 12px)'
+              : 'calc(56px + env(safe-area-inset-top) + 10px)',
+          }}
           animate={{
             y: isRefreshing || pullDistance > 0 ? 0 : -18,
             opacity: isRefreshing || pullDistance > 0 ? 1 : 0,
@@ -541,7 +539,9 @@ export default function AppLayout() {
           className="lg:min-h-screen"
           style={{
             transform: `translateY(${pullDistance}px)`,
-            minHeight: 'calc(100vh - 56px - 90px - env(safe-area-inset-bottom))',
+            minHeight: isImmersiveToday
+              ? 'calc(100vh - 90px - env(safe-area-inset-bottom))'
+              : 'calc(100vh - 56px - 90px - env(safe-area-inset-bottom))',
           }}
         >
           <AnimatePresence mode="wait" initial={false}>

@@ -1,11 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import {
-  CheckCircle2,
   Clock3,
   Flame,
   Pencil,
   Plus,
-  Sparkles,
   Target,
   Trash2,
   UtensilsCrossed,
@@ -16,7 +14,6 @@ import {
   PrimaryButton,
   SafePageBoundary,
   SecondaryButton,
-  SectionCard,
   StatusBanner,
   shiftDate,
 } from '@/components/shared/StablePage';
@@ -185,18 +182,6 @@ function getProgressPercent(current, target) {
 
 function getRemainingValue(target, current) {
   return Math.max(0, Math.round(target - current));
-}
-
-function HeroStat({ label, value, detail }) {
-  return (
-    <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.8)] px-4 py-4 shadow-[var(--shadow-xs)]">
-      <p className="atlas-metric-label">{label}</p>
-      <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-        {value}
-      </p>
-      <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
-    </div>
-  );
 }
 
 function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }) {
@@ -597,298 +582,257 @@ function NutritionContent() {
   };
 
   return (
-    <div className="atlas-page-shell">
-      <div className="mx-auto max-w-6xl space-y-8 px-5 py-6 lg:px-8 lg:py-10">
-        <section className="atlas-page-header relative overflow-hidden px-6 py-6 lg:px-8 lg:py-8">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[hsl(var(--warn)/0.12)] via-[hsl(var(--warn)/0.04)] to-transparent" />
+    <AppContainer>
+      <PageHeader
+        eyebrow="Nutrition"
+        title="Nutrition that reads like a daily rhythm."
+        subtitle="Track meals, compare intake against the day&apos;s targets and keep the page focused on the next food decision instead of dashboard noise."
+        accentClassName="from-[hsl(var(--warn)/0.12)] via-[hsl(var(--warn)/0.04)]"
+        actions={
+          <ActionRow>
+            <DateStepper
+              date={selectedDate}
+              onChange={(amount) => setSelectedDate(shiftDate(selectedDate, amount))}
+            />
+            <PrimaryButton
+              type="button"
+              onClick={handleCreate}
+              className="inline-flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" strokeWidth={1.9} />
+              Adicionar refeicao
+            </PrimaryButton>
+          </ActionRow>
+        }
+      >
+        <div className="grid gap-3">
+          <StatCard
+            label="Intake"
+            value={formatUnit(nutritionTotals.calories, ' kcal')}
+            detail={`${remainingCalories} kcal restantes para a meta do dia.`}
+          />
+          <StatCard
+            label="Protein"
+            value={formatUnit(nutritionTotals.protein, ' g')}
+            detail={`${remainingProtein} g faltando para bater a proteina alvo.`}
+          />
+          <StatCard
+            label="Meals"
+            value={`${mealsForDate.length} registradas`}
+            detail={`Cobertura de ${mealCoverage}% da estrutura prevista para hoje.`}
+          />
+        </div>
+      </PageHeader>
 
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.18fr)_360px] lg:gap-10">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="atlas-overline">Nutrition</span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    Meal-driven module
-                  </span>
-                </div>
+      <StatusBanner tone="warning">
+        Nutrition agora roda so com estado local mock. Nenhuma logica de Protocols, treino ou backend
+        permanece nesta pagina.
+      </StatusBanner>
 
-                <div className="max-w-3xl space-y-4">
-                  <h1 className="atlas-display-title">Nutrition that reads like a daily rhythm.</h1>
-                  <p className="max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
-                    Track meals, compare intake against the day&apos;s targets and keep the nutrition flow
-                    easy to scan from first meal to final check-in.
-                  </p>
-                </div>
-              </div>
+      {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
-              <div className="flex flex-wrap items-center gap-3">
-                <DateStepper
-                  date={selectedDate}
-                  onChange={(amount) => setSelectedDate(shiftDate(selectedDate, amount))}
-                />
-                <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
-                  <Plus className="h-4 w-4" strokeWidth={1.9} />
-                  Adicionar refeicao
-                </PrimaryButton>
-              </div>
+      <Section
+        title="Intake and targets"
+        subtitle="Leitura nutricional clara para o dia selecionado, com foco primeiro no que falta fechar."
+      >
+        <Card className="px-5 py-5">
+          <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-4 py-4">
+            <p className="atlas-metric-label">Calories logged</p>
+            <p className="mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
+              {Math.round(nutritionTotals.calories)}
+              <span className="ml-1 text-[15px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
+                / {DEFAULT_PROFILE.calories_target} kcal
+              </span>
+            </p>
+            <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+              {remainingCalories > 0
+                ? `${remainingCalories} kcal ainda abertas dentro da meta do dia.`
+                : 'Meta calorica atingida para o dia selecionado.'}
+            </p>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                <HeroStat
-                  label="Intake"
-                  value={formatUnit(nutritionTotals.calories, ' kcal')}
-                  detail={`${remainingCalories} kcal restantes para a meta do dia.`}
-                />
-                <HeroStat
-                  label="Protein"
-                  value={formatUnit(nutritionTotals.protein, ' g')}
-                  detail={`${remainingProtein} g faltando para bater a proteina alvo.`}
-                />
-                <HeroStat
-                  label="Meals"
-                  value={`${mealsForDate.length} registradas`}
-                  detail={`Cobertura de ${mealCoverage}% da estrutura prevista para hoje.`}
-                />
-              </div>
+            <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[hsl(var(--card))]">
+              <div
+                className="h-full rounded-full bg-[hsl(var(--fg))]"
+                style={{ width: `${calorieProgress}%` }}
+              />
             </div>
+          </div>
 
-            <aside className="rounded-[30px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.6)] p-5 shadow-[var(--shadow-xs)] lg:p-6">
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div>
-                  <p className="atlas-overline">Plano do dia</p>
-                  <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                    {MOCK_PRESCRIBED_DIET.name}
-                  </p>
-                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                    {MOCK_PRESCRIBED_DIET.description}
-                  </p>
-                </div>
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] text-[hsl(var(--fg-2))]">
-                  <UtensilsCrossed className="h-4 w-4" strokeWidth={1.9} />
-                </div>
-              </div>
+          <div className="mt-5 space-y-5">
+            <MacroTrack
+              label="Proteina"
+              consumed={nutritionTotals.protein}
+              target={DEFAULT_PROFILE.protein_target}
+              unit="g"
+              tone="protein"
+            />
+            <MacroTrack
+              label="Carboidratos"
+              consumed={nutritionTotals.carbs}
+              target={DEFAULT_PROFILE.carbs_target}
+              unit="g"
+              tone="carbs"
+            />
+            <MacroTrack
+              label="Gordura"
+              consumed={nutritionTotals.fat}
+              target={DEFAULT_PROFILE.fat_target}
+              unit="g"
+              tone="fat"
+            />
+          </div>
+        </Card>
+      </Section>
 
-              <div className="space-y-3">
-                {MOCK_PRESCRIBED_DIET.meals.map((meal, index) => (
-                  <div
-                    key={`${meal.name}-${meal.time}`}
-                    className="flex items-start gap-3 rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.78)] px-4 py-4"
-                  >
-                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]">
-                      <Clock3 className="h-4 w-4" strokeWidth={1.8} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-                          Meal {index + 1}
-                        </p>
-                        <span className="text-[12px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                          {meal.time}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        {meal.name}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <Section
+        title="Meal flow"
+        subtitle="Cards editaveis desta rota, com leitura sequencial e foco em alimento, contexto e macros."
+        actions={
+          <div className="flex flex-wrap justify-end gap-2">
+            {filterOptions.map((option) => {
+              const isActive = mealFilter === option;
 
-              <div className="mt-5 rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.78)] px-4 py-4">
-                <p className="atlas-metric-label">Targets</p>
-                <p className="mt-3 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  {MOCK_PRESCRIBED_DIET.target_calories} kcal
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setMealFilter(option)}
+                  className={cn(
+                    'atlas-button h-9 rounded-full px-4 text-[12px]',
+                    isActive ? 'atlas-button-primary' : 'atlas-button-secondary shadow-none'
+                  )}
+                >
+                  {option === 'all' ? 'Todas' : getMealTypeLabel(option)}
+                </button>
+              );
+            })}
+          </div>
+        }
+      >
+        {!mealsForDate.length ? (
+          <EmptyState
+            icon={UtensilsCrossed}
+            title="Nenhuma refeicao registrada"
+            description="Use o botao acima para abrir o modal local de refeicao e começar o dia alimentar."
+            action={
+              <PrimaryButton type="button" onClick={handleCreate}>
+                Adicionar refeicao
+              </PrimaryButton>
+            }
+          />
+        ) : null}
+
+        {mealsForDate.length > 0 && filteredMeals.length === 0 ? (
+          <EmptyState
+            icon={Target}
+            title="Nenhuma refeicao neste filtro"
+            description="Troque o filtro atual ou adicione um novo registro para este periodo."
+          />
+        ) : null}
+
+        {filteredMeals.length > 0 ? (
+          <div className="space-y-3">
+            {filteredMeals.map((meal) => (
+              <MealCard
+                key={meal.id}
+                meal={meal}
+                onEdit={() => handleEdit(meal)}
+                onDelete={() => handleDelete(meal)}
+              />
+            ))}
+          </div>
+        ) : null}
+      </Section>
+
+      <Section
+        title="Plan and insight"
+        subtitle="O plano alimentar e a leitura curta do dia ficam abaixo da acao principal, como apoio e nao como dashboard."
+      >
+        <div className="space-y-3">
+          <Card className="px-5 py-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="atlas-overline">Plano do dia</p>
+                <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                  {MOCK_PRESCRIBED_DIET.name}
                 </p>
                 <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                  P {MOCK_PRESCRIBED_DIET.target_protein}g · C {MOCK_PRESCRIBED_DIET.target_carbs}g · G{' '}
-                  {MOCK_PRESCRIBED_DIET.target_fat}g
+                  {MOCK_PRESCRIBED_DIET.description}
                 </p>
               </div>
-            </aside>
-          </div>
-        </section>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.78)] text-[hsl(var(--fg-2))]">
+                <UtensilsCrossed className="h-4 w-4" strokeWidth={1.9} />
+              </div>
+            </div>
 
-        <StatusBanner tone="warning">
-          Nutrition agora roda so com estado local mock. Nenhuma logica de Protocols, treino ou backend permanece nesta pagina.
-        </StatusBanner>
-
-        {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
-
-        <SectionCard
-          title="Intake vs targets"
-          subtitle="Leitura nutricional clara para o dia selecionado, sem reuso de logica de outros modulos."
-        >
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_330px]">
-            <div className="space-y-6">
-              <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.5)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="atlas-metric-label">Calories logged</p>
-                    <p className="mt-3 text-[2.25rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
-                      {Math.round(nutritionTotals.calories)}
-                      <span className="ml-1 text-[15px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-                        / {DEFAULT_PROFILE.calories_target} kcal
+            <div className="mt-5 space-y-3">
+              {MOCK_PRESCRIBED_DIET.meals.map((meal, index) => (
+                <div
+                  key={`${meal.name}-${meal.time}`}
+                  className="flex items-start gap-3 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4"
+                >
+                  <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg-2))]">
+                    <Clock3 className="h-4 w-4" strokeWidth={1.8} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+                        Meal {index + 1}
+                      </p>
+                      <span className="text-[12px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                        {meal.time}
                       </span>
-                    </p>
-                    <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                      {remainingCalories > 0
-                        ? `${remainingCalories} kcal ainda abertas dentro da meta do dia.`
-                        : 'Meta calorica atingida para o dia selecionado.'}
+                    </div>
+                    <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                      {meal.name}
                     </p>
                   </div>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    {Math.round(calorieProgress)}% da meta
-                  </span>
-                </div>
-
-                <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[hsl(var(--card))]">
-                  <div
-                    className="h-full rounded-full bg-[hsl(var(--fg))]"
-                    style={{ width: `${calorieProgress}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-5">
-                <MacroTrack
-                  label="Proteina"
-                  consumed={nutritionTotals.protein}
-                  target={DEFAULT_PROFILE.protein_target}
-                  unit="g"
-                  tone="protein"
-                />
-                <MacroTrack
-                  label="Carboidratos"
-                  consumed={nutritionTotals.carbs}
-                  target={DEFAULT_PROFILE.carbs_target}
-                  unit="g"
-                  tone="carbs"
-                />
-                <MacroTrack
-                  label="Gordura"
-                  consumed={nutritionTotals.fat}
-                  target={DEFAULT_PROFILE.fat_target}
-                  unit="g"
-                  tone="fat"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                <p className="atlas-metric-label">Snapshot</p>
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                      Refeicoes registradas
-                    </p>
-                    <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                      {mealsForDate.length} hoje · {MOCK_PRESCRIBED_DIET.meals.length} previstas no plano.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                      Proteina restante
-                    </p>
-                    <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                      {remainingProtein} g para fechar a meta configurada.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                      Ritmo do dia
-                    </p>
-                    <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                      Esta tela privilegia sequencia de refeicoes, clareza de intake e leitura limpa do dia.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.5)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--warn))]">
-                    <Flame className="h-4 w-4" strokeWidth={1.9} />
-                  </div>
-                  <div>
-                    <p className="atlas-metric-label">Suggested focus</p>
-                    <p className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                      Feche a refeicao seguinte antes de revisar o resto.
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-4 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                  Quanto mais cedo o dia alimentar fica visivel, mais facil fica manter contexto, aderencia e decisao limpa nas outras rotas.
-                </p>
-              </div>
-            </div>
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="Meal flow"
-          subtitle="Cards editaveis desta rota, com leitura sequencial e foco em alimento, contexto e macros."
-          actions={
-            <div className="flex flex-wrap gap-2">
-              {filterOptions.map((option) => {
-                const isActive = mealFilter === option;
-
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setMealFilter(option)}
-                    className={cn(
-                      'atlas-button h-9 rounded-full px-4 text-[12px]',
-                      isActive
-                        ? 'atlas-button-primary'
-                        : 'atlas-button-secondary shadow-none'
-                    )}
-                  >
-                    {option === 'all' ? 'Todas' : getMealTypeLabel(option)}
-                  </button>
-                );
-              })}
-            </div>
-          }
-        >
-          {!mealsForDate.length ? (
-            <EmptyState
-              icon={UtensilsCrossed}
-              title="Nenhuma refeicao registrada"
-              description="Use o botao acima para abrir o modal local de refeicao e começar o dia alimentar."
-              action={
-                <PrimaryButton type="button" onClick={handleCreate}>
-                  Adicionar refeicao
-                </PrimaryButton>
-              }
-            />
-          ) : null}
-
-          {mealsForDate.length > 0 && filteredMeals.length === 0 ? (
-            <EmptyState
-              icon={Target}
-              title="Nenhuma refeicao neste filtro"
-              description="Troque o filtro atual ou adicione um novo registro para este periodo."
-            />
-          ) : null}
-
-          {filteredMeals.length > 0 ? (
-            <div className="space-y-4">
-              {filteredMeals.map((meal, index) => (
-                <div key={meal.id} className="space-y-4">
-                  {index > 0 ? <div className="mx-auto h-px w-full max-w-[92%] bg-[hsl(var(--border)/0.75)]" /> : null}
-                  <MealCard
-                    meal={meal}
-                    onEdit={() => handleEdit(meal)}
-                    onDelete={() => handleDelete(meal)}
-                  />
                 </div>
               ))}
             </div>
-          ) : null}
-        </SectionCard>
+          </Card>
+
+          <Card className="px-5 py-5">
+            <p className="atlas-metric-label">Snapshot</p>
+            <div className="mt-4 space-y-4">
+              <div>
+                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
+                  Refeicoes registradas
+                </p>
+                <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+                  {mealsForDate.length} hoje · {MOCK_PRESCRIBED_DIET.meals.length} previstas no plano.
+                </p>
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
+                  Proteina restante
+                </p>
+                <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+                  {remainingProtein} g para fechar a meta configurada.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--warn))]">
+                  <Flame className="h-4 w-4" strokeWidth={1.9} />
+                </div>
+                <div>
+                  <p className="atlas-metric-label">Suggested focus</p>
+                  <p className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                    Feche a refeicao seguinte antes de revisar o resto.
+                  </p>
+                </div>
+              </div>
+              <p className="mt-4 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+                Quanto mais cedo o dia alimentar fica visivel, mais facil fica manter contexto,
+                aderencia e decisao limpa nas outras rotas.
+              </p>
+            </div>
+          </Card>
+        </div>
+      </Section>
 
         <Dialog
           open={isFormOpen}
@@ -897,7 +841,7 @@ function NutritionContent() {
             if (!open) setEditingMeal(null);
           }}
         >
-          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[860px]">
+          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
             <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--warn)/0.1)] to-transparent" />
               <div className="relative">
@@ -923,7 +867,6 @@ function NutritionContent() {
             />
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+    </AppContainer>
   );
 }

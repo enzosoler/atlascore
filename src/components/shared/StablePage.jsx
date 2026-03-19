@@ -1,5 +1,13 @@
 import React from 'react';
 import { AlertTriangle, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import {
+  ActionRow,
+  AppContainer,
+  Card,
+  PageHeader,
+  Section,
+  StatCard,
+} from '@/components/shared/AppContainer';
 import { cn } from '@/lib/utils';
 
 export function formatNumber(value, options = {}) {
@@ -86,44 +94,21 @@ export function PageShell({
   subtitle,
   actions,
   children,
-  maxWidth = 'max-w-6xl',
   eyebrow,
 }) {
   return (
-    <div className="atlas-page-shell">
-      <div className={cn('mx-auto space-y-8 px-5 py-6 lg:px-8 lg:py-10', maxWidth)}>
-        <header className="atlas-page-header px-6 py-6 lg:px-8 lg:py-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl space-y-3">
-              {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
-              <div>
-                <h1 className="atlas-display-title">{title}</h1>
-                {subtitle ? <p className="atlas-section-description mt-3">{subtitle}</p> : null}
-              </div>
-            </div>
-            {actions ? <div className="flex flex-wrap items-center gap-2.5">{actions}</div> : null}
-          </div>
-        </header>
+    <AppContainer>
+      <PageHeader eyebrow={eyebrow} title={title} subtitle={subtitle} actions={actions} />
         {children}
-      </div>
-    </div>
+    </AppContainer>
   );
 }
 
 export function SectionCard({ title, subtitle, actions, children, className = '' }) {
   return (
-    <section className={cn('atlas-card px-6 py-6 lg:px-7 lg:py-7', className)}>
-      {title || subtitle || actions ? (
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl">
-            {title ? <h2 className="atlas-section-title">{title}</h2> : null}
-            {subtitle ? <p className="atlas-section-description mt-2">{subtitle}</p> : null}
-          </div>
-          {actions ? <div className="flex flex-wrap items-center gap-2.5">{actions}</div> : null}
-        </div>
-      ) : null}
-      {children}
-    </section>
+    <Section title={title} subtitle={subtitle} actions={actions}>
+      <Card className={cn('px-5 py-5', className)}>{children}</Card>
+    </Section>
   );
 }
 
@@ -168,22 +153,7 @@ export function ErrorState({
 }
 
 export function MetricCard({ label, value, hint, icon: Icon }) {
-  return (
-    <article className="atlas-card px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-3">
-          <p className="atlas-metric-label">{label}</p>
-          <p className="atlas-metric-value">{value}</p>
-          {hint ? <p className="atlas-metric-hint">{hint}</p> : null}
-        </div>
-        {Icon ? (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-            <Icon className="h-5 w-5" strokeWidth={1.9} />
-          </div>
-        ) : null}
-      </div>
-    </article>
-  );
+  return <StatCard label={label} value={value} detail={hint} icon={Icon} />;
 }
 
 export function EmptyState({ title, description, action, icon: Icon }) {
@@ -235,7 +205,7 @@ export function SecondaryButton({ children, className = '', ...props }) {
 
 export function DateStepper({ date, onChange }) {
   return (
-    <div className="atlas-card inline-flex items-center gap-2 px-3 py-2">
+    <Card className="inline-flex items-center gap-2 px-2 py-2 shadow-[var(--shadow-xs)]">
       <button
         type="button"
         onClick={() => onChange(-1)}
@@ -253,6 +223,6 @@ export function DateStepper({ date, onChange }) {
       >
         <ChevronRight className="h-4 w-4" strokeWidth={2} />
       </button>
-    </div>
+    </Card>
   );
 }
