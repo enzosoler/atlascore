@@ -176,7 +176,6 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     min-height: 100%;
-    overscroll-behavior-y: none;
     /* Prevent horizontal overflow from triggering layout reflow / scale on iOS */
     overflow-x: hidden;
   }
@@ -191,11 +190,13 @@
     font-size: 16px;
     line-height: 1.5;
     letter-spacing: -0.018em;
-    overscroll-behavior-y: none;
     -webkit-user-select: text;
     user-select: text;
-    /* Prevent horizontal scroll from triggering iOS page scaling */
-    overflow-x: hidden;
+    /*
+     * Keep decorative gradients from creating horizontal bleed without turning
+     * the body into a constrained desktop scroll container.
+     */
+    overflow-x: clip;
   }
 
   #root {

@@ -24,6 +24,7 @@ import PublicSiteShell, {
   PublicLanguageSwitcher,
   PublicSectionHeader,
 } from '@/components/public/PublicSiteShell';
+import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
 import { getRegionPricing } from '@/lib/regionalPricing';
 import { ROUTES } from '@/lib/routes';
@@ -315,7 +316,10 @@ export default function Pricing() {
 
   return (
     <PublicSiteShell
-      navLinks={[{ href: '#plans', label: t('landing.nav.pricing') }]}
+      navLinks={[
+        { href: ROUTES.blog, label: 'Blog' },
+        { href: '#plans', label: t('landing.nav.pricing') },
+      ]}
       actions={(
         <>
           <PublicLanguageSwitcher />
@@ -336,6 +340,12 @@ export default function Pricing() {
         </>
       )}
     >
+      <PublicMetadata
+        title="Pricing — Atlas Core"
+        description="Compare Atlas Core plans and choose the right public entry point for training, nutrition, progress, and connected performance tracking."
+        canonicalPath={ROUTES.pricing}
+      />
+
       <section className="mx-auto max-w-6xl px-5 pb-8 pt-12 lg:px-8 lg:pb-12 lg:pt-16">
         <div className="atlas-page-header px-6 py-6 lg:px-8 lg:py-8">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">

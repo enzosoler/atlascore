@@ -23,6 +23,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import PublicSiteShell, {
   PublicLanguageSwitcher,
 } from '@/components/public/PublicSiteShell';
+import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
 
 /* ─────────────────────────────────────────
@@ -61,7 +62,7 @@ const handlePlan   = (id) => {
 ───────────────────────────────────────── */
 const COPY = {
   'pt-BR': {
-    nav: { howItWorks: 'Como funciona', features: 'Funcionalidades', pricing: 'Planos', login: 'Entrar', signup: 'Criar conta' },
+    nav: { howItWorks: 'Como funciona', features: 'Funcionalidades', blog: 'Blog', pricing: 'Planos', login: 'Entrar', signup: 'Criar conta' },
     hero: {
       badge: 'Acesso Antecipado',
       h1a: 'Seu corpo está evoluindo.',
@@ -232,7 +233,7 @@ const COPY = {
     },
   },
   'en-US': {
-    nav: { howItWorks: 'How it works', features: 'Features', pricing: 'Pricing', login: 'Log In', signup: 'Get Started' },
+    nav: { howItWorks: 'How it works', features: 'Features', blog: 'Blog', pricing: 'Pricing', login: 'Log In', signup: 'Get Started' },
     hero: {
       badge: 'Early Access',
       h1a: 'Your body is changing.',
@@ -678,6 +679,7 @@ export default function Landing() {
       navLinks={[
         { href: '#solution', label: c.nav.howItWorks },
         { href: '#features', label: c.nav.features },
+        { href: ROUTES.blog, label: c.nav.blog },
         { href: '#pricing', label: c.nav.pricing },
       ]}
       actions={(
@@ -688,6 +690,11 @@ export default function Landing() {
         </>
       )}
     >
+      <PublicMetadata
+        title="Atlas Core"
+        description="Atlas Core is the public performance operating system for workouts, nutrition, measurements, supplements, and connected progress."
+        canonicalPath={ROUTES.home}
+      />
 
       {/* ══ HERO ══════════════════════════════════ */}
       <section className="mx-auto max-w-6xl px-5 pb-14 pt-12 lg:px-8 lg:pb-20 lg:pt-16">

@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Clock3, CalendarDays, Tag } from 'lucide-react';
 import PublicSiteShell, {
   PublicLanguageSwitcher,
-  PublicSectionHeader,
 } from '@/components/public/PublicSiteShell';
+import PublicMetadata from '@/components/public/PublicMetadata';
 import { BLOG_POSTS } from '@/lib/blogPosts';
 import { ROUTES } from '@/lib/routes';
 
@@ -68,20 +68,6 @@ const CATEGORIES = ['All', ...Array.from(new Set(BLOG_POSTS.map((p) => p.categor
 export default function BlogIndex() {
   const [activeCategory, setActiveCategory] = React.useState('All');
 
-  useEffect(() => {
-    document.title = 'Blog — Atlas Core';
-    const desc = document.querySelector('meta[name="description"]');
-    if (desc) {
-      desc.setAttribute(
-        'content',
-        'Insights on fitness tracking, nutrition, training, and building systems that actually produce results.'
-      );
-    }
-    // Set canonical
-    const canonical = document.querySelector('link[rel="canonical"]');
-    if (canonical) canonical.setAttribute('href', `${window.location.origin}/blog`);
-  }, []);
-
   const filtered =
     activeCategory === 'All'
       ? BLOG_POSTS
@@ -91,6 +77,7 @@ export default function BlogIndex() {
     <PublicSiteShell
       navLinks={[
         { href: ROUTES.home, label: 'Home' },
+        { href: ROUTES.blog, label: 'Blog' },
         { href: ROUTES.pricing, label: 'Pricing' },
         { href: ROUTES.help, label: 'Help' },
       ]}
@@ -112,14 +99,23 @@ export default function BlogIndex() {
         </>
       }
     >
+      <PublicMetadata
+        title="Blog — Atlas Core"
+        description="Insights on fitness tracking, nutrition, training, and building systems that actually produce results."
+        canonicalPath={ROUTES.blog}
+      />
+
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-5 pb-10 pt-12 lg:px-8 lg:pb-14 lg:pt-16">
-        <PublicSectionHeader
-          eyebrow="Blog"
-          title={'Insights for athletes\nwho track seriously.'}
-          description="Practical guides on training, nutrition, and building systems that actually produce results — not motivation, not hype."
-          align="center"
-        />
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="atlas-overline justify-center">Blog</p>
+          <h1 className="atlas-display-title mt-4 whitespace-pre-line text-[clamp(2rem,1.4rem+1.2vw,3rem)]">
+            {'Insights for athletes\nwho track seriously.'}
+          </h1>
+          <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
+            Practical guides on training, nutrition, and building systems that actually produce results — not motivation, not hype.
+          </p>
+        </div>
       </section>
 
       {/* Category filter */}

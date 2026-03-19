@@ -1,5 +1,5 @@
 export const ROUTES = {
-  home: '/Landing',
+  home: '/',
   auth: '/auth',
   login: '/login',
   signup: '/signup',
@@ -46,6 +46,7 @@ export const ROLE_HOME = {
 };
 
 export const LEGACY_ROUTE_REDIRECTS = [
+  ['/Landing', ROUTES.home],
   ['/home', ROUTES.home],
   ['/landing', ROUTES.home],
   ['/onboarding', ROUTES.onboarding],

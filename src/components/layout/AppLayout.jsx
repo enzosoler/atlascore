@@ -493,7 +493,7 @@ export default function AppLayout() {
       {/* ── Main content ────────────────────────────────────────── */}
       <main
         className={cn(
-          'flex-1 min-h-screen transition-all duration-300',
+          'flex-1 min-h-screen overscroll-y-none transition-all duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'pt-14 lg:pt-0',
           'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'

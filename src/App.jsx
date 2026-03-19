@@ -2,7 +2,7 @@ import React from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -11,7 +11,7 @@ import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
 import { DailyStoreProvider } from '@/store/dailyStore.jsx';
-import { LEGACY_ROUTE_REDIRECTS, ROLE_HOME, ROUTES } from '@/lib/routes';
+import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
 
 // Pages
 import Landing from '@/pages/Landing.jsx';
@@ -57,97 +57,89 @@ import GettingStartedGuide from '@/pages/guides/GettingStartedGuide';
 import GitHubPRTracker from '@/pages/GitHubPRTracker';
 import WorkoutLoggingGuide from '@/pages/guides/WorkoutLoggingGuide';
 import PlanVsExecutionGuide from '@/pages/guides/PlanVsExecutionGuide';
+import BlogIndex from '@/pages/blog/BlogIndex.jsx';
+import BlogPost from '@/pages/blog/BlogPost.jsx';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout.jsx';
 import RouteGuard from '@/components/rbac/RouteGuard';
 
-const AuthenticatedApp = () => {
-  const { authError, user, isAuthenticated, authState } = useAuth();
+const FullScreenSpinner = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-[hsl(var(--bg))]">
+    <div className="w-8 h-8 border-[3px] border-[hsl(var(--border))] border-t-[hsl(var(--primary))] rounded-full animate-spin"></div>
+  </div>
+);
+
+const MissingConfigScreen = () => (
+  <div className="min-h-screen bg-[hsl(var(--bg))] flex items-center justify-center p-6">
+    <div className="max-w-xl w-full rounded-2xl border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] p-6 space-y-4">
+      <div>
+        <p className="text-[20px] font-semibold text-[hsl(var(--fg))]">Configuração do Base44 ausente</p>
+        <p className="mt-2 text-[14px] text-[hsl(var(--fg-2))]">
+          A área logada depende das variáveis <code>VITE_BASE44_APP_ID</code> e <code>VITE_BASE44_APP_BASE_URL</code>.
+          Sem isso, autenticação, queries e páginas internas não conseguem carregar.
+        </p>
+      </div>
+
+      <div className="rounded-xl bg-[hsl(var(--shell))] p-4 text-[13px] text-[hsl(var(--fg))]">
+        <p className="font-medium mb-2">Crie um arquivo <code>.env.local</code> na raiz com:</p>
+        <pre className="whitespace-pre-wrap break-all text-[12px] leading-6">
+{`VITE_BASE44_APP_ID=seu_app_id
+VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
+        </pre>
+      </div>
+
+      <p className="text-[13px] text-[hsl(var(--fg-2))]">
+        Existe um modelo em <code>.env.example</code>. Depois de preencher, reinicie o <code>npm run dev</code>.
+      </p>
+    </div>
+  </div>
+);
+
+const RequireAuthenticatedApp = () => {
+  const { authError, isAuthenticated, authState } = useAuth();
   const location = useLocation();
 
-  const needsLogin = authError?.type === 'auth_required';
-
   if (authState === 'loading') {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[hsl(var(--bg))]">
-        <div className="w-8 h-8 border-[3px] border-[hsl(var(--border))] border-t-[hsl(var(--primary))] rounded-full animate-spin"></div>
-      </div>
-    );
+    return <FullScreenSpinner />;
   }
 
   if (authError?.type === 'user_not_registered') return <UserNotRegisteredError />;
-  if (authError?.type === 'missing_config') {
-    return (
-      <div className="min-h-screen bg-[hsl(var(--bg))] flex items-center justify-center p-6">
-        <div className="max-w-xl w-full rounded-2xl border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] p-6 space-y-4">
-          <div>
-            <p className="text-[20px] font-semibold text-[hsl(var(--fg))]">Configuração do Base44 ausente</p>
-            <p className="mt-2 text-[14px] text-[hsl(var(--fg-2))]">
-              A área logada depende das variáveis <code>VITE_BASE44_APP_ID</code> e <code>VITE_BASE44_APP_BASE_URL</code>.
-              Sem isso, autenticação, queries e páginas internas não conseguem carregar.
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-[hsl(var(--shell))] p-4 text-[13px] text-[hsl(var(--fg))]">
-            <p className="font-medium mb-2">Crie um arquivo <code>.env.local</code> na raiz com:</p>
-            <pre className="whitespace-pre-wrap break-all text-[12px] leading-6">
-{`VITE_BASE44_APP_ID=seu_app_id
-VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
-            </pre>
-          </div>
-
-          <p className="text-[13px] text-[hsl(var(--fg-2))]">
-            Existe um modelo em <code>.env.example</code>. Depois de preencher, reinicie o <code>npm run dev</code>.
-          </p>
-        </div>
-      </div>
-    );
-  }
-  if (needsLogin) {
+  if (authError?.type === 'missing_config') return <MissingConfigScreen />;
+  if (!isAuthenticated) {
     const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
-
-    if (location.pathname !== '/auth') {
-      return (
-        <Navigate
-          to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`}
-          replace
-        />
-      );
-    }
-
-    return <Auth />;
+    return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
   }
 
-  const homeRoute = isAuthenticated && user
-    ? (ROLE_HOME[user.atlas_role] || ROUTES.today)
-    : ROUTES.home;
+  return <Outlet />;
+};
 
-  return (
-    <Routes>
-      {/* Root redirect — role-aware */}
-      <Route path="/" element={<Navigate to={homeRoute} replace />} />
-      <Route path={ROUTES.home} element={<Landing />} />
-      <Route path={ROUTES.auth} element={<Auth />} />
-      <Route path={ROUTES.signup} element={<Auth />} />
-      <Route path={ROUTES.login} element={<Auth />} />
+const AppRoutes = () => (
+  <Routes>
+    <Route path={ROUTES.home} element={<Landing />} />
+    <Route path={ROUTES.blog} element={<BlogIndex />} />
+    <Route path={`${ROUTES.blog}/:slug`} element={<BlogPost />} />
+    <Route path={ROUTES.auth} element={<Auth />} />
+    <Route path={ROUTES.signup} element={<Auth />} />
+    <Route path={ROUTES.login} element={<Auth />} />
+    <Route path={ROUTES.pricing} element={<Pricing />} />
+    <Route path={ROUTES.help} element={<HelpCenter />} />
+    <Route path="/use-case/:role" element={<UseCase />} />
+    <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
+    <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
+    <Route path="/guides/plan-vs-execution" element={<PlanVsExecutionGuide />} />
+    {LEGACY_ROUTE_REDIRECTS.map(([from, to]) => (
+      <Route
+        key={from}
+        caseSensitive
+        path={from}
+        element={<Navigate to={to} replace />}
+      />
+    ))}
+
+    <Route element={<RequireAuthenticatedApp />}>
       <Route path={ROUTES.onboarding} element={<Onboarding />} />
-      <Route path={ROUTES.pricing} element={<Pricing />} />
-      <Route path={ROUTES.help} element={<HelpCenter />} />
-      <Route path="/use-case/:role" element={<UseCase />} />
-      <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
-      <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
-      <Route path="/guides/plan-vs-execution" element={<PlanVsExecutionGuide />} />
-      {LEGACY_ROUTE_REDIRECTS.map(([from, to]) => (
-        <Route
-          key={from}
-          caseSensitive
-          path={from}
-          element={<Navigate to={to} replace />}
-        />
-      ))}
 
-      {/* App (with sidebar layout) */}
       <Route element={<AppLayout />}>
         <Route path={ROUTES.today} element={<Today />} />
         <Route path={ROUTES.nutrition} element={<Nutrition />} />
@@ -184,9 +176,15 @@ VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
         <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminPanel /></RouteGuard>} />
         <Route path={ROUTES.githubPRs} element={<GitHubPRTracker />} />
       </Route>
+    </Route>
 
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <Route path="*" element={<PageNotFound />} />
+  </Routes>
+);
+
+const AuthenticatedApp = () => {
+  return (
+    <AppRoutes />
   );
 };
 
