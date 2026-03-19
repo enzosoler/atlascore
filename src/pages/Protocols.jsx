@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
 import {
@@ -25,9 +26,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-const PROTOCOLS_QUERY_KEY = ['protocols-stable'];
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const PROTOCOLS_QUERY_KEY = ['protocols'];
 const FILTERS = ['all', 'active', 'paused', 'finished'];
-const FILTER_LABELS = { all: 'Todos', active: 'Ativo', paused: 'Pausado', finished: 'Finalizado' };
+const FILTER_LABELS = {
+  all: 'Todos',
+  active: 'Ativo',
+  paused: 'Pausado',
+  finished: 'Finalizado',
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getToday() {
   return new Date().toISOString().split('T')[0];
@@ -39,14 +49,61 @@ function getProtocolStatus(protocol) {
   return 'active';
 }
 
+// ── Supabase data-access helpers ──────────────────────────────────────────────
+// RLS automatically filters rows to the authenticated user — no manual
+// .eq('user_id', ...) needed on reads, but we still pass user_id on writes.
+
+async function fetchProtocols() {
+  const { data, error } = await supabase
+    .from('protocols')
+    .select('*')
+    .order('start_date', { ascending: false })
+    .limit(200);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function createProtocol(payload) {
+  const { data, error } = await supabase
+    .from('protocols')
+    .insert(payload)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+async function updateProtocol(protocolId, payload) {
+  const { data, error } = await supabase
+    .from('protocols')
+    .update(payload)
+    .eq('id', protocolId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+async function deleteProtocol(protocolId) {
+  const { error } = await supabase
+    .from('protocols')
+    .delete()
+    .eq('id', protocolId);
+
+  if (error) throw error;
+}
+
+// ── Summary tile ──────────────────────────────────────────────────────────────
+
 function SummaryTile({ label, value, hint, icon: Icon }) {
   return (
     <article className="atlas-card rounded-[28px] border-[hsl(var(--border)/0.92)] px-5 py-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="atlas-overline">
-            {label}
-          </p>
+          <p className="atlas-overline">{label}</p>
           <p className="mt-3 text-[30px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
             {value}
           </p>
@@ -62,6 +119,8 @@ function SummaryTile({ label, value, hint, icon: Icon }) {
   );
 }
 
+// ── Page entry point ──────────────────────────────────────────────────────────
+
 export default function Protocols() {
   return (
     <SafePageBoundary
@@ -75,142 +134,106 @@ export default function Protocols() {
   );
 }
 
+// ── Main content ──────────────────────────────────────────────────────────────
+
 function ProtocolsContent() {
+  const { user } = useAuth();
   const qc = useQueryClient();
+
   const [filter, setFilter] = useState('active');
   const [notice, setNotice] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProtocol, setEditingProtocol] = useState(null);
   const [pendingActionKey, setPendingActionKey] = useState('');
 
+  // ── Query ──────────────────────────────────────────────────────────────────
+
   const protocolsQuery = useQuery({
     queryKey: PROTOCOLS_QUERY_KEY,
-    queryFn: () => base44.entities.Protocol.list('-start_date', 100),
+    queryFn: fetchProtocols,
+    // Only fetch once the user session is confirmed
+    enabled: Boolean(user?.id),
     retry: 1,
   });
 
-  const saveProtocol = useMutation({
+  // ── Save (create / update) ─────────────────────────────────────────────────
+
+  const saveProtocolMutation = useMutation({
     mutationFn: ({ protocolId, payload }) =>
       protocolId
-        ? base44.entities.Protocol.update(protocolId, payload)
-        : base44.entities.Protocol.create(payload),
+        ? updateProtocol(protocolId, payload)
+        : createProtocol({ ...payload, user_id: user.id }),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
       setIsFormOpen(false);
       setEditingProtocol(null);
       setNotice({
         tone: 'success',
-        message: variables.protocolId
-          ? 'Protocolo atualizado.'
-          : 'Protocolo adicionado.',
+        message: variables.protocolId ? 'Protocolo atualizado.' : 'Protocolo adicionado.',
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('[Protocols] save error:', error);
       setNotice({
         tone: 'warning',
-        message:
-          'Não foi possível salvar o protocolo. Tente novamente.',
+        message: 'Não foi possível salvar o protocolo. Tente novamente.',
       });
     },
   });
+
+  // ── Status change (pause / resume / finish / reactivate) ──────────────────
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, payload }) => base44.entities.Protocol.update(id, payload),
-    onMutate: ({ actionKey }) => {
-      setPendingActionKey(actionKey);
-    },
+    mutationFn: ({ id, payload }) => updateProtocol(id, payload),
+    onMutate: ({ actionKey }) => setPendingActionKey(actionKey),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setNotice({
-        tone: 'success',
-        message: variables.successMessage,
-      });
+      setNotice({ tone: 'success', message: variables.successMessage });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
-        message:
-          'Não foi possível atualizar o status do protocolo. Tente novamente.',
+        message: 'Não foi possível atualizar o status. Tente novamente.',
       });
     },
-    onSettled: () => {
-      setPendingActionKey('');
-    },
+    onSettled: () => setPendingActionKey(''),
   });
 
-  const deleteProtocol = useMutation({
-    mutationFn: ({ id }) => base44.entities.Protocol.delete(id),
-    onMutate: ({ actionKey }) => {
-      setPendingActionKey(actionKey);
-    },
+  // ── Delete ─────────────────────────────────────────────────────────────────
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ id }) => deleteProtocol(id),
+    onMutate: ({ actionKey }) => setPendingActionKey(actionKey),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setNotice({
-        tone: 'success',
-        message: 'Protocolo excluído.',
-      });
+      setNotice({ tone: 'success', message: 'Protocolo excluído.' });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
-        message:
-          'Não foi possível excluir o protocolo. Tente novamente.',
+        message: 'Não foi possível excluir o protocolo. Tente novamente.',
       });
     },
-    onSettled: () => {
-      setPendingActionKey('');
-    },
+    onSettled: () => setPendingActionKey(''),
   });
 
-  // Log today's dose — creates a Supplement record linked to the protocol via protocol_id
-  const [loggingDoseId, setLoggingDoseId] = useState(null);
-  const logDoseMutation = useMutation({
-    mutationFn: ({ protocol }) =>
-      base44.entities.Supplement.create({
-        protocol_id: protocol.id,
-        name: protocol.substance_name || protocol.name,
-        dose: protocol.dose,
-        category: protocol.category,
-        date: getToday(),
-        active: true,
-        notes: `Dose registrada via protocolo "${protocol.substance_name || protocol.name}"`,
-      }),
-    onMutate: ({ protocol }) => setLoggingDoseId(protocol.id),
-    onSuccess: (_, { protocol }) => {
-      setLoggingDoseId(null);
-      setNotice({
-        tone: 'success',
-        message: `Dose de ${protocol.substance_name || protocol.name} registrada para hoje.`,
-      });
-    },
-    onError: () => {
-      setLoggingDoseId(null);
-      setNotice({
-        tone: 'warning',
-        message: 'Não foi possível registrar a dose. Tente novamente.',
-      });
-    },
-  });
+  // ── Derived state ──────────────────────────────────────────────────────────
 
   const protocols = toArray(protocolsQuery.data);
   const isLoading = protocolsQuery.isPending;
   const hasLoadError = protocolsQuery.isError;
 
   const groupedProtocols = useMemo(() => {
-    const active = protocols.filter((item) => item?.active && !item?.end_date);
-    const paused = protocols.filter((item) => !item?.active && !item?.end_date);
-    const finished = protocols.filter((item) => Boolean(item?.end_date));
-
-    return {
-      all: protocols,
-      active,
-      paused,
-      finished,
-    };
+    const active   = protocols.filter((p) =>  p?.active && !p?.end_date);
+    const paused   = protocols.filter((p) => !p?.active && !p?.end_date);
+    const finished = protocols.filter((p) =>  Boolean(p?.end_date));
+    return { all: protocols, active, paused, finished };
   }, [protocols]);
 
-  const filteredProtocols = groupedProtocols[filter] || [];
+  const filteredProtocols = groupedProtocols[filter] ?? [];
   const hasAnyProtocols = protocols.length > 0;
+
+  // ── Event handlers ─────────────────────────────────────────────────────────
 
   const handleCreate = () => {
     setNotice(null);
@@ -227,24 +250,16 @@ function ProtocolsContent() {
   const handleStatusChange = (protocol, nextStatus) => {
     if (!protocol?.id) return;
 
+    // Send null (not empty string) for date columns — Postgres rejects ''
     const payloads = {
-      active: {
-        active: true,
-        end_date: '',
-      },
-      paused: {
-        active: false,
-        end_date: '',
-      },
-      finished: {
-        active: false,
-        end_date: protocol?.end_date || getToday(),
-      },
+      active:   { active: true,  end_date: null },
+      paused:   { active: false, end_date: null },
+      finished: { active: false, end_date: protocol?.end_date || getToday() },
     };
 
-    const successMessages = {
-      active: 'Protocolo reativado.',
-      paused: 'Protocolo pausado.',
+    const messages = {
+      active:   'Protocolo reativado.',
+      paused:   'Protocolo pausado.',
       finished: 'Protocolo marcado como finalizado.',
     };
 
@@ -252,23 +267,36 @@ function ProtocolsContent() {
       id: protocol.id,
       payload: payloads[nextStatus],
       actionKey: `${protocol.id}-${nextStatus}`,
-      successMessage: successMessages[nextStatus],
+      successMessage: messages[nextStatus],
     });
   };
 
   const handleDelete = (protocol) => {
     if (!protocol?.id) return;
 
-    const protocolLabel = protocol?.substance_name || protocol?.name || 'este item';
-    const confirmed = window.confirm(`Excluir ${protocolLabel}?`);
+    const label = protocol?.substance_name || protocol?.name || 'este item';
+    if (!window.confirm(`Excluir ${label}?`)) return;
 
-    if (!confirmed) return;
-
-    deleteProtocol.mutate({
+    deleteMutation.mutate({
       id: protocol.id,
       actionKey: `${protocol.id}-delete`,
     });
   };
+
+  const handleFormSubmit = (payload) => {
+    saveProtocolMutation.mutate({
+      protocolId: editingProtocol?.id ?? null,
+      payload,
+    });
+  };
+
+  const handleFormClose = () => {
+    if (saveProtocolMutation.isPending) return;
+    setIsFormOpen(false);
+    setEditingProtocol(null);
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <PageShell
@@ -286,7 +314,9 @@ function ProtocolsContent() {
       }
       maxWidth="max-w-6xl"
     >
-      {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
+      {notice?.message ? (
+        <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>
+      ) : null}
 
       {isLoading ? (
         <LoadingState
@@ -302,6 +332,7 @@ function ProtocolsContent() {
         />
       ) : null}
 
+      {/* Summary tiles */}
       <section className="grid gap-3 md:grid-cols-3">
         <SummaryTile
           label="Ativo"
@@ -323,6 +354,7 @@ function ProtocolsContent() {
         />
       </section>
 
+      {/* Protocol list */}
       <SectionCard
         title="Itens do protocolo atual"
         subtitle="Rastreamento por status das substâncias que você usa ou monitora atualmente."
@@ -332,7 +364,7 @@ function ProtocolsContent() {
               const count =
                 option === 'all'
                   ? groupedProtocols.all.length
-                  : groupedProtocols[option]?.length || 0;
+                  : groupedProtocols[option]?.length ?? 0;
 
               return (
                 <FilterChip
@@ -347,6 +379,7 @@ function ProtocolsContent() {
           </div>
         }
       >
+        {/* Skeleton while loading */}
         {isLoading ? (
           <div className="space-y-4">
             {[0, 1].map((index) => (
@@ -365,6 +398,7 @@ function ProtocolsContent() {
           </div>
         ) : null}
 
+        {/* No protocols at all */}
         {!isLoading && !hasAnyProtocols ? (
           <EmptyState
             title="Nenhum item no protocolo"
@@ -381,6 +415,7 @@ function ProtocolsContent() {
           />
         ) : null}
 
+        {/* Filter has no matches */}
         {!isLoading && hasAnyProtocols && filteredProtocols.length === 0 ? (
           <EmptyState
             title={`Nenhum protocolo ${FILTER_LABELS[filter]?.toLowerCase() || filter}`}
@@ -393,6 +428,7 @@ function ProtocolsContent() {
           />
         ) : null}
 
+        {/* Protocol cards */}
         {!isLoading && filteredProtocols.length > 0 ? (
           <div className="space-y-4">
             {filteredProtocols.map((protocol) => {
@@ -400,19 +436,27 @@ function ProtocolsContent() {
 
               return (
                 <ProtocolCard
-                  key={protocol?.id || `${protocol?.name}-${protocol?.start_date || 'date'}`}
+                  key={protocol?.id ?? `${protocol?.name}-${protocol?.start_date}`}
                   protocol={protocol}
                   status={status}
                   busyActionKey={pendingActionKey}
                   onEdit={() => handleEdit(protocol)}
-                  onPause={status === 'active' ? () => handleStatusChange(protocol, 'paused') : null}
-                  onResume={status === 'paused' ? () => handleStatusChange(protocol, 'active') : null}
+                  onPause={
+                    status === 'active'
+                      ? () => handleStatusChange(protocol, 'paused')
+                      : null
+                  }
+                  onResume={
+                    status === 'paused'
+                      ? () => handleStatusChange(protocol, 'active')
+                      : null
+                  }
                   onFinish={
-                    status !== 'finished' ? () => handleStatusChange(protocol, 'finished') : null
+                    status !== 'finished'
+                      ? () => handleStatusChange(protocol, 'finished')
+                      : null
                   }
                   onDelete={() => handleDelete(protocol)}
-                  onLogDose={status === 'active' ? () => logDoseMutation.mutate({ protocol }) : null}
-                  isLogDosePending={loggingDoseId === protocol?.id}
                 />
               );
             })}
@@ -420,10 +464,11 @@ function ProtocolsContent() {
         ) : null}
       </SectionCard>
 
+      {/* Create / Edit dialog */}
       <Dialog
         open={isFormOpen}
         onOpenChange={(open) => {
-          if (saveProtocol.isPending) return;
+          if (saveProtocolMutation.isPending) return;
           setIsFormOpen(open);
           if (!open) setEditingProtocol(null);
         }}
@@ -432,30 +477,24 @@ function ProtocolsContent() {
           <DialogPanelHeader
             eyebrow="Protocolos"
             title={editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
-            description="Registre os dados principais do protocolo: substância, categoria, dose, frequência, horário e status atual."
+            description="Registre os dados principais do protocolo: substância, categoria, dose, unidade, frequência, horário e status atual."
             accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
           />
+          {/* Visually hidden for accessibility */}
           <DialogHeader className="sr-only">
-            <DialogTitle>{editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}</DialogTitle>
+            <DialogTitle>
+              {editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
+            </DialogTitle>
             <DialogDescription>
-              Registre os dados principais do protocolo: substância, categoria, dose, frequência, horário e status atual.
+              Registre os dados principais do protocolo: substância, categoria, dose, unidade, frequência, horário e status atual.
             </DialogDescription>
           </DialogHeader>
 
           <ProtocolForm
             protocol={editingProtocol}
-            isSubmitting={saveProtocol.isPending}
-            onCancel={() => {
-              if (saveProtocol.isPending) return;
-              setIsFormOpen(false);
-              setEditingProtocol(null);
-            }}
-            onSubmit={(payload) =>
-              saveProtocol.mutate({
-                protocolId: editingProtocol?.id,
-                payload,
-              })
-            }
+            isSubmitting={saveProtocolMutation.isPending}
+            onCancel={handleFormClose}
+            onSubmit={handleFormSubmit}
           />
         </DialogContent>
       </Dialog>

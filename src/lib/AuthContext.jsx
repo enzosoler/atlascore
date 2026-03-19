@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { fetchProfileRole, normalizeAtlasRole } from '@/hooks/useRole';
+import { sendWelcomeEmailAsync } from '@/lib/emailService';
 
 const AuthContext = createContext(null);
 
@@ -282,6 +283,11 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (error) throw error;
+
+    // Fire-and-forget welcome email.
+    // Runs after successful account creation. Never blocks auth or throws.
+    const firstName = trimmedName.split(' ')[0] || '';
+    sendWelcomeEmailAsync({ email: normalizedEmail, firstName });
 
     if (data.session?.user) {
       return {

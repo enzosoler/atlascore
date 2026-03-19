@@ -318,21 +318,11 @@ function ProgressPhotosContent() {
 
   // ── Query de fotos ──────────────────────────────────────────────
 
+  // onSuccess was removed in TanStack Query v5 — derive saved dates from query data directly
+  // (allDates computation below merges checkpointDates + savedDates from allPhotos on every render)
   const { data: allPhotos = [] } = useQuery({
     queryKey: ['progress-photos-page'],
     queryFn: () => base44.entities.ProgressPhoto.list('-date', 200),
-    onSuccess: (data) => {
-      // Coleta as datas únicas já salvas
-      const saved = [...new Set(data.map((p) => p.date).filter(Boolean))].sort(
-        (a, b) => new Date(b) - new Date(a)
-      );
-      setCheckpointDates((prev) => {
-        const merged = [...new Set([...prev, ...saved])].sort(
-          (a, b) => new Date(b) - new Date(a)
-        );
-        return merged;
-      });
-    },
   });
 
   // ── Mutações ────────────────────────────────────────────────────

@@ -10,6 +10,7 @@ import { ptBR } from 'date-fns/locale';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
+import { toast } from 'sonner';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -191,6 +192,11 @@ export default function WorkoutsV2() {
       base44.entities.Workout.update(id, { ...completedData, status: 'completed' }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workout-sessions-recent'] });
+      // Toast is shown inside WorkoutExecutionScreen before this fires;
+      // this ensures the session list refreshes in the background.
+    },
+    onError: () => {
+      toast.error('Erro ao salvar treino. Verifique sua conexão.');
     },
   });
 
@@ -210,8 +216,11 @@ export default function WorkoutsV2() {
 
   const handleSessionComplete = (completedData) => {
     if (activeSession?.id) {
+      // completedData = { exercises_completed, volume_load, duration_minutes }
+      // Merge into the existing Workout entity and mark as completed
       completeSessionMut.mutate({ id: activeSession.id, completedData });
     }
+    // Reset to planning view immediately (mutation fires async in background)
     setActiveSession(null);
     setMode('planning');
   };

@@ -98,7 +98,10 @@ export default function ProtocolCard({
               ) : null}
             </div>
             <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-              {protocol?.dose || 'Dose não definida'} · {protocol?.frequency || 'Frequência não definida'}
+              {protocol?.dose
+                ? `${protocol.dose}${protocol?.unit ? ` ${protocol.unit}` : ''}`
+                : 'Dose não definida'}{' '}
+              · {protocol?.frequency || 'Frequência não definida'}
             </p>
           </div>
 

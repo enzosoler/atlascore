@@ -1,6 +1,18 @@
 import React from 'react';
-import { Brain, Dumbbell, Loader2, Sparkles, User, UtensilsCrossed } from 'lucide-react';
+import {
+  Brain,
+  CheckCircle2,
+  Clock,
+  Dumbbell,
+  Loader2,
+  Scale,
+  Shield,
+  Sparkles,
+  User,
+  UtensilsCrossed,
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { useRole } from '@/hooks/useRole';
 import { base44 } from '@/api/base44Client';
@@ -62,6 +74,107 @@ function getDateLabel() {
   }).format(new Date());
 }
 
+// ── Simple rules-based insight generator ──────────────────────────────────────
+// Priority order: missing data warnings → positive streaks → protocol info → default
+function buildInsight({
+  recentSessions,
+  todayMeals,
+  recentMeasurements,
+  activeProtocolsList,
+  activeDietPlan,
+  activeWorkoutPlan,
+  todayStr,
+}) {
+  const last7 = recentSessions.filter((s) => {
+    if (!s.date) return false;
+    const diff = (new Date(todayStr) - new Date(s.date)) / (1000 * 60 * 60 * 24);
+    return diff >= 0 && diff < 7;
+  });
+  const completedLast7 = last7.filter((s) => s.status === 'completed').length;
+
+  // 1. No workouts this week despite having an active plan
+  if (activeWorkoutPlan && completedLast7 === 0) {
+    return {
+      title: 'Nenhum treino registrado esta semana.',
+      description:
+        'Você tem um plano ativo. Abra Treinos para registrar sua próxima sessão.',
+    };
+  }
+
+  // 2. No meals logged today despite having an active diet plan
+  if (activeDietPlan && todayMeals.length === 0) {
+    return {
+      title: 'Nenhuma refeição registrada hoje.',
+      description:
+        'Abra Nutrição para registrar suas refeições e acompanhar os macros do dia.',
+    };
+  }
+
+  // 3. No measurements ever (new user prompt)
+  if (recentMeasurements.length === 0) {
+    return {
+      title: 'Sem medidas registradas ainda.',
+      description:
+        'Registre o peso e medidas em Progresso para acompanhar sua evolução ao longo do tempo.',
+    };
+  }
+
+  // 4. No measurements in the last 30 days (lapsed tracking)
+  const thirtyAgoStr = (() => {
+    const d = new Date(todayStr);
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split('T')[0];
+  })();
+  const hasRecentMeasure = recentMeasurements.some((m) => m.date && m.date >= thirtyAgoStr);
+  if (!hasRecentMeasure) {
+    return {
+      title: 'Nenhuma medida nos últimos 30 dias.',
+      description:
+        'Registrar o peso regularmente ajuda a identificar tendências e ajustar o plano.',
+    };
+  }
+
+  // 5. Great workout consistency this week
+  if (completedLast7 >= 4) {
+    return {
+      title: `${completedLast7} treinos concluídos nos últimos 7 dias.`,
+      description:
+        'Consistência excelente. Continue neste ritmo para maximizar os resultados.',
+    };
+  }
+  if (completedLast7 >= 2) {
+    return {
+      title: `${completedLast7} treinos concluídos esta semana.`,
+      description: 'Boa consistência. Cada sessão completa conta para o resultado final.',
+    };
+  }
+
+  // 6. Active protocol info
+  if (activeProtocolsList.length > 0) {
+    const p = activeProtocolsList[0];
+    const since = p.start_date
+      ? new Date(`${p.start_date}T12:00:00`).toLocaleDateString('pt-BR', {
+          day: 'numeric',
+          month: 'short',
+        })
+      : null;
+    const count = activeProtocolsList.length;
+    return {
+      title: `${count} protocolo${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}.`,
+      description: since
+        ? `${p.name || 'Protocolo'} ativo desde ${since}. Acompanhe o estoque em Protocolos.`
+        : 'Acompanhe seus suplementos e protocolos na aba Protocolos.',
+    };
+  }
+
+  // Default
+  return {
+    title: 'Comece pela nutrição, depois abra o treino.',
+    description:
+      'Manter a primeira decisão alimentar visível geralmente deixa o resto do dia mais leve e fácil de executar.',
+  };
+}
+
 export default function Today() {
   return (
     <SafePageBoundary
@@ -83,7 +196,9 @@ function TodayContent() {
   const greeting = getGreeting();
   const isAdmin = !isRoleLoading && role === 'admin';
 
-  // ── Real data queries ──────────────────────────────────────────────────────
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // ── Data queries ───────────────────────────────────────────────────────────
 
   const { data: activeDietPlans = [], isLoading: loadingDiet } = useQuery({
     queryKey: ['today-diet-plan'],
@@ -97,43 +212,93 @@ function TodayContent() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Fix: fetch 20 sessions sorted by date (not created_date) for accurate 7-day window
   const { data: recentSessions = [], isLoading: loadingSessions } = useQuery({
     queryKey: ['today-sessions'],
-    queryFn: () => base44.entities.Workout.list('-created_date', 5),
+    queryFn: () => base44.entities.Workout.list('-date', 20),
     staleTime: 2 * 60 * 1000,
   });
 
+  // Today's meals — for real nutrition adherence (not just plan existence)
+  const { data: recentMeals = [], isLoading: loadingMeals } = useQuery({
+    queryKey: ['today-meals-recent'],
+    queryFn: () => base44.entities.Meal.list('-date', 30),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Recent measurements — for the progress snapshot card
+  const { data: recentMeasurements = [], isLoading: loadingMeasurements } = useQuery({
+    queryKey: ['today-measurements-recent'],
+    queryFn: () => base44.entities.Measurement.list('-date', 10),
+    staleTime: 10 * 60 * 1000,
+  });
+
+  // Active protocols — for the protocols snapshot card and insight
+  const { data: allProtocols = [], isLoading: loadingProtocols } = useQuery({
+    queryKey: ['today-protocols'],
+    queryFn: () => base44.entities.Protocol.list('-start_date', 50),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isLoading =
+    loadingDiet ||
+    loadingWorkout ||
+    loadingSessions ||
+    loadingMeals ||
+    loadingMeasurements ||
+    loadingProtocols;
+
+  // ── Derived state ─────────────────────────────────────────────────────────
+
   const activeDietPlan = activeDietPlans[0] || null;
   const activeWorkoutPlan = activeWorkoutPlans[0] || null;
-
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayMeals = recentMeals.filter((m) => m.date === todayStr);
+  const activeProtocolsList = allProtocols.filter((p) => p.active && !p.end_date);
+  const latestMeasurement = recentMeasurements[0] || null;
   const todaySession = recentSessions.find((s) => s.date === todayStr);
-  const isLoading = loadingDiet || loadingWorkout || loadingSessions;
 
-  // ── Snapshot cards — driven by real data ─────────────────────────────────
+  // ── Snapshot card values ─────────────────────────────────────────────────
 
   const nutritionValue = activeDietPlan
     ? `${activeDietPlan.total_calories ?? activeDietPlan.target_calories ?? '—'} kcal`
     : 'Sem plano';
-
   const nutritionMeta = activeDietPlan
     ? activeDietPlan.name || 'Plano ativo'
     : 'Configure em Nutrição';
 
   const workoutValue = todaySession
-    ? todaySession.status === 'completed' ? 'Concluído' : 'Em andamento'
-    : activeWorkoutPlan ? 'Pendente' : 'Sem plano';
-
+    ? todaySession.status === 'completed'
+      ? 'Concluído'
+      : 'Em andamento'
+    : activeWorkoutPlan
+      ? 'Pendente'
+      : 'Sem plano';
   const workoutMeta = activeWorkoutPlan
     ? activeWorkoutPlan.name || 'Plano ativo'
     : 'Configure em Treinos';
+
+  const progressValue = latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—';
+  const progressMeta = latestMeasurement
+    ? new Date(`${latestMeasurement.date}T12:00:00`).toLocaleDateString('pt-BR', {
+        day: 'numeric',
+        month: 'short',
+      })
+    : 'Adicionar medida';
+
+  const protocolsValue = String(activeProtocolsList.length);
+  const protocolsMeta =
+    activeProtocolsList.length > 0
+      ? `${activeProtocolsList.length} ativo${activeProtocolsList.length > 1 ? 's' : ''}`
+      : 'Nenhum ativo';
 
   const snapshotCards = [
     {
       to: ROUTES.nutrition,
       label: 'Nutrição',
       value: isLoading ? '—' : nutritionValue,
-      description: activeDietPlan ? 'Meta calórica do plano ativo.' : 'Nenhum plano alimentar ativo.',
+      description: activeDietPlan
+        ? 'Meta calórica do plano ativo.'
+        : 'Nenhum plano alimentar ativo.',
       meta: isLoading ? '...' : nutritionMeta,
       icon: UtensilsCrossed,
       tone: 'blue',
@@ -142,15 +307,39 @@ function TodayContent() {
       to: ROUTES.workouts,
       label: 'Treino',
       value: isLoading ? '—' : workoutValue,
-      description: activeWorkoutPlan ? 'Plano de treino ativo.' : 'Nenhum plano de treino ativo.',
+      description: activeWorkoutPlan
+        ? 'Plano de treino ativo.'
+        : 'Nenhum plano de treino ativo.',
       meta: isLoading ? '...' : workoutMeta,
       icon: Dumbbell,
       tone: 'orange',
     },
+    {
+      to: ROUTES.measurements,
+      label: 'Progresso',
+      value: isLoading ? '—' : progressValue,
+      description: latestMeasurement
+        ? 'Última medida registrada.'
+        : 'Nenhuma medida registrada.',
+      meta: isLoading ? '...' : progressMeta,
+      icon: Scale,
+      tone: 'green',
+    },
+    {
+      to: ROUTES.protocols,
+      label: 'Protocolos',
+      value: isLoading ? '—' : protocolsValue,
+      description:
+        activeProtocolsList.length > 0
+          ? 'Protocolos ativos agora.'
+          : 'Nenhum protocolo ativo.',
+      meta: isLoading ? '...' : protocolsMeta,
+      icon: Shield,
+      tone: 'teal',
+    },
   ];
 
-  // ── Adherence — derived from real session data ─────────────────────────────
-  // Simple proxy: sessions in the last 7 days vs expected frequency.
+  // ── Adherence — driven by real data ────────────────────────────────────────
 
   const last7 = recentSessions.filter((s) => {
     if (!s.date) return false;
@@ -158,32 +347,58 @@ function TodayContent() {
     return diff >= 0 && diff < 7;
   });
   const completedLast7 = last7.filter((s) => s.status === 'completed').length;
-  const workoutFreq = activeWorkoutPlan?.days?.length || 4;
-  const workoutAdherence = Math.min(100, Math.round((completedLast7 / workoutFreq) * 100));
-  const nutritionAdherence = activeDietPlan ? 100 : 0; // plan exists = baseline adherence
+  const workoutFreq = activeWorkoutPlan?.frequency || activeWorkoutPlan?.days?.length || 4;
+  const workoutAdherence = activeWorkoutPlan
+    ? Math.min(100, Math.round((completedLast7 / Math.max(1, workoutFreq)) * 100))
+    : 0;
+
+  // Nutrition adherence: based on meals actually logged today (not just plan existence)
+  const mealsLoggedToday = todayMeals.length;
+  const nutritionAdherence =
+    mealsLoggedToday >= 3 ? 100 : mealsLoggedToday === 2 ? 66 : mealsLoggedToday === 1 ? 33 : 0;
+
   const adherenceSignals = [
     { label: 'Nutrição', value: nutritionAdherence },
     { label: 'Treino', value: workoutAdherence },
   ];
-  const adherenceAverage = adherenceSignals.length
-    ? Math.round(adherenceSignals.reduce((t, i) => t + i.value, 0) / adherenceSignals.length)
-    : 0;
+  const adherenceAverage = Math.round(
+    adherenceSignals.reduce((t, i) => t + i.value, 0) / adherenceSignals.length,
+  );
+
+  // ── Dynamic data-driven insight ────────────────────────────────────────────
+
+  const insight = isLoading
+    ? { title: 'Carregando...', description: 'Aguarde enquanto os dados são carregados.' }
+    : buildInsight({
+        recentSessions,
+        todayMeals,
+        recentMeasurements,
+        activeProtocolsList,
+        activeDietPlan,
+        activeWorkoutPlan,
+        todayStr,
+      });
+
+  // ── Recent activity (last 5 workout sessions) ─────────────────────────────
+
+  const recentActivity = recentSessions.slice(0, 5);
 
   return (
     <TodayScreen>
+      {/* ── Header ── */}
       <header className="flex items-start justify-between gap-4 px-1">
         <div className="min-w-0">
-          <p className="atlas-overline">
-            {getDateLabel()}
-          </p>
-          <h1 className="mt-3 text-[34px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">Hoje</h1>
+          <p className="atlas-overline">{getDateLabel()}</p>
+          <h1 className="mt-3 text-[34px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
+            Hoje
+          </h1>
         </div>
-
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.9)_0%,hsl(var(--card))_100%)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
           <Sparkles className="h-5 w-5" strokeWidth={2} />
         </div>
       </header>
 
+      {/* ── Greeting card ── */}
       <TodayCard className="relative overflow-hidden border-[hsl(var(--brand)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.14),transparent_28%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.18),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_45%,hsl(var(--fill)/0.96)_100%)] shadow-[var(--shadow-md)]">
         <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.16)] blur-3xl" />
         <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[hsl(var(--accent-secondary)/0.16)] blur-2xl" />
@@ -196,7 +411,6 @@ function TodayContent() {
               </span>
             </div>
           )}
-
           <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
             {greeting}, {preferredName}
           </p>
@@ -206,30 +420,11 @@ function TodayContent() {
         </div>
       </TodayCard>
 
-      <TodaySection
-        eyebrow="Próximos passos"
-        title="Ações prioritárias"
-        description="Avance pelo dia na ordem certa, com uma ação clara por card."
-      >
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          {NEXT_STEPS.map((item, index) => (
-            <TodayActionCard
-              key={item.to}
-              to={item.to}
-              title={item.title}
-              description={item.description}
-              icon={item.icon}
-              priority={item.phase}
-              highlighted={index === 0}
-            />
-          ))}
-        </div>
-      </TodaySection>
-
+      {/* ── Snapshot cards — 4 pillars ── */}
       <TodaySection eyebrow="Resumo" title="Hoje em um olhar">
         {isLoading ? (
-          <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))] py-4">
-            <Loader2 className="w-4 h-4 animate-spin" /> Carregando dados…
+          <div className="flex items-center gap-2 py-4 text-[13px] text-[hsl(var(--fg-2))]">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando dados…
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -249,6 +444,7 @@ function TodayContent() {
         )}
       </TodaySection>
 
+      {/* ── Adherence + Insight side by side ── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <TodaySection eyebrow="Aderência" title="Consistência recente">
           <TodayAdherenceCard
@@ -258,21 +454,106 @@ function TodayContent() {
                 ? 'Calculando...'
                 : adherenceAverage >= 70
                   ? 'Boa consistência nas últimas semanas.'
-                  : 'Configure seus planos para calcular a aderência.'
+                  : adherenceAverage > 0
+                    ? 'Há espaço para melhorar a consistência.'
+                    : 'Configure seus planos para calcular a aderência.'
             }
             items={isLoading ? [] : adherenceSignals}
           />
         </TodaySection>
 
-        <TodaySection eyebrow="Atlas AI" title="Orientação discreta">
+        <TodaySection eyebrow="Insight do dia" title="Leitura rápida">
           <TodayInsightCard
-            to={ROUTES.atlasAI}
+            to={ROUTES.insights}
+            eyebrow="Insight do dia"
             icon={Brain}
-            title="Comece pela nutrição, depois abra o treino."
-            description="Manter a primeira decisão alimentar visível geralmente deixa o resto do dia mais leve e fácil de executar."
+            title={insight.title}
+            description={insight.description}
+            cta="Ver todos os insights"
           />
         </TodaySection>
       </div>
+
+      {/* ── Recent activity — last 5 workout sessions ── */}
+      {!isLoading && recentActivity.length > 0 && (
+        <TodaySection eyebrow="Atividade" title="Sessões recentes">
+          <TodayCard>
+            <div className="space-y-3">
+              {recentActivity.map((session) => {
+                const isCompleted = session.status === 'completed';
+                const sessionDate = session.date
+                  ? new Date(`${session.date}T12:00:00`).toLocaleDateString('pt-BR', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short',
+                    })
+                  : '—';
+
+                return (
+                  <div
+                    key={session.id || `${session.date}-${session.name}`}
+                    className="flex items-center gap-3"
+                  >
+                    <div
+                      className={cn(
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border',
+                        isCompleted
+                          ? 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
+                          : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.7)] text-[hsl(var(--fg-2))]',
+                      )}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
+                      ) : (
+                        <Clock className="h-4 w-4" strokeWidth={2} />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[14px] font-medium text-[hsl(var(--fg))]">
+                        {session.name || session.workout_type || 'Treino'}
+                      </p>
+                      <p className="text-[12px] text-[hsl(var(--fg-3))]">{sessionDate}</p>
+                    </div>
+
+                    <span
+                      className={cn(
+                        'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                        isCompleted
+                          ? 'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]'
+                          : 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))]',
+                      )}
+                    >
+                      {isCompleted ? 'Concluído' : 'Pendente'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </TodayCard>
+        </TodaySection>
+      )}
+
+      {/* ── Next steps — action cards ── */}
+      <TodaySection
+        eyebrow="Próximos passos"
+        title="Ações prioritárias"
+        description="Avance pelo dia na ordem certa, com uma ação clara por card."
+      >
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {NEXT_STEPS.map((item, index) => (
+            <TodayActionCard
+              key={item.to}
+              to={item.to}
+              title={item.title}
+              description={item.description}
+              icon={item.icon}
+              priority={item.phase}
+              highlighted={index === 0}
+            />
+          ))}
+        </div>
+      </TodaySection>
     </TodayScreen>
   );
 }

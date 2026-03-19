@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { TrendingUp, TrendingDown, Minus, Plus, Loader2 } from 'lucide-react';
+import { format, subDays, parseISO, isValid } from 'date-fns';
 import AIProgressAnalysis from '@/components/ai/AIProgressAnalysis';
 
 function MetricCard({ label, value, unit, change, goal, data }) {
@@ -70,7 +70,7 @@ export default function Progress() {
   const weeksBack = timeframe === '4w' ? 4 : timeframe === '8w' ? 8 : 12;
   const startDate = subDays(new Date(), weeksBack * 7);
 
-  const { data: measurements = [] } = useQuery({
+  const { data: measurements = [], isLoading: measurementsLoading } = useQuery({
     queryKey: ['measurements-progress', timeframe],
     queryFn: () => base44.entities.Measurement.list('-date', 100),
   });
@@ -80,10 +80,12 @@ export default function Progress() {
     queryFn: () => base44.entities.UserProfile.list().then(r => r?.[0]),
   });
 
-  const { data: photos = [] } = useQuery({
+  const { data: photos = [], isLoading: photosLoading } = useQuery({
     queryKey: ['progress-photos'],
     queryFn: () => base44.entities.ProgressPhoto.list('-date', 50),
   });
+
+  const isLoading = measurementsLoading || photosLoading;
 
   // Filter by timeframe
   const filteredMeasurements = measurements.filter(m => {
@@ -108,12 +110,43 @@ export default function Progress() {
       waist: m.waist,
     }));
 
+  // ── Safe date formatter — avoids Invalid Date crash ────────────────
+  const safeFormatDate = (dateValue, fmt = 'MMM d') => {
+    if (!dateValue) return '—';
+    try {
+      const d = typeof dateValue === 'string' ? parseISO(dateValue) : new Date(dateValue);
+      return isValid(d) ? format(d, fmt) : '—';
+    } catch {
+      return '—';
+    }
+  };
+
   return (
     <div className="mx-auto max-w-5xl p-5 lg:p-8 space-y-6">
       <div>
         <h1 className="t-headline mb-1">Seu Progresso</h1>
         <p className="t-caption">Acompanhe tendências ao longo do tempo</p>
       </div>
+
+      {/* Loading state */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={1.9} />
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">Carregando progresso…</p>
+          </div>
+        </div>
+      )}
+
+      {/* Empty state — no measurements yet */}
+      {!isLoading && measurements.length === 0 && (
+        <div className="surface rounded-xl p-10 text-center space-y-3">
+          <p className="t-subtitle text-[hsl(var(--fg))]">Nenhuma medida registrada ainda</p>
+          <p className="t-small text-[hsl(var(--fg-2))]">
+            Acesse a página de Medidas para registrar o primeiro checkpoint corporal.
+          </p>
+        </div>
+      )}
 
       {/* Timeframe toggle */}
       <div className="flex gap-2">
@@ -197,7 +230,7 @@ export default function Progress() {
                   <img src={p.photo_url} alt="progress" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[hsl(var(--fg-2))]">
-                    <span className="text-[12px]">{format(new Date(p.created_date), 'MMM d')}</span>
+                    <span className="text-[12px]">{safeFormatDate(p.date || p.created_date)}</span>
                   </div>
                 )}
               </div>

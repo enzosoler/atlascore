@@ -1,6 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import {
   Activity,
   ArrowDownRight,
@@ -55,7 +53,73 @@ const TODAY = getToday();
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const BODY_FIELD_KEYS = ['weight', 'body_fat', 'waist', 'chest', 'arms', 'thighs', 'hips', 'neck'];
 
-// Mock data removed — all measurements now persisted via base44.entities.Measurement
+const MOCK_MEASUREMENTS = [
+  {
+    id: 'measurement-1',
+    date: shiftDate(TODAY, -28),
+    weight: 84.4,
+    body_fat: 16.8,
+    waist: 86.5,
+    chest: 103,
+    arms: 38.2,
+    thighs: 59.3,
+    hips: 97.4,
+    neck: 39.5,
+    notes: 'Retorno apos deload.',
+  },
+  {
+    id: 'measurement-2',
+    date: shiftDate(TODAY, -21),
+    weight: 83.8,
+    body_fat: 16.4,
+    waist: 85.9,
+    chest: 103.4,
+    arms: 38.3,
+    thighs: 59.1,
+    hips: 97,
+    neck: 39.4,
+    notes: '',
+  },
+  {
+    id: 'measurement-3',
+    date: shiftDate(TODAY, -14),
+    weight: 83.1,
+    body_fat: 15.9,
+    waist: 85,
+    chest: 103.6,
+    arms: 38.5,
+    thighs: 58.8,
+    hips: 96.5,
+    neck: 39.3,
+    notes: 'Sono melhor e cintura baixando.',
+  },
+  {
+    id: 'measurement-4',
+    date: shiftDate(TODAY, -7),
+    weight: 82.6,
+    body_fat: 15.5,
+    waist: 84.3,
+    chest: 103.8,
+    arms: 38.7,
+    thighs: 58.6,
+    hips: 96.1,
+    neck: 39.2,
+    notes: '',
+  },
+  {
+    id: 'measurement-5',
+    date: TODAY,
+    weight: 82.1,
+    body_fat: 15.1,
+    waist: 83.7,
+    chest: 104.1,
+    arms: 38.9,
+    thighs: 58.4,
+    hips: 95.8,
+    neck: 39.1,
+    notes: 'Check-in mais seco, sem queda de performance.',
+  },
+];
 
 const METRIC_OPTIONS = [
   {
@@ -680,7 +744,6 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           {measurement ? 'Salvar checkpoint' : 'Registrar checkpoint'}
         </PrimaryButton>
       </div>
-      {/* Note: submit button disabling on in-flight mutations is handled in parent via isMutating */}
     </form>
   );
 }
@@ -701,56 +764,9 @@ export default function Measurements() {
 function MeasurementsContent() {
   const [metricKey, setMetricKey] = useState('weight');
   const [notice, setNotice] = useState(null);
+  const [measurements, setMeasurements] = useState(MOCK_MEASUREMENTS);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeasurement, setEditingMeasurement] = useState(null);
-
-  const queryClient = useQueryClient();
-
-  // ── Data fetching ────────────────────────────────────────────────
-  const { data: measurements = [], isLoading, isError } = useQuery({
-    queryKey: ['measurements'],
-    queryFn: () => base44.entities.Measurement.list('-date', 200),
-  });
-
-  // ── Mutations ────────────────────────────────────────────────────
-  const invalidateMeasurements = () => {
-    queryClient.invalidateQueries({ queryKey: ['measurements'] });
-    queryClient.invalidateQueries({ queryKey: ['measurements-progress'] });
-  };
-
-  const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Measurement.create(data),
-    onSuccess: () => {
-      invalidateMeasurements();
-      setIsFormOpen(false);
-      setEditingMeasurement(null);
-      setNotice({ tone: 'success', message: 'Checkpoint corporal registrado.' });
-    },
-    onError: () =>
-      setNotice({ tone: 'error', message: 'Erro ao registrar checkpoint. Tente novamente.' }),
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Measurement.update(id, data),
-    onSuccess: () => {
-      invalidateMeasurements();
-      setIsFormOpen(false);
-      setEditingMeasurement(null);
-      setNotice({ tone: 'success', message: 'Checkpoint corporal atualizado.' });
-    },
-    onError: () =>
-      setNotice({ tone: 'error', message: 'Erro ao atualizar checkpoint. Tente novamente.' }),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Measurement.delete(id),
-    onSuccess: () => {
-      invalidateMeasurements();
-      setNotice({ tone: 'success', message: 'Checkpoint corporal removido.' });
-    },
-    onError: () =>
-      setNotice({ tone: 'error', message: 'Erro ao remover checkpoint. Tente novamente.' }),
-  });
 
   const sortedMeasurements = useMemo(() => {
     return [...measurements].sort((left, right) => new Date(left.date) - new Date(right.date));
@@ -831,11 +847,15 @@ function MeasurementsContent() {
   };
 
   const handleDelete = (measurement) => {
-    const confirmed = window.confirm(
-      `Excluir as medidas de ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}?`
-    );
+    const confirmed = window.confirm(`Excluir as medidas de ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}?`);
+
     if (!confirmed) return;
-    deleteMutation.mutate(measurement.id);
+
+    setMeasurements((current) => current.filter((item) => item.id !== measurement.id));
+    setNotice({
+      tone: 'success',
+      message: 'Checkpoint corporal removido.',
+    });
   };
 
   const handleSaveMeasurement = (payload) => {
@@ -847,39 +867,26 @@ function MeasurementsContent() {
       return;
     }
 
-    // Strip local id before sending to backend — backend assigns real ids
-    const { id, ...data } = payload;
+    setMeasurements((current) => {
+      const exists = current.some((item) => item.id === payload.id);
 
-    if (editingMeasurement?.id) {
-      updateMutation.mutate({ id: editingMeasurement.id, data });
-    } else {
-      createMutation.mutate(data);
-    }
+      if (exists) {
+        return current.map((item) => (item.id === payload.id ? payload : item));
+      }
+
+      return [...current, payload];
+    });
+
+    setIsFormOpen(false);
+    setEditingMeasurement(null);
+    setNotice({
+      tone: 'success',
+      message:
+        payload.id === editingMeasurement?.id
+          ? 'Checkpoint corporal atualizado.'
+          : 'Checkpoint corporal registrado.',
+    });
   };
-
-  // ── Loading / error guards ───────────────────────────────────────
-  if (isLoading) {
-    return (
-      <AppContainer>
-        <div className="flex items-center justify-center py-24">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[hsl(var(--brand)/0.18)] border-t-[hsl(var(--brand))]" />
-            <p className="text-[13px] text-[hsl(var(--fg-2))]">Carregando checkpoints…</p>
-          </div>
-        </div>
-      </AppContainer>
-    );
-  }
-
-  if (isError) {
-    return (
-      <AppContainer>
-        <StatusBanner tone="error">
-          Erro ao carregar os dados de medidas. Verifique sua conexão e tente novamente.
-        </StatusBanner>
-      </AppContainer>
-    );
-  }
 
   return (
     <AppContainer>
