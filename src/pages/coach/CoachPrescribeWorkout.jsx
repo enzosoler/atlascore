@@ -98,15 +98,15 @@ function ProtocolsContent() {
       setNotice({
         tone: 'success',
         message: variables.protocolId
-          ? 'Protocol item updated.'
-          : 'Protocol item added.',
+          ? 'Protocolo atualizado.'
+          : 'Protocolo adicionado.',
       });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
         message:
-          'This protocol item could not be saved right now. The page is still available.',
+          'Não foi possível salvar o protocolo. Tente novamente.',
       });
     },
   });
@@ -127,7 +127,7 @@ function ProtocolsContent() {
       setNotice({
         tone: 'warning',
         message:
-          'The protocol status could not be updated right now. Your list is still safe to use.',
+          'Não foi possível atualizar o status. Tente novamente.',
       });
     },
     onSettled: () => {
@@ -144,14 +144,14 @@ function ProtocolsContent() {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
       setNotice({
         tone: 'success',
-        message: 'Protocol item deleted.',
+        message: 'Protocolo excluído.',
       });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
         message:
-          'The protocol item could not be deleted right now. Nothing else on the page was affected.',
+          'Não foi possível excluir o protocolo. Tente novamente.',
       });
     },
     onSettled: () => {
@@ -210,9 +210,9 @@ function ProtocolsContent() {
     };
 
     const successMessages = {
-      active: 'Protocol item resumed.',
-      paused: 'Protocol item paused.',
-      finished: 'Protocol item marked as finished.',
+      active: 'Protocolo reativado.',
+      paused: 'Protocolo pausado.',
+      finished: 'Protocolo marcado como finalizado.',
     };
 
     statusMutation.mutate({
@@ -226,8 +226,8 @@ function ProtocolsContent() {
   const handleDelete = (protocol) => {
     if (!protocol?.id) return;
 
-    const protocolLabel = protocol?.substance_name || protocol?.name || 'this protocol item';
-    const confirmed = window.confirm(`Delete ${protocolLabel}?`);
+    const protocolLabel = protocol?.substance_name || protocol?.name || 'este protocolo';
+    const confirmed = window.confirm(`Excluir ${protocolLabel}?`);
 
     if (!confirmed) return;
 
@@ -248,7 +248,7 @@ function ProtocolsContent() {
           className="inline-flex items-center gap-2"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
-          Add protocol item
+          Adicionar protocolo
         </PrimaryButton>
       }
       maxWidth="max-w-6xl"
@@ -312,7 +312,7 @@ function ProtocolsContent() {
                       : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'
                   }`}
                 >
-                  {option[0].toUpperCase() + option.slice(1)} ({count})
+                  {({'all': 'Todos', 'active': 'Ativo', 'paused': 'Pausado', 'finished': 'Finalizado'}[option] || option)} ({count})
                 </button>
               );
             })}
@@ -342,12 +342,12 @@ function ProtocolsContent() {
             title="Nenhum item no protocolo"
             description={
               hasLoadError
-                ? 'The existing list could not be loaded. You can still add your first protocol item safely from here.'
-                : 'Start with a medication, hormone, peptide, supplement, or any other tracked compound.'
+                ? 'A lista não pôde ser carregada. Você ainda pode adicionar novos protocolos.'
+                : 'Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto rastreado.'
             }
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Add protocol item
+                Adicionar protocolo
               </PrimaryButton>
             }
           />
@@ -359,7 +359,7 @@ function ProtocolsContent() {
             description="Try another status filter or add a new protocol item."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Add protocol item
+                Adicionar protocolo
               </PrimaryButton>
             }
           />
@@ -401,7 +401,7 @@ function ProtocolsContent() {
         <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[32px] border-zinc-200 bg-white p-0 shadow-[0_28px_90px_rgba(15,23,42,0.18)] sm:max-w-3xl">
           <DialogHeader className="border-b border-zinc-200 px-6 pb-5 pt-6 text-left">
             <DialogTitle className="text-[28px] font-semibold tracking-[-0.04em] text-zinc-950">
-              {editingProtocol ? 'Edit protocol item' : 'Add protocol item'}
+              {editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
             </DialogTitle>
             <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
               Capture the core details that make this protocol useful right away: substance,

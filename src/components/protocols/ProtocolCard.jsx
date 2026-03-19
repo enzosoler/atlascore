@@ -2,9 +2,9 @@ import React from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 
 function getStatusLabel(status) {
-  if (status === 'paused') return 'Paused';
-  if (status === 'finished') return 'Finished';
-  return 'Active';
+  if (status === 'paused') return 'Pausado';
+  if (status === 'finished') return 'Finalizado';
+  return 'Ativo';
 }
 
 function getStatusClassName(status) {
@@ -56,7 +56,7 @@ export default function ProtocolCard({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-lg font-semibold text-zinc-950">
-                {protocol?.substance_name || protocol?.name || 'Protocol item'}
+                {protocol?.substance_name || protocol?.name || 'Protocolo'}
               </h3>
               <span
                 className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClassName(status)}`}
@@ -119,7 +119,7 @@ export default function ProtocolCard({
             className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-50"
           >
             <Pencil className="h-4 w-4" strokeWidth={2} />
-            Edit
+            Editar
           </ActionButton>
 
           {onPause ? (
@@ -128,7 +128,7 @@ export default function ProtocolCard({
               disabled={isPausePending}
               className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-100"
             >
-              Pause
+              Pausar
             </ActionButton>
           ) : null}
 
@@ -138,7 +138,7 @@ export default function ProtocolCard({
               disabled={isResumePending}
               className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-100"
             >
-              Resume
+              Retomar
             </ActionButton>
           ) : null}
 
@@ -148,7 +148,7 @@ export default function ProtocolCard({
               disabled={isFinishPending}
               className="rounded-2xl border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-sm font-semibold text-zinc-800 transition-colors hover:bg-zinc-200"
             >
-              Finish
+              Finalizar
             </ActionButton>
           ) : null}
 
@@ -158,7 +158,7 @@ export default function ProtocolCard({
             className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100"
           >
             <Trash2 className="h-4 w-4" strokeWidth={2} />
-            Delete
+            Excluir
           </ActionButton>
         </div>
       </div>

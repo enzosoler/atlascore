@@ -680,7 +680,7 @@ export default function AtlasAI() {
                     <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-3 shadow-[var(--shadow-xs)]">
                       <p className="atlas-metric-label">Modo</p>
                       <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        Local preview
+                        Modo IA local
                       </p>
                     </div>
                     <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-3 shadow-[var(--shadow-xs)]">
@@ -756,7 +756,7 @@ export default function AtlasAI() {
                       <span className="atlas-overline">Atlas AI</span>
                       <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
                         <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                        Local preview
+                        IA Atlas
                       </span>
                       <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
                         <Clock3 className="h-3.5 w-3.5" strokeWidth={1.9} />
@@ -1010,7 +1010,7 @@ export default function AtlasAI() {
                     <div className="mb-6 flex justify-center">
                       <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
                         <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                        {hasProfileContext ? 'Profile context active' : 'Local preview active'}
+                        {hasProfileContext ? 'Perfil conectado' : 'Pronto para iniciar'}
                       </div>
                     </div>
 

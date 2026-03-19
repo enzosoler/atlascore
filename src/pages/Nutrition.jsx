@@ -265,8 +265,8 @@ function mapFoodLogToMeal(log) {
     total_fat: Number(log?.fat || 0),
     notes:
       quantity > 1
-        ? `Quantidade salva: ${quantity}. Snapshot persistido no food_logs.`
-        : 'Snapshot persistido no food_logs.',
+        ? `Alimento salvo com sucesso.`
+        : 'Alimento salvo com sucesso.',
   };
 }
 
@@ -412,7 +412,7 @@ function MealCard({ meal, onEdit, onDelete }) {
 
           <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.55)]">
             <div className="grid gap-px bg-[hsl(var(--border)/0.7)] sm:grid-cols-4">
-              <LoggedMetric label="Kcal" value={meal?.total_calories || 0} unit="kcal" />
+              <LoggedMetric label="Calorias" value={meal?.total_calories || 0} unit="kcal" />
               <LoggedMetric
                 label="Proteína"
                 value={meal?.total_protein || 0}
@@ -512,7 +512,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
-        <p className="atlas-overline">Meal basics</p>
+        <p className="atlas-overline">Dados da refeição</p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
             Data
@@ -563,10 +563,10 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
       </div>
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <p className="atlas-overline">Macro summary</p>
+        <p className="atlas-overline">Resumo de macros</p>
         <div className="mt-4 grid gap-4 md:grid-cols-4">
           <label className={FIELD_LABEL_CLASS}>
-            Kcal
+            Calorias
             <input
               type="number"
               min="0"
@@ -576,7 +576,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
             />
           </label>
           <label className={FIELD_LABEL_CLASS}>
-            Proteina
+            Proteína
             <input
               type="number"
               min="0"
@@ -871,7 +871,7 @@ function NutritionContent() {
     if (!user?.id) {
       setNotice({
         tone: 'warning',
-        message: 'Faca login para salvar snapshots reais no food_logs.',
+        message: 'Faça login para salvar alimentos.',
       });
       return;
     }
@@ -907,7 +907,7 @@ function NutritionContent() {
       setSearchError('');
       setNotice({
         tone: 'success',
-        message: `${food.name} salvo com snapshot completo no food_logs.`,
+        message: `${food.name} adicionado com sucesso.`,
       });
     } catch (error) {
       console.error('Nutrition snapshot save failed:', error);
@@ -963,10 +963,7 @@ function NutritionContent() {
         </div>
       </PageHeader>
 
-      <StatusBanner tone="neutral">
-        A busca USDA salva snapshots em <code>food_logs</code>. O modal manual continua disponivel
-        para registros locais rapidos.
-      </StatusBanner>
+      {/* Info banner removed — internal implementation detail, not user-facing */}
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
       {isLoadingMeals ? (
