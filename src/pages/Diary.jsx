@@ -5,100 +5,132 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
-import { ChevronLeft, ChevronRight, Smile, Moon, Droplets, UtensilsCrossed, Dumbbell, BarChart3, Pill } from 'lucide-react';
-import { getToday, MEAL_TYPES } from '@/lib/atlas-theme';
+import {
+  Smile,
+  Moon,
+  Droplets,
+  UtensilsCrossed,
+  Dumbbell,
+  BarChart3,
+  Pill,
+  Minus,
+} from 'lucide-react';
+import { getToday } from '@/lib/atlas-theme';
+import {
+  AppContainer,
+  Card,
+  PageHeader,
+  Section,
+} from '@/components/shared/AppContainer';
+import {
+  DateStepper,
+  SafePageBoundary,
+  shiftDate,
+} from '@/components/shared/StablePage';
+import { cn } from '@/lib/utils';
 
-function formatDiaryDate(dateStr) {
-  const dt = new Date(dateStr + 'T12:00:00');
-  const weekday = dt.toLocaleDateString('pt-BR', { weekday: 'long' });
-  const day = dt.getDate();
-  const month = dt.toLocaleDateString('pt-BR', { month: 'long' });
-  // Capitalize only the first letter of the weekday
-  const weekdayCapitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-  return `${weekdayCapitalized}, ${day} de ${month}`;
-}
+// ─────────────────────────────────────────────────────────────────
+// Sub-components reutilizando os mesmos padrões das outras páginas
+// ─────────────────────────────────────────────────────────────────
 
-function DateNav({ date, onChange }) {
-  const isToday = date === getToday();
+function HeroStat({ label, value, detail }) {
   return (
-    <div className="flex items-center gap-3">
-      <button
-        onClick={() => onChange(-1)}
-        className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[hsl(var(--fill)/0.9)] transition-colors border border-transparent hover:border-[hsl(var(--border)/0.5)]"
-      >
-        <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-      </button>
-      <span className="text-[14px] font-semibold min-w-[220px] text-center text-[hsl(var(--fg))] tracking-[-0.01em]">
-        {formatDiaryDate(date)}
-        {isToday && (
-          <span className="ml-2 inline-flex items-center rounded-full bg-[hsl(var(--brand)/0.1)] px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--brand))]">
-            Hoje
-          </span>
-        )}
-      </span>
-      <button
-        onClick={() => onChange(1)}
-        className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-[hsl(var(--fill)/0.9)] transition-colors border border-transparent hover:border-[hsl(var(--border)/0.5)]"
-      >
-        <ChevronRight className="w-4 h-4" strokeWidth={2} />
-      </button>
+    <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.8)] px-4 py-4 shadow-[var(--shadow-xs)]">
+      <p className="atlas-metric-label">{label}</p>
+      <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+        {value}
+      </p>
+      <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
     </div>
   );
 }
 
-function ScoreDot({ value, max = 5 }) {
+function SectionMetric({ label, value, suffix }) {
   return (
-    <div className="flex gap-1">
+    <div className="bg-[hsl(var(--card)/0.86)] px-4 py-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+        {label}
+      </p>
+      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+        {value}
+        {suffix ? (
+          <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]">{suffix}</span>
+        ) : null}
+      </p>
+    </div>
+  );
+}
+
+function ScoreDots({ value, max = 5 }) {
+  return (
+    <div className="flex gap-1.5">
       {Array.from({ length: max }).map((_, i) => (
         <div
           key={i}
-          className={`w-2 h-2 rounded-full transition-colors ${i < value ? 'bg-[hsl(var(--brand))]' : 'bg-[hsl(var(--border))]'}`}
+          className={cn(
+            'h-2 w-2 rounded-full transition-colors',
+            i < value ? 'bg-[hsl(var(--brand))]' : 'bg-[hsl(var(--border))]'
+          )}
         />
       ))}
     </div>
   );
 }
 
-function TimelineSection({ icon: Icon, color, title, children, empty }) {
+function EmptySlot({ message }) {
   return (
-    <div className="flex gap-4">
-      <div className="flex flex-col items-center">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-[hsl(var(--border)/0.5)]"
-          style={{ background: color ? `color-mix(in srgb, ${color} 12%, transparent)` : 'hsl(var(--fill))' }}
-        >
-          <Icon className="w-4 h-4" style={{ color: color || 'hsl(var(--fg-2))' }} strokeWidth={2} />
-        </div>
-        <div className="w-px flex-1 bg-[hsl(var(--border)/0.5)] mt-2" />
-      </div>
-      <div className="flex-1 pb-7">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] mb-2.5">
-          {title}
-        </p>
-        {empty ? (
-          <p className="text-[13px] text-[hsl(var(--fg-2))] italic">Nenhum registro.</p>
-        ) : children}
-      </div>
+    <div className="flex items-center gap-2 py-5 px-5 text-[13px] text-[hsl(var(--fg-2))]">
+      <Minus className="h-3.5 w-3.5 opacity-40 shrink-0" strokeWidth={2} />
+      {message}
     </div>
   );
 }
 
+function SectionIconHeader({ icon: Icon, color, label }) {
+  return (
+    <div className="flex items-center gap-3 px-5 py-4 border-b border-[hsl(var(--border)/0.5)]">
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.6)]"
+        style={{ background: `color-mix(in srgb, ${color} 10%, transparent)` }}
+      >
+        <Icon className="h-4 w-4" style={{ color }} strokeWidth={1.9} />
+      </div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Página principal
+// ─────────────────────────────────────────────────────────────────
+
 export default function Diary() {
+  return (
+    <SafePageBoundary
+      title="Diário"
+      subtitle="Modo seguro do diário."
+      fallbackDescription="O diário carregou em modo de segurança. Navegue para outra rota e volte para tentar novamente."
+    >
+      <DiaryContent />
+    </SafePageBoundary>
+  );
+}
+
+function DiaryContent() {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const [date, setDate] = useState(getToday());
+  const isToday = date === getToday();
 
   useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated) navigate(ROUTES.home, { replace: true });
   }, [isAuthenticated, isLoadingAuth, navigate]);
 
-  const changeDate = (d) => {
-    const dt = new Date(date);
-    dt.setDate(dt.getDate() + d);
-    setDate(dt.toISOString().split('T')[0]);
-  };
+  // ── Queries ────────────────────────────────────────────────────
 
-  const { data: checkin } = useQuery({
+  const { data: checkin = null } = useQuery({
     queryKey: ['diary-checkin', date],
     queryFn: async () => {
       try {
@@ -110,7 +142,6 @@ export default function Diary() {
     },
   });
 
-  // Meals: lê do Supabase food_logs (mesma fonte que a página Nutrição)
   const { data: meals = [] } = useQuery({
     queryKey: ['diary-food-logs', date, user?.id],
     queryFn: async () => {
@@ -123,20 +154,16 @@ export default function Diary() {
           .eq('date', date)
           .order('created_at', { ascending: true });
         if (error) throw error;
-        // Mapeia food_logs para o formato do Diary
         return (data || []).map((log) => ({
           id: log.id,
           date: log.date,
-          meal_type: null,
           title: log.food_name || 'Alimento',
-          foods: [{ name: log.food_name || 'Alimento' }],
           total_calories: Number(log.calories || 0),
           total_protein: Number(log.protein || 0),
           total_carbs: Number(log.carbs || 0),
           total_fat: Number(log.fat || 0),
         }));
       } catch {
-        // Se Supabase não disponível, tenta Base44 como fallback
         try {
           return await base44.entities.Meal.filter({ date });
         } catch {
@@ -180,179 +207,337 @@ export default function Diary() {
     },
   });
 
-  const totalCal = meals.reduce((s, m) => s + (m.total_calories || 0), 0);
-  const measurement = measurements[0] || null;
+  // ── Valores derivados ──────────────────────────────────────────
+
+  const totalCal      = meals.reduce((s, m) => s + (m.total_calories || 0), 0);
+  const totalProtein  = meals.reduce((s, m) => s + (m.total_protein || 0), 0);
+  const totalCarbs    = meals.reduce((s, m) => s + (m.total_carbs || 0), 0);
+  const totalFat      = meals.reduce((s, m) => s + (m.total_fat || 0), 0);
+  const measurement   = measurements[0] || null;
+  const doneWorkouts  = workouts.filter((w) => w.completed || w.status === 'completed').length;
+
+  // ── Render ─────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--shell,var(--bg,#F5F5F7)))]">
-      <div className="max-w-2xl mx-auto px-4 py-8 lg:px-8 lg:py-10">
-
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-[28px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
-            Diário
-          </h1>
-          <p className="mt-1 text-[14px] text-[hsl(var(--fg-2))]">
-            Resumo cronológico do seu dia
-          </p>
-        </div>
-
-        {/* Date navigator */}
-        <div className="mb-8 rounded-[20px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card,white))] px-4 py-3 shadow-[0_2px_12px_rgba(15,23,42,0.04)]">
-          <DateNav date={date} onChange={changeDate} />
-        </div>
-
-        {/* Timeline */}
-        <div className="rounded-[20px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card,white))] px-6 py-6 shadow-[0_2px_12px_rgba(15,23,42,0.04)]">
-
-          {/* Check-in */}
-          <TimelineSection
-            icon={Smile}
-            color="hsl(var(--ok, #34C759))"
-            title="Check-in"
-            empty={!checkin}
-          >
-            {checkin && (
-              <div className="rounded-[14px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] p-4 space-y-3">
-                {[
-                  { label: 'Humor', value: checkin.mood, max: 5 },
-                  { label: 'Energia', value: checkin.energy, max: 5 },
-                ].map(({ label, value, max }) => (
-                  <div key={label} className="flex items-center justify-between">
-                    <span className="text-[13px] text-[hsl(var(--fg-2))]">{label}</span>
-                    <ScoreDot value={value} max={max} />
-                  </div>
-                ))}
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-[hsl(var(--fg-2))] flex items-center gap-1.5">
-                    <Moon className="w-3.5 h-3.5" /> Sono
-                  </span>
-                  <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">{checkin.sleep_hours}h</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-[hsl(var(--fg-2))] flex items-center gap-1.5">
-                    <Droplets className="w-3.5 h-3.5" /> Água
-                  </span>
-                  <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">{checkin.hydration_liters}L</span>
-                </div>
-                {checkin.notes && (
-                  <p className="text-[12px] italic text-[hsl(var(--fg-2))] border-t border-[hsl(var(--border)/0.5)] pt-2">
-                    {checkin.notes}
-                  </p>
-                )}
-              </div>
+    <AppContainer>
+      {/* ── Page Header ─────────────────────────────────────────── */}
+      <PageHeader
+        eyebrow="Diário"
+        title="Seu dia em um lugar só."
+        subtitle="Visão consolidada de nutrição, treinos, check-in e medidas para a data selecionada."
+        accentClassName="from-[hsl(var(--brand)/0.07)] via-[hsl(var(--brand)/0.02)]"
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <DateStepper
+              date={date}
+              onChange={(amount) => setDate(shiftDate(date, amount))}
+            />
+            {isToday && (
+              <span className="inline-flex items-center rounded-full bg-[hsl(var(--brand)/0.1)] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--brand))]">
+                Hoje
+              </span>
             )}
-          </TimelineSection>
+          </div>
+        }
+      >
+        <div className="grid gap-3">
+          <HeroStat
+            label="Energia do dia"
+            value={totalCal > 0 ? `${Math.round(totalCal)} kcal` : '—'}
+            detail={
+              meals.length > 0
+                ? `${meals.length} registro(s) · ${Math.round(totalProtein)}g proteína`
+                : 'Nenhum alimento registrado para este dia.'
+            }
+          />
+          <HeroStat
+            label="Check-in"
+            value={
+              checkin
+                ? `Humor ${checkin.mood ?? '—'}/5 · Energia ${checkin.energy ?? '—'}/5`
+                : '—'
+            }
+            detail={
+              checkin
+                ? `${checkin.sleep_hours || 0}h de sono · ${checkin.hydration_liters || 0}L de água`
+                : 'Check-in não registrado para este dia.'
+            }
+          />
+          <HeroStat
+            label="Treinos"
+            value={workouts.length > 0 ? `${workouts.length} sessão(ões)` : '—'}
+            detail={
+              workouts.length > 0
+                ? `${doneWorkouts} concluído(s) para a data selecionada.`
+                : 'Nenhum treino registrado para este dia.'
+            }
+          />
+        </div>
+      </PageHeader>
 
-          {/* Nutrition */}
-          <TimelineSection
+      {/* ── Nutrição ────────────────────────────────────────────── */}
+      <Section
+        eyebrow="Diário"
+        title={meals.length > 0 ? `Nutrição · ${Math.round(totalCal)} kcal` : 'Nutrição'}
+        subtitle="Alimentos registrados via página de Nutrição para a data selecionada."
+      >
+        <Card className="overflow-hidden px-0 py-0">
+          <SectionIconHeader
             icon={UtensilsCrossed}
             color="hsl(var(--brand, #0A84FF))"
-            title={`Nutrição${meals.length > 0 ? ` · ${totalCal} kcal` : ''}`}
-            empty={meals.length === 0}
-          >
-            <div className="space-y-2">
-              {meals.map((m) => (
-                <div key={m.id} className="rounded-[14px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] px-4 py-3">
-                  <div className="flex justify-between items-baseline">
-                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-                      {m.title || (m.meal_type ? (MEAL_TYPES[m.meal_type]?.label || m.meal_type) : 'Alimento')}
-                    </p>
-                    <span className="text-[12px] text-[hsl(var(--fg-2))]">{m.total_calories || 0} kcal</span>
-                  </div>
-                  <div className="flex gap-3 mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
-                    <span>P {m.total_protein || 0}g</span>
-                    <span>C {m.total_carbs || 0}g</span>
-                    <span>G {m.total_fat || 0}g</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </TimelineSection>
+            label="Nutrição"
+          />
 
-          {/* Workout */}
-          <TimelineSection
+          {meals.length === 0 ? (
+            <EmptySlot message="Nenhum alimento registrado para este dia." />
+          ) : (
+            <>
+              <div className="divide-y divide-[hsl(var(--border)/0.5)]">
+                {meals.map((m) => (
+                  <div key={m.id} className="px-5 py-4">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
+                        {m.title}
+                      </p>
+                      <span className="shrink-0 text-[13px] font-semibold text-[hsl(var(--fg))]">
+                        {Math.round(m.total_calories)}{' '}
+                        <span className="text-[11px] font-medium text-[hsl(var(--fg-2))]">kcal</span>
+                      </span>
+                    </div>
+                    <div className="mt-1.5 flex gap-4 text-[12px] text-[hsl(var(--fg-2))]">
+                      <span>P {Math.round(m.total_protein)}g</span>
+                      <span>C {Math.round(m.total_carbs)}g</span>
+                      <span>G {Math.round(m.total_fat)}g</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="grid gap-px bg-[hsl(var(--border)/0.6)] sm:grid-cols-3">
+                <SectionMetric label="Proteína" value={`${Math.round(totalProtein)}`} suffix="g" />
+                <SectionMetric label="Carboidratos" value={`${Math.round(totalCarbs)}`} suffix="g" />
+                <SectionMetric label="Gordura" value={`${Math.round(totalFat)}`} suffix="g" />
+              </div>
+            </>
+          )}
+        </Card>
+      </Section>
+
+      {/* ── Check-in ────────────────────────────────────────────── */}
+      <Section
+        eyebrow="Diário"
+        title="Check-in"
+        subtitle="Dados de bem-estar, sono e hidratação registrados para o dia."
+      >
+        <Card className="overflow-hidden px-0 py-0">
+          <SectionIconHeader
+            icon={Smile}
+            color="hsl(var(--ok, #34C759))"
+            label="Check-in"
+          />
+
+          {!checkin ? (
+            <EmptySlot message="Check-in não registrado para este dia." />
+          ) : (
+            <div className="px-5 py-5 space-y-5">
+              {/* Métricas em grid */}
+              <div className="grid gap-px overflow-hidden rounded-[20px] bg-[hsl(var(--border)/0.6)] sm:grid-cols-2">
+                <SectionMetric label="Humor" value={`${checkin.mood ?? '—'}`} suffix={checkin.mood != null ? '/5' : ''} />
+                <SectionMetric label="Energia" value={`${checkin.energy ?? '—'}`} suffix={checkin.energy != null ? '/5' : ''} />
+                <SectionMetric
+                  label="Sono"
+                  value={`${checkin.sleep_hours || 0}`}
+                  suffix="h"
+                />
+                <SectionMetric
+                  label="Hidratação"
+                  value={`${checkin.hydration_liters || 0}`}
+                  suffix="L"
+                />
+              </div>
+
+              {/* Score dots visuais */}
+              {(checkin.mood != null || checkin.energy != null) && (
+                <div className="space-y-3">
+                  {checkin.mood != null && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
+                        <Smile className="h-3.5 w-3.5" strokeWidth={1.9} />
+                        Humor
+                      </div>
+                      <ScoreDots value={checkin.mood} max={5} />
+                    </div>
+                  )}
+                  {checkin.energy != null && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
+                        <Moon className="h-3.5 w-3.5" strokeWidth={1.9} />
+                        Energia
+                      </div>
+                      <ScoreDots value={checkin.energy} max={5} />
+                    </div>
+                  )}
+                  {checkin.hydration_liters != null && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
+                        <Droplets className="h-3.5 w-3.5" strokeWidth={1.9} />
+                        Hidratação
+                      </div>
+                      <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+                        {checkin.hydration_liters}L
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Notas */}
+              {checkin.notes && (
+                <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))] mb-1.5">
+                    Observações
+                  </p>
+                  <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">{checkin.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
+      </Section>
+
+      {/* ── Treinos ─────────────────────────────────────────────── */}
+      <Section
+        eyebrow="Diário"
+        title={workouts.length > 0 ? `Treinos · ${workouts.length} sessão(ões)` : 'Treinos'}
+        subtitle="Sessões registradas na rota de Treinos para a data selecionada."
+      >
+        <Card className="overflow-hidden px-0 py-0">
+          <SectionIconHeader
             icon={Dumbbell}
             color="hsl(var(--brand-ai, #8B5CF6))"
-            title="Treino"
-            empty={workouts.length === 0}
-          >
-            {workouts.map((w) => (
-              <div key={w.id} className="rounded-[14px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] px-4 py-3 space-y-1">
-                <div className="flex justify-between items-center">
-                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{w.name}</p>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                      w.completed
-                        ? 'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok,#34C759))]'
-                        : 'bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn,#FF9F0A))]'
-                    }`}
-                  >
-                    {w.completed ? 'Concluído' : 'Pendente'}
-                  </span>
-                </div>
-                <div className="flex gap-3 text-[12px] text-[hsl(var(--fg-2))]">
-                  {w.duration_minutes > 0 && <span>{w.duration_minutes} min</span>}
-                  {w.volume_load > 0 && <span>{w.volume_load.toLocaleString()} kg vol.</span>}
-                  {w.perceived_effort > 0 && <span>RPE {w.perceived_effort}</span>}
-                </div>
-                {(w.exercises || []).length > 0 && (
-                  <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                    {w.exercises.map((e) => e.name).join(', ')}
-                  </p>
-                )}
-              </div>
-            ))}
-          </TimelineSection>
+            label="Treinos"
+          />
 
-          {/* Measurements */}
-          <TimelineSection
+          {workouts.length === 0 ? (
+            <EmptySlot message="Nenhum treino registrado para este dia." />
+          ) : (
+            <div className="divide-y divide-[hsl(var(--border)/0.5)]">
+              {workouts.map((w) => {
+                const done = w.completed || w.status === 'completed';
+                return (
+                  <div key={w.id} className="px-5 py-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-[14px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
+                        {w.name}
+                      </p>
+                      <span
+                        className={cn(
+                          'shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                          done
+                            ? 'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]'
+                            : 'bg-[hsl(var(--warn)/0.12)] text-[hsl(34_68%_32%)]'
+                        )}
+                      >
+                        {done ? 'Concluído' : 'Pendente'}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap gap-3 text-[12px] text-[hsl(var(--fg-2))]">
+                      {w.duration_minutes > 0 && <span>{w.duration_minutes} min</span>}
+                      {w.volume_load > 0 && (
+                        <span>{w.volume_load.toLocaleString('pt-BR')} kg vol.</span>
+                      )}
+                      {w.perceived_effort > 0 && <span>RPE {w.perceived_effort}</span>}
+                    </div>
+                    {(w.exercises || []).length > 0 && (
+                      <p className="mt-1.5 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+                        {w.exercises.map((e) => e.name).join(' · ')}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+      </Section>
+
+      {/* ── Medidas ─────────────────────────────────────────────── */}
+      <Section
+        eyebrow="Diário"
+        title="Medidas"
+        subtitle="Checkpoint corporal registrado para a data selecionada."
+      >
+        <Card className="overflow-hidden px-0 py-0">
+          <SectionIconHeader
             icon={BarChart3}
             color="hsl(var(--warn, #FF9F0A))"
-            title="Medidas"
-            empty={!measurement}
-          >
-            {measurement && (
-              <div className="rounded-[14px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] px-4 py-3">
-                <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-[hsl(var(--fg-2))]">
-                  {measurement.weight && (
-                    <span>Peso <b className="text-[hsl(var(--fg))] font-semibold">{measurement.weight}kg</b></span>
-                  )}
-                  {measurement.body_fat && (
-                    <span>Gordura <b className="text-[hsl(var(--fg))] font-semibold">{measurement.body_fat}%</b></span>
-                  )}
-                  {measurement.waist && (
-                    <span>Cintura <b className="text-[hsl(var(--fg))] font-semibold">{measurement.waist}cm</b></span>
-                  )}
-                  {measurement.arms && (
-                    <span>Braços <b className="text-[hsl(var(--fg))] font-semibold">{measurement.arms}cm</b></span>
-                  )}
-                </div>
-              </div>
-            )}
-          </TimelineSection>
+            label="Medidas"
+          />
 
-          {/* Supplements */}
-          <TimelineSection
+          {!measurement ? (
+            <EmptySlot message="Nenhuma medida registrada para este dia." />
+          ) : (
+            <div className="grid gap-px bg-[hsl(var(--border)/0.6)] sm:grid-cols-2">
+              {measurement.weight != null && (
+                <SectionMetric label="Peso" value={`${measurement.weight}`} suffix="kg" />
+              )}
+              {measurement.body_fat != null && (
+                <SectionMetric
+                  label="Gordura corporal"
+                  value={`${measurement.body_fat}`}
+                  suffix="%"
+                />
+              )}
+              {measurement.waist != null && (
+                <SectionMetric label="Cintura" value={`${measurement.waist}`} suffix="cm" />
+              )}
+              {measurement.arms != null && (
+                <SectionMetric label="Braços" value={`${measurement.arms}`} suffix="cm" />
+              )}
+              {measurement.chest != null && (
+                <SectionMetric label="Peito" value={`${measurement.chest}`} suffix="cm" />
+              )}
+              {measurement.hips != null && (
+                <SectionMetric label="Quadril" value={`${measurement.hips}`} suffix="cm" />
+              )}
+            </div>
+          )}
+        </Card>
+      </Section>
+
+      {/* ── Suplementos ─────────────────────────────────────────── */}
+      <Section
+        eyebrow="Diário"
+        title={
+          supplements.length > 0
+            ? `Suplementos · ${supplements.length} ativo(s)`
+            : 'Suplementos'
+        }
+        subtitle="Compostos ativos cadastrados nos Protocolos."
+      >
+        <Card className="overflow-hidden px-0 py-0">
+          <SectionIconHeader
             icon={Pill}
             color="hsl(var(--ok, #34C759))"
-            title={`Suplementos${supplements.length > 0 ? ` (${supplements.length} ativos)` : ''}`}
-            empty={supplements.length === 0}
-          >
-            <div className="flex flex-wrap gap-1.5">
+            label="Suplementos"
+          />
+
+          {supplements.length === 0 ? (
+            <EmptySlot message="Nenhum suplemento ativo cadastrado." />
+          ) : (
+            <div className="flex flex-wrap gap-2 px-5 py-5">
               {supplements.map((s) => (
                 <span
                   key={s.id}
-                  className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.6)] px-3 py-1 text-[12px] font-medium text-[hsl(var(--fg-2))]"
+                  className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.6)] px-3.5 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))]"
                 >
-                  {s.name}{s.dose ? ` · ${s.dose}` : ''}
+                  {s.name}
+                  {s.dose ? ` · ${s.dose}` : ''}
                 </span>
               ))}
             </div>
-          </TimelineSection>
-
-        </div>
-      </div>
-    </div>
+          )}
+        </Card>
+      </Section>
+    </AppContainer>
   );
 }
