@@ -10,7 +10,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
-import { DailyStoreProvider } from '@/store/dailyStore';
+import { DailyStoreProvider } from '@/store/dailyStore.jsx';
 import { LEGACY_ROUTE_REDIRECTS, ROLE_HOME, ROUTES } from '@/lib/routes';
 
 // Pages
