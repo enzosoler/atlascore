@@ -40,13 +40,13 @@ const WORKOUT_FILTERS = ['all', 'pending', 'completed'];
 
 const STATUS_META = {
   pending: {
-    label: 'Pending',
+    label: 'Pendente',
     chip:
       'border-[hsl(var(--warn)/0.18)] bg-[hsl(var(--warn)/0.12)] text-[hsl(34_68%_32%)]',
     actionLabel: 'Concluir',
   },
   completed: {
-    label: 'Completed',
+    label: 'Concluído',
     chip: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]',
     actionLabel: 'Reabrir',
   },
@@ -593,8 +593,8 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
               onChange={(event) => updateField('status', event.target.value)}
               className={SELECT_CLASS_NAME}
             >
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
+              <option value="pending">Pendente</option>
+              <option value="completed">Concluído</option>
             </select>
           </label>
 
@@ -743,8 +743,8 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
 export default function Workouts() {
   return (
     <SafePageBoundary
-      title="Workouts"
-      subtitle="Execucao e registro de treinos com estado local proprio, separado de protocols."
+      title="Treinos"
+      subtitle="Execução e registro de treinos com estado local próprio, separado de protocolos."
       maxWidth="max-w-6xl"
       fallbackDescription="A rota de Workouts continua acessivel mesmo se a interface principal falhar."
     >
@@ -866,9 +866,9 @@ function WorkoutsContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Workouts"
-        title="Training with a clear line from plan to execution."
-        subtitle="Keep the day&apos;s plan visible, log execution without noise and read performance status with enough structure to act quickly."
+        eyebrow="Treinos"
+        title="Treino com linha clara do plano à execução."
+        subtitle="Mantenha o plano do dia visível, registre a execução sem ruído e leia o status de performance para agir rapidamente."
         accentClassName="from-[hsl(var(--brand)/0.09)] via-[hsl(var(--brand)/0.03)]"
         actions={
           <ActionRow>
@@ -885,7 +885,7 @@ function WorkoutsContent() {
       >
         <div className="grid gap-3">
           <HeroStat
-            label="Plan"
+            label="Plano"
             value={plannedWorkout?.name || 'No plan'}
             detail={
               plannedWorkout
@@ -894,7 +894,7 @@ function WorkoutsContent() {
             }
           />
           <HeroStat
-            label="Execution"
+            label="Execução"
             value={`${workoutsForDate.length} registradas`}
             detail={`${completedCount} concluido(s) dentro do estado local desta rota.`}
           />
@@ -913,8 +913,8 @@ function WorkoutsContent() {
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
       <Section
-        title="Session line"
-        subtitle="Antes do log detalhado, deixe visivel se existe plano, execucao e comparacao pronta para agir."
+        title="Linha da sessão"
+        subtitle="Antes do log detalhado, deixe visível se existe plano, execução e comparação pronta para agir."
       >
         <Card className="px-5 py-5">
           <div className="flex items-start justify-between gap-4">
@@ -936,7 +936,7 @@ function WorkoutsContent() {
 
           <div className="mt-5 space-y-3">
             <SessionSignal
-              label="Plan ready"
+              label="Plano pronto"
               value={plannedWorkout ? 'Visible' : 'Open'}
               detail={
                 plannedWorkout
@@ -946,7 +946,7 @@ function WorkoutsContent() {
               tone={plannedWorkout ? 'neutral' : 'warn'}
             />
             <SessionSignal
-              label="Execution logged"
+              label="Execução salva"
               value={workoutsForDate.length > 0 ? `${workoutsForDate.length} session(s)` : 'None yet'}
               detail={
                 workoutsForDate.length > 0
@@ -956,7 +956,7 @@ function WorkoutsContent() {
               tone={workoutsForDate.length > 0 ? 'ok' : 'warn'}
             />
             <SessionSignal
-              label="Comparison ready"
+              label="Comparação disponível"
               value={`${Math.round(executionCoverage)}% match`}
               detail="A comparacao abaixo separa claramente o que era plano do que foi executado."
               tone={executionCoverage >= 100 ? 'ok' : 'neutral'}
@@ -966,8 +966,8 @@ function WorkoutsContent() {
       </Section>
 
         <SectionCard
-          title="Plan vs execution"
-          subtitle="Plano, execucao e status aparecem separados para leitura imediata da sessao."
+          title="Plano vs execução"
+          subtitle="Plano, execução e status aparecem separados para leitura imediata da sessão."
           actions={
             workoutsForDate.length > 1 ? (
               <div className="flex flex-wrap gap-2">
@@ -986,14 +986,14 @@ function WorkoutsContent() {
         >
           <div className="grid gap-4">
             <ComparisonPanel
-              title="No planned session"
-              eyebrow="Planned"
+              title="Nenhuma sessão planejada"
+              eyebrow="Planejado"
               workout={plannedWorkout}
               planned
             />
             <ComparisonPanel
-              title="No execution logged"
-              eyebrow="Executed"
+              title="Nenhuma execução registrada"
+              eyebrow="Executado"
               workout={comparisonWorkout}
             />
           </div>
@@ -1027,8 +1027,8 @@ function WorkoutsContent() {
         </SectionCard>
 
         <SectionCard
-          title="Workout log"
-          subtitle="Cards e acoes desta rota, com plano, status e execucao visualmente separados."
+          title="Histórico de treinos"
+          subtitle="Cards e ações desta rota, com plano, status e execução visualmente separados."
           actions={
             <div className="flex flex-wrap gap-2">
               {WORKOUT_FILTERS.map((option) => (
@@ -1090,7 +1090,7 @@ function WorkoutsContent() {
         >
           <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
             <DialogPanelHeader
-              eyebrow="Workout session"
+              eyebrow="Sessão de treino"
               title={editingWorkout ? 'Editar treino' : 'Novo treino'}
               description="Este modal pertence apenas a Workouts e manipula somente dados de treino do estado local desta rota."
               accentClassName="from-[hsl(var(--brand)/0.1)]"

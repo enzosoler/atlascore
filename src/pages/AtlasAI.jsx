@@ -774,7 +774,7 @@ export default function AtlasAI() {
                   <ChatSignalCard
                     icon={Activity}
                     label="Modo"
-                    value="Mock local estavel"
+                    value="Mock local estável"
                     detail="A experiencia continua sem backend remoto, mantendo o fluxo de chat atual."
                   />
                 </div>
@@ -880,14 +880,14 @@ export default function AtlasAI() {
                           <div className="grid gap-3 sm:grid-cols-3">
                             <ChatSignalCard
                               icon={Brain}
-                              label="Assistant"
+                              label="Assistente"
                               value="Premium e contextual"
                               detail="Mais próximo de uma camada estratégica do produto do que de um chat utilitário."
                             />
                             <ChatSignalCard
                               icon={Clock3}
-                              label="Persistencia"
-                              value="Historico local salvo"
+                              label="Persistência"
+                              value="Histórico local salvo"
                               detail="Cada conversa criada aqui reaparece organizada na sidebar."
                             />
                             <ChatSignalCard

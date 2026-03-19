@@ -469,7 +469,7 @@ function ProfileField({ field, value, onChange, multiline = false }) {
 export default function Profile() {
   return (
     <SafePageBoundary
-      title="Profile"
+      title="Perfil"
       subtitle="Modo seguro do perfil premium."
       maxWidth="max-w-6xl"
       fallbackDescription="Profile page loaded. O conteudo principal falhou, mas a rota continua acessivel."
@@ -565,7 +565,7 @@ function ProfileContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Profile"
+        eyebrow="Perfil"
         title={`${preferredName}, keep your baseline sharp.`}
         subtitle="Conta, targets e identidade do atleta agora leem como uma unica superficie: sofisticada, pessoal e pronta para sustentar nutricao, treino e performance."
         accentClassName="from-[hsl(var(--brand)/0.08)] via-[hsl(var(--ok)/0.04)]"
@@ -578,23 +578,23 @@ function ProfileContent() {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to={ROUTES.myWorkout}>Abrir Meu Workout</Link>
+              <Link to={ROUTES.myWorkout}>Abrir Meu Treino</Link>
             </Button>
           </ActionRow>
         }
       >
         <div className="grid gap-3">
           <HeroStat
-            label="Session"
-            value="Supabase active"
+            label="Sessão"
+            value="Supabase ativo"
             detail={user?.email || 'Sessao autenticada e pronta para uso.'}
           />
           <HeroStat
-            label="Profile"
+            label="Perfil"
             value={`${completionScore}% aligned`}
             detail={`${filledFields} de ${totalFields} campos principais preenchidos.`}
           />
-          <HeroStat label="Daily fuel" value={calorieTargetValue} detail={macroSignature} />
+          <HeroStat label="Combustível diário" value={calorieTargetValue} detail={macroSignature} />
         </div>
       </PageHeader>
 
@@ -614,7 +614,7 @@ function ProfileContent() {
 
         {!profileQuery.isLoading && profileQuery.isError ? (
           <ErrorState
-            title="Profile em modo seguro"
+            title="Perfil em modo seguro"
             description="Parte dos dados nao carregou, mas voce ainda pode revisar a conta e salvar as informacoes principais."
           />
         ) : null}
@@ -622,7 +622,7 @@ function ProfileContent() {
         {!profileQuery.isLoading ? (
           <>
             <Section
-              title="Account"
+              title="Conta"
               subtitle="Identidade premium, acesso estavel e um resumo curto da conta antes dos dados e targets."
             >
               <Card className="px-5 py-5">
@@ -663,9 +663,9 @@ function ProfileContent() {
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  <AccountDetail icon={Mail} label="Email" value={user?.email || '--'} />
-                  <AccountDetail icon={UserCircle2} label="Role" value={roleLabel} />
-                  <AccountDetail icon={Sparkles} label="Profile state" value={draftStatus} />
+                  <AccountDetail icon={Mail} label="E-mail" value={user?.email || '--'} />
+                  <AccountDetail icon={UserCircle2} label="Função" value={roleLabel} />
+                  <AccountDetail icon={Sparkles} label="Estado do perfil" value={draftStatus} />
                 </div>
 
                 <Button
@@ -682,13 +682,13 @@ function ProfileContent() {
 
             <section className="grid gap-4 sm:grid-cols-2">
               <QuickMetricCard
-                label="Weight direction"
+                label="Direção do peso"
                 value={weightDirection.value}
                 detail={weightDirection.detail}
                 icon={Scale}
               />
               <QuickMetricCard
-                label="Calories"
+                label="Calorias"
                 value={calorieTargetValue}
                 detail={
                   hasValue(form.calories_target)
@@ -698,7 +698,7 @@ function ProfileContent() {
                 icon={Flame}
               />
               <QuickMetricCard
-                label="Protein"
+                label="Proteína"
                 value={proteinTargetValue}
                 detail={
                   hasValue(form.protein_target)
@@ -708,7 +708,7 @@ function ProfileContent() {
                 icon={Target}
               />
               <QuickMetricCard
-                label="Hydration"
+                label="Hidratação"
                 value={waterTargetValue}
                 detail={
                   hasValue(form.water_target)
@@ -721,7 +721,7 @@ function ProfileContent() {
 
             <section className="grid gap-4">
               <SectionCard
-                title="Profile blueprint"
+                title="Configurações do perfil"
                 subtitle="Organize baseline, composicao corporal e targets em blocos claros, com a mesma linguagem sofisticada do restante do produto."
               >
                 {!profileData ? (
@@ -857,8 +857,8 @@ function ProfileContent() {
 
               <SectionCard
                 className="relative overflow-hidden"
-                title="Profile readout"
-                subtitle="Uma leitura curta e pessoal de como o restante do produto deve enxergar voce hoje."
+                title="Resumo do perfil"
+                subtitle="Uma leitura curta e pessoal de como o restante do app deve enxergar você hoje."
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand)/0.07)] to-transparent" />
 
@@ -882,7 +882,7 @@ function ProfileContent() {
                   </div>
 
                   <ReadoutItem
-                    label="Daily intake"
+                    label="Consumo diário"
                     value={calorieTargetValue}
                     detail={
                       macroSignature === 'Macros pendentes'
@@ -891,12 +891,12 @@ function ProfileContent() {
                     }
                   />
                   <ReadoutItem
-                    label="Body direction"
+                    label="Direção corporal"
                     value={weightDirection.value}
                     detail={weightDirection.detail}
                   />
                   <ReadoutItem
-                    label="Hydration cadence"
+                    label="Cadência de hidratação"
                     value={waterTargetValue}
                     detail={
                       hasValue(form.water_target)

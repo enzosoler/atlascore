@@ -485,10 +485,10 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <HistoryMetricChip label="Peito" value={measurement.chest} unit="cm" />
-            <HistoryMetricChip label="Braco" value={measurement.arms} unit="cm" />
+            <HistoryMetricChip label="Braço" value={measurement.arms} unit="cm" />
             <HistoryMetricChip label="Coxa" value={measurement.thighs} unit="cm" />
             <HistoryMetricChip label="Quadril" value={measurement.hips} unit="cm" />
-            <HistoryMetricChip label="Pescoco" value={measurement.neck} unit="cm" />
+            <HistoryMetricChip label="Pescoço" value={measurement.neck} unit="cm" />
             <HistoryMetricChip label="Campos" value={countFilledMetrics(measurement)} unit="dados" />
           </div>
 
@@ -646,7 +646,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('weight', event.target.value)}
           />
           <MeasurementField
-            label="Body fat"
+            label="Gordura corporal"
             unit="%"
             type="number"
             step="0.1"
@@ -682,7 +682,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('chest', event.target.value)}
           />
           <MeasurementField
-            label="Braco"
+            label="Braço"
             unit="cm"
             type="number"
             step="0.1"
@@ -712,7 +712,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('hips', event.target.value)}
           />
           <MeasurementField
-            label="Pescoco"
+            label="Pescoço"
             unit="cm"
             type="number"
             step="0.1"
@@ -751,7 +751,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 export default function Measurements() {
   return (
     <SafePageBoundary
-      title="Measurements"
+      title="Medidas"
       subtitle="Tracking corporal com checkpoint unificado, leitura de tendencia clara e historico proprio."
       maxWidth="max-w-6xl"
       fallbackDescription="A rota de Measurements continua acessivel mesmo se a interface principal falhar."
@@ -891,8 +891,8 @@ function MeasurementsContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Measurements"
-        title="Body tracking com calma, hierarquia e leitura real."
+        eyebrow="Medidas"
+        title="Medidas com calma, hierarquia e leitura real."
         subtitle="Um espaco dedicado para checkpoints corporais: peso, composicao e circunferencias em uma leitura premium, limpa e ritmada."
         accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"
         actions={
@@ -925,7 +925,7 @@ function MeasurementsContent() {
             metric={METRIC_LOOKUP.weight}
           />
           <HeroStat
-            label="Body fat"
+            label="Gordura corporal"
             value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.body_fat)} %` : '--'}
             detail={getDeltaLabel(metricSnapshots.body_fat?.delta, METRIC_LOOKUP.body_fat)}
             icon={Activity}
@@ -955,7 +955,7 @@ function MeasurementsContent() {
         {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
         <Section
-          title="Latest checkpoint"
+          title="Último checkpoint"
           subtitle="Resumo imediato do registro mais recente, antes de abrir a tendencia ou o historico."
         >
           <Card className="px-5 py-5">
@@ -983,10 +983,10 @@ function MeasurementsContent() {
 
                 <div className="mt-5 space-y-3">
                   <SnapshotRow label="Peso" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
-                  <SnapshotRow label="Body fat" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
+                  <SnapshotRow label="Gordura corporal" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
                   <SnapshotRow label="Cintura" value={toDisplayNumber(latestMeasurement.waist)} unit="cm" />
                   <SnapshotRow label="Peito" value={toDisplayNumber(latestMeasurement.chest)} unit="cm" />
-                  <SnapshotRow label="Braco" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
+                  <SnapshotRow label="Braço" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
                   <SnapshotRow label="Coxa" value={toDisplayNumber(latestMeasurement.thighs)} unit="cm" />
                 </div>
 
@@ -1012,7 +1012,7 @@ function MeasurementsContent() {
         </Section>
 
         <SectionCard
-          title="Trend view"
+          title="Tendência"
           subtitle="Selecione a metrica principal e leia a curva com contexto suficiente para tomar decisao sem excesso visual."
         >
           {sortedMeasurements.length ? (
@@ -1254,7 +1254,7 @@ function MeasurementsContent() {
         >
           <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
             <DialogPanelHeader
-              eyebrow="Measurements checkpoint"
+              eyebrow="Checkpoint de medidas"
               title={editingMeasurement ? 'Editar checkpoint corporal' : 'Registrar checkpoint corporal'}
               description="Este modal mantem a logica atual da pagina, mas organiza a entrada com mais clareza para peso, composicao e circunferencias."
               accentClassName="from-[rgba(14,165,233,0.12)]"

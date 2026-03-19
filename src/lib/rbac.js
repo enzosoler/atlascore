@@ -146,16 +146,16 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.atlasAI,         label: 'Atlas AI',     icon: 'Brain' },
     { path: ROUTES.insights,        label: 'Insights',     icon: 'TrendingUp' },
     // ── Coach area ───────────────────────────────
-    { path: ROUTES.coachDashboard,    label: 'Coach Dashboard',    icon: 'LayoutDashboard' },
-    { path: ROUTES.coachStudents,     label: 'Coach Alunos',       icon: 'Users' },
+    { path: ROUTES.coachDashboard,    label: 'Dashboard Coach',    icon: 'LayoutDashboard' },
+    { path: ROUTES.coachStudents,     label: 'Alunos Coach',       icon: 'Users' },
     // ── Nutritionist area ────────────────────────
-    { path: ROUTES.nutritionistDashboard,  label: 'Nutricionista Dashboard', icon: 'LayoutDashboard' },
-    { path: ROUTES.nutritionistClients,    label: 'Nutricionista Clientes',  icon: 'Users' },
+    { path: ROUTES.nutritionistDashboard,  label: 'Dashboard Nutricionista', icon: 'LayoutDashboard' },
+    { path: ROUTES.nutritionistClients,    label: 'Clientes Nutricionista',  icon: 'Users' },
     // ── Clinician area ──────────────────────────
-    { path: ROUTES.clinicianDashboard,  label: 'Clínico Dashboard', icon: 'LayoutDashboard' },
-    { path: ROUTES.clinicianPatients,   label: 'Clínico Pacientes', icon: 'Users' },
+    { path: ROUTES.clinicianDashboard,  label: 'Dashboard Clínico', icon: 'LayoutDashboard' },
+    { path: ROUTES.clinicianPatients,   label: 'Pacientes Clínico', icon: 'Users' },
     // ── Admin area ───────────────────────────────
-    { path: ROUTES.admin,  label: 'Admin Panel',    icon: 'ShieldCheck' },
+    { path: ROUTES.admin,  label: 'Painel Admin',    icon: 'ShieldCheck' },
     // ── Shared ──────────────────────────────────
     { path: ROUTES.social,      label: 'Social',         icon: 'Users' },
     { path: ROUTES.export,      label: 'Exportar',       icon: 'Download' },

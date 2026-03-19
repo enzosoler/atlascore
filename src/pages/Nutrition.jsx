@@ -414,7 +414,7 @@ function MealCard({ meal, onEdit, onDelete }) {
             <div className="grid gap-px bg-[hsl(var(--border)/0.7)] sm:grid-cols-4">
               <LoggedMetric label="Kcal" value={meal?.total_calories || 0} unit="kcal" />
               <LoggedMetric
-                label="Proteina"
+                label="Proteína"
                 value={meal?.total_protein || 0}
                 unit="g"
                 tone="protein"
@@ -625,7 +625,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
           Cancelar
         </SecondaryButton>
         <PrimaryButton type="submit">
-          {meal ? 'Salvar refeicao' : 'Adicionar refeicao'}
+          {meal ? 'Salvar refeicao' : 'Adicionar refeição'}
         </PrimaryButton>
       </div>
     </form>
@@ -635,8 +635,8 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
 export default function Nutrition() {
   return (
     <SafePageBoundary
-      title="Nutrition"
-      subtitle="Busca USDA, snapshots no Supabase e comparacao simples com as metas do dia."
+      title="Nutrição"
+      subtitle="Busca USDA, snapshots no Supabase e comparação simples com as metas do dia."
       maxWidth="max-w-6xl"
       fallbackDescription="A rota de Nutrition continua acessivel mesmo se a interface principal falhar."
     >
@@ -923,9 +923,9 @@ function NutritionContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Nutrition"
-        title="Nutrition that reads like a daily rhythm."
-        subtitle="Busque alimentos na USDA, salve snapshots no Supabase e mantenha a leitura do dia focada na proxima decisao alimentar."
+        eyebrow="Nutrição"
+        title="Nutrição que acompanha o ritmo do dia."
+        subtitle="Busque alimentos na USDA, salve snapshots no Supabase e mantenha a leitura do dia focada na próxima decisão alimentar."
         accentClassName="from-[hsl(var(--warn)/0.12)] via-[hsl(var(--warn)/0.04)]"
         actions={
           <ActionRow>
@@ -939,24 +939,24 @@ function NutritionContent() {
               className="inline-flex items-center justify-center gap-2"
             >
               <Plus className="h-4 w-4" strokeWidth={1.9} />
-              Adicionar refeicao
+              Adicionar refeição
             </PrimaryButton>
           </ActionRow>
         }
       >
         <div className="grid gap-3">
           <StatCard
-            label="Intake"
+            label="Consumo"
             value={formatUnit(nutritionTotals.calories, ' kcal')}
             detail={`${remainingCalories} kcal restantes para a meta do dia.`}
           />
           <StatCard
-            label="Protein"
+            label="Proteína"
             value={formatUnit(nutritionTotals.protein, ' g')}
-            detail={`${remainingProtein} g faltando para bater a proteina alvo.`}
+            detail={`${remainingProtein} g faltando para atingir a proteína alvo.`}
           />
           <StatCard
-            label="Meals"
+            label="Refeições"
             value={`${mealsForDate.length} registradas`}
             detail={`Cobertura de ${mealCoverage}% da estrutura prevista para hoje.`}
           />
@@ -970,12 +970,12 @@ function NutritionContent() {
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
       {isLoadingMeals ? (
-        <StatusBanner tone="neutral">Carregando snapshots salvos da sua conta...</StatusBanner>
+        <StatusBanner tone="neutral">Carregando refeições salvas da sua conta...</StatusBanner>
       ) : null}
 
       <Section
         title="Buscar alimento"
-        subtitle="Digite pelo menos 2 letras. Ao selecionar um item, a tela salva nome e macros como snapshot no food_logs."
+        subtitle="Digite pelo menos 2 letras. Ao selecionar um item, a tela salva nome e macros."
       >
         <Card className="px-5 py-5">
           <label className={FIELD_LABEL_CLASS}>
@@ -1038,12 +1038,12 @@ function NutritionContent() {
       </Section>
 
       <Section
-        title="Intake and targets"
-        subtitle="Leitura nutricional clara para o dia selecionado, com foco primeiro no que falta fechar."
+        title="Consumo e metas"
+        subtitle="Leitura nutricional clara para o dia selecionado, com foco no que falta fechar."
       >
         <Card className="px-5 py-5">
           <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-4 py-4">
-            <p className="atlas-metric-label">Calories logged</p>
+            <p className="atlas-metric-label">Calorias registradas</p>
             <p className="mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
               {Math.round(nutritionTotals.calories)}
               <span className="ml-1 text-[15px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
@@ -1053,7 +1053,7 @@ function NutritionContent() {
             <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
               {remainingCalories > 0
                 ? `${remainingCalories} kcal ainda abertas dentro da meta do dia.`
-                : 'Meta calorica atingida para o dia selecionado.'}
+                : 'Meta calórica atingida para o dia selecionado.'}
             </p>
 
             <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[hsl(var(--card))]">
@@ -1066,7 +1066,7 @@ function NutritionContent() {
 
           <div className="mt-5 space-y-5">
             <MacroTrack
-              label="Proteina"
+              label="Proteína"
               consumed={nutritionTotals.protein}
               target={DEFAULT_PROFILE.protein_target}
               unit="g"
@@ -1091,8 +1091,8 @@ function NutritionContent() {
       </Section>
 
       <Section
-        title="Meal flow"
-        subtitle="Cards editaveis desta rota, com leitura sequencial e foco em alimento, contexto e macros."
+        title="Refeições do dia"
+        subtitle="Cards editáveis com leitura sequencial e foco em alimento, contexto e macros."
         actions={
           <div className="flex flex-wrap justify-end gap-2">
             {filterOptions.map((option) => {
@@ -1114,11 +1114,11 @@ function NutritionContent() {
         {!mealsForDate.length ? (
           <EmptyState
             icon={UtensilsCrossed}
-            title="Nenhuma refeicao registrada"
+            title="Nenhuma refeição registrada"
             description="Use a busca USDA ou o botao acima para abrir o modal local de refeicao e comecar o dia alimentar."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar refeicao
+                Adicionar refeição
               </PrimaryButton>
             }
           />
@@ -1127,7 +1127,7 @@ function NutritionContent() {
         {mealsForDate.length > 0 && filteredMeals.length === 0 ? (
           <EmptyState
             icon={Target}
-            title="Nenhuma refeicao neste filtro"
+            title="Nenhuma refeição neste filtro"
             description="Troque o filtro atual ou adicione um novo registro para este periodo."
           />
         ) : null}
@@ -1147,8 +1147,8 @@ function NutritionContent() {
       </Section>
 
       <Section
-        title="Plan and insight"
-        subtitle="O plano alimentar e a leitura curta do dia ficam abaixo da acao principal, como apoio e nao como dashboard."
+        title="Plano e leitura"
+        subtitle="O plano alimentar e a leitura curta do dia ficam abaixo da ação principal."
       >
         <div className="space-y-3">
           <Card className="px-5 py-5">
@@ -1245,9 +1245,9 @@ function NutritionContent() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
           <DialogPanelHeader
-            eyebrow="Nutrition meal"
-            title={editingMeal ? 'Editar refeicao' : 'Adicionar refeicao'}
-            description="Este modal continua local. Para salvar snapshot real no Supabase, use a busca USDA acima."
+            eyebrow="Refeição"
+            title={editingMeal ? 'Editar refeição' : 'Adicionar refeição'}
+            description="Este modal é local. Para salvar no Supabase, use a busca USDA acima."
             accentClassName="from-[hsl(var(--warn)/0.1)]"
           />
 

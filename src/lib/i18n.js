@@ -6,7 +6,7 @@ export const translations = {
   'en-US': enUS,
 };
 
-export const DEFAULT_LANGUAGE = 'en-US';
+export const DEFAULT_LANGUAGE = 'pt-BR';
 export const supportedLanguages = ['pt-BR', 'en-US'];
 export const LANGUAGE_STORAGE_KEY = 'atlas_locale';
 export const LEGACY_LANGUAGE_STORAGE_KEY = 'language';

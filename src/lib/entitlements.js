@@ -81,7 +81,7 @@ export const FEATURE_LOCKS = {
     roles: ['coach'],
   },
   nutritionist_dashboard: {
-    label: 'Nutritionist Dashboard',
+    label: 'Dashboard Nutricionista',
     minPlan: 'nutritionist',
     roles: ['nutritionist'],
   },
@@ -100,7 +100,7 @@ export const FEATURE_LOCKS = {
 
   // Social
   social_cards: {
-    label: 'Social Cards Premium',
+    label: 'Cards Sociais Premium',
     minPlan: 'pro',
   },
 

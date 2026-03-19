@@ -53,7 +53,7 @@ export default function Insights() {
   return (
     <SafePageBoundary
       title="Insights"
-      subtitle="Modo seguro da pagina de insights."
+      subtitle="Modo seguro da página de insights."
       maxWidth="max-w-5xl"
       fallbackDescription="Insights page loaded. O conteudo principal falhou, mas a rota continua acessivel."
     >
@@ -185,7 +185,7 @@ function InsightsContent() {
     >
       {loading ? (
         <LoadingState
-          title="Insights page loaded"
+          title="Insights carregado"
           description="Estamos carregando as fontes de dados e mantendo a pagina aberta em modo seguro."
         />
       ) : null}
@@ -198,7 +198,7 @@ function InsightsContent() {
       ) : null}
 
       {!loading && !hasAnyData ? (
-        <SectionCard title="Insights page loaded" subtitle="Ainda sem base suficiente.">
+        <SectionCard title="Insights carregado" subtitle="Ainda sem base suficiente.">
           <EmptyState
             title="Nenhum dado suficiente para interpretar"
             description="Registre check-ins, treinos, refeicoes, medidas ou protocolos para preencher os insights."
@@ -210,19 +210,19 @@ function InsightsContent() {
         <>
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Treinos concluidos"
+              label="Treinos concluídos"
               value={formatNumber(completedWorkouts.length)}
               hint={`Periodo analisado: ultimos ${days} dias`}
               icon={Activity}
             />
             <MetricCard
-              label="Sono medio"
+              label="Sono médio"
               value={averageSleep ? `${averageSleep.toFixed(1)} h` : '--'}
               hint="Calculado a partir dos check-ins registrados."
               icon={Moon}
             />
             <MetricCard
-              label="Calorias medias"
+              label="Calorias médias"
               value={caloriesPerDay ? `${formatNumber(caloriesPerDay)} kcal` : '--'}
               hint="Media por dia com refeicoes registradas."
               icon={Brain}
@@ -237,7 +237,7 @@ function InsightsContent() {
 
           <SectionCard
             title="Leituras principais"
-            subtitle="Resumo textual do que o historico recente esta mostrando."
+            subtitle="Resumo textual do que o histórico recente está mostrando."
           >
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
@@ -261,7 +261,7 @@ function InsightsContent() {
 
           <SectionCard
             title="Contagem de registros"
-            subtitle="Visao simples do volume de dados disponiveis no periodo."
+            subtitle="Visão simples do volume de dados disponíveis no período."
           >
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">

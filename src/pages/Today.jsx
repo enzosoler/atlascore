@@ -18,50 +18,50 @@ import {
 const NEXT_STEPS = [
   {
     to: ROUTES.nutrition,
-    title: 'Open nutrition',
-    description: 'Confirm meals, macros and the first food choice before the day gets busy.',
+    title: 'Abrir nutrição',
+    description: 'Confirme as refeições, macros e a primeira escolha alimentar antes do dia ficar cheio.',
     icon: UtensilsCrossed,
-    phase: 'Top priority',
+    phase: 'Prioridade máxima',
   },
   {
     to: ROUTES.workouts,
-    title: 'Review workout',
-    description: 'Keep the main session ready before your training window opens.',
+    title: 'Revisar treino',
+    description: 'Deixe a sessão principal pronta antes da sua janela de treino abrir.',
     icon: Dumbbell,
-    phase: 'Up next',
+    phase: 'Próximo passo',
   },
   {
     to: ROUTES.atlasAI,
-    title: 'Ask Atlas AI',
-    description: 'Use one short prompt when you want a clean next decision without extra noise.',
+    title: 'Perguntar à Atlas AI',
+    description: 'Use um prompt curto quando quiser uma decisão clara sem ruído extra.',
     icon: Brain,
-    phase: 'Quick insight',
+    phase: 'Insight rápido',
   },
   {
     to: ROUTES.profile,
-    title: 'Refine profile',
-    description: 'Keep baseline preferences aligned so the rest of the app stays accurate.',
+    title: 'Refinar perfil',
+    description: 'Mantenha as preferências base alinhadas para o app ficar preciso.',
     icon: User,
-    phase: 'Keep aligned',
+    phase: 'Manter alinhado',
   },
 ];
 
 const SNAPSHOT_CARDS = [
   {
     to: ROUTES.nutrition,
-    label: 'Nutrition',
-    value: 'Ready',
-    description: 'Meals and targets are lined up for a clean start.',
-    meta: 'Daily plan',
+    label: 'Nutrição',
+    value: 'Pronto',
+    description: 'Refeições e metas alinhadas para um começo limpo.',
+    meta: 'Plano diário',
     icon: UtensilsCrossed,
     tone: 'blue',
   },
   {
     to: ROUTES.workouts,
-    label: 'Workout',
-    value: 'Pending',
-    description: 'Your main session is prepared and waiting for execution.',
-    meta: 'Today session',
+    label: 'Treino',
+    value: 'Pendente',
+    description: 'Sua sessão principal está preparada e aguardando execução.',
+    meta: 'Sessão de hoje',
     icon: Dumbbell,
     tone: 'orange',
   },
@@ -69,27 +69,27 @@ const SNAPSHOT_CARDS = [
 
 const ADHERENCE_SIGNALS = [
   {
-    label: 'Nutrition',
+    label: 'Nutrição',
     value: 82,
   },
   {
-    label: 'Training',
+    label: 'Treino',
     value: 76,
   },
   {
-    label: 'Recovery',
+    label: 'Recuperação',
     value: 88,
   },
 ];
 
 function getPreferredName(displayName) {
-  if (!displayName) return 'Athlete';
+  if (!displayName) return 'Atleta';
   const [firstChunk] = displayName.split(/[ @]/).filter(Boolean);
   return firstChunk || displayName;
 }
 
 function getDateLabel() {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -99,10 +99,10 @@ function getDateLabel() {
 export default function Today() {
   return (
     <SafePageBoundary
-      title="Today"
-      subtitle="Mobile-first daily overview."
+      title="Hoje"
+      subtitle="Visão geral diária."
       maxWidth="max-w-[480px]"
-      fallbackDescription="The Today screen opened in safe mode."
+      fallbackDescription="A tela Hoje abriu em modo seguro."
     >
       <TodayContent />
     </SafePageBoundary>
@@ -112,7 +112,7 @@ export default function Today() {
 function TodayContent() {
   const { user } = useAuth();
   const { role, loading: isRoleLoading } = useRole(user);
-  const displayName = user?.full_name || user?.email || 'Athlete';
+  const displayName = user?.full_name || user?.email || 'Atleta';
   const preferredName = getPreferredName(displayName);
   const greeting = getGreeting();
   const isAdmin = !isRoleLoading && role === 'admin';
@@ -127,7 +127,7 @@ function TodayContent() {
           <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
             {getDateLabel()}
           </p>
-          <h1 className="mt-2 text-[34px] font-bold tracking-[-0.07em] text-[#111827]">Today</h1>
+          <h1 className="mt-2 text-[34px] font-bold tracking-[-0.07em] text-[#111827]">Hoje</h1>
         </div>
 
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/80 text-[#0A84FF] shadow-[0_4px_20px_rgba(15,23,42,0.05)]">
@@ -142,11 +142,11 @@ function TodayContent() {
         <div className="relative">
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex rounded-full bg-white/16 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white/92">
-              Local preview
+              Pré-visualização local
             </span>
             {isAdmin && (
               <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white">
-                Admin mode enabled
+                Modo admin ativo
               </span>
             )}
           </div>
@@ -155,16 +155,16 @@ function TodayContent() {
             {greeting}, {preferredName}
           </p>
           <p className="mt-2 max-w-[24rem] text-[15px] leading-6 text-white/84">
-            A calm home for nutrition, training and the next decision that matters today.
+            Seu centro de nutrição, treino e próxima decisão do dia.
           </p>
           <p className="mt-5 text-[13px] font-medium text-white/80">{displayName}</p>
         </div>
       </TodayCard>
 
       <TodaySection
-        eyebrow="What's Next"
-        title="Priority actions"
-        description="Move through the day in the right order, with one clear action per card."
+        eyebrow="Próximos passos"
+        title="Ações prioritárias"
+        description="Avance pelo dia na ordem certa, com uma ação clara por card."
       >
         <div className="space-y-3">
           {NEXT_STEPS.map((item, index) => (
@@ -181,7 +181,7 @@ function TodayContent() {
         </div>
       </TodaySection>
 
-      <TodaySection eyebrow="Snapshot" title="Today at a glance">
+      <TodaySection eyebrow="Resumo" title="Hoje em um olhar">
         <div className="grid grid-cols-2 gap-3">
           {SNAPSHOT_CARDS.map((item) => (
             <TodayStatCard
@@ -198,20 +198,20 @@ function TodayContent() {
         </div>
       </TodaySection>
 
-      <TodaySection eyebrow="Adherence" title="Daily consistency">
+      <TodaySection eyebrow="Aderência" title="Consistência diária">
         <TodayAdherenceCard
           score={adherenceAverage}
-          summary="Nutrition is leading the day, training is queued up, and recovery is already giving you a stable base."
+          summary="Nutrição liderando o dia, treino na fila, e recuperação já dando base estável."
           items={ADHERENCE_SIGNALS}
         />
       </TodaySection>
 
-      <TodaySection eyebrow="Atlas AI" title="Quiet guidance">
+      <TodaySection eyebrow="Atlas AI" title="Orientação discreta">
         <TodayInsightCard
           to={ROUTES.atlasAI}
           icon={Brain}
-          title="Start with nutrition, then open the workout."
-          description="Keeping the first meal decision visible usually makes the rest of the day feel lighter and easier to execute."
+          title="Comece pela nutrição, depois abra o treino."
+          description="Manter a primeira decisão alimentar visível geralmente deixa o resto do dia mais leve e fácil de executar."
         />
       </TodaySection>
     </TodayScreen>

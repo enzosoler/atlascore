@@ -62,8 +62,8 @@ function SummaryTile({ label, value, hint, icon: Icon }) {
 export default function Protocols() {
   return (
     <SafePageBoundary
-      title="Protocols"
-      subtitle="Active protocol management for medications, hormones, peptides, supplements, and other compounds you are using or tracking."
+      title="Protocolos"
+      subtitle="Gerencie medicamentos, hormônios, peptídeos, suplementos e outros compostos que você usa ou acompanha."
       maxWidth="max-w-6xl"
       fallbackDescription="The Protocols route stayed available in safe mode even though the main content failed."
     >
@@ -239,7 +239,7 @@ function ProtocolsContent() {
 
   return (
     <PageShell
-      title="Protocols"
+      title="Protocolos"
       subtitle="A focused V1 workspace for current compounds, simple scheduling, status control, and visible adherence context without breaking the stable app shell."
       actions={
         <PrimaryButton
@@ -257,33 +257,33 @@ function ProtocolsContent() {
 
       {isLoading ? (
         <LoadingState
-          title="Loading protocols"
+          title="Carregando protocolos"
           description="The page is already open in safe mode while your current protocol items load."
         />
       ) : null}
 
       {!isLoading && hasLoadError ? (
         <ErrorState
-          title="Protocols in safe mode"
+          title="Protocolos em modo seguro"
           description="Existing protocol data did not fully load, but you can still open the page and create new items."
         />
       ) : null}
 
       <section className="grid gap-3 md:grid-cols-3">
         <SummaryTile
-          label="Active"
+          label="Ativo"
           value={groupedProtocols.active.length}
           hint="Current compounds still in rotation right now."
           icon={FlaskConical}
         />
         <SummaryTile
-          label="Paused"
+          label="Pausado"
           value={groupedProtocols.paused.length}
           hint="Items temporarily stopped but still being tracked."
           icon={PauseCircle}
         />
         <SummaryTile
-          label="Finished"
+          label="Finalizado"
           value={groupedProtocols.finished.length}
           hint="Completed cycles and protocols kept in history."
           icon={Clock3}
@@ -291,7 +291,7 @@ function ProtocolsContent() {
       </section>
 
       <SectionCard
-        title="Current protocol items"
+        title="Itens do protocolo atual"
         subtitle="Clean, status-driven tracking for the substances you are currently using or still monitoring."
         actions={
           <div className="flex flex-wrap gap-2">
@@ -339,7 +339,7 @@ function ProtocolsContent() {
 
         {!isLoading && !hasAnyProtocols ? (
           <EmptyState
-            title="No protocol items yet"
+            title="Nenhum item no protocolo"
             description={
               hasLoadError
                 ? 'The existing list could not be loaded. You can still add your first protocol item safely from here.'

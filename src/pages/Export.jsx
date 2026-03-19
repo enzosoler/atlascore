@@ -32,8 +32,8 @@ function serializeCsv(summary) {
 export default function Export() {
   return (
     <SafePageBoundary
-      title="Export"
-      subtitle="Modo seguro da pagina de exportacao."
+      title="Exportar"
+      subtitle="Modo seguro da página de exportação."
       maxWidth="max-w-4xl"
       fallbackDescription="Export page loaded. O conteudo principal falhou, mas a rota continua acessivel."
     >
@@ -175,7 +175,7 @@ function ExportContent() {
 
   return (
     <PageShell
-      title="Export"
+      title="Exportar"
       subtitle="Pagina reconstruida para exportar dados com previsibilidade. Sem PDF sofisticado, mas com JSON completo e CSV-resumo funcionando."
       maxWidth="max-w-4xl"
     >
@@ -183,19 +183,19 @@ function ExportContent() {
 
       {busy ? (
         <LoadingState
-          title="Export page loaded"
+          title="Página de exportação carregada"
           description="Estamos gerando o arquivo em modo seguro para evitar falhas silenciosas."
         />
       ) : null}
 
       {invalidRange ? (
         <ErrorState
-          title="Periodo invalido"
+          title="Período inválido"
           description="A data inicial precisa ser menor ou igual a data final para a exportacao continuar."
         />
       ) : null}
 
-      <SectionCard title="Periodo da exportacao" subtitle="Escolha o intervalo que voce quer baixar.">
+      <SectionCard title="Período de exportação" subtitle="Escolha o intervalo que você quer baixar.">
         <div className="grid gap-3 md:grid-cols-2">
           <label className="text-sm text-zinc-700">
             Data inicial
@@ -243,7 +243,7 @@ function ExportContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Downloads" subtitle="Arquivos simples, diretos e confiaveis.">
+      <SectionCard title="Downloads" subtitle="Arquivos simples, diretos e confiáveis.">
         <div className="grid gap-3 md:grid-cols-2">
           <button
             type="button"
@@ -282,7 +282,7 @@ function ExportContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="O que entra no arquivo" subtitle="Escopo da exportacao reconstruida.">
+      <SectionCard title="O que entra no arquivo" subtitle="Escopo da exportação reconstruída.">
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
             <Calendar className="mb-3 h-5 w-5 text-zinc-700" strokeWidth={2} />
