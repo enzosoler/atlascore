@@ -64,7 +64,7 @@ export default function Routines() {
   const activeRoutine = routines.find(r => r.active);
 
   return (
-    <div className="p-5 lg:p-8 max-w-6xl space-y-8">
+    <div className="mx-auto max-w-6xl p-5 lg:p-8 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>

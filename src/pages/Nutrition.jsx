@@ -944,7 +944,7 @@ function NutritionContent() {
           </ActionRow>
         }
       >
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           <StatCard
             label="Consumo"
             value={formatUnit(nutritionTotals.calories, ' kcal')}

@@ -29,7 +29,7 @@ export default function WorkoutsV2() {
   // Planning mode
   if (mode === 'planning') {
     return (
-      <div className="p-5 lg:p-8 space-y-6">
+      <div className="mx-auto max-w-5xl p-5 lg:p-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="t-headline mb-1">Meus Treinos</h1>

@@ -583,7 +583,7 @@ function ProfileContent() {
           </ActionRow>
         }
       >
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           <HeroStat
             label="Sessão"
             value="Supabase ativo"

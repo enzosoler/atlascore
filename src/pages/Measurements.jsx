@@ -916,7 +916,7 @@ function MeasurementsContent() {
           </ActionRow>
         }
       >
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <HeroStat
             label="Peso atual"
             value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.weight)} kg` : '--'}

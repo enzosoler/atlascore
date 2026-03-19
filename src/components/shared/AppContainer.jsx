@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 const CARD_CLASS_NAME = 'atlas-card';
 
-export function AppContainer({ children, className = '' }) {
+export function AppContainer({ children, className = '', maxWidth = 'max-w-5xl' }) {
   return (
     <div
       className="min-h-full bg-[hsl(var(--bg))] text-[hsl(var(--fg))]"
@@ -12,7 +12,8 @@ export function AppContainer({ children, className = '' }) {
     >
       <div
         className={cn(
-          'mx-auto flex w-full max-w-[30rem] flex-col gap-6 px-4 pb-10 pt-[max(env(safe-area-inset-top),20px)] sm:px-5 sm:pb-12',
+          'mx-auto flex w-full flex-col gap-6 px-4 pb-10 pt-[max(env(safe-area-inset-top),20px)] sm:px-6 sm:pb-12 lg:px-8 lg:pb-16 lg:pt-10',
+          maxWidth,
           className
         )}
       >

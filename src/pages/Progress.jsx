@@ -109,7 +109,7 @@ export default function Progress() {
     }));
 
   return (
-    <div className="p-5 lg:p-8 space-y-6">
+    <div className="mx-auto max-w-5xl p-5 lg:p-8 space-y-6">
       <div>
         <h1 className="t-headline mb-1">Seu Progresso</h1>
         <p className="t-caption">Acompanhe tendências ao longo do tempo</p>
@@ -135,27 +135,28 @@ export default function Progress() {
       {/* AI Analysis */}
       <AIProgressAnalysis measurements={filteredMeasurements} profile={profile} />
 
-      {/* Weight */}
-      <MetricCard
-        label="Peso"
-        value={latest?.weight}
-        unit="kg"
-        change={weightChange}
-        goal={profile?.target_weight}
-        data={chartData.map(d => ({ date: d.date, value: d.weight }))}
-      />
-
-      {/* Body Fat */}
-      {latest?.body_fat && (
+      {/* Weight + Body Fat side-by-side on desktop */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <MetricCard
-          label="Gordura Corporal"
-          value={latest.body_fat}
-          unit="%"
-          change={bfChange}
-          goal={profile?.body_fat_goal}
-          data={chartData.map(d => ({ date: d.date, value: d.body_fat }))}
+          label="Peso"
+          value={latest?.weight}
+          unit="kg"
+          change={weightChange}
+          goal={profile?.target_weight}
+          data={chartData.map(d => ({ date: d.date, value: d.weight }))}
         />
-      )}
+
+        {latest?.body_fat && (
+          <MetricCard
+            label="Gordura Corporal"
+            value={latest.body_fat}
+            unit="%"
+            change={bfChange}
+            goal={profile?.body_fat_goal}
+            data={chartData.map(d => ({ date: d.date, value: d.body_fat }))}
+          />
+        )}
+      </div>
 
       {/* Measurements */}
       {latest?.waist && (

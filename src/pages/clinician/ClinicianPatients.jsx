@@ -26,7 +26,7 @@ export default function ClinicianPatients() {
 
   return (
     <RoleGate roles={['clinician', 'admin']}>
-      <div className="p-5 lg:p-8 max-w-3xl space-y-6">
+      <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
         <div className="flex items-start justify-between gap-4 pb-5 border-b border-[hsl(var(--border-h))]">
           <div>
             <h1 className="t-headline">Meus Pacientes</h1>

@@ -275,7 +275,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
   }
 
   return (
-    <div className="p-5 lg:p-8 max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap pb-5 border-b border-[hsl(var(--border-h))]">
         <div>

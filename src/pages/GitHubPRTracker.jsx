@@ -72,7 +72,7 @@ export default function GitHubPRTracker() {
   });
 
   return (
-    <div className="p-5 lg:p-8 max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl p-5 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 pb-5 border-b border-[hsl(var(--border-h))]">
         <div className="flex items-center gap-3">

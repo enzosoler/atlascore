@@ -212,7 +212,7 @@ export default function ClinicianPatientProfile() {
 
   return (
     <RoleGate roles={['clinician', 'admin']}>
-      <div className="p-5 lg:p-8 max-w-3xl space-y-6">
+      <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
         <div className="pb-5 border-b border-[hsl(var(--border-h))]">
           <Link to="/clinician/patients" className="flex items-center gap-1 t-caption text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] mb-3 transition-colors">
             <ChevronLeft className="w-3.5 h-3.5" strokeWidth={2} /> Voltar para pacientes

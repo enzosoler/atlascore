@@ -151,7 +151,7 @@ export default function AdminPanel() {
 
   return (
     <RoleGate page="AdminPanel">
-      <div className="p-5 lg:p-8 max-w-4xl space-y-6">
+      <div className="mx-auto max-w-4xl p-5 lg:p-8 space-y-6">
         {/* Header */}
         <div className="pb-5 border-b border-[hsl(var(--border-h))]">
           <h1 className="t-headline">Painel Admin</h1>

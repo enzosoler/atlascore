@@ -54,7 +54,7 @@ export default function CoachDashboard() {
 
   return (
     <RoleGate roles={['coach', 'admin']}>
-      <div className="p-5 lg:p-8 max-w-4xl space-y-6">
+      <div className="mx-auto max-w-4xl p-5 lg:p-8 space-y-6">
         <div className="pb-5 border-b border-[hsl(var(--border-h))]">
           <h1 className="t-headline">Dashboard Coach</h1>
           <p className="t-small mt-1">Visão geral dos seus alunos</p>

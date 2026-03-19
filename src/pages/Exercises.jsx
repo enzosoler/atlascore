@@ -83,7 +83,7 @@ export default function Exercises() {
   const equipment = [...new Set(exercises.flatMap(e => e.equipment || []))].sort();
 
   return (
-    <div className="p-5 lg:p-8 space-y-6">
+    <div className="mx-auto max-w-7xl p-5 lg:p-8 space-y-6">
       <div>
         <h1 className="t-headline mb-1">Biblioteca de Exercícios</h1>
         <p className="t-caption">Explore, favoritos e adicione aos seus treinos</p>

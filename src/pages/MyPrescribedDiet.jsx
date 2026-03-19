@@ -102,7 +102,7 @@ export default function MyPrescribedDiet() {
   const activePlan = plans.find(p => p.active) || plans[0];
 
   return (
-    <div className="p-4 lg:p-8 max-w-4xl w-full space-y-6">
+    <div className="mx-auto max-w-4xl w-full p-4 lg:p-8 space-y-6">
       <div className="flex items-start justify-between gap-4 pb-5 border-b border-border">
         <div>
           <h1 className="t-headline">Dieta Prescrita</h1>

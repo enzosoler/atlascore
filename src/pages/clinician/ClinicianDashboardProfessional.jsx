@@ -76,7 +76,7 @@ export default function ClinicianDashboardProfessional() {
 
   return (
     <RoleGate page="ClinicianDashboard">
-      <div className="p-5 lg:p-8 max-w-5xl space-y-6">
+      <div className="mx-auto max-w-5xl p-5 lg:p-8 space-y-6">
         {/* Header */}
         <div className="pb-5 border-b border-[hsl(var(--border-h))]">
           <div className="flex items-start gap-3 mb-2">

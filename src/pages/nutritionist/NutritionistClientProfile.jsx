@@ -78,7 +78,7 @@ export default function NutritionistClientProfile() {
 
   return (
     <RoleGate page="NutritionistClientProfile">
-      <div className="p-5 lg:p-8 max-w-4xl space-y-6">
+      <div className="mx-auto max-w-4xl p-5 lg:p-8 space-y-6">
         {/* Back + Header */}
         <div className="flex items-center gap-3 mb-4">
           <button onClick={() => navigate('/nutritionist/clients')} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[hsl(var(--shell))] transition-colors">

@@ -80,7 +80,7 @@ export class SafePageBoundary extends React.Component {
         this.props.subtitle || 'Modo seguro ativado para evitar tela em branco.';
 
       return (
-        <PageShell title={title} subtitle={subtitle} maxWidth={this.props.maxWidth}>
+        <PageShell title={title} subtitle={subtitle} maxWidth={this.props.maxWidth || 'max-w-5xl'}>
           <StatusBanner tone="warning">
             Detectamos uma falha de renderizacao e abrimos o fallback de seguranca da pagina.
           </StatusBanner>
@@ -107,9 +107,10 @@ export function PageShell({
   actions,
   children,
   eyebrow,
+  maxWidth,
 }) {
   return (
-    <AppContainer>
+    <AppContainer maxWidth={maxWidth}>
       <PageHeader eyebrow={eyebrow} title={title} subtitle={subtitle} actions={actions} />
       {children}
     </AppContainer>

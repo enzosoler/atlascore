@@ -240,7 +240,7 @@ function DiaryContent() {
           </div>
         }
       >
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           <HeroStat
             label="Energia do dia"
             value={totalCal > 0 ? `${Math.round(totalCal)} kcal` : '—'}

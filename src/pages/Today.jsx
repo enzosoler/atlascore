@@ -101,7 +101,7 @@ export default function Today() {
     <SafePageBoundary
       title="Hoje"
       subtitle="Visão geral diária."
-      maxWidth="max-w-[480px]"
+      maxWidth="max-w-5xl"
       fallbackDescription="A tela Hoje abriu em modo seguro."
     >
       <TodayContent />
@@ -163,7 +163,7 @@ function TodayContent() {
         title="Ações prioritárias"
         description="Avance pelo dia na ordem certa, com uma ação clara por card."
       >
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {NEXT_STEPS.map((item, index) => (
             <TodayActionCard
               key={item.to}
@@ -179,7 +179,7 @@ function TodayContent() {
       </TodaySection>
 
       <TodaySection eyebrow="Resumo" title="Hoje em um olhar">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {SNAPSHOT_CARDS.map((item) => (
             <TodayStatCard
               key={item.label}
@@ -195,22 +195,24 @@ function TodayContent() {
         </div>
       </TodaySection>
 
-      <TodaySection eyebrow="Aderência" title="Consistência diária">
-        <TodayAdherenceCard
-          score={adherenceAverage}
-          summary="Nutrição liderando o dia, treino na fila, e recuperação já dando base estável."
-          items={ADHERENCE_SIGNALS}
-        />
-      </TodaySection>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TodaySection eyebrow="Aderência" title="Consistência diária">
+          <TodayAdherenceCard
+            score={adherenceAverage}
+            summary="Nutrição liderando o dia, treino na fila, e recuperação já dando base estável."
+            items={ADHERENCE_SIGNALS}
+          />
+        </TodaySection>
 
-      <TodaySection eyebrow="Atlas AI" title="Orientação discreta">
-        <TodayInsightCard
-          to={ROUTES.atlasAI}
-          icon={Brain}
-          title="Comece pela nutrição, depois abra o treino."
-          description="Manter a primeira decisão alimentar visível geralmente deixa o resto do dia mais leve e fácil de executar."
-        />
-      </TodaySection>
+        <TodaySection eyebrow="Atlas AI" title="Orientação discreta">
+          <TodayInsightCard
+            to={ROUTES.atlasAI}
+            icon={Brain}
+            title="Comece pela nutrição, depois abra o treino."
+            description="Manter a primeira decisão alimentar visível geralmente deixa o resto do dia mais leve e fácil de executar."
+          />
+        </TodaySection>
+      </div>
     </TodayScreen>
   );
 }

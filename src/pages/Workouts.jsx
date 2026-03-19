@@ -883,7 +883,7 @@ function WorkoutsContent() {
           </ActionRow>
         }
       >
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           <HeroStat
             label="Plano"
             value={plannedWorkout?.name || 'Sem plano'}
@@ -984,7 +984,7 @@ function WorkoutsContent() {
             ) : null
           }
         >
-          <div className="grid gap-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             <ComparisonPanel
               title="Nenhuma sessão planejada"
               eyebrow="Planejado"

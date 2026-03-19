@@ -73,7 +73,7 @@ export default function NutritionistPrescribeDiet() {
 
   return (
     <RoleGate roles={['nutritionist']}>
-      <div className="p-5 lg:p-8 space-y-6 max-w-3xl">
+      <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Voltar
         </button>
