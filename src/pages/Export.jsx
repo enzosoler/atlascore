@@ -116,7 +116,7 @@ function ExportContent() {
 
   const exportJson = async () => {
     if (invalidRange) {
-      setNotice('Ajuste o periodo antes de exportar.');
+      setNotice('Ajuste o período antes de exportar.');
       return;
     }
 
@@ -130,12 +130,12 @@ function ExportContent() {
       );
       setNotice(
         payload.warnings.length > 0
-          ? `Exportacao JSON concluida com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
-          : 'Exportacao JSON concluida.'
+          ? `Exportação JSON concluida com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
+          : 'Exportação JSON concluida.'
       );
     } catch (error) {
       console.error(error);
-      setNotice('Nao foi possivel gerar o arquivo JSON.');
+      setNotice('Não foi possivel gerar o arquivo JSON.');
     } finally {
       setBusy(false);
     }
@@ -143,7 +143,7 @@ function ExportContent() {
 
   const exportCsv = async () => {
     if (invalidRange) {
-      setNotice('Ajuste o periodo antes de exportar.');
+      setNotice('Ajuste o período antes de exportar.');
       return;
     }
 
@@ -167,7 +167,7 @@ function ExportContent() {
       );
     } catch (error) {
       console.error(error);
-      setNotice('Nao foi possivel gerar o CSV.');
+      setNotice('Não foi possivel gerar o CSV.');
     } finally {
       setBusy(false);
     }
@@ -176,7 +176,7 @@ function ExportContent() {
   return (
     <PageShell
       title="Exportar"
-      subtitle="Pagina reconstruida para exportar dados com previsibilidade. Sem PDF sofisticado, mas com JSON completo e CSV-resumo funcionando."
+      subtitle="Página reconstruida para exportar dados com previsibilidade. Sem PDF sofisticado, mas com JSON completo e CSV-resumo funcionando."
       maxWidth="max-w-4xl"
     >
       {notice ? <StatusBanner>{notice}</StatusBanner> : null}
@@ -191,7 +191,7 @@ function ExportContent() {
       {invalidRange ? (
         <ErrorState
           title="Período inválido"
-          description="A data inicial precisa ser menor ou igual a data final para a exportacao continuar."
+          description="A data inicial precisa ser menor ou igual a data final para a exportação continuar."
         />
       ) : null}
 
@@ -254,7 +254,7 @@ function ExportContent() {
             <FileJson className="h-6 w-6 text-zinc-700" strokeWidth={2} />
             <p className="mt-4 text-base font-semibold text-zinc-950">Exportar JSON completo</p>
             <p className="mt-2 text-sm text-zinc-600">
-              Baixa todas as entidades principais filtradas pelo periodo escolhido.
+              Baixa todas as entidades principais filtradas pelo período escolhido.
             </p>
           </button>
 
@@ -267,7 +267,7 @@ function ExportContent() {
             <FileSpreadsheet className="h-6 w-6 text-zinc-700" strokeWidth={2} />
             <p className="mt-4 text-base font-semibold text-zinc-950">Exportar CSV-resumo</p>
             <p className="mt-2 text-sm text-zinc-600">
-              Baixa uma planilha com contagem de registros por dataset no periodo.
+              Baixa uma planilha com contagem de registros por dataset no período.
             </p>
           </button>
         </div>
@@ -286,13 +286,13 @@ function ExportContent() {
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
             <Calendar className="mb-3 h-5 w-5 text-zinc-700" strokeWidth={2} />
-            Refeicoes, check-ins, treinos e medicoes dentro do periodo selecionado.
+            Refeições, check-ins, treinos e medições dentro do período selecionado.
           </div>
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-            Protocolos, exames laboratoriais e fotos de progresso tambem entram.
+            Protocolos, exames laboratoriais e fotos de progresso também entram.
           </div>
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-            O arquivo inclui nome, email e o periodo usado na geracao.
+            O arquivo inclui nome, email e o período usado na geração.
           </div>
         </div>
       </SectionCard>

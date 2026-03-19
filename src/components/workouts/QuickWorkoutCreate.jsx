@@ -29,7 +29,7 @@ export default function QuickWorkoutCreate({ date, onClose }) {
 
   const handleSave = () => {
     if (!name.trim() || !exercises.some(e => e.name?.trim())) {
-      toast.error('Add workout name and at least one exercise');
+      toast.error('Adicione um nome e pelo menos um exercício');
       return;
     }
 

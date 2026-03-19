@@ -396,7 +396,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete }) {
               {workout.name}
             </h3>
             <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              {workout.exercises.length} exercicios · {workout.duration_minutes || 0} min · RPE{' '}
+              {workout.exercises.length} exercícios · {workout.duration_minutes || 0} min · RPE{' '}
               {workout.perceived_effort || '--'}
             </p>
           </div>
@@ -599,7 +599,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            Duracao
+            Duração
             <input
               type="number"
               min="0"
@@ -639,7 +639,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           <div>
             <p className="atlas-overline">Exercises</p>
             <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-              Mantenha cada bloco limpo para preservar a leitura da execucao.
+              Mantenha cada bloco limpo para preservar a leitura da execução.
             </p>
           </div>
           <button
@@ -647,7 +647,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
             onClick={addExercise}
             className="atlas-button atlas-button-secondary h-9 px-4 text-[12px]"
           >
-            + Adicionar exercicio
+            + Adicionar exercício
           </button>
         </div>
 
@@ -718,11 +718,11 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <label className={FIELD_LABEL_CLASS}>
-          Observacoes
+          Observações
           <textarea
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="Ex: treino mais curto, foco em tecnica."
+            placeholder="Ex: treino mais curto, foco em técnica."
             className={TEXTAREA_CLASS_NAME}
           />
         </label>
@@ -818,7 +818,7 @@ function WorkoutsContent() {
       tone: 'success',
       message:
         nextStatus === 'completed'
-          ? 'Treino marcado como concluido.'
+          ? 'Treino marcado como concluído.'
           : 'Treino voltou para pendente.',
     });
   };
@@ -839,7 +839,7 @@ function WorkoutsContent() {
     if (!payload.name || payload.exercises.length === 0) {
       setNotice({
         tone: 'warning',
-        message: 'Adicione nome e pelo menos um exercicio para salvar o treino.',
+        message: 'Adicione nome e pelo menos um exercício para salvar o treino.',
       });
       return;
     }
@@ -886,28 +886,28 @@ function WorkoutsContent() {
         <div className="grid gap-3">
           <HeroStat
             label="Plano"
-            value={plannedWorkout?.name || 'No plan'}
+            value={plannedWorkout?.name || 'Sem plano'}
             detail={
               plannedWorkout
-                ? `${plannedExerciseCount} exercicios previstos para a data selecionada.`
+                ? `${plannedExerciseCount} exercícios previstos para a data selecionada.`
                 : 'Nenhum treino planejado para o dia selecionado.'
             }
           />
           <HeroStat
             label="Execução"
             value={`${workoutsForDate.length} registradas`}
-            detail={`${completedCount} concluido(s) dentro do estado local desta rota.`}
+            detail={`${completedCount} concluído(s) dentro do estado local desta rota.`}
           />
           <HeroStat
             label="Volume"
             value={`${formatVolume(totalVolume)} kg`}
-            detail="Carga total registrada nas sessoes do dia."
+            detail="Carga total registrada nas sessões do dia."
           />
         </div>
       </PageHeader>
 
       <StatusBanner tone="neutral">
-        Esta rota agora concentra plano, execucao e comparacao em uma camada visual unica, sem depender de Protocols.
+        Esta rota agora concentra plano, execução e comparação em uma camada visual única, sem depender de Protocols.
       </StatusBanner>
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
@@ -926,7 +926,7 @@ function WorkoutsContent() {
               <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
                 {plannedWorkout
                   ? `${plannedWorkout.duration_minutes || 0} min · RPE ${plannedWorkout.perceived_effort || '--'}`
-                  : 'Use o registro local para estruturar a execucao do dia mesmo sem plano.'}
+                  : 'Use o registro local para estruturar a execução do dia mesmo sem plano.'}
               </p>
             </div>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
@@ -937,28 +937,28 @@ function WorkoutsContent() {
           <div className="mt-5 space-y-3">
             <SessionSignal
               label="Plano pronto"
-              value={plannedWorkout ? 'Visible' : 'Open'}
+              value={plannedWorkout ? 'Visível' : 'Aberto'}
               detail={
                 plannedWorkout
-                  ? `${plannedExerciseCount} exercicios definidos para comparar.`
+                  ? `${plannedExerciseCount} exercícios definidos para comparar.`
                   : 'Sem plano ativo para o dia selecionado.'
               }
               tone={plannedWorkout ? 'neutral' : 'warn'}
             />
             <SessionSignal
               label="Execução salva"
-              value={workoutsForDate.length > 0 ? `${workoutsForDate.length} session(s)` : 'None yet'}
+              value={workoutsForDate.length > 0 ? `${workoutsForDate.length} sessão(ões)` : 'Nenhuma ainda'}
               detail={
                 workoutsForDate.length > 0
-                  ? `${completedCount} marcada(s) como concluida(s).`
-                  : 'Adicione uma execucao para acompanhar o dia.'
+                  ? `${completedCount} marcada(s) como concluída(s).`
+                  : 'Adicione uma execução para acompanhar o dia.'
               }
               tone={workoutsForDate.length > 0 ? 'ok' : 'warn'}
             />
             <SessionSignal
               label="Comparação disponível"
               value={`${Math.round(executionCoverage)}% match`}
-              detail="A comparacao abaixo separa claramente o que era plano do que foi executado."
+              detail="A comparação abaixo separa claramente o que era plano do que foi executado."
               tone={executionCoverage >= 100 ? 'ok' : 'neutral'}
             />
           </div>
@@ -1002,17 +1002,17 @@ function WorkoutsContent() {
             <div className="mt-4 rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.48)] px-5 py-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="atlas-metric-label">Execution coverage</p>
+                  <p className="atlas-metric-label">Cobertura de execução</p>
                   <p className="mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
                     {Math.round(executionCoverage)}%
                   </p>
                   <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                    {comparisonWorkout.exercises.length} de {plannedWorkout.exercises.length} exercicios aparecem na leitura comparada.
+                    {comparisonWorkout.exercises.length} de {plannedWorkout.exercises.length} exercícios aparecem na leitura comparada.
                   </p>
                 </div>
                 <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
                   <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={1.9} />
-                  {executionCoverage >= 100 ? 'Sessao coberta' : 'Ainda em andamento'}
+                  {executionCoverage >= 100 ? 'Sessão coberta' : 'Ainda em andamento'}
                 </span>
               </div>
 
@@ -1047,7 +1047,7 @@ function WorkoutsContent() {
             <EmptyState
               icon={ClipboardList}
               title="Nenhum treino registrado"
-              description="Abra o modal local de treino para adicionar a execucao do dia."
+              description="Abra o modal local de treino para adicionar a execução do dia."
               action={
                 <PrimaryButton type="button" onClick={handleCreate}>
                   Novo treino
@@ -1060,7 +1060,7 @@ function WorkoutsContent() {
             <EmptyState
               icon={Target}
               title="Nenhum treino neste filtro"
-              description="Troque o status atual ou registre outra sessao para este dia."
+              description="Troque o status atual ou registre outra sessão para este dia."
             />
           ) : null}
 

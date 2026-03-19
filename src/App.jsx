@@ -10,6 +10,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
+import { DailyStoreProvider } from '@/store/dailyStore';
 import { LEGACY_ROUTE_REDIRECTS, ROLE_HOME, ROUTES } from '@/lib/routes';
 
 // Pages
@@ -196,10 +197,12 @@ function App() {
           <AuthProvider>
             <QueryClientProvider client={queryClientInstance}>
               <SubscriptionProvider>
-                <Router>
-                  <AuthenticatedApp />
-                </Router>
-                <Toaster />
+                <DailyStoreProvider>
+                  <Router>
+                    <AuthenticatedApp />
+                  </Router>
+                  <Toaster />
+                </DailyStoreProvider>
               </SubscriptionProvider>
             </QueryClientProvider>
           </AuthProvider>

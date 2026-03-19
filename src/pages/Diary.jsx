@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
-import { ChevronLeft, ChevronRight, Smile, Zap, Moon, Droplets, UtensilsCrossed, Dumbbell, BarChart3, Pill } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Smile, Moon, Droplets, UtensilsCrossed, Dumbbell, BarChart3, Pill } from 'lucide-react';
 import { getToday, MEAL_TYPES } from '@/lib/atlas-theme';
 
 function formatDiaryDate(dateStr) {
@@ -83,7 +84,7 @@ function TimelineSection({ icon: Icon, color, title, children, empty }) {
 }
 
 export default function Diary() {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const [date, setDate] = useState(getToday());
 
@@ -100,25 +101,83 @@ export default function Diary() {
   const { data: checkin } = useQuery({
     queryKey: ['diary-checkin', date],
     queryFn: async () => {
-      const r = await base44.entities.DailyCheckin.filter({ date });
-      return r?.[0] || null;
+      try {
+        const r = await base44.entities.DailyCheckin.filter({ date });
+        return r?.[0] || null;
+      } catch {
+        return null;
+      }
     },
   });
+
+  // Meals: lê do Supabase food_logs (mesma fonte que a página Nutrição)
   const { data: meals = [] } = useQuery({
-    queryKey: ['diary-meals', date],
-    queryFn: () => base44.entities.Meal.filter({ date }),
+    queryKey: ['diary-food-logs', date, user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      try {
+        const { data, error } = await supabase
+          .from('food_logs')
+          .select('id, food_name, calories, protein, carbs, fat, date, created_at')
+          .eq('user_id', user.id)
+          .eq('date', date)
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+        // Mapeia food_logs para o formato do Diary
+        return (data || []).map((log) => ({
+          id: log.id,
+          date: log.date,
+          meal_type: null,
+          title: log.food_name || 'Alimento',
+          foods: [{ name: log.food_name || 'Alimento' }],
+          total_calories: Number(log.calories || 0),
+          total_protein: Number(log.protein || 0),
+          total_carbs: Number(log.carbs || 0),
+          total_fat: Number(log.fat || 0),
+        }));
+      } catch {
+        // Se Supabase não disponível, tenta Base44 como fallback
+        try {
+          return await base44.entities.Meal.filter({ date });
+        } catch {
+          return [];
+        }
+      }
+    },
+    enabled: !!user?.id,
   });
+
   const { data: workouts = [] } = useQuery({
     queryKey: ['diary-workouts', date],
-    queryFn: () => base44.entities.Workout.filter({ date }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Workout.filter({ date });
+      } catch {
+        return [];
+      }
+    },
   });
+
   const { data: measurements = [] } = useQuery({
     queryKey: ['diary-measurements', date],
-    queryFn: () => base44.entities.Measurement.filter({ date }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Measurement.filter({ date });
+      } catch {
+        return [];
+      }
+    },
   });
+
   const { data: supplements = [] } = useQuery({
     queryKey: ['diary-supplements-active'],
-    queryFn: () => base44.entities.Supplement.filter({ active: true }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.Supplement.filter({ active: true });
+      } catch {
+        return [];
+      }
+    },
   });
 
   const totalCal = meals.reduce((s, m) => s + (m.total_calories || 0), 0);
@@ -197,7 +256,7 @@ export default function Diary() {
                 <div key={m.id} className="rounded-[14px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] px-4 py-3">
                   <div className="flex justify-between items-baseline">
                     <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-                      {MEAL_TYPES[m.meal_type]?.label || m.meal_type}
+                      {m.title || (m.meal_type ? (MEAL_TYPES[m.meal_type]?.label || m.meal_type) : 'Alimento')}
                     </p>
                     <span className="text-[12px] text-[hsl(var(--fg-2))]">{m.total_calories || 0} kcal</span>
                   </div>
@@ -206,11 +265,6 @@ export default function Diary() {
                     <span>C {m.total_carbs || 0}g</span>
                     <span>G {m.total_fat || 0}g</span>
                   </div>
-                  {(m.foods || []).length > 0 && (
-                    <p className="text-[12px] mt-1 text-[hsl(var(--fg-2))]">
-                      {m.foods.map((f) => f.name).join(', ')}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>

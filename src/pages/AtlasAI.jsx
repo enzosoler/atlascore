@@ -45,7 +45,7 @@ const PROMPTS = [
   },
   {
     id: 'supplements',
-    title: 'Suplementacao',
+    title: 'Suplementação',
     prompt: 'Quais suplementos combinam com meus objetivos?',
     description: 'Priorize o que faz sentido para seu objetivo antes de empilhar intervenção.',
   },
@@ -57,7 +57,7 @@ const PROMPTS = [
   },
   {
     id: 'plan',
-    title: 'Plano vs execucao',
+    title: 'Plano vs execução',
     prompt: 'Compare meu plano vs execução',
     description: 'Entenda intenção versus consistência real sem abrir várias telas.',
   },
@@ -260,7 +260,7 @@ function buildMockReply(user, content) {
 
   if (normalized.includes('suplement')) {
     return [
-      'Sugestao local simulada para suplementacao:',
+      'Sugestão local simulada para suplementação:',
       goal
         ? `- Eu alinharia qualquer suplemento primeiro ao objetivo **${goal}**.`
         : '- Sem objetivo salvo, eu evitaria sugerir suplemento específico cedo demais.',
@@ -270,7 +270,7 @@ function buildMockReply(user, content) {
       '- Creatina e proteína costumam ser as opções mais fáceis de justificar quando base, treino e tolerância estão organizados.',
       '- Cafeína, ômega-3 e vitamina D dependem mais do seu contexto e dos exames.',
       '',
-      `A melhor combinacao muda conforme objetivo, rotina e tolerancia individual. ${modeLine}`,
+      `A melhor combinação muda conforme objetivo, rotina e tolerância individual. ${modeLine}`,
     ].join('\n');
   }
 
@@ -286,7 +286,7 @@ function buildMockReply(user, content) {
       calories
         ? `- Meta diária registrada: **${calories}**${macros ? ` com ${macros}.` : '.'}`
         : '- As metas nutricionais ainda não foram definidas no perfil local.',
-      `- Foco da proxima semana: repetir o que funcionou e proteger a rotina de descanso. ${modeLine}`,
+      `- Foco da próxima semana: repetir o que funcionou e proteger a rotina de descanso. ${modeLine}`,
     ].join('\n');
   }
 
@@ -296,14 +296,14 @@ function buildMockReply(user, content) {
     normalized.includes('compare')
   ) {
     return [
-      'Comparacao local simulada entre plano e execucao:',
-      '- O layout do chat já suporta esse fluxo, mas nesta etapa local ainda não tenho treino, dieta ou check-ins sincronizados automaticamente.',
+      'Comparação local simulada entre plano e execução:',
+      '- O layout do chat já suporta esse fluxo, mas nesta etapa local ainda não tenho treino, dieta ou check-ins sincronizados automáticamente.',
       goal
         ? `- Enquanto isso, eu usaria o objetivo **${goal}** como régua para comparar intenção vs consistência real.`
         : '- Sem objetivo salvo, a comparação entre plano e execução fica genérica demais.',
       '- Maior ganho imediato costuma vir de reduzir a fricção entre o que foi planejado e o que realmente cabe na rotina.',
       '',
-      `Posso continuar com uma versao resumida ou com recomendacoes praticas. ${modeLine}`,
+      `Posso continuar com uma versão resumida ou com recomendações práticas. ${modeLine}`,
     ].join('\n');
   }
 
@@ -314,15 +314,15 @@ function buildMockReply(user, content) {
     calories
       ? `- Sua principal meta nutricional salva é **${calories}**${macros ? ` com ${macros}.` : '.'}`
       : '- Se você salvar calorias e macros no Profile, o chat fica mais contextual.',
-    `- Nesta rota, o chat esta usando mock local e nao consulta Base44 nem LLM real. ${modeLine}`,
+    `- Nesta rota, o chat esta usando mock local e não consulta Base44 nem LLM real. ${modeLine}`,
   ].join('\n');
 }
 
 function formatConversationTimestamp(value) {
-  if (!value) return 'Sem historico';
+  if (!value) return 'Sem histórico';
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Sem historico';
+  if (Number.isNaN(date.getTime())) return 'Sem histórico';
 
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
@@ -704,8 +704,8 @@ export default function AtlasAI() {
                 <p className="atlas-metric-label">Conversas</p>
                 <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
                   {conversations.length
-                    ? `${conversations.length} sessoes locais`
-                    : 'Nenhum historico salvo'}
+                    ? `${conversations.length} sessões locais`
+                    : 'Nenhum histórico salvo'}
                 </p>
               </div>
             </div>
@@ -773,7 +773,7 @@ export default function AtlasAI() {
                       <p className="mt-2 max-w-3xl text-[14px] leading-7 text-[hsl(var(--fg-2))]">
                         {activeConversation
                           ? getConversationPreview(activeConversation)
-                          : 'Uma experiencia de assistant premium para revisar treino, nutricao, progresso e sinais do profile sem parecer um chat generico.'}
+                          : 'Uma experiência de assistant premium para revisar treino, nutrição, progresso e sinais do profile sem parecer um chat generico.'}
                       </p>
                     </div>
                   </div>
@@ -812,7 +812,7 @@ export default function AtlasAI() {
                     }
                     detail={
                       activeConversation
-                        ? 'O historico local fica salvo e reaparece na sidebar.'
+                        ? 'O histórico local fica salvo e reaparece na sidebar.'
                         : 'Comece com um prompt objetivo para dar contexto desde a primeira troca.'
                     }
                   />
@@ -820,14 +820,14 @@ export default function AtlasAI() {
                     icon={Activity}
                     label="Modo"
                     value="Mock local estável"
-                    detail="A experiencia continua sem backend remoto, mantendo o fluxo de chat atual."
+                    detail="A experiência continua sem backend remoto, mantendo o fluxo de chat atual."
                   />
                 </div>
 
                 <StatusBanner tone={hasProfileContext ? 'success' : 'neutral'}>
                   {hasProfileContext
                     ? 'O Profile local esta conectado e ja alimenta objetivo, peso e metas nas respostas desta conversa.'
-                    : 'Conecte metas e peso no Profile para deixar o Atlas AI mais contextual sem mudar a logica local desta fase.'}
+                    : 'Conecte metas e peso no Profile para deixar o Atlas AI mais contextual sem mudar a lógica local desta fase.'}
                 </StatusBanner>
 
                 {hasProfileContext ? (
@@ -893,7 +893,7 @@ export default function AtlasAI() {
                         Carregando suas conversas
                       </p>
                       <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                        Restaurando o historico local e preparando a interface contextual do Atlas
+                        Restaurando o histórico local e preparando a interface contextual do Atlas
                         AI.
                       </p>
                     </div>
@@ -913,7 +913,7 @@ export default function AtlasAI() {
 
                           <div className="max-w-3xl">
                             <h2 className="text-[clamp(2rem,1.55rem+1.2vw,3rem)] font-semibold tracking-[-0.075em] text-[hsl(var(--fg))]">
-                              Converse com o contexto do Atlas, nao com um chat generico.
+                              Converse com o contexto do Atlas, não com um chat genérico.
                             </h2>
                             <p className="mt-4 max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
                               Abra uma leitura rápida sobre progresso, aderência ou próximo passo.
@@ -1082,7 +1082,7 @@ export default function AtlasAI() {
                           }
                         }}
                         rows={1}
-                        placeholder="Pergunte algo sobre seus dados, progresso ou proxima decisao..."
+                        placeholder="Pergunte algo sobre seus dados, progresso ou próxima decisão..."
                         className="min-h-[88px] w-full resize-none bg-transparent px-1 py-1 text-[15px] leading-7 text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
                       />
 

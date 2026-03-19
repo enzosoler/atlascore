@@ -355,7 +355,7 @@ function MetricSelectorCard({ metric, snapshot, isActive, onClick }) {
           </p>
           <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
             {snapshot?.entries?.length
-              ? `${snapshot.entries.length} checkpoints com essa metrica`
+              ? `${snapshot.entries.length} checkpoints com essa métrica`
               : 'Sem dados suficientes'}
           </p>
         </div>
@@ -606,7 +606,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
               Registre todas as medidas do mesmo momento.
             </p>
             <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              Isso preserva comparabilidade e deixa a leitura de tendencia muito mais limpa no historico.
+              Isso preserva comparabilidade e deixa a leitura de tendência muito mais limpa no histórico.
             </p>
           </div>
 
@@ -626,7 +626,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
             <p className="atlas-metric-label">Guia rapido</p>
             <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              Use peso, body fat e cintura como nucleo da leitura. As circunferencias entram como camadas de refinamento do mesmo checkpoint.
+              Use peso, body fat e cintura como nucleo da leitura. As circunferências entram como camadas de refinamento do mesmo checkpoint.
             </p>
           </div>
         </div>
@@ -669,7 +669,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
       </div>
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <p className="atlas-overline">Circunferencias</p>
+        <p className="atlas-overline">Circunferências</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <MeasurementField
             label="Peito"
@@ -726,7 +726,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <label className={FIELD_LABEL_CLASS}>
-          Observacoes de contexto
+          Observações de contexto
           <textarea
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
@@ -752,7 +752,7 @@ export default function Measurements() {
   return (
     <SafePageBoundary
       title="Medidas"
-      subtitle="Tracking corporal com checkpoint unificado, leitura de tendencia clara e historico proprio."
+      subtitle="Tracking corporal com checkpoint unificado, leitura de tendência clara e histórico proprio."
       maxWidth="max-w-6xl"
       fallbackDescription="A rota de Measurements continua acessivel mesmo se a interface principal falhar."
     >
@@ -893,7 +893,7 @@ function MeasurementsContent() {
       <PageHeader
         eyebrow="Medidas"
         title="Medidas com calma, hierarquia e leitura real."
-        subtitle="Um espaco dedicado para checkpoints corporais: peso, composicao e circunferencias em uma leitura premium, limpa e ritmada."
+        subtitle="Um espaço dedicado para checkpoints corporais: peso, composição e circunferências em uma leitura premium, limpa e ritmada."
         accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"
         actions={
           <ActionRow>
@@ -941,7 +941,7 @@ function MeasurementsContent() {
           <HeroStat
             label="Cadencia"
             value={averageCadenceDays ? `${averageCadenceDays} dias` : '--'}
-            detail={`${sortedMeasurements.length || 0} checkpoints no historico.`}
+            detail={`${sortedMeasurements.length || 0} checkpoints no histórico.`}
             icon={CalendarClock}
             metric={METRIC_LOOKUP.chest}
           />
@@ -949,14 +949,14 @@ function MeasurementsContent() {
       </PageHeader>
 
         <StatusBanner tone="neutral">
-          Checkpoints, grafico e historico desta rota seguem organizados como uma leitura corporal unica, sem depender de outros modulos.
+          Checkpoints, gráfico e histórico desta rota seguem organizados como uma leitura corporal única, sem depender de outros módulos.
         </StatusBanner>
 
         {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
         <Section
           title="Último checkpoint"
-          subtitle="Resumo imediato do registro mais recente, antes de abrir a tendencia ou o historico."
+          subtitle="Resumo imediato do registro mais recente, antes de abrir a tendência ou o histórico."
         >
           <Card className="px-5 py-5">
             {latestMeasurement ? (
@@ -972,7 +972,7 @@ function MeasurementsContent() {
                       })}
                     </p>
                     <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      Resumo imediato do checkpoint mais recente, sem ruído de outros modulos.
+                      Resumo imediato do checkpoint mais recente, sem ruído de outros módulos.
                     </p>
                   </div>
 
@@ -993,7 +993,7 @@ function MeasurementsContent() {
                 <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
                   <p className="atlas-metric-label">Contexto</p>
                   <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-                    {latestMeasurement.notes || 'Sem observacoes adicionais neste checkpoint.'}
+                    {latestMeasurement.notes || 'Sem observações adicionais neste checkpoint.'}
                   </p>
                 </div>
               </>
@@ -1013,7 +1013,7 @@ function MeasurementsContent() {
 
         <SectionCard
           title="Tendência"
-          subtitle="Selecione a metrica principal e leia a curva com contexto suficiente para tomar decisao sem excesso visual."
+          subtitle="Selecione a métrica principal e leia a curva com contexto suficiente para tomar decisão sem excesso visual."
         >
           {sortedMeasurements.length ? (
             <div className="grid gap-6">
@@ -1201,7 +1201,7 @@ function MeasurementsContent() {
                         Ultimo contexto registrado
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {latestMeasurement?.notes || 'Sem observacoes no checkpoint mais recente.'}
+                        {latestMeasurement?.notes || 'Sem observações no checkpoint mais recente.'}
                       </p>
                     </div>
                   </div>
@@ -1211,19 +1211,19 @@ function MeasurementsContent() {
           ) : (
             <EmptyState
               title="Sem medidas para mostrar"
-              description="Registre a primeira entrada para ativar o grafico, a leitura de tendencia e o resumo lateral."
+              description="Registre a primeira entrada para ativar o gráfico, a leitura de tendência e o resumo lateral."
             />
           )}
         </SectionCard>
 
         <SectionCard
           title="Checkpoint history"
-          subtitle="Entradas organizadas como checkpoints corporais completos, com contexto e variacao contra o registro anterior."
+          subtitle="Entradas organizadas como checkpoints corporais completos, com contexto e variação contra o registro anterior."
         >
           {!measurementHistory.length ? (
             <EmptyState
               title="Nenhum registro de medidas"
-              description="Abra o modal desta pagina para criar o primeiro checkpoint corporal."
+              description="Abra o modal desta página para criar o primeiro checkpoint corporal."
               action={
                 <PrimaryButton type="button" onClick={handleCreate}>
                   Registrar medidas
@@ -1256,7 +1256,7 @@ function MeasurementsContent() {
             <DialogPanelHeader
               eyebrow="Checkpoint de medidas"
               title={editingMeasurement ? 'Editar checkpoint corporal' : 'Registrar checkpoint corporal'}
-              description="Este modal mantem a logica atual da pagina, mas organiza a entrada com mais clareza para peso, composicao e circunferencias."
+              description="Este modal mantém a lógica atual da página, mas organiza a entrada com mais clareza para peso, composição e circunferências."
               accentClassName="from-[rgba(14,165,233,0.12)]"
             />
 

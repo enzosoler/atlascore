@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
 import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, Bot, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  getActiveDietPlans,
+  createDietPlan,
+  deactivateAllDietPlans,
+} from '@/services/dietPlanService';
 
 const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'Você' };
 const CREATOR_BADGE  = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutral' };
@@ -61,7 +66,7 @@ function MealCard({ meal }) {
 }
 
 export default function MyDiet() {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [generating, setGenerating] = useState(false);
@@ -73,12 +78,33 @@ export default function MyDiet() {
 
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
-    queryFn: async () => { const p = await base44.entities.UserProfile.list(); return p?.[0] || null; },
+    queryFn: async () => {
+      try {
+        const p = await base44.entities.UserProfile.list();
+        return p?.[0] || null;
+      } catch {
+        return null;
+      }
+    },
   });
 
   const { data: plans = [], isLoading } = useQuery({
-    queryKey: ['diet-plans'],
-    queryFn: () => base44.entities.DietPlan.filter({ active: true }, '-created_date'),
+    queryKey: ['diet-plans', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      try {
+        // Tenta Supabase primeiro
+        return await getActiveDietPlans(user.id);
+      } catch {
+        // Fallback para Base44 se Supabase falhar
+        try {
+          return await base44.entities.DietPlan.filter({ active: true }, '-created_date');
+        } catch {
+          return [];
+        }
+      }
+    },
+    enabled: !!user?.id,
   });
 
   const plan = plans[0] || null;
@@ -146,14 +172,36 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
       clearTimeout(timeoutId);
 
       if (res?.name) {
-        for (const p of plans) await base44.entities.DietPlan.update(p.id, { active: false });
-        await base44.entities.DietPlan.create({
-          ...res,
-          created_by_type: 'ai',
-          active: true,
-          version: 1,
-          start_date: new Date().toISOString().split('T')[0],
-        });
+        // Desativa planos anteriores no Supabase
+        try {
+          await deactivateAllDietPlans(user.id);
+        } catch {
+          // Fallback para Base44
+          for (const p of plans) {
+            try { await base44.entities.DietPlan.update(p.id, { active: false }); } catch { /* noop */ }
+          }
+        }
+        // Cria novo plano no Supabase
+        try {
+          await createDietPlan(user.id, {
+            ...res,
+            created_by_type: 'ai',
+            active: true,
+            version: 1,
+            start_date: new Date().toISOString().split('T')[0],
+          });
+        } catch {
+          // Fallback para Base44
+          try {
+            await base44.entities.DietPlan.create({
+              ...res,
+              created_by_type: 'ai',
+              active: true,
+              version: 1,
+              start_date: new Date().toISOString().split('T')[0],
+            });
+          } catch { /* noop */ }
+        }
         qc.invalidateQueries({ queryKey: ['diet-plans'] });
         toast.success('Plano alimentar gerado!');
       } else {

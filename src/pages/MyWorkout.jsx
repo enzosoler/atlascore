@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import {
+  getActiveWorkoutPlans,
+  createWorkoutPlan,
+  deactivateAllWorkoutPlans,
+} from '@/services/workoutPlanService';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
@@ -121,7 +126,7 @@ function WorkoutDayCard({ day }) {
 }
 
 export default function MyWorkout() {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [generating, setGenerating] = useState(false);
@@ -134,14 +139,30 @@ export default function MyWorkout() {
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: async () => {
-      const p = await base44.entities.UserProfile.list();
-      return p?.[0] || null;
+      try {
+        const p = await base44.entities.UserProfile.list();
+        return p?.[0] || null;
+      } catch {
+        return null;
+      }
     },
   });
 
   const { data: plans = [], isLoading } = useQuery({
-    queryKey: ['workout-plans'],
-    queryFn: () => base44.entities.WorkoutPlan.filter({ active: true }, '-created_date'),
+    queryKey: ['workout-plans', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      try {
+        return await getActiveWorkoutPlans(user.id);
+      } catch {
+        try {
+          return await base44.entities.WorkoutPlan.filter({ active: true }, '-created_date');
+        } catch {
+          return [];
+        }
+      }
+    },
+    enabled: !!user?.id,
   });
 
   const plan = plans[0] || null;
@@ -199,16 +220,32 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
       clearTimeout(timeoutId);
 
       if (res?.name) {
-        for (const p of plans) {
-          await base44.entities.WorkoutPlan.update(p.id, { active: false });
+        try {
+          await deactivateAllWorkoutPlans(user.id);
+        } catch {
+          for (const p of plans) {
+            try { await base44.entities.WorkoutPlan.update(p.id, { active: false }); } catch { /* noop */ }
+          }
         }
-        await base44.entities.WorkoutPlan.create({
-          ...res,
-          created_by_type: 'ai',
-          active: true,
-          version: 1,
-          start_date: new Date().toISOString().split('T')[0],
-        });
+        try {
+          await createWorkoutPlan(user.id, {
+            ...res,
+            created_by_type: 'ai',
+            active: true,
+            version: 1,
+            start_date: new Date().toISOString().split('T')[0],
+          });
+        } catch {
+          try {
+            await base44.entities.WorkoutPlan.create({
+              ...res,
+              created_by_type: 'ai',
+              active: true,
+              version: 1,
+              start_date: new Date().toISOString().split('T')[0],
+            });
+          } catch { /* noop */ }
+        }
         qc.invalidateQueries({ queryKey: ['workout-plans'] });
         toast.success('Plano de treino gerado com sucesso!');
       } else {

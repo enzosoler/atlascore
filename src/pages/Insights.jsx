@@ -29,24 +29,24 @@ function avg(values) {
 
 function summarizeWeight(measurements) {
   if (measurements.length < 2) {
-    return 'Ainda nao ha registros suficientes para identificar tendencia de peso.';
+    return 'Ainda não ha registros suficientes para identificar tendencia de peso.';
   }
 
   const newest = measurements[0]?.weight;
   const oldest = measurements[measurements.length - 1]?.weight;
 
   if (newest == null || oldest == null) {
-    return 'Os registros atuais ainda nao permitem ler a tendencia de peso.';
+    return 'Os registros atuais ainda não permitem ler a tendencia de peso.';
   }
 
   const delta = Number(newest) - Number(oldest);
   if (Math.abs(delta) < 0.2) {
-    return 'Seu peso esta relativamente estavel dentro do periodo selecionado.';
+    return 'Seu peso esta relativamente estavel dentro do período selecionado.';
   }
   if (delta > 0) {
-    return `Seu peso subiu cerca de ${delta.toFixed(1)} kg no periodo analisado.`;
+    return `Seu peso subiu cerca de ${delta.toFixed(1)} kg no período analisado.`;
   }
-  return `Seu peso caiu cerca de ${Math.abs(delta).toFixed(1)} kg no periodo analisado.`;
+  return `Seu peso caiu cerca de ${Math.abs(delta).toFixed(1)} kg no período analisado.`;
 }
 
 export default function Insights() {
@@ -148,23 +148,23 @@ function InsightsContent() {
 
   const consistencyText =
     completedWorkouts.length >= Math.max(3, Math.floor(days / 10))
-      ? 'Sua consistencia de treino no periodo esta boa.'
-      : 'Seu volume de treino no periodo esta baixo. Vale reforcar a frequencia.';
+      ? 'Sua consistencia de treino no período esta boa.'
+      : 'Seu volume de treino no período esta baixo. Vale reforçar a frequência.';
 
   const nutritionText =
     caloriesPerDay > 0
       ? `Sua media de ingestao registrada ficou em torno de ${formatNumber(caloriesPerDay)} kcal por dia.`
-      : 'Ainda nao ha refeicoes suficientes registradas para gerar leitura de nutricao.';
+      : 'Ainda não ha refeicoes suficientes registradas para gerar leitura de nutrição.';
 
   const recoveryText =
     averageSleep > 0
       ? `Media de sono: ${averageSleep.toFixed(1)}h. Energia media: ${averageEnergy.toFixed(1)} / 5.`
-      : 'Ainda nao ha check-ins suficientes para resumir recuperacao.';
+      : 'Ainda não ha check-ins suficientes para resumir recuperação.';
 
   return (
     <PageShell
       title="Insights"
-      subtitle="Uma leitura objetiva do seu historico recente, sem graficos complexos nem gates bloqueando a pagina."
+      subtitle="Uma leitura objetiva do seu histórico recente, sem gráficos complexos nem gates bloqueando a página."
       actions={
         <>
           {Object.keys(RANGE_DAYS).map((option) => (
@@ -186,14 +186,14 @@ function InsightsContent() {
       {loading ? (
         <LoadingState
           title="Insights carregado"
-          description="Estamos carregando as fontes de dados e mantendo a pagina aberta em modo seguro."
+          description="Estamos carregando as fontes de dados e mantendo a página aberta em modo seguro."
         />
       ) : null}
 
       {!loading && hasErrors ? (
         <ErrorState
           title="Insights em modo seguro"
-          description="Parte dos dados nao carregou completamente, mas a pagina continua aberta e legivel."
+          description="Parte dos dados não carregou completamente, mas a página continua aberta e legível."
         />
       ) : null}
 
@@ -249,11 +249,11 @@ function InsightsContent() {
                 <p className="mt-2">{consistencyText}</p>
               </div>
               <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
-                <p className="font-semibold text-zinc-950">Nutricao</p>
+                <p className="font-semibold text-zinc-950">Nutrição</p>
                 <p className="mt-2">{nutritionText}</p>
               </div>
               <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
-                <p className="font-semibold text-zinc-950">Recuperacao</p>
+                <p className="font-semibold text-zinc-950">Recuperação</p>
                 <p className="mt-2">{recoveryText}</p>
               </div>
             </div>

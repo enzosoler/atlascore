@@ -118,7 +118,7 @@ const MOCK_MEALS = [
     total_protein: 54,
     total_carbs: 68,
     total_fat: 18,
-    notes: 'Refeicao principal do dia.',
+    notes: 'Refeição principal do dia.',
     source: 'mock',
   },
   {
@@ -154,7 +154,7 @@ function createLocalId(prefix) {
 }
 
 function getMealTypeLabel(mealType) {
-  return MEAL_TYPES[mealType]?.label || mealType || 'Refeicao';
+  return MEAL_TYPES[mealType]?.label || mealType || 'Refeição';
 }
 
 function getMealSortOrder(mealType) {
@@ -358,7 +358,7 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
         </div>
         <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-            proteina
+            proteína
           </p>
           <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
             {Math.round(food.protein || 0)} g
@@ -441,7 +441,7 @@ function MealCard({ meal, onEdit, onDelete }) {
 
         <div className="flex w-full flex-col gap-3 lg:w-[188px]">
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.58)] px-4 py-4">
-            <p className="atlas-metric-label">Energy</p>
+            <p className="atlas-metric-label">Energia</p>
             <p className="mt-3 text-[1.75rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
               {Math.round(meal?.total_calories || 0)}
               <span className="ml-1 text-[13px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
@@ -449,7 +449,7 @@ function MealCard({ meal, onEdit, onDelete }) {
               </span>
             </p>
             <p className="mt-2 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-              Registro isolado desta refeicao.
+              Registro isolado desta refeição.
             </p>
           </div>
 
@@ -525,7 +525,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            Tipo de refeicao
+            Tipo de refeição
             <select
               value={form.meal_type}
               onChange={(event) => updateField('meal_type', event.target.value)}
@@ -614,7 +614,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
           <textarea
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="Contexto util para lembrar o motivo dessa refeicao."
+            placeholder="Contexto util para lembrar o motivo dessa refeição."
             className={TEXTAREA_CLASS_NAME}
           />
         </label>
@@ -625,7 +625,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
           Cancelar
         </SecondaryButton>
         <PrimaryButton type="submit">
-          {meal ? 'Salvar refeicao' : 'Adicionar refeição'}
+          {meal ? 'Salvar refeição' : 'Adicionar refeição'}
         </PrimaryButton>
       </div>
     </form>
@@ -691,7 +691,7 @@ function NutritionContent() {
         setNotice({
           tone: 'warning',
           message:
-            'Nao foi possivel carregar os snapshots salvos no Supabase. O registro manual continua disponivel.',
+            'Não foi possivel carregar os snapshots salvos no Supabase. O registro manual continua disponível.',
         });
       } finally {
         if (isActive) {
@@ -732,7 +732,7 @@ function NutritionContent() {
 
         if (isActive) {
           setResults([]);
-          setSearchError(error?.message || 'Nao foi possivel buscar alimentos agora.');
+          setSearchError(error?.message || 'Não foi possivel buscar alimentos agora.');
         }
       } finally {
         if (isActive) {
@@ -826,13 +826,13 @@ function NutritionContent() {
         message:
           meal?.source === 'supabase'
             ? 'Snapshot removido do food_logs.'
-            : 'Refeicao removida do estado local.',
+            : 'Refeição removida do estado local.',
       });
     } catch (error) {
       console.error('Nutrition delete failed:', error);
       setNotice({
         tone: 'warning',
-        message: 'Nao foi possivel excluir este registro agora.',
+        message: 'Não foi possivel excluir este registro agora.',
       });
     }
   };
@@ -863,7 +863,7 @@ function NutritionContent() {
     setNotice({
       tone: 'success',
       message:
-        payload.id === editingMeal?.id ? 'Refeicao local atualizada.' : 'Refeicao local adicionada.',
+        payload.id === editingMeal?.id ? 'Refeição local atualizada.' : 'Refeição local adicionada.',
     });
   };
 
@@ -913,7 +913,7 @@ function NutritionContent() {
       console.error('Nutrition snapshot save failed:', error);
       setNotice({
         tone: 'warning',
-        message: 'Nao foi possivel salvar o snapshot deste alimento no Supabase.',
+        message: 'Não foi possivel salvar o snapshot deste alimento no Supabase.',
       });
     } finally {
       setSavingFoodId(null);
@@ -1112,7 +1112,7 @@ function NutritionContent() {
           <EmptyState
             icon={UtensilsCrossed}
             title="Nenhuma refeição registrada"
-            description="Use a busca USDA ou o botao acima para abrir o modal local de refeicao e comecar o dia alimentar."
+            description="Use a busca USDA ou o botão acima para abrir o modal local de refeição e comecar o dia alimentar."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
                 Adicionar refeição
@@ -1204,7 +1204,7 @@ function NutritionContent() {
               </div>
               <div>
                 <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                  Proteina restante
+                  Proteína restante
                 </p>
                 <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
                   {remainingProtein} g para fechar a meta configurada.
@@ -1218,15 +1218,15 @@ function NutritionContent() {
                   <Flame className="h-4 w-4" strokeWidth={1.9} />
                 </div>
                 <div>
-                  <p className="atlas-metric-label">Suggested focus</p>
+                  <p className="atlas-metric-label">Foco sugerido</p>
                   <p className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                    Feche a refeicao seguinte antes de revisar o resto.
+                    Feche a refeição seguinte antes de revisar o resto.
                   </p>
                 </div>
               </div>
               <p className="mt-4 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                Quanto mais cedo o dia alimentar fica visivel, mais facil fica manter contexto,
-                aderencia e decisao limpa nas outras rotas.
+                Quanto mais cedo o dia alimentar fica visível, mais fácil fica manter contexto,
+                aderência e decisão limpa nas outras rotas.
               </p>
             </div>
           </Card>

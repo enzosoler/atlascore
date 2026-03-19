@@ -26,6 +26,7 @@ export default function LabExams() {
   const [expanded, setExpanded] = useState({});
   const [form, setForm] = useState({ exam_date: getToday(), panel_name: '', markers: [emptyMarker()], notes: '' });
   const [importing, setImporting] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const qc = useQueryClient();
 
   const { data: exams } = useQuery({
@@ -93,6 +94,14 @@ export default function LabExams() {
   });
 
   const handleSave = () => {
+    const errors = {};
+    if (!form.panel_name?.trim()) errors.panel_name = 'Nome do painel é obrigatório';
+    if (!form.exam_date) errors.exam_date = 'Data é obrigatória';
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
     const payload = {
       ...form,
       markers: form.markers.filter(m => m.name).map(m => ({
@@ -154,7 +163,7 @@ export default function LabExams() {
           {/* Marker trends */}
           {Object.keys(markerTrends).length > 0 && (
             <div className="space-y-3">
-              <p className="t-subtitle">Key Markers Over Time</p>
+              <p className="t-subtitle">Evolução dos Marcadores</p>
               {Object.entries(markerTrends).filter(([_, data]) => data.length > 1).map(([markerName, data]) => {
                 const latest = data[data.length - 1];
                 const oldest = data[0];
@@ -178,7 +187,7 @@ export default function LabExams() {
                               d.status === 'normal' ? 'bg-[hsl(var(--ok))]' : 'bg-[hsl(var(--warn))]'
                             }`}
                             style={{ height: `${height}%` }}
-                            title={`${d.value} on ${d.date}`}
+                            title={`${d.value} em ${d.date}`}
                           />
                         );
                       })}
@@ -237,7 +246,7 @@ export default function LabExams() {
           )}
 
       {/* Add dialog */}
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+      <Dialog open={showAdd} onOpenChange={(open) => { setShowAdd(open); if (!open) { setFormErrors({}); setForm({ exam_date: getToday(), panel_name: '', markers: [emptyMarker()], notes: '' }); } }}>
         <DialogContent className="sm:max-w-lg bg-[hsl(var(--card))] border-[hsl(var(--border-h))] rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Novo exame</DialogTitle></DialogHeader>
           <div className="space-y-4">
@@ -250,12 +259,38 @@ export default function LabExams() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Painel / exame</label>
-                <Input placeholder="Ex: Hemograma, Hormônios" value={form.panel_name} onChange={e => setForm(f => ({ ...f, panel_name: e.target.value }))} className="rounded-2xl" />
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Painel / exame <span className="text-[hsl(var(--err))]">*</span>
+                </label>
+                <Input
+                  placeholder="Ex: Hemograma, Hormônios"
+                  value={form.panel_name}
+                  onChange={e => {
+                    setForm(f => ({ ...f, panel_name: e.target.value }));
+                    if (formErrors.panel_name) setFormErrors(prev => ({ ...prev, panel_name: undefined }));
+                  }}
+                  className={`rounded-2xl ${formErrors.panel_name ? 'border-[hsl(var(--err))] ring-1 ring-[hsl(var(--err)/0.4)]' : ''}`}
+                />
+                {formErrors.panel_name && (
+                  <p className="mt-1 text-[11px] text-[hsl(var(--err))]">{formErrors.panel_name}</p>
+                )}
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Data</label>
-                <Input type="date" value={form.exam_date} onChange={e => setForm(f => ({ ...f, exam_date: e.target.value }))} className="rounded-2xl" />
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Data <span className="text-[hsl(var(--err))]">*</span>
+                </label>
+                <Input
+                  type="date"
+                  value={form.exam_date}
+                  onChange={e => {
+                    setForm(f => ({ ...f, exam_date: e.target.value }));
+                    if (formErrors.exam_date) setFormErrors(prev => ({ ...prev, exam_date: undefined }));
+                  }}
+                  className={`rounded-2xl ${formErrors.exam_date ? 'border-[hsl(var(--err))] ring-1 ring-[hsl(var(--err)/0.4)]' : ''}`}
+                />
+                {formErrors.exam_date && (
+                  <p className="mt-1 text-[11px] text-[hsl(var(--err))]">{formErrors.exam_date}</p>
+                )}
               </div>
             </div>
 
@@ -286,7 +321,7 @@ export default function LabExams() {
               <Textarea placeholder="Observações..." value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="rounded-2xl resize-none h-20" />
             </div>
 
-            <Button onClick={handleSave} disabled={!form.panel_name || createMutation.isPending} className="btn btn-primary w-full h-11 rounded-xl text-[14px]">
+            <Button onClick={handleSave} disabled={createMutation.isPending} className="btn btn-primary w-full h-11 rounded-xl text-[14px]">
               Salvar exame
             </Button>
           </div>

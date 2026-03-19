@@ -27,7 +27,7 @@ export default function QuickMealLog({ date, mealType, onClose }) {
 
   const handleSave = () => {
     if (!foods.some(f => f.name?.trim())) {
-      toast.error('Add at least one food item');
+      toast.error('Adicione pelo menos um alimento');
       return;
     }
 

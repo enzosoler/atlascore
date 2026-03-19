@@ -66,7 +66,7 @@ const PROFILE_FORM_SECTIONS = [
   {
     eyebrow: 'Baseline',
     title: 'Personal baseline',
-    description: 'Dados pessoais essenciais para dar contexto ao resto da experiencia.',
+    description: 'Dados pessoais essenciais para dar contexto ao resto da experiência.',
     gridClassName: 'sm:grid-cols-2',
     fields: [
       {
@@ -92,7 +92,7 @@ const PROFILE_FORM_SECTIONS = [
         step: '1',
         unit: 'cm',
         placeholder: '178',
-        description: 'Base para leitura de composicao e progresso.',
+        description: 'Base para leitura de composição e progresso.',
       },
     ],
   },
@@ -125,7 +125,7 @@ const PROFILE_FORM_SECTIONS = [
   {
     eyebrow: 'Targets',
     title: 'Daily performance targets',
-    description: 'Targets que deixam nutricao, treino e recuperacao mais coerentes.',
+    description: 'Targets que deixam nutrição, treino e recuperação mais coerentes.',
     gridClassName: 'sm:grid-cols-2',
     fields: [
       {
@@ -139,7 +139,7 @@ const PROFILE_FORM_SECTIONS = [
       },
       {
         key: 'protein_target',
-        label: 'Proteina alvo',
+        label: 'Proteína alvo',
         type: 'number',
         step: '1',
         unit: 'g',
@@ -171,7 +171,7 @@ const PROFILE_FORM_SECTIONS = [
         step: '0.1',
         unit: 'L',
         placeholder: '3.2',
-        description: 'Ritmo diario de hidratacao.',
+        description: 'Ritmo diário de hidratação.',
       },
     ],
   },
@@ -314,7 +314,7 @@ function getWeightDirection(currentWeight, targetWeight) {
     if (delta === 0) {
       return {
         value: `${formatNumber(current, { maximumFractionDigits: 1 })} kg`,
-        detail: 'Peso atual e meta estao alinhados na mesma faixa.',
+        detail: 'Peso atual e meta estão alinhados na mesma faixa.',
       };
     }
 
@@ -528,7 +528,7 @@ function ProfileContent() {
     onError: () => {
       setNotice({
         tone: 'error',
-        message: 'Nao foi possivel salvar o perfil.',
+        message: 'Não foi possivel salvar o perfil.',
       });
     },
   });
@@ -567,7 +567,7 @@ function ProfileContent() {
       <PageHeader
         eyebrow="Perfil"
         title={`${preferredName}, keep your baseline sharp.`}
-        subtitle="Conta, targets e identidade do atleta agora leem como uma unica superficie: sofisticada, pessoal e pronta para sustentar nutricao, treino e performance."
+        subtitle="Conta, targets e identidade do atleta agora leem como uma única superfície: sofisticada, pessoal e pronta para sustentar nutrição, treino e performance."
         accentClassName="from-[hsl(var(--brand)/0.08)] via-[hsl(var(--ok)/0.04)]"
         actions={
           <ActionRow>
@@ -608,14 +608,14 @@ function ProfileContent() {
         {profileQuery.isLoading ? (
           <LoadingState
             title="Carregando seu perfil"
-            description="Estamos trazendo os dados existentes para essa nova leitura visual sem interromper a pagina."
+            description="Estamos trazendo os dados existentes para essa nova leitura visual sem interromper a página."
           />
         ) : null}
 
         {!profileQuery.isLoading && profileQuery.isError ? (
           <ErrorState
             title="Perfil em modo seguro"
-            description="Parte dos dados nao carregou, mas voce ainda pode revisar a conta e salvar as informacoes principais."
+            description="Parte dos dados não carregou, mas você ainda pode revisar a conta e salvar as informações principais."
           />
         ) : null}
 
@@ -623,14 +623,14 @@ function ProfileContent() {
           <>
             <Section
               title="Conta"
-              subtitle="Identidade premium, acesso estavel e um resumo curto da conta antes dos dados e targets."
+              subtitle="Identidade premium, acesso estável e um resumo curto da conta antes dos dados e targets."
             >
               <Card className="px-5 py-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="atlas-overline">Conta</p>
                     <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                      Identidade premium, acesso estavel.
+                      Identidade premium, acesso estável.
                     </p>
                   </div>
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
@@ -655,7 +655,7 @@ function ProfileContent() {
                       </div>
 
                       <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                        Sua autenticacao ja esta ativa. O restante da experiencia agora fica ancorado
+                        Sua autenticação ja esta ativa. O restante da experiência agora fica ancorado
                         neste perfil com o fluxo de dados atual preservado.
                       </p>
                     </div>
@@ -702,7 +702,7 @@ function ProfileContent() {
                 value={proteinTargetValue}
                 detail={
                   hasValue(form.protein_target)
-                    ? 'Proteina alvo pronta para sustentar recuperacao e composicao.'
+                    ? 'Proteína alvo pronta para sustentar recuperação e composição.'
                     : 'Defina a proteina alvo para fechar o baseline nutricional.'
                 }
                 icon={Target}
@@ -712,8 +712,8 @@ function ProfileContent() {
                 value={waterTargetValue}
                 detail={
                   hasValue(form.water_target)
-                    ? 'Meta diaria pronta para manter constancia de hidratacao.'
-                    : 'Configure uma meta de agua para completar o setup diario.'
+                    ? 'Meta diaria pronta para manter constância de hidratação.'
+                    : 'Configure uma meta de água para completar o setup diário.'
                 }
                 icon={Droplets}
               />
@@ -722,7 +722,7 @@ function ProfileContent() {
             <section className="grid gap-4">
               <SectionCard
                 title="Configurações do perfil"
-                subtitle="Organize baseline, composicao corporal e targets em blocos claros, com a mesma linguagem sofisticada do restante do produto."
+                subtitle="Organize baseline, composição corporal e targets em blocos claros, com a mesma linguagem sofisticada do restante do produto."
               >
                 {!profileData ? (
                   <div className="mb-6 rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--brand)/0.05)] px-5 py-5 shadow-[var(--shadow-xs)]">
@@ -805,7 +805,7 @@ function ProfileContent() {
                         Training goal
                       </h3>
                       <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        Descreva o foco principal do momento para a experiencia parecer mais sua e
+                        Descreva o foco principal do momento para a experiência parecer mais sua e
                         menos generica.
                       </p>
                     </div>
@@ -818,7 +818,7 @@ function ProfileContent() {
                         placeholder:
                           'Ex.: perder gordura com alta energia, ganhar massa com controle, melhorar consistencia e rotina.',
                         description:
-                          'Use uma frase curta e honesta sobre o resultado que voce quer perseguir agora.',
+                          'Use uma frase curta e honesta sobre o resultado que você quer perseguir agora.',
                       }}
                       value={form.training_goal}
                       onChange={handleFieldChange('training_goal')}
@@ -831,11 +831,11 @@ function ProfileContent() {
                     <div className="max-w-2xl">
                       <p className="atlas-metric-label">Persistencia</p>
                       <p className="mt-3 text-[16px] font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">
-                        Salve o perfil sem alterar a logica atual de dados.
+                        Salve o perfil sem alterar a lógica atual de dados.
                       </p>
                       <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        Esta acao atualiza o perfil com o fluxo existente e mantem a pagina pronta
-                        para o restante da experiencia premium.
+                        Esta ação atualiza o perfil com o fluxo existente e mantém a página pronta
+                        para o restante da experiência premium.
                       </p>
                     </div>
 
@@ -901,7 +901,7 @@ function ProfileContent() {
                     detail={
                       hasValue(form.water_target)
                         ? 'Meta diaria definida para manter consistencia de energia e rotina.'
-                        : 'Defina a meta de agua para fechar a preparacao diaria.'
+                        : 'Defina a meta de água para fechar a preparação diária.'
                     }
                   />
                   <ReadoutItem
@@ -910,7 +910,7 @@ function ProfileContent() {
                     detail={
                       hasValue(form.height)
                         ? 'Altura registrada para deixar o baseline mais completo.'
-                        : 'Altura ainda nao definida neste setup.'
+                        : 'Altura ainda não definida neste setup.'
                     }
                   />
 
@@ -918,7 +918,7 @@ function ProfileContent() {
                     <p className="atlas-metric-label">Why it matters</p>
                     <p className="mt-3 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
                       Um perfil claro deixa metas, planos e contextos mais consistentes sem adicionar
-                      friccao ao backend. A pagina passa a parecer pessoal porque o sistema le voce
+                      friccao ao backend. A página passa a parecer pessoal porque o sistema le voce
                       com mais nitidez.
                     </p>
                   </div>
