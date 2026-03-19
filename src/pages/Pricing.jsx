@@ -1,224 +1,483 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
-  ArrowLeft,
+  Activity,
+  ArrowRight,
   Check,
+  Loader2,
+  ShieldCheck,
   Sparkles,
   Star,
   Stethoscope,
   Users,
+  X,
   Zap,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import {
-  PrimaryButton,
-  SafePageBoundary,
-  SectionCard,
-  SecondaryButton,
-} from '@/components/shared/StablePage';
+import { toast } from 'sonner';
+import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
+import { useI18n } from '@/lib/i18nContext';
+import { base44 } from '@/api/base44Client';
+import RegionSelector from '@/components/pricing/RegionSelector';
+import PublicSiteShell, {
+  PublicLanguageSwitcher,
+  PublicSectionHeader,
+} from '@/components/public/PublicSiteShell';
+import { Button } from '@/components/ui/button';
+import { getRegionPricing } from '@/lib/regionalPricing';
 import { ROUTES } from '@/lib/routes';
 
-const ATHLETE_PLANS = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: 'R$ 0',
-    subtitle: 'Entrada simples para registrar e comecar.',
-    icon: Sparkles,
-    features: ['Today', 'Measurements', 'Nutrition', 'Workouts', 'Historico inicial'],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 'R$ 29',
-    subtitle: 'Uso diario com IA, historico expandido e export.',
-    icon: Zap,
-    featured: true,
-    features: [
-      'Tudo do Free',
-      'Atlas AI contextual',
-      'Exames e fotos de progresso',
-      'Export PDF / CSV',
-      'Historico ampliado',
-    ],
-  },
-  {
-    id: 'performance',
-    name: 'Performance',
-    price: 'R$ 59',
-    subtitle: 'Camada premium para rotina e leitura profunda.',
-    icon: Star,
-    features: [
-      'Tudo do Pro',
-      'Protocolos avancados',
-      'Relatorios premium',
-      'Historico ilimitado',
-      'Leitura mais profunda de dados',
-    ],
-  },
+const fade = {
+  hidden: { opacity: 0, y: 18 },
+  show: (index = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: index * 0.06,
+      duration: 0.52,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  }),
+};
+
+const ATHLETE_PLAN_META = [
+  { id: 'free', key: 'free', icon: Activity },
+  { id: 'athlete_pro', key: 'pro', icon: Zap, popular: true },
+  { id: 'athlete_performance', key: 'performance', icon: Star },
 ];
 
-const PROFESSIONAL_PLANS = [
-  {
-    id: 'coach',
-    name: 'Coach',
-    price: 'R$ 99',
-    subtitle: 'Prescricao, acompanhamento e progresso de alunos.',
-    icon: Users,
-    features: [
-      'Dashboard profissional',
-      'Gestao de alunos',
-      'Prescricao de treino',
-      'Acompanhamento de aderencia',
-    ],
-  },
-  {
-    id: 'nutritionist',
-    name: 'Nutritionist',
-    price: 'R$ 79',
-    subtitle: 'Fluxo nutricional focado em cliente e prescricao.',
-    icon: Users,
-    features: [
-      'Dashboard nutricional',
-      'Clientes e refeicoes',
-      'Prescricao de dieta',
-      'Resumo de medidas e progresso',
-    ],
-  },
-  {
-    id: 'clinician',
-    name: 'Clinician',
-    price: 'R$ 129',
-    subtitle: 'Visao clinica consolidada com historico contextual.',
-    icon: Stethoscope,
-    features: [
-      'Dashboard clinico',
-      'Pacientes e exames',
-      'Historico corporal e protocolos',
-      'Export consolidado',
-    ],
-  },
+const PROFESSIONAL_PLAN_META = [
+  { id: 'coach', key: 'coach', icon: Users },
+  { id: 'nutritionist', key: 'nutritionist', icon: Users },
+  { id: 'clinician', key: 'clinician', icon: Stethoscope },
 ];
 
-function PlanCard({ plan }) {
+function formatPlanPrice(planId, translatedPrice, pricing, locale) {
+  if (planId === 'free') return translatedPrice;
+
+  const amount = pricing.prices?.[planId];
+  if (typeof amount !== 'number') return translatedPrice;
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: pricing.currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function PricingCard({
+  plan,
+  loading,
+  currentPlanId,
+  isAuthenticated,
+  onSubscribe,
+  labels,
+}) {
   const Icon = plan.icon;
+  const isFree = plan.id === 'free';
+  const isCurrentPlan = currentPlanId === plan.id || (isFree && !currentPlanId);
 
   return (
     <article
-      className={`atlas-card relative flex h-full flex-col px-5 py-5 lg:px-6 lg:py-6 ${
-        plan.featured ? 'border-[hsl(var(--brand)/0.32)] shadow-[var(--shadow-md)]' : ''
+      className={`relative flex h-full flex-col rounded-[30px] border px-5 py-5 lg:px-6 lg:py-6 ${
+        plan.popular
+          ? 'border-[hsl(var(--brand)/0.32)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]'
+          : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.86)] shadow-[var(--shadow-xs)]'
       }`}
     >
-      {plan.featured ? (
-        <span className="absolute right-5 top-5 rounded-full bg-[hsl(var(--brand)/0.1)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
-          Mais usado
+      {plan.popular ? (
+        <span className="atlas-public-pill absolute right-5 top-5 border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]">
+          {labels.popular}
         </span>
       ) : null}
 
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
           <Icon className="h-5 w-5" strokeWidth={1.9} />
         </div>
-        <div className="min-w-0">
-          <p className="text-[1rem] font-semibold tracking-[-0.026em] text-[hsl(var(--fg))]">
-            {plan.name}
+
+        <div className="min-w-0 pt-1">
+          <p className="atlas-metric-label">{plan.name}</p>
+          <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+            {plan.pitch}
           </p>
-          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{plan.subtitle}</p>
+          {plan.note ? (
+            <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{plan.note}</p>
+          ) : null}
         </div>
       </div>
 
       <div className="mt-6">
-        <p className="text-[2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
-          {plan.price}
-          <span className="ml-1 text-[13px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-            /mes
+        <div className="flex items-end gap-1">
+          <span className="text-[2.35rem] font-semibold tracking-[-0.065em] text-[hsl(var(--fg))]">
+            {plan.price}
           </span>
-        </p>
+          {!isFree ? (
+            <span className="pb-1 text-[13px] text-[hsl(var(--fg-2))]">{plan.period}</span>
+          ) : null}
+        </div>
+        {plan.trial ? (
+          <p className="mt-2 text-[12px] font-semibold text-[hsl(var(--ok))]">{plan.trial}</p>
+        ) : null}
       </div>
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 flex-1 space-y-2.5">
         {plan.features.map((feature) => (
-          <div key={feature} className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.1} />
-            <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">{feature}</p>
+          <div key={feature} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.4} />
+            <span>{feature}</span>
+          </div>
+        ))}
+        {plan.missing?.map((feature) => (
+          <div key={feature} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-3))]">
+            <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2.1} />
+            <span className="line-through">{feature}</span>
           </div>
         ))}
       </div>
+
+      <Button
+        onClick={() => onSubscribe(plan.id)}
+        disabled={loading === plan.id || (isFree && isCurrentPlan)}
+        variant={plan.popular && !isCurrentPlan ? 'default' : 'outline'}
+        className={`mt-6 h-11 w-full ${
+          isCurrentPlan ? 'border-[hsl(var(--ok)/0.34)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]' : ''
+        }`}
+      >
+        {loading === plan.id ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : isCurrentPlan ? (
+          labels.current
+        ) : isFree ? (
+          isAuthenticated ? labels.freeCurrent : labels.freeSignup
+        ) : (
+          plan.cta
+        )}
+      </Button>
     </article>
   );
 }
 
 export default function Pricing() {
+  const [loading, setLoading] = useState(null);
+  const [region, setRegion] = useState('US');
+  const { user, isAuthenticated } = useAuth();
+  const { subscription } = useSubscription();
+  const { t, locale } = useI18n();
+
+  const pricing = getRegionPricing(region);
+  const isPt = locale === 'pt-BR';
+
+  const ui = useMemo(
+    () => (
+      isPt
+        ? {
+            login: 'Entrar',
+            signup: 'Criar conta',
+            compareTitle: 'Planos desenhados para o mesmo produto premium',
+            compareCopy:
+              'Comece grátis, evolua para IA, contexto e acompanhamento profissional quando fizer sentido.',
+            trustA: '7 dias grátis',
+            trustB: 'Troque de plano a qualquer momento',
+            trustC: 'Stripe com checkout seguro',
+            popular: 'Mais escolhido',
+            current: 'Plano atual',
+            freeCurrent: 'Plano Free',
+            freeSignup: 'Criar conta grátis',
+            athleteLabel: t('pricing_page.athlete'),
+            professionalLabel: t('pricing_page.professional'),
+            footerTitle: 'Tudo no mesmo sistema visual',
+            footerCopy:
+              'Nada de pricing separado do produto. Os mesmos princípios de clareza, calma e confiança seguem daqui para o app.',
+          }
+        : {
+            login: 'Login',
+            signup: 'Create account',
+            compareTitle: 'Plans designed for the same premium product',
+            compareCopy:
+              'Start free, then expand into AI, context and professional collaboration when you need it.',
+            trustA: '7-day free trial',
+            trustB: 'Change plans anytime',
+            trustC: 'Secure Stripe checkout',
+            popular: 'Most chosen',
+            current: 'Current plan',
+            freeCurrent: 'Free plan',
+            freeSignup: 'Create free account',
+            athleteLabel: t('pricing_page.athlete'),
+            professionalLabel: t('pricing_page.professional'),
+            footerTitle: 'One visual system from first click to daily use',
+            footerCopy:
+              'Pricing should feel like part of Atlas Core itself, not a detached marketing layer.',
+          }
+    ),
+    [isPt, t]
+  );
+
+  const currentPlanId = (() => {
+    if (!isAuthenticated || !subscription) return null;
+    const status = subscription.status;
+    if (!['active', 'trialing'].includes(status)) return null;
+    const code = subscription.plan_code;
+    const map = {
+      pro: 'athlete_pro',
+      performance: 'athlete_performance',
+      free: 'free',
+      coach: 'coach',
+      nutritionist: 'nutritionist',
+      clinician: 'clinician',
+    };
+    return map[code] || 'free';
+  })();
+
+  const athletePlans = useMemo(() => {
+    const translations = t('pricing_page.plans');
+    return ATHLETE_PLAN_META.map((meta) => {
+      const translated = translations[meta.key];
+      return {
+        ...meta,
+        name: translated.name,
+        pitch: translated.pitch,
+        features: translated.features,
+        missing: translated.missing || [],
+        cta: translated.cta,
+        trial: translated.trial,
+        period: translated.period,
+        price: formatPlanPrice(meta.id, translated.price, pricing, locale),
+      };
+    });
+  }, [locale, pricing, t]);
+
+  const professionalPlans = useMemo(() => {
+    const translations = t('pricing_page.plans');
+    return PROFESSIONAL_PLAN_META.map((meta) => {
+      const translated = translations[meta.key];
+      return {
+        ...meta,
+        name: translated.name,
+        pitch: translated.pitch,
+        note: translated.note,
+        features: translated.features,
+        cta: translated.cta,
+        trial: translated.trial,
+        period: translated.period,
+        price: formatPlanPrice(meta.id, translated.price, pricing, locale),
+      };
+    });
+  }, [locale, pricing, t]);
+
+  const handleSubscribe = async (planId) => {
+    if (planId === 'free') {
+      window.location.href = '/auth?mode=signup';
+      return;
+    }
+
+    if (window.self !== window.top) {
+      toast.error('O checkout só funciona no app publicado. Acesse a URL pública para assinar.');
+      return;
+    }
+
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pending_plan', planId);
+      window.location.href = `/auth?mode=signup&next=/Pricing`;
+      return;
+    }
+
+    setLoading(planId);
+    try {
+      const res = await base44.functions.invoke('createCheckout', {
+        plan: planId,
+        success_url: `${window.location.origin}/Today?subscribed=1`,
+        cancel_url: `${window.location.origin}/Pricing`,
+        email: user?.email,
+      });
+
+      if (res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        toast.error(res.data?.error || 'Erro ao iniciar checkout. Tente novamente.');
+      }
+    } catch (error) {
+      toast.error('Não foi possível conectar ao servidor de pagamentos. Tente novamente.');
+      console.error('Checkout error:', error);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  useEffect(() => {
+    const pendingPlan = sessionStorage.getItem('pending_plan');
+    if (pendingPlan && isAuthenticated) {
+      sessionStorage.removeItem('pending_plan');
+      handleSubscribe(pendingPlan);
+    }
+  }, [isAuthenticated]);
+
   return (
-    <SafePageBoundary
-      title="Pricing"
-      subtitle="Planos do Atlas Core para atletas e profissionais."
-      maxWidth="max-w-6xl"
-      fallbackDescription="A rota de Pricing continua acessivel mesmo se a interface principal falhar."
+    <PublicSiteShell
+      navLinks={[{ href: '#plans', label: t('landing.nav.pricing') }]}
+      actions={(
+        <>
+          <PublicLanguageSwitcher />
+          {isAuthenticated ? (
+            <Button asChild variant="ghost" className="hidden sm:inline-flex">
+              <Link to={ROUTES.today}>{t('pricing_page.backToApp')}</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild variant="ghost" className="hidden sm:inline-flex">
+                <Link to={`${ROUTES.auth}?mode=login`}>{ui.login}</Link>
+              </Button>
+              <Button asChild>
+                <Link to={`${ROUTES.auth}?mode=signup`}>{ui.signup}</Link>
+              </Button>
+            </>
+          )}
+        </>
+      )}
     >
-      <div className="atlas-page-shell">
-        <div className="mx-auto max-w-6xl space-y-8 px-5 py-6 lg:px-8 lg:py-10">
-          <section className="atlas-page-header relative overflow-hidden px-6 py-6 lg:px-8 lg:py-8">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[hsl(var(--brand)/0.08)] to-transparent" />
-
-            <div className="relative space-y-6">
-              <Link
-                to={ROUTES.today}
-                className="inline-flex items-center gap-2 text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
-              >
-                <ArrowLeft className="h-4 w-4" strokeWidth={1.9} />
-                Voltar para o app
-              </Link>
-
-              <div className="max-w-3xl space-y-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="atlas-overline">Pricing</span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    Atlas Core plans
-                  </span>
+      <section className="mx-auto max-w-6xl px-5 pb-8 pt-12 lg:px-8 lg:pb-12 lg:pt-16">
+        <div className="atlas-page-header px-6 py-6 lg:px-8 lg:py-8">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <span className="atlas-public-pill">
+                  <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
+                  {t('pricing_page.title')}
+                </span>
+                <div className="space-y-4">
+                  <h1 className="atlas-display-title text-[clamp(2.6rem,2rem+1.8vw,4.4rem)]">
+                    {t('pricing_page.heading')}
+                  </h1>
+                  <p className="atlas-public-copy max-w-2xl">{t('pricing_page.subtitle')}</p>
                 </div>
-
-                <h1 className="atlas-display-title">Escolha a camada certa para a sua operacao.</h1>
-                <p className="max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
-                  Os planos abaixo mantem a estrutura central do produto e escalam profundidade,
-                  historico e capacidades profissionais conforme o uso.
-                </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Link to={ROUTES.signup}>
-                  <PrimaryButton type="button">Criar conta</PrimaryButton>
-                </Link>
-                <Link to={ROUTES.help}>
-                  <SecondaryButton type="button">Ver ajuda</SecondaryButton>
-                </Link>
+                <span className="atlas-public-pill">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--ok))]" strokeWidth={1.9} />
+                  {ui.trustA}
+                </span>
+                <span className="atlas-public-pill">{ui.trustB}</span>
+                <span className="atlas-public-pill">{ui.trustC}</span>
               </div>
             </div>
-          </section>
 
-          <SectionCard
-            title="Athlete plans"
-            subtitle="Camadas para quem usa o produto no proprio dia a dia."
-          >
-            <div className="grid gap-4 lg:grid-cols-3">
-              {ATHLETE_PLANS.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
+            <div className="space-y-3">
+              <RegionSelector onRegionChange={setRegion} />
+              <div className="atlas-public-panel-muted p-4">
+                <p className="atlas-metric-label">{ui.compareTitle}</p>
+                <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                  {ui.compareCopy}
+                </p>
+              </div>
             </div>
-          </SectionCard>
-
-          <SectionCard
-            title="Professional plans"
-            subtitle="Planos pensados para acompanhamento, prescricao e leitura consolidada."
-          >
-            <div className="grid gap-4 lg:grid-cols-3">
-              {PROFESSIONAL_PLANS.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </div>
-          </SectionCard>
+          </div>
         </div>
-      </div>
-    </SafePageBoundary>
+      </section>
+
+      <section id="plans" className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
+        <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
+          <PublicSectionHeader
+            eyebrow={isPt ? 'Atleta' : 'Athlete'}
+            title={ui.athleteLabel}
+            description={t('pricing_page.subtitle')}
+            className="mb-10"
+          />
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {athletePlans.map((plan, index) => (
+              <motion.div
+                key={plan.id}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
+                variants={fade}
+                custom={index}
+              >
+                <PricingCard
+                  plan={{ ...plan, popular: plan.popular }}
+                  loading={loading}
+                  currentPlanId={currentPlanId}
+                  isAuthenticated={isAuthenticated}
+                  onSubscribe={handleSubscribe}
+                  labels={{
+                    popular: ui.popular,
+                    current: ui.current,
+                    freeCurrent: ui.freeCurrent,
+                    freeSignup: ui.freeSignup,
+                  }}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-10">
+          <PublicSectionHeader
+            eyebrow={isPt ? 'Profissional' : 'Professional'}
+            title={ui.professionalLabel}
+            description={t('pricing_page.professionalDesc')}
+          />
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {professionalPlans.map((plan, index) => (
+              <motion.div
+                key={plan.id}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
+                variants={fade}
+                custom={index}
+              >
+                <PricingCard
+                  plan={plan}
+                  loading={loading}
+                  currentPlanId={currentPlanId}
+                  isAuthenticated={isAuthenticated}
+                  onSubscribe={handleSubscribe}
+                  labels={{
+                    popular: ui.popular,
+                    current: ui.current,
+                    freeCurrent: ui.freeCurrent,
+                    freeSignup: ui.freeSignup,
+                  }}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pb-6 lg:px-8">
+        <div className="atlas-public-panel-muted px-6 py-6 lg:px-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div>
+              <p className="atlas-metric-label">{ui.footerTitle}</p>
+              <p className="mt-3 max-w-3xl text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                {ui.footerCopy}
+              </p>
+              <p className="mt-4 text-[12px] text-[hsl(var(--fg-3))]">{t('pricing_page.footer')}</p>
+              <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">{t('pricing_page.footerPayment')}</p>
+            </div>
+
+            {!isAuthenticated ? (
+              <Button asChild size="lg">
+                <Link to={`${ROUTES.auth}?mode=signup`}>
+                  {ui.signup}
+                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="lg" variant="outline">
+                <Link to={ROUTES.today}>{t('pricing_page.backToApp')}</Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      </section>
+    </PublicSiteShell>
   );
 }

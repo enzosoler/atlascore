@@ -1,13 +1,23 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Clock3,
   Flame,
+  Loader2,
   Pencil,
   Plus,
+  Search,
   Target,
   Trash2,
   UtensilsCrossed,
 } from 'lucide-react';
+import {
+  ActionRow,
+  AppContainer,
+  Card,
+  PageHeader,
+  Section,
+  StatCard,
+} from '@/components/shared/AppContainer';
 import {
   DateStepper,
   EmptyState,
@@ -24,8 +34,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useAuth } from '@/lib/AuthContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
+import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
+import { searchFoods } from '@/services/foodApi';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -59,6 +72,7 @@ const MOCK_PRESCRIBED_DIET = {
 
 const TODAY = getToday();
 const YESTERDAY = shiftDate(TODAY, -1);
+const USDA_SEARCH_DEBOUNCE_MS = 300;
 const MEAL_ORDER = [
   'breakfast',
   'morning_snack',
@@ -96,6 +110,7 @@ const MOCK_MEALS = [
     total_carbs: 48,
     total_fat: 11,
     notes: 'Mantido leve para treinar no meio da manha.',
+    source: 'mock',
   },
   {
     id: 'meal-lunch',
@@ -108,6 +123,7 @@ const MOCK_MEALS = [
     total_carbs: 68,
     total_fat: 18,
     notes: 'Refeicao principal do dia.',
+    source: 'mock',
   },
   {
     id: 'meal-post-workout',
@@ -120,18 +136,20 @@ const MOCK_MEALS = [
     total_carbs: 38,
     total_fat: 4,
     notes: 'Foco em digestao facil.',
+    source: 'mock',
   },
   {
     id: 'meal-yesterday',
     date: YESTERDAY,
     meal_type: 'dinner',
     title: 'Jantar',
-    foods: [{ name: 'Salmão' }, { name: 'Batata doce' }, { name: 'Salada' }],
+    foods: [{ name: 'Salmao' }, { name: 'Batata doce' }, { name: 'Salada' }],
     total_calories: 640,
     total_protein: 45,
     total_carbs: 44,
     total_fat: 24,
     notes: '',
+    source: 'mock',
   },
 ];
 
@@ -141,6 +159,11 @@ function createLocalId(prefix) {
 
 function getMealTypeLabel(mealType) {
   return MEAL_TYPES[mealType]?.label || mealType || 'Refeicao';
+}
+
+function getMealSortOrder(mealType) {
+  const index = MEAL_ORDER.indexOf(mealType);
+  return index === -1 ? MEAL_ORDER.length : index;
 }
 
 function buildFoodList(foodText) {
@@ -184,6 +207,73 @@ function getRemainingValue(target, current) {
   return Math.max(0, Math.round(target - current));
 }
 
+function formatDateKey(value) {
+  if (!value) return TODAY;
+
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return TODAY;
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function buildSnapshotDate(selectedDate) {
+  if (!selectedDate || selectedDate === TODAY) {
+    return new Date().toISOString();
+  }
+
+  const [year, month, day] = selectedDate.split('-').map(Number);
+  const snapshotDate = new Date();
+
+  snapshotDate.setFullYear(year, (month || 1) - 1, day || 1);
+  snapshotDate.setHours(12, 0, 0, 0);
+
+  return snapshotDate.toISOString();
+}
+
+function getMealTypeFromDate(value) {
+  const parsed = value ? new Date(value) : new Date();
+  const hour = Number.isNaN(parsed.getTime()) ? 8 : parsed.getHours();
+
+  if (hour < 10) return 'breakfast';
+  if (hour < 12) return 'morning_snack';
+  if (hour < 15) return 'lunch';
+  if (hour < 18) return 'afternoon_snack';
+  if (hour < 20) return 'post_workout';
+  if (hour < 22) return 'dinner';
+  return 'evening_snack';
+}
+
+function mapFoodLogToMeal(log) {
+  const quantity = Number(log?.quantity || 1);
+  const foodName = log?.food_name || 'Alimento registrado';
+
+  return {
+    id: log?.id ? `food-log-${log.id}` : createLocalId('food-log'),
+    source: 'supabase',
+    source_row_id: log?.id || null,
+    date: formatDateKey(log?.date),
+    meal_type: getMealTypeFromDate(log?.date),
+    title: foodName,
+    foods: [{ name: foodName }],
+    total_calories: Number(log?.calories || 0),
+    total_protein: Number(log?.protein || 0),
+    total_carbs: Number(log?.carbs || 0),
+    total_fat: Number(log?.fat || 0),
+    notes:
+      quantity > 1
+        ? `Quantidade salva: ${quantity}. Snapshot persistido no food_logs.`
+        : 'Snapshot persistido no food_logs.',
+  };
+}
+
 function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }) {
   const pct = getProgressPercent(consumed, target);
   const remaining = getRemainingValue(target, consumed);
@@ -208,7 +298,10 @@ function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }
         </p>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
-        <div className={cn('h-full rounded-full', TRACK_FILL_CLASS[tone])} style={{ width: `${pct}%` }} />
+        <div
+          className={cn('h-full rounded-full', TRACK_FILL_CLASS[tone])}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );
@@ -231,10 +324,75 @@ function LoggedMetric({ label, value, unit, tone = 'calories' }) {
   );
 }
 
+function FoodSearchResult({ food, onSelect, isSaving = false }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(food)}
+      disabled={isSaving}
+      className="w-full rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-4 text-left transition-colors hover:bg-[hsl(var(--fill)/0.72)] disabled:cursor-wait disabled:opacity-70"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+            {food.name}
+          </p>
+          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+            {food.brand || 'USDA FoodData Central'}
+          </p>
+        </div>
+
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.86)] text-[hsl(var(--fg-2))]">
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
+          ) : (
+            <Plus className="h-4 w-4" strokeWidth={1.9} />
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-4">
+        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+            kcal
+          </p>
+          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
+            {Math.round(food.calories || 0)}
+          </p>
+        </div>
+        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+            proteina
+          </p>
+          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
+            {Math.round(food.protein || 0)} g
+          </p>
+        </div>
+        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+            carbs
+          </p>
+          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
+            {Math.round(food.carbs || 0)} g
+          </p>
+        </div>
+        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+            gordura
+          </p>
+          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
+            {Math.round(food.fat || 0)} g
+          </p>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function MealCard({ meal, onEdit, onDelete }) {
   return (
     <article className="atlas-card px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
@@ -259,8 +417,18 @@ function MealCard({ meal, onEdit, onDelete }) {
           <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.55)]">
             <div className="grid gap-px bg-[hsl(var(--border)/0.7)] sm:grid-cols-4">
               <LoggedMetric label="Kcal" value={meal?.total_calories || 0} unit="kcal" />
-              <LoggedMetric label="Proteina" value={meal?.total_protein || 0} unit="g" tone="protein" />
-              <LoggedMetric label="Carbos" value={meal?.total_carbs || 0} unit="g" tone="carbs" />
+              <LoggedMetric
+                label="Proteina"
+                value={meal?.total_protein || 0}
+                unit="g"
+                tone="protein"
+              />
+              <LoggedMetric
+                label="Carbos"
+                value={meal?.total_carbs || 0}
+                unit="g"
+                tone="carbs"
+              />
               <LoggedMetric label="Gordura" value={meal?.total_fat || 0} unit="g" tone="fat" />
             </div>
           </div>
@@ -275,7 +443,7 @@ function MealCard({ meal, onEdit, onDelete }) {
           ) : null}
         </div>
 
-        <div className="flex w-full flex-col gap-3">
+        <div className="flex w-full flex-col gap-3 lg:w-[188px]">
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.58)] px-4 py-4">
             <p className="atlas-metric-label">Energy</p>
             <p className="mt-3 text-[1.75rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
@@ -289,24 +457,30 @@ function MealCard({ meal, onEdit, onDelete }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={onEdit}
-              className="atlas-button atlas-button-secondary h-10 flex-1"
-            >
-              <Pencil className="h-4 w-4" strokeWidth={1.9} />
-              Editar
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)]"
-            >
-              <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-              Excluir
-            </button>
-          </div>
+          {onEdit || onDelete ? (
+            <div className="flex flex-wrap gap-2 lg:flex-col">
+              {onEdit ? (
+                <button
+                  type="button"
+                  onClick={onEdit}
+                  className="atlas-button atlas-button-secondary h-10 flex-1 lg:w-full"
+                >
+                  <Pencil className="h-4 w-4" strokeWidth={1.9} />
+                  Editar
+                </button>
+              ) : null}
+              {onDelete ? (
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)] lg:w-full"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={1.9} />
+                  Excluir
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </article>
@@ -343,7 +517,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
     <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
         <p className="atlas-overline">Meal basics</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
             Data
             <input
@@ -394,7 +568,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <p className="atlas-overline">Macro summary</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 md:grid-cols-4">
           <label className={FIELD_LABEL_CLASS}>
             Kcal
             <input
@@ -466,7 +640,7 @@ export default function Nutrition() {
   return (
     <SafePageBoundary
       title="Nutrition"
-      subtitle="Registro local de refeicoes, metas do dia e comparacao simples com o plano alimentar."
+      subtitle="Busca USDA, snapshots no Supabase e comparacao simples com as metas do dia."
       maxWidth="max-w-6xl"
       fallbackDescription="A rota de Nutrition continua acessivel mesmo se a interface principal falhar."
     >
@@ -476,19 +650,111 @@ export default function Nutrition() {
 }
 
 function NutritionContent() {
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [mealFilter, setMealFilter] = useState('all');
   const [notice, setNotice] = useState(null);
   const [meals, setMeals] = useState(MOCK_MEALS);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState(null);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [isSearchingFoods, setIsSearchingFoods] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [savingFoodId, setSavingFoodId] = useState(null);
+  const [isLoadingMeals, setIsLoadingMeals] = useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadFoodLogs() {
+      if (!user?.id) {
+        setMeals(MOCK_MEALS);
+        return;
+      }
+
+      setIsLoadingMeals(true);
+
+      try {
+        const { data, error } = await supabase
+          .from('food_logs')
+          .select('id, food_name, calories, protein, carbs, fat, quantity, date')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false })
+          .limit(200);
+
+        if (error) throw error;
+        if (!isActive) return;
+
+        setMeals((data || []).map(mapFoodLogToMeal));
+      } catch (error) {
+        console.error('Nutrition food_logs load failed:', error);
+
+        if (!isActive) return;
+
+        setNotice({
+          tone: 'warning',
+          message:
+            'Nao foi possivel carregar os snapshots salvos no Supabase. O registro manual continua disponivel.',
+        });
+      } finally {
+        if (isActive) {
+          setIsLoadingMeals(false);
+        }
+      }
+    }
+
+    loadFoodLogs();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+
+    if (normalizedQuery.length < 2) {
+      setResults([]);
+      setSearchError('');
+      setIsSearchingFoods(false);
+      return undefined;
+    }
+
+    let isActive = true;
+    const timeout = window.setTimeout(async () => {
+      setIsSearchingFoods(true);
+      setSearchError('');
+
+      try {
+        const foods = await searchFoods(normalizedQuery);
+        if (isActive) {
+          setResults(foods);
+        }
+      } catch (error) {
+        console.error('USDA food search failed:', error);
+
+        if (isActive) {
+          setResults([]);
+          setSearchError(error?.message || 'Nao foi possivel buscar alimentos agora.');
+        }
+      } finally {
+        if (isActive) {
+          setIsSearchingFoods(false);
+        }
+      }
+    }, USDA_SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(timeout);
+    };
+  }, [query]);
 
   const mealsForDate = useMemo(() => {
     return meals
       .filter((meal) => meal.date === selectedDate)
-      .sort((left, right) => {
-        return MEAL_ORDER.indexOf(left.meal_type) - MEAL_ORDER.indexOf(right.meal_type);
-      });
+      .sort((left, right) => getMealSortOrder(left.meal_type) - getMealSortOrder(right.meal_type));
   }, [meals, selectedDate]);
 
   const filterOptions = useMemo(() => {
@@ -541,17 +807,38 @@ function NutritionContent() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (meal) => {
+  const handleDelete = async (meal) => {
     const mealLabel = meal?.title || getMealTypeLabel(meal?.meal_type);
-    const confirmed = window.confirm(`Delete ${mealLabel}?`);
+    const confirmed = window.confirm(`Excluir ${mealLabel}?`);
 
     if (!confirmed) return;
 
-    setMeals((current) => current.filter((item) => item.id !== meal.id));
-    setNotice({
-      tone: 'success',
-      message: 'Refeicao removida do estado local.',
-    });
+    try {
+      if (meal?.source === 'supabase' && meal?.source_row_id && user?.id) {
+        const { error } = await supabase
+          .from('food_logs')
+          .delete()
+          .eq('id', meal.source_row_id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      }
+
+      setMeals((current) => current.filter((item) => item.id !== meal.id));
+      setNotice({
+        tone: 'success',
+        message:
+          meal?.source === 'supabase'
+            ? 'Snapshot removido do food_logs.'
+            : 'Refeicao removida do estado local.',
+      });
+    } catch (error) {
+      console.error('Nutrition delete failed:', error);
+      setNotice({
+        tone: 'warning',
+        message: 'Nao foi possivel excluir este registro agora.',
+      });
+    }
   };
 
   const handleSaveMeal = (payload) => {
@@ -567,18 +854,74 @@ function NutritionContent() {
       const exists = current.some((item) => item.id === payload.id);
 
       if (exists) {
-        return current.map((item) => (item.id === payload.id ? payload : item));
+        return current.map((item) =>
+          item.id === payload.id ? { ...payload, source: item.source || 'local' } : item
+        );
       }
 
-      return [payload, ...current];
+      return [{ ...payload, source: 'local' }, ...current];
     });
 
     setIsFormOpen(false);
     setEditingMeal(null);
     setNotice({
       tone: 'success',
-      message: payload.id === editingMeal?.id ? 'Refeicao atualizada.' : 'Refeicao adicionada.',
+      message:
+        payload.id === editingMeal?.id ? 'Refeicao local atualizada.' : 'Refeicao local adicionada.',
     });
+  };
+
+  const handleSelectFood = async (food) => {
+    if (!user?.id) {
+      setNotice({
+        tone: 'warning',
+        message: 'Faca login para salvar snapshots reais no food_logs.',
+      });
+      return;
+    }
+
+    const snapshot = {
+      user_id: user.id,
+      food_name: food.name,
+      calories: food.calories,
+      protein: food.protein,
+      carbs: food.carbs,
+      fat: food.fat,
+      quantity: 1,
+      date: buildSnapshotDate(selectedDate),
+    };
+
+    setSavingFoodId(food.id);
+    setNotice(null);
+
+    try {
+      const { data, error } = await supabase
+        .from('food_logs')
+        .insert(snapshot)
+        .select('id, food_name, calories, protein, carbs, fat, quantity, date')
+        .single();
+
+      if (error) throw error;
+
+      const savedMeal = mapFoodLogToMeal(data || snapshot);
+
+      setMeals((current) => [savedMeal, ...current]);
+      setQuery('');
+      setResults([]);
+      setSearchError('');
+      setNotice({
+        tone: 'success',
+        message: `${food.name} salvo com snapshot completo no food_logs.`,
+      });
+    } catch (error) {
+      console.error('Nutrition snapshot save failed:', error);
+      setNotice({
+        tone: 'warning',
+        message: 'Nao foi possivel salvar o snapshot deste alimento no Supabase.',
+      });
+    } finally {
+      setSavingFoodId(null);
+    }
   };
 
   return (
@@ -586,7 +929,7 @@ function NutritionContent() {
       <PageHeader
         eyebrow="Nutrition"
         title="Nutrition that reads like a daily rhythm."
-        subtitle="Track meals, compare intake against the day&apos;s targets and keep the page focused on the next food decision instead of dashboard noise."
+        subtitle="Busque alimentos na USDA, salve snapshots no Supabase e mantenha a leitura do dia focada na proxima decisao alimentar."
         accentClassName="from-[hsl(var(--warn)/0.12)] via-[hsl(var(--warn)/0.04)]"
         actions={
           <ActionRow>
@@ -624,12 +967,79 @@ function NutritionContent() {
         </div>
       </PageHeader>
 
-      <StatusBanner tone="warning">
-        Nutrition agora roda so com estado local mock. Nenhuma logica de Protocols, treino ou backend
-        permanece nesta pagina.
+      <StatusBanner tone="neutral">
+        A busca USDA salva snapshots em <code>food_logs</code>. O modal manual continua disponivel
+        para registros locais rapidos.
       </StatusBanner>
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
+      {isLoadingMeals ? (
+        <StatusBanner tone="neutral">Carregando snapshots salvos da sua conta...</StatusBanner>
+      ) : null}
+
+      <Section
+        title="Buscar alimento"
+        subtitle="Digite pelo menos 2 letras. Ao selecionar um item, a tela salva nome e macros como snapshot no food_logs."
+      >
+        <Card className="px-5 py-5">
+          <label className={FIELD_LABEL_CLASS}>
+            Busca USDA
+            <div className="relative mt-2">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
+              <input
+                type="text"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Ex: chicken breast, rice, banana"
+                className={cn(INPUT_CLASS_NAME, 'pl-11')}
+              />
+            </div>
+          </label>
+
+          <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+            Data ativa do registro:{' '}
+            <span className="font-semibold text-[hsl(var(--fg))]">{selectedDate}</span>
+          </p>
+
+          {query.trim().length > 0 && query.trim().length < 2 ? (
+            <p className="mt-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              Continue digitando para buscar alimentos na USDA.
+            </p>
+          ) : null}
+
+          {isSearchingFoods ? (
+            <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]">
+              <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
+              Buscando alimentos na USDA FoodData Central...
+            </div>
+          ) : null}
+
+          {!isSearchingFoods && searchError ? (
+            <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]">
+              {searchError}
+            </div>
+          ) : null}
+
+          {!isSearchingFoods && !searchError && results.length > 0 ? (
+            <div className="mt-5 space-y-3">
+              {results.map((food) => (
+                <FoodSearchResult
+                  key={food.id}
+                  food={food}
+                  onSelect={handleSelectFood}
+                  isSaving={savingFoodId === food.id}
+                />
+              ))}
+            </div>
+          ) : null}
+
+          {!isSearchingFoods && !searchError && query.trim().length >= 2 && results.length === 0 ? (
+            <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              Nenhum alimento encontrado para esta busca.
+            </div>
+          ) : null}
+        </Card>
+      </Section>
 
       <Section
         title="Intake and targets"
@@ -713,7 +1123,7 @@ function NutritionContent() {
           <EmptyState
             icon={UtensilsCrossed}
             title="Nenhuma refeicao registrada"
-            description="Use o botao acima para abrir o modal local de refeicao e começar o dia alimentar."
+            description="Use a busca USDA ou o botao acima para abrir o modal local de refeicao e comecar o dia alimentar."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
                 Adicionar refeicao
@@ -736,7 +1146,7 @@ function NutritionContent() {
               <MealCard
                 key={meal.id}
                 meal={meal}
-                onEdit={() => handleEdit(meal)}
+                onEdit={meal?.source === 'supabase' ? undefined : () => handleEdit(meal)}
                 onDelete={() => handleDelete(meal)}
               />
             ))}
@@ -834,39 +1244,40 @@ function NutritionContent() {
         </div>
       </Section>
 
-        <Dialog
-          open={isFormOpen}
-          onOpenChange={(open) => {
-            setIsFormOpen(open);
-            if (!open) setEditingMeal(null);
-          }}
-        >
-          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
-            <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--warn)/0.1)] to-transparent" />
-              <div className="relative">
-                <p className="atlas-overline">Nutrition meal</p>
-                <DialogTitle className="mt-3">
-                  {editingMeal ? 'Editar refeicao' : 'Adicionar refeicao'}
-                </DialogTitle>
-                <DialogDescription className="mt-3 max-w-2xl">
-                  Este modal pertence apenas a Nutrition e salva refeicoes em estado local desta rota.
-                </DialogDescription>
-              </div>
-            </DialogHeader>
+      <Dialog
+        open={isFormOpen}
+        onOpenChange={(open) => {
+          setIsFormOpen(open);
+          if (!open) setEditingMeal(null);
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
+          <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--warn)/0.1)] to-transparent" />
+            <div className="relative">
+              <p className="atlas-overline">Nutrition meal</p>
+              <DialogTitle className="mt-3">
+                {editingMeal ? 'Editar refeicao' : 'Adicionar refeicao'}
+              </DialogTitle>
+              <DialogDescription className="mt-3 max-w-2xl">
+                Este modal continua local. Para salvar snapshot real no Supabase, use a busca USDA
+                acima.
+              </DialogDescription>
+            </div>
+          </DialogHeader>
 
-            <MealForm
-              key={editingMeal?.id || 'new-meal'}
-              meal={editingMeal}
-              selectedDate={selectedDate}
-              onCancel={() => {
-                setIsFormOpen(false);
-                setEditingMeal(null);
-              }}
-              onSubmit={handleSaveMeal}
-            />
-          </DialogContent>
-        </Dialog>
+          <MealForm
+            key={editingMeal?.id || 'new-meal'}
+            meal={editingMeal}
+            selectedDate={selectedDate}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingMeal(null);
+            }}
+            onSubmit={handleSaveMeal}
+          />
+        </DialogContent>
+      </Dialog>
     </AppContainer>
   );
 }
