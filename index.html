@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link id="app-favicon" rel="icon" type="image/x-icon" href="/branding/light/favicon.ico" sizes="any" />
+    <link id="app-favicon" rel="icon" type="image/x-icon" href="/branding/dark/favicon.ico" sizes="any" />
     <link id="app-apple-touch-icon" rel="apple-touch-icon" href="/branding/dark/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta id="app-theme-color" name="theme-color" content="#FFFFFF" />
+    <meta id="app-theme-color" name="theme-color" content="#0B0D12" />
     <meta
       name="description"
       content="Atlas Core is the performance operating system for workouts, nutrition, measurements, supplements, and real-world progress."
@@ -29,13 +29,29 @@
     <title>Atlas Core</title>
     <script>
       (function () {
-        var theme = localStorage.getItem('atlas-theme') || 'light';
+        var THEME_KEY = 'atlas-theme';
+        var THEME_EXPLICIT_KEY = 'atlas-theme-explicit';
+        var DEFAULT_THEME = 'dark';
+        var root = document.documentElement;
+        var storedTheme = localStorage.getItem(THEME_KEY);
+        var hasExplicitPreference = localStorage.getItem(THEME_EXPLICIT_KEY) === 'true';
+        var theme =
+          hasExplicitPreference && (storedTheme === 'dark' || storedTheme === 'light')
+            ? storedTheme
+            : DEFAULT_THEME;
         var isDark = theme === 'dark';
         var favicon = document.getElementById('app-favicon');
+        var appleTouchIcon = document.getElementById('app-apple-touch-icon');
         var themeColor = document.getElementById('app-theme-color');
 
+        root.classList.remove('light', 'dark');
+        root.classList.add(theme);
+        root.dataset.theme = theme;
+        localStorage.setItem(THEME_KEY, theme);
+
         if (favicon) favicon.setAttribute('href', isDark ? '/branding/dark/favicon.ico' : '/branding/light/favicon.ico');
-        if (themeColor) themeColor.setAttribute('content', isDark ? '#1B3A6B' : '#FFFFFF');
+        if (appleTouchIcon) appleTouchIcon.setAttribute('href', isDark ? '/branding/dark/apple-touch-icon.png' : '/branding/light/apple-touch-icon.png');
+        if (themeColor) themeColor.setAttribute('content', isDark ? '#0B0D12' : '#F4F7FB');
       })();
     </script>
   </head>

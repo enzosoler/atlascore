@@ -1,8 +1,25 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const ThemeContext = createContext({ theme: 'dark', setTheme: () => {} });
+const THEME_KEY = 'atlas-theme';
+const THEME_EXPLICIT_KEY = 'atlas-theme-explicit';
+const DEFAULT_THEME = 'dark';
+
+const ThemeContext = createContext({ theme: DEFAULT_THEME, setTheme: () => {} });
 const LIGHT_THEME_COLOR = '#F4F7FB';
 const DARK_THEME_COLOR = '#0B0D12';
+
+function getInitialTheme() {
+  if (typeof window === 'undefined') return DEFAULT_THEME;
+
+  const storedTheme = window.localStorage.getItem(THEME_KEY);
+  const hasExplicitPreference = window.localStorage.getItem(THEME_EXPLICIT_KEY) === 'true';
+
+  if (hasExplicitPreference && (storedTheme === 'dark' || storedTheme === 'light')) {
+    return storedTheme;
+  }
+
+  return DEFAULT_THEME;
+}
 
 function syncBrandAssets(theme) {
   const isDark = theme === 'dark';
@@ -24,21 +41,21 @@ function syncBrandAssets(theme) {
 }
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return 'dark';
-    return localStorage.getItem('atlas-theme') || 'dark';
-  });
+  const [theme, setThemeState] = useState(getInitialTheme);
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove('dark', 'light');
     root.classList.add(theme);
     root.dataset.theme = theme;
-    localStorage.setItem('atlas-theme', theme);
+    localStorage.setItem(THEME_KEY, theme);
     syncBrandAssets(theme);
   }, [theme]);
 
-  const setTheme = (t) => setThemeState(t);
+  const setTheme = (nextTheme) => {
+    localStorage.setItem(THEME_EXPLICIT_KEY, 'true');
+    setThemeState(nextTheme === 'light' ? 'light' : 'dark');
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
