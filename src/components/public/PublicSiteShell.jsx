@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ThemeToggleButton from '@/components/shared/ThemeToggleButton';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -22,10 +23,26 @@ const DEFAULT_FOOTER_LINKS = [
 
 export function PublicLanguageSwitcher({ className = '', align = 'end' }) {
   const { language, setLanguage } = useTranslation();
+  const [open, setOpen] = React.useState(false);
   const currentLanguageLabel = language === 'pt-BR' ? 'PT' : 'EN';
 
+  const handleLanguageSelect = React.useCallback((nextLanguage) => {
+    setOpen(false);
+
+    if (nextLanguage === language) return;
+
+    if (typeof window === 'undefined') {
+      setLanguage(nextLanguage);
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      setLanguage(nextLanguage);
+    });
+  }, [language, setLanguage]);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -47,7 +64,7 @@ export function PublicLanguageSwitcher({ className = '', align = 'end' }) {
         className="atlas-popover-panel w-44 p-1.5"
       >
         <DropdownMenuItem
-          onClick={() => setLanguage('pt-BR')}
+          onSelect={() => handleLanguageSelect('pt-BR')}
           className={cn(
             'rounded-[14px] px-3 py-2 text-[13px]',
             language === 'pt-BR'
@@ -63,7 +80,7 @@ export function PublicLanguageSwitcher({ className = '', align = 'end' }) {
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => setLanguage('en-US')}
+          onSelect={() => handleLanguageSelect('en-US')}
           className={cn(
             'rounded-[14px] px-3 py-2 text-[13px]',
             language === 'en-US'
@@ -145,7 +162,11 @@ export function PublicNav({ links = [], actions, compact = false }) {
           </nav>
         ) : null}
 
-        <div className="flex items-center gap-2.5">{actions}</div>
+        <div className="flex items-center gap-2.5">
+          <ThemeToggleButton compact className="sm:hidden" />
+          <ThemeToggleButton className="hidden sm:inline-flex" />
+          {actions}
+        </div>
       </div>
     </header>
   );

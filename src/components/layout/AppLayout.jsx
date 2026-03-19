@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import TrialBanner from '@/components/shared/TrialBanner';
 import SupportWidget from '@/components/shared/SupportWidget';
+import ThemeToggleButton from '@/components/shared/ThemeToggleButton';
 import { TabBar } from '@/components/shared/AppContainer';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import { useAuth } from '@/lib/AuthContext';
@@ -336,6 +337,10 @@ export default function AppLayout() {
           ) : null}
 
           <div className="space-y-0.5">
+            <ThemeToggleButton
+              compact={collapsed}
+              className={collapsed ? '' : 'w-full justify-start'}
+            />
             <button
               onClick={() => logout()}
               className={getDesktopNavItemClass(false, collapsed, true)}
@@ -383,7 +388,7 @@ export default function AppLayout() {
         {/* Logo mark only — no text, reduces visual noise */}
         <AtlasCoreLogoSVG width={22} height={22} className="text-[hsl(var(--fg))]" color="hsl(var(--fg))" />
 
-        <div className="w-9" />
+        <ThemeToggleButton compact />
       </header>
 
       {/* ── Mobile drawer ───────────────────────────────────────── */}
