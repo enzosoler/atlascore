@@ -2,12 +2,13 @@
  * TrialBanner — shown to users with trialing subscription
  * Shows days remaining + CTA to upgrade
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, X, Clock } from 'lucide-react';
+import { Clock, Sparkles, X } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAuth } from '@/lib/AuthContext';
 import { ROUTES } from '@/lib/routes';
+import { cn } from '@/lib/utils';
 
 function daysLeft(dateStr) {
   if (!dateStr) return 0;
@@ -30,38 +31,52 @@ export default function TrialBanner() {
   const isUrgent = days <= 2;
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium border-b
-      ${isUrgent
-        ? 'bg-[hsl(var(--err)/0.08)] border-[hsl(var(--err)/0.2)] text-[hsl(var(--err))]'
-        : 'bg-[hsl(var(--brand)/0.06)] border-[hsl(var(--brand)/0.15)] text-[hsl(var(--brand))]'
-      }`}>
-      <div className="flex items-center gap-1.5 shrink-0">
-        {isUrgent
-          ? <Clock className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} />
-          : <Sparkles className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-        }
-        <span>
+    <div
+      className={cn(
+        'glass flex flex-wrap items-center gap-3 border-b border-[hsl(var(--border)/0.72)] px-4 py-3 text-sm',
+        isUrgent
+          ? 'text-[hsl(var(--err))]'
+          : 'text-[hsl(var(--fg-2))]'
+      )}
+    >
+      <div
+        className={cn(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border bg-[hsl(var(--card)/0.82)]',
+          isUrgent
+            ? 'border-[hsl(var(--err)/0.16)] text-[hsl(var(--err))]'
+            : 'border-[hsl(var(--border)/0.9)] text-[hsl(var(--brand))]'
+        )}
+      >
+        {isUrgent ? <Clock className="h-4 w-4" strokeWidth={2.1} /> : <Sparkles className="h-4 w-4" strokeWidth={2.1} />}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
           {days > 0
             ? `Trial Performance — ${days} dia${days !== 1 ? 's' : ''} restante${days !== 1 ? 's' : ''}`
             : 'Seu trial encerrou hoje'}
-        </span>
+        </p>
+        <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+          Continue com o mesmo fluxo e mantenha acesso ao workspace completo do Atlas Core.
+        </p>
       </div>
-      <div className="flex items-center gap-2 ml-auto shrink-0">
+
+      <div className="ml-auto flex items-center gap-2">
         <Link
           to={ROUTES.pricing}
-          className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-colors
-            ${isUrgent
-              ? 'bg-[hsl(var(--err))] text-white hover:bg-[hsl(var(--err)/0.88)]'
-              : 'bg-[hsl(var(--brand))] text-white hover:bg-[hsl(var(--brand)/0.88)]'
-            }`}
+          className={cn(
+            'atlas-button h-9 px-3 text-[11px] font-semibold',
+            isUrgent ? 'atlas-button-danger' : 'atlas-button-primary'
+          )}
         >
           Assinar agora
         </Link>
         <button
           onClick={() => setDismissed(true)}
-          className="opacity-50 hover:opacity-100 transition-opacity"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]"
+          aria-label="Fechar banner"
         >
-          <X className="w-3.5 h-3.5" strokeWidth={2} />
+          <X className="h-4 w-4" strokeWidth={2} />
         </button>
       </div>
     </div>

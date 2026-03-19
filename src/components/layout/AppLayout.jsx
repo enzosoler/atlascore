@@ -1,25 +1,59 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate, useOutlet } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  BarChart3,
+  BookOpen,
+  Brain,
+  Camera,
+  ChefHat,
+  ChevronLeft,
+  ClipboardList,
+  Download,
+  FlaskConical,
+  Heart,
+  Home,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Menu,
+  MessageSquare,
+  ShieldCheck,
+  TrendingUp,
+  User,
+  Users,
+  UtensilsCrossed,
+  Dumbbell,
+  X,
+} from 'lucide-react';
 import TrialBanner from '@/components/shared/TrialBanner';
 import SupportWidget from '@/components/shared/SupportWidget';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
-import {
-  Home, UtensilsCrossed, Dumbbell, FlaskConical,
-  BarChart3, Brain, User, Menu, X, ChevronLeft,
-  Heart, BookOpen, LogOut, ShieldCheck, Users,
-  Download, Camera, ClipboardList, ChefHat,
-  LayoutDashboard, MessageSquare, TrendingUp, Loader2,
-} from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '@/lib/AuthContext';
 import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
+import { cn } from '@/lib/utils';
 
 const ICON_MAP = {
-  Home, UtensilsCrossed, Dumbbell, FlaskConical, BarChart3, Brain, User,
-  Heart, BookOpen, ShieldCheck, Users, Download, Camera, ClipboardList,
-  ChefHat, LayoutDashboard, MessageSquare, TrendingUp,
+  Home,
+  UtensilsCrossed,
+  Dumbbell,
+  FlaskConical,
+  BarChart3,
+  Brain,
+  User,
+  Heart,
+  BookOpen,
+  ShieldCheck,
+  Users,
+  Download,
+  Camera,
+  ClipboardList,
+  ChefHat,
+  LayoutDashboard,
+  MessageSquare,
+  TrendingUp,
 };
 
 const BOTTOM_PATHS_BY_ROLE = {
@@ -87,6 +121,38 @@ function getTransitionState(pathname, previousPathname, bottomPaths) {
     exit: { opacity: 0, y: -10 },
     transition: { duration: 0.18, ease: 'easeOut' },
   };
+}
+
+function getDesktopNavItemClass(active, collapsed, destructive = false) {
+  return cn(
+    'group flex h-11 items-center rounded-[20px] text-[13px] font-medium tracking-[-0.014em] transition-all duration-200',
+    collapsed ? 'mx-auto w-11 justify-center px-0' : 'gap-3 px-4',
+    destructive
+      ? 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--err)/0.08)] hover:text-[hsl(var(--err))]'
+      : active
+        ? 'border border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
+        : 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.9)] hover:text-[hsl(var(--fg))]'
+  );
+}
+
+function getMobileNavItemClass(active, destructive = false) {
+  return cn(
+    'flex h-11 items-center gap-3 rounded-[20px] px-4 text-[14px] font-medium tracking-[-0.014em] transition-all duration-200',
+    destructive
+      ? 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--err)/0.08)] hover:text-[hsl(var(--err))]'
+      : active
+        ? 'border border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
+        : 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.9)] hover:text-[hsl(var(--fg))]'
+  );
+}
+
+function getBottomNavItemClass(active) {
+  return cn(
+    'flex flex-1 min-w-0 flex-col items-center gap-1 rounded-[20px] px-2 py-2 transition-all duration-200',
+    active
+      ? 'border border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
+      : 'text-[hsl(var(--fg-2))]'
+  );
 }
 
 export default function AppLayout() {
@@ -210,16 +276,28 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="flex min-h-screen bg-transparent">
       <aside
-        className={`hidden lg:flex flex-col fixed inset-y-0 left-0 z-40 bg-white border-r border-[#D5D5D7] transition-all duration-300 ease-out shrink-0 ${collapsed ? 'w-16' : 'w-60'}`}
+        className={cn(
+          'glass hidden shrink-0 flex-col fixed inset-y-0 left-0 z-40 border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.8)] transition-all duration-300 ease-out lg:flex',
+          collapsed ? 'w-[4.5rem]' : 'w-72'
+        )}
       >
-        <div className={`flex items-center h-14 shrink-0 border-b border-[#D5D5D7] px-4 ${collapsed ? 'justify-center' : 'gap-3'}`}>
+        <div
+          className={cn(
+            'flex h-16 shrink-0 items-center border-b border-[hsl(var(--border)/0.72)] px-5',
+            collapsed ? 'justify-center px-0' : 'gap-3'
+          )}
+        >
           <AtlasCoreLogoSVG width={28} height={28} className="shrink-0" />
-          {!collapsed && <span className="text-[16px] font-semibold tracking-tight text-[#1D1D1D]">Atlas Core</span>}
+          {!collapsed ? (
+            <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              Atlas Core
+            </span>
+          ) : null}
         </div>
 
-        <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {nav.map(({ path, label, icon }) => {
             const Icon = ICON_MAP[icon] || Home;
             const active = isActive(path);
@@ -229,57 +307,67 @@ export default function AppLayout() {
                 key={path}
                 to={path}
                 title={collapsed ? label : undefined}
-                className={`flex items-center rounded-[10px] text-[13px] font-medium transition-colors h-10 ${collapsed ? 'justify-center w-10 mx-auto' : 'gap-3 px-3'} ${active ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'text-[#86868B] hover:text-[#1D1D1D] hover:bg-[#F5F5F7]'}`}
+                className={getDesktopNavItemClass(active, collapsed)}
               >
-                <Icon className="w-4 h-4 shrink-0" strokeWidth={active ? 2.5 : 2} />
-                {!collapsed && label}
+                <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.25 : 1.9} />
+                {!collapsed ? <span className="truncate">{label}</span> : null}
               </Link>
             );
           })}
 
-          {role === 'admin' && (
+          {role === 'admin' ? (
             <Link
               to={ROUTES.admin}
               title={collapsed ? 'Admin Panel' : undefined}
-              className={`flex items-center rounded-[10px] text-[13px] font-medium transition-colors h-10 ${collapsed ? 'justify-center w-10 mx-auto' : 'gap-3 px-3'} ${isActive(ROUTES.admin) ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'text-[#86868B] hover:text-[#1D1D1D] hover:bg-[#F5F5F7]'}`}
+              className={getDesktopNavItemClass(isActive(ROUTES.admin), collapsed)}
             >
-              <ShieldCheck className="w-4 h-4 shrink-0" strokeWidth={2} />
-              {!collapsed && 'Admin Panel'}
+              <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+              {!collapsed ? <span className="truncate">Admin Panel</span> : null}
             </Link>
-          )}
+          ) : null}
         </nav>
 
-        <div className="px-2 py-3 border-t border-[#D5D5D7] space-y-1 shrink-0">
-          {!collapsed && (
-            <div className="px-3 py-2 mb-1">
-              <p className="text-[12px] truncate text-[#1D1D1D] font-medium">{user?.full_name || user?.email}</p>
-              <span className="inline-block text-[11px] text-[#86868B] mt-0.5">{ROLE_LABELS[role] || role}</span>
+        <div className="border-t border-[hsl(var(--border)/0.72)] px-3 py-4">
+          {!collapsed ? (
+            <div className="mx-1 mb-3 rounded-[22px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] px-4 py-3 shadow-[var(--shadow-xs)]">
+              <p className="truncate text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                {user?.full_name || user?.email}
+              </p>
+              <span className="mt-1 inline-block text-[11px] font-medium text-[hsl(var(--fg-2))]">
+                {ROLE_LABELS[role] || role}
+              </span>
             </div>
-          )}
-          <button
-            onClick={() => logout()}
-            className={`flex items-center rounded-[10px] text-[13px] font-medium transition-colors h-10 text-[#86868B] hover:text-[#DC2626] hover:bg-[#DC2626]/10 w-full ${collapsed ? 'justify-center' : 'gap-3 px-3'}`}
-          >
-            <LogOut className="w-4 h-4 shrink-0" strokeWidth={2} />
-            {!collapsed && 'Sair'}
-          </button>
-          <button
-            onClick={() => setCollapsed((value) => !value)}
-            className={`flex items-center rounded-[10px] text-[13px] transition-colors h-10 text-[#86868B] hover:text-[#1D1D1D] hover:bg-[#F5F5F7] w-full ${collapsed ? 'justify-center' : 'gap-3 px-3'}`}
-          >
-            <ChevronLeft className={`w-4 h-4 shrink-0 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} strokeWidth={2} />
-            {!collapsed && 'Recolher'}
-          </button>
+          ) : null}
+
+          <div className="space-y-1">
+            <button
+              onClick={() => logout()}
+              className={getDesktopNavItemClass(false, collapsed, true)}
+            >
+              <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
+              {!collapsed ? <span>Sair</span> : null}
+            </button>
+            <button
+              onClick={() => setCollapsed((value) => !value)}
+              className={getDesktopNavItemClass(false, collapsed)}
+            >
+              <ChevronLeft
+                className={cn(
+                  'h-[18px] w-[18px] shrink-0 transition-transform duration-300',
+                  collapsed ? 'rotate-180' : ''
+                )}
+                strokeWidth={1.95}
+              />
+              {!collapsed ? <span>Recolher</span> : null}
+            </button>
+          </div>
         </div>
       </aside>
 
-      <header
-        className="lg:hidden fixed top-0 inset-x-0 z-[60] h-12 bg-white border-b border-[#D5D5D7] flex items-center justify-between px-4"
-        style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
-      >
+      <header className="glass fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4 lg:hidden">
         <button
           onClick={() => setMobileOpen((value) => !value)}
-          className="p-1.5 rounded-lg hover:bg-[hsl(var(--shell))] transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
           aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -290,21 +378,23 @@ export default function AppLayout() {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              {mobileOpen ? <X className="w-5 h-5" strokeWidth={2} /> : <Menu className="w-5 h-5" strokeWidth={2} />}
+              {mobileOpen ? <X className="h-5 w-5" strokeWidth={2} /> : <Menu className="h-5 w-5" strokeWidth={2} />}
             </motion.div>
           </AnimatePresence>
         </button>
 
-        <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-          <AtlasCoreLogoSVG width={24} height={24} />
-          <span className="text-[16px] font-semibold tracking-tight text-[#1D1D1D]">Atlas Core</span>
+        <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+          <AtlasCoreLogoSVG width={22} height={22} />
+          <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            Atlas Core
+          </span>
         </div>
 
-        <div className="w-8" />
+        <div className="w-9" />
       </header>
 
       <AnimatePresence>
-        {mobileOpen && (
+        {mobileOpen ? (
           <>
             <motion.div
               key="backdrop"
@@ -313,7 +403,7 @@ export default function AppLayout() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setMobileOpen(false)}
-              className="lg:hidden fixed inset-0 z-[65] bg-black/50"
+              className="fixed inset-0 z-[65] bg-[rgba(10,14,22,0.28)] backdrop-blur-[2px] lg:hidden"
             />
             <motion.div
               key="drawer"
@@ -321,19 +411,24 @@ export default function AppLayout() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:hidden fixed top-0 left-0 bottom-0 z-[70] w-72 bg-white border-r border-[#D5D5D7] flex flex-col shadow-xl"
+              className="glass fixed bottom-0 left-0 top-0 z-[70] flex w-[18rem] flex-col border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.88)] lg:hidden"
             >
-              <div className="flex items-center justify-between h-12 px-4 border-b border-[#D5D5D7] shrink-0">
+              <div className="flex h-14 shrink-0 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4">
                 <div className="flex items-center gap-2">
-                  <AtlasCoreLogoSVG width={24} height={24} />
-                  <span className="text-[16px] font-semibold tracking-tight text-[#1D1D1D]">Atlas Core</span>
+                  <AtlasCoreLogoSVG width={22} height={22} />
+                  <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                    Atlas Core
+                  </span>
                 </div>
-                <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-[#F5F5F7] transition-colors">
-                  <X className="w-4 h-4 text-[#1D1D1D]" strokeWidth={2} />
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
+                >
+                  <X className="h-4 w-4" strokeWidth={2} />
                 </button>
               </div>
 
-              <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
+              <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
                 {nav.map(({ path, label, icon }) => {
                   const Icon = ICON_MAP[icon] || Home;
                   const active = isActive(path);
@@ -342,48 +437,46 @@ export default function AppLayout() {
                     <Link
                       key={path}
                       to={path}
-                      className={`flex items-center gap-3 px-3 h-11 rounded-[10px] text-[14px] font-medium transition-colors ${active ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'text-[#86868B] hover:text-[#1D1D1D] hover:bg-[#F5F5F7]'}`}
+                      className={getMobileNavItemClass(active)}
                     >
-                      <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={active ? 2.5 : 2} />
-                      {label}
+                      <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.9} />
+                      <span className="truncate">{label}</span>
                     </Link>
                   );
                 })}
 
-                {role === 'admin' && (
-                  <Link
-                    to={ROUTES.admin}
-                    className={`flex items-center gap-3 px-3 h-11 rounded-[10px] text-[14px] font-medium transition-colors ${isActive(ROUTES.admin) ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'text-[#86868B] hover:text-[#1D1D1D] hover:bg-[#F5F5F7]'}`}
-                  >
-                    <ShieldCheck className="w-[18px] h-[18px] shrink-0" strokeWidth={2} />
-                    Admin Panel
+                {role === 'admin' ? (
+                  <Link to={ROUTES.admin} className={getMobileNavItemClass(isActive(ROUTES.admin))}>
+                    <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+                    <span className="truncate">Admin Panel</span>
                   </Link>
-                )}
+                ) : null}
               </nav>
 
-              <div className="px-2 py-3 border-t border-[#D5D5D7] space-y-1 shrink-0">
-                <div className="px-3 py-2">
-                  <p className="text-[13px] font-medium truncate text-[#1D1D1D]">{user?.full_name || user?.email}</p>
-                  <p className="text-[11px] text-[#86868B] truncate">{user?.email}</p>
-                  <span className="text-[11px] text-[#86868B] inline-block mt-1">{ROLE_LABELS[role] || role}</span>
+              <div className="border-t border-[hsl(var(--border)/0.72)] px-3 py-4">
+                <div className="mx-1 mb-3 rounded-[22px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] px-4 py-3 shadow-[var(--shadow-xs)]">
+                  <p className="truncate text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                    {user?.full_name || user?.email}
+                  </p>
+                  <p className="mt-1 truncate text-[11px] font-medium text-[hsl(var(--fg-2))]">
+                    {user?.email}
+                  </p>
+                  <span className="mt-1 inline-block text-[11px] font-medium text-[hsl(var(--fg-2))]">
+                    {ROLE_LABELS[role] || role}
+                  </span>
                 </div>
-                <button
-                  onClick={() => logout()}
-                  className="flex items-center gap-3 px-3 h-11 rounded-[10px] text-[14px] font-medium text-[#86868B] hover:text-[#DC2626] hover:bg-[#DC2626]/10 w-full transition-colors"
-                >
-                  <LogOut className="w-[18px] h-[18px] shrink-0" strokeWidth={2} /> Sair
+                <button onClick={() => logout()} className={getMobileNavItemClass(false, true)}>
+                  <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
+                  <span>Sair</span>
                 </button>
               </div>
             </motion.div>
           </>
-        )}
+        ) : null}
       </AnimatePresence>
 
-      <nav
-        className="lg:hidden fixed bottom-0 inset-x-0 z-[60] bg-white border-t border-[#D5D5D7]"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        <div className="flex items-center justify-around h-[60px] px-1">
+      <nav className="glass fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.72)] lg:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-center gap-2 px-3 py-3">
           {bottomNav.map(({ path, label, icon }) => {
             const Icon = ICON_MAP[icon] || Home;
             const active = currentTabRoot === path;
@@ -393,25 +486,28 @@ export default function AppLayout() {
                 key={path}
                 to={getBottomTabTarget(path)}
                 onClick={(event) => handleBottomTabPress(event, path)}
-                className={`flex flex-col items-center gap-[4px] px-2 py-1.5 rounded-lg transition-colors min-w-0 flex-1 ${active ? 'text-[#3B82F6]' : 'text-[#86868B]'}`}
+                className={getBottomNavItemClass(active)}
               >
-                <Icon className="w-5 h-5 shrink-0" strokeWidth={active ? 2.5 : 2} />
-                <span className="text-[10px] font-medium tracking-tight leading-none truncate max-w-[52px] text-center">{label}</span>
+                <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.25 : 1.9} />
+                <span className="max-w-[56px] truncate text-center text-[10px] font-semibold tracking-[-0.01em] leading-none">
+                  {label}
+                </span>
               </Link>
             );
           })}
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="flex flex-col items-center gap-[4px] px-2 py-1.5 rounded-lg transition-colors text-[#86868B] flex-1"
-          >
-            <Menu className="w-5 h-5 shrink-0" strokeWidth={2} />
-            <span className="text-[10px] font-medium tracking-tight leading-none">Menu</span>
+          <button onClick={() => setMobileOpen(true)} className={getBottomNavItemClass(false)}>
+            <Menu className="h-5 w-5 shrink-0" strokeWidth={1.9} />
+            <span className="text-[10px] font-semibold tracking-[-0.01em] leading-none">Menu</span>
           </button>
         </div>
       </nav>
 
       <main
-        className={`flex-1 min-h-screen transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-56'} pt-12 lg:pt-0 pb-[calc(76px+env(safe-area-inset-bottom))] lg:pb-0 overflow-x-hidden`}
+        className={cn(
+          'flex-1 min-h-screen overflow-x-hidden transition-all duration-300',
+          collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-72',
+          'pt-14 lg:pt-0 pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
+        )}
         onTouchStart={handlePullStart}
         onTouchMove={handlePullMove}
         onTouchEnd={finishPull}
@@ -420,22 +516,22 @@ export default function AppLayout() {
         <TrialBanner />
 
         <motion.div
-          className="lg:hidden fixed left-1/2 z-50 -translate-x-1/2 pointer-events-none"
-          style={{ top: 'calc(48px + env(safe-area-inset-top) + 8px)' }}
+          className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2 lg:hidden"
+          style={{ top: 'calc(56px + env(safe-area-inset-top) + 10px)' }}
           animate={{
             y: isRefreshing || pullDistance > 0 ? 0 : -18,
             opacity: isRefreshing || pullDistance > 0 ? 1 : 0,
           }}
           transition={{ duration: 0.16, ease: 'easeOut' }}
         >
-          <div className="flex items-center gap-2 rounded-full border border-[#D5D5D7] bg-white/95 px-3 py-1.5 shadow-sm">
+          <div className="atlas-card flex items-center gap-2 rounded-full px-3 py-1.5">
             <motion.div
               animate={isRefreshing ? { rotate: 360 } : { rotate: pullDistance >= PULL_REFRESH_THRESHOLD ? 180 : 0 }}
               transition={isRefreshing ? { repeat: Infinity, duration: 0.8, ease: 'linear' } : { duration: 0.18 }}
             >
-              <Loader2 className={`w-3.5 h-3.5 text-[#3B82F6] ${isRefreshing ? 'animate-spin' : ''}`} />
+              <Loader2 className={cn('h-3.5 w-3.5 text-[hsl(var(--brand))]', isRefreshing ? 'animate-spin' : '')} />
             </motion.div>
-            <span className="text-[11px] font-medium text-[#1D1D1D]">
+            <span className="text-[11px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
               {isRefreshing ? 'Atualizando' : 'Puxe para atualizar'}
             </span>
           </div>
@@ -443,7 +539,10 @@ export default function AppLayout() {
 
         <div
           className="lg:min-h-screen"
-          style={{ transform: `translateY(${pullDistance}px)`, minHeight: 'calc(100vh - 48px - 76px - env(safe-area-inset-bottom))' }}
+          style={{
+            transform: `translateY(${pullDistance}px)`,
+            minHeight: 'calc(100vh - 56px - 90px - env(safe-area-inset-bottom))',
+          }}
         >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
