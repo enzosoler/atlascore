@@ -17,6 +17,13 @@ import {
 import { useAuth } from '@/lib/AuthContext';
 import { ROUTES } from '@/lib/routes';
 import {
+  ActionRow,
+  AppContainer,
+  Card,
+  PageHeader,
+  Section,
+} from '@/components/shared/AppContainer';
+import {
   ErrorState,
   LoadingState,
   SafePageBoundary,
@@ -60,7 +67,7 @@ const PROFILE_FORM_SECTIONS = [
     eyebrow: 'Baseline',
     title: 'Personal baseline',
     description: 'Dados pessoais essenciais para dar contexto ao resto da experiencia.',
-    gridClassName: 'md:grid-cols-3',
+    gridClassName: 'sm:grid-cols-2',
     fields: [
       {
         key: 'phone',
@@ -93,7 +100,7 @@ const PROFILE_FORM_SECTIONS = [
     eyebrow: 'Body',
     title: 'Current body metrics',
     description: 'Ajuste direcao e referencia corporal de forma objetiva.',
-    gridClassName: 'md:grid-cols-2',
+    gridClassName: 'sm:grid-cols-2',
     fields: [
       {
         key: 'current_weight',
@@ -119,7 +126,7 @@ const PROFILE_FORM_SECTIONS = [
     eyebrow: 'Targets',
     title: 'Daily performance targets',
     description: 'Targets que deixam nutricao, treino e recuperacao mais coerentes.',
-    gridClassName: 'md:grid-cols-2 xl:grid-cols-3',
+    gridClassName: 'sm:grid-cols-2',
     fields: [
       {
         key: 'calories_target',

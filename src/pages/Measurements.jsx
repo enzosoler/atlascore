@@ -463,7 +463,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
     <article className="atlas-card relative overflow-hidden px-5 py-5 lg:px-6 lg:py-6">
       <div className="pointer-events-none absolute inset-y-0 left-0 w-[4px] bg-[linear-gradient(180deg,rgba(15,118,110,0.28),rgba(37,99,235,0.18))]" />
 
-      <div className="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_260px]">
+      <div className="flex flex-col gap-6">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
@@ -895,142 +895,132 @@ function MeasurementsContent() {
   };
 
   return (
-    <div className="atlas-page-shell">
-      <div className="mx-auto max-w-6xl space-y-8 px-5 py-6 lg:px-8 lg:py-10">
-        <section className="atlas-page-header relative overflow-hidden px-6 py-6 lg:px-8 lg:py-8">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(14,165,233,0.12),rgba(14,165,233,0.03),transparent)]" />
-          <div className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(15,118,110,0.18),transparent_68%)]" />
+    <AppContainer>
+      <PageHeader
+        eyebrow="Measurements"
+        title="Body tracking com calma, hierarquia e leitura real."
+        subtitle="Um espaco dedicado para checkpoints corporais: peso, composicao e circunferencias em uma leitura premium, limpa e ritmada."
+        accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"
+        actions={
+          <ActionRow>
+            <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
+              <Plus className="h-4 w-4" strokeWidth={1.9} />
+              Registrar medidas
+            </PrimaryButton>
 
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.12fr)_350px] lg:gap-10">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="atlas-overline">Measurements</span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    Body composition module
-                  </span>
-                </div>
+            {latestMeasurement ? (
+              <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
+                Ultimo checkpoint em{' '}
+                <span className="text-[hsl(var(--fg))]">
+                  {formatMeasurementDate(latestMeasurement.date, {
+                    day: '2-digit',
+                    month: 'long',
+                  })}
+                </span>
+              </span>
+            ) : null}
+          </ActionRow>
+        }
+      >
+        <div className="grid gap-3">
+          <HeroStat
+            label="Peso atual"
+            value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.weight)} kg` : '--'}
+            detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight)}
+            icon={Scale}
+            metric={METRIC_LOOKUP.weight}
+          />
+          <HeroStat
+            label="Body fat"
+            value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.body_fat)} %` : '--'}
+            detail={getDeltaLabel(metricSnapshots.body_fat?.delta, METRIC_LOOKUP.body_fat)}
+            icon={Activity}
+            metric={METRIC_LOOKUP.body_fat}
+          />
+          <HeroStat
+            label="Cintura"
+            value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.waist)} cm` : '--'}
+            detail={getDeltaLabel(metricSnapshots.waist?.delta, METRIC_LOOKUP.waist)}
+            icon={Ruler}
+            metric={METRIC_LOOKUP.waist}
+          />
+          <HeroStat
+            label="Cadencia"
+            value={averageCadenceDays ? `${averageCadenceDays} dias` : '--'}
+            detail={`${sortedMeasurements.length || 0} checkpoints no historico.`}
+            icon={CalendarClock}
+            metric={METRIC_LOOKUP.chest}
+          />
+        </div>
+      </PageHeader>
 
-                <div className="max-w-3xl space-y-4">
-                  <h1 className="atlas-display-title">
-                    Body tracking com calma, hierarquia e leitura real.
-                  </h1>
-                  <p className="max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
-                    Um espaco dedicado para checkpoints corporais: peso, composicao e circunferencias em uma leitura premium, limpa e ritmada.
-                  </p>
-                </div>
-              </div>
+        {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
-              <div className="flex flex-wrap items-center gap-3">
-                <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
-                  <Plus className="h-4 w-4" strokeWidth={1.9} />
-                  Registrar medidas
-                </PrimaryButton>
-
-                {latestMeasurement ? (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
-                    Ultimo checkpoint em{' '}
-                    <span className="text-[hsl(var(--fg))]">
+        <Section
+          title="Latest checkpoint"
+          subtitle="Resumo imediato do registro mais recente, antes de abrir a tendencia ou o historico."
+        >
+          <Card className="px-5 py-5">
+            {latestMeasurement ? (
+              <>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="atlas-overline">Latest checkpoint</p>
+                    <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
                       {formatMeasurementDate(latestMeasurement.date, {
                         day: '2-digit',
                         month: 'long',
+                        year: 'numeric',
                       })}
-                    </span>
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <HeroStat
-                  label="Peso atual"
-                  value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.weight)} kg` : '--'}
-                  detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight)}
-                  icon={Scale}
-                  metric={METRIC_LOOKUP.weight}
-                />
-                <HeroStat
-                  label="Body fat"
-                  value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.body_fat)} %` : '--'}
-                  detail={getDeltaLabel(metricSnapshots.body_fat?.delta, METRIC_LOOKUP.body_fat)}
-                  icon={Activity}
-                  metric={METRIC_LOOKUP.body_fat}
-                />
-                <HeroStat
-                  label="Cintura"
-                  value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.waist)} cm` : '--'}
-                  detail={getDeltaLabel(metricSnapshots.waist?.delta, METRIC_LOOKUP.waist)}
-                  icon={Ruler}
-                  metric={METRIC_LOOKUP.waist}
-                />
-                <HeroStat
-                  label="Cadencia"
-                  value={averageCadenceDays ? `${averageCadenceDays} dias` : '--'}
-                  detail={`${sortedMeasurements.length || 0} checkpoints no historico.`}
-                  icon={CalendarClock}
-                  metric={METRIC_LOOKUP.chest}
-                />
-              </div>
-            </div>
-
-            <aside className="rounded-[30px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.58)] p-5 shadow-[var(--shadow-xs)] lg:p-6">
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div>
-                  <p className="atlas-overline">Latest checkpoint</p>
-                  <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                    {latestMeasurement
-                      ? formatMeasurementDate(latestMeasurement.date, {
-                          day: '2-digit',
-                          month: 'long',
-                          year: 'numeric',
-                        })
-                      : 'Nenhum registro'}
-                  </p>
-                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                    {latestMeasurement
-                      ? 'Resumo imediato do checkpoint mais recente, sem ruído de outros modulos.'
-                      : 'Registre o primeiro checkpoint para ativar essa leitura.'}
-                  </p>
-                </div>
-
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[rgba(14,165,233,0.18)] bg-[rgba(14,165,233,0.12)] text-[#0891b2]">
-                  <BarChart3 className="h-4 w-4" strokeWidth={1.9} />
-                </div>
-              </div>
-
-              {latestMeasurement ? (
-                <>
-                  <div className="space-y-3">
-                    <SnapshotRow label="Peso" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
-                    <SnapshotRow label="Body fat" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
-                    <SnapshotRow label="Cintura" value={toDisplayNumber(latestMeasurement.waist)} unit="cm" />
-                    <SnapshotRow label="Peito" value={toDisplayNumber(latestMeasurement.chest)} unit="cm" />
-                    <SnapshotRow label="Braco" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
-                    <SnapshotRow label="Coxa" value={toDisplayNumber(latestMeasurement.thighs)} unit="cm" />
-                  </div>
-
-                  <div className="mt-5 rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.8)] px-4 py-4">
-                    <p className="atlas-metric-label">Contexto</p>
-                    <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-                      {latestMeasurement.notes || 'Sem observacoes adicionais neste checkpoint.'}
+                    </p>
+                    <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                      Resumo imediato do checkpoint mais recente, sem ruído de outros modulos.
                     </p>
                   </div>
-                </>
-              ) : null}
-            </aside>
-          </div>
-        </section>
 
-        {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[rgba(14,165,233,0.18)] bg-[rgba(14,165,233,0.12)] text-[#0891b2]">
+                    <BarChart3 className="h-4 w-4" strokeWidth={1.9} />
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  <SnapshotRow label="Peso" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
+                  <SnapshotRow label="Body fat" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
+                  <SnapshotRow label="Cintura" value={toDisplayNumber(latestMeasurement.waist)} unit="cm" />
+                  <SnapshotRow label="Peito" value={toDisplayNumber(latestMeasurement.chest)} unit="cm" />
+                  <SnapshotRow label="Braco" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
+                  <SnapshotRow label="Coxa" value={toDisplayNumber(latestMeasurement.thighs)} unit="cm" />
+                </div>
+
+                <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
+                  <p className="atlas-metric-label">Contexto</p>
+                  <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
+                    {latestMeasurement.notes || 'Sem observacoes adicionais neste checkpoint.'}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                title="Nenhum registro ainda"
+                description="Registre o primeiro checkpoint para ativar a leitura mais recente."
+                action={
+                  <PrimaryButton type="button" onClick={handleCreate}>
+                    Registrar medidas
+                  </PrimaryButton>
+                }
+              />
+            )}
+          </Card>
+        </Section>
 
         <SectionCard
           title="Trend view"
           subtitle="Selecione a metrica principal e leia a curva com contexto suficiente para tomar decisao sem excesso visual."
         >
           {sortedMeasurements.length ? (
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="grid gap-6">
               <div className="space-y-6">
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {METRIC_OPTIONS.map((metric) => (
                     <MetricSelectorCard
                       key={metric.key}
@@ -1264,7 +1254,7 @@ function MeasurementsContent() {
             if (!open) setEditingMeasurement(null);
           }}
         >
-          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[900px]">
+          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
             <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(14,165,233,0.12),transparent)]" />
               <div className="relative">
@@ -1289,7 +1279,6 @@ function MeasurementsContent() {
             />
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+    </AppContainer>
   );
 }

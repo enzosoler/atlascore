@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Globe } from 'lucide-react';
-import { getRegionPricing, setRegionPricing, detectRegion } from '@/lib/regionalPricing';
+import { setRegionPricing, detectRegion } from '@/lib/regionalPricing';
 
 /**
  * RegionSelector — permite usuário escolher Brasil ou US para preços
@@ -27,15 +27,13 @@ export default function RegionSelector({ onRegionChange }) {
 
   if (loading) return null;
 
-  const cfg = getRegionPricing(region);
-
   return (
-    <div className="flex items-center gap-2 bg-[hsl(var(--shell))] rounded-lg px-3 py-2">
-      <Globe className="w-4 h-4 text-[hsl(var(--fg-2))]" strokeWidth={2} />
+    <div className="atlas-public-panel-muted flex items-center gap-2 px-3 py-2.5">
+      <Globe className="h-4 w-4 text-[hsl(var(--fg-2))]" strokeWidth={1.9} />
       <select
         value={region}
         onChange={(e) => handleChange(e.target.value)}
-        className="text-[13px] font-medium bg-transparent border-none outline-none text-[hsl(var(--fg))] cursor-pointer"
+        className="w-full cursor-pointer bg-transparent text-[13px] font-medium text-[hsl(var(--fg))] outline-none"
       >
         <option value="BR">Brasil (R$)</option>
         <option value="US">USA ($)</option>
