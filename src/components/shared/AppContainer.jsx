@@ -2,13 +2,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-const CARD_CLASS_NAME =
-  'rounded-[20px] border border-[#E5E7EB] bg-white shadow-[0_4px_20px_rgba(15,23,42,0.05)]';
+const CARD_CLASS_NAME = 'atlas-card';
 
 export function AppContainer({ children, className = '' }) {
   return (
-    <div className="min-h-full bg-[#F5F5F7] text-[#111827]" style={{ colorScheme: 'light' }}>
-      <div className={cn('mx-auto flex w-full max-w-[30rem] flex-col gap-5 px-4 pb-8 pt-[max(env(safe-area-inset-top),20px)] sm:px-5 sm:pb-10', className)}>
+    <div
+      className="min-h-full bg-[hsl(var(--bg))] text-[hsl(var(--fg))]"
+      style={{ colorScheme: 'light' }}
+    >
+      <div
+        className={cn(
+          'mx-auto flex w-full max-w-[30rem] flex-col gap-6 px-4 pb-10 pt-[max(env(safe-area-inset-top),20px)] sm:px-5 sm:pb-12',
+          className
+        )}
+      >
         {children}
       </div>
     </div>
@@ -21,7 +28,7 @@ export function Card({ as: Comp = 'div', interactive = false, className = '', ch
       className={cn(
         CARD_CLASS_NAME,
         interactive &&
-          'transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--card))] hover:shadow-[var(--shadow-md)]',
+          'transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--separator-strong))] hover:bg-[hsl(var(--card))] hover:shadow-[var(--shadow-md)]',
         className
       )}
       {...props}
@@ -41,24 +48,25 @@ export function PageHeader({
   accentClassName = 'from-[#EFF6FF]',
 }) {
   return (
-    <Card className={cn('relative overflow-hidden px-5 py-5', className)}>
-      <div className={cn('pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b to-transparent', accentClassName)} />
+    <Card className={cn('atlas-page-header relative overflow-hidden px-5 py-6 sm:px-6', className)}>
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent',
+          accentClassName
+        )}
+      />
 
-      <div className="relative space-y-5">
-        <div className="space-y-3">
-          {eyebrow ? (
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-              {eyebrow}
-            </p>
-          ) : null}
+      <div className="relative space-y-6">
+        <div className="space-y-4">
+          {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
           <div className="space-y-3">
-            <h1 className="text-[34px] font-bold tracking-[-0.07em] text-[#111827]">{title}</h1>
-            {subtitle ? <p className="text-[15px] leading-6 text-[#6B7280]">{subtitle}</p> : null}
+            <h1 className="atlas-display-title text-[clamp(2rem,1.65rem+1vw,2.8rem)]">{title}</h1>
+            {subtitle ? <p className="atlas-copy max-w-3xl">{subtitle}</p> : null}
           </div>
         </div>
 
         {actions ? <ActionRow>{actions}</ActionRow> : null}
-        {children ? <div className="space-y-3">{children}</div> : null}
+        {children ? <div className="space-y-4">{children}</div> : null}
       </div>
     </Card>
   );
@@ -75,19 +83,20 @@ export function Section({
   contentClassName = '',
 }) {
   return (
-    <section className={cn('space-y-3', className)}>
+    <section className={cn('space-y-4', className)}>
       {eyebrow || title || subtitle || actions ? (
-        <div className={cn('flex items-end justify-between gap-3', headerClassName)}>
-          <div className="min-w-0 space-y-2">
-            {eyebrow ? (
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-                {eyebrow}
-              </p>
-            ) : null}
-            {title ? <h2 className="text-[20px] font-semibold tracking-[-0.04em] text-[#111827]">{title}</h2> : null}
-            {subtitle ? <p className="text-[14px] leading-6 text-[#6B7280]">{subtitle}</p> : null}
+        <div
+          className={cn(
+            'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
+            headerClassName
+          )}
+        >
+          <div className="min-w-0 max-w-3xl space-y-2">
+            {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
+            {title ? <h2 className="atlas-section-title text-[1.25rem]">{title}</h2> : null}
+            {subtitle ? <p className="atlas-copy">{subtitle}</p> : null}
           </div>
-          {actions ? <div className="shrink-0">{actions}</div> : null}
+          {actions ? <div className="shrink-0 self-start sm:self-auto">{actions}</div> : null}
         </div>
       ) : null}
 
@@ -98,20 +107,18 @@ export function Section({
 
 export function StatCard({ label, value, detail, icon: Icon, className = '' }) {
   return (
-    <Card className={cn('px-4 py-4', className)}>
+    <Card className={cn('px-4 py-4 sm:px-5', className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B7280]">
-            {label}
-          </p>
-          <p className="mt-3 break-words text-[17px] font-semibold tracking-[-0.03em] text-[#111827]">
+          <p className="atlas-metric-label">{label}</p>
+          <p className="mt-3 break-words text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
             {value}
           </p>
-          {detail ? <p className="mt-2 text-[14px] leading-6 text-[#6B7280]">{detail}</p> : null}
+          {detail ? <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p> : null}
         </div>
 
         {Icon ? (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-[#E5E7EB] bg-[#F9FAFB] text-[#6B7280]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
             <Icon className="h-4 w-4" strokeWidth={1.9} />
           </div>
         ) : null}
@@ -121,14 +128,18 @@ export function StatCard({ label, value, detail, icon: Icon, className = '' }) {
 }
 
 export function ActionRow({ children, className = '' }) {
-  return <div className={cn('flex flex-col gap-3 sm:flex-row sm:flex-wrap', className)}>{children}</div>;
+  return (
+    <div className={cn('flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center', className)}>
+      {children}
+    </div>
+  );
 }
 
 export function TabBar({ items, className = '' }) {
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[60] border-t border-[#E5E7EB] bg-[rgba(255,255,255,0.94)] backdrop-blur-xl lg:hidden',
+        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.88)] bg-[rgba(255,255,255,0.94)] backdrop-blur-xl lg:hidden',
         className
       )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -140,8 +151,8 @@ export function TabBar({ items, className = '' }) {
           const classes = cn(
             'flex flex-1 min-w-0 flex-col items-center gap-1 rounded-[20px] px-2 py-2 text-center text-[10px] font-semibold tracking-[-0.01em] leading-none transition-all duration-200',
             item.active
-              ? 'border border-[#E5E7EB] bg-white text-[#111827] shadow-[0_4px_20px_rgba(15,23,42,0.05)]'
-              : 'text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#111827]'
+              ? 'border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
+              : 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.92)] hover:text-[hsl(var(--fg))]'
           );
 
           if (item.to) {

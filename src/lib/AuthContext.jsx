@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
+import { fetchProfileRole, normalizeAtlasRole } from '@/hooks/useRole';
 
 const AuthContext = createContext(null);
 
@@ -40,6 +41,14 @@ function normalizeSupabaseUser(authUser) {
   const appMetadata = authUser.app_metadata ?? {};
   const email = authUser.email || firstNonEmptyString(userMetadata.email, appMetadata.email) || '';
   const fallbackName = email ? email.split('@')[0] : 'Athlete';
+  const metadataAtlasRole = normalizeAtlasRole(
+    firstNonEmptyString(
+      userMetadata.atlas_role,
+      appMetadata.atlas_role,
+      userMetadata.role
+    ),
+    'athlete'
+  );
 
   return {
     id: authUser.id,
@@ -51,12 +60,8 @@ function normalizeSupabaseUser(authUser) {
         userMetadata.display_name,
         appMetadata.full_name
       ) || fallbackName,
-    atlas_role:
-      firstNonEmptyString(
-        userMetadata.atlas_role,
-        appMetadata.atlas_role,
-        userMetadata.role
-      ) || 'athlete',
+    atlas_role: metadataAtlasRole,
+    profile_role: null,
     onboarding_completed: normalizeBoolean(userMetadata.onboarding_completed),
     role: firstNonEmptyString(appMetadata.role, userMetadata.role) || 'user',
     phone: authUser.phone || firstNonEmptyString(userMetadata.phone) || null,
@@ -103,15 +108,29 @@ export const AuthProvider = ({ children }) => {
     window.sessionStorage.clear();
   }, []);
 
-  const applyAuthenticatedUser = useCallback((authUser) => {
+  const applyAuthenticatedUser = useCallback(async (authUser) => {
     const normalizedUser = normalizeSupabaseUser(authUser);
+    if (!normalizedUser) {
+      return null;
+    }
+
+    const profileRole = await fetchProfileRole(authUser?.id, normalizedUser?.atlas_role || 'athlete');
+    const resolvedUser = {
+      ...normalizedUser,
+      atlas_role: profileRole,
+      profile_role: profileRole,
+    };
+
+    if (!mountedRef.current) {
+      return resolvedUser;
+    }
 
     hadAuthenticatedSessionRef.current = true;
-    setUser(normalizedUser);
+    setUser(resolvedUser);
     setAuthState(AUTH_STATES.AUTHENTICATED);
     setAuthError(null);
 
-    return normalizedUser;
+    return resolvedUser;
   }, []);
 
   const applyUnauthenticatedState = useCallback(
@@ -159,7 +178,7 @@ export const AuthProvider = ({ children }) => {
 
       const sessionUser = data?.session?.user;
       if (sessionUser) {
-        return applyAuthenticatedUser(sessionUser);
+        return await applyAuthenticatedUser(sessionUser);
       }
 
       applyUnauthenticatedState();
@@ -177,7 +196,7 @@ export const AuthProvider = ({ children }) => {
 
       const sessionUser = data?.session?.user;
       if (sessionUser) {
-        return applyAuthenticatedUser(sessionUser);
+        return await applyAuthenticatedUser(sessionUser);
       }
 
       applyUnauthenticatedState({
@@ -212,7 +231,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (session?.user) {
-        applyAuthenticatedUser(session.user);
+        void applyAuthenticatedUser(session.user);
       }
     });
 
@@ -243,7 +262,7 @@ export const AuthProvider = ({ children }) => {
 
     if (error) throw error;
 
-    return applyAuthenticatedUser(data.user ?? data.session?.user);
+    return await applyAuthenticatedUser(data.user ?? data.session?.user);
   }, [applyAuthenticatedUser]);
 
   const signUp = useCallback(async ({ email, password, fullName }) => {
@@ -266,7 +285,7 @@ export const AuthProvider = ({ children }) => {
 
     if (data.session?.user) {
       return {
-        user: applyAuthenticatedUser(data.session.user),
+        user: await applyAuthenticatedUser(data.session.user),
         needsEmailConfirmation: false,
       };
     }

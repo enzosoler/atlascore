@@ -1,6 +1,7 @@
 import React from 'react';
 import { Brain, Dumbbell, Sparkles, User, UtensilsCrossed } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useRole } from '@/hooks/useRole';
 import { ROUTES } from '@/lib/routes';
 import { getGreeting } from '@/lib/atlas-theme';
 import { SafePageBoundary } from '@/components/shared/StablePage';
@@ -110,9 +111,11 @@ export default function Today() {
 
 function TodayContent() {
   const { user } = useAuth();
+  const { role, loading: isRoleLoading } = useRole(user);
   const displayName = user?.full_name || user?.email || 'Athlete';
   const preferredName = getPreferredName(displayName);
   const greeting = getGreeting();
+  const isAdmin = !isRoleLoading && role === 'admin';
   const adherenceAverage = Math.round(
     ADHERENCE_SIGNALS.reduce((total, item) => total + item.value, 0) / ADHERENCE_SIGNALS.length
   );
@@ -137,9 +140,16 @@ function TodayContent() {
         <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[#BAE6FD]/35 blur-2xl" />
 
         <div className="relative">
-          <span className="inline-flex rounded-full bg-white/16 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white/92">
-            Local preview
-          </span>
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex rounded-full bg-white/16 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white/92">
+              Local preview
+            </span>
+            {isAdmin && (
+              <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-white">
+                Admin mode enabled
+              </span>
+            )}
+          </div>
 
           <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-white">
             {greeting}, {preferredName}

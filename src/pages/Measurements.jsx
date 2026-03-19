@@ -31,6 +31,7 @@ import {
   Section,
 } from '@/components/shared/AppContainer';
 import {
+  DialogPanelHeader,
   EmptyState,
   PrimaryButton,
   SafePageBoundary,
@@ -39,13 +40,7 @@ import {
   StatusBanner,
   shiftDate,
 } from '@/components/shared/StablePage';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { getToday } from '@/lib/atlas-theme';
 import { cn } from '@/lib/utils';
 
@@ -953,6 +948,10 @@ function MeasurementsContent() {
         </div>
       </PageHeader>
 
+        <StatusBanner tone="neutral">
+          Checkpoints, grafico e historico desta rota seguem organizados como uma leitura corporal unica, sem depender de outros modulos.
+        </StatusBanner>
+
         {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
         <Section
@@ -1254,18 +1253,12 @@ function MeasurementsContent() {
           }}
         >
           <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
-            <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(14,165,233,0.12),transparent)]" />
-              <div className="relative">
-                <p className="atlas-overline">Measurements checkpoint</p>
-                <DialogTitle className="mt-3">
-                  {editingMeasurement ? 'Editar checkpoint corporal' : 'Registrar checkpoint corporal'}
-                </DialogTitle>
-                <DialogDescription className="mt-3 max-w-2xl">
-                  Este modal mantem a logica atual da pagina, mas organiza a entrada com mais clareza para peso, composicao e circunferencias.
-                </DialogDescription>
-              </div>
-            </DialogHeader>
+            <DialogPanelHeader
+              eyebrow="Measurements checkpoint"
+              title={editingMeasurement ? 'Editar checkpoint corporal' : 'Registrar checkpoint corporal'}
+              description="Este modal mantem a logica atual da pagina, mas organiza a entrada com mais clareza para peso, composicao e circunferencias."
+              accentClassName="from-[rgba(14,165,233,0.12)]"
+            />
 
             <MeasurementForm
               key={editingMeasurement?.id || 'new-measurement'}

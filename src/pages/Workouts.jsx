@@ -10,7 +10,9 @@ import {
 } from 'lucide-react';
 import {
   DateStepper,
+  DialogPanelHeader,
   EmptyState,
+  FilterChip,
   PrimaryButton,
   SafePageBoundary,
   SecondaryButton,
@@ -25,13 +27,7 @@ import {
   PageHeader,
   Section,
 } from '@/components/shared/AppContainer';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { WORKOUT_TYPES, getToday } from '@/lib/atlas-theme';
 import { cn } from '@/lib/utils';
 
@@ -828,7 +824,7 @@ function WorkoutsContent() {
   };
 
   const handleDelete = (workout) => {
-    const confirmed = window.confirm(`Delete ${workout.name}?`);
+    const confirmed = window.confirm(`Excluir ${workout.name}?`);
 
     if (!confirmed) return;
 
@@ -910,8 +906,8 @@ function WorkoutsContent() {
         </div>
       </PageHeader>
 
-      <StatusBanner tone="warning">
-        Workouts agora usa somente estado local desta pagina. Nenhuma logica de Protocols continua ligada a esta rota.
+      <StatusBanner tone="neutral">
+        Esta rota agora concentra plano, execucao e comparacao em uma camada visual unica, sem depender de Protocols.
       </StatusBanner>
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
@@ -976,19 +972,13 @@ function WorkoutsContent() {
             workoutsForDate.length > 1 ? (
               <div className="flex flex-wrap gap-2">
                 {workoutsForDate.map((workout) => (
-                  <button
+                  <FilterChip
                     key={workout.id}
-                    type="button"
                     onClick={() => setComparisonWorkoutId(workout.id)}
-                    className={cn(
-                      'atlas-button h-9 rounded-full px-4 text-[12px]',
-                      comparisonWorkout?.id === workout.id
-                        ? 'atlas-button-primary'
-                        : 'atlas-button-secondary shadow-none'
-                    )}
+                    active={comparisonWorkout?.id === workout.id}
                   >
                     {workout.name}
-                  </button>
+                  </FilterChip>
                 ))}
               </div>
             ) : null
@@ -1042,19 +1032,13 @@ function WorkoutsContent() {
           actions={
             <div className="flex flex-wrap gap-2">
               {WORKOUT_FILTERS.map((option) => (
-                <button
+                <FilterChip
                   key={option}
-                  type="button"
                   onClick={() => setStatusFilter(option)}
-                  className={cn(
-                    'atlas-button h-9 rounded-full px-4 text-[12px]',
-                    statusFilter === option
-                      ? 'atlas-button-primary'
-                      : 'atlas-button-secondary shadow-none'
-                  )}
+                  active={statusFilter === option}
                 >
                   {option[0].toUpperCase() + option.slice(1)}
-                </button>
+                </FilterChip>
               ))}
             </div>
           }
@@ -1105,18 +1089,12 @@ function WorkoutsContent() {
           }}
         >
           <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
-            <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand)/0.1)] to-transparent" />
-              <div className="relative">
-                <p className="atlas-overline">Workout session</p>
-                <DialogTitle className="mt-3">
-                  {editingWorkout ? 'Editar treino' : 'Novo treino'}
-                </DialogTitle>
-                <DialogDescription className="mt-3 max-w-2xl">
-                  Este modal pertence apenas a Workouts e manipula somente dados de treino do estado local desta rota.
-                </DialogDescription>
-              </div>
-            </DialogHeader>
+            <DialogPanelHeader
+              eyebrow="Workout session"
+              title={editingWorkout ? 'Editar treino' : 'Novo treino'}
+              description="Este modal pertence apenas a Workouts e manipula somente dados de treino do estado local desta rota."
+              accentClassName="from-[hsl(var(--brand)/0.1)]"
+            />
 
             <WorkoutForm
               key={editingWorkout?.id || 'new-workout'}

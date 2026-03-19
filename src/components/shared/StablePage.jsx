@@ -1,5 +1,13 @@
 import React from 'react';
-import { AlertTriangle, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
 import {
   AppContainer,
   Card,
@@ -7,6 +15,11 @@ import {
   Section,
   StatCard,
 } from '@/components/shared/AppContainer';
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 export function formatNumber(value, options = {}) {
@@ -98,7 +111,7 @@ export function PageShell({
   return (
     <AppContainer>
       <PageHeader eyebrow={eyebrow} title={title} subtitle={subtitle} actions={actions} />
-        {children}
+      {children}
     </AppContainer>
   );
 }
@@ -106,7 +119,9 @@ export function PageShell({
 export function SectionCard({ title, subtitle, actions, children, className = '' }) {
   return (
     <Section title={title} subtitle={subtitle} actions={actions}>
-      <Card className={cn('px-5 py-5', className)}>{children}</Card>
+      <Card className={cn('relative overflow-hidden px-5 py-5 sm:px-6 sm:py-6', className)}>
+        {children}
+      </Card>
     </Section>
   );
 }
@@ -157,25 +172,57 @@ export function MetricCard({ label, value, hint, icon: Icon }) {
 
 export function EmptyState({ title, description, action, icon: Icon }) {
   return (
-    <div className="atlas-empty px-6 py-12 lg:px-8">
+    <div className="atlas-empty px-6 py-10 lg:px-8">
       {Icon ? (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-          <Icon className="h-5 w-5" strokeWidth={1.8} />
+        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[22px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+          <Icon className="h-5 w-5" strokeWidth={1.85} />
         </div>
       ) : null}
-      <p className="text-[1.0625rem] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">
+      <p className="text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
         {title}
       </p>
       {description ? <p className="atlas-copy mt-2 max-w-xl">{description}</p> : null}
-      {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
+      {action ? <div className="mt-6 flex justify-center">{action}</div> : null}
     </div>
   );
 }
 
 export function StatusBanner({ children, tone = 'neutral' }) {
+  const toneMeta = {
+    neutral: {
+      icon: Info,
+      iconClass:
+        'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
+    },
+    warning: {
+      icon: AlertTriangle,
+      iconClass: 'border-[hsl(39_62%_80%)] bg-[hsl(var(--card)/0.9)] text-[hsl(34_68%_32%)]',
+    },
+    success: {
+      icon: CheckCircle2,
+      iconClass: 'border-[hsl(152_38%_80%)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--ok))]',
+    },
+    error: {
+      icon: XCircle,
+      iconClass: 'border-[hsl(0_56%_82%)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--err))]',
+    },
+  };
+  const meta = toneMeta[tone] || toneMeta.neutral;
+  const Icon = meta.icon;
+
   return (
     <div className="atlas-banner px-4 py-3.5 text-sm leading-6" data-tone={tone}>
-      {children}
+      <div className="flex items-start gap-3">
+        <div
+          className={cn(
+            'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[18px] border shadow-[var(--shadow-xs)]',
+            meta.iconClass
+          )}
+        >
+          <Icon className="h-4 w-4" strokeWidth={1.9} />
+        </div>
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
     </div>
   );
 }
@@ -199,6 +246,55 @@ export function SecondaryButton({ children, className = '', ...props }) {
     >
       {children}
     </button>
+  );
+}
+
+export function FilterChip({ active = false, children, className = '', ...props }) {
+  return (
+    <button
+      type="button"
+      {...props}
+      className={cn(
+        'atlas-button h-9 rounded-full px-4 text-[12px] shadow-none',
+        active
+          ? 'atlas-button-primary'
+          : 'atlas-button-secondary bg-[hsl(var(--card)/0.88)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.94)] hover:text-[hsl(var(--fg))]',
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function DialogPanelHeader({
+  eyebrow,
+  title,
+  description,
+  accentClassName = '',
+  className = '',
+}) {
+  return (
+    <DialogHeader
+      className={cn(
+        'relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent',
+          accentClassName
+        )}
+      />
+      <div className="relative pr-8">
+        {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
+        <DialogTitle className={eyebrow ? 'mt-3' : ''}>{title}</DialogTitle>
+        {description ? (
+          <DialogDescription className="mt-3 max-w-2xl">{description}</DialogDescription>
+        ) : null}
+      </div>
+    </DialogHeader>
   );
 }
 

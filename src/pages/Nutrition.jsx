@@ -20,20 +20,16 @@ import {
 } from '@/components/shared/AppContainer';
 import {
   DateStepper,
+  DialogPanelHeader,
   EmptyState,
+  FilterChip,
   PrimaryButton,
   SafePageBoundary,
   SecondaryButton,
   StatusBanner,
   shiftDate,
 } from '@/components/shared/StablePage';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useAuth } from '@/lib/AuthContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
@@ -1103,17 +1099,13 @@ function NutritionContent() {
               const isActive = mealFilter === option;
 
               return (
-                <button
+                <FilterChip
                   key={option}
-                  type="button"
                   onClick={() => setMealFilter(option)}
-                  className={cn(
-                    'atlas-button h-9 rounded-full px-4 text-[12px]',
-                    isActive ? 'atlas-button-primary' : 'atlas-button-secondary shadow-none'
-                  )}
+                  active={isActive}
                 >
                   {option === 'all' ? 'Todas' : getMealTypeLabel(option)}
-                </button>
+                </FilterChip>
               );
             })}
           </div>
@@ -1252,19 +1244,12 @@ function NutritionContent() {
         }}
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
-          <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--warn)/0.1)] to-transparent" />
-            <div className="relative">
-              <p className="atlas-overline">Nutrition meal</p>
-              <DialogTitle className="mt-3">
-                {editingMeal ? 'Editar refeicao' : 'Adicionar refeicao'}
-              </DialogTitle>
-              <DialogDescription className="mt-3 max-w-2xl">
-                Este modal continua local. Para salvar snapshot real no Supabase, use a busca USDA
-                acima.
-              </DialogDescription>
-            </div>
-          </DialogHeader>
+          <DialogPanelHeader
+            eyebrow="Nutrition meal"
+            title={editingMeal ? 'Editar refeicao' : 'Adicionar refeicao'}
+            description="Este modal continua local. Para salvar snapshot real no Supabase, use a busca USDA acima."
+            accentClassName="from-[hsl(var(--warn)/0.1)]"
+          />
 
           <MealForm
             key={editingMeal?.id || 'new-meal'}

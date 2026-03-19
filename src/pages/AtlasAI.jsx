@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAuth } from '@/lib/AuthContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
+import { FilterChip, StatusBanner } from '@/components/shared/StablePage';
 import {
   Activity,
   ArrowUpRight,
@@ -778,6 +779,12 @@ export default function AtlasAI() {
                   />
                 </div>
 
+                <StatusBanner tone={hasProfileContext ? 'success' : 'neutral'}>
+                  {hasProfileContext
+                    ? 'O Profile local esta conectado e ja alimenta objetivo, peso e metas nas respostas desta conversa.'
+                    : 'Conecte metas e peso no Profile para deixar o Atlas AI mais contextual sem mudar a logica local desta fase.'}
+                </StatusBanner>
+
                 {hasProfileContext ? (
                   <div className="flex flex-wrap gap-2">
                     {profileContext.map(item => (
@@ -1000,14 +1007,14 @@ export default function AtlasAI() {
               <div className="mx-auto max-w-4xl space-y-3">
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {PROMPTS.slice(0, 3).map(item => (
-                    <button
+                    <FilterChip
                       key={`${item.id}-composer`}
                       onClick={() => send(item.prompt)}
-                      className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.8)] px-3 py-2 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)] transition-colors hover:bg-[hsl(var(--fill)/0.9)] hover:text-[hsl(var(--fg))]"
+                      className="whitespace-nowrap"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
                       {item.title}
-                    </button>
+                    </FilterChip>
                   ))}
                 </div>
 
