@@ -65,7 +65,7 @@ const handlePlanClick = (planId) => {
   window.location.href = `${ROUTES.auth}?mode=signup&next=${encodeURIComponent(ROUTES.pricing)}`;
 };
 
-function TodayPreview({ t }) {
+function TodayPreview({ t, ui }) {
   return (
     <div className="atlas-public-panel relative overflow-hidden px-5 py-5 lg:px-6 lg:py-6">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[hsl(var(--brand)/0.08)] to-transparent" />
@@ -73,7 +73,7 @@ function TodayPreview({ t }) {
       <div className="relative space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="atlas-overline">Today Preview</p>
+            <p className="atlas-overline">{ui.todayPreview}</p>
             <p className="mt-3 text-[1.15rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
               {t('landing.mock.greeting')}
             </p>
@@ -81,7 +81,7 @@ function TodayPreview({ t }) {
           </div>
 
           <div className="atlas-public-panel-muted px-3 py-2">
-            <p className="atlas-metric-label">Adherence</p>
+            <p className="atlas-metric-label">{ui.adherenceLabel}</p>
             <p className="mt-2 text-[1.1rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
               78%
             </p>
@@ -204,7 +204,7 @@ function GainCard({ item }) {
   );
 }
 
-function AudienceCard({ audience }) {
+function AudienceCard({ audience, ui }) {
   const Icon = audience.icon;
 
   return (
@@ -229,7 +229,7 @@ function AudienceCard({ audience }) {
 
       <Button asChild variant="ghost" className="mt-6 justify-start px-0 text-[13px] text-[hsl(var(--fg))]">
         <Link to={`/use-case/${audience.key}`}>
-          Ver cenário
+          {ui.useCaseCta}
           <ArrowRight className="h-4 w-4" strokeWidth={1.9} />
         </Link>
       </Button>
@@ -252,7 +252,7 @@ function SystemCard({ item }) {
   );
 }
 
-function PricingPreviewCard({ plan, popular, onSelect, periodLabel }) {
+function PricingPreviewCard({ plan, popular, onSelect, periodLabel, popularLabel }) {
   return (
     <article
       className={`relative flex h-full flex-col rounded-[28px] border px-5 py-5 lg:px-6 lg:py-6 ${
@@ -263,7 +263,7 @@ function PricingPreviewCard({ plan, popular, onSelect, periodLabel }) {
     >
       {popular ? (
         <span className="atlas-public-pill absolute right-5 top-5 border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]">
-          Most chosen
+          {popularLabel}
         </span>
       ) : null}
 
@@ -365,10 +365,46 @@ const getContent = (t) => ({
 
 export default function Landing() {
   const [openFaq, setOpenFaq] = useState(0);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isPt = language === 'pt-BR';
 
   const content = getContent(t);
   const plans = t('landing.pricing.plans');
+  const ui = isPt
+    ? {
+        todayPreview: 'Preview do Today',
+        adherenceLabel: 'Aderência',
+        useCaseCta: 'Ver cenário',
+        planPopularLabel: 'Mais escolhido',
+        timelineLabel: 'Uma timeline',
+        timelineCopy: 'Treino, nutrição, exames e protocolos em uma visão calma e conectada.',
+        adherenceTitle: 'Aderência real',
+        adherenceCopy: 'O desvio entre plano e execução aparece de forma clara todos os dias.',
+        contextLabel: 'Contexto compartilhado',
+        contextCopy: 'Você e seus profissionais podem trabalhar sobre o mesmo sistema.',
+        guidesCta: 'Explorar guias',
+        systemEyebrow: 'Sistema',
+        systemDescription: 'A mesma clareza do produto logado, só que aplicada desde o primeiro contato.',
+        fullComparison: 'Ver comparação completa',
+        startLabel: 'Comece com calma',
+      }
+    : {
+        todayPreview: 'Today Preview',
+        adherenceLabel: 'Adherence',
+        useCaseCta: 'See use case',
+        planPopularLabel: 'Most chosen',
+        timelineLabel: 'One timeline',
+        timelineCopy: 'Training, nutrition, labs and protocols in one calm, connected view.',
+        adherenceTitle: 'Real adherence',
+        adherenceCopy: 'The gap between plan and execution becomes clear every day.',
+        contextLabel: 'Shared context',
+        contextCopy: 'You and your professionals can work from the same system.',
+        guidesCta: 'Explore guides',
+        systemEyebrow: 'System',
+        systemDescription: 'The same clarity from the logged-in product, now applied from the very first touchpoint.',
+        fullComparison: 'See full comparison',
+        startLabel: 'Start Calm',
+      };
 
   return (
     <PublicSiteShell
@@ -432,28 +468,28 @@ export default function Landing() {
 
             <motion.div variants={fade} className="grid gap-3 sm:grid-cols-3">
               <div className="atlas-public-panel-muted p-4">
-                <p className="atlas-metric-label">One timeline</p>
+                <p className="atlas-metric-label">{ui.timelineLabel}</p>
                 <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  Training, nutrition, labs and protocols in one quiet view.
+                  {ui.timelineCopy}
                 </p>
               </div>
               <div className="atlas-public-panel-muted p-4">
-                <p className="atlas-metric-label">Real adherence</p>
+                <p className="atlas-metric-label">{ui.adherenceTitle}</p>
                 <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  The gap between plan and execution becomes visible every day.
+                  {ui.adherenceCopy}
                 </p>
               </div>
               <div className="atlas-public-panel-muted p-4">
-                <p className="atlas-metric-label">Shared context</p>
+                <p className="atlas-metric-label">{ui.contextLabel}</p>
                 <p className="mt-3 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  You and your professionals can work from the same system.
+                  {ui.contextCopy}
                 </p>
               </div>
             </motion.div>
           </div>
 
           <motion.div variants={fade}>
-            <TodayPreview t={t} />
+            <TodayPreview t={t} ui={ui} />
           </motion.div>
         </motion.div>
       </section>
@@ -494,7 +530,7 @@ export default function Landing() {
               description={t('landing.solution.subtitle')}
             />
             <Button asChild variant="outline">
-              <Link to={ROUTES.help}>Explore guides</Link>
+              <Link to={ROUTES.help}>{ui.guidesCta}</Link>
             </Button>
           </div>
 
@@ -535,7 +571,7 @@ export default function Landing() {
                 variants={fade}
                 custom={index}
               >
-                <AudienceCard audience={audience} />
+                <AudienceCard audience={audience} ui={ui} />
               </motion.div>
             ))}
           </div>
@@ -544,9 +580,9 @@ export default function Landing() {
 
       <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
         <PublicSectionHeader
-          eyebrow="System"
+          eyebrow={ui.systemEyebrow}
           title={t('landing.system.title')}
-          description="A mesma clareza do produto logado, só que aplicada desde o primeiro contato."
+          description={ui.systemDescription}
           align="center"
           className="mb-10"
         />
@@ -585,13 +621,14 @@ export default function Landing() {
                 popular={plan.popular}
                 onSelect={handlePlanClick}
                 periodLabel={t('landing.pricing.period')}
+                popularLabel={ui.planPopularLabel}
               />
             ))}
           </div>
 
           <div className="mt-8 flex justify-center">
             <Button asChild variant="outline" size="lg">
-              <Link to={ROUTES.pricing}>Ver comparação completa</Link>
+              <Link to={ROUTES.pricing}>{ui.fullComparison}</Link>
             </Button>
           </div>
         </div>
@@ -619,7 +656,7 @@ export default function Landing() {
 
       <section className="mx-auto max-w-4xl px-5 pb-6 lg:px-8">
         <div className="atlas-page-header px-6 py-8 text-center lg:px-8 lg:py-10">
-          <p className="atlas-overline justify-center">Start Calm</p>
+          <p className="atlas-overline justify-center">{ui.startLabel}</p>
           <h2 className="atlas-display-title mt-4 whitespace-pre-line text-[clamp(2.4rem,1.9rem+1.8vw,4rem)]">
             {t('landing.cta.title')}
           </h2>

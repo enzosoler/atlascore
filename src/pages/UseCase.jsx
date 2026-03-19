@@ -1,125 +1,156 @@
 import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Users, Zap, Target, BarChart3, UtensilsCrossed } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  ArrowRight,
+  BarChart3,
+  ChevronLeft,
+  Target,
+  TrendingUp,
+  Users,
+  UtensilsCrossed,
+  Zap,
+} from 'lucide-react';
+import PublicSiteShell, {
+  PublicLanguageSwitcher,
+  PublicSectionHeader,
+} from '@/components/public/PublicSiteShell';
+import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
 
 const USE_CASES = {
   athlete: {
-    title: 'Para Atletas & Entusiastas Fitness',
-    heroSubtitle: 'Rastreie treinos, nutrição e progresso com precisão profissional.',
+    eyebrow: 'Atleta',
+    title: 'Para atletas e entusiastas que querem histórico real.',
+    heroSubtitle: 'Treino, nutrição, progresso e contexto de decisão em um único sistema.',
     features: [
       {
         icon: Target,
-        title: 'Logging Detalhado de Treinos',
-        description: 'Registre cada série, repetição e peso. Atlas rastreia seu progresso automaticamente.',
+        title: 'Tracking detalhado',
+        description: 'Registre treino, dieta e evolução sem espalhar dados por ferramentas diferentes.',
       },
       {
-        icon: UtensilsCrossed,
-        title: 'Nutrição Inteligente',
-        description: 'Registre refeições, acompanhe macros e veja aderência ao plano alimentar em tempo real.',
+        icon: TrendingUp,
+        title: 'Leitura de tendência',
+        description: 'Veja como peso, força, aderência e rotina realmente evoluem ao longo do tempo.',
       },
       {
         icon: BarChart3,
-        title: 'Análises Profundas',
-        description: 'Correlações entre sono, energia, treino e resultados. Identifique padrões que funcionam.',
+        title: 'Contexto para ajustar',
+        description: 'Entenda o que está funcionando e onde a execução foge do plano.',
       },
     ],
     benefits: [
-      'Histórico completo de exercícios — nunca esqueça um PR',
-      'Fotos de progresso com comparação lado a lado',
-      'Medições (peso, gordura, circunferência)',
-      'Atlas AI para sugestões de treino e nutrição',
-      'Exportações em PDF para seus registros',
+      'Fotos, medidas e histórico no mesmo lugar',
+      'Atlas AI com contexto do seu uso real',
+      'Plano vs execução visível no dia a dia',
+      'Exportações para guardar ou compartilhar',
     ],
-    cta: 'Comece seu Rastreamento',
+    cta: 'Criar conta de atleta',
   },
   coach: {
-    title: 'Para Coaches & Personal Trainers',
-    heroSubtitle: 'Gerencie múltiplos alunos, prescreva planos, acompanhe aderência.',
+    eyebrow: 'Coach',
+    title: 'Para coaches que precisam acompanhar aderência sem depender de prints.',
+    heroSubtitle: 'Prescreva, acompanhe e interprete a execução dos alunos a partir do mesmo histórico.',
     features: [
       {
         icon: Users,
-        title: 'Gerenciamento de Alunos',
-        description: 'Convide alunos, veja dados deles em tempo real, e acompanhe progresso.',
+        title: 'Visão de alunos',
+        description: 'Centralize progresso, aderência e contexto de cada atleta em uma mesma base.',
       },
       {
         icon: Target,
-        title: 'Prescrição de Treinos',
-        description: 'Crie planos de treino customizados e veja exatamente o que seus alunos estão fazendo.',
+        title: 'Prescrição clara',
+        description: 'Transforme o plano em rotina executável, com comparação direta entre prescrito e realizado.',
       },
       {
         icon: BarChart3,
-        title: 'Aderência em Tempo Real',
-        description: 'Saiba se seus alunos estão seguindo o plano — compare prescrito vs executado.',
+        title: 'Leitura prática',
+        description: 'Identifique quem está travando, onde a execução cai e o que precisa de ajuste.',
       },
     ],
     benefits: [
-      'Dashboard dedicado para coaches com 5+ alunos',
-      'Alertas de baixa aderência',
-      'Comparação Plano vs Execução visual',
-      'Exportar relatórios de progresso em PDF',
-      'Acompanhar peso, medições e progresso de força',
+      'Dashboard profissional com múltiplos alunos',
+      'Acompanhamento de aderência em tempo real',
+      'Treino, dieta e check-ins no mesmo fluxo',
+      'Resumo exportável para acompanhamento',
     ],
-    cta: 'Comece a Gerenciar Alunos',
+    cta: 'Começar como coach',
   },
   nutritionist: {
-    title: 'Para Nutricionistas & Dietistas',
-    heroSubtitle: 'Prescreva dietas profissionais, acompanhe aderência nutricional, exporte relatórios.',
+    eyebrow: 'Nutricionista',
+    title: 'Para nutricionistas que querem contexto além do plano alimentar.',
+    heroSubtitle: 'Dieta prescrita, refeições reais, medidas e evolução conectadas na mesma narrativa.',
     features: [
       {
         icon: UtensilsCrossed,
-        title: 'Prescrição de Dietas',
-        description: 'Crie planos alimentares com macros específicas e envie para seus clientes.',
+        title: 'Plano e ingestão lado a lado',
+        description: 'Compare o planejado com o consumido e entenda aderência de forma concreta.',
       },
       {
         icon: BarChart3,
-        title: 'Análise de Aderência',
-        description: 'Visualize o que seu cliente planejou vs o que comeu. Identifique lacunas nutricionais.',
+        title: 'Histórico confiável',
+        description: 'Veja refeições, progresso, sinais de consistência e lacunas com menos ruído.',
       },
       {
-        icon: Target,
-        title: 'Relatórios Profissionais',
-        description: 'Exporte análises detalhadas, comparações de macros e progresso de peso.',
+        icon: TrendingUp,
+        title: 'Ajuste com evidência',
+        description: 'Refine o plano com base na execução real e na evolução do cliente.',
       },
     ],
     benefits: [
-      'Plano Nutricionista com até 25 clientes',
-      'Dashboard com alertas — baixa aderência, sem logging',
-      'Gráficos Plan vs Execution',
-      'Integração com medições e dados biométricos',
-      'Relatórios em PDF para seus clientes',
+      'Clientes e prescrições no mesmo ambiente',
+      'Leitura de medidas e progresso corporal',
+      'Relatórios nutricionais com mais contexto',
+      'Geração de dieta com apoio de IA quando necessário',
     ],
-    cta: 'Comece a Prescrever',
+    cta: 'Começar como nutricionista',
   },
   clinician: {
-    title: 'Para Clínicos & Médicos',
-    heroSubtitle: 'Monitore pacientes com detalhe — nutrição, medicações, exames laboratoriais.',
+    eyebrow: 'Clínico',
+    title: 'Para clínicos que precisam de uma visão integrada do paciente.',
+    heroSubtitle: 'Exames, protocolos, medidas e rotina registrados de forma contínua e compartilhável.',
     features: [
       {
         icon: BarChart3,
-        title: 'Acompanhamento de Saúde',
-        description: 'Veja registros nutricionais, peso, pressão e aderência a medicações.',
+        title: 'Histórico consolidado',
+        description: 'Acompanhe dados laboratoriais, biometria e sinais de rotina sem fragmentação.',
       },
       {
         icon: Target,
-        title: 'Histórico Integrado',
-        description: 'Exames laboratoriais, protocolo de suplementação e metas de saúde em um lugar.',
+        title: 'Protocolos com contexto',
+        description: 'Ligue decisões clínicas ao comportamento real do paciente ao longo do tempo.',
       },
       {
         icon: Users,
-        title: 'Comunicação Paciente',
-        description: 'Envie recomendações, veja compliance e ajuste prescrições baseado em dados reais.',
+        title: 'Acompanhamento contínuo',
+        description: 'Tenha uma base comum para monitorar adesão, evolução e próximos ajustes.',
       },
     ],
     benefits: [
-      'Plano Clínico com até 50 pacientes',
-      'Rastreamento de exames laboratoriais e tendências',
-      'Aderência a protocolos de medicação e suplementação',
-      'Medições e biométricos ao longo do tempo',
-      'Alertas para pacientes com baixa aderência',
+      'Visão clínica com histórico contínuo',
+      'Protocolos e logs em um só lugar',
+      'Medidas e evolução corporal conectadas',
+      'Relatórios consolidados para acompanhamento',
     ],
-    cta: 'Comece o Monitoramento',
+    cta: 'Começar como clínico',
   },
 };
+
+function FeatureCard({ feature }) {
+  const Icon = feature.icon;
+
+  return (
+    <article className="atlas-card h-full px-5 py-5 lg:px-6 lg:py-6">
+      <div className="flex h-11 w-11 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+        <Icon className="h-5 w-5" strokeWidth={1.9} />
+      </div>
+      <p className="mt-5 text-[15px] font-semibold tracking-[-0.022em] text-[hsl(var(--fg))]">
+        {feature.title}
+      </p>
+      <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{feature.description}</p>
+    </article>
+  );
+}
 
 export default function UseCase() {
   const { role } = useParams();
@@ -128,83 +159,135 @@ export default function UseCase() {
 
   if (!caseData) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-[14px] text-[hsl(var(--fg-2))] mb-4">Use case não encontrado</p>
-          <Link to="/" className="btn btn-primary">Voltar para Home</Link>
-        </div>
-      </div>
+      <PublicSiteShell
+        compactNav
+        actions={<PublicLanguageSwitcher />}
+      >
+        <section className="mx-auto max-w-4xl px-5 pb-6 pt-16 lg:px-8">
+          <div className="atlas-page-header px-6 py-8 text-center lg:px-8 lg:py-10">
+            <p className="atlas-overline justify-center">Use Case</p>
+            <h1 className="atlas-display-title mt-4">Use case não encontrado.</h1>
+            <p className="atlas-public-copy mx-auto mt-4 max-w-xl">
+              Esse cenário ainda não existe nesta versão pública do Atlas Core.
+            </p>
+            <div className="mt-8 flex justify-center">
+              <Button asChild>
+                <Link to={ROUTES.home}>Voltar para home</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </PublicSiteShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-gradient-to-b from-[hsl(var(--brand)/0.08)] to-white border-b border-[hsl(var(--border-h))]">
-        <div className="max-w-4xl mx-auto px-5 lg:px-8 py-12 lg:py-16">
-          <button 
+    <PublicSiteShell
+      compactNav
+      actions={(
+        <>
+          <PublicLanguageSwitcher />
+          <Button asChild variant="ghost" className="hidden sm:inline-flex">
+            <Link to={ROUTES.help}>Help</Link>
+          </Button>
+          <Button asChild>
+            <Link to={`${ROUTES.auth}?mode=signup`}>Criar conta</Link>
+          </Button>
+        </>
+      )}
+    >
+      <section className="mx-auto max-w-6xl px-5 pb-6 pt-12 lg:px-8 lg:pt-16">
+        <div className="atlas-page-header px-6 py-6 lg:px-8 lg:py-8">
+          <button
+            type="button"
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] mb-4 transition-colors"
+            className="atlas-overline transition-colors hover:text-[hsl(var(--fg-2))]"
           >
-            <ChevronLeft className="w-3 h-3" /> Voltar
+            <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2} />
+            Voltar
           </button>
-          
-          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-3 text-[hsl(var(--fg))]">
-            {caseData.title}
-          </h1>
-          
-          <p className="text-[18px] text-[hsl(var(--fg-2))] max-w-2xl">
-            {caseData.heroSubtitle}
-          </p>
-        </div>
-      </div>
 
-      {/* Features Grid */}
-      <div className="max-w-4xl mx-auto px-5 lg:px-8 py-16">
-        <h2 className="text-2xl font-bold mb-8">Funcionalidades Principais</h2>
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
-          {caseData.features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <div key={feature.title} className="space-y-3">
-                <div className="w-12 h-12 rounded-lg bg-[hsl(var(--brand)/0.1)] flex items-center justify-center">
-                  <Icon className="w-6 h-6 text-[hsl(var(--brand))]" strokeWidth={1.5} />
-                </div>
-                <h3 className="font-semibold text-[15px] text-[hsl(var(--fg))]">
-                  {feature.title}
-                </h3>
-                <p className="text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+          <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
+            <div>
+              <p className="atlas-overline">{caseData.eyebrow}</p>
+              <h1 className="atlas-display-title mt-4 text-[clamp(2.5rem,2rem+1.6vw,4.15rem)]">
+                {caseData.title}
+              </h1>
+              <p className="atlas-public-copy mt-4 max-w-2xl">{caseData.heroSubtitle}</p>
+            </div>
 
-        {/* Benefits */}
-        <div className="bg-[hsl(var(--card-hi))] rounded-2xl border border-[hsl(var(--border-h))] p-8">
-          <h2 className="text-2xl font-bold mb-6">Benefícios</h2>
-          <ul className="space-y-3">
-            {caseData.benefits.map((benefit) => (
-              <li key={benefit} className="flex items-start gap-3 text-[14px]">
-                <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--brand))] mt-1.5 shrink-0" />
-                <span className="text-[hsl(var(--fg-2))]">{benefit}</span>
-              </li>
+            <div className="atlas-public-panel-muted p-4">
+              <p className="atlas-metric-label">Por que Atlas Core</p>
+              <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                O valor não está só em registrar. Está em transformar tudo em uma linha do tempo confiável.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
+        <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
+          <PublicSectionHeader
+            eyebrow="Capacidades"
+            title="O que muda nesse cenário."
+            description="Cada perfil usa o mesmo produto, mas com leituras e ações ajustadas ao seu papel."
+            className="mb-10"
+          />
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {caseData.features.map((feature) => (
+              <FeatureCard key={feature.title} feature={feature} />
             ))}
-          </ul>
+          </div>
         </div>
+      </section>
 
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <button className="btn btn-primary mb-4 gap-2">
-            <Zap className="w-4 h-4" />
-            {caseData.cta}
-          </button>
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">
-            Comece grátis. Sem cartão de crédito.
-          </p>
+      <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-10">
+          <PublicSectionHeader
+            eyebrow="Benefícios"
+            title="Benefícios práticos."
+            description="Resultados de produto quando os dados deixam de ficar espalhados."
+          />
+
+          <div className="atlas-public-panel-muted p-5 lg:p-6">
+            <div className="space-y-3">
+              {caseData.benefits.map((benefit) => (
+                <div key={benefit} className="flex items-start gap-3 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+                  <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
+                    <Zap className="h-3.5 w-3.5" strokeWidth={2} />
+                  </div>
+                  <span>{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-5 pb-6 lg:px-8">
+        <div className="atlas-page-header px-6 py-8 text-center lg:px-8 lg:py-10">
+          <p className="atlas-overline justify-center">Começar</p>
+          <h2 className="atlas-display-title mt-4 text-[clamp(2.2rem,1.9rem+1.3vw,3.3rem)]">
+            {caseData.cta}
+          </h2>
+          <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
+            Entre no Atlas Core e continue a partir do mesmo sistema visual, sem mudar de contexto entre público e produto.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button asChild size="lg">
+              <Link to={`${ROUTES.auth}?mode=signup`}>
+                {caseData.cta}
+                <ArrowRight className="h-4 w-4" strokeWidth={2} />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to={ROUTES.pricing}>Ver pricing</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    </PublicSiteShell>
   );
 }

@@ -10,7 +10,6 @@ import {
   Plus,
   Ruler,
   Scale,
-  Sparkles,
   Trash2,
 } from 'lucide-react';
 import {
@@ -489,7 +488,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <HistoryMetricChip label="Peito" value={measurement.chest} unit="cm" />
             <HistoryMetricChip label="Braco" value={measurement.arms} unit="cm" />
             <HistoryMetricChip label="Coxa" value={measurement.thighs} unit="cm" />
@@ -605,7 +604,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
       <div className="rounded-[28px] border border-[hsl(var(--border)/0.85)] bg-[linear-gradient(180deg,rgba(14,165,233,0.08),hsl(var(--card)/0.88))] px-5 py-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-4">
           <div className="max-w-2xl">
             <p className="atlas-overline">Checkpoint</p>
             <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
@@ -621,7 +620,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+        <div className="mt-5 grid gap-4">
           <MeasurementField
             label="Data da coleta"
             type="date"
@@ -640,7 +639,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
         <p className="atlas-overline">Core metrics</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <MeasurementField
             label="Peso"
             unit="kg"
@@ -676,7 +675,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <p className="atlas-overline">Circunferencias</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <MeasurementField
             label="Peito"
             unit="cm"
@@ -1039,7 +1038,7 @@ function MeasurementsContent() {
                       background: `linear-gradient(180deg, ${selectedMetric.tint} 0%, hsl(var(--card) / 0.82) 100%)`,
                     }}
                   >
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="flex flex-col gap-5">
                       <div className="max-w-2xl">
                         <p className="atlas-overline">Selected metric</p>
                         <div className="mt-3 flex flex-wrap items-center gap-3">

@@ -32,7 +32,7 @@ import Diary from '@/pages/Diary';
 import ProgressPhotos from '@/pages/ProgressPhotos';
 import Social from '@/pages/Social';
 import MyPrescribedDiet from '@/pages/MyPrescribedDiet';
-import Pricing from '@/pages/Pricing';
+import Pricing from '@/pages/Pricing.jsx';
 import MyPrescribedWorkout from '@/pages/MyPrescribedWorkout';
 import CoachDashboard from '@/pages/coach/CoachDashboard';
 import CoachStudents from '@/pages/coach/CoachStudents';
@@ -50,7 +50,7 @@ import Insights from '@/pages/Insights';
 import Exercises from '@/pages/Exercises';
 import ExerciseDetail from '@/pages/ExerciseDetail';
 import Progress from '@/pages/Progress';
-import HelpCenter from '@/pages/HelpCenter';
+import HelpCenter from '@/pages/HelpCenter.jsx';
 import UseCase from '@/pages/UseCase';
 import GettingStartedGuide from '@/pages/guides/GettingStartedGuide';
 import GitHubPRTracker from '@/pages/GitHubPRTracker';
@@ -59,8 +59,6 @@ import PlanVsExecutionGuide from '@/pages/guides/PlanVsExecutionGuide';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout.jsx';
-
-console.log("FORCE REBUILD 123");
 
 const AuthenticatedApp = () => {
   const { authError, user, isAuthenticated, authState } = useAuth();
@@ -132,6 +130,7 @@ VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
       <Route path={ROUTES.signup} element={<Auth />} />
       <Route path={ROUTES.login} element={<Auth />} />
       <Route path={ROUTES.onboarding} element={<Onboarding />} />
+      <Route path={ROUTES.pricing} element={<Pricing />} />
       <Route path={ROUTES.help} element={<HelpCenter />} />
       <Route path="/use-case/:role" element={<UseCase />} />
       <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
@@ -169,7 +168,6 @@ VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
         <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
         <Route path={ROUTES.social} element={<Social />} />
         <Route path={ROUTES.prescribedDiet} element={<MyPrescribedDiet />} />
-        <Route path={ROUTES.pricing} element={<Pricing />} />
         <Route path={ROUTES.prescribedWorkout} element={<MyPrescribedWorkout />} />
         <Route path={ROUTES.coachDashboard} element={<CoachDashboard />} />
         <Route path={ROUTES.coachStudents} element={<CoachStudents />} />

@@ -563,124 +563,40 @@ function ProfileContent() {
   };
 
   return (
-    <div className="atlas-page-shell">
-      <div className="mx-auto max-w-6xl space-y-8 px-5 py-6 lg:px-8 lg:py-10">
-        <section className="atlas-page-header relative overflow-hidden px-6 py-6 lg:px-8 lg:py-8">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[hsl(var(--brand)/0.08)] via-[hsl(var(--ok)/0.04)] to-transparent" />
-          <div className="pointer-events-none absolute -right-10 top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.08)] blur-3xl" />
-
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_360px] lg:gap-10">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="atlas-overline">Profile</span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    Premium health setup
-                  </span>
-                </div>
-
-                <div className="max-w-3xl space-y-4">
-                  <h1 className="atlas-display-title">{preferredName}, keep your baseline sharp.</h1>
-                  <p className="max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
-                    Conta, targets e identidade do atleta agora leem como uma unica superficie:
-                    sofisticada, pessoal e pronta para sustentar nutricao, treino e performance.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <Button asChild size="lg">
-                  <Link to={ROUTES.myDiet}>
-                    Abrir Meu Diet
-                    <ArrowRight className="h-4 w-4" strokeWidth={2} />
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg">
-                  <Link to={ROUTES.myWorkout}>Abrir Meu Workout</Link>
-                </Button>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <HeroStat
-                  label="Session"
-                  value="Supabase active"
-                  detail={user?.email || 'Sessao autenticada e pronta para uso.'}
-                />
-                <HeroStat
-                  label="Profile"
-                  value={`${completionScore}% aligned`}
-                  detail={`${filledFields} de ${totalFields} campos principais preenchidos.`}
-                />
-                <HeroStat
-                  label="Daily fuel"
-                  value={calorieTargetValue}
-                  detail={macroSignature}
-                />
-              </div>
-            </div>
-
-            <aside className="rounded-[30px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.6)] p-5 shadow-[var(--shadow-xs)] lg:p-6">
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div>
-                  <p className="atlas-overline">Conta</p>
-                  <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                    Identidade premium, acesso estavel.
-                  </p>
-                </div>
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] text-[hsl(var(--fg-2))]">
-                  <ShieldCheck className="h-4 w-4" strokeWidth={1.9} />
-                </div>
-              </div>
-
-              <div className="rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                    {initials}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                        {displayName}
-                      </p>
-                      <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                        {roleLabel}
-                      </span>
-                    </div>
-
-                    <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      Sua autenticacao ja esta ativa. O restante da experiencia agora fica ancorado
-                      neste perfil com o fluxo de dados atual preservado.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    Auth ativa
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    {draftStatus}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                <AccountDetail icon={Mail} label="Email" value={user?.email || '--'} />
-                <AccountDetail icon={UserCircle2} label="Role" value={roleLabel} />
-                <AccountDetail icon={Sparkles} label="Profile state" value={draftStatus} />
-              </div>
-
-              <Button type="button" variant="outline" size="lg" className="mt-5 w-full" onClick={() => logout?.()}>
-                <LogOut className="h-4 w-4" strokeWidth={1.9} />
-                Sair da conta
-              </Button>
-            </aside>
-          </div>
-        </section>
+    <AppContainer>
+      <PageHeader
+        eyebrow="Profile"
+        title={`${preferredName}, keep your baseline sharp.`}
+        subtitle="Conta, targets e identidade do atleta agora leem como uma unica superficie: sofisticada, pessoal e pronta para sustentar nutricao, treino e performance."
+        accentClassName="from-[hsl(var(--brand)/0.08)] via-[hsl(var(--ok)/0.04)]"
+        actions={
+          <ActionRow>
+            <Button asChild>
+              <Link to={ROUTES.myDiet}>
+                Abrir Meu Diet
+                <ArrowRight className="h-4 w-4" strokeWidth={2} />
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to={ROUTES.myWorkout}>Abrir Meu Workout</Link>
+            </Button>
+          </ActionRow>
+        }
+      >
+        <div className="grid gap-3">
+          <HeroStat
+            label="Session"
+            value="Supabase active"
+            detail={user?.email || 'Sessao autenticada e pronta para uso.'}
+          />
+          <HeroStat
+            label="Profile"
+            value={`${completionScore}% aligned`}
+            detail={`${filledFields} de ${totalFields} campos principais preenchidos.`}
+          />
+          <HeroStat label="Daily fuel" value={calorieTargetValue} detail={macroSignature} />
+        </div>
+      </PageHeader>
 
         <StatusBanner>
           Auth real com Supabase segue intacta. Esta tela preserva o fluxo atual de dados do perfil
@@ -705,7 +621,66 @@ function ProfileContent() {
 
         {!profileQuery.isLoading ? (
           <>
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <Section
+              title="Account"
+              subtitle="Identidade premium, acesso estavel e um resumo curto da conta antes dos dados e targets."
+            >
+              <Card className="px-5 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="atlas-overline">Conta</p>
+                    <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
+                      Identidade premium, acesso estavel.
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
+                    <ShieldCheck className="h-4 w-4" strokeWidth={1.9} />
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                      {initials}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                          {displayName}
+                        </p>
+                        <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
+                          {roleLabel}
+                        </span>
+                      </div>
+
+                      <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                        Sua autenticacao ja esta ativa. O restante da experiencia agora fica ancorado
+                        neste perfil com o fluxo de dados atual preservado.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  <AccountDetail icon={Mail} label="Email" value={user?.email || '--'} />
+                  <AccountDetail icon={UserCircle2} label="Role" value={roleLabel} />
+                  <AccountDetail icon={Sparkles} label="Profile state" value={draftStatus} />
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-5 w-full"
+                  onClick={() => logout?.()}
+                >
+                  <LogOut className="h-4 w-4" strokeWidth={1.9} />
+                  Sair da conta
+                </Button>
+              </Card>
+            </Section>
+
+            <section className="grid gap-4 sm:grid-cols-2">
               <QuickMetricCard
                 label="Weight direction"
                 value={weightDirection.value}
@@ -744,7 +719,7 @@ function ProfileContent() {
               />
             </section>
 
-            <section className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(320px,0.88fr)]">
+            <section className="grid gap-4">
               <SectionCard
                 title="Profile blueprint"
                 subtitle="Organize baseline, composicao corporal e targets em blocos claros, com a mesma linguagem sofisticada do restante do produto."
@@ -852,7 +827,7 @@ function ProfileContent() {
                 </div>
 
                 <div className="mt-8 rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.52)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                  <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="flex flex-col gap-5">
                     <div className="max-w-2xl">
                       <p className="atlas-metric-label">Persistencia</p>
                       <p className="mt-3 text-[16px] font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">
@@ -969,7 +944,6 @@ function ProfileContent() {
             </section>
           </>
         ) : null}
-      </div>
-    </div>
+    </AppContainer>
   );
 }

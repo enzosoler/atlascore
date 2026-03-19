@@ -234,7 +234,7 @@ function LoggedMetric({ label, value, unit, tone = 'calories' }) {
 function MealCard({ meal, onEdit, onDelete }) {
   return (
     <article className="atlas-card px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-5">
         <div className="min-w-0 flex-1 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
@@ -275,7 +275,7 @@ function MealCard({ meal, onEdit, onDelete }) {
           ) : null}
         </div>
 
-        <div className="flex w-full flex-col gap-3 lg:w-[188px]">
+        <div className="flex w-full flex-col gap-3">
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.58)] px-4 py-4">
             <p className="atlas-metric-label">Energy</p>
             <p className="mt-3 text-[1.75rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
@@ -289,11 +289,11 @@ function MealCard({ meal, onEdit, onDelete }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 lg:flex-col">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={onEdit}
-              className="atlas-button atlas-button-secondary h-10 flex-1 lg:w-full"
+              className="atlas-button atlas-button-secondary h-10 flex-1"
             >
               <Pencil className="h-4 w-4" strokeWidth={1.9} />
               Editar
@@ -301,7 +301,7 @@ function MealCard({ meal, onEdit, onDelete }) {
             <button
               type="button"
               onClick={onDelete}
-              className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)] lg:w-full"
+              className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)]"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.9} />
               Excluir
@@ -343,7 +343,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
     <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
         <p className="atlas-overline">Meal basics</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
             Data
             <input
@@ -394,7 +394,7 @@ function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <p className="atlas-overline">Macro summary</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
             Kcal
             <input

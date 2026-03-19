@@ -5,7 +5,6 @@ import {
   Dumbbell,
   Pencil,
   Plus,
-  Sparkles,
   Target,
   Trash2,
 } from 'lucide-react';
@@ -19,6 +18,13 @@ import {
   StatusBanner,
   shiftDate,
 } from '@/components/shared/StablePage';
+import {
+  ActionRow,
+  AppContainer,
+  Card,
+  PageHeader,
+  Section,
+} from '@/components/shared/AppContainer';
 import {
   Dialog,
   DialogContent,
@@ -378,7 +384,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete }) {
 
   return (
     <article className="atlas-card px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-5">
         <div className="min-w-0 flex-1 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.04em]', status.chip)}>
@@ -437,7 +443,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete }) {
           ) : null}
         </div>
 
-        <div className="flex w-full flex-col gap-3 lg:w-[196px]">
+        <div className="flex w-full flex-col gap-3">
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.58)] px-4 py-4">
             <p className="atlas-metric-label">Execution</p>
             <p className="mt-3 text-[1.75rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
@@ -451,11 +457,11 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2 lg:flex-col">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={onEdit}
-              className="atlas-button atlas-button-secondary h-10 flex-1 lg:w-full"
+              className="atlas-button atlas-button-secondary h-10 flex-1"
             >
               <Pencil className="h-4 w-4" strokeWidth={1.9} />
               Editar
@@ -464,7 +470,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete }) {
               type="button"
               onClick={onToggleStatus}
               className={cn(
-                'atlas-button h-10 flex-1 lg:w-full',
+                'atlas-button h-10 flex-1',
                 workout.status === 'completed'
                   ? 'border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill))] text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill-secondary))]'
                   : 'border border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))] hover:bg-[hsl(var(--ok)/0.14)]'
@@ -475,7 +481,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete }) {
             <button
               type="button"
               onClick={onDelete}
-              className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)] lg:w-full"
+              className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)]"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.9} />
               Excluir
@@ -545,7 +551,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
     <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
         <p className="atlas-overline">Session basics</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
             Data
             <input
@@ -568,7 +574,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           </label>
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
             Tipo
             <select
@@ -655,7 +661,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
               key={`exercise-${index}`}
               className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.5)] p-4"
             >
-              <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_100px_110px_110px_auto]">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <label className={FIELD_LABEL_CLASS}>
                   Nome
                   <input
@@ -862,120 +868,106 @@ function WorkoutsContent() {
   };
 
   return (
-    <div className="atlas-page-shell">
-      <div className="mx-auto max-w-6xl space-y-8 px-5 py-6 lg:px-8 lg:py-10">
-        <section className="atlas-page-header relative overflow-hidden px-6 py-6 lg:px-8 lg:py-8">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[hsl(var(--brand)/0.09)] via-[hsl(var(--brand)/0.03)] to-transparent" />
+    <AppContainer>
+      <PageHeader
+        eyebrow="Workouts"
+        title="Training with a clear line from plan to execution."
+        subtitle="Keep the day&apos;s plan visible, log execution without noise and read performance status with enough structure to act quickly."
+        accentClassName="from-[hsl(var(--brand)/0.09)] via-[hsl(var(--brand)/0.03)]"
+        actions={
+          <ActionRow>
+            <DateStepper
+              date={selectedDate}
+              onChange={(amount) => setSelectedDate(shiftDate(selectedDate, amount))}
+            />
+            <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
+              <Plus className="h-4 w-4" strokeWidth={1.9} />
+              Novo treino
+            </PrimaryButton>
+          </ActionRow>
+        }
+      >
+        <div className="grid gap-3">
+          <HeroStat
+            label="Plan"
+            value={plannedWorkout?.name || 'No plan'}
+            detail={
+              plannedWorkout
+                ? `${plannedExerciseCount} exercicios previstos para a data selecionada.`
+                : 'Nenhum treino planejado para o dia selecionado.'
+            }
+          />
+          <HeroStat
+            label="Execution"
+            value={`${workoutsForDate.length} registradas`}
+            detail={`${completedCount} concluido(s) dentro do estado local desta rota.`}
+          />
+          <HeroStat
+            label="Volume"
+            value={`${formatVolume(totalVolume)} kg`}
+            detail="Carga total registrada nas sessoes do dia."
+          />
+        </div>
+      </PageHeader>
 
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.18fr)_360px] lg:gap-10">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="atlas-overline">Workouts</span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-                    <Sparkles className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    Performance module
-                  </span>
-                </div>
+      <StatusBanner tone="warning">
+        Workouts agora usa somente estado local desta pagina. Nenhuma logica de Protocols continua ligada a esta rota.
+      </StatusBanner>
 
-                <div className="max-w-3xl space-y-4">
-                  <h1 className="atlas-display-title">Training with a clear line from plan to execution.</h1>
-                  <p className="max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
-                    Keep the day&apos;s plan visible, log execution without noise and read performance
-                    status with enough structure to act quickly.
-                  </p>
-                </div>
-              </div>
+      {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
-              <div className="flex flex-wrap items-center gap-3">
-                <DateStepper
-                  date={selectedDate}
-                  onChange={(amount) => setSelectedDate(shiftDate(selectedDate, amount))}
-                />
-                <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
-                  <Plus className="h-4 w-4" strokeWidth={1.9} />
-                  Novo treino
-                </PrimaryButton>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                <HeroStat
-                  label="Plan"
-                  value={plannedWorkout?.name || 'No plan'}
-                  detail={
-                    plannedWorkout
-                      ? `${plannedExerciseCount} exercicios previstos para a data selecionada.`
-                      : 'Nenhum treino planejado para o dia selecionado.'
-                  }
-                />
-                <HeroStat
-                  label="Execution"
-                  value={`${workoutsForDate.length} registradas`}
-                  detail={`${completedCount} concluido(s) dentro do estado local desta rota.`}
-                />
-                <HeroStat
-                  label="Volume"
-                  value={`${formatVolume(totalVolume)} kg`}
-                  detail="Carga total registrada nas sessoes do dia."
-                />
-              </div>
+      <Section
+        title="Session line"
+        subtitle="Antes do log detalhado, deixe visivel se existe plano, execucao e comparacao pronta para agir."
+      >
+        <Card className="px-5 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="atlas-overline">Session line</p>
+              <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
+                {plannedWorkout?.name || 'No planned session'}
+              </p>
+              <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                {plannedWorkout
+                  ? `${plannedWorkout.duration_minutes || 0} min · RPE ${plannedWorkout.perceived_effort || '--'}`
+                  : 'Use o registro local para estruturar a execucao do dia mesmo sem plano.'}
+              </p>
             </div>
-
-            <aside className="rounded-[30px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.6)] p-5 shadow-[var(--shadow-xs)] lg:p-6">
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div>
-                  <p className="atlas-overline">Session line</p>
-                  <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                    {plannedWorkout?.name || 'No planned session'}
-                  </p>
-                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                    {plannedWorkout
-                      ? `${plannedWorkout.duration_minutes || 0} min · RPE ${plannedWorkout.perceived_effort || '--'}`
-                      : 'Use o registro local para estruturar a execucao do dia mesmo sem plano.'}
-                  </p>
-                </div>
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] text-[hsl(var(--fg-2))]">
-                  <Dumbbell className="h-4 w-4" strokeWidth={1.9} />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <SessionSignal
-                  label="Plan ready"
-                  value={plannedWorkout ? 'Visible' : 'Open'}
-                  detail={
-                    plannedWorkout
-                      ? `${plannedExerciseCount} exercicios definidos para comparar.`
-                      : 'Sem plano ativo para o dia selecionado.'
-                  }
-                  tone={plannedWorkout ? 'neutral' : 'warn'}
-                />
-                <SessionSignal
-                  label="Execution logged"
-                  value={workoutsForDate.length > 0 ? `${workoutsForDate.length} session(s)` : 'None yet'}
-                  detail={
-                    workoutsForDate.length > 0
-                      ? `${completedCount} marcada(s) como concluida(s).`
-                      : 'Adicione uma execucao para acompanhar o dia.'
-                  }
-                  tone={workoutsForDate.length > 0 ? 'ok' : 'warn'}
-                />
-                <SessionSignal
-                  label="Comparison ready"
-                  value={`${Math.round(executionCoverage)}% match`}
-                  detail="A comparacao abaixo separa claramente o que era plano do que foi executado."
-                  tone={executionCoverage >= 100 ? 'ok' : 'neutral'}
-                />
-              </div>
-            </aside>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
+              <Dumbbell className="h-4 w-4" strokeWidth={1.9} />
+            </div>
           </div>
-        </section>
 
-        <StatusBanner tone="warning">
-          Workouts agora usa somente estado local desta pagina. Nenhuma logica de Protocols continua ligada a esta rota.
-        </StatusBanner>
-
-        {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
+          <div className="mt-5 space-y-3">
+            <SessionSignal
+              label="Plan ready"
+              value={plannedWorkout ? 'Visible' : 'Open'}
+              detail={
+                plannedWorkout
+                  ? `${plannedExerciseCount} exercicios definidos para comparar.`
+                  : 'Sem plano ativo para o dia selecionado.'
+              }
+              tone={plannedWorkout ? 'neutral' : 'warn'}
+            />
+            <SessionSignal
+              label="Execution logged"
+              value={workoutsForDate.length > 0 ? `${workoutsForDate.length} session(s)` : 'None yet'}
+              detail={
+                workoutsForDate.length > 0
+                  ? `${completedCount} marcada(s) como concluida(s).`
+                  : 'Adicione uma execucao para acompanhar o dia.'
+              }
+              tone={workoutsForDate.length > 0 ? 'ok' : 'warn'}
+            />
+            <SessionSignal
+              label="Comparison ready"
+              value={`${Math.round(executionCoverage)}% match`}
+              detail="A comparacao abaixo separa claramente o que era plano do que foi executado."
+              tone={executionCoverage >= 100 ? 'ok' : 'neutral'}
+            />
+          </div>
+        </Card>
+      </Section>
 
         <SectionCard
           title="Plan vs execution"
@@ -1002,7 +994,7 @@ function WorkoutsContent() {
             ) : null
           }
         >
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4">
             <ComparisonPanel
               title="No planned session"
               eyebrow="Planned"
@@ -1112,7 +1104,7 @@ function WorkoutsContent() {
             if (!open) setEditingWorkout(null);
           }}
         >
-          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[980px]">
+          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
             <DialogHeader className="relative overflow-hidden border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand)/0.1)] to-transparent" />
               <div className="relative">
@@ -1138,7 +1130,6 @@ function WorkoutsContent() {
             />
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
+    </AppContainer>
   );
 }
