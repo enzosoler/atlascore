@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -37,6 +38,7 @@ import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 import { searchFoods } from '@/services/foodApi';
+import { searchFatSecretFoods } from '@/services/fatsecretService';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -71,6 +73,10 @@ const MOCK_PRESCRIBED_DIET = {
 const TODAY = getToday();
 const YESTERDAY = shiftDate(TODAY, -1);
 const USDA_SEARCH_DEBOUNCE_MS = 300;
+const FATSECRET_SEARCH_DEBOUNCE_MS = 300;
+const RECENT_FOODS_STORAGE_KEY = 'atlas_recent_foods';
+
+
 const MEAL_ORDER = [
   'breakfast',
   'morning_snack',
@@ -205,6 +211,26 @@ function getRemainingValue(target, current) {
   return Math.max(0, Math.round(target - current));
 }
 
+function getRecentFoods() {
+  try {
+    const item = localStorage.getItem(RECENT_FOODS_STORAGE_KEY);
+    return item ? JSON.parse(item) : [];
+  } catch (error) {
+    console.error("Error reading recent foods from local storage:", error);
+    return [];
+  }
+}
+
+function addRecentFood(food) {
+  try {
+    const recentFoods = getRecentFoods();
+    const updatedFoods = [food, ...recentFoods.filter((f) => f.id !== food.id)].slice(0, 5);
+    localStorage.setItem(RECENT_FOODS_STORAGE_KEY, JSON.stringify(updatedFoods));
+  } catch (error) {
+    console.error("Error saving recent food to local storage:", error);
+  }
+}
+
 function formatDateKey(value) {
   if (!value) return TODAY;
 
@@ -282,20 +308,20 @@ function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', MEAL_MACRO_DOT[tone])} />
-            <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+            <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]\
               {label}
             </p>
           </div>
-          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]\
             {detail || (remaining > 0 ? `${remaining}${unit} restantes` : 'Meta atingida')}
           </p>
         </div>
-        <p className="shrink-0 text-[13px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+        <p className="shrink-0 text-[13px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]\
           {Math.round(consumed)} / {target}
           {unit}
         </p>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
+      <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]\
         <div
           className={cn('h-full rounded-full', TRACK_FILL_CLASS[tone])}
           style={{ width: `${pct}%` }}
@@ -310,13 +336,13 @@ function LoggedMetric({ label, value, unit, tone = 'calories' }) {
     <div className="bg-[hsl(var(--card)/0.86)] px-4 py-3">
       <div className="flex items-center gap-2">
         <span className={cn('h-2 w-2 rounded-full', MEAL_MACRO_DOT[tone])} />
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]\
           {label}
         </p>
       </div>
-      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]\
         {value}
-        <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]">{unit}</span>
+        <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]\">{unit}</span>
       </p>
     </div>
   );
@@ -332,405 +358,262 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+          <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]\
             {food.name}
           </p>
-          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]\
             {food.brand || 'USDA FoodData Central'}
           </p>
         </div>
-
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.86)] text-[hsl(var(--fg-2))]">
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-          ) : (
-            <Plus className="h-4 w-4" strokeWidth={1.9} />
-          )}
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-2 sm:grid-cols-4">
-        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-            kcal
-          </p>
-          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
-            {Math.round(food.calories || 0)}
-          </p>
-        </div>
-        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-            proteína
-          </p>
-          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
-            {Math.round(food.protein || 0)} g
-          </p>
-        </div>
-        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-            carbs
-          </p>
-          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
-            {Math.round(food.carbs || 0)} g
-          </p>
-        </div>
-        <div className="rounded-[18px] bg-[hsl(var(--card)/0.92)] px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-            gordura
-          </p>
-          <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
-            {Math.round(food.fat || 0)} g
-          </p>
+        <div className="grid shrink-0 grid-cols-2 gap-x-3 gap-y-2 text-right">
+          <LoggedMetric label="kcal" value={formatUnit(food.calories, '')} />
+          <LoggedMetric label="prot" value={formatUnit(food.protein, 'g')} tone="protein" />
+          <LoggedMetric label="carbs" value={formatUnit(food.carbs, 'g')} tone="carbs" />
+          <LoggedMetric label="fat" value={formatUnit(food.fat, 'g')} tone="fat" />
         </div>
       </div>
     </button>
   );
 }
 
-function MealCard({ meal, onEdit, onDelete }) {
+function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
   return (
-    <article className="atlas-card px-5 py-5 lg:px-6 lg:py-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 flex-1 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-              {getMealTypeLabel(meal?.meal_type)}
-            </span>
-            <span className="rounded-full border border-transparent bg-[hsl(var(--warn)/0.12)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(34_68%_32%)]">
-              {meal?.foods?.length || 0} itens
-            </span>
-          </div>
-
-          <div>
-            <h3 className="text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {meal?.title || getMealTypeLabel(meal?.meal_type)}
-            </h3>
-            <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              {meal?.foods?.length
-                ? meal.foods.map((food) => food.name).join(' · ')
-                : 'Sem alimentos adicionados'}
+    <Card className="px-5 py-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <UtensilsCrossed className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
+            <p className="text-sm font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]\
+              {meal.title}
             </p>
           </div>
-
-          <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.55)]">
-            <div className="grid gap-px bg-[hsl(var(--border)/0.7)] sm:grid-cols-4">
-              <LoggedMetric label="Calorias" value={meal?.total_calories || 0} unit="kcal" />
-              <LoggedMetric
-                label="Proteína"
-                value={meal?.total_protein || 0}
-                unit="g"
-                tone="protein"
-              />
-              <LoggedMetric
-                label="Carbos"
-                value={meal?.total_carbs || 0}
-                unit="g"
-                tone="carbs"
-              />
-              <LoggedMetric label="Gordura" value={meal?.total_fat || 0} unit="g" tone="fat" />
-            </div>
-          </div>
-
-          {meal?.notes ? (
-            <div className="rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                Contexto
-              </p>
-              <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">{meal.notes}</p>
-            </div>
-          ) : null}
+          <p className="mt-2.5 text-sm text-[hsl(var(--fg-2))]\
+            {meal.foods.map((food) => food.name).join(', ')}
+          </p>
         </div>
-
-        <div className="flex w-full flex-col gap-3 lg:w-[188px]">
-          <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.58)] px-4 py-4">
-            <p className="atlas-metric-label">Energia</p>
-            <p className="mt-3 text-[1.75rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
-              {Math.round(meal?.total_calories || 0)}
-              <span className="ml-1 text-[13px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-                kcal
-              </span>
-            </p>
-            <p className="mt-2 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-              Registro isolado desta refeição.
-            </p>
-          </div>
-
-          {onEdit || onDelete ? (
-            <div className="flex flex-wrap gap-2 lg:flex-col">
-              {onEdit ? (
-                <button
-                  type="button"
-                  onClick={onEdit}
-                  className="atlas-button atlas-button-secondary h-10 flex-1 lg:w-full"
-                >
-                  <Pencil className="h-4 w-4" strokeWidth={1.9} />
-                  Editar
-                </button>
-              ) : null}
-              {onDelete ? (
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)] lg:w-full"
-                >
-                  <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-                  Excluir
-                </button>
-              ) : null}
-            </div>
-          ) : null}
+        <div className="grid shrink-0 grid-cols-2 gap-x-3 gap-y-2 text-right">
+          <LoggedMetric label="kcal" value={formatUnit(meal.total_calories, '')} />
+          <LoggedMetric label="prot" value={formatUnit(meal.total_protein, 'g')} tone="protein" />
+          <LoggedMetric label="carbs" value={formatUnit(meal.total_carbs, 'g')} tone="carbs" />
+          <LoggedMetric label="fat" value={formatUnit(meal.total_fat, 'g')} tone="fat" />
         </div>
       </div>
-    </article>
+      {meal.notes ? (
+        <div className="mt-4 border-t border-[hsl(var(--border))] pt-4">
+          <p className="text-sm text-[hsl(var(--fg-2))]\">{meal.notes}</p>
+        </div>
+      ) : null}
+      <div className="mt-4 flex items-center justify-end gap-3 border-t border-[hsl(var(--border))] pt-4">
+        <SecondaryButton
+          size="sm"
+          onClick={() => onDelete(meal)}
+          disabled={isProcessing}
+          className="gap-2"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Apagar
+        </SecondaryButton>
+        <PrimaryButton
+          size="sm"
+          onClick={() => onEdit(meal)}
+          disabled={isProcessing}
+          className="gap-2"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Editar
+        </PrimaryButton>
+      </div>
+    </Card>
   );
 }
 
-function MealForm({ meal, selectedDate, onCancel, onSubmit }) {
-  const [form, setForm] = useState(() => getMealFormState(meal, selectedDate));
+function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
+  const [form, setForm] = useState(getMealFormState(meal, selectedDate));
 
-  const updateField = (field, value) => {
+  const handleField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
-    const foods = buildFoodList(form.foodsText);
-
-    onSubmit({
-      id: meal?.id || createLocalId('meal'),
-      date: form.date || selectedDate,
-      meal_type: form.meal_type,
-      title: form.title.trim() || getMealTypeLabel(form.meal_type),
-      foods,
-      total_calories: toNumber(form.total_calories),
-      total_protein: toNumber(form.total_protein),
-      total_carbs: toNumber(form.total_carbs),
-      total_fat: toNumber(form.total_fat),
-      notes: form.notes.trim(),
-    });
+    onSave({ ...form });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
-      <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
-        <p className="atlas-overline">Dados da refeição</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className={FIELD_LABEL_CLASS}>
-            Data
-            <input
-              type="date"
-              value={form.date}
-              onChange={(event) => updateField('date', event.target.value)}
-              className={INPUT_CLASS_NAME}
-            />
-          </label>
-
-          <label className={FIELD_LABEL_CLASS}>
-            Tipo de refeição
-            <select
-              value={form.meal_type}
-              onChange={(event) => updateField('meal_type', event.target.value)}
-              className={SELECT_CLASS_NAME}
-            >
-              {Object.entries(MEAL_TYPES).map(([value, item]) => (
-                <option key={value} value={value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <label className={cn(FIELD_LABEL_CLASS, 'mt-4')}>
-          Titulo
+    <form onSubmit={handleSubmit}>
+      <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
+        <label className={FIELD_LABEL_CLASS}>
+          Data da refeição
           <input
-            type="text"
-            value={form.title}
-            onChange={(event) => updateField('title', event.target.value)}
-            placeholder="Ex: Pos-treino rapido"
+            type="date"
+            value={formatDateKey(form.date)}
+            onChange={(event) => handleField('date', event.target.value)}
             className={INPUT_CLASS_NAME}
           />
         </label>
-
-        <label className={cn(FIELD_LABEL_CLASS, 'mt-4')}>
-          Alimentos
+        <label className={FIELD_LABEL_CLASS}>
+          Tipo de refeição
+          <select
+            value={form.meal_type}
+            onChange={(event) => handleField('meal_type', event.target.value)}
+            className={SELECT_CLASS_NAME}
+          >
+            {Object.entries(MEAL_TYPES).map(([key, { label }]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="mt-5">
+        <label className={FIELD_LABEL_CLASS}>
+          Título da refeição
+          <input
+            type="text"
+            value={form.title}
+            onChange={(event) => handleField('title', event.target.value)}
+            placeholder="Ex: Café da manhã, Pós-treino"
+            className={INPUT_CLASS_NAME}
+          />
+        </label>
+      </div>
+      <div className="mt-5">
+        <label className={FIELD_LABEL_CLASS}>
+          Alimentos (um por linha)
           <textarea
             value={form.foodsText}
-            onChange={(event) => updateField('foodsText', event.target.value)}
-            placeholder={'Um alimento por linha\nEx: Frango desfiado\nEx: Arroz branco'}
+            onChange={(event) => handleField('foodsText', event.target.value)}
+            placeholder="Ex:\n1 banana\n1 scoop de whey\n2 fatias de pão integral"
             className={TEXTAREA_CLASS_NAME}
           />
         </label>
       </div>
-
-      <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <p className="atlas-overline">Resumo de macros</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-4">
-          <label className={FIELD_LABEL_CLASS}>
-            Calorias
-            <input
-              type="number"
-              min="0"
-              value={form.total_calories}
-              onChange={(event) => updateField('total_calories', event.target.value)}
-              className={INPUT_CLASS_NAME}
-            />
-          </label>
-          <label className={FIELD_LABEL_CLASS}>
-            Proteína
-            <input
-              type="number"
-              min="0"
-              value={form.total_protein}
-              onChange={(event) => updateField('total_protein', event.target.value)}
-              className={INPUT_CLASS_NAME}
-            />
-          </label>
-          <label className={FIELD_LABEL_CLASS}>
-            Carbos
-            <input
-              type="number"
-              min="0"
-              value={form.total_carbs}
-              onChange={(event) => updateField('total_carbs', event.target.value)}
-              className={INPUT_CLASS_NAME}
-            />
-          </label>
-          <label className={FIELD_LABEL_CLASS}>
-            Gordura
-            <input
-              type="number"
-              min="0"
-              value={form.total_fat}
-              onChange={(event) => updateField('total_fat', event.target.value)}
-              className={INPUT_CLASS_NAME}
-            />
-          </label>
-        </div>
-      </div>
-
-      <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
+      <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-5 md:grid-cols-4">
         <label className={FIELD_LABEL_CLASS}>
-          Observacoes
+          Calorias (kcal)
+          <input
+            type="number"
+            value={form.total_calories}
+            onChange={(event) => handleField('total_calories', event.target.value)}
+            placeholder="0"
+            className={INPUT_CLASS_NAME}
+          />
+        </label>
+        <label className={FIELD_LABEL_CLASS}>
+          Proteínas (g)
+          <input
+            type="number"
+            value={form.total_protein}
+            onChange={(event) => handleField('total_protein', event.target.value)}
+            placeholder="0"
+            className={INPUT_CLASS_NAME}
+          />
+        </label>
+        <label className={FIELD_LABEL_CLASS}>
+          Carboidratos (g)
+          <input
+            type="number"
+            value={form.total_carbs}
+            onChange={(event) => handleField('total_carbs', event.target.value)}
+            placeholder="0"
+            className={INPUT_CLASS_NAME}
+          />
+        </label>
+        <label className={FIELD_LABEL_CLASS}>
+          Gorduras (g)
+          <input
+            type="number"
+            value={form.total_fat}
+            onChange={(event) => handleField('total_fat', event.target.value)}
+            placeholder="0"
+            className={INPUT_CLASS_NAME}
+          />
+        </label>
+      </div>
+      <div className="mt-5">
+        <label className={FIELD_LABEL_CLASS}>
+          Notas
           <textarea
             value={form.notes}
-            onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="Contexto util para lembrar o motivo dessa refeição."
+            onChange={(event) => handleField('notes', event.target.value)}
+            placeholder="Alguma observação sobre a refeição?"
             className={TEXTAREA_CLASS_NAME}
           />
         </label>
       </div>
-
-      <div className="flex flex-col-reverse gap-3 border-t border-[hsl(var(--border)/0.85)] pt-6 sm:flex-row sm:justify-end">
-        <SecondaryButton type="button" onClick={onCancel}>
+      <ActionRow className="mt-6">
+        <SecondaryButton type="button" onClick={onCancel} disabled={isSaving}>
           Cancelar
         </SecondaryButton>
-        <PrimaryButton type="submit">
-          {meal ? 'Salvar refeição' : 'Adicionar refeição'}
+        <PrimaryButton type="submit" disabled={isSaving} className="gap-2">
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Plus className="h-4 w-4" />
+          )}
+          {meal ? 'Salvar' : 'Adicionar'}
         </PrimaryButton>
-      </div>
+      </ActionRow>
     </form>
   );
 }
 
-export default function Nutrition() {
-  return (
-    <SafePageBoundary
-      title="Nutrição"
-      subtitle="Busca USDA, snapshots no Supabase e comparação simples com as metas do dia."
-      maxWidth="max-w-6xl"
-      fallbackDescription="A rota de Nutrition continua acessivel mesmo se a interface principal falhar."
-    >
-      <NutritionContent />
-    </SafePageBoundary>
-  );
-}
-
-function NutritionContent() {
+export default function NutritionPage() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(TODAY);
-  const [mealFilter, setMealFilter] = useState('all');
-
-  // ── Active diet plan ──────────────────────────────────────────────────────
-  const { data: activePlans = [] } = useQuery({
-    queryKey: ['diet-plans-active'],
-    queryFn: () => base44.entities.DietPlan.filter({ active: true }),
-    staleTime: 5 * 60 * 1000,
-  });
-  const activeDietPlan = activePlans[0] || null;
-
-  // Resolve macro targets: plan first, then DEFAULT_PROFILE fallback
-  const nutritionProfile = useMemo(() => ({
-    calories_target:
-      activeDietPlan?.target_calories ??
-      activeDietPlan?.daily_calories ??
-      DEFAULT_PROFILE.calories_target,
-    protein_target:
-      activeDietPlan?.target_protein ??
-      activeDietPlan?.daily_protein ??
-      DEFAULT_PROFILE.protein_target,
-    carbs_target:
-      activeDietPlan?.target_carbs ??
-      activeDietPlan?.daily_carbs ??
-      DEFAULT_PROFILE.carbs_target,
-    fat_target:
-      activeDietPlan?.target_fat ??
-      activeDietPlan?.daily_fat ??
-      DEFAULT_PROFILE.fat_target,
-  }), [activeDietPlan]);
+  const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [notice, setNotice] = useState(null);
   const [meals, setMeals] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState(null);
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [isSearchingFoods, setIsSearchingFoods] = useState(false);
-  const [searchError, setSearchError] = useState('');
+  const [query, setQuery] = useState(''); // For USDA search
+  const [results, setResults] = useState([]); // For USDA search
+  const [isSearchingFoods, setIsSearchingFoods] = useState(false); // For USDA search
+  const [searchError, setSearchError] = useState(''); // For USDA search
+
+  const [fatSecretQuery, setFatSecretQuery] = useState('');
+  const [fatSecretResults, setFatSecretResults] = useState([]);
+  const [isSearchingFatSecretFoods, setIsSearchingFatSecretFoods] = useState(false);
+  const [fatSecretSearchError, setFatSecretSearchError] = useState('');
   const [savingFoodId, setSavingFoodId] = useState(null);
   const [isLoadingMeals, setIsLoadingMeals] = useState(false);
+  const [recentFoods, setRecentFoods] = useState([]);
 
   useEffect(() => {
+    if (!user?.id) return undefined;
+
     let isActive = true;
-
-    async function loadFoodLogs() {
-      if (!user?.id) {
-        setMeals([]);
-        return;
-      }
-
+    const fetchInitialData = async () => {
       setIsLoadingMeals(true);
-
       try {
         const { data, error } = await supabase
           .from('food_logs')
-          .select('id, food_name, calories, protein, carbs, fat, quantity, date')
+          .select('*')
           .eq('user_id', user.id)
-          .order('date', { ascending: false })
-          .limit(200);
+          .order('date', { ascending: false });
 
         if (error) throw error;
-        if (!isActive) return;
 
-        setMeals((data || []).map(mapFoodLogToMeal));
+        if (isActive) {
+          setMeals(data.map(mapFoodLogToMeal));
+        }
       } catch (error) {
-        console.error('Nutrition food_logs load failed:', error);
-
-        if (!isActive) return;
-
-        setNotice({
-          tone: 'warning',
-          message:
-            'Não foi possivel carregar os snapshots salvos no Supabase. O registro manual continua disponível.',
-        });
+        console.error('Failed to load meals:', error);
+        if (isActive) {
+          setNotice({
+            tone: 'error',
+            message: 'Não foi possível carregar seu histórico de refeições.',
+          });
+        }
       } finally {
         if (isActive) {
           setIsLoadingMeals(false);
         }
       }
-    }
+    };
 
-    loadFoodLogs();
+    fetchInitialData();
 
     return () => {
       isActive = false;
@@ -738,195 +621,106 @@ function NutritionContent() {
   }, [user?.id]);
 
   useEffect(() => {
-    const normalizedQuery = query.trim();
+    setRecentFoods(getRecentFoods());
+  }, []);
 
-    if (normalizedQuery.length < 2) {
+  useEffect(() => {
+    // USDA Search Logic
+    const normalizedUSDAQuery = query.trim();
+    if (normalizedUSDAQuery.length < 2) {
       setResults([]);
       setSearchError('');
       setIsSearchingFoods(false);
-      return undefined;
+    } else {
+      let isActiveUSDA = true;
+      const timeoutUSDA = window.setTimeout(async () => {
+        setIsSearchingFoods(true);
+        setSearchError('');
+        try {
+          const foods = await searchFoods(normalizedUSDAQuery);
+          if (isActiveUSDA) {
+            setResults(foods);
+          }
+        } catch (error) {
+          console.error('USDA food search failed:', error);
+          if (isActiveUSDA) {
+            setResults([]);
+            setSearchError(error?.message || 'Não foi possivel buscar alimentos agora.');
+          }
+        } finally {
+          if (isActiveUSDA) {
+            setIsSearchingFoods(false);
+          }
+        }
+      }, USDA_SEARCH_DEBOUNCE_MS);
+      return () => {
+        isActiveUSDA = false;
+        window.clearTimeout(timeoutUSDA);
+      };
     }
 
-    let isActive = true;
-    const timeout = window.setTimeout(async () => {
-      setIsSearchingFoods(true);
-      setSearchError('');
-
-      try {
-        const foods = await searchFoods(normalizedQuery);
-        if (isActive) {
-          setResults(foods);
+    // FatSecret Search Logic
+    const normalizedFatSecretQuery = fatSecretQuery.trim();
+    if (normalizedFatSecretQuery.length < 2) {
+      setFatSecretResults([]);
+      setFatSecretSearchError('');
+      setIsSearchingFatSecretFoods(false);
+    } else {
+      let isActiveFatSecret = true;
+      const timeoutFatSecret = window.setTimeout(async () => {
+        setIsSearchingFatSecretFoods(true);
+        setFatSecretSearchError('');
+        try {
+          let foods = await searchFatSecretFoods(normalizedFatSecretQuery, 'en');
+          if (foods.length === 0) {
+            foods = await searchFatSecretFoods(normalizedFatSecretQuery, 'pt');
+          }
+          if (isActiveFatSecret) {
+            setFatSecretResults(foods);
+          }
+        } catch (error) {
+          console.error('FatSecret food search failed:', error);
+          if (isActiveFatSecret) {
+            setFatSecretResults([]);
+            setFatSecretSearchError(error?.message || 'Não foi possivel buscar alimentos agora.');
+          }
+        } finally {
+          if (isActiveFatSecret) {
+            setIsSearchingFatSecretFoods(false);
+          }
         }
-      } catch (error) {
-        console.error('USDA food search failed:', error);
-
-        if (isActive) {
-          setResults([]);
-          setSearchError(error?.message || 'Não foi possivel buscar alimentos agora.');
-        }
-      } finally {
-        if (isActive) {
-          setIsSearchingFoods(false);
-        }
-      }
-    }, USDA_SEARCH_DEBOUNCE_MS);
-
-    return () => {
-      isActive = false;
-      window.clearTimeout(timeout);
-    };
-  }, [query]);
-
-  const mealsForDate = useMemo(() => {
-    return meals
-      .filter((meal) => meal.date === selectedDate)
-      .sort((left, right) => getMealSortOrder(left.meal_type) - getMealSortOrder(right.meal_type));
-  }, [meals, selectedDate]);
-
-  const filterOptions = useMemo(() => {
-    const availableTypes = Array.from(new Set(mealsForDate.map((meal) => meal.meal_type)));
-    return ['all', ...availableTypes];
-  }, [mealsForDate]);
-
-  const filteredMeals = useMemo(() => {
-    if (mealFilter === 'all') return mealsForDate;
-    return mealsForDate.filter((meal) => meal.meal_type === mealFilter);
-  }, [mealFilter, mealsForDate]);
-
-  const nutritionTotals = useMemo(() => {
-    return mealsForDate.reduce(
-      (totals, meal) => ({
-        calories: totals.calories + (meal.total_calories || 0),
-        protein: totals.protein + (meal.total_protein || 0),
-        carbs: totals.carbs + (meal.total_carbs || 0),
-        fat: totals.fat + (meal.total_fat || 0),
-      }),
-      { calories: 0, protein: 0, carbs: 0, fat: 0 }
-    );
-  }, [mealsForDate]);
-
-  const remainingCalories = getRemainingValue(
-    nutritionProfile.calories_target,
-    nutritionTotals.calories
-  );
-  const remainingProtein = getRemainingValue(
-    nutritionProfile.protein_target,
-    nutritionTotals.protein
-  );
-  const calorieProgress = getProgressPercent(
-    nutritionTotals.calories,
-    nutritionProfile.calories_target
-  );
-  const planMealCount = activeDietPlan?.meals?.length || MOCK_PRESCRIBED_DIET.meals.length;
-  const mealCoverage = Math.round(
-    getProgressPercent(mealsForDate.length, planMealCount)
-  );
-
-  const handleCreate = () => {
-    setNotice(null);
-    setEditingMeal(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEdit = (meal) => {
-    setNotice(null);
-    setEditingMeal(meal);
-    setIsFormOpen(true);
-  };
-
-  const handleDelete = async (meal) => {
-    const mealLabel = meal?.title || getMealTypeLabel(meal?.meal_type);
-    const confirmed = window.confirm(`Excluir ${mealLabel}?`);
-
-    if (!confirmed) return;
-
-    try {
-      if (meal?.source === 'supabase' && meal?.source_row_id && user?.id) {
-        const { error } = await supabase
-          .from('food_logs')
-          .delete()
-          .eq('id', meal.source_row_id)
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-      }
-
-      setMeals((current) => current.filter((item) => item.id !== meal.id));
-      setNotice({
-        tone: 'success',
-        message:
-          meal?.source === 'supabase'
-            ? 'Snapshot removido do food_logs.'
-            : 'Refeição removida do estado local.',
-      });
-    } catch (error) {
-      console.error('Nutrition delete failed:', error);
-      setNotice({
-        tone: 'warning',
-        message: 'Não foi possivel excluir este registro agora.',
-      });
+      }, FATSECRET_SEARCH_DEBOUNCE_DEBOUNCE_MS);
+      return () => {
+        isActiveFatSecret = false;
+        window.clearTimeout(timeoutFatSecret);
+      };
     }
-  };
-
-  const handleSaveMeal = (payload) => {
-    if (!payload.foods.length && !payload.title.trim()) {
-      setNotice({
-        tone: 'warning',
-        message: 'Adicione um titulo ou ao menos um alimento antes de salvar.',
-      });
-      return;
-    }
-
-    setMeals((current) => {
-      const exists = current.some((item) => item.id === payload.id);
-
-      if (exists) {
-        return current.map((item) =>
-          item.id === payload.id ? { ...payload, source: item.source || 'local' } : item
-        );
-      }
-
-      return [{ ...payload, source: 'local' }, ...current];
-    });
-
-    setIsFormOpen(false);
-    setEditingMeal(null);
-    setNotice({
-      tone: 'success',
-      message:
-        payload.id === editingMeal?.id ? 'Refeição local atualizada.' : 'Refeição local adicionada.',
-    });
-  };
+  }, [query, fatSecretQuery]);
 
   const handleSelectFood = async (food) => {
     if (!user?.id) {
-      setNotice({
-        tone: 'warning',
-        message: 'Faça login para salvar alimentos.',
-      });
+      setNotice({ tone: 'error', message: 'Você precisa estar logado para salvar um alimento.' });
       return;
     }
 
-    const snapshot = {
-      user_id: user.id,
-      food_name: food.name,
-      calories: food.calories,
-      protein: food.protein,
-      carbs: food.carbs,
-      fat: food.fat,
-      quantity: 1,
-      date: buildSnapshotDate(selectedDate),
-    };
-
     setSavingFoodId(food.id);
-    setNotice(null);
-
     try {
-      const { data, error } = await supabase
-        .from('food_logs')
-        .insert(snapshot)
-        .select('id, food_name, calories, protein, carbs, fat, quantity, date')
-        .single();
+      const snapshot = {
+        user_id: user.id,
+        date: buildSnapshotDate(selectedDate),
+        food_name: food.name,
+        calories: food.calories,
+        protein: food.protein,
+        carbs: food.carbs,
+        fat: food.fat,
+        quantity: 1,
+        serving_unit: 'g',
+        serving_size: 100,
+        external_id: food.id,
+        source_api: food.brand === 'USDA' ? 'USDA' : 'FatSecret',
+      };
+
+      const { data, error } = await supabase.from('food_logs').insert(snapshot).select().single();
 
       if (error) throw error;
 
@@ -936,390 +730,356 @@ function NutritionContent() {
       setQuery('');
       setResults([]);
       setSearchError('');
+      setFatSecretQuery('');
+      setFatSecretResults([]);
+      setFatSecretSearchError('');
       setNotice({
         tone: 'success',
         message: `${food.name} adicionado com sucesso.`,
       });
+      addRecentFood(food);
     } catch (error) {
-      console.error('Nutrition snapshot save failed:', error);
+      console.error('Failed to save food log:', error);
       setNotice({
-        tone: 'warning',
-        message: 'Não foi possivel salvar o snapshot deste alimento no Supabase.',
+        tone: 'error',
+        message: `Não foi possível salvar ${food.name}. Tente novamente.`,
       });
     } finally {
       setSavingFoodId(null);
     }
   };
 
+  const handleSaveMeal = async (form) => {
+    if (!user?.id) {
+      setNotice({ tone: 'error', message: 'Você precisa estar logado para salvar uma refeição.' });
+      return;
+    }
+
+    const isEditing = !!editingMeal?.id;
+    const mealId = isEditing ? editingMeal.id : createLocalId('meal');
+
+    const mealData = {
+      id: mealId,
+      source: 'supabase',
+      source_row_id: isEditing ? editingMeal.source_row_id : null,
+      date: formatDateKey(form.date),
+      meal_type: form.meal_type,
+      title: form.title || getMealTypeLabel(form.meal_type),
+      foods: buildFoodList(form.foodsText),
+      total_calories: toNumber(form.total_calories),
+      total_protein: toNumber(form.total_protein),
+      total_carbs: toNumber(form.total_carbs),
+      total_fat: toNumber(form.total_fat),
+      notes: form.notes,
+    };
+
+    // TODO: Implement Supabase upsert for meals
+
+    setMeals((current) =>
+      isEditing ? current.map((m) => (m.id === mealId ? mealData : m)) : [mealData, ...current]
+    );
+    setIsFormOpen(false);
+    setEditingMeal(null);
+    setNotice({
+      tone: 'success',
+      message: `${mealData.title} foi ${isEditing ? 'atualizada' : 'adicionada'} com sucesso.`,
+    });
+  };
+
+  const handleDeleteMeal = (meal) => {
+    // TODO: Implement Supabase delete for meals
+    setMeals((current) => current.filter((m) => m.id !== meal.id));
+    setNotice({ tone: 'success', message: `${meal.title} foi removida.` });
+  };
+
+  const handleDateChange = (newDate) => {
+    setSelectedDate(formatDateKey(newDate));
+  };
+
+  const dailyTotals = useMemo(() => {
+    const todaysMeals = meals.filter((meal) => meal.date === selectedDate);
+    return {
+      calories: todaysMeals.reduce((sum, meal) => sum + meal.total_calories, 0),
+      protein: todaysMeals.reduce((sum, meal) => sum + meal.total_protein, 0),
+      carbs: todaysMeals.reduce((sum, meal) => sum + meal.total_carbs, 0),
+      fat: todaysMeals.reduce((sum, meal) => sum + meal.total_fat, 0),
+    };
+  }, [meals, selectedDate]);
+
+  const sortedMeals = useMemo(() => {
+    return meals
+      .filter((meal) => meal.date === selectedDate)
+      .sort((a, b) => getMealSortOrder(a.meal_type) - getMealSortOrder(b.meal_type));
+  }, [meals, selectedDate]);
+
   return (
-    <AppContainer>
-      <PageHeader
-        eyebrow="Nutrição"
-        title="Nutrição que acompanha o ritmo do dia."
-        subtitle="Busque alimentos na USDA, salve snapshots no Supabase e mantenha a leitura do dia focada na próxima decisão alimentar."
-        accentClassName="from-[hsl(var(--warn)/0.12)] via-[hsl(var(--warn)/0.04)]"
-        actions={
-          <ActionRow>
-            <DateStepper
-              date={selectedDate}
-              onChange={(amount) => setSelectedDate(shiftDate(selectedDate, amount))}
-            />
-            <PrimaryButton
-              type="button"
-              onClick={handleCreate}
-              className="inline-flex items-center justify-center gap-2"
-            >
-              <Plus className="h-4 w-4" strokeWidth={1.9} />
-              Adicionar refeição
-            </PrimaryButton>
-          </ActionRow>
-        }
-      >
-        <div className="grid gap-3 sm:grid-cols-3">
-          <StatCard
-            label="Consumo"
-            value={formatUnit(nutritionTotals.calories, ' kcal')}
-            detail={`${remainingCalories} kcal restantes para a meta do dia.`}
+    <SafePageBoundary>
+      <AppContainer>
+        <PageHeader
+          title="Nutrição"
+          subtitle={`Resumo de calorias e macros para ${selectedDate}`}
+        />
+
+        {notice ? (
+          <StatusBanner
+            tone={notice.tone}
+            message={notice.message}
+            onDismiss={() => setNotice(null)}
+            className="mb-6"
           />
-          <StatCard
-            label="Proteína"
-            value={formatUnit(nutritionTotals.protein, ' g')}
-            detail={`${remainingProtein} g faltando para atingir a proteína alvo.`}
-          />
-          <StatCard
-            label="Refeições"
-            value={`${mealsForDate.length} registradas`}
-            detail={`Cobertura de ${mealCoverage}% da estrutura prevista para hoje.`}
-          />
-        </div>
-      </PageHeader>
+        ) : null}
 
-      {/* Info banner removed — internal implementation detail, not user-facing */}
-
-      {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
-      {isLoadingMeals ? (
-        <StatusBanner tone="neutral">Carregando refeições salvas da sua conta...</StatusBanner>
-      ) : null}
-
-      <Section
-        title="Buscar alimento"
-        subtitle="Digite pelo menos 2 letras. Ao selecionar um item, a tela salva nome e macros."
-      >
-        <Card className="px-5 py-5">
-          <label className={FIELD_LABEL_CLASS}>
-            Busca USDA
-            <div className="relative mt-2">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
-              <input
-                type="text"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Ex: chicken breast, rice, banana"
-                className={cn(INPUT_CLASS_NAME, 'pl-11')}
-              />
-            </div>
-          </label>
-
-          <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-            Data ativa do registro:{' '}
-            <span className="font-semibold text-[hsl(var(--fg))]">{selectedDate}</span>
-          </p>
-
-          {query.trim().length > 0 && query.trim().length < 2 ? (
-            <p className="mt-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              Continue digitando para buscar alimentos na USDA.
-            </p>
-          ) : null}
-
-          {isSearchingFoods ? (
-            <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]">
-              <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-              Buscando alimentos na USDA FoodData Central...
-            </div>
-          ) : null}
-
-          {!isSearchingFoods && searchError ? (
-            <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]">
-              {searchError}
-            </div>
-          ) : null}
-
-          {!isSearchingFoods && !searchError && results.length > 0 ? (
-            <div className="mt-5 space-y-3">
-              {results.map((food) => (
-                <FoodSearchResult
-                  key={food.id}
-                  food={food}
-                  onSelect={handleSelectFood}
-                  isSaving={savingFoodId === food.id}
-                />
-              ))}
-            </div>
-          ) : null}
-
-          {!isSearchingFoods && !searchError && query.trim().length >= 2 && results.length === 0 ? (
-            <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              Nenhum alimento encontrado para esta busca.
-            </div>
-          ) : null}
-        </Card>
-      </Section>
-
-      <Section
-        title="Consumo e metas"
-        subtitle="Leitura nutricional clara para o dia selecionado, com foco no que falta fechar."
-      >
-        <Card className="px-5 py-5">
-          <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-4 py-4">
-            <p className="atlas-metric-label">Calorias registradas</p>
-            <p className="mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
-              {Math.round(nutritionTotals.calories)}
-              <span className="ml-1 text-[15px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-                / {nutritionProfile.calories_target} kcal
-              </span>
-            </p>
-            <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-              {remainingCalories > 0
-                ? `${remainingCalories} kcal ainda abertas dentro da meta do dia.`
-                : 'Meta calórica atingida para o dia selecionado.'}
-            </p>
-
-            <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-[hsl(var(--card))]">
-              <div
-                className="h-full rounded-full bg-[hsl(var(--fg))]"
-                style={{ width: `${calorieProgress}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="mt-5 space-y-5">
+        <Section
+          title="Metas do dia"
+          subtitle="Calorias e macronutrientes para referência rápida."
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MacroTrack
-              label="Proteína"
-              consumed={nutritionTotals.protein}
-              target={nutritionProfile.protein_target}
+              label="Calorias"
+              consumed={dailyTotals.calories}
+              target={profile.calories_target}
+              unit="kcal"
+              tone="calories"
+            />
+            <MacroTrack
+              label="Proteínas"
+              consumed={dailyTotals.protein}
+              target={profile.protein_target}
               unit="g"
               tone="protein"
             />
             <MacroTrack
               label="Carboidratos"
-              consumed={nutritionTotals.carbs}
-              target={nutritionProfile.carbs_target}
+              consumed={dailyTotals.carbs}
+              target={profile.carbs_target}
               unit="g"
               tone="carbs"
             />
             <MacroTrack
-              label="Gordura"
-              consumed={nutritionTotals.fat}
-              target={nutritionProfile.fat_target}
+              label="Gorduras"
+              consumed={dailyTotals.fat}
+              target={profile.fat_target}
               unit="g"
               tone="fat"
             />
           </div>
-        </Card>
-      </Section>
+        </Section>
 
-      <Section
-        title="Refeições do dia"
-        subtitle="Cards editáveis com leitura sequencial e foco em alimento, contexto e macros."
-        actions={
-          <div className="flex flex-wrap justify-end gap-2">
-            {filterOptions.map((option) => {
-              const isActive = mealFilter === option;
-
-              return (
-                <FilterChip
-                  key={option}
-                  onClick={() => setMealFilter(option)}
-                  active={isActive}
-                >
-                  {option === 'all' ? 'Todas' : getMealTypeLabel(option)}
-                </FilterChip>
-              );
-            })}
+        <Section
+          title="Registro do dia"
+          subtitle="Refeições e alimentos registrados na data selecionada."
+        >
+          <div className="flex items-center justify-between">
+            <DateStepper date={selectedDate} onChange={handleDateChange} />
+            <PrimaryButton onClick={() => setIsFormOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Adicionar refeição
+            </PrimaryButton>
           </div>
-        }
-      >
-        {!mealsForDate.length ? (
-          <EmptyState
-            icon={UtensilsCrossed}
-            title="Nenhuma refeição registrada"
-            description="Use a busca USDA ou o botão acima para abrir o modal local de refeição e comecar o dia alimentar."
-            action={
-              <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar refeição
-              </PrimaryButton>
-            }
-          />
-        ) : null}
 
-        {mealsForDate.length > 0 && filteredMeals.length === 0 ? (
-          <EmptyState
-            icon={Target}
-            title="Nenhuma refeição neste filtro"
-            description="Troque o filtro atual ou adicione um novo registro para este periodo."
-          />
-        ) : null}
-
-        {filteredMeals.length > 0 ? (
-          <div className="space-y-3">
-            {filteredMeals.map((meal) => (
-              <MealCard
-                key={meal.id}
-                meal={meal}
-                onEdit={meal?.source === 'supabase' ? undefined : () => handleEdit(meal)}
-                onDelete={() => handleDelete(meal)}
-              />
-            ))}
-          </div>
-        ) : null}
-      </Section>
-
-      <Section
-        title="Plano e leitura"
-        subtitle="O plano alimentar e a leitura curta do dia ficam abaixo da ação principal."
-      >
-        <div className="space-y-3">
-          <Card className="px-5 py-5">
-            {activeDietPlan ? (
-              <>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="atlas-overline">Plano ativo</p>
-                    <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                      {activeDietPlan.name}
-                    </p>
-                    {(activeDietPlan.description || activeDietPlan.objective) && (
-                      <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                        {activeDietPlan.description || activeDietPlan.objective}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.78)] text-[hsl(var(--fg-2))]">
-                    <UtensilsCrossed className="h-4 w-4" strokeWidth={1.9} />
-                  </div>
-                </div>
-
-                {(activeDietPlan.meals || []).length > 0 && (
-                  <div className="mt-5 space-y-3">
-                    {activeDietPlan.meals.map((meal, index) => (
-                      <div
-                        key={`${meal.name}-${index}`}
-                        className="flex items-start gap-3 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4"
-                      >
-                        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg-2))]">
-                          <Clock3 className="h-4 w-4" strokeWidth={1.8} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-                              Refeição {index + 1}
-                            </p>
-                            {meal.time && (
-                              <span className="text-[12px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                                {meal.time}
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                            {meal.name}
-                          </p>
-                          {(meal.calories || meal.protein) ? (
-                            <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
-                              {meal.calories ? `${meal.calories} kcal` : ''}
-                              {meal.protein ? ` · ${meal.protein}g prot` : ''}
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.78)] text-[hsl(var(--fg-2))]">
-                  <UtensilsCrossed className="h-4 w-4" strokeWidth={1.9} />
-                </div>
-                <div>
-                  <p className="atlas-overline">Plano do dia</p>
-                  <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-                    Nenhum plano alimentar ativo. Crie um em{' '}
-                    <span className="font-semibold text-[hsl(var(--fg))]">Minha Dieta</span>.
-                  </p>
-                </div>
-              </div>
-            )}
-          </Card>
-
-          <Card className="px-5 py-5">
-            <p className="atlas-metric-label">Snapshot</p>
-            <div className="mt-4 space-y-4">
-              <div>
-                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                  Refeicoes registradas
-                </p>
-                <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                  {mealsForDate.length} hoje · {planMealCount} previstas no plano.
-                </p>
-              </div>
-              <div>
-                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                  Proteína restante
-                </p>
-                <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                  {remainingProtein} g para fechar a meta configurada.
-                </p>
-              </div>
+          {isLoadingMeals ? (
+            <div className="mt-6 flex items-center justify-center gap-3 rounded-lg bg-[hsl(var(--fill))] p-8 text-sm text-[hsl(var(--fg-2))]\">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Carregando refeições...
             </div>
+          ) : null}
 
-            <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--warn))]">
-                  <Flame className="h-4 w-4" strokeWidth={1.9} />
-                </div>
-                <div>
-                  <p className="atlas-metric-label">Foco sugerido</p>
-                  <p className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                    Feche a refeição seguinte antes de revisar o resto.
-                  </p>
-                </div>
+          {!isLoadingMeals && sortedMeals.length === 0 ? (
+            <EmptyState
+              icon={UtensilsCrossed}
+              title="Nenhuma refeição registrada"
+              message="Adicione uma refeição para começar a monitorar sua nutrição."
+              className="mt-6"
+            />
+          ) : null}
+
+          {!isLoadingMeals && sortedMeals.length > 0 ? (
+            <div className="mt-6 space-y-4">
+              {sortedMeals.map((meal) => (
+                <MealCard
+                  key={meal.id}
+                  meal={meal}
+                  onEdit={() => {
+                    setEditingMeal(meal);
+                    setIsFormOpen(true);
+                  }}
+                  onDelete={handleDeleteMeal}
+                />
+              ))}
+            </div>
+          ) : null}
+        </Section>
+
+        <Section
+          title="Buscar alimento"
+          subtitle="Digite pelo menos 2 letras. Ao selecionar um item, a tela salva nome e macros."
+        >
+          <Card className="px-5 py-5">
+            <label className={FIELD_LABEL_CLASS}>
+              Busca FatSecret (PT/EN)
+              <div className="relative mt-2">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
+                <input
+                  type="text"
+                  value={fatSecretQuery}
+                  onChange={(event) => setFatSecretQuery(event.target.value)}
+                  placeholder="Ex: peito de frango, arroz, banana"
+                  className={cn(INPUT_CLASS_NAME, 'pl-11')}
+                />
               </div>
-              <p className="mt-4 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                Quanto mais cedo o dia alimentar fica visível, mais fácil fica manter contexto,
-                aderência e decisão limpa nas outras rotas.
+            </label>
+            {fatSecretQuery.trim().length > 0 && fatSecretQuery.trim().length < 2 ? (
+              <p className="mt-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
+                Continue digitando para buscar alimentos na FatSecret.
               </p>
-            </div>
+            ) : null}
+            {isSearchingFatSecretFoods ? (
+              <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]\">
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
+                Buscando alimentos na FatSecret...
+              </div>
+            ) : null}
+            {!isSearchingFatSecretFoods && fatSecretSearchError ? (
+              <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]\">
+                {fatSecretSearchError}
+              </div>
+            ) : null}
+            {!isSearchingFatSecretFoods && !fatSecretSearchError && fatSecretResults.length > 0 ? (
+              <div className="mt-5 space-y-3">
+                {fatSecretResults.map((food) => (
+                  <FoodSearchResult
+                    key={food.id}
+                    food={food}
+                    onSelect={handleSelectFood}
+                    isSaving={savingFoodId === food.id}
+                  />
+                ))}
+              </div>
+            ) : null}
+            {!isSearchingFatSecretFoods &&
+            !fatSecretSearchError &&
+            fatSecretQuery.trim().length >= 2 &&
+            fatSecretResults.length === 0 ? (
+              <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
+                Nenhum alimento encontrado para esta busca na FatSecret.
+              </div>
+            ) : null}
           </Card>
-        </div>
-      </Section>
 
-      <Dialog
-        open={isFormOpen}
-        onOpenChange={(open) => {
-          setIsFormOpen(open);
-          if (!open) setEditingMeal(null);
-        }}
-      >
-        <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
+          {!isSearchingFoods &&
+          !isSearchingFatSecretFoods &&
+          !query &&
+          !fatSecretQuery &&
+          recentFoods.length > 0 ? (
+            <Card className="px-5 py-5 mt-5">
+              <p className={FIELD_LABEL_CLASS}>Alimentos recentes</p>
+              <div className="mt-5 space-y-3">
+                {recentFoods.map((food) => (
+                  <FoodSearchResult
+                    key={food.id}
+                    food={food}
+                    onSelect={handleSelectFood}
+                    isSaving={savingFoodId === food.id}
+                  />
+                ))}
+              </div>
+            </Card>
+          ) : null}
+
+          <Card className="px-5 py-5 mt-5">
+            <label className={FIELD_LABEL_CLASS}>
+              Busca USDA
+              <div className="relative mt-2">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Ex: chicken breast, rice, banana"
+                  className={cn(INPUT_CLASS_NAME, 'pl-11')}
+                />
+              </div>
+            </label>
+            <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
+              Data ativa do registro:{' '}
+              <span className="font-semibold text-[hsl(var(--fg))]\">{selectedDate}</span>
+            </p>
+            {query.trim().length > 0 && query.trim().length < 2 ? (
+              <p className="mt-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
+                Continue digitando para buscar alimentos na USDA.
+              </p>
+            ) : null}
+            {isSearchingFoods ? (
+              <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]\">
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
+                Buscando alimentos na USDA FoodData Central...
+              </div>
+            ) : null}
+            {!isSearchingFoods && searchError ? (
+              <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]\">
+                {searchError}
+              </div>
+            ) : null}
+            {!isSearchingFoods && !searchError && results.length > 0 ? (
+              <div className="mt-5 space-y-3">
+                {results.map((food) => (
+                  <FoodSearchResult
+                    key={food.id}
+                    food={food}
+                    onSelect={handleSelectFood}
+                    isSaving={savingFoodId === food.id}
+                  />
+                ))}
+              </div>
+            ) : null}
+            {!isSearchingFoods && !searchError && query.trim().length >= 2 && results.length === 0 ? (
+              <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
+                Nenhum alimento encontrado para esta busca.
+              </div>
+            ) : null}
+          </Card>
+
+          {!isSearchingFoods &&
+          !isSearchingFatSecretFoods &&
+          !query &&
+          !fatSecretQuery &&
+          recentFoods.length > 0 ? (
+            <Card className="px-5 py-5 mt-5">
+              <p className={FIELD_LABEL_CLASS}>Alimentos recentes</p>
+              <div className="mt-5 space-y-3">
+                {recentFoods.map((food) => (
+                  <FoodSearchResult
+                    key={food.id}
+                    food={food}
+                    onSelect={handleSelectFood}
+                    isSaving={savingFoodId === food.id}
+                  />
+                ))}
+              </div>
+            </Card>
+          ) : null}
+        </Section>
+      </AppContainer>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent>
           <DialogPanelHeader
-            eyebrow="Refeição"
             title={editingMeal ? 'Editar refeição' : 'Adicionar refeição'}
-            description="Este modal é local. Para salvar no Supabase, use a busca USDA acima."
-            accentClassName="from-[hsl(var(--warn)/0.1)]"
+            subtitle={editingMeal ? 'Ajuste os detalhes da sua refeição.' : 'Registre uma nova refeição.'}
           />
-
-          <MealForm
-            key={editingMeal?.id || 'new-meal'}
-            meal={editingMeal}
-            selectedDate={selectedDate}
-            onCancel={() => {
-              setIsFormOpen(false);
-              setEditingMeal(null);
-            }}
-            onSubmit={handleSaveMeal}
-          />
+          <div className="p-6 pt-0">
+            <MealForm
+              meal={editingMeal}
+              selectedDate={selectedDate}
+              onSave={handleSaveMeal}
+              onCancel={() => {
+                setIsFormOpen(false);
+                setEditingMeal(null);
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
-    </AppContainer>
+    </SafePageBoundary>
   );
 }
