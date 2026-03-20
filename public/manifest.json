@@ -4,8 +4,8 @@
   "description": "Treino, nutricao, exames e progresso em um sistema conectado.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1B3A6B",
-  "theme_color": "#1B3A6B",
+  "background_color": "#05070A",
+  "theme_color": "#05070A",
   "icons": [
     {
       "src": "/branding/dark/favicon.ico",

@@ -157,9 +157,9 @@ export default function MyPrescribedDiet() {
               {(plan.total_calories || plan.total_protein) && (
                 <div className="grid grid-cols-4 gap-2 mb-4 p-3 bg-[hsl(var(--shell))] rounded-xl">
                   <MacroChip label="Calorias" value={plan.total_calories} unit="kcal" color="hsl(var(--fg))" />
-                  <MacroChip label="Proteína" value={plan.total_protein} color="#4F8CFF" />
-                  <MacroChip label="Carbos"   value={plan.total_carbs}   color="#8B7CFF" />
-                  <MacroChip label="Gordura"  value={plan.total_fat}     color="#F5A83A" />
+                  <MacroChip label="Proteína" value={plan.total_protein} color="hsl(var(--accent-primary))" />
+                  <MacroChip label="Carbos"   value={plan.total_carbs}   color="hsl(var(--accent-secondary))" />
+                  <MacroChip label="Gordura"  value={plan.total_fat}     color="hsl(var(--status-warning))" />
                 </div>
               )}
 

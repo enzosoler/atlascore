@@ -9,8 +9,18 @@ module.exports = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
-  		colors: {
-        app: 'hsl(var(--bg-app))',
+	  		colors: {
+	        atlas: {
+	          cyan: '#00FFFF',
+	          obsidian: '#05070A',
+	          white: '#FFFFFF',
+	        },
+	        semantic: {
+	          success: '#10B981',
+	          warning: '#F59E0B',
+	          error: '#EF4444',
+	        },
+	        app: 'hsl(var(--bg-app))',
         surface: 'hsl(var(--bg-surface))',
         'surface-2': 'hsl(var(--bg-surface-2))',
         'card-elevated': 'hsl(var(--bg-card-elevated))',

@@ -258,9 +258,9 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
             <p className="t-label mb-3">Totais diários</p>
             <div className="grid grid-cols-4 gap-2">
               <MacroChip label="Calorias" value={plan.total_calories ?? plan.target_calories} unit="kcal" color="hsl(var(--brand))" />
-              <MacroChip label="Proteína" value={plan.total_protein ?? plan.target_protein} unit="g" color="#4F8CFF" />
-              <MacroChip label="Carboidr." value={plan.total_carbs ?? plan.target_carbs} unit="g" color="#8B7CFF" />
-              <MacroChip label="Gordura" value={plan.total_fat ?? plan.target_fat} unit="g" color="#F5A83A" />
+              <MacroChip label="Proteína" value={plan.total_protein ?? plan.target_protein} unit="g" color="hsl(var(--accent-primary))" />
+              <MacroChip label="Carboidr." value={plan.total_carbs ?? plan.target_carbs} unit="g" color="hsl(var(--accent-secondary))" />
+              <MacroChip label="Gordura" value={plan.total_fat ?? plan.target_fat} unit="g" color="hsl(var(--status-warning))" />
             </div>
           </div>
 

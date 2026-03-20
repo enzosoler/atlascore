@@ -21,13 +21,13 @@
     --border-default: 216 23% 87%;
     --border-strong: 216 16% 76%;
 
-    --accent-primary: 219 100% 65%;
-    --accent-primary-hover: 219 91% 58%;
-    --accent-secondary: 169 71% 46%;
+    --accent-primary: 180 100% 50%;
+    --accent-primary-hover: 180 100% 45%;
+    --accent-secondary: 160 84% 39%;
 
-    --status-success: 148 71% 44%;
-    --status-warning: 40 89% 60%;
-    --status-danger: 352 100% 68%;
+    --status-success: 160 84% 39%;
+    --status-warning: 38 92% 50%;
+    --status-danger: 0 84% 60%;
     --status-ai: 191 69% 52%;
 
     /* Legacy / compatibility aliases */
@@ -149,19 +149,19 @@
   [data-theme="dark"] {
     color-scheme: dark;
 
-    --bg-app: 223 24% 6%;
-    --bg-surface: 218 23% 9%;
-    --bg-surface-2: 217 22% 12%;
-    --bg-card-semantic: 217 20% 13%;
-    --bg-card-elevated: 217 20% 15%;
+    --bg-app: 216 33% 3%;
+    --bg-surface: 216 33% 5%;
+    --bg-surface-2: 216 33% 7%;
+    --bg-card-semantic: 216 33% 8%;
+    --bg-card-elevated: 216 33% 10%;
 
-    --text-primary: 216 33% 97%;
-    --text-secondary: 218 16% 71%;
-    --text-muted: 217 10% 54%;
-    --text-subtle: 216 11% 36%;
+    --text-primary: 0 0% 100%;
+    --text-secondary: 216 10% 80%;
+    --text-muted: 216 10% 60%;
+    --text-subtle: 216 10% 40%;
 
-    --border-default: 217 20% 18%;
-    --border-strong: 217 18% 27%;
+    --border-default: 216 10% 15%;
+    --border-strong: 216 10% 25%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
