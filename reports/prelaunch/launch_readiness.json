@@ -1,0 +1,407 @@
+{
+  "gate_date": "2026-03-20 (America/Sao_Paulo)",
+  "default_locale": "en-US",
+  "supported_locales": [
+    "pt-BR",
+    "en-US"
+  ],
+  "decision": "NO_GO",
+  "checks": [
+    {
+      "area": "Baseline & Inventory",
+      "priority": "P1",
+      "status": "PASS",
+      "summary": "Stack, commands, commit, env references, locale catalog, and TBBM inventory were detected locally.",
+      "evidence": [
+        "commit=6676fe5490cbdd152af02d3143445e627de49fa6",
+        "branch=main",
+        "package_manager=npm",
+        "env_refs=VITE_APP_URL, VITE_BASE44_APP_BASE_URL, VITE_BASE44_APP_ID, VITE_BASE44_FUNCTIONS_VERSION, VITE_SUPABASE_ANON_KEY, VITE_SUPABASE_PUBLISHABLE_KEY, VITE_SUPABASE_URL, VITE_USDA_API_KEY",
+        "supported_locales=pt-BR, en-US",
+        "tbbm_templates=3"
+      ]
+    },
+    {
+      "area": "Functional",
+      "priority": "P0",
+      "status": "BLOCKED",
+      "summary": "No staging smoke suite or E2E runner is configured, so signup/login/logout/reset and persistence flows were not executed end-to-end.",
+      "evidence": [
+        "staging_environment=not_configured_in_repo",
+        "e2e_command=not_detected",
+        "critical_routes=src/App.jsx, src/pages/Auth.jsx, src/components/rbac/RouteGuard.jsx"
+      ]
+    },
+    {
+      "area": "Security",
+      "priority": "P0",
+      "status": "FAIL",
+      "summary": "RLS policies exist, but no CSP/security-header configuration was detected in the repo.",
+      "evidence": [
+        "rls_policies=true",
+        "csp_detected=false",
+        "auth_session_handling=src/lib/AuthContext.jsx",
+        "rls_source=supabase/migrations/001_create_profiles_subscriptions.sql"
+      ]
+    },
+    {
+      "area": "Performance",
+      "priority": "P1",
+      "status": "FAIL",
+      "summary": "Largest build asset is 2571.24 KiB, above the 500 KiB warning threshold.",
+      "evidence": [
+        "build_exit_code=0",
+        "largest_asset=dist/assets/index-B9JamHB6.js (2571.24 KiB)",
+        "chunk_warning=true"
+      ]
+    },
+    {
+      "area": "UX",
+      "priority": "P1",
+      "status": "BLOCKED",
+      "summary": "Loading, empty, error, and recovery states were not manually validated in staging during this run.",
+      "evidence": [
+        "manual_ux_walkthrough=not_run",
+        "source_examples=src/pages/Auth.jsx, src/pages/Today.jsx, src/pages/Settings.jsx"
+      ]
+    },
+    {
+      "area": "Localization & i18n",
+      "priority": "P0",
+      "status": "PASS",
+      "summary": "Locale normalization, Accept-Language negotiation, fallback behavior, and translation coverage passed automated checks.",
+      "evidence": [
+        "supported_locales=pt-BR, en-US",
+        "translation_keys=695",
+        "sample_negotiation={\"negotiation_pt\":\"pt-BR\",\"negotiation_en\":\"en-US\",\"fallback_ptPT\":[\"pt-BR\",\"en-US\"],\"fallback_frCA\":[\"en-US\"],\"currency_ptBR\":\"R$ 123,45\",\"currency_enUS\":\"$123.45\"}",
+        "preference_fix=App no longer wipes explicit locale on boot"
+      ]
+    },
+    {
+      "area": "Accessibility",
+      "priority": "P0",
+      "status": "BLOCKED",
+      "summary": "No automated a11y audit or keyboard-navigation smoke test is configured for critical flows.",
+      "evidence": [
+        "wcag_target=2.2 AA",
+        "axe_or_pa11y=not_detected",
+        "keyboard_smoke=not_run"
+      ]
+    },
+    {
+      "area": "Compliance",
+      "priority": "P1",
+      "status": "BLOCKED",
+      "summary": "The repo has account deletion functionality but no complete policy/consent audit or launch evidence for LGPD sign-off.",
+      "evidence": [
+        "policy_docs_detected=false",
+        "delete_account_function=base44/functions/deleteAccount/entry.ts",
+        "privacy_review=not_run"
+      ]
+    },
+    {
+      "area": "TBBM",
+      "priority": "P0",
+      "status": "PASS",
+      "summary": "Critical templates cover email, sms, push, and in_app in en-US and pt-BR with snapshot-backed validation.",
+      "evidence": [
+        "coverage_pct=100",
+        "covered_variants=24",
+        "missing_variants=0",
+        "snapshot_tests=tests/prelaunch/tbbm.test.mjs"
+      ]
+    },
+    {
+      "area": "Observability & Operation",
+      "priority": "P1",
+      "status": "FAIL",
+      "summary": "No launch runbook was found and trace_id correlation is not consistently present in the repo.",
+      "evidence": [
+        "trace_id_detected=false",
+        "runbook_detected=false",
+        "structured_logs=partial_console_logging_only"
+      ]
+    },
+    {
+      "area": "Tooling Baseline",
+      "priority": "P1",
+      "status": "FAIL",
+      "summary": "Local lint, typecheck, build, and unit test commands were executed to establish a release baseline.",
+      "evidence": [
+        "lint_exit_code=1",
+        "typecheck_exit_code=2",
+        "build_exit_code=0",
+        "unit_exit_code=0"
+      ]
+    }
+  ],
+  "i18n": {
+    "default_locale": "en-US",
+    "supported_locales": [
+      "pt-BR",
+      "en-US"
+    ],
+    "translation_key_count": 695,
+    "sample_negotiation": {
+      "negotiation_pt": "pt-BR",
+      "negotiation_en": "en-US",
+      "fallback_ptPT": [
+        "pt-BR",
+        "en-US"
+      ],
+      "fallback_frCA": [
+        "en-US"
+      ],
+      "currency_ptBR": "R$ 123,45",
+      "currency_enUS": "$123.45"
+    },
+    "rtl_supported_locales": [],
+    "notes": [
+      "Explicit user locale is now preserved across app loads.",
+      "RTL validation is skipped because no RTL locale is currently configured as supported."
+    ]
+  },
+  "tbbm": {
+    "channels": [
+      "email",
+      "sms",
+      "push",
+      "in_app"
+    ],
+    "coverage": {
+      "total": 24,
+      "covered": [
+        "welcome_user/email/pt-BR",
+        "welcome_user/email/en-US",
+        "welcome_user/sms/pt-BR",
+        "welcome_user/sms/en-US",
+        "welcome_user/push/pt-BR",
+        "welcome_user/push/en-US",
+        "welcome_user/in_app/pt-BR",
+        "welcome_user/in_app/en-US",
+        "trial_ends_soon/email/pt-BR",
+        "trial_ends_soon/email/en-US",
+        "trial_ends_soon/sms/pt-BR",
+        "trial_ends_soon/sms/en-US",
+        "trial_ends_soon/push/pt-BR",
+        "trial_ends_soon/push/en-US",
+        "trial_ends_soon/in_app/pt-BR",
+        "trial_ends_soon/in_app/en-US",
+        "invite_user/email/pt-BR",
+        "invite_user/email/en-US",
+        "invite_user/sms/pt-BR",
+        "invite_user/sms/en-US",
+        "invite_user/push/pt-BR",
+        "invite_user/push/en-US",
+        "invite_user/in_app/pt-BR",
+        "invite_user/in_app/en-US"
+      ],
+      "missing": [],
+      "coveragePct": 100
+    },
+    "templates": [
+      {
+        "template_id": "welcome_user",
+        "event_type": "welcome_user",
+        "critical": true,
+        "description": "Welcome message sent after account creation.",
+        "required_vars": [
+          "firstName",
+          "appUrl"
+        ],
+        "channels": [
+          "email",
+          "sms",
+          "push",
+          "in_app"
+        ],
+        "locales": [
+          "pt-BR",
+          "en-US"
+        ]
+      },
+      {
+        "template_id": "trial_ends_soon",
+        "event_type": "trial_ends_soon",
+        "critical": true,
+        "description": "Reminder sent three days before trial expiration.",
+        "required_vars": [
+          "firstName",
+          "days",
+          "trialEndDate",
+          "billingUrl"
+        ],
+        "channels": [
+          "email",
+          "sms",
+          "push",
+          "in_app"
+        ],
+        "locales": [
+          "pt-BR",
+          "en-US"
+        ]
+      },
+      {
+        "template_id": "invite_user",
+        "event_type": "invite_user",
+        "critical": true,
+        "description": "Invitation message for staff and patient/client relationships.",
+        "required_vars": [
+          "recipientName",
+          "inviterName",
+          "inviteLink",
+          "recipientRole"
+        ],
+        "channels": [
+          "email",
+          "sms",
+          "push",
+          "in_app"
+        ],
+        "locales": [
+          "pt-BR",
+          "en-US"
+        ]
+      }
+    ],
+    "sample_renders": [
+      {
+        "template_id": "welcome_user",
+        "channel": "email",
+        "locale": "en-US",
+        "preview": {
+          "subject": "Welcome to Atlas Core",
+          "bodyText": "Hi Alex,\n\nYour account is ready.\nAtlas Core keeps training, nutrition, progress, and protocols in one clear system.\n\nOpen the app: https://atlascore.app"
+        }
+      },
+      {
+        "template_id": "trial_ends_soon",
+        "channel": "email",
+        "locale": "pt-BR",
+        "preview": {
+          "subject": "Seu trial termina em 3 dias",
+          "bodyText": "Olá Alex,\n\nSeu trial termina em 3 dias, em 27 de março de 2026.\nFaça o upgrade para manter acesso aos recursos premium.\n\nAtualizar plano: https://atlascore.app/pricing"
+        }
+      },
+      {
+        "template_id": "invite_user",
+        "channel": "push",
+        "locale": "en-US",
+        "preview": {
+          "title": "New invite",
+          "bodyText": "Camila invited you to Atlas Core."
+        }
+      }
+    ],
+    "notes": [
+      "Catalog and snapshot validation exist locally for email, sms, push, and in_app.",
+      "Runtime senders still need a follow-up migration to consume the shared catalog consistently."
+    ]
+  },
+  "metrics": {
+    "package_manager": "npm",
+    "commit_hash": "6676fe5490cbdd152af02d3143445e627de49fa6",
+    "branch": "main",
+    "command_exit_codes": {
+      "lint": 1,
+      "typecheck": 2,
+      "build": 0,
+      "unit": 0
+    },
+    "bundle": {
+      "largest_asset": {
+        "file": "dist/assets/index-B9JamHB6.js",
+        "bytes": 2632954
+      },
+      "top_assets": [
+        {
+          "file": "dist/assets/index-B9JamHB6.js",
+          "bytes": 2632954
+        },
+        {
+          "file": "dist/assets/html2canvas.esm-QH1iLAAe.js",
+          "bytes": 202379
+        },
+        {
+          "file": "dist/assets/index.es-DeDh243y.js",
+          "bytes": 159384
+        },
+        {
+          "file": "dist/assets/index-BEGLsnhj.css",
+          "bytes": 146063
+        },
+        {
+          "file": "dist/assets/purify.es-B9ZVCkUG.js",
+          "bytes": 22636
+        }
+      ]
+    },
+    "translations": {
+      "supported_locale_count": 2,
+      "translation_key_count": 695
+    },
+    "tbbm": {
+      "coverage_pct": 100,
+      "template_count": 3,
+      "channel_count": 4
+    }
+  },
+  "risks": [
+    {
+      "id": "RISK-001",
+      "title": "No staging smoke or E2E verification for critical auth and persistence flows",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add a staging seed plus Playwright smoke coverage for signup/login/logout/reset and refresh persistence."
+    },
+    {
+      "id": "RISK-002",
+      "title": "Security-header baseline is incomplete",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add CSP and related response-header enforcement, then validate in staging."
+    },
+    {
+      "id": "RISK-003",
+      "title": "Bundle size regression on the main client chunk",
+      "severity": "P1",
+      "status": "open",
+      "mitigation": "Split the 2.5+ MiB client bundle and add bundle budgets to CI."
+    },
+    {
+      "id": "RISK-004",
+      "title": "Accessibility gate is missing",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add automated axe/keyboard checks on critical routes before launch."
+    },
+    {
+      "id": "RISK-005",
+      "title": "Two separate trial-provisioning paths exist in Base44 and Supabase",
+      "severity": "P1",
+      "status": "open",
+      "mitigation": "Converge signup/trial ownership so the product has a single source of truth for subscriptions."
+    }
+  ],
+  "signoff": [
+    {
+      "role": "Engineering",
+      "owner": "Codex",
+      "status": "PROPOSED",
+      "note": "Local prelaunch automation executed and artifacts generated."
+    },
+    {
+      "role": "Product",
+      "owner": "Unassigned",
+      "status": "PENDING",
+      "note": "Manual staging walkthrough is still required."
+    },
+    {
+      "role": "Security",
+      "owner": "Unassigned",
+      "status": "PENDING",
+      "note": "ASVS/CSP validation and runtime header review are still required."
+    }
+  ]
+}

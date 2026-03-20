@@ -8,6 +8,8 @@
     "build": "vite build",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
+    "prelaunch": "node scripts/prelaunch/run.mjs",
+    "test": "node --test tests/prelaunch/*.test.mjs",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview"
   },

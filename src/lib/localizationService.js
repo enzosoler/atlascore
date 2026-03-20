@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE, formatCurrencyValue, normalizeLocale } from '../../shared/localization.js';
+
 /**
  * Localization Service — Manage Currency Based on Browser Language
  * 
@@ -70,12 +72,11 @@ export const getCurrencyObject = (currencyCode) => {
  */
 export const formatPrice = (amount, currencyCode) => {
   const currency = getCurrencyObject(currencyCode);
-  
-  if (currencyCode === 'BRL') {
-    return `${currency.symbol} ${amount.toFixed(2).replace('.', ',')}`;
-  }
-  
-  return `${currency.symbol}${amount.toFixed(2)}`;
+  const numericAmount = Number.isFinite(amount) ? amount : Number(amount || 0);
+  const locale =
+    normalizeLocale(currencyCode === 'BRL' ? 'pt-BR' : DEFAULT_LOCALE) || DEFAULT_LOCALE;
+
+  return formatCurrencyValue(numericAmount, locale, currency.code);
 };
 
 /**
