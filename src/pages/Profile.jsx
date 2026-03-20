@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -281,6 +282,22 @@ function buildProfilePayload(form) {
 }
 
 async function loadLocalProfile(user) {
+  // Try Supabase first (works on all devices including mobile)
+  if (user?.id) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('profile_data')
+        .eq('id', user.id)
+        .single();
+      if (!error && data?.profile_data && Object.keys(data.profile_data).length > 0) {
+        return data.profile_data;
+      }
+    } catch {
+      // fall through to localStorage
+    }
+  }
+  // Fallback: localStorage (for existing users / offline)
   const profiles = readStoredProfiles();
   const scope = getProfileScope(user);
   const profile = profiles[scope];
@@ -288,8 +305,8 @@ async function loadLocalProfile(user) {
 }
 
 async function saveLocalProfile(user, currentProfileId, payload) {
-  const profiles = readStoredProfiles();
   const scope = getProfileScope(user);
+  const profiles = readStoredProfiles();
   const existingProfile =
     profiles[scope] && typeof profiles[scope] === 'object' ? profiles[scope] : {};
 
@@ -299,8 +316,21 @@ async function saveLocalProfile(user, currentProfileId, payload) {
     id: currentProfileId || existingProfile.id || createLocalProfileId(scope),
   };
 
+  // Write to localStorage (backward compat)
   profiles[scope] = nextProfile;
   writeStoredProfiles(profiles);
+
+  // Write to Supabase (so it works on mobile/other devices)
+  if (user?.id) {
+    try {
+      await supabase
+        .from('profiles')
+        .update({ profile_data: nextProfile })
+        .eq('id', user.id);
+    } catch {
+      // non-fatal — localStorage copy is still valid
+    }
+  }
 
   return nextProfile;
 }
