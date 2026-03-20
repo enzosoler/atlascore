@@ -313,7 +313,7 @@ function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }
             </p>
           </div>
           <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-            {detail || (remaining > 0 ? `${remaining}${unit} restantes` : 'Meta atingida')}
+            {detail || (remaining > 0 ? `${remaining}${unit} remaining` : 'Goal reached')}
           </p>
         </div>
         <p className="shrink-0 text-[13px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
@@ -974,8 +974,8 @@ export default function NutritionPage() {
     <SafePageBoundary>
       <AppContainer>
         <PageHeader
-          title="Nutrição"
-          subtitle={`Resumo de calorias e macros para ${selectedDate}`}
+          title="Nutrition"
+          subtitle={`Calorie and macro summary for ${selectedDate}`}
         />
 
         {notice ? (
@@ -988,33 +988,33 @@ export default function NutritionPage() {
         ) : null}
 
         <Section
-          title="Metas do dia"
-          subtitle="Calorias e macronutrientes para referência rápida."
+          title="Daily Goals"
+          subtitle="Calories and macronutrients for quick reference."
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MacroTrack
-              label="Calorias"
+              label="Calories"
               consumed={dailyTotals.calories}
               target={profile.calories_target}
               unit="kcal"
               tone="calories"
             />
             <MacroTrack
-              label="Proteínas"
+              label="Protein"
               consumed={dailyTotals.protein}
               target={profile.protein_target}
               unit="g"
               tone="protein"
             />
             <MacroTrack
-              label="Carboidratos"
+              label="Carbohydrates"
               consumed={dailyTotals.carbs}
               target={profile.carbs_target}
               unit="g"
               tone="carbs"
             />
             <MacroTrack
-              label="Gorduras"
+              label="Fats"
               consumed={dailyTotals.fat}
               target={profile.fat_target}
               unit="g"
@@ -1024,8 +1024,8 @@ export default function NutritionPage() {
         </Section>
 
         <Section
-          title="Registro do dia"
-          subtitle="Refeições e alimentos registrados na data selecionada."
+          title="Daily Log"
+          subtitle="Meals and foods logged for the selected date."
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <DateStepper date={selectedDate} onChange={handleDateChange} />

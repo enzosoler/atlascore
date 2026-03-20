@@ -557,7 +557,7 @@ export default function AtlasAI() {
   const messages = activeConversation?.messages || [];
   const hasProfileContext = profileContext.length > 0;
   const activeConversationLabel =
-    activeConversation?.metadata?.name || 'Nova conversa contextual';
+    activeConversation?.metadata?.name || 'New contextual conversation';
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -686,7 +686,7 @@ export default function AtlasAI() {
                     <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-3 shadow-[var(--shadow-xs)]">
                       <p className="atlas-metric-label">Contexto</p>
                       <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        {hasProfileContext ? 'Profile conectado' : 'Profile pendente'}
+                        {hasProfileContext ? 'Profile connected' : 'Profile pendente'}
                       </p>
                     </div>
                   </div>
@@ -695,7 +695,7 @@ export default function AtlasAI() {
 
               <Button onClick={newConv} size="lg" className="mt-4 w-full rounded-[20px]">
                 <Plus className="h-4 w-4" strokeWidth={2} />
-                Nova conversa
+                New conversation
               </Button>
             </div>
 
@@ -756,13 +756,13 @@ export default function AtlasAI() {
                       <span className="atlas-overline">Atlas AI</span>
                       <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
                         <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                        IA Atlas
+                        Atlas AI
                       </span>
                       <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.74)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
                         <Clock3 className="h-3.5 w-3.5" strokeWidth={1.9} />
                         {activeConversation
                           ? formatConversationTimestamp(activeConversation.updated_at)
-                          : 'Pronto para iniciar'}
+                          : 'Ready to start'}
                       </span>
                     </div>
 
@@ -773,7 +773,7 @@ export default function AtlasAI() {
                       <p className="mt-2 max-w-3xl text-[14px] leading-7 text-[hsl(var(--fg-2))]">
                         {activeConversation
                           ? getConversationPreview(activeConversation)
-                          : 'Uma experiência de assistant premium para revisar treino, nutrição, progresso e sinais do profile sem parecer um chat generico.'}
+                          : 'A premium assistant experience to review training, nutrition, progress and profile signals — not a generic chat.'}
                       </p>
                     </div>
                   </div>
@@ -786,7 +786,7 @@ export default function AtlasAI() {
                       className="rounded-full px-4"
                     >
                       <Plus className="h-4 w-4" strokeWidth={2} />
-                      Nova conversa
+                      New conversation
                     </Button>
                   </div>
                 </div>
@@ -794,40 +794,40 @@ export default function AtlasAI() {
                 <div className="grid gap-3 md:grid-cols-3">
                   <ChatSignalCard
                     icon={Target}
-                    label="Contexto"
-                    value={hasProfileContext ? 'Profile conectado' : 'Adicionar profile'}
+                    label="Context"
+                    value={hasProfileContext ? 'Profile connected' : 'Add profile'}
                     detail={
                       hasProfileContext
-                        ? 'Metas e sinais locais ajudam a resposta a soar mais pessoal.'
-                        : 'Adicione objetivo, calorias e peso no Profile para respostas mais profundas.'
+                        ? 'Local goals and signals help responses feel more personal.'
+                        : 'Add your goal, calories and weight in Profile for deeper responses.'
                     }
                   />
                   <ChatSignalCard
                     icon={MessageSquare}
-                    label="Conversa"
+                    label="Conversation"
                     value={
                       activeConversation
                         ? getMessageCountLabel(messages.length)
-                        : 'Sessao pronta para abrir'
+                        : 'Session ready to open'
                     }
                     detail={
                       activeConversation
-                        ? 'O histórico local fica salvo e reaparece na sidebar.'
-                        : 'Comece com um prompt objetivo para dar contexto desde a primeira troca.'
+                        ? 'Local history is saved and reappears in the sidebar.'
+                        : 'Start with an objective prompt to give context from the very first exchange.'
                     }
                   />
                   <ChatSignalCard
                     icon={Activity}
-                    label="Modo"
-                    value="Mock local estável"
-                    detail="A experiência continua sem backend remoto, mantendo o fluxo de chat atual."
+                    label="Mode"
+                    value="Stable local mode"
+                    detail="Experience continues without remote backend, keeping the current chat flow."
                   />
                 </div>
 
                 <StatusBanner tone={hasProfileContext ? 'success' : 'neutral'}>
                   {hasProfileContext
-                    ? 'O Profile local esta conectado e ja alimenta objetivo, peso e metas nas respostas desta conversa.'
-                    : 'Conecte metas e peso no Profile para deixar o Atlas AI mais contextual sem mudar a lógica local desta fase.'}
+                    ? 'Local profile is connected and already informs goal, weight and targets in this conversation.'
+                    : 'Connect goals and weight in Profile to make Atlas AI more contextual.'}
                 </StatusBanner>
 
                 {hasProfileContext ? (
@@ -857,7 +857,7 @@ export default function AtlasAI() {
                   </div>
                   <div>
                     <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                      Nova conversa
+                      New conversation
                     </p>
                     <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
                       Abrir um novo fio contextual
@@ -913,7 +913,7 @@ export default function AtlasAI() {
 
                           <div className="max-w-3xl">
                             <h2 className="text-[clamp(2rem,1.55rem+1.2vw,3rem)] font-semibold tracking-[-0.075em] text-[hsl(var(--fg))]">
-                              Converse com o contexto do Atlas, não com um chat genérico.
+                              Chat with Atlas context — not a generic chatbot.
                             </h2>
                             <p className="mt-4 max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
                               Abra uma leitura rápida sobre progresso, aderência ou próximo passo.
@@ -938,7 +938,7 @@ export default function AtlasAI() {
                             <ChatSignalCard
                               icon={Target}
                               label="Leitura"
-                              value={hasProfileContext ? 'Pronta para contexto' : 'Pronta para iniciar'}
+                              value={hasProfileContext ? 'Ready for context' : 'Ready to start'}
                               detail={
                                 hasProfileContext
                                   ? 'O profile local já adiciona sinais úteis para a resposta.'
@@ -978,7 +978,7 @@ export default function AtlasAI() {
                             ) : (
                               <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
                                 Preencha metas, peso ou objetivo no Profile para deixar o assistant
-                                ainda mais específico ao seu contexto.
+                                even more specific to your context.
                               </p>
                             )}
                           </div>
@@ -1010,7 +1010,7 @@ export default function AtlasAI() {
                     <div className="mb-6 flex justify-center">
                       <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
                         <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                        {hasProfileContext ? 'Perfil conectado' : 'Pronto para iniciar'}
+                        {hasProfileContext ? 'Profile connected' : 'Ready to start'}
                       </div>
                     </div>
 

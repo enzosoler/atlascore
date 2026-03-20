@@ -14,11 +14,11 @@ export default function AdherenceScore({ meals, workouts, checkin }) {
   const circumference = 2 * Math.PI * 34;
   const offset = circumference - (score / 100) * circumference;
 
-  const label = score >= 80 ? 'Excelente' : score >= 50 ? 'Bom' : 'Atenção';
+  const label = score >= 80 ? 'Excellent' : score >= 50 ? 'Good' : 'Needs focus';
 
   return (
     <div className="p-5 rounded-2xl bg-card border border-border">
-      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">Aderência</p>
+      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">Adherence</p>
       <div className="flex items-center gap-4">
         <div className="relative w-[84px] h-[84px] shrink-0">
           <svg width="84" height="84" className="-rotate-90">
@@ -39,7 +39,7 @@ export default function AdherenceScore({ meals, workouts, checkin }) {
         <div>
           <p className="text-base font-semibold">{label}</p>
           <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
-            {score >= 80 ? 'Continue assim.' : score >= 50 ? 'Pode melhorar ainda mais.' : 'Foque nos itens pendentes.'}
+            {score >= 80 ? 'Keep it up.' : score >= 50 ? 'Room to improve.' : 'Focus on pending items.'}
           </p>
         </div>
       </div>

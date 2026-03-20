@@ -23,12 +23,12 @@ import {
 import { cn } from '@/lib/utils';
 
 export function formatNumber(value, options = {}) {
-  return new Intl.NumberFormat('pt-BR', options).format(Number(value || 0));
+  return new Intl.NumberFormat('en-US', options).format(Number(value || 0));
 }
 
 export function formatDateLabel(date, options) {
   return new Date(`${date}T12:00:00`).toLocaleDateString(
-    'pt-BR',
+    'en-US',
     options || {
       weekday: 'short',
       day: 'numeric',

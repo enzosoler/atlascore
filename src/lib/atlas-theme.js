@@ -23,7 +23,7 @@ export const WORKOUT_TYPES = {
 
 export const formatDate = (date) => {
   if (!date) return '';
-  return new Date(date + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return new Date(date + 'T12:00').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
 };
 
 export const getToday = () => new Date().toISOString().split('T')[0];

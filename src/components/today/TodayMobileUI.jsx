@@ -196,13 +196,13 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="atlas-overline">Aderência</p>
+              <p className="atlas-overline">Adherence</p>
               <p className="mt-1 text-[18px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                Consistência do bloco atual
+                Current block consistency
               </p>
             </div>
             <span className={cn('inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', styles.pill)}>
-              {score >= 75 ? 'Em ritmo' : score >= 45 ? 'Ajustar' : 'Reforçar'}
+              {score >= 75 ? 'On track' : score >= 45 ? 'Adjust' : 'Focus up'}
             </span>
           </div>
           <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{summary}</p>
