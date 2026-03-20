@@ -313,7 +313,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-transparent">
+    <div className="flex min-h-screen bg-transparent" style={{ overflowX: 'clip' }}>
       {/* ── Sidebar desktop ─────────────────────────────────────── */}
       <aside
         className={cn(
@@ -557,12 +557,12 @@ export default function AppLayout() {
       <main
         ref={mainRef}
         className={cn(
-          'flex-1 min-h-screen overflow-x-hidden overscroll-y-none transition-all duration-300',
+          'flex-1 min-h-screen transition-all duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'lg:pt-0',
           'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
         )}
-        style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
+        style={{ overflowX: 'clip', paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
       >
         <TrialBanner />
 
