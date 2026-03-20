@@ -9,7 +9,7 @@ import {
   Clock3,
   Loader2,
   Plus,
-  Send
+  Send,
   Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -819,7 +819,6 @@ export default function AtlasAI() {
                   </div>
                 ) : null}
               </div>
-            </div>
 
             {/* ── MOBILE CONVERSATIONS STRIP ── */}
             <div className="border-b border-[hsl(var(--border)/0.72)] px-4 py-3 lg:hidden">

@@ -1,0 +1,3 @@
+module RevenueCat {
+    header "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCat.build/include/RevenueCat-Swift.h"
+}

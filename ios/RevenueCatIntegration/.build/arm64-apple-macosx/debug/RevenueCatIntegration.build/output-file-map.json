@@ -1,0 +1,40 @@
+{
+  "": {
+    "swift-dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/master.swiftdeps"
+  },
+  "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/Sources/RevenueCatIntegration/CustomerCenterSheet.swift": {
+    "dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/CustomerCenterSheet.d",
+    "object": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/CustomerCenterSheet.swift.o",
+    "swiftmodule": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/CustomerCenterSheet~partial.swiftmodule",
+    "swift-dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/CustomerCenterSheet.swiftdeps",
+    "diagnostics": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/CustomerCenterSheet.dia"
+  },
+  "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/Sources/RevenueCatIntegration/PaywallGateView.swift": {
+    "dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/PaywallGateView.d",
+    "object": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/PaywallGateView.swift.o",
+    "swiftmodule": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/PaywallGateView~partial.swiftmodule",
+    "swift-dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/PaywallGateView.swiftdeps",
+    "diagnostics": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/PaywallGateView.dia"
+  },
+  "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/Sources/RevenueCatIntegration/RevenueCatConfig.swift": {
+    "dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatConfig.d",
+    "object": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatConfig.swift.o",
+    "swiftmodule": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatConfig~partial.swiftmodule",
+    "swift-dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatConfig.swiftdeps",
+    "diagnostics": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatConfig.dia"
+  },
+  "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/Sources/RevenueCatIntegration/RevenueCatSubscriptionManager.swift": {
+    "dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatSubscriptionManager.d",
+    "object": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatSubscriptionManager.swift.o",
+    "swiftmodule": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatSubscriptionManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatSubscriptionManager.swiftdeps",
+    "diagnostics": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/RevenueCatSubscriptionManager.dia"
+  },
+  "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/Sources/RevenueCatIntegration/SubscriptionPurchaseView.swift": {
+    "dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/SubscriptionPurchaseView.d",
+    "object": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/SubscriptionPurchaseView.swift.o",
+    "swiftmodule": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/SubscriptionPurchaseView~partial.swiftmodule",
+    "swift-dependencies": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/SubscriptionPurchaseView.swiftdeps",
+    "diagnostics": "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/RevenueCatIntegration.build/SubscriptionPurchaseView.dia"
+  }
+}
