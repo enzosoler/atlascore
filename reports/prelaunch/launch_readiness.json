@@ -1,407 +1,752 @@
 {
-  "gate_date": "2026-03-20 (America/Sao_Paulo)",
+  "gate_date": "2026-03-20T00:00:00-03:00",
   "default_locale": "en-US",
-  "supported_locales": [
-    "pt-BR",
-    "en-US"
-  ],
+  "supported_locales": ["en-US", "pt-BR"],
   "decision": "NO_GO",
+  "mvp": {
+    "criteria_source": "INFERRED",
+    "criteria": [
+      {
+        "id": "MVP-001",
+        "description": "Production build succeeds with no fatal errors",
+        "status": "PASS",
+        "severity_if_fail": "P0",
+        "evidence": ["npm run build exit code 0", "dist/assets/index-B9JamHB6.js generated (2.57 MiB)"]
+      },
+      {
+        "id": "MVP-002",
+        "description": "Typecheck passes (no JSX/TypeScript errors)",
+        "status": "FAIL",
+        "severity_if_fail": "P0",
+        "evidence": ["npm run typecheck exit code 1", "src/pages/Workouts.jsx(333,13): error TS17002", "8 cascading TSC errors"]
+      },
+      {
+        "id": "MVP-003",
+        "description": "Security headers include effective CSP (no unsafe-inline on scripts, no unsafe-eval)",
+        "status": "FAIL",
+        "severity_if_fail": "P0",
+        "evidence": ["vercel.json: script-src 'unsafe-inline' 'unsafe-eval'", "HSTS header absent", "OWASP ASVS 14.4.3"]
+      },
+      {
+        "id": "MVP-004",
+        "description": "No legacy Base44 SDK dependencies in production code",
+        "status": "FAIL",
+        "severity_if_fail": "P0",
+        "evidence": ["186 base44.* call sites across 54 files", "All core domain entities persist in Base44", "Project rule: No Base44 dependencies"]
+      },
+      {
+        "id": "MVP-005",
+        "description": "CI pipeline exists and passes on main branch",
+        "status": "FAIL",
+        "severity_if_fail": "P0",
+        "evidence": ["No .github/workflows/ directory", "No .circleci, .travis.yml, Jenkinsfile found"]
+      },
+      {
+        "id": "MVP-006",
+        "description": "E2E smoke tests pass for critical auth flows (signup, login, logout, session refresh)",
+        "status": "BLOCKED",
+        "severity_if_fail": "P0",
+        "evidence": ["No E2E runner configured", "No staging environment defined in repo", "docs/prelaunch/README.md: no E2E suite exists yet"]
+      },
+      {
+        "id": "MVP-007",
+        "description": "Automated accessibility gate (WCAG 2.2 AA) passes on auth and today routes",
+        "status": "BLOCKED",
+        "severity_if_fail": "P0",
+        "evidence": ["No axe-core or pa11y CI gate", "Lighthouse contrast_selectors found: header.atlas-public-nav button, div.grid button", "html[lang] never updated at runtime"]
+      },
+      {
+        "id": "MVP-008",
+        "description": "All unit tests pass",
+        "status": "PASS",
+        "severity_if_fail": "P1",
+        "evidence": ["npm test: 11/11 pass", "i18n.test.mjs: 6 pass", "tbbm.test.mjs: 3 pass", "translation-coverage.test.mjs: 2 pass"]
+      },
+      {
+        "id": "MVP-009",
+        "description": "TBBM catalog achieves 100% coverage across all templates, channels, and locales",
+        "status": "PASS",
+        "severity_if_fail": "P1",
+        "evidence": ["validateCatalogCoverage(): coveragePct=100", "24/24 combinations covered", "Snapshot tests stable"]
+      },
+      {
+        "id": "MVP-010",
+        "description": "Core Web Vitals in Good range: LCP<=2500ms, CLS<=0.1",
+        "status": "FAIL",
+        "severity_if_fail": "P1",
+        "evidence": ["LCP=5733ms (budget: 2500ms)", "CLS=0.00 (PASS)", "TTI=5763ms", "Performance score: 0.59"]
+      },
+      {
+        "id": "MVP-011",
+        "description": "Translation key parity between all supported locales",
+        "status": "PASS",
+        "severity_if_fail": "P1",
+        "evidence": ["en-US: 683 keys", "pt-BR: 683 keys", "translation-coverage.test.mjs: PASS"]
+      },
+      {
+        "id": "MVP-012",
+        "description": "LGPD/GDPR: privacy policy accessible, consent banner present, account deletion functional via Supabase",
+        "status": "BLOCKED",
+        "severity_if_fail": "P1",
+        "evidence": ["No /privacy route", "No consent banner component", "deleteCurrentAccount() calls Base44 DELETE — not Supabase"]
+      },
+      {
+        "id": "MVP-013",
+        "description": "ESLint passes with exit code 0",
+        "status": "FAIL",
+        "severity_if_fail": "P2",
+        "evidence": ["npm run lint exit code 1", "73 errors: 71 unused-imports + 2 react/no-unknown-property"]
+      }
+    ],
+    "verdict": "NO_GO",
+    "notes": "MVP criteria were INFERRED from README.md, docs/prelaunch/README.md, project instruction comments, and engineering rules. Formal acceptance criteria document not found in repo. 6 P0 criteria FAIL or BLOCKED; 4 P1 criteria FAIL or BLOCKED."
+  },
   "checks": [
     {
-      "area": "Baseline & Inventory",
-      "priority": "P1",
-      "status": "PASS",
-      "summary": "Stack, commands, commit, env references, locale catalog, and TBBM inventory were detected locally.",
-      "evidence": [
-        "commit=6676fe5490cbdd152af02d3143445e627de49fa6",
-        "branch=main",
-        "package_manager=npm",
-        "env_refs=VITE_APP_URL, VITE_BASE44_APP_BASE_URL, VITE_BASE44_APP_ID, VITE_BASE44_FUNCTIONS_VERSION, VITE_SUPABASE_ANON_KEY, VITE_SUPABASE_PUBLISHABLE_KEY, VITE_SUPABASE_URL, VITE_USDA_API_KEY",
-        "supported_locales=pt-BR, en-US",
-        "tbbm_templates=3"
-      ]
-    },
-    {
-      "area": "Functional",
+      "area": "Build",
       "priority": "P0",
-      "status": "BLOCKED",
-      "summary": "No staging smoke suite or E2E runner is configured, so signup/login/logout/reset and persistence flows were not executed end-to-end.",
-      "evidence": [
-        "staging_environment=not_configured_in_repo",
-        "e2e_command=not_detected",
-        "critical_routes=src/App.jsx, src/pages/Auth.jsx, src/components/rbac/RouteGuard.jsx"
+      "status": "PASS",
+      "summary": "Production build succeeds. Main chunk 2.57 MiB (gzip 766 KB) with bundle size warning.",
+      "evidence": ["npm run build exit code 0", "dist/assets/index-B9JamHB6.js: 2632954 bytes", "vite: 4232 modules transformed"],
+      "commands": [
+        { "cmd": "rm -f dist/.DS_Store && npm run build", "expected": "exit 0; dist/index.html produced", "ran": true }
       ]
     },
     {
-      "area": "Security",
+      "area": "Typecheck",
       "priority": "P0",
       "status": "FAIL",
-      "summary": "RLS policies exist, but no CSP/security-header configuration was detected in the repo.",
+      "summary": "8 TypeScript/JSX parse errors in src/pages/Workouts.jsx. Fragment closing tag mismatch in .map() callback.",
       "evidence": [
-        "rls_policies=true",
-        "csp_detected=false",
-        "auth_session_handling=src/lib/AuthContext.jsx",
-        "rls_source=supabase/migrations/001_create_profiles_subscriptions.sql"
+        "src/pages/Workouts.jsx(333,13): error TS17002: Expected corresponding JSX closing tag for 'button'",
+        "src/pages/Workouts.jsx(350,9): error TS1005: ')' expected",
+        "src/pages/Workouts.jsx(936,9): error TS17002: Expected corresponding JSX closing tag for 'SectionCard'",
+        "src/pages/Workouts.jsx(1103,1): error TS1005: '}' expected"
+      ],
+      "commands": [
+        { "cmd": "npm run typecheck", "expected": "exit 0 (after fix)", "ran": true }
+      ]
+    },
+    {
+      "area": "Security / CSP",
+      "priority": "P0",
+      "status": "FAIL",
+      "summary": "CSP contains unsafe-inline and unsafe-eval on script-src, making it non-functional as XSS mitigation. HSTS header absent.",
+      "evidence": [
+        "vercel.json: script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "No Strict-Transport-Security header in vercel.json",
+        "OWASP A05:2021 Security Misconfiguration",
+        "ASVS 14.4.3: CSP must not include unsafe-inline for scripts"
+      ],
+      "commands": [
+        { "cmd": "grep -c 'unsafe-inline\\|unsafe-eval' vercel.json", "expected": "0 (after fix)", "ran": true }
+      ]
+    },
+    {
+      "area": "Security / RLS",
+      "priority": "P0",
+      "status": "PASS",
+      "summary": "Supabase RLS is enabled for profiles and subscriptions tables. Users cannot update their own role. Admin check uses database-backed is_admin() function.",
+      "evidence": [
+        "supabase/migrations/001_create_profiles_subscriptions.sql: RLS enabled",
+        "Policy: Users cannot update role (FOR UPDATE USING FALSE)",
+        "supabase/migrations/003_security_helpers.sql: is_admin() SECURITY DEFINER",
+        "No email-based admin bypass detected in RLS"
+      ],
+      "commands": [
+        { "cmd": "grep 'ENABLE ROW LEVEL SECURITY' supabase/migrations/001_create_profiles_subscriptions.sql", "expected": "2 matches (profiles + subscriptions)", "ran": true }
+      ]
+    },
+    {
+      "area": "Legacy Base44 / Dual-System",
+      "priority": "P0",
+      "status": "FAIL",
+      "summary": "186 base44.* call sites across 54 files. All domain entities (workouts, nutrition, measurements, etc.) persist in Base44, not Supabase. Violates project rule and creates data sovereignty risk.",
+      "evidence": [
+        "grep -rn 'base44\\.' src/ count: 186",
+        "54 unique files affected",
+        "Entities: DailyCheckin, Workout, Subscription, CoachStudent, DietPlan, Measurement, ProgressPhoto, FoodLog, Routine, Protocol, LabResult, etc.",
+        "src/api/base44Client.js: ATLAS_CORE_BASE44_DEFAULTS.appId hardcoded as fallback"
+      ],
+      "commands": [
+        { "cmd": "grep -rn 'base44\\.' src/ --include='*.js' --include='*.jsx' | grep -v '//' | wc -l", "expected": "0 (after migration)", "ran": true }
+      ]
+    },
+    {
+      "area": "CI Pipeline",
+      "priority": "P0",
+      "status": "FAIL",
+      "summary": "No CI configuration found. No .github/workflows/, no .circleci/, no .travis.yml, no Jenkinsfile.",
+      "evidence": [
+        "find . -name '*.yml' -path '*/.github/*': no results",
+        "No automated gate between code authoring and deployment",
+        "P0-01 JSX error reached preMVP commit undetected"
+      ],
+      "commands": [
+        { "cmd": "ls .github/workflows/ 2>/dev/null || echo 'MISSING'", "expected": "ci.yml (after creation)", "ran": true }
+      ]
+    },
+    {
+      "area": "E2E / Staging Smoke",
+      "priority": "P0",
+      "status": "BLOCKED",
+      "summary": "No E2E runner configured in the repo. Critical flows (signup, login, logout, session refresh, role-based navigation) have not been smoke-tested end-to-end.",
+      "evidence": [
+        "docs/prelaunch/README.md: 'ainda nao existe suite E2E/staging dentro do repo'",
+        "No playwright.config.js, cypress.config.js, or equivalent",
+        "Critical route files: src/App.jsx, src/pages/Auth.jsx, src/components/rbac/RouteGuard.jsx"
+      ],
+      "commands": [
+        { "cmd": "npx playwright test --config=playwright.config.js", "expected": "all smoke tests pass", "ran": false },
+        { "cmd": "npx playwright install && npx playwright test", "expected": "suite to be created first", "ran": false }
+      ]
+    },
+    {
+      "area": "Accessibility (WCAG 2.2 AA)",
+      "priority": "P0",
+      "status": "BLOCKED",
+      "summary": "No automated a11y CI gate. Lighthouse detected contrast violations on landing page buttons. html[lang] never updated at runtime (WCAG 2.2 SC 3.1.1).",
+      "evidence": [
+        "No axe-core, pa11y, or similar in devDependencies",
+        "Lighthouse contrast_selectors: header.atlas-public-nav button, div.grid button",
+        "index.html: <html lang='en'> — static, never updated on locale change",
+        "WCAG 2.2 SC 3.1.1: Language of Page must be programmatically determinable"
+      ],
+      "commands": [
+        { "cmd": "npx pa11y-ci http://localhost:5173/auth", "expected": "0 errors", "ran": false },
+        { "cmd": "npx @axe-core/cli http://localhost:5173/", "expected": "0 violations", "ran": false }
+      ]
+    },
+    {
+      "area": "Unit Tests",
+      "priority": "P1",
+      "status": "PASS",
+      "summary": "All 11 unit tests pass across i18n, TBBM, and translation-coverage suites.",
+      "evidence": [
+        "npm test: 11 pass, 0 fail, 0 skip",
+        "i18n.test.mjs: 6/6 pass",
+        "tbbm.test.mjs: 3/3 pass (coverage 100%, snapshot stable, validation rejects missing vars)",
+        "translation-coverage.test.mjs: 2/2 pass (key parity en-US=pt-BR=683)"
+      ],
+      "commands": [
+        { "cmd": "npm test", "expected": "11 pass, 0 fail", "ran": true }
       ]
     },
     {
       "area": "Performance",
       "priority": "P1",
       "status": "FAIL",
-      "summary": "Largest build asset is 2571.24 KiB, above the 500 KiB warning threshold.",
+      "summary": "LCP 5733 ms vs budget 2500 ms. TTI 5763 ms. Main chunk 2.57 MiB. Performance score 0.59.",
       "evidence": [
-        "build_exit_code=0",
-        "largest_asset=dist/assets/index-B9JamHB6.js (2571.24 KiB)",
-        "chunk_warning=true"
+        "reports/prelaunch/lighthouse-summary.txt: performance=0.59, lcp_ms=5733, interactive_ms=5763, tbt_ms=325, cls=0",
+        "dist/assets/index-B9JamHB6.js: 2632954 bytes (gzip: ~766 KB)",
+        "No route-based code splitting in vite.config.js",
+        "Core Web Vitals budget: LCP<=2500ms, CLS<=0.1, INP<=200ms per https://web.dev/articles/vitals"
+      ],
+      "commands": [
+        { "cmd": "npx lighthouse http://localhost:5173/ --output=json --chrome-flags='--headless'", "expected": "performance>=0.9, lcp<=2500", "ran": false }
       ]
     },
     {
-      "area": "UX",
+      "area": "Lint",
+      "priority": "P2",
+      "status": "FAIL",
+      "summary": "73 ESLint errors: 71 unused-imports, 2 react/no-unknown-property (SVG props).",
+      "evidence": [
+        "npm run lint exit code 1",
+        "AtlasCoreLogoSVG.jsx: stroke-linejoin should be strokeLinejoin (2 errors)",
+        "20+ files with unused imports (TrendingUp, TrendingDown, Minus, Heart, Loader2, etc.)"
+      ],
+      "commands": [
+        { "cmd": "npm run lint", "expected": "exit 0 (after lint:fix + manual cleanup)", "ran": true },
+        { "cmd": "npm run lint:fix", "expected": "auto-fix unused imports", "ran": false }
+      ]
+    },
+    {
+      "area": "Compliance (LGPD/GDPR)",
       "priority": "P1",
       "status": "BLOCKED",
-      "summary": "Loading, empty, error, and recovery states were not manually validated in staging during this run.",
+      "summary": "No consent banner, no /privacy route, deleteCurrentAccount() only calls Base44 DELETE, no Supabase-backed data export.",
       "evidence": [
-        "manual_ux_walkthrough=not_run",
-        "source_examples=src/pages/Auth.jsx, src/pages/Today.jsx, src/pages/Settings.jsx"
+        "grep -rn 'lgpd|gdpr|consent|privacy' src/: only sidebar cookie + settings privacy link (points to /export)",
+        "src/lib/account.js: deleteCurrentAccount() calls Base44 /entities/User/me DELETE",
+        "No consent component found",
+        "LGPD Art. 9 (data subject information), Art. 18 (deletion + portability)"
+      ],
+      "commands": [
+        { "cmd": "curl -s https://atlascore.app/privacy | grep -c 'Privacy'", "expected": ">0 (page must exist)", "ran": false }
       ]
     },
     {
-      "area": "Localization & i18n",
-      "priority": "P0",
-      "status": "PASS",
-      "summary": "Locale normalization, Accept-Language negotiation, fallback behavior, and translation coverage passed automated checks.",
-      "evidence": [
-        "supported_locales=pt-BR, en-US",
-        "translation_keys=695",
-        "sample_negotiation={\"negotiation_pt\":\"pt-BR\",\"negotiation_en\":\"en-US\",\"fallback_ptPT\":[\"pt-BR\",\"en-US\"],\"fallback_frCA\":[\"en-US\"],\"currency_ptBR\":\"R$ 123,45\",\"currency_enUS\":\"$123.45\"}",
-        "preference_fix=App no longer wipes explicit locale on boot"
-      ]
-    },
-    {
-      "area": "Accessibility",
-      "priority": "P0",
-      "status": "BLOCKED",
-      "summary": "No automated a11y audit or keyboard-navigation smoke test is configured for critical flows.",
-      "evidence": [
-        "wcag_target=2.2 AA",
-        "axe_or_pa11y=not_detected",
-        "keyboard_smoke=not_run"
-      ]
-    },
-    {
-      "area": "Compliance",
-      "priority": "P1",
-      "status": "BLOCKED",
-      "summary": "The repo has account deletion functionality but no complete policy/consent audit or launch evidence for LGPD sign-off.",
-      "evidence": [
-        "policy_docs_detected=false",
-        "delete_account_function=base44/functions/deleteAccount/entry.ts",
-        "privacy_review=not_run"
-      ]
-    },
-    {
-      "area": "TBBM",
-      "priority": "P0",
-      "status": "PASS",
-      "summary": "Critical templates cover email, sms, push, and in_app in en-US and pt-BR with snapshot-backed validation.",
-      "evidence": [
-        "coverage_pct=100",
-        "covered_variants=24",
-        "missing_variants=0",
-        "snapshot_tests=tests/prelaunch/tbbm.test.mjs"
-      ]
-    },
-    {
-      "area": "Observability & Operation",
+      "area": "Observability",
       "priority": "P1",
       "status": "FAIL",
-      "summary": "No launch runbook was found and trace_id correlation is not consistently present in the repo.",
+      "summary": "console.error() used throughout. No structured logging utility. No runbook. trace_id defined in TBBM envelopes but not threaded to backend calls.",
       "evidence": [
-        "trace_id_detected=false",
-        "runbook_detected=false",
-        "structured_logs=partial_console_logging_only"
-      ]
-    },
-    {
-      "area": "Tooling Baseline",
-      "priority": "P1",
-      "status": "FAIL",
-      "summary": "Local lint, typecheck, build, and unit test commands were executed to establish a release baseline.",
-      "evidence": [
-        "lint_exit_code=1",
-        "typecheck_exit_code=2",
-        "build_exit_code=0",
-        "unit_exit_code=0"
+        "grep 'console.error' src/lib/adminService.js: 8 occurrences",
+        "No src/lib/logger.js or equivalent",
+        "No reports/prelaunch/RUNBOOK.md",
+        "TBBM trace_id field defined but not used in Supabase Edge Function calls"
+      ],
+      "commands": [
+        { "cmd": "grep -rn 'console.error' src/ | wc -l", "expected": "0 (after replacing with structured logger)", "ran": true }
       ]
     }
   ],
   "i18n": {
     "default_locale": "en-US",
-    "supported_locales": [
-      "pt-BR",
-      "en-US"
-    ],
-    "translation_key_count": 695,
-    "sample_negotiation": {
-      "negotiation_pt": "pt-BR",
-      "negotiation_en": "en-US",
-      "fallback_ptPT": [
-        "pt-BR",
-        "en-US"
-      ],
-      "fallback_frCA": [
-        "en-US"
-      ],
-      "currency_ptBR": "R$ 123,45",
-      "currency_enUS": "$123.45"
+    "supported_locales": ["pt-BR", "en-US"],
+    "bcp47_valid": true,
+    "translation_key_count": 683,
+    "onboarding_key_count": 12,
+    "parity_pass": true,
+    "negotiation": {
+      "pt-BR_from_accept_language": "pt-BR",
+      "en-US_from_browser_array": "en-US",
+      "en-GB_fallback": "en-US",
+      "fr-CA_fallback": "en-US",
+      "pt_language_only": "pt-BR"
     },
-    "rtl_supported_locales": [],
-    "notes": [
-      "Explicit user locale is now preserved across app loads.",
-      "RTL validation is skipped because no RTL locale is currently configured as supported."
+    "fallback_chains": {
+      "pt-PT": ["pt-BR", "en-US"],
+      "fr-CA": ["en-US"]
+    },
+    "cultural_formatting": {
+      "currency_ptBR_BRL": "R$\u00A0123,45",
+      "currency_enUS_USD": "$123.45"
+    },
+    "rtl": {
+      "infrastructure_present": true,
+      "rtl_locales_in_supported_set": [],
+      "status": "SKIPPED_NO_RTL_LOCALE"
+    },
+    "html_lang_dynamic": false,
+    "html_lang_fix_required": "Add document.documentElement.setAttribute('lang', locale) in I18nProvider useEffect",
+    "pluralization": "Intl.PluralRules used in TBBM catalog (formatDays); no ICU MessageFormat",
+    "issues": [
+      "html[lang] attribute is static ('en') — never updated when user changes locale to pt-BR. Fix: update in I18nProvider useEffect. WCAG 2.2 SC 3.1.1."
     ]
   },
   "tbbm": {
-    "channels": [
-      "email",
-      "sms",
-      "push",
-      "in_app"
-    ],
-    "coverage": {
-      "total": 24,
-      "covered": [
-        "welcome_user/email/pt-BR",
-        "welcome_user/email/en-US",
-        "welcome_user/sms/pt-BR",
-        "welcome_user/sms/en-US",
-        "welcome_user/push/pt-BR",
-        "welcome_user/push/en-US",
-        "welcome_user/in_app/pt-BR",
-        "welcome_user/in_app/en-US",
-        "trial_ends_soon/email/pt-BR",
-        "trial_ends_soon/email/en-US",
-        "trial_ends_soon/sms/pt-BR",
-        "trial_ends_soon/sms/en-US",
-        "trial_ends_soon/push/pt-BR",
-        "trial_ends_soon/push/en-US",
-        "trial_ends_soon/in_app/pt-BR",
-        "trial_ends_soon/in_app/en-US",
-        "invite_user/email/pt-BR",
-        "invite_user/email/en-US",
-        "invite_user/sms/pt-BR",
-        "invite_user/sms/en-US",
-        "invite_user/push/pt-BR",
-        "invite_user/push/en-US",
-        "invite_user/in_app/pt-BR",
-        "invite_user/in_app/en-US"
-      ],
-      "missing": [],
-      "coveragePct": 100
-    },
+    "channels": ["email", "sms", "push", "in_app"],
+    "template_version": "1",
     "templates": [
       {
         "template_id": "welcome_user",
         "event_type": "welcome_user",
         "critical": true,
-        "description": "Welcome message sent after account creation.",
-        "required_vars": [
-          "firstName",
-          "appUrl"
-        ],
-        "channels": [
-          "email",
-          "sms",
-          "push",
-          "in_app"
-        ],
-        "locales": [
-          "pt-BR",
-          "en-US"
-        ]
+        "required_vars": ["firstName", "appUrl"],
+        "channels": ["email", "sms", "push", "in_app"],
+        "locales": ["pt-BR", "en-US"]
       },
       {
         "template_id": "trial_ends_soon",
         "event_type": "trial_ends_soon",
         "critical": true,
-        "description": "Reminder sent three days before trial expiration.",
-        "required_vars": [
-          "firstName",
-          "days",
-          "trialEndDate",
-          "billingUrl"
-        ],
-        "channels": [
-          "email",
-          "sms",
-          "push",
-          "in_app"
-        ],
-        "locales": [
-          "pt-BR",
-          "en-US"
-        ]
+        "required_vars": ["firstName", "days", "trialEndDate", "billingUrl"],
+        "channels": ["email", "sms", "push", "in_app"],
+        "locales": ["pt-BR", "en-US"]
       },
       {
         "template_id": "invite_user",
         "event_type": "invite_user",
         "critical": true,
-        "description": "Invitation message for staff and patient/client relationships.",
-        "required_vars": [
-          "recipientName",
-          "inviterName",
-          "inviteLink",
-          "recipientRole"
-        ],
-        "channels": [
-          "email",
-          "sms",
-          "push",
-          "in_app"
-        ],
-        "locales": [
-          "pt-BR",
-          "en-US"
-        ]
+        "required_vars": ["recipientName", "inviterName", "inviteLink", "recipientRole"],
+        "channels": ["email", "sms", "push", "in_app"],
+        "locales": ["pt-BR", "en-US"]
       }
     ],
+    "coverage": {
+      "total": 24,
+      "covered": 24,
+      "missing": [],
+      "coverage_pct": 100
+    },
+    "envelope_validation": "PASS",
+    "snapshot_tests": "PASS",
+    "html_escaping": "PASS (escapeHtml() used in buildEmailHtml)",
+    "idempotency_key_required": true,
+    "trace_id_required": true,
     "sample_renders": [
       {
         "template_id": "welcome_user",
         "channel": "email",
         "locale": "en-US",
-        "preview": {
-          "subject": "Welcome to Atlas Core",
-          "bodyText": "Hi Alex,\n\nYour account is ready.\nAtlas Core keeps training, nutrition, progress, and protocols in one clear system.\n\nOpen the app: https://atlascore.app"
-        }
+        "subject": "Welcome to Atlas Core",
+        "body_preview": "Hi Alex, Your account is ready. Atlas Core keeps training, nutrition, progress, and protocols in one clear system."
       },
       {
         "template_id": "trial_ends_soon",
         "channel": "email",
         "locale": "pt-BR",
-        "preview": {
-          "subject": "Seu trial termina em 3 dias",
-          "bodyText": "Olá Alex,\n\nSeu trial termina em 3 dias, em 27 de março de 2026.\nFaça o upgrade para manter acesso aos recursos premium.\n\nAtualizar plano: https://atlascore.app/pricing"
-        }
+        "subject": "Seu trial termina em 3 dias",
+        "body_preview": "Olá Alex, Seu trial termina em 3 dias, em 27 de março de 2026."
       },
       {
         "template_id": "invite_user",
         "channel": "push",
         "locale": "en-US",
-        "preview": {
-          "title": "New invite",
-          "bodyText": "Camila invited you to Atlas Core."
-        }
+        "push_title": "New invite",
+        "push_body": "Camila invited you to Atlas Core."
       }
     ],
-    "notes": [
-      "Catalog and snapshot validation exist locally for email, sms, push, and in_app.",
-      "Runtime senders still need a follow-up migration to consume the shared catalog consistently."
+    "issues": [
+      "Runtime senders (supabase/functions/send-welcome-email) need to be migrated to consume shared TBBM catalog consistently — currently may use independent templates"
     ]
   },
-  "metrics": {
-    "package_manager": "npm",
-    "commit_hash": "6676fe5490cbdd152af02d3143445e627de49fa6",
-    "branch": "main",
-    "command_exit_codes": {
-      "lint": 1,
-      "typecheck": 2,
-      "build": 0,
-      "unit": 0
+  "testing": {
+    "unit": {
+      "runner": "node --test (Node.js built-in test runner)",
+      "suite_count": 3,
+      "test_count": 11,
+      "pass": 11,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0,
+      "files": ["tests/prelaunch/i18n.test.mjs", "tests/prelaunch/tbbm.test.mjs", "tests/prelaunch/translation-coverage.test.mjs"]
+    },
+    "integration": {
+      "status": "NOT_CONFIGURED",
+      "notes": "No integration test suite detected"
+    },
+    "e2e": {
+      "status": "NOT_CONFIGURED",
+      "framework_options": [
+        { "name": "Playwright", "pros": "Built-in trace, screenshot, video; great TS support", "cons": "Slower first install" },
+        { "name": "Cypress", "pros": "Great DX, time-travel debugger", "cons": "Heavier; flaky on CI without retries" },
+        { "name": "WebdriverIO", "pros": "Cross-browser", "cons": "More config overhead" }
+      ],
+      "recommended": "Playwright",
+      "critical_flows_to_cover": ["signup", "email-login", "google-sso", "logout", "session-refresh-on-reload", "role-based-redirect", "onboarding-completion"]
+    }
+  },
+  "security": {
+    "owasp_top10_mapping": [
+      { "category": "A01:2021 Broken Access Control", "status": "PARTIAL", "notes": "RLS on profiles/subscriptions. Frontend RBAC via RoleGate/RouteGuard. Domain data in Base44 has unknown RLS." },
+      { "category": "A02:2021 Cryptographic Failures", "status": "PASS", "notes": "HTTPS via Vercel. Supabase handles encryption at rest. No custom crypto." },
+      { "category": "A03:2021 Injection", "status": "PASS", "notes": "Supabase JS SDK uses parameterized queries. No raw SQL in frontend. escapeHtml() in TBBM email builder." },
+      { "category": "A04:2021 Insecure Design", "status": "FAIL", "notes": "Dual data system (Base44 + Supabase) creates undefined security boundary." },
+      { "category": "A05:2021 Security Misconfiguration", "status": "FAIL", "notes": "CSP: unsafe-inline + unsafe-eval on script-src. HSTS absent. X-Permitted-Cross-Domain-Policies absent." },
+      { "category": "A06:2021 Vulnerable Components", "status": "BLOCKED", "notes": "npm audit not run (no network access in sandbox). Run: npm audit --audit-level=high" },
+      { "category": "A07:2021 Auth Failures", "status": "PASS", "notes": "Supabase Auth with 5s timeout, state machine, AuthContext. No hardcoded admin email bypass in auth flow." },
+      { "category": "A08:2021 Software Integrity", "status": "BLOCKED", "notes": "No SLSA provenance. CI absent — no artifact signing." },
+      { "category": "A09:2021 Logging Failures", "status": "FAIL", "notes": "console.error() only. No structured logs. No audit trail for admin operations." },
+      { "category": "A10:2021 SSRF", "status": "PASS", "notes": "No server-side URL fetch in frontend. Edge Functions use known endpoints." }
+    ],
+    "secrets_in_tracked_files": false,
+    "service_role_key_in_client": false,
+    "dangerous_innerhtml": {
+      "present": true,
+      "location": "src/components/ui/chart.jsx:61",
+      "content": "Developer-controlled CSS theme variables — not user input. Low XSS risk but requires unsafe-inline."
+    },
+    "hsts": false,
+    "x_frame_options": "DENY",
+    "x_content_type_options": "nosniff",
+    "referrer_policy": "strict-origin-when-cross-origin",
+    "csp_effective": false
+  },
+  "performance": {
+    "lighthouse_home": {
+      "url": "http://127.0.0.1:4173/",
+      "performance_score": 0.59,
+      "accessibility_score": 0.96,
+      "best_practices_score": 0.96,
+      "seo_score": 0.92,
+      "lcp_ms": 5733,
+      "tti_ms": 5763,
+      "tbt_ms": 325,
+      "cls": 0,
+      "speed_index_ms": 5247,
+      "transfer_kib": 5741
+    },
+    "lighthouse_auth": {
+      "url": "http://127.0.0.1:4173/auth?mode=login",
+      "performance_score": 0.61,
+      "accessibility_score": 0.96,
+      "best_practices_score": 0.96,
+      "seo_score": 0.83,
+      "lcp_ms": 5681,
+      "tti_ms": 5681,
+      "tbt_ms": 276,
+      "cls": 0
+    },
+    "budgets": {
+      "lcp_budget_ms": 2500,
+      "lcp_status": "FAIL",
+      "cls_budget": 0.1,
+      "cls_status": "PASS",
+      "inp_budget_ms": 200,
+      "inp_status": "BLOCKED"
     },
     "bundle": {
-      "largest_asset": {
-        "file": "dist/assets/index-B9JamHB6.js",
-        "bytes": 2632954
-      },
-      "top_assets": [
-        {
-          "file": "dist/assets/index-B9JamHB6.js",
-          "bytes": 2632954
-        },
-        {
-          "file": "dist/assets/html2canvas.esm-QH1iLAAe.js",
-          "bytes": 202379
-        },
-        {
-          "file": "dist/assets/index.es-DeDh243y.js",
-          "bytes": 159384
-        },
-        {
-          "file": "dist/assets/index-BEGLsnhj.css",
-          "bytes": 146063
-        },
-        {
-          "file": "dist/assets/purify.es-B9ZVCkUG.js",
-          "bytes": 22636
-        }
-      ]
+      "main_chunk_bytes": 2632954,
+      "main_chunk_gzip_kb": 766,
+      "code_splitting": false,
+      "lazy_loading": false
+    }
+  },
+  "accessibility": {
+    "target_standard": "WCAG 2.2 AA",
+    "automated_gate": false,
+    "lighthouse_a11y_score_home": 0.96,
+    "lighthouse_a11y_score_auth": 0.96,
+    "contrast_violations": [
+      "header.atlas-public-nav > div.mx-auto > div.flex > button.atlas-button",
+      "div.grid > div.space-y-8 > div.flex > button.atlas-button",
+      "div.atlas-public-panel > div.mx-auto > form.mt-7 > button.atlas-button"
+    ],
+    "html_lang_dynamic": false,
+    "wcag_3_1_1_status": "FAIL",
+    "radix_ui_primitives": true,
+    "keyboard_nav_patterns": "Radix UI provides built-in keyboard handling for dialogs, menus, select",
+    "issues": [
+      "html[lang] is static 'en' — fails WCAG 2.2 SC 3.1.1 when user changes to pt-BR",
+      "3 contrast violations detected on landing and auth page primary buttons",
+      "No automated axe/pa11y CI gate — manual verification insufficient for launch"
+    ]
+  },
+  "compliance": {
+    "lgpd_applicable": true,
+    "gdpr_applicable": true,
+    "consent_banner": false,
+    "privacy_policy_route": false,
+    "cookie_policy": false,
+    "data_export": {
+      "exists": true,
+      "covers_supabase": false,
+      "covers_base44": true,
+      "route": "/export"
+    },
+    "account_deletion": {
+      "exists": true,
+      "file": "src/lib/account.js",
+      "backend": "base44",
+      "supabase_deletion": false,
+      "anonymization": false
+    },
+    "personal_data_inventory": [
+      "auth.users.email (Supabase Auth)",
+      "profiles.id, profiles.role (Supabase)",
+      "subscriptions (Supabase)",
+      "DailyCheckin, Workout, FoodLog, Measurement, ProgressPhoto, LabResult (Base44)",
+      "CoachStudent, NutritionistClientLink, ClinicianPatient (Base44)"
+    ],
+    "legal_basis": "NOT_DOCUMENTED",
+    "issues": [
+      "No consent banner or cookie notice (LGPD Art. 9, GDPR Art. 13)",
+      "No /privacy route — Settings 'Privacy' points to /export (data export, not policy)",
+      "deleteCurrentAccount() only deletes from Base44, not Supabase auth.users or profiles",
+      "No data retention policy documented",
+      "LGPD requires informing users about processing purpose and data controller identity"
+    ]
+  },
+  "ci": {
+    "configured": false,
+    "provider": null,
+    "pipeline_file": null,
+    "stages": [],
+    "branch_protection": "UNKNOWN",
+    "recommended_pipeline": {
+      "provider": "GitHub Actions",
+      "file": ".github/workflows/ci.yml",
+      "stages": ["checkout", "setup-node", "npm-ci", "lint", "typecheck", "build", "test", "bundle-budget-check"]
+    }
+  },
+  "metrics": {
+    "commit_hash": "ca4ba42966a565802a09deaf0c778b3a69ba4eba",
+    "branch": "main",
+    "tag": "preMVP",
+    "gate_date_local": "2026-03-20T00:00:00-03:00",
+    "audit_run_at": "2026-03-20T21:00:00Z",
+    "stack": {
+      "framework": "React 18.2.0",
+      "build_tool": "Vite 6.4.1",
+      "css": "Tailwind CSS 3.4.17",
+      "backend": "Supabase JS 2.99.3 + Base44 SDK 0.8.0",
+      "router": "react-router-dom 6.26.0",
+      "ui_primitives": "Radix UI",
+      "state": "TanStack Query 5.84.1",
+      "forms": "react-hook-form 7.54.2 + zod 3.24.2",
+      "node_version": "22.22.0",
+      "package_manager": "npm"
+    },
+    "command_exit_codes": {
+      "build": 0,
+      "typecheck": 1,
+      "lint": 1,
+      "test": 0
+    },
+    "bundle": {
+      "main_chunk_bytes": 2632954,
+      "css_bytes": 146063,
+      "total_dist_mb": 14
     },
     "translations": {
       "supported_locale_count": 2,
-      "translation_key_count": 695
+      "core_key_count": 683,
+      "onboarding_key_count": 12,
+      "parity": "PASS"
     },
     "tbbm": {
-      "coverage_pct": 100,
       "template_count": 3,
-      "channel_count": 4
+      "channel_count": 4,
+      "locale_count": 2,
+      "coverage_pct": 100
     }
   },
   "risks": [
     {
       "id": "RISK-001",
-      "title": "No staging smoke or E2E verification for critical auth and persistence flows",
+      "title": "JSX syntax error in Workouts.jsx",
       "severity": "P0",
       "status": "open",
-      "mitigation": "Add a staging seed plus Playwright smoke coverage for signup/login/logout/reset and refresh persistence."
+      "file": "src/pages/Workouts.jsx",
+      "lines": "333-353",
+      "mitigation": "Replace '</' closing fragment with '))}' to close .map() callback correctly. Verified fix with npm run typecheck."
     },
     {
       "id": "RISK-002",
-      "title": "Security-header baseline is incomplete",
+      "title": "CSP unsafe-inline+unsafe-eval renders XSS protection non-functional",
       "severity": "P0",
       "status": "open",
-      "mitigation": "Add CSP and related response-header enforcement, then validate in staging."
+      "file": "vercel.json",
+      "mitigation": "Remove unsafe-eval from CSP. Remove unsafe-inline from script-src. Add HSTS header. Requires replacing dangerouslySetInnerHTML in chart.jsx with CSS custom property approach.",
+      "reference": "https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html"
     },
     {
       "id": "RISK-003",
-      "title": "Bundle size regression on the main client chunk",
-      "severity": "P1",
+      "title": "Base44 SDK as primary data backend — 186 call sites in 54 files",
+      "severity": "P0",
       "status": "open",
-      "mitigation": "Split the 2.5+ MiB client bundle and add bundle budgets to CI."
+      "files_affected": 54,
+      "call_sites": 186,
+      "mitigation": "Full Supabase migration required. APPROVAL REQUEST pending. Estimated effort: large. Must define Supabase schema for each domain entity and migrate data.",
+      "approval_required": true
     },
     {
       "id": "RISK-004",
-      "title": "Accessibility gate is missing",
+      "title": "No CI pipeline",
       "severity": "P0",
       "status": "open",
-      "mitigation": "Add automated axe/keyboard checks on critical routes before launch."
+      "mitigation": "Create .github/workflows/ci.yml with lint, typecheck, build, test, and bundle-budget stages."
     },
     {
       "id": "RISK-005",
-      "title": "Two separate trial-provisioning paths exist in Base44 and Supabase",
+      "title": "No E2E / staging smoke tests",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add Playwright E2E suite covering signup, login, logout, session refresh, role-based navigation."
+    },
+    {
+      "id": "RISK-006",
+      "title": "No automated accessibility gate",
+      "severity": "P0",
+      "status": "open",
+      "mitigation": "Add @axe-core/playwright or pa11y-ci to CI. Fix contrast violations on primary buttons.",
+      "reference": "https://www.w3.org/TR/WCAG22/"
+    },
+    {
+      "id": "RISK-007",
+      "title": "Main bundle 2.57 MiB; LCP 5.7 s (3x over budget)",
       "severity": "P1",
       "status": "open",
-      "mitigation": "Converge signup/trial ownership so the product has a single source of truth for subscriptions."
+      "mitigation": "Add manualChunks to vite.config.js. Lazy-load pages with React.lazy(). Target: LCP <= 2500 ms.",
+      "reference": "https://web.dev/articles/vitals"
+    },
+    {
+      "id": "RISK-008",
+      "title": "html[lang] never updated on locale change",
+      "severity": "P1",
+      "status": "open",
+      "file": "src/lib/i18nContext.jsx",
+      "mitigation": "Add document.documentElement.setAttribute('lang', locale) in I18nProvider useEffect.",
+      "reference": "https://www.w3.org/TR/WCAG22/#language-of-page"
+    },
+    {
+      "id": "RISK-009",
+      "title": "Dual subscription systems (Base44 + Supabase conflict)",
+      "severity": "P1",
+      "status": "open",
+      "mitigation": "Resolved when RISK-003 (Base44 migration) is complete. Designate Supabase subscriptions as single source of truth."
+    },
+    {
+      "id": "RISK-010",
+      "title": "No LGPD/GDPR consent layer or /privacy route",
+      "severity": "P1",
+      "status": "open",
+      "mitigation": "Add consent banner, /privacy route, Supabase-backed account deletion, and data export covering all Supabase tables.",
+      "reference": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+    },
+    {
+      "id": "RISK-011",
+      "title": "73 ESLint errors block CI",
+      "severity": "P2",
+      "status": "open",
+      "mitigation": "Run npm run lint:fix then manually remove remaining unused imports."
+    },
+    {
+      "id": "RISK-012",
+      "title": "grant_admin_*.mjs scripts hardcode admin email and accept SERVICE_ROLE_KEY as CLI arg",
+      "severity": "P2",
+      "status": "open",
+      "files": ["grant_admin_local.mjs", "grant_admin_simple.mjs"],
+      "mitigation": "Add to .gitignore or delete from repo. Use Supabase Dashboard for admin grants."
     }
   ],
   "signoff": [
     {
       "role": "Engineering",
-      "owner": "Codex",
-      "status": "PROPOSED",
-      "note": "Local prelaunch automation executed and artifacts generated."
-    },
-    {
-      "role": "Product",
-      "owner": "Unassigned",
+      "owner": "TBD",
       "status": "PENDING",
-      "note": "Manual staging walkthrough is still required."
+      "blockers": ["RISK-001", "RISK-002", "RISK-003", "RISK-004", "RISK-005"],
+      "note": "P0 blockers must be resolved and CI must pass before engineering sign-off."
     },
     {
       "role": "Security",
-      "owner": "Unassigned",
+      "owner": "TBD",
       "status": "PENDING",
-      "note": "ASVS/CSP validation and runtime header review are still required."
+      "blockers": ["RISK-002", "RISK-003"],
+      "note": "CSP must be tightened, HSTS added, and Base44 migration security boundary reviewed."
+    },
+    {
+      "role": "Product / QA",
+      "owner": "TBD",
+      "status": "PENDING",
+      "blockers": ["RISK-005", "RISK-006"],
+      "note": "Staging smoke walkthrough and accessibility review required."
+    },
+    {
+      "role": "Legal / DPO",
+      "owner": "TBD",
+      "status": "PENDING",
+      "blockers": ["RISK-010"],
+      "note": "LGPD consent layer and privacy policy required before any public launch."
     }
+  ],
+  "evidence_index": [
+    { "kind": "file", "path_or_ref": "src/pages/Workouts.jsx:333-353", "description": "JSX fragment mismatch in .map() callback — root cause of 8 TSC errors" },
+    { "kind": "file", "path_or_ref": "vercel.json", "description": "Security headers: X-Frame-Options DENY, CSP (unsafe-inline+eval), missing HSTS" },
+    { "kind": "file", "path_or_ref": "src/api/base44Client.js", "description": "Base44 SDK client — 186 call sites across 54 files" },
+    { "kind": "command_output", "path_or_ref": "npm run typecheck (exit 1)", "description": "8 TypeScript parse errors in Workouts.jsx" },
+    { "kind": "command_output", "path_or_ref": "npm run lint (exit 1)", "description": "73 ESLint errors: unused imports + SVG prop names" },
+    { "kind": "command_output", "path_or_ref": "npm test (exit 0, 11/11)", "description": "All unit tests pass: i18n, TBBM, translation-coverage" },
+    { "kind": "command_output", "path_or_ref": "npm run build (exit 0)", "description": "Production build succeeds; 2.57 MiB main chunk warning" },
+    { "kind": "file", "path_or_ref": "reports/prelaunch/lighthouse-summary.txt", "description": "Lighthouse: performance 0.59, LCP 5733ms, TTI 5763ms, CLS 0, a11y 0.96" },
+    { "kind": "file", "path_or_ref": "shared/tbbm/catalog.js", "description": "TBBM catalog: 3 templates, 4 channels, 2 locales" },
+    { "kind": "file", "path_or_ref": "tests/prelaunch/__snapshots__/tbbm.snapshots.json", "description": "TBBM snapshot baseline — verified stable" },
+    { "kind": "file", "path_or_ref": "shared/localization.js", "description": "Locale negotiation, BCP47 normalization, fallback chains" },
+    { "kind": "file", "path_or_ref": "src/lib/translations/en-US.json", "description": "683 translation keys (en-US)" },
+    { "kind": "file", "path_or_ref": "src/lib/translations/pt-BR.json", "description": "683 translation keys (pt-BR) — parity confirmed" },
+    { "kind": "file", "path_or_ref": "supabase/migrations/001_create_profiles_subscriptions.sql", "description": "RLS policies for profiles and subscriptions tables" },
+    { "kind": "file", "path_or_ref": "supabase/migrations/003_security_helpers.sql", "description": "is_admin(), has_active_access() SECURITY DEFINER functions" },
+    { "kind": "file", "path_or_ref": "src/lib/AuthContext.jsx", "description": "Auth state machine with 5s timeout and role normalization" },
+    { "kind": "file", "path_or_ref": "src/lib/rbac.js", "description": "RBAC: 6 roles, PAGE_ACCESS map, canAccess() function" },
+    { "kind": "file", "path_or_ref": "src/lib/entitlements.js", "description": "Entitlement gates — admin bypass uses atlas_role check" },
+    { "kind": "file", "path_or_ref": "src/lib/account.js", "description": "deleteCurrentAccount() — calls Base44 DELETE, not Supabase" },
+    { "kind": "file", "path_or_ref": "src/lib/i18nContext.jsx", "description": "I18nProvider — missing html[lang] dynamic update" },
+    { "kind": "file", "path_or_ref": "src/components/ui/chart.jsx:61", "description": "dangerouslySetInnerHTML — developer-controlled CSS vars only; justifies unsafe-inline in CSP" },
+    { "kind": "file", "path_or_ref": "grant_admin_local.mjs", "description": "Admin grant script with hardcoded email — should not be tracked in git" },
+    { "kind": "file", "path_or_ref": "package.json", "description": "Dependencies: React 18, Vite 6, Supabase JS 2.99.3, @base44/sdk 0.8.0, TanStack Query 5" }
   ]
 }
