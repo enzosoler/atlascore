@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   Loader2,
   LogOut,
+  Settings,
   Menu,
   MessageSquare,
   ShieldCheck,
@@ -56,6 +57,7 @@ const ICON_MAP = {
   LayoutDashboard,
   MessageSquare,
   TrendingUp,
+  Settings,
 };
 
 const BOTTOM_PATHS_BY_ROLE = {
@@ -337,6 +339,13 @@ export default function AppLayout() {
           ) : null}
 
           <div className="space-y-0.5">
+            <Link
+              to={ROUTES.settings}
+              className={getDesktopNavItemClass(isActive(ROUTES.settings), collapsed)}
+            >
+              <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
+              {!collapsed ? <span>Configurações</span> : null}
+            </Link>
             <ThemeToggleButton
               compact={collapsed}
               className={collapsed ? '' : 'w-full justify-start'}
@@ -464,6 +473,10 @@ export default function AppLayout() {
                     {ROLE_LABELS[role] || role}
                   </span>
                 </div>
+                <Link to={ROUTES.settings} className={getMobileNavItemClass(isActive(ROUTES.settings))}>
+                  <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
+                  <span>Configurações</span>
+                </Link>
                 <button onClick={() => logout()} className={getMobileNavItemClass(false, true)}>
                   <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
                   <span>Sair</span>

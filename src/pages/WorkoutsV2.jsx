@@ -32,6 +32,7 @@ function planExToExecution(ex) {
     target_sets: setCount,
     target_reps: ex.reps || '',
     target_weight: ex.target_weight ?? null,
+    media_gif_url: ex.media_gif_url || null,
     sets: setsArr,
   };
 }

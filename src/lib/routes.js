@@ -35,6 +35,7 @@ export const ROUTES = {
   githubPRs: '/github-prs',
   help: '/help',
   blog: '/blog',
+  settings: '/Settings',
 };
 
 export const ROLE_HOME = {

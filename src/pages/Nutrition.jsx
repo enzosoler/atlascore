@@ -427,35 +427,137 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
   );
 }
 
-function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
-  const [form, setForm] = useState(getMealFormState(meal, selectedDate));
+// Maps meal type to hour so getMealTypeFromDate can round-trip correctly when saving to food_logs
+const MEAL_TYPE_HOURS = {
+  breakfast: 8,
+  morning_snack: 10,
+  lunch: 12,
+  afternoon_snack: 15,
+  pre_workout: 17,
+  post_workout: 18,
+  dinner: 20,
+  evening_snack: 22,
+};
 
-  const handleField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }));
+function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
+  const [date, setDate] = useState(meal?.date || selectedDate || TODAY);
+  const [mealType, setMealType] = useState(meal?.meal_type || 'breakfast');
+  const [foods, setFoods] = useState(
+    (meal?.foods || []).map((f) => ({
+      name: f.name || '',
+      kcal: f.kcal || 0,
+      protein: f.protein || 0,
+      carbs: f.carbs || 0,
+      fat: f.fat || 0,
+      amount: f.amount || 100,
+      unit: f.unit || 'g',
+      external_id: f.external_id || null,
+      source_api: f.source_api || null,
+    }))
+  );
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+
+  // Debounced FatSecret search
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setSearchError('');
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    setSearchError('');
+    const timer = setTimeout(async () => {
+      try {
+        let results = await searchFatSecretFoods(q, 'pt');
+        if (results.length === 0) {
+          results = await searchFatSecretFoods(q, 'en');
+        }
+        setSearchResults(results.slice(0, 8));
+      } catch {
+        setSearchError('Erro ao buscar alimentos. Tente novamente.');
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const addFood = (food) => {
+    setFoods((prev) => [
+      ...prev,
+      {
+        name: food.name,
+        kcal: Math.round(food.calories || 0),
+        protein: Math.round((food.protein || 0) * 10) / 10,
+        carbs: Math.round((food.carbs || 0) * 10) / 10,
+        fat: Math.round((food.fat || 0) * 10) / 10,
+        amount: 100,
+        unit: 'g',
+        external_id: food.id || null,
+        source_api: 'FatSecret',
+      },
+    ]);
+    setSearchQuery('');
+    setSearchResults([]);
   };
+
+  const removeFood = (idx) => {
+    setFoods((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const totals = useMemo(
+    () =>
+      foods.reduce(
+        (acc, f) => ({
+          kcal: acc.kcal + (f.kcal || 0),
+          protein: acc.protein + (f.protein || 0),
+          carbs: acc.carbs + (f.carbs || 0),
+          fat: acc.fat + (f.fat || 0),
+        }),
+        { kcal: 0, protein: 0, carbs: 0, fat: 0 }
+      ),
+    [foods]
+  );
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSave({ ...form });
+    if (foods.length === 0) return;
+    onSave({
+      date: formatDateKey(date),
+      meal_type: mealType,
+      foods,
+      total_calories: Math.round(totals.kcal),
+      total_protein: Math.round(totals.protein * 10) / 10,
+      total_carbs: Math.round(totals.carbs * 10) / 10,
+      total_fat: Math.round(totals.fat * 10) / 10,
+    });
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* Date + Meal type */}
       <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
         <label className={FIELD_LABEL_CLASS}>
           Data da refeição
           <input
             type="date"
-            value={formatDateKey(form.date)}
-            onChange={(event) => handleField('date', event.target.value)}
+            value={formatDateKey(date)}
+            onChange={(e) => setDate(e.target.value)}
             className={INPUT_CLASS_NAME}
           />
         </label>
         <label className={FIELD_LABEL_CLASS}>
           Tipo de refeição
           <select
-            value={form.meal_type}
-            onChange={(event) => handleField('meal_type', event.target.value)}
+            value={mealType}
+            onChange={(e) => setMealType(e.target.value)}
             className={SELECT_CLASS_NAME}
           >
             {Object.entries(MEAL_TYPES).map(([key, { label }]) => (
@@ -466,93 +568,135 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
           </select>
         </label>
       </div>
+
+      {/* FatSecret food search */}
       <div className="mt-5">
-        <label className={FIELD_LABEL_CLASS}>
-          Título da refeição
+        <p className={FIELD_LABEL_CLASS}>Buscar alimento</p>
+        <div className="relative mt-2">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
           <input
             type="text"
-            value={form.title}
-            onChange={(event) => handleField('title', event.target.value)}
-            placeholder="Ex: Café da manhã, Pós-treino"
-            className={INPUT_CLASS_NAME}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Ex: frango grelhado, arroz integral, banana..."
+            className={cn(INPUT_CLASS_NAME, 'pl-11')}
           />
-        </label>
+        </div>
+
+        {isSearching ? (
+          <div className="mt-3 flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
+            <Loader2 className="h-4 w-4 animate-spin" /> Buscando na FatSecret...
+          </div>
+        ) : null}
+
+        {!isSearching && searchError ? (
+          <p className="mt-3 text-[13px] text-[hsl(var(--err))]">{searchError}</p>
+        ) : null}
+
+        {!isSearching && searchResults.length > 0 ? (
+          <div className="mt-2 max-h-56 overflow-y-auto rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]">
+            {searchResults.map((food) => (
+              <button
+                key={food.id}
+                type="button"
+                onClick={() => addFood(food)}
+                className="w-full border-b border-[hsl(var(--border)/0.5)] px-4 py-3 text-left text-[13px] transition-colors last:border-0 hover:bg-[hsl(var(--fill)/0.72)]"
+              >
+                <p className="font-semibold text-[hsl(var(--fg))]">{food.name}</p>
+                <p className="text-[12px] text-[hsl(var(--fg-2))]">
+                  {Math.round(food.calories)} kcal · P {Math.round(food.protein)}g · C{' '}
+                  {Math.round(food.carbs)}g · G {Math.round(food.fat)}g
+                </p>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {!isSearching && !searchError && searchQuery.trim().length >= 2 && searchResults.length === 0 ? (
+          <p className="mt-3 text-[13px] text-[hsl(var(--fg-2))]">
+            Nenhum resultado para &quot;{searchQuery}&quot;. Tente outro nome.
+          </p>
+        ) : null}
       </div>
-      <div className="mt-5">
-        <label className={FIELD_LABEL_CLASS}>
-          Alimentos (um por linha)
-          <textarea
-            value={form.foodsText}
-            onChange={(event) => handleField('foodsText', event.target.value)}
-            placeholder="Ex:\n1 banana\n1 scoop de whey\n2 fatias de pão integral"
-            className={TEXTAREA_CLASS_NAME}
-          />
-        </label>
-      </div>
-      <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-5 md:grid-cols-4">
-        <label className={FIELD_LABEL_CLASS}>
-          Calorias (kcal)
-          <input
-            type="number"
-            value={form.total_calories}
-            onChange={(event) => handleField('total_calories', event.target.value)}
-            placeholder="0"
-            className={INPUT_CLASS_NAME}
-          />
-        </label>
-        <label className={FIELD_LABEL_CLASS}>
-          Proteínas (g)
-          <input
-            type="number"
-            value={form.total_protein}
-            onChange={(event) => handleField('total_protein', event.target.value)}
-            placeholder="0"
-            className={INPUT_CLASS_NAME}
-          />
-        </label>
-        <label className={FIELD_LABEL_CLASS}>
-          Carboidratos (g)
-          <input
-            type="number"
-            value={form.total_carbs}
-            onChange={(event) => handleField('total_carbs', event.target.value)}
-            placeholder="0"
-            className={INPUT_CLASS_NAME}
-          />
-        </label>
-        <label className={FIELD_LABEL_CLASS}>
-          Gorduras (g)
-          <input
-            type="number"
-            value={form.total_fat}
-            onChange={(event) => handleField('total_fat', event.target.value)}
-            placeholder="0"
-            className={INPUT_CLASS_NAME}
-          />
-        </label>
-      </div>
-      <div className="mt-5">
-        <label className={FIELD_LABEL_CLASS}>
-          Notas
-          <textarea
-            value={form.notes}
-            onChange={(event) => handleField('notes', event.target.value)}
-            placeholder="Alguma observação sobre a refeição?"
-            className={TEXTAREA_CLASS_NAME}
-          />
-        </label>
-      </div>
+
+      {/* Added foods list */}
+      {foods.length > 0 ? (
+        <div className="mt-5">
+          <p className={FIELD_LABEL_CLASS}>
+            Alimentos adicionados ({foods.length})
+          </p>
+          <div className="mt-2 space-y-2">
+            {foods.map((food, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold text-[hsl(var(--fg))]">{food.name}</p>
+                  <p className="text-[12px] text-[hsl(var(--fg-2))]">
+                    {food.kcal} kcal · P {food.protein}g · C {food.carbs}g · G {food.fat}g
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeFood(idx)}
+                  className="ml-3 shrink-0 rounded-lg p-1.5 text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Totals row */}
+          <div className="mt-3 grid grid-cols-4 gap-3 rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
+            {[
+              { label: 'kcal', value: Math.round(totals.kcal), tone: 'calories' },
+              { label: 'Prot', value: `${Math.round(totals.protein)}g`, tone: 'protein' },
+              { label: 'Carb', value: `${Math.round(totals.carbs)}g`, tone: 'carbs' },
+              { label: 'Gord', value: `${Math.round(totals.fat)}g`, tone: 'fat' },
+            ].map(({ label, value, tone }) => (
+              <div key={label} className="text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <span className={cn('h-2 w-2 rounded-full', MEAL_MACRO_DOT[tone])} />
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
+                    {label}
+                  </p>
+                </div>
+                <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {foods.length === 0 && searchQuery.trim().length < 2 ? (
+        <div className="mt-5 flex flex-col items-center justify-center rounded-[16px] border border-dashed border-[hsl(var(--border-h))] py-8 text-center">
+          <UtensilsCrossed className="h-8 w-8 text-[hsl(var(--fg-3))]" strokeWidth={1.5} />
+          <p className="mt-3 text-[13px] font-medium text-[hsl(var(--fg-2))]">
+            Busque e adicione alimentos acima
+          </p>
+          <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
+            Os macros são calculados automaticamente via FatSecret
+          </p>
+        </div>
+      ) : null}
+
       <ActionRow className="mt-6">
         <SecondaryButton type="button" onClick={onCancel} disabled={isSaving}>
           Cancelar
         </SecondaryButton>
-        <PrimaryButton type="submit" disabled={isSaving} className="gap-2">
+        <PrimaryButton
+          type="submit"
+          disabled={isSaving || foods.length === 0}
+          className="gap-2"
+        >
           {isSaving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Plus className="h-4 w-4" />
           )}
-          {meal ? 'Salvar' : 'Adicionar'}
+          {meal ? 'Salvar alterações' : 'Adicionar refeição'}
         </PrimaryButton>
       </ActionRow>
     </form>
@@ -689,7 +833,7 @@ export default function NutritionPage() {
             setIsSearchingFatSecretFoods(false);
           }
         }
-      }, FATSECRET_SEARCH_DEBOUNCE_DEBOUNCE_MS);
+      }, FATSECRET_SEARCH_DEBOUNCE_MS);
       return () => {
         isActiveFatSecret = false;
         window.clearTimeout(timeoutFatSecret);
@@ -755,39 +899,81 @@ export default function NutritionPage() {
       return;
     }
 
-    const isEditing = !!editingMeal?.id;
-    const mealId = isEditing ? editingMeal.id : createLocalId('meal');
+    const foods = form.foods || [];
+    if (foods.length === 0) {
+      setNotice({ tone: 'error', message: 'Adicione pelo menos um alimento antes de salvar.' });
+      return;
+    }
 
-    const mealData = {
-      id: mealId,
-      source: 'supabase',
-      source_row_id: isEditing ? editingMeal.source_row_id : null,
-      date: formatDateKey(form.date),
-      meal_type: form.meal_type,
-      title: form.title || getMealTypeLabel(form.meal_type),
-      foods: buildFoodList(form.foodsText),
-      total_calories: toNumber(form.total_calories),
-      total_protein: toNumber(form.total_protein),
-      total_carbs: toNumber(form.total_carbs),
-      total_fat: toNumber(form.total_fat),
-      notes: form.notes,
+    // Build a timestamp that encodes the meal type so getMealTypeFromDate can round-trip it
+    const buildMealTimestamp = (dateStr, mealTypeKey) => {
+      const hour = MEAL_TYPE_HOURS[mealTypeKey] ?? 12;
+      const [year, month, day] = (dateStr || TODAY).split('-').map(Number);
+      const d = new Date();
+      d.setFullYear(year, (month || 1) - 1, day || 1);
+      d.setHours(hour, 0, 0, 0);
+      return d.toISOString();
     };
 
-    // TODO: Implement Supabase upsert for meals
+    const mealLabel = getMealTypeLabel(form.meal_type);
+    const savedMeals = [];
 
-    setMeals((current) =>
-      isEditing ? current.map((m) => (m.id === mealId ? mealData : m)) : [mealData, ...current]
-    );
+    try {
+      for (const food of foods) {
+        const snapshot = {
+          user_id: user.id,
+          date: buildMealTimestamp(form.date, form.meal_type),
+          food_name: food.name,
+          calories: Math.round(food.kcal || 0),
+          protein: Math.round((food.protein || 0) * 10) / 10,
+          carbs: Math.round((food.carbs || 0) * 10) / 10,
+          fat: Math.round((food.fat || 0) * 10) / 10,
+          quantity: 1,
+          serving_unit: food.unit || 'g',
+          serving_size: food.amount || 100,
+          external_id: food.external_id || null,
+          source_api: food.source_api || 'FatSecret',
+        };
+
+        const { data, error } = await supabase
+          .from('food_logs')
+          .insert(snapshot)
+          .select()
+          .single();
+
+        if (error) throw error;
+        if (data) savedMeals.push(mapFoodLogToMeal(data));
+      }
+    } catch (error) {
+      console.error('[Nutrition] Failed to save meal to Supabase:', error);
+      setNotice({ tone: 'error', message: `Erro ao salvar refeição. Verifique sua conexão e tente novamente.` });
+      return;
+    }
+
+    setMeals((current) => [...current, ...savedMeals]);
     setIsFormOpen(false);
     setEditingMeal(null);
     setNotice({
       tone: 'success',
-      message: `${mealData.title} foi ${isEditing ? 'atualizada' : 'adicionada'} com sucesso.`,
+      message: `${foods.length} alimento(s) adicionado(s) em ${mealLabel}.`,
     });
   };
 
-  const handleDeleteMeal = (meal) => {
-    // TODO: Implement Supabase delete for meals
+  const handleDeleteMeal = async (meal) => {
+    if (meal.source_row_id) {
+      try {
+        const { error } = await supabase
+          .from('food_logs')
+          .delete()
+          .eq('id', meal.source_row_id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+      } catch (error) {
+        console.error('Failed to delete meal from Supabase:', error);
+        setNotice({ tone: 'error', message: `Erro ao remover ${meal.title}. Tente novamente.` });
+        return;
+      }
+    }
     setMeals((current) => current.filter((m) => m.id !== meal.id));
     setNotice({ tone: 'success', message: `${meal.title} foi removida.` });
   };
@@ -1039,25 +1225,6 @@ export default function NutritionPage() {
             ) : null}
           </Card>
 
-          {!isSearchingFoods &&
-          !isSearchingFatSecretFoods &&
-          !query &&
-          !fatSecretQuery &&
-          recentFoods.length > 0 ? (
-            <Card className="px-5 py-5 mt-5">
-              <p className={FIELD_LABEL_CLASS}>Alimentos recentes</p>
-              <div className="mt-5 space-y-3">
-                {recentFoods.map((food) => (
-                  <FoodSearchResult
-                    key={food.id}
-                    food={food}
-                    onSelect={handleSelectFood}
-                    isSaving={savingFoodId === food.id}
-                  />
-                ))}
-              </div>
-            </Card>
-          ) : null}
         </Section>
       </AppContainer>
 

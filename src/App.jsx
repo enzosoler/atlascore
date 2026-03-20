@@ -58,6 +58,7 @@ import GitHubPRTracker from '@/pages/GitHubPRTracker';
 import WorkoutLoggingGuide from '@/pages/guides/WorkoutLoggingGuide';
 import PlanVsExecutionGuide from '@/pages/guides/PlanVsExecutionGuide';
 import BlogIndex from '@/pages/blog/BlogIndex.jsx';
+import Settings from '@/pages/Settings.jsx';
 import BlogPost from '@/pages/blog/BlogPost.jsx';
 
 // Layout
@@ -154,6 +155,7 @@ const AppRoutes = () => (
         <Route path="/exercise/:id" element={<ExerciseDetail />} />
         <Route path={ROUTES.progress} element={<Progress />} />
         <Route path={ROUTES.profile} element={<Profile />} />
+        <Route path={ROUTES.settings} element={<Settings />} />
         <Route path={ROUTES.export} element={<Export />} />
         <Route path={ROUTES.myDiet} element={<MyDiet />} />
         <Route path={ROUTES.myWorkout} element={<MyWorkout />} />
