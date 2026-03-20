@@ -125,24 +125,24 @@ function SettingsRow({ icon: Icon, label, description, href, onClick, destructiv
 function SettingsContent() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { locale, setLocale } = useI18n();
+  const { locale, setLocale, t } = useI18n();
 
   const handleLogout = async () => {
-    if (window.confirm('Tem certeza que deseja sair?')) {
+    if (window.confirm(t('settings.signout.confirm'))) {
       await logout?.();
     }
   };
 
   return (
     <PageShell
-      title="Configurações"
-      subtitle="Personalize sua experiência no Atlas Core."
+      title={t('settings.title')}
+      subtitle={t('settings.subtitle')}
       maxWidth="max-w-2xl"
     >
       {/* Account info */}
       <SectionCard
-        title="Conta"
-        subtitle="Informações da sua conta atual."
+        title={t('settings.account.title')}
+        subtitle={t('settings.account.subtitle')}
       >
         <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
@@ -158,7 +158,7 @@ function SettingsContent() {
             to={ROUTES.profile}
             className="ml-auto flex items-center gap-1.5 rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] px-3 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
           >
-            Editar perfil
+            {t('settings.account.editProfile')}
             <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
           </Link>
         </div>
@@ -166,20 +166,20 @@ function SettingsContent() {
 
       {/* Appearance */}
       <SectionCard
-        title="Aparência"
-        subtitle="Escolha o tema da interface."
+        title={t('settings.appearance.title')}
+        subtitle={t('settings.appearance.subtitle')}
       >
         <div className="flex gap-3">
           <ThemeOption
             icon={Sun}
-            label="Claro"
+            label={t('settings.appearance.light')}
             value="light"
             currentTheme={theme}
             onSelect={setTheme}
           />
           <ThemeOption
             icon={Moon}
-            label="Escuro"
+            label={t('settings.appearance.dark')}
             value="dark"
             currentTheme={theme}
             onSelect={setTheme}
@@ -189,8 +189,8 @@ function SettingsContent() {
 
       {/* Language */}
       <SectionCard
-        title="Idioma"
-        subtitle="Selecione o idioma da interface."
+        title={t('settings.language.title')}
+        subtitle={t('settings.language.subtitle')}
       >
         <div className="flex gap-3">
           <LangOption
@@ -208,40 +208,33 @@ function SettingsContent() {
             onSelect={setLocale}
           />
         </div>
-        {locale === 'en-US' ? (
-          <p className="mt-3 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-            Note: blog posts and some legacy sections remain in Portuguese as they contain
-            user-specific content.
-          </p>
-        ) : (
-          <p className="mt-3 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-            Nota: os posts do blog e algumas seções legadas permanecem no idioma original.
-          </p>
-        )}
+        <p className="mt-3 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+          {locale === 'en-US' ? t('settings.language.noteEn') : t('settings.language.notePt')}
+        </p>
       </SectionCard>
 
       {/* Other links */}
       <SectionCard
-        title="Mais opções"
-        subtitle="Acesse outras áreas da conta."
+        title={t('settings.more.title')}
+        subtitle={t('settings.more.subtitle')}
       >
         <div className="space-y-3">
           <SettingsRow
             icon={User}
-            label="Meu Perfil"
-            description="Dados pessoais, metas e informações biométricas."
+            label={t('settings.more.profile')}
+            description={t('settings.more.profileDesc')}
             href={ROUTES.profile}
           />
           <SettingsRow
             icon={Shield}
-            label="Privacidade e dados"
-            description="Controle como seus dados são usados."
+            label={t('settings.more.privacy')}
+            description={t('settings.more.privacyDesc')}
             href={ROUTES.export}
           />
           <SettingsRow
             icon={Bell}
-            label="Ajuda e suporte"
-            description="Central de ajuda, tutoriais e contato."
+            label={t('settings.more.help')}
+            description={t('settings.more.helpDesc')}
             href={ROUTES.help}
           />
         </div>
@@ -249,13 +242,13 @@ function SettingsContent() {
 
       {/* Danger zone */}
       <SectionCard
-        title="Sair"
-        subtitle="Encerrar sessão desta conta."
+        title={t('settings.signout.title')}
+        subtitle={t('settings.signout.subtitle')}
       >
         <SettingsRow
           icon={LogOut}
-          label="Sair da conta"
-          description="Você será redirecionado para a tela de login."
+          label={t('settings.signout.label')}
+          description={t('settings.signout.description')}
           onClick={handleLogout}
           destructive
         />
@@ -267,8 +260,8 @@ function SettingsContent() {
 export default function Settings() {
   return (
     <SafePageBoundary
-      title="Configurações"
-      subtitle="Personalize sua experiência."
+      title="Settings"
+      subtitle="Personalize your experience."
       maxWidth="max-w-2xl"
       fallbackDescription="Settings page encountered an error."
     >

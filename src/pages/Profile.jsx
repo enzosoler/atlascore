@@ -18,6 +18,7 @@ import {
   UserCircle2,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/lib/i18nContext';
 import { ROUTES } from '@/lib/routes';
 import {
   ActionRow,
@@ -79,135 +80,139 @@ const NUMERIC_FIELDS = [
 
 const LOCAL_PROFILE_STORAGE_KEY = 'atlas_local_profile_store';
 
-const PROFILE_FORM_SECTIONS = [
-  {
-    eyebrow: 'Baseline',
-    title: 'Personal baseline',
-    description: 'Dados pessoais essenciais para dar contexto ao resto da experiência.',
-    gridClassName: 'sm:grid-cols-2',
-    fields: [
-      {
-        key: 'phone',
-        label: 'Telefone',
-        type: 'tel',
-        placeholder: '(11) 99999-0000',
-        description: 'Contato rapido para referencia e suporte.',
-      },
-      {
-        key: 'age',
-        label: 'Idade',
-        type: 'number',
-        step: '1',
-        unit: 'anos',
-        placeholder: '29',
-        description: 'Ajuda a contextualizar rotina e metas.',
-      },
-      {
-        key: 'height',
-        label: 'Altura',
-        type: 'number',
-        step: '1',
-        unit: 'cm',
-        placeholder: '178',
-        description: 'Base para leitura de composição e progresso.',
-      },
-    ],
-  },
-  {
-    eyebrow: 'Body',
-    title: 'Current body metrics',
-    description: 'Ajuste direcao e referencia corporal de forma objetiva.',
-    gridClassName: 'sm:grid-cols-2',
-    fields: [
-      {
-        key: 'current_weight',
-        label: 'Peso atual',
-        type: 'number',
-        step: '0.1',
-        unit: 'kg',
-        placeholder: '82.4',
-        description: 'Ponto de partida da fase atual.',
-      },
-      {
-        key: 'target_weight',
-        label: 'Peso alvo',
-        type: 'number',
-        step: '0.1',
-        unit: 'kg',
-        placeholder: '78.0',
-        description: 'Meta corporal que guia a direcao do bloco.',
-      },
-    ],
-  },
-  {
-    eyebrow: 'Targets',
-    title: 'Daily performance targets',
-    description: 'Targets que deixam nutrição, treino e recuperação mais coerentes.',
-    gridClassName: 'sm:grid-cols-2',
-    fields: [
-      {
-        key: 'calories_target',
-        label: 'Calorias alvo',
-        type: 'number',
-        step: '1',
-        unit: 'kcal',
-        placeholder: '2200',
-        description: 'Base energetica do dia.',
-      },
-      {
-        key: 'protein_target',
-        label: 'Proteína alvo',
-        type: 'number',
-        step: '1',
-        unit: 'g',
-        placeholder: '160',
-        description: 'Prioridade para recuperar e sustentar massa magra.',
-      },
-      {
-        key: 'carbs_target',
-        label: 'Carboidratos alvo',
-        type: 'number',
-        step: '1',
-        unit: 'g',
-        placeholder: '240',
-        description: 'Combustivel util para o treino e o dia.',
-      },
-      {
-        key: 'fat_target',
-        label: 'Gordura alvo',
-        type: 'number',
-        step: '1',
-        unit: 'g',
-        placeholder: '60',
-        description: 'Complementa energia e adesao nutricional.',
-      },
-      {
-        key: 'water_target',
-        label: 'Agua alvo',
-        type: 'number',
-        step: '0.1',
-        unit: 'L',
-        placeholder: '3.2',
-        description: 'Ritmo diário de hidratação.',
-      },
-    ],
-  },
-];
+function getProfileFormSections(t) {
+  return [
+    {
+      eyebrow: 'Baseline',
+      title: t('profile.sections.baselineTitle'),
+      description: t('profile.sections.baselineDesc'),
+      gridClassName: 'sm:grid-cols-2',
+      fields: [
+        {
+          key: 'phone',
+          label: t('profile.fields.phone'),
+          type: 'tel',
+          placeholder: '(11) 99999-0000',
+          description: t('profile.fields.phoneDesc'),
+        },
+        {
+          key: 'age',
+          label: t('profile.fields.age'),
+          type: 'number',
+          step: '1',
+          unit: t('profile.fields.ageUnit'),
+          placeholder: '29',
+          description: t('profile.fields.ageDesc'),
+        },
+        {
+          key: 'height',
+          label: t('profile.fields.height'),
+          type: 'number',
+          step: '1',
+          unit: t('profile.fields.heightUnit'),
+          placeholder: '178',
+          description: t('profile.fields.heightDesc'),
+        },
+      ],
+    },
+    {
+      eyebrow: 'Body',
+      title: t('profile.sections.bodyTitle'),
+      description: t('profile.sections.bodyDesc'),
+      gridClassName: 'sm:grid-cols-2',
+      fields: [
+        {
+          key: 'current_weight',
+          label: t('profile.fields.currentWeight'),
+          type: 'number',
+          step: '0.1',
+          unit: t('profile.fields.currentWeightUnit'),
+          placeholder: '82.4',
+          description: t('profile.fields.currentWeightDesc'),
+        },
+        {
+          key: 'target_weight',
+          label: t('profile.fields.targetWeight'),
+          type: 'number',
+          step: '0.1',
+          unit: t('profile.fields.targetWeightUnit'),
+          placeholder: '78.0',
+          description: t('profile.fields.targetWeightDesc'),
+        },
+      ],
+    },
+    {
+      eyebrow: 'Targets',
+      title: t('profile.sections.targetsTitle'),
+      description: t('profile.sections.targetsDesc'),
+      gridClassName: 'sm:grid-cols-2',
+      fields: [
+        {
+          key: 'calories_target',
+          label: t('profile.fields.calories'),
+          type: 'number',
+          step: '1',
+          unit: t('profile.fields.caloriesUnit'),
+          placeholder: '2200',
+          description: t('profile.fields.caloriesDesc'),
+        },
+        {
+          key: 'protein_target',
+          label: t('profile.fields.protein'),
+          type: 'number',
+          step: '1',
+          unit: t('profile.fields.proteinUnit'),
+          placeholder: '160',
+          description: t('profile.fields.proteinDesc'),
+        },
+        {
+          key: 'carbs_target',
+          label: t('profile.fields.carbs'),
+          type: 'number',
+          step: '1',
+          unit: t('profile.fields.carbsUnit'),
+          placeholder: '240',
+          description: t('profile.fields.carbsDesc'),
+        },
+        {
+          key: 'fat_target',
+          label: t('profile.fields.fat'),
+          type: 'number',
+          step: '1',
+          unit: t('profile.fields.fatUnit'),
+          placeholder: '60',
+          description: t('profile.fields.fatDesc'),
+        },
+        {
+          key: 'water_target',
+          label: t('profile.fields.water'),
+          type: 'number',
+          step: '0.1',
+          unit: t('profile.fields.waterUnit'),
+          placeholder: '3.2',
+          description: t('profile.fields.waterDesc'),
+        },
+      ],
+    },
+  ];
+}
 
 // ---------------------------------------------------------------------------
 // Reset progress — entities to wipe and their display labels
 // ---------------------------------------------------------------------------
 
-const RESET_ENTITIES = [
-  { entity: 'Workout',       label: 'Histórico de treinos' },
-  { entity: 'ExerciseLog',   label: 'Logs de exercícios' },
-  { entity: 'Measurement',   label: 'Métricas de progresso (peso, gordura, medidas)' },
-  { entity: 'ProgressPhoto', label: 'Fotos de progresso' },
-  { entity: 'FoodLog',       label: 'Registros de nutrição' },
-  { entity: 'Meal',          label: 'Refeições registradas' },
-  { entity: 'Supplement',    label: 'Suplementos registrados' },
-  { entity: 'DailyCheckin',  label: 'Checkins e entradas do diário' },
-];
+function getResetEntities(t) {
+  return [
+    { entity: 'Workout',       label: t('profile.reset.entities.Workout') },
+    { entity: 'ExerciseLog',   label: t('profile.reset.entities.ExerciseLog') },
+    { entity: 'Measurement',   label: t('profile.reset.entities.Measurement') },
+    { entity: 'ProgressPhoto', label: t('profile.reset.entities.ProgressPhoto') },
+    { entity: 'FoodLog',       label: t('profile.reset.entities.FoodLog') },
+    { entity: 'Meal',          label: t('profile.reset.entities.Meal') },
+    { entity: 'Supplement',    label: t('profile.reset.entities.Supplement') },
+    { entity: 'DailyCheckin',  label: t('profile.reset.entities.DailyCheckin') },
+  ];
+}
 
 /**
  * Fetches all records from an entity (up to 1000) and deletes them in
@@ -224,11 +229,11 @@ async function wipeEntity(entityName) {
 }
 
 /**
- * Sequentially wipes every entity in RESET_ENTITIES so we don't hammer the
+ * Sequentially wipes every entity so we don't hammer the
  * backend with concurrent batch-deletes across all entity types at once.
  */
-async function executeProgressReset() {
-  for (const { entity } of RESET_ENTITIES) {
+async function executeProgressReset(resetEntities) {
+  for (const { entity } of resetEntities) {
     await wipeEntity(entity);
   }
 }
@@ -344,28 +349,28 @@ function formatValue(value, suffix, options = {}) {
   return `${formatNumber(value, options)} ${suffix}`;
 }
 
-function getReadinessCopy(score) {
+function getReadinessCopy(score, t) {
   if (score >= 82) {
-    return 'Seu perfil ja esta maduro o bastante para deixar metas e leitura do produto mais precisas.';
+    return t('profile.readiness.high');
   }
 
   if (score >= 45) {
-    return 'A base principal esta montada. Complete os campos restantes para dar mais contexto ao seu dia.';
+    return t('profile.readiness.medium');
   }
 
-  return 'Defina baseline, targets e direcao para o produto ficar mais pessoal desde a primeira leitura.';
+  return t('profile.readiness.low');
 }
 
-function getGoalSummary(goal) {
+function getGoalSummary(goal, t) {
   if (!goal) {
-    return 'Defina um objetivo claro para o treino e o restante do produto responder com mais contexto.';
+    return t('profile.hero.noGoal');
   }
 
   const trimmedGoal = goal.trim();
   return trimmedGoal.length > 140 ? `${trimmedGoal.slice(0, 137).trim()}...` : trimmedGoal;
 }
 
-function getWeightDirection(currentWeight, targetWeight) {
+function getWeightDirection(currentWeight, targetWeight, t) {
   const hasCurrent = hasValue(currentWeight);
   const hasTarget = hasValue(targetWeight);
 
@@ -378,46 +383,49 @@ function getWeightDirection(currentWeight, targetWeight) {
     if (delta === 0) {
       return {
         value: `${formatNumber(current, { maximumFractionDigits: 1 })} kg`,
-        detail: 'Peso atual e meta estão alinhados na mesma faixa.',
+        detail: t('profile.weightDirection.aligned'),
       };
     }
 
+    const directionLabel = delta > 0 ? t('profile.weightDirection.gain') : t('profile.weightDirection.loss');
+    const formattedDelta = formatNumber(deltaValue, { maximumFractionDigits: 1 });
+
     return {
       value: `${formatNumber(current, { maximumFractionDigits: 1 })} -> ${formatNumber(target, { maximumFractionDigits: 1 })} kg`,
-      detail: `${delta > 0 ? 'Ganho' : 'Reducao'} planejada de ${formatNumber(deltaValue, {
-        maximumFractionDigits: 1,
-      })} kg.`,
+      detail: delta > 0
+        ? t('profile.weightDirection.gain').replace('{delta}', formattedDelta)
+        : t('profile.weightDirection.loss').replace('{delta}', formattedDelta),
     };
   }
 
   if (hasCurrent) {
     return {
       value: `${formatNumber(currentWeight, { maximumFractionDigits: 1 })} kg`,
-      detail: 'Peso atual informado. Falta definir o alvo corporal.',
+      detail: t('profile.weightDirection.noCurrent'),
     };
   }
 
   if (hasTarget) {
     return {
       value: `${formatNumber(targetWeight, { maximumFractionDigits: 1 })} kg`,
-      detail: 'Meta corporal definida. Falta registrar o peso atual.',
+      detail: t('profile.weightDirection.noTarget'),
     };
   }
 
   return {
-    value: 'Sem direcao',
-    detail: 'Preencha peso atual e peso alvo para enxergar a estrategia corporal.',
+    value: t('profile.weightDirection.noData'),
+    detail: t('profile.weightDirection.noDataDetail'),
   };
 }
 
-function getMacroSignature(form) {
+function getMacroSignature(form, t) {
   const parts = [
     hasValue(form.protein_target) ? `P ${formatNumber(form.protein_target)}g` : null,
     hasValue(form.carbs_target) ? `C ${formatNumber(form.carbs_target)}g` : null,
     hasValue(form.fat_target) ? `G ${formatNumber(form.fat_target)}g` : null,
   ].filter(Boolean);
 
-  return parts.length ? parts.join(' · ') : 'Macros pendentes';
+  return parts.length ? parts.join(' · ') : t('profile.macros.pending');
 }
 
 // ---------------------------------------------------------------------------
@@ -538,7 +546,8 @@ function ProfileField({ field, value, onChange, multiline = false }) {
 // ResetProgressModal
 // ---------------------------------------------------------------------------
 
-function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error }) {
+function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error, resetEntities }) {
+  const { t } = useI18n();
   const [confirmText, setConfirmText] = useState('');
   const canConfirm = confirmText === 'RESET' && !isLoading;
 
@@ -555,24 +564,24 @@ function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error })
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] bg-[hsl(var(--err)/0.1)] text-[hsl(var(--err))]">
               <AlertTriangle className="h-5 w-5" strokeWidth={1.9} />
             </div>
-            <DialogTitle>Resetar progresso</DialogTitle>
+            <DialogTitle>{t('profile.reset.title')}</DialogTitle>
           </div>
           <DialogDescription>
-            Esta ação é{' '}
+            {t('profile.reset.desc')}
             <strong className="font-semibold text-[hsl(var(--err))]">
-              permanente e irreversível
+              {t('profile.reset.descStrong')}
             </strong>
-            . Todos os dados listados abaixo serão apagados e não poderão ser recuperados.
+            {t('profile.reset.descEnd')}
           </DialogDescription>
         </DialogHeader>
 
         {/* What gets deleted */}
         <div className="rounded-[20px] border border-[hsl(var(--err)/0.25)] bg-[hsl(var(--err)/0.05)] px-4 py-4">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--err))]">
-            O que será apagado
+            {t('profile.reset.whatGetsDeleted')}
           </p>
           <ul className="space-y-2">
-            {RESET_ENTITIES.map(({ entity, label }) => (
+            {resetEntities.map(({ entity, label }) => (
               <li
                 key={entity}
                 className="flex items-center gap-2 text-[14px] text-[hsl(var(--fg))]"
@@ -587,8 +596,7 @@ function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error })
           </ul>
           <div className="mt-3 border-t border-[hsl(var(--err)/0.15)] pt-3">
             <p className="text-[13px] leading-5 text-[hsl(var(--fg-2))]">
-              <span className="font-semibold text-[hsl(var(--ok))]">Preservado:</span> conta,
-              perfil, planos prescritos e dados de autenticação.
+              <span className="font-semibold text-[hsl(var(--ok))]">{t('profile.reset.preserved')}</span> {t('profile.reset.preservedItems')}
             </p>
           </div>
         </div>
@@ -599,16 +607,14 @@ function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error })
             htmlFor="reset-confirm-input"
             className="block text-[13px] font-semibold text-[hsl(var(--fg))]"
           >
-            Digite{' '}
-            <span className="font-mono font-bold text-[hsl(var(--err))]">RESET</span> para
-            habilitar a confirmação
+            {t('profile.reset.typeToConfirm')}
           </label>
           <input
             id="reset-confirm-input"
             type="text"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
-            placeholder="RESET"
+            placeholder={t('profile.reset.placeholder')}
             disabled={isLoading}
             autoComplete="off"
             autoCorrect="off"
@@ -631,7 +637,7 @@ function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error })
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" disabled={isLoading}>
-              Cancelar
+              {t('profile.reset.cancel')}
             </Button>
           </DialogClose>
           <Button
@@ -643,12 +649,12 @@ function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error })
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-                Apagando dados…
+                {t('profile.reset.confirming')}
               </>
             ) : (
               <>
                 <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-                Confirmar reset
+                {t('profile.reset.confirmBtn')}
               </>
             )}
           </Button>
@@ -663,12 +669,14 @@ function ResetProgressModal({ open, onOpenChange, onConfirm, isLoading, error })
 // ---------------------------------------------------------------------------
 
 export default function Profile() {
+  const { t } = useI18n();
+
   return (
     <SafePageBoundary
-      title="Perfil"
-      subtitle="Modo seguro do perfil premium."
+      title={t('profile.sections_labels.account')}
+      subtitle={t('profile.statusBanner')}
       maxWidth="max-w-6xl"
-      fallbackDescription="Profile page loaded. O conteudo principal falhou, mas a rota continua acessivel."
+      fallbackDescription={t('profile.statusBanner')}
     >
       <ProfileContent />
     </SafePageBoundary>
@@ -682,6 +690,7 @@ export default function Profile() {
 function ProfileContent() {
   const qc = useQueryClient();
   const { user, logout } = useAuth();
+  const { t, locale } = useI18n();
   const [form, setForm] = useState(EMPTY_FORM);
   const [profileId, setProfileId] = useState(null);
   const [notice, setNotice] = useState(null);
@@ -728,13 +737,13 @@ function ProfileContent() {
       qc.setQueryData(profileQueryKey, result);
       setNotice({
         tone: 'success',
-        message: 'Perfil salvo com sucesso.',
+        message: t('profile.sections_labels.successBanner'),
       });
     },
     onError: () => {
       setNotice({
         tone: 'error',
-        message: 'Não foi possivel salvar o perfil.',
+        message: t('profile.sections_labels.errorBanner'),
       });
     },
   });
@@ -748,7 +757,8 @@ function ProfileContent() {
     setResetError(null);
 
     try {
-      await executeProgressReset();
+      const resetEntities = getResetEntities(t);
+      await executeProgressReset(resetEntities);
 
       // Invalidate all cached entity queries so every page reflects the wipe
       await qc.invalidateQueries();
@@ -756,11 +766,11 @@ function ProfileContent() {
       setShowResetModal(false);
       setNotice({
         tone: 'success',
-        message: 'Progresso resetado. Todos os dados de treino, nutrição e progresso foram apagados.',
+        message: t('profile.sections_labels.resetProgressDesc'),
       });
     } catch {
       setResetError(
-        'Ocorreu um erro ao resetar o progresso. Verifique sua conexão e tente novamente.'
+        t('profile.statusBanner')
       );
     } finally {
       setResetLoading(false);
@@ -778,17 +788,19 @@ function ProfileContent() {
   const filledFields = countFilledFields(form);
   const totalFields = Object.keys(EMPTY_FORM).length;
   const completionScore = Math.round((filledFields / totalFields) * 100);
-  const readinessCopy = getReadinessCopy(completionScore);
-  const weightDirection = getWeightDirection(form.current_weight, form.target_weight);
-  const goalSummary = getGoalSummary(form.training_goal);
-  const macroSignature = getMacroSignature(form);
+  const readinessCopy = getReadinessCopy(completionScore, t);
+  const weightDirection = getWeightDirection(form.current_weight, form.target_weight, t);
+  const goalSummary = getGoalSummary(form.training_goal, t);
+  const macroSignature = getMacroSignature(form, t);
   const calorieTargetValue = hasValue(form.calories_target)
     ? `${formatNumber(form.calories_target)} kcal`
-    : 'Target pendente';
+    : t('profile.sections_labels.profileReadiness');
   const proteinTargetValue = formatValue(form.protein_target, 'g');
   const waterTargetValue = formatValue(form.water_target, 'L', { maximumFractionDigits: 1 });
-  const draftStatus = profileId ? 'Perfil configurado' : 'Primeiro setup';
+  const draftStatus = profileId ? t('profile.sections_labels.saveProfile') : t('profile.sections_labels.firstSetup');
   const payload = buildProfilePayload(form);
+  const profileFormSections = getProfileFormSections(t);
+  const resetEntities = getResetEntities(t);
 
   // Calculate macros based on calories and training goal
   const calculateMacros = (calorieTarget, trainingGoal) => {
@@ -856,72 +868,71 @@ function ProfileContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Perfil"
-        title={`${preferredName}, keep your baseline sharp.`}
-        subtitle="Conta, targets e identidade do atleta agora leem como uma única superfície: sofisticada, pessoal e pronta para sustentar nutrição, treino e performance."
+        eyebrow={t('profile.sections_labels.account')}
+        title={`${preferredName}, ${t('profile.pageTitle')}`}
+        subtitle={t('profile.pageSubtitle')}
         accentClassName="from-[hsl(var(--brand)/0.08)] via-[hsl(var(--ok)/0.04)]"
         actions={
           <ActionRow>
             <Button asChild>
               <Link to={ROUTES.myDiet}>
-                Abrir Meu Diet
+                {t('profile.openMyDiet')}
                 <ArrowRight className="h-4 w-4" strokeWidth={2} />
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to={ROUTES.myWorkout}>Abrir Meu Treino</Link>
+              <Link to={ROUTES.myWorkout}>{t('profile.openMyWorkout')}</Link>
             </Button>
           </ActionRow>
         }
       >
         <div className="grid gap-3 sm:grid-cols-3">
           <HeroStat
-            label="Sessão"
-            value="Supabase ativo"
-            detail={user?.email || 'Sessao autenticada e pronta para uso.'}
+            label={t('profile.sessionLabel')}
+            value={t('profile.sessionValue')}
+            detail={user?.email || t('profile.sessionDetail')}
           />
           <HeroStat
-            label="Perfil"
-            value={`${completionScore}% aligned`}
-            detail={`${filledFields} de ${totalFields} campos principais preenchidos.`}
+            label={t('profile.profileLabel')}
+            value={`${completionScore}${t('profile.profileAligned')}`}
+            detail={t('profile.fieldsFilledDetail').replace('{filled}', filledFields).replace('{total}', totalFields)}
           />
-          <HeroStat label="Combustível diário" value={calorieTargetValue} detail={macroSignature} />
+          <HeroStat label={t('profile.dailyFuel')} value={calorieTargetValue} detail={macroSignature} />
         </div>
       </PageHeader>
 
       <StatusBanner>
-        Auth real com Supabase segue intacta. Esta tela preserva o fluxo atual de dados do perfil
-        enquanto ganha a nova camada visual premium.
+        {t('profile.statusBanner')}
       </StatusBanner>
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
       {profileQuery.isLoading ? (
         <LoadingState
-          title="Carregando seu perfil"
-          description="Estamos trazendo os dados existentes para essa nova leitura visual sem interromper a página."
+          title={t('profile.loadingProfile')}
+          description={t('profile.loadingProfileDesc')}
         />
       ) : null}
 
       {!profileQuery.isLoading && profileQuery.isError ? (
         <ErrorState
-          title="Perfil em modo seguro"
-          description="Parte dos dados não carregou, mas você ainda pode revisar a conta e salvar as informações principais."
+          title={t('profile.safeMode')}
+          description={t('profile.safeModeDesc')}
         />
       ) : null}
 
       {!profileQuery.isLoading ? (
         <>
           <Section
-            title="Conta"
-            subtitle="Identidade premium, acesso estável e um resumo curto da conta antes dos dados e targets."
+            title={t('profile.sections.account')}
+            subtitle={t('profile.sections.accountSubtitle')}
           >
             <Card className="px-5 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="atlas-overline">Conta</p>
+                  <p className="atlas-overline">{t('profile.sections.account')}</p>
                   <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                    Identidade premium, acesso estável.
+                    {t('profile.sections.accountDesc')}
                   </p>
                 </div>
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
@@ -946,17 +957,16 @@ function ProfileContent() {
                     </div>
 
                     <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      Sua autenticação ja esta ativa. O restante da experiência agora fica ancorado
-                      neste perfil com o fluxo de dados atual preservado.
+                      {t('profile.statusBanner')}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-4 space-y-3">
-                <AccountDetail icon={Mail} label="E-mail" value={user?.email || '--'} />
-                <AccountDetail icon={UserCircle2} label="Função" value={roleLabel} />
-                <AccountDetail icon={Sparkles} label="Estado do perfil" value={draftStatus} />
+                <AccountDetail icon={Mail} label={t('profile.sections_labels.email')} value={user?.email || '--'} />
+                <AccountDetail icon={UserCircle2} label={t('profile.sections_labels.readinessLabel')} value={roleLabel} />
+                <AccountDetail icon={Sparkles} label={t('profile.sections_labels.profileReadiness')} value={draftStatus} />
               </div>
 
               <Button
@@ -966,45 +976,45 @@ function ProfileContent() {
                 onClick={() => logout?.()}
               >
                 <LogOut className="h-4 w-4" strokeWidth={1.9} />
-                Sair da conta
+                {t('profile.sections_labels.logOut')}
               </Button>
             </Card>
           </Section>
 
           <section className="grid gap-4 sm:grid-cols-2">
             <QuickMetricCard
-              label="Direção do peso"
+              label={t('profile.metrics.weightDirection')}
               value={weightDirection.value}
               detail={weightDirection.detail}
               icon={Scale}
             />
             <QuickMetricCard
-              label="Calorias"
+              label={t('profile.metrics.calories')}
               value={calorieTargetValue}
               detail={
                 hasValue(form.calories_target)
-                  ? 'Target energetico definido para dar base ao dia.'
-                  : 'Configure um alvo calorico para ancorar a leitura nutricional.'
+                  ? t('profile.metrics.calorieTargetSet')
+                  : t('profile.metrics.calorieTargetNotSet')
               }
               icon={Flame}
             />
             <QuickMetricCard
-              label="Proteína"
+              label={t('profile.metrics.protein')}
               value={proteinTargetValue}
               detail={
                 hasValue(form.protein_target)
-                  ? 'Proteína alvo pronta para sustentar recuperação e composição.'
-                  : 'Defina a proteina alvo para fechar o baseline nutricional.'
+                  ? t('profile.metrics.proteinTargetSet')
+                  : t('profile.metrics.proteinTargetNotSet')
               }
               icon={Target}
             />
             <QuickMetricCard
-              label="Hidratação"
+              label={t('profile.metrics.hydration')}
               value={waterTargetValue}
               detail={
                 hasValue(form.water_target)
-                  ? 'Meta diaria pronta para manter constância de hidratação.'
-                  : 'Configure uma meta de água para completar o setup diário.'
+                  ? t('profile.metrics.hydrationTargetSet')
+                  : t('profile.metrics.hydrationTargetNotSet')
               }
               icon={Droplets}
             />
@@ -1012,8 +1022,8 @@ function ProfileContent() {
 
           <section className="grid gap-4">
             <SectionCard
-              title="Configurações do perfil"
-              subtitle="Organize baseline, composição corporal e targets em blocos claros, com a mesma linguagem sofisticada do restante do produto."
+              title={t('profile.sections_labels.profileSettings')}
+              subtitle={t('profile.sections_labels.profileSettingsSubtitle')}
             >
               {!profileData ? (
                 <div className="mb-6 rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--brand)/0.05)] px-5 py-5 shadow-[var(--shadow-xs)]">
@@ -1023,11 +1033,10 @@ function ProfileContent() {
                     </div>
                     <div>
                       <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        Primeiro setup em andamento
+                        {t('profile.sections_labels.firstSetup')}
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        Preencha os dados abaixo para transformar a rota de perfil em uma base
-                        pessoal mais completa e coerente com o restante do app.
+                        {t('profile.sections_labels.firstSetupDesc')}
                       </p>
                     </div>
                   </div>
@@ -1037,7 +1046,7 @@ function ProfileContent() {
               <div className="mb-6 rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.52)] px-5 py-5 shadow-[var(--shadow-xs)]">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="atlas-metric-label">Profile readiness</p>
+                    <p className="atlas-metric-label">{t('profile.hero.readiness')}</p>
                     <p className="mt-3 text-[2.25rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
                       {completionScore}%
                     </p>
@@ -1061,7 +1070,7 @@ function ProfileContent() {
               </div>
 
               <div className="space-y-6">
-                {PROFILE_FORM_SECTIONS.map((section) => (
+                {profileFormSections.map((section) => (
                   <section
                     key={section.title}
                     className="rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-5 py-5 shadow-[var(--shadow-xs)]"
@@ -1093,11 +1102,10 @@ function ProfileContent() {
                   <div className="mb-5">
                     <p className="atlas-overline">Direction</p>
                     <h3 className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                      Training goal
+                      {t('profile.trainingGoalSection.title')}
                     </h3>
                     <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                      Descreva o foco principal do momento para a experiência parecer mais sua e
-                      menos generica.
+                      {t('profile.trainingGoalSection.subtitle')}
                     </p>
                   </div>
 
@@ -1105,11 +1113,9 @@ function ProfileContent() {
                     multiline
                     field={{
                       key: 'training_goal',
-                      label: 'Objetivo de treino',
-                      placeholder:
-                        'Ex.: perder gordura com alta energia, ganhar massa com controle, melhorar consistencia e rotina.',
-                      description:
-                        'Use uma frase curta e honesta sobre o resultado que você quer perseguir agora.',
+                      label: t('profile.trainingGoalSection.label'),
+                      placeholder: t('profile.trainingGoalSection.placeholder'),
+                      description: t('profile.fields.trainingGoalDesc'),
                     }}
                     value={form.training_goal}
                     onChange={handleFieldChange('training_goal')}
@@ -1120,26 +1126,25 @@ function ProfileContent() {
               <div className="mt-8 rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.52)] px-5 py-5 shadow-[var(--shadow-xs)]">
                 <div className="flex flex-col gap-5">
                   <div className="max-w-2xl">
-                    <p className="atlas-metric-label">Persistencia</p>
+                    <p className="atlas-metric-label">{t('profile.sections_labels.persistenceLabel')}</p>
                     <p className="mt-3 text-[16px] font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">
-                      Salve o perfil sem alterar a lógica atual de dados.
+                      {t('profile.sections_labels.persistenceDesc')}
                     </p>
                     <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                      Esta ação atualiza o perfil com o fluxo existente e mantém a página pronta
-                      para o restante da experiência premium.
+                      {t('profile.sections_labels.persistenceDetail')}
                     </p>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Button type="button" variant="outline" onClick={handleReset}>
-                      Limpar campos
+                      {t('profile.sections_labels.clearFields')}
                     </Button>
                     <Button
                       type="button"
                       disabled={saveProfile.isPending}
                       onClick={() => saveProfile.mutate(payload)}
                     >
-                      {saveProfile.isPending ? 'Salvando...' : 'Salvar perfil'}
+                      {saveProfile.isPending ? t('profile.sections_labels.saving') : t('profile.sections_labels.saveProfile')}
                     </Button>
                   </div>
                 </div>
@@ -1148,8 +1153,8 @@ function ProfileContent() {
 
             <SectionCard
               className="relative overflow-hidden"
-              title="Resumo do perfil"
-              subtitle="Uma leitura curta e pessoal de como o restante do app deve enxergar você hoje."
+              title={t('profile.sections_labels.profileSummary')}
+              subtitle={t('profile.sections_labels.profileSummarySubtitle')}
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand)/0.07)] to-transparent" />
 
@@ -1160,9 +1165,9 @@ function ProfileContent() {
                       <Target className="h-4 w-4" strokeWidth={1.9} />
                     </div>
                     <div>
-                      <p className="atlas-metric-label">Current focus</p>
+                      <p className="atlas-metric-label">{t('profile.sections_labels.currentFocus')}</p>
                       <p className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        {form.training_goal ? 'Goal defined' : 'Direction pending'}
+                        {form.training_goal ? t('profile.sections_labels.goalDefined') : t('profile.sections_labels.directionPending')}
                       </p>
                     </div>
                   </div>
@@ -1173,44 +1178,42 @@ function ProfileContent() {
                 </div>
 
                 <ReadoutItem
-                  label="Consumo diário"
+                  label={t('profile.sections_labels.dailyConsumption')}
                   value={calorieTargetValue}
                   detail={
-                    macroSignature === 'Macros pendentes'
-                      ? 'Complete proteina, carboidratos e gordura para uma leitura nutricional mais precisa.'
+                    macroSignature === t('profile.macros.pending')
+                      ? t('profile.trainingGoalSection.placeholder')
                       : macroSignature
                   }
                 />
                 <ReadoutItem
-                  label="Direção corporal"
+                  label={t('profile.sections_labels.bodyDirection')}
                   value={weightDirection.value}
                   detail={weightDirection.detail}
                 />
                 <ReadoutItem
-                  label="Cadência de hidratação"
+                  label={t('profile.sections_labels.hydrationPace')}
                   value={waterTargetValue}
                   detail={
                     hasValue(form.water_target)
-                      ? 'Meta diaria definida para manter consistencia de energia e rotina.'
-                      : 'Defina a meta de água para fechar a preparação diária.'
+                      ? t('profile.metrics.hydrationTargetSet')
+                      : t('profile.metrics.hydrationTargetNotSet')
                   }
                 />
                 <ReadoutItem
-                  label="Structure"
+                  label={t('profile.sections_labels.structure')}
                   value={formatValue(form.height, 'cm')}
                   detail={
                     hasValue(form.height)
-                      ? 'Altura registrada para deixar o baseline mais completo.'
-                      : 'Altura ainda não definida neste setup.'
+                      ? t('profile.fields.heightDesc')
+                      : t('profile.weightDirection.noData')
                   }
                 />
 
                 <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
-                  <p className="atlas-metric-label">Why it matters</p>
+                  <p className="atlas-metric-label">{t('profile.sections_labels.whyMatters')}</p>
                   <p className="mt-3 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                    Um perfil claro deixa metas, planos e contextos mais consistentes sem adicionar
-                    friccao ao backend. A página passa a parecer pessoal porque o sistema le voce
-                    com mais nitidez.
+                    {t('profile.sections_labels.whyMattersDesc')}
                   </p>
                 </div>
 
@@ -1221,11 +1224,10 @@ function ProfileContent() {
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        Refinado para leitura rapida
+                        {t('profile.sections_labels.refinedForSpeed')}
                       </p>
                       <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                        A hierarquia agora separa identidade, metrics rapidas e formulario em
-                        blocos muito mais claros.
+                        {t('profile.sections_labels.refinedForSpeedDesc')}
                       </p>
                     </div>
                   </div>
@@ -1238,8 +1240,8 @@ function ProfileContent() {
           {/* Danger Zone                                                       */}
           {/* ---------------------------------------------------------------- */}
           <SectionCard
-            title="Danger zone"
-            subtitle="Ações destrutivas e permanentes. Não podem ser desfeitas."
+            title={t('profile.sections_labels.dangerZoneTitle')}
+            subtitle={t('profile.sections_labels.dangerZoneSubtitleText')}
           >
             <div className="rounded-[24px] border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] px-5 py-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -1249,11 +1251,10 @@ function ProfileContent() {
                   </div>
                   <div>
                     <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                      Resetar progresso
+                      {t('profile.sections_labels.resetProgressTitle')}
                     </p>
                     <p className="mt-1 max-w-lg text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                      Apaga permanentemente todos os seus dados de treino, nutrição, progresso,
-                      fotos e checkins. Sua conta, perfil e planos prescritos são preservados.
+                      {t('profile.sections_labels.resetProgressDetail')}
                     </p>
                   </div>
                 </div>
@@ -1267,7 +1268,7 @@ function ProfileContent() {
                   }}
                 >
                   <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-                  Resetar progresso
+                  {t('profile.sections_labels.resetProgress')}
                 </Button>
               </div>
             </div>
@@ -1282,6 +1283,7 @@ function ProfileContent() {
         onConfirm={handleProgressReset}
         isLoading={resetLoading}
         error={resetError}
+        resetEntities={resetEntities}
       />
     </AppContainer>
   );

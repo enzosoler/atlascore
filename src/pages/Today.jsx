@@ -14,6 +14,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/lib/i18nContext';
 import { useRole } from '@/hooks/useRole';
 import { base44 } from '@/api/base44Client';
 import { ROUTES } from '@/lib/routes';
@@ -29,62 +30,68 @@ import {
   TodayStatCard,
 } from '@/components/today/TodayMobileUI';
 
-const NEXT_STEPS = [
-  {
-    to: ROUTES.nutrition,
-    title: 'Abrir nutrição',
-    description: 'Confirme as refeições, macros e a primeira escolha alimentar antes do dia ficar cheio.',
-    icon: UtensilsCrossed,
-    phase: 'Prioridade máxima',
-  },
-  {
-    to: ROUTES.workouts,
-    title: 'Revisar treino',
-    description: 'Deixe a sessão principal pronta antes da sua janela de treino abrir.',
-    icon: Dumbbell,
-    phase: 'Próximo passo',
-  },
-  {
-    to: ROUTES.atlasAI,
-    title: 'Perguntar à Atlas AI',
-    description: 'Use um prompt curto quando quiser uma decisão clara sem ruído extra.',
-    icon: Brain,
-    phase: 'Insight rápido',
-  },
-  {
-    to: ROUTES.profile,
-    title: 'Refinar perfil',
-    description: 'Mantenha as preferências base alinhadas para o app ficar preciso.',
-    icon: User,
-    phase: 'Manter alinhado',
-  },
-];
-
 function getPreferredName(displayName) {
-  if (!displayName) return 'Atleta';
+  if (!displayName) return null;
   const [firstChunk] = displayName.split(/[ @]/).filter(Boolean);
   return firstChunk || displayName;
 }
 
-function getDateLabel() {
-  return new Intl.DateTimeFormat('pt-BR', {
+function getDateLabel(locale) {
+  return new Intl.DateTimeFormat(locale === 'en-US' ? 'en-US' : 'pt-BR', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   }).format(new Date());
 }
 
+function getNextSteps(t, ROUTES) {
+  return [
+    {
+      to: ROUTES.nutrition,
+      title: t('today_page.nextSteps.nutritionTitle'),
+      description: t('today_page.nextSteps.nutritionDesc'),
+      icon: UtensilsCrossed,
+      phase: t('today_page.nextSteps.nutritionPhase'),
+    },
+    {
+      to: ROUTES.workouts,
+      title: t('today_page.nextSteps.workoutTitle'),
+      description: t('today_page.nextSteps.workoutDesc'),
+      icon: Dumbbell,
+      phase: t('today_page.nextSteps.workoutPhase'),
+    },
+    {
+      to: ROUTES.atlasAI,
+      title: t('today_page.nextSteps.aiTitle'),
+      description: t('today_page.nextSteps.aiDesc'),
+      icon: Brain,
+      phase: t('today_page.nextSteps.aiPhase'),
+    },
+    {
+      to: ROUTES.profile,
+      title: t('today_page.nextSteps.profileTitle'),
+      description: t('today_page.nextSteps.profileDesc'),
+      icon: User,
+      phase: t('today_page.nextSteps.profilePhase'),
+    },
+  ];
+}
+
 // ── Simple rules-based insight generator ──────────────────────────────────────
 // Priority order: missing data warnings → positive streaks → protocol info → default
-function buildInsight({
-  recentSessions,
-  todayMeals,
-  recentMeasurements,
-  activeProtocolsList,
-  activeDietPlan,
-  activeWorkoutPlan,
-  todayStr,
-}) {
+function buildInsight(
+  t,
+  locale,
+  {
+    recentSessions,
+    todayMeals,
+    recentMeasurements,
+    activeProtocolsList,
+    activeDietPlan,
+    activeWorkoutPlan,
+    todayStr,
+  },
+) {
   const last7 = recentSessions.filter((s) => {
     if (!s.date) return false;
     const diff = (new Date(todayStr) - new Date(s.date)) / (1000 * 60 * 60 * 24);
@@ -95,27 +102,24 @@ function buildInsight({
   // 1. No workouts this week despite having an active plan
   if (activeWorkoutPlan && completedLast7 === 0) {
     return {
-      title: 'Nenhum treino registrado esta semana.',
-      description:
-        'Você tem um plano ativo. Abra Treinos para registrar sua próxima sessão.',
+      title: t('today_page.insight.noWorkoutsTitle'),
+      description: t('today_page.insight.noWorkoutsDesc'),
     };
   }
 
   // 2. No meals logged today despite having an active diet plan
   if (activeDietPlan && todayMeals.length === 0) {
     return {
-      title: 'Nenhuma refeição registrada hoje.',
-      description:
-        'Abra Nutrição para registrar suas refeições e acompanhar os macros do dia.',
+      title: t('today_page.insight.noMealsTitle'),
+      description: t('today_page.insight.noMealsDesc'),
     };
   }
 
   // 3. No measurements ever (new user prompt)
   if (recentMeasurements.length === 0) {
     return {
-      title: 'Sem medidas registradas ainda.',
-      description:
-        'Registre o peso e medidas em Progresso para acompanhar sua evolução ao longo do tempo.',
+      title: t('today_page.insight.noMeasurementsTitle'),
+      description: t('today_page.insight.noMeasurementsDesc'),
     };
   }
 
@@ -128,24 +132,28 @@ function buildInsight({
   const hasRecentMeasure = recentMeasurements.some((m) => m.date && m.date >= thirtyAgoStr);
   if (!hasRecentMeasure) {
     return {
-      title: 'Nenhuma medida nos últimos 30 dias.',
-      description:
-        'Registrar o peso regularmente ajuda a identificar tendências e ajustar o plano.',
+      title: t('today_page.insight.oldMeasurementsTitle'),
+      description: t('today_page.insight.oldMeasurementsDesc'),
     };
   }
 
   // 5. Great workout consistency this week
   if (completedLast7 >= 4) {
     return {
-      title: `${completedLast7} treinos concluídos nos últimos 7 dias.`,
-      description:
-        'Consistência excelente. Continue neste ritmo para maximizar os resultados.',
+      title:
+        locale === 'en-US'
+          ? `${completedLast7} workouts completed in the last 7 days.`
+          : `${completedLast7} treinos concluídos nos últimos 7 dias.`,
+      description: t('today_page.insight.workoutConsistencyDesc'),
     };
   }
   if (completedLast7 >= 2) {
     return {
-      title: `${completedLast7} treinos concluídos esta semana.`,
-      description: 'Boa consistência. Cada sessão completa conta para o resultado final.',
+      title:
+        locale === 'en-US'
+          ? `${completedLast7} workouts completed this week.`
+          : `${completedLast7} treinos concluídos esta semana.`,
+      description: t('today_page.insight.workoutGoodDesc'),
     };
   }
 
@@ -153,33 +161,40 @@ function buildInsight({
   if (activeProtocolsList.length > 0) {
     const p = activeProtocolsList[0];
     const since = p.start_date
-      ? new Date(`${p.start_date}T12:00:00`).toLocaleDateString('pt-BR', {
-          day: 'numeric',
-          month: 'short',
-        })
+      ? new Date(`${p.start_date}T12:00:00`).toLocaleDateString(
+          locale === 'en-US' ? 'en-US' : 'pt-BR',
+          {
+            day: 'numeric',
+            month: 'short',
+          },
+        )
       : null;
     const count = activeProtocolsList.length;
+    const protocolWord =
+      locale === 'en-US'
+        ? `${count} active protocol${count > 1 ? 's' : ''}.`
+        : `${count} protocolo${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}.`;
     return {
-      title: `${count} protocolo${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}.`,
+      title: protocolWord,
       description: since
-        ? `${p.name || 'Protocolo'} ativo desde ${since}. Acompanhe o estoque em Protocolos.`
-        : 'Acompanhe seus suplementos e protocolos na aba Protocolos.',
+        ? `${p.name || (locale === 'en-US' ? 'Protocol' : 'Protocolo')} ${t('today_page.insight.protocolDescWith').replace('{date}', since)}`
+        : t('today_page.insight.protocolDescDefault'),
     };
   }
 
   // Default
   return {
-    title: 'Comece pela nutrição, depois abra o treino.',
-    description:
-      'Manter a primeira decisão alimentar visível geralmente deixa o resto do dia mais leve e fácil de executar.',
+    title: t('today_page.insight.defaultTitle'),
+    description: t('today_page.insight.defaultDesc'),
   };
 }
 
 export default function Today() {
+  const { t } = useI18n();
   return (
     <SafePageBoundary
-      title="Hoje"
-      subtitle="Visão geral diária."
+      title={t('today_page.title')}
+      subtitle={t('today_page.subtitle')}
       maxWidth="max-w-5xl"
       fallbackDescription="A tela Hoje abriu em modo seguro."
     >
@@ -190,9 +205,10 @@ export default function Today() {
 
 function TodayContent() {
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const { role, loading: isRoleLoading } = useRole(user);
-  const displayName = user?.full_name || user?.email || 'Atleta';
-  const preferredName = getPreferredName(displayName);
+  const displayName = user?.full_name || user?.email || t('today_page.fallbackName');
+  const preferredName = getPreferredName(displayName) || t('today_page.fallbackName');
   const greeting = getGreeting();
   const isAdmin = !isRoleLoading && role === 'admin';
 
@@ -261,78 +277,83 @@ function TodayContent() {
 
   const nutritionValue = activeDietPlan
     ? `${activeDietPlan.total_calories ?? activeDietPlan.target_calories ?? '—'} kcal`
-    : 'Sem plano';
+    : t('today_page.noPlan');
   const nutritionMeta = activeDietPlan
-    ? activeDietPlan.name || 'Plano ativo'
-    : 'Configure em Nutrição';
+    ? activeDietPlan.name || t('today_page.activePlan')
+    : t('today_page.setupNutrition');
 
   const workoutValue = todaySession
     ? todaySession.status === 'completed'
-      ? 'Concluído'
-      : 'Em andamento'
+      ? t('today_page.completed')
+      : t('today_page.inProgress')
     : activeWorkoutPlan
-      ? 'Pendente'
-      : 'Sem plano';
+      ? t('today_page.pending')
+      : t('today_page.noPlan');
   const workoutMeta = activeWorkoutPlan
-    ? activeWorkoutPlan.name || 'Plano ativo'
-    : 'Configure em Treinos';
+    ? activeWorkoutPlan.name || t('today_page.activePlan')
+    : t('today_page.setupWorkouts');
 
   const progressValue = latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—';
   const progressMeta = latestMeasurement
-    ? new Date(`${latestMeasurement.date}T12:00:00`).toLocaleDateString('pt-BR', {
-        day: 'numeric',
-        month: 'short',
-      })
-    : 'Adicionar medida';
+    ? new Date(`${latestMeasurement.date}T12:00:00`).toLocaleDateString(
+        locale === 'en-US' ? 'en-US' : 'pt-BR',
+        {
+          day: 'numeric',
+          month: 'short',
+        },
+      )
+    : t('today_page.addMeasurement');
 
   const protocolsValue = String(activeProtocolsList.length);
   const protocolsMeta =
     activeProtocolsList.length > 0
-      ? `${activeProtocolsList.length} ativo${activeProtocolsList.length > 1 ? 's' : ''}`
-      : 'Nenhum ativo';
+      ? `${activeProtocolsList.length} ${activeProtocolsList.length > 1 ? (locale === 'en-US' ? 'active' : 'ativos') : (locale === 'en-US' ? 'active' : 'ativo')}`
+      : t('today_page.noActive');
+
+  const NEXT_STEPS = getNextSteps(t, ROUTES);
 
   const snapshotCards = [
     {
       to: ROUTES.nutrition,
-      label: 'Nutrição',
+      label: t('today_page.snapshot.nutrition'),
       value: isLoading ? '—' : nutritionValue,
       description: activeDietPlan
-        ? 'Meta calórica do plano ativo.'
-        : 'Nenhum plano alimentar ativo.',
+        ? t('today_page.snapshot.nutritionActive')
+        : t('today_page.snapshot.nutritionNone'),
       meta: isLoading ? '...' : nutritionMeta,
       icon: UtensilsCrossed,
       tone: 'blue',
     },
     {
       to: ROUTES.workouts,
-      label: 'Treino',
+      label: t('today_page.snapshot.workout'),
       value: isLoading ? '—' : workoutValue,
       description: activeWorkoutPlan
-        ? 'Plano de treino ativo.'
-        : 'Nenhum plano de treino ativo.',
+        ? t('today_page.snapshot.workoutActive')
+        : t('today_page.snapshot.workoutNone'),
       meta: isLoading ? '...' : workoutMeta,
       icon: Dumbbell,
       tone: 'orange',
     },
     {
       to: ROUTES.measurements,
-      label: 'Progresso',
+      label: t('today_page.snapshot.progress'),
       value: isLoading ? '—' : progressValue,
       description: latestMeasurement
-        ? 'Última medida registrada.'
-        : 'Nenhuma medida registrada.',
+        ? t('today_page.snapshot.progressLatest')
+        : t('today_page.snapshot.progressNone'),
       meta: isLoading ? '...' : progressMeta,
       icon: Scale,
       tone: 'green',
     },
     {
       to: ROUTES.protocols,
-      label: 'Protocolos',
+      label: t('today_page.snapshot.protocols'),
       value: isLoading ? '—' : protocolsValue,
       description:
         activeProtocolsList.length > 0
-          ? 'Protocolos ativos agora.'
-          : 'Nenhum protocolo ativo.',
+          ? t('today_page.snapshot.protocolsActive')
+          : t('today_page.snapshot.protocolsNone'),
       meta: isLoading ? '...' : protocolsMeta,
       icon: Shield,
       tone: 'teal',
@@ -358,8 +379,8 @@ function TodayContent() {
     mealsLoggedToday >= 3 ? 100 : mealsLoggedToday === 2 ? 66 : mealsLoggedToday === 1 ? 33 : 0;
 
   const adherenceSignals = [
-    { label: 'Nutrição', value: nutritionAdherence },
-    { label: 'Treino', value: workoutAdherence },
+    { label: t('today_page.snapshot.nutrition'), value: nutritionAdherence },
+    { label: t('today_page.snapshot.workout'), value: workoutAdherence },
   ];
   const adherenceAverage = Math.round(
     adherenceSignals.reduce((t, i) => t + i.value, 0) / adherenceSignals.length,
@@ -368,8 +389,11 @@ function TodayContent() {
   // ── Dynamic data-driven insight ────────────────────────────────────────────
 
   const insight = isLoading
-    ? { title: 'Carregando...', description: 'Aguarde enquanto os dados são carregados.' }
-    : buildInsight({
+    ? {
+        title: t('today_page.insight.loadingTitle'),
+        description: t('today_page.insight.loadingDesc'),
+      }
+    : buildInsight(t, locale, {
         recentSessions,
         todayMeals,
         recentMeasurements,
@@ -388,9 +412,9 @@ function TodayContent() {
       {/* ── Header ── */}
       <header className="flex items-start justify-between gap-4 px-1">
         <div className="min-w-0">
-          <p className="atlas-overline">{getDateLabel()}</p>
+          <p className="atlas-overline">{getDateLabel(locale)}</p>
           <h1 className="mt-3 text-[34px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
-            Hoje
+            {t('today_page.heading')}
           </h1>
         </div>
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.9)_0%,hsl(var(--card))_100%)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
@@ -407,7 +431,7 @@ function TodayContent() {
           {isAdmin && (
             <div className="flex flex-wrap gap-2">
               <span className="inline-flex rounded-full border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
-                Modo admin ativo
+                {t('today_page.adminBadge')}
               </span>
             </div>
           )}
@@ -415,16 +439,19 @@ function TodayContent() {
             {greeting}, {preferredName}
           </p>
           <p className="mt-2 max-w-[30rem] text-[15px] leading-6 text-[hsl(var(--fg-2))]">
-            Seu centro de nutrição, treino e próxima decisão do dia.
+            {t('today_page.tagline')}
           </p>
         </div>
       </TodayCard>
 
       {/* ── Snapshot cards — 4 pillars ── */}
-      <TodaySection eyebrow="Resumo" title="Hoje em um olhar">
+      <TodaySection
+        eyebrow={t('today_page.snapshot.eyebrow')}
+        title={t('today_page.snapshot.title')}
+      >
         {isLoading ? (
           <div className="flex items-center gap-2 py-4 text-[13px] text-[hsl(var(--fg-2))]">
-            <Loader2 className="h-4 w-4 animate-spin" /> Carregando dados…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t('today_page.loading')}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -446,47 +473,59 @@ function TodayContent() {
 
       {/* ── Adherence + Insight side by side ── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TodaySection eyebrow="Aderência" title="Consistência recente">
+        <TodaySection
+          eyebrow={t('today_page.adherence.eyebrow')}
+          title={t('today_page.adherence.title')}
+        >
           <TodayAdherenceCard
             score={isLoading ? 0 : adherenceAverage}
             summary={
               isLoading
-                ? 'Calculando...'
+                ? t('today_page.calculating')
                 : adherenceAverage >= 70
-                  ? 'Boa consistência nas últimas semanas.'
+                  ? t('today_page.adherence.good')
                   : adherenceAverage > 0
-                    ? 'Há espaço para melhorar a consistência.'
-                    : 'Configure seus planos para calcular a aderência.'
+                    ? t('today_page.adherence.improve')
+                    : t('today_page.adherence.configure')
             }
             items={isLoading ? [] : adherenceSignals}
           />
         </TodaySection>
 
-        <TodaySection eyebrow="Insight do dia" title="Leitura rápida">
+        <TodaySection
+          eyebrow={t('today_page.insight.eyebrow')}
+          title={t('today_page.insight.title')}
+        >
           <TodayInsightCard
             to={ROUTES.insights}
-            eyebrow="Insight do dia"
+            eyebrow={t('today_page.insight.eyebrow')}
             icon={Brain}
             title={insight.title}
             description={insight.description}
-            cta="Ver todos os insights"
+            cta={t('today_page.insight.cta')}
           />
         </TodaySection>
       </div>
 
       {/* ── Recent activity — last 5 workout sessions ── */}
       {!isLoading && recentActivity.length > 0 && (
-        <TodaySection eyebrow="Atividade" title="Sessões recentes">
+        <TodaySection
+          eyebrow={t('today_page.activity.eyebrow')}
+          title={t('today_page.activity.title')}
+        >
           <TodayCard>
             <div className="space-y-3">
               {recentActivity.map((session) => {
                 const isCompleted = session.status === 'completed';
                 const sessionDate = session.date
-                  ? new Date(`${session.date}T12:00:00`).toLocaleDateString('pt-BR', {
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short',
-                    })
+                  ? new Date(`${session.date}T12:00:00`).toLocaleDateString(
+                      locale === 'en-US' ? 'en-US' : 'pt-BR',
+                      {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                      },
+                    )
                   : '—';
 
                 return (
@@ -511,7 +550,9 @@ function TodayContent() {
 
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-medium text-[hsl(var(--fg))]">
-                        {session.name || session.workout_type || 'Treino'}
+                        {session.name ||
+                          session.workout_type ||
+                          t('today_page.activity.fallbackName')}
                       </p>
                       <p className="text-[12px] text-[hsl(var(--fg-3))]">{sessionDate}</p>
                     </div>
@@ -524,7 +565,9 @@ function TodayContent() {
                           : 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))]',
                       )}
                     >
-                      {isCompleted ? 'Concluído' : 'Pendente'}
+                      {isCompleted
+                        ? t('today_page.completed')
+                        : t('today_page.pending')}
                     </span>
                   </div>
                 );
@@ -536,9 +579,9 @@ function TodayContent() {
 
       {/* ── Next steps — action cards ── */}
       <TodaySection
-        eyebrow="Próximos passos"
-        title="Ações prioritárias"
-        description="Avance pelo dia na ordem certa, com uma ação clara por card."
+        eyebrow={t('today_page.nextSteps.eyebrow')}
+        title={t('today_page.nextSteps.title')}
+        description={t('today_page.nextSteps.description')}
       >
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {NEXT_STEPS.map((item, index) => (
