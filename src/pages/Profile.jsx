@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
+import { setLanguage } from '@/lib/i18n';
 import { ROUTES } from '@/lib/routes';
 import {
   ActionRow,
@@ -291,6 +292,10 @@ async function loadLocalProfile(user) {
         .eq('id', user.id)
         .single();
       if (!error && data?.profile_data && Object.keys(data.profile_data).length > 0) {
+        // Auto-apply locale preference stored in the profile
+        if (data.profile_data.locale) {
+          setLanguage(data.profile_data.locale);
+        }
         return data.profile_data;
       }
     } catch {

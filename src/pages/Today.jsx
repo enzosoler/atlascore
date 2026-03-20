@@ -210,7 +210,7 @@ function TodayContent() {
   const { role, loading: isRoleLoading } = useRole(user);
   const displayName = user?.full_name || user?.email || t('today_page.fallbackName');
   const preferredName = getPreferredName(displayName) || t('today_page.fallbackName');
-  const greeting = getGreeting();
+  const greeting = getGreeting(locale);
   const isAdmin = !isRoleLoading && role === 'admin';
 
   const todayStr = new Date().toISOString().split('T')[0];
