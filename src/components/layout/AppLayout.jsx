@@ -313,7 +313,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-transparent" style={{ overflowX: 'clip' }}>
+    <div className="flex min-h-screen bg-transparent overflow-x-clip">
       {/* ── Sidebar desktop ─────────────────────────────────────── */}
       <aside
         className={cn(
@@ -439,8 +439,14 @@ export default function AppLayout() {
           </button>
 
           {/* Brand — absolutely centered so side buttons don't push it */}
-          <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2">
-            <AtlasCoreLogoSVG width={80} height={28} color="hsl(var(--fg))" />
+          <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2.5">
+            {/* Icon mark: hidden on very small screens, shown when space permits */}
+            <AtlasCoreLogoSVG
+              width={46}
+              height={16}
+              color="hsl(var(--accent-primary))"
+              className="hidden sm:block shrink-0"
+            />
             <span className="text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </span>
@@ -557,12 +563,12 @@ export default function AppLayout() {
       <main
         ref={mainRef}
         className={cn(
-          'flex-1 min-h-screen transition-all duration-300',
+          'flex-1 min-h-screen overflow-x-clip transition-all duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'lg:pt-0',
           'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
         )}
-        style={{ overflowX: 'clip', paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
+        style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
       >
         <TrialBanner />
 

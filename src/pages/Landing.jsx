@@ -818,8 +818,8 @@ export default function Landing() {
       actions={(
         <>
           <span className="hidden sm:contents"><PublicLanguageSwitcher /></span>
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-[13px]" onClick={handleLogin}>{c.nav.login}</Button>
-          <Button size="sm" onClick={handleSignUp}>{c.nav.signup}</Button>
+          <Button size="sm" onClick={handleLogin}>{c.nav.login}</Button>
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-[13px]" onClick={handleSignUp}>{c.nav.signup}</Button>
         </>
       )}
     >
