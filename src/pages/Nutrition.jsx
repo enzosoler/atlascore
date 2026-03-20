@@ -308,20 +308,20 @@ function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', MEAL_MACRO_DOT[tone])} />
-            <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]\
+            <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
               {label}
             </p>
           </div>
-          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]\
+          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
             {detail || (remaining > 0 ? `${remaining}${unit} restantes` : 'Meta atingida')}
           </p>
         </div>
-        <p className="shrink-0 text-[13px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]\
+        <p className="shrink-0 text-[13px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
           {Math.round(consumed)} / {target}
           {unit}
         </p>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]\
+      <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
         <div
           className={cn('h-full rounded-full', TRACK_FILL_CLASS[tone])}
           style={{ width: `${pct}%` }}
@@ -336,11 +336,11 @@ function LoggedMetric({ label, value, unit, tone = 'calories' }) {
     <div className="bg-[hsl(var(--card)/0.86)] px-4 py-3">
       <div className="flex items-center gap-2">
         <span className={cn('h-2 w-2 rounded-full', MEAL_MACRO_DOT[tone])} />
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]\
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
           {label}
         </p>
       </div>
-      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]\
+      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
         {value}
         <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]\">{unit}</span>
       </p>
@@ -358,10 +358,10 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]\
+          <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
             {food.name}
           </p>
-          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]\
+          <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
             {food.brand || 'USDA FoodData Central'}
           </p>
         </div>
@@ -383,11 +383,11 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <UtensilsCrossed className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
-            <p className="text-sm font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]\
+            <p className="text-sm font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
               {meal.title}
             </p>
           </div>
-          <p className="mt-2.5 text-sm text-[hsl(var(--fg-2))]\
+          <p className="mt-2.5 text-sm text-[hsl(var(--fg-2))]">
             {meal.foods.map((food) => food.name).join(', ')}
           </p>
         </div>
