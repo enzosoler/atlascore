@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -799,7 +799,7 @@ export default function Landing() {
   const { language } = useTranslation();
   const c = COPY[language] || COPY['en-US'];
   const homeMocks = HOME_MOCK_COPY[language] || HOME_MOCK_COPY['en-US'];
-  const [showBR, setShowBR] = useState(language === 'pt-BR');
+  const showBR = language === 'pt-BR';
 
   return (
     <PublicSiteShell
@@ -1059,35 +1059,6 @@ export default function Landing() {
           <p className="atlas-public-copy mx-auto mt-3 max-w-md">{c.pricing.sub}</p>
         </motion.div>
 
-        {/* Currency toggle */}
-        <motion.div {...fadeIn(0.05)} className="mb-10 flex items-center justify-center gap-3">
-          <button
-            onClick={() => setShowBR(false)}
-            className={`text-[13px] font-medium transition-colors ${!showBR ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-3))]'}`}
-          >
-            {c.pricing.toggle.intl}
-          </button>
-          <button
-            onClick={() => setShowBR(!showBR)}
-            className={`relative h-6 w-11 rounded-full border transition-all ${
-              showBR
-                ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--tint)/0.1)]'
-                : 'border-[hsl(var(--border))] bg-[hsl(var(--fill))]'
-            }`}
-          >
-            <span className={`absolute top-0.5 h-5 w-5 rounded-full transition-all ${
-              showBR
-                ? 'left-[22px] bg-[hsl(var(--brand))]'
-                : 'left-0.5 bg-[hsl(var(--fg-3))]'
-            }`} />
-          </button>
-          <button
-            onClick={() => setShowBR(true)}
-            className={`text-[13px] font-medium transition-colors ${showBR ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-3))]'}`}
-          >
-            {c.pricing.toggle.br}
-          </button>
-        </motion.div>
 
         {/* Cards */}
         <motion.div {...fadeIn(0.1)} className="mx-auto grid max-w-3xl gap-5 md:grid-cols-2">
