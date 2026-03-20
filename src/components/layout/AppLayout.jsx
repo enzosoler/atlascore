@@ -163,8 +163,19 @@ export default function AppLayout() {
   const queryClient = useQueryClient();
   const { pathname } = location;
   const previousPathnameRef = useRef(pathname);
+
+  // Pull-to-refresh refs — all mutable pull state lives here to avoid stale closures
+  const mainRef = useRef(null);
   const pullStartYRef = useRef(0);
   const isPullingRef = useRef(false);
+  const pullDistanceRef = useRef(0);
+  const mobileOpenRef = useRef(mobileOpen);
+  const isRefreshingRef = useRef(isRefreshing);
+  const queryClientRef = useRef(queryClient);
+
+  useEffect(() => { mobileOpenRef.current = mobileOpen; }, [mobileOpen]);
+  useEffect(() => { isRefreshingRef.current = isRefreshing; }, [isRefreshing]);
+  useEffect(() => { queryClientRef.current = queryClient; }, [queryClient]);
 
   const { user, logout } = useAuth();
   const { role, nav } = useRBAC(user);
@@ -208,6 +219,85 @@ export default function AppLayout() {
     });
   }, [currentTabRoot, pathname]);
 
+  // ── Imperative pull-to-refresh (non-passive touchmove so preventDefault works) ──
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+
+    const onTouchStart = (event) => {
+      if (
+        window.innerWidth >= 1024 ||
+        mobileOpenRef.current ||
+        isRefreshingRef.current ||
+        window.scrollY > 0
+      ) return;
+
+      pullStartYRef.current = event.touches[0]?.clientY ?? 0;
+      isPullingRef.current = true;
+    };
+
+    const onTouchMove = (event) => {
+      if (!isPullingRef.current) return;
+
+      const currentY = event.touches[0]?.clientY ?? 0;
+      const rawDelta = currentY - pullStartYRef.current;
+
+      if (rawDelta <= 0 || window.scrollY > 0) {
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+        isPullingRef.current = false;
+        return;
+      }
+
+      const nextDistance = Math.min(rawDelta * 0.45, PULL_MAX_DISTANCE);
+      pullDistanceRef.current = nextDistance;
+      setPullDistance(nextDistance);
+
+      // Prevent browser scroll while pulling — requires non-passive listener
+      event.preventDefault();
+    };
+
+    const onTouchEnd = async () => {
+      if (!isPullingRef.current) return;
+      isPullingRef.current = false;
+
+      const distance = pullDistanceRef.current;
+
+      if (distance < PULL_REFRESH_THRESHOLD) {
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+        return;
+      }
+
+      setIsRefreshing(true);
+      isRefreshingRef.current = true;
+      pullDistanceRef.current = PULL_REFRESH_THRESHOLD;
+      setPullDistance(PULL_REFRESH_THRESHOLD);
+
+      try {
+        await queryClientRef.current.invalidateQueries();
+        await queryClientRef.current.refetchQueries({ type: 'active' });
+      } finally {
+        isRefreshingRef.current = false;
+        setIsRefreshing(false);
+        pullDistanceRef.current = 0;
+        setPullDistance(0);
+      }
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false }); // ← non-passive: allows preventDefault
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    el.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, []); // handlers only registered once; all mutable state via refs
+
   const isActive = (path) =>
     pathname === path || (path !== ROUTES.today && pathname.startsWith(path));
 
@@ -219,54 +309,6 @@ export default function AppLayout() {
     const target = getBottomTabTarget(path);
     if (target !== pathname) {
       navigate(target);
-    }
-  };
-
-  const handlePullStart = (event) => {
-    if (window.innerWidth >= 1024 || mobileOpen || isRefreshing || window.scrollY > 0) return;
-
-    pullStartYRef.current = event.touches[0]?.clientY ?? 0;
-    isPullingRef.current = true;
-  };
-
-  const handlePullMove = (event) => {
-    if (!isPullingRef.current) return;
-
-    const currentY = event.touches[0]?.clientY ?? 0;
-    const rawDelta = currentY - pullStartYRef.current;
-
-    if (rawDelta <= 0 || window.scrollY > 0) {
-      setPullDistance(0);
-      return;
-    }
-
-    const nextDistance = Math.min(rawDelta * 0.45, PULL_MAX_DISTANCE);
-    setPullDistance(nextDistance);
-
-    if (nextDistance > 0) {
-      event.preventDefault();
-    }
-  };
-
-  const finishPull = async () => {
-    if (!isPullingRef.current) return;
-
-    isPullingRef.current = false;
-
-    if (pullDistance < PULL_REFRESH_THRESHOLD) {
-      setPullDistance(0);
-      return;
-    }
-
-    setIsRefreshing(true);
-    setPullDistance(PULL_REFRESH_THRESHOLD);
-
-    try {
-      await queryClient.invalidateQueries();
-      await queryClient.refetchQueries({ type: 'active' });
-    } finally {
-      setIsRefreshing(false);
-      setPullDistance(0);
     }
   };
 
@@ -510,37 +552,52 @@ export default function AppLayout() {
 
       {/* ── Main content ────────────────────────────────────────── */}
       <main
+        ref={mainRef}
         className={cn(
           'flex-1 min-h-screen overscroll-y-none transition-all duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'pt-14 lg:pt-0',
           'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
         )}
-        onTouchStart={handlePullStart}
-        onTouchMove={handlePullMove}
-        onTouchEnd={finishPull}
-        onTouchCancel={finishPull}
       >
         <TrialBanner />
 
+        {/* ── Pull-to-refresh indicator ── */}
         <motion.div
           className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2 lg:hidden"
-          style={{ top: 'calc(56px + env(safe-area-inset-top) + 10px)' }}
+          style={{ top: 'calc(56px + env(safe-area-inset-top) + 8px)' }}
           animate={{
-            y: isRefreshing || pullDistance > 0 ? 0 : -18,
+            y: isRefreshing || pullDistance > 0 ? 0 : -56,
             opacity: isRefreshing || pullDistance > 0 ? 1 : 0,
+            scale: isRefreshing || pullDistance > 0 ? 1 : 0.88,
           }}
-          transition={{ duration: 0.16, ease: 'easeOut' }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="atlas-card flex items-center gap-2 rounded-full px-3 py-1.5">
-            <motion.div
-              animate={isRefreshing ? { rotate: 360 } : { rotate: pullDistance >= PULL_REFRESH_THRESHOLD ? 180 : 0 }}
-              transition={isRefreshing ? { repeat: Infinity, duration: 0.8, ease: 'linear' } : { duration: 0.18 }}
-            >
-              <Loader2 className={cn('h-3.5 w-3.5 text-[hsl(var(--brand))]', isRefreshing ? 'animate-spin' : '')} />
-            </motion.div>
+          <div className="atlas-card flex items-center gap-2.5 rounded-full px-3.5 py-2 shadow-[var(--shadow-md)]">
+            {/* Circular progress ring or spinner */}
+            <div className="relative h-4 w-4 shrink-0">
+              {isRefreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--brand))]" />
+              ) : (
+                <svg viewBox="0 0 16 16" className="h-4 w-4 -rotate-90">
+                  <circle cx="8" cy="8" r="6" fill="none" stroke="hsl(var(--border))" strokeWidth="2.2" />
+                  <circle
+                    cx="8" cy="8" r="6" fill="none"
+                    stroke="hsl(var(--brand))"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 6}`}
+                    strokeDashoffset={`${2 * Math.PI * 6 * (1 - Math.min(pullDistance / PULL_REFRESH_THRESHOLD, 1))}`}
+                  />
+                </svg>
+              )}
+            </div>
             <span className="text-[11px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
-              {isRefreshing ? 'Atualizando' : 'Puxe para atualizar'}
+              {isRefreshing
+                ? 'Atualizando...'
+                : pullDistance >= PULL_REFRESH_THRESHOLD
+                  ? 'Solte para atualizar'
+                  : 'Puxe para atualizar'}
             </span>
           </div>
         </motion.div>
@@ -549,6 +606,8 @@ export default function AppLayout() {
           className="lg:min-h-screen"
           style={{
             transform: `translateY(${pullDistance}px)`,
+            // Spring release animation when finger lifts; no transition while actively pulling
+            transition: isPullingRef.current ? 'none' : 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         >
           <AnimatePresence mode="wait" initial={false}>

@@ -14,6 +14,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { ROLE_HOME, ROUTES } from '@/lib/routes';
 import PublicSiteShell, { PublicLanguageSwitcher } from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 const SUPPORT_EMAIL = 'suporte@atlascore.app';
 
@@ -468,6 +469,20 @@ export default function Auth() {
                       : ui.signUpCta}
                   {!isSubmitting ? <ArrowRight className="h-4 w-4" strokeWidth={2} /> : null}
                 </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[hsl(var(--border))]" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">Or</span>
+                  </div>
+                </div>
+
+                <GoogleSignInButton
+                  redirectUrl={`${window.location.origin}/auth/callback`}
+                  className="w-full h-11"
+                />
               </form>
 
               {!isLogin ? (

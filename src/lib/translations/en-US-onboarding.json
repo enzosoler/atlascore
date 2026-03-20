@@ -1,0 +1,28 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to atlas.core",
+      "description": "Your unified system for workouts, nutrition, progress, and performance. Let us show you how to get started."
+    },
+    "nutrition": {
+      "title": "📊 Nutrition",
+      "description": "Manage your daily calorie intake, macros, and supplements. Create personalized diet plans or let AI do it for you."
+    },
+    "workouts": {
+      "title": "💪 Workouts",
+      "description": "Create, organize, and track your workouts. Choose from pre-built templates or build manually. Log every set and rep."
+    },
+    "progress": {
+      "title": "📸 Progress",
+      "description": "Take photos regularly to track your body transformation. Visualize your evolution over time."
+    },
+    "profile": {
+      "title": "👤 Profile",
+      "description": "Set your goal, weight, height, and other metrics. This helps us personalize everything for you."
+    },
+    "complete": {
+      "title": "Ready to get started!",
+      "description": "You're all set to explore atlas.core. Good luck on your performance journey!"
+    }
+  }
+}

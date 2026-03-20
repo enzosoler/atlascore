@@ -12,6 +12,7 @@ import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
 import { DailyStoreProvider } from '@/store/dailyStore.jsx';
 import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 
 // Pages
 import Landing from '@/pages/Landing.jsx';
@@ -65,6 +66,9 @@ import BlogPost from '@/pages/blog/BlogPost.jsx';
 // Layout
 import AppLayout from '@/components/layout/AppLayout.jsx';
 import RouteGuard from '@/components/rbac/RouteGuard';
+
+// Onboarding
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 
 const FullScreenSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-[hsl(var(--bg))]">
@@ -203,6 +207,7 @@ function App() {
                 <DailyStoreProvider>
                   <Router>
                     <AuthenticatedApp />
+                    <OnboardingTour />
                   </Router>
                   <Toaster />
                 </DailyStoreProvider>

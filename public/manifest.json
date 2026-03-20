@@ -1,6 +1,6 @@
 {
-  "name": "Atlas Core",
-  "short_name": "Atlas Core",
+  "name": "atlas.core",
+  "short_name": "atlas.core",
   "description": "Treino, nutricao, exames e progresso em um sistema conectado.",
   "start_url": "/",
   "display": "standalone",
