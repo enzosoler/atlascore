@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   Clock,
   Dumbbell,
@@ -12,16 +11,26 @@ import {
   Loader2,
   Play,
   Plus,
+  Search,
+  Trash2,
   TrendingUp,
+  X,
   Zap,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
-import { ROUTES } from '@/lib/routes';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
-import { getActiveWorkoutPlans } from '@/services/workoutPlanService';
+import ExerciseSearch from '@/components/workouts/ExerciseSearch';
+import {
+  getActiveWorkoutPlans,
+  createWorkoutPlan,
+  deactivateAllWorkoutPlans,
+} from '@/services/workoutPlanService';
 import { getRecentWorkouts, saveCompletedWorkout } from '@/services/workoutService';
+import {
+  fetchRecentWorkoutHistory,
+  computePersonalRecords,
+} from '@/services/workoutHistoryService';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -82,90 +91,429 @@ function formatRelativeDate(iso) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-// ─── sub-components ───────────────────────────────────────────────────────────
+// ─── CreatePlanModal ──────────────────────────────────────────────────────────
 
-function DayCard({ day, dayIndex, onStart }) {
-  const [expanded, setExpanded] = useState(false);
-  const exerciseCount = (day.exercises || []).length;
+// ── ExerciseRow — editable row inside DayEditor ───────────────────────────────
+
+function ExerciseRow({ ex, onChange, onRemove }) {
+  return (
+    <div className="flex items-center gap-2 py-1.5 group">
+      {/* Exercise name — read-only display; library selection handles setting it */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-[hsl(var(--fg))] truncate">{ex.name}</p>
+        {ex.muscle_group && (
+          <p className="text-[10px] text-[hsl(var(--fg-3))] capitalize truncate">{ex.muscle_group}</p>
+        )}
+      </div>
+      {/* Sets */}
+      <input
+        type="number"
+        min="1"
+        max="20"
+        value={ex.sets}
+        onChange={(e) => onChange('sets', Number(e.target.value) || 3)}
+        className="w-12 h-8 px-1.5 rounded-lg bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-xs text-[hsl(var(--fg))] text-center focus:outline-none focus:ring-1 focus:ring-[hsl(var(--brand)/0.5)]"
+        title="Sets"
+      />
+      {/* Reps */}
+      <input
+        type="text"
+        placeholder="8-12"
+        value={ex.reps}
+        onChange={(e) => onChange('reps', e.target.value)}
+        className="w-16 h-8 px-1.5 rounded-lg bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-xs text-[hsl(var(--fg))] text-center focus:outline-none focus:ring-1 focus:ring-[hsl(var(--brand)/0.5)]"
+        title="Reps"
+      />
+      <button
+        onClick={onRemove}
+        className="flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-lg text-[hsl(var(--fg-3))] hover:text-red-400 hover:bg-red-400/10 transition-colors opacity-0 group-hover:opacity-100"
+      >
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+// ── DayEditor — one training day with exercise library search ────────────────
+
+function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemoveExercise, onUpdateExercise }) {
+  const [expanded, setExpanded] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
+
+  const handleSelect = (searchResult) => {
+    // searchResult comes from ExerciseSearch.onSelect — unified shape
+    const name = searchResult.canonical_name_pt || searchResult.canonical_name_en || searchResult.name || '';
+    const muscle = (searchResult.primary_muscles || [])[0] || '';
+    const sets = searchResult.default_set_range || 3;
+    const reps = searchResult.default_rep_range || '8-12';
+    const rest = searchResult.default_rest_seconds || 60;
+    onAddExerciseFromLibrary(dayIndex, { name, muscle_group: muscle, sets, reps: String(reps), rest });
+    setShowSearch(false);
+  };
 
   return (
-    <div className="rounded-2xl border border-white/8 bg-white/4 overflow-hidden">
-      {/* Header row */}
+    <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.4)] overflow-hidden">
+      {/* Day header */}
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+        className="w-full flex items-center gap-3 px-3 py-2.5 text-left"
       >
-        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center">
-          <Dumbbell className="w-4 h-4 text-cyan-400" />
-        </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white leading-tight truncate">{day.label || day.name || `Day ${dayIndex + 1}`}</p>
-          <p className="text-xs text-white/45 mt-0.5">{exerciseCount} exercises</p>
+          <input
+            type="text"
+            value={day.label}
+            onChange={(e) => { e.stopPropagation(); onChange(dayIndex, 'label', e.target.value); }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full bg-transparent text-sm font-semibold text-[hsl(var(--fg))] focus:outline-none"
+            placeholder={`Day ${dayIndex + 1}`}
+          />
         </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); onStart(dayIndex); }}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500 text-black text-xs font-bold hover:bg-cyan-400 transition-colors"
-        >
-          <Play className="w-3 h-3 fill-current" />
-          Start
-        </button>
-        <span className="flex-shrink-0 text-white/30 ml-1">
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </span>
+        <span className="text-xs text-[hsl(var(--fg-3))] flex-shrink-0">{day.exercises.length} ex</span>
+        {expanded
+          ? <ChevronUp className="w-3.5 h-3.5 text-[hsl(var(--fg-3))] flex-shrink-0" />
+          : <ChevronDown className="w-3.5 h-3.5 text-[hsl(var(--fg-3))] flex-shrink-0" />}
       </button>
 
-      {/* Exercise list */}
       {expanded && (
-        <div className="border-t border-white/6 px-4 py-2 space-y-2">
-          {(day.exercises || []).map((ex, i) => (
-            <div key={i} className="flex items-center gap-2 py-1.5">
-              <span className="w-5 h-5 rounded-md bg-white/8 flex items-center justify-center text-[10px] font-bold text-white/40 flex-shrink-0">{i + 1}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-white/85 truncate">{ex.name}</p>
+        <div className="border-t border-[hsl(var(--border)/0.7)]">
+          {/* Exercise rows */}
+          {day.exercises.length > 0 && (
+            <div className="px-3 pt-2 pb-1">
+              {/* Column headers */}
+              <div className="flex items-center gap-2 mb-1 px-0">
+                <span className="flex-1 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider">Exercise</span>
+                <span className="w-12 text-[10px] text-[hsl(var(--fg-3))] text-center uppercase tracking-wider">Sets</span>
+                <span className="w-16 text-[10px] text-[hsl(var(--fg-3))] text-center uppercase tracking-wider">Reps</span>
+                <span className="w-8" />
               </div>
-              <span className="text-xs text-white/40 flex-shrink-0">{ex.sets}×{ex.reps}</span>
-              {ex.load && <span className="text-xs text-cyan-400/70 flex-shrink-0">{ex.load}kg</span>}
+              {day.exercises.map((ex, exIdx) => (
+                <ExerciseRow
+                  key={exIdx}
+                  ex={ex}
+                  onChange={(field, val) => onUpdateExercise(dayIndex, exIdx, field, val)}
+                  onRemove={() => onRemoveExercise(dayIndex, exIdx)}
+                />
+              ))}
             </div>
-          ))}
+          )}
+
+          {/* Library search panel */}
+          {showSearch ? (
+            <div className="px-3 pb-3 pt-2 border-t border-[hsl(var(--border)/0.5)]">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-[hsl(var(--fg-2))]">Search exercise library</p>
+                <button
+                  onClick={() => setShowSearch(false)}
+                  className="text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              <ExerciseSearch onSelect={handleSelect} />
+            </div>
+          ) : (
+            <div className="px-3 pb-3 pt-2">
+              <button
+                onClick={() => setShowSearch(true)}
+                className="flex items-center gap-1.5 w-full px-3 py-2 rounded-lg border border-dashed border-[hsl(var(--border))] text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--brand))] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] transition-colors"
+              >
+                <Search className="w-3.5 h-3.5" />
+                Add exercise from library
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function SessionCard({ session }) {
-  const exerciseCount = Array.isArray(session.exercises_completed) ? session.exercises_completed.length : 0;
+function CreatePlanModal({ onClose, onCreated, userId }) {
+  const [name, setName] = useState('');
+  const [objective, setObjective] = useState('');
+  const [frequency, setFrequency] = useState(3);
+  const [days, setDays] = useState(() =>
+    Array.from({ length: 3 }, (_, i) => ({ label: `Day ${i + 1}`, exercises: [] }))
+  );
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDays((prev) => {
+      const next = [...prev];
+      while (next.length < frequency) next.push({ label: `Day ${next.length + 1}`, exercises: [] });
+      while (next.length > frequency) next.pop();
+      return next;
+    });
+  }, [frequency]);
+
+  const handleDayLabelChange = (dayIdx, _field, value) => {
+    setDays((prev) => prev.map((d, i) => (i === dayIdx ? { ...d, label: value } : d)));
+  };
+
+  const handleAddExerciseFromLibrary = (dayIdx, exercise) => {
+    setDays((prev) =>
+      prev.map((d, i) =>
+        i === dayIdx
+          ? { ...d, exercises: [...d.exercises, { name: exercise.name, muscle_group: exercise.muscle_group || '', sets: exercise.sets || 3, reps: exercise.reps || '8-12', rest: exercise.rest || 60 }] }
+          : d
+      )
+    );
+  };
+
+  const handleRemoveExercise = (dayIdx, exIdx) => {
+    setDays((prev) =>
+      prev.map((d, i) =>
+        i === dayIdx ? { ...d, exercises: d.exercises.filter((_, j) => j !== exIdx) } : d
+      )
+    );
+  };
+
+  const handleUpdateExercise = (dayIdx, exIdx, field, value) => {
+    setDays((prev) =>
+      prev.map((d, i) =>
+        i === dayIdx
+          ? { ...d, exercises: d.exercises.map((e, j) => (j === exIdx ? { ...e, [field]: value } : e)) }
+          : d
+      )
+    );
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) { toast.error('Please enter a plan name.'); return; }
+    setSaving(true);
+    try {
+      await deactivateAllWorkoutPlans(userId);
+      await createWorkoutPlan(userId, {
+        name: name.trim(),
+        objective: objective.trim() || null,
+        frequency,
+        days: days.map((d) => ({
+          label: d.label || '',
+          exercises: d.exercises.filter((e) => e.name.trim()),
+        })),
+        active: true,
+        created_by_type: 'user',
+        start_date: new Date().toISOString().split('T')[0],
+      });
+      onCreated();
+    } catch (err) {
+      toast.error(err.message || 'Failed to create plan.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-white/8 bg-white/4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="w-full sm:max-w-lg bg-[hsl(var(--card))] rounded-t-3xl sm:rounded-2xl border border-[hsl(var(--border))] flex flex-col max-h-[92vh] sm:max-h-[85vh] overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[hsl(var(--border))] flex-shrink-0">
+          <div>
+            <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">New Plan</p>
+            <h2 className="text-lg font-bold text-[hsl(var(--fg))] mt-0.5">Create Training Plan</h2>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={saving}
+            className="h-9 w-9 flex items-center justify-center rounded-xl text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))] transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+
+          <div>
+            <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
+              Plan name <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Push Pull Legs · 3×/week"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              className="w-full h-10 px-3.5 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm text-[hsl(var(--fg))] placeholder-[hsl(var(--fg-3))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.4)]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
+              Objective <span className="text-[hsl(var(--fg-3))] font-normal normal-case">(optional)</span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Hypertrophy, strength, fat loss…"
+              value={objective}
+              onChange={(e) => setObjective(e.target.value)}
+              className="w-full h-10 px-3.5 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm text-[hsl(var(--fg))] placeholder-[hsl(var(--fg-3))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.4)]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
+              Sessions per week
+            </label>
+            <div className="flex gap-2">
+              {[2, 3, 4, 5, 6].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFrequency(f)}
+                  className={`flex-1 h-9 rounded-xl text-sm font-semibold transition-colors ${
+                    frequency === f
+                      ? 'bg-[hsl(var(--brand))] text-white'
+                      : 'bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill-secondary))]'
+                  }`}
+                >
+                  {f}×
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
+              Training days
+            </label>
+            <div className="space-y-2">
+              {days.map((day, i) => (
+                <DayEditor
+                  key={i}
+                  day={day}
+                  dayIndex={i}
+                  onChange={handleDayLabelChange}
+                  onAddExerciseFromLibrary={handleAddExerciseFromLibrary}
+                  onRemoveExercise={handleRemoveExercise}
+                  onUpdateExercise={handleUpdateExercise}
+                />
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-2.5 px-5 py-4 border-t border-[hsl(var(--border))] flex-shrink-0">
+          <button
+            onClick={onClose}
+            disabled={saving}
+            className="flex-1 h-11 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm font-semibold text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill-secondary))] transition-colors disabled:opacity-40"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !name.trim()}
+            className="flex-1 h-11 rounded-xl bg-[hsl(var(--brand))] text-sm font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Plan'}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// ─── DayCard (plan day in list view) ──────────────────────────────────────────
+
+function DayCard({ day, dayIndex, onStart }) {
+  const [expanded, setExpanded] = useState(false);
+  const exerciseCount = (day.exercises || []).length;
+
+  return (
+    <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)] overflow-hidden">
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+      >
+        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
+          <Dumbbell className="w-4 h-4 text-[hsl(var(--brand))]" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-[hsl(var(--fg))] leading-tight truncate">
+            {day.label || day.name || `Day ${dayIndex + 1}`}
+          </p>
+          <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">{exerciseCount} exercises</p>
+        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onStart(dayIndex); }}
+          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[hsl(var(--brand))] text-white text-xs font-bold hover:opacity-90 transition-colors"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          Start
+        </button>
+        <span className="flex-shrink-0 text-[hsl(var(--fg-3))] ml-1">
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </span>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-[hsl(var(--border)/0.7)] px-4 py-2 space-y-2">
+          {(day.exercises || []).map((ex, i) => (
+            <div key={i} className="flex items-center gap-2 py-1.5">
+              <span className="w-5 h-5 rounded-md bg-[hsl(var(--fill))] flex items-center justify-center text-[10px] font-bold text-[hsl(var(--fg-3))] flex-shrink-0">
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-[hsl(var(--fg))] truncate">{ex.name}</p>
+              </div>
+              <span className="text-xs text-[hsl(var(--fg-3))] flex-shrink-0">{ex.sets}×{ex.reps}</span>
+              {ex.load && <span className="text-xs text-[hsl(var(--brand)/0.7)] flex-shrink-0">{ex.load}kg</span>}
+            </div>
+          ))}
+          {exerciseCount === 0 && (
+            <p className="text-xs text-[hsl(var(--fg-3))] py-2">No exercises added yet</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SessionCard ──────────────────────────────────────────────────────────────
+
+function SessionCard({ session }) {
+  const exerciseCount = Array.isArray(session.exercises_completed)
+    ? session.exercises_completed.length
+    : 0;
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)]">
       <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white truncate">{session.name}</p>
-        <p className="text-xs text-white/40 mt-0.5">{formatRelativeDate(session.completed_at)}</p>
+        <p className="text-sm font-semibold text-[hsl(var(--fg))] truncate">{session.name}</p>
+        <p className="text-xs text-[hsl(var(--fg-3))] mt-0.5">
+          {formatRelativeDate(session.completed_at)}
+          {exerciseCount > 0 && ` · ${exerciseCount} exercises`}
+        </p>
       </div>
       <div className="flex-shrink-0 text-right space-y-0.5">
         <div className="flex items-center gap-1 justify-end">
-          <Clock className="w-3 h-3 text-white/30" />
-          <span className="text-xs text-white/50">{formatDuration(session.duration_minutes)}</span>
+          <Clock className="w-3 h-3 text-[hsl(var(--fg-3))]" />
+          <span className="text-xs text-[hsl(var(--fg-2))]">{formatDuration(session.duration_minutes)}</span>
         </div>
         <div className="flex items-center gap-1 justify-end">
-          <TrendingUp className="w-3 h-3 text-white/30" />
-          <span className="text-xs text-white/50">{formatVolume(session.volume_load)}</span>
+          <TrendingUp className="w-3 h-3 text-[hsl(var(--fg-3))]" />
+          <span className="text-xs text-[hsl(var(--fg-2))]">{formatVolume(session.volume_load)}</span>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── main component ───────────────────────────────────────────────────────────
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function WorkoutsV2() {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const [mode, setMode] = useState('list');
+  const [mode, setMode] = useState('list'); // 'list' | 'execution'
   const [activeSession, setActiveSession] = useState(null);
+  const [showCreatePlan, setShowCreatePlan] = useState(false);
 
   const { data: activePlan, isLoading: isLoadingPlan } = useQuery({
     queryKey: ['active-workout-plan', user?.id],
@@ -181,6 +529,15 @@ export default function WorkoutsV2() {
     queryFn: () => getRecentWorkouts(user.id, 5),
     enabled: !!user?.id,
   });
+
+  // History for PR computation — fetched ahead of execution so it's ready instantly
+  const { data: workoutHistory = [] } = useQuery({
+    queryKey: ['workout-history', user?.id],
+    queryFn: () => fetchRecentWorkoutHistory(user.id),
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 min
+  });
+  const personalRecords = computePersonalRecords(workoutHistory);
 
   const saveWorkoutMut = useMutation({
     mutationFn: ({ userId, payload, originalWorkout }) =>
@@ -212,6 +569,12 @@ export default function WorkoutsV2() {
     saveWorkoutMut.mutate({ userId: user.id, payload: completedData, originalWorkout: activeSession });
   };
 
+  const handlePlanCreated = () => {
+    setShowCreatePlan(false);
+    qc.invalidateQueries({ queryKey: ['active-workout-plan'] });
+    toast.success('Plan created! Start a session from any day.');
+  };
+
   // ── Execution mode ────────────────────────────────────────────────────────
   if (mode === 'execution') {
     return (
@@ -219,6 +582,8 @@ export default function WorkoutsV2() {
         workout={activeSession}
         onComplete={handleCompleteWorkout}
         onBack={() => { setMode('list'); setActiveSession(null); }}
+        workoutHistory={workoutHistory}
+        personalRecords={personalRecords}
       />
     );
   }
@@ -228,61 +593,77 @@ export default function WorkoutsV2() {
 
   // ── List mode ─────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#070d0d] pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#070d0d]/95 backdrop-blur-sm px-4 pt-14 pb-4 border-b border-white/6">
+    <div className="min-h-screen bg-[hsl(var(--bg))]">
+
+      {/* Page Header */}
+      <div className="mx-auto max-w-3xl px-4 pt-6 pb-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold tracking-widest text-white/30 uppercase">Training</p>
-            <h1 className="text-2xl font-bold text-white mt-0.5">Workouts</h1>
+            <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">Training</p>
+            <h1 className="text-2xl font-bold text-[hsl(var(--fg))] mt-0.5">Workouts</h1>
           </div>
-          <button
-            onClick={handleStartEmpty}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/8 text-white text-sm font-medium hover:bg-white/12 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Free
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCreatePlan(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[hsl(var(--brand)/0.12)] border border-[hsl(var(--brand)/0.25)] text-[hsl(var(--brand))] text-sm font-semibold hover:bg-[hsl(var(--brand)/0.22)] transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              New Plan
+            </button>
+            <button
+              onClick={handleStartEmpty}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-[hsl(var(--fg-2))] text-sm font-medium hover:bg-[hsl(var(--fill-secondary))] transition-colors"
+            >
+              <Zap className="w-4 h-4" />
+              Free Workout
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 pt-6 space-y-8">
+      <div className="mx-auto max-w-3xl px-4 pb-10 space-y-8 sm:px-6 lg:px-8">
 
         {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+            <Loader2 className="w-6 h-6 text-[hsl(var(--brand))] animate-spin" />
           </div>
         )}
 
         {/* Active Plan */}
         {!isLoading && activePlan && (
           <section>
-            {/* Plan summary bar */}
-            <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/8 px-4 py-4 mb-4">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                  <Zap className="w-4 h-4 text-cyan-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold tracking-widest text-cyan-400 uppercase">Active Plan</p>
-                  <p className="text-base font-bold text-white mt-0.5 truncate">{activePlan.name}</p>
-                  <div className="flex items-center gap-3 mt-1.5">
-                    <span className="flex items-center gap-1 text-xs text-white/40">
-                      <Calendar className="w-3 h-3" />{activePlan.frequency}x / week
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-white/40">
-                      <Dumbbell className="w-3 h-3" />{days.length} days
-                    </span>
+            <div className="rounded-2xl border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.08)] px-4 py-4 mb-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-[hsl(var(--brand)/0.2)] flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-4 h-4 text-[hsl(var(--brand))]" />
                   </div>
-                  {activePlan.objective && (
-                    <p className="text-xs text-white/35 mt-1 italic truncate">{activePlan.objective}</p>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold tracking-widest text-[hsl(var(--brand))] uppercase">Active Plan</p>
+                    <p className="text-base font-bold text-[hsl(var(--fg))] mt-0.5 truncate">{activePlan.name}</p>
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
+                        <Calendar className="w-3 h-3" />{activePlan.frequency}× / week
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
+                        <Dumbbell className="w-3 h-3" />{days.length} days
+                      </span>
+                    </div>
+                    {activePlan.objective && (
+                      <p className="text-xs text-[hsl(var(--fg-3))] mt-1 italic truncate">{activePlan.objective}</p>
+                    )}
+                  </div>
                 </div>
+                <button
+                  onClick={() => setShowCreatePlan(true)}
+                  className="flex-shrink-0 text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors px-2 py-1 rounded-lg hover:bg-[hsl(var(--fill))]"
+                >
+                  Replace
+                </button>
               </div>
             </div>
 
-            {/* Day cards */}
             <div className="space-y-2.5">
               {days.map((day, i) => (
                 <DayCard key={i} day={day} dayIndex={i} onStart={handleStartFromPlan} />
@@ -293,19 +674,30 @@ export default function WorkoutsV2() {
 
         {/* No plan state */}
         {!isLoading && !activePlan && (
-          <div className="rounded-2xl border border-white/8 bg-white/4 px-6 py-10 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-white/8 flex items-center justify-center mx-auto mb-4">
-              <Dumbbell className="w-6 h-6 text-white/30" />
+          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)] px-6 py-10 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--fill))] flex items-center justify-center mx-auto mb-4">
+              <Dumbbell className="w-6 h-6 text-[hsl(var(--fg-3))]" />
             </div>
-            <p className="text-white font-semibold">No active plan</p>
-            <p className="text-white/40 text-sm mt-1 mb-5">Create a structured plan or start a free workout</p>
-            <button
-              onClick={handleStartEmpty}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 text-black text-sm font-bold hover:bg-cyan-400 transition-colors"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              Start Free Workout
-            </button>
+            <p className="text-[hsl(var(--fg))] font-semibold">No active plan</p>
+            <p className="text-[hsl(var(--fg-3))] text-sm mt-1 mb-5">
+              Create a structured plan or jump straight into a free workout
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
+              <button
+                onClick={() => setShowCreatePlan(true)}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-bold hover:opacity-90 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Create Plan
+              </button>
+              <button
+                onClick={handleStartEmpty}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-[hsl(var(--fg))] text-sm font-medium hover:bg-[hsl(var(--fill-secondary))] transition-colors"
+              >
+                <Play className="w-4 h-4 fill-current" />
+                Free Workout
+              </button>
+            </div>
           </div>
         )}
 
@@ -313,8 +705,8 @@ export default function WorkoutsV2() {
         {!isLoading && recentSessions.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold tracking-widest text-white/30 uppercase">Recent Sessions</p>
-              <span className="flex items-center gap-1 text-xs text-white/30">
+              <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">Recent Sessions</p>
+              <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
                 <Flame className="w-3 h-3 text-orange-400" />
                 {recentSessions.length} logged
               </span>
@@ -328,6 +720,16 @@ export default function WorkoutsV2() {
         )}
 
       </div>
+
+      {/* Create Plan Modal */}
+      {showCreatePlan && (
+        <CreatePlanModal
+          userId={user?.id}
+          onClose={() => setShowCreatePlan(false)}
+          onCreated={handlePlanCreated}
+        />
+      )}
+
     </div>
   );
 }

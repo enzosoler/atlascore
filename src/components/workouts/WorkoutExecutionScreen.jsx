@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ArrowRight, CheckCircle2, Play, Plus, Trophy } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { ArrowRight, CheckCircle2, Clock, Play, Plus, Trophy, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
 import { toast } from 'sonner';
 import { useI18n } from '@/lib/i18nContext';
+import { getLastSession, checkSetIsPR } from '@/services/workoutHistoryService';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -80,7 +81,7 @@ function FieldInput({ label, value, onChange, placeholder }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function WorkoutExecutionScreen({ workout, onComplete }) {
+export default function WorkoutExecutionScreen({ workout, onComplete, workoutHistory = [], personalRecords = {} }) {
   const { locale } = useI18n();
   const isPt = locale === 'pt-BR';
 
@@ -97,6 +98,8 @@ export default function WorkoutExecutionScreen({ workout, onComplete }) {
     () => (workout.exercises || []).length === 0
   );
   const [isDone, setIsDone] = useState(false);
+  // PR flash: exerciseIdx when a PR was just set (cleared after 3s)
+  const [prFlash, setPrFlash] = useState(null);
 
   const audioRef = useRef(null);
   const startedAt = useRef(Date.now());
@@ -107,6 +110,24 @@ export default function WorkoutExecutionScreen({ workout, onComplete }) {
   const completionRatio = exercises.length
     ? ((exerciseIdx + setIdx / Math.max(sets.length, 1)) / exercises.length) * 100
     : 0;
+
+  // ── Last-session context for current exercise ──────────────────────────────
+  const lastSession = useMemo(
+    () => (exercise ? getLastSession(workoutHistory, exercise.name) : null),
+    [workoutHistory, exercise?.name]
+  );
+
+  // ── Live PR check — re-evaluate whenever weight/reps inputs change ─────────
+  const livePR = useMemo(() => {
+    if (!exercise || !formData.weight || !formData.reps) return null;
+    const { isPR, type } = checkSetIsPR(
+      personalRecords,
+      exercise.name,
+      Number(formData.weight),
+      Number(formData.reps)
+    );
+    return isPR ? type : null;
+  }, [personalRecords, exercise?.name, formData.weight, formData.reps]);
 
   // ── Rest countdown timer ──────────────────────────────────────────────────
 
@@ -209,6 +230,11 @@ export default function WorkoutExecutionScreen({ workout, onComplete }) {
   const handleSetComplete = () => {
     if (formData.weight || formData.reps || formData.rir) {
       recordSet(exerciseIdx, setIdx, { ...formData });
+      // Fire PR flash if this set broke a record
+      if (livePR) {
+        setPrFlash(exerciseIdx);
+        setTimeout(() => setPrFlash(null), 3000);
+      }
     }
     if (setIdx < sets.length - 1) {
       setSetIdx((i) => i + 1);
@@ -449,14 +475,42 @@ export default function WorkoutExecutionScreen({ workout, onComplete }) {
         </div>
       </section>
 
+      {/* Last-session context — shows what the user did last time */}
+      {lastSession && (
+        <div className="flex items-center gap-2.5 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-4 py-2.5">
+          <Clock className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2} />
+          <span className="text-[12px] text-[hsl(var(--fg-2))]">
+            {isPt ? 'Última vez:' : 'Last time:'}
+            {' '}
+            <span className="font-semibold text-[hsl(var(--fg))]">
+              {lastSession.setCount}×{lastSession.maxWeight > 0 ? ` ${lastSession.maxWeight}kg` : ''}
+              {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} reps` : ''}
+            </span>
+            <span className="ml-1.5 text-[hsl(var(--fg-3))]">
+              {new Date(lastSession.date).toLocaleDateString(isPt ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
+            </span>
+          </span>
+        </div>
+      )}
+
       {/* Set logging form */}
-      <section className="atlas-card rounded-[28px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
+      <section className={`atlas-card rounded-[28px] p-5 sm:p-6 transition-all duration-300 ${prFlash === exerciseIdx ? 'border-[hsl(var(--ok)/0.7)] bg-[hsl(var(--ok)/0.04)]' : 'border-[hsl(var(--border)/0.92)]'}`}>
         <div className="space-y-4">
-          <div>
-            <p className="atlas-overline">{isPt ? 'Registrar set' : 'Log set'}</p>
-            <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-              {isPt ? 'Preencha o realizado agora. Se preferir, deixe campos vazios e avance apenas com o fluxo.' : 'Fill in what you did now. If you prefer, leave fields empty and just move forward.'}
-            </p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="atlas-overline">
+                {isPt ? 'Registrar set' : 'Log set'} {setIdx + 1}/{sets.length}
+              </p>
+            </div>
+            {/* Live PR badge — shown when current inputs would be a PR */}
+            {livePR && (
+              <div className="flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] border border-[hsl(var(--ok)/0.3)] px-2.5 py-1">
+                <Trophy className="h-3 w-3 text-[hsl(var(--ok))]" strokeWidth={2.5} />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--ok))]">
+                  {livePR === 'weight' ? (isPt ? 'Novo PR de carga!' : 'New weight PR!') : (isPt ? 'Novo PR de volume!' : 'New volume PR!')}
+                </span>
+              </div>
+            )}
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <FieldInput

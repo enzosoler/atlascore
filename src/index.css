@@ -21,9 +21,9 @@
     --border-default: 216 15% 90%;
     --border-strong: 216 15% 80%;
 
-    --accent-primary: 180 35% 50%;
-    --accent-primary-hover: 180 35% 45%;
-    --accent-secondary: 160 30% 48%;
+    --accent-primary: 185 32% 36%;
+    --accent-primary-hover: 185 32% 31%;
+    --accent-secondary: 160 28% 42%;
 
     --status-success: 160 45% 45%;
     --status-warning: 38 60% 55%;
@@ -163,9 +163,9 @@
     --border-default: 216 10% 20%;
     --border-strong: 216 10% 30%;
 
-    --accent-primary: 180 65% 50%;
-    --accent-primary-hover: 180 65% 45%;
-    --accent-secondary: 160 84% 39%;
+    --accent-primary: 185 40% 46%;
+    --accent-primary-hover: 185 40% 40%;
+    --accent-secondary: 160 34% 42%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
@@ -192,7 +192,7 @@
     --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
     --button-primary-bg: var(--accent-primary);
-    --button-primary-bg-hover: 219 100% 70%;
+    --button-primary-bg-hover: var(--accent-primary-hover);
     --button-primary-foreground: 0 0% 100%;
 
     --background: var(--sys-bg);

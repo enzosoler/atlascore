@@ -13,6 +13,8 @@ import {
   Trash2,
   UtensilsCrossed,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/lib/routes';
 import {
   ActionRow,
   AppContainer,
@@ -47,29 +49,16 @@ const INPUT_CLASS_NAME = 'atlas-field mt-2 h-11 px-4 py-2 text-base';
 const SELECT_CLASS_NAME = `${INPUT_CLASS_NAME} appearance-none`;
 const TEXTAREA_CLASS_NAME = 'atlas-field mt-2 min-h-[120px] resize-y px-4 py-3 text-base';
 
+// Sensible fallback if the user has never configured targets.
+// These values are intentionally conservative and only used until the profile loads.
 const DEFAULT_PROFILE = {
-  calories_target: 2300,
-  protein_target: 170,
-  carbs_target: 230,
-  fat_target: 75,
+  calories_target: 0,
+  protein_target: 0,
+  carbs_target: 0,
+  fat_target: 0,
 };
 
-const MOCK_PRESCRIBED_DIET = {
-  id: 'diet-blueprint',
-  name: 'Cutting clean',
-  description:
-    'Distribuicao simples das refeicoes para manter proteina alta e calorias sob controle.',
-  meals: [
-    { name: 'Cafe da manha', time: '07:00' },
-    { name: 'Almoco', time: '12:30' },
-    { name: 'Pos-treino', time: '17:30' },
-    { name: 'Jantar', time: '20:30' },
-  ],
-  target_calories: 2300,
-  target_protein: 170,
-  target_carbs: 230,
-  target_fat: 75,
-};
+// MOCK_PRESCRIBED_DIET removed — targets now come from profiles.profile_data
 
 const TODAY = getToday();
 const YESTERDAY = shiftDate(TODAY, -1);
@@ -102,60 +91,7 @@ const TRACK_FILL_CLASS = {
   fat: 'bg-[hsl(var(--warn))]',
 };
 
-const MOCK_MEALS = [
-  {
-    id: 'meal-breakfast',
-    date: TODAY,
-    meal_type: 'breakfast',
-    title: 'Cafe da manha',
-    foods: [{ name: 'Iogurte grego' }, { name: 'Banana' }, { name: 'Aveia' }],
-    total_calories: 420,
-    total_protein: 32,
-    total_carbs: 48,
-    total_fat: 11,
-    notes: 'Mantido leve para treinar no meio da manha.',
-    source: 'mock',
-  },
-  {
-    id: 'meal-lunch',
-    date: TODAY,
-    meal_type: 'lunch',
-    title: 'Almoco',
-    foods: [{ name: 'Arroz' }, { name: 'Frango' }, { name: 'Legumes' }],
-    total_calories: 690,
-    total_protein: 54,
-    total_carbs: 68,
-    total_fat: 18,
-    notes: 'Refeição principal do dia.',
-    source: 'mock',
-  },
-  {
-    id: 'meal-post-workout',
-    date: TODAY,
-    meal_type: 'post_workout',
-    title: 'Pos-treino',
-    foods: [{ name: 'Whey' }, { name: 'Creme de arroz' }],
-    total_calories: 310,
-    total_protein: 31,
-    total_carbs: 38,
-    total_fat: 4,
-    notes: 'Foco em digestao facil.',
-    source: 'mock',
-  },
-  {
-    id: 'meal-yesterday',
-    date: YESTERDAY,
-    meal_type: 'dinner',
-    title: 'Jantar',
-    foods: [{ name: 'Salmao' }, { name: 'Batata doce' }, { name: 'Salada' }],
-    total_calories: 640,
-    total_protein: 45,
-    total_carbs: 44,
-    total_fat: 24,
-    notes: '',
-    source: 'mock',
-  },
-];
+// MOCK_MEALS removed — all meal data comes from Supabase food_logs table
 
 function createLocalId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -731,6 +667,66 @@ export default function NutritionPage() {
   const [savingFoodId, setSavingFoodId] = useState(null);
   const [isLoadingMeals, setIsLoadingMeals] = useState(false);
   const [recentFoods, setRecentFoods] = useState([]);
+  const [showTargetsEditor, setShowTargetsEditor] = useState(false);
+  const [targetDraft, setTargetDraft] = useState(null); // populated when editor opens
+  const [isSavingTargets, setIsSavingTargets] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Load nutrition targets from profile_data (the same source Profile.jsx writes to)
+  useEffect(() => {
+    if (!user?.id) return undefined;
+
+    let isActive = true;
+
+    const fetchTargets = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('profile_data')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          // Profile row may not exist yet — keep defaults
+          if (isActive) setProfileLoaded(true);
+          return;
+        }
+
+        const pd = data?.profile_data;
+        if (!pd || typeof pd !== 'object') {
+          if (isActive) setProfileLoaded(true);
+          return;
+        }
+
+        if (isActive) {
+          setProfile({
+            calories_target: Number(pd.calories_target) || 0,
+            protein_target:  Number(pd.protein_target)  || 0,
+            carbs_target:    Number(pd.carbs_target)    || 0,
+            fat_target:      Number(pd.fat_target)      || 0,
+          });
+          setProfileLoaded(true);
+        }
+      } catch (err) {
+        // Non-fatal — page still works with DEFAULT_PROFILE
+        console.warn('[Nutrition] Could not load targets from profile:', err);
+        if (isActive) setProfileLoaded(true);
+      }
+    };
+
+    fetchTargets();
+
+    return () => { isActive = false; };
+  }, [user?.id]);
+
+  // Auto-open targets editor on first visit when no targets are configured
+  useEffect(() => {
+    if (profileLoaded && profile.calories_target === 0 && !showTargetsEditor) {
+      setTargetDraft({ ...DEFAULT_PROFILE });
+      setShowTargetsEditor(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileLoaded]);
 
   useEffect(() => {
     if (!user?.id) return undefined;
@@ -775,6 +771,53 @@ export default function NutritionPage() {
   useEffect(() => {
     setRecentFoods(getRecentFoods());
   }, []);
+
+  const handleOpenTargetsEditor = () => {
+    setTargetDraft({ ...profile });
+    setShowTargetsEditor(true);
+  };
+
+  const handleSaveTargets = async () => {
+    if (!user?.id || !targetDraft) return;
+    setIsSavingTargets(true);
+    try {
+      // Read current profile_data first so we don't overwrite unrelated fields
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('profile_data')
+        .eq('id', user.id)
+        .single();
+
+      const merged = {
+        ...(existing?.profile_data || {}),
+        calories_target: Number(targetDraft.calories_target) || 0,
+        protein_target:  Number(targetDraft.protein_target)  || 0,
+        carbs_target:    Number(targetDraft.carbs_target)    || 0,
+        fat_target:      Number(targetDraft.fat_target)      || 0,
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ profile_data: merged })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setProfile({
+        calories_target: merged.calories_target,
+        protein_target:  merged.protein_target,
+        carbs_target:    merged.carbs_target,
+        fat_target:      merged.fat_target,
+      });
+      setShowTargetsEditor(false);
+      setTargetDraft(null);
+      setNotice({ tone: 'success', message: 'Nutrition targets updated.' });
+    } catch (err) {
+      setNotice({ tone: 'error', message: 'Could not save targets. Try again.' });
+    } finally {
+      setIsSavingTargets(false);
+    }
+  };
 
   useEffect(() => {
     const q = foodQuery.trim();
@@ -970,6 +1013,29 @@ export default function NutritionPage() {
       .sort((a, b) => getMealSortOrder(a.meal_type) - getMealSortOrder(b.meal_type));
   }, [meals, selectedDate]);
 
+  // Logging streak: count consecutive days ending today (or yesterday) with at least one log
+  const loggingStreak = useMemo(() => {
+    const loggedDates = new Set(meals.map((m) => m.date));
+    let count = 0;
+    // Start from today; if today has no logs, allow streak to count from yesterday
+    const todayHasLogs = loggedDates.has(TODAY);
+    let cursor = new Date(TODAY);
+    if (!todayHasLogs) {
+      // Peek at yesterday — if nothing there either, streak is 0
+      cursor.setDate(cursor.getDate() - 1);
+      const yd = cursor.toISOString().slice(0, 10);
+      if (!loggedDates.has(yd)) return 0;
+    }
+    // Walk backwards while we find logged days
+    while (true) {
+      const key = cursor.toISOString().slice(0, 10);
+      if (!loggedDates.has(key)) break;
+      count += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return count;
+  }, [meals]);
+
   return (
     <SafePageBoundary>
       <AppContainer>
@@ -990,7 +1056,89 @@ export default function NutritionPage() {
         <Section
           title="Daily Goals"
           subtitle="Calories and macronutrients for quick reference."
+          actions={loggingStreak >= 2 ? (
+            <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--warn)/0.12)] border border-[hsl(var(--warn)/0.25)] px-3 py-1">
+              <span className="text-[13px]">🔥</span>
+              <span className="text-[12px] font-semibold text-[hsl(var(--warn))]">
+                {loggingStreak}-day streak
+              </span>
+            </div>
+          ) : null}
         >
+          {/* Targets banner / inline editor */}
+          {!showTargetsEditor && (
+            <div className={`mb-4 flex items-center justify-between gap-3 rounded-[18px] border px-4 py-3 ${profile.calories_target === 0 ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)]' : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)]'}`}>
+              <div className="flex items-center gap-2.5 text-[13px] text-[hsl(var(--fg-2))]">
+                <Target className={`h-4 w-4 shrink-0 ${profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={1.9} />
+                <span>
+                  {profile.calories_target === 0
+                    ? 'Set your daily calorie and macro targets to get started.'
+                    : `${profile.calories_target} kcal · ${profile.protein_target}g protein · ${profile.carbs_target}g carbs · ${profile.fat_target}g fat`}
+                </span>
+              </div>
+              <button
+                onClick={handleOpenTargetsEditor}
+                className="flex-shrink-0 text-[12px] font-semibold text-[hsl(var(--brand))] hover:underline underline-offset-2"
+              >
+                {profile.calories_target === 0 ? 'Set targets →' : 'Edit'}
+              </button>
+            </div>
+          )}
+
+          {/* Inline targets editor */}
+          {showTargetsEditor && targetDraft && (
+            <div className="mb-4 rounded-[22px] border border-[hsl(var(--brand)/0.25)] bg-[hsl(var(--brand)/0.03)] px-5 py-5 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+                    {profile.calories_target === 0 ? 'Set up your nutrition targets' : 'Daily Nutrition Targets'}
+                  </p>
+                  {profile.calories_target === 0 && (
+                    <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">Enter your daily goals to track progress against them.</p>
+                  )}
+                </div>
+                <Target className="h-5 w-5 text-[hsl(var(--brand))]" strokeWidth={1.8} />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { key: 'calories_target', label: 'Calories', unit: 'kcal' },
+                  { key: 'protein_target',  label: 'Protein',  unit: 'g'    },
+                  { key: 'carbs_target',    label: 'Carbs',    unit: 'g'    },
+                  { key: 'fat_target',      label: 'Fat',      unit: 'g'    },
+                ].map(({ key, label, unit }) => (
+                  <div key={key}>
+                    <label className="block text-[11px] font-medium text-[hsl(var(--fg-2))] mb-1">{label} ({unit})</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={targetDraft[key] || ''}
+                      onChange={(e) => setTargetDraft((d) => ({ ...d, [key]: e.target.value }))}
+                      placeholder="0"
+                      className="atlas-field h-9 px-3 text-[13px] w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-1">
+                {profile.calories_target > 0 && (
+                  <button
+                    onClick={() => { setShowTargetsEditor(false); setTargetDraft(null); }}
+                    disabled={isSavingTargets}
+                    className="flex-1 h-9 rounded-[14px] border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  onClick={handleSaveTargets}
+                  disabled={isSavingTargets}
+                  className="flex-1 h-9 rounded-[14px] bg-[hsl(var(--brand))] text-[13px] font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {isSavingTargets ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
+                </button>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MacroTrack
               label="Calories"

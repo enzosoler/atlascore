@@ -7,8 +7,8 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 const MACRO_COLORS = { protein: '#4F8CFF', carbs: '#8B7CFF', fat: '#F5A83A' };
 
 function MacroBar({ label, logged, target, color }) {
-  const pct = Math.min((logged / target) * 100, 100);
-  const status = logged >= target * 0.9 ? 'ok' : 'warn';
+  const pct = target > 0 ? Math.min((logged / target) * 100, 100) : 0;
+  const status = target > 0 && logged >= target * 0.9 ? 'ok' : 'warn';
   return (
     <div>
       <div className="flex justify-between text-[11px] mb-1">
@@ -26,10 +26,10 @@ function MacroBar({ label, logged, target, color }) {
 
 export default function NutritionComparison({ profile, logged, prescribed }) {
   const targets = {
-    cal: profile?.calories_target || 2200,
-    pro: profile?.protein_target || 160,
-    carb: profile?.carbs_target || 250,
-    fat: profile?.fat_target || 70,
+    cal: profile?.calories_target || 0,
+    pro: profile?.protein_target || 0,
+    carb: profile?.carbs_target || 0,
+    fat: profile?.fat_target || 0,
   };
 
   const t = logged.reduce((a, m) => ({
@@ -39,8 +39,8 @@ export default function NutritionComparison({ profile, logged, prescribed }) {
     fat: a.fat + (m.total_fat || 0),
   }), { cal: 0, pro: 0, carb: 0, fat: 0 });
 
-  const calPct = Math.min((t.cal / targets.cal) * 100, 100);
-  const remaining = Math.max(0, targets.cal - Math.round(t.cal));
+  const calPct = targets.cal > 0 ? Math.min((t.cal / targets.cal) * 100, 100) : 0;
+  const remaining = targets.cal > 0 ? Math.max(0, targets.cal - Math.round(t.cal)) : null;
 
   return (
     <div className="space-y-6">
@@ -56,7 +56,7 @@ export default function NutritionComparison({ profile, logged, prescribed }) {
             <span className="kpi-sm">{Math.round(t.cal)}</span>
             <span className="text-[13px] text-muted-foreground">/ {targets.cal} kcal</span>
           </div>
-          <span className="text-[12px] text-muted-foreground">{remaining > 0 ? `${remaining} restam` : '✓ Meta atingida'}</span>
+          <span className="text-[12px] text-muted-foreground">{remaining === null ? 'Meta não configurada' : remaining > 0 ? `${remaining} restam` : '✓ Meta atingida'}</span>
         </div>
         <div className="h-2 rounded-full bg-[hsl(var(--secondary))] overflow-hidden mb-5">
           <div className="h-full rounded-full transition-all duration-700 bg-[hsl(var(--brand))]" style={{ width: `${calPct}%` }} />
@@ -92,7 +92,7 @@ export default function NutritionComparison({ profile, logged, prescribed }) {
       <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[hsl(var(--brand)/0.05)] border border-[hsl(var(--brand)/0.1)] text-[12px] text-[hsl(var(--brand))]">
         <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={2} />
         <span className="font-medium">
-          {calPct >= 90 ? '✓ Meta de calorias atingida' : `${Math.round(calPct)}% da meta de calorias`}
+          {targets.cal === 0 ? 'Configure sua meta calórica no perfil' : calPct >= 90 ? '✓ Meta de calorias atingida' : `${Math.round(calPct)}% da meta de calorias`}
         </span>
       </div>
     </div>
