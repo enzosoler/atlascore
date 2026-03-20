@@ -292,13 +292,35 @@ export async function fetchExerciseLibrary({ bodyPart, muscle, equipment, limit 
 
 async function searchBase44Exercises(query, limit = 30) {
   try {
+    // First try the base44 API
     const raw = await base44.functions.invoke('exerciseSearch', {
       action: 'search',
       query,
     });
     const results = raw?.data?.results || [];
-    return results.slice(0, limit).map((ex) => normalizeBase44Exercise(ex)).filter(Boolean);
-  } catch {
+    const normalized = results.slice(0, limit).map((ex) => normalizeBase44Exercise(ex)).filter(Boolean);
+    
+    // If we got results, return them
+    if (normalized.length > 0) return normalized;
+    
+    // Otherwise, try local search with PT translation
+    const enQuery = translateSearchQueryToEN(query);
+    try {
+      const allExercises = await base44.entities.ExerciseMaster.all();
+      const localResults = localSearch(allExercises.map(normalizeBase44Exercise).filter(Boolean), query);
+      
+      if (localResults.length > 0) return localResults.slice(0, limit);
+      
+      // Try with translated EN query
+      const enResults = localSearch(allExercises.map(normalizeBase44Exercise).filter(Boolean), enQuery);
+      return enResults.slice(0, limit);
+    } catch (localErr) {
+      console.warn('[ExerciseService] Local search failed:', localErr.message);
+    }
+    
+    return [];
+  } catch (err) {
+    console.warn('[ExerciseService] searchBase44Exercises failed:', err.message);
     return [];
   }
 }

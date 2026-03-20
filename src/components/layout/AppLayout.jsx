@@ -289,7 +289,7 @@ export default function AppLayout() {
           <AtlasCoreLogoSVG width={32} height={32} className="shrink-0" />
           {!collapsed ? (
             <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              Atlas Core
+              <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </span>
           ) : null}
         </div>
@@ -423,9 +423,9 @@ export default function AppLayout() {
             >
               <div className="flex h-14 shrink-0 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4">
                 <div className="flex items-center gap-2">
-                  <AtlasCoreLogoSVG width={22} height={22} />
+                  <AtlasCoreLogoSVG width={24} height={24} />
                   <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                    Atlas Core
+                    <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
                   </span>
                 </div>
                 <button

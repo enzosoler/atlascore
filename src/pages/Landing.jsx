@@ -846,7 +846,7 @@ export default function Landing() {
                   {c.hero.h1a}
                 </h1>
                 <h1 className="atlas-display-title text-[clamp(2.8rem,2rem+2.8vw,5rem)] leading-[1.08]">
-                  <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core {c.hero.h1b.replace('?', '')}?
+                  {c.hero.h1b}?
                 </h1>
               </motion.div>
 
