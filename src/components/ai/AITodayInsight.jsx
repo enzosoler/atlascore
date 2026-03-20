@@ -29,7 +29,7 @@ export default function AITodayInsight({ checkin, meals, workouts, profile }) {
           
 - Refeições registradas: ${mealsCount}
 - Treino completado: ${workoutLogged ? 'sim' : 'não'}
-- Meta de calorias: ${profile?.calories_target || 2200} kcal
+- Meta de calorias: ${profile?.calories_target || 0} kcal
 - Humor/energia (se checkin): ${checkin ? `${checkin.mood}/5 humor, ${checkin.energy}/5 energia` : 'não preenchido'}
 
 Seja motivador, prático, uma ação concreta para as próximas horas.`,

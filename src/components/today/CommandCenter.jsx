@@ -40,7 +40,7 @@ export default function CommandCenter({ protocols, supplements, meals, workouts,
   }
 
   const calSoFar = (meals || []).reduce((s, m) => s + (m.total_calories || 0), 0);
-  const calLeft = (profile?.calories_target || 2200) - calSoFar;
+  const calLeft = (profile?.calories_target || 0) - calSoFar;
   if (calLeft > 400) {
     items.push({ key: 'cal', icon: UtensilsCrossed, title: `${Math.round(calLeft)} kcal restantes`, subtitle: `${(meals || []).length} refeições registradas hoje`, href: ROUTES.nutrition });
   }
