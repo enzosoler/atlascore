@@ -1,0 +1,3 @@
+module ReceiptParser {
+    header "/Users/enzosoler/Documents/atlas.core/ios/RevenueCatIntegration/.build/arm64-apple-macosx/debug/ReceiptParser.build/include/ReceiptParser-Swift.h"
+}
