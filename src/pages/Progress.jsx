@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, Minus, Plus, Loader2 } from 'lucide-react';
 import { format, subDays, parseISO, isValid } from 'date-fns';
 import AIProgressAnalysis from '@/components/ai/AIProgressAnalysis';
+import ProgressPhotoCarousel from '@/components/progress/ProgressPhotoCarousel';
 
 function MetricCard({ label, value, unit, change, goal, data }) {
   const isPositive = change > 0;
@@ -80,9 +81,28 @@ export default function Progress() {
     queryFn: () => base44.entities.UserProfile.list().then(r => r?.[0]),
   });
 
-  const { data: photos = [], isLoading: photosLoading } = useQuery({
+  // Demo photos with realistic dates (60 days span)
+  const DEMO_PHOTOS = [
+    {
+      id: 'demo-1',
+      date: '2026-01-01',
+      photo_url: '/demo-progress-photos/progress_casual_1.jpg',
+    },
+    {
+      id: 'demo-2',
+      date: '2026-02-15',
+      photo_url: '/demo-progress-photos/progress_casual_2.jpg',
+    },
+    {
+      id: 'demo-3',
+      date: '2026-03-19',
+      photo_url: '/demo-progress-photos/progress_casual_3.jpg',
+    },
+  ];
+
+  const { data: photos = DEMO_PHOTOS, isLoading: photosLoading } = useQuery({
     queryKey: ['progress-photos'],
-    queryFn: () => base44.entities.ProgressPhoto.list('-date', 50),
+    queryFn: () => base44.entities.ProgressPhoto.list('-date', 50).catch(() => DEMO_PHOTOS),
   });
 
   const isLoading = measurementsLoading || photosLoading;
@@ -219,24 +239,9 @@ export default function Progress() {
         </div>
       )}
 
-      {/* Photos */}
+      {/* Photos Carousel */}
       {photos.length > 0 && (
-        <div className="surface rounded-xl p-5 space-y-4">
-          <p className="t-subtitle">Fotos de Progresso</p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {photos.map(p => (
-              <div key={p.id} className="aspect-square rounded-lg overflow-hidden bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))]">
-                {p.photo_url ? (
-                  <img src={p.photo_url} alt="progress" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[hsl(var(--fg-2))]">
-                    <span className="text-[12px]">{safeFormatDate(p.date || p.created_date)}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <ProgressPhotoCarousel photos={photos} />
       )}
     </div>
   );

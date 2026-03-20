@@ -29,6 +29,7 @@ import Export from '@/pages/Export';
 import AdminPanel from '@/pages/AdminPanel';
 import MyDiet from '@/pages/MyDiet';
 import MyWorkout from '@/pages/MyWorkout';
+import ManualWorkoutPlan from '@/pages/ManualWorkoutPlan';
 import Diary from '@/pages/Diary';
 import ProgressPhotos from '@/pages/ProgressPhotos';
 import Social from '@/pages/Social';
@@ -159,6 +160,7 @@ const AppRoutes = () => (
         <Route path={ROUTES.export} element={<Export />} />
         <Route path={ROUTES.myDiet} element={<MyDiet />} />
         <Route path={ROUTES.myWorkout} element={<MyWorkout />} />
+        <Route path={ROUTES.manualWorkout} element={<ManualWorkoutPlan />} />
         <Route path={ROUTES.diary} element={<Diary />} />
         <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
         <Route path={ROUTES.social} element={<Social />} />

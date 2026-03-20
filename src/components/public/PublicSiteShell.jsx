@@ -131,7 +131,7 @@ export function PublicNav({ links = [], actions, compact = false }) {
           to={ROUTES.home}
           className="flex min-w-0 items-center gap-3 text-[hsl(var(--fg))] transition-opacity hover:opacity-80"
         >
-          <AtlasCoreLogoSVG width={48} height={24} className="shrink-0" />
+          <AtlasCoreLogoSVG width={56} height={28} className="shrink-0" />
           <div className="min-w-0">
             <p className="truncate text-[18px] font-semibold tracking-[-0.02em]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core

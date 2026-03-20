@@ -21,9 +21,9 @@
     --border-default: 216 15% 90%;
     --border-strong: 216 15% 80%;
 
-    --accent-primary: 180 100% 35%;
-    --accent-primary-hover: 180 100% 30%;
-    --accent-secondary: 160 84% 30%;
+    --accent-primary: 180 60% 45%;
+    --accent-primary-hover: 180 60% 40%;
+    --accent-secondary: 160 50% 40%;
 
     --status-success: 160 84% 39%;
     --status-warning: 38 92% 50%;
@@ -33,7 +33,7 @@
     /* Legacy / compatibility aliases */
     --tint: var(--accent-primary);
     --tint-hover: var(--accent-primary-hover);
-    --tint-soft: 214 100% 98%;
+    --tint-soft: 214 60% 98%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
@@ -163,8 +163,8 @@
     --border-default: 216 10% 20%;
     --border-strong: 216 10% 30%;
 
-    --accent-primary: 180 100% 50%;
-    --accent-primary-hover: 180 100% 45%;
+    --accent-primary: 180 65% 50%;
+    --accent-primary-hover: 180 65% 45%;
     --accent-secondary: 160 84% 39%;
 
     --sys-bg: var(--bg-app);

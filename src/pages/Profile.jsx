@@ -790,9 +790,58 @@ function ProfileContent() {
   const draftStatus = profileId ? 'Perfil configurado' : 'Primeiro setup';
   const payload = buildProfilePayload(form);
 
+  // Calculate macros based on calories and training goal
+  const calculateMacros = (calorieTarget, trainingGoal) => {
+    if (!calorieTarget || calorieTarget === '') return {};
+    
+    const calories = Number(calorieTarget);
+    let proteinRatio, carbsRatio, fatRatio;
+    
+    // Adjust macros based on training goal
+    if (trainingGoal === 'hipertrofia' || trainingGoal === 'muscle gain') {
+      proteinRatio = 0.30; // 30% protein
+      carbsRatio = 0.45;   // 45% carbs
+      fatRatio = 0.25;     // 25% fat
+    } else if (trainingGoal === 'perda de peso' || trainingGoal === 'weight loss') {
+      proteinRatio = 0.35; // 35% protein
+      carbsRatio = 0.40;   // 40% carbs
+      fatRatio = 0.25;     // 25% fat
+    } else if (trainingGoal === 'força' || trainingGoal === 'strength') {
+      proteinRatio = 0.32; // 32% protein
+      carbsRatio = 0.48;   // 48% carbs
+      fatRatio = 0.20;     // 20% fat
+    } else {
+      // Default balanced
+      proteinRatio = 0.30;
+      carbsRatio = 0.45;
+      fatRatio = 0.25;
+    }
+    
+    return {
+      protein_target: String(Math.round((calories * proteinRatio) / 4)), // 4 cal per gram
+      carbs_target: String(Math.round((calories * carbsRatio) / 4)),    // 4 cal per gram
+      fat_target: String(Math.round((calories * fatRatio) / 9)),        // 9 cal per gram
+    };
+  };
+
   const handleFieldChange = (key) => (event) => {
     setNotice(null);
-    setForm((current) => ({ ...current, [key]: event.target.value }));
+    const newValue = event.target.value;
+    
+    // Auto-calculate macros when calories or training goal changes
+    if (key === 'calories_target' || key === 'training_goal') {
+      const calorieTarget = key === 'calories_target' ? newValue : form.calories_target;
+      const trainingGoal = key === 'training_goal' ? newValue : form.training_goal;
+      
+      const calculatedMacros = calculateMacros(calorieTarget, trainingGoal);
+      setForm((current) => ({ 
+        ...current, 
+        [key]: newValue,
+        ...calculatedMacros
+      }));
+    } else {
+      setForm((current) => ({ ...current, [key]: newValue }));
+    }
   };
 
   const handleReset = () => {

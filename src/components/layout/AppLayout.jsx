@@ -286,7 +286,7 @@ export default function AppLayout() {
             collapsed ? 'justify-center px-0' : 'gap-3'
           )}
         >
-          <AtlasCoreLogoSVG width={28} height={28} className="shrink-0" />
+          <AtlasCoreLogoSVG width={32} height={32} className="shrink-0" />
           {!collapsed ? (
             <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               Atlas Core

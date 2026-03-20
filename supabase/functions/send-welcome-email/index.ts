@@ -12,6 +12,7 @@
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const DEFAULT_APP_URL = 'https://atlascore.app';
@@ -155,6 +156,30 @@ serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // ── Require authenticated caller ───────────────────────────────────────────
+  // Prevents anyone who discovers this URL from using it to spam via Resend.
+  const authHeader = req.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    );
+    const { error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+    if (authError) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+  } else {
+    return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+      status: 401,
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
   }

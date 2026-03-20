@@ -23,6 +23,7 @@ export const ROUTES = {
   diary: '/diary',
   progressPhotos: '/progress-photos',
   social: '/social',
+  manualWorkout: '/manual-workout',
   prescribedDiet: '/prescribed-diet',
   pricing: '/Pricing',
   prescribedWorkout: '/prescribed-workout',

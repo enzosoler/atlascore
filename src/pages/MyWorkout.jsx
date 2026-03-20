@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
-import { Sparkles, Loader2, Dumbbell, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'Você' };
@@ -262,18 +262,27 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
           <h1 className="t-headline">Meu Treino</h1>
           <p className="t-small mt-1">Plano de treino ativo prescrito</p>
         </div>
-        <button
-          onClick={generate}
-          disabled={generating}
-          className="btn btn-secondary gap-1.5"
-        >
-          {generating ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Sparkles className="w-3.5 h-3.5" />
-          )}
-          {plan ? 'Gerar novo plano' : 'Gerar plano por IA'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate(ROUTES.manualWorkout)}
+            className="btn btn-secondary gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Criar Manual
+          </button>
+          <button
+            onClick={generate}
+            disabled={generating}
+            className="btn btn-secondary gap-1.5"
+          >
+            {generating ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5" />
+            )}
+            {plan ? 'Gerar novo plano' : 'Gerar plano por IA'}
+          </button>
+        </div>
       </div>
 
       {genError && (
@@ -291,18 +300,27 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
           <p className="t-caption mb-4">
             Gere um plano personalizado com IA baseado no seu perfil e objetivos.
           </p>
-          <button
-            onClick={generate}
-            disabled={generating}
-            className="btn btn-primary gap-1.5"
-          >
-            {generating ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5" />
-            )}
-            Gerar com IA
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => navigate(ROUTES.manualWorkout)}
+              className="btn btn-secondary gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Criar Manualmente
+            </button>
+            <button
+              onClick={generate}
+              disabled={generating}
+              className="btn btn-primary gap-1.5"
+            >
+              {generating ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              Gerar com IA
+            </button>
+          </div>
         </div>
       ) : (
         <>
