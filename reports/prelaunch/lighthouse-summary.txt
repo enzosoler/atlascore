@@ -1,0 +1,28 @@
+[home]
+url=http://127.0.0.1:4173/
+performance=0.59
+accessibility=0.96
+best_practices=0.96
+seo=0.92
+lcp_ms=5733.03144
+interactive_ms=5763.126593000001
+cls=0
+tbt_ms=325
+speed_index_ms=5246.818613120178
+transfer_kib=5741.6
+contrast_selectors=header.atlas-public-nav > div.mx-auto > div.flex > button.atlas-button | div.grid > div.space-y-8 > div.flex > button.atlas-button
+
+[auth]
+url=http://127.0.0.1:4173/auth?mode=login
+performance=0.61
+accessibility=0.96
+best_practices=0.96
+seo=0.83
+lcp_ms=5680.54673
+interactive_ms=5680.54673
+cls=0
+tbt_ms=276
+speed_index_ms=4784.1564
+transfer_kib=780.9
+contrast_selectors=div.atlas-public-panel > div.mx-auto > form.mt-7 > button.atlas-button
+

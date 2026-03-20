@@ -134,7 +134,7 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.coachDashboard,        label: 'Coach',             icon: 'LayoutDashboard' },
     { path: ROUTES.nutritionistDashboard, label: 'Nutritionist',      icon: 'ChefHat' },
     { path: ROUTES.clinicianDashboard,    label: 'Clinician',         icon: 'Heart' },
-    { path: ROUTES.admin,                 label: 'Admin',             icon: 'ShieldCheck' },
+    { path: ROUTES.admin,                 label: 'Admin Console',     icon: 'ShieldCheck' },
     { path: ROUTES.profile,              label: 'Profile',            icon: 'User' },
   ],
 };

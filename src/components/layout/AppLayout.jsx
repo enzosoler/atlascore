@@ -360,16 +360,7 @@ export default function AppLayout() {
             );
           })}
 
-          {role === 'admin' ? (
-            <Link
-              to={ROUTES.admin}
-              title={collapsed ? 'Painel Admin' : undefined}
-              className={getDesktopNavItemClass(isActive(ROUTES.admin), collapsed)}
-            >
-              <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-              {!collapsed ? <span className="truncate">Painel Admin</span> : null}
-            </Link>
-          ) : null}
+          {/* Admin Console entry is rendered via nav.map() from rbac.js NAV_BY_ROLE — no duplicate here */}
         </nav>
 
         {/* Bottom: user card + actions */}
@@ -519,12 +510,7 @@ export default function AppLayout() {
                   );
                 })}
 
-                {role === 'admin' ? (
-                  <Link to={ROUTES.admin} className={getMobileNavItemClass(isActive(ROUTES.admin))}>
-                    <ShieldCheck className="h-[18px] w-[18px] shrink-0" strokeWidth={2} />
-                    <span className="truncate">Painel Admin</span>
-                  </Link>
-                ) : null}
+                {/* Admin Console entry is rendered via nav.map() from rbac.js NAV_BY_ROLE — no duplicate here */}
               </nav>
 
               <div className="border-t border-[hsl(var(--border)/0.72)] px-3 py-4">
