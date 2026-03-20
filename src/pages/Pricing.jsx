@@ -273,11 +273,6 @@ export default function Pricing() {
       return;
     }
 
-    if (window.self !== window.top) {
-      toast.error('O checkout só funciona no app publicado. Acesse a URL pública para assinar.');
-      return;
-    }
-
     if (!isAuthenticated) {
       sessionStorage.setItem('pending_plan', planId);
       window.location.href = `/auth?mode=signup&next=/Pricing`;
@@ -286,20 +281,22 @@ export default function Pricing() {
 
     setLoading(planId);
     try {
+      // Use Stripe Checkout via Base44 Edge Function
       const res = await base44.functions.invoke('createCheckout', {
         plan: planId,
         success_url: `${window.location.origin}/Today?subscribed=1`,
         cancel_url: `${window.location.origin}/Pricing`,
         email: user?.email,
+        region: region, // Pass region to handle currency correctly in Stripe
       });
 
       if (res.data?.url) {
         window.location.href = res.data.url;
       } else {
-        toast.error(res.data?.error || 'Erro ao iniciar checkout. Tente novamente.');
+        toast.error(res.data?.error || (isPt ? 'Erro ao iniciar checkout. Tente novamente.' : 'Error starting checkout. Please try again.'));
       }
     } catch (error) {
-      toast.error('Não foi possível conectar ao servidor de pagamentos. Tente novamente.');
+      toast.error(isPt ? 'Não foi possível conectar ao servidor de pagamentos.' : 'Could not connect to payment server.');
       console.error('Checkout error:', error);
     } finally {
       setLoading(null);

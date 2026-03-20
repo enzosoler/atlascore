@@ -70,7 +70,7 @@ export const BLOG_POSTS_PT = [
   {
     slug: 'how-to-follow-a-meal-plan',
     title: 'Como Realmente Seguir um Plano Alimentar na Vida Real (Sem obsessão ou falhas na quinta-feira)',
-    excerpt: 'Planos alimentares parecem ótimos no papel. Então a vida real acontece. Isso não é um problema de disciplina — é um problema de design.',
+    excerpt: 'Planos alimentares parearam ótimos no papel. Então a vida real acontece. Isso não é um problema de disciplina — é um problema de design.',
     publishedAt: '2025-03-05',
     readingTime: 8,
     category: 'Nutrição',
@@ -222,7 +222,7 @@ A maioria das pessoas tira uma foto de progresso uma vez por mês, se pesa de fo
 
 ---
 
-## Por que seu método atual de monitoramento está mentindo para você
+## O problema da inconsistência
 
 Se você se pesa uma vez por semana em dias diferentes, em horários diferentes, usando roupas diferentes, após refeições diferentes — você não está monitorando seu peso. Você está monitorando ruído.
 
@@ -261,40 +261,92 @@ Esta é a variável de monitoramento mais subestimada. Se você está mais forte
 ## Por que a maioria das pessoas nunca vê progresso real (Não é o que você pensa)
 
 As academias estão cheias, suplementos são uma indústria bilionária — e ainda assim a maioria das pessoas continua com a mesma aparência de quando começou. Isso é um problema de sistema.
+
+O erro mais comum é focar no esforço em vez da estrutura. Você pode treinar até a falha em cada série, mas se não houver sobrecarga progressiva monitorada, você está apenas se cansando, não evoluindo.
+
+O progresso real exige três pilares:
+1. **Intencionalidade:** Saber exatamente o que você está tentando realizar em cada sessão.
+2. **Precisão:** Medir as variáveis que realmente importam (não apenas o cansaço).
+3. **Contexto:** Entender como seu sono, nutrição e estresse estão afetando seus resultados.
+
+Sem esses três, você está apenas jogando dados e esperando que a sorte esteja ao seu lado.
 `,
   'not-the-program': `
 ## A real razão pela qual você não está evoluindo não tem nada a ver com seu treino
 
-Você mudou de treino três vezes este ano. Seu treino quase certamente não é o problema. Aqui está o que realmente é.
+Você mudou de treino três vezes este ano. Seu treino quase certamente não é o problema. O problema é a **adesão e a recuperação**.
+
+A maioria das pessoas subestima drasticamente o quanto a vida fora da academia afeta os resultados dentro dela. Se você dorme 5 horas por noite, vive sob estresse crônico e sua ingestão de proteína é inconsistente, o melhor programa de treino do mundo falhará.
+
+Pare de procurar o "programa mágico" e comece a olhar para os fundamentos:
+- Você está progredindo carga ou repetições consistentemente?
+- Sua nutrição suporta seu volume de treino?
+- Você está dando ao seu corpo o descanso necessário para reconstruir o tecido que você destruiu no treino?
+
+A evolução acontece no descanso, não no esforço.
 `,
   'spreadsheets-vs-apps-vs-allinone': `
 ## Planilhas vs. Apps vs. Sistemas All-in-One: O que Realmente Funciona?
 
-Uma análise direta e sem rodeios sobre como cada abordagem de monitoramento funciona na prática — e qual é a ideal para você.
+Planilhas são poderosas, mas têm alta fricção. Apps comuns são fáceis de usar, mas são limitados. Sistemas All-in-One como o Atlas Core tentam unir o melhor dos dois mundos.
+
+A melhor ferramenta é aquela que você realmente usa. Se abrir uma planilha no meio do treino é um fardo, você vai parar de registrar. Se o seu app de treino não fala com o seu app de dieta, você perde a visão do todo.
+
+O futuro do fitness de alta performance é a **integração**. Ter seus dados de treino, nutrição e biometria em um único lugar permite que você veja correlações que seriam impossíveis de notar de outra forma.
 `,
   'discipline-is-overrated': `
 ## Por que a Disciplina é Superestimada (E o que realmente mantém atletas consistentes)
 
-Atletas que mantêm a consistência por anos não dependem apenas de disciplina. Eles dependem de algo muito mais confiável — e muito menos exaustivo.
+A disciplina é um recurso finito. Se você depende apenas de força de vontade para treinar e comer bem, você eventualmente falhará quando a vida ficar difícil.
+
+Atletas consistentes dependem de **sistemas e identidade**.
+- **Sistemas:** Tornar o comportamento desejado o caminho de menor resistência.
+- **Identidade:** Treinar porque você é um atleta, não porque você "tem que" treinar.
+
+Quando você constrói um ambiente que suporta seus objetivos, a disciplina se torna secundária. O sistema faz o trabalho pesado por você.
 `,
   'what-serious-athletes-track': `
-## 10 Coisas que Atletas Sérios Monitoram e Iniciantes Não (E por que isso muda tudo)
+## 10 Coisas que Atletas Sérios Monitoram e Iniciantes Não
 
-A diferença entre quem tem progresso constante e quem não tem não é esforço ou genética. É informação.
+Iniciantes olham para o peso na balança. Atletas sérios olham para:
+1. Volume total de treino por grupo muscular.
+2. Qualidade do sono e HRV.
+3. Ingestão de micronutrientes e hidratação.
+4. RPE (Percepção Subjetiva de Esforço) e RIR (Repetições em Reserva).
+5. Tendências de composição corporal, não apenas peso.
+6. Consistência de horários de refeição.
+7. Resposta inflamatória e recuperação articular.
+8. Marcadores laboratoriais periódicos.
+9. Progressão de carga em exercícios chave.
+10. Bem-estar psicológico e motivação.
+
+A informação é a ferramenta mais poderosa para o progresso constante.
 `,
   'how-to-follow-a-meal-plan': `
-## Como Realmente Seguir um Plano Alimentar na Vida Real (Sem obsessão ou falhas na quinta-feira)
+## Como Realmente Seguir um Plano Alimentar na Vida Real
 
-Planos alimentares parecem ótimos no papel. Então a vida real acontece. Isso não é um problema de disciplina — é um problema de design.
+O erro número um é tentar ser perfeito. A perfeição é inimiga da consistência.
+
+Para seguir um plano alimentar a longo prazo:
+1. **Regra 80/20:** Foque em acertar o básico 80% do tempo.
+2. **Preparação:** Tenha opções saudáveis sempre disponíveis.
+3. **Flexibilidade:** Saiba como ajustar suas refeições quando sair da rotina.
+4. **Monitoramento sem obsessão:** Use os dados para informar, não para punir.
+
+Um plano alimentar deve servir à sua vida, não o contrário.
 `,
   'tracking-vs-guessing': `
 ## Monitorar vs. Adivinhar: Por que a Falta de Dados está Destruindo seu Progresso
 
-A lacuna entre o que você acha que está fazendo e o que realmente está fazendo não é pequena — e é a causa raiz da maioria das falhas no fitness.
+Se você não mede, você não gerencia. Adivinhar quanto você comeu ou quanto levantou na semana passada é a maneira mais rápida de estagnar.
+
+O cérebro humano é péssimo em estimar volume e calorias de forma objetiva. Tendemos a subestimar o que comemos e superestimar o quanto nos esforçamos. Os dados trazem a verdade nua e crua, permitindo ajustes precisos que levam a resultados reais.
 `,
   'hidden-reason-diet-not-working': `
-## A Razão Oculta pela qual sua Dieta Não Funciona Não Tem Nada a Ver com a Dieta
+## A Razão Oculta pela qual sua Dieta Não Funciona
 
-Você já tentou todas as dietas. A razão pela qual não funciona quase certamente não é a dieta em si — e a solução é mais simples do que qualquer nova abordagem.
+Muitas vezes, o problema não é o que você come, mas **como seu corpo processa** o que você come. Estresse, falta de sono e saúde intestinal desempenham um papel crucial na partição de nutrientes.
+
+Se o seu corpo está em um estado constante de alerta (cortisol alto), ele priorizará o armazenamento de gordura e a preservação de energia, independentemente do déficit calórico. Olhe para o seu estilo de vida de forma holística antes de cortar mais calorias.
 `,
 };
