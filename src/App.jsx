@@ -67,9 +67,6 @@ import BlogPost from '@/pages/blog/BlogPost.jsx';
 import AppLayout from '@/components/layout/AppLayout.jsx';
 import RouteGuard from '@/components/rbac/RouteGuard';
 
-// Onboarding
-import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
-
 const FullScreenSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-[hsl(var(--bg))]">
     <div className="w-8 h-8 border-[3px] border-[hsl(var(--border))] border-t-[hsl(var(--primary))] rounded-full animate-spin"></div>

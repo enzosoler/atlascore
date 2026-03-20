@@ -1025,9 +1025,9 @@ export default function NutritionPage() {
           title="Registro do dia"
           subtitle="Refeições e alimentos registrados na data selecionada."
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <DateStepper date={selectedDate} onChange={handleDateChange} />
-            <PrimaryButton onClick={() => setIsFormOpen(true)} className="gap-2">
+            <PrimaryButton onClick={() => setIsFormOpen(true)} className="gap-2 self-start sm:self-auto">
               <Plus className="h-4 w-4" />
               Adicionar refeição
             </PrimaryButton>

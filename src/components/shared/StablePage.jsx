@@ -309,7 +309,7 @@ export function DateStepper({ date, onChange }) {
       >
         <ChevronLeft className="h-4 w-4" strokeWidth={2} />
       </button>
-      <span className="min-w-[180px] text-center text-sm font-medium tracking-[-0.016em] text-[hsl(var(--fg))]">
+      <span className="min-w-0 w-[130px] sm:w-[180px] text-center text-sm font-medium tracking-[-0.016em] text-[hsl(var(--fg))]">
         {formatDateLabel(date, { weekday: 'long', day: 'numeric', month: 'long' })}
       </span>
       <button
