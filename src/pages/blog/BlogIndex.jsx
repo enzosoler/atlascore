@@ -5,12 +5,13 @@ import PublicSiteShell, {
   PublicLanguageSwitcher,
 } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
-import { BLOG_POSTS } from '@/lib/blogPosts';
+import { BLOG_POSTS, getLocalizedPost } from '@/lib/blogPosts';
 import { ROUTES } from '@/lib/routes';
+import { useI18n } from '@/lib/i18nContext';
 
-function formatDate(dateStr) {
+function formatDate(dateStr, locale) {
   if (!dateStr) return '';
-  return new Date(`${dateStr}T12:00:00`).toLocaleDateString('en-US', {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -26,36 +27,39 @@ function CategoryPill({ category }) {
   );
 }
 
-function PostCard({ post }) {
+function PostCard({ post, locale }) {
+  const localized = getLocalizedPost(post, locale);
+  const isPt = locale === 'pt-BR';
+
   return (
     <Link
       to={`${ROUTES.blog}/${post.slug}`}
       className="group atlas-card flex flex-col gap-4 p-5 transition-all duration-200 hover:shadow-[var(--shadow-md)] lg:p-6"
     >
       <div className="flex items-center justify-between gap-3">
-        <CategoryPill category={post.category} />
+        <CategoryPill category={localized.category} />
         <div className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--fg-3))]">
           <Clock3 className="h-3 w-3" strokeWidth={1.9} />
-          <span>{post.readingTime} min read</span>
+          <span>{post.readingTime} min {isPt ? 'leitura' : 'read'}</span>
         </div>
       </div>
 
       <div className="space-y-2">
         <h2 className="text-[16px] font-semibold leading-snug tracking-[-0.025em] text-[hsl(var(--fg))] transition-colors group-hover:text-[hsl(var(--tint))] lg:text-[17px]">
-          {post.title}
+          {localized.title}
         </h2>
         <p className="text-[13.5px] leading-6 text-[hsl(var(--fg-2))] line-clamp-2">
-          {post.excerpt}
+          {localized.excerpt}
         </p>
       </div>
 
       <div className="mt-auto flex items-center justify-between pt-1">
         <div className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))]">
           <CalendarDays className="h-3 w-3" strokeWidth={1.9} />
-          <span>{formatDate(post.publishedAt)}</span>
+          <span>{formatDate(post.publishedAt, locale)}</span>
         </div>
         <span className="flex items-center gap-1 text-[12px] font-medium text-[hsl(var(--tint))] opacity-0 transition-opacity group-hover:opacity-100">
-          Read
+          {isPt ? 'Ler mais' : 'Read'}
           <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
         </span>
       </div>
@@ -63,23 +67,41 @@ function PostCard({ post }) {
   );
 }
 
-const CATEGORIES = ['All', ...Array.from(new Set(BLOG_POSTS.map((p) => p.category)))];
-
 export default function BlogIndex() {
+  const { locale, t } = useI18n();
+  const isPt = locale === 'pt-BR';
   const [activeCategory, setActiveCategory] = React.useState('All');
+
+  const localizedPosts = BLOG_POSTS.map(p => getLocalizedPost(p, locale));
+  const categories = ['All', ...Array.from(new Set(localizedPosts.map((p) => p.category)))];
 
   const filtered =
     activeCategory === 'All'
       ? BLOG_POSTS
-      : BLOG_POSTS.filter((p) => p.category === activeCategory);
+      : BLOG_POSTS.filter((p) => {
+          const loc = getLocalizedPost(p, locale);
+          return loc.category === activeCategory;
+        });
+
+  const ui = isPt ? {
+    title: 'Insights para atletas\nque treinam a sério.',
+    description: 'Guias práticos sobre treino, nutrição e construção de sistemas que realmente produzem resultados — sem hype, sem enrolação.',
+    noPosts: 'Nenhum post nesta categoria ainda.',
+    all: 'Todos'
+  } : {
+    title: 'Insights for athletes\nwho track seriously.',
+    description: 'Practical guides on training, nutrition, and building systems that actually produce results — not motivation, not hype.',
+    noPosts: 'No posts in this category yet.',
+    all: 'All'
+  };
 
   return (
     <PublicSiteShell
       navLinks={[
-        { href: ROUTES.home, label: 'Home' },
+        { href: ROUTES.home, label: isPt ? 'Início' : 'Home' },
         { href: ROUTES.blog, label: 'Blog' },
-        { href: ROUTES.pricing, label: 'Pricing' },
-        { href: ROUTES.help, label: 'Help' },
+        { href: ROUTES.pricing, label: isPt ? 'Planos' : 'Pricing' },
+        { href: ROUTES.help, label: isPt ? 'Ajuda' : 'Help' },
       ]}
       actions={
         <>
@@ -88,20 +110,20 @@ export default function BlogIndex() {
             to={`${ROUTES.auth}?mode=login`}
             className="atlas-button atlas-button-secondary h-9 rounded-full px-4 text-[13px]"
           >
-            Log in
+            {isPt ? 'Entrar' : 'Log in'}
           </Link>
           <Link
             to={`${ROUTES.auth}?mode=signup`}
             className="atlas-button atlas-button-primary h-9 rounded-full px-4 text-[13px]"
           >
-            Get started
+            {isPt ? 'Começar' : 'Get started'}
           </Link>
         </>
       }
     >
       <PublicMetadata
-        title="Blog — Atlas Core"
-        description="Insights on fitness tracking, nutrition, training, and building systems that actually produce results."
+        title={`Blog — Atlas Core`}
+        description={ui.description}
         canonicalPath={ROUTES.blog}
       />
 
@@ -110,10 +132,10 @@ export default function BlogIndex() {
         <div className="mx-auto max-w-3xl text-center">
           <p className="atlas-overline justify-center">Blog</p>
           <h1 className="atlas-display-title mt-4 whitespace-pre-line text-[clamp(2rem,1.4rem+1.2vw,3rem)]">
-            {'Insights for athletes\nwho track seriously.'}
+            {ui.title}
           </h1>
           <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
-            Practical guides on training, nutrition, and building systems that actually produce results — not motivation, not hype.
+            {ui.description}
           </p>
         </div>
       </section>
@@ -121,7 +143,7 @@ export default function BlogIndex() {
       {/* Category filter */}
       <section className="mx-auto max-w-6xl px-5 pb-8 lg:px-8">
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               type="button"
@@ -132,7 +154,7 @@ export default function BlogIndex() {
                   : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))] hover:border-[hsl(var(--tint)/0.5)] hover:text-[hsl(var(--fg))]'
               }`}
             >
-              {cat}
+              {cat === 'All' ? ui.all : cat}
             </button>
           ))}
         </div>
@@ -142,13 +164,13 @@ export default function BlogIndex() {
       <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((post) => (
-            <PostCard key={post.slug} post={post} />
+            <PostCard key={post.slug} post={post} locale={locale} />
           ))}
         </div>
 
         {filtered.length === 0 && (
           <p className="py-12 text-center text-[14px] text-[hsl(var(--fg-3))]">
-            No posts in this category yet.
+            {ui.noPosts}
           </p>
         )}
       </section>

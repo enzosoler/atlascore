@@ -12,7 +12,7 @@ import {
   revokeAccess,
   getAdminMetrics,
 } from '@/lib/adminService';
-import StablePage from '@/components/shared/StablePage';
+import { SafePageBoundary as StablePage } from '@/components/shared/StablePage';
 import { ChevronDown, Search, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
