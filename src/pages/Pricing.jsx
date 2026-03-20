@@ -54,10 +54,11 @@ const PROFESSIONAL_PLAN_META = [
   { id: 'clinician', key: 'clinician', icon: Stethoscope },
 ];
 
-function formatPlanPrice(planId, translatedPrice, pricing, locale) {
+function formatPlanPrice(planId, translatedPrice, pricing, locale, billing = 'monthly') {
   if (planId === 'free') return translatedPrice;
 
-  const amount = pricing.prices?.[planId];
+  const prices = billing === 'yearly' ? pricing.prices_yearly : pricing.prices;
+  const amount = prices?.[planId];
   if (typeof amount !== 'number') return translatedPrice;
 
   return new Intl.NumberFormat(locale, {
@@ -65,6 +66,14 @@ function formatPlanPrice(planId, translatedPrice, pricing, locale) {
     currency: pricing.currency,
     maximumFractionDigits: 0,
   }).format(amount);
+}
+
+/** Returns integer savings % for yearly vs monthly, or null if unavailable. */
+function calcYearlySavings(planId, pricing) {
+  const monthly = pricing.prices?.[planId];
+  const yearly  = pricing.prices_yearly?.[planId];
+  if (!monthly || !yearly) return null;
+  return Math.round((1 - yearly / (monthly * 12)) * 100);
 }
 
 function PricingCard({
@@ -118,7 +127,11 @@ function PricingCard({
             <span className="pb-1 text-[13px] text-[hsl(var(--fg-2))]">{plan.period}</span>
           ) : null}
         </div>
-        {plan.trial ? (
+        {plan.savings ? (
+          <p className="mt-2 text-[12px] font-semibold text-[hsl(var(--ok))]">
+            {labels.savePrefix}{plan.savings}%
+          </p>
+        ) : plan.trial ? (
           <p className="mt-2 text-[12px] font-semibold text-[hsl(var(--ok))]">{plan.trial}</p>
         ) : null}
       </div>
@@ -163,6 +176,7 @@ function PricingCard({
 export default function Pricing() {
   const [loading, setLoading] = useState(null);
   const [region, setRegion] = useState('US');
+  const [billing, setBilling] = useState('monthly');
   const { user, isAuthenticated } = useAuth();
   const { subscription } = useSubscription();
   const { t, locale } = useI18n();
@@ -186,6 +200,9 @@ export default function Pricing() {
             current: 'Plano atual',
             freeCurrent: 'Plano Free',
             freeSignup: 'Criar conta grátis',
+            billingMonthly: 'Mensal',
+            billingYearly: 'Anual',
+            savePrefix: 'Economize ',
             athleteLabel: t('pricing_page.athlete'),
             professionalLabel: t('pricing_page.professional'),
             footerTitle: 'Tudo no mesmo sistema visual',
@@ -205,6 +222,9 @@ export default function Pricing() {
             current: 'Current plan',
             freeCurrent: 'Free plan',
             freeSignup: 'Create free account',
+            billingMonthly: 'Monthly',
+            billingYearly: 'Yearly',
+            savePrefix: 'Save ',
             athleteLabel: t('pricing_page.athlete'),
             professionalLabel: t('pricing_page.professional'),
             footerTitle: 'One visual system from first click to daily use',
@@ -235,6 +255,7 @@ export default function Pricing() {
     const translations = t('pricing_page.plans');
     return ATHLETE_PLAN_META.map((meta) => {
       const translated = translations[meta.key];
+      const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
       return {
         ...meta,
         name: translated.name,
@@ -242,17 +263,21 @@ export default function Pricing() {
         features: translated.features,
         missing: translated.missing || [],
         cta: translated.cta,
-        trial: translated.trial,
-        period: translated.period,
-        price: formatPlanPrice(meta.id, translated.price, pricing, locale),
+        trial: billing === 'monthly' ? translated.trial : null,
+        period: billing === 'yearly'
+          ? (isPt ? '/ano' : '/year')
+          : translated.period,
+        savings,
+        price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, t]);
+  }, [locale, pricing, billing, isPt, t]);
 
   const professionalPlans = useMemo(() => {
     const translations = t('pricing_page.plans');
     return PROFESSIONAL_PLAN_META.map((meta) => {
       const translated = translations[meta.key];
+      const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
       return {
         ...meta,
         name: translated.name,
@@ -260,12 +285,15 @@ export default function Pricing() {
         note: translated.note,
         features: translated.features,
         cta: translated.cta,
-        trial: translated.trial,
-        period: translated.period,
-        price: formatPlanPrice(meta.id, translated.price, pricing, locale),
+        trial: billing === 'monthly' ? translated.trial : null,
+        period: billing === 'yearly'
+          ? (isPt ? '/ano' : '/year')
+          : translated.period,
+        savings,
+        price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, t]);
+  }, [locale, pricing, billing, isPt, t]);
 
   const handleSubscribe = async (planId) => {
     if (planId === 'free') {
@@ -287,7 +315,8 @@ export default function Pricing() {
         success_url: `${window.location.origin}/Today?subscribed=1`,
         cancel_url: `${window.location.origin}/Pricing`,
         email: user?.email,
-        region: region, // Pass region to handle currency correctly in Stripe
+        region,
+        billing,
       });
 
       if (res.data?.url) {
@@ -372,6 +401,38 @@ export default function Pricing() {
 
             <div className="space-y-3">
               <RegionSelector onRegionChange={setRegion} />
+
+              {/* Billing interval toggle */}
+              <div className="flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] p-1">
+                <button
+                  type="button"
+                  onClick={() => setBilling('monthly')}
+                  className={`flex-1 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                    billing === 'monthly'
+                      ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-sm'
+                      : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
+                  }`}
+                >
+                  {ui.billingMonthly}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBilling('yearly')}
+                  className={`flex-1 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                    billing === 'yearly'
+                      ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-sm'
+                      : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
+                  }`}
+                >
+                  {ui.billingYearly}
+                  {billing !== 'yearly' && (
+                    <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
+                      {isPt ? 'até 31%' : 'up to 31%'}
+                    </span>
+                  )}
+                </button>
+              </div>
+
               <div className="atlas-public-panel-muted p-4">
                 <p className="atlas-metric-label">{ui.compareTitle}</p>
                 <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
@@ -413,6 +474,7 @@ export default function Pricing() {
                     current: ui.current,
                     freeCurrent: ui.freeCurrent,
                     freeSignup: ui.freeSignup,
+                    savePrefix: ui.savePrefix,
                   }}
                 />
               </motion.div>
@@ -450,6 +512,7 @@ export default function Pricing() {
                     current: ui.current,
                     freeCurrent: ui.freeCurrent,
                     freeSignup: ui.freeSignup,
+                    savePrefix: ui.savePrefix,
                   }}
                 />
               </motion.div>

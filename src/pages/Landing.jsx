@@ -228,19 +228,19 @@ const COPY = {
     nav: { howItWorks: 'How it works', features: 'Features', blog: 'Blog', pricing: 'Pricing', login: 'Log In', signup: 'Get Started' },
     hero: {
       badge: 'Early Access',
-      h1a: 'Your body is changing.',
-      h1b: 'You should know exactly how.',
-      sub: 'One place for your workouts, nutrition, supplements, and progress. Stop juggling apps. Start understanding your evolution.',
-      cta1: 'Start Free — No Card Needed',
-      cta2: 'See How It Works',
+      h1a: 'Track what you do.',
+      h1b: 'Understand what works',
+      sub: 'Atlas connects your training, nutrition, and body progress in one place — so the relationship between your habits and your results becomes clear.',
+      cta1: 'Get Started',
+      cta2: 'How It Works',
       s1t: '1 system', s1d: 'instead of 6 apps',
       s2t: 'Full clarity', s2d: 'on your real progress',
       s3t: 'Built for', s3d: 'real life, not perfect plans',
     },
     problem: {
       label: 'The Problem',
-      h2: 'Your health data is\nscattered everywhere.',
-      sub: 'You\'re serious about your body — but your information lives in 5 different places. None of them talk to each other.',
+      h2: 'You\'re collecting data.\nYou\'re not gaining clarity.',
+      sub: 'You\'re putting in the work. But nothing is connected — so nothing makes sense together.',
       items: [
         { e: '🏋️', t: 'Workout App', d: 'Sets, reps, PRs — but nothing else' },
         { e: '🥗', t: 'Food Tracker', d: 'Calories logged, ignored by morning' },
@@ -249,22 +249,23 @@ const COPY = {
         { e: '📸', t: 'Photo Gallery', d: 'Progress photos buried in your camera roll' },
         { e: '💬', t: 'WhatsApp', d: 'Coach feedback you\'ll never find again' },
       ],
-      quote: '"The problem isn\'t that you\'re not putting in the effort. It\'s that you have no real picture of what all that effort is doing."',
-      quoteDesc: 'Without a unified view, you can\'t tell if you\'re progressing, plateauing, or going backwards. You\'re working blind.',
+      quote: 'That\'s not a data problem. It\'s a clarity problem.',
+      quoteDesc: 'Without a unified view, you can\'t tell if you\'re progressing, plateauing, or going backwards.',
     },
     solution: {
       label: 'The Solution',
-      h2a: 'Everything in one place.',
+      h2a: 'Everything connected.',
       h2b: 'Finally.',
-      sub: 'Atlas Core is your personal performance system. Not a workout app, not a diet tracker — a single place where all your health data lives, connects, and makes sense.',
-      p1t: 'Centralized', p1d: 'Workouts, nutrition, supplements, measurements, and photos — all in one system. No more context-switching.',
-      p2t: 'Progress-Focused', p2d: 'The entire product is built around one question: are you actually improving?',
-      p3t: 'Real-Life Ready', p3d: 'Plans aren\'t perfect. Atlas Core reflects how you actually live — not how you intended to.',
+      sub: 'Atlas is a single platform for people who want to understand their progress, not just record it. Training, nutrition, and body metrics — organized, connected, readable.',
+      p1t: 'Centralized', p1d: 'Training, nutrition, body metrics — all in one system. When the data lives together, patterns become visible.',
+      p2t: 'Connected', p2d: 'The entire product is built around one question: what is actually driving your results?',
+      p3t: 'Honest', p3d: 'No gamification. No motivation tricks. Just your data, clearly presented.',
     },
     features: {
       workouts: {
-        label: 'Workouts', h2: 'Train smarter.\nRecord everything.',
-        desc: 'Log any workout, any style. Track sets, reps, weight, and rest. Know exactly what you did last time — and beat it.',
+        label: 'Workouts',
+        h2: 'See how your\ntraining builds.',
+        desc: 'Track volume, intensity, and consistency over time. Know when you\'re progressing and when you\'ve plateaued.',
         pts: [
           { t: 'Full exercise library', d: '— or add your own. Bodybuilding, functional, cardio.' },
           { t: 'Workout history at a glance', d: '— see every session you\'ve ever done.' },
@@ -273,8 +274,9 @@ const COPY = {
         ],
       },
       nutrition: {
-        label: 'Nutrition', h2: 'Log food.\nUnderstand patterns.',
-        desc: 'Track what you eat without obsessing over it. The goal isn\'t perfection — it\'s awareness. See what\'s actually moving your results.',
+        label: 'Nutrition',
+        h2: 'See what your\nnutrition is doing.',
+        desc: 'Not just a daily calorie count. A clear view of your intake patterns and how they connect to your performance and body composition.',
         pts: [
           { t: 'Fast daily logging', d: '— meals, macros, and calories without friction.' },
           { t: 'Weekly patterns', d: '— see where you\'re hitting targets and where you\'re not.' },
@@ -283,8 +285,9 @@ const COPY = {
         ],
       },
       progress: {
-        label: 'Progress Tracking', h2: 'Numbers don\'t lie.\nNow you can see them.',
-        desc: 'Weight, body fat, circumferences — logged in seconds, visible over time.',
+        label: 'Progress Tracking',
+        h2: 'Track real\nbody changes.',
+        desc: 'Weight fluctuates. Atlas tracks multiple markers — body measurements, visual progress, weight trends — so you see the full picture.',
         pts: [
           { t: 'Body weight trends', d: '— weekly averages cut through daily noise.' },
           { t: 'Full measurements', d: '— waist, chest, arms, legs, hips, body fat %.' },
@@ -293,7 +296,8 @@ const COPY = {
         ],
       },
       photos: {
-        label: 'Progress Photos', h2: 'See what the scale\ncan\'t show.',
+        label: 'Progress Photos',
+        h2: 'See what the scale\ncan\'t show.',
         desc: 'Your body changes in ways measurements miss. Progress photos are the most honest record you have.',
         pts: [
           { t: 'Organized by date', d: '— no more digging through your camera roll.' },
@@ -303,8 +307,9 @@ const COPY = {
         ],
       },
       supplements: {
-        label: 'Supplements & Protocols', h2: 'Your stack, tracked.\nFinally consistent.',
-        desc: 'Creatine, vitamins, pre-workout — whatever your protocol is, Atlas Core keeps it organized and trackable.',
+        label: 'Supplements & Protocols',
+        h2: 'Your stack, tracked.\nFinally consistent.',
+        desc: 'Creatine, vitamins, pre-workout — whatever your protocol is, Atlas keeps it organized and trackable.',
         pts: [
           { t: 'Daily checklist', d: '— log what you took, when you took it.' },
           { t: 'Custom protocols', d: '— morning stack, evening stack, cycle-based dosing.' },
@@ -313,7 +318,8 @@ const COPY = {
         ],
       },
       timeline: {
-        label: 'Unified Timeline', h2: 'Everything that happened,\nin one view.',
+        label: 'Unified Timeline',
+        h2: 'Everything that happened,\nin one view.',
         desc: 'Workouts, check-ins, photos, protocol changes — all visible in a single chronological timeline.',
         pts: [
           { t: 'Automatic log', d: '— every action you take becomes part of your history.' },
@@ -324,10 +330,10 @@ const COPY = {
       },
     },
     diff: {
-      label: 'Why Atlas Core',
+      label: 'Why Atlas',
       h2: 'Not another fitness app.',
-      sub: 'Every other tool is built around a single category. Atlas Core is built around you.',
-      cols: ['Capability', 'Workout Apps', 'Food Trackers', 'Generic Health Apps', 'Atlas Core'],
+      sub: 'Most tools track a single category. Atlas is built around the connection between all of them.',
+      cols: ['Capability', 'Workout Apps', 'Food Trackers', 'Generic Health Apps', 'Atlas'],
       rows: [
         ['Workout tracking', '✓', '—', 'Partial', '✓ Full'],
         ['Nutrition & macros', '—', '✓', 'Partial', '✓ Full'],
@@ -338,9 +344,9 @@ const COPY = {
         ['Cross-metric analysis', '—', '—', '—', '✓ Built-in'],
       ],
       cards: [
-        { e: '🚫', t: 'Not a plan-pusher', d: 'Atlas Core doesn\'t tell you what to do. It tracks what you actually do — and shows you if it\'s working.' },
-        { e: '🚫', t: 'Not gamified', d: 'No streaks, no badges, no fake motivation. Your progress is real. That\'s the reward.' },
-        { e: '🚫', t: 'Not clinical', d: 'Built for serious people — not patients. No jargon, no forms, no complexity.' },
+        { e: '🚫', t: 'No plan-pushing', d: 'Atlas doesn\'t tell you what to do. It tracks what you actually do — and shows you if it\'s working.' },
+        { e: '🚫', t: 'No gamification', d: 'No streaks, no badges. Your progress is real. That\'s the reward.' },
+        { e: '🚫', t: 'Not clinical', d: 'Built for serious people. No jargon, no forms, no complexity.' },
       ],
     },
     pricing: {
@@ -367,25 +373,25 @@ const COPY = {
       },
       founder: {
         h3: '🔒 Founder Price — Locked Forever',
-        desc: 'Joining during Early Access? Your price never changes — even when we raise rates. You\'re in at the ground level.',
+        desc: 'Joining during Early Access? Your price never changes — even when we raise rates.',
         cta: 'Claim Founder Price',
       },
     },
     pros: {
       label: 'For Professionals',
       h2: 'Built for individuals.\nWorks with your team.',
-      sub: 'Atlas Core doesn\'t require a coach or nutritionist. But if you work with one, they can see your data and collaborate directly inside the app.',
+      sub: 'Atlas doesn\'t require a coach or nutritionist. But if you work with one, they can see your data and collaborate directly inside the app.',
       cards: [
         { e: '🏃', t: 'Personal Trainers', d: 'See your clients\' workout logs, progress photos, and measurements in real-time. No more WhatsApp screenshots.' },
         { e: '🥦', t: 'Nutritionists', d: 'Review actual food logs alongside body metrics. See whether the plan is translating into real results.' },
       ],
-      note: 'Professional collaboration is optional. Atlas Core works perfectly without anyone else involved.',
+      note: 'Professional collaboration is optional. Atlas works perfectly without anyone else involved.',
     },
     closing: {
-      h2a: 'You\'ve been putting in the work.',
-      h2b: 'It\'s time to see it.',
-      sub: 'Atlas Core gives you the one thing no single fitness app ever could — the full picture of your physical evolution, in one place, always honest.',
-      cta1: 'Start Free Today', cta2: 'See All Plans',
+      h2a: 'Clarity over guesswork.',
+      h2b: 'Start now.',
+      sub: 'If you\'re serious about your results, your tools should be too. Atlas gives you the clarity to see what\'s working — and the foundation to keep improving.',
+      cta1: 'Get Started', cta2: 'See All Plans',
       fine: 'No credit card needed. Free plan available. Cancel anytime.',
     },
   },
