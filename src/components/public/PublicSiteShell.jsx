@@ -129,9 +129,9 @@ export function PublicNav({ links = [], actions, compact = false }) {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 lg:px-8">
         <Link
           to={ROUTES.home}
-          className="flex min-w-0 items-center gap-3 text-[hsl(var(--fg))] transition-opacity hover:opacity-80"
+          className="flex min-w-[56px] sm:min-w-0 items-center gap-3 text-[hsl(var(--fg))] transition-opacity hover:opacity-80"
         >
-          <AtlasCoreLogoSVG width={56} height={28} className="shrink-0" />
+          <AtlasCoreLogoSVG width={56} height={28} className="shrink-0 block" color="hsl(var(--fg))" />
           <div className="hidden min-w-0 sm:block">
             <p className="truncate text-[20px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
