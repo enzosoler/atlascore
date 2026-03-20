@@ -65,7 +65,7 @@ const BOTTOM_PATHS_BY_ROLE = {
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.profile],
-  admin: [ROUTES.today, ROUTES.pricing, ROUTES.social, ROUTES.profile],
+  admin: [ROUTES.today, ROUTES.nutrition, ROUTES.workouts, ROUTES.profile],
 };
 
 const MOBILE_TAB_HISTORY_KEY = 'atlas_mobile_tab_history_v1';
@@ -328,9 +328,9 @@ export default function AppLayout() {
             collapsed ? 'justify-center px-0' : 'gap-3'
           )}
         >
-          <AtlasCoreLogoSVG width={32} height={32} className="shrink-0" />
+          <AtlasCoreLogoSVG width={52} height={26} className="shrink-0" />
           {!collapsed ? (
-            <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </span>
           ) : null}
@@ -445,8 +445,8 @@ export default function AppLayout() {
           {/* Brand — absolutely centered so side buttons don't push it */}
           <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2">
             {/* viewBox is 800×400 → use 2:1 ratio so the icon isn't squished */}
-            <AtlasCoreLogoSVG width={36} height={18} color="hsl(var(--fg))" />
-            <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            <AtlasCoreLogoSVG width={52} height={26} color="hsl(var(--fg))" />
+            <span className="text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </span>
           </div>
@@ -480,8 +480,8 @@ export default function AppLayout() {
                 style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
               >
                 <div className="flex items-center gap-2">
-                  <AtlasCoreLogoSVG width={24} height={24} />
-                  <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                  <AtlasCoreLogoSVG width={44} height={22} />
+                  <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
                     <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
                   </span>
                 </div>
@@ -555,13 +555,6 @@ export default function AppLayout() {
             icon: ICON_MAP[icon] || Home,
             active: currentTabRoot === path,
           })),
-          {
-            key: 'menu',
-            label: 'Menu',
-            icon: Menu,
-            onClick: () => setMobileOpen(true),
-            active: false,
-          },
         ]}
       />
 
