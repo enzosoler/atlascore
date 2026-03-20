@@ -111,7 +111,7 @@ export default function MyDiet() {
       const res = await base44.integrations.Core.InvokeLLM({
         prompt: `Crie um plano alimentar detalhado em português brasileiro para um usuário com o seguinte perfil:
 - Objetivo: ${profile?.training_goal || 'saúde geral'}
-- Calorias alvo: ${profile?.calories_target || 2200} kcal
+- Calorias alvo: ${profile?.calories_target || 0} kcal
 - Proteína alvo: ${profile?.protein_target || 160}g
 - Carboidratos alvo: ${profile?.carbs_target || 250}g
 - Gordura alvo: ${profile?.fat_target || 70}g
