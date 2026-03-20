@@ -1,9 +1,11 @@
 import ptBR from './translations/pt-BR.json';
 import enUS from './translations/en-US.json';
+import ptBROnboarding from './translations/pt-BR-onboarding.json';
+import enUSOnboarding from './translations/en-US-onboarding.json';
 
 export const translations = {
-  'pt-BR': ptBR,
-  'en-US': enUS,
+  'pt-BR': { ...ptBR, ...ptBROnboarding },
+  'en-US': { ...enUS, ...enUSOnboarding },
 };
 
 export const DEFAULT_LANGUAGE = 'pt-BR';

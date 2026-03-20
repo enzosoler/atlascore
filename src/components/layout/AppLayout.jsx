@@ -341,11 +341,16 @@ export default function AppLayout() {
           {nav.map(({ path, label, icon }) => {
             const Icon = ICON_MAP[icon] || Home;
             const active = isActive(path);
+            const tourId = path === ROUTES.nutrition ? 'nutrition' :
+                           path === ROUTES.workouts ? 'workouts' :
+                           path === ROUTES.progress ? 'progress' :
+                           path === ROUTES.profile ? 'profile' : undefined;
 
             return (
               <Link
                 key={path}
                 to={path}
+                data-tour={tourId}
                 title={collapsed ? label : undefined}
                 className={getDesktopNavItemClass(active, collapsed)}
               >
@@ -497,11 +502,16 @@ export default function AppLayout() {
                 {nav.map(({ path, label, icon }) => {
                   const Icon = ICON_MAP[icon] || Home;
                   const active = isActive(path);
+                  const tourId = path === ROUTES.nutrition ? 'nutrition' :
+                                 path === ROUTES.workouts ? 'workouts' :
+                                 path === ROUTES.progress ? 'progress' :
+                                 path === ROUTES.profile ? 'profile' : undefined;
 
                   return (
                     <Link
                       key={path}
                       to={path}
+                      data-tour={tourId}
                       className={getMobileNavItemClass(active)}
                     >
                       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.2 : 1.9} />

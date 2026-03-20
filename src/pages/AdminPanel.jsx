@@ -18,7 +18,7 @@ import toast from 'react-hot-toast';
 
 const AdminPanel = () => {
   const { user } = useAuth();
-  const { role } = useRoleAndSubscription(user?.id);
+  const { role, loading: roleLoading } = useRoleAndSubscription(user?.id);
 
   // Metrics
   const [metrics, setMetrics] = useState(null);
@@ -176,6 +176,16 @@ const AdminPanel = () => {
   }, [page, pageSize]);
 
   // Check authorization
+  if (roleLoading) {
+    return (
+      <StablePage>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--primary))]" />
+        </div>
+      </StablePage>
+    );
+  }
+
   if (role !== 'admin') {
     return (
       <StablePage>

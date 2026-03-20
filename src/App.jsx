@@ -188,8 +188,12 @@ const AppRoutes = () => (
 );
 
 const AuthenticatedApp = () => {
+  const { isAuthenticated } = useAuth();
   return (
-    <AppRoutes />
+    <>
+      <AppRoutes />
+      {isAuthenticated && <OnboardingTour />}
+    </>
   );
 };
 
@@ -204,7 +208,6 @@ function App() {
                 <DailyStoreProvider>
                   <Router>
                     <AuthenticatedApp />
-                    <OnboardingTour />
                   </Router>
                   <Toaster />
                 </DailyStoreProvider>
