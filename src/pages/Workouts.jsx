@@ -30,6 +30,7 @@ import {
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { WORKOUT_TYPES, getToday } from '@/lib/atlas-theme';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18nContext';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -38,19 +39,21 @@ const SELECT_CLASS_NAME = `${INPUT_CLASS_NAME} appearance-none`;
 const TEXTAREA_CLASS_NAME = 'atlas-field mt-2 min-h-[120px] resize-y px-4 py-3 text-base';
 const WORKOUT_FILTERS = ['all', 'pending', 'completed'];
 
-const STATUS_META = {
-  pending: {
-    label: 'Pendente',
-    chip:
-      'border-[hsl(var(--warn)/0.18)] bg-[hsl(var(--warn)/0.12)] text-[hsl(34_68%_32%)]',
-    actionLabel: 'Concluir',
-  },
-  completed: {
-    label: 'Concluído',
-    chip: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]',
-    actionLabel: 'Reabrir',
-  },
-};
+function getStatusMeta(t) {
+  return {
+    pending: {
+      label: t('pages.workouts.status.pending'),
+      chip:
+        'border-[hsl(var(--warn)/0.18)] bg-[hsl(var(--warn)/0.12)] text-[hsl(34_68%_32%)]',
+      actionLabel: t('pages.workouts.actions.mark_complete'),
+    },
+    completed: {
+      label: t('pages.workouts.status.completed'),
+      chip: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]',
+      actionLabel: t('pages.workouts.actions.mark_pending'),
+    },
+  };
+}
 
 const TODAY = getToday();
 const YESTERDAY = shiftDate(TODAY, -1);
@@ -194,8 +197,8 @@ function getWorkoutTypeLabel(type) {
   return WORKOUT_TYPES[type]?.label || type || 'Treino';
 }
 
-function getWorkoutStatusMeta(status) {
-  return STATUS_META[status] || STATUS_META.pending;
+function getWorkoutStatusMeta(status, statusMeta) {
+  return statusMeta[status] || statusMeta.pending;
 }
 
 function getWorkoutFormState(workout, selectedDate) {
@@ -306,7 +309,7 @@ function WorkoutMetric({ label, value, suffix = '' }) {
   );
 }
 
-function ComparisonPanel({ title, eyebrow, workout, planned = false }) {
+function ComparisonPanel({ title, eyebrow, workout, planned = false, statusMeta }) {
   return (
     <div
       className={cn(
@@ -329,10 +332,10 @@ function ComparisonPanel({ title, eyebrow, workout, planned = false }) {
               'rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.04em]',
               planned
                 ? 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] text-[hsl(var(--fg-2))]'
-                : getWorkoutStatusMeta(workout.status).chip
+                : getWorkoutStatusMeta(workout.status, statusMeta).chip
             )}
           >
-            {planned ? `${workout.exercises.length} exerc.` : getWorkoutStatusMeta(workout.status).label}
+            {planned ? `${workout.exercises.length} exerc.` : getWorkoutStatusMeta(workout.status, statusMeta).label}
           </span>
         ) : null}
       </div>
@@ -364,19 +367,13 @@ function ComparisonPanel({ title, eyebrow, workout, planned = false }) {
             ))}
           </div>
         </>
-      ) : (
-        <p className="mt-4 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-          {planned
-            ? 'Sem plano definido para a data selecionada.'
-            : 'Nenhum treino registrado para comparar ainda.'}
-        </p>
-      )}
+      ) : null}
     </div>
   );
 }
 
-function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete }) {
-  const status = getWorkoutStatusMeta(workout.status);
+function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta }) {
+  const status = getWorkoutStatusMeta(workout.status, statusMeta);
 
   return (
     <article className="atlas-card px-5 py-5 lg:px-6 lg:py-6">
@@ -741,10 +738,11 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
 }
 
 export default function Workouts() {
+  const { t } = useI18n();
   return (
     <SafePageBoundary
-      title="Treinos"
-      subtitle="Execução e registro de treinos com estado local próprio, separado de protocolos."
+      title={t('pages.workouts.title')}
+      subtitle={t('pages.workouts.subtitle')}
       maxWidth="max-w-6xl"
       fallbackDescription="A rota de Workouts continua acessivel mesmo se a interface principal falhar."
     >
@@ -754,6 +752,9 @@ export default function Workouts() {
 }
 
 function WorkoutsContent() {
+  const { t } = useI18n();
+  const statusMeta = getStatusMeta(t);
+
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [statusFilter, setStatusFilter] = useState('all');
   const [notice, setNotice] = useState(null);
@@ -818,7 +819,7 @@ function WorkoutsContent() {
       tone: 'success',
       message:
         nextStatus === 'completed'
-          ? 'Treino marcado como concluído.'
+          ? t('pages.workouts.messages.workout_marked_complete')
           : 'Treino voltou para pendente.',
     });
   };
@@ -839,7 +840,7 @@ function WorkoutsContent() {
     if (!payload.name || payload.exercises.length === 0) {
       setNotice({
         tone: 'warning',
-        message: 'Adicione nome e pelo menos um exercício para salvar o treino.',
+        message: t('pages.workouts.messages.empty_subtitle'),
       });
       return;
     }
@@ -886,7 +887,7 @@ function WorkoutsContent() {
         <div className="grid gap-3 sm:grid-cols-3">
           <HeroStat
             label="Plano"
-            value={plannedWorkout?.name || 'Sem plano'}
+            value={plannedWorkout?.name || t('pages.workouts.messages.no_plan')}
             detail={
               plannedWorkout
                 ? `${plannedExerciseCount} exercícios previstos para a data selecionada.`
@@ -926,7 +927,7 @@ function WorkoutsContent() {
               <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
                 {plannedWorkout
                   ? `${plannedWorkout.duration_minutes || 0} min · RPE ${plannedWorkout.perceived_effort || '--'}`
-                  : 'Use o registro local para estruturar a execução do dia mesmo sem plano.'}
+                  : t('pages.workouts.messages.use_local_register')}
               </p>
             </div>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--fg-2))]">
@@ -951,7 +952,7 @@ function WorkoutsContent() {
               detail={
                 workoutsForDate.length > 0
                   ? `${completedCount} marcada(s) como concluída(s).`
-                  : 'Adicione uma execução para acompanhar o dia.'
+                  : t('pages.workouts.messages.no_execution_logged')
               }
               tone={workoutsForDate.length > 0 ? 'ok' : 'warn'}
             />
@@ -986,15 +987,17 @@ function WorkoutsContent() {
         >
           <div className="grid gap-4 lg:grid-cols-2">
             <ComparisonPanel
-              title="Nenhuma sessão planejada"
+              title={t('pages.workouts.messages.no_plan')}
               eyebrow="Planejado"
               workout={plannedWorkout}
               planned
+              statusMeta={statusMeta}
             />
             <ComparisonPanel
-              title="Nenhuma execução registrada"
+              title={t('pages.workouts.messages.empty_state')}
               eyebrow="Executado"
               workout={comparisonWorkout}
+              statusMeta={statusMeta}
             />
           </div>
 
@@ -1012,7 +1015,7 @@ function WorkoutsContent() {
                 </div>
                 <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
                   <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={1.9} />
-                  {executionCoverage >= 100 ? 'Sessão coberta' : 'Ainda em andamento'}
+                  {executionCoverage >= 100 ? t('pages.workouts.messages.session_covered') : t('pages.workouts.messages.still_in_progress')}
                 </span>
               </div>
 
@@ -1074,6 +1077,7 @@ function WorkoutsContent() {
                     onEdit={() => handleEdit(workout)}
                     onToggleStatus={() => handleToggleStatus(workout)}
                     onDelete={() => handleDelete(workout)}
+                    statusMeta={statusMeta}
                   />
                 </div>
               ))}

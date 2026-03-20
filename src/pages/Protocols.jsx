@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/lib/i18nContext';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
 import {
@@ -30,12 +31,15 @@ import {
 
 const PROTOCOLS_QUERY_KEY = ['protocols'];
 const FILTERS = ['all', 'active', 'paused', 'finished'];
-const FILTER_LABELS = {
-  all: 'Todos',
-  active: 'Ativo',
-  paused: 'Pausado',
-  finished: 'Finalizado',
-};
+
+function getFilterLabels(t) {
+  return {
+    all: t('pages.protocols.tab_all'),
+    active: t('pages.protocols.tab_active'),
+    paused: t('pages.protocols.tab_paused'),
+    finished: t('pages.protocols.tab_finished'),
+  };
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -122,10 +126,11 @@ function SummaryTile({ label, value, hint, icon: Icon }) {
 // ── Page entry point ──────────────────────────────────────────────────────────
 
 export default function Protocols() {
+  const { t } = useI18n();
   return (
     <SafePageBoundary
-      title="Protocolos"
-      subtitle="Gerencie medicamentos, hormônios, peptídeos, suplementos e outros compostos que você usa ou acompanha."
+      title={t('pages.protocols.title')}
+      subtitle={t('pages.protocols.subtitle')}
       maxWidth="max-w-6xl"
       fallbackDescription="The Protocols route stayed available in safe mode even though the main content failed."
     >
@@ -138,6 +143,8 @@ export default function Protocols() {
 
 function ProtocolsContent() {
   const { user } = useAuth();
+  const { t } = useI18n();
+  const filterLabels = getFilterLabels(t);
   const qc = useQueryClient();
 
   const [filter, setFilter] = useState('active');
@@ -176,7 +183,7 @@ function ProtocolsContent() {
       console.error('[Protocols] save error:', error);
       setNotice({
         tone: 'warning',
-        message: 'Não foi possível salvar o protocolo. Tente novamente.',
+        message: t('pages.protocols.save_error'),
       });
     },
   });
@@ -193,7 +200,7 @@ function ProtocolsContent() {
     onError: () => {
       setNotice({
         tone: 'warning',
-        message: 'Não foi possível atualizar o status. Tente novamente.',
+        message: t('pages.protocols.status_error'),
       });
     },
     onSettled: () => setPendingActionKey(''),
@@ -206,12 +213,12 @@ function ProtocolsContent() {
     onMutate: ({ actionKey }) => setPendingActionKey(actionKey),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setNotice({ tone: 'success', message: 'Protocolo excluído.' });
+      setNotice({ tone: 'success', message: t('pages.protocols.delete_success') });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
-        message: 'Não foi possível excluir o protocolo. Tente novamente.',
+        message: t('pages.protocols.delete_error'),
       });
     },
     onSettled: () => setPendingActionKey(''),
@@ -372,7 +379,7 @@ function ProtocolsContent() {
                   onClick={() => setFilter(option)}
                   active={filter === option}
                 >
-                  {FILTER_LABELS[option] || option} ({count})
+                  {filterLabels[option] || option} ({count})
                 </FilterChip>
               );
             })}
@@ -418,7 +425,7 @@ function ProtocolsContent() {
         {/* Filter has no matches */}
         {!isLoading && hasAnyProtocols && filteredProtocols.length === 0 ? (
           <EmptyState
-            title={`Nenhum protocolo ${FILTER_LABELS[filter]?.toLowerCase() || filter}`}
+            title={`Nenhum protocolo ${filterLabels[filter]?.toLowerCase() || filter}`}
             description="Tente outro filtro ou adicione um novo protocolo."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>

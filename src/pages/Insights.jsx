@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Activity, Brain, Moon, Shield } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useI18n } from '@/lib/i18nContext';
 import {
   EmptyState,
   ErrorState,
@@ -27,21 +28,21 @@ function avg(values) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-function summarizeWeight(measurements) {
+function summarizeWeight(measurements, t) {
   if (measurements.length < 2) {
-    return 'Ainda não há registros suficientes para identificar tendência de peso.';
+    return t('pages.insights.no_weight_data');
   }
 
   const newest = measurements[0]?.weight;
   const oldest = measurements[measurements.length - 1]?.weight;
 
   if (newest == null || oldest == null) {
-    return 'Os registros atuais ainda não permitem ler a tendência de peso.';
+    return t('pages.insights.weight_insufficient');
   }
 
   const delta = Number(newest) - Number(oldest);
   if (Math.abs(delta) < 0.2) {
-    return 'Seu peso está relativamente estável dentro do período selecionado.';
+    return t('pages.insights.weight_stable');
   }
   if (delta > 0) {
     return `Seu peso subiu cerca de ${delta.toFixed(1)} kg no período analisado.`;
@@ -49,10 +50,10 @@ function summarizeWeight(measurements) {
   return `Seu peso caiu cerca de ${Math.abs(delta).toFixed(1)} kg no período analisado.`;
 }
 
-function summarizeProtocols(protocols) {
+function summarizeProtocols(protocols, t) {
   const active = protocols.filter((p) => p?.active && !p?.end_date);
   if (active.length === 0) {
-    return 'Nenhum protocolo ativo no momento. Acesse Protocolos para configurar suplementação.';
+    return t('pages.insights.no_active_protocols');
   }
   const names = active
     .slice(0, 3)
@@ -63,10 +64,11 @@ function summarizeProtocols(protocols) {
 }
 
 export default function Insights() {
+  const { t } = useI18n();
   return (
     <SafePageBoundary
-      title="Insights"
-      subtitle="Modo seguro da página de insights."
+      title={t('pages.insights.title')}
+      subtitle={t('pages.insights.subtitle')}
       maxWidth="max-w-5xl"
       fallbackDescription="Insights page loaded. O conteúdo principal falhou, mas a rota continua acessível."
     >
@@ -76,6 +78,7 @@ export default function Insights() {
 }
 
 function InsightsContent() {
+  const { t } = useI18n();
   const [range, setRange] = useState('30d');
   const days = RANGE_DAYS[range] || 30;
 
@@ -166,8 +169,8 @@ function InsightsContent() {
   const consistencyText =
     completedWorkouts.length === 0
       ? workouts.length > 0
-        ? 'Há treinos no período, mas nenhum marcado como concluído. Verifique se as sessões estão sendo finalizadas.'
-        : 'Nenhum treino registrado no período. Registre as sessões em Treinos para acompanhar a consistência.'
+        ? t('pages.insights.training_not_completed')
+        : t('pages.insights.training_no_records')
       : completedWorkouts.length >= Math.max(3, Math.floor(days / 10))
         ? `Sua consistência de treino no período está boa — ${completedWorkouts.length} sessões concluídas.`
         : `Seu volume de treino no período está baixo (${completedWorkouts.length} sessões). Vale reforçar a frequência.`;
@@ -175,14 +178,14 @@ function InsightsContent() {
   const nutritionText =
     caloriesPerDay > 0
       ? `Sua média de ingestão registrada ficou em torno de ${formatNumber(caloriesPerDay)} kcal por dia.`
-      : 'Ainda não há refeições suficientes registradas para gerar leitura de nutrição.';
+      : t('pages.insights.nutrition_insufficient');
 
   const recoveryText =
     averageSleep > 0
       ? `Média de sono: ${averageSleep.toFixed(1)}h. Energia média: ${averageEnergy.toFixed(1)} / 5.`
-      : 'Ainda não há check-ins suficientes para resumir recuperação.';
+      : t('pages.insights.recovery_insufficient');
 
-  const protocolsText = summarizeProtocols(protocols);
+  const protocolsText = summarizeProtocols(protocols, t);
 
   return (
     <PageShell
@@ -267,7 +270,7 @@ function InsightsContent() {
             <div className="grid gap-3 md:grid-cols-2">
               <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
                 <p className="font-semibold text-[hsl(var(--fg))]">Peso</p>
-                <p className="mt-2">{summarizeWeight(measurements)}</p>
+                <p className="mt-2">{summarizeWeight(measurements, t)}</p>
               </div>
               <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
                 <p className="font-semibold text-[hsl(var(--fg))]">Treino</p>

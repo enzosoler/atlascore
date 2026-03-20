@@ -328,7 +328,7 @@ export default function AppLayout() {
             collapsed ? 'justify-center px-0' : 'gap-3'
           )}
         >
-          <AtlasCoreLogoSVG width={52} height={26} className="shrink-0" />
+          <AtlasCoreLogoSVG width={72} height={25} className="shrink-0" />
           {!collapsed ? (
             <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
@@ -449,8 +449,7 @@ export default function AppLayout() {
 
           {/* Brand — absolutely centered so side buttons don't push it */}
           <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2">
-            {/* viewBox is 800×400 → use 2:1 ratio so the icon isn't squished */}
-            <AtlasCoreLogoSVG width={52} height={26} color="hsl(var(--fg))" />
+            <AtlasCoreLogoSVG width={80} height={28} color="hsl(var(--fg))" />
             <span className="text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </span>
@@ -485,7 +484,7 @@ export default function AppLayout() {
                 style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
               >
                 <div className="flex items-center gap-2">
-                  <AtlasCoreLogoSVG width={44} height={22} />
+                  <AtlasCoreLogoSVG width={68} height={24} />
                   <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
                     <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
                   </span>

@@ -510,12 +510,36 @@
       "subtitle": "Define o foco do seu painel e das recomendações da IA",
       "basics": "Dados básicos",
       "goals": [
-        { "id": "fat_loss", "emoji": "🔥", "label": "Perda de gordura" },
-        { "id": "muscle_gain", "emoji": "💪", "label": "Ganho muscular" },
-        { "id": "recomp", "emoji": "⚡", "label": "Recomposição" },
-        { "id": "performance", "emoji": "🏆", "label": "Performance" },
-        { "id": "health", "emoji": "❤️", "label": "Saúde geral" },
-        { "id": "longevity", "emoji": "🌱", "label": "Longevidade" }
+        {
+          "id": "fat_loss",
+          "emoji": "🔥",
+          "label": "Perda de gordura"
+        },
+        {
+          "id": "muscle_gain",
+          "emoji": "💪",
+          "label": "Ganho muscular"
+        },
+        {
+          "id": "recomp",
+          "emoji": "⚡",
+          "label": "Recomposição"
+        },
+        {
+          "id": "performance",
+          "emoji": "🏆",
+          "label": "Performance"
+        },
+        {
+          "id": "health",
+          "emoji": "❤️",
+          "label": "Saúde geral"
+        },
+        {
+          "id": "longevity",
+          "emoji": "🌱",
+          "label": "Longevidade"
+        }
       ],
       "fields": {
         "height": "Altura (cm)",
@@ -532,11 +556,31 @@
       "subtitle": "Calibra metas e personaliza a geração de treinos e dietas",
       "activityLevel": "Nível de atividade",
       "activities": [
-        { "id": "sedentary", "label": "Sedentário", "desc": "Sem exercícios regulares" },
-        { "id": "light", "label": "Leve", "desc": "1–2× por semana" },
-        { "id": "moderate", "label": "Moderado", "desc": "3–4× por semana" },
-        { "id": "active", "label": "Ativo", "desc": "5–6× por semana" },
-        { "id": "very_active", "label": "Muito ativo", "desc": "2× ao dia / atleta" }
+        {
+          "id": "sedentary",
+          "label": "Sedentário",
+          "desc": "Sem exercícios regulares"
+        },
+        {
+          "id": "light",
+          "label": "Leve",
+          "desc": "1–2× por semana"
+        },
+        {
+          "id": "moderate",
+          "label": "Moderado",
+          "desc": "3–4× por semana"
+        },
+        {
+          "id": "active",
+          "label": "Ativo",
+          "desc": "5–6× por semana"
+        },
+        {
+          "id": "very_active",
+          "label": "Muito ativo",
+          "desc": "2× ao dia / atleta"
+        }
       ],
       "fields": {
         "workoutsPerWeek": "Treinos / semana",
@@ -561,23 +605,52 @@
       "subtitle": "Isso monta seu painel inicial. Você pode ativar ou desativar depois a qualquer momento.",
       "hint": "Selecione quantos quiser — mais é sempre melhor para a IA",
       "options": [
-        { "id": "protocol", "emoji": "💉", "label": "Protocolo", "desc": "Substâncias, doses, ciclos" },
-        { "id": "body", "emoji": "📏", "label": "Composição corporal", "desc": "Peso, medidas, fotos" },
-        { "id": "exams", "emoji": "🧬", "label": "Exames laboratoriais", "desc": "Hormônios, sangue, saúde" },
-        { "id": "nutrition", "emoji": "🥗", "label": "Alimentação", "desc": "Refeições e macros" },
-        { "id": "workouts", "emoji": "🏋️", "label": "Treinos", "desc": "Sessões e evolução" },
-        { "id": "symptoms", "emoji": "📊", "label": "Sintomas / humor", "desc": "Check-in diário" }
+        {
+          "id": "protocol",
+          "emoji": "💉",
+          "label": "Protocolo",
+          "desc": "Substâncias, doses, ciclos"
+        },
+        {
+          "id": "body",
+          "emoji": "📏",
+          "label": "Composição corporal",
+          "desc": "Peso, medidas, fotos"
+        },
+        {
+          "id": "exams",
+          "emoji": "🧬",
+          "label": "Exames laboratoriais",
+          "desc": "Hormônios, sangue, saúde"
+        },
+        {
+          "id": "nutrition",
+          "emoji": "🥗",
+          "label": "Alimentação",
+          "desc": "Refeições e macros"
+        },
+        {
+          "id": "workouts",
+          "emoji": "🏋️",
+          "label": "Treinos",
+          "desc": "Sessões e evolução"
+        },
+        {
+          "id": "symptoms",
+          "emoji": "📊",
+          "label": "Sintomas / humor",
+          "desc": "Check-in diário"
+        }
       ]
     },
     "setup": {
       "analyzing": "Analisando seus objetivos...",
       "building": "Construindo seu painel personalizado...",
-      "configuring": "Configurando suas categorias de tracking...",
+      "configuring": "Configurar meu Atlas Core",
       "calculating": "Calculando metas nutricionais...",
       "preparing": "Preparando sua linha do tempo...",
       "ready": "Seu Atlas Core está pronto.",
-      "enter": "Entrar no app",
-      "configuring": "Configurar meu Atlas Core"
+      "enter": "Entrar no app"
     }
   },
   "today": {
@@ -675,7 +748,9 @@
     "trainingGoal": "Objetivo de treino",
     "targetWeight": "Peso alvo (kg)",
     "bodyFatGoal": "Gordura alvo (%)",
-    "macros": "Macros diários",
+    "macros": {
+      "pending": "Macros pendentes"
+    },
     "calories": "Calorias (kcal)",
     "protein": "Proteína (g)",
     "carbs": "Carboidratos (g)",
@@ -779,9 +854,6 @@
       "noCurrent": "Meta corporal definida. Falta registrar o peso atual.",
       "noData": "Sem direcao",
       "noDataDetail": "Preencha peso atual e peso alvo para enxergar a estrategia corporal."
-    },
-    "macros": {
-      "pending": "Macros pendentes"
     },
     "hero": {
       "readiness": "Profile readiness",
@@ -962,6 +1034,151 @@
       "profileTitle": "Refinar perfil",
       "profileDesc": "Mantenha as preferências base alinhadas para o app ficar preciso.",
       "profilePhase": "Manter alinhado"
+    }
+  },
+  "pages": {
+    "workouts": {
+      "title": "Treinos",
+      "subtitle": "Planejar, executar e acompanhar suas sessões de treino",
+      "status": {
+        "pending": "Pendente",
+        "completed": "Concluído",
+        "in_progress": "Em andamento"
+      },
+      "actions": {
+        "mark_complete": "Concluir",
+        "mark_pending": "Reabrir",
+        "add_exercise": "Adicionar exercício",
+        "save_workout": "Salvar treino",
+        "edit_workout": "Editar treino"
+      },
+      "messages": {
+        "workout_marked_complete": "Treino marcado como concluído.",
+        "no_execution_logged": "Adicione uma execução para acompanhar o dia.",
+        "use_local_register": "Use o registro local para estruturar a execução do dia mesmo sem plano.",
+        "empty_state": "Nenhuma execução registrada",
+        "no_plan": "Nenhuma sessão planejada",
+        "empty_subtitle": "Adicione nome e pelo menos um exercício para salvar o treino.",
+        "session_covered": "Sessão coberta",
+        "still_in_progress": "Ainda em andamento",
+        "open_modal": "Abra o modal local de treino para adicionar a execução do dia.",
+        "no_plan_defined": "Sem plano definido para a data selecionada.",
+        "no_workouts_to_compare": "Nenhum treino registrado para comparar ainda."
+      }
+    },
+    "nutrition": {
+      "title": "Nutrição",
+      "subtitle": "Acompanhe suas refeições e macronutrientes",
+      "add_meal": "Adicionar refeição",
+      "edit_meal": "Editar refeição",
+      "save_changes": "Salvar alterações",
+      "meal_subtitle": "Ajuste os detalhes da sua refeição.",
+      "register_new_meal": "Registre uma nova refeição.",
+      "meal_type": "Tipo de refeição",
+      "meal": "Refeição",
+      "meal_of_day": "Refeição principal do dia.",
+      "search_label": "Procure alimentos",
+      "search_placeholder": "Buscar por nome ou descrição",
+      "not_found": "Não encontrado. Tente outro nome ou verifique a conexão.",
+      "load_error": "Não foi possível carregar seu histórico de refeições.",
+      "need_login_food": "Você precisa estar logado para salvar um alimento.",
+      "need_login_meal": "Você precisa estar logado para salvar uma refeição.",
+      "proteins": "Proteínas",
+      "calories_and_macros": "Calorias e macronutrientes para referência rápida.",
+      "meals_logged": "Refeições e alimentos registrados na data selecionada.",
+      "empty_state": "Adicione uma refeição para começar a monitorar sua nutrição."
+    },
+    "measurements": {
+      "title": "Medidas",
+      "subtitle": "Snapshots de composição corporal",
+      "weight": "Peso",
+      "body_fat": "Gordura corporal",
+      "chest": "Peito",
+      "arm": "Braço",
+      "thigh": "Coxa",
+      "waist": "Cintura",
+      "hip": "Quadril",
+      "neck": "Pescoço",
+      "circumferences": "Circunferências",
+      "trend": "Tendência",
+      "weight_desc": "Leitura base de massa total para acompanhar o corpo sem ruído.",
+      "body_fat_desc": "Composição corporal em um recorte limpo do período.",
+      "chest_desc": "Volume superior do tronco dentro do histórico de checkpoints.",
+      "arm_desc": "Leitura dedicada para acompanhar braço sem se perder em outros dados.",
+      "thigh_desc": "Dimensão inferior com curva própria para observar densidade corporal.",
+      "waist_desc": "Contexto de proporção e distribuição medido checkpoint a checkpoint.",
+      "hip_desc": "Métrica complementar para um retrato corporal mais completo.",
+      "neck_desc": "Uma das referências mais úteis para ver mudança corporal real.",
+      "notes": "Observações de contexto",
+      "no_notes": "Sem observações adicionais neste checkpoint.",
+      "no_notes_recent": "Sem observações no checkpoint mais recente.",
+      "empty_state": "Abra o modal desta página para criar o primeiro checkpoint corporal.",
+      "register_first": "Registre a primeira entrada para ativar o gráfico, a leitura de tendência e o resumo lateral."
+    },
+    "lab_exams": {
+      "title": "Exames Laboratoriais",
+      "subtitle": "Registro clínico dos seus marcadores laboratoriais",
+      "status": {
+        "low": "Baixo",
+        "high": "Alto",
+        "critical": "Crítico",
+        "normal": "Normal"
+      },
+      "add_panel": "Adicionar painel",
+      "upload_pdf": "Enviar PDF ou imagem",
+      "panel_name": "Nome do painel",
+      "exam_date": "Data do exame",
+      "panel_name_required": "Nome do painel é obrigatório.",
+      "date_required": "Data é obrigatória.",
+      "import_error": "Não foi possível importar o arquivo.",
+      "panels": "Painéis",
+      "evolution": "Evolução de marcadores",
+      "history": "Histórico de exames",
+      "empty_state": "Adicione manualmente ou importe um PDF ou imagem para iniciar o histórico laboratorial.",
+      "recent_trends": "Leitura rápida de tendência para o que já possui histórico suficiente."
+    },
+    "insights": {
+      "title": "Insights",
+      "subtitle": "Uma leitura rápida do seu histórico recente",
+      "weight_trend": "Tendência de peso",
+      "no_weight_data": "Ainda não há registros suficientes para identificar tendência de peso.",
+      "weight_stable": "Seu peso está relativamente estável dentro do período selecionado.",
+      "weight_insufficient": "Os registros atuais ainda não permitem ler a tendência de peso.",
+      "training_summary": "Resumo de treino",
+      "training_no_records": "Nenhum treino registrado no período. Registre as sessões em Treinos para acompanhar a consistência.",
+      "training_not_completed": "Há treinos no período, mas nenhum marcado como concluído. Verifique se as sessões estão sendo finalizadas.",
+      "nutrition_summary": "Resumo nutricional",
+      "nutrition_insufficient": "Ainda não há refeições suficientes registradas para gerar leitura de nutrição.",
+      "recovery_summary": "Resumo de recuperação",
+      "recovery_insufficient": "Ainda não há check-ins suficientes para resumir recuperação.",
+      "protocols_summary": "Resumo de protocolos",
+      "no_active_protocols": "Nenhum protocolo ativo no momento. Acesse Protocolos para configurar suplementação.",
+      "avg_calories": "Calorias médias",
+      "calories_per_day": "Média por dia com refeições registradas.",
+      "completed_workouts": "Treinos concluídos",
+      "avg_sleep": "Sono médio",
+      "measurements": "Medições",
+      "meals": "Refeições",
+      "nutrition": "Nutrição",
+      "recovery": "Recuperação"
+    },
+    "protocols": {
+      "title": "Protocolos",
+      "subtitle": "Gerencie medicamentos, suplementos e compostos",
+      "tab_all": "Todos",
+      "tab_active": "Ativo",
+      "tab_paused": "Pausado",
+      "tab_finished": "Finalizado",
+      "add_protocol": "Adicionar protocolo",
+      "start_with": "Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto rastreado.",
+      "empty_state_list": "A lista não pôde ser carregada. Você ainda pode adicionar seu primeiro protocolo.",
+      "empty_state_empty": "Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto rastreado.",
+      "save_error": "Não foi possível salvar o protocolo. Tente novamente.",
+      "status_error": "Não foi possível atualizar o status. Tente novamente.",
+      "delete_error": "Não foi possível excluir o protocolo. Tente novamente.",
+      "delete_success": "Protocolo excluído.",
+      "loading": "Aguarde enquanto seus protocolos são carregados.",
+      "loading_partial": "Os dados não carregaram completamente, mas você ainda pode adicionar novos itens."
     }
   }
 }

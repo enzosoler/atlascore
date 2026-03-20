@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { formatDate, getToday } from '@/lib/atlas-theme';
+import { useI18n } from '@/lib/i18nContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,12 +37,14 @@ import {
   StatusBanner,
 } from '@/components/shared/StablePage';
 
-const STATUS_CONFIG = {
-  normal: { label: 'Normal', cls: 'badge badge-ok', tone: 'success' },
-  low: { label: 'Baixo', cls: 'badge badge-warn', tone: 'warning' },
-  high: { label: 'Alto', cls: 'badge badge-err', tone: 'danger' },
-  critical: { label: 'Crítico', cls: 'badge badge-err', tone: 'danger' },
-};
+function getStatusConfig(t) {
+  return {
+    normal: { label: t('pages.lab_exams.status.normal'), cls: 'badge badge-ok', tone: 'success' },
+    low: { label: t('pages.lab_exams.status.low'), cls: 'badge badge-warn', tone: 'warning' },
+    high: { label: t('pages.lab_exams.status.high'), cls: 'badge badge-err', tone: 'danger' },
+    critical: { label: t('pages.lab_exams.status.critical'), cls: 'badge badge-err', tone: 'danger' },
+  };
+}
 
 const emptyMarker = () => ({
   name: '',
@@ -189,8 +192,8 @@ function ExamCard({
                     {marker.value} {marker.unit}
                   </span>
                   {marker.status ? (
-                    <span className={STATUS_CONFIG[marker.status]?.cls || 'badge badge-neutral'}>
-                      {STATUS_CONFIG[marker.status]?.label}
+                    <span className={statusConfig[marker.status]?.cls || 'badge badge-neutral'}>
+                      {statusConfig[marker.status]?.label}
                     </span>
                   ) : null}
                 </div>
@@ -208,12 +211,13 @@ function ExamCard({
 }
 
 export default function LabExams() {
+  const { t } = useI18n();
   return (
     <SafePageBoundary
-      title="Exames"
-      subtitle="Registro clínico seguro dos seus marcadores laboratoriais."
+      title={t('pages.lab_exams.title')}
+      subtitle={t('pages.lab_exams.subtitle')}
       maxWidth="max-w-6xl"
-      fallbackDescription="A rota de exames ficou disponível em modo seguro."
+      fallbackDescription={t('pages.lab_exams.status.normal')}
     >
       <LabExamsContent />
     </SafePageBoundary>
@@ -221,6 +225,8 @@ export default function LabExams() {
 }
 
 function LabExamsContent() {
+  const { t } = useI18n();
+  const statusConfig = getStatusConfig(t);
   const [showAdd, setShowAdd] = useState(false);
   const [expanded, setExpanded] = useState({});
   const [form, setForm] = useState({
@@ -292,7 +298,7 @@ function LabExamsContent() {
       });
 
       if (result.status !== 'success') {
-        toast.error('Não foi possível importar o arquivo.');
+        toast.error(t('pages.lab_exams.import_error'));
         return;
       }
 
@@ -330,8 +336,8 @@ function LabExamsContent() {
 
   const handleSave = () => {
     const errors = {};
-    if (!form.panel_name?.trim()) errors.panel_name = 'Nome do painel é obrigatório.';
-    if (!form.exam_date) errors.exam_date = 'Data é obrigatória.';
+    if (!form.panel_name?.trim()) errors.panel_name = t('pages.lab_exams.panel_name_required');
+    if (!form.exam_date) errors.exam_date = t('pages.lab_exams.date_required');
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);

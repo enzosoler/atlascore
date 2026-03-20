@@ -17,6 +17,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useRole } from '@/hooks/useRole';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { getGreeting } from '@/lib/atlas-theme';
 import { SafePageBoundary } from '@/components/shared/StablePage';
@@ -217,42 +218,73 @@ function TodayContent() {
   // ── Data queries ───────────────────────────────────────────────────────────
 
   const { data: activeDietPlans = [], isLoading: loadingDiet } = useQuery({
-    queryKey: ['today-diet-plan'],
-    queryFn: () => base44.entities.DietPlan.filter({ active: true }),
+    queryKey: ['today-diet-plan', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase.from('diet_plans').select('*').eq('user_id', user.id).eq('active', true).order('created_at', { ascending: false });
+      return data || [];
+    },
+    enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: activeWorkoutPlans = [], isLoading: loadingWorkout } = useQuery({
-    queryKey: ['today-workout-plan'],
-    queryFn: () => base44.entities.WorkoutPlan.filter({ active: true }),
+    queryKey: ['today-workout-plan', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase.from('workout_plans').select('*').eq('user_id', user.id).eq('active', true).order('created_at', { ascending: false });
+      return data || [];
+    },
+    enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fix: fetch 20 sessions sorted by date (not created_date) for accurate 7-day window
+  // Completed sessions from Supabase — sorted by completed_at
   const { data: recentSessions = [], isLoading: loadingSessions } = useQuery({
-    queryKey: ['today-sessions'],
-    queryFn: () => base44.entities.Workout.list('-date', 20),
+    queryKey: ['today-sessions', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(20);
+      // Normalise: add a `date` field (YYYY-MM-DD) from completed_at so existing logic works
+      return (data || []).map((s) => ({ ...s, date: s.completed_at ? s.completed_at.split('T')[0] : null }));
+    },
+    enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
   });
 
-  // Today's meals — for real nutrition adherence (not just plan existence)
+  // Today's food logs for nutrition adherence
   const { data: recentMeals = [], isLoading: loadingMeals } = useQuery({
-    queryKey: ['today-meals-recent'],
-    queryFn: () => base44.entities.Meal.list('-date', 30),
+    queryKey: ['today-meals-recent', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase.from('food_logs').select('*').eq('user_id', user.id).gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]).order('date', { ascending: false });
+      return data || [];
+    },
+    enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
   });
 
-  // Recent measurements — for the progress snapshot card
+  // Recent measurements from Supabase
   const { data: recentMeasurements = [], isLoading: loadingMeasurements } = useQuery({
-    queryKey: ['today-measurements-recent'],
-    queryFn: () => base44.entities.Measurement.list('-date', 10),
+    queryKey: ['today-measurements-recent', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(10);
+      return data || [];
+    },
+    enabled: !!user?.id,
     staleTime: 10 * 60 * 1000,
   });
 
-  // Active protocols — for the protocols snapshot card and insight
+  // Active protocols from Supabase
   const { data: allProtocols = [], isLoading: loadingProtocols } = useQuery({
-    queryKey: ['today-protocols'],
-    queryFn: () => base44.entities.Protocol.list('-start_date', 50),
+    queryKey: ['today-protocols', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase.from('protocols').select('*').eq('user_id', user.id).order('start_date', { ascending: false });
+      return data || [];
+    },
+    enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
 

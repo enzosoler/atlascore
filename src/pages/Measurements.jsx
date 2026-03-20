@@ -44,6 +44,7 @@ import {
 } from '@/components/shared/StablePage';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { getToday } from '@/lib/atlas-theme';
+import { useI18n } from '@/lib/i18nContext';
 import { cn } from '@/lib/utils';
 
 const FIELD_LABEL_CLASS =
@@ -686,10 +687,11 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 }
 
 export default function Measurements() {
+  const { t } = useI18n();
   return (
     <SafePageBoundary
-      title="Medidas"
-      subtitle="Tracking corporal com checkpoint unificado, leitura de tendência clara e histórico proprio."
+      title={t('pages.measurements.title')}
+      subtitle={t('pages.measurements.subtitle')}
       maxWidth="max-w-6xl"
       fallbackDescription="A rota de Measurements continua acessivel mesmo se a interface principal falhar."
     >
@@ -699,6 +701,7 @@ export default function Measurements() {
 }
 
 function MeasurementsContent() {
+  const { t } = useI18n();
   const [metricKey, setMetricKey] = useState('weight');
   const [notice, setNotice] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -986,7 +989,7 @@ function MeasurementsContent() {
                 <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
                   <p className="atlas-metric-label">Contexto</p>
                   <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-                    {latestMeasurement.notes || 'Sem observações adicionais neste checkpoint.'}
+                    {latestMeasurement.notes || t('pages.measurements.no_notes')}
                   </p>
                 </div>
               </>
@@ -1194,7 +1197,7 @@ function MeasurementsContent() {
                         Ultimo contexto registrado
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {latestMeasurement?.notes || 'Sem observações no checkpoint mais recente.'}
+                        {latestMeasurement?.notes || t('pages.measurements.no_notes_recent')}
                       </p>
                     </div>
                   </div>

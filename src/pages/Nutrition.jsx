@@ -34,6 +34,7 @@ import {
 } from '@/components/shared/StablePage';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/lib/i18nContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
@@ -706,7 +707,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
           ) : (
             <Plus className="h-4 w-4" />
           )}
-          {meal ? 'Salvar alterações' : 'Adicionar refeição'}
+          {meal ? t('pages.nutrition.save_changes') : t('pages.nutrition.add_meal')}
         </PrimaryButton>
       </ActionRow>
     </form>
@@ -715,6 +716,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
 export default function NutritionPage() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [notice, setNotice] = useState(null);
@@ -753,7 +755,7 @@ export default function NutritionPage() {
         if (isActive) {
           setNotice({
             tone: 'error',
-            message: 'Não foi possível carregar seu histórico de refeições.',
+            message: t('pages.nutrition.load_error'),
           });
         }
       } finally {
@@ -805,7 +807,7 @@ export default function NutritionPage() {
         console.error('FatSecret search failed:', error);
         if (active) {
           setFoodResults([]);
-          setFoodSearchError('Não encontrado. Tente outro nome ou verifique a conexão.');
+          setFoodSearchError(t('pages.nutrition.not_found'));
         }
       } finally {
         if (active) setIsSearchingFoods(false);
@@ -816,7 +818,7 @@ export default function NutritionPage() {
 
   const handleSelectFood = async (food) => {
     if (!user?.id) {
-      setNotice({ tone: 'error', message: 'Você precisa estar logado para salvar um alimento.' });
+      setNotice({ tone: 'error', message: t('pages.nutrition.need_login_food') });
       return;
     }
 
@@ -865,7 +867,7 @@ export default function NutritionPage() {
 
   const handleSaveMeal = async (form) => {
     if (!user?.id) {
-      setNotice({ tone: 'error', message: 'Você precisa estar logado para salvar uma refeição.' });
+      setNotice({ tone: 'error', message: t('pages.nutrition.need_login_meal') });
       return;
     }
 
@@ -1139,8 +1141,8 @@ export default function NutritionPage() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogPanelHeader
-            title={editingMeal ? 'Editar refeição' : 'Adicionar refeição'}
-            subtitle={editingMeal ? 'Ajuste os detalhes da sua refeição.' : 'Registre uma nova refeição.'}
+            title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
+            subtitle={editingMeal ? t('pages.nutrition.meal_subtitle') : t('pages.nutrition.register_new_meal')}
           />
           <div className="p-6 pt-0">
             <MealForm

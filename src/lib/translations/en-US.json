@@ -509,12 +509,36 @@
       "subtitle": "This sets your dashboard focus and AI recommendations",
       "basics": "Basic info",
       "goals": [
-        { "id": "fat_loss", "emoji": "🔥", "label": "Fat loss" },
-        { "id": "muscle_gain", "emoji": "💪", "label": "Muscle gain" },
-        { "id": "recomp", "emoji": "⚡", "label": "Body recomp" },
-        { "id": "performance", "emoji": "🏆", "label": "Performance" },
-        { "id": "health", "emoji": "❤️", "label": "General health" },
-        { "id": "longevity", "emoji": "🌱", "label": "Longevity" }
+        {
+          "id": "fat_loss",
+          "emoji": "🔥",
+          "label": "Fat loss"
+        },
+        {
+          "id": "muscle_gain",
+          "emoji": "💪",
+          "label": "Muscle gain"
+        },
+        {
+          "id": "recomp",
+          "emoji": "⚡",
+          "label": "Body recomp"
+        },
+        {
+          "id": "performance",
+          "emoji": "🏆",
+          "label": "Performance"
+        },
+        {
+          "id": "health",
+          "emoji": "❤️",
+          "label": "General health"
+        },
+        {
+          "id": "longevity",
+          "emoji": "🌱",
+          "label": "Longevity"
+        }
       ],
       "fields": {
         "height": "Height (cm)",
@@ -531,11 +555,31 @@
       "subtitle": "Calibrates targets and personalizes plans",
       "activityLevel": "Activity level",
       "activities": [
-        { "id": "sedentary", "label": "Sedentary", "desc": "No regular exercise" },
-        { "id": "light", "label": "Light", "desc": "1–2× per week" },
-        { "id": "moderate", "label": "Moderate", "desc": "3–4× per week" },
-        { "id": "active", "label": "Active", "desc": "5–6× per week" },
-        { "id": "very_active", "label": "Very active", "desc": "2× daily / athlete" }
+        {
+          "id": "sedentary",
+          "label": "Sedentary",
+          "desc": "No regular exercise"
+        },
+        {
+          "id": "light",
+          "label": "Light",
+          "desc": "1–2× per week"
+        },
+        {
+          "id": "moderate",
+          "label": "Moderate",
+          "desc": "3–4× per week"
+        },
+        {
+          "id": "active",
+          "label": "Active",
+          "desc": "5–6× per week"
+        },
+        {
+          "id": "very_active",
+          "label": "Very active",
+          "desc": "2× daily / athlete"
+        }
       ],
       "fields": {
         "workoutsPerWeek": "Workouts per week",
@@ -560,23 +604,52 @@
       "subtitle": "This builds your initial dashboard. You can enable/disable anytime.",
       "hint": "Select as many as you want — more is always better for AI",
       "options": [
-        { "id": "protocol", "emoji": "💉", "label": "Protocols", "desc": "Substances, doses, cycles" },
-        { "id": "body", "emoji": "📏", "label": "Body composition", "desc": "Weight, measurements, photos" },
-        { "id": "exams", "emoji": "🧬", "label": "Lab results", "desc": "Hormones, blood, health" },
-        { "id": "nutrition", "emoji": "🥗", "label": "Nutrition", "desc": "Meals and macros" },
-        { "id": "workouts", "emoji": "🏋️", "label": "Workouts", "desc": "Sessions and progress" },
-        { "id": "symptoms", "emoji": "📊", "label": "Symptoms & mood", "desc": "Daily check-ins" }
+        {
+          "id": "protocol",
+          "emoji": "💉",
+          "label": "Protocols",
+          "desc": "Substances, doses, cycles"
+        },
+        {
+          "id": "body",
+          "emoji": "📏",
+          "label": "Body composition",
+          "desc": "Weight, measurements, photos"
+        },
+        {
+          "id": "exams",
+          "emoji": "🧬",
+          "label": "Lab results",
+          "desc": "Hormones, blood, health"
+        },
+        {
+          "id": "nutrition",
+          "emoji": "🥗",
+          "label": "Nutrition",
+          "desc": "Meals and macros"
+        },
+        {
+          "id": "workouts",
+          "emoji": "🏋️",
+          "label": "Workouts",
+          "desc": "Sessions and progress"
+        },
+        {
+          "id": "symptoms",
+          "emoji": "📊",
+          "label": "Symptoms & mood",
+          "desc": "Daily check-ins"
+        }
       ]
     },
     "setup": {
       "analyzing": "Analyzing your goals...",
       "building": "Building your personalized dashboard...",
-      "configuring": "Setting up your tracking categories...",
+      "configuring": "Set up my Atlas Core",
       "calculating": "Computing your nutrition targets...",
       "preparing": "Preparing your timeline...",
       "ready": "Your Atlas Core is ready.",
-      "enter": "Enter the app",
-      "configuring": "Set up my Atlas Core"
+      "enter": "Enter the app"
     }
   },
   "today": {
@@ -674,7 +747,9 @@
     "trainingGoal": "Training goal",
     "targetWeight": "Target weight (kg)",
     "bodyFatGoal": "Target body fat (%)",
-    "macros": "Daily macros",
+    "macros": {
+      "pending": "Pending macros"
+    },
     "calories": "Calories (kcal)",
     "protein": "Protein (g)",
     "carbs": "Carbohydrates (g)",
@@ -778,9 +853,6 @@
       "noCurrent": "Body goal set. Current weight not logged.",
       "noData": "No direction",
       "noDataDetail": "Fill in current weight and target weight to see the body strategy."
-    },
-    "macros": {
-      "pending": "Pending macros"
     },
     "hero": {
       "readiness": "Profile readiness",
@@ -961,6 +1033,151 @@
       "profileTitle": "Refine profile",
       "profileDesc": "Keep base preferences aligned so the app stays accurate.",
       "profilePhase": "Keep aligned"
+    }
+  },
+  "pages": {
+    "workouts": {
+      "title": "Workouts",
+      "subtitle": "Plan, execute, and track your training sessions",
+      "status": {
+        "pending": "Pending",
+        "completed": "Completed",
+        "in_progress": "In progress"
+      },
+      "actions": {
+        "mark_complete": "Complete",
+        "mark_pending": "Reopen",
+        "add_exercise": "Add exercise",
+        "save_workout": "Save workout",
+        "edit_workout": "Edit workout"
+      },
+      "messages": {
+        "workout_marked_complete": "Workout marked as completed.",
+        "no_execution_logged": "Add an execution to track the day.",
+        "use_local_register": "Use the local register to structure the day's execution even without a plan.",
+        "empty_state": "No logged execution",
+        "no_plan": "No session planned",
+        "empty_subtitle": "Add a name and at least one exercise to save the workout.",
+        "session_covered": "Session covered",
+        "still_in_progress": "Still in progress",
+        "open_modal": "Open the local workout modal to add the day's execution.",
+        "no_plan_defined": "No plan defined for the selected date.",
+        "no_workouts_to_compare": "No logged workouts to compare yet."
+      }
+    },
+    "nutrition": {
+      "title": "Nutrition",
+      "subtitle": "Track your meals and macronutrients",
+      "add_meal": "Add meal",
+      "edit_meal": "Edit meal",
+      "save_changes": "Save changes",
+      "meal_subtitle": "Adjust your meal details.",
+      "register_new_meal": "Register a new meal.",
+      "meal_type": "Meal type",
+      "meal": "Meal",
+      "meal_of_day": "Main meal of the day.",
+      "search_label": "Search for foods",
+      "search_placeholder": "Search by name or description",
+      "not_found": "Not found. Try another name or check the connection.",
+      "load_error": "Could not load your meal history.",
+      "need_login_food": "You need to be logged in to save a food.",
+      "need_login_meal": "You need to be logged in to save a meal.",
+      "proteins": "Proteins",
+      "calories_and_macros": "Calories and macronutrients for quick reference.",
+      "meals_logged": "Meals and foods registered on the selected date.",
+      "empty_state": "Add a meal to start monitoring your nutrition."
+    },
+    "measurements": {
+      "title": "Measurements",
+      "subtitle": "Body composition snapshots",
+      "weight": "Weight",
+      "body_fat": "Body fat",
+      "chest": "Chest",
+      "arm": "Arm",
+      "thigh": "Thigh",
+      "waist": "Waist",
+      "hip": "Hip",
+      "neck": "Neck",
+      "circumferences": "Circumferences",
+      "trend": "Trend",
+      "weight_desc": "Base reading of total mass to track your body without noise.",
+      "body_fat_desc": "Body composition in a clean snapshot of the period.",
+      "chest_desc": "Upper torso volume within the history of checkpoints.",
+      "arm_desc": "Dedicated reading to track arm without getting lost in other data.",
+      "thigh_desc": "Dimension below with its own curve to observe body density.",
+      "waist_desc": "Context of proportion and distribution measured checkpoint to checkpoint.",
+      "hip_desc": "Complementary metric for a more complete body portrait.",
+      "neck_desc": "One of the most useful references to see real body change.",
+      "notes": "Context notes",
+      "no_notes": "No additional notes on this checkpoint.",
+      "no_notes_recent": "No notes on the most recent checkpoint.",
+      "empty_state": "Open the modal on this page to create the first body checkpoint.",
+      "register_first": "Register the first entry to activate the graph, trend reading, and side summary."
+    },
+    "lab_exams": {
+      "title": "Lab Exams",
+      "subtitle": "Clinical record of your lab markers",
+      "status": {
+        "low": "Low",
+        "high": "High",
+        "critical": "Critical",
+        "normal": "Normal"
+      },
+      "add_panel": "Add panel",
+      "upload_pdf": "Upload PDF or image",
+      "panel_name": "Panel name",
+      "exam_date": "Exam date",
+      "panel_name_required": "Panel name is required.",
+      "date_required": "Date is required.",
+      "import_error": "Could not import the file.",
+      "panels": "Panels",
+      "evolution": "Evolution of markers",
+      "history": "Exam history",
+      "empty_state": "Add manually or import a PDF or image to start the lab history.",
+      "recent_trends": "Quick reading of trends for what already has enough history."
+    },
+    "insights": {
+      "title": "Insights",
+      "subtitle": "A quick read of your recent history",
+      "weight_trend": "Weight trend",
+      "no_weight_data": "Not enough records to identify weight trend.",
+      "weight_stable": "Your weight is relatively stable within the selected period.",
+      "weight_insufficient": "Current records don't yet allow reading weight trend.",
+      "training_summary": "Training summary",
+      "training_no_records": "No workouts logged in the period. Register sessions in Workouts to track consistency.",
+      "training_not_completed": "There are workouts in the period, but none marked as completed. Check if sessions are being finalized.",
+      "nutrition_summary": "Nutrition summary",
+      "nutrition_insufficient": "Not enough meals registered to generate a nutrition reading.",
+      "recovery_summary": "Recovery summary",
+      "recovery_insufficient": "Not enough check-ins to summarize recovery.",
+      "protocols_summary": "Protocols summary",
+      "no_active_protocols": "No active protocol at the moment. Access Protocols to set up supplementation.",
+      "avg_calories": "Average calories",
+      "calories_per_day": "Average per day with registered meals.",
+      "completed_workouts": "Completed workouts",
+      "avg_sleep": "Average sleep",
+      "measurements": "Measurements",
+      "meals": "Meals",
+      "nutrition": "Nutrition",
+      "recovery": "Recovery"
+    },
+    "protocols": {
+      "title": "Protocols",
+      "subtitle": "Manage medications, supplements, and compounds",
+      "tab_all": "All",
+      "tab_active": "Active",
+      "tab_paused": "Paused",
+      "tab_finished": "Finished",
+      "add_protocol": "Add protocol",
+      "start_with": "Start with a medication, hormone, peptide, supplement or other tracked compound.",
+      "empty_state_list": "The list could not be loaded. You can still add your first protocol.",
+      "empty_state_empty": "Start with a medication, hormone, peptide, supplement or other tracked compound.",
+      "save_error": "Could not save the protocol. Try again.",
+      "status_error": "Could not update the status. Try again.",
+      "delete_error": "Could not delete the protocol. Try again.",
+      "delete_success": "Protocol deleted.",
+      "loading": "Wait while your protocols are loaded.",
+      "loading_partial": "Data didn't load completely, but you can still add new items."
     }
   }
 }
