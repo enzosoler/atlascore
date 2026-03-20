@@ -133,21 +133,21 @@ export function PublicNav({ links = [], actions, compact = false }) {
         >
           <AtlasCoreLogoSVG width={56} height={28} className="shrink-0" />
           <div className="min-w-0">
-            <p className="truncate text-[18px] font-semibold tracking-[-0.02em]">
-              <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core
+            <p className="truncate text-[20px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </p>
-            <p className="truncate text-[11px] text-[hsl(var(--fg-3))]">Performance operating system</p>
+            <p className="truncate text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">Performance OS</p>
           </div>
         </Link>
 
         {!compact && links.length > 0 ? (
-          <nav className="hidden items-center gap-7 lg:flex">
+          <nav className="hidden items-center gap-8 lg:flex">
             {links.map((link) => (
               link.href.startsWith('#') ? (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+                  className="text-[12px] font-semibold uppercase tracking-[0.05em] text-[hsl(var(--fg-2))] transition-all hover:text-[hsl(var(--accent-primary))] hover:tracking-[0.06em]"
                 >
                   {link.label}
                 </a>
@@ -155,7 +155,7 @@ export function PublicNav({ links = [], actions, compact = false }) {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className="text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+                  className="text-[12px] font-semibold uppercase tracking-[0.05em] text-[hsl(var(--fg-2))] transition-all hover:text-[hsl(var(--accent-primary))] hover:tracking-[0.06em]"
                 >
                   {link.label}
                 </Link>

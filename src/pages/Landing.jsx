@@ -642,14 +642,20 @@ function ProgressMock({ copy }) {
 }
 
 function PhotosMock({ copy }) {
+  const demoPhotos = [
+    { date: '01 Jan', url: '/demo-progress-photos/progress_casual_1.jpg' },
+    { date: '15 Feb', url: '/demo-progress-photos/progress_casual_2.jpg' },
+    { date: '19 Mar', url: '/demo-progress-photos/progress_casual_3.jpg' },
+  ];
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
       <p className="atlas-overline">{copy.overline}</p>
       <div className="grid grid-cols-3 gap-2">
-        {copy.items.map(([date, bg]) => (
-          <div key={date} className="relative overflow-hidden rounded-[12px] border border-[hsl(var(--border)/0.7)]" style={{ aspectRatio: '3/4', background: bg }}>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <span className="absolute bottom-2 left-2 text-[10px] font-semibold text-white/80">{date}</span>
+        {demoPhotos.map(({ date, url }) => (
+          <div key={date} className="relative overflow-hidden rounded-[12px] border border-[hsl(var(--border)/0.7)]" style={{ aspectRatio: '3/4' }}>
+            <img src={url} alt={date} className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <span className="absolute bottom-2 left-2 text-[10px] font-semibold text-white/90">{date}</span>
           </div>
         ))}
       </div>
