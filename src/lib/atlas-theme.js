@@ -28,9 +28,10 @@ export const formatDate = (date) => {
 
 export const getToday = () => new Date().toISOString().split('T')[0];
 
-export const getGreeting = () => {
+export const getGreeting = (locale) => {
   const h = new Date().getHours();
-  if (h < 12) return 'Bom dia';
-  if (h < 18) return 'Boa tarde';
-  return 'Boa noite';
+  const isPt = !locale || locale === 'pt-BR';
+  if (h < 12) return isPt ? 'Bom dia' : 'Good morning';
+  if (h < 18) return isPt ? 'Boa tarde' : 'Good afternoon';
+  return isPt ? 'Boa noite' : 'Good evening';
 };

@@ -10,7 +10,12 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
+import { resetLanguageToSystem } from '@/lib/i18n';
 import { DailyStoreProvider } from '@/store/dailyStore.jsx';
+
+// Re-sync stored language with system language on every app load.
+// This clears any stale 'pt-BR' saved in localStorage when the device is now in English.
+resetLanguageToSystem();
 import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 

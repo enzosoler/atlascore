@@ -8,7 +8,7 @@ export const translations = {
   'en-US': { ...enUS, ...enUSOnboarding },
 };
 
-export const DEFAULT_LANGUAGE = 'pt-BR';
+export const DEFAULT_LANGUAGE = 'en-US';
 export const supportedLanguages = ['pt-BR', 'en-US'];
 export const LANGUAGE_STORAGE_KEY = 'atlas_locale';
 export const LEGACY_LANGUAGE_STORAGE_KEY = 'language';
@@ -27,14 +27,27 @@ export const normalizeLanguage = (lang) => {
 export const detectPreferredLanguage = () => {
   if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
 
+  // Respect explicitly saved preference
   const saved = normalizeLanguage(localStorage.getItem(LANGUAGE_STORAGE_KEY));
   if (saved) return saved;
 
   const legacySaved = normalizeLanguage(localStorage.getItem(LEGACY_LANGUAGE_STORAGE_KEY));
   if (legacySaved) return legacySaved;
 
+  // Fall back to browser/system language, then to default (English)
   const browserLang = normalizeLanguage(navigator.language || navigator.languages?.[0]);
   return browserLang || DEFAULT_LANGUAGE;
+};
+
+// Clear any previously auto-saved language and re-detect from browser.
+// Call this when you want to "reset" to follow system language.
+export const resetLanguageToSystem = () => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+  localStorage.removeItem(LEGACY_LANGUAGE_STORAGE_KEY);
+  const lang = detectPreferredLanguage();
+  setLanguage(lang);
+  return lang;
 };
 
 export const getLanguage = () => {
