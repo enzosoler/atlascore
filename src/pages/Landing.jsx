@@ -645,7 +645,7 @@ function PhotosMock({ copy }) {
   const demoPhotos = [
     { date: '01 Jan', url: '/demo-progress-photos/progress_casual_1.jpg' },
     { date: '15 Feb', url: '/demo-progress-photos/progress_casual_2.jpg' },
-    { date: '19 Mar', url: '/demo-progress-photos/progress_casual_3.jpg' },
+    { date: '19 Mar', url: '/demo-progress-photos/progress_photo_2_during.jpg' },
   ];
   return (
     <div className="atlas-public-panel space-y-3 px-5 py-5">
@@ -812,7 +812,7 @@ export default function Landing() {
       actions={(
         <>
           <PublicLanguageSwitcher />
-          <Button variant="ghost" size="sm" className="text-[13px]" onClick={handleLogin}>{c.nav.login}</Button>
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-[13px]" onClick={handleLogin}>{c.nav.login}</Button>
           <Button size="sm" onClick={handleSignUp}>{c.nav.signup}</Button>
         </>
       )}
