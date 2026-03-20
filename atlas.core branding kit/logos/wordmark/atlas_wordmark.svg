@@ -1,0 +1,6 @@
+<svg width="800" height="100" viewBox="0 0 800 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Typography: atlas.core -->
+  <text x="400" y="70" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="600" letter-spacing="-0.02em">
+    <tspan fill="#00FFFF">atlas</tspan><tspan fill="white">.core</tspan>
+  </text>
+</svg>

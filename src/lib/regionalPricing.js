@@ -10,11 +10,20 @@ export const REGIONAL_PRICING = {
     symbol: 'R$',
     stripe_prices: {
       free: null,
-      athlete_pro: 'price_1Q5tJxLJhPVfVPqNjXYZ', // R$ 29/month
-      athlete_performance: 'price_1Q5tJxLJhPVfVPqNjABC', // R$ 59/month
-      coach: 'price_1Q5tJxLJhPVfVPqNjDEF', // R$ 99/month
-      nutritionist: 'price_1Q5tJxLJhPVfVPqNjGHI', // R$ 79/month
-      clinician: 'price_1Q5tJxLJhPVfVPqNjJKL', // R$ 129/month
+      athlete_pro: 'price_1Q5tJxLJhPVfVPqNjXYZ', // R$29/mês
+      athlete_performance: 'price_1Q5tJxLJhPVfVPqNjABC', // R$59/mês
+      coach: 'price_1Q5tJxLJhPVfVPqNjDEF', // R$99/mês
+      nutritionist: 'price_1Q5tJxLJhPVfVPqNjGHI', // R$79/mês
+      clinician: 'price_1Q5tJxLJhPVfVPqNjJKL', // R$129/mês
+    },
+    // Yearly Stripe price IDs — set via env vars after creating in Stripe
+    stripe_prices_yearly: {
+      free: null,
+      athlete_pro: null,         // env: STRIPE_PRICE_BR_YEARLY_ATHLETE_PRO
+      athlete_performance: null, // env: STRIPE_PRICE_BR_YEARLY_ATHLETE_PERFORMANCE
+      coach: null,               // env: STRIPE_PRICE_BR_YEARLY_COACH
+      nutritionist: null,        // env: STRIPE_PRICE_BR_YEARLY_NUTRITIONIST
+      clinician: null,           // env: STRIPE_PRICE_BR_YEARLY_CLINICIAN
     },
     prices: {
       free: 0,
@@ -23,6 +32,15 @@ export const REGIONAL_PRICING = {
       coach: 99,
       nutritionist: 79,
       clinician: 129,
+    },
+    // Yearly totals billed upfront — ~28% savings vs monthly
+    prices_yearly: {
+      free: 0,
+      athlete_pro: 249,        // R$29×12=R$348 → saves R$99 (28%)
+      athlete_performance: 499, // R$59×12=R$708 → saves R$209 (29%)
+      coach: 849,               // R$99×12=R$1188 → saves R$339 (28%)
+      nutritionist: 679,        // R$79×12=R$948 → saves R$269 (28%)
+      clinician: 1099,          // R$129×12=R$1548 → saves R$449 (29%)
     },
   },
   'US': {
@@ -37,6 +55,15 @@ export const REGIONAL_PRICING = {
       nutritionist: 'price_1Q5tJxLJhPVfVPqNkGHI', // $24/month
       clinician: 'price_1Q5tJxLJhPVfVPqNkJKL', // $39/month
     },
+    // Yearly Stripe price IDs — set via env vars after creating in Stripe
+    stripe_prices_yearly: {
+      free: null,
+      athlete_pro: null,         // env: STRIPE_PRICE_US_YEARLY_ATHLETE_PRO
+      athlete_performance: null, // env: STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE
+      coach: null,               // env: STRIPE_PRICE_US_YEARLY_COACH
+      nutritionist: null,        // env: STRIPE_PRICE_US_YEARLY_NUTRITIONIST
+      clinician: null,           // env: STRIPE_PRICE_US_YEARLY_CLINICIAN
+    },
     prices: {
       free: 0,
       athlete_pro: 9,
@@ -45,38 +72,50 @@ export const REGIONAL_PRICING = {
       nutritionist: 24,
       clinician: 39,
     },
+    // Yearly totals billed upfront — ~27-28% savings vs monthly
+    prices_yearly: {
+      free: 0,
+      athlete_pro: 79,      // $9×12=$108 → saves $29 (27%)
+      athlete_performance: 159, // $19×12=$228 → saves $69 (30%)
+      coach: 249,           // $29×12=$348 → saves $99 (28%)
+      nutritionist: 199,    // $24×12=$288 → saves $89 (31%)
+      clinician: 319,       // $39×12=$468 → saves $149 (32%)
+    },
   },
 };
 
 /**
- * Detec region baseado em:
- * 1. localStorage (user preference)
- * 2. geolocalização (IP)
- * 3. default: US
+ * Detecta região via IP (ipapi.co).
+ * Resultado é cached na sessionStorage por tab — não persiste entre sessões
+ * e não pode ser manipulado por localStorage.
+ *
+ * Returns: 'BR' | 'US'
  */
 export async function detectRegion() {
-  // Check localStorage
-  const saved = localStorage.getItem('atlas_region');
-  if (saved && REGIONAL_PRICING[saved]) return saved;
-  
-  // Try geolocation (pode falhar, é ok)
+  // Session-scoped cache only — resets on new tab/session
+  const cached = sessionStorage.getItem('atlas_detected_region');
+  if (cached && REGIONAL_PRICING[cached]) return cached;
+
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
-    const countryCode = data.country_code;
-    
-    if (countryCode === 'BR') return 'BR';
-    if (countryCode === 'US') return 'US';
+    const region = data.country_code === 'BR' ? 'BR' : 'US';
+    sessionStorage.setItem('atlas_detected_region', region);
+    return region;
   } catch (e) {
-    // Silently fail
+    // Silently fail — default to US
   }
-  
-  return 'US'; // default
+
+  return 'US';
 }
 
+/**
+ * Stores the user's active region selection for this session.
+ * Only used after geo-detection confirms the user is in BR (see RegionSelector).
+ */
 export function setRegionPricing(region) {
   if (REGIONAL_PRICING[region]) {
-    localStorage.setItem('atlas_region', region);
+    sessionStorage.setItem('atlas_region', region);
   }
 }
 
