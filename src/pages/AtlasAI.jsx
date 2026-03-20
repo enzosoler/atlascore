@@ -9,7 +9,7 @@ import {
   Clock3,
   Loader2,
   Plus,
-  Send,
+  Send
   Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -819,7 +819,7 @@ export default function AtlasAI() {
                   </div>
                 ) : null}
               </div>
-            </header>
+            </div>
 
             {/* ── MOBILE CONVERSATIONS STRIP ── */}
             <div className="border-b border-[hsl(var(--border)/0.72)] px-4 py-3 lg:hidden">
@@ -959,8 +959,8 @@ export default function AtlasAI() {
                                 Preencha metas, peso ou objetivo no Profile para deixar o assistant
                                 even more specific to your context.
                               </p>
-                            </div>
                           )}
+                            </div>
                         </div>
                       </section>
 
