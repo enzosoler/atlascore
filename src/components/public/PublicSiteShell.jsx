@@ -131,9 +131,11 @@ export function PublicNav({ links = [], actions, compact = false }) {
           to={ROUTES.home}
           className="flex min-w-0 items-center gap-3 text-[hsl(var(--fg))] transition-opacity hover:opacity-80"
         >
-          <AtlasCoreLogoSVG width={28} height={28} className="shrink-0 rounded-[10px]" />
+          <AtlasCoreLogoSVG width={48} height={24} className="shrink-0" />
           <div className="min-w-0">
-            <p className="truncate text-[15px] font-semibold tracking-[-0.03em]">Atlas Core</p>
+            <p className="truncate text-[18px] font-semibold tracking-[-0.02em]">
+              <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core
+            </p>
             <p className="truncate text-[11px] text-[hsl(var(--fg-3))]">Performance operating system</p>
           </div>
         </Link>
@@ -199,8 +201,8 @@ export default function PublicSiteShell({
           <footer className="relative border-t border-[hsl(var(--border)/0.7)]">
             <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-8 lg:flex-row lg:items-center lg:justify-between lg:px-8">
               <div className="space-y-1">
-                <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                  Atlas Core
+                <p className="text-[16px] font-semibold tracking-[-0.02em]">
+                  <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
                   Calm, connected tracking for real-world performance.

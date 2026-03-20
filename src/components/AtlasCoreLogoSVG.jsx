@@ -16,39 +16,16 @@ export default function AtlasCoreLogoSVG({
     <svg
       width={width}
       height={height}
-      viewBox="0 0 100 100"
+      viewBox="0 0 800 400"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label={alt}
       role="img"
       className={className}
     >
-      {/* Left leg of A */}
-      <line
-        x1="50" y1="10"
-        x2="10" y2="90"
-        stroke={color}
-        strokeWidth="10"
-        strokeLinecap="round"
-      />
-      {/* Right leg of A */}
-      <line
-        x1="50" y1="10"
-        x2="90" y2="90"
-        stroke={color}
-        strokeWidth="10"
-        strokeLinecap="round"
-      />
-      {/* Crossbar */}
-      <line
-        x1="26" y1="63"
-        x2="74" y2="63"
-        stroke={color}
-        strokeWidth="10"
-        strokeLinecap="round"
-      />
-      {/* Center dot on crossbar */}
-      <circle cx="50" cy="63" r="7.5" fill={color} />
+      {/* Heartbeat-to-Arrow Icon */}
+      <path d="M150 200H250L275 240L325 120L375 240L400 200H450L550 140" stroke={color} strokeWidth="12" strokeLinecap="round" stroke-linejoin="round"/>
+      <path d="M530 140H550V160" stroke={color} strokeWidth="12" strokeLinecap="round" stroke-linejoin="round"/>
     </svg>
   );
 }

@@ -168,7 +168,7 @@ export default function UseCase() {
             <p className="atlas-overline justify-center">Use Case</p>
             <h1 className="atlas-display-title mt-4">Use case não encontrado.</h1>
             <p className="atlas-public-copy mx-auto mt-4 max-w-xl">
-              Esse cenário ainda não existe nesta versão pública do Atlas Core.
+              Esse cenário ainda não existe nesta versão pública do <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core.
             </p>
             <div className="mt-8 flex justify-center">
               <Button asChild>
@@ -217,7 +217,7 @@ export default function UseCase() {
             </div>
 
             <div className="atlas-public-panel-muted p-4">
-              <p className="atlas-metric-label">Por que Atlas Core</p>
+              <p className="atlas-metric-label">Por que <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core</p>
               <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
                 O valor não está só em registrar. Está em transformar tudo em uma linha do tempo confiável.
               </p>
@@ -273,7 +273,7 @@ export default function UseCase() {
             {caseData.cta}
           </h2>
           <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
-            Entre no Atlas Core e continue a partir do mesmo sistema visual, sem mudar de contexto entre público e produto.
+            Entre no <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core e continue a partir do mesmo sistema visual, sem mudar de contexto entre público e produto.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">

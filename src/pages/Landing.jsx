@@ -812,8 +812,8 @@ export default function Landing() {
       )}
     >
       <PublicMetadata
-        title="Atlas Core"
-        description="Atlas Core is the public performance operating system for workouts, nutrition, measurements, supplements, and connected progress."
+        title="atlas.core"
+        description="atlas.core is the public performance operating system for workouts, nutrition, measurements, supplements, and connected progress."
         canonicalPath={ROUTES.home}
       />
 
@@ -839,8 +839,8 @@ export default function Landing() {
                 <h1 className="atlas-display-title text-[clamp(2.8rem,2rem+2.8vw,5rem)] leading-[1.08]">
                   {c.hero.h1a}
                 </h1>
-                <h1 className="atlas-display-title text-[clamp(2.8rem,2rem+2.8vw,5rem)] leading-[1.08] text-[hsl(var(--brand))]">
-                  {c.hero.h1b}
+                <h1 className="atlas-display-title text-[clamp(2.8rem,2rem+2.8vw,5rem)] leading-[1.08]">
+                  <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core {c.hero.h1b.replace('?', '')}?
                 </h1>
               </motion.div>
 

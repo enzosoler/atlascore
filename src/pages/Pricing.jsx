@@ -209,7 +209,7 @@ export default function Pricing() {
             professionalLabel: t('pricing_page.professional'),
             footerTitle: 'One visual system from first click to daily use',
             footerCopy:
-              'Pricing should feel like part of Atlas Core itself, not a detached marketing layer.',
+              'Pricing should feel like part of atlas.core itself, not a detached marketing layer.',
           }
     ),
     [isPt, t]
@@ -341,8 +341,8 @@ export default function Pricing() {
       )}
     >
       <PublicMetadata
-        title="Pricing — Atlas Core"
-        description="Compare Atlas Core plans and choose the right public entry point for training, nutrition, progress, and connected performance tracking."
+        title="Pricing — atlas.core"
+        description="Compare atlas.core plans and choose the right public entry point for training, nutrition, progress, and connected performance tracking."
         canonicalPath={ROUTES.pricing}
       />
 

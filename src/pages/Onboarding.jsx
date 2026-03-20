@@ -57,8 +57,11 @@ const SETUP_MESSAGES = [
 function Logo() {
   return (
     <div className="flex items-center justify-center gap-2.5 mb-8">
-      <AtlasCoreLogoSVG width={28} height={28} className="shrink-0" />
-      <span className="text-[17px] font-bold tracking-tight">Atlas Core</span>
+      <AtlasCoreLogoSVG width={48} height={24} className="shrink-0" />
+      <span className="text-[17px] font-bold tracking-tight">
+        <span className="text-[hsl(var(--accent-primary))]">atlas</span>
+        <span className="text-[hsl(var(--fg))]">.core</span>
+      </span>
     </div>
   );
 }
@@ -135,7 +138,9 @@ function StepWelcome() {
          <Heart className="w-8 h-8 text-[hsl(var(--brand))]" strokeWidth={1.75} />
        </div>
       <div>
-        <h2 className="text-[22px] font-bold tracking-tight mb-2">Bem-vindo ao Atlas Core</h2>
+        <h2 className="text-[22px] font-bold tracking-tight mb-2">
+          Bem-vindo ao <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core
+        </h2>
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
           Vamos configurar o app especificamente para você. Leva menos de 2 minutos.
         </p>

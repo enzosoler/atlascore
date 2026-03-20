@@ -7,23 +7,23 @@
     color-scheme: light;
 
     /* Semantic theme tokens */
-    --bg-app: 216 36% 97%;
-    --bg-surface: 214 31% 95%;
-    --bg-surface-2: 214 29% 93%;
+    --bg-app: 216 33% 98%;
+    --bg-surface: 216 33% 96%;
+    --bg-surface-2: 216 33% 94%;
     --bg-card-semantic: 0 0% 100%;
-    --bg-card-elevated: 210 33% 99%;
+    --bg-card-elevated: 0 0% 100%;
 
-    --text-primary: 219 27% 14%;
-    --text-secondary: 218 16% 39%;
-    --text-muted: 217 14% 55%;
-    --text-subtle: 216 12% 72%;
+    --text-primary: 216 33% 3%;
+    --text-secondary: 216 20% 25%;
+    --text-muted: 216 15% 45%;
+    --text-subtle: 216 10% 65%;
 
-    --border-default: 216 23% 87%;
-    --border-strong: 216 16% 76%;
+    --border-default: 216 15% 90%;
+    --border-strong: 216 15% 80%;
 
-    --accent-primary: 180 100% 50%;
-    --accent-primary-hover: 180 100% 45%;
-    --accent-secondary: 160 84% 39%;
+    --accent-primary: 180 100% 35%;
+    --accent-primary-hover: 180 100% 30%;
+    --accent-secondary: 160 84% 30%;
 
     --status-success: 160 84% 39%;
     --status-warning: 38 92% 50%;
@@ -156,12 +156,16 @@
     --bg-card-elevated: 216 33% 10%;
 
     --text-primary: 0 0% 100%;
-    --text-secondary: 216 10% 80%;
-    --text-muted: 216 10% 60%;
-    --text-subtle: 216 10% 40%;
+    --text-secondary: 216 10% 85%;
+    --text-muted: 216 10% 70%;
+    --text-subtle: 216 10% 50%;
 
-    --border-default: 216 10% 15%;
-    --border-strong: 216 10% 25%;
+    --border-default: 216 10% 20%;
+    --border-strong: 216 10% 30%;
+
+    --accent-primary: 180 100% 50%;
+    --accent-primary-hover: 180 100% 45%;
+    --accent-secondary: 160 84% 39%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
@@ -228,9 +232,9 @@
   body {
     min-height: 100%;
     background:
-      radial-gradient(circle at top, hsl(var(--accent-primary) / 0.13), transparent 32%),
-      radial-gradient(circle at 88% 16%, hsl(var(--accent-secondary) / 0.08), transparent 26%),
-      linear-gradient(180deg, hsl(var(--sys-bg)) 0%, hsl(var(--sys-bg2)) 58%, hsl(var(--sys-bg)) 100%);
+      radial-gradient(circle at top, hsl(var(--accent-primary) / 0.08), transparent 45%),
+      radial-gradient(circle at 88% 16%, hsl(var(--accent-secondary) / 0.05), transparent 35%),
+      hsl(var(--sys-bg));
     background-attachment: fixed;
     color: hsl(var(--label));
     font-size: 16px;
