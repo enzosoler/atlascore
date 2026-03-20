@@ -37,8 +37,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
-import { searchFoods } from '@/services/foodApi';
 import { searchFatSecretFoods } from '@/services/fatsecretService';
+import { searchTaco } from '@/services/tacoService';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -72,8 +72,7 @@ const MOCK_PRESCRIBED_DIET = {
 
 const TODAY = getToday();
 const YESTERDAY = shiftDate(TODAY, -1);
-const USDA_SEARCH_DEBOUNCE_MS = 300;
-const FATSECRET_SEARCH_DEBOUNCE_MS = 300;
+const FATSECRET_SEARCH_DEBOUNCE_MS = 400;
 const RECENT_FOODS_STORAGE_KEY = 'atlas_recent_foods';
 
 
@@ -362,7 +361,9 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
             {food.name}
           </p>
           <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-            {food.brand || 'USDA FoodData Central'}
+            {food.brand === 'TACO'
+              ? '🇧🇷 TACO/UNICAMP'
+              : food.brand || 'FatSecret'}
           </p>
         </div>
         <div className="grid shrink-0 grid-cols-2 gap-x-3 gap-y-2 text-right">
@@ -461,7 +462,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
 
-  // Debounced FatSecret search
+  // Busca: TACO instantâneo → FatSecret fallback
   useEffect(() => {
     const q = searchQuery.trim();
     if (q.length < 2) {
@@ -470,17 +471,26 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
       setIsSearching(false);
       return;
     }
+
+    // 1. TACO (offline, imediato)
+    const tacoHits = searchTaco(q, 8);
+    if (tacoHits.length > 0) {
+      setSearchResults(tacoHits);
+      setIsSearching(false);
+      setSearchError('');
+      return;
+    }
+
+    // 2. FatSecret (industrializados não cobertos pelo TACO)
     setIsSearching(true);
     setSearchError('');
     const timer = setTimeout(async () => {
       try {
         let results = await searchFatSecretFoods(q, 'pt');
-        if (results.length === 0) {
-          results = await searchFatSecretFoods(q, 'en');
-        }
+        if (results.length === 0) results = await searchFatSecretFoods(q, 'en');
         setSearchResults(results.slice(0, 8));
       } catch {
-        setSearchError('Erro ao buscar alimentos. Tente novamente.');
+        setSearchError('Erro ao buscar. Tente outro nome.');
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -585,7 +595,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
         {isSearching ? (
           <div className="mt-3 flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
-            <Loader2 className="h-4 w-4 animate-spin" /> Buscando na FatSecret...
+            <Loader2 className="h-4 w-4 animate-spin" /> Não achei no TACO, buscando na FatSecret...
           </div>
         ) : null}
 
@@ -677,7 +687,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
             Busque e adicione alimentos acima
           </p>
           <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
-            Os macros são calculados automaticamente via FatSecret
+            Busca instantânea via TACO 🇧🇷 — industrializados via FatSecret
           </p>
         </div>
       ) : null}
@@ -711,15 +721,11 @@ export default function NutritionPage() {
   const [meals, setMeals] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState(null);
-  const [query, setQuery] = useState(''); // For USDA search
-  const [results, setResults] = useState([]); // For USDA search
-  const [isSearchingFoods, setIsSearchingFoods] = useState(false); // For USDA search
-  const [searchError, setSearchError] = useState(''); // For USDA search
-
-  const [fatSecretQuery, setFatSecretQuery] = useState('');
-  const [fatSecretResults, setFatSecretResults] = useState([]);
-  const [isSearchingFatSecretFoods, setIsSearchingFatSecretFoods] = useState(false);
-  const [fatSecretSearchError, setFatSecretSearchError] = useState('');
+  // Unified food search (TACO → FatSecret fallback)
+  const [foodQuery, setFoodQuery] = useState('');
+  const [foodResults, setFoodResults] = useState([]);
+  const [isSearchingFoods, setIsSearchingFoods] = useState(false);
+  const [foodSearchError, setFoodSearchError] = useState('');
   const [savingFoodId, setSavingFoodId] = useState(null);
   const [isLoadingMeals, setIsLoadingMeals] = useState(false);
   const [recentFoods, setRecentFoods] = useState([]);
@@ -769,77 +775,44 @@ export default function NutritionPage() {
   }, []);
 
   useEffect(() => {
-    // USDA Search Logic
-    const normalizedUSDAQuery = query.trim();
-    if (normalizedUSDAQuery.length < 2) {
-      setResults([]);
-      setSearchError('');
+    const q = foodQuery.trim();
+    if (q.length < 2) {
+      setFoodResults([]);
+      setFoodSearchError('');
       setIsSearchingFoods(false);
-    } else {
-      let isActiveUSDA = true;
-      const timeoutUSDA = window.setTimeout(async () => {
-        setIsSearchingFoods(true);
-        setSearchError('');
-        try {
-          const foods = await searchFoods(normalizedUSDAQuery);
-          if (isActiveUSDA) {
-            setResults(foods);
-          }
-        } catch (error) {
-          console.error('USDA food search failed:', error);
-          if (isActiveUSDA) {
-            setResults([]);
-            setSearchError(error?.message || 'Não foi possivel buscar alimentos agora.');
-          }
-        } finally {
-          if (isActiveUSDA) {
-            setIsSearchingFoods(false);
-          }
-        }
-      }, USDA_SEARCH_DEBOUNCE_MS);
-      return () => {
-        isActiveUSDA = false;
-        window.clearTimeout(timeoutUSDA);
-      };
+      return;
     }
 
-    // FatSecret Search Logic
-    const normalizedFatSecretQuery = fatSecretQuery.trim();
-    if (normalizedFatSecretQuery.length < 2) {
-      setFatSecretResults([]);
-      setFatSecretSearchError('');
-      setIsSearchingFatSecretFoods(false);
-    } else {
-      let isActiveFatSecret = true;
-      const timeoutFatSecret = window.setTimeout(async () => {
-        setIsSearchingFatSecretFoods(true);
-        setFatSecretSearchError('');
-        try {
-          let foods = await searchFatSecretFoods(normalizedFatSecretQuery, 'en');
-          if (foods.length === 0) {
-            foods = await searchFatSecretFoods(normalizedFatSecretQuery, 'pt');
-          }
-          if (isActiveFatSecret) {
-            setFatSecretResults(foods);
-          }
-        } catch (error) {
-          console.error('FatSecret food search failed:', error);
-          if (isActiveFatSecret) {
-            setFatSecretResults([]);
-            setFatSecretSearchError(error?.message || 'Não foi possivel buscar alimentos agora.');
-          }
-        } finally {
-          if (isActiveFatSecret) {
-            setIsSearchingFatSecretFoods(false);
-          }
-        }
-      }, FATSECRET_SEARCH_DEBOUNCE_MS);
-      return () => {
-        isActiveFatSecret = false;
-        window.clearTimeout(timeoutFatSecret);
-      };
+    // Passo 1: busca instantânea no TACO (offline, sem custo)
+    const tacoResults = searchTaco(q, 10);
+    if (tacoResults.length > 0) {
+      setFoodResults(tacoResults);
+      setIsSearchingFoods(false);
+      setFoodSearchError('');
+      return;
     }
-  }, [query, fatSecretQuery]);
+
+    // Passo 2: fallback FatSecret para industrializados não cobertos pelo TACO
+    setIsSearchingFoods(true);
+    setFoodSearchError('');
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      try {
+        let foods = await searchFatSecretFoods(q, 'pt');
+        if (foods.length === 0) foods = await searchFatSecretFoods(q, 'en');
+        if (active) setFoodResults(foods.slice(0, 8));
+      } catch (error) {
+        console.error('FatSecret search failed:', error);
+        if (active) {
+          setFoodResults([]);
+          setFoodSearchError('Não encontrado. Tente outro nome ou verifique a conexão.');
+        }
+      } finally {
+        if (active) setIsSearchingFoods(false);
+      }
+    }, FATSECRET_SEARCH_DEBOUNCE_MS);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [foodQuery]);
 
   const handleSelectFood = async (food) => {
     if (!user?.id) {
@@ -861,7 +834,7 @@ export default function NutritionPage() {
         serving_unit: 'g',
         serving_size: 100,
         external_id: food.id,
-        source_api: food.brand === 'USDA' ? 'USDA' : 'FatSecret',
+        source_api: food.brand === 'TACO' ? 'TACO' : 'FatSecret',
       };
 
       const { data, error } = await supabase.from('food_logs').insert(snapshot).select().single();
@@ -871,12 +844,9 @@ export default function NutritionPage() {
       const savedMeal = mapFoodLogToMeal(data || snapshot);
 
       setMeals((current) => [savedMeal, ...current]);
-      setQuery('');
-      setResults([]);
-      setSearchError('');
-      setFatSecretQuery('');
-      setFatSecretResults([]);
-      setFatSecretSearchError('');
+      setFoodQuery('');
+      setFoodResults([]);
+      setFoodSearchError('');
       setNotice({
         tone: 'success',
         message: `${food.name} adicionado com sucesso.`,
@@ -1098,41 +1068,39 @@ export default function NutritionPage() {
 
         <Section
           title="Buscar alimento"
-          subtitle="Digite pelo menos 2 letras. Ao selecionar um item, a tela salva nome e macros."
+          subtitle="Resultados instantâneos da tabela TACO. Para industrializados, busca automaticamente na FatSecret."
         >
           <Card className="px-5 py-5">
             <label className={FIELD_LABEL_CLASS}>
-              Busca FatSecret (PT/EN)
+              Buscar alimento
               <div className="relative mt-2">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
                 <input
                   type="text"
-                  value={fatSecretQuery}
-                  onChange={(event) => setFatSecretQuery(event.target.value)}
-                  placeholder="Ex: peito de frango, arroz, banana"
+                  value={foodQuery}
+                  onChange={(event) => setFoodQuery(event.target.value)}
+                  placeholder="Ex: frango grelhado, arroz, banana, whey..."
                   className={cn(INPUT_CLASS_NAME, 'pl-11')}
                 />
               </div>
             </label>
-            {fatSecretQuery.trim().length > 0 && fatSecretQuery.trim().length < 2 ? (
-              <p className="mt-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
-                Continue digitando para buscar alimentos na FatSecret.
-              </p>
-            ) : null}
-            {isSearchingFatSecretFoods ? (
-              <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]\">
+
+            {isSearchingFoods ? (
+              <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]">
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-                Buscando alimentos na FatSecret...
+                Não achei no TACO, buscando na FatSecret...
               </div>
             ) : null}
-            {!isSearchingFatSecretFoods && fatSecretSearchError ? (
-              <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]\">
-                {fatSecretSearchError}
+
+            {!isSearchingFoods && foodSearchError ? (
+              <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]">
+                {foodSearchError}
               </div>
             ) : null}
-            {!isSearchingFatSecretFoods && !fatSecretSearchError && fatSecretResults.length > 0 ? (
+
+            {!isSearchingFoods && !foodSearchError && foodResults.length > 0 ? (
               <div className="mt-5 space-y-3">
-                {fatSecretResults.map((food) => (
+                {foodResults.map((food) => (
                   <FoodSearchResult
                     key={food.id}
                     food={food}
@@ -1142,21 +1110,15 @@ export default function NutritionPage() {
                 ))}
               </div>
             ) : null}
-            {!isSearchingFatSecretFoods &&
-            !fatSecretSearchError &&
-            fatSecretQuery.trim().length >= 2 &&
-            fatSecretResults.length === 0 ? (
-              <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
-                Nenhum alimento encontrado para esta busca na FatSecret.
+
+            {!isSearchingFoods && !foodSearchError && foodQuery.trim().length >= 2 && foodResults.length === 0 ? (
+              <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                Nenhum resultado. Tente um nome diferente ou mais genérico.
               </div>
             ) : null}
           </Card>
 
-          {!isSearchingFoods &&
-          !isSearchingFatSecretFoods &&
-          !query &&
-          !fatSecretQuery &&
-          recentFoods.length > 0 ? (
+          {!isSearchingFoods && !foodQuery && recentFoods.length > 0 ? (
             <Card className="px-5 py-5 mt-5">
               <p className={FIELD_LABEL_CLASS}>Alimentos recentes</p>
               <div className="mt-5 space-y-3">
@@ -1171,60 +1133,6 @@ export default function NutritionPage() {
               </div>
             </Card>
           ) : null}
-
-          <Card className="px-5 py-5 mt-5">
-            <label className={FIELD_LABEL_CLASS}>
-              Busca USDA
-              <div className="relative mt-2">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Ex: chicken breast, rice, banana"
-                  className={cn(INPUT_CLASS_NAME, 'pl-11')}
-                />
-              </div>
-            </label>
-            <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
-              Data ativa do registro:{' '}
-              <span className="font-semibold text-[hsl(var(--fg))]\">{selectedDate}</span>
-            </p>
-            {query.trim().length > 0 && query.trim().length < 2 ? (
-              <p className="mt-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
-                Continue digitando para buscar alimentos na USDA.
-              </p>
-            ) : null}
-            {isSearchingFoods ? (
-              <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]\">
-                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-                Buscando alimentos na USDA FoodData Central...
-              </div>
-            ) : null}
-            {!isSearchingFoods && searchError ? (
-              <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]\">
-                {searchError}
-              </div>
-            ) : null}
-            {!isSearchingFoods && !searchError && results.length > 0 ? (
-              <div className="mt-5 space-y-3">
-                {results.map((food) => (
-                  <FoodSearchResult
-                    key={food.id}
-                    food={food}
-                    onSelect={handleSelectFood}
-                    isSaving={savingFoodId === food.id}
-                  />
-                ))}
-              </div>
-            ) : null}
-            {!isSearchingFoods && !searchError && query.trim().length >= 2 && results.length === 0 ? (
-              <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]\">
-                Nenhum alimento encontrado para esta busca.
-              </div>
-            ) : null}
-          </Card>
-
         </Section>
       </AppContainer>
 
