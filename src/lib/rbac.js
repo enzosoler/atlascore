@@ -127,15 +127,11 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.profile,              label: 'Profile',       icon: 'User' },
   ],
   admin: [
-    { path: ROUTES.today,                  label: 'Today',             icon: 'Home' },
-    { path: ROUTES.nutrition,              label: 'Nutrition',         icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,               label: 'Workouts',          icon: 'Dumbbell' },
-    { path: ROUTES.protocols,             label: 'Protocols',         icon: 'FlaskConical' },
-    { path: ROUTES.coachDashboard,        label: 'Coach',             icon: 'LayoutDashboard' },
-    { path: ROUTES.nutritionistDashboard, label: 'Nutritionist',      icon: 'ChefHat' },
-    { path: ROUTES.clinicianDashboard,    label: 'Clinician',         icon: 'Heart' },
-    { path: ROUTES.admin,                 label: 'Admin Console',     icon: 'ShieldCheck' },
-    { path: ROUTES.profile,              label: 'Profile',            icon: 'User' },
+    { path: ROUTES.today,      label: 'Today',         icon: 'Home' },
+    { path: ROUTES.nutrition,  label: 'Nutrition',     icon: 'UtensilsCrossed' },
+    { path: ROUTES.workouts,   label: 'Workouts',      icon: 'Dumbbell' },
+    { path: ROUTES.admin,      label: 'Admin Console', icon: 'ShieldCheck' },
+    { path: ROUTES.profile,    label: 'Profile',       icon: 'User' },
   ],
 };
 
