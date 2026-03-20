@@ -11,7 +11,7 @@ export function AppContainer({ children, className = '', maxWidth = 'max-w-5xl' 
     >
       <div
         className={cn(
-          'mx-auto flex w-full flex-col gap-6 px-4 pb-10 pt-[max(env(safe-area-inset-top),20px)] sm:px-6 sm:pb-12 lg:px-8 lg:pb-16 lg:pt-10',
+          'mx-auto flex w-full flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 sm:pb-12 lg:px-8 lg:pb-16 lg:pt-10',
           maxWidth,
           className
         )}

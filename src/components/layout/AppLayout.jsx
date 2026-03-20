@@ -417,29 +417,42 @@ export default function AppLayout() {
       </aside>
 
       {/* ── Mobile top bar ──────────────────────────────────────── */}
-      <header className="glass fixed inset-x-0 top-0 z-[60] flex h-14 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4 lg:hidden">
-        <button
-          onClick={() => setMobileOpen((value) => !value)}
-          className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
-          aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={mobileOpen ? 'close' : 'open'}
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              {mobileOpen ? <X className="h-5 w-5" strokeWidth={2} /> : <Menu className="h-5 w-5" strokeWidth={2} />}
-            </motion.div>
-          </AnimatePresence>
-        </button>
+      {/* padding-top: env(safe-area-inset-top) pushes content below notch/Dynamic Island */}
+      <header
+        className="glass fixed inset-x-0 top-0 z-[60] border-b border-[hsl(var(--border)/0.72)] lg:hidden"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        {/* relative so the brand can be absolutely centered regardless of side-button widths */}
+        <div className="relative flex h-14 items-center justify-between px-4">
+          <button
+            onClick={() => setMobileOpen((value) => !value)}
+            className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
+            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={mobileOpen ? 'close' : 'open'}
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                {mobileOpen ? <X className="h-5 w-5" strokeWidth={2} /> : <Menu className="h-5 w-5" strokeWidth={2} />}
+              </motion.div>
+            </AnimatePresence>
+          </button>
 
-        {/* Logo mark only — no text, reduces visual noise */}
-        <AtlasCoreLogoSVG width={22} height={22} className="text-[hsl(var(--fg))]" color="hsl(var(--fg))" />
+          {/* Brand — absolutely centered so side buttons don't push it */}
+          <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2">
+            {/* viewBox is 800×400 → use 2:1 ratio so the icon isn't squished */}
+            <AtlasCoreLogoSVG width={36} height={18} color="hsl(var(--fg))" />
+            <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
+            </span>
+          </div>
 
-        <ThemeToggleButton compact />
+          <ThemeToggleButton compact />
+        </div>
       </header>
 
       {/* ── Mobile drawer ───────────────────────────────────────── */}
@@ -463,7 +476,9 @@ export default function AppLayout() {
               transition={{ type: 'tween', duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="glass fixed bottom-0 left-0 top-0 z-[70] flex w-[18rem] flex-col border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.88)] lg:hidden"
             >
-              <div className="flex h-14 shrink-0 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4">
+              <div className="flex shrink-0 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4"
+                style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
+              >
                 <div className="flex items-center gap-2">
                   <AtlasCoreLogoSVG width={24} height={24} />
                   <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
@@ -554,11 +569,12 @@ export default function AppLayout() {
       <main
         ref={mainRef}
         className={cn(
-          'flex-1 min-h-screen overscroll-y-none transition-all duration-300',
+          'flex-1 min-h-screen overflow-x-hidden overscroll-y-none transition-all duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
-          'pt-14 lg:pt-0',
+          'lg:pt-0',
           'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
         )}
+        style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
       >
         <TrialBanner />
 

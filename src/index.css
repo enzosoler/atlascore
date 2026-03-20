@@ -225,8 +225,9 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     min-height: 100%;
-    /* Prevent horizontal overflow from triggering layout reflow / scale on iOS */
-    overflow-x: hidden;
+    /* clip (not hidden) avoids creating a new scroll container on iOS Safari,
+       which would break position:fixed for the header and bottom tab bar */
+    overflow-x: clip;
   }
 
   body {
