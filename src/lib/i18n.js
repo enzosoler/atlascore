@@ -2,26 +2,26 @@ import ptBR from './translations/pt-BR.json';
 import enUS from './translations/en-US.json';
 import ptBROnboarding from './translations/pt-BR-onboarding.json';
 import enUSOnboarding from './translations/en-US-onboarding.json';
+import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  getLocaleFallbackChain,
+  negotiateLocale,
+  normalizeLocale,
+} from '../../shared/localization.js';
 
 export const translations = {
   'pt-BR': { ...ptBR, ...ptBROnboarding },
   'en-US': { ...enUS, ...enUSOnboarding },
 };
 
-export const DEFAULT_LANGUAGE = 'en-US';
-export const supportedLanguages = ['pt-BR', 'en-US'];
+export const DEFAULT_LANGUAGE = DEFAULT_LOCALE;
+export const supportedLanguages = [...SUPPORTED_LOCALES];
 export const LANGUAGE_STORAGE_KEY = 'atlas_locale';
 export const LEGACY_LANGUAGE_STORAGE_KEY = 'language';
 
 export const normalizeLanguage = (lang) => {
-  if (!lang || typeof lang !== 'string') return null;
-  if (supportedLanguages.includes(lang)) return lang;
-
-  const lower = lang.toLowerCase();
-  if (lower.startsWith('pt')) return 'pt-BR';
-  if (lower.startsWith('en')) return 'en-US';
-
-  return null;
+  return normalizeLocale(lang, supportedLanguages);
 };
 
 export const detectPreferredLanguage = () => {
@@ -34,9 +34,11 @@ export const detectPreferredLanguage = () => {
   const legacySaved = normalizeLanguage(localStorage.getItem(LEGACY_LANGUAGE_STORAGE_KEY));
   if (legacySaved) return legacySaved;
 
-  // Fall back to browser/system language, then to default (English)
-  const browserLang = normalizeLanguage(navigator.language || navigator.languages?.[0]);
-  return browserLang || DEFAULT_LANGUAGE;
+  const browserPreferences = Array.isArray(navigator.languages) && navigator.languages.length > 0
+    ? navigator.languages
+    : [navigator.language].filter(Boolean);
+
+  return negotiateLocale(browserPreferences, supportedLanguages, DEFAULT_LANGUAGE);
 };
 
 // Clear any previously auto-saved language and re-detect from browser.
@@ -46,7 +48,7 @@ export const resetLanguageToSystem = () => {
   localStorage.removeItem(LANGUAGE_STORAGE_KEY);
   localStorage.removeItem(LEGACY_LANGUAGE_STORAGE_KEY);
   const lang = detectPreferredLanguage();
-  setLanguage(lang);
+  window.dispatchEvent(new CustomEvent('languageChanged', { detail: lang }));
   return lang;
 };
 
@@ -62,17 +64,48 @@ export const setLanguage = (lang) => {
   localStorage.setItem(LEGACY_LANGUAGE_STORAGE_KEY, normalized);
 };
 
-export const t = (key, lang = getLanguage()) => {
+const getTranslationValue = (key, lang) => {
   const keys = key.split('.');
-  let value = translations[lang] || translations[DEFAULT_LANGUAGE];
-  
-  for (const k of keys) {
-    value = value?.[k];
-    if (!value) {
-      console.warn(`Translation key not found: ${key}`);
-      return key;
+
+  for (const locale of getLocaleFallbackChain(lang, supportedLanguages, DEFAULT_LANGUAGE)) {
+    let value = translations[locale] || translations[DEFAULT_LANGUAGE];
+
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) {
+        break;
+      }
+    }
+
+    if (value !== undefined) {
+      return value;
     }
   }
-  
-  return value;
+
+  return undefined;
+};
+
+const interpolate = (template, params = {}) => {
+  if (typeof template !== 'string' || !params || typeof params !== 'object') {
+    return template;
+  }
+
+  return template.replace(/\{(\w+)\}/g, (_, token) => {
+    if (params[token] === undefined || params[token] === null) {
+      return `{${token}}`;
+    }
+
+    return String(params[token]);
+  });
+};
+
+export const t = (key, lang = getLanguage(), params) => {
+  const value = getTranslationValue(key, lang);
+
+  if (value === undefined) {
+    console.warn(`Translation key not found: ${key}`);
+    return key;
+  }
+
+  return interpolate(value, params);
 };
