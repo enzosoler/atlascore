@@ -1,10 +1,9 @@
 export const DEFAULT_LOCALE = 'en-US';
-export const SUPPORTED_LOCALES = Object.freeze(['pt-BR', 'en-US']);
+export const SUPPORTED_LOCALES = Object.freeze(['en-US']);
 export const RTL_BASE_LANGUAGES = Object.freeze(['ar', 'fa', 'he', 'ur']);
 
 const FALLBACK_LOCALE_BY_LANGUAGE = Object.freeze({
   en: 'en-US',
-  pt: 'pt-BR',
 });
 
 export function canonicalizeLocale(locale) {

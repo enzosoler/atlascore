@@ -1,38 +1,20 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { getLanguage, setLanguage, t as translate } from '@/lib/i18n';
+import React, { createContext } from 'react';
+import { t as translate } from '@/lib/i18n';
 
 export const I18nContext = createContext();
 
 /**
- * I18nContext — gerenciar idioma global + preferência persistida
- * PT-BR ou EN-US apenas
+ * I18nContext — English-only provider
+ * Always uses en-US locale
  */
 export function I18nProvider({ children }) {
-  const [locale, setLocaleState] = useState(() => getLanguage());
+  const locale = 'en-US';
 
-  const setLocale = React.useCallback((newLocale) => {
-    setLanguage(newLocale);
-    const normalized = getLanguage();
-    setLocaleState(normalized);
-    window.dispatchEvent(new CustomEvent('languageChanged', { detail: normalized }));
+  const setLocale = React.useCallback(() => {
+    // No-op: language is always en-US
   }, []);
 
-  useEffect(() => {
-    const syncLocale = () => setLocaleState(getLanguage());
-    const syncFromStorage = (event) => {
-      if (event.key === 'atlas_locale' || event.key === 'language') syncLocale();
-    };
-
-    window.addEventListener('languageChanged', syncLocale);
-    window.addEventListener('storage', syncFromStorage);
-
-    return () => {
-      window.removeEventListener('languageChanged', syncLocale);
-      window.removeEventListener('storage', syncFromStorage);
-    };
-  }, []);
-
-  const t = React.useCallback((key) => translate(key, locale), [locale]);
+  const t = React.useCallback((key) => translate(key, locale), []);
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>

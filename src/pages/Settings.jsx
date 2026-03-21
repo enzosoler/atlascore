@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Globe,
   Moon,
   Sun,
   Monitor,
@@ -40,27 +39,6 @@ function ThemeOption({ icon: Icon, label, value, currentTheme, onSelect }) {
       ].join(' ')}
     >
       <Icon className="h-5 w-5" strokeWidth={1.9} />
-      {label}
-    </button>
-  );
-}
-
-// ── Language option button ────────────────────────────────────────────────────
-
-function LangOption({ code, label, flag, currentLocale, onSelect }) {
-  const active = currentLocale === code;
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(code)}
-      className={[
-        'flex flex-1 items-center justify-center gap-2 rounded-[20px] border py-3.5 text-[13px] font-medium transition-all duration-200',
-        active
-          ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]'
-          : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)] hover:text-[hsl(var(--fg))]',
-      ].join(' ')}
-    >
-      <span className="text-lg">{flag}</span>
       {label}
     </button>
   );
@@ -187,31 +165,6 @@ function SettingsContent() {
         </div>
       </SectionCard>
 
-      {/* Language */}
-      <SectionCard
-        title={t('settings.language.title')}
-        subtitle={t('settings.language.subtitle')}
-      >
-        <div className="flex gap-3">
-          <LangOption
-            code="pt-BR"
-            label="Português"
-            flag="🇧🇷"
-            currentLocale={locale}
-            onSelect={setLocale}
-          />
-          <LangOption
-            code="en-US"
-            label="English"
-            flag="🇺🇸"
-            currentLocale={locale}
-            onSelect={setLocale}
-          />
-        </div>
-        <p className="mt-3 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-          {locale === 'en-US' ? t('settings.language.noteEn') : t('settings.language.notePt')}
-        </p>
-      </SectionCard>
 
       {/* Other links */}
       <SectionCard

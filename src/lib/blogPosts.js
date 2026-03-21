@@ -2,9 +2,8 @@
  * Blog post metadata and markdown content.
  * All posts are public, indexable, and part of the marketing/discovery layer.
  * Routes: /blog (index) and /blog/:slug (individual posts).
+ * English-only version.
  */
-
-import { BLOG_POSTS_PT, BLOG_POST_CONTENT_PT } from './blogPosts_pt';
 
 export const BLOG_POSTS = [
   {
@@ -194,22 +193,19 @@ export function getPostBySlug(slug) {
   return BLOG_POSTS.find((p) => p.slug === slug);
 }
 
-/** Get localized post metadata */
-export function getLocalizedPost(post, lang = 'pt-BR') {
+/** Get localized post metadata (English-only) */
+export function getLocalizedPost(post, lang = 'en-US') {
   if (!post) return null;
   return {
     ...post,
-    title: post.title[lang] || post.title['en-US'],
-    excerpt: post.excerpt[lang] || post.excerpt['en-US'],
-    category: post.category[lang] || post.category['en-US'],
+    title: post.title['en-US'],
+    excerpt: post.excerpt['en-US'],
+    category: post.category['en-US'],
   };
 }
 
-/** Get localized post content */
-export function getLocalizedContent(slug, lang = 'pt-BR') {
-  if (lang === 'pt-BR' && BLOG_POST_CONTENT_PT[slug]) {
-    return BLOG_POST_CONTENT_PT[slug];
-  }
+/** Get localized post content (English-only) */
+export function getLocalizedContent(slug, lang = 'en-US') {
   return BLOG_POST_CONTENT[slug];
 }
 

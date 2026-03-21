@@ -246,34 +246,34 @@ function DiaryContent() {
       >
         <div className="grid gap-3 sm:grid-cols-3">
           <HeroStat
-            label="Energia do dia"
+            label="Daily energy"
             value={totalCal > 0 ? `${Math.round(totalCal)} kcal` : '—'}
             detail={
               meals.length > 0
-                ? `${meals.length} registro(s) · ${Math.round(totalProtein)}g proteína`
-                : 'Nenhum alimento registrado para este dia.'
+                ? `${meals.length} meal(s) · ${Math.round(totalProtein)}g protein`
+                : 'No meals logged for this day.'
             }
           />
           <HeroStat
             label="Check-in"
             value={
               checkin
-                ? `Humor ${checkin.mood ?? '—'}/5 · Energia ${checkin.energy ?? '—'}/5`
+                ? `Mood ${checkin.mood ?? '—'}/5 · Energy ${checkin.energy ?? '—'}/5`
                 : '—'
             }
             detail={
               checkin
-                ? `${checkin.sleep_hours || 0}h de sono · ${checkin.hydration_liters || 0}L de água`
-                : 'Check-in não registrado para este dia.'
+                ? `${checkin.sleep_hours || 0}h sleep · ${checkin.hydration_liters || 0}L water`
+                : 'No check-in recorded for this day.'
             }
           />
           <HeroStat
-            label="Treinos"
-            value={workouts.length > 0 ? `${workouts.length} sessão(ões)` : '—'}
+            label="Workouts"
+            value={workouts.length > 0 ? `${workouts.length} session(s)` : '—'}
             detail={
               workouts.length > 0
-                ? `${doneWorkouts} concluído(s) para a data selecionada.`
-                : 'Nenhum treino registrado para este dia.'
+                ? `${doneWorkouts} completed for this date.`
+                : 'No workouts recorded for this day.'
             }
           />
         </div>
@@ -281,19 +281,19 @@ function DiaryContent() {
 
       {/* ── Nutrição ────────────────────────────────────────────── */}
       <Section
-        eyebrow="Diário"
-        title={meals.length > 0 ? `Nutrição · ${Math.round(totalCal)} kcal` : 'Nutrição'}
-        subtitle="Alimentos registrados via página de Nutrição para a data selecionada."
+        eyebrow="Diary"
+        title={meals.length > 0 ? `Nutrition · ${Math.round(totalCal)} kcal` : 'Nutrition'}
+        subtitle="Foods logged via Nutrition page for the selected date."
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
             icon={UtensilsCrossed}
             color="hsl(var(--brand, #0A84FF))"
-            label="Nutrição"
+            label="Nutrition"
           />
 
           {meals.length === 0 ? (
-            <EmptySlot message="Nenhum alimento registrado para este dia." />
+            <EmptySlot message="No meals logged for this day." />
           ) : (
             <>
               <div className="divide-y divide-[hsl(var(--border)/0.5)]">
@@ -317,9 +317,9 @@ function DiaryContent() {
                 ))}
               </div>
               <div className="grid gap-px bg-[hsl(var(--border)/0.6)] sm:grid-cols-3">
-                <SectionMetric label="Proteína" value={`${Math.round(totalProtein)}`} suffix="g" />
-                <SectionMetric label="Carboidratos" value={`${Math.round(totalCarbs)}`} suffix="g" />
-                <SectionMetric label="Gordura" value={`${Math.round(totalFat)}`} suffix="g" />
+                <SectionMetric label="Protein" value={`${Math.round(totalProtein)}`} suffix="g" />
+                <SectionMetric label="Carbs" value={`${Math.round(totalCarbs)}`} suffix="g" />
+                <SectionMetric label="Fat" value={`${Math.round(totalFat)}`} suffix="g" />
               </div>
             </>
           )}
@@ -328,9 +328,9 @@ function DiaryContent() {
 
       {/* ── Check-in ────────────────────────────────────────────── */}
       <Section
-        eyebrow="Diário"
+        eyebrow="Diary"
         title="Check-in"
-        subtitle="Dados de bem-estar, sono e hidratação registrados para o dia."
+        subtitle="Wellness, sleep, and hydration data logged for the day."
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
@@ -340,33 +340,33 @@ function DiaryContent() {
           />
 
           {!checkin ? (
-            <EmptySlot message="Check-in não registrado para este dia." />
+            <EmptySlot message="No check-in recorded for this day." />
           ) : (
             <div className="px-5 py-5 space-y-5">
-              {/* Métricas em grid */}
+              {/* Metrics grid */}
               <div className="grid gap-px overflow-hidden rounded-[20px] bg-[hsl(var(--border)/0.6)] sm:grid-cols-2">
-                <SectionMetric label="Humor" value={`${checkin.mood ?? '—'}`} suffix={checkin.mood != null ? '/5' : ''} />
-                <SectionMetric label="Energia" value={`${checkin.energy ?? '—'}`} suffix={checkin.energy != null ? '/5' : ''} />
+                <SectionMetric label="Mood" value={`${checkin.mood ?? '—'}`} suffix={checkin.mood != null ? '/5' : ''} />
+                <SectionMetric label="Energy" value={`${checkin.energy ?? '—'}`} suffix={checkin.energy != null ? '/5' : ''} />
                 <SectionMetric
-                  label="Sono"
+                  label="Sleep"
                   value={`${checkin.sleep_hours || 0}`}
                   suffix="h"
                 />
                 <SectionMetric
-                  label="Hidratação"
+                  label="Hydration"
                   value={`${checkin.hydration_liters || 0}`}
                   suffix="L"
                 />
               </div>
 
-              {/* Score dots visuais */}
+              {/* Visual score dots */}
               {(checkin.mood != null || checkin.energy != null) && (
                 <div className="space-y-3">
                   {checkin.mood != null && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
                         <Smile className="h-3.5 w-3.5" strokeWidth={1.9} />
-                        Humor
+                        Mood
                       </div>
                       <ScoreDots value={checkin.mood} max={5} />
                     </div>
@@ -375,7 +375,7 @@ function DiaryContent() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
                         <Moon className="h-3.5 w-3.5" strokeWidth={1.9} />
-                        Energia
+                        Energy
                       </div>
                       <ScoreDots value={checkin.energy} max={5} />
                     </div>
@@ -384,7 +384,7 @@ function DiaryContent() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
                         <Droplets className="h-3.5 w-3.5" strokeWidth={1.9} />
-                        Hidratação
+                        Hydration
                       </div>
                       <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">
                         {checkin.hydration_liters}L

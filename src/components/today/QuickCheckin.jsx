@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 
 const rows = [
-  { key: 'mood', label: 'Humor', min: 1, max: 5, step: 1, format: v => ['', 'Péssimo', 'Ruim', 'Neutro', 'Bom', 'Ótimo'][v] },
-  { key: 'energy', label: 'Energia', min: 1, max: 5, step: 1, format: v => `${v}/5` },
-  { key: 'sleep_hours', label: 'Sono', min: 3, max: 12, step: 0.5, format: v => `${v}h` },
-  { key: 'hydration_liters', label: 'Água', min: 0, max: 5, step: 0.25, format: v => `${v.toFixed(1)}L` },
+  { key: 'mood', label: 'Mood', min: 1, max: 5, step: 1, format: v => ['', 'Terrible', 'Poor', 'Neutral', 'Good', 'Excellent'][v] },
+  { key: 'energy', label: 'Energy', min: 1, max: 5, step: 1, format: v => `${v}/5` },
+  { key: 'sleep_hours', label: 'Sleep', min: 3, max: 12, step: 0.5, format: v => `${v}h` },
+  { key: 'hydration_liters', label: 'Water', min: 0, max: 5, step: 0.25, format: v => `${v.toFixed(1)}L` },
 ];
 
 export default function QuickCheckin({ existingCheckin }) {
@@ -32,7 +32,7 @@ export default function QuickCheckin({ existingCheckin }) {
       await base44.entities.DailyCheckin.create(data);
     }
     qc.invalidateQueries({ queryKey: ['daily-checkin'] });
-    toast.success('Check-in salvo');
+    toast.success('Check-in saved');
     setSaving(false);
   };
 
@@ -42,7 +42,7 @@ export default function QuickCheckin({ existingCheckin }) {
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Check-in</p>
         <Button onClick={handleSave} disabled={saving} size="sm"
           className="h-7 px-3 rounded-lg text-[12px] font-medium bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)/0.85)] text-white">
-          {saving ? 'Salvando…' : 'Salvar'}
+          {saving ? 'Saving...' : 'Save'}
         </Button>
       </div>
       {rows.map(row => (

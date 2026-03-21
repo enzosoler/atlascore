@@ -1,16 +1,12 @@
 import { DEFAULT_LOCALE, formatCurrencyValue, normalizeLocale } from '../../shared/localization.js';
 
 /**
- * Localization Service — Manage Currency Based on Browser Language
- * 
- * Rules:
- * - If browser language is Portuguese AND selected language is Portuguese -> BRL
- * - Any other combination -> USD
- * - User can change the UI language without affecting currency
+ * Localization Service — Manage Currency
+ *
+ * English-only version: always uses USD
  */
 
 export const CURRENCIES = {
-  BRL: { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
   USD: { code: 'USD', symbol: '$', name: 'US Dollar' },
 };
 
@@ -26,38 +22,27 @@ export const getBrowserLanguage = () => {
 };
 
 /**
- * Check if browser language is Portuguese
+ * Check if browser language is Portuguese (no longer used)
  */
 export const isBrowserPortuguese = () => {
-  const browserLang = getBrowserLanguage();
-  if (!browserLang) return false;
-  return browserLang.toLowerCase().startsWith('pt');
+  return false;
 };
 
 /**
- * Determine currency based on browser language and selected language
- * 
- * @param {string} selectedLanguage - The user's selected language (e.g., 'pt-BR', 'en-US')
- * @returns {string} - Currency code ('BRL' or 'USD')
+ * Determine currency - always returns USD
+ *
+ * @param {string} selectedLanguage - Unused; always returns USD
+ * @returns {string} - Currency code ('USD')
  */
 export const determineCurrency = (selectedLanguage) => {
-  // Rule: BRL only if browser is Portuguese AND selected language is Portuguese
-  const browserIsPT = isBrowserPortuguese();
-  const selectedIsPT = selectedLanguage?.toLowerCase().startsWith('pt');
-
-  if (browserIsPT && selectedIsPT) {
-    return 'BRL';
-  }
-
   return 'USD';
 };
 
 /**
- * Get the current currency based on browser language
- * (This is computed, not stored, so it always reflects the browser language)
+ * Get the current currency - always USD
  */
 export const getCurrentCurrency = (selectedLanguage) => {
-  return determineCurrency(selectedLanguage);
+  return 'USD';
 };
 
 /**
@@ -73,8 +58,7 @@ export const getCurrencyObject = (currencyCode) => {
 export const formatPrice = (amount, currencyCode) => {
   const currency = getCurrencyObject(currencyCode);
   const numericAmount = Number.isFinite(amount) ? amount : Number(amount || 0);
-  const locale =
-    normalizeLocale(currencyCode === 'BRL' ? 'pt-BR' : DEFAULT_LOCALE) || DEFAULT_LOCALE;
+  const locale = DEFAULT_LOCALE;
 
   return formatCurrencyValue(numericAmount, locale, currency.code);
 };
