@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 function getStatusMeta(status) {
   if (status === 'paused') {
     return {
-      label: 'Pausado',
+      label: 'Paused',
       badgeClassName: 'border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.14)] text-[hsl(var(--warn))]',
       iconClassName: 'border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]',
     };
@@ -13,14 +13,14 @@ function getStatusMeta(status) {
 
   if (status === 'finished') {
     return {
-      label: 'Finalizado',
+      label: 'Finished',
       badgeClassName: 'border-[hsl(var(--border)/0.92)] bg-[hsl(var(--fill)/0.86)] text-[hsl(var(--fg-2))]',
       iconClassName: 'border-[hsl(var(--border)/0.92)] bg-[hsl(var(--fill)/0.78)] text-[hsl(var(--fg-2))]',
     };
   }
 
   return {
-    label: 'Ativo',
+    label: 'Active',
     badgeClassName: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.14)] text-[hsl(var(--ok))]',
     iconClassName: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]',
   };
@@ -86,7 +86,7 @@ export default function ProtocolCard({
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <h3 className="text-lg font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                {protocol?.substance_name || protocol?.name || 'Protocolo'}
+                {protocol?.substance_name || protocol?.name || 'Protocol'}
               </h3>
               <span className={cn('rounded-full border px-2.5 py-1 text-[11px] font-semibold', statusMeta.badgeClassName)}>
                 {statusMeta.label}
@@ -100,20 +100,20 @@ export default function ProtocolCard({
             <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
               {protocol?.dose
                 ? `${protocol.dose}${protocol?.unit ? ` ${protocol.unit}` : ''}`
-                : 'Dose não definida'}{' '}
-              · {protocol?.frequency || 'Frequência não definida'}
+                : 'Dose not defined'}{' '}
+              · {protocol?.frequency || 'Frequency not defined'}
             </p>
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
-            <DetailTile label="Início" value={protocol?.start_date} />
-            <DetailTile label="Fim" value={protocol?.end_date} />
-            <DetailTile label="Rotina" value={protocol?.schedule || protocol?.name} />
+            <DetailTile label="Start" value={protocol?.start_date} />
+            <DetailTile label="End" value={protocol?.end_date} />
+            <DetailTile label="Schedule" value={protocol?.schedule || protocol?.name} />
           </div>
 
           {protocol?.notes ? (
             <div className="rounded-[22px] border border-[hsl(var(--border)/0.88)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.76)_0%,hsl(var(--card))_100%)] px-4 py-4">
-              <p className="atlas-overline">Notas</p>
+              <p className="atlas-overline">Notes</p>
               <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">{protocol.notes}</p>
             </div>
           ) : null}
@@ -127,7 +127,7 @@ export default function ProtocolCard({
               className="border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))] hover:bg-[hsl(var(--ok)/0.18)]"
             >
               <Check className="h-4 w-4" strokeWidth={2} />
-              {isLogDosePending ? 'Registrando…' : 'Registrar dose'}
+              {isLogDosePending ? 'Logging...' : 'Log dose'}
             </ActionButton>
           ) : null}
 
@@ -137,7 +137,7 @@ export default function ProtocolCard({
             className="border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card))] text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill)/0.72)]"
           >
             <Pencil className="h-4 w-4" strokeWidth={2} />
-            Editar
+            Edit
           </ActionButton>
 
           {onPause ? (
@@ -146,7 +146,7 @@ export default function ProtocolCard({
               disabled={isPausePending}
               className="border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.14)] text-[hsl(var(--warn))] hover:bg-[hsl(var(--warn)/0.2)]"
             >
-              Pausar
+              Pause
             </ActionButton>
           ) : null}
 
@@ -156,7 +156,7 @@ export default function ProtocolCard({
               disabled={isResumePending}
               className="border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.14)] text-[hsl(var(--ok))] hover:bg-[hsl(var(--ok)/0.2)]"
             >
-              Retomar
+              Resume
             </ActionButton>
           ) : null}
 
@@ -166,7 +166,7 @@ export default function ProtocolCard({
               disabled={isFinishPending}
               className="border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.84)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))]"
             >
-              Finalizar
+              Finish
             </ActionButton>
           ) : null}
 
@@ -176,7 +176,7 @@ export default function ProtocolCard({
             className="border-[hsl(var(--err)/0.22)] bg-[hsl(var(--err)/0.12)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.18)]"
           >
             <Trash2 className="h-4 w-4" strokeWidth={2} />
-            Excluir
+            Delete
           </ActionButton>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ArrowRight, CheckCircle2, Clock, Play, Plus, Trophy, Zap } from 'lucide-react';
+import { ArrowRight, Clock, Play, Plus, Trophy } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
@@ -42,6 +42,13 @@ function searchResultToExecution(ex) {
       target_weight: null,
     })),
   };
+}
+
+function formatRestCountdown(seconds) {
+  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainingSeconds = safeSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -132,18 +139,23 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
   // ── Rest countdown timer ──────────────────────────────────────────────────
 
   useEffect(() => {
+    if (!resting || restTime > 0) return;
+    setResting(false);
+  }, [resting, restTime]);
+
+  useEffect(() => {
     if (!resting || restTime <= 0) return;
-    const timer = setInterval(() => {
-      setRestTime((v) => {
-        if (v <= 1) {
+    const timer = setTimeout(() => {
+      setRestTime((value) => {
+        if (value <= 1) {
           if (audioRef.current) audioRef.current.play().catch(() => {});
           return 0;
         }
-        return v - 1;
+        return value - 1;
       });
     }, 1000);
-    return () => clearInterval(timer);
-  }, [restTime, resting]);
+    return () => clearTimeout(timer);
+  }, [resting, restTime]);
 
   // ── Set/exercise recording ────────────────────────────────────────────────
 
@@ -316,7 +328,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
             </div>
             <div className="rounded-xl bg-[hsl(var(--shell))] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
-                Sets
+                {isPt ? 'Séries' : 'Sets'}
               </p>
               <p className="mt-1 text-[18px] font-bold text-[hsl(var(--fg))]">{totalSets}</p>
             </div>
@@ -349,7 +361,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
           <div className="space-y-2">
             <p className="atlas-overline">{isPt ? 'Descanso' : 'Rest'}</p>
             <p className="text-sm text-[hsl(var(--fg-2))]">
-              {isPt ? 'Próximo set:' : 'Next set:'} {exercise.name} (Set {setIdx + 1})
+              {isPt ? 'Próxima série:' : 'Next set:'} {exercise.name} ({isPt ? 'Série' : 'Set'} {setIdx + 1})
             </p>
           </div>
           <div className="relative flex h-48 w-48 items-center justify-center">
@@ -375,14 +387,20 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
               />
             </svg>
             <span className="text-[4rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
-              {restTime}
+              {formatRestCountdown(restTime)}
             </span>
           </div>
           <div className="flex gap-3 w-full">
             <Button variant="outline" className="flex-1" onClick={() => setRestTime((v) => v + 30)}>
               +30s
             </Button>
-            <Button className="flex-1" onClick={() => setRestTime(0)}>
+            <Button
+              className="flex-1"
+              onClick={() => {
+                setRestTime(0);
+                setResting(false);
+              }}
+            >
               {isPt ? 'Pular' : 'Skip'}
             </Button>
           </div>
@@ -484,7 +502,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
             {' '}
             <span className="font-semibold text-[hsl(var(--fg))]">
               {lastSession.setCount}×{lastSession.maxWeight > 0 ? ` ${lastSession.maxWeight}kg` : ''}
-              {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} reps` : ''}
+              {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} ${isPt ? 'reps' : 'reps'}` : ''}
             </span>
             <span className="ml-1.5 text-[hsl(var(--fg-3))]">
               {new Date(lastSession.date).toLocaleDateString(isPt ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}

@@ -24,24 +24,24 @@ import {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MUSCLE_FILTER_OPTIONS = [
-  { label: 'Peito',       value: 'chest' },
-  { label: 'Costas',      value: 'back' },
-  { label: 'Ombros',      value: 'delts' },
-  { label: 'Bíceps',      value: 'biceps' },
-  { label: 'Tríceps',     value: 'triceps' },
-  { label: 'Quadríceps',  value: 'quads' },
-  { label: 'Posterior',   value: 'hamstrings' },
-  { label: 'Glúteo',      value: 'glutes' },
-  { label: 'Panturrilha', value: 'calves' },
+  { label: 'Chest',       value: 'chest' },
+  { label: 'Back',      value: 'back' },
+  { label: 'Shoulders',      value: 'delts' },
+  { label: 'Biceps',      value: 'biceps' },
+  { label: 'Triceps',     value: 'triceps' },
+  { label: 'Quadriceps',  value: 'quads' },
+  { label: 'Hamstrings',   value: 'hamstrings' },
+  { label: 'Glutes',      value: 'glutes' },
+  { label: 'Calves', value: 'calves' },
   { label: 'Core',        value: 'abs' },
 ];
 
 const EQUIPMENT_FILTER_OPTIONS = [
-  { label: 'Barra',        value: 'barbell' },
-  { label: 'Halter',       value: 'dumbbell' },
-  { label: 'Polia',        value: 'cable' },
-  { label: 'Máquina',      value: 'machine' },
-  { label: 'Peso corporal', value: 'body weight' },
+  { label: 'Barbell',        value: 'barbell' },
+  { label: 'Dumbbell',       value: 'dumbbell' },
+  { label: 'Cable',        value: 'cable' },
+  { label: 'Machine',      value: 'machine' },
+  { label: 'Bodyweight', value: 'body weight' },
   { label: 'Kettlebell',   value: 'kettlebell' },
 ];
 
@@ -51,9 +51,9 @@ const DIFFICULTY_BADGE = {
   advanced:     'badge-err',
 };
 const DIFFICULTY_LABEL = {
-  beginner:     'Iniciante',
-  intermediate: 'Intermediário',
-  advanced:     'Avançado',
+  beginner:     'Beginner',
+  intermediate: 'Intermediate',
+  advanced:     'Advanced',
 };
 
 // ─── ExerciseRow ─────────────────────────────────────────────────────────────
@@ -131,16 +131,16 @@ function ManualEntry({ onAdd, onBack }) {
         onClick={onBack}
         className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]"
       >
-        ← Voltar
+        ← Back
       </button>
       <div>
         <label className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-          Nome do exercício
+          Exercise name
         </label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Meu exercício personalizado"
+          placeholder="Ex: My custom exercise"
           className="atlas-input"
           autoFocus
         />
@@ -161,7 +161,7 @@ function ManualEntry({ onAdd, onBack }) {
         disabled={!name.trim()}
         className="btn btn-primary w-full h-10 rounded-xl text-[13px] gap-1.5 disabled:opacity-50"
       >
-        <PenLine className="w-3.5 h-3.5" /> Adicionar manualmente
+        <PenLine className="w-3.5 h-3.5" /> Add manually
       </button>
     </div>
   );
@@ -336,7 +336,7 @@ export default function ExerciseSearch({ onSelect }) {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar exercício… (supino, agachamento)"
+            placeholder="Search exercise… (bench press, squat)"
             className="atlas-input pl-9 pr-9"
             inputMode="text"
           />
@@ -368,7 +368,7 @@ export default function ExerciseSearch({ onSelect }) {
       {showFilters && (
         <div className="space-y-2 p-3 rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))]">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">Músculo</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">Muscle</p>
             <div className="flex flex-wrap gap-1.5">
               {MUSCLE_FILTER_OPTIONS.map(({ label, value }) => (
                 <button
@@ -386,7 +386,7 @@ export default function ExerciseSearch({ onSelect }) {
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">Equipamento</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">Equipment</p>
             <div className="flex flex-wrap gap-1.5">
               {EQUIPMENT_FILTER_OPTIONS.map(({ label, value }) => (
                 <button
@@ -411,7 +411,7 @@ export default function ExerciseSearch({ onSelect }) {
         <div className="border border-[hsl(var(--border-h))] rounded-xl overflow-hidden bg-[hsl(var(--card))]">
           {favorites.length > 0 && (
             <>
-              <SectionHeader icon={Star} label="Favoritos" />
+              <SectionHeader icon={Star} label="Favorites" />
               {favorites.slice(0, 3).map((ex, i) => (
                 <ExerciseRow key={`fav-${i}`} exercise={ex} onSelect={handleSelect} />
               ))}
@@ -419,7 +419,7 @@ export default function ExerciseSearch({ onSelect }) {
           )}
           {recents.length > 0 && (
             <>
-              <SectionHeader icon={Clock} label="Recentes" />
+              <SectionHeader icon={Clock} label="Recent" />
               {recents.slice(0, 5).map((ex, i) => (
                 <ExerciseRow key={`rec-${i}`} exercise={ex} onSelect={handleSelect} />
               ))}
@@ -436,8 +436,8 @@ export default function ExerciseSearch({ onSelect }) {
               icon={Dumbbell}
               label={
                 muscleFilter
-                  ? `Músculo: ${MUSCLE_FILTER_OPTIONS.find((o) => o.value === muscleFilter)?.label || muscleFilter}`
-                  : `Equipamento: ${EQUIPMENT_FILTER_OPTIONS.find((o) => o.value === equipFilter)?.label || equipFilter}`
+                  ? `Muscle: ${MUSCLE_FILTER_OPTIONS.find((o) => o.value === muscleFilter)?.label || muscleFilter}`
+                  : `Equipment: ${EQUIPMENT_FILTER_OPTIONS.find((o) => o.value === equipFilter)?.label || equipFilter}`
               }
             />
           )}
@@ -446,12 +446,12 @@ export default function ExerciseSearch({ onSelect }) {
           ))}
           {!loading && results.length === 0 && (
             <div className="px-3 py-4 text-center">
-              <p className="text-[13px] text-[hsl(var(--fg-2))] mb-2">Nenhum resultado encontrado</p>
+              <p className="text-[13px] text-[hsl(var(--fg-2))] mb-2">No results found</p>
               <button
                 onClick={() => setShowManual(true)}
                 className="text-[12px] text-[hsl(var(--brand))] font-medium hover:underline flex items-center gap-1 mx-auto"
               >
-                <PenLine className="w-3.5 h-3.5" /> Adicionar manualmente
+                <PenLine className="w-3.5 h-3.5" /> Add manually
               </button>
             </div>
           )}
@@ -461,12 +461,12 @@ export default function ExerciseSearch({ onSelect }) {
       {/* No results for text search */}
       {query.length >= 2 && !loading && results.length === 0 && (
         <div className="text-center py-3">
-          <p className="text-[13px] text-[hsl(var(--fg-2))] mb-1">Nenhum resultado para "{query}"</p>
+          <p className="text-[13px] text-[hsl(var(--fg-2))] mb-1">No results for "{query}"</p>
           <button
             onClick={() => setShowManual(true)}
             className="text-[12px] text-[hsl(var(--brand))] font-medium hover:underline flex items-center gap-1 mx-auto"
           >
-            <PenLine className="w-3.5 h-3.5" /> Adicionar manualmente
+            <PenLine className="w-3.5 h-3.5" /> Add manually
           </button>
         </div>
       )}
@@ -477,7 +477,7 @@ export default function ExerciseSearch({ onSelect }) {
           onClick={() => setShowManual(true)}
           className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[12px] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors rounded-lg hover:bg-[hsl(var(--shell))]"
         >
-          <PenLine className="w-3.5 h-3.5" strokeWidth={2} /> Adicionar exercício manualmente
+          <PenLine className="w-3.5 h-3.5" strokeWidth={2} /> Add exercise manually
         </button>
       )}
     </div>
