@@ -40,7 +40,7 @@ export default function ManualFoodEntry({ onAdd, onBack }) {
         <button onClick={onBack} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-[hsl(var(--shell))] transition-colors text-[hsl(var(--fg-2))]">
           <ChevronLeft className="w-4 h-4" strokeWidth={2} />
         </button>
-        <p className="text-[13px] font-semibold">Adicionar manualmente</p>
+        <p className="text-[13px] font-semibold">Add manually</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

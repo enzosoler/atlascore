@@ -97,7 +97,7 @@ export default function WorkoutExecution({ workout, onComplete, onBack }) {
   };
 
   if (!currentExercise) {
-    return <div className="text-center py-12">Sem exercícios</div>;
+    return <div className="text-center py-12">No exercises</div>;
   }
 
   const loggedSet = sets.find(s => s.exerciseIdx === currentExerciseIdx && s.setIdx === currentSetIdx);

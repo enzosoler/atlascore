@@ -128,8 +128,8 @@ export function SectionCard({ title, subtitle, actions, children, className = ''
 }
 
 export function LoadingState({
-  title = 'Carregando dados',
-  description = 'A pagina ja abriu em modo seguro e o conteudo aparece assim que os dados responderem.',
+  title = 'Loading data',
+  description = 'The page has opened in safe mode and content appears when data responds.',
 }) {
   return (
     <SectionCard title={title} subtitle={description}>
@@ -149,8 +149,8 @@ export function LoadingState({
 }
 
 export function ErrorState({
-  title = 'Modo seguro ativado',
-  description = 'Parte dos dados falhou, mas a pagina continua aberta e utilizavel.',
+  title = 'Safe mode active',
+  description = 'Some data failed to load, but the page remains open and usable.',
 }) {
   return (
     <SectionCard title={title} subtitle={description}>

@@ -23,14 +23,14 @@ export default function AIMeasurementProjection({ latest, measurements, profile 
       const weeklyRate = (recentAvg - oldAvg) / Math.max(1, (sorted.length - 1) / 7);
       
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Projete quando o usuário atingirá a meta, baseado em:
-        
-- Peso atual: ${latest.weight}kg
-- Meta: ${profile?.target_weight}kg
-- Taxa média semanal: ${weeklyRate.toFixed(2)}kg/semana
-- Semanas de tracking: ${Math.round((sorted.length - 1) / 7)}
+        prompt: `Project when the user will reach their goal, based on:
 
-Responda com: "Em ~X semanas" ou "já atingiu!" + dica motivadora.`,
+- Current weight: ${latest.weight}kg
+- Goal: ${profile?.target_weight}kg
+- Average weekly rate: ${weeklyRate.toFixed(2)}kg/week
+- Weeks of tracking: ${Math.round((sorted.length - 1) / 7)}
+
+Answer with: "In ~X weeks" or "already achieved!" + motivating tip.`,
         model: 'gemini_3_flash',
       });
 
@@ -47,7 +47,7 @@ Responda com: "Em ~X semanas" ou "já atingiu!" + dica motivadora.`,
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Projeção de Meta</span>
+          <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Goal Projection</span>
         </div>
       </div>
       {projection ? (
@@ -59,7 +59,7 @@ Responda com: "Em ~X semanas" ou "já atingiu!" + dica motivadora.`,
           className="mt-2 px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
         >
           {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />}
-          {loading ? 'Calculando...' : 'Gerar projeção'}
+          {loading ? 'Calculating...' : 'Generate projection'}
         </button>
       )}
     </div>

@@ -282,7 +282,7 @@ function ProtocolsContent() {
     if (!protocol?.id) return;
 
     const label = protocol?.substance_name || protocol?.name || 'este item';
-    if (!window.confirm(`Excluir ${label}?`)) return;
+    if (!window.confirm(`Delete ${label}?`)) return;
 
     deleteMutation.mutate({
       id: protocol.id,
@@ -316,7 +316,7 @@ function ProtocolsContent() {
           className="inline-flex items-center gap-2"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
-          Adicionar protocolo
+          Add Protocol
         </PrimaryButton>
       }
       maxWidth="max-w-6xl"
@@ -327,7 +327,7 @@ function ProtocolsContent() {
 
       {isLoading ? (
         <LoadingState
-          title="Carregando protocolos"
+          title="Loading protocols"
           description="Aguarde enquanto seus protocolos são carregados."
         />
       ) : null}
@@ -416,7 +416,7 @@ function ProtocolsContent() {
             }
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar protocolo
+                Add Protocol
               </PrimaryButton>
             }
           />
@@ -429,7 +429,7 @@ function ProtocolsContent() {
             description="Tente outro filtro ou adicione um novo protocolo."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar protocolo
+                Add Protocol
               </PrimaryButton>
             }
           />
@@ -483,14 +483,14 @@ function ProtocolsContent() {
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-3xl">
           <DialogPanelHeader
             eyebrow="Protocolos"
-            title={editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
+            title={editingProtocol ? 'Editar protocolo' : 'Add Protocol'}
             description="Registre os dados principais do protocolo: substância, categoria, dose, unidade, frequência, horário e status atual."
             accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
           />
           {/* Visually hidden for accessibility */}
           <DialogHeader className="sr-only">
             <DialogTitle>
-              {editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
+              {editingProtocol ? 'Editar protocolo' : 'Add Protocol'}
             </DialogTitle>
             <DialogDescription>
               Registre os dados principais do protocolo: substância, categoria, dose, unidade, frequência, horário e status atual.

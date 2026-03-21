@@ -23,10 +23,10 @@ export default function MilestoneCard({ streak, checkins, workouts }) {
   const count = typeof streak === 'number' ? streak : calcStreak(checkins);
 
   const milestones = [
-    { days: 7,   label: '1 semana',  emoji: '🔥', message: 'Semana de ouro!' },
-    { days: 14,  label: '2 semanas', emoji: '🎯', message: 'Disciplina em ação!' },
-    { days: 30,  label: '1 mês',     emoji: '🏆', message: 'Mês incrível!' },
-    { days: 100, label: '100 dias',  emoji: '👑', message: 'Mestre da consistência!' },
+    { days: 7,   label: '1 week',   emoji: '🔥', message: 'Golden week!' },
+    { days: 14,  label: '2 weeks',  emoji: '🎯', message: 'Discipline in action!' },
+    { days: 30,  label: '1 month',  emoji: '🏆', message: 'Incredible month!' },
+    { days: 100, label: '100 days', emoji: '👑', message: 'Master of consistency!' },
   ];
 
   const nextMilestone = milestones.find(m => m.days > count);
@@ -36,8 +36,8 @@ export default function MilestoneCard({ streak, checkins, workouts }) {
     return (
       <div className="surface p-4 text-center space-y-2">
         <p className="text-[20px]">👑</p>
-        <p className="text-[13px] font-semibold">Você é uma lenda!</p>
-        <p className="text-[11px] text-[hsl(var(--fg-2))]">{count} dias de consistência</p>
+        <p className="text-[13px] font-semibold">You are a legend!</p>
+        <p className="text-[11px] text-[hsl(var(--fg-2))]">{count} days of consistency</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export default function MilestoneCard({ streak, checkins, workouts }) {
     <div className="surface p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Trophy className="w-4 h-4 text-[hsl(var(--warn))]" strokeWidth={2} />
-        <p className="t-label">Próxima meta</p>
+        <p className="t-label">Next milestone</p>
       </div>
 
       <div>

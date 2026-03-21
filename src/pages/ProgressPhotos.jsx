@@ -36,9 +36,9 @@ import {
 // ─────────────────────────────────────────────────────────────────
 
 const POSES = [
-  { key: 'front',      label: 'Frente',      hint: 'Braços ao lado, olhando para a câmera' },
-  { key: 'side',       label: 'Lateral',     hint: 'Perfil direito, braços soltos' },
-  { key: 'back',       label: 'Costas',      hint: 'De costas para a câmera, braços ao lado' },
+  { key: 'front',      label: 'Front',      hint: 'Arms to sides, looking at camera' },
+  { key: 'side',       label: 'Side',     hint: 'Right profile, arms relaxed' },
+  { key: 'back',       label: 'Back',      hint: 'Back to camera, arms at sides' },
   { key: 'pose',       label: 'Pose livre',  hint: 'Pose de sua escolha para comparação' },
 ];
 
@@ -297,7 +297,7 @@ function NewCheckpointModal({ onConfirm, onClose }) {
 export default function ProgressPhotos() {
   return (
     <SafePageBoundary
-      title="Fotos de Progresso"
+      title="Progress Photos"
       subtitle="Modo seguro da página de fotos."
       fallbackDescription="A página de fotos carregou em modo de segurança."
     >
@@ -337,7 +337,7 @@ function ProgressPhotosContent() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
       qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
-      setNotice({ tone: 'success', message: 'Foto removida.' });
+      setNotice({ tone: 'success', message: 'Photo removed.' });
     },
     onError: () => setNotice({ tone: 'error', message: 'Erro ao remover a foto.' }),
   });
@@ -365,7 +365,7 @@ function ProgressPhotosContent() {
         });
         qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
         qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
-        setNotice({ tone: 'success', message: 'Foto salva com sucesso.' });
+        setNotice({ tone: 'success', message: 'Photo saved successfully.' });
       } catch (error) {
         setNotice({
           tone: 'error',
@@ -409,8 +409,8 @@ function ProgressPhotosContent() {
     <AppContainer>
       {/* ── Page Header ─────────────────────────────────────────── */}
       <PageHeader
-        eyebrow="Fotos"
-        title="Fotos de Progresso"
+        eyebrow="Photos"
+        title="Progress Photos"
         subtitle="Registre checkpoints fotográficos nas poses padrão para visualizar a evolução do seu corpo ao longo do tempo."
         accentClassName="from-[hsl(var(--brand)/0.06)] via-[hsl(var(--brand)/0.02)]"
         actions={
@@ -438,7 +438,7 @@ function ProgressPhotosContent() {
             </p>
           </div>
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.8)] px-4 py-4 shadow-[var(--shadow-xs)]">
-            <p className="atlas-metric-label">Fotos registradas</p>
+            <p className="atlas-metric-label">Registered photos</p>
             <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               {allPhotos.length > 0 ? `${allPhotos.length} foto(s)` : '—'}
             </p>
@@ -489,7 +489,7 @@ function ProgressPhotosContent() {
 
       {/* ── Checkpoints ─────────────────────────────────────────── */}
       <Section
-        eyebrow="Fotos"
+        eyebrow="Photos"
         title={allDates.length > 0 ? `Checkpoints · ${allDates.length}` : 'Checkpoints'}
         subtitle="Cada checkpoint agrupa as 4 poses padrão para a data selecionada."
         actions={

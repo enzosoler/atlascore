@@ -47,7 +47,7 @@ export default function WorkoutComparison({ planned, logged }) {
             )}
           </div>
         ) : (
-          <p className="text-[12px] text-muted-foreground italic">Sem plano para hoje</p>
+          <p className="text-[12px] text-muted-foreground italic">No plan for today</p>
         )}
       </div>
 
