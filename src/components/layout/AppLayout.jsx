@@ -440,14 +440,13 @@ export default function AppLayout() {
 
           {/* Brand — absolutely centered so side buttons don't push it */}
           <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2.5">
-            {/* Icon mark: hidden on very small screens, shown when space permits */}
             <AtlasCoreLogoSVG
-              width={46}
-              height={16}
+              width={42}
+              height={15}
               color="hsl(var(--accent-primary))"
-              className="hidden sm:block shrink-0"
+              className="shrink-0"
             />
-            <span className="text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))] sm:text-[17px]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </span>
           </div>

@@ -1,10 +1,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import {
-  Clock3,
-  Flame,
   Loader2,
   Pencil,
   Plus,
@@ -13,21 +9,17 @@ import {
   Trash2,
   UtensilsCrossed,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { ROUTES } from '@/lib/routes';
 import {
   ActionRow,
   AppContainer,
   Card,
   PageHeader,
   Section,
-  StatCard,
 } from '@/components/shared/AppContainer';
 import {
   DateStepper,
   DialogPanelHeader,
   EmptyState,
-  FilterChip,
   PrimaryButton,
   SafePageBoundary,
   SecondaryButton,
@@ -61,7 +53,6 @@ const DEFAULT_PROFILE = {
 // MOCK_PRESCRIBED_DIET removed — targets now come from profiles.profile_data
 
 const TODAY = getToday();
-const YESTERDAY = shiftDate(TODAY, -1);
 const FATSECRET_SEARCH_DEBOUNCE_MS = 400;
 const RECENT_FOODS_STORAGE_KEY = 'atlas_recent_foods';
 
@@ -222,7 +213,17 @@ function mapFoodLogToMeal(log) {
     date: formatDateKey(log?.date),
     meal_type: getMealTypeFromDate(log?.date),
     title: foodName,
-    foods: [{ name: foodName }],
+    foods: [{
+      name: foodName,
+      kcal: Number(log?.calories || 0),
+      protein: Number(log?.protein || 0),
+      carbs: Number(log?.carbs || 0),
+      fat: Number(log?.fat || 0),
+      amount: Number(log?.serving_size || 100),
+      unit: log?.serving_unit || 'g',
+      external_id: log?.external_id || null,
+      source_api: log?.source_api || null,
+    }],
     total_calories: Number(log?.calories || 0),
     total_protein: Number(log?.protein || 0),
     total_carbs: Number(log?.carbs || 0),
@@ -278,7 +279,7 @@ function LoggedMetric({ label, value, unit, tone = 'calories' }) {
       </div>
       <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
         {value}
-        <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]\">{unit}</span>
+        <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]">{unit}</span>
       </p>
     </div>
   );
@@ -338,7 +339,7 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
       </div>
       {meal.notes ? (
         <div className="mt-4 border-t border-[hsl(var(--border))] pt-4">
-          <p className="text-sm text-[hsl(var(--fg-2))]\">{meal.notes}</p>
+          <p className="text-sm text-[hsl(var(--fg-2))]">{meal.notes}</p>
         </div>
       ) : null}
       <div className="mt-4 flex items-center justify-end gap-3 border-t border-[hsl(var(--border))] pt-4">
@@ -378,6 +379,7 @@ const MEAL_TYPE_HOURS = {
 };
 
 function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
+  const { t } = useI18n();
   const [date, setDate] = useState(meal?.date || selectedDate || TODAY);
   const [mealType, setMealType] = useState(meal?.meal_type || 'breakfast');
   const [foods, setFoods] = useState(
@@ -934,6 +936,16 @@ export default function NutritionPage() {
     const savedMeals = [];
 
     try {
+      if (editingMeal?.source_row_id) {
+        const { error: deleteError } = await supabase
+          .from('food_logs')
+          .delete()
+          .eq('id', editingMeal.source_row_id)
+          .eq('user_id', user.id);
+
+        if (deleteError) throw deleteError;
+      }
+
       for (const food of foods) {
         const snapshot = {
           user_id: user.id,
@@ -965,12 +977,19 @@ export default function NutritionPage() {
       return;
     }
 
-    setMeals((current) => [...current, ...savedMeals]);
+    setMeals((current) => {
+      const withoutEditedMeal = editingMeal?.id
+        ? current.filter((meal) => meal.id !== editingMeal.id)
+        : current;
+      return [...withoutEditedMeal, ...savedMeals];
+    });
     setIsFormOpen(false);
     setEditingMeal(null);
     setNotice({
       tone: 'success',
-      message: `${foods.length} alimento(s) adicionado(s) em ${mealLabel}.`,
+      message: editingMeal?.id
+        ? `${foods.length} alimento(s) atualizado(s) em ${mealLabel}.`
+        : `${foods.length} alimento(s) adicionado(s) em ${mealLabel}.`,
     });
   };
 
@@ -993,8 +1012,8 @@ export default function NutritionPage() {
     setNotice({ tone: 'success', message: `${meal.title} foi removida.` });
   };
 
-  const handleDateChange = (newDate) => {
-    setSelectedDate(formatDateKey(newDate));
+  const handleDateChange = (delta) => {
+    setSelectedDate((current) => shiftDate(current, delta));
   };
 
   const dailyTotals = useMemo(() => {
@@ -1037,7 +1056,11 @@ export default function NutritionPage() {
   }, [meals]);
 
   return (
-    <SafePageBoundary>
+    <SafePageBoundary
+      title="Nutrition"
+      subtitle={`Calorie and macro summary for ${selectedDate}`}
+      fallbackDescription="Nutrition abriu em modo seguro porque a renderização principal falhou."
+    >
       <AppContainer>
         <PageHeader
           title="Nutrition"
@@ -1045,12 +1068,9 @@ export default function NutritionPage() {
         />
 
         {notice ? (
-          <StatusBanner
-            tone={notice.tone}
-            message={notice.message}
-            onDismiss={() => setNotice(null)}
-            className="mb-6"
-          />
+          <div className="mb-6">
+            <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>
+          </div>
         ) : null}
 
         <Section
@@ -1184,19 +1204,20 @@ export default function NutritionPage() {
           </div>
 
           {isLoadingMeals ? (
-            <div className="mt-6 flex items-center justify-center gap-3 rounded-lg bg-[hsl(var(--fill))] p-8 text-sm text-[hsl(var(--fg-2))]\">
+            <div className="mt-6 flex items-center justify-center gap-3 rounded-lg bg-[hsl(var(--fill))] p-8 text-sm text-[hsl(var(--fg-2))]">
               <Loader2 className="h-5 w-5 animate-spin" />
               Carregando refeições...
             </div>
           ) : null}
 
           {!isLoadingMeals && sortedMeals.length === 0 ? (
-            <EmptyState
-              icon={UtensilsCrossed}
-              title="Nenhuma refeição registrada"
-              message="Adicione uma refeição para começar a monitorar sua nutrição."
-              className="mt-6"
-            />
+            <div className="mt-6">
+              <EmptyState
+                icon={UtensilsCrossed}
+                title="Nenhuma refeição registrada"
+                description="Adicione uma refeição para começar a monitorar sua nutrição."
+              />
+            </div>
           ) : null}
 
           {!isLoadingMeals && sortedMeals.length > 0 ? (
@@ -1290,7 +1311,7 @@ export default function NutritionPage() {
         <DialogContent>
           <DialogPanelHeader
             title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
-            subtitle={editingMeal ? t('pages.nutrition.meal_subtitle') : t('pages.nutrition.register_new_meal')}
+            description={editingMeal ? t('pages.nutrition.meal_subtitle') : t('pages.nutrition.register_new_meal')}
           />
           <div className="p-6 pt-0">
             <MealForm

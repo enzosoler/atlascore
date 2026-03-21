@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Plus, Loader2 } from 'lucide-react';
+import { ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import { format, subDays, parseISO, isValid } from 'date-fns';
 import AIProgressAnalysis from '@/components/ai/AIProgressAnalysis';
 import ProgressPhotoCarousel from '@/components/progress/ProgressPhotoCarousel';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabaseClient';
+import {
+  listMeasurements,
+  listProgressPhotos,
+} from '@/services/bodyProgressService';
 
 function MetricCard({ label, value, unit, change, goal, data }) {
   const isPositive = change > 0;
@@ -67,18 +72,33 @@ function MetricCard({ label, value, unit, change, goal, data }) {
 
 export default function Progress() {
   const [timeframe, setTimeframe] = useState('12w'); // 4w, 8w, 12w
+  const { user } = useAuth();
 
   const weeksBack = timeframe === '4w' ? 4 : timeframe === '8w' ? 8 : 12;
   const startDate = subDays(new Date(), weeksBack * 7);
 
   const { data: measurements = [], isLoading: measurementsLoading } = useQuery({
-    queryKey: ['measurements-progress', timeframe],
-    queryFn: () => base44.entities.Measurement.list('-date', 100),
+    queryKey: ['measurements-progress', user?.id, timeframe],
+    queryFn: () => listMeasurements(user.id, 100),
+    enabled: !!user?.id,
   });
 
   const { data: profile } = useQuery({
-    queryKey: ['user-profile-progress'],
-    queryFn: () => base44.entities.UserProfile.list().then(r => r?.[0]),
+    queryKey: ['user-profile-progress', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('profile_data')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data?.profile_data || {};
+    },
+    enabled: !!user?.id,
   });
 
   // Demo photos with realistic dates (60 days span)
@@ -96,13 +116,17 @@ export default function Progress() {
     {
       id: 'demo-3',
       date: '2026-03-19',
-      photo_url: '/demo-progress-photos/progress_casual_3.jpg',
+      photo_url: '/demo-progress-photos/progress_photo_3_after.jpg',
     },
   ];
 
   const { data: photos = DEMO_PHOTOS, isLoading: photosLoading } = useQuery({
-    queryKey: ['progress-photos'],
-    queryFn: () => base44.entities.ProgressPhoto.list('-date', 50).catch(() => DEMO_PHOTOS),
+    queryKey: ['progress-photos', user?.id],
+    queryFn: async () => {
+      const items = await listProgressPhotos(user.id, 50);
+      return items.length > 0 ? items : DEMO_PHOTOS;
+    },
+    enabled: !!user?.id,
   });
 
   const isLoading = measurementsLoading || photosLoading;
@@ -126,8 +150,13 @@ export default function Progress() {
     .map(m => ({
       date: format(new Date(m.date), 'MMM d'),
       weight: m.weight,
-      bf: m.body_fat,
+      body_fat: m.body_fat,
       waist: m.waist,
+      chest: m.chest,
+      arms: m.arms,
+      thighs: m.thighs,
+      hips: m.hips,
+      neck: m.neck,
     }));
 
   // ── Safe date formatter — avoids Invalid Date crash ────────────────

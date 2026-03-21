@@ -24,8 +24,8 @@ export default function AtlasCoreLogoSVG({
       className={className}
     >
       {/* Heartbeat-to-Arrow Icon */}
-      <path d="M150 200H250L275 240L325 120L375 240L400 200H450L550 140" stroke={color} strokeWidth="12" strokeLinecap="round" stroke-linejoin="round"/>
-      <path d="M530 140H550V160" stroke={color} strokeWidth="12" strokeLinecap="round" stroke-linejoin="round"/>
+      <path d="M150 200H250L275 240L325 120L375 240L400 200H450L550 140" stroke={color} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M530 140H550V160" stroke={color} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }

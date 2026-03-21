@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Activity, Brain, Moon, Shield } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
+import { supabase } from '@/lib/supabaseClient';
 import {
   EmptyState,
   ErrorState,
@@ -16,6 +17,7 @@ import {
   formatNumber,
   toArray,
 } from '@/components/shared/StablePage';
+import { listMeasurements } from '@/services/bodyProgressService';
 
 const RANGE_DAYS = {
   '14d': 14,
@@ -79,6 +81,7 @@ export default function Insights() {
 
 function InsightsContent() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [range, setRange] = useState('30d');
   const days = RANGE_DAYS[range] || 30;
 
@@ -89,29 +92,80 @@ function InsightsContent() {
   }, [days]);
 
   const measurementsQuery = useQuery({
-    queryKey: ['insights-measurements-stable', days],
-    queryFn: () => base44.entities.Measurement.list('-date', 200),
+    queryKey: ['insights-measurements-stable', user?.id, days],
+    queryFn: () => listMeasurements(user.id, 200),
     initialData: [],
+    enabled: !!user?.id,
   });
   const checkinsQuery = useQuery({
-    queryKey: ['insights-checkins-stable', days],
-    queryFn: () => base44.entities.DailyCheckin.list('-date', 200),
+    queryKey: ['insights-checkins-stable', user?.id, days],
+    queryFn: async () => [],
     initialData: [],
+    enabled: !!user?.id,
   });
   const workoutsQuery = useQuery({
-    queryKey: ['insights-workouts-stable', days],
-    queryFn: () => base44.entities.Workout.list('-date', 200),
+    queryKey: ['insights-workouts-stable', user?.id, days],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('completed_at', { ascending: false })
+        .limit(200);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data || []).map((workout) => ({
+        ...workout,
+        date: workout.completed_at ? workout.completed_at.split('T')[0] : null,
+      }));
+    },
     initialData: [],
+    enabled: !!user?.id,
   });
   const mealsQuery = useQuery({
-    queryKey: ['insights-meals-stable', days],
-    queryFn: () => base44.entities.Meal.list('-date', 500),
+    queryKey: ['insights-meals-stable', user?.id, days],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('food_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(500);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data || []).map((item) => ({
+        ...item,
+        date: item.date ? item.date.split('T')[0] : null,
+        total_calories: Number(item.calories || 0),
+      }));
+    },
     initialData: [],
+    enabled: !!user?.id,
   });
   const protocolsQuery = useQuery({
-    queryKey: ['insights-protocols-stable'],
-    queryFn: () => base44.entities.Protocol.list('-start_date', 100),
+    queryKey: ['insights-protocols-stable', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('protocols')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('start_date', { ascending: false })
+        .limit(100);
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
+    },
     initialData: [],
+    enabled: !!user?.id,
   });
 
   const loading =

@@ -20,14 +20,10 @@ import {
 } from '@/lib/adminService';
 import { SafePageBoundary as StablePage } from '@/components/shared/StablePage';
 import {
-  Activity,
   AlertCircle,
   AlertTriangle,
-  ArrowUpRight,
   CheckCircle2,
-  ChevronDown,
   Clock,
-  Download,
   FileText,
   Loader2,
   MoreHorizontal,
@@ -127,6 +123,141 @@ function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = f
             )}
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserDetailsModal({ user, onClose, onUpdated }) {
+  const latestSubscription = user?.subscriptions?.[0] || null;
+  const [tier, setTier] = useState(latestSubscription?.tier || 'free');
+  const [status, setStatus] = useState(latestSubscription?.status || 'inactive');
+  const [saving, setSaving] = useState(false);
+  const hasSubscription = Boolean(latestSubscription?.user_id);
+  const hasChanges =
+    hasSubscription &&
+    (tier !== (latestSubscription?.tier || 'free') ||
+      status !== (latestSubscription?.status || 'inactive'));
+
+  const handleSave = async () => {
+    if (!hasSubscription) return;
+
+    setSaving(true);
+    try {
+      if (tier !== latestSubscription?.tier) {
+        await updateSubscriptionTier(user.id, tier);
+      }
+      if (status !== latestSubscription?.status) {
+        await updateSubscriptionStatus(user.id, status);
+      }
+      toast.success('User details updated');
+      onUpdated?.();
+      onClose?.();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update subscription details');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
+      <div className="w-full max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-xl)] space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-[18px] font-semibold text-[hsl(var(--fg))]">User details</h3>
+            <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+              Review account, role and latest subscription state.
+            </p>
+          </div>
+          <button onClick={onClose} className="text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--shell)/0.5)] p-4 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Account</p>
+            <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
+              {user?.full_name || user?.display_name || user?.email || '—'}
+            </p>
+            <p className="text-[12px] text-[hsl(var(--fg-2))] break-all">{user?.email || 'No email available'}</p>
+            <p className="text-[12px] font-mono text-[hsl(var(--fg-2))] break-all">{user?.id || '—'}</p>
+          </div>
+
+          <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--shell)/0.5)] p-4 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Status</p>
+            <div className="flex flex-wrap gap-2">
+              <Badge label={user?.role || '—'} className={roleBadge(user?.role)} />
+              {user?.is_suspended ? (
+                <Badge label="suspended" className="bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]" />
+              ) : null}
+            </div>
+            <p className="text-[12px] text-[hsl(var(--fg-2))]">Joined {fmt(user?.created_at)}</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--shell)/0.5)] p-4 space-y-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Subscription</p>
+            <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+              {hasSubscription ? 'Latest subscription can be edited below.' : 'No subscription record found for this user yet.'}
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block mb-2 text-[12px] font-medium text-[hsl(var(--fg))]">Tier</label>
+              <select
+                value={tier}
+                onChange={(event) => setTier(event.target.value)}
+                disabled={!hasSubscription || saving}
+                className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50"
+              >
+                {TIERS.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-2 text-[12px] font-medium text-[hsl(var(--fg))]">Status</label>
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                disabled={!hasSubscription || saving}
+                className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50"
+              >
+                {SUBSCRIPTION_STATUSES.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-2 text-[12px] text-[hsl(var(--fg-2))] sm:grid-cols-2">
+            <p>Trial ends: {fmt(latestSubscription?.trial_ends_at)}</p>
+            <p>Current period ends: {fmt(latestSubscription?.current_period_ends_at)}</p>
+            <p>Provider: {latestSubscription?.provider || 'manual'}</p>
+            <p>Created: {fmt(latestSubscription?.created_at)}</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={onClose}
+            className="flex-1 h-10 rounded-xl border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))] transition-colors"
+          >
+            Close
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!hasChanges || saving}
+            className="flex-1 h-10 rounded-xl bg-[hsl(var(--primary))] text-[13px] font-medium text-white hover:bg-[hsl(var(--primary)/0.88)] transition-colors disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Save subscription'}
           </button>
         </div>
       </div>
@@ -359,7 +490,7 @@ function UsersTab() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [actionUser, setActionUser] = useState(null);
+  const [detailsUser, setDetailsUser] = useState(null);
   const [confirm, setConfirm] = useState(null); // { type, user }
   const [actionLoading, setActionLoading] = useState(false);
   const [roleEdit, setRoleEdit] = useState(null); // { userId, currentRole }
@@ -480,6 +611,11 @@ function UsersTab() {
                   <Td>
                     <ActionMenu items={[
                       {
+                        label: 'View details',
+                        icon: User,
+                        onClick: () => setDetailsUser(u),
+                      },
+                      {
                         label: 'Edit Role',
                         icon: UserCheck,
                         onClick: () => { setRoleEdit({ userId: u.id, name: u.full_name || shortId(u.id) }); setSelectedRole(u.role || 'athlete'); },
@@ -533,6 +669,14 @@ function UsersTab() {
       )}
 
       {/* Role Edit Modal */}
+      {detailsUser && (
+        <UserDetailsModal
+          user={detailsUser}
+          onClose={() => setDetailsUser(null)}
+          onUpdated={() => load(page, search)}
+        />
+      )}
+
       {roleEdit && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
           <div className="w-full max-w-sm rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-xl)] space-y-4">
@@ -727,8 +871,9 @@ function SubscriptionsTab() {
                       onClick: () => setConfirm({ type: 'revoke', sub: s }),
                     },
                     {
-                      label: 'Resync Billing',
+                      label: 'Resync Billing (backend)',
                       icon: RefreshCw,
+                      disabled: true,
                       onClick: () => setConfirm({ type: 'resync', sub: s }),
                     },
                   ]} />
