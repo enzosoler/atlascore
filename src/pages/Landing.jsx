@@ -228,19 +228,19 @@ const COPY = {
     nav: { howItWorks: 'How it works', features: 'Features', blog: 'Blog', pricing: 'Pricing', login: 'Log In', signup: 'Get Started' },
     hero: {
       badge: 'Early Access',
-      h1a: 'Track what you do.',
-      h1b: 'Understand what works',
-      sub: 'Atlas connects your training, nutrition, and body progress in one place — so the relationship between your habits and your results becomes clear.',
+      h1a: 'See what\'s',
+      h1b: 'actually working.',
+      sub: 'Atlas connects your workouts, nutrition, and body metrics — so the patterns driving your results become visible.',
       cta1: 'Get Started',
       cta2: 'How It Works',
       s1t: '1 system', s1d: 'instead of 6 apps',
-      s2t: 'Full clarity', s2d: 'on your real progress',
-      s3t: 'Built for', s3d: 'real life, not perfect plans',
+      s2t: 'See your patterns', s2d: 'not just your data',
+      s3t: 'Built for', s3d: 'how you actually train',
     },
     problem: {
       label: 'The Problem',
       h2: 'You\'re collecting data.\nYou\'re not gaining clarity.',
-      sub: 'You\'re putting in the work. But nothing is connected — so nothing makes sense together.',
+      sub: 'You\'re putting in the work. Nothing is connected. Nothing adds up.',
       items: [
         { e: '🏋️', t: 'Workout App', d: 'Sets, reps, PRs — but nothing else' },
         { e: '🥗', t: 'Food Tracker', d: 'Calories logged, ignored by morning' },
@@ -255,7 +255,7 @@ const COPY = {
     solution: {
       label: 'The Solution',
       h2a: 'Everything connected.',
-      h2b: 'Finally.',
+      h2b: 'One view.',
       sub: 'Atlas is a single platform for people who want to understand their progress, not just record it. Training, nutrition, and body metrics — organized, connected, readable.',
       p1t: 'Centralized', p1d: 'Training, nutrition, body metrics — all in one system. When the data lives together, patterns become visible.',
       p2t: 'Connected', p2d: 'The entire product is built around one question: what is actually driving your results?',
@@ -264,7 +264,7 @@ const COPY = {
     features: {
       workouts: {
         label: 'Workouts',
-        h2: 'See how your\ntraining builds.',
+        h2: 'Watch your\ntraining compound.',
         desc: 'Track volume, intensity, and consistency over time. Know when you\'re progressing and when you\'ve plateaued.',
         pts: [
           { t: 'Full exercise library', d: '— or add your own. Bodybuilding, functional, cardio.' },
@@ -275,7 +275,7 @@ const COPY = {
       },
       nutrition: {
         label: 'Nutrition',
-        h2: 'See what your\nnutrition is doing.',
+        h2: 'Understand what\nyour nutrition does.',
         desc: 'Not just a daily calorie count. A clear view of your intake patterns and how they connect to your performance and body composition.',
         pts: [
           { t: 'Fast daily logging', d: '— meals, macros, and calories without friction.' },
@@ -286,7 +286,7 @@ const COPY = {
       },
       progress: {
         label: 'Progress Tracking',
-        h2: 'Track real\nbody changes.',
+        h2: 'See the full picture,\nnot just the number.',
         desc: 'Weight fluctuates. Atlas tracks multiple markers — body measurements, visual progress, weight trends — so you see the full picture.',
         pts: [
           { t: 'Body weight trends', d: '— weekly averages cut through daily noise.' },
@@ -308,7 +308,7 @@ const COPY = {
       },
       supplements: {
         label: 'Supplements & Protocols',
-        h2: 'Your stack, tracked.\nFinally consistent.',
+        h2: 'Your protocol, organized.\nYour adherence, visible.',
         desc: 'Creatine, vitamins, pre-workout — whatever your protocol is, Atlas keeps it organized and trackable.',
         pts: [
           { t: 'Daily checklist', d: '— log what you took, when you took it.' },
@@ -319,7 +319,7 @@ const COPY = {
       },
       timeline: {
         label: 'Unified Timeline',
-        h2: 'Everything that happened,\nin one view.',
+        h2: 'Your entire history.\nOne scroll.',
         desc: 'Workouts, check-ins, photos, protocol changes — all visible in a single chronological timeline.',
         pts: [
           { t: 'Automatic log', d: '— every action you take becomes part of your history.' },
@@ -331,8 +331,8 @@ const COPY = {
     },
     diff: {
       label: 'Why Atlas',
-      h2: 'Not another fitness app.',
-      sub: 'Most tools track a single category. Atlas is built around the connection between all of them.',
+      h2: 'Built around the connection,\nnot the category.',
+      sub: 'Every other tool tracks one thing well. Atlas tracks how everything relates.',
       cols: ['Capability', 'Workout Apps', 'Food Trackers', 'Generic Health Apps', 'Atlas'],
       rows: [
         ['Workout tracking', '✓', '—', 'Partial', '✓ Full'],
@@ -388,9 +388,9 @@ const COPY = {
       note: 'Professional collaboration is optional. Atlas works perfectly without anyone else involved.',
     },
     closing: {
-      h2a: 'Clarity over guesswork.',
-      h2b: 'Start now.',
-      sub: 'If you\'re serious about your results, your tools should be too. Atlas gives you the clarity to see what\'s working — and the foundation to keep improving.',
+      h2a: 'Stop guessing.',
+      h2b: 'Start seeing.',
+      sub: 'Atlas gives you the full picture — what you\'ve done, how it\'s working, and where to keep pushing.',
       cta1: 'Get Started', cta2: 'See All Plans',
       fine: 'No credit card needed. Free plan available. Cancel anytime.',
     },
