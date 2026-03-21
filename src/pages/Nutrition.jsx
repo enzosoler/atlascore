@@ -235,9 +235,10 @@ function mapFoodLogToMeal(log) {
   };
 }
 
-function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }) {
+function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail, locale = 'pt-BR' }) {
   const pct = getProgressPercent(consumed, target);
   const remaining = getRemainingValue(target, consumed);
+  const isEnglish = locale === 'en-US';
 
   return (
     <div className="space-y-2.5">
@@ -250,7 +251,13 @@ function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail }
             </p>
           </div>
           <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-            {detail || (remaining > 0 ? `${remaining}${unit} remaining` : 'Goal reached')}
+            {detail || (remaining > 0
+              ? isEnglish
+                ? `${remaining}${unit} remaining`
+                : `${remaining}${unit} restantes`
+              : isEnglish
+                ? 'Goal reached'
+                : 'Meta atingida')}
           </p>
         </div>
         <p className="shrink-0 text-[13px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
@@ -654,7 +661,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
 export default function NutritionPage() {
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [notice, setNotice] = useState(null);
@@ -1057,14 +1064,14 @@ export default function NutritionPage() {
 
   return (
     <SafePageBoundary
-      title="Nutrition"
-      subtitle={`Calorie and macro summary for ${selectedDate}`}
-      fallbackDescription="Nutrition abriu em modo seguro porque a renderização principal falhou."
+      title={locale === 'en-US' ? 'Nutrition' : 'Nutrição'}
+      subtitle={locale === 'en-US' ? `Calorie and macro summary for ${selectedDate}` : `Resumo de calorias e macros para ${selectedDate}`}
+      fallbackDescription={locale === 'en-US' ? 'Nutrition loaded in safe mode because the main render failed.' : 'Nutrição abriu em modo seguro porque a renderização principal falhou.'}
     >
       <AppContainer>
         <PageHeader
-          title="Nutrition"
-          subtitle={`Calorie and macro summary for ${selectedDate}`}
+          title={locale === 'en-US' ? 'Nutrition' : 'Nutrição'}
+          subtitle={locale === 'en-US' ? `Calorie and macro summary for ${selectedDate}` : `Resumo de calorias e macros para ${selectedDate}`}
         />
 
         {notice ? (
@@ -1074,13 +1081,13 @@ export default function NutritionPage() {
         ) : null}
 
         <Section
-          title="Daily Goals"
-          subtitle="Calories and macronutrients for quick reference."
+          title={locale === 'en-US' ? 'Daily Goals' : 'Metas do dia'}
+          subtitle={locale === 'en-US' ? 'Calories and macronutrients for quick reference.' : 'Calorias e macronutrientes para consulta rápida.'}
           actions={loggingStreak >= 2 ? (
             <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--warn)/0.12)] border border-[hsl(var(--warn)/0.25)] px-3 py-1">
               <span className="text-[13px]">🔥</span>
               <span className="text-[12px] font-semibold text-[hsl(var(--warn))]">
-                {loggingStreak}-day streak
+                {locale === 'en-US' ? `${loggingStreak}-day streak` : `${loggingStreak} dias seguidos`}
               </span>
             </div>
           ) : null}
@@ -1092,7 +1099,9 @@ export default function NutritionPage() {
                 <Target className={`h-4 w-4 shrink-0 ${profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={1.9} />
                 <span>
                   {profile.calories_target === 0
-                    ? 'Set your daily calorie and macro targets to get started.'
+                    ? locale === 'en-US'
+                      ? 'Set your daily calorie and macro targets to get started.'
+                      : 'Defina suas metas diárias de calorias e macros para começar.'
                     : `${profile.calories_target} kcal · ${profile.protein_target}g protein · ${profile.carbs_target}g carbs · ${profile.fat_target}g fat`}
                 </span>
               </div>
@@ -1100,7 +1109,7 @@ export default function NutritionPage() {
                 onClick={handleOpenTargetsEditor}
                 className="flex-shrink-0 text-[12px] font-semibold text-[hsl(var(--brand))] hover:underline underline-offset-2"
               >
-                {profile.calories_target === 0 ? 'Set targets →' : 'Edit'}
+                {profile.calories_target === 0 ? (locale === 'en-US' ? 'Set targets →' : 'Definir metas →') : (locale === 'en-US' ? 'Edit' : 'Editar')}
               </button>
             </div>
           )}
@@ -1111,20 +1120,24 @@ export default function NutritionPage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-                    {profile.calories_target === 0 ? 'Set up your nutrition targets' : 'Daily Nutrition Targets'}
+                    {profile.calories_target === 0
+                      ? locale === 'en-US' ? 'Set up your nutrition targets' : 'Configure suas metas de nutrição'
+                      : locale === 'en-US' ? 'Daily Nutrition Targets' : 'Metas diárias de nutrição'}
                   </p>
                   {profile.calories_target === 0 && (
-                    <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">Enter your daily goals to track progress against them.</p>
+                    <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
+                      {locale === 'en-US' ? 'Enter your daily goals to track progress against them.' : 'Informe suas metas diárias para acompanhar o progresso em relação a elas.'}
+                    </p>
                   )}
                 </div>
                 <Target className="h-5 w-5 text-[hsl(var(--brand))]" strokeWidth={1.8} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { key: 'calories_target', label: 'Calories', unit: 'kcal' },
-                  { key: 'protein_target',  label: 'Protein',  unit: 'g'    },
-                  { key: 'carbs_target',    label: 'Carbs',    unit: 'g'    },
-                  { key: 'fat_target',      label: 'Fat',      unit: 'g'    },
+                  { key: 'calories_target', label: locale === 'en-US' ? 'Calories' : 'Calorias', unit: 'kcal' },
+                  { key: 'protein_target',  label: locale === 'en-US' ? 'Protein' : 'Proteínas', unit: 'g' },
+                  { key: 'carbs_target',    label: locale === 'en-US' ? 'Carbs' : 'Carboidratos', unit: 'g' },
+                  { key: 'fat_target',      label: locale === 'en-US' ? 'Fat' : 'Gorduras', unit: 'g' },
                 ].map(({ key, label, unit }) => (
                   <div key={key}>
                     <label className="block text-[11px] font-medium text-[hsl(var(--fg-2))] mb-1">{label} ({unit})</label>
@@ -1146,7 +1159,7 @@ export default function NutritionPage() {
                     disabled={isSavingTargets}
                     className="flex-1 h-9 rounded-[14px] border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors disabled:opacity-50"
                   >
-                    Cancel
+                    {locale === 'en-US' ? 'Cancel' : 'Cancelar'}
                   </button>
                 )}
                 <button
@@ -1154,46 +1167,50 @@ export default function NutritionPage() {
                   disabled={isSavingTargets}
                   className="flex-1 h-9 rounded-[14px] bg-[hsl(var(--brand))] text-[13px] font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
-                  {isSavingTargets ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
+                  {isSavingTargets ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (locale === 'en-US' ? 'Save' : 'Salvar')}
                 </button>
               </div>
             </div>
           )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MacroTrack
-              label="Calories"
+              label={locale === 'en-US' ? 'Calories' : 'Calorias'}
               consumed={dailyTotals.calories}
               target={profile.calories_target}
               unit="kcal"
               tone="calories"
+              locale={locale}
             />
             <MacroTrack
-              label="Protein"
+              label={locale === 'en-US' ? 'Protein' : 'Proteínas'}
               consumed={dailyTotals.protein}
               target={profile.protein_target}
               unit="g"
               tone="protein"
+              locale={locale}
             />
             <MacroTrack
-              label="Carbohydrates"
+              label={locale === 'en-US' ? 'Carbohydrates' : 'Carboidratos'}
               consumed={dailyTotals.carbs}
               target={profile.carbs_target}
               unit="g"
               tone="carbs"
+              locale={locale}
             />
             <MacroTrack
-              label="Fats"
+              label={locale === 'en-US' ? 'Fats' : 'Gorduras'}
               consumed={dailyTotals.fat}
               target={profile.fat_target}
               unit="g"
               tone="fat"
+              locale={locale}
             />
           </div>
         </Section>
 
         <Section
-          title="Daily Log"
-          subtitle="Meals and foods logged for the selected date."
+          title={locale === 'en-US' ? 'Daily Log' : 'Registro do dia'}
+          subtitle={locale === 'en-US' ? 'Meals and foods logged for the selected date.' : 'Refeições e alimentos registrados na data selecionada.'}
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <DateStepper date={selectedDate} onChange={handleDateChange} />

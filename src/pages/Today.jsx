@@ -43,19 +43,23 @@ function getDateLabel(locale) {
   }).format(new Date());
 }
 
-function getNextSteps(t, ROUTES, {
+function getNextSteps(t, locale, ROUTES, {
   activeWorkoutPlan,
   todaySession,
   todayMealsCount,
   recentMeasurementsCount,
   progressPhotosCount,
 }) {
+  const isEnglish = locale === 'en-US';
+
   return [
     {
       to: ROUTES.nutrition,
-      title: todayMealsCount > 0 ? 'Review nutrition' : t('today_page.nextSteps.nutritionTitle'),
+      title: todayMealsCount > 0 ? (isEnglish ? 'Review nutrition' : 'Revisar nutrição') : t('today_page.nextSteps.nutritionTitle'),
       description: todayMealsCount > 0
-        ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
+        ? isEnglish
+          ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
+          : `Você já registrou ${todayMealsCount} alimento${todayMealsCount > 1 ? 's' : ''} hoje. Mantenha o dia completo.`
         : t('today_page.nextSteps.nutritionDesc'),
       icon: UtensilsCrossed,
       phase: t('today_page.nextSteps.nutritionPhase'),
@@ -63,35 +67,49 @@ function getNextSteps(t, ROUTES, {
     {
       to: ROUTES.workouts,
       title: !activeWorkoutPlan
-        ? 'Create workout plan'
+        ? isEnglish ? 'Create workout plan' : 'Criar plano de treino'
         : todaySession?.status === 'completed'
-          ? 'Review workout log'
-          : 'Start workout',
+          ? isEnglish ? 'Review workout log' : 'Revisar treino registrado'
+          : isEnglish ? 'Start workout' : 'Iniciar treino',
       description: !activeWorkoutPlan
-        ? 'Build your active training plan first so Today, history and execution all point to the same structure.'
+        ? isEnglish
+          ? 'Build your active training plan first so Today, history and execution all point to the same structure.'
+          : 'Monte primeiro seu plano de treino ativo para que Hoje, histórico e execução apontem para a mesma estrutura.'
         : todaySession?.status === 'completed'
-          ? 'Open the completed session, review the numbers and prepare the next training day.'
-          : 'Launch the active plan and log sets, reps and load from the structured session.',
+          ? isEnglish
+            ? 'Open the completed session, review the numbers and prepare the next training day.'
+            : 'Abra a sessão concluída, revise os números e prepare o próximo dia de treino.'
+          : isEnglish
+            ? 'Launch the active plan and log sets, reps and load from the structured session.'
+            : 'Abra o plano ativo e registre séries, repetições e carga a partir da sessão estruturada.',
       icon: Dumbbell,
       phase: t('today_page.nextSteps.workoutPhase'),
     },
     {
       to: ROUTES.measurements,
-      title: recentMeasurementsCount > 0 ? 'Review measurements' : 'Log measurement',
+      title: recentMeasurementsCount > 0
+        ? isEnglish ? 'Review measurements' : 'Revisar medidas'
+        : isEnglish ? 'Log measurement' : 'Registrar medida',
       description: recentMeasurementsCount > 0
-        ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
-        : 'Add body weight and body measurements so progress tracking starts with a real baseline.',
+        ? isEnglish
+          ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
+          : 'Mantenha peso e circunferências atualizados para que as tendências de progresso continuem confiáveis.'
+        : isEnglish
+          ? 'Add body weight and body measurements so progress tracking starts with a real baseline.'
+          : 'Adicione peso e medidas corporais para que o acompanhamento de progresso comece com uma base real.',
       icon: Scale,
-      phase: 'Body',
+      phase: isEnglish ? 'Body' : 'Corpo',
     },
     {
       to: progressPhotosCount > 0 ? ROUTES.atlasAI : ROUTES.progressPhotos,
-      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : 'Add progress photo',
+      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : isEnglish ? 'Add progress photo' : 'Adicionar foto de progresso',
       description: progressPhotosCount > 0
         ? t('today_page.nextSteps.aiDesc')
-        : 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.',
+        : isEnglish
+          ? 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.'
+          : 'Capture um checkpoint visual com data para que sua linha do tempo de fotos evolua junto com o restante dos dados.',
       icon: progressPhotosCount > 0 ? Brain : Sparkles,
-      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : 'Photos',
+      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : isEnglish ? 'Photos' : 'Fotos',
     },
   ];
 }
@@ -377,7 +395,7 @@ function TodayContent() {
       ? `${activeProtocolsList.length} ${activeProtocolsList.length > 1 ? (locale === 'en-US' ? 'active' : 'ativos') : (locale === 'en-US' ? 'active' : 'ativo')}`
       : t('today_page.noActive');
 
-  const NEXT_STEPS = getNextSteps(t, ROUTES, {
+  const NEXT_STEPS = getNextSteps(t, locale, ROUTES, {
     activeWorkoutPlan,
     todaySession,
     todayMealsCount: todayMeals.length,
