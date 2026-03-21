@@ -520,14 +520,9 @@ function ProgressPhotosContent() {
               <div className="flex h-14 w-14 items-center justify-center rounded-[26px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.6)]">
                 <Camera className="h-6 w-6 text-[hsl(var(--fg-2))]" strokeWidth={1.5} />
               </div>
-              <div>
-                <p className="text-[15px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
-                  No checkpoints yet
-                </p>
-                <p className="mt-1.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                  Create your first checkpoint to start recording your visual progress.
-                </p>
-              </div>
+              <p className="text-[15px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
+                No checkpoints yet
+              </p>
               <PrimaryButton
                 type="button"
                 onClick={() => setShowNewModal(true)}
@@ -536,6 +531,9 @@ function ProgressPhotosContent() {
                 <Plus className="h-4 w-4" strokeWidth={1.9} />
                 Create first checkpoint
               </PrimaryButton>
+              <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                Add your first photo checkpoint to start tracking your visual progress over time.
+              </p>
             </div>
           </Card>
         ) : (

@@ -233,7 +233,7 @@ export default function Today() {
       title={t('today_page.title')}
       subtitle={t('today_page.subtitle')}
       maxWidth="max-w-5xl"
-      fallbackDescription="A tela Hoje abriu em modo seguro."
+      fallbackDescription="The Today screen opened in safe mode."
     >
       <TodayContent />
     </SafePageBoundary>
@@ -519,13 +519,6 @@ function TodayContent() {
         <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[hsl(var(--accent-secondary)/0.16)] blur-2xl" />
 
         <div className="relative">
-          {isAdmin && (
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex rounded-full border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] px-3 py-1 text-[12px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
-                {t('today_page.adminBadge')}
-              </span>
-            </div>
-          )}
           <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
             {greeting}, {preferredName}
           </p>

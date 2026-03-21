@@ -25,11 +25,11 @@ export const ROLES = {
 };
 
 export const ROLE_LABELS = {
-  visitor:      'Visitante',
-  athlete:      'Atleta',
+  visitor:      'Visitor',
+  athlete:      'Athlete',
   coach:        'Coach',
-  nutritionist: 'Nutricionista',
-  clinician:    'Clínico',
+  nutritionist: 'Nutritionist',
+  clinician:    'Clinician',
   admin:        'Admin',
 };
 
@@ -57,6 +57,7 @@ export const PAGE_ACCESS = {
   Measurements:    ['athlete', 'admin'],
   LabExams:        ['athlete', 'admin'],
   ProgressPhotos:  ['athlete', 'admin'],
+  Body:            ['athlete', 'admin'],
   MyDiet:          ['athlete', 'admin'],
   MyWorkout:       ['athlete', 'admin'],
   MyPrescribedDiet:    ['athlete', 'admin'],
@@ -93,18 +94,14 @@ export const PAGE_ACCESS = {
  */
 export const NAV_BY_ROLE = {
   athlete: [
-    { path: ROUTES.today,          label: 'Today',           icon: 'Home' },
-    { path: ROUTES.nutrition,      label: 'Nutrition',       icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,       label: 'Workouts',        icon: 'Dumbbell' },
-    { path: ROUTES.diary,          label: 'Diary',           icon: 'BookOpen' },
-    { path: ROUTES.protocols,      label: 'Protocols',       icon: 'FlaskConical' },
-    { path: ROUTES.measurements,   label: 'Measurements',    icon: 'BarChart3' },
-    { path: ROUTES.progress,       label: 'Progress',        icon: 'TrendingUp' },
-    { path: ROUTES.progressPhotos, label: 'Progress Photos', icon: 'Camera' },
-    { path: ROUTES.insights,       label: 'Insights',        icon: 'Heart' },
-    { path: ROUTES.labExams,       label: 'Lab Exams',       icon: 'ClipboardList' },
-    { path: ROUTES.atlasAI,        label: 'Atlas AI',        icon: 'Brain' },
-    { path: ROUTES.profile,        label: 'Profile',         icon: 'User' },
+    { path: ROUTES.today,      label: 'Today',     icon: 'Home' },
+    { path: ROUTES.nutrition,  label: 'Nutrition', icon: 'UtensilsCrossed' },
+    { path: ROUTES.workouts,   label: 'Workouts',  icon: 'Dumbbell' },
+    { path: ROUTES.body,       label: 'Body',      icon: 'TrendingUp' },
+    { path: ROUTES.protocols,  label: 'Protocols', icon: 'FlaskConical' },
+    { path: ROUTES.labExams,   label: 'Lab Exams', icon: 'ClipboardList' },
+    { path: ROUTES.atlasAI,    label: 'Atlas AI',  icon: 'Brain' },
+    { path: ROUTES.profile,    label: 'Profile',   icon: 'User' },
   ],
   coach: [
     { path: ROUTES.today,              label: 'Home',           icon: 'Home' },
@@ -131,19 +128,15 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.profile,              label: 'Profile',       icon: 'User' },
   ],
   admin: [
-    { path: ROUTES.today,          label: 'Today',           icon: 'Home' },
-    { path: ROUTES.nutrition,      label: 'Nutrition',       icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,       label: 'Workouts',        icon: 'Dumbbell' },
-    { path: ROUTES.diary,          label: 'Diary',           icon: 'BookOpen' },
-    { path: ROUTES.protocols,      label: 'Protocols',       icon: 'FlaskConical' },
-    { path: ROUTES.measurements,   label: 'Measurements',    icon: 'BarChart3' },
-    { path: ROUTES.progress,       label: 'Progress',        icon: 'TrendingUp' },
-    { path: ROUTES.progressPhotos, label: 'Progress Photos', icon: 'Camera' },
-    { path: ROUTES.insights,       label: 'Insights',        icon: 'Heart' },
-    { path: ROUTES.labExams,       label: 'Lab Exams',       icon: 'ClipboardList' },
-    { path: ROUTES.atlasAI,        label: 'Atlas AI',        icon: 'Brain' },
-    { path: ROUTES.admin,          label: 'Admin Console',   icon: 'ShieldCheck' },
-    { path: ROUTES.profile,        label: 'Profile',         icon: 'User' },
+    { path: ROUTES.today,      label: 'Today',        icon: 'Home' },
+    { path: ROUTES.nutrition,  label: 'Nutrition',    icon: 'UtensilsCrossed' },
+    { path: ROUTES.workouts,   label: 'Workouts',     icon: 'Dumbbell' },
+    { path: ROUTES.body,       label: 'Body',         icon: 'TrendingUp' },
+    { path: ROUTES.protocols,  label: 'Protocols',    icon: 'FlaskConical' },
+    { path: ROUTES.labExams,   label: 'Lab Exams',    icon: 'ClipboardList' },
+    { path: ROUTES.atlasAI,    label: 'Atlas AI',     icon: 'Brain' },
+    { path: ROUTES.admin,      label: 'Admin',        icon: 'ShieldCheck' },
+    { path: ROUTES.profile,    label: 'Profile',      icon: 'User' },
   ],
 };
 

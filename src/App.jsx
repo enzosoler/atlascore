@@ -53,6 +53,7 @@ import Insights from '@/pages/Insights';
 import Exercises from '@/pages/Exercises';
 import ExerciseDetail from '@/pages/ExerciseDetail';
 import Progress from '@/pages/Progress';
+import Body from '@/pages/Body';
 import HelpCenter from '@/pages/HelpCenter.jsx';
 import UseCase from '@/pages/UseCase';
 import GettingStartedGuide from '@/pages/guides/GettingStartedGuide';
@@ -156,6 +157,7 @@ const AppRoutes = () => (
         <Route path={ROUTES.exercises} element={<Exercises />} />
         <Route path="/exercise/:id" element={<ExerciseDetail />} />
         <Route path={ROUTES.progress} element={<Progress />} />
+        <Route path={ROUTES.body} element={<Body />} />
         <Route path={ROUTES.profile} element={<Profile />} />
         <Route path={ROUTES.settings} element={<Settings />} />
         <Route path={ROUTES.export} element={<Export />} />

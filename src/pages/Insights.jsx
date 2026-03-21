@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, Brain, Moon, Shield } from 'lucide-react';
+import { Activity, Brain, Moon, Shield, BarChart3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
@@ -296,15 +299,18 @@ function InsightsContent() {
 
       {/* Empty state — shown only when there is genuinely no data */}
       {!loading && !hasAnyData ? (
-        <SectionCard
-          title="Sem dados suficientes"
-          subtitle="Registre atividades para ver os insights."
-        >
-          <EmptyState
-            title="Nenhum dado para interpretar ainda"
-            description="Registre check-ins, treinos, refeições, medidas ou protocolos para preencher os insights."
-          />
-        </SectionCard>
+        <div className="surface rounded-2xl p-10 text-center space-y-4">
+          <BarChart3 className="h-10 w-10 mx-auto text-[hsl(var(--brand)/0.5)]" strokeWidth={1.5} />
+          <h2 className="text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            No data to show yet
+          </h2>
+          <Button asChild size="default" className="mx-auto">
+            <Link to={ROUTES.body}>Add your first measurement →</Link>
+          </Button>
+          <p className="text-[13px] text-[hsl(var(--fg-2))]">
+            Log at least 7 days of workouts, nutrition, or measurements to generate your first insight.
+          </p>
+        </div>
       ) : null}
 
       {/* Metrics and text sections — shown only when there is actual data */}

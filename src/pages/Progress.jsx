@@ -14,7 +14,8 @@ import {
 
 function MetricCard({ label, value, unit, change, goal, data }) {
   const isPositive = change > 0;
-  const isGoal = goal && Math.abs(goal - value) < Math.abs(goal - (data?.[0]?.value || value));
+  const hasValue = value != null && !Number.isNaN(Number(value));
+  const isGoal = goal && hasValue && Math.abs(goal - value) < Math.abs(goal - (data?.[0]?.value || value));
 
   return (
     <div className="surface rounded-xl p-4 space-y-3">
@@ -22,11 +23,11 @@ function MetricCard({ label, value, unit, change, goal, data }) {
         <div>
           <p className="t-small text-[hsl(var(--fg-2))]">{label}</p>
           <p className="t-kpi-sm mt-1">
-            {value?.toFixed(1)}
+            {hasValue ? Number(value).toFixed(1) : '—'}
             <span className="text-[14px] font-normal ml-1 text-[hsl(var(--fg-2))]">{unit}</span>
           </p>
         </div>
-        {change !== 0 && (
+        {change !== 0 && hasValue && (
           <div className={`flex items-center gap-1 text-[12px] font-medium ${isPositive ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--warn))]'}`}>
             {isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
             {Math.abs(change).toFixed(1)}
@@ -49,19 +50,19 @@ function MetricCard({ label, value, unit, change, goal, data }) {
         </ResponsiveContainer>
       )}
 
-      {/* Goal */}
-      {goal && (
+      {/* Goal — only render when both value and goal are valid numbers */}
+      {goal && hasValue && (
         <div className="pt-2 border-t border-[hsl(var(--border-h))]">
           <div className="flex items-center justify-between text-[12px] mb-1">
-            <span className="text-[hsl(var(--fg-2))]">Meta: {goal}</span>
+            <span className="text-[hsl(var(--fg-2))]">Goal: {goal}</span>
             <span className={`font-medium ${isGoal ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--warn))]'}`}>
-              {Math.abs(goal - value).toFixed(1)} para ir
+              {Math.abs(goal - value).toFixed(1)} to go
             </span>
           </div>
           <div className="h-1.5 bg-[hsl(var(--shell))] rounded-full overflow-hidden">
             <div
               className="h-full bg-[hsl(var(--brand))] rounded-full transition-all"
-              style={{ width: `${Math.min((value / goal) * 100, 100)}%` }}
+              style={{ width: `${Math.min(((value || 0) / (goal || 1)) * 100, 100)}%` }}
             />
           </div>
         </div>
@@ -174,7 +175,7 @@ export default function Progress() {
     <div className="mx-auto max-w-5xl p-5 lg:p-8 space-y-6">
       <div>
         <h1 className="t-headline mb-1">Your Progress</h1>
-        <p className="t-caption">Acompanhe tendências ao longo do tempo</p>
+        <p className="t-caption">Track trends over time</p>
       </div>
 
       {/* Loading state */}
@@ -182,7 +183,7 @@ export default function Progress() {
         <div className="flex items-center justify-center py-16">
           <div className="flex flex-col items-center gap-3 text-center">
             <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={1.9} />
-            <p className="text-[13px] text-[hsl(var(--fg-2))]">Carregando progresso…</p>
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">Loading progress…</p>
           </div>
         </div>
       )}
@@ -190,9 +191,9 @@ export default function Progress() {
       {/* Empty state — no measurements yet */}
       {!isLoading && measurements.length === 0 && (
         <div className="surface rounded-xl p-10 text-center space-y-3">
-          <p className="t-subtitle text-[hsl(var(--fg))]">Nenhuma medida registrada ainda</p>
+          <p className="t-subtitle text-[hsl(var(--fg))]">No measurements recorded yet</p>
           <p className="t-small text-[hsl(var(--fg-2))]">
-            Acesse a página de Medidas para registrar o primeiro checkpoint corporal.
+            Go to the Measurements page to record your first body checkpoint.
           </p>
         </div>
       )}
@@ -220,7 +221,7 @@ export default function Progress() {
       {/* Weight + Body Fat side-by-side on desktop */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <MetricCard
-          label="Peso"
+          label="Weight"
           value={latest?.weight}
           unit="kg"
           change={weightChange}
@@ -230,7 +231,7 @@ export default function Progress() {
 
         {latest?.body_fat && (
           <MetricCard
-            label="Gordura Corporal"
+            label="Body Fat"
             value={latest.body_fat}
             unit="%"
             change={bfChange}
@@ -244,12 +245,12 @@ export default function Progress() {
       {latest?.waist && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {[
-            { key: 'waist', label: 'Cintura', unit: 'cm' },
-            { key: 'chest', label: 'Peito', unit: 'cm' },
-            { key: 'arms', label: 'Braço', unit: 'cm' },
-            { key: 'thighs', label: 'Coxa', unit: 'cm' },
-            { key: 'hips', label: 'Quadril', unit: 'cm' },
-            { key: 'neck', label: 'Pescoço', unit: 'cm' },
+            { key: 'waist', label: 'Waist', unit: 'cm' },
+            { key: 'chest', label: 'Chest', unit: 'cm' },
+            { key: 'arms', label: 'Arms', unit: 'cm' },
+            { key: 'thighs', label: 'Thighs', unit: 'cm' },
+            { key: 'hips', label: 'Hips', unit: 'cm' },
+            { key: 'neck', label: 'Neck', unit: 'cm' },
           ].map(({ key, label, unit }) => {
             const latestVal = latest?.[key];
             const oldestVal = oldest?.[key];
