@@ -1000,105 +1000,47 @@ export default function AtlasAI() {
                   </div>
                 ) : messages.length === 0 ? (
                   /* ── EMPTY STATE ── */
-                  <div className="px-4 py-5 lg:px-6 lg:py-6">
-                    <div className="mx-auto max-w-3xl space-y-5">
-                      {/* Welcome panel */}
-                      <section className="relative overflow-hidden rounded-[32px] border border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card)/0.96)_0%,hsl(var(--fill)/0.62)_100%)] px-6 py-6 shadow-[var(--shadow-lg)] lg:px-7 lg:py-7">
-                        <div className="pointer-events-none absolute -right-8 top-0 h-40 w-40 rounded-full bg-[hsl(var(--brand-ai)/0.14)] blur-3xl atlas-chat-orb" />
-                        <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-32 rounded-full bg-[hsl(var(--tint)/0.07)] blur-3xl atlas-chat-orb" />
+                  <div className="px-4 py-6 lg:px-6 lg:py-8">
+                    <div className="mx-auto max-w-3xl space-y-8">
 
-                        <div className="relative space-y-4">
-                          <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-                            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                            Contextual assistant
-                          </div>
-
-                          <div className="max-w-3xl">
-                            <h2 className="text-[clamp(2rem,1.55rem+1.2vw,3rem)] font-semibold tracking-[-0.075em] text-[hsl(var(--fg))]">
-                              Chat with Atlas context — not a generic chatbot.
-                            </h2>
-                            <p className="mt-4 max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))] lg:text-[16px]">
-                              Abra uma leitura rápida sobre progresso, aderência ou próximo passo.
-                              A camada visual já é nativa do produto, enquanto a lógica continua
-                              usando o mock local desta fase.
-                            </p>
-                          </div>
-
-                          <div className="grid gap-3 sm:grid-cols-3">
-                            <ChatSignalCard
-                              icon={Brain}
-                              label="Assistente"
-                              value="Premium e contextual"
-                              detail="Mais próximo de uma camada estratégica do produto do que de um chat utilitário."
-                            />
-                            <ChatSignalCard
-                              icon={Clock3}
-                              label="Persistência"
-                              value="Histórico local salvo"
-                              detail="Cada conversa criada aqui reaparece organizada na sidebar."
-                            />
-                            <ChatSignalCard
-                              icon={Target}
-                              label="Leitura"
-                              value={hasProfileContext ? 'Ready for context' : 'Ready to start'}
-                              detail={
-                                hasProfileContext
-                                  ? 'O profile local já adiciona sinais úteis para a resposta.'
-                                  : 'Mesmo sem profile completo, o fluxo do chat já está pronto.'
-                              }
-                            />
-                          </div>
-
-                          <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.74)] px-5 py-5 shadow-[var(--shadow-sm)]">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                              <div>
-                                <p className="atlas-metric-label">Contexto visivel agora</p>
-                                <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                                  {hasProfileContext
-                                    ? 'Seu profile local já informa parte da conversa.'
-                                    : 'Ainda não há sinais suficientes do Profile nesta rota.'}
-                                </p>
-                              </div>
-                              <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-                                <Activity className="h-3.5 w-3.5" strokeWidth={1.9} />
-                                Sem backend remoto
-                              </span>
-                            </div>
-
-                            {hasProfileContext ? (
-                              <div className="mt-4 flex flex-wrap gap-2">
-                                {profileContext.map(item => (
-                                  <div
-                                    key={`${item.label}-${item.value}-empty`}
-                                    className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]"
-                                  >
-                                    <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
-                                    <span className="text-[hsl(var(--fg))]">{item.value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                                Preencha metas, peso ou objetivo no Profile para deixar o assistant
-                                even more specific to your context.
-                              </p>
-                          )}
-                            </div>
+                      {/* Hero heading */}
+                      <div className="text-center space-y-2">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+                          <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+                          Contextual assistant
                         </div>
-                      </section>
-
-                      {/* Quick starts */}
-                      <div>
-                        <p className="atlas-overline px-1">Quick starts</p>
-                        <p className="mt-2 px-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                          Comece com um prompt objetivo para dar contexto desde a primeira troca.
+                        <h2 className="text-[1.6rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))] lg:text-[2rem]">
+                          What do you want to understand today?
+                        </h2>
+                        <p className="text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+                          Choose a starting point or type your own question below.
                         </p>
-                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                          {PROMPTS.map(item => (
-                            <PromptCard key={item.id} item={item} onSelect={send} />
-                          ))}
-                        </div>
                       </div>
+
+                      {/* Prompt grid — primary CTA */}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {PROMPTS.map(item => (
+                          <PromptCard key={item.id} item={item} onSelect={send} />
+                        ))}
+                      </div>
+
+                      {/* Profile context pills — secondary, only shown when connected */}
+                      {hasProfileContext && (
+                        <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-5 py-4 shadow-[var(--shadow-xs)]">
+                          <p className="atlas-metric-label mb-3">Your profile context</p>
+                          <div className="flex flex-wrap gap-2">
+                            {profileContext.map(item => (
+                              <div
+                                key={`${item.label}-${item.value}-empty`}
+                                className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.76)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]"
+                              >
+                                <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
+                                <span className="text-[hsl(var(--fg))]">{item.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (

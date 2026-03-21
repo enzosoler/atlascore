@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import {
   Activity,
   ArrowRight,
+  ArrowLeft,
   BarChart3,
   Brain,
   Dumbbell,
@@ -12,6 +13,7 @@ import {
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/lib/AuthContext';
 import { ROLE_HOME, ROUTES } from '@/lib/routes';
+import { supabase } from '@/lib/supabaseClient';
 import PublicSiteShell, { PublicLanguageSwitcher } from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
@@ -157,6 +159,10 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [successMessage, setSuccessMessage] = React.useState('');
+  const [forgotPassword, setForgotPassword] = React.useState(false);
+  const [resetSent, setResetSent] = React.useState(false);
+
+  const isPt = language === 'pt-BR';
 
   const ui = React.useMemo(
     () => (
@@ -320,6 +326,32 @@ export default function Auth() {
     }
   };
 
+  const handlePasswordReset = async (event) => {
+    event.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setErrorMessage(isPt ? 'Digite seu email para continuar.' : 'Enter your email to continue.');
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMessage('');
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/auth?mode=login`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+    } catch {
+      setErrorMessage(
+        isPt
+          ? 'Não foi possível enviar o link. Tente novamente.'
+          : 'Could not send the reset link. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <PublicSiteShell
       compactNav
@@ -381,24 +413,74 @@ export default function Auth() {
                 ) : null}
               </div>
 
-              {legacyRecoveryRequested ? (
-                <div className="atlas-public-panel-muted mt-6 px-4 py-4">
-                  <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                    {ui.recoveryTitle}
-                  </p>
-                  <p className="mt-2 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-                    {ui.recoveryCopy}{' '}
-                    <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold text-[hsl(var(--fg))] hover:underline">
-                      {SUPPORT_EMAIL}
-                    </a>
-                    .
-                  </p>
-                  <Button asChild variant="outline" className="mt-4 h-10 w-full">
-                    <a href={supportHref}>{ui.recoveryCta}</a>
+              {/* ── Forgot password panel ── */}
+              {isLogin && forgotPassword && !resetSent && (
+                <form className="mt-7 space-y-4" onSubmit={handlePasswordReset}>
+                  <div>
+                    <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                      {ui.recoveryTitle}
+                    </p>
+                    <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                      {isPt
+                        ? 'Informe seu email e enviaremos um link para redefinir sua senha.'
+                        : 'Enter your email and we will send you a link to reset your password.'}
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="resetEmail" className="text-[12px] font-semibold text-[hsl(var(--fg))]">
+                      {t('profile.email')}
+                    </label>
+                    <input
+                      id="resetEmail"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder={ui.emailPlaceholder}
+                      className="atlas-field h-12 px-4 text-base"
+                    />
+                  </div>
+                  {errorMessage ? (
+                    <div className="atlas-banner px-4 py-3.5 text-[12px]" data-tone="error">
+                      {errorMessage}
+                    </div>
+                  ) : null}
+                  <Button type="submit" size="lg" className="h-11 w-full" disabled={isSubmitting}>
+                    {isSubmitting
+                      ? (isPt ? 'Enviando...' : 'Sending...')
+                      : (isPt ? 'Enviar link de recuperação' : 'Send reset link')}
+                    {!isSubmitting ? <ArrowRight className="h-4 w-4" strokeWidth={2} /> : null}
                   </Button>
-                </div>
-              ) : null}
+                  <button
+                    type="button"
+                    onClick={() => { setForgotPassword(false); setErrorMessage(''); }}
+                    className="flex w-full items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+                    {isPt ? 'Voltar para o login' : 'Back to sign in'}
+                  </button>
+                </form>
+              )}
 
+              {isLogin && forgotPassword && resetSent && (
+                <div className="mt-7 space-y-5">
+                  <div className="atlas-banner px-4 py-4 text-[13px]" data-tone="success">
+                    {isPt
+                      ? 'Link enviado! Verifique seu email para redefinir sua senha.'
+                      : 'Reset link sent! Check your email to reset your password.'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setForgotPassword(false); setResetSent(false); setErrorMessage(''); }}
+                    className="flex w-full items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+                    {isPt ? 'Voltar para o login' : 'Back to sign in'}
+                  </button>
+                </div>
+              )}
+
+              {!(isLogin && forgotPassword) && (
               <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
                 {!isLogin ? (
                   <div className="space-y-1.5">
@@ -484,6 +566,7 @@ export default function Auth() {
                   className="w-full h-11"
                 />
               </form>
+              )}
 
               {!isLogin ? (
                 <div className="mt-6 flex items-center justify-center gap-4 border-t border-[hsl(var(--border)/0.76)] pt-5">
@@ -495,29 +578,37 @@ export default function Auth() {
                 </div>
               ) : null}
 
-              <div className="mt-5 text-center text-[13px] text-[hsl(var(--fg-2))]">
-                {isLogin ? t('auth.login.noAccount') : t('auth.signup.hasAccount')}{' '}
-                <Link
-                  to={isLogin ? signupHref : loginHref}
-                  className="font-semibold text-[hsl(var(--fg))] hover:underline"
-                >
-                  {isLogin ? t('auth.login.createAccount') : t('auth.signup.signIn')}
-                </Link>
-              </div>
+              {!(isLogin && forgotPassword) && (
+                <>
+                  <div className="mt-5 text-center text-[13px] text-[hsl(var(--fg-2))]">
+                    {isLogin ? t('auth.login.noAccount') : t('auth.signup.hasAccount')}{' '}
+                    <Link
+                      to={isLogin ? signupHref : loginHref}
+                      className="font-semibold text-[hsl(var(--fg))] hover:underline"
+                    >
+                      {isLogin ? t('auth.login.createAccount') : t('auth.signup.signIn')}
+                    </Link>
+                  </div>
 
-              {isLogin ? (
-                <div className="mt-3 text-center">
-                  <a href={supportHref} className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]">
-                    {ui.supportLink}
-                  </a>
-                </div>
-              ) : null}
+                  {isLogin ? (
+                    <div className="mt-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => { setForgotPassword(true); setErrorMessage(''); setSuccessMessage(''); }}
+                        className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] hover:underline underline-offset-2"
+                      >
+                        {isPt ? 'Esqueceu a senha?' : 'Forgot your password?'}
+                      </button>
+                    </div>
+                  ) : null}
 
-              <div className="mt-3 text-center">
-                <Link to={ROUTES.home} className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]">
-                  {t('auth.backHome')}
-                </Link>
-              </div>
+                  <div className="mt-3 text-center">
+                    <Link to={ROUTES.home} className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]">
+                      {t('auth.backHome')}
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
