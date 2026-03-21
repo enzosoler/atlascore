@@ -17,7 +17,12 @@
 
 import * as client from './client.js';
 import { normalizeExercise, normalizeExercises, normalizeBase44Exercise } from './normalizer.js';
-import { normalizeStr, translateSearchQueryToEN } from './translations.js';
+import {
+  EXERCISE_TRANSLATIONS,
+  getExercisePT,
+  normalizeStr,
+  translateSearchQueryToEN,
+} from './translations.js';
 import { base44 } from '@/api/base44Client.js';
 
 // ─── Query key factory ────────────────────────────────────────────────────────
@@ -31,6 +36,22 @@ export const exerciseKeys = {
   detail: (id) => ['exercises', 'detail', id],
   lists: () => ['exercises', 'lists'],
 };
+
+const STATIC_EXERCISE_CATALOG = Object.entries(EXERCISE_TRANSLATIONS)
+  .map(([canonicalNameEN, entry]) =>
+    normalizeBase44Exercise({
+      id: `static_${normalizeStr(canonicalNameEN).replace(/\s+/g, '_')}`,
+      canonical_name_en: canonicalNameEN,
+      canonical_name_pt: entry?.pt || getExercisePT(canonicalNameEN),
+      aliases_en: entry?.aliases_en || [],
+      aliases_pt: entry?.aliases_pt || [],
+      primary_muscles: [],
+      secondary_muscles: [],
+      equipment: '',
+      category: '',
+    })
+  )
+  .filter(Boolean);
 
 // ─── Local search utility ─────────────────────────────────────────────────────
 
@@ -102,13 +123,49 @@ export async function searchExercises(query, limit = 30) {
         const ptIds = new Set(ptFiltered.map((e) => e.id));
         return [...ptFiltered, ...enResults.filter((e) => !ptIds.has(e.id))].slice(0, limit);
       }
+
+      const libraryRaw = await client.fetchAllExercises(200, 0);
+      if (libraryRaw && libraryRaw.length > 0) {
+        const normalizedLibrary = normalizeExercises(libraryRaw);
+        const localMatches = localSearch(normalizedLibrary, trimmed);
+        const translatedMatches =
+          enQuery !== trimmed ? localSearch(normalizedLibrary, enQuery) : [];
+
+        const merged = [...localMatches];
+        const seenIds = new Set(localMatches.map((exercise) => exercise.id));
+
+        translatedMatches.forEach((exercise) => {
+          if (!seenIds.has(exercise.id)) {
+            merged.push(exercise);
+            seenIds.add(exercise.id);
+          }
+        });
+
+        if (merged.length > 0) {
+          return merged.slice(0, limit);
+        }
+      }
     } catch (err) {
       console.warn('[ExerciseService] API search failed, falling back:', err.message);
     }
   }
 
   // Fallback to base44
-  return searchBase44Exercises(trimmed, limit);
+  const base44Results = await searchBase44Exercises(trimmed, limit);
+  if (base44Results.length > 0) {
+    return base44Results;
+  }
+
+  const staticMatches = localSearch(STATIC_EXERCISE_CATALOG, trimmed);
+  if (staticMatches.length > 0) {
+    return staticMatches.slice(0, limit);
+  }
+
+  if (enQuery !== trimmed) {
+    return localSearch(STATIC_EXERCISE_CATALOG, enQuery).slice(0, limit);
+  }
+
+  return [];
 }
 
 /**

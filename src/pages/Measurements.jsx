@@ -76,7 +76,7 @@ const METRIC_OPTIONS = [
   },
   {
     key: 'body_fat',
-    label: 'Body fat',
+    label: 'Gordura corporal',
     unit: '%',
     digits: 1,
     color: '#2563eb',
@@ -106,7 +106,7 @@ const METRIC_OPTIONS = [
   },
   {
     key: 'arms',
-    label: 'Braco',
+    label: 'Braço',
     unit: 'cm',
     digits: 1,
     color: '#0ea5e9',
@@ -136,7 +136,7 @@ const METRIC_OPTIONS = [
   },
   {
     key: 'neck',
-    label: 'Pescoco',
+    label: 'Pescoço',
     unit: 'cm',
     digits: 1,
     color: '#475569',
@@ -214,6 +214,15 @@ function getMeasurementFormState(measurement) {
     neck: measurement?.neck ? String(measurement.neck) : '',
     notes: measurement?.notes || '',
   };
+}
+
+function parseOptionalNumber(value) {
+  if (value === '' || value === null || value === undefined) {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
 function HeroStat({ label, value, detail, icon: Icon, metric }) {
@@ -384,7 +393,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
       metric: METRIC_LOOKUP.weight,
     },
     {
-      label: 'Body fat',
+      label: 'Gordura corporal',
       delta: previousMeasurement ? measurement.body_fat - previousMeasurement.body_fat : null,
       metric: METRIC_LOOKUP.body_fat,
     },
@@ -526,14 +535,14 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
     onSubmit({
       id: measurement?.id || createLocalId('measurement'),
       date: form.date || TODAY,
-      weight: Number(form.weight || 0),
-      body_fat: Number(form.body_fat || 0),
-      waist: Number(form.waist || 0),
-      chest: Number(form.chest || 0),
-      arms: Number(form.arms || 0),
-      thighs: Number(form.thighs || 0),
-      hips: Number(form.hips || 0),
-      neck: Number(form.neck || 0),
+      weight: parseOptionalNumber(form.weight),
+      body_fat: parseOptionalNumber(form.body_fat),
+      waist: parseOptionalNumber(form.waist),
+      chest: parseOptionalNumber(form.chest),
+      arms: parseOptionalNumber(form.arms),
+      thighs: parseOptionalNumber(form.thighs),
+      hips: parseOptionalNumber(form.hips),
+      neck: parseOptionalNumber(form.neck),
       notes: form.notes.trim(),
     });
   };
@@ -568,14 +577,14 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
             <p className="atlas-metric-label">Guia rapido</p>
             <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              Use peso, body fat e cintura como nucleo da leitura. As circunferências entram como camadas de refinamento do mesmo checkpoint.
+              Você pode salvar com qualquer combinação de medidas. Peso não é obrigatório; basta preencher ao menos uma métrica corporal.
             </p>
           </div>
         </div>
       </div>
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
-        <p className="atlas-overline">Core metrics</p>
+        <p className="atlas-overline">Métricas centrais</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <MeasurementField
             label="Peso"
@@ -850,10 +859,12 @@ function MeasurementsContent() {
   };
 
   const handleSaveMeasurement = (payload) => {
-    if (!payload.date || payload.weight <= 0) {
+    const filledMetricCount = BODY_FIELD_KEYS.filter((field) => Number(payload?.[field]) > 0).length;
+
+    if (!payload.date || filledMetricCount === 0) {
       setNotice({
         tone: 'warning',
-        message: 'Informe ao menos data e peso para salvar o checkpoint.',
+        message: 'Informe a data e pelo menos uma medida para salvar o checkpoint.',
       });
       return;
     }
@@ -967,7 +978,7 @@ function MeasurementsContent() {
               <>
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="atlas-overline">Latest checkpoint</p>
+                    <p className="atlas-overline">Último checkpoint</p>
                     <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
                       {formatMeasurementDate(latestMeasurement.date, {
                         day: '2-digit',
@@ -1043,7 +1054,7 @@ function MeasurementsContent() {
                   >
                   <div className="flex flex-col gap-5">
                       <div className="max-w-2xl">
-                        <p className="atlas-overline">Selected metric</p>
+                        <p className="atlas-overline">Métrica selecionada</p>
                         <div className="mt-3 flex flex-wrap items-center gap-3">
                           <h3 className="text-[1.5rem] font-semibold tracking-[-0.045em] text-[hsl(var(--fg))]">
                             {selectedMetric.label}
@@ -1165,7 +1176,7 @@ function MeasurementsContent() {
                 <MeasurementInsights measurements={sortedMeasurements} latest={latestMeasurement} />
 
                 <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.56)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                  <p className="atlas-overline">Coverage</p>
+                  <p className="atlas-overline">Cobertura</p>
                   <div className="mt-4 space-y-4">
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
@@ -1221,7 +1232,7 @@ function MeasurementsContent() {
         </SectionCard>
 
         <SectionCard
-          title="Checkpoint history"
+          title="Histórico de checkpoints"
           subtitle="Entradas organizadas como checkpoints corporais completos, com contexto e variação contra o registro anterior."
         >
           {!measurementHistory.length ? (

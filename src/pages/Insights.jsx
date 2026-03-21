@@ -72,7 +72,7 @@ export default function Insights() {
       title={t('pages.insights.title')}
       subtitle={t('pages.insights.subtitle')}
       maxWidth="max-w-5xl"
-      fallbackDescription="Insights page loaded. O conteúdo principal falhou, mas a rota continua acessível."
+      fallbackDescription="A página de Insights abriu em modo seguro. O conteúdo principal falhou, mas a rota continua acessível."
     >
       <InsightsContent />
     </SafePageBoundary>
@@ -244,7 +244,7 @@ function InsightsContent() {
   return (
     <PageShell
       title="Insights"
-      subtitle="Uma leitura objetiva do seu histórico recente, sem gráficos complexos nem gates bloqueando a página."
+      subtitle="Uma leitura objetiva do seu histórico recente, sem gráficos complexos nem bloqueios artificiais."
       actions={
         <>
           {Object.keys(RANGE_DAYS).map((option) => (
