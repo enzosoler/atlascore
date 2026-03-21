@@ -149,11 +149,11 @@
   [data-theme="dark"] {
     color-scheme: dark;
 
-    --bg-app: 216 33% 3%;
-    --bg-surface: 216 33% 5%;
-    --bg-surface-2: 216 33% 7%;
-    --bg-card-semantic: 216 33% 8%;
-    --bg-card-elevated: 216 33% 10%;
+    --bg-app: 220 8% 8%;
+    --bg-surface: 220 8% 11%;
+    --bg-surface-2: 220 8% 13%;
+    --bg-card-semantic: 220 8% 14%;
+    --bg-card-elevated: 220 8% 17%;
 
     --text-primary: 0 0% 100%;
     --text-secondary: 216 10% 85%;
@@ -182,8 +182,8 @@
 
     --separator-opaque: var(--border-default);
     --separator-strong: var(--border-strong);
-    --fill: 217 19% 15%;
-    --fill-secondary: 217 17% 18%;
+    --fill: 220 8% 16%;
+    --fill-secondary: 220 8% 19%;
 
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.18);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18), 0 18px 40px rgba(0, 0, 0, 0.22);
