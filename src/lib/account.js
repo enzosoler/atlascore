@@ -1,4 +1,3 @@
-import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { appParams } from '@/lib/app-params';
 
 function getAccessToken() {
@@ -12,11 +11,18 @@ function getAccessToken() {
 }
 
 export async function deleteCurrentAccount() {
-  const client = createAxiosClient({
-    baseURL: '/api',
-    token: getAccessToken(),
-    interceptResponses: true,
+  const token = getAccessToken();
+  const response = await fetch(`/api/apps/${appParams.appId}/entities/User/me`, {
+    method: 'DELETE',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'Content-Type': 'application/json',
+    },
   });
 
-  return client.delete(`/apps/${appParams.appId}/entities/User/me`);
+  if (!response.ok) {
+    throw new Error(`Failed to delete account: ${response.status}`);
+  }
+
+  return response.json().catch(() => null);
 }
