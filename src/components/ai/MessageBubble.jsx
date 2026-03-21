@@ -33,25 +33,25 @@ function FunctionDisplay({ toolCall }) {
 
   const statusConfig =
     {
-      pending: { icon: Clock, color: 'text-[hsl(var(--fg-3))]', text: 'Pendente' },
+      pending: { icon: Clock, color: 'text-[hsl(var(--fg-3))]', text: 'Pending' },
       running: {
         icon: Loader2,
         color: 'text-[hsl(var(--brand-ai))]',
-        text: 'Executando...',
+        text: 'Running...',
         spin: true,
       },
       in_progress: {
         icon: Loader2,
         color: 'text-[hsl(var(--brand-ai))]',
-        text: 'Executando...',
+        text: 'Running...',
         spin: true,
       },
       completed: isError
-        ? { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Falhou' }
-        : { icon: CheckCircle2, color: 'text-[hsl(var(--ok))]', text: 'Sucesso' },
-      success: { icon: CheckCircle2, color: 'text-[hsl(var(--ok))]', text: 'Sucesso' },
-      failed: { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Falhou' },
-      error: { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Falhou' },
+        ? { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Failed' }
+        : { icon: CheckCircle2, color: 'text-[hsl(var(--ok))]', text: 'Success' },
+      success: { icon: CheckCircle2, color: 'text-[hsl(var(--ok))]', text: 'Success' },
+      failed: { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Failed' },
+      error: { icon: AlertCircle, color: 'text-[hsl(var(--err))]', text: 'Failed' },
     }[status] || { icon: Clock, color: 'text-[hsl(var(--fg-3))]', text: '' };
 
   const Icon = statusConfig.icon;

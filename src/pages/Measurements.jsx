@@ -196,9 +196,9 @@ function getDeltaIcon(delta) {
 }
 
 function getDeltaLabel(delta, metric) {
-  if (delta === null || delta === undefined) return 'Sem base anterior';
-  if (Math.abs(delta) < 0.05) return 'Sem mudanca relevante';
-  return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} vs anterior`.trim();
+  if (delta === null || delta === undefined) return 'No previous data';
+  if (Math.abs(delta) < 0.05) return 'No relevant change';
+  return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} vs previous`.trim();
 }
 
 function getMeasurementFormState(measurement) {
@@ -306,8 +306,8 @@ function MetricSelectorCard({ metric, snapshot, isActive, onClick }) {
           </p>
           <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
             {snapshot?.entries?.length
-              ? `${snapshot.entries.length} checkpoints com essa métrica`
-              : 'Sem dados suficientes'}
+              ? `${snapshot.entries.length} checkpoints with this metric`
+              : 'Insufficient data'}
           </p>
         </div>
 
@@ -388,12 +388,12 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
 
   const keyDeltas = [
     {
-      label: 'Peso',
+      label: 'Weight',
       delta: previousMeasurement ? measurement.weight - previousMeasurement.weight : null,
       metric: METRIC_LOOKUP.weight,
     },
     {
-      label: 'Gordura corporal',
+      label: 'Body Fat',
       delta: previousMeasurement ? measurement.body_fat - previousMeasurement.body_fat : null,
       metric: METRIC_LOOKUP.body_fat,
     },
@@ -415,7 +415,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               Checkpoint corporal
             </span>
             <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-              {previousMeasurement ? `${daysSincePrevious} dias apos o anterior` : 'Primeiro registro'}
+              {previousMeasurement ? `${daysSincePrevious} days after previous` : 'First entry'}
             </span>
           </div>
 
@@ -478,7 +478,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               className="atlas-button atlas-button-secondary h-10 flex-1 xl:w-full"
             >
               <Pencil className="h-4 w-4" strokeWidth={1.9} />
-              Editar
+              Edit
             </button>
             <button
               type="button"
@@ -486,7 +486,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)] xl:w-full"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-              Excluir
+              Delete
             </button>
           </div>
         </aside>
@@ -577,7 +577,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
             <p className="atlas-metric-label">Guia rapido</p>
             <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              Você pode salvar com qualquer combinação de medidas. Peso não é obrigatório; basta preencher ao menos uma métrica corporal.
+              You can save with any combination of measurements. Weight is optional; just fill in at least one body metric.
             </p>
           </div>
         </div>
@@ -587,7 +587,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
         <p className="atlas-overline">Métricas centrais</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <MeasurementField
-            label="Peso"
+            label="Weight"
             unit="kg"
             type="number"
             step="0.1"
@@ -597,7 +597,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('weight', event.target.value)}
           />
           <MeasurementField
-            label="Gordura corporal"
+            label="Body Fat"
             unit="%"
             type="number"
             step="0.1"
@@ -689,10 +689,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 
       <div className="flex flex-col-reverse gap-3 border-t border-[hsl(var(--border)/0.85)] pt-6 sm:flex-row sm:justify-end">
         <SecondaryButton type="button" onClick={onCancel}>
-          Cancelar
+          Cancel
         </SecondaryButton>
         <PrimaryButton type="submit">
-          {measurement ? 'Salvar checkpoint' : 'Registrar checkpoint'}
+          {measurement ? 'Save checkpoint' : 'Log checkpoint'}
         </PrimaryButton>
       </div>
       {/* Note: submit button disabling on in-flight mutations is handled in parent via isMutating */}
@@ -852,7 +852,7 @@ function MeasurementsContent() {
 
   const handleDelete = (measurement) => {
     const confirmed = window.confirm(
-      `Excluir as medidas de ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}?`
+      `Delete as medidas de ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}?`
     );
     if (!confirmed) return;
     deleteMutation.mutate(measurement.id);
@@ -886,7 +886,7 @@ function MeasurementsContent() {
         <div className="flex items-center justify-center py-24">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[hsl(var(--brand)/0.18)] border-t-[hsl(var(--brand))]" />
-            <p className="text-[13px] text-[hsl(var(--fg-2))]">Carregando checkpoints…</p>
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">Loading checkpoints…</p>
           </div>
         </div>
       </AppContainer>
@@ -897,7 +897,7 @@ function MeasurementsContent() {
     return (
       <AppContainer>
         <StatusBanner tone="error">
-          Erro ao carregar os dados de medidas. Verifique sua conexão e tente novamente.
+          Error loading measurement data. Check your connection and try again.
         </StatusBanner>
       </AppContainer>
     );
@@ -906,9 +906,9 @@ function MeasurementsContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Medidas"
-        title="Medidas com calma, hierarquia e leitura real."
-        subtitle="Um espaço dedicado para checkpoints corporais: peso, composição e circunferências em uma leitura premium, limpa e ritmada."
+        eyebrow="Measurements"
+        title="Measurements with care, hierarchy and clean reading."
+        subtitle="A dedicated space for body checkpoints: weight, composition and measurements in a premium, clean and rhythmic view."
         accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"
         actions={
           <ActionRow>
@@ -933,14 +933,14 @@ function MeasurementsContent() {
       >
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <HeroStat
-            label="Peso atual"
+            label="Current Weight"
             value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.weight)} kg` : '--'}
             detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight)}
             icon={Scale}
             metric={METRIC_LOOKUP.weight}
           />
           <HeroStat
-            label="Gordura corporal"
+            label="Body Fat"
             value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.body_fat)} %` : '--'}
             detail={getDeltaLabel(metricSnapshots.body_fat?.delta, METRIC_LOOKUP.body_fat)}
             icon={Activity}
@@ -997,8 +997,8 @@ function MeasurementsContent() {
                 </div>
 
                 <div className="mt-5 space-y-3">
-                  <SnapshotRow label="Peso" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
-                  <SnapshotRow label="Gordura corporal" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
+                  <SnapshotRow label="Weight" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
+                  <SnapshotRow label="Body Fat" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
                   <SnapshotRow label="Cintura" value={toDisplayNumber(latestMeasurement.waist)} unit="cm" />
                   <SnapshotRow label="Peito" value={toDisplayNumber(latestMeasurement.chest)} unit="cm" />
                   <SnapshotRow label="Braço" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
@@ -1028,7 +1028,7 @@ function MeasurementsContent() {
 
         <SectionCard
           title="Tendência"
-          subtitle="Selecione a métrica principal e leia a curva com contexto suficiente para tomar decisão sem excesso visual."
+          subtitle="Select the main metric and read the curve with enough context to decide without visual excess."
         >
           {sortedMeasurements.length ? (
             <div className="grid gap-6">
@@ -1084,7 +1084,7 @@ function MeasurementsContent() {
                           label="Desde o inicio"
                           value={
                             selectedSnapshot.rangeDelta === null
-                              ? 'Sem base'
+                              ? 'No data'
                               : `${selectedSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(
                                   selectedSnapshot.rangeDelta,
                                   selectedMetric.digits
@@ -1225,15 +1225,15 @@ function MeasurementsContent() {
             </div>
           ) : (
             <EmptyState
-              title="Sem medidas para mostrar"
+              title="No measurements to show"
               description="Registre a primeira entrada para ativar o gráfico, a leitura de tendência e o resumo lateral."
             />
           )}
         </SectionCard>
 
         <SectionCard
-          title="Histórico de checkpoints"
-          subtitle="Entradas organizadas como checkpoints corporais completos, com contexto e variação contra o registro anterior."
+          title="Measurement History"
+          subtitle="Entries organized as complete body checkpoints, with context and variation compared to previous entry."
         >
           {!measurementHistory.length ? (
             <EmptyState
@@ -1270,7 +1270,7 @@ function MeasurementsContent() {
           <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
             <DialogPanelHeader
               eyebrow="Checkpoint de medidas"
-              title={editingMeasurement ? 'Editar checkpoint corporal' : 'Registrar checkpoint corporal'}
+              title={editingMeasurement ? 'Edit checkpoint corporal' : 'Registrar checkpoint corporal'}
               description="Este modal mantém a lógica atual da página, mas organiza a entrada com mais clareza para peso, composição e circunferências."
               accentClassName="from-[rgba(14,165,233,0.12)]"
             />

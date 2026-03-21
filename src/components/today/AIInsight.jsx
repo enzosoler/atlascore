@@ -13,7 +13,7 @@ export default function AIInsight() {
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-semibold">Atlas AI</p>
         <p className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
-          Seu copiloto contextual. Registre dados para insights personalizados.
+          Your contextual copilot. Log data for personalized insights.
         </p>
       </div>
       <ChevronRight className="w-4 h-4 text-muted-foreground/50 shrink-0 group-hover:text-[hsl(var(--primary))] transition-colors" strokeWidth={2} />

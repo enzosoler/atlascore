@@ -25,9 +25,9 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
 
   // Group photos into phases (start, middle, end)
   const getPhaseLabel = (index, total) => {
-    if (index === 0) return 'Início';
-    if (index === total - 1) return 'Atual';
-    return `Semana ${Math.round((index / (total - 1)) * 52)}`;
+    if (index === 0) return 'Start';
+    if (index === total - 1) return 'Current';
+    return `Week ${Math.round((index / (total - 1)) * 52)}`;
   };
 
   const safeFormatDate = (dateValue) => {

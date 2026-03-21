@@ -78,7 +78,7 @@ export default function PendingInvites() {
             <div className="flex-1 min-w-0">
               <span className="badge badge-warn mr-2">{invite.label}</span>
               <span className="text-[13px] font-medium">{invite.from}</span>
-              <p className="t-caption mt-0.5">quer acesso aos seus dados</p>
+              <p className="t-caption mt-0.5">wants access to your data</p>
             </div>
             <div className="flex gap-2 shrink-0">
               <button

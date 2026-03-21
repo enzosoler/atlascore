@@ -32,48 +32,48 @@ export default function MeasurementInsights({ measurements, latest }) {
 
   if (Math.abs(weightChange) > 0.1) {
     insights.push({
-      label: 'Peso no periodo',
+      label: 'Weight in period',
       icon: weightChange > 0 ? ArrowUpRight : ArrowDownRight,
       tone: weightChange > 0 ? 'attention' : 'positive',
-      text: `${weightChange > 0 ? 'Subiu' : 'Caiu'} ${Math.abs(weightChange).toFixed(1)}kg desde ${new Date(
+      text: `${weightChange > 0 ? 'Increased' : 'Decreased'} ${Math.abs(weightChange).toFixed(1)}kg since ${new Date(
         `${oldest.date}T12:00:00`
-      ).toLocaleDateString('pt-BR')}.`,
+      ).toLocaleDateString('en-US')}.`,
     });
   }
 
   if (bfChange !== null && Math.abs(bfChange) > 0.05) {
     insights.push({
-      label: 'Composicao corporal',
+      label: 'Body composition',
       icon: bfChange > 0 ? ArrowUpRight : ArrowDownRight,
       tone: bfChange > 0 ? 'attention' : 'positive',
-      text: `Body fat ${bfChange > 0 ? 'subiu' : 'caiu'} ${Math.abs(bfChange).toFixed(2)}% no intervalo analisado.`,
+      text: `Body fat ${bfChange > 0 ? 'increased' : 'decreased'} ${Math.abs(bfChange).toFixed(2)}% in the period analyzed.`,
     });
   }
 
   if (waistChange !== null && Math.abs(waistChange) > 0.1) {
     insights.push({
-      label: 'Linha de cintura',
+      label: 'Waist line',
       icon: waistChange > 0 ? ArrowUpRight : ArrowDownRight,
       tone: waistChange > 0 ? 'attention' : 'positive',
-      text: `Cintura ${waistChange > 0 ? 'subiu' : 'caiu'} ${Math.abs(waistChange).toFixed(1)}cm desde a base inicial.`,
+      text: `Waist ${waistChange > 0 ? 'increased' : 'decreased'} ${Math.abs(waistChange).toFixed(1)}cm from baseline.`,
     });
   }
 
   if (Math.abs(weightRate) > 0.05) {
     insights.push({
-      label: 'Ritmo atual',
+      label: 'Current rate',
       icon: AlertCircle,
       tone: 'neutral',
-      text: `Ritmo medio de ${Math.abs(weightRate).toFixed(2)}kg por semana. Mantido o mesmo compasso, a projecao em 8 semanas aponta ${projectedWeight8w.toFixed(1)}kg.`,
+      text: `Average rate of ${Math.abs(weightRate).toFixed(2)}kg per week. At the same pace, the 8-week projection points to ${projectedWeight8w.toFixed(1)}kg.`,
     });
   }
 
   if (insights.length === 0) {
     insights.push({
-      label: 'Leitura estavel',
+      label: 'Stable reading',
       icon: Minus,
       tone: 'neutral',
-      text: 'As medidas estao estaveis no periodo atual. Novos checkpoints ajudam a tornar a curva mais legivel.',
+      text: 'Measurements are stable in the current period. New checkpoints help make the curve more readable.',
     });
   }
 
@@ -82,10 +82,10 @@ export default function MeasurementInsights({ measurements, latest }) {
       <div>
         <p className="atlas-overline">Automated reading</p>
         <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-          Sinais detectados no periodo
+          Signals detected in period
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          Um resumo automatico da curva corporal atual, sem competir com a visualizacao principal.
+          An automatic summary of your current body curve, without competing with the main visualization.
         </p>
       </div>
 

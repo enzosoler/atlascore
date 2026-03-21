@@ -173,7 +173,7 @@ export default function Progress() {
   return (
     <div className="mx-auto max-w-5xl p-5 lg:p-8 space-y-6">
       <div>
-        <h1 className="t-headline mb-1">Seu Progresso</h1>
+        <h1 className="t-headline mb-1">Your Progress</h1>
         <p className="t-caption">Acompanhe tendências ao longo do tempo</p>
       </div>
 

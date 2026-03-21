@@ -252,7 +252,7 @@ function LabExamsContent() {
       setShowAdd(false);
       setFormErrors({});
       setForm({ exam_date: getToday(), panel_name: '', markers: [emptyMarker()], notes: '' });
-      toast.success('Exame registrado.');
+      toast.success('Exam recorded.');
     },
   });
 
@@ -260,7 +260,7 @@ function LabExamsContent() {
     mutationFn: (id) => base44.entities.LabExam.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lab-exams'] });
-      toast.success('Exame removido.');
+      toast.success('Exam removed.');
     },
   });
 
@@ -385,7 +385,7 @@ function LabExamsContent() {
 
   return (
     <PageShell
-      title="Exames laboratoriais"
+      title="Lab Exams"
       subtitle="Centralize PDF, imagem e leitura estruturada dos seus exames em uma camada mais confiável e legível."
       actions={(
         <PrimaryButton type="button" onClick={() => setShowAdd(true)} className="inline-flex items-center gap-2">
@@ -561,7 +561,7 @@ function LabExamsContent() {
                 </div>
                 <Button type="button" variant="outline" className="h-10" onClick={addMarker}>
                   <Plus className="h-4 w-4" />
-                  Adicionar marcador
+                  Add marker
                 </Button>
               </div>
 

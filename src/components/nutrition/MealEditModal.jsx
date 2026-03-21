@@ -37,10 +37,10 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['meals', date] });
       onOpenChange(false);
-      toast.success('Refeição atualizada');
+      toast.success('Meal updated');
       onSuccess?.();
     },
-    onError: () => toast.error('Erro ao salvar refeição'),
+    onError: () => toast.error('Error saving meal'),
   });
 
   const saveMeal = () => {
@@ -107,7 +107,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl bg-[hsl(var(--card))] border-border rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[15px]">Editar refeição</DialogTitle>
+          <DialogTitle className="text-[15px]">Edit Meal</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">

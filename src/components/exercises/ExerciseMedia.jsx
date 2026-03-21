@@ -33,7 +33,7 @@ function SkeletonPlaceholder({ size }) {
   return (
     <div
       className={`${SIZE_CLASSES[size]} ${ASPECT_CLASSES[size]} bg-[hsl(var(--shell))] animate-pulse flex items-center justify-center`}
-      aria-label="Carregando mídia..."
+      aria-label="Loading media..."
     >
       <Dumbbell className="w-6 h-6 text-[hsl(var(--border))]" strokeWidth={1.5} />
     </div>

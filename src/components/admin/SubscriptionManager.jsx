@@ -77,7 +77,7 @@ export default function SubscriptionManager() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-8 gap-2 t-small text-[hsl(var(--fg-2))]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading…
           </div>
         ) : subs.length === 0 ? (
           <p className="t-caption text-center py-6">Nenhuma assinatura cadastrada</p>

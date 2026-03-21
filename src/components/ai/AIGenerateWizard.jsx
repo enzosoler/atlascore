@@ -80,7 +80,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[15px]">
             <Sparkles className="w-4 h-4 text-[hsl(var(--brand-ai))]" />
-            {isDiet ? 'Gerar Plano Alimentar por IA' : 'Gerar Treino por IA'}
+            {isDiet ? 'Generate AI Meal Plan' : 'Generate AI Workout'}
           </DialogTitle>
         </DialogHeader>
 
@@ -88,33 +88,33 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
           <div className="space-y-4">
             <div>
               <p className="text-[12px] text-[hsl(var(--fg-2))] mb-3">
-                Vou usar seus dados atuais de perfil para gerar um plano personalizado.
+                I'll use your current profile data to generate a personalized plan.
               </p>
               <div className="bg-[hsl(var(--shell))] rounded-xl p-3 space-y-1.5">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">O que já sei sobre você</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">What I already know about you</p>
                 {knownItems.length > 0 ? knownItems.map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-[12px]">
                     <Check className="w-3 h-3 text-[hsl(var(--ok))] shrink-0" strokeWidth={2.5} />
                     <span>{item}</span>
                   </div>
                 )) : (
-                  <p className="text-[12px] text-[hsl(var(--fg-2))]">Perfil ainda não preenchido — vou usar padrões razoáveis.</p>
+                  <p className="text-[12px] text-[hsl(var(--fg-2))]">Profile not yet filled — I'll use reasonable defaults.</p>
                 )}
               </div>
             </div>
 
             {hasMissing && (
               <p className="text-[12px] text-[hsl(var(--warn))] bg-[hsl(var(--warn)/0.08)] border border-[hsl(var(--warn)/0.2)] rounded-lg px-3 py-2">
-                Há {missing.length} informação(ões) faltando que melhoram a qualidade do plano. Vou te perguntar na próxima etapa.
+                There are {missing.length} missing piece(s) that improve plan quality. I'll ask you in the next step.
               </p>
             )}
 
             <div className="flex gap-2">
               <button onClick={onClose} className="btn btn-secondary flex-1 h-10 rounded-xl text-[13px]">
-                Cancelar
+                Cancel
               </button>
               <button onClick={handleReview} className="btn btn-primary flex-1 h-10 rounded-xl text-[13px] gap-1.5">
-                {hasMissing ? <>Revisar <ChevronRight className="w-3.5 h-3.5" /></> : <><Sparkles className="w-3.5 h-3.5" /> Gerar agora</>}
+                {hasMissing ? <>Review <ChevronRight className="w-3.5 h-3.5" /></> : <><Sparkles className="w-3.5 h-3.5" /> Generate now</>}
               </button>
             </div>
           </div>
@@ -123,18 +123,18 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
         {step === 'fill' && (
           <div className="space-y-4">
             <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              Apenas as informações que faltam para personalização máxima:
+              Only the information missing for maximum personalization:
             </p>
 
             {isDiet && missing.includes('meals_per_day') && (
               <div>
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-                  Quantas refeições por dia?
+                  How many meals per day?
                 </label>
                 <Select value={String(answers.meals_per_day || '')} onValueChange={v => set('meals_per_day', Number(v))}>
-                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
-                    {[3, 4, 5, 6].map(n => <SelectItem key={n} value={String(n)}>{n} refeições</SelectItem>)}
+                    {[3, 4, 5, 6].map(n => <SelectItem key={n} value={String(n)}>{n} meals</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -142,12 +142,12 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
             {isDiet && missing.includes('restrictions') && (
               <div>
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-                  Restrições ou preferências alimentares?
+                  Food restrictions or preferences?
                 </label>
                 <Input
                   value={answers.restrictions || ''}
                   onChange={e => set('restrictions', e.target.value)}
-                  placeholder="Ex: Sem lactose, low-carb, vegetariano..."
+                  placeholder="Ex: No dairy, low-carb, vegetarian..."
                   className="h-10 rounded-lg text-base"
                 />
               </div>
@@ -155,14 +155,14 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
             {!isDiet && missing.includes('experience') && (
               <div>
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-                  Nível de experiência no treino?
+                  Training experience level?
                 </label>
                 <Select value={answers.experience || ''} onValueChange={v => set('experience', v)}>
-                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="beginner">Iniciante (menos de 1 ano)</SelectItem>
-                    <SelectItem value="intermediate">Intermediário (1-3 anos)</SelectItem>
-                    <SelectItem value="advanced">Avançado (3-6 anos)</SelectItem>
+                    <SelectItem value="beginner">Beginner (less than 1 year)</SelectItem>
+                    <SelectItem value="intermediate">Intermediate (1-3 years)</SelectItem>
+                    <SelectItem value="advanced">Advanced (3-6 years)</SelectItem>
                     <SelectItem value="expert">Expert (6+ anos)</SelectItem>
                   </SelectContent>
                 </Select>
@@ -171,15 +171,15 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
             {!isDiet && missing.includes('location') && (
               <div>
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-                  Local de treino?
+                  Training location?
                 </label>
                 <Select value={answers.location || ''} onValueChange={v => set('location', v)}>
-                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="gym">Academia completa</SelectItem>
-                    <SelectItem value="home">Casa (sem equipamentos)</SelectItem>
-                    <SelectItem value="home_eq">Casa (com equipamentos)</SelectItem>
-                    <SelectItem value="outdoor">Ar livre</SelectItem>
+                    <SelectItem value="gym">Full gym</SelectItem>
+                    <SelectItem value="home">Home (no equipment)</SelectItem>
+                    <SelectItem value="home_eq">Home (with equipment)</SelectItem>
+                    <SelectItem value="outdoor">Outdoor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -187,12 +187,12 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
             {!isDiet && missing.includes('session_minutes') && (
               <div>
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-                  Duração da sessão?
+                  Session duration?
                 </label>
                 <Select value={String(answers.session_minutes || '')} onValueChange={v => set('session_minutes', Number(v))}>
-                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
-                    {[30, 45, 60, 75, 90].map(n => <SelectItem key={n} value={String(n)}>{n} minutos</SelectItem>)}
+                    {[30, 45, 60, 75, 90].map(n => <SelectItem key={n} value={String(n)}>{n} minutes</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -202,12 +202,12 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
             {!isDiet && (
               <div>
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-                  Foco muscular de hoje (opcional)
+                  Muscle focus for today (optional)
                 </label>
                 <Input
                   value={answers.muscular_focus || ''}
                   onChange={e => set('muscular_focus', e.target.value)}
-                  placeholder="Ex: Peito e tríceps, Costas, Pernas..."
+                  placeholder="Ex: Chest and triceps, Back, Legs..."
                   className="h-10 rounded-lg text-base"
                 />
               </div>
@@ -215,10 +215,10 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
 
             <div className="flex gap-2">
               <button onClick={() => setStep('review')} className="btn btn-secondary h-10 rounded-xl px-4 text-[13px]">
-                Voltar
+                Back
               </button>
               <button onClick={handleGenerate} className="btn btn-primary flex-1 h-10 rounded-xl text-[13px] gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Gerar agora
+                <Sparkles className="w-3.5 h-3.5" /> Generate now
               </button>
             </div>
           </div>

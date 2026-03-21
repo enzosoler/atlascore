@@ -24,39 +24,39 @@ const FREE_PROMPT_LIMIT = 3;
 const PROMPTS = [
   {
     id: 'nutrition',
-    title: 'Aderencia nutricional',
-    prompt: 'Como está minha aderência nutricional?',
-    description: 'Veja onde sua rotina alimentar está sustentando ou travando a semana.',
+    title: 'Nutrition adherence',
+    prompt: 'How is my nutrition adherence?',
+    description: 'See where your diet is sustaining or blocking the week.',
   },
   {
     id: 'weight',
-    title: 'Progresso de peso',
-    prompt: 'Analise meu progresso de peso',
-    description: 'Leia tendência, distância até a meta e próximos ajustes com clareza.',
+    title: 'Weight Progress',
+    prompt: 'Analyze my weight progress',
+    description: 'Read trend, distance to goal and next adjustments clearly.',
   },
   {
     id: 'labs',
-    title: 'Leitura de exames',
-    prompt: 'O que meus exames indicam?',
-    description: 'Abra uma interpretação guiada e contextual do que merece atenção.',
+    title: 'Lab Results Reading',
+    prompt: 'What do my lab exams indicate?',
+    description: 'Get a guided and contextual interpretation of what deserves attention.',
   },
   {
     id: 'supplements',
-    title: 'Suplementação',
-    prompt: 'Quais suplementos combinam com meus objetivos?',
-    description: 'Priorize o que faz sentido para seu objetivo antes de empilhar intervenção.',
+    title: 'Supplementation',
+    prompt: 'Which supplements match my goals?',
+    description: 'Prioritize what makes sense for your goal before stacking interventions.',
   },
   {
     id: 'weekly',
-    title: 'Resumo semanal',
-    prompt: 'Gere um resumo semanal',
-    description: 'Condense a semana em uma leitura rápida, com foco na próxima decisão.',
+    title: 'Weekly Summary',
+    prompt: 'Generate a weekly summary',
+    description: 'Condense the week into a quick read, focused on the next decision.',
   },
   {
     id: 'plan',
-    title: 'Plano vs execução',
-    prompt: 'Compare meu plano vs execução',
-    description: 'Entenda intenção versus consistência real sem abrir várias telas.',
+    title: 'Plan vs Execution',
+    prompt: 'Compare my plan vs execution',
+    description: 'Understand intention versus real consistency without opening multiple screens.',
   },
 ];
 
@@ -64,7 +64,7 @@ function createConversation(name) {
   return {
     id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     metadata: {
-      name: name || new Date().toLocaleDateString('pt-BR'),
+      name: name || new Date().toLocaleDateString('en-US'),
     },
     messages: [],
     updated_at: new Date().toISOString(),
@@ -111,7 +111,7 @@ function sanitizeConversations(raw) {
     .map((conversation, index) => ({
       id: conversation?.id || `local-restored-${index}`,
       metadata: {
-        name: conversation?.metadata?.name || 'Conversa',
+        name: conversation?.metadata?.name || 'Conversation',
       },
       messages: Array.isArray(conversation?.messages)
         ? conversation.messages
@@ -210,80 +210,80 @@ function buildMockReply(user, content) {
 
   if (normalized.includes('ader') || normalized.includes('nutri')) {
     return [
-      'Resumo local simulado da sua aderencia nutricional:',
+      'Local simulated nutrition adherence summary:',
       calories
-        ? `- Meta calórica salva no perfil: **${calories}**.`
-        : '- Ainda não encontrei meta calórica salva no perfil local.',
+        ? `- Calorie goal saved in profile: **${calories}**.`
+        : '- I found no calorie goal saved in local profile yet.',
       macros
-        ? `- Metas registradas hoje: ${macros}.`
-        : '- Proteína, carboidratos, gordura e água ainda não foram definidos no perfil local.',
+        ? `- Targets logged today: ${macros}.`
+        : '- Protein, carbs, fat and water have not been set in local profile yet.',
       goal
-        ? `- Seu objetivo atual é **${goal}**, então eu avaliaria aderência pelo quanto a rotina diária sustenta essa meta.`
-        : '- Sem objetivo salvo, eu trataria aderência como consistência básica de refeições e hidratação.',
+        ? `- Your current goal is **${goal}**, so I would evaluate adherence by how much daily routine sustains this goal.`
+        : '- With no saved goal, I would treat adherence as basic meal and hydration consistency.',
       '',
-      `Proximo passo sugerido: manter uma ancora proteica no fim do dia e repetir as refeicoes que ja funcionaram bem. ${modeLine}`,
+      `Suggested next step: keep a protein anchor at end of day and repeat meals that already worked well. ${modeLine}`,
     ].join('\n');
   }
 
   if (normalized.includes('peso') || normalized.includes('progresso')) {
     return [
-      'Leitura local simulada do seu progresso de peso:',
+      'Local simulated weight progress reading:',
       Number.isFinite(currentWeight)
-        ? `- Peso atual salvo: **${currentWeight} kg**.`
-        : '- Ainda não encontrei peso atual salvo no perfil local.',
+        ? `- Current weight saved: **${currentWeight} kg**.`
+        : '- I found no current weight saved in local profile yet.',
       Number.isFinite(targetWeight)
-        ? `- Meta registrada: **${targetWeight} kg**${weightGap ? ` e ${weightGap}.` : '.'}`
-        : '- Ainda não encontrei peso-alvo salvo para comparar tendência.',
+        ? `- Registered goal: **${targetWeight} kg**${weightGap ? ` and ${weightGap}.` : '.'}`
+        : '- I found no target weight saved to compare trend.',
       goal
-        ? `- Com o objetivo **${goal}**, eu acompanharia peso junto com energia, treino e consistência semanal.`
-        : '- Para uma leitura melhor, vale salvar objetivo e meta no Profile.',
+        ? `- With the goal **${goal}**, I would track weight alongside energy, training and weekly consistency.`
+        : '- For better reading, it helps to save goal and target in Profile.',
       '',
-      `Se quiser, posso transformar essa analise em um plano simples de ajustes para treino, sono e calorias. ${modeLine}`,
+      `If you want, I can transform this analysis into a simple plan for training, sleep and calorie adjustments. ${modeLine}`,
     ].join('\n');
   }
 
   if (normalized.includes('exame')) {
     return [
-      'Analise local simulada dos exames:',
-      '- Nesta etapa local eu ainda não tenho exames sincronizados nesta rota.',
+      'Local simulated exam analysis:',
+      '- At this local stage I do not have exams synced to this route yet.',
       goal
-        ? `- Mesmo assim, já dá para priorizar a leitura com base no objetivo **${goal}**.`
-        : '- Sem objetivo salvo, eu começaria definindo meta principal, sintomas e rotina recente.',
-      '- A interpretação faz mais sentido quando combinada com sintomas, sono e carga de treino.',
+        ? `- Even so, I can prioritize the reading based on your goal **${goal}**.`
+        : '- With no saved goal, I would start by defining main goal, symptoms and recent routine.',
+      '- The interpretation makes more sense when combined with symptoms, sleep and training load.',
       '',
-      `Nesta rota desacoplada, eu estou respondendo com mock local e sem acessar exames reais. ${modeLine}`,
+      `At this decoupled route, I am responding with local mock without accessing real exams. ${modeLine}`,
     ].join('\n');
   }
 
   if (normalized.includes('suplement')) {
     return [
-      'Sugestão local simulada para suplementação:',
+      'Local simulated supplementation suggestion:',
       goal
-        ? `- Eu alinharia qualquer suplemento primeiro ao objetivo **${goal}**.`
-        : '- Sem objetivo salvo, eu evitaria sugerir suplemento específico cedo demais.',
+        ? `- I would align any supplement first to your goal **${goal}**.`
+        : '- With no saved goal, I would avoid suggesting a specific supplement too early.',
       calories || macros
-        ? '- Como você já tem metas no perfil, eu priorizaria consistência alimentar antes de empilhar intervenção.'
-        : '- Antes de pensar em suplemento, vale definir ingestão diária e hidratação no Profile.',
-      '- Creatina e proteína costumam ser as opções mais fáceis de justificar quando base, treino e tolerância estão organizados.',
-      '- Cafeína, ômega-3 e vitamina D dependem mais do seu contexto e dos exames.',
+        ? '- Since you already have targets in your profile, I would prioritize eating consistency before stacking interventions.'
+        : '- Before thinking about supplements, it helps to define daily intake and hydration in Profile.',
+      '- Creatine and protein are usually the easiest options to justify when base, training and tolerance are organized.',
+      '- Caffeine, omega-3 and vitamin D depend more on your context and exams.',
       '',
-      `A melhor combinação muda conforme objetivo, rotina e tolerância individual. ${modeLine}`,
+      `The best combination changes based on goal, routine and individual tolerance. ${modeLine}`,
     ].join('\n');
   }
 
   if (normalized.includes('resumo') || normalized.includes('semana')) {
     return [
-      'Resumo semanal local simulado:',
+      'Local simulated weekly summary:',
       goal
-        ? `- Foco principal da semana: **${goal}**.`
-        : '- Ainda falta um objetivo principal salvo para resumir a semana com mais contexto.',
+        ? `- Main focus of the week: **${goal}**.`
+        : '- Still missing a main saved goal to summarize the week with more context.',
       Number.isFinite(currentWeight)
-        ? `- Peso de referência salvo: **${currentWeight} kg**${Number.isFinite(targetWeight) ? ` para uma meta de **${targetWeight} kg**.` : '.'}`
-        : '- Ainda não há peso salvo para eu usar como referência desta semana.',
+        ? `- Saved reference weight: **${currentWeight} kg**${Number.isFinite(targetWeight) ? ` for a goal of **${targetWeight} kg**.` : '.'}`
+        : '- No weight saved yet for me to use as reference for this week.',
       calories
-        ? `- Meta diária registrada: **${calories}**${macros ? ` com ${macros}.` : '.'}`
-        : '- As metas nutricionais ainda não foram definidas no perfil local.',
-      `- Foco da próxima semana: repetir o que funcionou e proteger a rotina de descanso. ${modeLine}`,
+        ? `- Registered daily goal: **${calories}**${macros ? ` with ${macros}.` : '.'}`
+        : '- Nutritional goals have not been set in local profile yet.',
+      `- Focus for next week: repeat what worked and protect your rest routine. ${modeLine}`,
     ].join('\n');
   }
 
@@ -324,7 +324,7 @@ function formatConversationTimestamp(value) {
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
 
-  return new Intl.DateTimeFormat('pt-BR', isToday ? { hour: '2-digit', minute: '2-digit' } : { day: '2-digit', month: 'short' }).format(date);
+  return new Intl.DateTimeFormat('en-US', isToday ? { hour: '2-digit', minute: '2-digit' } : { day: '2-digit', month: 'short' }).format(date);
 }
 
 function getConversationPreview(conversation) {
@@ -567,7 +567,7 @@ export default function AtlasAI() {
   }
 
   const newConv = () => {
-    const conversation = createConversation(new Date().toLocaleDateString('pt-BR'));
+    const conversation = createConversation(new Date().toLocaleDateString('en-US'));
     setConversations(prev => [conversation, ...prev]);
     setActiveId(conversation.id);
     setInput('');
@@ -867,10 +867,10 @@ export default function AtlasAI() {
                         <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.9} />
                       </div>
                       <p className="mt-4 text-[1.05rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                        Carregando suas conversas
+                        Loading your conversations
                       </p>
                       <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                        Restaurando o histórico local do Atlas AI.
+                        Restoring Atlas AI local history.
                       </p>
                     </div>
                   </div>
