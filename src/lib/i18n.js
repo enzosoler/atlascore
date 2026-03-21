@@ -33,25 +33,16 @@ export const setLanguage = (lang) => {
   // No-op: language is always en-US
 };
 
-const getTranslationValue = (key, lang) => {
+const getTranslationValue = (key) => {
   const keys = key.split('.');
+  let value = translations['en-US'];
 
-  for (const locale of getLocaleFallbackChain(lang, supportedLanguages, DEFAULT_LANGUAGE)) {
-    let value = translations[locale] || translations[DEFAULT_LANGUAGE];
-
-    for (const k of keys) {
-      value = value?.[k];
-      if (value === undefined) {
-        break;
-      }
-    }
-
-    if (value !== undefined) {
-      return value;
-    }
+  for (const k of keys) {
+    value = value?.[k];
+    if (value === undefined) break;
   }
 
-  return undefined;
+  return value;
 };
 
 const interpolate = (template, params = {}) => {
@@ -68,8 +59,8 @@ const interpolate = (template, params = {}) => {
   });
 };
 
-export const t = (key, lang = getLanguage(), params) => {
-  const value = getTranslationValue(key, lang);
+export const t = (key, _lang, params) => {
+  const value = getTranslationValue(key);
 
   if (value === undefined) {
     console.warn(`Translation key not found: ${key}`);
