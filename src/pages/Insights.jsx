@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Activity, Brain, Moon, Shield } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
 import {
   EmptyState,
@@ -19,10 +20,11 @@ import {
 } from '@/components/shared/StablePage';
 import { listMeasurements } from '@/services/bodyProgressService';
 
-const RANGE_DAYS = {
+const ALL_RANGE_DAYS = {
   '14d': 14,
   '30d': 30,
   '90d': 90,
+  '1yr': 365,
 };
 
 function avg(values) {
@@ -82,8 +84,19 @@ export default function Insights() {
 function InsightsContent() {
   const { t } = useI18n();
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   const [range, setRange] = useState('30d');
-  const days = RANGE_DAYS[range] || 30;
+
+  // Compute max allowed days based on plan
+  const planCode = subscription?.plan_code || 'free';
+  const maxHistoryDays = planCode === 'performance' ? 3650 : planCode === 'pro' ? 365 : 30;
+
+  // Filter available ranges by plan
+  const visibleRanges = Object.entries(ALL_RANGE_DAYS).filter(([, d]) => d <= maxHistoryDays);
+
+  // Clamp current range to what's allowed
+  const validRange = visibleRanges.some(([key]) => key === range) ? range : '30d';
+  const days = ALL_RANGE_DAYS[validRange] || 30;
 
   const cutoff = useMemo(() => {
     const date = new Date();
@@ -247,11 +260,11 @@ function InsightsContent() {
       subtitle="Uma leitura objetiva do seu histórico recente, sem gráficos complexos nem bloqueios artificiais."
       actions={
         <>
-          {Object.keys(RANGE_DAYS).map((option) => (
+          {visibleRanges.map(([option]) => (
             <FilterChip
               key={option}
               onClick={() => setRange(option)}
-              active={range === option}
+              active={validRange === option}
             >
               {option}
             </FilterChip>
@@ -260,6 +273,13 @@ function InsightsContent() {
       }
       maxWidth="max-w-5xl"
     >
+      {/* Free plan notice */}
+      {planCode === 'free' && (
+        <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--brand)/0.06)] px-4 py-3 text-sm text-[hsl(var(--fg-2))]">
+          <p>Histórico limitado aos últimos 30 dias. <a href="/pricing" className="font-semibold text-[hsl(var(--brand))] hover:opacity-80">Upgrade para Pro</a> para ver até 1 ano.</p>
+        </div>
+      )}
+
       {loading ? (
         <LoadingState
           title="Carregando insights"

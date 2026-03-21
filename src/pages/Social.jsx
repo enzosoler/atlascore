@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
+import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import {
   SafePageBoundary,
   PageShell,
@@ -94,32 +96,79 @@ export default function Social() {
 
 function SocialContent() {
   const { user } = useAuth();
+  const { can } = useSubscription();
   const [selectedCard, setSelectedCard] = useState(null);
 
   const today = getToday();
   const weekStart = getWeekStart();
 
+  // Check if user can access social cards
+  if (!can('social_cards')) {
+    return <UpgradeGate feature="social_cards" plan="Pro" />;
+  }
+
   const { data: checkin, isLoading: loadingCheckin } = useQuery({
     queryKey: ['social-checkin', today],
     queryFn: async () => {
-      const r = await base44.entities.DailyCheckin.filter({ date: today });
-      return r?.[0] || null;
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('daily_checkins')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .maybeSingle();
+      return data || null;
     },
+    enabled: !!user?.id,
   });
 
   const { data: meals = [], isLoading: loadingMeals } = useQuery({
     queryKey: ['social-meals', today],
-    queryFn: () => base44.entities.Meal.filter({ date: today }),
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('food_logs')
+        .select('id, date, calories, protein, carbs, fat, food_name')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .order('created_at', { ascending: true });
+      return (data || []).map(m => ({
+        total_calories: Number(m.calories || 0),
+        total_protein: Number(m.protein || 0),
+        total_carbs: Number(m.carbs || 0),
+      }));
+    },
+    enabled: !!user?.id,
   });
 
   const { data: workoutsWeek = [], isLoading: loadingWorkouts } = useQuery({
     queryKey: ['social-workouts-week', weekStart],
-    queryFn: () => base44.entities.Workout.filter({ date: weekStart }),
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('workouts')
+        .select('id, status, completed_at')
+        .eq('user_id', user.id)
+        .gte('completed_at', `${weekStart}T00:00:00`)
+        .order('completed_at', { ascending: false });
+      return (data || []).map(w => ({ ...w, completed: w.status === 'completed' }));
+    },
+    enabled: !!user?.id,
   });
 
   const { data: measurements = [] } = useQuery({
     queryKey: ['social-measurements'],
-    queryFn: () => base44.entities.Measurement.list('-date', 1),
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('measurements')
+        .select('weight, body_fat, date')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(1);
+      return data || [];
+    },
+    enabled: !!user?.id,
   });
 
   const isLoading = loadingCheckin || loadingMeals || loadingWorkouts;
