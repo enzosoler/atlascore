@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Calendar, Download, FileJson, FileSpreadsheet } from 'lucide-react';
+import { Calendar, Download, FileJson, FileSpreadsheet, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
+import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import {
   ErrorState,
   LoadingState,
@@ -20,11 +23,30 @@ function isWithinRange(value, startDate, endDate) {
   return value >= startDate && value <= endDate;
 }
 
-function serializeCsv(summary) {
+function serializeCsvDataRows(workouts, meals) {
   const rows = [
-    ['dataset', 'items'],
-    ...summary.map((item) => [item.label, String(item.count)]),
+    ['date', 'type', 'name_or_description', 'value'],
   ];
+
+  // Add meals
+  meals.forEach((meal) => {
+    rows.push([
+      meal.date || '',
+      'Refeição',
+      meal.description || 'Refeição',
+      `${meal.total_calories || 0} cal`,
+    ]);
+  });
+
+  // Add workouts
+  workouts.forEach((workout) => {
+    rows.push([
+      workout.date || '',
+      'Treino',
+      workout.status || workout.name || 'Treino',
+      workout.exercises?.length ? `${workout.exercises.length} exercícios` : 'N/A',
+    ]);
+  });
 
   return rows.map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
 }
@@ -150,20 +172,12 @@ function ExportContent() {
     setBusy(true);
     try {
       const payload = await collectData();
-      const summary = [
-        { label: 'meals', count: payload.meals.length },
-        { label: 'workouts', count: payload.workouts.length },
-        { label: 'measurements', count: payload.measurements.length },
-        { label: 'checkins', count: payload.checkins.length },
-        { label: 'protocols', count: payload.protocols.length },
-        { label: 'lab_exams', count: payload.labExams.length },
-        { label: 'progress_photos', count: payload.progressPhotos.length },
-      ];
-      downloadFile(`${fileBase}.csv`, serializeCsv(summary), 'text/csv;charset=utf-8');
+      const csvData = serializeCsvDataRows(payload.workouts, payload.meals);
+      downloadFile(`${fileBase}.csv`, csvData, 'text/csv;charset=utf-8');
       setNotice(
         payload.warnings.length > 0
-          ? `Resumo CSV exportado com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
-          : 'Resumo CSV exportado.'
+          ? `CSV exportado com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
+          : 'CSV exportado com sucesso.'
       );
     } catch (error) {
       console.error(error);
@@ -173,10 +187,126 @@ function ExportContent() {
     }
   };
 
+  const exportPdf = async () => {
+    if (invalidRange) {
+      setNotice('Ajuste o período antes de exportar.');
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const payload = await collectData();
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let yPosition = 15;
+      const margin = 10;
+      const lineHeight = 5;
+      const sectionGap = 8;
+
+      // Header
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text('Atlas Core — Relatório de Dados', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Atleta: ${payload.user.name}`, margin, yPosition);
+      yPosition += 5;
+      doc.text(`Período: ${payload.period.startDate} a ${payload.period.endDate}`, margin, yPosition);
+      yPosition += 5;
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, margin, yPosition);
+      yPosition += sectionGap;
+
+      const addSection = (title, items) => {
+        if (yPosition > pageHeight - 20) {
+          doc.addPage();
+          yPosition = 15;
+        }
+
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(title, margin, yPosition);
+        yPosition += 6;
+
+        if (items.length === 0) {
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'italic');
+          doc.text('Sem registros neste período', margin, yPosition);
+          yPosition += 5;
+        } else {
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          items.forEach((item) => {
+            if (yPosition > pageHeight - 15) {
+              doc.addPage();
+              yPosition = 15;
+            }
+            doc.text(item, margin, yPosition);
+            yPosition += lineHeight;
+          });
+        }
+        yPosition += sectionGap;
+      };
+
+      // Treinos section
+      const workoutItems = payload.workouts.map(
+        (w) => `${w.date} — ${w.status || w.name || 'Treino'} (${w.exercises?.length || 0} exercícios)`
+      );
+      addSection('Treinos', workoutItems);
+
+      // Refeições/Nutrição section
+      const mealItems = payload.meals.map(
+        (m) => `${m.date} — ${m.description || 'Refeição'} (${m.total_calories || 0} cal, ${m.total_protein || 0}g proteína)`
+      );
+      addSection('Refeições e Nutrição', mealItems);
+
+      // Medições section
+      const measurementItems = payload.measurements.map(
+        (m) => `${m.date} — Peso: ${m.weight || 'N/A'} kg`
+      );
+      addSection('Medições', measurementItems);
+
+      // Protocolos section
+      const protocolItems = payload.protocols.map(
+        (p) => `${p.start_date || p.created_date?.slice(0, 10) || '?'} — ${p.name} (${p.status || 'ativo'})`
+      );
+      addSection('Protocolos', protocolItems);
+
+      // Exames Laboratoriais section
+      const examItems = payload.labExams.map(
+        (e) => `${e.exam_date} — ${e.exam_type || 'Exame'}`
+      );
+      addSection('Exames Laboratoriais', examItems);
+
+      // Footer
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'italic');
+      doc.text(
+        `Documento gerado por Atlas Core em ${new Date().toLocaleString('pt-BR')}`,
+        margin,
+        pageHeight - 8
+      );
+
+      doc.save(`${fileBase}.pdf`);
+      setNotice(
+        payload.warnings.length > 0
+          ? `PDF exportado com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
+          : 'PDF exportado com sucesso.'
+      );
+    } catch (error) {
+      console.error(error);
+      setNotice('Não foi possivel gerar o PDF.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <PageShell
       title="Exportar"
-      subtitle="Página reconstruida para exportar dados com previsibilidade. Sem PDF sofisticado, mas com JSON completo e CSV-resumo funcionando."
+      subtitle="Exporte seus dados em JSON, CSV ou PDF formatado com resumo completo."
       maxWidth="max-w-4xl"
     >
       {notice ? <StatusBanner>{notice}</StatusBanner> : null}
@@ -243,44 +373,59 @@ function ExportContent() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Downloads" subtitle="Arquivos simples, diretos e confiáveis.">
-        <div className="grid gap-3 md:grid-cols-2">
-          <button
-            type="button"
-            disabled={busy || invalidRange}
-            onClick={exportJson}
-            className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <FileJson className="h-6 w-6 text-zinc-700" strokeWidth={2} />
-            <p className="mt-4 text-base font-semibold text-zinc-950">Exportar JSON completo</p>
-            <p className="mt-2 text-sm text-zinc-600">
-              Baixa todas as entidades principais filtradas pelo período escolhido.
-            </p>
-          </button>
+      <UpgradeGate feature="standard_exports" plan="Pro">
+        <SectionCard title="Downloads" subtitle="Arquivos simples, diretos e confiáveis.">
+          <div className="grid gap-3 md:grid-cols-3">
+            <button
+              type="button"
+              disabled={busy || invalidRange}
+              onClick={exportJson}
+              className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FileJson className="h-6 w-6 text-zinc-700" strokeWidth={2} />
+              <p className="mt-4 text-base font-semibold text-zinc-950">Exportar JSON completo</p>
+              <p className="mt-2 text-sm text-zinc-600">
+                Baixa todas as entidades principais filtradas pelo período escolhido.
+              </p>
+            </button>
 
-          <button
-            type="button"
-            disabled={busy || invalidRange}
-            onClick={exportCsv}
-            className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <FileSpreadsheet className="h-6 w-6 text-zinc-700" strokeWidth={2} />
-            <p className="mt-4 text-base font-semibold text-zinc-950">Exportar CSV-resumo</p>
-            <p className="mt-2 text-sm text-zinc-600">
-              Baixa uma planilha com contagem de registros por dataset no período.
-            </p>
-          </button>
-        </div>
+            <button
+              type="button"
+              disabled={busy || invalidRange}
+              onClick={exportCsv}
+              className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FileSpreadsheet className="h-6 w-6 text-zinc-700" strokeWidth={2} />
+              <p className="mt-4 text-base font-semibold text-zinc-950">Exportar CSV</p>
+              <p className="mt-2 text-sm text-zinc-600">
+                Planilha com registros de treinos e refeições no período.
+              </p>
+            </button>
 
-        <div className="mt-4 flex justify-end">
-          <PrimaryButton type="button" disabled={busy || invalidRange} onClick={exportJson}>
-            <span className="inline-flex items-center gap-2">
-              <Download className="h-4 w-4" strokeWidth={2} />
-              {busy ? 'Gerando arquivo...' : 'Exportar agora'}
-            </span>
-          </PrimaryButton>
-        </div>
-      </SectionCard>
+            <button
+              type="button"
+              disabled={busy || invalidRange}
+              onClick={exportPdf}
+              className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FileText className="h-6 w-6 text-zinc-700" strokeWidth={2} />
+              <p className="mt-4 text-base font-semibold text-zinc-950">Exportar PDF</p>
+              <p className="mt-2 text-sm text-zinc-600">
+                Relatório formatado com resumo de treinos, nutrição, medições e protocolos.
+              </p>
+            </button>
+          </div>
+
+          <div className="mt-4 flex justify-end">
+            <PrimaryButton type="button" disabled={busy || invalidRange} onClick={exportJson}>
+              <span className="inline-flex items-center gap-2">
+                <Download className="h-4 w-4" strokeWidth={2} />
+                {busy ? 'Gerando arquivo...' : 'Exportar agora'}
+              </span>
+            </PrimaryButton>
+          </div>
+        </SectionCard>
+      </UpgradeGate>
 
       <SectionCard title="O que entra no arquivo" subtitle="Escopo da exportação reconstruída.">
         <div className="grid gap-3 md:grid-cols-3">

@@ -12,6 +12,7 @@ import {
   Play,
   Plus,
   Search,
+  Sparkles,
   Trash2,
   TrendingUp,
   X,
@@ -20,6 +21,10 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
+import UpgradeGate from '@/components/entitlements/UpgradeGate';
+import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
 import {
@@ -86,10 +91,10 @@ function formatRelativeDate(iso) {
   const d = new Date(iso);
   const now = new Date();
   const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'Hoje';
-  if (diffDays === 1) return 'Ontem';
-  if (diffDays < 7) return `Há ${diffDays} dias`;
-  return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 }
 
 // ─── CreatePlanModal ──────────────────────────────────────────────────────────
@@ -114,7 +119,7 @@ function ExerciseRow({ ex, onChange, onRemove }) {
         value={ex.sets}
         onChange={(e) => onChange('sets', Number(e.target.value) || 3)}
         className="w-12 h-8 px-1.5 rounded-lg bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-xs text-[hsl(var(--fg))] text-center focus:outline-none focus:ring-1 focus:ring-[hsl(var(--brand)/0.5)]"
-        title="Séries"
+        title="Sets"
       />
       {/* Reps */}
       <input
@@ -123,7 +128,7 @@ function ExerciseRow({ ex, onChange, onRemove }) {
         value={ex.reps}
         onChange={(e) => onChange('reps', e.target.value)}
         className="w-16 h-8 px-1.5 rounded-lg bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-xs text-[hsl(var(--fg))] text-center focus:outline-none focus:ring-1 focus:ring-[hsl(var(--brand)/0.5)]"
-        title="Repetições"
+        title="Reps"
       />
       <button
         onClick={onRemove}
@@ -166,10 +171,10 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
             onChange={(e) => { e.stopPropagation(); onChange(dayIndex, 'label', e.target.value); }}
             onClick={(e) => e.stopPropagation()}
             className="w-full bg-transparent text-sm font-semibold text-[hsl(var(--fg))] focus:outline-none"
-            placeholder={`Dia ${dayIndex + 1}`}
+            placeholder={`Day ${dayIndex + 1}`}
           />
         </div>
-        <span className="text-xs text-[hsl(var(--fg-3))] flex-shrink-0">{day.exercises.length} exercícios</span>
+        <span className="text-xs text-[hsl(var(--fg-3))] flex-shrink-0">{day.exercises.length} exercise{day.exercises.length !== 1 ? 's' : ''}</span>
         {expanded
           ? <ChevronUp className="w-3.5 h-3.5 text-[hsl(var(--fg-3))] flex-shrink-0" />
           : <ChevronDown className="w-3.5 h-3.5 text-[hsl(var(--fg-3))] flex-shrink-0" />}
@@ -182,9 +187,9 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
             <div className="px-3 pt-2 pb-1">
               {/* Column headers */}
               <div className="flex items-center gap-2 mb-1 px-0">
-                <span className="flex-1 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider">Exercício</span>
-                <span className="w-12 text-[10px] text-[hsl(var(--fg-3))] text-center uppercase tracking-wider">Séries</span>
-                <span className="w-16 text-[10px] text-[hsl(var(--fg-3))] text-center uppercase tracking-wider">Repetições</span>
+                <span className="flex-1 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider">Exercise</span>
+                <span className="w-12 text-[10px] text-[hsl(var(--fg-3))] text-center uppercase tracking-wider">Sets</span>
+                <span className="w-16 text-[10px] text-[hsl(var(--fg-3))] text-center uppercase tracking-wider">Reps</span>
                 <span className="w-8" />
               </div>
               {day.exercises.map((ex, exIdx) => (
@@ -202,12 +207,12 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
           {showSearch ? (
             <div className="px-3 pb-3 pt-2 border-t border-[hsl(var(--border)/0.5)]">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-[hsl(var(--fg-2))]">Buscar na biblioteca</p>
+                <p className="text-xs font-semibold text-[hsl(var(--fg-2))]">Search library</p>
                 <button
                   onClick={() => setShowSearch(false)}
                   className="text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] transition-colors"
                 >
-                  Cancelar
+                  Cancel
                 </button>
               </div>
               <ExerciseSearch onSelect={handleSelect} />
@@ -219,7 +224,7 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
                 className="flex items-center gap-1.5 w-full px-3 py-2 rounded-lg border border-dashed border-[hsl(var(--border))] text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--brand))] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] transition-colors"
               >
                 <Search className="w-3.5 h-3.5" />
-                Adicionar exercício da biblioteca
+                Add exercise from library
               </button>
             </div>
           )}
@@ -236,14 +241,14 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
   const [objective, setObjective] = useState('');
   const [frequency, setFrequency] = useState(3);
   const [days, setDays] = useState(() =>
-    Array.from({ length: 3 }, (_, i) => ({ label: `Dia ${i + 1}`, exercises: [] }))
+    Array.from({ length: 3 }, (_, i) => ({ label: `Day ${i + 1}`, exercises: [] }))
   );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setDays((prev) => {
       const next = [...prev];
-      while (next.length < frequency) next.push({ label: `Dia ${next.length + 1}`, exercises: [] });
+      while (next.length < frequency) next.push({ label: `Day ${next.length + 1}`, exercises: [] });
       while (next.length > frequency) next.pop();
       return next;
     });
@@ -473,16 +478,16 @@ function DayCard({ day, dayIndex, onStart }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-[hsl(var(--fg))] leading-tight truncate">
-            {day.label || day.name || `Dia ${dayIndex + 1}`}
+            {day.label || day.name || `Day ${dayIndex + 1}`}
           </p>
-          <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">{exerciseCount} exercícios</p>
+          <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">{exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}</p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onStart(dayIndex); }}
           className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[hsl(var(--brand))] text-white text-xs font-bold hover:opacity-90 transition-colors"
         >
           <Play className="w-3 h-3 fill-current" />
-          Iniciar
+          Start
         </button>
         <span className="flex-shrink-0 text-[hsl(var(--fg-3))] ml-1">
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -504,7 +509,7 @@ function DayCard({ day, dayIndex, onStart }) {
             </div>
           ))}
           {exerciseCount === 0 && (
-            <p className="text-xs text-[hsl(var(--fg-3))] py-2">Nenhum exercício adicionado ainda</p>
+            <p className="text-xs text-[hsl(var(--fg-3))] py-2">No exercises added yet</p>
           )}
         </div>
       )}
@@ -552,9 +557,12 @@ export default function WorkoutsV2() {
   const isEnglish = locale === 'en-US';
   const qc = useQueryClient();
   const { user } = useAuth();
+  const { can } = useSubscription();
   const [mode, setMode] = useState('list'); // 'list' | 'execution'
   const [activeSession, setActiveSession] = useState(null);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
+  const [showAIGen, setShowAIGen] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
 
   const { data: activePlan, isLoading: isLoadingPlan } = useQuery({
     queryKey: ['active-workout-plan', user?.id],
@@ -621,6 +629,76 @@ export default function WorkoutsV2() {
     toast.success(isEnglish ? 'Plan created! Start a session from any day.' : 'Plano criado! Você já pode iniciar uma sessão de qualquer dia.');
   };
 
+  const generateAIPlan = async () => {
+    setAiGenerating(true);
+    try {
+      const profileData = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      const profile = profileData?.data || {};
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `Create a detailed weekly workout plan in ${isEnglish ? 'English' : 'Portuguese'} for an athlete with the following profile:
+- Goal: ${profile.training_goal || 'general fitness'}
+- Experience: ${profile.training_experience || 'intermediate'}
+- Location: ${profile.training_location || 'gym'}
+- Session duration: ${profile.training_session_minutes || 60} minutes
+- Frequency: ${profile.training_frequency || 4} days/week
+
+Create a structured plan with 3-5 training days, each with specific exercises, sets, reps and rest time.`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            objective: { type: 'string' },
+            frequency: { type: 'number' },
+            days: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  label: { type: 'string' },
+                  focus: { type: 'string' },
+                  exercises: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                        sets: { type: 'number' },
+                        reps: { type: 'string' },
+                        rest: { type: 'number' },
+                        notes: { type: 'string' },
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+      if (res?.days?.length) {
+        await deactivateAllWorkoutPlans(user.id);
+        await createWorkoutPlan(user.id, {
+          ...res,
+          active: true,
+          created_by_type: 'ai',
+          version: 1,
+          start_date: new Date().toISOString().split('T')[0],
+        });
+        qc.invalidateQueries({ queryKey: ['active-workout-plan', user?.id] });
+        qc.invalidateQueries({ queryKey: ['today-workout-plan', user?.id] });
+        toast.success(isEnglish ? 'AI plan generated!' : 'Plano gerado pela IA!');
+        setShowAIGen(false);
+      } else {
+        toast.error(isEnglish ? 'Could not generate plan. Try again.' : 'Não foi possível gerar. Tente novamente.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(isEnglish ? 'Error generating plan.' : 'Erro ao gerar plano.');
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
   // ── Execution mode ────────────────────────────────────────────────────────
   if (mode === 'execution') {
     return (
@@ -649,6 +727,15 @@ export default function WorkoutsV2() {
             <h1 className="text-2xl font-bold text-[hsl(var(--fg))] mt-0.5">{isEnglish ? 'Workouts' : 'Treinos'}</h1>
           </div>
           <div className="flex items-center gap-2">
+            {can('ai_workout_generation') ? (
+              <button
+                onClick={() => setShowAIGen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[hsl(var(--brand)/0.12)] border border-[hsl(var(--brand)/0.25)] text-[hsl(var(--brand))] text-sm font-semibold hover:bg-[hsl(var(--brand)/0.22)] transition-colors"
+              >
+                <Sparkles className="w-4 h-4" />
+                {isEnglish ? 'AI Plan' : 'IA Plano'}
+              </button>
+            ) : null}
             <button
               onClick={() => setShowCreatePlan(true)}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[hsl(var(--brand)/0.12)] border border-[hsl(var(--brand)/0.25)] text-[hsl(var(--brand))] text-sm font-semibold hover:bg-[hsl(var(--brand)/0.22)] transition-colors"
@@ -774,6 +861,24 @@ export default function WorkoutsV2() {
           onClose={() => setShowCreatePlan(false)}
           onCreated={handlePlanCreated}
         />
+      )}
+
+      {/* AI Generation Modal */}
+      {showAIGen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm rounded-[28px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-lg mx-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">{isEnglish ? 'Atlas AI' : 'Atlas IA'}</p>
+            <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">{isEnglish ? 'Generate AI Workout Plan' : 'Gerar Plano de Treino com IA'}</h2>
+            <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">{isEnglish ? 'Atlas AI will create a personalized training plan based on your profile. Your current active plan will be replaced.' : 'O Atlas IA criará um plano de treino personalizado baseado no seu perfil. O plano ativo atual será substituído.'}</p>
+            <div className="mt-5 flex gap-3">
+              <button onClick={() => setShowAIGen(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-[hsl(var(--border))] text-sm font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors">{isEnglish ? 'Cancel' : 'Cancelar'}</button>
+              <button onClick={generateAIPlan} disabled={aiGenerating} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-bold hover:opacity-90 transition-colors disabled:opacity-60">
+                {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {aiGenerating ? (isEnglish ? 'Generating...' : 'Gerando...') : (isEnglish ? 'Generate' : 'Gerar')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

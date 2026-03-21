@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ROLE_HOME, ROUTES } from '@/lib/routes';
@@ -545,9 +545,9 @@ export default function Onboarding() {
       payload.fat_target = Math.round((payload.calories_target * 0.25) / 9);
       payload.water_target = parseFloat((w * 0.035).toFixed(1));
 
-      const existing = await base44.entities.UserProfile.list();
-      if (existing?.[0]) await base44.entities.UserProfile.update(existing[0].id, payload);
-      else await base44.entities.UserProfile.create(payload);
+      await supabase
+        .from('profiles')
+        .upsert({ ...payload, id: user.id, updated_at: new Date().toISOString() }, { onConflict: 'id' });
     } catch (err) {
       console.error('Onboarding save error:', err);
     } finally {

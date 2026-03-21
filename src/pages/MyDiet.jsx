@@ -6,9 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
 import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, Bot, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSubscription } from '@/lib/SubscriptionContext';
+import UpgradeGate from '@/components/entitlements/UpgradeGate';
 // Supabase diet plan services removed — base44 is now the single source of truth
 
-const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'Você' };
+const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'You' };
 const CREATOR_BADGE  = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutral' };
 const CREATOR_ICONS  = { ai: Bot, coach: Users, user: User };
 
@@ -65,6 +67,7 @@ export default function MyDiet() {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { can } = useSubscription();
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
 
@@ -109,15 +112,15 @@ export default function MyDiet() {
 
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Crie um plano alimentar detalhado em português brasileiro para um usuário com o seguinte perfil:
-- Objetivo: ${profile?.training_goal || 'saúde geral'}
-- Calorias alvo: ${profile?.calories_target || 0} kcal
-- Proteína alvo: ${profile?.protein_target || 160}g
-- Carboidratos alvo: ${profile?.carbs_target || 250}g
+        prompt: `Create a detailed diet plan in English for a user with the following profile:
+- Goal: ${profile?.training_goal || 'general health'}
+- Target calories: ${profile?.calories_target || 0} kcal
+- Target protein: ${profile?.protein_target || 160}g
+- Target carbs: ${profile?.carbs_target || 250}g
 - Gordura alvo: ${profile?.fat_target || 70}g
 - Estilo alimentar: ${profile?.dietary_style || 'balanceado'}
 
-Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos reais e quantidades em gramas/unidades.`,
+Create a plan with 5-6 meals distributed throughout the day, with real foods and quantities in grams/units.`,
         response_json_schema: {
           type: 'object',
           properties: {
@@ -178,19 +181,19 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
         });
         qc.invalidateQueries({ queryKey: ['diet-plans'] });
         qc.invalidateQueries({ queryKey: ['diet-plans-active'] });
-        toast.success('Plano alimentar gerado!');
+        toast.success('Diet plan generated!');
       } else {
-        setGenError('A resposta da IA não continha um plano válido. Tente novamente.');
-        toast.error('Erro ao gerar. Tente novamente.');
+        setGenError('The AI response did not contain a valid plan. Please try again.');
+        toast.error('Error generating. Please try again.');
       }
     } catch (err) {
       clearTimeout(timeoutId);
       if (err?.name === 'AbortError' || controller.signal.aborted) {
-        setGenError('A geração demorou muito (>15s). Verifique sua conexão e tente novamente.');
-        toast.error('Tempo limite atingido. Tente novamente.');
+        setGenError('Generation took too long (>15s). Check your connection and try again.');
+        toast.error('Timed out. Please try again.');
       } else {
-        setGenError('Erro ao conectar com a IA. Tente novamente em alguns instantes.');
-        toast.error('Erro ao gerar plano.');
+        setGenError('Error connecting to AI. Please try again in a moment.');
+        toast.error('Error generating plan.');
       }
     } finally {
       setGenerating(false);
@@ -199,7 +202,7 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-[50vh] gap-2 t-small text-[hsl(var(--fg-2))]">
-      <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
+      <Loader2 className="w-4 h-4 animate-spin" /> Loading…
     </div>
   );
 
@@ -210,13 +213,17 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap pb-5 border-b border-[hsl(var(--border-h))]">
         <div>
-          <h1 className="t-headline">Minha Dieta</h1>
-          <p className="t-small mt-1">Plano alimentar prescrito ativo</p>
+          <h1 className="t-headline">My Diet</h1>
+          <p className="t-small mt-1">Active prescribed diet plan</p>
         </div>
-        <button onClick={generate} disabled={generating} className="btn btn-secondary gap-1.5">
-          {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-          {plan ? 'Gerar novo plano' : 'Gerar plano por IA'}
-        </button>
+        {can('ai_diet_generation') ? (
+          <button onClick={generate} disabled={generating} className="btn btn-secondary gap-1.5">
+            {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            {plan ? 'Generate new plan' : 'Generate AI plan'}
+          </button>
+        ) : (
+          <UpgradeGate feature="ai_diet_generation" plan="Pro" />
+        )}
       </div>
 
       {genError && (
@@ -228,12 +235,16 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
       {!plan ? (
         <div className="empty-state">
           <div className="empty-state-icon"><UtensilsCrossed className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} /></div>
-          <p className="t-subtitle mb-1">Nenhum plano alimentar ativo</p>
-          <p className="t-caption mb-4">Gere um plano personalizado com IA baseado no seu perfil.</p>
-          <button onClick={generate} disabled={generating} className="btn btn-primary gap-1.5">
-            {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            Gerar com IA
-          </button>
+          <p className="t-subtitle mb-1">No active diet plan</p>
+          <p className="t-caption mb-4">Generate a personalized plan with AI based on your profile.</p>
+          {can('ai_diet_generation') ? (
+            <button onClick={generate} disabled={generating} className="btn btn-primary gap-1.5">
+              {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              Generate with AI
+            </button>
+          ) : (
+            <UpgradeGate feature="ai_diet_generation" plan="Pro" />
+          )}
         </div>
       ) : (
         <>
@@ -243,30 +254,30 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
               <p className="t-title flex-1">{plan.name}</p>
               <span className={`badge ${CREATOR_BADGE[plan.created_by_type] || 'badge-neutral'} gap-1`}>
                 {CreatorIcon && <CreatorIcon className="w-3 h-3" />}
-                {CREATOR_LABELS[plan.created_by_type] || 'IA'}
+                {CREATOR_LABELS[plan.created_by_type] || 'AI'}
               </span>
               <span className="badge badge-neutral">v{plan.version || 1}</span>
             </div>
             {plan.objective && <p className="t-body text-[hsl(var(--fg-2))]">{plan.objective}</p>}
             {plan.start_date && (
-              <p className="t-caption">Desde {new Date(plan.start_date + 'T12:00').toLocaleDateString('pt-BR')}</p>
+              <p className="t-caption">Since {new Date(plan.start_date + 'T12:00').toLocaleDateString('en-US')}</p>
             )}
           </div>
 
           {/* Macros */}
           <div>
-            <p className="t-label mb-3">Totais diários</p>
+            <p className="t-label mb-3">Daily totals</p>
             <div className="grid grid-cols-4 gap-2">
-              <MacroChip label="Calorias" value={plan.total_calories ?? plan.target_calories} unit="kcal" color="hsl(var(--brand))" />
-              <MacroChip label="Proteína" value={plan.total_protein ?? plan.target_protein} unit="g" color="hsl(var(--accent-primary))" />
-              <MacroChip label="Carboidr." value={plan.total_carbs ?? plan.target_carbs} unit="g" color="hsl(var(--accent-secondary))" />
-              <MacroChip label="Gordura" value={plan.total_fat ?? plan.target_fat} unit="g" color="hsl(var(--status-warning))" />
+              <MacroChip label="Calories" value={plan.total_calories ?? plan.target_calories} unit="kcal" color="hsl(var(--brand))" />
+              <MacroChip label="Protein" value={plan.total_protein ?? plan.target_protein} unit="g" color="hsl(var(--accent-primary))" />
+              <MacroChip label="Carbs" value={plan.total_carbs ?? plan.target_carbs} unit="g" color="hsl(var(--accent-secondary))" />
+              <MacroChip label="Fat" value={plan.total_fat ?? plan.target_fat} unit="g" color="hsl(var(--status-warning))" />
             </div>
           </div>
 
           {/* Meals */}
           <div>
-            <p className="t-label mb-3">Refeições planejadas ({(plan.meals || []).length})</p>
+            <p className="t-label mb-3">Planned meals ({(plan.meals || []).length})</p>
             <div className="space-y-2">
               {(plan.meals || []).map((meal, i) => <MealCard key={i} meal={meal} />)}
             </div>
@@ -274,7 +285,7 @@ Crie um plano com 5-6 refeições distribuídas ao longo do dia, com alimentos r
 
           {plan.notes && (
             <div className="surface p-4">
-              <p className="t-label mb-1">Observações</p>
+              <p className="t-label mb-1">Notes</p>
               <p className="t-body text-[hsl(var(--fg-2))]">{plan.notes}</p>
             </div>
           )}

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import { ROUTES } from '@/lib/routes';
 import {
   Camera,
@@ -11,6 +12,7 @@ import {
   ChevronUp,
   Loader2,
   X,
+  Lock,
 } from 'lucide-react';
 import { getToday } from '@/lib/atlas-theme';
 import {
@@ -37,9 +39,9 @@ import {
 
 const POSES = [
   { key: 'front',      label: 'Front',      hint: 'Arms to sides, looking at camera' },
-  { key: 'side',       label: 'Side',     hint: 'Right profile, arms relaxed' },
-  { key: 'back',       label: 'Back',      hint: 'Back to camera, arms at sides' },
-  { key: 'pose',       label: 'Pose livre',  hint: 'Pose de sua escolha para comparação' },
+  { key: 'side',       label: 'Side',       hint: 'Right profile, arms relaxed' },
+  { key: 'back',       label: 'Back',       hint: 'Back to camera, arms at sides' },
+  { key: 'pose',       label: 'Free pose',  hint: 'Pose of your choice for comparison' },
 ];
 
 // ─────────────────────────────────────────────────────────────────
@@ -48,13 +50,8 @@ const POSES = [
 
 function formatCheckpointDate(dateStr) {
   const dt = new Date(dateStr + 'T12:00:00');
-  const weekday = dt.toLocaleDateString('pt-BR', { weekday: 'long' });
-  const day = dt.getDate();
-  const month = dt.toLocaleDateString('pt-BR', { month: 'long' });
-  const year = dt.getFullYear();
   const today = getToday();
-  const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-  const label = `${capitalized}, ${day} de ${month} de ${year}`;
+  const label = dt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return { label, isToday: dateStr === today };
 }
 
@@ -105,7 +102,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
             ) : (
               <>
                 <Camera className="h-6 w-6 opacity-40" strokeWidth={1.5} />
-                <p className="text-[11px] font-medium opacity-60">Adicionar foto</p>
+                <p className="text-[11px] font-medium opacity-60">Add photo</p>
               </>
             )}
           </button>
@@ -163,12 +160,12 @@ function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose }) {
               </p>
               {isToday && (
                 <span className="inline-flex items-center rounded-full bg-[hsl(var(--brand)/0.1)] px-2 py-0.5 text-[10px] font-semibold text-[hsl(var(--brand))]">
-                  Hoje
+                  Today
                 </span>
               )}
             </div>
             <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
-              {filledCount} de {POSES.length} poses preenchidas
+              {filledCount} of {POSES.length} poses filled
             </p>
           </div>
         </div>
@@ -248,18 +245,18 @@ function NewCheckpointModal({ onConfirm, onClose }) {
         </button>
 
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-          Fotos
+          Photos
         </p>
         <h2 className="mt-2 text-[1.25rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-          Novo checkpoint
+          New checkpoint
         </h2>
         <p className="mt-1.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          Selecione a data do registro fotográfico. Você poderá adicionar as fotos em cada pose depois.
+          Select the date for the photo record. You can add photos for each pose afterward.
         </p>
 
         <div className="mt-5">
           <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))] mb-2">
-            Data do checkpoint
+            Checkpoint date
           </label>
           <input
             type="date"
@@ -275,14 +272,14 @@ function NewCheckpointModal({ onConfirm, onClose }) {
             onClick={onClose}
             className="atlas-button atlas-button-secondary flex-1"
           >
-            Cancelar
+            Cancel
           </button>
           <PrimaryButton
             type="button"
             onClick={() => onConfirm(date)}
             className="flex-1"
           >
-            Criar checkpoint
+            Create checkpoint
           </PrimaryButton>
         </div>
       </div>
@@ -298,8 +295,8 @@ export default function ProgressPhotos() {
   return (
     <SafePageBoundary
       title="Progress Photos"
-      subtitle="Modo seguro da página de fotos."
-      fallbackDescription="A página de fotos carregou em modo de segurança."
+      subtitle="Photos page safe mode."
+      fallbackDescription="The photos page loaded in safe mode."
     >
       <ProgressPhotosContent />
     </SafePageBoundary>
@@ -308,6 +305,7 @@ export default function ProgressPhotos() {
 
 function ProgressPhotosContent() {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
+  const { subscription } = useSubscription();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -339,7 +337,7 @@ function ProgressPhotosContent() {
       qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
       setNotice({ tone: 'success', message: 'Photo removed.' });
     },
-    onError: () => setNotice({ tone: 'error', message: 'Erro ao remover a foto.' }),
+    onError: () => setNotice({ tone: 'error', message: 'Error removing photo.' }),
   });
 
   // ── Handlers ────────────────────────────────────────────────────
@@ -369,7 +367,7 @@ function ProgressPhotosContent() {
       } catch (error) {
         setNotice({
           tone: 'error',
-          message: error?.message || 'Erro ao fazer upload da foto. Tente novamente.',
+          message: error?.message || 'Error uploading photo. Please try again.',
         });
       } finally {
         setUploadingPose(null);
@@ -380,7 +378,7 @@ function ProgressPhotosContent() {
 
   const handleDelete = useCallback(
     (photo) => {
-      if (!window.confirm('Remover esta foto do checkpoint?')) return;
+      if (!window.confirm('Remove this photo from the checkpoint?')) return;
       deleteMutation.mutate({ id: photo.id, photoUrl: photo.photo_url });
     },
     [deleteMutation]
@@ -403,6 +401,11 @@ function ProgressPhotosContent() {
     (a, b) => new Date(b) - new Date(a)
   );
 
+  // Compute whether user can add more checkpoints
+  const planCode = subscription?.plan_code || 'free';
+  const FREE_PHOTO_LIMIT = 5; // 5 checkpoints
+  const isAtLimit = planCode === 'free' && allDates.length >= FREE_PHOTO_LIMIT;
+
   // ── Render ─────────────────────────────────────────────────────
 
   return (
@@ -411,17 +414,26 @@ function ProgressPhotosContent() {
       <PageHeader
         eyebrow="Photos"
         title="Progress Photos"
-        subtitle="Registre checkpoints fotográficos nas poses padrão para visualizar a evolução do seu corpo ao longo do tempo."
+        subtitle="Record photo checkpoints in standard poses to track your body's visual evolution over time."
         accentClassName="from-[hsl(var(--brand)/0.06)] via-[hsl(var(--brand)/0.02)]"
         actions={
-          <PrimaryButton
+          isAtLimit ? (
+            <div className="text-center">
+              <p className="text-xs text-[hsl(var(--fg-3))] mb-2">Limit reached (5 checkpoints on Free plan)</p>
+              <Link to="/pricing" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--brand))] text-white text-xs font-semibold hover:opacity-90 transition-colors">
+                <Lock className="w-3 h-3" /> Upgrade to Pro
+              </Link>
+            </div>
+          ) : (
+            <PrimaryButton
             type="button"
             onClick={() => setShowNewModal(true)}
             className="inline-flex items-center gap-2"
           >
             <Plus className="h-4 w-4" strokeWidth={1.9} />
-            Novo checkpoint
+            New checkpoint
           </PrimaryButton>
+          )}
         }
       >
         {/* Resumo rápido */}
@@ -429,21 +441,21 @@ function ProgressPhotosContent() {
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.8)] px-4 py-4 shadow-[var(--shadow-xs)]">
             <p className="atlas-metric-label">Checkpoints</p>
             <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {allDates.length > 0 ? `${allDates.length} registro(s)` : '—'}
+              {allDates.length > 0 ? `${allDates.length} checkpoint(s)` : '—'}
             </p>
             <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
               {allDates.length > 0
-                ? 'Clique em "Novo checkpoint" para adicionar mais.'
-                : 'Adicione o primeiro checkpoint fotográfico.'}
+                ? 'Click "New checkpoint" to add more.'
+                : 'Add your first photo checkpoint.'}
             </p>
           </div>
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.8)] px-4 py-4 shadow-[var(--shadow-xs)]">
             <p className="atlas-metric-label">Registered photos</p>
             <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {allPhotos.length > 0 ? `${allPhotos.length} foto(s)` : '—'}
+              {allPhotos.length > 0 ? `${allPhotos.length} photo(s)` : '—'}
             </p>
             <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              {`${POSES.length} poses por checkpoint: ${POSES.map((p) => p.label).join(', ')}.`}
+              {`${POSES.length} poses per checkpoint: ${POSES.map((p) => p.label).join(', ')}.`}
             </p>
           </div>
         </div>
@@ -463,9 +475,9 @@ function ProgressPhotosContent() {
 
       {/* ── Instruções de pose ───────────────────────────────────── */}
       <Section
-        eyebrow="Guia"
-        title="Como registrar"
-        subtitle="Siga as poses padrão para garantir comparações consistentes entre checkpoints."
+        eyebrow="Guide"
+        title="How to record"
+        subtitle="Follow the standard poses to ensure consistent comparisons between checkpoints."
       >
         <Card className="px-5 py-5">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -491,7 +503,7 @@ function ProgressPhotosContent() {
       <Section
         eyebrow="Photos"
         title={allDates.length > 0 ? `Checkpoints · ${allDates.length}` : 'Checkpoints'}
-        subtitle="Cada checkpoint agrupa as 4 poses padrão para a data selecionada."
+        subtitle="Each checkpoint groups the 4 standard poses for the selected date."
         actions={
           <PrimaryButton
             type="button"
@@ -499,7 +511,7 @@ function ProgressPhotosContent() {
             className="inline-flex items-center gap-2"
           >
             <Plus className="h-4 w-4" strokeWidth={1.9} />
-            Novo
+            New
           </PrimaryButton>
         }
       >
@@ -511,10 +523,10 @@ function ProgressPhotosContent() {
               </div>
               <div>
                 <p className="text-[15px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
-                  Nenhum checkpoint ainda
+                  No checkpoints yet
                 </p>
                 <p className="mt-1.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                  Crie o primeiro checkpoint para começar a registrar sua evolução visual.
+                  Create your first checkpoint to start recording your visual progress.
                 </p>
               </div>
               <PrimaryButton
@@ -523,7 +535,7 @@ function ProgressPhotosContent() {
                 className="inline-flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" strokeWidth={1.9} />
-                Criar primeiro checkpoint
+                Create first checkpoint
               </PrimaryButton>
             </div>
           </Card>

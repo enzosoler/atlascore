@@ -4,8 +4,10 @@ import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
+import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import {
   DialogPanelHeader,
   EmptyState,
@@ -31,6 +33,42 @@ import {
 
 const PROTOCOLS_QUERY_KEY = ['protocols'];
 const FILTERS = ['all', 'active', 'paused', 'finished'];
+
+// Half-life lookup table (in days) for common substances
+const SUBSTANCE_HALF_LIFE_MAP = {
+  'Cipionato de Testosterona': 8.0,
+  'Test C': 8.0,
+  'Enantato de Testosterona': 4.5,
+  'Test E': 4.5,
+  'Propionato de Testosterona': 0.8,
+  'Test P': 0.8,
+  'Undecanoato de Testosterona': 20.9,
+  'Nebido': 20.9,
+  'Decanoato de Nandrolona': 12.0,
+  'Deca': 12.0,
+  'Fenilpropionato de Nandrolona': 2.5,
+  'NPP': 2.5,
+  'Acetato de Trembolona': 1.0,
+  'Tren A': 1.0,
+  'Enantato de Trembolona': 5.0,
+  'Tren E': 5.0,
+  'Drostanolona Propionato': 1.0,
+  'Masteron': 1.0,
+  'Drostanolona Enantato': 4.5,
+  'Mast E': 4.5,
+  'Metenolona Enantato': 10.5,
+  'Primobolan': 10.5,
+  'Oxandrolona': 0.4,
+  'Anavar': 0.4,
+  'Oximetolona': 0.35,
+  'Hemogenin': 0.35,
+  'Metandienona': 0.2,
+  'Dianabol': 0.2,
+  'Estanozolol': 0.4,
+  'Winstrol': 0.4,
+};
+
+const CURVE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
 function getFilterLabels(t) {
   return {
@@ -98,6 +136,161 @@ async function deleteProtocol(protocolId) {
     .eq('id', protocolId);
 
   if (error) throw error;
+}
+
+// ── Half-Life Curve Chart ────────────────────────────────────────────────────
+
+function getSubstanceHalfLife(protocol) {
+  // First check if protocol has estimated_half_life_days
+  if (typeof protocol?.estimated_half_life_days === 'number' && protocol.estimated_half_life_days > 0) {
+    return protocol.estimated_half_life_days;
+  }
+
+  // Fall back to lookup by substance name
+  const name = protocol?.substance_name;
+  if (name && SUBSTANCE_HALF_LIFE_MAP[name]) {
+    return SUBSTANCE_HALF_LIFE_MAP[name];
+  }
+
+  // Default to 1 day
+  return 1;
+}
+
+function HalfLifeCurveChart({ protocols }) {
+  if (!protocols || protocols.length === 0) {
+    return (
+      <div className="flex items-center justify-center rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.4)] px-6 py-12 text-center">
+        <p className="text-[14px] text-[hsl(var(--fg-2))]">Nenhum protocolo ativo para visualizar.</p>
+      </div>
+    );
+  }
+
+  const VIEWBOX_WIDTH = 400;
+  const VIEWBOX_HEIGHT = 200;
+  const PADDING = { top: 20, bottom: 30, left: 40, right: 60 };
+  const PLOT_WIDTH = VIEWBOX_WIDTH - PADDING.left - PADDING.right;
+  const PLOT_HEIGHT = VIEWBOX_HEIGHT - PADDING.top - PADDING.bottom;
+
+  const xAxisEnd = PADDING.left + PLOT_WIDTH;
+  const yAxisEnd = PADDING.top;
+
+  // Generate points for a decay curve: C(t) = 100 × e^(-0.693 × t / half_life)
+  const generateCurvePoints = (halfLife, colorIndex) => {
+    const points = [];
+    const daysToShow = 30;
+    const pointsPerDay = 2;
+
+    for (let i = 0; i <= daysToShow * pointsPerDay; i++) {
+      const t = i / pointsPerDay; // days
+      const c = 100 * Math.exp((-0.693 * t) / halfLife); // concentration
+      const x = PADDING.left + (t / daysToShow) * PLOT_WIDTH;
+      const y = PADDING.top + PLOT_HEIGHT - (c / 100) * PLOT_HEIGHT;
+      points.push({ x, y, c, t });
+    }
+
+    return points;
+  };
+
+  const curvesData = protocols.slice(0, 4).map((protocol, index) => {
+    const halfLife = getSubstanceHalfLife(protocol);
+    const points = generateCurvePoints(halfLife, index);
+    return {
+      protocol,
+      halfLife,
+      points,
+      color: CURVE_COLORS[index],
+      label: protocol?.substance_name || `Protocol ${index + 1}`,
+    };
+  });
+
+  const pathData = curvesData.map(curve => {
+    const d = curve.points.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ');
+    return { color: curve.color, d };
+  });
+
+  return (
+    <div className="space-y-4">
+      <svg viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`} className="w-full border border-[hsl(var(--border)/0.88)] rounded-[16px] bg-[hsl(var(--fill)/0.3)]">
+        {/* Grid lines */}
+        <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={PADDING.top + PLOT_HEIGHT} stroke="hsl(var(--border))" strokeWidth="1" opacity="0.5" />
+        <line x1={PADDING.left} y1={PADDING.top + PLOT_HEIGHT} x2={xAxisEnd} y2={PADDING.top + PLOT_HEIGHT} stroke="hsl(var(--border))" strokeWidth="1" opacity="0.5" />
+
+        {/* Y-axis labels */}
+        <text x={PADDING.left - 8} y={PADDING.top + 4} fontSize="10" textAnchor="end" fill="hsl(var(--fg-2))">100%</text>
+        <text x={PADDING.left - 8} y={PADDING.top + PLOT_HEIGHT / 2 + 4} fontSize="10" textAnchor="end" fill="hsl(var(--fg-2))">50%</text>
+        <text x={PADDING.left - 8} y={PADDING.top + PLOT_HEIGHT + 4} fontSize="10" textAnchor="end" fill="hsl(var(--fg-2))">0%</text>
+
+        {/* X-axis labels */}
+        <text x={PADDING.left} y={PADDING.top + PLOT_HEIGHT + 20} fontSize="10" textAnchor="middle" fill="hsl(var(--fg-2))">0d</text>
+        <text x={PADDING.left + PLOT_WIDTH / 2} y={PADDING.top + PLOT_HEIGHT + 20} fontSize="10" textAnchor="middle" fill="hsl(var(--fg-2))">15d</text>
+        <text x={xAxisEnd} y={PADDING.top + PLOT_HEIGHT + 20} fontSize="10" textAnchor="middle" fill="hsl(var(--fg-2))">30d</text>
+
+        {/* Axis labels */}
+        <text x={PADDING.left - 25} y={PADDING.top - 5} fontSize="11" fontWeight="600" fill="hsl(var(--fg-2))">Conc.</text>
+        <text x={xAxisEnd + 15} y={PADDING.top + PLOT_HEIGHT + 22} fontSize="11" fontWeight="600" fill="hsl(var(--fg-2))">Dias</text>
+
+        {/* Curves */}
+        {pathData.map((path, idx) => (
+          <path
+            key={idx}
+            d={path.d}
+            stroke={path.color}
+            strokeWidth="2"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ))}
+
+        {/* Half-life markers (50% point) */}
+        {curvesData.map((curve, idx) => {
+          const halfLifePoint = curve.points.find(pt => pt.c <= 50);
+          if (!halfLifePoint) return null;
+          return (
+            <circle
+              key={`marker-${idx}`}
+              cx={halfLifePoint.x}
+              cy={halfLifePoint.y}
+              r="2.5"
+              fill={curve.color}
+              stroke="white"
+              strokeWidth="1"
+            />
+          );
+        })}
+
+        {/* Protocol labels at right edge */}
+        {curvesData.map((curve, idx) => {
+          const lastPoint = curve.points[curve.points.length - 1];
+          return (
+            <g key={`label-${idx}`}>
+              <text
+                x={xAxisEnd + 8}
+                y={lastPoint.y + 4}
+                fontSize="11"
+                fontWeight="600"
+                fill={curve.color}
+              >
+                {curve.label.slice(0, 12)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {curvesData.map((curve, idx) => (
+          <div key={idx} className="rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.5)] px-3 py-2">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: curve.color }} />
+              <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">{curve.label.slice(0, 14)}</p>
+            </div>
+            <p className="mt-1 text-[11px] text-[hsl(var(--fg-2))]">T½: {curve.halfLife.toFixed(1)}d</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // ── Summary tile ──────────────────────────────────────────────────────────────
@@ -176,7 +369,7 @@ function ProtocolsContent() {
       setEditingProtocol(null);
       setNotice({
         tone: 'success',
-        message: variables.protocolId ? 'Protocolo atualizado.' : 'Protocolo adicionado.',
+        message: variables.protocolId ? 'Protocol updated.' : 'Protocol added.',
       });
     },
     onError: (error) => {
@@ -265,9 +458,9 @@ function ProtocolsContent() {
     };
 
     const messages = {
-      active:   'Protocolo reativado.',
-      paused:   'Protocolo pausado.',
-      finished: 'Protocolo marcado como finalizado.',
+      active:   'Protocol reactivated.',
+      paused:   'Protocol paused.',
+      finished: 'Protocol marked as finished.',
     };
 
     statusMutation.mutate({
@@ -281,7 +474,7 @@ function ProtocolsContent() {
   const handleDelete = (protocol) => {
     if (!protocol?.id) return;
 
-    const label = protocol?.substance_name || protocol?.name || 'este item';
+    const label = protocol?.substance_name || protocol?.name || 'this item';
     if (!window.confirm(`Delete ${label}?`)) return;
 
     deleteMutation.mutate({
@@ -307,8 +500,8 @@ function ProtocolsContent() {
 
   return (
     <PageShell
-      title="Protocolos"
-      subtitle="Rastreie compostos, doses e ciclos do seu protocolo atual em um só lugar."
+      title="Protocols"
+      subtitle="Track compounds, doses and cycles of your current protocol in one place."
       actions={
         <PrimaryButton
           type="button"
@@ -328,43 +521,50 @@ function ProtocolsContent() {
       {isLoading ? (
         <LoadingState
           title="Loading protocols"
-          description="Aguarde enquanto seus protocolos são carregados."
+          description="Please wait while your protocols are loading."
         />
       ) : null}
 
       {!isLoading && hasLoadError ? (
         <ErrorState
-          title="Protocolos em modo seguro"
-          description="Os dados não carregaram completamente, mas você ainda pode adicionar novos itens."
+          title="Protocols in safe mode"
+          description="Data did not load completely, but you can still add new items."
         />
       ) : null}
 
       {/* Summary tiles */}
       <section className="grid gap-3 md:grid-cols-3">
         <SummaryTile
-          label="Ativo"
+          label="Active"
           value={groupedProtocols.active.length}
-          hint="Compostos atualmente em uso ou monitoramento."
+          hint="Compounds currently in use or being monitored."
           icon={FlaskConical}
         />
         <SummaryTile
-          label="Pausado"
+          label="Paused"
           value={groupedProtocols.paused.length}
-          hint="Itens temporariamente suspensos mas ainda rastreados."
+          hint="Items temporarily suspended but still tracked."
           icon={PauseCircle}
         />
         <SummaryTile
-          label="Finalizado"
+          label="Finished"
           value={groupedProtocols.finished.length}
-          hint="Ciclos e protocolos concluídos mantidos no histórico."
+          hint="Completed cycles and protocols kept in history."
           icon={Clock3}
         />
       </section>
 
+      {/* Half-Life Curve Visualization (Performance Plan) */}
+      <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
+        <SectionCard title="Curvas de Meia-Vida" subtitle="Visualização da concentração ativa ao longo do tempo para protocolos ativos.">
+          <HalfLifeCurveChart protocols={groupedProtocols.active} />
+        </SectionCard>
+      </UpgradeGate>
+
       {/* Protocol list */}
       <SectionCard
-        title="Itens do protocolo atual"
-        subtitle="Rastreamento por status das substâncias que você usa ou monitora atualmente."
+        title="Current protocol items"
+        subtitle="Status tracking of substances you currently use or monitor."
         actions={
           <div className="flex flex-wrap gap-2">
             {FILTERS.map((option) => {
@@ -408,11 +608,11 @@ function ProtocolsContent() {
         {/* No protocols at all */}
         {!isLoading && !hasAnyProtocols ? (
           <EmptyState
-            title="Nenhum item no protocolo"
+            title="No protocol items"
             description={
               hasLoadError
-                ? 'A lista não pôde ser carregada. Você ainda pode adicionar seu primeiro protocolo.'
-                : 'Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto rastreado.'
+                ? 'The list could not be loaded. You can still add your first protocol.'
+                : 'Start with a medication, hormone, peptide, supplement or other tracked compound.'
             }
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
@@ -425,8 +625,8 @@ function ProtocolsContent() {
         {/* Filter has no matches */}
         {!isLoading && hasAnyProtocols && filteredProtocols.length === 0 ? (
           <EmptyState
-            title={`Nenhum protocolo ${filterLabels[filter]?.toLowerCase() || filter}`}
-            description="Tente outro filtro ou adicione um novo protocolo."
+            title={`No ${filterLabels[filter]?.toLowerCase() || filter} protocols`}
+            description="Try another filter or add a new protocol."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
                 Add Protocol
@@ -482,18 +682,18 @@ function ProtocolsContent() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-3xl">
           <DialogPanelHeader
-            eyebrow="Protocolos"
-            title={editingProtocol ? 'Editar protocolo' : 'Add Protocol'}
-            description="Registre os dados principais do protocolo: substância, categoria, dose, unidade, frequência, horário e status atual."
+            eyebrow="Protocols"
+            title={editingProtocol ? 'Edit protocol' : 'Add Protocol'}
+            description="Enter the main protocol data: substance, category, dose, unit, frequency, timing and current status."
             accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
           />
           {/* Visually hidden for accessibility */}
           <DialogHeader className="sr-only">
             <DialogTitle>
-              {editingProtocol ? 'Editar protocolo' : 'Add Protocol'}
+              {editingProtocol ? 'Edit protocol' : 'Add Protocol'}
             </DialogTitle>
             <DialogDescription>
-              Registre os dados principais do protocolo: substância, categoria, dose, unidade, frequência, horário e status atual.
+              Enter the main protocol data: substance, category, dose, unit, frequency, timing and current status.
             </DialogDescription>
           </DialogHeader>
 

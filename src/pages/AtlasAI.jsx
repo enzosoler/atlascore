@@ -2,19 +2,23 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAuth } from '@/lib/AuthContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
-import { FilterChip } from '@/components/shared/StablePage';
+import { FilterChip, StatusBanner } from '@/components/shared/StablePage';
 import {
+  Activity,
   ArrowUpRight,
   Brain,
   Clock3,
   Loader2,
+  MessageSquare,
   Plus,
   Send,
   Sparkles,
+  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MessageBubble from '@/components/ai/MessageBubble';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabaseClient';
 
 const LOCAL_ATLAS_AI_STORAGE_KEY = 'atlas-ai-local-conversations';
 const LOCAL_PROFILE_STORAGE_KEY = 'atlas_local_profile_store';
@@ -362,6 +366,85 @@ function buildProfileContext(profile) {
   return pills.slice(0, 4);
 }
 
+// ── Supabase CRUD helpers for AI conversations ────────────────────────────────
+
+async function fetchConversationsFromSupabase(userId) {
+  if (!userId) return [];
+  const { data, error } = await supabase
+    .from('ai_conversations')
+    .select('id, name, messages, updated_at')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false })
+    .limit(50);
+  if (error) {
+    console.warn('[Atlas AI] Supabase fetch error:', error);
+    return [];
+  }
+  return (data || []).map(row => ({
+    id: row.id,
+    metadata: { name: row.name },
+    messages: Array.isArray(row.messages) ? row.messages : [],
+    updated_at: row.updated_at,
+  }));
+}
+
+async function createConversationInSupabase(userId, name) {
+  if (!userId) return null;
+  const { data, error } = await supabase
+    .from('ai_conversations')
+    .insert({ user_id: userId, name, messages: [] })
+    .select()
+    .single();
+  if (error) {
+    console.warn('[Atlas AI] Supabase create error:', error);
+    return null;
+  }
+  return { id: data.id, metadata: { name: data.name }, messages: [], updated_at: data.updated_at };
+}
+
+async function saveConversationToSupabase(conversationId, messages, name) {
+  if (!conversationId) return false;
+  const { error } = await supabase
+    .from('ai_conversations')
+    .update({ messages, name, updated_at: new Date().toISOString() })
+    .eq('id', conversationId);
+  if (error) {
+    console.warn('[Atlas AI] Supabase save error:', error);
+    return false;
+  }
+  return true;
+}
+
+async function deleteConversationFromSupabase(conversationId) {
+  if (!conversationId) return false;
+  const { error } = await supabase
+    .from('ai_conversations')
+    .delete()
+    .eq('id', conversationId);
+  if (error) {
+    console.warn('[Atlas AI] Supabase delete error:', error);
+    return false;
+  }
+  return true;
+}
+
+function ChatSignalCard({ icon: Icon, label, value, detail }) {
+  return (
+    <div className="rounded-[20px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card)/0.74)] px-4 py-4 shadow-[var(--shadow-xs)]">
+      <div className="flex items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand-ai))]">
+          <Icon className="h-4 w-4" strokeWidth={1.8} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))]">{label}</p>
+          <p className="mt-1.5 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{value}</p>
+          <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{detail}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConversationListItem({ conversation, active, onClick, compact = false }) {
   const messageCount = conversation?.messages?.length || 0;
 
@@ -501,17 +584,36 @@ export default function AtlasAI() {
 
     setLoading(true);
 
-    const loadTimer = window.setTimeout(() => {
+    const loadTimer = window.setTimeout(async () => {
       if (cancelled) return;
 
       try {
-        const restored = readStoredConversations(user);
+        let restored = [];
+
+        // Try to fetch from Supabase first (for authenticated users, not local mock)
+        if (!isLocalMockUser(user) && user?.id) {
+          restored = await fetchConversationsFromSupabase(user.id);
+        }
+
+        // Fall back to localStorage if no Supabase results
+        if (!restored || restored.length === 0) {
+          restored = readStoredConversations(user);
+        }
+
         setConversations(restored);
         setActiveId(restored[0]?.id || null);
         setInput('');
-      } catch {
-        setConversations([]);
-        setActiveId(null);
+      } catch (error) {
+        console.warn('[Atlas AI] Load error:', error);
+        // On error, fall back to localStorage
+        try {
+          const restored = readStoredConversations(user);
+          setConversations(restored);
+          setActiveId(restored[0]?.id || null);
+        } catch {
+          setConversations([]);
+          setActiveId(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -528,7 +630,23 @@ export default function AtlasAI() {
 
   useEffect(() => {
     if (loading || !hasAtlasAIAccess) return;
+
+    // Always write to localStorage
     writeStoredConversations(user, conversations);
+
+    // Also try to write to Supabase for authenticated (non-local) users
+    if (!isLocalMockUser(user) && user?.id) {
+      // Debounce Supabase writes to avoid excessive API calls
+      const timer = window.setTimeout(() => {
+        conversations.forEach(conversation => {
+          if (conversation.id && conversation.id !== 'local-') {
+            saveConversationToSupabase(conversation.id, conversation.messages, conversation.metadata?.name || 'Conversa');
+          }
+        });
+      }, 1000);
+
+      return () => window.clearTimeout(timer);
+    }
   }, [conversations, hasAtlasAIAccess, loading, user]);
 
   const activeConversation =
@@ -595,10 +713,16 @@ export default function AtlasAI() {
     let conversationId = activeId;
     let createdConversation = null;
 
+    // If creating a new conversation, also create it in Supabase for authenticated users
     if (!conversationId) {
       createdConversation = createConversation(content.slice(0, 40));
       conversationId = createdConversation.id;
       setActiveId(conversationId);
+
+      // Create in Supabase for authenticated (non-local) users
+      if (!isLocalMockUser(user) && user?.id) {
+        createConversationInSupabase(user.id, content.slice(0, 40));
+      }
     }
 
     const userMessage = { role: 'user', content };

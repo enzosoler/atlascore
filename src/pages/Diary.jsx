@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -109,9 +108,9 @@ function SectionIconHeader({ icon: Icon, color, label }) {
 export default function Diary() {
   return (
     <SafePageBoundary
-      title="Diário"
-      subtitle="Modo seguro do diário."
-      fallbackDescription="O diário carregou em modo de segurança. Navegue para outra rota e volte para tentar novamente."
+      title="Diary"
+      subtitle="Diary safe mode."
+      fallbackDescription="The diary loaded in safe mode. Navigate to another route and come back to try again."
     >
       <DiaryContent />
     </SafePageBoundary>
@@ -133,43 +132,38 @@ function DiaryContent() {
   const { data: checkin = null } = useQuery({
     queryKey: ['diary-checkin', date],
     queryFn: async () => {
-      try {
-        const r = await base44.entities.DailyCheckin.filter({ date });
-        return r?.[0] || null;
-      } catch {
-        return null;
-      }
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('daily_checkins')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('date', date)
+        .maybeSingle();
+      return data || null;
     },
+    enabled: !!user?.id,
   });
 
   const { data: meals = [] } = useQuery({
     queryKey: ['diary-food-logs', date, user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      try {
-        const { data, error } = await supabase
-          .from('food_logs')
-          .select('id, food_name, calories, protein, carbs, fat, date, created_at')
-          .eq('user_id', user.id)
-          .eq('date', date)
-          .order('created_at', { ascending: true });
-        if (error) throw error;
-        return (data || []).map((log) => ({
-          id: log.id,
-          date: log.date,
-          title: log.food_name || 'Alimento',
-          total_calories: Number(log.calories || 0),
-          total_protein: Number(log.protein || 0),
-          total_carbs: Number(log.carbs || 0),
-          total_fat: Number(log.fat || 0),
-        }));
-      } catch {
-        try {
-          return await base44.entities.Meal.filter({ date });
-        } catch {
-          return [];
-        }
-      }
+      const { data, error } = await supabase
+        .from('food_logs')
+        .select('id, food_name, calories, protein, carbs, fat, date, created_at')
+        .eq('user_id', user.id)
+        .eq('date', date)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return (data || []).map((log) => ({
+        id: log.id,
+        date: log.date,
+        title: log.food_name || 'Food',
+        total_calories: Number(log.calories || 0),
+        total_protein: Number(log.protein || 0),
+        total_carbs: Number(log.carbs || 0),
+        total_fat: Number(log.fat || 0),
+      }));
     },
     enabled: !!user?.id,
   });
@@ -177,38 +171,60 @@ function DiaryContent() {
   const { data: workouts = [] } = useQuery({
     queryKey: ['diary-workouts', date],
     queryFn: async () => {
-      try {
-        return await base44.entities.Workout.filter({ date });
-      } catch {
-        return [];
-      }
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('workouts')
+        .select('id, status, completed_at, exercises, duration_minutes, notes')
+        .eq('user_id', user.id)
+        .gte('completed_at', `${date}T00:00:00`)
+        .lte('completed_at', `${date}T23:59:59`)
+        .order('completed_at', { ascending: true });
+      return (data || []).map(w => ({
+        ...w,
+        date,
+        name: w.status || 'Treino',
+      }));
     },
+    enabled: !!user?.id,
   });
 
   const { data: measurements = [] } = useQuery({
     queryKey: ['diary-measurements', date],
     queryFn: async () => {
-      try {
-        return await base44.entities.Measurement.filter({ date });
-      } catch {
-        return [];
-      }
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('measurements')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('date', date)
+        .order('created_at', { ascending: true });
+      return data || [];
     },
+    enabled: !!user?.id,
   });
 
   // Show doses logged for the selected date (protocol_id links log → plan)
   const { data: supplements = [] } = useQuery({
     queryKey: ['diary-supplements', date],
     queryFn: async () => {
-      try {
-        const byDate = await base44.entities.Supplement.filter({ date });
-        if (byDate.length > 0) return byDate;
-        // Fallback: show active supplements if none logged for this date
-        return await base44.entities.Supplement.filter({ active: true });
-      } catch {
-        return [];
-      }
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('protocols')
+        .select('id, substance_name, name, dose, unit, frequency, active')
+        .eq('user_id', user.id)
+        .eq('active', true)
+        .order('start_date', { ascending: false })
+        .limit(20);
+      return (data || []).map(p => ({
+        id: p.id,
+        name: p.substance_name || p.name || 'Protocolo',
+        dose: p.dose,
+        unit: p.unit,
+        frequency: p.frequency,
+        active: p.active,
+      }));
     },
+    enabled: !!user?.id,
   });
 
   // ── Valores derivados ──────────────────────────────────────────
@@ -226,9 +242,9 @@ function DiaryContent() {
     <AppContainer>
       {/* ── Page Header ─────────────────────────────────────────── */}
       <PageHeader
-        eyebrow="Diário"
-        title="Seu dia em um lugar só."
-        subtitle="Visão consolidada de nutrição, treinos, check-in e medidas para a data selecionada."
+        eyebrow="Diary"
+        title="Your day in one place."
+        subtitle="Consolidated view of nutrition, workouts, check-in and measurements for the selected date."
         accentClassName="from-[hsl(var(--brand)/0.07)] via-[hsl(var(--brand)/0.02)]"
         actions={
           <div className="flex flex-wrap items-center gap-3">
@@ -238,7 +254,7 @@ function DiaryContent() {
             />
             {isToday && (
               <span className="inline-flex items-center rounded-full bg-[hsl(var(--brand)/0.1)] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--brand))]">
-                Hoje
+                Today
               </span>
             )}
           </div>
@@ -398,7 +414,7 @@ function DiaryContent() {
               {checkin.notes && (
                 <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))] mb-1.5">
-                    Observações
+                    Notes
                   </p>
                   <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">{checkin.notes}</p>
                 </div>
@@ -410,19 +426,19 @@ function DiaryContent() {
 
       {/* ── Treinos ─────────────────────────────────────────────── */}
       <Section
-        eyebrow="Diário"
-        title={workouts.length > 0 ? `Treinos · ${workouts.length} sessão(ões)` : 'Treinos'}
-        subtitle="Sessões registradas na rota de Treinos para a data selecionada."
+        eyebrow="Diary"
+        title={workouts.length > 0 ? `Workouts · ${workouts.length} session(s)` : 'Workouts'}
+        subtitle="Sessions recorded in the Workouts section for the selected date."
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
             icon={Dumbbell}
             color="hsl(var(--brand-ai, #8B5CF6))"
-            label="Treinos"
+            label="Workouts"
           />
 
           {workouts.length === 0 ? (
-            <EmptySlot message="Nenhum treino registrado para este dia." />
+            <EmptySlot message="No workouts recorded for this day." />
           ) : (
             <div className="divide-y divide-[hsl(var(--border)/0.5)]">
               {workouts.map((w) => {
@@ -441,13 +457,13 @@ function DiaryContent() {
                             : 'bg-[hsl(var(--warn)/0.12)] text-[hsl(34_68%_32%)]'
                         )}
                       >
-                        {done ? 'Concluído' : 'Pendente'}
+                        {done ? 'Done' : 'Pending'}
                       </span>
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-3 text-[12px] text-[hsl(var(--fg-2))]">
                       {w.duration_minutes > 0 && <span>{w.duration_minutes} min</span>}
                       {w.volume_load > 0 && (
-                        <span>{w.volume_load.toLocaleString('pt-BR')} kg vol.</span>
+                        <span>{w.volume_load.toLocaleString('en-US')} kg vol.</span>
                       )}
                       {w.perceived_effort > 0 && <span>RPE {w.perceived_effort}</span>}
                     </div>
@@ -466,42 +482,42 @@ function DiaryContent() {
 
       {/* ── Medidas ─────────────────────────────────────────────── */}
       <Section
-        eyebrow="Diário"
-        title="Medidas"
-        subtitle="Checkpoint corporal registrado para a data selecionada."
+        eyebrow="Diary"
+        title="Measurements"
+        subtitle="Body checkpoint recorded for the selected date."
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
             icon={BarChart3}
             color="hsl(var(--warn, #FF9F0A))"
-            label="Medidas"
+            label="Measurements"
           />
 
           {!measurement ? (
-            <EmptySlot message="Nenhuma medida registrada para este dia." />
+            <EmptySlot message="No measurements recorded for this day." />
           ) : (
             <div className="grid gap-px bg-[hsl(var(--border)/0.6)] sm:grid-cols-2">
               {measurement.weight != null && (
-                <SectionMetric label="Peso" value={`${measurement.weight}`} suffix="kg" />
+                <SectionMetric label="Weight" value={`${measurement.weight}`} suffix="kg" />
               )}
               {measurement.body_fat != null && (
                 <SectionMetric
-                  label="Gordura corporal"
+                  label="Body fat"
                   value={`${measurement.body_fat}`}
                   suffix="%"
                 />
               )}
               {measurement.waist != null && (
-                <SectionMetric label="Cintura" value={`${measurement.waist}`} suffix="cm" />
+                <SectionMetric label="Waist" value={`${measurement.waist}`} suffix="cm" />
               )}
               {measurement.arms != null && (
-                <SectionMetric label="Braços" value={`${measurement.arms}`} suffix="cm" />
+                <SectionMetric label="Arms" value={`${measurement.arms}`} suffix="cm" />
               )}
               {measurement.chest != null && (
-                <SectionMetric label="Peito" value={`${measurement.chest}`} suffix="cm" />
+                <SectionMetric label="Chest" value={`${measurement.chest}`} suffix="cm" />
               )}
               {measurement.hips != null && (
-                <SectionMetric label="Quadril" value={`${measurement.hips}`} suffix="cm" />
+                <SectionMetric label="Hips" value={`${measurement.hips}`} suffix="cm" />
               )}
             </div>
           )}
@@ -510,23 +526,23 @@ function DiaryContent() {
 
       {/* ── Suplementos ─────────────────────────────────────────── */}
       <Section
-        eyebrow="Diário"
+        eyebrow="Diary"
         title={
           supplements.length > 0
-            ? `Suplementos · ${supplements.length} ativo(s)`
-            : 'Suplementos'
+            ? `Supplements · ${supplements.length} active`
+            : 'Supplements'
         }
-        subtitle="Compostos ativos cadastrados nos Protocolos."
+        subtitle="Active compounds registered in Protocols."
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
             icon={Pill}
             color="hsl(var(--ok, #34C759))"
-            label="Suplementos"
+            label="Supplements"
           />
 
           {supplements.length === 0 ? (
-            <EmptySlot message="Nenhum suplemento ativo cadastrado." />
+            <EmptySlot message="No active supplements registered." />
           ) : (
             <div className="flex flex-wrap gap-2 px-5 py-5">
               {supplements.map((s) => (
@@ -538,7 +554,7 @@ function DiaryContent() {
                   {s.dose ? ` · ${s.dose}` : ''}
                   {s.protocol_id && (
                     <span className="rounded-full bg-[hsl(var(--brand)/0.12)] px-1.5 py-0.5 text-[10px] text-[hsl(var(--brand))]">
-                      protocolo
+                      protocol
                     </span>
                   )}
                 </span>
