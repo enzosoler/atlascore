@@ -21,8 +21,8 @@
     --border-default: 216 15% 90%;
     --border-strong: 216 15% 80%;
 
-    --accent-primary: 185 32% 36%;
-    --accent-primary-hover: 185 32% 31%;
+    --accent-primary: 190 34% 30%;
+    --accent-primary-hover: 190 36% 26%;
     --accent-secondary: 160 28% 42%;
 
     --status-success: 160 45% 45%;
@@ -163,8 +163,8 @@
     --border-default: 216 10% 20%;
     --border-strong: 216 10% 30%;
 
-    --accent-primary: 185 40% 46%;
-    --accent-primary-hover: 185 40% 40%;
+    --accent-primary: 190 36% 40%;
+    --accent-primary-hover: 190 38% 35%;
     --accent-secondary: 160 34% 42%;
 
     --sys-bg: var(--bg-app);

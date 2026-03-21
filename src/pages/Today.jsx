@@ -8,7 +8,6 @@ import {
   Scale,
   Shield,
   Sparkles,
-  User,
   UtensilsCrossed,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -16,7 +15,6 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useRole } from '@/hooks/useRole';
-import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { getGreeting } from '@/lib/atlas-theme';
@@ -45,35 +43,55 @@ function getDateLabel(locale) {
   }).format(new Date());
 }
 
-function getNextSteps(t, ROUTES) {
+function getNextSteps(t, ROUTES, {
+  activeWorkoutPlan,
+  todaySession,
+  todayMealsCount,
+  recentMeasurementsCount,
+  progressPhotosCount,
+}) {
   return [
     {
       to: ROUTES.nutrition,
-      title: t('today_page.nextSteps.nutritionTitle'),
-      description: t('today_page.nextSteps.nutritionDesc'),
+      title: todayMealsCount > 0 ? 'Review nutrition' : t('today_page.nextSteps.nutritionTitle'),
+      description: todayMealsCount > 0
+        ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
+        : t('today_page.nextSteps.nutritionDesc'),
       icon: UtensilsCrossed,
       phase: t('today_page.nextSteps.nutritionPhase'),
     },
     {
       to: ROUTES.workouts,
-      title: t('today_page.nextSteps.workoutTitle'),
-      description: t('today_page.nextSteps.workoutDesc'),
+      title: !activeWorkoutPlan
+        ? 'Create workout plan'
+        : todaySession?.status === 'completed'
+          ? 'Review workout log'
+          : 'Start workout',
+      description: !activeWorkoutPlan
+        ? 'Build your active training plan first so Today, history and execution all point to the same structure.'
+        : todaySession?.status === 'completed'
+          ? 'Open the completed session, review the numbers and prepare the next training day.'
+          : 'Launch the active plan and log sets, reps and load from the structured session.',
       icon: Dumbbell,
       phase: t('today_page.nextSteps.workoutPhase'),
     },
     {
-      to: ROUTES.atlasAI,
-      title: t('today_page.nextSteps.aiTitle'),
-      description: t('today_page.nextSteps.aiDesc'),
-      icon: Brain,
-      phase: t('today_page.nextSteps.aiPhase'),
+      to: ROUTES.measurements,
+      title: recentMeasurementsCount > 0 ? 'Review measurements' : 'Log measurement',
+      description: recentMeasurementsCount > 0
+        ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
+        : 'Add body weight and body measurements so progress tracking starts with a real baseline.',
+      icon: Scale,
+      phase: 'Body',
     },
     {
-      to: ROUTES.profile,
-      title: t('today_page.nextSteps.profileTitle'),
-      description: t('today_page.nextSteps.profileDesc'),
-      icon: User,
-      phase: t('today_page.nextSteps.profilePhase'),
+      to: progressPhotosCount > 0 ? ROUTES.atlasAI : ROUTES.progressPhotos,
+      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : 'Add progress photo',
+      description: progressPhotosCount > 0
+        ? t('today_page.nextSteps.aiDesc')
+        : 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.',
+      icon: progressPhotosCount > 0 ? Brain : Sparkles,
+      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : 'Photos',
     },
   ];
 }
@@ -276,6 +294,22 @@ function TodayContent() {
     staleTime: 10 * 60 * 1000,
   });
 
+  const { data: recentProgressPhotos = [], isLoading: loadingProgressPhotos } = useQuery({
+    queryKey: ['today-progress-photos', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('progress_photos')
+        .select('id, date, category')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(12);
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000,
+  });
+
   // Active protocols from Supabase
   const { data: allProtocols = [], isLoading: loadingProtocols } = useQuery({
     queryKey: ['today-protocols', user?.id],
@@ -294,6 +328,7 @@ function TodayContent() {
     loadingSessions ||
     loadingMeals ||
     loadingMeasurements ||
+    loadingProgressPhotos ||
     loadingProtocols;
 
   // ── Derived state ─────────────────────────────────────────────────────────
@@ -342,7 +377,13 @@ function TodayContent() {
       ? `${activeProtocolsList.length} ${activeProtocolsList.length > 1 ? (locale === 'en-US' ? 'active' : 'ativos') : (locale === 'en-US' ? 'active' : 'ativo')}`
       : t('today_page.noActive');
 
-  const NEXT_STEPS = getNextSteps(t, ROUTES);
+  const NEXT_STEPS = getNextSteps(t, ROUTES, {
+    activeWorkoutPlan,
+    todaySession,
+    todayMealsCount: todayMeals.length,
+    recentMeasurementsCount: recentMeasurements.length,
+    progressPhotosCount: recentProgressPhotos.length,
+  });
 
   const snapshotCards = [
     {

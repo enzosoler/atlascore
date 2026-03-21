@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
@@ -11,7 +10,6 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
-  ZoomIn,
   X,
 } from 'lucide-react';
 import { getToday } from '@/lib/atlas-theme';
@@ -26,6 +24,12 @@ import {
   SafePageBoundary,
 } from '@/components/shared/StablePage';
 import { cn } from '@/lib/utils';
+import {
+  createProgressPhoto,
+  deleteProgressPhoto,
+  listProgressPhotos,
+  uploadProgressPhoto,
+} from '@/services/bodyProgressService';
 
 // ─────────────────────────────────────────────────────────────────
 // Poses padrão para acompanhamento corporal
@@ -81,7 +85,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
             <div className="absolute inset-0 flex flex-col items-end justify-start gap-2 bg-gradient-to-b from-black/30 to-transparent p-2 opacity-0 transition-opacity hover:opacity-100">
               <button
                 type="button"
-                onClick={() => onDelete(photo.id)}
+                onClick={() => onDelete(photo)}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--err)/0.88)] text-white shadow"
               >
                 <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
@@ -303,7 +307,7 @@ export default function ProgressPhotos() {
 }
 
 function ProgressPhotosContent() {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -321,16 +325,18 @@ function ProgressPhotosContent() {
   // onSuccess was removed in TanStack Query v5 — derive saved dates from query data directly
   // (allDates computation below merges checkpointDates + savedDates from allPhotos on every render)
   const { data: allPhotos = [] } = useQuery({
-    queryKey: ['progress-photos-page'],
-    queryFn: () => base44.entities.ProgressPhoto.list('-date', 200),
+    queryKey: ['progress-photos-page', user?.id],
+    queryFn: () => listProgressPhotos(user.id, 200),
+    enabled: !!user?.id,
   });
 
   // ── Mutações ────────────────────────────────────────────────────
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.ProgressPhoto.delete(id),
+    mutationFn: ({ id, photoUrl }) => deleteProgressPhoto(user.id, id, photoUrl),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['progress-photos-page'] });
+      qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
+      qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
       setNotice({ tone: 'success', message: 'Foto removida.' });
     },
     onError: () => setNotice({ tone: 'error', message: 'Erro ao remover a foto.' }),
@@ -351,27 +357,31 @@ function ProgressPhotosContent() {
       const key = `${date}-${poseKey}`;
       setUploadingPose(key);
       try {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        await base44.entities.ProgressPhoto.create({
-          photo_url: file_url,
+        const photoUrl = await uploadProgressPhoto(user.id, file);
+        await createProgressPhoto(user.id, {
+          photo_url: photoUrl,
           date,
           category: poseKey,
         });
-        qc.invalidateQueries({ queryKey: ['progress-photos-page'] });
+        qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
+        qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
         setNotice({ tone: 'success', message: 'Foto salva com sucesso.' });
-      } catch {
-        setNotice({ tone: 'error', message: 'Erro ao fazer upload da foto. Tente novamente.' });
+      } catch (error) {
+        setNotice({
+          tone: 'error',
+          message: error?.message || 'Erro ao fazer upload da foto. Tente novamente.',
+        });
       } finally {
         setUploadingPose(null);
       }
     },
-    [qc]
+    [qc, user?.id]
   );
 
   const handleDelete = useCallback(
-    (id) => {
+    (photo) => {
       if (!window.confirm('Remover esta foto do checkpoint?')) return;
-      deleteMutation.mutate(id);
+      deleteMutation.mutate({ id: photo.id, photoUrl: photo.photo_url });
     },
     [deleteMutation]
   );

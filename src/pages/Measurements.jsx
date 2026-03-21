@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import {
   Activity,
   ArrowDownRight,
@@ -40,12 +39,18 @@ import {
   SecondaryButton,
   SectionCard,
   StatusBanner,
-  shiftDate,
 } from '@/components/shared/StablePage';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { getToday } from '@/lib/atlas-theme';
 import { useI18n } from '@/lib/i18nContext';
+import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
+import {
+  createMeasurement,
+  deleteMeasurement,
+  listMeasurements,
+  updateMeasurement,
+} from '@/services/bodyProgressService';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -702,6 +707,7 @@ export default function Measurements() {
 
 function MeasurementsContent() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [metricKey, setMetricKey] = useState('weight');
   const [notice, setNotice] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -711,18 +717,20 @@ function MeasurementsContent() {
 
   // ── Data fetching ────────────────────────────────────────────────
   const { data: measurements = [], isLoading, isError } = useQuery({
-    queryKey: ['measurements'],
-    queryFn: () => base44.entities.Measurement.list('-date', 200),
+    queryKey: ['measurements', user?.id],
+    queryFn: () => listMeasurements(user.id, 200),
+    enabled: !!user?.id,
   });
 
   // ── Mutations ────────────────────────────────────────────────────
   const invalidateMeasurements = () => {
-    queryClient.invalidateQueries({ queryKey: ['measurements'] });
-    queryClient.invalidateQueries({ queryKey: ['measurements-progress'] });
+    queryClient.invalidateQueries({ queryKey: ['measurements', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['measurements-progress', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['today-measurements-recent', user?.id] });
   };
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Measurement.create(data),
+    mutationFn: (data) => createMeasurement(user.id, data),
     onSuccess: () => {
       invalidateMeasurements();
       setIsFormOpen(false);
@@ -734,7 +742,7 @@ function MeasurementsContent() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Measurement.update(id, data),
+    mutationFn: ({ id, data }) => updateMeasurement(user.id, id, data),
     onSuccess: () => {
       invalidateMeasurements();
       setIsFormOpen(false);
@@ -746,7 +754,7 @@ function MeasurementsContent() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Measurement.delete(id),
+    mutationFn: (id) => deleteMeasurement(user.id, id),
     onSuccess: () => {
       invalidateMeasurements();
       setNotice({ tone: 'success', message: 'Checkpoint corporal removido.' });

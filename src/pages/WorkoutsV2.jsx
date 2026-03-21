@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
@@ -246,6 +246,19 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
     });
   }, [frequency]);
 
+  const totalExercises = days.reduce((sum, day) => sum + (day.exercises?.length || 0), 0);
+  const validationErrors = [];
+
+  if (!name.trim()) {
+    validationErrors.push('Plan name is required.');
+  }
+
+  if (totalExercises === 0) {
+    validationErrors.push('Add at least one exercise before saving.');
+  }
+
+  const isPlanValid = validationErrors.length === 0;
+
   const handleDayLabelChange = (dayIdx, _field, value) => {
     setDays((prev) => prev.map((d, i) => (i === dayIdx ? { ...d, label: value } : d)));
   };
@@ -279,7 +292,16 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
   };
 
   const handleSave = async () => {
-    if (!name.trim()) { toast.error('Please enter a plan name.'); return; }
+    if (!name.trim()) {
+      toast.error('Please enter a plan name.');
+      return;
+    }
+
+    if (totalExercises === 0) {
+      toast.error('Add at least one exercise before saving the plan.');
+      return;
+    }
+
     setSaving(true);
     try {
       await deactivateAllWorkoutPlans(userId);
@@ -324,6 +346,20 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+          {validationErrors.length > 0 && (
+            <div className="rounded-xl border border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--warn)/0.08)] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--warn))]">
+                Plan validation
+              </p>
+              <div className="mt-2 space-y-1">
+                {validationErrors.map((error) => (
+                  <p key={error} className="text-sm text-[hsl(var(--fg))]">
+                    {error}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
@@ -405,7 +441,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
           </button>
           <button
             onClick={handleSave}
-            disabled={saving || !name.trim()}
+            disabled={saving || !isPlanValid}
             className="flex-1 h-11 rounded-xl bg-[hsl(var(--brand))] text-sm font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Plan'}
@@ -543,7 +579,10 @@ export default function WorkoutsV2() {
     mutationFn: ({ userId, payload, originalWorkout }) =>
       saveCompletedWorkout(userId, payload, originalWorkout),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['recent-workouts', user?.id] });
       qc.invalidateQueries({ queryKey: ['recent-workouts'] });
+      qc.invalidateQueries({ queryKey: ['workout-history', user?.id] });
+      qc.invalidateQueries({ queryKey: ['today-sessions', user?.id] });
       setMode('list');
       setActiveSession(null);
       toast.success('Session saved!');
@@ -571,7 +610,9 @@ export default function WorkoutsV2() {
 
   const handlePlanCreated = () => {
     setShowCreatePlan(false);
-    qc.invalidateQueries({ queryKey: ['active-workout-plan'] });
+    qc.invalidateQueries({ queryKey: ['active-workout-plan', user?.id] });
+    qc.invalidateQueries({ queryKey: ['today-workout-plan', user?.id] });
+    qc.invalidateQueries({ queryKey: ['workout-history', user?.id] });
     toast.success('Plan created! Start a session from any day.');
   };
 
