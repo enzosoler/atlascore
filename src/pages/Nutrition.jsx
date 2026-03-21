@@ -89,7 +89,7 @@ function createLocalId(prefix) {
 }
 
 function getMealTypeLabel(mealType) {
-  return MEAL_TYPES[mealType]?.label || mealType || 'Refeição';
+  return MEAL_TYPES[mealType]?.label || mealType || 'Meal';
 }
 
 function getMealSortOrder(mealType) {
@@ -204,7 +204,7 @@ function getMealTypeFromDate(value) {
 
 function mapFoodLogToMeal(log) {
   const quantity = Number(log?.quantity || 1);
-  const foodName = log?.food_name || 'Alimento registrado';
+  const foodName = log?.food_name || 'Food logged';
 
   return {
     id: log?.id ? `food-log-${log.id}` : createLocalId('food-log'),
@@ -228,10 +228,7 @@ function mapFoodLogToMeal(log) {
     total_protein: Number(log?.protein || 0),
     total_carbs: Number(log?.carbs || 0),
     total_fat: Number(log?.fat || 0),
-    notes:
-      quantity > 1
-        ? `Alimento salvo com sucesso.`
-        : 'Alimento salvo com sucesso.',
+    notes: 'Food saved.',
   };
 }
 
@@ -254,10 +251,8 @@ function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail, 
             {detail || (remaining > 0
               ? isEnglish
                 ? `${remaining}${unit} remaining`
-                : `${remaining}${unit} restantes`
-              : isEnglish
-                ? 'Goal reached'
-                : 'Meta atingida')}
+                : `${remaining}${unit} remaining`
+              : 'Goal reached')}
           </p>
         </div>
         <p className="shrink-0 text-[13px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
@@ -610,7 +605,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
               { label: 'kcal', value: Math.round(totals.kcal), tone: 'calories' },
               { label: 'Prot', value: `${Math.round(totals.protein)}g`, tone: 'protein' },
               { label: 'Carb', value: `${Math.round(totals.carbs)}g`, tone: 'carbs' },
-              { label: 'Gord', value: `${Math.round(totals.fat)}g`, tone: 'fat' },
+              { label: 'Fat',  value: `${Math.round(totals.fat)}g`, tone: 'fat' },
             ].map(({ label, value, tone }) => (
               <div key={label} className="text-center">
                 <div className="flex items-center justify-center gap-1">
@@ -630,10 +625,10 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
         <div className="mt-5 flex flex-col items-center justify-center rounded-[16px] border border-dashed border-[hsl(var(--border-h))] py-8 text-center">
           <UtensilsCrossed className="h-8 w-8 text-[hsl(var(--fg-3))]" strokeWidth={1.5} />
           <p className="mt-3 text-[13px] font-medium text-[hsl(var(--fg-2))]">
-            Busque e adicione alimentos acima
+            Search and add foods above
           </p>
           <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
-            Busca instantânea via TACO 🇧🇷 — industrializados via FatSecret
+            Instant results from TACO — packaged foods via FatSecret
           </p>
         </div>
       ) : null}
@@ -674,6 +669,8 @@ export default function NutritionPage() {
   const [isSearchingFoods, setIsSearchingFoods] = useState(false);
   const [foodSearchError, setFoodSearchError] = useState('');
   const [savingFoodId, setSavingFoodId] = useState(null);
+  const [pendingFood, setPendingFood] = useState(null);
+  const [pendingFoodAmount, setPendingFoodAmount] = useState('100');
   const [isLoadingMeals, setIsLoadingMeals] = useState(false);
   const [recentFoods, setRecentFoods] = useState([]);
   const [showTargetsEditor, setShowTargetsEditor] = useState(false);
@@ -852,8 +849,7 @@ export default function NutritionPage() {
     let active = true;
     const timer = window.setTimeout(async () => {
       try {
-        let foods = await searchFatSecretFoods(q, 'pt');
-        if (foods.length === 0) foods = await searchFatSecretFoods(q, 'en');
+        let foods = await searchFatSecretFoods(q, 'en');
         if (active) setFoodResults(foods.slice(0, 8));
       } catch (error) {
         console.error('FatSecret search failed:', error);
@@ -868,50 +864,53 @@ export default function NutritionPage() {
     return () => { active = false; window.clearTimeout(timer); };
   }, [foodQuery]);
 
-  const handleSelectFood = async (food) => {
+  const handleSelectFood = (food) => {
     if (!user?.id) {
       setNotice({ tone: 'error', message: t('pages.nutrition.need_login_food') });
       return;
     }
+    setPendingFood(food);
+    setPendingFoodAmount('100');
+  };
 
-    setSavingFoodId(food.id);
+  const handleConfirmPortionAndSave = async () => {
+    if (!pendingFood || !user?.id) return;
+
+    const amount = parseFloat(pendingFoodAmount);
+    if (isNaN(amount) || amount <= 0) return;
+
+    const ratio = amount / 100;
+    setSavingFoodId(pendingFood.id);
     try {
       const snapshot = {
         user_id: user.id,
         date: buildSnapshotDate(selectedDate),
-        food_name: food.name,
-        calories: food.calories,
-        protein: food.protein,
-        carbs: food.carbs,
-        fat: food.fat,
+        food_name: pendingFood.name,
+        calories: Math.round((pendingFood.calories || 0) * ratio * 10) / 10,
+        protein: Math.round((pendingFood.protein || 0) * ratio * 10) / 10,
+        carbs: Math.round((pendingFood.carbs || 0) * ratio * 10) / 10,
+        fat: Math.round((pendingFood.fat || 0) * ratio * 10) / 10,
         quantity: 1,
         serving_unit: 'g',
-        serving_size: 100,
-        external_id: food.id,
-        source_api: food.brand === 'TACO' ? 'TACO' : 'FatSecret',
+        serving_size: amount,
+        external_id: pendingFood.id,
+        source_api: pendingFood.brand === 'TACO' ? 'TACO' : 'FatSecret',
       };
 
       const { data, error } = await supabase.from('food_logs').insert(snapshot).select().single();
-
       if (error) throw error;
 
       const savedMeal = mapFoodLogToMeal(data || snapshot);
-
       setMeals((current) => [savedMeal, ...current]);
       setFoodQuery('');
       setFoodResults([]);
       setFoodSearchError('');
-      setNotice({
-        tone: 'success',
-        message: `${food.name} adicionado com sucesso.`,
-      });
-      addRecentFood(food);
+      setNotice({ tone: 'success', message: `${pendingFood.name} added successfully.` });
+      addRecentFood(pendingFood);
+      setPendingFood(null);
     } catch (error) {
       console.error('Failed to save food log:', error);
-      setNotice({
-        tone: 'error',
-        message: `Não foi possível salvar ${food.name}. Tente novamente.`,
-      });
+      setNotice({ tone: 'error', message: `Could not save ${pendingFood.name}. Try again.` });
     } finally {
       setSavingFoodId(null);
     }
@@ -925,7 +924,7 @@ export default function NutritionPage() {
 
     const foods = form.foods || [];
     if (foods.length === 0) {
-      setNotice({ tone: 'error', message: 'Adicione pelo menos um alimento antes de salvar.' });
+      setNotice({ tone: 'error', message: 'Add at least one food before saving.' });
       return;
     }
 
@@ -1064,14 +1063,14 @@ export default function NutritionPage() {
 
   return (
     <SafePageBoundary
-      title={locale === 'en-US' ? 'Nutrition' : 'Nutrição'}
-      subtitle={locale === 'en-US' ? `Calorie and macro summary for ${selectedDate}` : `Resumo de calorias e macros para ${selectedDate}`}
-      fallbackDescription={locale === 'en-US' ? 'Nutrition loaded in safe mode because the main render failed.' : 'Nutrição abriu em modo seguro porque a renderização principal falhou.'}
+      title="Nutrition"
+      subtitle={`Calorie and macro summary for ${selectedDate}`}
+      fallbackDescription="Nutrition loaded in safe mode because the main render failed."
     >
       <AppContainer>
         <PageHeader
-          title={locale === 'en-US' ? 'Nutrition' : 'Nutrição'}
-          subtitle={locale === 'en-US' ? `Calorie and macro summary for ${selectedDate}` : `Resumo de calorias e macros para ${selectedDate}`}
+          title="Nutrition"
+          subtitle={`Calorie and macro summary for ${selectedDate}`}
         />
 
         {notice ? (
@@ -1081,13 +1080,13 @@ export default function NutritionPage() {
         ) : null}
 
         <Section
-          title={locale === 'en-US' ? 'Daily Goals' : 'Metas do dia'}
-          subtitle={locale === 'en-US' ? 'Calories and macronutrients for quick reference.' : 'Calorias e macronutrientes para consulta rápida.'}
+          title="Daily Goals"
+          subtitle="Calories and macronutrients for quick reference."
           actions={loggingStreak >= 2 ? (
             <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--warn)/0.12)] border border-[hsl(var(--warn)/0.25)] px-3 py-1">
               <span className="text-[13px]">🔥</span>
               <span className="text-[12px] font-semibold text-[hsl(var(--warn))]">
-                {locale === 'en-US' ? `${loggingStreak}-day streak` : `${loggingStreak} dias seguidos`}
+                {`${loggingStreak}-day streak`}
               </span>
             </div>
           ) : null}
@@ -1099,9 +1098,7 @@ export default function NutritionPage() {
                 <Target className={`h-4 w-4 shrink-0 ${profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={1.9} />
                 <span>
                   {profile.calories_target === 0
-                    ? locale === 'en-US'
-                      ? 'Set your daily calorie and macro targets to get started.'
-                      : 'Defina suas metas diárias de calorias e macros para começar.'
+                    ? 'Set your daily calorie and macro targets to get started.'
                     : `${profile.calories_target} kcal · ${profile.protein_target}g protein · ${profile.carbs_target}g carbs · ${profile.fat_target}g fat`}
                 </span>
               </div>
@@ -1109,7 +1106,7 @@ export default function NutritionPage() {
                 onClick={handleOpenTargetsEditor}
                 className="flex-shrink-0 text-[12px] font-semibold text-[hsl(var(--brand))] hover:underline underline-offset-2"
               >
-                {profile.calories_target === 0 ? (locale === 'en-US' ? 'Set targets →' : 'Definir metas →') : (locale === 'en-US' ? 'Edit' : 'Editar')}
+                {profile.calories_target === 0 ? 'Set targets →' : 'Edit'}
               </button>
             </div>
           )}
@@ -1120,13 +1117,11 @@ export default function NutritionPage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-                    {profile.calories_target === 0
-                      ? locale === 'en-US' ? 'Set up your nutrition targets' : 'Configure suas metas de nutrição'
-                      : locale === 'en-US' ? 'Daily Nutrition Targets' : 'Metas diárias de nutrição'}
+                    {profile.calories_target === 0 ? 'Set up your nutrition targets' : 'Daily Nutrition Targets'}
                   </p>
                   {profile.calories_target === 0 && (
                     <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
-                      {locale === 'en-US' ? 'Enter your daily goals to track progress against them.' : 'Informe suas metas diárias para acompanhar o progresso em relação a elas.'}
+                      Enter your daily goals to track progress against them.
                     </p>
                   )}
                 </div>
@@ -1134,10 +1129,10 @@ export default function NutritionPage() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { key: 'calories_target', label: locale === 'en-US' ? 'Calories' : 'Calorias', unit: 'kcal' },
-                  { key: 'protein_target',  label: locale === 'en-US' ? 'Protein' : 'Proteínas', unit: 'g' },
-                  { key: 'carbs_target',    label: locale === 'en-US' ? 'Carbs' : 'Carboidratos', unit: 'g' },
-                  { key: 'fat_target',      label: locale === 'en-US' ? 'Fat' : 'Gorduras', unit: 'g' },
+                  { key: 'calories_target', label: 'Calories', unit: 'kcal' },
+                  { key: 'protein_target',  label: 'Protein', unit: 'g' },
+                  { key: 'carbs_target',    label: 'Carbs', unit: 'g' },
+                  { key: 'fat_target',      label: 'Fat', unit: 'g' },
                 ].map(({ key, label, unit }) => (
                   <div key={key}>
                     <label className="block text-[11px] font-medium text-[hsl(var(--fg-2))] mb-1">{label} ({unit})</label>
@@ -1159,7 +1154,7 @@ export default function NutritionPage() {
                     disabled={isSavingTargets}
                     className="flex-1 h-9 rounded-[14px] border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors disabled:opacity-50"
                   >
-                    {locale === 'en-US' ? 'Cancel' : 'Cancelar'}
+                    Cancel
                   </button>
                 )}
                 <button
@@ -1167,63 +1162,59 @@ export default function NutritionPage() {
                   disabled={isSavingTargets}
                   className="flex-1 h-9 rounded-[14px] bg-[hsl(var(--brand))] text-[13px] font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
-                  {isSavingTargets ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (locale === 'en-US' ? 'Save' : 'Salvar')}
+                  {isSavingTargets ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
                 </button>
               </div>
             </div>
           )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MacroTrack
-              label={locale === 'en-US' ? 'Calories' : 'Calorias'}
+              label="Calories"
               consumed={dailyTotals.calories}
               target={profile.calories_target}
               unit="kcal"
               tone="calories"
-              locale={locale}
             />
             <MacroTrack
-              label={locale === 'en-US' ? 'Protein' : 'Proteínas'}
+              label="Protein"
               consumed={dailyTotals.protein}
               target={profile.protein_target}
               unit="g"
               tone="protein"
-              locale={locale}
             />
             <MacroTrack
-              label={locale === 'en-US' ? 'Carbohydrates' : 'Carboidratos'}
+              label="Carbohydrates"
               consumed={dailyTotals.carbs}
               target={profile.carbs_target}
               unit="g"
               tone="carbs"
-              locale={locale}
             />
             <MacroTrack
-              label={locale === 'en-US' ? 'Fats' : 'Gorduras'}
+              label="Fats"
               consumed={dailyTotals.fat}
               target={profile.fat_target}
               unit="g"
               tone="fat"
-              locale={locale}
             />
           </div>
         </Section>
 
         <Section
-          title={locale === 'en-US' ? 'Daily Log' : 'Registro do dia'}
-          subtitle={locale === 'en-US' ? 'Meals and foods logged for the selected date.' : 'Refeições e alimentos registrados na data selecionada.'}
+          title="Daily Log"
+          subtitle="Meals and foods logged for the selected date."
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <DateStepper date={selectedDate} onChange={handleDateChange} />
             <PrimaryButton onClick={() => setIsFormOpen(true)} className="gap-2 self-start sm:self-auto">
               <Plus className="h-4 w-4" />
-              Adicionar refeição
+              Add meal
             </PrimaryButton>
           </div>
 
           {isLoadingMeals ? (
             <div className="mt-6 flex items-center justify-center gap-3 rounded-lg bg-[hsl(var(--fill))] p-8 text-sm text-[hsl(var(--fg-2))]">
               <Loader2 className="h-5 w-5 animate-spin" />
-              Carregando refeições...
+              Loading meals...
             </div>
           ) : null}
 
@@ -1231,8 +1222,8 @@ export default function NutritionPage() {
             <div className="mt-6">
               <EmptyState
                 icon={UtensilsCrossed}
-                title="Nenhuma refeição registrada"
-                description="Adicione uma refeição para começar a monitorar sua nutrição."
+                title="No meals logged"
+                description="Add a meal to start tracking your nutrition."
               />
             </div>
           ) : null}
@@ -1255,19 +1246,19 @@ export default function NutritionPage() {
         </Section>
 
         <Section
-          title="Buscar alimento"
-          subtitle="Resultados instantâneos da tabela TACO. Para industrializados, busca automaticamente na FatSecret."
+          title="Search food"
+          subtitle="Instant results from the TACO database. For packaged foods, automatically searches FatSecret."
         >
           <Card className="px-5 py-5">
             <label className={FIELD_LABEL_CLASS}>
-              Buscar alimento
+              Search food
               <div className="relative mt-2">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
                 <input
                   type="text"
                   value={foodQuery}
                   onChange={(event) => setFoodQuery(event.target.value)}
-                  placeholder="Ex: frango grelhado, arroz, banana, whey..."
+                  placeholder="e.g. grilled chicken, rice, banana, whey..."
                   className={cn(INPUT_CLASS_NAME, 'pl-11')}
                 />
               </div>
@@ -1276,7 +1267,7 @@ export default function NutritionPage() {
             {isSearchingFoods ? (
               <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]">
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-                Não achei no TACO, buscando na FatSecret...
+                Not found in TACO, searching FatSecret...
               </div>
             ) : null}
 
@@ -1301,14 +1292,14 @@ export default function NutritionPage() {
 
             {!isSearchingFoods && !foodSearchError && foodQuery.trim().length >= 2 && foodResults.length === 0 ? (
               <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                Nenhum resultado. Tente um nome diferente ou mais genérico.
+                No results. Try a different or more generic name.
               </div>
             ) : null}
           </Card>
 
           {!isSearchingFoods && !foodQuery && recentFoods.length > 0 ? (
             <Card className="px-5 py-5 mt-5">
-              <p className={FIELD_LABEL_CLASS}>Alimentos recentes</p>
+              <p className={FIELD_LABEL_CLASS}>Recent foods</p>
               <div className="mt-5 space-y-3">
                 {recentFoods.map((food) => (
                   <FoodSearchResult
@@ -1341,6 +1332,88 @@ export default function NutritionPage() {
               }}
             />
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Portion size modal */}
+      <Dialog open={!!pendingFood} onOpenChange={(open) => { if (!open) setPendingFood(null); }}>
+        <DialogContent>
+          {pendingFood && (() => {
+            const amount = parseFloat(pendingFoodAmount) || 0;
+            const ratio = amount / 100;
+            const scaled = {
+              calories: Math.round((pendingFood.calories || 0) * ratio),
+              protein:  Math.round((pendingFood.protein  || 0) * ratio * 10) / 10,
+              carbs:    Math.round((pendingFood.carbs    || 0) * ratio * 10) / 10,
+              fat:      Math.round((pendingFood.fat      || 0) * ratio * 10) / 10,
+            };
+            return (
+              <>
+                <DialogPanelHeader
+                  title={pendingFood.name}
+                  description="Set the serving size to log."
+                />
+                <div className="px-6 pb-6 space-y-5">
+                  {/* Amount input */}
+                  <div>
+                    <label className={FIELD_LABEL_CLASS}>
+                      Amount (g)
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={pendingFoodAmount}
+                        onChange={(e) => setPendingFoodAmount(e.target.value)}
+                        autoFocus
+                        className={cn(INPUT_CLASS_NAME, 'mt-2')}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleConfirmPortionAndSave(); }}
+                      />
+                    </label>
+                  </div>
+
+                  {/* Scaled macros preview */}
+                  {amount > 0 && (
+                    <div className="grid grid-cols-4 gap-3 rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
+                      {[
+                        { label: 'kcal',  value: scaled.calories, tone: 'calories' },
+                        { label: 'Prot',  value: `${scaled.protein}g`, tone: 'protein' },
+                        { label: 'Carb',  value: `${scaled.carbs}g`, tone: 'carbs' },
+                        { label: 'Fat',   value: `${scaled.fat}g`, tone: 'fat' },
+                      ].map(({ label, value, tone }) => (
+                        <div key={label} className="text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <span className={cn('h-2 w-2 rounded-full', MEAL_MACRO_DOT[tone])} />
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">{label}</p>
+                          </div>
+                          <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <ActionRow>
+                    <SecondaryButton type="button" onClick={() => setPendingFood(null)}>
+                      Cancel
+                    </SecondaryButton>
+                    <PrimaryButton
+                      type="button"
+                      onClick={handleConfirmPortionAndSave}
+                      disabled={!amount || amount <= 0 || savingFoodId === pendingFood.id}
+                      className="gap-2"
+                    >
+                      {savingFoodId === pendingFood.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      Add to log
+                    </PrimaryButton>
+                  </ActionRow>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </SafePageBoundary>
