@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
+  Activity,
   ArrowRight,
   Check,
   CheckCircle,
   Layers,
+  Star,
+  Stethoscope,
   TrendingUp,
+  Users,
   X,
   Zap,
 } from 'lucide-react';
@@ -17,6 +21,8 @@ import PublicSiteShell, {
 } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
+import RegionSelector from '@/components/pricing/RegionSelector';
+import { getRegionPricing } from '@/lib/regionalPricing';
 
 /* ─────────────────────────────────────────
    ANIMATION VARIANTS
@@ -44,10 +50,44 @@ const handleSignUp = () => { window.location.href = `${ROUTES.auth}?mode=signup`
 const handleLogin  = () => { window.location.href = `${ROUTES.auth}?mode=login`; };
 const handlePlan   = (id) => {
   if (!id || id === 'free') { handleSignUp(); return; }
-  if (window.self !== window.top) { alert('O checkout só funciona no app publicado.'); return; }
+  if (window.self !== window.top) { alert('Checkout only works in the published app.'); return; }
   sessionStorage.setItem('pending_plan', id);
   window.location.href = `${ROUTES.auth}?mode=signup&next=${encodeURIComponent(ROUTES.pricing)}`;
 };
+
+/* ─────────────────────────────────────────
+   PLAN META (for full pricing section)
+───────────────────────────────────────── */
+const ATHLETE_PLAN_META = [
+  { id: 'free',                key: 'free',        icon: Activity },
+  { id: 'athlete_pro',         key: 'pro',         icon: Zap, popular: true },
+  { id: 'athlete_performance', key: 'performance', icon: Star },
+];
+
+const PROFESSIONAL_PLAN_META = [
+  { id: 'coach',        key: 'coach',        icon: Users },
+  { id: 'nutritionist', key: 'nutritionist', icon: Users },
+  { id: 'clinician',    key: 'clinician',    icon: Stethoscope },
+];
+
+function formatPlanPrice(planId, translatedPrice, pricing, locale, billing = 'monthly') {
+  if (planId === 'free') return translatedPrice;
+  const prices = billing === 'yearly' ? pricing.prices_yearly : pricing.prices;
+  const amount = prices?.[planId];
+  if (typeof amount !== 'number') return translatedPrice;
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: pricing.currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function calcYearlySavings(planId, pricing) {
+  const monthly = pricing.prices?.[planId];
+  const yearly  = pricing.prices_yearly?.[planId];
+  if (!monthly || !yearly) return null;
+  return Math.round((1 - yearly / (monthly * 12)) * 100);
+}
 
 /* ─────────────────────────────────────────
    COPY (bilingual, inline)
@@ -736,63 +776,78 @@ const FEATURE_BLOCKS = [
 /* ─────────────────────────────────────────
    PRICING CARD
 ───────────────────────────────────────── */
-function PricingCard({ data, featured, showBR }) {
-  const price = showBR ? data.priceBR : data.priceIntl;
-  const annual = showBR ? data.annualBR : data.annualIntl;
+function PricingCard({ plan, popularLabel }) {
+  const Icon = plan.icon;
+  const isFree = plan.id === 'free';
+
   return (
     <article
-      className={`relative flex h-full flex-col rounded-[28px] border px-6 py-6 ${
-        featured
-          ? 'border-[hsl(var(--tint)/0.3)] shadow-[var(--shadow-md),0_0_0_1px_hsl(var(--tint)/0.06)]'
-          : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.84)] shadow-[var(--shadow-xs)]'
+      className={`relative flex h-full flex-col rounded-[30px] border px-5 py-5 lg:px-6 lg:py-6 ${
+        plan.popular
+          ? 'border-[hsl(var(--brand)/0.32)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]'
+          : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.86)] shadow-[var(--shadow-xs)]'
       }`}
-      style={featured ? { background: 'linear-gradient(160deg, hsl(var(--card)) 0%, hsl(var(--tint)/0.04) 100%)' } : undefined}
     >
-      {featured && data.popular ? (
+      {plan.popular ? (
         <span className="atlas-public-pill absolute right-5 top-5 border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]">
-          {data.popular}
+          {popularLabel}
         </span>
       ) : null}
 
-      <p className="atlas-overline">{data.name}</p>
-
-      <div className="mt-3 flex items-end gap-1">
-        <span className="text-[2.4rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{price}</span>
-        <span className="pb-1.5 text-[13px] text-[hsl(var(--fg-2))]">{data.period}</span>
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+          <Icon className="h-5 w-5" strokeWidth={1.9} />
+        </div>
+        <div className="min-w-0 pt-1">
+          <p className="atlas-metric-label">{plan.name}</p>
+          <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+            {plan.pitch}
+          </p>
+          {plan.note ? (
+            <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{plan.note}</p>
+          ) : null}
+        </div>
       </div>
 
-      {annual ? (
-        <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
-          {annual.split('—')[0]}—
-          <span className="font-semibold text-[hsl(var(--brand))]">{annual.split('—')[1]}</span>
-        </p>
-      ) : (
-        <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">{data.annualNote}</p>
-      )}
+      <div className="mt-6">
+        <div className="flex items-end gap-1">
+          <span className="text-[2.35rem] font-semibold tracking-[-0.065em] text-[hsl(var(--fg))]">
+            {plan.price}
+          </span>
+          {!isFree ? (
+            <span className="pb-1 text-[13px] text-[hsl(var(--fg-2))]">{plan.period}</span>
+          ) : null}
+        </div>
+        {plan.savings ? (
+          <p className="mt-2 text-[12px] font-semibold text-[hsl(var(--ok))]">
+            Save {plan.savings}%
+          </p>
+        ) : plan.trial ? (
+          <p className="mt-2 text-[12px] font-semibold text-[hsl(var(--ok))]">{plan.trial}</p>
+        ) : null}
+      </div>
 
-      <div className="my-5 h-px bg-[hsl(var(--border)/0.7)]" />
-
-      <div className="flex-1 space-y-2.5">
-        {data.features?.map((f) => (
-          <div key={f} className="flex items-start gap-2 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
-            <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.1} />
-            <span>{f}</span>
+      <div className="mt-6 flex-1 space-y-2.5">
+        {plan.features?.map((feature) => (
+          <div key={feature} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.4} />
+            <span>{feature}</span>
           </div>
         ))}
-        {data.absent?.map((f) => (
-          <div key={f} className="flex items-start gap-2 text-[13px] leading-5 text-[hsl(var(--fg-3))]">
-            <X className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-40" strokeWidth={2} />
-            <span className="opacity-50">{f}</span>
+        {plan.missing?.map((feature) => (
+          <div key={feature} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-3))]">
+            <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2.1} />
+            <span className="line-through">{feature}</span>
           </div>
         ))}
       </div>
 
       <Button
-        onClick={() => handlePlan(data.id)}
-        variant={featured ? 'default' : 'outline'}
-        className="mt-6 h-11"
+        onClick={() => handlePlan(plan.id)}
+        variant={plan.popular ? 'default' : 'outline'}
+        className="mt-6 h-11 w-full"
       >
-        {data.cta}
+        {plan.cta}
       </Button>
     </article>
   );
@@ -802,10 +857,55 @@ function PricingCard({ data, featured, showBR }) {
    MAIN COMPONENT
 ───────────────────────────────────────── */
 export default function Landing() {
-  const { language } = useTranslation();
+  const { language, t, locale } = useTranslation();
   const c = COPY[language] || COPY['en-US'];
   const homeMocks = HOME_MOCK_COPY[language] || HOME_MOCK_COPY['en-US'];
   const showBR = language === 'pt-BR';
+  const isPt = locale === 'pt-BR';
+
+  const [billing, setBilling] = useState('monthly');
+  const [region, setRegion] = useState('US');
+  const pricing = getRegionPricing(region);
+
+  const athletePlans = useMemo(() => {
+    const translations = t('pricing_page.plans');
+    return ATHLETE_PLAN_META.map((meta) => {
+      const translated = translations[meta.key];
+      const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
+      return {
+        ...meta,
+        name: translated.name,
+        pitch: translated.pitch,
+        features: translated.features,
+        missing: translated.missing || [],
+        cta: translated.cta,
+        trial: billing === 'monthly' ? translated.trial : null,
+        period: billing === 'yearly' ? (isPt ? '/ano' : '/year') : translated.period,
+        savings,
+        price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
+      };
+    });
+  }, [locale, pricing, billing, isPt, t]);
+
+  const professionalPlans = useMemo(() => {
+    const translations = t('pricing_page.plans');
+    return PROFESSIONAL_PLAN_META.map((meta) => {
+      const translated = translations[meta.key];
+      const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
+      return {
+        ...meta,
+        name: translated.name,
+        pitch: translated.pitch,
+        note: translated.note,
+        features: translated.features,
+        cta: translated.cta,
+        trial: billing === 'monthly' ? translated.trial : null,
+        period: billing === 'yearly' ? (isPt ? '/ano' : '/year') : translated.period,
+        savings,
+        price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
+      };
+    });
+  }, [locale, pricing, billing, isPt, t]);
 
   return (
     <PublicSiteShell
@@ -1058,21 +1158,88 @@ export default function Landing() {
 
       {/* ══ PRICING ═══════════════════════════════ */}
       <section id="pricing" className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
-        <motion.div {...fadeIn(0)} className="mb-4 text-center">
-          <p className="atlas-overline justify-center">{c.pricing.label}</p>
-          <h2 className="atlas-display-title mt-4 text-[clamp(1.9rem,1.3rem+1.2vw,2.8rem)]">{c.pricing.h2}</h2>
-          <p className="atlas-public-copy mx-auto mt-3 max-w-md">{c.pricing.sub}</p>
+        {/* Header */}
+        <motion.div {...fadeIn(0)} className="mb-8">
+          <div className="atlas-page-header px-6 py-6 lg:px-8 lg:py-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-end">
+              <div>
+                <p className="atlas-overline">{c.pricing.label}</p>
+                <h2 className="atlas-display-title mt-4 text-[clamp(1.9rem,1.3rem+1.2vw,2.8rem)]">{c.pricing.h2}</h2>
+                <p className="atlas-public-copy mt-3 max-w-md">{c.pricing.sub}</p>
+              </div>
+
+              {/* Billing toggle + region */}
+              <div className="space-y-3">
+                <RegionSelector onRegionChange={setRegion} />
+                <div className="flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] p-1">
+                  <button
+                    type="button"
+                    onClick={() => setBilling('monthly')}
+                    className={`flex-1 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                      billing === 'monthly'
+                        ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-sm'
+                        : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
+                    }`}
+                  >
+                    {isPt ? 'Mensal' : 'Monthly'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBilling('yearly')}
+                    className={`flex-1 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                      billing === 'yearly'
+                        ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-sm'
+                        : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
+                    }`}
+                  >
+                    {isPt ? 'Anual' : 'Yearly'}
+                    {billing !== 'yearly' && (
+                      <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
+                        {isPt ? 'até 31%' : 'up to 31%'}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
+        {/* Athlete plans */}
+        <motion.div {...fadeIn(0.08)} className="atlas-public-panel mb-6 px-6 py-6 lg:px-8 lg:py-8">
+          <p className="atlas-overline mb-6">{isPt ? 'Atleta' : 'Athlete'}</p>
+          <div className="grid gap-4 lg:grid-cols-3">
+            {athletePlans.map((plan, index) => (
+              <motion.div key={plan.id} {...fadeIn(index * 0.06)}>
+                <PricingCard plan={plan} popularLabel={isPt ? 'Mais escolhido' : 'Most chosen'} />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-        {/* Cards */}
-        <motion.div {...fadeIn(0.1)} className="mx-auto grid max-w-3xl gap-5 md:grid-cols-2">
-          <PricingCard data={c.pricing.free} featured={false} showBR={showBR} />
-          <PricingCard data={c.pricing.pro}  featured={true}  showBR={showBR} />
+        {/* Professional plans */}
+        <motion.div {...fadeIn(0.12)} className="mb-6">
+          <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
+            <div className="pt-2">
+              <p className="atlas-overline">{isPt ? 'Profissional' : 'Professional'}</p>
+              <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                {isPt
+                  ? 'Planos para coaches, nutricionistas e clínicos.'
+                  : 'Plans for coaches, nutritionists, and clinicians.'}
+              </p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-3">
+              {professionalPlans.map((plan, index) => (
+                <motion.div key={plan.id} {...fadeIn(index * 0.06)}>
+                  <PricingCard plan={plan} popularLabel={isPt ? 'Mais escolhido' : 'Most chosen'} />
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </motion.div>
 
         {/* Founder box */}
-        <motion.div {...fadeIn(0.15)} className="mx-auto mt-6 max-w-3xl">
+        <motion.div {...fadeIn(0.15)}>
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-[hsl(var(--tint)/0.16)] bg-[hsl(var(--tint)/0.03)] px-6 py-5">
             <div>
               <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{c.pricing.founder.h3}</p>
