@@ -434,7 +434,6 @@ function ProgressPhotosContent() {
             New checkpoint
           </PrimaryButton>
           )}
-        }
       >
         {/* Resumo rápido */}
         <div className="grid gap-3 sm:grid-cols-2">
