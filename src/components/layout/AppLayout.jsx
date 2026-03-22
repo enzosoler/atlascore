@@ -37,6 +37,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
+import { getPrimaryScrollTop, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
 
 const ICON_MAP = {
   Home,
@@ -196,6 +197,8 @@ export default function AppLayout() {
   const currentTabRoot = resolveTabRoot(pathname, bottomPaths);
   const transitionState = getTransitionState(pathname, previousPathnameRef.current, bottomPaths);
 
+  usePrimaryRouteScrollReset(mainRef);
+
   useEffect(() => {
     previousPathnameRef.current = pathname;
   }, [pathname]);
@@ -237,7 +240,7 @@ export default function AppLayout() {
         window.innerWidth >= 1024 ||
         mobileOpenRef.current ||
         isRefreshingRef.current ||
-        window.scrollY > 0
+        getPrimaryScrollTop(el) > 0
       ) return;
 
       pullStartYRef.current = event.touches[0]?.clientY ?? 0;
@@ -250,7 +253,7 @@ export default function AppLayout() {
       const currentY = event.touches[0]?.clientY ?? 0;
       const rawDelta = currentY - pullStartYRef.current;
 
-      if (rawDelta <= 0 || window.scrollY > 0) {
+      if (rawDelta <= 0 || getPrimaryScrollTop(el) > 0) {
         pullDistanceRef.current = 0;
         setPullDistance(0);
         isPullingRef.current = false;
@@ -447,15 +450,15 @@ export default function AppLayout() {
           </button>
 
           {/* Brand — absolutely centered so side buttons don't push it */}
-          <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2.5">
+          <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2">
             <AtlasCoreLogoSVG
-              width={42}
-              height={15}
+              width={46}
+              height={16}
               color="hsl(var(--accent-primary))"
               className="shrink-0"
             />
-            <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))] sm:text-[17px]">
-              <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
+            <span className="text-[16px] font-semibold tracking-[-0.045em] text-[hsl(var(--fg))] sm:text-[18px]">
+              <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-medium text-[hsl(var(--fg)/0.82)]">.core</span>
             </span>
           </div>
 
@@ -488,9 +491,9 @@ export default function AppLayout() {
                 style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
               >
                 <div className="flex items-center gap-2">
-                  <AtlasCoreLogoSVG width={68} height={24} />
-                  <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                    <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
+                  <AtlasCoreLogoSVG width={72} height={25} />
+                  <span className="text-[17px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+                    <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-medium text-[hsl(var(--fg)/0.82)]">.core</span>
                   </span>
                 </div>
                 <button

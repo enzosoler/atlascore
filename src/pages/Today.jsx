@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Brain,
   CheckCircle2,
   Clock,
+  Cloud,
+  CloudDrizzle,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
   Dumbbell,
   Loader2,
   Scale,
   Shield,
   Sparkles,
+  SunMedium,
   UtensilsCrossed,
   CalendarCheck,
   BarChart3,
@@ -45,6 +53,128 @@ function getDateLabel(locale) {
     month: 'long',
     day: 'numeric',
   }).format(new Date());
+}
+
+function getHeroAmbientClassName(date = new Date(), weatherTone = 'default') {
+  const hour = date.getHours();
+
+  if (weatherTone === 'rain' || weatherTone === 'storm') {
+    if (hour < 18) {
+      return 'border-[hsl(var(--accent-secondary)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.18),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.12),transparent_30%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_42%,hsl(var(--fill-secondary)/0.98)_100%)]';
+    }
+
+    return 'border-[hsl(var(--accent-secondary)/0.26)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.22),transparent_22%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.1),transparent_28%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_40%,hsl(var(--fill-secondary)/0.98)_100%)]';
+  }
+
+  if (weatherTone === 'cloud' || weatherTone === 'fog' || weatherTone === 'snow') {
+    if (hour < 18) {
+      return 'border-[hsl(var(--border)/0.96)] bg-[radial-gradient(circle_at_top_right,hsl(var(--fill-secondary)/0.72),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.12),transparent_32%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_46%,hsl(var(--fill)/0.98)_100%)]';
+    }
+
+    return 'border-[hsl(var(--border)/0.96)] bg-[radial-gradient(circle_at_top_right,hsl(var(--fill-secondary)/0.82),transparent_22%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.1),transparent_28%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_42%,hsl(var(--fill-secondary)/0.98)_100%)]';
+  }
+
+  if (hour < 12) {
+    return 'border-[hsl(var(--brand)/0.22)] bg-[radial-gradient(circle_at_top_right,hsl(var(--warn)/0.14),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.18),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_48%,hsl(var(--fill)/0.98)_100%)]';
+  }
+
+  if (hour < 18) {
+    return 'border-[hsl(var(--brand)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.14),transparent_26%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.16),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_44%,hsl(var(--fill)/0.98)_100%)]';
+  }
+
+  return 'border-[hsl(var(--accent-secondary)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.2),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.14),transparent_30%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_42%,hsl(var(--fill-secondary)/0.98)_100%)]';
+}
+
+function getWeatherPresentation(code, locale) {
+  const isEnglish = locale === 'en-US';
+
+  if (code === 0) {
+    return {
+      Icon: SunMedium,
+      label: isEnglish ? 'Clear' : 'Sol',
+      tone: 'clear',
+      iconClassName: 'text-[hsl(var(--warn))]',
+    };
+  }
+
+  if (code === 1) {
+    return {
+      Icon: CloudSun,
+      label: isEnglish ? 'Mostly clear' : 'Sol entre nuvens',
+      tone: 'clear',
+      iconClassName: 'text-[hsl(var(--warn))]',
+    };
+  }
+
+  if (code === 2) {
+    return {
+      Icon: CloudSun,
+      label: isEnglish ? 'Partly cloudy' : 'Parcialmente nublado',
+      tone: 'cloud',
+      iconClassName: 'text-[hsl(var(--accent-secondary))]',
+    };
+  }
+
+  if (code === 3) {
+    return {
+      Icon: Cloud,
+      label: isEnglish ? 'Cloudy' : 'Nublado',
+      tone: 'cloud',
+      iconClassName: 'text-[hsl(var(--fg-2))]',
+    };
+  }
+
+  if (code === 45 || code === 48) {
+    return {
+      Icon: CloudFog,
+      label: isEnglish ? 'Fog' : 'Névoa',
+      tone: 'fog',
+      iconClassName: 'text-[hsl(var(--fg-2))]',
+    };
+  }
+
+  if ((code >= 51 && code <= 57) || (code >= 80 && code <= 82)) {
+    return {
+      Icon: CloudDrizzle,
+      label: isEnglish ? 'Drizzle' : 'Garoa',
+      tone: 'rain',
+      iconClassName: 'text-[hsl(var(--accent-secondary))]',
+    };
+  }
+
+  if (code >= 61 && code <= 67) {
+    return {
+      Icon: CloudRain,
+      label: isEnglish ? 'Rain' : 'Chuva',
+      tone: 'rain',
+      iconClassName: 'text-[hsl(var(--accent-secondary))]',
+    };
+  }
+
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
+    return {
+      Icon: CloudSnow,
+      label: isEnglish ? 'Snow' : 'Neve',
+      tone: 'snow',
+      iconClassName: 'text-[hsl(var(--fg))]',
+    };
+  }
+
+  if (code >= 95) {
+    return {
+      Icon: CloudLightning,
+      label: isEnglish ? 'Storm' : 'Tempestade',
+      tone: 'storm',
+      iconClassName: 'text-[hsl(var(--warn))]',
+    };
+  }
+
+  return {
+    Icon: Cloud,
+    label: isEnglish ? 'Conditions' : 'Clima',
+    tone: 'default',
+    iconClassName: 'text-[hsl(var(--fg-2))]',
+  };
 }
 
 function getNextSteps(t, locale, ROUTES, {
@@ -249,12 +379,84 @@ function TodayContent() {
   const { t, locale } = useI18n();
   const { role, loading: isRoleLoading } = useRole(user);
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [weather, setWeather] = useState(null);
   const displayName = user?.full_name || user?.email || t('today_page.fallbackName');
   const preferredName = getPreferredName(displayName) || t('today_page.fallbackName');
   const greeting = getGreeting(locale);
   const isAdmin = !isRoleLoading && role === 'admin';
+  const isEN = locale === 'en-US';
+  const weatherPresentation = weather
+    ? getWeatherPresentation(weather.weathercode, locale)
+    : null;
+  const heroGreeting = `${greeting}, ${preferredName}`;
+  const heroTagline = isEN
+    ? 'See what’s on track, what needs attention, and the next move that matters.'
+    : 'Veja o que está em dia, o que pede atenção e o próximo passo que mais importa.';
+  const heroAmbientClassName = getHeroAmbientClassName(
+    new Date(),
+    weatherPresentation?.tone || 'default'
+  );
 
   const todayStr = new Date().toISOString().split('T')[0];
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator?.geolocation) return undefined;
+
+    let isActive = true;
+    const controller = new AbortController();
+
+    const fetchWeather = async (latitude, longitude) => {
+      try {
+        const params = new URLSearchParams({
+          latitude: String(latitude),
+          longitude: String(longitude),
+          current_weather: 'true',
+        });
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const currentWeather = data?.current_weather;
+
+        if (!isActive || !currentWeather || typeof currentWeather.temperature !== 'number') {
+          return;
+        }
+
+        setWeather({
+          temperature: Math.round(currentWeather.temperature),
+          weathercode: Number.isFinite(currentWeather.weathercode)
+            ? currentWeather.weathercode
+            : null,
+        });
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          // Fail silently so the hero never blocks on weather/location.
+        }
+      }
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        void fetchWeather(position.coords.latitude, position.coords.longitude);
+      },
+      () => {
+        // If permission is denied or unavailable, keep the weather treatment hidden.
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 15 * 60 * 1000,
+      }
+    );
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, []);
 
   // ── Data queries ───────────────────────────────────────────────────────────
 
@@ -424,8 +626,6 @@ function TodayContent() {
     progressPhotosCount: recentProgressPhotos.length,
   });
 
-  const isEN = locale === 'en-US';
-
   const snapshotCards = [
     {
       to: ROUTES.nutrition,
@@ -553,17 +753,44 @@ function TodayContent() {
       </header>
 
       {/* ── Greeting card ── */}
-      <TodayCard className="relative overflow-hidden border-[hsl(var(--brand)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.14),transparent_28%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.18),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_45%,hsl(var(--fill)/0.96)_100%)] shadow-[var(--shadow-md)]">
+      <TodayCard
+        className={cn(
+          'relative overflow-hidden rounded-[26px] p-5 shadow-[var(--shadow-md)] sm:p-6',
+          heroAmbientClassName
+        )}
+      >
         <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.16)] blur-3xl" />
         <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[hsl(var(--accent-secondary)/0.16)] blur-2xl" />
 
-        <div className="relative">
-          <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
-            {greeting}, {preferredName}
-          </p>
-          <p className="mt-2 max-w-[30rem] text-[15px] leading-6 text-[hsl(var(--fg-2))]">
-            {t('today_page.tagline')}
-          </p>
+        <div className="relative flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="atlas-overline text-[hsl(var(--fg-3))]">
+              {isEN ? 'Daily brief' : 'Resumo do dia'}
+            </p>
+            <p className="mt-4 text-[clamp(1.9rem,1.55rem+1.4vw,2.45rem)] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
+              {heroGreeting}
+            </p>
+            <p className="mt-3 max-w-[32rem] text-[15px] leading-6 text-[hsl(var(--fg-2))]">
+              {heroTagline}
+            </p>
+          </div>
+
+          {weather && weatherPresentation ? (
+            <div className="mt-0.5 shrink-0 rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.54)] px-3.5 py-3 text-right shadow-[var(--shadow-xs)] backdrop-blur-[14px]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+                {isEN ? 'Weather' : 'Clima'}
+              </p>
+              <div className="mt-2 flex items-center justify-end gap-1.5">
+                <weatherPresentation.Icon className={cn('h-4 w-4 shrink-0', weatherPresentation.iconClassName)} strokeWidth={2.1} />
+                <span className="font-mono text-[22px] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
+                  {weather.temperature}°
+                </span>
+              </div>
+              <p className="mt-1 text-[12px] font-medium text-[hsl(var(--fg-2))]">
+                {weatherPresentation.label}
+              </p>
+            </div>
+          ) : null}
         </div>
       </TodayCard>
 

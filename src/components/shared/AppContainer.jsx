@@ -139,17 +139,17 @@ export function TabBar({ items, className = '' }) {
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.92)] bg-[hsl(var(--bg)/0.92)] backdrop-blur-2xl lg:hidden',
+        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.84)] bg-[hsl(var(--bg)/0.88)] shadow-[0_-10px_28px_hsl(var(--label)/0.04)] backdrop-blur-[24px] lg:hidden',
         className
       )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="mx-auto flex w-full max-w-[30rem] items-start gap-1 px-2.5 py-2.5">
+      <div className="mx-auto flex w-full max-w-[30rem] items-end gap-0.5 px-2 py-2">
         {items.map((item) => {
           const Icon = item.icon;
           const key = item.key || item.to || item.label;
           const classes = cn(
-            'flex flex-1 min-w-0 flex-col items-center gap-1 rounded-[14px] px-1.5 py-1.5 text-center text-[10px] font-semibold tracking-[-0.01em] leading-none transition-all duration-200',
+            'flex flex-1 min-w-0 flex-col items-center gap-0.5 rounded-[16px] px-1.5 py-1.5 text-center text-[10.5px] font-medium tracking-[-0.018em] leading-none transition-all duration-200',
             item.active
               ? 'text-[hsl(var(--brand))]'
               : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
@@ -159,20 +159,20 @@ export function TabBar({ items, className = '' }) {
             return (
               <Link key={key} to={item.to} onClick={item.onClick} className={classes}>
                 {Icon ? (
-                  <div className={cn(
-                    'flex h-7 w-7 items-center justify-center rounded-[10px] transition-all duration-200',
-                    item.active ? 'bg-[hsl(var(--brand)/0.14)] shadow-[0_0_0_1px_hsl(var(--brand)/0.12)]' : 'bg-transparent'
-                  )}>
-                    <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={item.active ? 2.25 : 1.95} />
+                  <div
+                    className={cn(
+                      'flex h-8 w-8 items-center justify-center rounded-[12px] transition-all duration-200',
+                      item.active
+                        ? 'bg-[hsl(var(--brand)/0.14)] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.1)]'
+                        : 'bg-transparent'
+                    )}
+                  >
+                    <Icon className="h-5 w-5 shrink-0" strokeWidth={item.active ? 2.3 : 2.05} />
                   </div>
                 ) : null}
-                <span className="max-w-[56px] truncate">{item.label}</span>
-                <span
-                  className={cn(
-                    'mt-0.5 h-1 w-1 rounded-full transition-all duration-200',
-                    item.active ? 'bg-[hsl(var(--brand))]' : 'bg-transparent'
-                  )}
-                />
+                <span className={cn('max-w-[58px] truncate', item.active ? 'font-semibold' : '')}>
+                  {item.label}
+                </span>
               </Link>
             );
           }
@@ -180,20 +180,20 @@ export function TabBar({ items, className = '' }) {
           return (
             <button key={key} type="button" onClick={item.onClick} className={classes}>
               {Icon ? (
-                <div className={cn(
-                  'flex h-7 w-7 items-center justify-center rounded-[10px] transition-all duration-200',
-                  item.active ? 'bg-[hsl(var(--brand)/0.14)] shadow-[0_0_0_1px_hsl(var(--brand)/0.12)]' : 'bg-transparent'
-                )}>
-                  <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={item.active ? 2.25 : 1.95} />
+                <div
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-[12px] transition-all duration-200',
+                    item.active
+                      ? 'bg-[hsl(var(--brand)/0.14)] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.1)]'
+                      : 'bg-transparent'
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0" strokeWidth={item.active ? 2.3 : 2.05} />
                 </div>
               ) : null}
-              <span className="max-w-[56px] truncate">{item.label}</span>
-              <span
-                className={cn(
-                  'mt-0.5 h-1 w-1 rounded-full transition-all duration-200',
-                  item.active ? 'bg-[hsl(var(--brand))]' : 'bg-transparent'
-                )}
-              />
+              <span className={cn('max-w-[58px] truncate', item.active ? 'font-semibold' : '')}>
+                {item.label}
+              </span>
             </button>
           );
         })}
