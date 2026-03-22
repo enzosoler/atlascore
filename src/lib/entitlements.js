@@ -8,69 +8,69 @@ export const FEATURE_LOCKS = {
   atlas_ai: {
     label: 'Atlas AI',
     minPlan: 'pro',
-    description: 'Insights contextuais com seus dados',
+    description: 'Contextual insights powered by your data',
   },
 
   // AI Generation
   ai_workout_generation: {
-    label: 'Geração de Treino por IA',
+    label: 'AI workout generation',
     minPlan: 'pro',
-    description: 'Crie treinos personalizados automaticamente',
+    description: 'Create personalized workouts automatically',
   },
   ai_diet_generation: {
-    label: 'Geração de Dieta por IA',
+    label: 'AI diet generation',
     minPlan: 'pro',
-    description: 'Crie planos alimentares personalizados automaticamente',
+    description: 'Create personalized diet plans automatically',
   },
 
   // Labs
   lab_exams: {
-    label: 'Exames Laboratoriais',
+    label: 'Lab exams',
     minPlan: 'pro',
-    description: 'Rastreie exames e marcadores de saúde',
+    description: 'Track labs and health markers',
   },
 
   // Progress
   progress_photos: {
-    label: 'Fotos de Progresso',
+    label: 'Progress photos',
     minPlan: 'pro',
     limits: { free: 5, pro: 'unlimited' },
-    description: 'Unlimited photos no Pro (5 no Free)',
+    description: 'Unlimited photos on Pro and above (5 on Free)',
   },
 
   // History
   history: {
-    label: 'Histórico Completo',
+    label: 'Full history',
     minPlan: 'pro',
     limits: { free: '30 days', pro: '1 year', performance: 'unlimited' },
   },
 
   // Analytics
   advanced_analytics: {
-    label: 'Analytics Avançados',
+    label: 'Advanced analytics',
     minPlan: 'pro',
   },
 
   // Exports
   standard_exports: {
-    label: 'Exportar Dados (PDF/CSV)',
+    label: 'Data export (PDF/CSV)',
     minPlan: 'pro',
   },
   premium_exports: {
-    label: 'Relatórios Premium',
+    label: 'Premium reports',
     minPlan: 'performance',
   },
 
   // Protocol tracking
   advanced_protocol_tracking: {
-    label: 'Protocolo Avançado',
+    label: 'Advanced protocol tracking',
     minPlan: 'performance',
     description: 'Half-life curves, next dose, stock alerts',
   },
 
   // Dose timeline
   dose_timeline: {
-    label: 'Timeline de Doses',
+    label: 'Dose timeline',
     minPlan: 'performance',
   },
 
@@ -81,7 +81,7 @@ export const FEATURE_LOCKS = {
     roles: ['coach'],
   },
   nutritionist_dashboard: {
-    label: 'Dashboard Nutricionista',
+    label: 'Nutritionist dashboard',
     minPlan: 'nutritionist',
     roles: ['nutritionist'],
   },
@@ -100,7 +100,7 @@ export const FEATURE_LOCKS = {
 
   // Social
   social_cards: {
-    label: 'Cards Sociais Premium',
+    label: 'Premium social cards',
     minPlan: 'pro',
   },
 
@@ -117,8 +117,8 @@ export const PLAN_LABELS = {
   pro: 'Pro',
   performance: 'Performance',
   coach: 'Coach',
-  nutritionist: 'Nutricionista',
-  clinician: 'Clínico',
+  nutritionist: 'Nutritionist',
+  clinician: 'Clinician',
   admin: 'Admin',
 };
 

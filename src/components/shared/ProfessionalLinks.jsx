@@ -66,7 +66,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
         <div className="surface border-[hsl(var(--warn)/0.4)] p-4 space-y-3">
           <div className="flex items-center gap-2">
             <UserCheck className="w-4 h-4 text-[hsl(var(--warn))]" strokeWidth={2} />
-            <p className="t-subtitle text-[hsl(var(--warn))]">Convites pendentes ({pendingLinks.length})</p>
+            <p className="t-subtitle text-[hsl(var(--warn))]">Pending invites ({pendingLinks.length})</p>
           </div>
           <div className="space-y-2">
             {pendingLinks.map(link => {
@@ -84,13 +84,13 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
                       onClick={respond(link.entity, link.id, 'accepted')}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))] border border-[hsl(var(--ok)/0.2)] text-[11px] font-semibold hover:bg-[hsl(var(--ok)/0.2)] transition-colors"
                     >
-                      <Check className="w-3 h-3" strokeWidth={2.5} /> Aceitar
+                      <Check className="w-3 h-3" strokeWidth={2.5} /> Accept
                     </button>
                     <button
                       onClick={respond(link.entity, link.id, 'rejected')}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[hsl(var(--err)/0.07)] text-[hsl(var(--err))] border border-[hsl(var(--err)/0.2)] text-[11px] font-semibold hover:bg-[hsl(var(--err)/0.15)] transition-colors"
                     >
-                      <X className="w-3 h-3" strokeWidth={2.5} /> Recusar
+                      <X className="w-3 h-3" strokeWidth={2.5} /> Decline
                     </button>
                   </div>
                 </div>
@@ -103,7 +103,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
       {/* Active professional links */}
       {showActive && activeLinks.length > 0 && (
         <div className="surface p-4 space-y-2">
-          <p className="t-label">Profissionais vinculados</p>
+          <p className="t-label">Active professionals</p>
           {activeLinks.map(link => {
             const meta = PROF_LABELS[link.kind] || { label: link.kind, badge: 'badge-neutral', icon: '👤' };
             return (
@@ -111,7 +111,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className={`badge ${meta.badge}`}>{meta.icon} {meta.label}</span>
-                    <span className="badge badge-ok text-[9px]">Ativo</span>
+                    <span className="badge badge-ok text-[9px]">Active</span>
                   </div>
                   <p className="text-[12px] text-[hsl(var(--fg-2))]">{link.from}</p>
                 </div>
@@ -119,7 +119,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
                   onClick={respond(link.entity, link.id, 'revoked')}
                   className="text-[10px] text-[hsl(var(--fg-2))/0.5] hover:text-[hsl(var(--err))] transition-colors px-2 py-1"
                 >
-                  Revogar
+                  Revoke
                 </button>
               </div>
             );

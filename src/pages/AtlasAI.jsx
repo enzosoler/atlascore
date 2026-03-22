@@ -5,7 +5,6 @@ import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import { StatusBanner } from '@/components/shared/StablePage';
 import {
   Activity,
-  ArrowUpRight,
   Brain,
   CalendarDays,
   ClipboardCheck,
@@ -37,32 +36,32 @@ const JOB_BUTTONS = [
   {
     id: 'review-week',
     icon: CalendarDays,
-    title: 'Revisar meus últimos 7 dias',
-    description: 'Treino, nutrição, peso e energia numa leitura só.',
+    title: 'Review my last 7 days',
+    description: 'Training, nutrition, weight, and energy in one reading.',
   },
   {
     id: 'weight-stuck',
     icon: Scale,
-    title: 'Por que meu peso está parado?',
-    description: 'Hipóteses + ação concreta para testar esta semana.',
+    title: 'Why is my weight stalled?',
+    description: 'Likely causes plus one concrete test for this week.',
   },
   {
     id: 'protocol-check',
     icon: ClipboardCheck,
-    title: 'Checar aderência ao protocolo',
-    description: 'Plano vs execução nas últimas 2 semanas.',
+    title: 'Check protocol adherence',
+    description: 'Plan versus execution over the last 2 weeks.',
   },
   {
     id: 'next-week-tweak',
     icon: Lightbulb,
-    title: 'Sugerir ajuste para a próxima semana',
-    description: 'Uma mudança de alto impacto com raciocínio claro.',
+    title: 'Suggest next week’s adjustment',
+    description: 'One high-impact change with clear reasoning.',
   },
   {
     id: 'nutrition-check',
     icon: Utensils,
-    title: 'Reality check de nutrição',
-    description: 'Calorias, macros e lacunas em relação à meta.',
+    title: 'Nutrition reality check',
+    description: 'Calories, macros, and the biggest gaps versus target.',
   },
 ];
 
@@ -192,20 +191,20 @@ function buildJobPrompt(jobId, profile) {
   const kcal = profile?.calories_target;
   const prot = profile?.protein_target;
   const ctx = profile
-    ? `[Perfil: objetivo=${goal || 'n/d'}${Number.isFinite(cw) ? `, peso atual=${cw}kg` : ''}${Number.isFinite(tw) ? `, meta=${tw}kg` : ''}${kcal ? `, meta kcal=${kcal}` : ''}${prot ? `, proteína-alvo=${prot}g` : ''}]\n\n`
+    ? `[Profile: goal=${goal || 'n/a'}${Number.isFinite(cw) ? `, current weight=${cw}kg` : ''}${Number.isFinite(tw) ? `, target=${tw}kg` : ''}${kcal ? `, calorie target=${kcal}` : ''}${prot ? `, protein target=${prot}g` : ''}]\n\n`
     : '';
 
   switch (jobId) {
     case 'review-week':
-      return `${ctx}Faça uma revisão completa dos meus últimos 7 dias. Avalie: (1) consistência de treino em relação ao plano, (2) aderência nutricional à meta calórica e de proteína, (3) tendência de peso vs meta, (4) sinais de energia/humor dos check-ins. Termine com o ajuste mais importante que devo fazer agora.`;
+      return `${ctx}Do a complete review of my last 7 days. Assess: (1) workout consistency versus plan, (2) nutrition adherence to calorie and protein targets, (3) weight trend versus goal, and (4) check-in signals like energy and mood. Finish with the single most important adjustment I should make now.`;
     case 'weight-stuck':
-      return `${ctx}Meu peso parece estagnado. Liste as 3 hipóteses mais prováveis considerando: déficit calórico real vs estimado, adaptação metabólica, retenção hídrica, volume/intensidade de treino. Para cada hipótese, dê uma ação concreta e mensurável para testar esta semana.`;
+      return `${ctx}My weight seems stalled. List the 3 most likely explanations considering actual versus estimated calorie deficit, metabolic adaptation, water retention, and training volume/intensity. For each explanation, give one measurable action to test this week.`;
     case 'protocol-check':
-      return `${ctx}Avalie minha aderência ao protocolo atual nas últimas 2 semanas. Analise: sessões realizadas vs planejadas, distribuição dos dias, e principais padrões de ruptura (dia da semana, período do dia). Conclua com o maior ponto de falha e como corrigi-lo.`;
+      return `${ctx}Assess my adherence to the current protocol over the last 2 weeks. Analyze completed versus planned sessions, day distribution, and the main failure patterns such as weekday or time of day. Finish with the biggest failure point and how to correct it.`;
     case 'next-week-tweak':
-      return `${ctx}Com base na minha rotina recente, sugira um único ajuste de alto impacto para a próxima semana — pode ser de treino, nutrição, sono ou recuperação. Explique o raciocínio em 3 linhas e como medir se funcionou.`;
+      return `${ctx}Based on my recent routine, suggest one high-impact adjustment for next week. It can be training, nutrition, sleep, or recovery. Explain the reasoning in 3 lines and how to measure whether it worked.`;
     case 'nutrition-check':
-      return `${ctx}Faça um reality check da minha nutrição. Analise: aderência à meta calórica, distribuição de macros vs alvo, consistência nos dias de treino vs descanso, e hidratação. Aponte o gap mais crítico e a correção mais simples.`;
+      return `${ctx}Do a reality check on my nutrition. Analyze calorie adherence, macro distribution versus target, consistency on training versus rest days, and hydration. Point out the most critical gap and the simplest correction.`;
     default:
       return `${ctx}${jobId}`;
   }
@@ -228,10 +227,10 @@ function appendMessage(list, conversationId, message) {
 function buildMacroSummary(profile) {
   const parts = [];
 
-  if (profile?.protein_target) parts.push(`${profile.protein_target} g de proteína`);
-  if (profile?.carbs_target) parts.push(`${profile.carbs_target} g de carboidratos`);
-  if (profile?.fat_target) parts.push(`${profile.fat_target} g de gordura`);
-  if (profile?.water_target) parts.push(`${profile.water_target} L de água`);
+  if (profile?.protein_target) parts.push(`${profile.protein_target} g protein`);
+  if (profile?.carbs_target) parts.push(`${profile.carbs_target} g carbs`);
+  if (profile?.fat_target) parts.push(`${profile.fat_target} g fat`);
+  if (profile?.water_target) parts.push(`${profile.water_target} L water`);
 
   return parts.join(', ');
 }
@@ -243,14 +242,14 @@ function formatWeightGap(currentWeight, targetWeight) {
   const formattedDelta = Number.isInteger(delta) ? String(delta) : delta.toFixed(1);
 
   if (targetWeight > currentWeight) {
-    return `faltam cerca de ${formattedDelta} kg para a meta de ganho`;
+    return `about ${formattedDelta} kg remain to reach the gain goal`;
   }
 
   if (targetWeight < currentWeight) {
-    return `faltam cerca de ${formattedDelta} kg para a meta de redução`;
+    return `about ${formattedDelta} kg remain to reach the fat-loss goal`;
   }
 
-  return 'você já está exatamente no peso-alvo';
+  return 'you are already exactly at the target weight';
 }
 
 function buildMockReply(user, content) {
@@ -262,7 +261,7 @@ function buildMockReply(user, content) {
   const calories = profile?.calories_target ? `${profile.calories_target} kcal` : null;
   const macros = buildMacroSummary(profile);
   const weightGap = formatWeightGap(currentWeight, targetWeight);
-  const modeLine = 'Modo local: resposta simulada sem Base44, usando apenas o perfil salvo nesta migração.';
+  const modeLine = 'Local mode: simulated response without Base44, using only the profile saved in this migration.';
 
   if (normalized.includes('ader') || normalized.includes('nutri')) {
     return [
@@ -307,7 +306,7 @@ function buildMockReply(user, content) {
         : '- With no saved goal, I would start by defining main goal, symptoms and recent routine.',
       '- The interpretation makes more sense when combined with symptoms, sleep and training load.',
       '',
-      `At this decoupled route, I am responding with local mock without accessing real exams. ${modeLine}`,
+      `At this decoupled route, I am responding with a local mock without accessing real exams. ${modeLine}`,
     ].join('\n');
   }
 
@@ -344,38 +343,38 @@ function buildMockReply(user, content) {
   }
 
   if (
-    normalized.includes('plano') ||
-    normalized.includes('execu') ||
+    normalized.includes('plan') ||
+    normalized.includes('execut') ||
     normalized.includes('compare')
   ) {
     return [
-      'Comparação local simulada entre plano e execução:',
-      '- O layout do chat já suporta esse fluxo, mas nesta etapa local ainda não tenho treino, dieta ou check-ins sincronizados automáticamente.',
+      'Local simulated plan-versus-execution comparison:',
+      '- The chat layout already supports this flow, but at this local stage I still do not have workouts, diet, or check-ins synced automatically.',
       goal
-        ? `- Enquanto isso, eu usaria o objetivo **${goal}** como régua para comparar intenção vs consistência real.`
-        : '- Sem objetivo salvo, a comparação entre plano e execução fica genérica demais.',
-      '- Maior ganho imediato costuma vir de reduzir a fricção entre o que foi planejado e o que realmente cabe na rotina.',
+        ? `- In the meantime, I would use the goal **${goal}** as the lens to compare intent versus real consistency.`
+        : '- Without a saved goal, the comparison between plan and execution becomes too generic.',
+      '- The fastest win usually comes from reducing friction between what was planned and what actually fits your routine.',
       '',
-      `Posso continuar com uma versão resumida ou com recomendações práticas. ${modeLine}`,
+      `I can continue with a shorter version or with practical recommendations. ${modeLine}`,
     ].join('\n');
   }
 
   return [
-    'Resposta local simulada do Atlas AI:',
-    `- Sua pergunta foi: **"${content}"**`,
-    goal ? `- Hoje o objetivo salvo no seu perfil é **${goal}**.` : '- Ainda não encontrei um objetivo salvo no Profile.',
+    'Local simulated Atlas AI reply:',
+    `- Your question was: **"${content}"**`,
+    goal ? `- Your saved goal today is **${goal}**.` : '- I still have not found a saved goal in Profile.',
     calories
-      ? `- Sua principal meta nutricional salva é **${calories}**${macros ? ` com ${macros}.` : '.'}`
-      : '- Se você salvar calorias e macros no Profile, o chat fica mais contextual.',
-    `- Nesta rota, o chat esta usando mock local e não consulta Base44 nem LLM real. ${modeLine}`,
+      ? `- Your main saved nutrition target is **${calories}**${macros ? ` with ${macros}.` : '.'}`
+      : '- If you save calories and macros in Profile, the chat becomes much more contextual.',
+    `- On this route, the chat is using a local mock and does not call Base44 or a live LLM. ${modeLine}`,
   ].join('\n');
 }
 
 function formatConversationTimestamp(value) {
-  if (!value) return 'Sem histórico';
+  if (!value) return 'No history';
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Sem histórico';
+  if (Number.isNaN(date.getTime())) return 'No history';
 
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
@@ -385,34 +384,34 @@ function formatConversationTimestamp(value) {
 
 function getConversationPreview(conversation) {
   const lastMessage = conversation?.messages?.[conversation.messages.length - 1];
-  if (!lastMessage?.content) return 'Sem mensagens ainda. Abra uma nova leitura contextual.';
+  if (!lastMessage?.content) return 'No messages yet. Open a new contextual conversation.';
 
   const preview = lastMessage.content.replace(/\s+/g, ' ').trim();
   return preview.length > 110 ? `${preview.slice(0, 107)}...` : preview;
 }
 
 function getMessageCountLabel(count) {
-  if (!count) return 'Sem mensagens';
-  return `${count} ${count === 1 ? 'mensagem' : 'mensagens'}`;
+  if (!count) return 'No messages';
+  return `${count} ${count === 1 ? 'message' : 'messages'}`;
 }
 
 function buildProfileContext(profile) {
   const pills = [];
 
   if (profile?.training_goal) {
-    pills.push({ label: 'Objetivo', value: profile.training_goal });
+    pills.push({ label: 'Goal', value: profile.training_goal });
   }
 
   if (profile?.calories_target) {
-    pills.push({ label: 'Calorias', value: `${profile.calories_target} kcal` });
+    pills.push({ label: 'Calories', value: `${profile.calories_target} kcal` });
   }
 
   if (profile?.current_weight) {
-    pills.push({ label: 'Peso atual', value: `${profile.current_weight} kg` });
+    pills.push({ label: 'Current weight', value: `${profile.current_weight} kg` });
   }
 
   if (profile?.target_weight) {
-    pills.push({ label: 'Meta', value: `${profile.target_weight} kg` });
+    pills.push({ label: 'Target', value: `${profile.target_weight} kg` });
   }
 
   return pills.slice(0, 4);
@@ -731,7 +730,7 @@ export default function AtlasAI() {
       const timer = window.setTimeout(() => {
         conversations.forEach(conversation => {
           if (conversation.id && conversation.id !== 'local-') {
-            saveConversationToSupabase(conversation.id, conversation.messages, conversation.metadata?.name || 'Conversa');
+            saveConversationToSupabase(conversation.id, conversation.messages, conversation.metadata?.name || 'Conversation');
           }
         });
       }, 1000);
@@ -759,16 +758,16 @@ export default function AtlasAI() {
             Atlas AI
           </p>
           <p className="text-[20px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
-            Você usou seus {FREE_PROMPT_LIMIT} prompts gratuitos
+            You used your {FREE_PROMPT_LIMIT} free prompts
           </p>
           <p className="text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-            Faça upgrade para o Plano Pro e tenha acesso ilimitado a insights contextuais com IA.
+            Upgrade to Pro for unlimited access to contextual AI insights.
           </p>
           <UpgradeGate
             feature="atlas_ai"
             plan="Pro"
-            title="Atlas AI — Plano Pro+"
-            description="Desbloqueie insights contextuais com inteligência artificial poderosa"
+            title="Atlas AI - Pro plan+"
+            description="Unlock contextual insights with powerful AI"
           />
         </div>
       </div>
@@ -842,8 +841,8 @@ export default function AtlasAI() {
 
   return (
     <div className="atlas-page-shell">
-      <div className="mx-auto max-w-[1560px] px-3 py-3 lg:px-6 lg:py-4">
-        <div className="atlas-chat-shell flex min-h-[80vh] flex-col overflow-hidden lg:h-[calc(100dvh-2rem)] lg:flex-row">
+      <div className="mx-auto max-w-[1560px] px-4 py-4 lg:px-6 lg:py-5">
+        <div className="atlas-chat-shell flex min-h-[82vh] flex-col overflow-hidden lg:h-[calc(100dvh-2rem)] lg:flex-row">
 
           {/* ── SIDEBAR ── */}
           <aside className="atlas-chat-sidebar hidden w-[300px] shrink-0 border-r border-[hsl(var(--border)/0.82)] lg:flex lg:flex-col">
@@ -870,15 +869,15 @@ export default function AtlasAI() {
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-2.5 shadow-[var(--shadow-xs)]">
-                      <p className="atlas-metric-label">Modo</p>
+                      <p className="atlas-metric-label">Mode</p>
                       <p className="mt-1.5 text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        IA local
+                        Local AI
                       </p>
                     </div>
                     <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-2.5 shadow-[var(--shadow-xs)]">
-                      <p className="atlas-metric-label">Contexto</p>
+                      <p className="atlas-metric-label">Context</p>
                       <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                        {hasProfileContext ? 'Profile connected' : 'Profile pendente'}
+                        {hasProfileContext ? 'Profile connected' : 'Profile pending'}
                       </p>
                     </div>
                   </div>
@@ -893,11 +892,11 @@ export default function AtlasAI() {
 
             <div className="flex items-center justify-between px-5 pb-3 pt-4">
               <div>
-                <p className="atlas-metric-label">Conversas</p>
+                <p className="atlas-metric-label">Conversations</p>
                 <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
                   {conversations.length
-                    ? `${conversations.length} sessões locais`
-                    : 'Nenhum histórico salvo'}
+                    ? `${conversations.length} local sessions`
+                    : 'No saved history'}
                 </p>
               </div>
             </div>
@@ -926,10 +925,10 @@ export default function AtlasAI() {
               ) : (
                 <div className="rounded-[28px] border border-dashed border-[hsl(var(--border)/0.92)] bg-[hsl(var(--card)/0.66)] px-4 py-5 text-center shadow-[var(--shadow-xs)]">
                   <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                    Sua primeira conversa aparece aqui
+                    Your first conversation will appear here
                   </p>
                   <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-                    Inicie um prompt para criar o histórico local.
+                    Start with a prompt to create local history.
                   </p>
                 </div>
               )}
@@ -939,7 +938,7 @@ export default function AtlasAI() {
           {/* ── MAIN SECTION ── */}
           <section className="flex min-h-0 flex-1 flex-col">
 
-              <div className="relative flex flex-col gap-5">
+              <div className="relative flex flex-col gap-6 px-4 py-4 lg:px-6 lg:py-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2.5">
@@ -957,10 +956,10 @@ export default function AtlasAI() {
                     </div>
 
                     <div className="mt-4">
-                      <h1 className="text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))] lg:text-[1.7rem]">
+                      <h1 className="text-[1.55rem] font-semibold tracking-[-0.055em] text-[hsl(var(--fg))] lg:text-[1.95rem]">
                         {activeConversationLabel}
                       </h1>
-                      <p className="mt-2 max-w-3xl text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+                      <p className="mt-2 max-w-3xl text-[15px] leading-7 text-[hsl(var(--fg-2))]">
                         {activeConversation
                           ? getConversationPreview(activeConversation)
                           : 'A premium assistant experience to review training, nutrition, progress and profile signals — not a generic chat.'}
@@ -972,8 +971,8 @@ export default function AtlasAI() {
                     <Button
                       onClick={newConv}
                       variant="outline"
-                      size="sm"
-                      className="rounded-full px-4"
+                      size="default"
+                      className="rounded-full px-5"
                     >
                       <Plus className="h-4 w-4" strokeWidth={2} />
                       New conversation
@@ -1061,7 +1060,7 @@ export default function AtlasAI() {
                       New conversation
                     </p>
                     <p className="mt-0.5 text-[11px] leading-5 text-[hsl(var(--fg-2))]">
-                      Novo fio contextual
+                      Start a fresh contextual thread
                     </p>
                   </div>
                 </button>
@@ -1177,10 +1176,10 @@ export default function AtlasAI() {
                               <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
                               <div>
                                 <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                                  Atlas AI estruturando a resposta
+                                  Atlas AI is preparing the reply
                                 </p>
                                 <p className="mt-1 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-                                  Lendo o profile local e montando retorno contextual.
+                                  Reading your local profile and assembling a contextual response.
                                 </p>
                               </div>
                             </div>
@@ -1248,28 +1247,28 @@ export default function AtlasAI() {
                           }
                         }}
                         rows={3}
-                        placeholder="Pergunte algo sobre seus dados, progresso ou próxima decisão..."
+                        placeholder="Ask something about your data, progress, or next decision..."
                         className="w-full resize-none bg-transparent px-1 py-1 text-[15px] leading-7 text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
                       />
 
                       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-[hsl(var(--border)/0.72)] pt-2">
                         <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[hsl(var(--fg-3))]">
                           <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-2.5 py-1 font-semibold">
-                            Enter envia
+                            Enter sends
                           </span>
                           <span className="rounded-full bg-[hsl(var(--fill)/0.82)] px-2.5 py-1 font-semibold">
-                            Shift+Enter quebra linha
+                            Shift+Enter adds a line break
                           </span>
                         </div>
 
                         <p className="text-[11px] leading-6 text-[hsl(var(--fg-2))]">
                           {!hasPaidAccess && freePromptsRemaining > 0 ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--brand-ai)/0.10)] px-2.5 py-1 font-semibold text-[hsl(var(--brand-ai))]">
-                              {freePromptsRemaining} prompt{freePromptsRemaining !== 1 ? 's' : ''} gratuito{freePromptsRemaining !== 1 ? 's' : ''} restante{freePromptsRemaining !== 1 ? 's' : ''}
+                              {freePromptsRemaining} free prompt{freePromptsRemaining !== 1 ? 's' : ''} remaining
                             </span>
                           ) : hasProfileContext
-                            ? 'Contexto do Profile ativo.'
-                            : 'Adicione metas no Profile para respostas precisas.'}
+                            ? 'Profile context is active.'
+                            : 'Add goals in Profile for sharper responses.'}
                         </p>
                       </div>
                     </div>
@@ -1285,7 +1284,7 @@ export default function AtlasAI() {
                       ) : (
                         <Send className="h-4 w-4" strokeWidth={2} />
                       )}
-                      <span className="hidden sm:inline">Enviar</span>
+                      <span className="hidden sm:inline">Send</span>
                     </Button>
                   </div>
                 </div>

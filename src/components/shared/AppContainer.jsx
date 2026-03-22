@@ -11,7 +11,7 @@ export function AppContainer({ children, className = '', maxWidth = 'max-w-5xl' 
     >
       <div
         className={cn(
-          'mx-auto flex w-full flex-col gap-6 px-4 pb-10 pt-5 sm:px-6 sm:pb-12 lg:px-8 lg:pb-16 lg:pt-10',
+          'mx-auto flex w-full flex-col gap-7 px-4 pb-12 pt-5 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:gap-9 lg:px-8 lg:pb-16 lg:pt-9',
           maxWidth,
           className
         )}
@@ -48,7 +48,7 @@ export function PageHeader({
   accentClassName = 'from-[hsl(var(--brand)/0.18)] via-[hsl(var(--brand-ai)/0.08)]',
 }) {
   return (
-    <Card className={cn('atlas-page-header relative overflow-hidden px-5 py-6 sm:px-6', className)}>
+    <Card className={cn('atlas-page-header relative overflow-hidden px-5 py-6 sm:px-6 sm:py-7 lg:px-7 lg:py-8', className)}>
       <div
         className={cn(
           'pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent',
@@ -56,11 +56,11 @@ export function PageHeader({
         )}
       />
 
-      <div className="relative space-y-6">
+      <div className="relative space-y-7">
         <div className="space-y-4">
           {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
-          <div className="space-y-3">
-            <h1 className="atlas-display-title text-[clamp(2rem,1.65rem+1vw,2.8rem)]">{title}</h1>
+          <div className="space-y-3.5">
+            <h1 className="atlas-display-title text-[clamp(2.15rem,1.9rem+1vw,3rem)]">{title}</h1>
             {subtitle ? <p className="atlas-copy max-w-3xl">{subtitle}</p> : null}
           </div>
         </div>
@@ -83,15 +83,15 @@ export function Section({
   contentClassName = '',
 }) {
   return (
-    <section className={cn('space-y-4', className)}>
+    <section className={cn('space-y-5', className)}>
       {eyebrow || title || subtitle || actions ? (
         <div
           className={cn(
-            'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
+            'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
             headerClassName
           )}
         >
-          <div className="min-w-0 max-w-3xl space-y-2">
+          <div className="min-w-0 max-w-3xl space-y-2.5">
             {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
             {title ? <h2 className="atlas-section-title text-[1.25rem]">{title}</h2> : null}
             {subtitle ? <p className="atlas-copy">{subtitle}</p> : null}
@@ -107,19 +107,19 @@ export function Section({
 
 export function StatCard({ label, value, detail, icon: Icon, className = '' }) {
   return (
-    <Card className={cn('px-4 py-4 sm:px-5', className)}>
+    <Card className={cn('px-5 py-5 sm:px-6', className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="atlas-metric-label">{label}</p>
-          <p className="mt-3 break-words text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+          <p className="mt-3 break-words text-[1.15rem] font-semibold tracking-[-0.038em] text-[hsl(var(--fg))]">
             {value}
           </p>
-          {detail ? <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p> : null}
+          {detail ? <p className="mt-2.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p> : null}
         </div>
 
         {Icon ? (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.96)_0%,hsl(var(--card))_100%)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
-            <Icon className="h-4 w-4" strokeWidth={1.9} />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.96)_0%,hsl(var(--card))_100%)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+            <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
           </div>
         ) : null}
       </div>
@@ -129,7 +129,7 @@ export function StatCard({ label, value, detail, icon: Icon, className = '' }) {
 
 export function ActionRow({ children, className = '' }) {
   return (
-    <div className={cn('flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center', className)}>
+    <div className={cn('flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 [&>*]:w-full [&>*]:justify-center sm:[&>*]:w-auto', className)}>
       {children}
     </div>
   );
@@ -139,40 +139,40 @@ export function TabBar({ items, className = '' }) {
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.92)] bg-[hsl(var(--bg)/0.92)] backdrop-blur-2xl lg:hidden',
+        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.84)] bg-[hsl(var(--bg)/0.92)] shadow-[0_-12px_34px_hsl(var(--label)/0.05)] backdrop-blur-[24px] lg:hidden',
         className
       )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="mx-auto flex w-full max-w-[30rem] items-start gap-1 px-2.5 py-2.5">
+      <div className="mx-auto flex w-full max-w-[28rem] items-stretch gap-1 px-3 py-2.5">
         {items.map((item) => {
           const Icon = item.icon;
           const key = item.key || item.to || item.label;
           const classes = cn(
-            'flex flex-1 min-w-0 flex-col items-center gap-1 rounded-[14px] px-1.5 py-1.5 text-center text-[10px] font-semibold tracking-[-0.01em] leading-none transition-all duration-200',
+            'flex min-h-[58px] flex-1 min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 text-center text-[11.5px] font-semibold tracking-[-0.014em] leading-none transition-all duration-200',
             item.active
-              ? 'text-[hsl(var(--brand))]'
-              : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
+              ? 'border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
+              : 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.86)] hover:text-[hsl(var(--fg))]'
           );
 
           if (item.to) {
             return (
               <Link key={key} to={item.to} onClick={item.onClick} className={classes}>
                 {Icon ? (
-                  <div className={cn(
-                    'flex h-7 w-7 items-center justify-center rounded-[10px] transition-all duration-200',
-                    item.active ? 'bg-[hsl(var(--brand)/0.14)] shadow-[0_0_0_1px_hsl(var(--brand)/0.12)]' : 'bg-transparent'
-                  )}>
-                    <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={item.active ? 2.25 : 1.95} />
+                  <div
+                    className={cn(
+                      'flex h-9 w-9 items-center justify-center rounded-[14px] transition-all duration-200',
+                      item.active
+                        ? 'bg-[hsl(var(--brand)/0.14)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.12)]'
+                        : 'bg-transparent'
+                    )}
+                  >
+                    <Icon className="h-[22px] w-[22px] shrink-0" strokeWidth={item.active ? 2.35 : 2.1} />
                   </div>
                 ) : null}
-                <span className="max-w-[56px] truncate">{item.label}</span>
-                <span
-                  className={cn(
-                    'mt-0.5 h-1 w-1 rounded-full transition-all duration-200',
-                    item.active ? 'bg-[hsl(var(--brand))]' : 'bg-transparent'
-                  )}
-                />
+                <span className={cn('max-w-[64px] truncate', item.active ? 'font-semibold text-[hsl(var(--fg))]' : '')}>
+                  {item.label}
+                </span>
               </Link>
             );
           }
@@ -180,20 +180,20 @@ export function TabBar({ items, className = '' }) {
           return (
             <button key={key} type="button" onClick={item.onClick} className={classes}>
               {Icon ? (
-                <div className={cn(
-                  'flex h-7 w-7 items-center justify-center rounded-[10px] transition-all duration-200',
-                  item.active ? 'bg-[hsl(var(--brand)/0.14)] shadow-[0_0_0_1px_hsl(var(--brand)/0.12)]' : 'bg-transparent'
-                )}>
-                  <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={item.active ? 2.25 : 1.95} />
+                <div
+                  className={cn(
+                    'flex h-9 w-9 items-center justify-center rounded-[14px] transition-all duration-200',
+                    item.active
+                      ? 'bg-[hsl(var(--brand)/0.14)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.12)]'
+                      : 'bg-transparent'
+                  )}
+                >
+                  <Icon className="h-[22px] w-[22px] shrink-0" strokeWidth={item.active ? 2.35 : 2.1} />
                 </div>
               ) : null}
-              <span className="max-w-[56px] truncate">{item.label}</span>
-              <span
-                className={cn(
-                  'mt-0.5 h-1 w-1 rounded-full transition-all duration-200',
-                  item.active ? 'bg-[hsl(var(--brand))]' : 'bg-transparent'
-                )}
-              />
+              <span className={cn('max-w-[64px] truncate', item.active ? 'font-semibold text-[hsl(var(--fg))]' : '')}>
+                {item.label}
+              </span>
             </button>
           );
         })}

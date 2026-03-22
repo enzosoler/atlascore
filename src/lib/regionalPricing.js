@@ -1,11 +1,11 @@
 /**
- * Regional Pricing — preços por região/moeda
- * BR (BRL) e US (USD) primeiro
+ * Regional Pricing — prices by region/currency
+ * BR (BRL) and US (USD) first
  */
 
 export const REGIONAL_PRICING = {
   'BR': {
-    region: 'Brasil',
+    region: 'Brazil',
     currency: 'BRL',
     symbol: 'R$',
     stripe_prices: {
@@ -85,9 +85,9 @@ export const REGIONAL_PRICING = {
 };
 
 /**
- * Detecta região via IP (ipapi.co).
- * Resultado é cached na sessionStorage por tab — não persiste entre sessões
- * e não pode ser manipulado por localStorage.
+ * Detect region via IP (ipapi.co).
+ * Result is cached in sessionStorage per tab, does not persist across sessions,
+ * and cannot be manipulated via localStorage.
  *
  * Returns: 'BR' | 'US'
  */
@@ -119,7 +119,7 @@ export function setRegionPricing(region) {
   }
 }
 
-// Alias para compatibilidade
+// Alias for compatibility
 export function setRegionPreference(region) {
   return setRegionPricing(region);
 }

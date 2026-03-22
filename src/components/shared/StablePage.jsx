@@ -120,7 +120,7 @@ export function PageShell({
 export function SectionCard({ title, subtitle, actions, children, className = '' }) {
   return (
     <Section title={title} subtitle={subtitle} actions={actions}>
-      <Card className={cn('relative overflow-hidden px-5 py-5 sm:px-6 sm:py-6', className)}>
+      <Card className={cn('relative overflow-hidden px-5 py-5 sm:px-6 sm:py-6 lg:px-7', className)}>
         {children}
       </Card>
     </Section>
@@ -256,7 +256,7 @@ export function FilterChip({ active = false, children, className = '', ...props 
       type="button"
       {...props}
       className={cn(
-        'atlas-button h-9 rounded-full px-4 text-[12px] shadow-none',
+        'atlas-button h-10 rounded-full px-4 text-[12px] shadow-none',
         active
           ? 'atlas-button-primary'
           : 'atlas-button-secondary bg-[hsl(var(--card)/0.88)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.94)] hover:text-[hsl(var(--fg))]',

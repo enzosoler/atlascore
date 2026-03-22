@@ -65,7 +65,7 @@ const MOCK_MEASUREMENTS = [
     thighs: 59.3,
     hips: 97.4,
     neck: 39.5,
-    notes: 'Retorno apos deload.',
+    notes: 'Back after a deload.',
   },
   {
     id: 'measurement-2',
@@ -91,7 +91,7 @@ const MOCK_MEASUREMENTS = [
     thighs: 58.8,
     hips: 96.5,
     neck: 39.3,
-    notes: 'Sono melhor e cintura baixando.',
+    notes: 'Sleep improved and waist is trending down.',
   },
   {
     id: 'measurement-4',
@@ -117,20 +117,20 @@ const MOCK_MEASUREMENTS = [
     thighs: 58.4,
     hips: 95.8,
     neck: 39.1,
-    notes: 'Check-in mais seco, sem queda de performance.',
+    notes: 'Leaner check-in with no drop in performance.',
   },
 ];
 
 const METRIC_OPTIONS = [
   {
     key: 'weight',
-    label: 'Peso',
+    label: 'Weight',
     unit: 'kg',
     digits: 1,
     color: '#0f766e',
     tint: 'rgba(15, 118, 110, 0.10)',
     border: 'rgba(15, 118, 110, 0.24)',
-    description: 'Leitura base de massa total para acompanhar o corpo sem ruído.',
+    description: 'Core body-mass read for tracking overall change without noise.',
   },
   {
     key: 'body_fat',
@@ -140,67 +140,67 @@ const METRIC_OPTIONS = [
     color: '#2563eb',
     tint: 'rgba(37, 99, 235, 0.10)',
     border: 'rgba(37, 99, 235, 0.22)',
-    description: 'Composição corporal em um recorte limpo do período.',
+    description: 'Body-composition read presented with a clean period view.',
   },
   {
     key: 'waist',
-    label: 'Cintura',
+    label: 'Waist',
     unit: 'cm',
     digits: 1,
     color: '#0891b2',
     tint: 'rgba(8, 145, 178, 0.10)',
     border: 'rgba(8, 145, 178, 0.22)',
-    description: 'Uma das referências mais úteis para ver mudança corporal real.',
+    description: 'One of the clearest references for real body change.',
   },
   {
     key: 'chest',
-    label: 'Peito',
+    label: 'Chest',
     unit: 'cm',
     digits: 1,
     color: '#1d4ed8',
     tint: 'rgba(29, 78, 216, 0.10)',
     border: 'rgba(29, 78, 216, 0.22)',
-    description: 'Volume superior do tronco dentro do histórico de checkpoints.',
+    description: 'Upper-torso size tracked cleanly across checkpoints.',
   },
   {
     key: 'arms',
-    label: 'Braco',
+    label: 'Arm',
     unit: 'cm',
     digits: 1,
     color: '#0ea5e9',
     tint: 'rgba(14, 165, 233, 0.10)',
     border: 'rgba(14, 165, 233, 0.22)',
-    description: 'Leitura dedicada para acompanhar braço sem se perder em outros dados.',
+    description: 'Dedicated arm read without getting lost in the rest of the data.',
   },
   {
     key: 'thighs',
-    label: 'Coxa',
+    label: 'Thigh',
     unit: 'cm',
     digits: 1,
     color: '#047857',
     tint: 'rgba(4, 120, 87, 0.10)',
     border: 'rgba(4, 120, 87, 0.22)',
-    description: 'Dimensão inferior com curva própria para observar densidade corporal.',
+    description: 'Lower-body dimension with its own curve for spotting real density changes.',
   },
   {
     key: 'hips',
-    label: 'Quadril',
+    label: 'Hips',
     unit: 'cm',
     digits: 1,
     color: '#a16207',
     tint: 'rgba(161, 98, 7, 0.10)',
     border: 'rgba(161, 98, 7, 0.22)',
-    description: 'Contexto de proporção e distribuição medido checkpoint a checkpoint.',
+    description: 'Helpful context for proportion and distribution from checkpoint to checkpoint.',
   },
   {
     key: 'neck',
-    label: 'Pescoco',
+    label: 'Neck',
     unit: 'cm',
     digits: 1,
     color: '#475569',
     tint: 'rgba(71, 85, 105, 0.10)',
     border: 'rgba(71, 85, 105, 0.22)',
-    description: 'Métrica complementar para um retrato corporal mais completo.',
+    description: 'Complementary metric for a more complete body picture.',
   },
 ];
 
@@ -217,7 +217,7 @@ function formatMeasurementDate(date, options) {
   if (!date) return '--';
 
   return new Date(`${date}T12:00:00`).toLocaleDateString(
-    'pt-BR',
+    'en-US',
     options || {
       day: '2-digit',
       month: '2-digit',
@@ -254,9 +254,9 @@ function getDeltaIcon(delta) {
 }
 
 function getDeltaLabel(delta, metric) {
-  if (delta === null || delta === undefined) return 'Sem base anterior';
-  if (Math.abs(delta) < 0.05) return 'Sem mudanca relevante';
-  return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} vs anterior`.trim();
+  if (delta === null || delta === undefined) return 'No prior baseline';
+  if (Math.abs(delta) < 0.05) return 'No meaningful change';
+  return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} vs previous`.trim();
 }
 
 function getMeasurementFormState(measurement) {
@@ -355,8 +355,8 @@ function MetricSelectorCard({ metric, snapshot, isActive, onClick }) {
           </p>
           <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
             {snapshot?.entries?.length
-              ? `${snapshot.entries.length} checkpoints com essa métrica`
-              : 'Sem dados suficientes'}
+              ? `${snapshot.entries.length} checkpoints with this metric`
+              : 'Not enough data yet'}
           </p>
         </div>
 
@@ -437,7 +437,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
 
   const keyDeltas = [
     {
-      label: 'Peso',
+      label: 'Weight',
       delta: previousMeasurement ? measurement.weight - previousMeasurement.weight : null,
       metric: METRIC_LOOKUP.weight,
     },
@@ -447,7 +447,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
       metric: METRIC_LOOKUP.body_fat,
     },
     {
-      label: 'Cintura',
+      label: 'Waist',
       delta: previousMeasurement ? measurement.waist - previousMeasurement.waist : null,
       metric: METRIC_LOOKUP.waist,
     },
@@ -461,10 +461,10 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-              Checkpoint corporal
+              Body checkpoint
             </span>
             <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-              {previousMeasurement ? `${daysSincePrevious} dias apos o anterior` : 'Primeiro registro'}
+              {previousMeasurement ? `${daysSincePrevious} days after the previous one` : 'First entry'}
             </span>
           </div>
 
@@ -477,25 +477,25 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               })}
             </h3>
             <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              Peso {toDisplayNumber(measurement.weight)} kg · BF {toDisplayNumber(measurement.body_fat)}%
+              Weight {toDisplayNumber(measurement.weight)} kg · BF {toDisplayNumber(measurement.body_fat)}%
               {' · '}
-              Cintura {toDisplayNumber(measurement.waist)} cm
+              Waist {toDisplayNumber(measurement.waist)} cm
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <HistoryMetricChip label="Peito" value={measurement.chest} unit="cm" />
-            <HistoryMetricChip label="Braço" value={measurement.arms} unit="cm" />
-            <HistoryMetricChip label="Coxa" value={measurement.thighs} unit="cm" />
-            <HistoryMetricChip label="Quadril" value={measurement.hips} unit="cm" />
-            <HistoryMetricChip label="Pescoço" value={measurement.neck} unit="cm" />
-            <HistoryMetricChip label="Campos" value={countFilledMetrics(measurement)} unit="dados" />
+            <HistoryMetricChip label="Chest" value={measurement.chest} unit="cm" />
+            <HistoryMetricChip label="Arm" value={measurement.arms} unit="cm" />
+            <HistoryMetricChip label="Thigh" value={measurement.thighs} unit="cm" />
+            <HistoryMetricChip label="Hips" value={measurement.hips} unit="cm" />
+            <HistoryMetricChip label="Neck" value={measurement.neck} unit="cm" />
+            <HistoryMetricChip label="Fields" value={countFilledMetrics(measurement)} unit="entries" />
           </div>
 
           {measurement.notes ? (
             <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                Contexto da coleta
+                Capture context
               </p>
               <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">{measurement.notes}</p>
             </div>
@@ -503,7 +503,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
         </div>
 
         <aside className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.55)] px-5 py-5 shadow-[var(--shadow-xs)]">
-          <p className="atlas-overline">Resumo</p>
+          <p className="atlas-overline">Summary</p>
           <p className="mt-3 text-[2rem] font-semibold tracking-[-0.065em] text-[hsl(var(--fg))]">
             {toDisplayNumber(measurement.weight)}
             <span className="ml-1 text-[13px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
@@ -511,7 +511,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
             </span>
           </p>
           <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-            {countFilledMetrics(measurement)} campos preenchidos neste checkpoint.
+            {countFilledMetrics(measurement)} fields filled in this checkpoint.
           </p>
 
           <div className="mt-5 space-y-2.5">
@@ -527,7 +527,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               className="atlas-button atlas-button-secondary h-10 flex-1 xl:w-full"
             >
               <Pencil className="h-4 w-4" strokeWidth={1.9} />
-              Editar
+              Edit
             </button>
             <button
               type="button"
@@ -535,7 +535,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)] xl:w-full"
             >
               <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-              Excluir
+              Delete
             </button>
           </div>
         </aside>
@@ -603,10 +603,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           <div className="max-w-2xl">
             <p className="atlas-overline">Checkpoint</p>
             <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              Registre todas as medidas do mesmo momento.
+              Capture every measurement from the same moment.
             </p>
             <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              Isso preserva comparabilidade e deixa a leitura de tendência muito mais limpa no histórico.
+              That keeps the data comparable and makes trend reading much cleaner over time.
             </p>
           </div>
 
@@ -617,16 +617,16 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 
         <div className="mt-5 grid gap-4">
           <MeasurementField
-            label="Data da coleta"
+            label="Capture date"
             type="date"
             value={form.date}
             onChange={(event) => updateField('date', event.target.value)}
           />
 
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
-            <p className="atlas-metric-label">Guia rapido</p>
+            <p className="atlas-metric-label">Quick guide</p>
             <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              Use peso, body fat e cintura como nucleo da leitura. As circunferências entram como camadas de refinamento do mesmo checkpoint.
+              Use weight, body fat, and waist as the core read. Circumferences add refinement to the same checkpoint.
             </p>
           </div>
         </div>
@@ -636,7 +636,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
         <p className="atlas-overline">Core metrics</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <MeasurementField
-            label="Peso"
+            label="Weight"
             unit="kg"
             type="number"
             step="0.1"
@@ -646,7 +646,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('weight', event.target.value)}
           />
           <MeasurementField
-            label="Gordura corporal"
+            label="Body fat"
             unit="%"
             type="number"
             step="0.1"
@@ -656,7 +656,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('body_fat', event.target.value)}
           />
           <MeasurementField
-            label="Cintura"
+            label="Waist"
             unit="cm"
             type="number"
             step="0.1"
@@ -669,10 +669,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
       </div>
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <p className="atlas-overline">Circunferências</p>
+        <p className="atlas-overline">Circumferences</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <MeasurementField
-            label="Peito"
+            label="Chest"
             unit="cm"
             type="number"
             step="0.1"
@@ -682,7 +682,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('chest', event.target.value)}
           />
           <MeasurementField
-            label="Braço"
+            label="Arm"
             unit="cm"
             type="number"
             step="0.1"
@@ -692,7 +692,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('arms', event.target.value)}
           />
           <MeasurementField
-            label="Coxa"
+            label="Thigh"
             unit="cm"
             type="number"
             step="0.1"
@@ -702,7 +702,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('thighs', event.target.value)}
           />
           <MeasurementField
-            label="Quadril"
+            label="Hips"
             unit="cm"
             type="number"
             step="0.1"
@@ -712,7 +712,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             onChange={(event) => updateField('hips', event.target.value)}
           />
           <MeasurementField
-            label="Pescoço"
+            label="Neck"
             unit="cm"
             type="number"
             step="0.1"
@@ -726,11 +726,11 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <label className={FIELD_LABEL_CLASS}>
-          Observações de contexto
+          Context notes
           <textarea
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="Ex: cintura em queda, pump mantido, sono melhor ou qualquer detalhe que ajude a ler o checkpoint depois."
+            placeholder="e.g. waist trending down, pump maintained, sleep improved, or any detail that will help you read this checkpoint later."
             className={cn(TEXTAREA_CLASS_NAME, 'mt-2')}
           />
         </label>
@@ -738,10 +738,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 
       <div className="flex flex-col-reverse gap-3 border-t border-[hsl(var(--border)/0.85)] pt-6 sm:flex-row sm:justify-end">
         <SecondaryButton type="button" onClick={onCancel}>
-          Cancelar
+          Cancel
         </SecondaryButton>
         <PrimaryButton type="submit">
-          {measurement ? 'Salvar checkpoint' : 'Registrar checkpoint'}
+          {measurement ? 'Save checkpoint' : 'Log checkpoint'}
         </PrimaryButton>
       </div>
     </form>
@@ -751,10 +751,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
 export default function Measurements() {
   return (
     <SafePageBoundary
-      title="Medidas"
-      subtitle="Tracking corporal com checkpoint unificado, leitura de tendência clara e histórico proprio."
+      title="Measurements"
+      subtitle="Body tracking with unified checkpoints, clear trend reading, and a dedicated history."
       maxWidth="max-w-6xl"
-      fallbackDescription="A rota de Measurements continua acessivel mesmo se a interface principal falhar."
+      fallbackDescription="The Measurements route stays available even if the main interface fails."
     >
       <MeasurementsContent />
     </SafePageBoundary>
@@ -847,7 +847,7 @@ function MeasurementsContent() {
   };
 
   const handleDelete = (measurement) => {
-    const confirmed = window.confirm(`Excluir as medidas de ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}?`);
+    const confirmed = window.confirm(`Delete the measurements from ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}?`);
 
     if (!confirmed) return;
 
@@ -862,7 +862,7 @@ function MeasurementsContent() {
     if (!payload.date || payload.weight <= 0) {
       setNotice({
         tone: 'warning',
-        message: 'Informe ao menos data e peso para salvar o checkpoint.',
+        message: 'Enter at least a date and weight before saving the checkpoint.',
       });
       return;
     }
@@ -891,20 +891,20 @@ function MeasurementsContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Medidas"
-        title="Medidas com calma, hierarquia e leitura real."
-        subtitle="Um espaço dedicado para checkpoints corporais: peso, composição e circunferências em uma leitura premium, limpa e ritmada."
+        eyebrow="Measurements"
+        title="Body measurements with calm hierarchy and real readability."
+        subtitle="A dedicated space for body checkpoints: weight, composition, and circumferences in a premium, clean view."
         accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"
         actions={
           <ActionRow>
             <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
               <Plus className="h-4 w-4" strokeWidth={1.9} />
-              Registrar medidas
+              Log measurements
             </PrimaryButton>
 
             {latestMeasurement ? (
               <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
-                Ultimo checkpoint em{' '}
+                Latest checkpoint on{' '}
                 <span className="text-[hsl(var(--fg))]">
                   {formatMeasurementDate(latestMeasurement.date, {
                     day: '2-digit',
@@ -918,30 +918,30 @@ function MeasurementsContent() {
       >
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <HeroStat
-            label="Peso atual"
+            label="Current weight"
             value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.weight)} kg` : '--'}
             detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight)}
             icon={Scale}
             metric={METRIC_LOOKUP.weight}
           />
           <HeroStat
-            label="Gordura corporal"
+            label="Body fat"
             value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.body_fat)} %` : '--'}
             detail={getDeltaLabel(metricSnapshots.body_fat?.delta, METRIC_LOOKUP.body_fat)}
             icon={Activity}
             metric={METRIC_LOOKUP.body_fat}
           />
           <HeroStat
-            label="Cintura"
+            label="Waist"
             value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.waist)} cm` : '--'}
             detail={getDeltaLabel(metricSnapshots.waist?.delta, METRIC_LOOKUP.waist)}
             icon={Ruler}
             metric={METRIC_LOOKUP.waist}
           />
           <HeroStat
-            label="Cadencia"
-            value={averageCadenceDays ? `${averageCadenceDays} dias` : '--'}
-            detail={`${sortedMeasurements.length || 0} checkpoints no histórico.`}
+            label="Cadence"
+            value={averageCadenceDays ? `${averageCadenceDays} days` : '--'}
+            detail={`${sortedMeasurements.length || 0} checkpoints in history.`}
             icon={CalendarClock}
             metric={METRIC_LOOKUP.chest}
           />
@@ -949,14 +949,14 @@ function MeasurementsContent() {
       </PageHeader>
 
         <StatusBanner tone="neutral">
-          Checkpoints, gráfico e histórico desta rota seguem organizados como uma leitura corporal única, sem depender de outros módulos.
+          Checkpoints, charting, and history on this route stay organized as one unified body read, without depending on other modules.
         </StatusBanner>
 
         {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
         <Section
-          title="Último checkpoint"
-          subtitle="Resumo imediato do registro mais recente, antes de abrir a tendência ou o histórico."
+          title="Latest checkpoint"
+          subtitle="Immediate summary of the most recent entry before opening trends or history."
         >
           <Card className="px-5 py-5">
             {latestMeasurement ? (
@@ -972,7 +972,7 @@ function MeasurementsContent() {
                       })}
                     </p>
                     <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      Resumo imediato do checkpoint mais recente, sem ruído de outros módulos.
+                      Immediate summary of the most recent checkpoint, without noise from other modules.
                     </p>
                   </div>
 
@@ -982,28 +982,28 @@ function MeasurementsContent() {
                 </div>
 
                 <div className="mt-5 space-y-3">
-                  <SnapshotRow label="Peso" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
-                  <SnapshotRow label="Gordura corporal" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
-                  <SnapshotRow label="Cintura" value={toDisplayNumber(latestMeasurement.waist)} unit="cm" />
-                  <SnapshotRow label="Peito" value={toDisplayNumber(latestMeasurement.chest)} unit="cm" />
-                  <SnapshotRow label="Braço" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
-                  <SnapshotRow label="Coxa" value={toDisplayNumber(latestMeasurement.thighs)} unit="cm" />
+                  <SnapshotRow label="Weight" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
+                  <SnapshotRow label="Body fat" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
+                  <SnapshotRow label="Waist" value={toDisplayNumber(latestMeasurement.waist)} unit="cm" />
+                  <SnapshotRow label="Chest" value={toDisplayNumber(latestMeasurement.chest)} unit="cm" />
+                  <SnapshotRow label="Arm" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
+                  <SnapshotRow label="Thigh" value={toDisplayNumber(latestMeasurement.thighs)} unit="cm" />
                 </div>
 
                 <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
-                  <p className="atlas-metric-label">Contexto</p>
+                  <p className="atlas-metric-label">Context</p>
                   <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-                    {latestMeasurement.notes || 'Sem observações adicionais neste checkpoint.'}
+                    {latestMeasurement.notes || 'No additional notes for this checkpoint.'}
                   </p>
                 </div>
               </>
             ) : (
               <EmptyState
-                title="Nenhum registro ainda"
-                description="Registre o primeiro checkpoint para ativar a leitura mais recente."
+                title="No entries yet"
+                description="Log your first checkpoint to unlock the latest-summary view."
                 action={
                   <PrimaryButton type="button" onClick={handleCreate}>
-                    Registrar medidas
+                    Log measurements
                   </PrimaryButton>
                 }
               />
@@ -1012,8 +1012,8 @@ function MeasurementsContent() {
         </Section>
 
         <SectionCard
-          title="Tendência"
-          subtitle="Selecione a métrica principal e leia a curva com contexto suficiente para tomar decisão sem excesso visual."
+          title="Trend"
+          subtitle="Select the primary metric and read the curve with enough context to make decisions without visual overload."
         >
           {sortedMeasurements.length ? (
             <div className="grid gap-6">
@@ -1062,14 +1062,14 @@ function MeasurementsContent() {
 
                       <div className="grid gap-3 sm:grid-cols-3">
                         <TrendPill
-                          label="Atual"
+                          label="Current"
                           value={formatMetricValue(selectedSnapshot.value, selectedMetric)}
                         />
                         <TrendPill
-                          label="Desde o inicio"
+                          label="Since start"
                           value={
                             selectedSnapshot.rangeDelta === null
-                              ? 'Sem base'
+                              ? 'No baseline'
                               : `${selectedSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(
                                   selectedSnapshot.rangeDelta,
                                   selectedMetric.digits
@@ -1077,8 +1077,8 @@ function MeasurementsContent() {
                           }
                         />
                         <TrendPill
-                          label="Registros"
-                          value={`${selectedSnapshot.entries.length} pontos`}
+                          label="Entries"
+                          value={`${selectedSnapshot.entries.length} points`}
                         />
                       </div>
                     </div>
@@ -1165,25 +1165,25 @@ function MeasurementsContent() {
                   <div className="mt-4 space-y-4">
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Janela analisada
+                        Analyzed window
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {captureSpanDays} dias entre o primeiro e o ultimo checkpoint.
+                        {captureSpanDays} days between the first and latest checkpoint.
                       </p>
                     </div>
 
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Cobertura do ultimo registro
+                        Latest checkpoint coverage
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {latestMeasurement ? countFilledMetrics(latestMeasurement) : 0} campos preenchidos no checkpoint mais recente.
+                        {latestMeasurement ? countFilledMetrics(latestMeasurement) : 0} fields filled in the latest checkpoint.
                       </p>
                     </div>
 
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Base inicial
+                        Starting point
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
                         {firstMeasurement
@@ -1198,10 +1198,10 @@ function MeasurementsContent() {
 
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Ultimo contexto registrado
+                        Latest saved context
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {latestMeasurement?.notes || 'Sem observações no checkpoint mais recente.'}
+                        {latestMeasurement?.notes || 'No notes on the latest checkpoint.'}
                       </p>
                     </div>
                   </div>
@@ -1210,23 +1210,23 @@ function MeasurementsContent() {
             </div>
           ) : (
             <EmptyState
-              title="Sem medidas para mostrar"
-              description="Registre a primeira entrada para ativar o gráfico, a leitura de tendência e o resumo lateral."
+              title="No measurements to show"
+              description="Log the first entry to activate the chart, trend read, and side summary."
             />
           )}
         </SectionCard>
 
         <SectionCard
           title="Checkpoint history"
-          subtitle="Entradas organizadas como checkpoints corporais completos, com contexto e variação contra o registro anterior."
+          subtitle="Entries organized as full body checkpoints, with context and change versus the previous record."
         >
           {!measurementHistory.length ? (
             <EmptyState
-              title="Nenhum registro de medidas"
-              description="Abra o modal desta página para criar o primeiro checkpoint corporal."
+              title="No measurement entries yet"
+              description="Open this page's modal to create the first body checkpoint."
               action={
                 <PrimaryButton type="button" onClick={handleCreate}>
-                  Registrar medidas
+                  Log measurements
                 </PrimaryButton>
               }
             />
@@ -1254,9 +1254,9 @@ function MeasurementsContent() {
         >
           <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
             <DialogPanelHeader
-              eyebrow="Checkpoint de medidas"
-              title={editingMeasurement ? 'Editar checkpoint corporal' : 'Registrar checkpoint corporal'}
-              description="Este modal mantém a lógica atual da página, mas organiza a entrada com mais clareza para peso, composição e circunferências."
+              eyebrow="Measurement checkpoint"
+              title={editingMeasurement ? 'Edit body checkpoint' : 'Log body checkpoint'}
+              description="This modal keeps the page logic intact while organizing inputs more clearly for weight, composition, and circumferences."
               accentClassName="from-[rgba(14,165,233,0.12)]"
             />
 

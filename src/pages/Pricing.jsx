@@ -21,7 +21,6 @@ import { useI18n } from '@/lib/i18nContext';
 import { base44 } from '@/api/base44Client';
 import RegionSelector from '@/components/pricing/RegionSelector';
 import PublicSiteShell, {
-  PublicLanguageSwitcher,
   PublicSectionHeader,
 } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
@@ -182,57 +181,31 @@ export default function Pricing() {
   const { t, locale } = useI18n();
 
   const pricing = getRegionPricing(region);
-  const isPt = locale === 'pt-BR';
 
   const ui = useMemo(
-    () => (
-      isPt
-        ? {
-            login: 'Entrar',
-            signup: 'Criar conta',
-            compareTitle: 'Planos desenhados para o mesmo produto premium',
-            compareCopy:
-              'Comece grátis, evolua para IA, contexto e acompanhamento profissional quando fizer sentido.',
-            trustA: '7 dias grátis',
-            trustB: 'Troque de plano a qualquer momento',
-            trustC: 'Stripe com checkout seguro',
-            popular: 'Mais escolhido',
-            current: 'Plano atual',
-            freeCurrent: 'Plano Free',
-            freeSignup: 'Criar conta grátis',
-            billingMonthly: 'Mensal',
-            billingYearly: 'Anual',
-            savePrefix: 'Economize ',
-            athleteLabel: t('pricing_page.athlete'),
-            professionalLabel: t('pricing_page.professional'),
-            footerTitle: 'Tudo no mesmo sistema visual',
-            footerCopy:
-              'Nada de pricing separado do produto. Os mesmos princípios de clareza, calma e confiança seguem daqui para o app.',
-          }
-        : {
-            login: 'Login',
-            signup: 'Create account',
-            compareTitle: 'Plans designed for the same premium product',
-            compareCopy:
-              'Start free, then expand into AI, context and professional collaboration when you need it.',
-            trustA: '7-day free trial',
-            trustB: 'Change plans anytime',
-            trustC: 'Secure Stripe checkout',
-            popular: 'Most chosen',
-            current: 'Current plan',
-            freeCurrent: 'Free plan',
-            freeSignup: 'Create free account',
-            billingMonthly: 'Monthly',
-            billingYearly: 'Yearly',
-            savePrefix: 'Save ',
-            athleteLabel: t('pricing_page.athlete'),
-            professionalLabel: t('pricing_page.professional'),
-            footerTitle: 'One visual system from first click to daily use',
-            footerCopy:
-              'Pricing should feel like part of atlas.core itself, not a detached marketing layer.',
-          }
-    ),
-    [isPt, t]
+    () => ({
+      login: 'Login',
+      signup: 'Create account',
+      compareTitle: 'Plans designed for the same premium product',
+      compareCopy:
+        'Start free, then expand into AI, context and professional collaboration when you need it.',
+      trustA: '7-day free trial',
+      trustB: 'Change plans anytime',
+      trustC: 'Secure Stripe checkout',
+      popular: 'Most chosen',
+      current: 'Current plan',
+      freeCurrent: 'Free plan',
+      freeSignup: 'Create free account',
+      billingMonthly: 'Monthly',
+      billingYearly: 'Yearly',
+      savePrefix: 'Save ',
+      athleteLabel: t('pricing_page.athlete'),
+      professionalLabel: t('pricing_page.professional'),
+      footerTitle: 'One visual system from first click to daily use',
+      footerCopy:
+        'Pricing should feel like part of atlas.core itself, not a detached marketing layer.',
+    }),
+    [t]
   );
 
   const currentPlanId = (() => {
@@ -264,14 +237,12 @@ export default function Pricing() {
         missing: translated.missing || [],
         cta: translated.cta,
         trial: billing === 'monthly' ? translated.trial : null,
-        period: billing === 'yearly'
-          ? (isPt ? '/ano' : '/year')
-          : translated.period,
+        period: billing === 'yearly' ? '/year' : translated.period,
         savings,
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, isPt, t]);
+  }, [locale, pricing, billing, t]);
 
   const professionalPlans = useMemo(() => {
     const translations = t('pricing_page.plans');
@@ -286,14 +257,12 @@ export default function Pricing() {
         features: translated.features,
         cta: translated.cta,
         trial: billing === 'monthly' ? translated.trial : null,
-        period: billing === 'yearly'
-          ? (isPt ? '/ano' : '/year')
-          : translated.period,
+        period: billing === 'yearly' ? '/year' : translated.period,
         savings,
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, isPt, t]);
+  }, [locale, pricing, billing, t]);
 
   const handleSubscribe = async (planId) => {
     if (planId === 'free') {
@@ -322,10 +291,10 @@ export default function Pricing() {
       if (res.data?.url) {
         window.location.href = res.data.url;
       } else {
-        toast.error(res.data?.error || (isPt ? 'Erro ao iniciar checkout. Tente novamente.' : 'Error starting checkout. Please try again.'));
+        toast.error(res.data?.error || 'Error starting checkout. Please try again.');
       }
     } catch (error) {
-      toast.error(isPt ? 'Não foi possível conectar ao servidor de pagamentos.' : 'Could not connect to payment server.');
+      toast.error('Could not connect to the payment server.');
       console.error('Checkout error:', error);
     } finally {
       setLoading(null);
@@ -348,7 +317,6 @@ export default function Pricing() {
       ]}
       actions={(
         <>
-          <PublicLanguageSwitcher />
           {isAuthenticated ? (
             <Button asChild variant="ghost" className="hidden sm:inline-flex">
               <Link to={ROUTES.today}>{t('pricing_page.backToApp')}</Link>
@@ -427,7 +395,7 @@ export default function Pricing() {
                   {ui.billingYearly}
                   {billing !== 'yearly' && (
                     <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
-                      {isPt ? 'até 31%' : 'up to 31%'}
+                      up to 31%
                     </span>
                   )}
                 </button>
@@ -447,7 +415,7 @@ export default function Pricing() {
       <section id="plans" className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
           <PublicSectionHeader
-            eyebrow={isPt ? 'Atleta' : 'Athlete'}
+            eyebrow="Athlete"
             title={ui.athleteLabel}
             description={t('pricing_page.subtitle')}
             className="mb-10"
@@ -486,7 +454,7 @@ export default function Pricing() {
       <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
         <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-10">
           <PublicSectionHeader
-            eyebrow={isPt ? 'Profissional' : 'Professional'}
+            eyebrow="Professional"
             title={ui.professionalLabel}
             description={t('pricing_page.professionalDesc')}
           />

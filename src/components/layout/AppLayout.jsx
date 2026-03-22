@@ -37,6 +37,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
+import { getPrimaryScrollTop, resetPrimaryScroll, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
 
 const ICON_MAP = {
   Home,
@@ -155,6 +156,23 @@ function getMobileNavItemClass(active, destructive = false) {
   );
 }
 
+function BrandLockup({ logoWidth, logoHeight, textClassName = '', className = '' }) {
+  return (
+    <div className={cn('flex items-center gap-2.5', className)}>
+      <AtlasCoreLogoSVG
+        width={logoWidth}
+        height={logoHeight}
+        color="hsl(var(--accent-primary))"
+        className="shrink-0"
+      />
+      <span className={cn('text-[17px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]', textClassName)}>
+        <span className="text-[hsl(var(--accent-primary))]">atlas</span>
+        <span className="font-medium text-[hsl(var(--fg)/0.84)]">.core</span>
+      </span>
+    </div>
+  );
+}
+
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -195,6 +213,8 @@ export default function AppLayout() {
   );
   const currentTabRoot = resolveTabRoot(pathname, bottomPaths);
   const transitionState = getTransitionState(pathname, previousPathnameRef.current, bottomPaths);
+
+  usePrimaryRouteScrollReset(mainRef);
 
   useEffect(() => {
     previousPathnameRef.current = pathname;
@@ -237,7 +257,7 @@ export default function AppLayout() {
         window.innerWidth >= 1024 ||
         mobileOpenRef.current ||
         isRefreshingRef.current ||
-        window.scrollY > 0
+        getPrimaryScrollTop(el) > 0
       ) return;
 
       pullStartYRef.current = event.touches[0]?.clientY ?? 0;
@@ -250,7 +270,7 @@ export default function AppLayout() {
       const currentY = event.touches[0]?.clientY ?? 0;
       const rawDelta = currentY - pullStartYRef.current;
 
-      if (rawDelta <= 0 || window.scrollY > 0) {
+      if (rawDelta <= 0 || getPrimaryScrollTop(el) > 0) {
         pullDistanceRef.current = 0;
         setPullDistance(0);
         isPullingRef.current = false;
@@ -315,9 +335,12 @@ export default function AppLayout() {
     event.preventDefault();
 
     const target = getBottomTabTarget(path);
-    if (target !== pathname) {
-      navigate(target);
+    if (target === pathname) {
+      resetPrimaryScroll(mainRef.current);
+      return;
     }
+
+    navigate(target);
   };
 
   return (
@@ -332,16 +355,15 @@ export default function AppLayout() {
         {/* Logo */}
         <div
           className={cn(
-            'flex h-16 shrink-0 items-center border-b border-[hsl(var(--border)/0.72)] px-5',
+            'flex h-[4.5rem] shrink-0 items-center border-b border-[hsl(var(--border)/0.72)] px-5',
             collapsed ? 'justify-center px-0' : 'gap-3'
           )}
         >
-          <AtlasCoreLogoSVG width={72} height={25} className="shrink-0" />
-          {!collapsed ? (
-            <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
-            </span>
-          ) : null}
+          {collapsed ? (
+            <AtlasCoreLogoSVG width={34} height={34} className="shrink-0" color="hsl(var(--accent-primary))" />
+          ) : (
+            <BrandLockup logoWidth={82} logoHeight={28} textClassName="text-[18px]" />
+          )}
         </div>
 
         {/* Nav links */}
@@ -390,7 +412,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(isActive(ROUTES.settings), collapsed)}
             >
               <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>Configurações</span> : null}
+              {!collapsed ? <span>Settings</span> : null}
             </Link>
             <ThemeToggleButton
               compact={collapsed}
@@ -401,7 +423,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(false, collapsed, true)}
             >
               <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>Sair</span> : null}
+              {!collapsed ? <span>Sign out</span> : null}
             </button>
             <button
               onClick={() => setCollapsed((value) => !value)}
@@ -414,7 +436,7 @@ export default function AppLayout() {
                 )}
                 strokeWidth={1.95}
               />
-              {!collapsed ? <span>Recolher</span> : null}
+              {!collapsed ? <span>Collapse</span> : null}
             </button>
           </div>
         </div>
@@ -427,11 +449,11 @@ export default function AppLayout() {
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         {/* relative so the brand can be absolutely centered regardless of side-button widths */}
-        <div className="relative flex h-14 items-center justify-between px-4">
+        <div className="relative flex h-[3.75rem] items-center justify-between px-4 sm:px-5">
           <button
             onClick={() => setMobileOpen((value) => !value)}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
-            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+            className="flex h-10 w-10 items-center justify-center rounded-[18px] text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -447,16 +469,14 @@ export default function AppLayout() {
           </button>
 
           {/* Brand — absolutely centered so side buttons don't push it */}
-          <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center gap-2.5">
-            <AtlasCoreLogoSVG
-              width={42}
-              height={15}
-              color="hsl(var(--accent-primary))"
-              className="shrink-0"
-            />
-            <span className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))] sm:text-[17px]">
-              <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
-            </span>
+          <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center">
+            <div className="flex items-center rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.84)] px-3.5 py-1.5 shadow-[var(--shadow-xs)] backdrop-blur-[18px]">
+              <BrandLockup
+                logoWidth={58}
+                logoHeight={19}
+                textClassName="text-[17px] sm:text-[18px]"
+              />
+            </div>
           </div>
 
           <ThemeToggleButton compact />
@@ -485,17 +505,12 @@ export default function AppLayout() {
               className="glass fixed bottom-0 left-0 top-0 z-[70] flex w-[18rem] flex-col border-r border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.88)] lg:hidden"
             >
               <div className="flex shrink-0 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4"
-                style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
+                style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.75rem + env(safe-area-inset-top, 0px))' }}
               >
-                <div className="flex items-center gap-2">
-                  <AtlasCoreLogoSVG width={68} height={24} />
-                  <span className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                    <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
-                  </span>
-                </div>
+                <BrandLockup logoWidth={78} logoHeight={27} />
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
+                  className="flex h-10 w-10 items-center justify-center rounded-[18px] text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
                 >
                   <X className="h-4 w-4" strokeWidth={2} />
                 </button>
@@ -540,11 +555,11 @@ export default function AppLayout() {
                 </div>
                 <Link to={ROUTES.settings} className={getMobileNavItemClass(isActive(ROUTES.settings))}>
                   <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>Configurações</span>
+                  <span>Settings</span>
                 </Link>
                 <button onClick={() => logout()} className={getMobileNavItemClass(false, true)}>
                   <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>Sair</span>
+                  <span>Sign out</span>
                 </button>
               </div>
             </motion.div>
@@ -573,16 +588,16 @@ export default function AppLayout() {
           'flex-1 min-h-screen overflow-x-clip transition-all duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'lg:pt-0',
-          'pb-[calc(90px+env(safe-area-inset-bottom))] lg:pb-0'
+          'pb-[calc(94px+env(safe-area-inset-bottom))] lg:pb-0'
         )}
-        style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))' }}
+        style={{ paddingTop: 'calc(3.75rem + env(safe-area-inset-top, 0px))' }}
       >
         <TrialBanner />
 
         {/* ── Pull-to-refresh indicator ── */}
         <motion.div
           className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2 lg:hidden"
-          style={{ top: 'calc(56px + env(safe-area-inset-top) + 8px)' }}
+          style={{ top: 'calc(60px + env(safe-area-inset-top) + 10px)' }}
           animate={{
             y: isRefreshing || pullDistance > 0 ? 0 : -56,
             opacity: isRefreshing || pullDistance > 0 ? 1 : 0,

@@ -453,7 +453,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
           ) : null}
         </div>
 
-        <aside className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.55)] px-5 py-5 shadow-[var(--shadow-xs)]">
+        <aside className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.55)] px-5 py-5 shadow-[var(--shadow-xs)]">
           <p className="atlas-overline">Summary</p>
           <p className="mt-3 text-[2rem] font-semibold tracking-[-0.065em] text-[hsl(var(--fg))]">
             {toDisplayNumber(measurement.weight)}
@@ -548,8 +548,8 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
-      <div className="rounded-[28px] border border-[hsl(var(--border)/0.85)] bg-[linear-gradient(180deg,rgba(14,165,233,0.08),hsl(var(--card)/0.88))] px-5 py-5">
+    <form onSubmit={handleSubmit} className="space-y-5 px-6 py-6 lg:px-7 lg:py-7">
+      <div className="rounded-[24px] border border-[hsl(var(--border)/0.85)] bg-[linear-gradient(180deg,rgba(14,165,233,0.08),hsl(var(--card)/0.88))] px-5 py-5">
         <div className="flex flex-col gap-4">
           <div className="max-w-2xl">
             <p className="atlas-overline">Checkpoint</p>
@@ -1055,7 +1055,7 @@ function MeasurementsContent({ embedded = false }) {
         >
           {sortedMeasurements.length ? (
             <div className="grid gap-6">
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {METRIC_OPTIONS.map((metric) => (
                     <MetricSelectorCard
@@ -1198,7 +1198,7 @@ function MeasurementsContent({ embedded = false }) {
               <aside className="space-y-4">
                 <MeasurementInsights measurements={sortedMeasurements} latest={latestMeasurement} />
 
-                <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.56)] px-5 py-5 shadow-[var(--shadow-xs)]">
+                <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.56)] px-5 py-5 shadow-[var(--shadow-xs)]">
                   <p className="atlas-overline">Coverage</p>
                   <div className="mt-4 space-y-4">
                     <div>
@@ -1312,5 +1312,5 @@ function MeasurementsContent({ embedded = false }) {
     </>
   );
 
-  return embedded ? <div className="space-y-6">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>;
+  return embedded ? <div className="space-y-7">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>;
 }

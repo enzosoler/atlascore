@@ -32,8 +32,8 @@ function serializeCsvDataRows(workouts, meals) {
   meals.forEach((meal) => {
     rows.push([
       meal.date || '',
-      'Refeição',
-      meal.description || 'Refeição',
+      'Meal',
+      meal.description || 'Meal',
       `${meal.total_calories || 0} cal`,
     ]);
   });
@@ -42,9 +42,9 @@ function serializeCsvDataRows(workouts, meals) {
   workouts.forEach((workout) => {
     rows.push([
       workout.date || '',
-      'Treino',
-      workout.status || workout.name || 'Treino',
-      workout.exercises?.length ? `${workout.exercises.length} exercícios` : 'N/A',
+      'Workout',
+      workout.status || workout.name || 'Workout',
+      workout.exercises?.length ? `${workout.exercises.length} exercises` : 'N/A',
     ]);
   });
 
@@ -54,10 +54,10 @@ function serializeCsvDataRows(workouts, meals) {
 export default function Export() {
   return (
     <SafePageBoundary
-      title="Exportar"
-      subtitle="Modo seguro da página de exportação."
+      title="Export"
+      subtitle="Safe mode for the export page."
       maxWidth="max-w-4xl"
-      fallbackDescription="Export page loaded. O conteudo principal falhou, mas a rota continua acessivel."
+      fallbackDescription="The export page loaded. The main content failed, but the route is still accessible."
     >
       <ExportContent />
     </SafePageBoundary>
@@ -121,7 +121,7 @@ function ExportContent() {
       period: { startDate, endDate },
       warnings,
       user: {
-        name: user?.full_name || 'Atleta',
+        name: user?.full_name || 'Athlete',
         email: user?.email || '',
       },
       meals: meals.filter((item) => isWithinRange(item?.date, startDate, endDate)),
@@ -138,7 +138,7 @@ function ExportContent() {
 
   const exportJson = async () => {
     if (invalidRange) {
-      setNotice('Ajuste o período antes de exportar.');
+      setNotice('Adjust the date range before exporting.');
       return;
     }
 
@@ -152,12 +152,12 @@ function ExportContent() {
       );
       setNotice(
         payload.warnings.length > 0
-          ? `Exportação JSON concluida com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
-          : 'Exportação JSON concluida.'
+          ? `JSON export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
+          : 'JSON export finished.'
       );
     } catch (error) {
       console.error(error);
-      setNotice('Não foi possivel gerar o arquivo JSON.');
+      setNotice('Could not generate the JSON file.');
     } finally {
       setBusy(false);
     }
@@ -165,7 +165,7 @@ function ExportContent() {
 
   const exportCsv = async () => {
     if (invalidRange) {
-      setNotice('Ajuste o período antes de exportar.');
+      setNotice('Adjust the date range before exporting.');
       return;
     }
 
@@ -176,12 +176,12 @@ function ExportContent() {
       downloadFile(`${fileBase}.csv`, csvData, 'text/csv;charset=utf-8');
       setNotice(
         payload.warnings.length > 0
-          ? `CSV exportado com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
-          : 'CSV exportado com sucesso.'
+          ? `CSV export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
+          : 'CSV export finished.'
       );
     } catch (error) {
       console.error(error);
-      setNotice('Não foi possivel gerar o CSV.');
+      setNotice('Could not generate the CSV file.');
     } finally {
       setBusy(false);
     }
@@ -189,7 +189,7 @@ function ExportContent() {
 
   const exportPdf = async () => {
     if (invalidRange) {
-      setNotice('Ajuste o período antes de exportar.');
+      setNotice('Adjust the date range before exporting.');
       return;
     }
 
@@ -207,16 +207,16 @@ function ExportContent() {
       // Header
       doc.setFontSize(20);
       doc.setFont(undefined, 'bold');
-      doc.text('Atlas Core — Relatório de Dados', margin, yPosition);
+      doc.text('Atlas Core - Data Report', margin, yPosition);
       yPosition += 8;
 
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
-      doc.text(`Atleta: ${payload.user.name}`, margin, yPosition);
+      doc.text(`Athlete: ${payload.user.name}`, margin, yPosition);
       yPosition += 5;
-      doc.text(`Período: ${payload.period.startDate} a ${payload.period.endDate}`, margin, yPosition);
+      doc.text(`Period: ${payload.period.startDate} to ${payload.period.endDate}`, margin, yPosition);
       yPosition += 5;
-      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, margin, yPosition);
+      doc.text(`Generated on: ${new Date().toLocaleDateString('en-US')}`, margin, yPosition);
       yPosition += sectionGap;
 
       const addSection = (title, items) => {
@@ -233,7 +233,7 @@ function ExportContent() {
         if (items.length === 0) {
           doc.setFontSize(9);
           doc.setFont(undefined, 'italic');
-          doc.text('Sem registros neste período', margin, yPosition);
+          doc.text('No records in this period', margin, yPosition);
           yPosition += 5;
         } else {
           doc.setFontSize(9);
@@ -250,41 +250,41 @@ function ExportContent() {
         yPosition += sectionGap;
       };
 
-      // Treinos section
+      // Workouts section
       const workoutItems = payload.workouts.map(
-        (w) => `${w.date} — ${w.status || w.name || 'Treino'} (${w.exercises?.length || 0} exercícios)`
+        (w) => `${w.date} - ${w.status || w.name || 'Workout'} (${w.exercises?.length || 0} exercises)`
       );
-      addSection('Treinos', workoutItems);
+      addSection('Workouts', workoutItems);
 
-      // Refeições/Nutrição section
+      // Meals/Nutrition section
       const mealItems = payload.meals.map(
-        (m) => `${m.date} — ${m.description || 'Refeição'} (${m.total_calories || 0} cal, ${m.total_protein || 0}g proteína)`
+        (m) => `${m.date} - ${m.description || 'Meal'} (${m.total_calories || 0} cal, ${m.total_protein || 0}g protein)`
       );
-      addSection('Refeições e Nutrição', mealItems);
+      addSection('Meals and Nutrition', mealItems);
 
-      // Medições section
+      // Measurements section
       const measurementItems = payload.measurements.map(
-        (m) => `${m.date} — Peso: ${m.weight || 'N/A'} kg`
+        (m) => `${m.date} - Weight: ${m.weight || 'N/A'} kg`
       );
-      addSection('Medições', measurementItems);
+      addSection('Measurements', measurementItems);
 
-      // Protocolos section
+      // Protocols section
       const protocolItems = payload.protocols.map(
-        (p) => `${p.start_date || p.created_date?.slice(0, 10) || '?'} — ${p.name} (${p.status || 'ativo'})`
+        (p) => `${p.start_date || p.created_date?.slice(0, 10) || '?'} - ${p.name} (${p.status || 'active'})`
       );
-      addSection('Protocolos', protocolItems);
+      addSection('Protocols', protocolItems);
 
-      // Exames Laboratoriais section
+      // Lab exams section
       const examItems = payload.labExams.map(
-        (e) => `${e.exam_date} — ${e.exam_type || 'Exame'}`
+        (e) => `${e.exam_date} - ${e.exam_type || 'Exam'}`
       );
-      addSection('Exames Laboratoriais', examItems);
+      addSection('Lab Exams', examItems);
 
       // Footer
       doc.setFontSize(8);
       doc.setFont(undefined, 'italic');
       doc.text(
-        `Documento gerado por Atlas Core em ${new Date().toLocaleString('pt-BR')}`,
+        `Document generated by Atlas Core on ${new Date().toLocaleString('en-US')}`,
         margin,
         pageHeight - 8
       );
@@ -292,12 +292,12 @@ function ExportContent() {
       doc.save(`${fileBase}.pdf`);
       setNotice(
         payload.warnings.length > 0
-          ? `PDF exportado com dados parciais. Falharam: ${payload.warnings.join(', ')}.`
-          : 'PDF exportado com sucesso.'
+          ? `PDF export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
+          : 'PDF export finished.'
       );
     } catch (error) {
       console.error(error);
-      setNotice('Não foi possivel gerar o PDF.');
+      setNotice('Could not generate the PDF file.');
     } finally {
       setBusy(false);
     }
@@ -305,31 +305,31 @@ function ExportContent() {
 
   return (
     <PageShell
-      title="Exportar"
-      subtitle="Exporte seus dados em JSON, CSV ou PDF formatado com resumo completo."
+      title="Export"
+      subtitle="Export your data as JSON, CSV, or a formatted PDF report."
       maxWidth="max-w-4xl"
     >
       {notice ? <StatusBanner>{notice}</StatusBanner> : null}
 
       {busy ? (
         <LoadingState
-          title="Página de exportação carregada"
-          description="Estamos gerando o arquivo em modo seguro para evitar falhas silenciosas."
+          title="Export page loaded"
+          description="We are generating the file in safe mode to avoid silent failures."
         />
       ) : null}
 
       {invalidRange ? (
         <ErrorState
-          title="Período inválido"
-          description="A data inicial precisa ser menor ou igual a data final para a exportação continuar."
+          title="Invalid date range"
+          description="The start date must be earlier than or equal to the end date."
         />
       ) : null}
 
-      <SectionCard title="Período de exportação" subtitle="Escolha o intervalo que você quer baixar.">
+      <SectionCard title="Export range" subtitle="Choose the period you want to download.">
         <div className="grid gap-3 md:grid-cols-2">
           <label className="atlas-field px-4 py-3 text-sm text-[hsl(var(--fg-2))]">
             <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Data inicial
+              Start date
             </span>
             <input
               type="date"
@@ -340,7 +340,7 @@ function ExportContent() {
           </label>
           <label className="atlas-field px-4 py-3 text-sm text-[hsl(var(--fg-2))]">
             <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Data final
+              End date
             </span>
             <input
               type="date"
@@ -352,7 +352,7 @@ function ExportContent() {
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <SecondaryButton type="button" onClick={() => setStartDate(endDate)}>
-            Mesmo dia
+            Same day
           </SecondaryButton>
           <SecondaryButton
             type="button"
@@ -362,7 +362,7 @@ function ExportContent() {
               setStartDate(date.toISOString().split('T')[0]);
             }}
           >
-            Ultimos 7 dias
+            Last 7 days
           </SecondaryButton>
           <SecondaryButton
             type="button"
@@ -372,13 +372,13 @@ function ExportContent() {
               setStartDate(date.toISOString().split('T')[0]);
             }}
           >
-            Ultimos 30 dias
+            Last 30 days
           </SecondaryButton>
         </div>
       </SectionCard>
 
       <UpgradeGate feature="standard_exports" plan="Pro">
-        <SectionCard title="Downloads" subtitle="Arquivos simples, diretos e confiáveis.">
+        <SectionCard title="Downloads" subtitle="Simple, dependable files ready to use.">
           <div className="grid gap-3 md:grid-cols-3">
             <button
               type="button"
@@ -389,9 +389,9 @@ function ExportContent() {
               <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
                 <FileJson className="h-5 w-5" strokeWidth={2} />
               </div>
-              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Exportar JSON completo</p>
+              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Export full JSON</p>
               <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                Baixa todas as entidades principais filtradas pelo período escolhido.
+                Download all primary entities filtered by the selected range.
               </p>
             </button>
 
@@ -404,9 +404,9 @@ function ExportContent() {
               <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
                 <FileSpreadsheet className="h-5 w-5" strokeWidth={2} />
               </div>
-              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Exportar CSV</p>
+              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Export CSV</p>
               <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                Planilha com registros de treinos e refeições no período.
+                Spreadsheet with workout and meal records for the selected range.
               </p>
             </button>
 
@@ -419,9 +419,9 @@ function ExportContent() {
               <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
                 <FileText className="h-5 w-5" strokeWidth={2} />
               </div>
-              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Exportar PDF</p>
+              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Export PDF</p>
               <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                Relatório formatado com resumo de treinos, nutrição, medições e protocolos.
+                Formatted report with workouts, nutrition, measurements, and protocols.
               </p>
             </button>
           </div>
@@ -430,24 +430,24 @@ function ExportContent() {
             <PrimaryButton type="button" disabled={busy || invalidRange} onClick={exportJson}>
               <span className="inline-flex items-center gap-2">
                 <Download className="h-4 w-4" strokeWidth={2} />
-                {busy ? 'Gerando arquivo...' : 'Exportar agora'}
+                {busy ? 'Generating file...' : 'Export now'}
               </span>
             </PrimaryButton>
           </div>
         </SectionCard>
       </UpgradeGate>
 
-      <SectionCard title="O que entra no arquivo" subtitle="Escopo da exportação reconstruída.">
+      <SectionCard title="What goes into the file" subtitle="Scope of the rebuilt export flow.">
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] p-4 text-sm text-[hsl(var(--fg-2))]">
             <Calendar className="mb-3 h-5 w-5 text-[hsl(var(--brand))]" strokeWidth={2} />
-            Refeições, check-ins, treinos e medições dentro do período selecionado.
+            Meals, check-ins, workouts, and measurements inside the selected period.
           </div>
           <div className="rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] p-4 text-sm text-[hsl(var(--fg-2))]">
-            Protocolos, exames laboratoriais e fotos de progresso também entram.
+            Protocols, lab exams, and progress photos are included too.
           </div>
           <div className="rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] p-4 text-sm text-[hsl(var(--fg-2))]">
-            O arquivo inclui nome, email e o período usado na geração.
+            The file includes name, email, and the date range used for generation.
           </div>
         </div>
       </SectionCard>

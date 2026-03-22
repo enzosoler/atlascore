@@ -26,7 +26,7 @@ import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
-import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
+import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import {
   getActiveWorkoutPlans,
@@ -726,7 +726,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
           ? 'Manage your active plan, launch focused sessions, and keep recent training history easy to scan.'
           : 'Gerencie o plano ativo, inicie sessões focadas e acompanhe o histórico recente com leitura rápida.'}
         actions={(
-          <div className="flex flex-wrap gap-2">
+          <ActionRow>
             {can('ai_workout_generation') ? (
               <SecondaryButton className="gap-2" onClick={() => setShowAIGen(true)}>
                 <Sparkles className="h-4 w-4" />
@@ -741,7 +741,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
               <Zap className="h-4 w-4" />
               {isEnglish ? 'Free Workout' : 'Treino livre'}
             </SecondaryButton>
-          </div>
+          </ActionRow>
         )}
       >
         <div className="grid gap-3 sm:grid-cols-3">
@@ -758,7 +758,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
           </Card>
           <Card className="px-4 py-4">
             <p className="atlas-overline">{isEnglish ? 'Recent sessions' : 'Sessões recentes'}</p>
-            <p className="mt-3 font-mono text-[24px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">
+            <p className="mt-3 text-[24px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
               {recentSessions.length}
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
@@ -767,7 +767,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
           </Card>
           <Card className="px-4 py-4">
             <p className="atlas-overline">{isEnglish ? 'Personal records' : 'Records'}</p>
-            <p className="mt-3 font-mono text-[24px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">
+            <p className="mt-3 text-[24px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
               {Object.keys(personalRecords || {}).length}
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
@@ -777,7 +777,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
         </div>
       </PageHeader>
 
-      <div className="space-y-8 pb-10">
+      <div className="space-y-7 pb-12">
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-6 h-6 text-[hsl(var(--brand))] animate-spin" />
@@ -812,12 +812,13 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
                     )}
                   </div>
                 </div>
-                <button
+                <SecondaryButton
+                  type="button"
                   onClick={() => setShowCreatePlan(true)}
-                  className="flex-shrink-0 rounded-[10px] px-2 py-1 text-xs text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg-2))]"
+                  className="shrink-0"
                 >
                   {isEnglish ? 'Replace' : 'Substituir'}
-                </button>
+                </SecondaryButton>
               </div>
             </Card>
 
@@ -890,12 +891,14 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
             <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">{isEnglish ? 'Atlas AI' : 'Atlas IA'}</p>
             <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">{isEnglish ? 'Generate AI Workout Plan' : 'Gerar Plano de Treino com IA'}</h2>
             <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">{isEnglish ? 'Atlas AI will create a personalized training plan based on your profile. Your current active plan will be replaced.' : 'O Atlas IA criará um plano de treino personalizado baseado no seu perfil. O plano ativo atual será substituído.'}</p>
-            <div className="mt-5 flex gap-3">
-              <button onClick={() => setShowAIGen(false)} className="flex-1 rounded-[12px] border border-[hsl(var(--border))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors">{isEnglish ? 'Cancel' : 'Cancelar'}</button>
-              <button onClick={generateAIPlan} disabled={aiGenerating} className="flex flex-1 items-center justify-center gap-2 rounded-[12px] bg-[hsl(var(--brand))] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-colors disabled:opacity-60">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <SecondaryButton type="button" onClick={() => setShowAIGen(false)} className="flex-1">
+                {isEnglish ? 'Cancel' : 'Cancelar'}
+              </SecondaryButton>
+              <PrimaryButton type="button" onClick={generateAIPlan} disabled={aiGenerating} className="flex-1 gap-2">
                 {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {aiGenerating ? (isEnglish ? 'Generating...' : 'Gerando...') : (isEnglish ? 'Generate' : 'Gerar')}
-              </button>
+              </PrimaryButton>
             </div>
           </div>
         </div>

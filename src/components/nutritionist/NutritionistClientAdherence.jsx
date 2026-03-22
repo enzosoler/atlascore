@@ -40,40 +40,40 @@ export default function NutritionistClientAdherence({ clientEmail, days = 7 }) {
     <div className="space-y-4">
       <div>
         <p className="t-subtitle flex items-center gap-2 mb-3">
-          <UtensilsCrossed className="w-4 h-4" /> Aderência Nutricional
+          <UtensilsCrossed className="w-4 h-4" /> Nutrition adherence
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AdherenceComparison
-          label={`Calorias (${days}d)`}
+          label={`Calories (${days}d)`}
           actual={Math.round(actualCals / avgDays)}
           prescribed={prescribedCals}
-          unit="kcal/dia"
+          unit="kcal/day"
         />
         <AdherenceComparison
-          label={`Proteína (${days}d)`}
+          label={`Protein (${days}d)`}
           actual={Math.round(actualProt / avgDays)}
           prescribed={prescribedProt}
-          unit="g/dia"
+          unit="g/day"
         />
         <AdherenceComparison
-          label={`Carboidratos (${days}d)`}
+          label={`Carbs (${days}d)`}
           actual={Math.round(actualCarbs / avgDays)}
           prescribed={prescribedCarbs}
-          unit="g/dia"
+          unit="g/day"
         />
         <AdherenceComparison
-          label={`Gordura (${days}d)`}
+          label={`Fat (${days}d)`}
           actual={Math.round(actualFat / avgDays)}
           prescribed={prescribedFat}
-          unit="g/dia"
+          unit="g/day"
         />
       </div>
 
       {prescribed.length === 0 && (
         <div className="p-4 rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] text-center">
-          <p className="t-small text-[hsl(var(--fg-2))]">Nenhuma dieta prescrita ainda</p>
+          <p className="t-small text-[hsl(var(--fg-2))]">No prescribed diet yet</p>
         </div>
       )}
     </div>

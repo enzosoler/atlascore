@@ -25,6 +25,7 @@ import {
   PrimaryButton,
   SafePageBoundary,
 } from '@/components/shared/StablePage';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
   createProgressPhoto,
@@ -422,11 +423,14 @@ function ProgressPhotosContent({ embedded = false }) {
         accentClassName="from-[hsl(var(--brand)/0.06)] via-[hsl(var(--brand)/0.02)]"
         actions={
           isAtLimit ? (
-            <div className="text-center">
-              <p className="text-xs text-[hsl(var(--fg-3))] mb-2">Limit reached (5 checkpoints on Free plan)</p>
-              <Link to="/pricing" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[hsl(var(--brand))] text-white text-xs font-semibold hover:opacity-90 transition-colors">
-                <Lock className="w-3 h-3" /> Upgrade to Pro
-              </Link>
+            <div className="space-y-2 text-left sm:text-right">
+              <p className="text-xs text-[hsl(var(--fg-3))]">Limit reached (5 checkpoints on Free plan)</p>
+              <Button asChild size="sm" className="gap-1.5">
+                <Link to="/pricing">
+                  <Lock className="h-3.5 w-3.5" />
+                  Upgrade to Pro
+                </Link>
+              </Button>
             </div>
           ) : (
             <PrimaryButton
@@ -441,7 +445,7 @@ function ProgressPhotosContent({ embedded = false }) {
       >
         {/* Resumo rápido */}
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.8)] px-4 py-4 shadow-[var(--shadow-xs)]">
+          <Card className="px-4 py-4">
             <p className="atlas-metric-label">Checkpoints</p>
             <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               {allDates.length > 0 ? `${allDates.length} checkpoint(s)` : '—'}
@@ -451,8 +455,8 @@ function ProgressPhotosContent({ embedded = false }) {
                 ? 'Click "New checkpoint" to add more.'
                 : 'Add your first photo checkpoint.'}
             </p>
-          </div>
-          <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.8)] px-4 py-4 shadow-[var(--shadow-xs)]">
+          </Card>
+          <Card className="px-4 py-4">
             <p className="atlas-metric-label">Registered photos</p>
             <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               {allPhotos.length > 0 ? `${allPhotos.length} photo(s)` : '—'}
@@ -460,7 +464,7 @@ function ProgressPhotosContent({ embedded = false }) {
             <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
               {`${POSES.length} poses per checkpoint: ${POSES.map((p) => p.label).join(', ')}.`}
             </p>
-          </div>
+          </Card>
         </div>
       </PageHeader>
       ) : (
@@ -589,5 +593,5 @@ function ProgressPhotosContent({ embedded = false }) {
     </>
   );
 
-  return embedded ? <div className="space-y-6">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>;
+  return embedded ? <div className="space-y-7">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>;
 }

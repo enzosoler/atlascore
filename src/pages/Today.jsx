@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Brain,
   CheckCircle2,
   Clock,
+  Cloud,
+  CloudDrizzle,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
   Dumbbell,
   Loader2,
   Scale,
   Shield,
   Sparkles,
+  SunMedium,
   UtensilsCrossed,
   CalendarCheck,
   BarChart3,
@@ -17,7 +25,6 @@ import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
-import { useRole } from '@/hooks/useRole';
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { getGreeting } from '@/lib/atlas-theme';
@@ -33,18 +40,151 @@ import {
 } from '@/components/today/TodayMobileUI';
 import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
 
-function getPreferredName(displayName) {
-  if (!displayName) return null;
-  const [firstChunk] = displayName.split(/[ @]/).filter(Boolean);
-  return firstChunk || displayName;
+function getPreferredName(displayName, fallbackName = null) {
+  if (!displayName) return fallbackName;
+  const [firstChunk] = String(displayName)
+    .split(/[\s@._-]+/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean);
+
+  if (!firstChunk) return fallbackName;
+
+  const sanitizedChunk = firstChunk.replace(/\d+$/u, '');
+  const candidate = sanitizedChunk || firstChunk;
+
+  if (!candidate) return fallbackName;
+
+  return `${candidate.charAt(0).toLocaleUpperCase()}${candidate.slice(1)}`;
 }
 
 function getDateLabel(locale) {
-  return new Intl.DateTimeFormat(locale === 'en-US' ? 'en-US' : 'pt-BR', {
+  return new Intl.DateTimeFormat(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   }).format(new Date());
+}
+
+function getHeroAmbientClassName(date = new Date(), weatherTone = 'default') {
+  const hour = date.getHours();
+
+  if (weatherTone === 'rain' || weatherTone === 'storm') {
+    if (hour < 18) {
+      return 'border-[hsl(var(--accent-secondary)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.18),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.12),transparent_30%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_42%,hsl(var(--fill-secondary)/0.98)_100%)]';
+    }
+
+    return 'border-[hsl(var(--accent-secondary)/0.26)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.22),transparent_22%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.1),transparent_28%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_40%,hsl(var(--fill-secondary)/0.98)_100%)]';
+  }
+
+  if (weatherTone === 'cloud' || weatherTone === 'fog' || weatherTone === 'snow') {
+    if (hour < 18) {
+      return 'border-[hsl(var(--border)/0.96)] bg-[radial-gradient(circle_at_top_right,hsl(var(--fill-secondary)/0.72),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.12),transparent_32%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_46%,hsl(var(--fill)/0.98)_100%)]';
+    }
+
+    return 'border-[hsl(var(--border)/0.96)] bg-[radial-gradient(circle_at_top_right,hsl(var(--fill-secondary)/0.82),transparent_22%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.1),transparent_28%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_42%,hsl(var(--fill-secondary)/0.98)_100%)]';
+  }
+
+  if (hour < 12) {
+    return 'border-[hsl(var(--brand)/0.22)] bg-[radial-gradient(circle_at_top_right,hsl(var(--warn)/0.14),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.18),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_48%,hsl(var(--fill)/0.98)_100%)]';
+  }
+
+  if (hour < 18) {
+    return 'border-[hsl(var(--brand)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.14),transparent_26%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.16),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_44%,hsl(var(--fill)/0.98)_100%)]';
+  }
+
+  return 'border-[hsl(var(--accent-secondary)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.2),transparent_24%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.14),transparent_30%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_42%,hsl(var(--fill-secondary)/0.98)_100%)]';
+}
+
+function getWeatherPresentation(code, locale) {
+  const isEnglish = locale === 'en-US';
+
+  if (code === 0) {
+    return {
+      Icon: SunMedium,
+      label: isEnglish ? 'Clear' : 'Limpo',
+      tone: 'clear',
+      iconClassName: 'text-[hsl(var(--warn))]',
+    };
+  }
+
+  if (code === 1) {
+    return {
+      Icon: CloudSun,
+      label: isEnglish ? 'Mostly clear' : 'Quase limpo',
+      tone: 'clear',
+      iconClassName: 'text-[hsl(var(--warn))]',
+    };
+  }
+
+  if (code === 2) {
+    return {
+      Icon: CloudSun,
+      label: isEnglish ? 'Partly cloudy' : 'Parcialmente nublado',
+      tone: 'cloud',
+      iconClassName: 'text-[hsl(var(--accent-secondary))]',
+    };
+  }
+
+  if (code === 3) {
+    return {
+      Icon: Cloud,
+      label: isEnglish ? 'Cloudy' : 'Nublado',
+      tone: 'cloud',
+      iconClassName: 'text-[hsl(var(--fg-2))]',
+    };
+  }
+
+  if (code === 45 || code === 48) {
+    return {
+      Icon: CloudFog,
+      label: isEnglish ? 'Fog' : 'Neblina',
+      tone: 'fog',
+      iconClassName: 'text-[hsl(var(--fg-2))]',
+    };
+  }
+
+  if ((code >= 51 && code <= 57) || (code >= 80 && code <= 82)) {
+    return {
+      Icon: CloudDrizzle,
+      label: isEnglish ? 'Drizzle' : 'Garoa',
+      tone: 'rain',
+      iconClassName: 'text-[hsl(var(--accent-secondary))]',
+    };
+  }
+
+  if (code >= 61 && code <= 67) {
+    return {
+      Icon: CloudRain,
+      label: isEnglish ? 'Rain' : 'Chuva',
+      tone: 'rain',
+      iconClassName: 'text-[hsl(var(--accent-secondary))]',
+    };
+  }
+
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
+    return {
+      Icon: CloudSnow,
+      label: isEnglish ? 'Snow' : 'Neve',
+      tone: 'snow',
+      iconClassName: 'text-[hsl(var(--fg))]',
+    };
+  }
+
+  if (code >= 95) {
+    return {
+      Icon: CloudLightning,
+      label: isEnglish ? 'Storm' : 'Tempestade',
+      tone: 'storm',
+      iconClassName: 'text-[hsl(var(--warn))]',
+    };
+  }
+
+  return {
+    Icon: Cloud,
+    label: isEnglish ? 'Conditions' : 'Clima',
+    tone: 'default',
+    iconClassName: 'text-[hsl(var(--fg-2))]',
+  };
 }
 
 function getNextSteps(t, locale, ROUTES, {
@@ -63,7 +203,7 @@ function getNextSteps(t, locale, ROUTES, {
       description: todayMealsCount > 0
         ? isEnglish
           ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
-          : `Você já registrou ${todayMealsCount} alimento${todayMealsCount > 1 ? 's' : ''} hoje. Mantenha o dia completo.`
+          : `Você já registrou ${todayMealsCount} alimento${todayMealsCount > 1 ? 's' : ''} hoje. Feche o dia com consistência.`
         : t('today_page.nextSteps.nutritionDesc'),
       icon: UtensilsCrossed,
       phase: t('today_page.nextSteps.nutritionPhase'),
@@ -71,20 +211,20 @@ function getNextSteps(t, locale, ROUTES, {
     {
       to: ROUTES.workouts,
       title: !activeWorkoutPlan
-        ? isEnglish ? 'Create workout plan' : 'Criar plano de treino'
+        ? (isEnglish ? 'Create workout plan' : 'Criar plano de treino')
         : todaySession?.status === 'completed'
-          ? isEnglish ? 'Review workout log' : 'Revisar treino registrado'
-          : isEnglish ? 'Start workout' : 'Iniciar treino',
+          ? (isEnglish ? 'Review workout log' : 'Revisar treino')
+          : (isEnglish ? 'Start workout' : 'Iniciar treino'),
       description: !activeWorkoutPlan
         ? isEnglish
-          ? 'Build your active training plan first so Today, history and execution all point to the same structure.'
-          : 'Monte primeiro seu plano de treino ativo para que Hoje, histórico e execução apontem para a mesma estrutura.'
+          ? 'Build your active training plan first so Today, history, and execution all point to the same structure.'
+          : 'Monte primeiro o plano ativo para que Hoje, histórico e execução apontem para a mesma estrutura.'
         : todaySession?.status === 'completed'
           ? isEnglish
-            ? 'Open the completed session, review the numbers and prepare the next training day.'
+            ? 'Open the completed session, review the numbers, and prepare the next training day.'
             : 'Abra a sessão concluída, revise os números e prepare o próximo dia de treino.'
           : isEnglish
-            ? 'Launch the active plan and log sets, reps and load from the structured session.'
+            ? 'Launch the active plan and log sets, reps, and load from the structured session.'
             : 'Abra o plano ativo e registre séries, repetições e carga a partir da sessão estruturada.',
       icon: Dumbbell,
       phase: t('today_page.nextSteps.workoutPhase'),
@@ -92,28 +232,28 @@ function getNextSteps(t, locale, ROUTES, {
     {
       to: ROUTES.measurements,
       title: recentMeasurementsCount > 0
-        ? isEnglish ? 'Review measurements' : 'Revisar medidas'
-        : isEnglish ? 'Log measurement' : 'Registrar medida',
+        ? (isEnglish ? 'Review measurements' : 'Revisar medidas')
+        : (isEnglish ? 'Log measurement' : 'Registrar medida'),
       description: recentMeasurementsCount > 0
         ? isEnglish
           ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
-          : 'Mantenha peso e circunferências atualizados para que as tendências de progresso continuem confiáveis.'
+          : 'Mantenha peso e circunferências atualizados para que as tendências continuem confiáveis.'
         : isEnglish
           ? 'Add body weight and body measurements so progress tracking starts with a real baseline.'
-          : 'Adicione peso e medidas corporais para que o acompanhamento de progresso comece com uma base real.',
+          : 'Adicione peso e medidas corporais para iniciar o acompanhamento com uma base real.',
       icon: Scale,
       phase: isEnglish ? 'Body' : 'Corpo',
     },
     {
       to: progressPhotosCount > 0 ? ROUTES.atlasAI : ROUTES.progressPhotos,
-      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : isEnglish ? 'Add progress photo' : 'Adicionar foto de progresso',
+      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : (isEnglish ? 'Add progress photo' : 'Adicionar foto de progresso'),
       description: progressPhotosCount > 0
         ? t('today_page.nextSteps.aiDesc')
         : isEnglish
           ? 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.'
-          : 'Capture um checkpoint visual com data para que sua linha do tempo de fotos evolua junto com o restante dos dados.',
+          : 'Capture um checkpoint visual com data para que sua linha do tempo evolua junto com o restante dos dados.',
       icon: progressPhotosCount > 0 ? Brain : Sparkles,
-      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : isEnglish ? 'Photos' : 'Fotos',
+      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : (isEnglish ? 'Photos' : 'Fotos'),
     },
   ];
 }
@@ -181,19 +321,13 @@ function buildInsight(
   // 5. Great workout consistency this week
   if (completedLast7 >= 4) {
     return {
-      title:
-        locale === 'en-US'
-          ? `${completedLast7} workouts completed in the last 7 days.`
-          : `${completedLast7} treinos concluídos nos últimos 7 dias.`,
+      title: `${completedLast7} workouts completed in the last 7 days.`,
       description: t('today_page.insight.workoutConsistencyDesc'),
     };
   }
   if (completedLast7 >= 2) {
     return {
-      title:
-        locale === 'en-US'
-          ? `${completedLast7} workouts completed this week.`
-          : `${completedLast7} treinos concluídos esta semana.`,
+      title: `${completedLast7} workouts completed this week.`,
       description: t('today_page.insight.workoutGoodDesc'),
     };
   }
@@ -203,7 +337,7 @@ function buildInsight(
     const p = activeProtocolsList[0];
     const since = p.start_date
       ? new Date(`${p.start_date}T12:00:00`).toLocaleDateString(
-          locale === 'en-US' ? 'en-US' : 'pt-BR',
+          'en-US',
           {
             day: 'numeric',
             month: 'short',
@@ -211,14 +345,11 @@ function buildInsight(
         )
       : null;
     const count = activeProtocolsList.length;
-    const protocolWord =
-      locale === 'en-US'
-        ? `${count} active protocol${count > 1 ? 's' : ''}.`
-        : `${count} protocolo${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}.`;
+    const protocolWord = `${count} active protocol${count > 1 ? 's' : ''}.`;
     return {
       title: protocolWord,
       description: since
-        ? `${p.name || (locale === 'en-US' ? 'Protocol' : 'Protocolo')} ${t('today_page.insight.protocolDescWith').replace('{date}', since)}`
+        ? `${p.name || 'Protocol'} ${t('today_page.insight.protocolDescWith').replace('{date}', since)}`
         : t('today_page.insight.protocolDescDefault'),
     };
   }
@@ -247,14 +378,81 @@ export default function Today() {
 function TodayContent() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
-  const { role, loading: isRoleLoading } = useRole(user);
+  const isEN = locale === 'en-US';
   const [checkinOpen, setCheckinOpen] = useState(false);
-  const displayName = user?.full_name || user?.email || t('today_page.fallbackName');
-  const preferredName = getPreferredName(displayName) || t('today_page.fallbackName');
+  const [weather, setWeather] = useState(null);
+  const fallbackName = t('today_page.fallbackName');
+  const displayName = user?.full_name || user?.email || fallbackName;
+  const preferredName = getPreferredName(displayName, fallbackName) || fallbackName;
   const greeting = getGreeting(locale);
-  const isAdmin = !isRoleLoading && role === 'admin';
+  const weatherPresentation = weather
+    ? getWeatherPresentation(weather.weathercode, locale)
+    : null;
+  const heroAmbientClassName = getHeroAmbientClassName(
+    new Date(),
+    weatherPresentation?.tone || 'default'
+  );
 
   const todayStr = new Date().toISOString().split('T')[0];
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator?.geolocation) return undefined;
+
+    let isActive = true;
+    const controller = new AbortController();
+
+    const fetchWeather = async (latitude, longitude) => {
+      try {
+        const params = new URLSearchParams({
+          latitude: String(latitude),
+          longitude: String(longitude),
+          current_weather: 'true',
+        });
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const currentWeather = data?.current_weather;
+
+        if (!isActive || !currentWeather || typeof currentWeather.temperature !== 'number') {
+          return;
+        }
+
+        setWeather({
+          temperature: Math.round(currentWeather.temperature),
+          weathercode: Number.isFinite(currentWeather.weathercode)
+            ? currentWeather.weathercode
+            : null,
+        });
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          // Fail silently so the hero never blocks on weather/location.
+        }
+      }
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        void fetchWeather(position.coords.latitude, position.coords.longitude);
+      },
+      () => {
+        // If permission is denied or unavailable, keep the weather treatment hidden.
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 15 * 60 * 1000,
+      }
+    );
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, []);
 
   // ── Data queries ───────────────────────────────────────────────────────────
 
@@ -378,6 +576,54 @@ function TodayContent() {
 
   const allDoneCount = [nutritionDone, workoutDone, measurementsDone].filter(Boolean).length;
   const showDailySummary = !isLoading && allDoneCount >= 2;
+  const heroGreeting = `${greeting}, ${preferredName}.`;
+  const heroTagline = isLoading
+    ? isEN
+      ? 'Pulling training, nutrition, and body signals into one clean daily brief.'
+      : 'Reunindo treino, nutrição e sinais corporais em um briefing diário claro.'
+    : allDoneCount === 3
+      ? isEN
+        ? 'Your core tracking is current. Review what is working and protect the next best decision.'
+        : 'Seu núcleo de acompanhamento está em dia. Revise o que está funcionando e proteja a próxima decisão.'
+      : allDoneCount === 0
+        ? isEN
+          ? 'Start with food, training, or body data so Today becomes something measurable.'
+          : 'Comece por nutrição, treino ou dados corporais para que Hoje vire algo mensurável.'
+        : isEN
+          ? 'You already have momentum today. Close the biggest gap and keep the day structurally complete.'
+          : 'Você já tem tração hoje. Feche a maior lacuna e mantenha o dia estruturalmente completo.';
+  const heroHighlights = [
+    {
+      label: isEN ? 'Focus' : 'Foco',
+      value: isEN ? `${allDoneCount}/3 core pillars` : `${allDoneCount}/3 pilares`,
+      tone: allDoneCount >= 2 ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]',
+    },
+    {
+      label: isEN ? 'Training' : 'Treino',
+      value: activeWorkoutPlan
+        ? workoutDone
+          ? (isEN ? 'Session complete' : 'Sessão concluída')
+          : (isEN ? 'Plan ready' : 'Plano pronto')
+        : (isEN ? 'Plan needed' : 'Falta plano'),
+      tone: workoutDone ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]',
+    },
+    {
+      label: weather && weatherPresentation ? (isEN ? 'Weather' : 'Clima') : (isEN ? 'Nutrition' : 'Nutrição'),
+      value: weather && weatherPresentation
+        ? `${weather.temperature}° · ${weatherPresentation.label}`
+        : nutritionDone
+          ? isEN
+            ? `${todayMeals.length} entr${todayMeals.length === 1 ? 'y' : 'ies'} logged`
+            : `${todayMeals.length} refeiç${todayMeals.length === 1 ? 'ão' : 'ões'} registradas`
+          : (isEN ? 'Needs a meal log' : 'Falta registrar refeição'),
+      tone: weather && weatherPresentation
+        ? weatherPresentation.iconClassName
+        : nutritionDone
+          ? 'text-[hsl(var(--ok))]'
+          : 'text-[hsl(var(--fg))]',
+      Icon: weather && weatherPresentation ? weatherPresentation.Icon : UtensilsCrossed,
+    },
+  ];
 
   // ── Snapshot card values ─────────────────────────────────────────────────
 
@@ -402,7 +648,7 @@ function TodayContent() {
   const progressValue = latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—';
   const progressMeta = latestMeasurement
     ? new Date(`${latestMeasurement.date}T12:00:00`).toLocaleDateString(
-        locale === 'en-US' ? 'en-US' : 'pt-BR',
+        locale === 'pt-BR' ? 'pt-BR' : 'en-US',
         {
           day: 'numeric',
           month: 'short',
@@ -413,7 +659,9 @@ function TodayContent() {
   const protocolsValue = String(activeProtocolsList.length);
   const protocolsMeta =
     activeProtocolsList.length > 0
-      ? `${activeProtocolsList.length} ${activeProtocolsList.length > 1 ? (locale === 'en-US' ? 'active' : 'ativos') : (locale === 'en-US' ? 'active' : 'ativo')}`
+      ? isEN
+        ? `${activeProtocolsList.length} active`
+        : `${activeProtocolsList.length} ativo${activeProtocolsList.length > 1 ? 's' : ''}`
       : t('today_page.noActive');
 
   const NEXT_STEPS = getNextSteps(t, locale, ROUTES, {
@@ -423,8 +671,6 @@ function TodayContent() {
     recentMeasurementsCount: recentMeasurements.length,
     progressPhotosCount: recentProgressPhotos.length,
   });
-
-  const isEN = locale === 'en-US';
 
   const snapshotCards = [
     {
@@ -438,9 +684,7 @@ function TodayContent() {
       icon: UtensilsCrossed,
       tone: 'blue',
       done: nutritionDone,
-      ctaLabel: nutritionDone
-        ? (isEN ? 'Review today' : 'Revisar hoje')
-        : (isEN ? 'Log meals' : 'Registrar refeições'),
+      ctaLabel: nutritionDone ? (isEN ? 'Review today' : 'Revisar hoje') : (isEN ? 'Log meals' : 'Registrar refeições'),
     },
     {
       to: ROUTES.workouts,
@@ -470,9 +714,7 @@ function TodayContent() {
       icon: Scale,
       tone: 'green',
       done: measurementsDone,
-      ctaLabel: measurementsDone
-        ? (isEN ? 'View body' : 'Ver medidas')
-        : (isEN ? 'Log weight' : 'Registrar peso'),
+      ctaLabel: measurementsDone ? (isEN ? 'View body' : 'Ver corpo') : (isEN ? 'Log weight' : 'Registrar peso'),
     },
     {
       to: ROUTES.protocols,
@@ -540,30 +782,60 @@ function TodayContent() {
   return (
     <TodayScreen>
       {/* ── Header ── */}
-      <header className="flex items-start justify-between gap-4 px-1">
+      <header className="flex items-end justify-between gap-4 px-1">
         <div className="min-w-0">
-          <p className="atlas-overline">{getDateLabel(locale)}</p>
-          <h1 className="mt-3 text-[34px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
-            {t('today_page.heading')}
-          </h1>
+          <p className="atlas-overline">{isEN ? 'Today' : 'Hoje'}</p>
+          <p className="mt-2 text-[15px] font-medium tracking-[-0.02em] text-[hsl(var(--fg-2))]">
+            {getDateLabel(locale)}
+          </p>
         </div>
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.9)_0%,hsl(var(--card))_100%)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
-          <Sparkles className="h-5 w-5" strokeWidth={2} />
+        <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.86)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
+          <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
+          {isLoading ? (isEN ? 'Loading' : 'Carregando') : isEN ? `${allDoneCount}/3 complete` : `${allDoneCount}/3 em dia`}
         </div>
       </header>
 
       {/* ── Greeting card ── */}
-      <TodayCard className="relative overflow-hidden border-[hsl(var(--brand)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.14),transparent_28%),radial-gradient(circle_at_18%_18%,hsl(var(--brand)/0.18),transparent_34%),linear-gradient(135deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_45%,hsl(var(--fill)/0.96)_100%)] shadow-[var(--shadow-md)]">
+      <TodayCard
+        className={cn(
+          'relative overflow-hidden rounded-[30px] p-6 shadow-[var(--shadow-md)] sm:p-7',
+          heroAmbientClassName
+        )}
+      >
         <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.16)] blur-3xl" />
         <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[hsl(var(--accent-secondary)/0.16)] blur-2xl" />
 
-        <div className="relative">
-          <p className="mt-5 text-[30px] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
-            {greeting}, {preferredName}
-          </p>
-          <p className="mt-2 max-w-[30rem] text-[15px] leading-6 text-[hsl(var(--fg-2))]">
-            {t('today_page.tagline')}
-          </p>
+        <div className="relative space-y-6">
+          <div className="min-w-0 max-w-3xl">
+            <p className="atlas-overline text-[hsl(var(--fg-3))]">
+              {isEN ? 'Daily brief' : 'Briefing do dia'}
+            </p>
+            <h1 className="mt-4 text-[clamp(2.05rem,1.78rem+1.15vw,2.7rem)] font-semibold tracking-[-0.07em] text-[hsl(var(--fg))]">
+              {heroGreeting}
+            </h1>
+            <p className="mt-3 max-w-[34rem] text-[15px] leading-7 text-[hsl(var(--fg-2))]">
+              {heroTagline}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2.5">
+            {heroHighlights.map((item) => {
+              const Icon = item.Icon;
+
+              return (
+                <div
+                  key={`${item.label}-${item.value}`}
+                  className="inline-flex items-center gap-2.5 rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.62)] px-3.5 py-2 text-[12px] font-semibold tracking-[-0.012em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)] backdrop-blur-[14px]"
+                >
+                  {Icon ? (
+                    <Icon className={cn('h-3.5 w-3.5 shrink-0', item.tone)} strokeWidth={2} />
+                  ) : null}
+                  <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
+                  <span className={cn('text-[hsl(var(--fg))]', item.tone)}>{item.value}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </TodayCard>
 
@@ -598,12 +870,12 @@ function TodayContent() {
 
       {/* ── Daily summary strip — shown once ≥ 2 pillars are done ── */}
       {showDailySummary && (
-        <div className="rounded-2xl border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.05)] px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--ok))] shrink-0">
+        <div className="atlas-card flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] border-[hsl(var(--ok)/0.18)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.08),transparent_42%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-5 py-4 shadow-[var(--shadow-xs)]">
+          <p className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--ok))]">
             {isEN ? 'Today so far' : 'Hoje até agora'}
           </p>
           {[
-            { label: isEN ? 'Nutrition' : 'Nutrição', done: nutritionDone, detail: nutritionDone ? `${todayMeals.length} ${isEN ? 'entries' : 'entradas'}` : null },
+            { label: isEN ? 'Nutrition' : 'Nutrição', done: nutritionDone, detail: nutritionDone ? (isEN ? `${todayMeals.length} entries` : `${todayMeals.length} registros`) : null },
             { label: isEN ? 'Workout' : 'Treino', done: workoutDone, detail: workoutDone ? (isEN ? 'completed' : 'concluído') : null },
             { label: isEN ? 'Measurements' : 'Medidas', done: measurementsDone, detail: measurementsDone ? (isEN ? 'up to date' : 'em dia') : null },
           ].map(({ label, done, detail }) => (
@@ -661,12 +933,12 @@ function TodayContent() {
           title={t('today_page.activity.title')}
         >
           <TodayCard>
-            <div className="space-y-3">
+            <div className="space-y-0 divide-y divide-[hsl(var(--border)/0.72)]">
               {recentActivity.map((session) => {
                 const isCompleted = session.status === 'completed';
                 const sessionDate = session.date
                   ? new Date(`${session.date}T12:00:00`).toLocaleDateString(
-                      locale === 'en-US' ? 'en-US' : 'pt-BR',
+                      locale === 'pt-BR' ? 'pt-BR' : 'en-US',
                       {
                         weekday: 'short',
                         day: 'numeric',
@@ -678,7 +950,7 @@ function TodayContent() {
                 return (
                   <div
                     key={session.id || `${session.date}-${session.name}`}
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-3 py-4 first:pt-0 last:pb-0"
                   >
                     <div
                       className={cn(
@@ -749,33 +1021,33 @@ function TodayContent() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           onClick={() => setCheckinOpen(true)}
-          className="atlas-card rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)] flex items-center gap-3 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+          className="atlas-card flex min-h-[104px] items-center gap-4 rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5 text-left shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
             <CalendarCheck className="h-[18px] w-[18px]" strokeWidth={2} />
           </div>
           <div className="min-w-0">
-            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            <p className="text-[16px] font-semibold tracking-[-0.034em] text-[hsl(var(--fg))]">
               {isEN ? 'Weekly check-in' : 'Check-in semanal'}
             </p>
-            <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              {isEN ? 'Energy, mood, sleep — 30 sec' : 'Energia, humor, sono — 30 seg'}
+            <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              {isEN ? 'Energy, mood, sleep - 30 sec' : 'Energia, humor, sono - 30 s'}
             </p>
           </div>
         </button>
 
         <Link
           to={ROUTES.blockReview}
-          className="atlas-card rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)] flex items-center gap-3 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+          className="atlas-card flex min-h-[104px] items-center gap-4 rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5 text-left shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--accent-secondary)/0.22)] bg-[hsl(var(--accent-secondary)/0.14)] text-[hsl(var(--accent-secondary))]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--accent-secondary)/0.22)] bg-[hsl(var(--accent-secondary)/0.14)] text-[hsl(var(--accent-secondary))]">
             <BarChart3 className="h-[18px] w-[18px]" strokeWidth={2} />
           </div>
           <div className="min-w-0">
-            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            <p className="text-[16px] font-semibold tracking-[-0.034em] text-[hsl(var(--fg))]">
               {isEN ? 'Review last 4 weeks' : 'Revisar últimas 4 semanas'}
             </p>
-            <p className="text-[12px] text-[hsl(var(--fg-2))]">
+            <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
               {isEN ? 'See what actually worked' : 'Veja o que realmente funcionou'}
             </p>
           </div>

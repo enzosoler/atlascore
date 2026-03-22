@@ -27,26 +27,26 @@ export default function CommandCenter({ protocols, supplements, meals, workouts,
 
   (protocols || []).filter(p => p.active && p.stock_quantity && p.daily_usage && (p.stock_quantity / p.daily_usage) <= 7).forEach(p => {
     const days = Math.floor(p.stock_quantity / p.daily_usage);
-    items.push({ key: `sp-${p.id}`, icon: Package, title: `${p.name} — estoque acaba em ${days}d`, subtitle: 'Reabastecer em breve', href: ROUTES.protocols, urgent: true });
+    items.push({ key: `sp-${p.id}`, icon: Package, title: `${p.name} runs out in ${days}d`, subtitle: 'Restock soon', href: ROUTES.protocols, urgent: true });
   });
   (supplements || []).filter(s => s.active && s.stock_quantity && s.daily_usage && (s.stock_quantity / s.daily_usage) <= 7).forEach(s => {
     const days = Math.floor(s.stock_quantity / s.daily_usage);
-    items.push({ key: `ss-${s.id}`, icon: Package, title: `${s.name} — estoque acaba em ${days}d`, subtitle: 'Reabastecer em breve', href: ROUTES.protocols, urgent: true });
+    items.push({ key: `ss-${s.id}`, icon: Package, title: `${s.name} runs out in ${days}d`, subtitle: 'Restock soon', href: ROUTES.protocols, urgent: true });
   });
 
   const todayWorkout = (workouts || []).find(w => !w.completed);
   if (todayWorkout) {
-    items.push({ key: 'workout', icon: Dumbbell, title: `Treino pendente: ${todayWorkout.name}`, subtitle: `${todayWorkout.exercises?.length || 0} exercícios`, href: ROUTES.workouts });
+    items.push({ key: 'workout', icon: Dumbbell, title: `Pending workout: ${todayWorkout.name}`, subtitle: `${todayWorkout.exercises?.length || 0} exercises`, href: ROUTES.workouts });
   }
 
   const calSoFar = (meals || []).reduce((s, m) => s + (m.total_calories || 0), 0);
   const calLeft = (profile?.calories_target || 0) - calSoFar;
   if (calLeft > 400) {
-    items.push({ key: 'cal', icon: UtensilsCrossed, title: `${Math.round(calLeft)} kcal restantes`, subtitle: `${(meals || []).length} refeições registradas hoje`, href: ROUTES.nutrition });
+    items.push({ key: 'cal', icon: UtensilsCrossed, title: `${Math.round(calLeft)} kcal remaining`, subtitle: `${(meals || []).length} meals logged today`, href: ROUTES.nutrition });
   }
 
   if (!checkin) {
-    items.push({ key: 'checkin', icon: ClipboardList, title: 'Check-in diário pendente', subtitle: 'Registre humor, energia e sono', href: ROUTES.today });
+    items.push({ key: 'checkin', icon: ClipboardList, title: 'Daily check-in pending', subtitle: 'Log mood, energy, and sleep', href: ROUTES.today });
   }
 
   if (items.length === 0) {
@@ -56,8 +56,8 @@ export default function CommandCenter({ protocols, supplements, meals, workouts,
           <CheckCircle className="w-4 h-4 text-[hsl(var(--primary))]" strokeWidth={2.5} />
         </div>
         <div>
-          <p className="text-[13px] font-semibold">Tudo em dia</p>
-          <p className="text-[11px] text-muted-foreground">Excelente aderência hoje.</p>
+          <p className="text-[13px] font-semibold">Everything is on track</p>
+          <p className="text-[11px] text-muted-foreground">Excellent adherence today.</p>
         </div>
       </div>
     );
@@ -66,7 +66,7 @@ export default function CommandCenter({ protocols, supplements, meals, workouts,
   return (
     <div className="rounded-2xl bg-card border border-border overflow-hidden">
       <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Ação necessária</p>
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Action needed</p>
         <span className="text-[11px] font-semibold text-[hsl(var(--primary))]">{items.length}</span>
       </div>
       <div className="p-2 space-y-1">

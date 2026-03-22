@@ -1069,8 +1069,9 @@ export default function NutritionPage() {
     >
       <AppContainer>
         <PageHeader
+          eyebrow="Nutrition"
           title="Nutrition"
-          subtitle={`Calorie and macro summary for ${selectedDate}`}
+          subtitle={`Calories, macros, and meal logging for ${selectedDate} in one calmer daily view.`}
         />
 
         {notice ? (
@@ -1102,12 +1103,13 @@ export default function NutritionPage() {
                     : `${profile.calories_target} kcal · ${profile.protein_target}g protein · ${profile.carbs_target}g carbs · ${profile.fat_target}g fat`}
                 </span>
               </div>
-              <button
+              <SecondaryButton
+                type="button"
                 onClick={handleOpenTargetsEditor}
-                className="flex-shrink-0 text-[12px] font-semibold text-[hsl(var(--brand))] hover:underline underline-offset-2"
+                className="shrink-0"
               >
-                {profile.calories_target === 0 ? 'Set targets →' : 'Edit'}
-              </button>
+                {profile.calories_target === 0 ? 'Set targets' : 'Edit targets'}
+              </SecondaryButton>
             </div>
           )}
 
@@ -1142,28 +1144,28 @@ export default function NutritionPage() {
                       value={targetDraft[key] || ''}
                       onChange={(e) => setTargetDraft((d) => ({ ...d, [key]: e.target.value }))}
                       placeholder="0"
-                      className="atlas-field h-9 px-3 text-[13px] w-full"
+                      className="atlas-field h-11 w-full px-3.5 text-[14px]"
                     />
                   </div>
                 ))}
               </div>
-              <div className="flex gap-2 pt-1">
+              <div className="flex flex-col gap-2 pt-1 sm:flex-row">
                 {profile.calories_target > 0 && (
-                  <button
+                  <SecondaryButton
                     onClick={() => { setShowTargetsEditor(false); setTargetDraft(null); }}
                     disabled={isSavingTargets}
-                    className="flex-1 h-9 rounded-[14px] border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors disabled:opacity-50"
+                    className="flex-1"
                   >
                     Cancel
-                  </button>
+                  </SecondaryButton>
                 )}
-                <button
+                <PrimaryButton
                   onClick={handleSaveTargets}
                   disabled={isSavingTargets}
-                  className="flex-1 h-9 rounded-[14px] bg-[hsl(var(--brand))] text-[13px] font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="flex-1 gap-2"
                 >
                   {isSavingTargets ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
-                </button>
+                </PrimaryButton>
               </div>
             </div>
           )}

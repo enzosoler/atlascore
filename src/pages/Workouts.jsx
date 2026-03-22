@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Bot,
+  CheckCircle2,
   ClipboardList,
   Dumbbell,
   Pencil,
@@ -88,9 +89,9 @@ const MOCK_PLANNED_WORKOUTS = [
     duration_minutes: 70,
     perceived_effort: 8,
     exercises: [
-      { name: 'Supino reto', sets: [{ reps: '8' }, { reps: '8' }, { reps: '6' }] },
-      { name: 'Remada curvada', sets: [{ reps: '10' }, { reps: '10' }, { reps: '8' }] },
-      { name: 'Desenvolvimento halteres', sets: [{ reps: '12' }, { reps: '10' }, { reps: '10' }] },
+      { name: 'Flat bench press', sets: [{ reps: '8' }, { reps: '8' }, { reps: '6' }] },
+      { name: 'Bent-over row', sets: [{ reps: '10' }, { reps: '10' }, { reps: '8' }] },
+      { name: 'Dumbbell shoulder press', sets: [{ reps: '12' }, { reps: '10' }, { reps: '10' }] },
     ],
   },
   {
@@ -101,7 +102,7 @@ const MOCK_PLANNED_WORKOUTS = [
     duration_minutes: 80,
     perceived_effort: 7,
     exercises: [
-      { name: 'Agachamento livre', sets: [{ reps: '6' }, { reps: '6' }, { reps: '6' }] },
+      { name: 'Back squat', sets: [{ reps: '6' }, { reps: '6' }, { reps: '6' }] },
       { name: 'Leg press', sets: [{ reps: '12' }, { reps: '12' }, { reps: '10' }] },
     ],
   },
@@ -118,10 +119,10 @@ const MOCK_LOGGED_WORKOUTS = [
     duration_minutes: 68,
     perceived_effort: 8,
     volume_load: 5620,
-    notes: 'Bom ritmo e descansos curtos.',
+    notes: 'Strong pace and short rest periods.',
     exercises: [
       {
-        name: 'Supino reto',
+        name: 'Flat bench press',
         sets: [
           { reps: '8', weight: 70 },
           { reps: '8', weight: 70 },
@@ -129,7 +130,7 @@ const MOCK_LOGGED_WORKOUTS = [
         ],
       },
       {
-        name: 'Remada curvada',
+        name: 'Bent-over row',
         sets: [
           { reps: '10', weight: 55 },
           { reps: '10', weight: 55 },
@@ -137,7 +138,7 @@ const MOCK_LOGGED_WORKOUTS = [
         ],
       },
       {
-        name: 'Desenvolvimento halteres',
+        name: 'Dumbbell shoulder press',
         sets: [
           { reps: '12', weight: 20 },
           { reps: '10', weight: 22.5 },
@@ -155,10 +156,10 @@ const MOCK_LOGGED_WORKOUTS = [
     duration_minutes: 20,
     perceived_effort: 6,
     volume_load: 0,
-    notes: 'Opcional se sobrar energia.',
+    notes: 'Optional if energy is still high.',
     exercises: [
       { name: 'Bike', sets: [{ reps: '12 min', weight: '' }] },
-      { name: 'Sled push', sets: [{ reps: '6 tiros', weight: '' }] },
+      { name: 'Sled push', sets: [{ reps: '6 pushes', weight: '' }] },
     ],
   },
   {
@@ -174,7 +175,7 @@ const MOCK_LOGGED_WORKOUTS = [
     notes: '',
     exercises: [
       {
-        name: 'Agachamento livre',
+        name: 'Back squat',
         sets: [
           { reps: '6', weight: 90 },
           { reps: '6', weight: 92.5 },
@@ -198,7 +199,7 @@ function createLocalId(prefix) {
 }
 
 function getWorkoutTypeLabel(type) {
-  return WORKOUT_TYPES[type]?.label || type || 'Treino';
+  return WORKOUT_TYPES[type]?.label || type || 'Workout';
 }
 
 function getWorkoutStatusMeta(status, statusMeta) {
@@ -247,7 +248,7 @@ function buildExerciseSets(count, reps, weight) {
 }
 
 function formatVolume(value) {
-  return Number(value || 0).toLocaleString('pt-BR');
+  return Number(value || 0).toLocaleString('en-US');
 }
 
 function getExerciseSummary(exercise) {
@@ -285,17 +286,82 @@ function WorkoutMetric({ label, value, suffix = '' }) {
   );
 }
 
-function ComparisonPanel({ title, eyebrow, workout, planned = false, statusMeta }) {
+function SessionSignal({ label, value, detail, tone = 'neutral' }) {
+  const toneStyles = {
+    neutral: 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg))]',
+    ok: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]',
+    warn: 'border-[hsl(var(--warn)/0.18)] bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]',
+  };
+
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.04em]',
-        className
-      )}
-    >
-      <Icon className="h-3 w-3" strokeWidth={2} />
-      {label}
-    </span>
+    <div className="rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="atlas-metric-label">{label}</p>
+          <p className="mt-2 text-[1.05rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            {value}
+          </p>
+          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
+        </div>
+        <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.04em]', toneStyles[tone] || toneStyles.neutral)}>
+          {tone}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ComparisonPanel({ title, eyebrow, workout, planned = false, statusMeta }) {
+  const status = workout ? getWorkoutStatusMeta(workout.status || 'pending', statusMeta) : null;
+
+  return (
+    <div className="rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="atlas-overline">{eyebrow}</p>
+          <h3 className="mt-3 text-[1.05rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            {workout?.name || title}
+          </h3>
+          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+            {workout
+              ? `${workout.exercises?.length || 0} exercises · ${workout.duration_minutes || 0} min`
+              : 'No session available for this comparison view.'}
+          </p>
+        </div>
+
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.74)] text-[hsl(var(--fg-2))]">
+          {planned ? <ClipboardList className="h-4 w-4" strokeWidth={1.9} /> : <Dumbbell className="h-4 w-4" strokeWidth={1.9} />}
+        </div>
+      </div>
+
+      {workout ? (
+        <>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className={cn('rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.04em]', planned ? 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] text-[hsl(var(--fg-2))]' : status?.chip)}>
+              {planned ? `${workout.exercises?.length || 0} exercises` : status?.label}
+            </span>
+            {!planned ? (
+              <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
+                {getWorkoutTypeLabel(workout.type)}
+              </span>
+            ) : null}
+          </div>
+
+          <div className="mt-5 space-y-2.5 border-t border-[hsl(var(--border)/0.82)] pt-4">
+            {workout.exercises?.map((exercise, index) => (
+              <div key={`${exercise.name}-${index}`} className="flex items-center justify-between gap-4">
+                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                  {exercise.name}
+                </p>
+                <p className="shrink-0 text-[13px] tabular-nums text-[hsl(var(--fg-2))]">
+                  {exercise.sets.length}&thinsp;x&thinsp;{exercise.sets[0]?.reps || '--'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : null}
+    </div>
   );
 }
 
@@ -312,43 +378,52 @@ function PlanCard({ plan, onLogSession }) {
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
           Build one yourself, generate with AI, or wait for your coach to assign it.
         </p>
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <button
-            type="button"
-            className="atlas-button atlas-button-secondary inline-flex h-9 items-center gap-2 px-4 text-[12px]"
-          >
-            <User className="h-3.5 w-3.5" strokeWidth={1.9} />
-            Build a plan
-          </button>
-          <button
-            type="button"
-            className={cn(
-              'rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.04em]',
-              planned
-                ? 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] text-[hsl(var(--fg-2))]'
-                : getWorkoutStatusMeta(workout.status, statusMeta).chip
-            )}
-          >
-            {planned ? `${workout.exercises.length} exerc.` : getWorkoutStatusMeta(workout.status, statusMeta).label}
-          </span>
-        ) : null}
+      </div>
+    );
+  }
+
+  const sourceMeta = PLAN_SOURCES[plan.source] || PLAN_SOURCES.self;
+  const SourceIcon = sourceMeta.Icon;
+
+  return (
+    <div className="rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="atlas-overline">Assigned plan</p>
+          <h3 className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
+            {plan.name}
+          </h3>
+          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+            {plan.duration_minutes || 0} min · RPE {plan.perceived_effort || '--'}
+          </p>
+        </div>
+
+        <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.04em]', sourceMeta.className)}>
+          <SourceIcon className="h-3 w-3" strokeWidth={2} />
+          {sourceMeta.label}
+        </span>
       </div>
 
       <div className="mt-5 space-y-2.5 border-t border-[hsl(var(--border)/0.82)] pt-4">
         {plan.exercises.map((exercise, index) => (
-          <div
-            key={`${exercise.name}-${index}`}
-            className="flex items-center justify-between gap-4"
-          >
+          <div key={`${exercise.name}-${index}`} className="flex items-center justify-between gap-4">
             <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
               {exercise.name}
             </p>
             <p className="shrink-0 text-[13px] tabular-nums text-[hsl(var(--fg-2))]">
-              {exercise.sets.length}&thinsp;×&thinsp;{exercise.sets[0]?.reps || '--'}
+              {exercise.sets.length}&thinsp;x&thinsp;{exercise.sets[0]?.reps || '--'}
             </p>
           </div>
-        </>
-      ) : null}
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onLogSession}
+        className="atlas-button mt-5 h-10 w-full"
+      >
+        Log plan session
+      </button>
     </div>
   );
 }
@@ -379,7 +454,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta }) 
               {workout.name}
             </h3>
             <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              {workout.exercises.length} exercícios · {workout.duration_minutes || 0} min · RPE{' '}
+              {workout.exercises.length} exercises · {workout.duration_minutes || 0} min · RPE{' '}
               {workout.perceived_effort || '--'}
             </p>
           </div>
@@ -387,7 +462,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta }) 
           <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.55)]">
             <div className="grid gap-px bg-[hsl(var(--border)/0.7)] sm:grid-cols-3">
               <WorkoutMetric label="Volume" value={formatVolume(workout.volume_load || 0)} suffix="kg" />
-              <WorkoutMetric label="Data" value={workout.date} />
+              <WorkoutMetric label="Date" value={workout.date} />
               <WorkoutMetric label="Status" value={status.label} />
             </div>
           </div>
@@ -429,7 +504,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta }) 
             className="atlas-button atlas-button-secondary h-10 flex-1"
           >
             <Pencil className="h-4 w-4" strokeWidth={1.9} />
-            Editar
+            Edit
           </button>
           <button
             type="button"
@@ -449,7 +524,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta }) 
             className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)]"
           >
             <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-            Excluir
+            Delete
           </button>
         </div>
       </div>
@@ -518,7 +593,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
         <p className="atlas-overline">Session basics</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
-            Data
+            Date
             <input
               type="date"
               value={form.date}
@@ -528,7 +603,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            Nome do treino
+            Workout name
             <input
               type="text"
               value={form.name}
@@ -541,7 +616,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
-            Tipo
+            Type
             <select
               value={form.type}
               onChange={(event) => updateField('type', event.target.value)}
@@ -562,13 +637,13 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
               onChange={(event) => updateField('status', event.target.value)}
               className={SELECT_CLASS_NAME}
             >
-              <option value="pending">Pendente</option>
-              <option value="completed">Concluído</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
             </select>
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            Duração
+            Duration
             <input
               type="number"
               min="0"
@@ -608,7 +683,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           <div>
             <p className="atlas-overline">Exercises</p>
             <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-              Mantenha cada bloco limpo para preservar a leitura da execução.
+              Keep each block clean so the execution read stays easy to scan.
             </p>
           </div>
           <button
@@ -616,7 +691,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
             onClick={addExercise}
             className="atlas-button atlas-button-secondary h-9 px-4 text-[12px]"
           >
-            + Adicionar exercício
+            + Add exercise
           </button>
         </div>
 
@@ -628,7 +703,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className={FIELD_LABEL_CLASS}>
-                  Nome
+                  Name
                   <input
                     type="text"
                     value={exercise.name}
@@ -659,7 +734,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
                 </label>
 
                 <label className={FIELD_LABEL_CLASS}>
-                  Peso
+                  Weight
                   <input
                     type="number"
                     min="0"
@@ -676,7 +751,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
                     disabled={form.exercises.length === 1}
                     className="atlas-button atlas-button-secondary h-11 w-full disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Remover
+                    Remove
                   </button>
                 </div>
               </div>
@@ -687,11 +762,11 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <label className={FIELD_LABEL_CLASS}>
-          Observações
+          Notes
           <textarea
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="Ex: treino mais curto, foco em técnica."
+            placeholder="e.g. shorter workout, technique focus."
             className={TEXTAREA_CLASS_NAME}
           />
         </label>
@@ -699,10 +774,10 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
 
       <div className="flex flex-col-reverse gap-3 border-t border-[hsl(var(--border)/0.85)] pt-6 sm:flex-row sm:justify-end">
         <SecondaryButton type="button" onClick={onCancel}>
-          Cancelar
+          Cancel
         </SecondaryButton>
         <PrimaryButton type="submit">
-          {workout?.id ? 'Salvar treino' : 'Adicionar treino'}
+          {workout?.id ? 'Save workout' : 'Add workout'}
         </PrimaryButton>
       </div>
     </form>
@@ -716,7 +791,7 @@ export default function Workouts() {
       title={t('pages.workouts.title')}
       subtitle={t('pages.workouts.subtitle')}
       maxWidth="max-w-6xl"
-      fallbackDescription="A rota de Workouts continua acessível mesmo se a interface principal falhar."
+      fallbackDescription="The Workouts route remains accessible even if the main interface fails."
     >
       <WorkoutsContent />
     </SafePageBoundary>
@@ -729,6 +804,7 @@ function WorkoutsContent() {
 
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [freeFilter, setFreeFilter] = useState('all');
+  const [comparisonWorkoutId, setComparisonWorkoutId] = useState(null);
   const [notice, setNotice] = useState(null);
   const [loggedWorkouts, setLoggedWorkouts] = useState(MOCK_LOGGED_WORKOUTS);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -758,6 +834,16 @@ function WorkoutsContent() {
     if (freeFilter === 'all') return freeWorkouts;
     return freeWorkouts.filter((w) => w.status === freeFilter);
   }, [freeWorkouts, freeFilter]);
+  const filteredWorkouts = filteredFreeWorkouts;
+  const comparisonCandidates = planSessions.length > 0 ? planSessions : workoutsForDate;
+  const comparisonWorkout =
+    comparisonCandidates.find((w) => w.id === comparisonWorkoutId) || comparisonCandidates[0] || null;
+  const plannedExerciseCount = plannedWorkout?.exercises?.length || 0;
+  const completedCount = workoutsForDate.filter((w) => w.status === 'completed').length;
+  const executionCoverage =
+    plannedExerciseCount > 0
+      ? Math.min(100, ((comparisonWorkout?.exercises?.length || 0) / plannedExerciseCount) * 100)
+      : 0;
 
   const totalVolume = workoutsForDate.reduce((total, w) => total + (w.volume_load || 0), 0);
 
@@ -792,14 +878,14 @@ function WorkoutsContent() {
       message:
         nextStatus === 'completed'
           ? t('pages.workouts.messages.workout_marked_complete')
-          : 'Treino voltou para pendente.',
+          : 'Workout moved back to pending.',
     });
   };
 
   const handleDelete = (workout) => {
-    if (!window.confirm(`Excluir ${workout.name}?`)) return;
+    if (!window.confirm(`Delete ${workout.name}?`)) return;
     setLoggedWorkouts((current) => current.filter((item) => item.id !== workout.id));
-    setNotice({ tone: 'success', message: 'Treino removido.' });
+    setNotice({ tone: 'success', message: 'Workout removed.' });
   };
 
   const handleSaveWorkout = (payload) => {
@@ -821,13 +907,13 @@ function WorkoutsContent() {
     setEditingWorkout(null);
     setNotice({
       tone: 'success',
-      message: editingWorkout?.id ? 'Treino atualizado.' : 'Treino adicionado.',
+      message: editingWorkout?.id ? 'Workout updated.' : 'Workout added.',
     });
   };
 
   const isEditing = Boolean(editingWorkout?.id);
   const formTitle = isEditing
-    ? 'Editar treino'
+    ? 'Edit workout'
     : editingWorkout?.plan_id
       ? 'Log plan session'
       : 'New free workout';
@@ -835,9 +921,9 @@ function WorkoutsContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Treinos"
-        title="Plano e execução livre, lado a lado."
-        subtitle="Seu plano do dia em cima — treinos livres embaixo. Dois espaços distintos, sem mistura."
+        eyebrow="Workouts"
+        title="Planned and free execution, side by side."
+        subtitle="Your assigned plan on top, free workouts below. Two distinct spaces with no mixing."
         accentClassName="from-[hsl(var(--brand)/0.09)] via-[hsl(var(--brand)/0.03)]"
         actions={
           <ActionRow>
@@ -850,27 +936,27 @@ function WorkoutsContent() {
       >
         <div className="grid gap-3 sm:grid-cols-3">
           <HeroStat
-            label="Plano"
+            label="Plan"
             value={plannedWorkout?.name || t('pages.workouts.messages.no_plan')}
             detail={
               plannedWorkout
                 ? `${plannedWorkout.exercises.length} exercises · ${PLAN_SOURCES[plannedWorkout.source]?.label || 'By you'}`
-                : 'Nenhum plano para a data selecionada.'
+                : 'No plan assigned for the selected date.'
             }
           />
           <HeroStat
-            label="Sessões do plano"
-            value={`${planSessions.length} registrada(s)`}
+            label="Plan sessions"
+            value={`${planSessions.length} logged`}
             detail={
               planSessions.length > 0
-                ? `${planSessions.filter((w) => w.status === 'completed').length} concluída(s).`
-                : 'Nenhuma sessão logada contra o plano.'
+                ? `${planSessions.filter((w) => w.status === 'completed').length} completed.`
+                : 'No sessions logged against the plan yet.'
             }
           />
           <HeroStat
-            label="Volume total"
+            label="Total volume"
             value={`${formatVolume(totalVolume)} kg`}
-            detail="Carga somada do plano e dos treinos livres do dia."
+            detail="Combined load from the plan and all free workouts for the day."
           />
         </div>
       </PageHeader>
@@ -906,38 +992,38 @@ function WorkoutsContent() {
 
           <div className="mt-5 space-y-3">
             <SessionSignal
-              label="Plano pronto"
-              value={plannedWorkout ? 'Visível' : 'Aberto'}
+              label="Plan ready"
+              value={plannedWorkout ? 'Visible' : 'Open'}
               detail={
                 plannedWorkout
-                  ? `${plannedExerciseCount} exercícios definidos para comparar.`
-                  : 'Sem plano ativo para o dia selecionado.'
+                  ? `${plannedExerciseCount} exercises defined for comparison.`
+                  : 'No active plan for the selected day.'
               }
               tone={plannedWorkout ? 'neutral' : 'warn'}
             />
             <SessionSignal
-              label="Execução salva"
-              value={workoutsForDate.length > 0 ? `${workoutsForDate.length} sessão(ões)` : 'Nenhuma ainda'}
+              label="Logged execution"
+              value={workoutsForDate.length > 0 ? `${workoutsForDate.length} sessions` : 'None yet'}
               detail={
                 workoutsForDate.length > 0
-                  ? `${completedCount} marcada(s) como concluída(s).`
+                  ? `${completedCount} marked as completed.`
                   : t('pages.workouts.messages.no_execution_logged')
               }
               tone={workoutsForDate.length > 0 ? 'ok' : 'warn'}
             />
             <SessionSignal
-              label="Comparação disponível"
+              label="Comparison ready"
               value={`${Math.round(executionCoverage)}% match`}
-              detail="A comparação abaixo separa claramente o que era plano do que foi executado."
+              detail="The comparison below clearly separates the plan from what was actually executed."
               tone={executionCoverage >= 100 ? 'ok' : 'neutral'}
             />
           </div>
         </Card>
-      </Section>
+      </SectionCard>
 
         <SectionCard
-          title="Plano vs execução"
-          subtitle="Plano, execução e status aparecem separados para leitura imediata da sessão."
+          title="Plan vs execution"
+          subtitle="Plan, execution, and status stay separate for an immediate read of the session."
           actions={
             workoutsForDate.length > 1 ? (
               <div className="flex flex-wrap gap-2">
@@ -957,14 +1043,14 @@ function WorkoutsContent() {
           <div className="grid gap-4 lg:grid-cols-2">
             <ComparisonPanel
               title={t('pages.workouts.messages.no_plan')}
-              eyebrow="Planejado"
+              eyebrow="Planned"
               workout={plannedWorkout}
               planned
               statusMeta={statusMeta}
             />
             <ComparisonPanel
               title={t('pages.workouts.messages.empty_state')}
-              eyebrow="Executado"
+              eyebrow="Executed"
               workout={comparisonWorkout}
               statusMeta={statusMeta}
             />
@@ -974,12 +1060,12 @@ function WorkoutsContent() {
             <div className="mt-4 rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.48)] px-5 py-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="atlas-metric-label">Cobertura de execução</p>
+                  <p className="atlas-metric-label">Execution coverage</p>
                   <p className="mt-3 text-[2rem] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">
                     {Math.round(executionCoverage)}%
                   </p>
                   <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                    {comparisonWorkout.exercises.length} de {plannedWorkout.exercises.length} exercícios aparecem na leitura comparada.
+                    {comparisonWorkout.exercises.length} of {plannedWorkout.exercises.length} exercises appear in the comparison.
                   </p>
                 </div>
                 <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
@@ -994,9 +1080,8 @@ function WorkoutsContent() {
                   style={{ width: `${executionCoverage}%` }}
                 />
               </div>
-            ))}
-          </div>
-        ) : null}
+            </div>
+          ) : null}
       </SectionCard>
 
       {/* ── SECTION 2: FREE WORKOUT ── */}
@@ -1044,8 +1129,8 @@ function WorkoutsContent() {
         {freeWorkouts.length > 0 && filteredFreeWorkouts.length === 0 ? (
           <EmptyState
             icon={Target}
-            title="Nenhum treino neste filtro"
-            description="Troque o filtro ou adicione um novo treino livre."
+            title="No workouts in this filter"
+            description="Switch the filter or add a new free workout."
           />
         ) : null}
 

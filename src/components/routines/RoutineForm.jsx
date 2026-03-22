@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export default function RoutineForm({ onSuccess }) {
   const { user } = useAuth();
@@ -32,7 +32,7 @@ export default function RoutineForm({ onSuccess }) {
     mutationFn: async (data) => {
       const daysData = Array.from(selectedDays).map(dayNum => ({
         day: dayNum,
-        name: DAYS_PT[dayNum],
+        name: DAYS[dayNum],
         workout_id: null,
         workout_name: null,
       }));
@@ -49,11 +49,11 @@ export default function RoutineForm({ onSuccess }) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['routines'] });
-      toast.success('Rotina criada com sucesso');
+      toast.success('Routine created successfully');
       onSuccess?.();
     },
     onError: (err) => {
-      toast.error('Erro ao criar rotina: ' + err.message);
+      toast.error('Error creating routine: ' + err.message);
     },
   });
 
@@ -71,12 +71,12 @@ export default function RoutineForm({ onSuccess }) {
     e.preventDefault();
 
     if (!form.name.trim()) {
-      toast.error('Nome da rotina é obrigatório');
+      toast.error('Routine name is required');
       return;
     }
 
     if (selectedDays.size === 0) {
-      toast.error('Selecione pelo menos um dia da semana');
+      toast.error('Select at least one day of the week');
       return;
     }
 
@@ -87,7 +87,7 @@ export default function RoutineForm({ onSuccess }) {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
         <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
-          Nome da Rotina
+          Routine name
         </label>
         <Input
           value={form.name}
@@ -99,12 +99,12 @@ export default function RoutineForm({ onSuccess }) {
 
       <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
         <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
-          Descrição
+          Description
         </label>
         <Textarea
           value={form.description}
           onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))}
-          placeholder="Descreva a rotina (opcional)"
+          placeholder="Describe the routine (optional)"
           className="atlas-field min-h-[96px] resize-none rounded-[10px] border-0 px-4 py-3 text-[14px]"
         />
       </div>
@@ -112,7 +112,7 @@ export default function RoutineForm({ onSuccess }) {
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
           <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
-            Duração (minutos)
+            Duration (minutes)
           </label>
           <Input
             type="number"
@@ -125,7 +125,7 @@ export default function RoutineForm({ onSuccess }) {
         </div>
         <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
           <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
-            Total de Exercícios
+            Total exercises
           </label>
           <Input
             type="number"
@@ -140,10 +140,10 @@ export default function RoutineForm({ onSuccess }) {
 
       <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
         <label className="mb-3 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
-          Dias da Semana
+          Days of the week
         </label>
         <div className="grid grid-cols-7 gap-2">
-          {DAYS_PT.map((day, idx) => (
+          {DAYS.map((day, idx) => (
             <button
               key={idx}
               type="button"
@@ -174,10 +174,10 @@ export default function RoutineForm({ onSuccess }) {
       >
         {createRoutine.isPending ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin mr-2" /> Criando…
+            <Loader2 className="w-4 h-4 animate-spin mr-2" /> Creating...
           </>
         ) : (
-          'Criar rotina'
+          'Create routine'
         )}
       </Button>
     </form>

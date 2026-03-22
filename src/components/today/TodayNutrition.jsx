@@ -39,7 +39,7 @@ export default function TodayNutrition({ meals, profile }) {
   return (
     <Link to={ROUTES.nutrition} className="block p-5 rounded-2xl bg-card border border-border hover:border-border/80 transition-colors">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Nutrição</p>
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Nutrition</p>
         <ChevronRight className="w-4 h-4 text-muted-foreground/50" strokeWidth={2} />
       </div>
       <div className="mb-4">
@@ -52,9 +52,9 @@ export default function TodayNutrition({ meals, profile }) {
         </div>
       </div>
       <div className="space-y-2">
-        <MacroBar label="Proteína" value={t.pro} max={targets.pro} color="#3b82f6" />
-        <MacroBar label="Carboidratos" value={t.carb} max={targets.carb} color="#a78bfa" />
-        <MacroBar label="Gordura" value={t.fat} max={targets.fat} color="#f59e0b" />
+        <MacroBar label="Protein" value={t.pro} max={targets.pro} color="#3b82f6" />
+        <MacroBar label="Carbs" value={t.carb} max={targets.carb} color="#a78bfa" />
+        <MacroBar label="Fat" value={t.fat} max={targets.fat} color="#f59e0b" />
       </div>
     </Link>
   );

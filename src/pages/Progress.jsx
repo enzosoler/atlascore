@@ -288,7 +288,7 @@ function ProgressContent({ embedded = false }) {
   );
 
   if (embedded) {
-    return <div className="space-y-6">{body}</div>;
+    return <div className="space-y-7">{body}</div>;
   }
 
   return <AppContainer>{body}</AppContainer>;

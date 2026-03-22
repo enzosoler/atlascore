@@ -1,9 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Clock3, CalendarDays, Tag } from 'lucide-react';
-import PublicSiteShell, {
-  PublicLanguageSwitcher,
-} from '@/components/public/PublicSiteShell';
+import PublicSiteShell from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
 import { BLOG_POSTS, getLocalizedPost } from '@/lib/blogPosts';
 import { ROUTES } from '@/lib/routes';
@@ -11,7 +9,7 @@ import { useI18n } from '@/lib/i18nContext';
 
 function formatDate(dateStr, locale) {
   if (!dateStr) return '';
-  return new Date(`${dateStr}T12:00:00`).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -29,7 +27,6 @@ function CategoryPill({ category }) {
 
 function PostCard({ post, locale }) {
   const localized = getLocalizedPost(post, locale);
-  const isPt = locale === 'pt-BR';
 
   return (
     <Link
@@ -40,7 +37,7 @@ function PostCard({ post, locale }) {
         <CategoryPill category={localized.category} />
         <div className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--fg-3))]">
           <Clock3 className="h-3 w-3" strokeWidth={1.9} />
-          <span>{post.readingTime} min {isPt ? 'leitura' : 'read'}</span>
+          <span>{post.readingTime} min read</span>
         </div>
       </div>
 
@@ -59,7 +56,7 @@ function PostCard({ post, locale }) {
           <span>{formatDate(post.publishedAt, locale)}</span>
         </div>
         <span className="flex items-center gap-1 text-[12px] font-medium text-[hsl(var(--tint))] opacity-0 transition-opacity group-hover:opacity-100">
-          {isPt ? 'Ler mais' : 'Read'}
+          Read
           <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
         </span>
       </div>
@@ -69,7 +66,6 @@ function PostCard({ post, locale }) {
 
 export default function BlogIndex() {
   const { locale, t } = useI18n();
-  const isPt = locale === 'pt-BR';
   const [activeCategory, setActiveCategory] = React.useState('All');
 
   const localizedPosts = BLOG_POSTS.map(p => getLocalizedPost(p, locale));
@@ -83,12 +79,7 @@ export default function BlogIndex() {
           return loc.category === activeCategory;
         });
 
-  const ui = isPt ? {
-    title: 'Insights para atletas\nque treinam a sério.',
-    description: 'Guias práticos sobre treino, nutrição e construção de sistemas que realmente produzem resultados — sem hype, sem enrolação.',
-    noPosts: 'Nenhum post nesta categoria ainda.',
-    all: 'Todos'
-  } : {
+  const ui = {
     title: 'Insights for athletes\nwho track seriously.',
     description: 'Practical guides on training, nutrition, and building systems that actually produce results — not motivation, not hype.',
     noPosts: 'No posts in this category yet.',
@@ -98,25 +89,24 @@ export default function BlogIndex() {
   return (
     <PublicSiteShell
       navLinks={[
-        { href: ROUTES.home, label: isPt ? 'Início' : 'Home' },
+        { href: ROUTES.home, label: 'Home' },
         { href: ROUTES.blog, label: 'Blog' },
-        { href: ROUTES.pricing, label: isPt ? 'Planos' : 'Pricing' },
-        { href: ROUTES.help, label: isPt ? 'Ajuda' : 'Help' },
+        { href: ROUTES.pricing, label: 'Pricing' },
+        { href: ROUTES.help, label: 'Help' },
       ]}
       actions={
         <>
-          <PublicLanguageSwitcher />
           <Link
             to={`${ROUTES.auth}?mode=login`}
             className="atlas-button atlas-button-secondary h-9 rounded-full px-4 text-[13px]"
           >
-            {isPt ? 'Entrar' : 'Log in'}
+            Log in
           </Link>
           <Link
             to={`${ROUTES.auth}?mode=signup`}
             className="atlas-button atlas-button-primary h-9 rounded-full px-4 text-[13px]"
           >
-            {isPt ? 'Começar' : 'Get started'}
+            Get started
           </Link>
         </>
       }

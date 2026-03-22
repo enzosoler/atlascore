@@ -25,14 +25,14 @@ export default function AIProgressAnalysis({ measurements, profile }) {
       const bfChange = latest.body_fat - oldest.body_fat;
       const days = (new Date(latest.date) - new Date(oldest.date)) / (1000 * 60 * 60 * 24);
       
-      const text = await invokeLLM(`Analise os TRENDS de ${Math.round(days)} dias:
+      const text = await invokeLLM(`Analyze these ${Math.round(days)}-day trends:
 
-- Peso: ${oldest.weight}kg → ${latest.weight}kg (${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}kg)
-- Gordura: ${oldest.body_fat}% → ${latest.body_fat}% (${bfChange > 0 ? '+' : ''}${bfChange.toFixed(1)}%)
-- Meta: ${profile?.target_weight}kg, ${profile?.body_fat_goal}% gordura
-- Objetivo: ${profile?.training_goal}
+- Weight: ${oldest.weight}kg -> ${latest.weight}kg (${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}kg)
+- Body fat: ${oldest.body_fat}% -> ${latest.body_fat}% (${bfChange > 0 ? '+' : ''}${bfChange.toFixed(1)}%)
+- Goal: ${profile?.target_weight}kg, ${profile?.body_fat_goal}% body fat
+- Objective: ${profile?.training_goal}
 
-Responda com 2-3 linhas: ritmo, se está no caminho certo, dica acionável.`);
+Reply in 2-3 lines: pace of change, whether it is on track, and one actionable recommendation.`);
 
       setAnalysis(text);
     } finally {
@@ -53,8 +53,8 @@ Responda com 2-3 linhas: ritmo, se está no caminho certo, dica acionável.`);
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Atlas AI — Análise de Trends</span>
+        <div className="flex items-center gap-2 mb-2">
+            <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Atlas AI - Trend analysis</span>
           </div>
           {analysis ? (
             <p className="text-[12px] text-foreground leading-relaxed">{analysis}</p>
@@ -65,7 +65,7 @@ Responda com 2-3 linhas: ritmo, se está no caminho certo, dica acionável.`);
               className="px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
             >
               {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
-              {loading ? 'Analisando...' : 'Analisar trends'}
+              {loading ? 'Analyzing...' : 'Analyze trends'}
             </button>
           )}
         </div>

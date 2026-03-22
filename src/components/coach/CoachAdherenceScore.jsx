@@ -42,10 +42,10 @@ export default function CoachAdherenceScore({ checkins = [], workouts = [], meal
   }, [checkins, workouts, meals, days]);
 
   const getAdherenceColor = () => {
-    if (adherence >= 85) return { bg: 'bg-[hsl(var(--ok)/0.08)]', text: 'text-[hsl(var(--ok))]', label: 'Excelente' };
-    if (adherence >= 70) return { bg: 'bg-[hsl(var(--brand)/0.08)]', text: 'text-[hsl(var(--brand))]', label: 'Boa' };
-    if (adherence >= 50) return { bg: 'bg-[hsl(var(--warn)/0.08)]', text: 'text-[hsl(var(--warn))]', label: 'Moderada' };
-    return { bg: 'bg-[hsl(var(--err)/0.08)]', text: 'text-[hsl(var(--err))]', label: 'Baixa' };
+    if (adherence >= 85) return { bg: 'bg-[hsl(var(--ok)/0.08)]', text: 'text-[hsl(var(--ok))]', label: 'Excellent' };
+    if (adherence >= 70) return { bg: 'bg-[hsl(var(--brand)/0.08)]', text: 'text-[hsl(var(--brand))]', label: 'Strong' };
+    if (adherence >= 50) return { bg: 'bg-[hsl(var(--warn)/0.08)]', text: 'text-[hsl(var(--warn))]', label: 'Moderate' };
+    return { bg: 'bg-[hsl(var(--err)/0.08)]', text: 'text-[hsl(var(--err))]', label: 'Low' };
   };
 
   const colors = getAdherenceColor();
@@ -53,7 +53,7 @@ export default function CoachAdherenceScore({ checkins = [], workouts = [], meal
   return (
     <div className={`surface p-5 rounded-xl border ${colors.bg.replace('bg-', 'border-').replace('/0.08', '/0.25')}`}>
       <div className="flex items-center justify-between mb-3">
-        <p className="t-label">Aderência Geral</p>
+        <p className="t-label">Overall adherence</p>
         <span className={`badge ${colors.bg} ${colors.text} font-bold`}>{adherence}%</span>
       </div>
       
@@ -68,17 +68,17 @@ export default function CoachAdherenceScore({ checkins = [], workouts = [], meal
         <div className="text-center p-2 rounded-lg bg-[hsl(var(--card-hi))]">
           <p className="text-muted-foreground mb-0.5">Check-ins</p>
           <p className="font-bold">{new Set(checkins.map(c => c.date)).size}</p>
-          <p className="text-muted-foreground text-[10px]">de {days}</p>
+          <p className="text-muted-foreground text-[10px]">of {days}</p>
         </div>
         <div className="text-center p-2 rounded-lg bg-[hsl(var(--card-hi))]">
-          <p className="text-muted-foreground mb-0.5">Treinos</p>
+          <p className="text-muted-foreground mb-0.5">Workouts</p>
           <p className="font-bold">{new Set(workouts.map(w => w.date)).size}</p>
-          <p className="text-muted-foreground text-[10px]">registrados</p>
+          <p className="text-muted-foreground text-[10px]">logged</p>
         </div>
         <div className="text-center p-2 rounded-lg bg-[hsl(var(--card-hi))]">
-          <p className="text-muted-foreground mb-0.5">Refeições</p>
+          <p className="text-muted-foreground mb-0.5">Meals</p>
           <p className="font-bold">{new Set(meals.map(m => m.date)).size}</p>
-          <p className="text-muted-foreground text-[10px]">de {days}</p>
+          <p className="text-muted-foreground text-[10px]">of {days}</p>
         </div>
       </div>
 

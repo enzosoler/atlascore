@@ -37,23 +37,23 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
   const hasMissing = missing.length > 0;
 
   const knownItems = isDiet ? [
-    profile?.current_weight && `Peso: ${profile.current_weight}kg`,
-    profile?.calories_target && `Meta calórica: ${profile.calories_target} kcal`,
-    profile?.protein_target && `Proteína alvo: ${profile.protein_target}g`,
-    profile?.health_goals?.length && `Objetivo: ${profile.health_goals.join(', ')}`,
-    profile?.activity_level && `Atividade: ${profile.activity_level}`,
-    profile?.dietary_style && `Estilo: ${profile.dietary_style}`,
-    profile?.allergies && `Alergias: ${profile.allergies}`,
-    profile?.meals_per_day && `Refeições/dia: ${profile.meals_per_day}`,
+    profile?.current_weight && `Weight: ${profile.current_weight}kg`,
+    profile?.calories_target && `Calorie target: ${profile.calories_target} kcal`,
+    profile?.protein_target && `Protein target: ${profile.protein_target}g`,
+    profile?.health_goals?.length && `Goal: ${profile.health_goals.join(', ')}`,
+    profile?.activity_level && `Activity: ${profile.activity_level}`,
+    profile?.dietary_style && `Style: ${profile.dietary_style}`,
+    profile?.allergies && `Allergies: ${profile.allergies}`,
+    profile?.meals_per_day && `Meals/day: ${profile.meals_per_day}`,
   ].filter(Boolean) : [
-    profile?.current_weight && `Peso: ${profile.current_weight}kg`,
-    profile?.training_goal && `Objetivo: ${profile.training_goal}`,
-    profile?.activity_level && `Atividade: ${profile.activity_level}`,
-    profile?.training_experience && `Experiência: ${profile.training_experience}`,
-    profile?.training_days_per_week && `Frequência: ${profile.training_days_per_week}×/semana`,
-    profile?.training_session_minutes && `Duração: ${profile.training_session_minutes}min`,
-    profile?.training_location && `Local: ${profile.training_location}`,
-    profile?.injuries && `Lesões: ${profile.injuries}`,
+    profile?.current_weight && `Weight: ${profile.current_weight}kg`,
+    profile?.training_goal && `Goal: ${profile.training_goal}`,
+    profile?.activity_level && `Activity: ${profile.activity_level}`,
+    profile?.training_experience && `Experience: ${profile.training_experience}`,
+    profile?.training_days_per_week && `Frequency: ${profile.training_days_per_week}×/week`,
+    profile?.training_session_minutes && `Duration: ${profile.training_session_minutes}min`,
+    profile?.training_location && `Location: ${profile.training_location}`,
+    profile?.injuries && `Injuries: ${profile.injuries}`,
   ].filter(Boolean);
 
   const handleGenerate = async () => {
@@ -158,12 +158,12 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                   Training experience level?
                 </label>
                 <Select value={answers.experience || ''} onValueChange={v => set('experience', v)}>
-                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="beginner">Beginner (less than 1 year)</SelectItem>
                     <SelectItem value="intermediate">Intermediate (1-3 years)</SelectItem>
                     <SelectItem value="advanced">Advanced (3-6 years)</SelectItem>
-                    <SelectItem value="expert">Expert (6+ anos)</SelectItem>
+                    <SelectItem value="expert">Expert (6+ years)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -231,10 +231,10 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
             </div>
             <div className="text-center">
               <p className="text-[14px] font-semibold mb-1">
-                {isDiet ? 'Gerando plano alimentar...' : 'Gerando treino...'}
+                {isDiet ? 'Generating meal plan...' : 'Generating workout...'}
               </p>
               <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                A IA está usando seu perfil para personalizar o plano
+                Atlas AI is using your profile to personalize the plan
               </p>
             </div>
           </div>

@@ -1,10 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const surfaceClassName =
-  'atlas-card rounded-[18px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)]';
+  'atlas-card rounded-[22px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)]';
+const summaryMetaClassName =
+  'inline-flex min-h-[36px] max-w-full items-center self-start overflow-hidden truncate whitespace-nowrap rounded-[13px] px-3.5 text-[11px] font-semibold tracking-[-0.012em] leading-none shadow-[var(--shadow-xs)]';
+const summaryCtaClassName =
+  'h-11 w-full justify-center gap-2 rounded-[16px] px-4 text-[13px] font-semibold tracking-[-0.014em] shadow-[var(--shadow-xs)] [&_svg]:h-[15px] [&_svg]:w-[15px]';
+const summaryCtaBaseClassName = buttonVariants({ variant: 'default', size: 'default' });
 
 const toneStyles = {
   blue: {
@@ -38,7 +44,7 @@ function getAdherenceTone(score) {
 export function TodayScreen({ children }) {
   return (
     <div className="min-h-full bg-transparent text-[hsl(var(--fg))]">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 pb-8 pt-4 sm:px-6 lg:gap-7 lg:px-8 lg:py-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 px-4 pb-12 pt-5 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:gap-9 lg:px-8 lg:pb-16 lg:pt-9">
         {children}
       </div>
     </div>
@@ -46,22 +52,22 @@ export function TodayScreen({ children }) {
 }
 
 export function TodayCard({ className, children }) {
-  return <section className={cn(surfaceClassName, 'p-4 sm:p-5', className)}>{children}</section>;
+  return <section className={cn(surfaceClassName, 'p-5 sm:p-6', className)}>{children}</section>;
 }
 
 export function TodaySection({ eyebrow, title, description, children, className }) {
   return (
-    <section className={cn('space-y-3', className)}>
+    <section className={cn('space-y-4', className)}>
       {(eyebrow || title || description) ? (
-        <div className="space-y-2 px-0.5">
+        <div className="space-y-2.5 px-0.5">
           {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
           {title ? (
-            <h2 className="text-[20px] font-semibold tracking-[-0.045em] text-[hsl(var(--fg))]">
+            <h2 className="atlas-section-title text-[1.28rem]">
               {title}
             </h2>
           ) : null}
           {description ? (
-            <p className="text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
+            <p className="atlas-copy">{description}</p>
           ) : null}
         </div>
       ) : null}
@@ -83,13 +89,13 @@ export function TodayActionCard({
       to={to}
       className={cn(
         surfaceClassName,
-        'group flex items-start gap-3 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+        'group flex min-h-[124px] items-start gap-4 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
         highlighted ? toneStyles.blue.glow : ''
       )}
     >
       <div
         className={cn(
-          'mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border',
+          'mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border',
           highlighted
             ? toneStyles.blue.icon
             : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.74)] text-[hsl(var(--fg-2))]'
@@ -98,14 +104,14 @@ export function TodayActionCard({
         <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 space-y-2">
         {priority ? <p className="atlas-overline">{priority}</p> : null}
-        <div className="mt-1.5 flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            <p className="text-[16px] font-semibold tracking-[-0.034em] text-[hsl(var(--fg))]">
               {title}
             </p>
-            <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
+            <p className="mt-1.5 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
           </div>
           <ChevronRight
             className="mt-1 h-4 w-4 shrink-0 text-[hsl(var(--fg-3))] transition-transform duration-200 group-hover:translate-x-0.5"
@@ -135,7 +141,7 @@ export function TodayStatCard({
       to={to}
       className={cn(
         surfaceClassName,
-        'flex min-h-[178px] flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+        'flex min-h-[214px] flex-col p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
         done
           ? 'border-[hsl(var(--ok)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.08),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]'
           : styles.glow
@@ -144,10 +150,10 @@ export function TodayStatCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="atlas-overline">{label}</p>
-          <p className="mt-3 font-mono text-[28px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{value}</p>
+          <p className="mt-3 tabular-nums text-[29px] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))]">{value}</p>
         </div>
         <div className={cn(
-          'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border',
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border',
           done
             ? 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
             : styles.icon
@@ -158,21 +164,31 @@ export function TodayStatCard({
 
       <p className="mt-3 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
 
-      <div className="mt-auto pt-4 flex items-center justify-between gap-2">
+      <div className="mt-auto flex flex-col gap-3 pt-6">
         {meta ? (
-          <span className={cn('inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold', done ? 'border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]' : styles.pill)}>
+          <span
+            className={cn(
+              summaryMetaClassName,
+              done
+                ? 'border border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]'
+                : styles.pill
+            )}
+          >
             {meta}
           </span>
-        ) : <span />}
+        ) : null}
         {ctaLabel ? (
-          <span className={cn(
-            'inline-flex items-center gap-1 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold transition-colors',
-            done
-              ? 'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
-              : 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-fg,var(--bg)))]'
-          )}>
-            {ctaLabel}
-            <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          <span
+            className={cn(
+              summaryCtaBaseClassName,
+              summaryCtaClassName,
+              done
+                ? 'border-[hsl(var(--ok)/0.16)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))] hover:bg-[hsl(var(--ok)/0.16)]'
+                : 'border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--primary))] text-[hsl(var(--primary-fg,var(--bg)))] hover:bg-[hsl(var(--primary)/0.94)]'
+            )}
+          >
+            <span className="truncate text-center">{ctaLabel}</span>
+            <ChevronRight className="shrink-0" strokeWidth={2.6} />
           </span>
         ) : null}
       </div>
@@ -194,7 +210,7 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
 
   return (
     <TodayCard className={styles.glow}>
-      <div className="flex items-center gap-4">
+      <div className="flex items-start gap-4">
         <div className="relative h-[72px] w-[72px] shrink-0">
           <svg width="72" height="72" className="-rotate-90">
             <circle cx="36" cy="36" r="26" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
@@ -211,12 +227,12 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-mono text-[20px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{score}</span>
+            <span className="tabular-nums text-[22px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">{score}</span>
           </div>
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
             <div>
               <p className="atlas-overline">Adherence</p>
               <p className="mt-1 text-[18px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
@@ -261,11 +277,11 @@ export function TodayInsightCard({
       className={cn(
         surfaceClassName,
         toneStyles.teal.glow,
-        'block p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] sm:p-5'
+        'block p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] sm:p-6'
       )}
     >
       <div className="flex items-start gap-3">
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border', toneStyles.teal.icon)}>
+        <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border', toneStyles.teal.icon)}>
           <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
         </div>
 

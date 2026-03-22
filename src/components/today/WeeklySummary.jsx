@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar } from 'lucide-react';
 import { subDays } from 'date-fns';
 
-const DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 /**
  * WeeklySummary — visual weekly adherence & highlights
@@ -36,7 +36,7 @@ export default function WeeklySummary({ allCheckins, meals, workouts }) {
     <div className="surface p-4 space-y-3">
       <div className="flex items-center gap-2 mb-2">
         <Calendar className="w-4 h-4 text-[hsl(var(--fg-2))]" strokeWidth={2} />
-        <p className="t-label">Esta semana</p>
+        <p className="t-label">This week</p>
       </div>
 
       {/* Weekly pattern */}
@@ -62,7 +62,7 @@ export default function WeeklySummary({ allCheckins, meals, workouts }) {
       {/* Summary metrics */}
       <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[hsl(var(--border-h))]">
         <div className="text-center">
-          <p className="text-[11px] text-[hsl(var(--fg-2))] mb-0.5">Média</p>
+          <p className="text-[11px] text-[hsl(var(--fg-2))] mb-0.5">Average</p>
           <p className="text-[14px] font-bold text-[hsl(var(--fg))]">{weekAvgScore}%</p>
         </div>
         <div className="text-center">
@@ -70,7 +70,7 @@ export default function WeeklySummary({ allCheckins, meals, workouts }) {
           <p className="text-[14px] font-bold text-[hsl(var(--fg))]">{checkinsThisWeek}/7</p>
         </div>
         <div className="text-center">
-          <p className="text-[11px] text-[hsl(var(--fg-2))] mb-0.5">Treinos</p>
+          <p className="text-[11px] text-[hsl(var(--fg-2))] mb-0.5">Workouts</p>
           <p className="text-[14px] font-bold text-[hsl(var(--fg))]">{workoutsThisWeek}</p>
         </div>
       </div>

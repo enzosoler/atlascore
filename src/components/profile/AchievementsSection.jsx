@@ -6,11 +6,11 @@ import { Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CATEGORY_LABELS = {
-  agua:     '💧 Hidratação',
+  agua:     '💧 Hydration',
   checkin:  '📋 Check-ins',
-  treino:   '💪 Treinos',
-  corpo:    '📏 Corpo',
-  especial: '🌟 Especiais',
+  treino:   '💪 Workouts',
+  corpo:    '📏 Body',
+  especial: '🌟 Specials',
 };
 
 function AchievementBadge({ def, progress, unlocked, isNew }) {
@@ -24,7 +24,7 @@ function AchievementBadge({ def, progress, unlocked, isNew }) {
       }`}>
       {isNew && (
         <span className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-[hsl(var(--warn))] text-white text-[9px] font-bold rounded-full leading-none">
-          NOVO
+          NEW
         </span>
       )}
       <div className={`text-[28px] leading-none transition-all ${unlocked ? '' : 'grayscale opacity-50'}`}>
@@ -43,7 +43,7 @@ function AchievementBadge({ def, progress, unlocked, isNew }) {
           <p className="text-[9px] text-[hsl(var(--fg-2))] mt-0.5">{progress}/{def.target}</p>
         </div>
       )}
-      {unlocked && <span className="text-[9px] text-[hsl(var(--warn))] font-semibold">Conquistado ✓</span>}
+      {unlocked && <span className="text-[9px] text-[hsl(var(--warn))] font-semibold">Unlocked ✓</span>}
     </div>
   );
 }
@@ -98,7 +98,7 @@ export default function AchievementsSection() {
 
       if (c.unlocked && !existing) {
         saveMut.mutate({ key: def.key, progress: c.progress });
-        toast.success(`🏆 Conquista desbloqueada: ${def.label}!`, { duration: 4000 });
+        toast.success(`🏆 Achievement unlocked: ${def.label}!`, { duration: 4000 });
       } else if (existing && !existing.notified && c.unlocked) {
         updateMut.mutate({ id: existing.id, data: { notified: true } });
       } else if (existing && !c.unlocked) {
@@ -124,12 +124,12 @@ export default function AchievementsSection() {
           <Trophy className="w-6 h-6 text-[hsl(var(--warn))]" strokeWidth={2} />
         </div>
         <div className="flex-1">
-          <p className="text-[14px] font-bold">Conquistas</p>
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">{unlockedCount} de {ACHIEVEMENTS.length} desbloqueadas</p>
+          <p className="text-[14px] font-bold">Achievements</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">{unlockedCount} of {ACHIEVEMENTS.length} unlocked</p>
         </div>
         <div className="text-right">
           <p className="text-[28px] font-black tracking-tight leading-none text-[hsl(var(--warn))]">{unlockedCount}</p>
-          <p className="text-[10px] text-[hsl(var(--fg-2))]">medalhas</p>
+          <p className="text-[10px] text-[hsl(var(--fg-2))]">badges</p>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function AchievementsSection() {
             style={{ width: `${Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)}%` }} />
         </div>
         <p className="text-[11px] text-[hsl(var(--fg-2))] mt-1 text-right">
-          {Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)}% completo
+          {Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)}% complete
         </p>
       </div>
 

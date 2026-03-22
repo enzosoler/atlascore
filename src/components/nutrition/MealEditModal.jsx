@@ -99,7 +99,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
       total_fiber: Math.round(totals.fib * 10) / 10,
     }).then(() => {
       qc.invalidateQueries({ queryKey: ['meals'] });
-      toast.success('Refeição duplicada para amanhã');
+      toast.success('Meal duplicated for tomorrow');
     });
   };
 
@@ -128,7 +128,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
           {/* Foods list with edit capability */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="section-label">Alimentos</p>
+              <p className="section-label">Foods</p>
               <FoodSearch
                 onSelectFood={(f) => setFoods([...foods, f])}
                 compact
@@ -192,7 +192,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
               </div>
             ) : (
               <p className="text-[12px] text-muted-foreground text-center py-3">
-                Nenhum alimento adicionado
+                No foods added
               </p>
             )}
           </div>
@@ -226,10 +226,10 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
             >
               {updateMutation.isPending ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Salvando…
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
                 </>
               ) : (
-                'Salvar alterações'
+                'Save changes'
               )}
             </Button>
             {meal && (

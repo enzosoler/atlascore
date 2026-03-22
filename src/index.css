@@ -72,16 +72,16 @@
     --space-16: 64px;
 
     /* Radius */
-    --atlas-card-radius: 14px;
-    --atlas-control-radius: 10px;
-    --atlas-sheet-radius: 20px;
+    --atlas-card-radius: 18px;
+    --atlas-control-radius: 14px;
+    --atlas-sheet-radius: 24px;
     --atlas-radius: var(--atlas-card-radius);
-    --r-xs: 10px;
-    --r-sm: 14px;
-    --r-md: 14px;
-    --r-lg: 20px;
-    --r-xl: 20px;
-    --r-2xl: 24px;
+    --r-xs: 12px;
+    --r-sm: 16px;
+    --r-md: 18px;
+    --r-lg: 24px;
+    --r-xl: 24px;
+    --r-2xl: 28px;
     --r-pill: 999px;
 
     /* Shadows */
@@ -227,10 +227,11 @@
   }
 
   html {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-kerning: normal;
     min-height: 100%;
     /* clip (not hidden) avoids creating a new scroll container on iOS Safari,
        which would break position:fixed for the header and bottom tab bar */
@@ -238,6 +239,7 @@
   }
 
   body {
+    font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
     min-height: 100%;
     background:
       radial-gradient(circle at top, hsl(var(--accent-primary) / 0.12), transparent 34%),
@@ -247,7 +249,7 @@
     color: hsl(var(--label));
     font-size: 16px;
     line-height: 1.5;
-    letter-spacing: -0.018em;
+    letter-spacing: -0.014em;
     -webkit-user-select: text;
     user-select: text;
     /*
@@ -255,6 +257,13 @@
      * the body into a constrained desktop scroll container.
      */
     overflow-x: clip;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
   }
 
   #root {
@@ -579,7 +588,7 @@
       linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.9);
     border-radius: var(--atlas-sheet-radius);
-    box-shadow: var(--shadow-sm), var(--shadow-inset);
+    box-shadow: var(--shadow-sm), var(--shadow-inset), 0 0 0 1px hsl(var(--accent-primary) / 0.03);
   }
 
   /* Gradient text utility — brand-tinted headlines */
@@ -649,42 +658,42 @@
   .atlas-overline {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.6875rem;
+    gap: 6px;
+    font-size: 0.71875rem;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: hsl(var(--label-tertiary));
   }
 
   .atlas-display-title {
-    font-size: clamp(2rem, 1.6rem + 1vw, 2.9rem);
+    font-size: clamp(2.1rem, 1.7rem + 1.02vw, 3.05rem);
     font-weight: 700;
-    letter-spacing: -0.055em;
-    line-height: 1.04;
+    letter-spacing: -0.05em;
+    line-height: 1.02;
     color: hsl(var(--label));
   }
 
   .atlas-section-title {
-    font-size: 1.125rem;
+    font-size: 1.1875rem;
     font-weight: 650;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
+    letter-spacing: -0.034em;
+    line-height: 1.16;
     color: hsl(var(--label));
   }
 
   .atlas-section-description,
   .atlas-copy {
     color: hsl(var(--label-secondary));
-    font-size: 0.9375rem;
-    line-height: 1.65;
-    letter-spacing: -0.016em;
+    font-size: 0.96875rem;
+    line-height: 1.68;
+    letter-spacing: -0.014em;
   }
 
   .atlas-metric-label {
-    font-size: 0.6875rem;
+    font-size: 0.71875rem;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     color: hsl(var(--label-tertiary));
   }
@@ -692,7 +701,7 @@
   .atlas-metric-value {
     font-size: clamp(1.75rem, 1.4rem + 0.8vw, 2.5rem);
     font-weight: 700;
-    letter-spacing: -0.055em;
+    letter-spacing: -0.048em;
     line-height: 1.05;
     color: hsl(var(--label));
   }
@@ -848,14 +857,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-    padding: 0 18px;
+    gap: 9px;
+    min-height: 46px;
+    padding: 0 20px;
     border-radius: var(--atlas-control-radius);
     border: 1px solid transparent;
     font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: -0.016em;
+    font-weight: 650;
+    letter-spacing: -0.018em;
+    line-height: 1.1;
     white-space: nowrap;
     cursor: pointer;
     transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
@@ -873,6 +883,7 @@
   .btn-primary {
     background: hsl(var(--button-primary-bg));
     color: hsl(var(--button-primary-foreground));
+    border-color: hsl(var(--button-primary-bg) / 0.2);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12), 0 14px 32px hsl(var(--button-primary-bg) / 0.26);
   }
 
@@ -883,16 +894,16 @@
 
   .atlas-button-secondary,
   .btn-secondary {
-    background: transparent;
-    color: hsl(var(--accent-primary));
-    border-color: hsl(var(--accent-primary) / 0.42);
-    box-shadow: none;
+    background: linear-gradient(180deg, hsl(var(--card) / 0.96) 0%, hsl(var(--fill) / 0.82) 100%);
+    color: hsl(var(--label));
+    border-color: hsl(var(--separator-opaque) / 0.9);
+    box-shadow: var(--shadow-xs), var(--shadow-inset);
   }
 
   .atlas-button-secondary:hover:not(:disabled),
   .btn-secondary:hover:not(:disabled) {
-    background: hsl(var(--accent-primary) / 0.08);
-    border-color: hsl(var(--accent-primary) / 0.6);
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill)) 100%);
+    border-color: hsl(var(--separator-strong));
     color: hsl(var(--label));
   }
 

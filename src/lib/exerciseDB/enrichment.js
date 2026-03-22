@@ -446,36 +446,36 @@ export function enrichExercise(exercise) {
 // ─── Label maps ───────────────────────────────────────────────────────────────
 
 export const MOVEMENT_PATTERN_LABELS = {
-  push_horizontal: 'Empurrar horizontal',
-  push_vertical: 'Empurrar vertical',
-  pull_horizontal: 'Puxar horizontal',
-  pull_vertical: 'Puxar vertical',
-  squat: 'Agachamento',
-  hinge: 'Dobradiça de quadril',
-  lunge: 'Avanço / Afundo',
-  carry: 'Carregamento',
-  rotation: 'Rotação',
-  hip_extension: 'Extensão de quadril',
-  isolation: 'Isolamento',
+  push_horizontal: 'Horizontal push',
+  push_vertical: 'Vertical push',
+  pull_horizontal: 'Horizontal pull',
+  pull_vertical: 'Vertical pull',
+  squat: 'Squat',
+  hinge: 'Hip hinge',
+  lunge: 'Lunge',
+  carry: 'Carry',
+  rotation: 'Rotation',
+  hip_extension: 'Hip extension',
+  isolation: 'Isolation',
 };
 
 export const RESISTANCE_CURVE_LABELS = {
-  ascending: 'Mais difícil no final',
-  mid_peak: 'Pico no meio',
-  constant: 'Relativamente constante',
-  descending: 'Mais difícil no início',
+  ascending: 'Hardest at lockout',
+  mid_peak: 'Hardest in the middle',
+  constant: 'Relatively constant',
+  descending: 'Hardest at the start',
 };
 
 export const FATIGUE_PROFILE_LABELS = {
-  very_high: 'Muito alta',
-  high: 'Alta',
-  medium: 'Média',
-  low: 'Baixa',
+  very_high: 'Very high',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
 };
 
 export const STABILITY_LABELS = {
-  very_high: 'Muito alta (guiado)',
-  high: 'Alta',
-  medium: 'Média',
-  low: 'Baixa (instável)',
+  very_high: 'Very high (guided)',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low (unstable)',
 };

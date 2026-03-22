@@ -24,6 +24,7 @@ import {
   StatusBanner,
   SecondaryButton,
 } from '@/components/shared/StablePage';
+import { Button } from '@/components/ui/button';
 
 // ── Theme option button ───────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ function ThemeOption({ icon: Icon, label, value, currentTheme, onSelect }) {
       type="button"
       onClick={() => onSelect(value)}
       className={[
-        'flex flex-1 flex-col items-center gap-2 rounded-[20px] border py-4 text-[13px] font-medium transition-all duration-200',
+        'flex min-h-[104px] flex-1 flex-col items-center justify-center gap-2 rounded-[22px] border px-4 py-5 text-[13px] font-medium transition-all duration-200',
         active
           ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]'
           : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)] hover:text-[hsl(var(--fg))]',
@@ -50,7 +51,7 @@ function ThemeOption({ icon: Icon, label, value, currentTheme, onSelect }) {
 
 function SettingsRow({ icon: Icon, label, description, href, onClick, destructive = false }) {
   const cls = [
-    'flex w-full items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-5 py-4 text-left transition-all duration-200',
+    'flex min-h-[84px] w-full items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-5 py-4 text-left transition-all duration-200',
     destructive
       ? 'hover:border-[hsl(var(--err)/0.3)] hover:bg-[hsl(var(--err)/0.06)]'
       : 'hover:bg-[hsl(var(--fill)/0.72)]',
@@ -105,7 +106,7 @@ function SettingsRow({ icon: Icon, label, description, href, onClick, destructiv
 function SettingsContent() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { locale, setLocale, t } = useI18n();
+  const { t } = useI18n();
 
   const handleLogout = async () => {
     if (window.confirm(t('settings.signout.confirm'))) {
@@ -138,13 +139,12 @@ function SettingsContent() {
             </p>
             <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">{user?.email || '—'}</p>
           </div>
-          <Link
-            to={ROUTES.profile}
-            className="ml-auto flex items-center gap-1.5 rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] px-3 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
-          >
-            {t('settings.account.editProfile')}
-            <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-          </Link>
+          <Button asChild variant="outline" size="sm" className="ml-auto gap-1.5">
+            <Link to={ROUTES.profile}>
+              {t('settings.account.editProfile')}
+              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+            </Link>
+          </Button>
         </div>
       </SectionCard>
 

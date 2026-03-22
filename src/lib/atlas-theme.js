@@ -2,23 +2,23 @@
 // Colors removed: use CSS tokens (--brand, --brand-ai, --ok, --warn, --err) directly
 
 export const MEAL_TYPES = {
-  breakfast:       { label: 'Café da manhã' },
-  morning_snack:   { label: 'Lanche da manhã' },
-  lunch:           { label: 'Almoço' },
-  afternoon_snack: { label: 'Lanche da tarde' },
-  dinner:          { label: 'Jantar' },
-  evening_snack:   { label: 'Ceia' },
-  pre_workout:     { label: 'Pré-treino' },
-  post_workout:    { label: 'Pós-treino' },
+  breakfast:       { label: 'Breakfast' },
+  morning_snack:   { label: 'Morning snack' },
+  lunch:           { label: 'Lunch' },
+  afternoon_snack: { label: 'Afternoon snack' },
+  dinner:          { label: 'Dinner' },
+  evening_snack:   { label: 'Evening snack' },
+  pre_workout:     { label: 'Pre-workout' },
+  post_workout:    { label: 'Post-workout' },
 };
 
 export const WORKOUT_TYPES = {
-  strength:    { label: 'Força' },
+  strength:    { label: 'Strength' },
   cardio:      { label: 'Cardio' },
   hiit:        { label: 'HIIT' },
-  flexibility: { label: 'Flexibilidade' },
-  sport:       { label: 'Esporte' },
-  other:       { label: 'Outro' },
+  flexibility: { label: 'Flexibility' },
+  sport:       { label: 'Sport' },
+  other:       { label: 'Other' },
 };
 
 export const formatDate = (date) => {
@@ -30,8 +30,7 @@ export const getToday = () => new Date().toISOString().split('T')[0];
 
 export const getGreeting = (locale) => {
   const h = new Date().getHours();
-  const isPt = !locale || locale === 'pt-BR';
-  if (h < 12) return isPt ? 'Bom dia' : 'Good morning';
-  if (h < 18) return isPt ? 'Boa tarde' : 'Good afternoon';
-  return isPt ? 'Boa noite' : 'Good evening';
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
 };

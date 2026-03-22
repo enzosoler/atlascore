@@ -23,16 +23,14 @@ function flattenKeys(value, prefix = '') {
   });
 }
 
-test('core translation catalogs stay in sync between en-US and pt-BR', () => {
+test('core translation catalog is present for English-only mode', () => {
   const englishKeys = flattenKeys(readJson('src/lib/translations/en-US.json'));
-  const portugueseKeys = flattenKeys(readJson('src/lib/translations/pt-BR.json'));
 
-  assert.deepEqual(portugueseKeys, englishKeys);
+  assert.ok(englishKeys.length > 0);
 });
 
-test('onboarding translation catalogs stay in sync between en-US and pt-BR', () => {
+test('onboarding translation catalog is present for English-only mode', () => {
   const englishKeys = flattenKeys(readJson('src/lib/translations/en-US-onboarding.json'));
-  const portugueseKeys = flattenKeys(readJson('src/lib/translations/pt-BR-onboarding.json'));
 
-  assert.deepEqual(portugueseKeys, englishKeys);
+  assert.ok(englishKeys.length > 0);
 });
