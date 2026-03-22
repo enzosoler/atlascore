@@ -5,7 +5,6 @@ import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import { StatusBanner } from '@/components/shared/StablePage';
 import {
   Activity,
-  ArrowUpRight,
   Brain,
   CalendarDays,
   ClipboardCheck,
@@ -842,8 +841,8 @@ export default function AtlasAI() {
 
   return (
     <div className="atlas-page-shell">
-      <div className="mx-auto max-w-[1560px] px-3 py-3 lg:px-6 lg:py-4">
-        <div className="atlas-chat-shell flex min-h-[80vh] flex-col overflow-hidden lg:h-[calc(100dvh-2rem)] lg:flex-row">
+      <div className="mx-auto max-w-[1560px] px-4 py-4 lg:px-6 lg:py-5">
+        <div className="atlas-chat-shell flex min-h-[82vh] flex-col overflow-hidden lg:h-[calc(100dvh-2rem)] lg:flex-row">
 
           {/* ── SIDEBAR ── */}
           <aside className="atlas-chat-sidebar hidden w-[300px] shrink-0 border-r border-[hsl(var(--border)/0.82)] lg:flex lg:flex-col">
@@ -939,7 +938,7 @@ export default function AtlasAI() {
           {/* ── MAIN SECTION ── */}
           <section className="flex min-h-0 flex-1 flex-col">
 
-              <div className="relative flex flex-col gap-5">
+              <div className="relative flex flex-col gap-6 px-4 py-4 lg:px-6 lg:py-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2.5">
@@ -957,10 +956,10 @@ export default function AtlasAI() {
                     </div>
 
                     <div className="mt-4">
-                      <h1 className="text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))] lg:text-[1.7rem]">
+                      <h1 className="text-[1.55rem] font-semibold tracking-[-0.055em] text-[hsl(var(--fg))] lg:text-[1.95rem]">
                         {activeConversationLabel}
                       </h1>
-                      <p className="mt-2 max-w-3xl text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+                      <p className="mt-2 max-w-3xl text-[15px] leading-7 text-[hsl(var(--fg-2))]">
                         {activeConversation
                           ? getConversationPreview(activeConversation)
                           : 'A premium assistant experience to review training, nutrition, progress and profile signals — not a generic chat.'}
@@ -972,8 +971,8 @@ export default function AtlasAI() {
                     <Button
                       onClick={newConv}
                       variant="outline"
-                      size="sm"
-                      className="rounded-full px-4"
+                      size="default"
+                      className="rounded-full px-5"
                     >
                       <Plus className="h-4 w-4" strokeWidth={2} />
                       New conversation

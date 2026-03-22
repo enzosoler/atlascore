@@ -54,7 +54,7 @@ export default function Body() {
         accentClassName="from-[hsl(var(--brand)/0.14)] via-[hsl(var(--brand)/0.04)]"
       >
         <div className="grid gap-3 md:grid-cols-3">
-          <Card className="px-4 py-4">
+          <Card className="px-5 py-5">
             <p className="atlas-metric-label">Current area</p>
             <p className="mt-3 text-[1.15rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
               {activeTabMeta.label}
@@ -63,7 +63,7 @@ export default function Body() {
               {activeTabMeta.description}
             </p>
           </Card>
-          <Card className="px-4 py-4">
+          <Card className="px-5 py-5">
             <p className="atlas-metric-label">Hub structure</p>
             <p className="mt-3 text-[1.15rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
               Trends, checkpoints, visuals
@@ -72,7 +72,7 @@ export default function Body() {
               The tabbed flow mirrors the handoff without splitting the body story apart.
             </p>
           </Card>
-          <Card className="px-4 py-4">
+          <Card className="px-5 py-5">
             <p className="atlas-metric-label">Navigation</p>
             <p className="mt-3 text-[1.15rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
               Large-title entry, embedded sections
@@ -84,7 +84,7 @@ export default function Body() {
         </div>
       </PageHeader>
 
-      <Card className="space-y-4 px-4 py-4 sm:px-5">
+      <Card className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex flex-wrap gap-2">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -102,7 +102,7 @@ export default function Body() {
           })}
         </div>
 
-        <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] px-4 py-3">
+        <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] px-4 py-4 sm:px-5">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand))]">
               <ActiveIcon className="h-4 w-4" strokeWidth={1.9} />
