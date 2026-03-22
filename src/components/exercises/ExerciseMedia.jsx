@@ -41,7 +41,7 @@ function SkeletonPlaceholder({ size }) {
 }
 
 function NoMediaPlaceholder({ exercise, size }) {
-  const initials = (exercise?.canonical_name_pt || exercise?.canonical_name_en || '?')
+  const initials = (exercise?.canonical_name_en || exercise?.name || exercise?.canonical_name_pt || '?')
     .split(' ')
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() || '')
@@ -99,7 +99,7 @@ export default function ExerciseMedia({
       {status !== 'error' && (
         <img
           src={mediaUrl}
-          alt={`Demonstration: ${exercise?.canonical_name_pt || exercise?.canonical_name_en || ''}`}
+          alt={`Demonstration: ${exercise?.canonical_name_en || exercise?.name || exercise?.canonical_name_pt || ''}`}
           loading="lazy"
           decoding="async"
           onLoad={() => setStatus('loaded')}

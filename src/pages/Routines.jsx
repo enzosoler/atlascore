@@ -11,7 +11,7 @@ import RoutineForm from '@/components/routines/RoutineForm';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 
-const DAYS_ABBR = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+const DAYS_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function Routines() {
   const { user } = useAuth();
@@ -36,7 +36,7 @@ export default function Routines() {
     mutationFn: (id) => base44.entities.Routine.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['routines'] });
-      toast.success('Rotina deletada');
+      toast.success('Routine deleted');
     },
   });
 
@@ -45,7 +45,7 @@ export default function Routines() {
       const newRoutine = {
         ...source,
         id: undefined,
-        name: `${source.name} (Cópia)`,
+        name: `${source.name} (Copy)`,
         created_date: undefined,
         updated_date: undefined,
       };
@@ -56,7 +56,7 @@ export default function Routines() {
       qc.invalidateQueries({ queryKey: ['routines'] });
       setShowClone(false);
       setCloneSource(null);
-      toast.success('Rotina clonada com sucesso');
+      toast.success('Routine cloned successfully');
     },
   });
 
@@ -67,12 +67,12 @@ export default function Routines() {
     <AppContainer maxWidth="max-w-6xl">
       <PageHeader
         eyebrow="Train"
-        title="Rotinas de Treino"
-        subtitle="Organize blocos recorrentes, distribua sessões na semana e mantenha um ponto de partida consistente para executar no painel de treino."
+        title="Workout routines"
+        subtitle="Organize recurring blocks, distribute sessions through the week, and keep a reliable starting point for execution."
         actions={(
           <PrimaryButton className="gap-2" onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4" />
-            Nova rotina
+            New routine
           </PrimaryButton>
         )}
       />
@@ -85,14 +85,14 @@ export default function Routines() {
                 <CheckCircle2 className="w-5 h-5 text-[hsl(var(--ok))]" strokeWidth={2} />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--ok))]">Rotina Ativa</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--ok))]">Active routine</p>
                 <p className="mt-0.5 text-[18px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">{activeRoutine.name}</p>
               </div>
             </div>
             {activeRoutine.last_completed_date && (
               <div className="text-right">
-                <p className="text-[11px] text-[hsl(var(--fg-3))]">Último completado</p>
-                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{new Date(activeRoutine.last_completed_date).toLocaleDateString('pt-BR')}</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">Last completed</p>
+                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{new Date(activeRoutine.last_completed_date).toLocaleDateString('en-US')}</p>
               </div>
             )}
           </div>
@@ -119,13 +119,13 @@ export default function Routines() {
             {activeRoutine.estimated_duration_minutes && (
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
-                <span>{activeRoutine.estimated_duration_minutes}min por sessão</span>
+                <span>{activeRoutine.estimated_duration_minutes} min per session</span>
               </div>
             )}
             {activeRoutine.total_exercises && (
               <div className="flex items-center gap-1.5">
                 <Dumbbell className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
-                <span>{activeRoutine.total_exercises} exercícios</span>
+                <span>{activeRoutine.total_exercises} exercises</span>
               </div>
             )}
           </div>
@@ -134,19 +134,19 @@ export default function Routines() {
 
       <Section
         eyebrow="Library"
-        title={`Todas as rotinas (${userRoutines.length})`}
-        subtitle="Templates pessoais para repetir semanas, duplicar estruturas e ativar a melhor opção para o bloco atual."
+        title={`All routines (${userRoutines.length})`}
+        subtitle="Personal templates to repeat weeks, duplicate structures, and activate the best option for the current block."
       >
         {userRoutines.length === 0 ? (
           <Card className="px-5 py-4">
             <EmptyState
               icon={Calendar}
-              title="Nenhuma rotina criada"
-              description="Monte sua primeira rotina para distribuir sessões na semana e começar com uma estrutura recorrente."
+              title="No routines created"
+              description="Build your first routine to spread sessions through the week and start with a repeatable structure."
               action={(
                 <PrimaryButton className="gap-2" onClick={() => setShowCreate(true)}>
                   <Plus className="h-4 w-4" />
-                  Criar primeira rotina
+                  Create first routine
                 </PrimaryButton>
               )}
             />
@@ -171,8 +171,8 @@ export default function Routines() {
       {prescribedRoutines.length > 0 && (
         <Section
           eyebrow="Assigned"
-          title="Rotinas prescritas"
-          subtitle="Estruturas enviadas por coach ou profissional para você iniciar sem reconfigurar a semana."
+          title="Prescribed routines"
+          subtitle="Structures sent by your coach or professional so you can start without rebuilding the week."
         >
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {prescribedRoutines.map(routine => (
@@ -188,7 +188,7 @@ export default function Routines() {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[24px] border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle className="text-[18px] font-semibold tracking-[-0.03em]">Criar nova rotina</DialogTitle>
+            <DialogTitle className="text-[18px] font-semibold tracking-[-0.03em]">Create new routine</DialogTitle>
           </DialogHeader>
           <RoutineForm onSuccess={() => setShowCreate(false)} />
         </DialogContent>
@@ -197,30 +197,30 @@ export default function Routines() {
       <Dialog open={showClone} onOpenChange={setShowClone}>
         <DialogContent className="rounded-[24px] border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[18px] font-semibold tracking-[-0.03em]">Clonar rotina</DialogTitle>
+            <DialogTitle className="text-[18px] font-semibold tracking-[-0.03em]">Clone routine</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">Nome da cópia</p>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">Copy name</p>
               <Input
                 id="clone-name"
-                defaultValue={`${cloneSource?.name} (Cópia)`}
+                defaultValue={`${cloneSource?.name} (Copy)`}
                 className="atlas-field h-11 rounded-[10px] border-0 px-4 text-[14px]"
               />
             </div>
             <div className="flex gap-2">
               <SecondaryButton type="button" onClick={() => setShowClone(false)} className="h-11 flex-1 rounded-[10px]">
-                Cancelar
+                Cancel
               </SecondaryButton>
               <PrimaryButton
                 onClick={() => {
                   const newName = document.getElementById('clone-name')?.value;
-                  cloneRoutine.mutate({ ...cloneSource, name: newName || `${cloneSource?.name} (Cópia)` });
+                  cloneRoutine.mutate({ ...cloneSource, name: newName || `${cloneSource?.name} (Copy)` });
                 }}
                 disabled={cloneRoutine.isPending}
                 className="h-11 flex-1 rounded-[10px]"
               >
-                {cloneRoutine.isPending ? 'Clonando…' : 'Clonar'}
+                {cloneRoutine.isPending ? 'Cloning…' : 'Clone'}
               </PrimaryButton>
             </div>
           </div>

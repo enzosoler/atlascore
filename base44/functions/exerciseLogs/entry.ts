@@ -1,9 +1,9 @@
 /**
- * Exercise Logs API — recentes, favoritos e PRs por usuário
+ * Exercise Logs API - recents, favorites, and PRs per user
  *
  * Actions:
- *   recent          → últimos 15 exercícios usados
- *   favorites       → exercícios favoritos
+ *   recent          -> last 15 exercises used
+ *   favorites       -> favorite exercises
  *   toggle_favorite { exercise_master_id }
  *   log_use         { exercise_master_id, exercise_name, weight, reps }
  */
@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
           const ex = list[0];
           results.push({
             id: ex.id,
-            name: ex.canonical_name_pt,
+            name: ex.canonical_name_en || ex.canonical_name_pt,
             exercise_type: ex.exercise_type,
             movement_pattern: ex.movement_pattern,
             primary_muscles: ex.primary_muscles || [],
@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
       } else {
         await base44.entities.ExerciseLog.create({
           exercise_master_id,
-          exercise_name: exercise_name || 'Exercício',
+          exercise_name: exercise_name || 'Exercise',
           last_used_at: now,
           use_count: 1,
           is_favorite: false,

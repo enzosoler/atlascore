@@ -22,6 +22,7 @@ export default function ExerciseDetail({ exercise }) {
       ? exercise.muscle_groups
       : null) ||
     [];
+  const formCues = Array.isArray(exercise.form_cues) ? exercise.form_cues : [];
 
   return (
     <div className="surface p-5 space-y-4">
@@ -52,11 +53,11 @@ export default function ExerciseDetail({ exercise }) {
       </div>
 
       {/* Form Cues */}
-      {exercise.form_cues_pt && exercise.form_cues_pt.length > 0 && (
+      {formCues.length > 0 && (
         <div>
           <p className="t-label mb-2">Form cues</p>
           <ul className="space-y-1">
-            {exercise.form_cues_pt.slice(0, 3).map((cue, i) => (
+            {formCues.slice(0, 3).map((cue, i) => (
               <li
                 key={i}
                 className="flex items-start gap-2 text-[12px] text-muted-foreground"

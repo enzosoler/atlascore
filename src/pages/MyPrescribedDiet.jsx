@@ -42,7 +42,7 @@ function MealCard({ meal }) {
               <span className="text-muted-foreground shrink-0 ml-3">{f.amount}{f.unit} · {f.kcal} kcal</span>
             </div>
           ))}
-          {meal.foods?.length === 0 && <p className="text-[12px] text-muted-foreground">Nenhum alimento cadastrado</p>}
+          {meal.foods?.length === 0 && <p className="text-[12px] text-muted-foreground">No foods added yet</p>}
         </div>
       )}
     </div>
@@ -71,7 +71,7 @@ export default function MyPrescribedDiet() {
 
   const createM = useMutation({
     mutationFn: (d) => base44.entities.DietPlan.create(d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['prescribed-diet'] }); qc.invalidateQueries({ queryKey: ['diet-plans-active'] }); setShowCreate(false); setForm(emptyForm()); toast.success('Plano criado'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['prescribed-diet'] }); qc.invalidateQueries({ queryKey: ['diet-plans-active'] }); setShowCreate(false); setForm(emptyForm()); toast.success('Plan created'); },
   });
   const deleteM = useMutation({
     mutationFn: (id) => base44.entities.DietPlan.delete(id),
@@ -87,8 +87,8 @@ export default function MyPrescribedDiet() {
   const removeMeal = (i) => setForm(f => ({ ...f, meals: f.meals.filter((_, j) => j !== i) }));
 
   const save = () => {
-    if (!form.name) { toast.error('Nome obrigatório'); return; }
-    if (isStaff && !form.athlete_email) { toast.error('Email do atleta obrigatório'); return; }
+    if (!form.name) { toast.error('Plan name is required'); return; }
+    if (isStaff && !form.athlete_email) { toast.error('Athlete email is required'); return; }
     createM.mutate({
       ...form,
       source: 'nutritionist',
@@ -111,25 +111,25 @@ export default function MyPrescribedDiet() {
     <div className="mx-auto max-w-4xl w-full p-4 lg:p-8 space-y-6">
       <div className="flex items-start justify-between gap-4 pb-5 border-b border-border">
         <div>
-          <h1 className="t-headline">Dieta Prescrita</h1>
-          <p className="t-small mt-1">Plano alimentar definido pelo seu profissional</p>
+          <h1 className="t-headline">Prescribed Diet</h1>
+          <p className="t-small mt-1">Nutrition plan assigned by your professional</p>
         </div>
         {isStaff && (
           <Button onClick={() => setShowCreate(true)} className="btn btn-primary gap-1.5 shrink-0">
-            <Plus className="w-3.5 h-3.5" /> Novo plano
+            <Plus className="w-3.5 h-3.5" /> New plan
           </Button>
         )}
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
-          <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
+          <Loader2 className="w-4 h-4 animate-spin" /> Loading…
         </div>
       ) : plans.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon"><UtensilsCrossed className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} /></div>
-          <p className="t-subtitle mb-1">Nenhum plano prescrito</p>
-          <p className="t-caption">{isStaff ? 'Crie um plano para um atleta.' : 'Aguarde seu coach prescrever um plano alimentar.'}</p>
+          <p className="t-subtitle mb-1">No prescribed plan yet</p>
+          <p className="t-caption">{isStaff ? 'Create a plan for an athlete.' : 'Wait for your coach to assign a nutrition plan.'}</p>
         </div>
       ) : (
         <div className="space-y-5">
@@ -139,11 +139,11 @@ export default function MyPrescribedDiet() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="t-subtitle">{plan.name}</p>
-                    {plan.active && <span className="badge badge-ok">Ativo</span>}
-                    {!plan.active && <span className="badge badge-neutral">Inativo</span>}
+                    {plan.active && <span className="badge badge-ok">Active</span>}
+                    {!plan.active && <span className="badge badge-neutral">Inactive</span>}
                   </div>
                   {plan.objective && <p className="t-caption mt-0.5">{plan.objective}</p>}
-                  {isStaff && <p className="t-caption mt-0.5">Para: {plan.athlete_email}</p>}
+                  {isStaff && <p className="t-caption mt-0.5">For: {plan.athlete_email}</p>}
                 </div>
                 {isStaff && (
                   <button onClick={() => deleteM.mutate(plan.id)}
@@ -156,10 +156,10 @@ export default function MyPrescribedDiet() {
               {/* Macros summary */}
               {(plan.total_calories || plan.total_protein) && (
                 <div className="grid grid-cols-4 gap-2 mb-4 p-3 bg-[hsl(var(--shell))] rounded-xl">
-                  <MacroChip label="Calorias" value={plan.total_calories} unit="kcal" color="hsl(var(--fg))" />
-                  <MacroChip label="Proteína" value={plan.total_protein} color="hsl(var(--accent-primary))" />
-                  <MacroChip label="Carbos"   value={plan.total_carbs}   color="hsl(var(--accent-secondary))" />
-                  <MacroChip label="Gordura"  value={plan.total_fat}     color="hsl(var(--status-warning))" />
+                  <MacroChip label="Calories" value={plan.total_calories} unit="kcal" color="hsl(var(--fg))" />
+                  <MacroChip label="Protein" value={plan.total_protein} color="hsl(var(--accent-primary))" />
+                  <MacroChip label="Carbs"   value={plan.total_carbs}   color="hsl(var(--accent-secondary))" />
+                  <MacroChip label="Fat"  value={plan.total_fat}     color="hsl(var(--status-warning))" />
                 </div>
               )}
 
@@ -177,28 +177,28 @@ export default function MyPrescribedDiet() {
       {/* Create dialog — staff only */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="sm:max-w-lg bg-[hsl(var(--card))] border-border rounded-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="t-subtitle">Novo plano alimentar</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="t-subtitle">New nutrition plan</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="t-label block mb-1.5">Email do atleta *</label>
-              <Input value={form.athlete_email} onChange={e => setForm(f => ({ ...f, athlete_email: e.target.value }))} placeholder="atleta@email.com" className="h-9 rounded-lg text-base" />
+              <label className="t-label block mb-1.5">Athlete email *</label>
+              <Input value={form.athlete_email} onChange={e => setForm(f => ({ ...f, athlete_email: e.target.value }))} placeholder="athlete@email.com" className="h-9 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="t-label block mb-1.5">Nome do plano *</label>
-                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Bulking Fase 1" className="h-9 rounded-lg text-base" />
+                <label className="t-label block mb-1.5">Plan name *</label>
+                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Lean bulk phase 1" className="h-9 rounded-lg text-base" />
               </div>
               <div>
-                <label className="t-label block mb-1.5">Data início</label>
+                <label className="t-label block mb-1.5">Start date</label>
                 <Input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="h-9 rounded-lg text-base" />
               </div>
             </div>
             <div>
-              <label className="t-label block mb-1.5">Objetivo</label>
-              <Input value={form.objective} onChange={e => setForm(f => ({ ...f, objective: e.target.value }))} placeholder="Ex: Ganho de massa, emagrecimento" className="h-9 rounded-lg text-base" />
+              <label className="t-label block mb-1.5">Goal</label>
+              <Input value={form.objective} onChange={e => setForm(f => ({ ...f, objective: e.target.value }))} placeholder="Ex: Muscle gain, fat loss" className="h-9 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {[['Kcal', 'total_calories'], ['Proteína g', 'total_protein'], ['Carbos g', 'total_carbs'], ['Gordura g', 'total_fat']].map(([l, k]) => (
+              {[['Kcal', 'total_calories'], ['Protein g', 'total_protein'], ['Carbs g', 'total_carbs'], ['Fat g', 'total_fat']].map(([l, k]) => (
                 <div key={k}>
                   <label className="t-label block mb-1.5">{l}</label>
                   <Input type="number" value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} className="h-9 rounded-lg text-base" />
@@ -208,13 +208,13 @@ export default function MyPrescribedDiet() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="t-label">Refeições</label>
-                <button onClick={addMeal} className="text-[11px] text-[hsl(var(--brand))] font-medium flex items-center gap-1"><Plus className="w-3 h-3" /> Adicionar</button>
+                <label className="t-label">Meals</label>
+                <button onClick={addMeal} className="text-[11px] text-[hsl(var(--brand))] font-medium flex items-center gap-1"><Plus className="w-3 h-3" /> Add</button>
               </div>
               {form.meals.map((meal, i) => (
                 <div key={i} className="p-3 bg-[hsl(var(--shell))] rounded-xl space-y-2">
                   <div className="flex items-center gap-2">
-                    <Input value={meal.name} onChange={e => updateMeal(i, 'name', e.target.value)} placeholder={`Refeição ${i + 1}`} className="h-8 rounded-lg text-base flex-1" />
+                    <Input value={meal.name} onChange={e => updateMeal(i, 'name', e.target.value)} placeholder={`Meal ${i + 1}`} className="h-8 rounded-lg text-base flex-1" />
                     <Input value={meal.time} onChange={e => updateMeal(i, 'time', e.target.value)} placeholder="08:00" className="h-8 rounded-lg text-base w-20" />
                     <button onClick={() => removeMeal(i)} className="text-muted-foreground/40 hover:text-[hsl(var(--err))]"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
@@ -223,11 +223,11 @@ export default function MyPrescribedDiet() {
             </div>
 
             <div>
-              <label className="t-label block mb-1.5">Observações</label>
+              <label className="t-label block mb-1.5">Notes</label>
               <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="rounded-lg resize-none h-16 text-base" />
             </div>
             <Button onClick={save} disabled={createM.isPending} className="w-full h-11 rounded-xl btn btn-primary">
-              {createM.isPending ? 'Salvando…' : 'Salvar plano'}
+              {createM.isPending ? 'Saving…' : 'Save plan'}
             </Button>
           </div>
         </DialogContent>

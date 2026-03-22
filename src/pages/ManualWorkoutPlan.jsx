@@ -27,16 +27,16 @@ export default function ManualWorkoutPlan() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   
-  const [planName, setPlanName] = useState('Meu Novo Plano');
+  const [planName, setPlanName] = useState('My New Plan');
   const [objective, setObjective] = useState('');
   const [days, setDays] = useState([
-    { id: crypto.randomUUID(), name: 'Treino A', focus: '', exercises: [] }
+    { id: crypto.randomUUID(), name: 'Workout A', focus: '', exercises: [] }
   ]);
   
   const [isSaving, setIsSaving] = useState(false);
 
   const addDay = () => {
-    setDays([...days, { id: crypto.randomUUID(), name: `Treino ${String.fromCharCode(65 + days.length)}`, focus: '', exercises: [] }]);
+    setDays([...days, { id: crypto.randomUUID(), name: `Workout ${String.fromCharCode(65 + days.length)}`, focus: '', exercises: [] }]);
   };
 
   const removeDay = (dayId) => {
@@ -57,7 +57,7 @@ export default function ManualWorkoutPlan() {
           exercises: [...d.exercises, {
             id: crypto.randomUUID(),
             exercise_id: exercise.id,
-            name: exercise.canonical_name_pt || exercise.name,
+            name: exercise.canonical_name_en || exercise.name,
             muscle_group: exercise.primary_muscles?.[0] || '',
             sets: 3,
             reps: '12',
@@ -124,12 +124,12 @@ export default function ManualWorkoutPlan() {
         start_date: new Date().toISOString().split('T')[0],
       });
 
-      toast.success('Plano de treino salvo com sucesso!');
+      toast.success('Workout plan saved successfully');
       qc.invalidateQueries({ queryKey: ['workout-plans'] });
       navigate(ROUTES.myWorkout);
     } catch (error) {
       console.error(error);
-      toast.error('Erro ao salvar o plano.');
+      toast.error('Could not save the plan.');
     } finally {
       setIsSaving(false);
     }
@@ -143,7 +143,7 @@ export default function ManualWorkoutPlan() {
         </Button>
         <div>
           <p className="atlas-overline">Train</p>
-          <h1 className="atlas-display-title text-2xl">Criar Plano Manual</h1>
+          <h1 className="atlas-display-title text-2xl">Create Manual Plan</h1>
         </div>
       </div>
 
@@ -151,20 +151,20 @@ export default function ManualWorkoutPlan() {
         <Card className="p-6 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="atlas-overline">Nome do Plano</label>
+              <label className="atlas-overline">Plan Name</label>
               <Input 
                 value={planName} 
                 onChange={(e) => setPlanName(e.target.value)}
-                placeholder="Ex: Hipertrofia ABC"
+                placeholder="Ex: Upper / Lower Split"
                 className="atlas-field h-11 rounded-[12px] border-0 px-4"
               />
             </div>
             <div className="space-y-2">
-              <label className="atlas-overline">Objetivo</label>
+              <label className="atlas-overline">Goal</label>
               <Input 
                 value={objective} 
                 onChange={(e) => setObjective(e.target.value)}
-                placeholder="Ex: Ganho de massa muscular"
+                placeholder="Ex: Build muscle"
                 className="atlas-field h-11 rounded-[12px] border-0 px-4"
               />
             </div>
@@ -187,11 +187,11 @@ export default function ManualWorkoutPlan() {
 
         <div className="flex items-center justify-between pt-4">
           <SecondaryButton onClick={addDay} className="gap-2">
-            <Plus className="w-4 h-4" /> Adicionar Dia
+            <Plus className="w-4 h-4" /> Add Day
           </SecondaryButton>
           <PrimaryButton onClick={handleSave} disabled={isSaving} className="gap-2">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Salvar Plano
+            Save Plan
           </PrimaryButton>
         </div>
       </div>
@@ -233,7 +233,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
           <Input 
             value={day.focus} 
             onChange={(e) => onUpdate({ focus: e.target.value })}
-            placeholder="Foco (ex: Peito e Tríceps)"
+            placeholder="Focus (ex: Chest and Triceps)"
             className="max-w-[250px] h-8 border-none bg-transparent px-0 text-sm text-[hsl(var(--fg-2))] focus-visible:ring-0"
           />
         </div>
@@ -257,7 +257,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
             
             <div className="flex items-center gap-2">
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">Séries</label>
+                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">Sets</label>
                 <Input 
                   type="number" 
                   value={ex.sets} 
@@ -274,7 +274,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">Descanso</label>
+                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">Rest</label>
                 <Input 
                   type="number" 
                   value={ex.rest_seconds} 
@@ -293,7 +293,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--fg-3))]" />
             <Input 
-              placeholder="Buscar exercício para adicionar..." 
+              placeholder="Search exercise to add..." 
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="atlas-field h-11 rounded-[12px] border-0 pl-9 text-sm"
@@ -314,7 +314,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[hsl(var(--shell))] transition-colors border-b border-[hsl(var(--border-h))] last:border-0"
                 >
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{result.canonical_name_pt || result.name}</p>
+                    <p className="text-sm font-medium">{result.canonical_name_en || result.name}</p>
                     <p className="text-[11px] text-[hsl(var(--fg-2))]">{result.primary_muscles?.[0] || result.body_part}</p>
                   </div>
                   <Plus className="w-4 h-4 text-[hsl(var(--brand))]" />

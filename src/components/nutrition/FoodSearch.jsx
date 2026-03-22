@@ -95,7 +95,7 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
         }
       });
 
-      toast.success(`${food.canonical_name} adicionado`);
+      toast.success(`${food.canonical_name} added`);
     },
     [onSelectFood]
   );
@@ -110,7 +110,7 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
         <Input
           type="text"
-          placeholder={compact ? '+ Alimento' : 'Buscar alimento...'}
+          placeholder={compact ? '+ Food' : 'Search food...'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onFocus={() => setOpen(true)}
@@ -126,7 +126,7 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
           {search === '' && recent.length > 0 && (
             <>
               <div className="sticky top-0 px-3 py-2 text-[11px] font-semibold uppercase text-muted-foreground bg-[hsl(var(--secondary))]">
-                <Clock className="w-3 h-3 inline mr-1" /> Recentes
+                <Clock className="w-3 h-3 inline mr-1" /> Recent
               </div>
               {recent.map((f) => (
                 <button
@@ -145,14 +145,14 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
 
           {debouncedSearch && results.length === 0 && (
             <div className="px-3 py-6 text-center text-[12px] text-muted-foreground">
-              Nenhum resultado para "{debouncedSearch}"
+              No results for "{debouncedSearch}"
             </div>
           )}
 
           {debouncedSearch && results.length > 0 && (
             <>
               <div className="sticky top-0 px-3 py-2 text-[11px] font-semibold uppercase text-muted-foreground bg-[hsl(var(--secondary))]">
-                <Search className="w-3 h-3 inline mr-1" /> Resultados
+                <Search className="w-3 h-3 inline mr-1" /> Results
               </div>
               {results.map((f) => (
                 <button

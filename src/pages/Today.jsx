@@ -58,7 +58,7 @@ function getPreferredName(displayName, fallbackName = null) {
 }
 
 function getDateLabel(locale) {
-  return new Intl.DateTimeFormat(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
+  return new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -101,7 +101,7 @@ function getWeatherPresentation(code, locale) {
   if (code === 0) {
     return {
       Icon: SunMedium,
-      label: isEnglish ? 'Clear' : 'Limpo',
+      label: 'Clear',
       tone: 'clear',
       iconClassName: 'text-[hsl(var(--warn))]',
     };
@@ -110,7 +110,7 @@ function getWeatherPresentation(code, locale) {
   if (code === 1) {
     return {
       Icon: CloudSun,
-      label: isEnglish ? 'Mostly clear' : 'Quase limpo',
+      label: 'Mostly clear',
       tone: 'clear',
       iconClassName: 'text-[hsl(var(--warn))]',
     };
@@ -181,7 +181,7 @@ function getWeatherPresentation(code, locale) {
 
   return {
     Icon: Cloud,
-    label: isEnglish ? 'Conditions' : 'Clima',
+    label: 'Conditions',
     tone: 'default',
     iconClassName: 'text-[hsl(var(--fg-2))]',
   };
@@ -199,11 +199,9 @@ function getNextSteps(t, locale, ROUTES, {
   return [
     {
       to: ROUTES.nutrition,
-      title: todayMealsCount > 0 ? (isEnglish ? 'Review nutrition' : 'Revisar nutrição') : t('today_page.nextSteps.nutritionTitle'),
+      title: todayMealsCount > 0 ? 'Review nutrition' : t('today_page.nextSteps.nutritionTitle'),
       description: todayMealsCount > 0
-        ? isEnglish
-          ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
-          : `Você já registrou ${todayMealsCount} alimento${todayMealsCount > 1 ? 's' : ''} hoje. Feche o dia com consistência.`
+        ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
         : t('today_page.nextSteps.nutritionDesc'),
       icon: UtensilsCrossed,
       phase: t('today_page.nextSteps.nutritionPhase'),
@@ -211,49 +209,37 @@ function getNextSteps(t, locale, ROUTES, {
     {
       to: ROUTES.workouts,
       title: !activeWorkoutPlan
-        ? (isEnglish ? 'Create workout plan' : 'Criar plano de treino')
+        ? 'Create workout plan'
         : todaySession?.status === 'completed'
-          ? (isEnglish ? 'Review workout log' : 'Revisar treino')
-          : (isEnglish ? 'Start workout' : 'Iniciar treino'),
+          ? 'Review workout log'
+          : 'Start workout',
       description: !activeWorkoutPlan
-        ? isEnglish
-          ? 'Build your active training plan first so Today, history, and execution all point to the same structure.'
-          : 'Monte primeiro o plano ativo para que Hoje, histórico e execução apontem para a mesma estrutura.'
+        ? 'Build your active training plan first so Today, history, and execution all point to the same structure.'
         : todaySession?.status === 'completed'
-          ? isEnglish
-            ? 'Open the completed session, review the numbers, and prepare the next training day.'
-            : 'Abra a sessão concluída, revise os números e prepare o próximo dia de treino.'
-          : isEnglish
-            ? 'Launch the active plan and log sets, reps, and load from the structured session.'
-            : 'Abra o plano ativo e registre séries, repetições e carga a partir da sessão estruturada.',
+          ? 'Open the completed session, review the numbers, and prepare the next training day.'
+          : 'Launch the active plan and log sets, reps, and load from the structured session.',
       icon: Dumbbell,
       phase: t('today_page.nextSteps.workoutPhase'),
     },
     {
       to: ROUTES.measurements,
       title: recentMeasurementsCount > 0
-        ? (isEnglish ? 'Review measurements' : 'Revisar medidas')
-        : (isEnglish ? 'Log measurement' : 'Registrar medida'),
+        ? 'Review measurements'
+        : 'Log measurement',
       description: recentMeasurementsCount > 0
-        ? isEnglish
-          ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
-          : 'Mantenha peso e circunferências atualizados para que as tendências continuem confiáveis.'
-        : isEnglish
-          ? 'Add body weight and body measurements so progress tracking starts with a real baseline.'
-          : 'Adicione peso e medidas corporais para iniciar o acompanhamento com uma base real.',
+        ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
+        : 'Add body weight and body measurements so progress tracking starts with a real baseline.',
       icon: Scale,
-      phase: isEnglish ? 'Body' : 'Corpo',
+      phase: 'Body',
     },
     {
       to: progressPhotosCount > 0 ? ROUTES.atlasAI : ROUTES.progressPhotos,
-      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : (isEnglish ? 'Add progress photo' : 'Adicionar foto de progresso'),
+      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : 'Add progress photo',
       description: progressPhotosCount > 0
         ? t('today_page.nextSteps.aiDesc')
-        : isEnglish
-          ? 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.'
-          : 'Capture um checkpoint visual com data para que sua linha do tempo evolua junto com o restante dos dados.',
+        : 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.',
       icon: progressPhotosCount > 0 ? Brain : Sparkles,
-      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : (isEnglish ? 'Photos' : 'Fotos'),
+      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : 'Photos',
     },
   ];
 }
@@ -578,44 +564,40 @@ function TodayContent() {
   const showDailySummary = !isLoading && allDoneCount >= 2;
   const heroGreeting = `${greeting}, ${preferredName}.`;
   const heroTagline = isLoading
-    ? isEN
-      ? 'Pulling training, nutrition, and body signals into one clean daily brief.'
-      : 'Reunindo treino, nutrição e sinais corporais em um briefing diário claro.'
+    ? 'Pulling training, nutrition, and body signals into one clean daily brief.'
     : allDoneCount === 3
       ? isEN
         ? 'Your core tracking is current. Review what is working and protect the next best decision.'
-        : 'Seu núcleo de acompanhamento está em dia. Revise o que está funcionando e proteja a próxima decisão.'
+        : 'Your core tracking is current. Review what is working and protect the next best decision.'
       : allDoneCount === 0
         ? isEN
           ? 'Start with food, training, or body data so Today becomes something measurable.'
-          : 'Comece por nutrição, treino ou dados corporais para que Hoje vire algo mensurável.'
+          : 'Start with food, training, or body data so Today becomes something measurable.'
         : isEN
           ? 'You already have momentum today. Close the biggest gap and keep the day structurally complete.'
-          : 'Você já tem tração hoje. Feche a maior lacuna e mantenha o dia estruturalmente completo.';
+          : 'You already have momentum today. Close the biggest gap and keep the day structurally complete.';
   const heroHighlights = [
     {
-      label: isEN ? 'Focus' : 'Foco',
-      value: isEN ? `${allDoneCount}/3 core pillars` : `${allDoneCount}/3 pilares`,
+      label: 'Focus',
+      value: `${allDoneCount}/3 core pillars`,
       tone: allDoneCount >= 2 ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]',
     },
     {
-      label: isEN ? 'Training' : 'Treino',
+      label: 'Training',
       value: activeWorkoutPlan
         ? workoutDone
-          ? (isEN ? 'Session complete' : 'Sessão concluída')
-          : (isEN ? 'Plan ready' : 'Plano pronto')
-        : (isEN ? 'Plan needed' : 'Falta plano'),
+          ? 'Session complete'
+          : 'Plan ready'
+        : 'Plan needed',
       tone: workoutDone ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]',
     },
     {
-      label: weather && weatherPresentation ? (isEN ? 'Weather' : 'Clima') : (isEN ? 'Nutrition' : 'Nutrição'),
+      label: weather && weatherPresentation ? 'Weather' : 'Nutrition',
       value: weather && weatherPresentation
         ? `${weather.temperature}° · ${weatherPresentation.label}`
         : nutritionDone
-          ? isEN
-            ? `${todayMeals.length} entr${todayMeals.length === 1 ? 'y' : 'ies'} logged`
-            : `${todayMeals.length} refeiç${todayMeals.length === 1 ? 'ão' : 'ões'} registradas`
-          : (isEN ? 'Needs a meal log' : 'Falta registrar refeição'),
+          ? `${todayMeals.length} entr${todayMeals.length === 1 ? 'y' : 'ies'} logged`
+          : 'Needs a meal log',
       tone: weather && weatherPresentation
         ? weatherPresentation.iconClassName
         : nutritionDone
@@ -648,7 +630,7 @@ function TodayContent() {
   const progressValue = latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—';
   const progressMeta = latestMeasurement
     ? new Date(`${latestMeasurement.date}T12:00:00`).toLocaleDateString(
-        locale === 'pt-BR' ? 'pt-BR' : 'en-US',
+        'en-US',
         {
           day: 'numeric',
           month: 'short',
@@ -659,9 +641,7 @@ function TodayContent() {
   const protocolsValue = String(activeProtocolsList.length);
   const protocolsMeta =
     activeProtocolsList.length > 0
-      ? isEN
-        ? `${activeProtocolsList.length} active`
-        : `${activeProtocolsList.length} ativo${activeProtocolsList.length > 1 ? 's' : ''}`
+      ? `${activeProtocolsList.length} active`
       : t('today_page.noActive');
 
   const NEXT_STEPS = getNextSteps(t, locale, ROUTES, {
@@ -684,7 +664,7 @@ function TodayContent() {
       icon: UtensilsCrossed,
       tone: 'blue',
       done: nutritionDone,
-      ctaLabel: nutritionDone ? (isEN ? 'Review today' : 'Revisar hoje') : (isEN ? 'Log meals' : 'Registrar refeições'),
+      ctaLabel: nutritionDone ? 'Review today' : 'Log meals',
     },
     {
       to: ROUTES.workouts,
@@ -698,10 +678,10 @@ function TodayContent() {
       tone: 'orange',
       done: workoutDone,
       ctaLabel: workoutDone
-        ? (isEN ? 'Review session' : 'Ver sessão')
+        ? 'Review session'
         : !activeWorkoutPlan
-          ? (isEN ? 'Create plan' : 'Criar plano')
-          : (isEN ? 'Start session' : 'Iniciar sessão'),
+          ? 'Create plan'
+          : 'Start session',
     },
     {
       to: ROUTES.measurements,
@@ -714,7 +694,7 @@ function TodayContent() {
       icon: Scale,
       tone: 'green',
       done: measurementsDone,
-      ctaLabel: measurementsDone ? (isEN ? 'View body' : 'Ver corpo') : (isEN ? 'Log weight' : 'Registrar peso'),
+      ctaLabel: measurementsDone ? 'View body' : 'Log weight',
     },
     {
       to: ROUTES.protocols,
@@ -728,7 +708,7 @@ function TodayContent() {
       icon: Shield,
       tone: 'teal',
       done: protocolsDone,
-      ctaLabel: isEN ? 'View protocols' : 'Ver protocolos',
+      ctaLabel: 'View protocols',
     },
   ];
 
@@ -784,14 +764,14 @@ function TodayContent() {
       {/* ── Header ── */}
       <header className="flex items-end justify-between gap-4 px-1">
         <div className="min-w-0">
-          <p className="atlas-overline">{isEN ? 'Today' : 'Hoje'}</p>
+          <p className="atlas-overline">Today</p>
           <p className="mt-2 text-[15px] font-medium tracking-[-0.02em] text-[hsl(var(--fg-2))]">
             {getDateLabel(locale)}
           </p>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.86)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
           <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
-          {isLoading ? (isEN ? 'Loading' : 'Carregando') : isEN ? `${allDoneCount}/3 complete` : `${allDoneCount}/3 em dia`}
+          {isLoading ? 'Loading' : `${allDoneCount}/3 complete`}
         </div>
       </header>
 
@@ -808,7 +788,7 @@ function TodayContent() {
         <div className="relative space-y-6">
           <div className="min-w-0 max-w-3xl">
             <p className="atlas-overline text-[hsl(var(--fg-3))]">
-              {isEN ? 'Daily brief' : 'Briefing do dia'}
+              Daily brief
             </p>
             <h1 className="mt-4 text-[clamp(2.05rem,1.78rem+1.15vw,2.7rem)] font-semibold tracking-[-0.07em] text-[hsl(var(--fg))]">
               {heroGreeting}
@@ -872,12 +852,12 @@ function TodayContent() {
       {showDailySummary && (
         <div className="atlas-card flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] border-[hsl(var(--ok)/0.18)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.08),transparent_42%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-5 py-4 shadow-[var(--shadow-xs)]">
           <p className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--ok))]">
-            {isEN ? 'Today so far' : 'Hoje até agora'}
+            Today so far
           </p>
           {[
-            { label: isEN ? 'Nutrition' : 'Nutrição', done: nutritionDone, detail: nutritionDone ? (isEN ? `${todayMeals.length} entries` : `${todayMeals.length} registros`) : null },
-            { label: isEN ? 'Workout' : 'Treino', done: workoutDone, detail: workoutDone ? (isEN ? 'completed' : 'concluído') : null },
-            { label: isEN ? 'Measurements' : 'Medidas', done: measurementsDone, detail: measurementsDone ? (isEN ? 'up to date' : 'em dia') : null },
+            { label: 'Nutrition', done: nutritionDone, detail: nutritionDone ? `${todayMeals.length} entries` : null },
+            { label: 'Workout', done: workoutDone, detail: workoutDone ? 'completed' : null },
+            { label: 'Measurements', done: measurementsDone, detail: measurementsDone ? 'up to date' : null },
           ].map(({ label, done, detail }) => (
             <span key={label} className={cn(
               'flex items-center gap-1 text-[12px] font-medium',
@@ -938,7 +918,7 @@ function TodayContent() {
                 const isCompleted = session.status === 'completed';
                 const sessionDate = session.date
                   ? new Date(`${session.date}T12:00:00`).toLocaleDateString(
-                      locale === 'pt-BR' ? 'pt-BR' : 'en-US',
+                      'en-US',
                       {
                         weekday: 'short',
                         day: 'numeric',
@@ -1028,10 +1008,10 @@ function TodayContent() {
           </div>
           <div className="min-w-0">
             <p className="text-[16px] font-semibold tracking-[-0.034em] text-[hsl(var(--fg))]">
-              {isEN ? 'Weekly check-in' : 'Check-in semanal'}
+              Weekly check-in
             </p>
             <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              {isEN ? 'Energy, mood, sleep - 30 sec' : 'Energia, humor, sono - 30 s'}
+              Energy, mood, sleep - 30 sec
             </p>
           </div>
         </button>
@@ -1045,10 +1025,10 @@ function TodayContent() {
           </div>
           <div className="min-w-0">
             <p className="text-[16px] font-semibold tracking-[-0.034em] text-[hsl(var(--fg))]">
-              {isEN ? 'Review last 4 weeks' : 'Revisar últimas 4 semanas'}
+              Review last 4 weeks
             </p>
             <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              {isEN ? 'See what actually worked' : 'Veja o que realmente funcionou'}
+              See what actually worked
             </p>
           </div>
         </Link>

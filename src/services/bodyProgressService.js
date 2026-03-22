@@ -164,14 +164,19 @@ export async function updateMeasurement(userId, id, payload) {
 export async function deleteMeasurement(userId, id) {
   requireUserId(userId);
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from(MEASUREMENTS_TABLE)
     .delete()
     .eq('id', id)
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .select('id');
 
   if (error) {
     throw error;
+  }
+
+  if (!data?.length) {
+    throw new Error('No matching checkpoint was found to delete.');
   }
 }
 

@@ -105,6 +105,46 @@ function normalizeMuscle(muscle = '') {
   return map[m] || m;
 }
 
+const ENGLISH_MUSCLES = new Set([
+  'abductors',
+  'abs',
+  'adductors',
+  'back',
+  'biceps',
+  'calves',
+  'chest',
+  'core',
+  'forearms',
+  'front delts',
+  'glute minimus',
+  'glutes',
+  'hamstrings',
+  'hip flexors',
+  'lats',
+  'lower abs',
+  'lower back',
+  'mid traps',
+  'neck',
+  'obliques',
+  'quads',
+  'rear delts',
+  'rhomboids',
+  'rotator cuff',
+  'serratus',
+  'shoulders',
+  'side delts',
+  'traps',
+  'transverse abdominis',
+  'triceps',
+  'upper chest',
+]);
+
+function sanitizeMuscles(list = []) {
+  return list
+    .map((muscle) => normalizeMuscle(muscle))
+    .filter((muscle) => ENGLISH_MUSCLES.has(muscle));
+}
+
 /**
  * Map ExerciseDB bodyPart to Atlas category.
  */
@@ -212,6 +252,8 @@ export function normalizeBase44Exercise(entity) {
   if (!entity || !entity.id) return null;
 
   const { aliases_en, aliases_pt } = getExerciseAliases(entity.canonical_name_en || '');
+  const primaryMuscles = sanitizeMuscles(entity.primary_muscles || []);
+  const secondaryMuscles = sanitizeMuscles(entity.secondary_muscles || []);
 
   const searchText = normalizeStr(
     [
@@ -219,7 +261,7 @@ export function normalizeBase44Exercise(entity) {
       entity.canonical_name_pt,
       ...(entity.aliases_en || []),
       ...(entity.aliases_pt || []),
-      ...(entity.primary_muscles || []),
+      ...primaryMuscles,
       entity.equipment,
     ]
       .filter(Boolean)
@@ -233,9 +275,9 @@ export function normalizeBase44Exercise(entity) {
     canonical_name_pt: entity.canonical_name_pt || entity.name || '',
     aliases_en: entity.aliases_en || aliases_en,
     aliases_pt: entity.aliases_pt || aliases_pt,
-    primary_muscles: entity.primary_muscles || [],
-    secondary_muscles: entity.secondary_muscles || [],
-    target_muscle: (entity.primary_muscles || [])[0] || '',
+    primary_muscles: primaryMuscles,
+    secondary_muscles: secondaryMuscles,
+    target_muscle: primaryMuscles[0] || '',
     body_part: entity.category || '',
     equipment: entity.equipment || '',
     category: entity.category || '',
@@ -245,7 +287,7 @@ export function normalizeBase44Exercise(entity) {
     },
     instructions: {
       en: [],
-      pt: entity.form_cues_pt || [],
+      pt: [],
     },
     _search: searchText,
     movement_pattern: entity.movement_pattern || null,

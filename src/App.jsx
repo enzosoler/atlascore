@@ -79,23 +79,23 @@ const MissingConfigScreen = () => (
   <div className="min-h-screen bg-[hsl(var(--bg))] flex items-center justify-center p-6">
     <div className="max-w-xl w-full rounded-2xl border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] p-6 space-y-4">
       <div>
-        <p className="text-[20px] font-semibold text-[hsl(var(--fg))]">Configuração do Base44 ausente</p>
+        <p className="text-[20px] font-semibold text-[hsl(var(--fg))]">Base44 configuration missing</p>
         <p className="mt-2 text-[14px] text-[hsl(var(--fg-2))]">
-          A área logada depende das variáveis <code>VITE_BASE44_APP_ID</code> e <code>VITE_BASE44_APP_BASE_URL</code>.
-          Sem isso, autenticação, queries e páginas internas não conseguem carregar.
+          The authenticated app depends on the <code>VITE_BASE44_APP_ID</code> and <code>VITE_BASE44_APP_BASE_URL</code> variables.
+          Without them, authentication, queries, and internal routes cannot load.
         </p>
       </div>
 
       <div className="rounded-xl bg-[hsl(var(--shell))] p-4 text-[13px] text-[hsl(var(--fg))]">
-        <p className="font-medium mb-2">Crie um arquivo <code>.env.local</code> na raiz com:</p>
+        <p className="font-medium mb-2">Create a <code>.env.local</code> file at the project root with:</p>
         <pre className="whitespace-pre-wrap break-all text-[12px] leading-6">
-{`VITE_BASE44_APP_ID=seu_app_id
-VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app`}
+{`VITE_BASE44_APP_ID=your_app_id
+VITE_BASE44_APP_BASE_URL=https://your-backend.base44.app`}
         </pre>
       </div>
 
       <p className="text-[13px] text-[hsl(var(--fg-2))]">
-        Existe um modelo em <code>.env.example</code>. Depois de preencher, reinicie o <code>npm run dev</code>.
+        A template already exists in <code>.env.example</code>. After filling it in, restart <code>npm run dev</code>.
       </p>
     </div>
   </div>

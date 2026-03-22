@@ -843,17 +843,18 @@ function ProfileContent() {
     
     const calories = Number(calorieTarget);
     let proteinRatio, carbsRatio, fatRatio;
+    const normalizedGoal = String(trainingGoal || '').toLowerCase();
     
     // Adjust macros based on training goal
-    if (trainingGoal === 'hipertrofia' || trainingGoal === 'muscle gain') {
+    if (normalizedGoal === 'muscle gain') {
       proteinRatio = 0.30; // 30% protein
       carbsRatio = 0.45;   // 45% carbs
       fatRatio = 0.25;     // 25% fat
-    } else if (trainingGoal === 'perda de peso' || trainingGoal === 'weight loss') {
+    } else if (normalizedGoal === 'weight loss') {
       proteinRatio = 0.35; // 35% protein
       carbsRatio = 0.40;   // 40% carbs
       fatRatio = 0.25;     // 25% fat
-    } else if (trainingGoal === 'força' || trainingGoal === 'strength') {
+    } else if (normalizedGoal === 'strength') {
       proteinRatio = 0.32; // 32% protein
       carbsRatio = 0.48;   // 48% carbs
       fatRatio = 0.20;     // 20% fat
@@ -1092,7 +1093,7 @@ function ProfileContent() {
 
                   <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
                     <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.9} />
-                    {filledFields} de {totalFields} campos
+                    {filledFields} of {totalFields} fields
                   </span>
                 </div>
 

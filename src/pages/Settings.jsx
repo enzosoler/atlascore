@@ -135,7 +135,7 @@ function SettingsContent() {
           </div>
           <div className="min-w-0">
             <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-              {user?.name || user?.email?.split('@')[0] || 'Usuário'}
+              {user?.name || user?.email?.split('@')[0] || 'User'}
             </p>
             <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">{user?.email || '—'}</p>
           </div>

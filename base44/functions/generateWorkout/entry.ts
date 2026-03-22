@@ -27,7 +27,7 @@ async function assertFeatureAccess(base44, user, featureKey) {
     else allowed.delete(featureKey);
   }
   if (!allowed.has(featureKey)) {
-    throw Object.assign(new Error(`Plano atual (${effectivePlan}) não inclui ${featureKey}. Faça upgrade para continuar.`), { status: 403 });
+    throw Object.assign(new Error(`Your current plan (${effectivePlan}) does not include ${featureKey}. Upgrade to continue.`), { status: 403 });
   }
 }
 
@@ -45,65 +45,65 @@ Deno.serve(async (req) => {
 
     const w = wizard || {};
 
-    const experience = w.experience || profile?.training_experience || 'intermediário';
-    const focus = w.focus || profile?.training_focus || 'hipertrofia';
-    const equipment = w.equipment || profile?.training_equipment || 'academia completa';
-    const injuries = w.injuries || profile?.injuries || 'nenhuma';
+    const experience = w.experience || profile?.training_experience || 'intermediate';
+    const focus = w.focus || profile?.training_focus || 'hypertrophy';
+    const equipment = w.equipment || profile?.training_equipment || 'full gym';
+    const injuries = w.injuries || profile?.injuries || 'none';
     const daysPerWeek = w.days_per_week || profile?.training_days_per_week || 4;
     const sessionMinutes = w.session_minutes || profile?.training_session_minutes || 60;
-    const muscularFocus = w.muscular_focus || 'escolha o melhor grupo para hoje considerando recuperação';
-    const methodology = w.methodology || profile?.training_methodology || 'musculação tradicional';
+    const muscularFocus = w.muscular_focus || 'choose the best muscle group for today based on recovery';
+    const methodology = w.methodology || profile?.training_methodology || 'traditional strength training';
 
     // Derive training focus from goal
     const goalToFocus = {
-      fat_loss: 'definição muscular e gasto calórico elevado',
-      muscle_gain: 'hipertrofia e volume de treino',
-      recomp: 'recomposição — intensidade moderada-alta',
-      performance: 'força e performance atlética',
-      health: 'saúde e condicionamento geral',
-      longevity: 'longevidade — intensidade controlada',
+      fat_loss: 'muscle definition and higher calorie expenditure',
+      muscle_gain: 'hypertrophy and training volume',
+      recomp: 'body recomposition with moderate-to-high intensity',
+      performance: 'strength and athletic performance',
+      health: 'overall health and conditioning',
+      longevity: 'longevity with controlled intensity',
     };
     const derivedFocus = goalToFocus[(profile?.health_goals || [])[0]] || focus;
 
     // Determine rep/set scheme by experience
     const repSchemes = {
-      beginner: '3 séries × 12–15 reps, RIR 3–4, cargas leves a moderadas',
-      intermediate: '4 séries × 8–12 reps, RIR 2–3, progressão linear',
-      advanced: '4–5 séries × 6–10 reps, RIR 1–2, técnicas avançadas quando pertinente',
-      expert: '5 séries × 5–8 reps, RIR 0–2, periodização intra-semana',
+      beginner: '3 sets × 12-15 reps, RIR 3-4, light to moderate loading',
+      intermediate: '4 sets × 8-12 reps, RIR 2-3, linear progression',
+      advanced: '4-5 sets × 6-10 reps, RIR 1-2, advanced methods when useful',
+      expert: '5 sets × 5-8 reps, RIR 0-2, intra-week periodization',
     };
     const repGuideline = repSchemes[experience] || repSchemes.intermediate;
 
-    const prompt = `Você é um personal trainer especialista em hipertrofia, força e recomposição. Gere um treino COMPLETO e ALTAMENTE PERSONALIZADO em português brasileiro.
+    const prompt = `You are an expert coach specializing in hypertrophy, strength, and recomposition. Generate a COMPLETE and HIGHLY PERSONALIZED workout plan in polished natural English.
 
-PERFIL COMPLETO DO ATLETA (use TODOS estes dados):
-- Peso corporal: ${profile?.current_weight || 80}kg
-- Objetivo principal: ${profile?.training_goal || profile?.health_goals?.join(', ') || 'hipertrofia'}
-- Foco derivado do objetivo: ${derivedFocus}
-- Nível de experiência: ${experience}
-- Equipamentos disponíveis: ${equipment}
-- Lesões / limitações: ${injuries}
-- Frequência semanal: ${daysPerWeek}x por semana
-- Duração da sessão: ${sessionMinutes} minutos
-- Metodologia preferida: ${methodology}
-- Nível de atividade geral: ${profile?.activity_level || 'moderate'}
-- Idade: ${profile?.age || 30} anos
-- Sexo: ${profile?.sex === 'female' ? 'Feminino' : 'Masculino'}
+ATHLETE PROFILE (use ALL of this context):
+- Body weight: ${profile?.current_weight || 80}kg
+- Primary goal: ${profile?.training_goal || profile?.health_goals?.join(', ') || 'hypertrophy'}
+- Derived focus from goal: ${derivedFocus}
+- Experience level: ${experience}
+- Available equipment: ${equipment}
+- Injuries or limitations: ${injuries}
+- Weekly frequency: ${daysPerWeek} sessions per week
+- Session duration: ${sessionMinutes} minutes
+- Preferred methodology: ${methodology}
+- General activity level: ${profile?.activity_level || 'moderate'}
+- Age: ${profile?.age || 30}
+- Sex: ${profile?.sex === 'female' ? 'Female' : 'Male'}
 
-FOCO MUSCULAR DESTA SESSÃO: ${muscularFocus}
+MUSCULAR FOCUS FOR THIS SESSION: ${muscularFocus}
 
-ESQUEMA DE SÉRIES/REPS INDICADO PARA O NÍVEL:
+RECOMMENDED SET/REP GUIDELINE FOR THIS LEVEL:
 ${repGuideline}
 
-REGRAS CRÍTICAS:
-1. Gere 5–7 exercícios adequados ao nível "${experience}" — nem muito fáceis, nem inacessíveis
-2. NUNCA inclua exercícios que agravem as lesões/limitações informadas (${injuries})
-3. RIR deve refletir o objetivo: força=1–2, hipertrofia=2–3, definição=2–4
-4. Cargas realistas baseadas no perfil — iniciantes sem carga excessiva, avançados com progressão real
-5. Nome do treino deve refletir o foco muscular (ex: "Peitoral e Tríceps — Volume", não apenas "Treino A")
-6. Notas de execução devem ser específicas, não genéricas ("manter neutro lombar" é genérico; "evitar hiperextensão no lockout do supino para preservar o ombro" é útil)
-7. Duração total deve ser próxima de ${sessionMinutes} minutos
-8. PROIBIDO treino genérico sem personalização — use o perfil acima completamente`;
+CRITICAL RULES:
+1. Generate 5-7 exercises appropriate for the "${experience}" level. They should be challenging but realistic.
+2. NEVER include exercises that worsen the listed injuries or limitations (${injuries}).
+3. RIR should match the goal: strength = 1-2, hypertrophy = 2-3, fat loss/definition = 2-4.
+4. Recommend realistic loading based on the athlete profile. Beginners should not receive aggressive loading prescriptions, and advanced athletes should show credible progression.
+5. The workout name must reflect the muscular focus, for example "Chest and Triceps - Volume" instead of "Workout A".
+6. Execution notes must be specific and useful, not generic.
+7. Total duration should stay close to ${sessionMinutes} minutes.
+8. Do not generate a generic template. Personalize the program using the full profile above.`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
@@ -154,7 +154,7 @@ REGRAS CRÍTICAS:
       acc + ex.sets.reduce((s, set) => s + (set.reps * set.weight), 0), 0);
 
     const workout = await base44.entities.Workout.create({
-      name:             typeof result?.name === 'string' ? result.name : 'Treino gerado por IA',
+      name:             typeof result?.name === 'string' ? result.name : 'AI-generated workout',
       type:             result?.type || 'strength',
       duration_minutes: Number(result?.duration_minutes) || sessionMinutes,
       perceived_effort: Number(result?.perceived_effort) || 7,

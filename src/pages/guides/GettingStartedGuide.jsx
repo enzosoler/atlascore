@@ -4,108 +4,108 @@ import BlogPostLayout from '@/components/content/BlogPostLayout';
 export default function GettingStartedGuide() {
   return (
     <BlogPostLayout
-      title="Primeiros Passos com Atlas Core"
-      excerpt="Um guia completo para começar — criar conta, completar onboarding e dominar o dashboard em 5 minutos."
+      title="Getting Started with Atlas Core"
+      excerpt="A complete guide to getting started — create your account, finish onboarding, and understand the dashboard in five minutes."
       publishedAt="2026-03-17"
       readingTime={5}
       author="Team Atlas"
       breadcrumb={{ href: '/help', label: 'Help Center' }}
     >
-      <h2>Bem-vindo ao Atlas Core</h2>
+      <h2>Welcome to Atlas Core</h2>
       <p>
-        Atlas Core é sua plataforma unificada para rastreamento de treino, nutrição e saúde. 
-        Quer você seja atleta, coach, nutricionista ou clínico, Atlas oferece ferramentas profissionais 
-        para acompanhar progresso com precisão.
+        Atlas Core is your unified platform for tracking training, nutrition, and health.
+        Whether you are an athlete, coach, nutritionist, or clinician, Atlas gives you professional tools
+        to follow progress with precision.
       </p>
 
-      <h2>Passo 1: Criar sua Conta</h2>
+      <h2>Step 1: Create Your Account</h2>
       <p>
-        Acesse <strong>atlascore.com</strong> e clique em "Começar Grátis". Você pode se registrar com email, 
-        Google ou Apple. Não é necessário cartão de crédito para começar.
+        Visit <strong>atlascore.com</strong> and click "Start Free". You can sign up with email,
+        Google, or Apple. No credit card is required to begin.
       </p>
       <p>
-        Após confirmar seu email, você será levado ao onboarding.
+        After confirming your email, you will be taken to onboarding.
       </p>
 
-      <h2>Passo 2: Completar Onboarding</h2>
+      <h2>Step 2: Complete Onboarding</h2>
       <p>
-        O onboarding é um tour rápido de 2-3 minutos que cobre:
+        Onboarding is a quick 2–3 minute walkthrough that covers:
       </p>
       <ul>
-        <li><strong>Seu Perfil</strong> — idade, altura, peso, objetivos de saúde</li>
-        <li><strong>Seu Plano</strong> — calorias diárias, macros (proteína, carboidratos, gordura)</li>
-        <li><strong>Seu Tipo</strong> — atleta, coach, nutricionista ou clínico</li>
+        <li><strong>Your profile</strong> — age, height, weight, and health goals</li>
+        <li><strong>Your plan</strong> — daily calories and macros (protein, carbs, fat)</li>
+        <li><strong>Your role</strong> — athlete, coach, nutritionist, or clinician</li>
       </ul>
       <p>
-        Você pode pular qualquer uma dessas etapas e voltar depois — não há pressa.
+        You can skip any of these steps and come back later — there is no rush.
       </p>
 
-      <h2>Passo 3: Entender o Dashboard (Today)</h2>
+      <h2>Step 3: Understand the Dashboard (Today)</h2>
       <p>
-        Depois de completar o onboarding, você chegará ao seu dashboard "Today". Este é o coração de Atlas Core.
+        After onboarding, you land on your "Today" dashboard. This is the center of Atlas Core.
       </p>
 
-      <h3>Check-in Diário</h3>
+      <h3>Daily Check-in</h3>
       <p>
-        Na parte superior, complete seu <strong>check-in diário</strong>. Conte-nos:
+        At the top, complete your <strong>daily check-in</strong>. Tell Atlas:
       </p>
       <ul>
-        <li>Como foi seu humor (1-5)</li>
-        <li>Seu nível de energia (1-5)</li>
-        <li>Horas de sono</li>
-        <li>Litros de água que você bebeu</li>
+        <li>Your mood (1–5)</li>
+        <li>Your energy level (1–5)</li>
+        <li>Hours of sleep</li>
+        <li>Liters of water you drank</li>
       </ul>
       <p>
-        Esses dados alimentam as análises do Atlas AI — quanto mais você registrar, melhores as insights.
+        This data feeds Atlas AI analysis — the more consistently you log, the better the insights become.
       </p>
 
       <h3>Nutritional Snapshot</h3>
       <p>
-        Veja suas calorias de hoje vs sua meta. Clique para registrar refeições.
+        See today’s calories versus your target. Click to log meals.
       </p>
 
       <h3>Workout Summary</h3>
       <p>
-        Veja seu treino de hoje. Clique para registrar exercícios.
+        See today’s workout. Click to log exercises.
       </p>
 
-      <h2>Passo 4: Registrar sua Primeira Refeição</h2>
+      <h2>Step 4: Log Your First Meal</h2>
       <p>
-        Acesse a seção <strong>Nutrition</strong> e clique em "Adicionar Refeição".
-      </p>
-      <ol>
-        <li>Selecione a refeição (café, almoço, lanche, jantar)</li>
-        <li>Procure por alimentos — Atlas tem um banco de dados com milhares de itens</li>
-        <li>Defina a quantidade (100g, 1 xícara, 1 unidade)</li>
-        <li>Salve — Atlas calcula calorias e macros automaticamente</li>
-      </ol>
-
-      <h2>Passo 5: Registrar seu Primeiro Treino</h2>
-      <p>
-        Acesse <strong>Workouts</strong> e clique em "Novo Treino".
+        Open the <strong>Nutrition</strong> section and click "Add Meal".
       </p>
       <ol>
-        <li>Escolha a data do treino</li>
-        <li>Procure por exercício (ex: "supino" ou "leg press")</li>
-        <li>Registre séries, repetições e peso</li>
-        <li>Continue adicionando exercícios até terminar sua sessão</li>
-        <li>Salve — Atlas calcula volume total, tempo e RPE</li>
+        <li>Select the meal (breakfast, lunch, snack, dinner)</li>
+        <li>Search foods — Atlas includes a database with thousands of items</li>
+        <li>Set the amount (100g, 1 cup, 1 unit)</li>
+        <li>Save — Atlas calculates calories and macros automatically</li>
       </ol>
 
-      <h2>Próximos Passos</h2>
+      <h2>Step 5: Log Your First Workout</h2>
       <p>
-        Parabéns! Você completou o essencial. Agora:
+        Open <strong>Workouts</strong> and click "New Workout".
+      </p>
+      <ol>
+        <li>Choose the workout date</li>
+        <li>Search for an exercise (ex: bench press or leg press)</li>
+        <li>Log sets, reps, and load</li>
+        <li>Keep adding exercises until the session is complete</li>
+        <li>Save — Atlas calculates total volume, time, and RPE</li>
+      </ol>
+
+      <h2>Next Steps</h2>
+      <p>
+        You’ve completed the essentials. Next:
       </p>
       <ul>
-        <li>Leia nossos <strong>Guides</strong> para aprender recursos avançados</li>
-        <li>Convide um <strong>Coach ou Nutricionista</strong> para prescrições customizadas</li>
-        <li>Explore o <strong>Atlas AI</strong> para análises e recomendações</li>
-        <li>Exporte seus dados em <strong>PDF/CSV</strong> sempre que necessário</li>
+        <li>Read the other <strong>Guides</strong> to learn advanced workflows</li>
+        <li>Invite a <strong>Coach or Nutritionist</strong> for custom prescriptions</li>
+        <li>Explore <strong>Atlas AI</strong> for analysis and recommendations</li>
+        <li>Export your data as <strong>PDF/CSV</strong> whenever needed</li>
       </ul>
 
       <blockquote>
-        <strong>Dica:</strong> Rastreamento consistente é a chave. Mesmo que você não visse resultados imediatos, 
-        dados de 30-60 dias revelam padrões reais. Comece hoje.
+        <strong>Tip:</strong> Consistent tracking is the key. Even if results are not obvious immediately,
+        30–60 days of data reveal real patterns. Start today.
       </blockquote>
     </BlogPostLayout>
   );

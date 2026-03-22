@@ -8,9 +8,9 @@ const ROLE_MAPPING = {
 };
 
 const ROLE_LABELS = {
-  student: 'aluno',
-  client: 'cliente',
-  patient: 'paciente',
+  student: 'student',
+  client: 'client',
+  patient: 'patient',
 };
 
 Deno.serve(async (req) => {
@@ -60,19 +60,19 @@ Deno.serve(async (req) => {
     // Send email
     const emailRes = await base44.integrations.Core.SendEmail({
       to: recipient_email,
-      subject: `${user.full_name} te convidou para o Atlas Core`,
+      subject: `${user.full_name} invited you to Atlas Core`,
       body: `
-Olá ${recipient_name}!
+Hi ${recipient_name},
 
-${user.full_name} te convidou para se juntar ao Atlas Core como ${ROLE_LABELS[recipient_role]}.
+${user.full_name} invited you to join Atlas Core as a ${ROLE_LABELS[recipient_role]}.
 
-🔗 Link de convite: ${inviteLink}
+Invitation link: ${inviteLink}
 
-Este convite expira em 30 dias.
+This invitation expires in 30 days.
 
-Qualquer dúvida, responda este email ou visite nosso suporte.
+If you have any questions, reply to this email or visit our support page.
 
-Bem-vindo ao Atlas Core! 💪
+Welcome to Atlas Core.
       `.trim(),
       from_name: 'Atlas Core',
     });
@@ -83,7 +83,7 @@ Bem-vindo ao Atlas Core! 💪
       success: true,
       invite_id: invite.id,
       invite_code,
-      message: `Convite enviado para ${recipient_email}`,
+      message: `Invite sent to ${recipient_email}`,
     });
   } catch (error) {
     console.error('sendInviteEmail error:', error.message);

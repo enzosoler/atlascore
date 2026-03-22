@@ -2,7 +2,7 @@
  * Atlas Core — Exercise System (English-only)
  *
  * This file exports stubs to maintain API compatibility.
- * Portuguese translation support has been removed.
+ * Legacy locale translation support has been removed.
  */
 
 // ─── Stubs for compatibility ────────────────────────────────────────────────

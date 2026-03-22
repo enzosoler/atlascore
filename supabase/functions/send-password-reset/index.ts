@@ -58,9 +58,7 @@ Deno.serve(async (req) => {
   const { data: userData } = await admin.auth.admin.listUsers();
   const user = userData?.users?.find(u => u.email?.toLowerCase() === email.trim().toLowerCase());
 
-  const lang = language === 'pt' ? 'pt'
-    : /^pt/i.test(user?.user_metadata?.language as string || '') ? 'pt'
-    : 'en';
+  const lang = 'en';
 
   const firstName = user?.user_metadata?.full_name
     ? (user.user_metadata.full_name as string).split(' ')[0]

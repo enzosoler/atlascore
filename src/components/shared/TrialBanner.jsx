@@ -53,11 +53,11 @@ export default function TrialBanner() {
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
           {days > 0
-            ? `Trial Performance — ${days} dia${days !== 1 ? 's' : ''} restante${days !== 1 ? 's' : ''}`
-            : 'Seu trial encerrou hoje'}
+            ? `Performance trial — ${days} day${days !== 1 ? 's' : ''} remaining`
+            : 'Your trial ends today'}
         </p>
         <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-          Continue com o mesmo fluxo e mantenha acesso ao workspace completo do Atlas Core.
+          Keep your current workflow and retain access to the full Atlas Core workspace.
         </p>
       </div>
 
@@ -69,12 +69,12 @@ export default function TrialBanner() {
             isUrgent ? 'atlas-button-danger' : 'atlas-button-primary'
           )}
         >
-          Assinar agora
+          Subscribe now
         </Link>
         <button
           onClick={() => setDismissed(true)}
           className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]"
-          aria-label="Fechar banner"
+          aria-label="Close banner"
         >
           <X className="h-4 w-4" strokeWidth={2} />
         </button>

@@ -626,10 +626,10 @@ export default function AppLayout() {
             </div>
             <span className="text-[11px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
               {isRefreshing
-                ? 'Atualizando...'
+                ? 'Refreshing...'
                 : pullDistance >= PULL_REFRESH_THRESHOLD
-                  ? 'Solte para atualizar'
-                  : 'Puxe para atualizar'}
+                  ? 'Release to refresh'
+                  : 'Pull to refresh'}
             </span>
           </div>
         </motion.div>

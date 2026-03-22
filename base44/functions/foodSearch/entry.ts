@@ -16,51 +16,51 @@
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-// ─── Brazilian food seed data (top 100 TACO database foods) ───────────────────
+// ─── English food seed data (core TACO catalog coverage) ───────────────────
 const SEED_FOODS = [
-  // Grãos e cereais
-  { canonical_name: 'Arroz branco cozido', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 130, protein_per_base: 2.7, carbs_per_base: 28.1, fat_per_base: 0.3, fiber_per_base: 0.3, is_verified: true, search_rank: 95, source_type: 'local', aliases: ['arroz', 'arroz branco'] },
-  { canonical_name: 'Arroz integral cozido', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 124, protein_per_base: 2.6, carbs_per_base: 25.8, fat_per_base: 1.0, fiber_per_base: 1.8, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['arroz integral'] },
-  { canonical_name: 'Feijão carioca cozido', category: 'protein_plant', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 77, protein_per_base: 4.8, carbs_per_base: 13.6, fat_per_base: 0.5, fiber_per_base: 8.4, is_verified: true, search_rank: 90, source_type: 'local', aliases: ['feijão', 'feijao carioca'] },
-  { canonical_name: 'Feijão preto cozido', category: 'protein_plant', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 77, protein_per_base: 4.5, carbs_per_base: 14.0, fat_per_base: 0.5, fiber_per_base: 8.7, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['feijão preto', 'feijao preto'] },
-  { canonical_name: 'Lentilha cozida', category: 'protein_plant', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 116, protein_per_base: 9.0, carbs_per_base: 20.1, fat_per_base: 0.4, fiber_per_base: 7.9, is_verified: true, search_rank: 55, source_type: 'local', aliases: ['lentilha'] },
-  { canonical_name: 'Aveia em flocos', category: 'grain', serving_base_amount: 40, serving_base_unit: 'g', calories_per_base: 152, protein_per_base: 5.4, carbs_per_base: 26.8, fat_per_base: 2.8, fiber_per_base: 3.6, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['aveia', 'flocos de aveia'] },
-  { canonical_name: 'Macarrão cozido', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 131, protein_per_base: 4.3, carbs_per_base: 26.6, fat_per_base: 0.9, fiber_per_base: 1.2, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['massa', 'espaguete', 'pasta'] },
-  { canonical_name: 'Pão francês', category: 'grain', serving_base_amount: 50, serving_base_unit: 'g', calories_per_base: 134, protein_per_base: 4.3, carbs_per_base: 26.6, fat_per_base: 0.8, fiber_per_base: 1.1, is_verified: true, search_rank: 85, source_type: 'local', aliases: ['pão', 'pao frances'] },
-  { canonical_name: 'Batata doce cozida', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 77, protein_per_base: 1.4, carbs_per_base: 18.3, fat_per_base: 0.1, fiber_per_base: 2.2, is_verified: true, search_rank: 82, source_type: 'local', aliases: ['batata doce', 'batata-doce'] },
-  { canonical_name: 'Batata inglesa cozida', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 56, protein_per_base: 1.2, carbs_per_base: 12.6, fat_per_base: 0.1, fiber_per_base: 1.8, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['batata', 'batata inglesa'] },
-  { canonical_name: 'Quinoa cozida', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 120, protein_per_base: 4.4, carbs_per_base: 21.3, fat_per_base: 1.9, fiber_per_base: 2.8, is_verified: true, search_rank: 60, source_type: 'local', aliases: ['quinoa'] },
-  // Proteínas animais
-  { canonical_name: 'Frango peito grelhado', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 159, protein_per_base: 32.0, carbs_per_base: 0, fat_per_base: 3.2, fiber_per_base: 0, is_verified: true, search_rank: 98, source_type: 'local', aliases: ['frango', 'peito de frango', 'frango grelhado'] },
-  { canonical_name: 'Frango coxa grelhada', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 197, protein_per_base: 26.0, carbs_per_base: 0, fat_per_base: 9.6, fiber_per_base: 0, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['coxa de frango'] },
-  { canonical_name: 'Carne bovina patinho grelhado', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 219, protein_per_base: 28.0, carbs_per_base: 0, fat_per_base: 12.0, fiber_per_base: 0, is_verified: true, search_rank: 78, source_type: 'local', aliases: ['patinho', 'carne bovina', 'carne vermelha'] },
-  { canonical_name: 'Carne bovina alcatra', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 195, protein_per_base: 29.0, carbs_per_base: 0, fat_per_base: 8.5, fiber_per_base: 0, is_verified: true, search_rank: 72, source_type: 'local', aliases: ['alcatra'] },
-  { canonical_name: 'Salmão grelhado', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 208, protein_per_base: 28.0, carbs_per_base: 0, fat_per_base: 10.5, fiber_per_base: 0, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['salmão', 'salmon'] },
-  { canonical_name: 'Atum em lata (água)', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 116, protein_per_base: 25.5, carbs_per_base: 0, fat_per_base: 0.9, fiber_per_base: 0, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['atum', 'atum em lata'] },
-  { canonical_name: 'Ovo inteiro cozido', category: 'protein_animal', serving_base_amount: 60, serving_base_unit: 'g', calories_per_base: 90, protein_per_base: 7.5, carbs_per_base: 0.4, fat_per_base: 6.3, fiber_per_base: 0, is_verified: true, search_rank: 92, source_type: 'local', aliases: ['ovo', 'ovo cozido'] },
-  { canonical_name: 'Clara de ovo', category: 'protein_animal', serving_base_amount: 33, serving_base_unit: 'g', calories_per_base: 17, protein_per_base: 3.6, carbs_per_base: 0.2, fat_per_base: 0.1, fiber_per_base: 0, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['clara', 'clara de ovo'] },
-  { canonical_name: 'Tilápia grelhada', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 128, protein_per_base: 26.2, carbs_per_base: 0, fat_per_base: 2.3, fiber_per_base: 0, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['tilapia', 'tilápia'] },
-  { canonical_name: 'Camarão cozido', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 99, protein_per_base: 20.9, carbs_per_base: 0.9, fat_per_base: 1.1, fiber_per_base: 0, is_verified: true, search_rank: 55, source_type: 'local', aliases: ['camarão', 'camarao'] },
-  // Laticínios
-  { canonical_name: 'Leite integral', category: 'dairy', serving_base_amount: 200, serving_base_unit: 'ml', calories_per_base: 122, protein_per_base: 6.6, carbs_per_base: 9.6, fat_per_base: 6.4, fiber_per_base: 0, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['leite'] },
-  { canonical_name: 'Iogurte natural integral', category: 'dairy', serving_base_amount: 170, serving_base_unit: 'g', calories_per_base: 102, protein_per_base: 5.9, carbs_per_base: 7.1, fat_per_base: 5.3, fiber_per_base: 0, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['iogurte', 'iogurte natural'] },
-  { canonical_name: 'Iogurte grego 0%', category: 'dairy', serving_base_amount: 170, serving_base_unit: 'g', calories_per_base: 85, protein_per_base: 15.0, carbs_per_base: 5.0, fat_per_base: 0.4, fiber_per_base: 0, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['iogurte grego', 'grego'] },
-  { canonical_name: 'Queijo cottage', category: 'dairy', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 98, protein_per_base: 11.1, carbs_per_base: 3.4, fat_per_base: 4.3, fiber_per_base: 0, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['cottage'] },
-  { canonical_name: 'Whey protein (scoop 30g)', category: 'supplement', serving_base_amount: 30, serving_base_unit: 'g', calories_per_base: 120, protein_per_base: 24.0, carbs_per_base: 3.0, fat_per_base: 1.5, fiber_per_base: 0, is_verified: true, search_rank: 85, source_type: 'local', aliases: ['whey', 'whey protein', 'proteína em pó'] },
-  // Gorduras
-  { canonical_name: 'Azeite de oliva', category: 'fat_oil', serving_base_amount: 10, serving_base_unit: 'ml', calories_per_base: 88, protein_per_base: 0, carbs_per_base: 0, fat_per_base: 10.0, fiber_per_base: 0, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['azeite', 'azeite extra virgem'] },
-  { canonical_name: 'Pasta de amendoim integral', category: 'fat_oil', serving_base_amount: 32, serving_base_unit: 'g', calories_per_base: 191, protein_per_base: 7.0, carbs_per_base: 6.5, fat_per_base: 16.0, fiber_per_base: 1.8, is_verified: true, search_rank: 78, source_type: 'local', aliases: ['pasta de amendoim', 'amendoim pasta', 'peanut butter'] },
-  { canonical_name: 'Castanha do Pará', category: 'fat_oil', serving_base_amount: 30, serving_base_unit: 'g', calories_per_base: 196, protein_per_base: 4.3, carbs_per_base: 3.7, fat_per_base: 19.7, fiber_per_base: 2.1, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['castanha', 'castanha do para', 'castanha-do-pará'] },
-  { canonical_name: 'Abacate', category: 'fat_oil', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 160, protein_per_base: 2.0, carbs_per_base: 8.5, fat_per_base: 14.7, fiber_per_base: 6.7, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['abacate', 'avocado'] },
-  // Frutas
-  { canonical_name: 'Banana prata', category: 'fruit', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 98, protein_per_base: 1.3, carbs_per_base: 26.0, fat_per_base: 0.1, fiber_per_base: 2.0, is_verified: true, search_rank: 88, source_type: 'local', aliases: ['banana', 'banana nanica'] },
-  { canonical_name: 'Maçã', category: 'fruit', serving_base_amount: 130, serving_base_unit: 'g', calories_per_base: 68, protein_per_base: 0.4, carbs_per_base: 17.4, fat_per_base: 0.3, fiber_per_base: 2.6, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['maçã', 'maca'] },
-  { canonical_name: 'Morango', category: 'fruit', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 32, protein_per_base: 0.7, carbs_per_base: 7.7, fat_per_base: 0.3, fiber_per_base: 2.0, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['morango'] },
-  // Vegetais
-  { canonical_name: 'Brócolis cozido', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 35, protein_per_base: 2.4, carbs_per_base: 7.2, fat_per_base: 0.4, fiber_per_base: 3.3, is_verified: true, search_rank: 72, source_type: 'local', aliases: ['brócolis', 'brocolis'] },
-  { canonical_name: 'Espinafre refogado', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 24, protein_per_base: 2.9, carbs_per_base: 3.5, fat_per_base: 0.3, fiber_per_base: 2.2, is_verified: true, search_rank: 60, source_type: 'local', aliases: ['espinafre'] },
-  { canonical_name: 'Tomate', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 18, protein_per_base: 0.9, carbs_per_base: 3.9, fat_per_base: 0.2, fiber_per_base: 1.2, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['tomate'] },
-  { canonical_name: 'Cenoura crua', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 34, protein_per_base: 0.9, carbs_per_base: 7.7, fat_per_base: 0.2, fiber_per_base: 2.8, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['cenoura'] },
+  // Grains and cereals
+  { canonical_name: 'White rice, cooked', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 130, protein_per_base: 2.7, carbs_per_base: 28.1, fat_per_base: 0.3, fiber_per_base: 0.3, is_verified: true, search_rank: 95, source_type: 'local', aliases: ['white rice cooked', 'white rice'] },
+  { canonical_name: 'Brown rice, cooked', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 124, protein_per_base: 2.6, carbs_per_base: 25.8, fat_per_base: 1.0, fiber_per_base: 1.8, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['brown rice cooked', 'brown rice'] },
+  { canonical_name: 'Carioca beans, cooked', category: 'protein_plant', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 77, protein_per_base: 4.8, carbs_per_base: 13.6, fat_per_base: 0.5, fiber_per_base: 8.4, is_verified: true, search_rank: 90, source_type: 'local', aliases: ['carioca beans cooked', 'carioca beans'] },
+  { canonical_name: 'Black beans, cooked', category: 'protein_plant', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 77, protein_per_base: 4.5, carbs_per_base: 14.0, fat_per_base: 0.5, fiber_per_base: 8.7, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['black beans cooked', 'black beans'] },
+  { canonical_name: 'Lentils, cooked', category: 'protein_plant', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 116, protein_per_base: 9.0, carbs_per_base: 20.1, fat_per_base: 0.4, fiber_per_base: 7.9, is_verified: true, search_rank: 55, source_type: 'local', aliases: ['lentils cooked', 'lentils'] },
+  { canonical_name: 'Rolled oats', category: 'grain', serving_base_amount: 40, serving_base_unit: 'g', calories_per_base: 152, protein_per_base: 5.4, carbs_per_base: 26.8, fat_per_base: 2.8, fiber_per_base: 3.6, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['rolled oats'] },
+  { canonical_name: 'Pasta, cooked', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 131, protein_per_base: 4.3, carbs_per_base: 26.6, fat_per_base: 0.9, fiber_per_base: 1.2, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['pasta cooked', 'pasta'] },
+  { canonical_name: 'French roll', category: 'grain', serving_base_amount: 50, serving_base_unit: 'g', calories_per_base: 134, protein_per_base: 4.3, carbs_per_base: 26.6, fat_per_base: 0.8, fiber_per_base: 1.1, is_verified: true, search_rank: 85, source_type: 'local', aliases: ['french roll'] },
+  { canonical_name: 'Sweet potato, cooked', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 77, protein_per_base: 1.4, carbs_per_base: 18.3, fat_per_base: 0.1, fiber_per_base: 2.2, is_verified: true, search_rank: 82, source_type: 'local', aliases: ['sweet potato cooked', 'sweet potato'] },
+  { canonical_name: 'White potato, cooked', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 56, protein_per_base: 1.2, carbs_per_base: 12.6, fat_per_base: 0.1, fiber_per_base: 1.8, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['white potato cooked', 'white potato'] },
+  { canonical_name: 'Quinoa, cooked', category: 'grain', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 120, protein_per_base: 4.4, carbs_per_base: 21.3, fat_per_base: 1.9, fiber_per_base: 2.8, is_verified: true, search_rank: 60, source_type: 'local', aliases: ['quinoa cooked', 'quinoa'] },
+  // Animal proteins
+  { canonical_name: 'Chicken breast, grilled', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 159, protein_per_base: 32.0, carbs_per_base: 0, fat_per_base: 3.2, fiber_per_base: 0, is_verified: true, search_rank: 98, source_type: 'local', aliases: ['chicken breast grilled', 'chicken breast'] },
+  { canonical_name: 'Chicken drumstick, grilled', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 197, protein_per_base: 26.0, carbs_per_base: 0, fat_per_base: 9.6, fiber_per_base: 0, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['chicken drumstick grilled', 'chicken drumstick'] },
+  { canonical_name: 'Lean beef round, grilled', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 219, protein_per_base: 28.0, carbs_per_base: 0, fat_per_base: 12.0, fiber_per_base: 0, is_verified: true, search_rank: 78, source_type: 'local', aliases: ['lean beef round grilled', 'lean beef round'] },
+  { canonical_name: 'Top sirloin', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 195, protein_per_base: 29.0, carbs_per_base: 0, fat_per_base: 8.5, fiber_per_base: 0, is_verified: true, search_rank: 72, source_type: 'local', aliases: ['top sirloin'] },
+  { canonical_name: 'Salmon, grilled', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 208, protein_per_base: 28.0, carbs_per_base: 0, fat_per_base: 10.5, fiber_per_base: 0, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['salmon grilled', 'salmon'] },
+  { canonical_name: 'Canned tuna in water', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 116, protein_per_base: 25.5, carbs_per_base: 0, fat_per_base: 0.9, fiber_per_base: 0, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['canned tuna in water'] },
+  { canonical_name: 'Whole egg, cooked', category: 'protein_animal', serving_base_amount: 60, serving_base_unit: 'g', calories_per_base: 90, protein_per_base: 7.5, carbs_per_base: 0.4, fat_per_base: 6.3, fiber_per_base: 0, is_verified: true, search_rank: 92, source_type: 'local', aliases: ['whole egg cooked', 'whole egg'] },
+  { canonical_name: 'Egg white', category: 'protein_animal', serving_base_amount: 33, serving_base_unit: 'g', calories_per_base: 17, protein_per_base: 3.6, carbs_per_base: 0.2, fat_per_base: 0.1, fiber_per_base: 0, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['egg white'] },
+  { canonical_name: 'Tilapia, grilled', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 128, protein_per_base: 26.2, carbs_per_base: 0, fat_per_base: 2.3, fiber_per_base: 0, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['tilapia grilled', 'tilapia'] },
+  { canonical_name: 'Shrimp, cooked', category: 'protein_animal', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 99, protein_per_base: 20.9, carbs_per_base: 0.9, fat_per_base: 1.1, fiber_per_base: 0, is_verified: true, search_rank: 55, source_type: 'local', aliases: ['shrimp cooked', 'shrimp'] },
+  // Dairy
+  { canonical_name: 'Whole milk', category: 'dairy', serving_base_amount: 200, serving_base_unit: 'ml', calories_per_base: 122, protein_per_base: 6.6, carbs_per_base: 9.6, fat_per_base: 6.4, fiber_per_base: 0, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['whole milk'] },
+  { canonical_name: 'Whole plain yogurt', category: 'dairy', serving_base_amount: 170, serving_base_unit: 'g', calories_per_base: 102, protein_per_base: 5.9, carbs_per_base: 7.1, fat_per_base: 5.3, fiber_per_base: 0, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['whole plain yogurt'] },
+  { canonical_name: 'Greek yogurt 0%', category: 'dairy', serving_base_amount: 170, serving_base_unit: 'g', calories_per_base: 85, protein_per_base: 15.0, carbs_per_base: 5.0, fat_per_base: 0.4, fiber_per_base: 0, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['greek yogurt 0'] },
+  { canonical_name: 'Cottage cheese', category: 'dairy', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 98, protein_per_base: 11.1, carbs_per_base: 3.4, fat_per_base: 4.3, fiber_per_base: 0, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['cottage cheese'] },
+  { canonical_name: 'Whey protein (30 g scoop)', category: 'supplement', serving_base_amount: 30, serving_base_unit: 'g', calories_per_base: 120, protein_per_base: 24.0, carbs_per_base: 3.0, fat_per_base: 1.5, fiber_per_base: 0, is_verified: true, search_rank: 85, source_type: 'local', aliases: ['whey protein 30 g scoop', 'whey protein'] },
+  // Fats
+  { canonical_name: 'Olive oil', category: 'fat_oil', serving_base_amount: 10, serving_base_unit: 'ml', calories_per_base: 88, protein_per_base: 0, carbs_per_base: 0, fat_per_base: 10.0, fiber_per_base: 0, is_verified: true, search_rank: 80, source_type: 'local', aliases: ['olive oil'] },
+  { canonical_name: 'Natural peanut butter', category: 'fat_oil', serving_base_amount: 32, serving_base_unit: 'g', calories_per_base: 191, protein_per_base: 7.0, carbs_per_base: 6.5, fat_per_base: 16.0, fiber_per_base: 1.8, is_verified: true, search_rank: 78, source_type: 'local', aliases: ['natural peanut butter'] },
+  { canonical_name: 'Brazil nuts', category: 'fat_oil', serving_base_amount: 30, serving_base_unit: 'g', calories_per_base: 196, protein_per_base: 4.3, carbs_per_base: 3.7, fat_per_base: 19.7, fiber_per_base: 2.1, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['brazil nuts'] },
+  { canonical_name: 'Avocado', category: 'fat_oil', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 160, protein_per_base: 2.0, carbs_per_base: 8.5, fat_per_base: 14.7, fiber_per_base: 6.7, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['avocado'] },
+  // Fruits
+  { canonical_name: 'Silver banana', category: 'fruit', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 98, protein_per_base: 1.3, carbs_per_base: 26.0, fat_per_base: 0.1, fiber_per_base: 2.0, is_verified: true, search_rank: 88, source_type: 'local', aliases: ['silver banana'] },
+  { canonical_name: 'Apple', category: 'fruit', serving_base_amount: 130, serving_base_unit: 'g', calories_per_base: 68, protein_per_base: 0.4, carbs_per_base: 17.4, fat_per_base: 0.3, fiber_per_base: 2.6, is_verified: true, search_rank: 75, source_type: 'local', aliases: ['apple'] },
+  { canonical_name: 'Strawberries', category: 'fruit', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 32, protein_per_base: 0.7, carbs_per_base: 7.7, fat_per_base: 0.3, fiber_per_base: 2.0, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['strawberries'] },
+  // Vegetables
+  { canonical_name: 'Broccoli, cooked', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 35, protein_per_base: 2.4, carbs_per_base: 7.2, fat_per_base: 0.4, fiber_per_base: 3.3, is_verified: true, search_rank: 72, source_type: 'local', aliases: ['broccoli cooked', 'broccoli'] },
+  { canonical_name: 'Spinach, sauteed', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 24, protein_per_base: 2.9, carbs_per_base: 3.5, fat_per_base: 0.3, fiber_per_base: 2.2, is_verified: true, search_rank: 60, source_type: 'local', aliases: ['spinach sauteed', 'spinach'] },
+  { canonical_name: 'Tomato', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 18, protein_per_base: 0.9, carbs_per_base: 3.9, fat_per_base: 0.2, fiber_per_base: 1.2, is_verified: true, search_rank: 70, source_type: 'local', aliases: ['tomato'] },
+  { canonical_name: 'Carrot, raw', category: 'vegetable', serving_base_amount: 100, serving_base_unit: 'g', calories_per_base: 34, protein_per_base: 0.9, carbs_per_base: 7.7, fat_per_base: 0.2, fiber_per_base: 2.8, is_verified: true, search_rank: 65, source_type: 'local', aliases: ['carrot raw', 'carrot'] },
 ];
 
 function normalize(s) {
@@ -109,10 +109,10 @@ function formatFood(food) {
   };
 }
 
-// Search Open Food Facts (Brazilian locale first)
+// Search Open Food Facts
 async function searchOpenFoodFacts(query) {
   try {
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&lc=pt&page_size=8&fields=id,product_name,brands,nutriments,serving_size,serving_quantity,categories_tags,code`;
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&lc=en&page_size=8&fields=id,product_name,brands,nutriments,serving_size,serving_quantity,categories_tags,code`;
     const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (!res.ok) return [];
     const data = await res.json();
@@ -138,7 +138,7 @@ async function searchOpenFoodFacts(query) {
       barcode: p.code || null,
       is_verified: false,
       search_rank: 20,
-      locale: 'pt-BR',
+      locale: 'en-US',
     }));
   } catch (err) {
     console.warn('OpenFoodFacts error:', err.message);
@@ -150,7 +150,7 @@ async function searchOpenFoodFacts(query) {
 async function llmSearch(query, base44) {
   try {
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `Retorne dados nutricionais precisos para o alimento brasileiro "${query}". Baseie-se na tabela TACO ou valores IBGE. Retorne até 3 variações (ex: cru, cozido, assado). Não invente marcas ou produtos industrializados.`,
+      prompt: `Return accurate nutrition data in English for the food "${query}". Base it on TACO, USDA, or equivalent standard references. Return up to 3 variations (for example: raw, cooked, roasted). Do not invent brands or ultra-processed products.`,
       response_json_schema: {
         type: 'object',
         properties: {
@@ -181,7 +181,7 @@ async function llmSearch(query, base44) {
       serving_base_unit: f.serving_base_unit || 'g',
       is_verified: false,
       search_rank: 5,
-      locale: 'pt-BR',
+      locale: 'en-US',
     }));
   } catch (err) {
     console.warn('LLM search error:', err.message);
@@ -256,7 +256,7 @@ Deno.serve(async (req) => {
           const food = {
             source_type: 'openfoodfacts',
             source_id: code,
-            canonical_name: p.product_name || p.product_name_pt || 'Produto desconhecido',
+            canonical_name: p.product_name || p.product_name_en || 'Unknown product',
             brand: p.brands?.split(',')[0]?.trim() || null,
             category: 'processed',
             serving_base_amount: 100,
@@ -295,7 +295,7 @@ Deno.serve(async (req) => {
 
       const created = await base44.asServiceRole.entities.FoodMaster.create({
         ...food,
-        locale: food.locale || 'pt-BR',
+        locale: food.locale || 'en-US',
         is_verified: false,
         search_rank: food.search_rank || 20,
       });
@@ -320,7 +320,7 @@ Deno.serve(async (req) => {
       for (const seed of SEED_FOODS) {
         const existing = await base44.asServiceRole.entities.FoodMaster.filter({ canonical_name: seed.canonical_name });
         if (existing.length === 0) {
-          await base44.asServiceRole.entities.FoodMaster.create({ ...seed, locale: 'pt-BR' });
+          await base44.asServiceRole.entities.FoodMaster.create({ ...seed, locale: 'en-US' });
           count++;
         }
       }

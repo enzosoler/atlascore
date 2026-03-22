@@ -22,13 +22,6 @@ export const getBrowserLanguage = () => {
 };
 
 /**
- * Check if browser language is Portuguese (no longer used)
- */
-export const isBrowserPortuguese = () => {
-  return false;
-};
-
-/**
  * Determine currency - always returns USD
  *
  * @param {string} selectedLanguage - Unused; always returns USD

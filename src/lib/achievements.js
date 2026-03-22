@@ -5,9 +5,9 @@
 
 export const ACHIEVEMENTS = [
   // ── Hydration ──
-  { key: 'water_3d',   emoji: '💧', label: 'Hydrated',         desc: 'Hit your water goal for 3 straight days',      category: 'agua',    target: 3  },
-  { key: 'water_7d',   emoji: '🌊', label: 'Steady Flow',      desc: 'Hit your water goal for 7 straight days',      category: 'agua',    target: 7  },
-  { key: 'water_30d',  emoji: '🏔️', label: 'Ocean Mode',      desc: 'Hit your water goal for 30 straight days',     category: 'agua',    target: 30 },
+  { key: 'water_3d',   emoji: '💧', label: 'Hydrated',         desc: 'Hit your water goal for 3 straight days',      category: 'water',    target: 3  },
+  { key: 'water_7d',   emoji: '🌊', label: 'Steady Flow',      desc: 'Hit your water goal for 7 straight days',      category: 'water',    target: 7  },
+  { key: 'water_30d',  emoji: '🏔️', label: 'Ocean Mode',      desc: 'Hit your water goal for 30 straight days',     category: 'water',    target: 30 },
 
   // ── Check-ins ──
   { key: 'checkin_7d',  emoji: '📋', label: 'Check-in Warrior', desc: 'Complete check-ins for 7 straight days',      category: 'checkin', target: 7  },
@@ -15,18 +15,18 @@ export const ACHIEVEMENTS = [
   { key: 'checkin_30d', emoji: '🔥', label: 'Unstoppable',      desc: 'Complete check-ins for 30 straight days',     category: 'checkin', target: 30 },
 
   // ── Workouts ──
-  { key: 'workout_5',   emoji: '💪', label: 'Getting Started',  desc: 'Log 5 workouts',                              category: 'treino',  target: 5  },
-  { key: 'workout_20',  emoji: '🏋️', label: 'Committed',       desc: 'Log 20 workouts',                             category: 'treino',  target: 20 },
-  { key: 'workout_50',  emoji: '🥇', label: 'Veteran',         desc: 'Log 50 workouts',                              category: 'treino',  target: 50 },
-  { key: 'workout_3streak', emoji: '⚡', label: 'Streak',       desc: 'Train for 3 straight weeks',                  category: 'treino',  target: 3  },
+  { key: 'workout_5',   emoji: '💪', label: 'Getting Started',  desc: 'Log 5 workouts',                              category: 'workout',  target: 5  },
+  { key: 'workout_20',  emoji: '🏋️', label: 'Committed',       desc: 'Log 20 workouts',                             category: 'workout',  target: 20 },
+  { key: 'workout_50',  emoji: '🥇', label: 'Veteran',         desc: 'Log 50 workouts',                              category: 'workout',  target: 50 },
+  { key: 'workout_3streak', emoji: '⚡', label: 'Streak',       desc: 'Train for 3 straight weeks',                  category: 'workout',  target: 3  },
 
   // ── Body metrics ──
-  { key: 'measurement_5',  emoji: '📏', label: 'Tracking',     desc: 'Log 5 measurements',                          category: 'corpo',   target: 5  },
-  { key: 'measurement_10', emoji: '🔬', label: 'Analytical',   desc: 'Log 10 measurements',                         category: 'corpo',   target: 10 },
+  { key: 'measurement_5',  emoji: '📏', label: 'Tracking',     desc: 'Log 5 measurements',                          category: 'body',   target: 5  },
+  { key: 'measurement_10', emoji: '🔬', label: 'Analytical',   desc: 'Log 10 measurements',                         category: 'body',   target: 10 },
 
   // ── Specials ──
-  { key: 'first_checkin',  emoji: '🌟', label: 'First Step',    desc: 'Complete your first check-in',                category: 'especial', target: 1 },
-  { key: 'perfect_week',   emoji: '👑', label: 'Perfect Week',  desc: 'Check-in, hydration, and training for 7 straight days', category: 'especial', target: 7 },
+  { key: 'first_checkin',  emoji: '🌟', label: 'First Step',    desc: 'Complete your first check-in',                category: 'special', target: 1 },
+  { key: 'perfect_week',   emoji: '👑', label: 'Perfect Week',  desc: 'Check-in, hydration, and training for 7 straight days', category: 'special', target: 7 },
 ];
 
 /**

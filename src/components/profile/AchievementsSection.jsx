@@ -6,11 +6,11 @@ import { Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CATEGORY_LABELS = {
-  agua:     '💧 Hydration',
+  water:    '💧 Hydration',
   checkin:  '📋 Check-ins',
-  treino:   '💪 Workouts',
-  corpo:    '📏 Body',
-  especial: '🌟 Specials',
+  workout:  '💪 Workouts',
+  body:     '📏 Body',
+  special:  '🌟 Specials',
 };
 
 function AchievementBadge({ def, progress, unlocked, isNew }) {

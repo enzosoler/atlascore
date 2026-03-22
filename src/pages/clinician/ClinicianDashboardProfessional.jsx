@@ -68,7 +68,7 @@ export default function ClinicianDashboardProfessional() {
     if (daysSinceLastMeasurement > 30) {
       alerts.push({
         patient: link.patient_name,
-        message: `Sem medições há ${daysSinceLastMeasurement} dias`,
+        message: `No measurements logged for ${daysSinceLastMeasurement} days`,
         severity: daysSinceLastMeasurement > 60 ? 'high' : 'medium',
       });
     }
@@ -85,7 +85,7 @@ export default function ClinicianDashboardProfessional() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">{t('clinician.dashboard')}</h1>
-              <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1">Gerenciar pacientes e acompanhamento clínico</p>
+              <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1">Manage patients and clinical follow-up</p>
             </div>
           </div>
         </div>
@@ -106,21 +106,21 @@ export default function ClinicianDashboardProfessional() {
             />
             <KPI
               icon={BarChart3}
-              label="Exames Registrados"
+              label="Recorded lab exams"
               value={labExams.length}
-              detail="Este mês"
+              detail="This month"
             />
             <KPI
               icon={Activity}
-              label="Protocolos Ativos"
+              label="Active protocols"
               value={protocols.filter(p => p.active).length}
-              detail="Em acompanhamento"
+              detail="Currently tracked"
             />
             <KPI
               icon={TrendingUp}
-              label="Taxa de Aderência"
+              label="Adherence rate"
               value={activePatients > 0 ? '85%' : '—'}
-              detail="Média geral"
+              detail="Overall average"
             />
           </div>
         )}
@@ -128,7 +128,7 @@ export default function ClinicianDashboardProfessional() {
         {/* Alerts */}
         {alerts.length > 0 && (
           <div className="space-y-2">
-            <p className="t-label">⚠️ {t('common.error')} de Acompanhamento</p>
+            <p className="t-label">⚠️ Follow-up {t('common.error')}</p>
             {alerts.slice(0, 5).map((alert, i) => (
               <div key={i} className="surface p-3 flex items-start gap-3 border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.02)]">
                 <AlertTriangle className="w-4 h-4 text-[hsl(var(--err))] mt-0.5 shrink-0" strokeWidth={2} />
@@ -141,12 +141,12 @@ export default function ClinicianDashboardProfessional() {
           </div>
         )}
 
-        {/* Pacientes */}
+        {/* Patients */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="t-label">Meus Pacientes</p>
+            <p className="t-label">My patients</p>
             <Link to="/clinician/patients" className="btn btn-secondary gap-1.5 h-8 text-[12px]">
-              <Plus className="w-3.5 h-3.5" /> Gerenciar
+              <Plus className="w-3.5 h-3.5" /> Manage
             </Link>
           </div>
 
@@ -173,7 +173,7 @@ export default function ClinicianDashboardProfessional() {
                     <p className="text-[11px] text-[hsl(var(--fg-2))]">{link.patient_email}</p>
                   </div>
                   <span className={`badge ${link.status === 'accepted' ? 'badge-ok' : 'badge-warn'}`}>
-                    {link.status === 'accepted' ? 'Ativo' : 'Pendente'}
+                    {link.status === 'accepted' ? 'Active' : 'Pending'}
                   </span>
                 </Link>
               ))}

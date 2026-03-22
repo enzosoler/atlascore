@@ -18,7 +18,7 @@ export async function saveCompletedWorkout(userId, payload, originalWorkout) {
     .from(TABLE)
     .insert({
       user_id: userId,
-      name: originalWorkout.name || 'Treino sem nome',
+      name: originalWorkout.name || 'Untitled workout',
       plan_id: originalWorkout.plan_id || null,
       plan_day_index: originalWorkout.plan_day_index ?? null,
       status: 'completed',

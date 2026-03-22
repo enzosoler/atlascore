@@ -41,7 +41,6 @@ import {
   StatusBanner,
 } from '@/components/shared/StablePage';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { getToday } from '@/lib/atlas-theme';
 import { useI18n } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
@@ -51,15 +50,20 @@ import {
   listMeasurements,
   updateMeasurement,
 } from '@/services/bodyProgressService';
+import {
+  BODY_FIELD_KEYS,
+  getMeasurementFieldErrors,
+  getMeasurementFormState,
+  getMeasurementValidationSummary,
+  measurementFormSchema,
+} from '@/lib/measurementCheckpoint';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
 const INPUT_CLASS_NAME = 'atlas-field h-11 px-4 py-2 text-base';
 const TEXTAREA_CLASS_NAME = 'atlas-field min-h-[120px] resize-y px-4 py-3 text-base';
 
-const TODAY = getToday();
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
-const BODY_FIELD_KEYS = ['weight', 'body_fat', 'waist', 'chest', 'arms', 'thighs', 'hips', 'neck'];
 
 // Mock data removed — all measurements now persisted via base44.entities.Measurement
 
@@ -151,8 +155,12 @@ const METRIC_LOOKUP = METRIC_OPTIONS.reduce((accumulator, metric) => {
   return accumulator;
 }, {});
 
-function createLocalId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+function getMutationErrorMessage(error, fallbackMessage) {
+  if (typeof error === 'string' && error.trim()) {
+    return error;
+  }
+
+  return error?.message || fallbackMessage;
 }
 
 function formatMeasurementDate(date, options) {
@@ -199,30 +207,6 @@ function getDeltaLabel(delta, metric) {
   if (delta === null || delta === undefined) return 'No previous data';
   if (Math.abs(delta) < 0.05) return 'No relevant change';
   return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} vs previous`.trim();
-}
-
-function getMeasurementFormState(measurement) {
-  return {
-    date: measurement?.date || TODAY,
-    weight: measurement?.weight ? String(measurement.weight) : '',
-    body_fat: measurement?.body_fat ? String(measurement.body_fat) : '',
-    waist: measurement?.waist ? String(measurement.waist) : '',
-    chest: measurement?.chest ? String(measurement.chest) : '',
-    arms: measurement?.arms ? String(measurement.arms) : '',
-    thighs: measurement?.thighs ? String(measurement.thighs) : '',
-    hips: measurement?.hips ? String(measurement.hips) : '',
-    neck: measurement?.neck ? String(measurement.neck) : '',
-    notes: measurement?.notes || '',
-  };
-}
-
-function parseOptionalNumber(value) {
-  if (value === '' || value === null || value === undefined) {
-    return null;
-  }
-
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
 function HeroStat({ label, value, detail, icon: Icon, metric }) {
@@ -398,7 +382,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
       metric: METRIC_LOOKUP.body_fat,
     },
     {
-      label: 'Cintura',
+      label: 'Waist',
       delta: previousMeasurement ? measurement.waist - previousMeasurement.waist : null,
       metric: METRIC_LOOKUP.waist,
     },
@@ -495,7 +479,15 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
   );
 }
 
-function MeasurementField({ label, unit, hint, className = '', inputClassName = '', ...props }) {
+function MeasurementField({
+  label,
+  unit,
+  hint,
+  error,
+  className = '',
+  inputClassName = '',
+  ...props
+}) {
   return (
     <label className={cn(FIELD_LABEL_CLASS, className)}>
       <div className="flex items-center justify-between gap-3">
@@ -510,7 +502,13 @@ function MeasurementField({ label, unit, hint, className = '', inputClassName = 
       <div className="relative mt-2">
         <input
           {...props}
-          className={cn(INPUT_CLASS_NAME, unit ? 'pr-14' : '', inputClassName)}
+          aria-invalid={!!error}
+          className={cn(
+            INPUT_CLASS_NAME,
+            unit ? 'pr-14' : '',
+            error && 'border-[hsl(var(--err)/0.52)] ring-1 ring-[hsl(var(--err)/0.18)]',
+            inputClassName
+          )}
         />
         {unit ? (
           <span className="pointer-events-none absolute inset-y-0 right-4 inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">
@@ -518,37 +516,46 @@ function MeasurementField({ label, unit, hint, className = '', inputClassName = 
           </span>
         ) : null}
       </div>
+
+      {error ? <p className="mt-2 text-[12px] font-medium leading-5 text-[hsl(var(--err))]">{error}</p> : null}
     </label>
   );
 }
 
-function MeasurementForm({ measurement, onCancel, onSubmit }) {
+function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, submitError = null, onClearError }) {
   const [form, setForm] = useState(() => getMeasurementFormState(measurement));
+  const validation = useMemo(() => measurementFormSchema.safeParse(form), [form]);
+  const fieldErrors = useMemo(() => getMeasurementFieldErrors(validation), [validation]);
+  const validationSummary = useMemo(
+    () => getMeasurementValidationSummary(validation, form),
+    [validation, form]
+  );
+  const canSubmit = validation.success && !isSaving;
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
+    onClearError?.();
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const parsed = measurementFormSchema.safeParse(form);
 
-    onSubmit({
-      id: measurement?.id || createLocalId('measurement'),
-      date: form.date || TODAY,
-      weight: parseOptionalNumber(form.weight),
-      body_fat: parseOptionalNumber(form.body_fat),
-      waist: parseOptionalNumber(form.waist),
-      chest: parseOptionalNumber(form.chest),
-      arms: parseOptionalNumber(form.arms),
-      thighs: parseOptionalNumber(form.thighs),
-      hips: parseOptionalNumber(form.hips),
-      neck: parseOptionalNumber(form.neck),
-      notes: form.notes.trim(),
-    });
+    if (!parsed.success) {
+      return;
+    }
+
+    // Pass the raw form state upward so the parent can normalize it once
+    // before persisting it to Supabase.
+    onSubmit(form);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 px-6 py-6 lg:px-7 lg:py-7">
+    <form noValidate onSubmit={handleSubmit} className="space-y-5 px-6 py-6 lg:px-7 lg:py-7">
+      {submitError ? <StatusBanner tone="error">{submitError}</StatusBanner> : null}
+
+      {validationSummary ? <StatusBanner tone={validationSummary.tone}>{validationSummary.message}</StatusBanner> : null}
+
       <div className="rounded-[24px] border border-[hsl(var(--border)/0.85)] bg-[linear-gradient(180deg,rgba(14,165,233,0.08),hsl(var(--card)/0.88))] px-5 py-5">
         <div className="flex flex-col gap-4">
           <div className="max-w-2xl">
@@ -572,12 +579,13 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
             type="date"
             value={form.date}
             onChange={(event) => updateField('date', event.target.value)}
+            error={fieldErrors.date}
           />
 
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
             <p className="atlas-metric-label">Quick guide</p>
             <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              You can save with any combination of measurements. Weight is optional; just fill in at least one body metric.
+              You can save with any combination of measurements. Weight is optional, but at least one body metric is required.
             </p>
           </div>
         </div>
@@ -589,32 +597,29 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           <MeasurementField
             label="Weight"
             unit="kg"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.weight}
             onChange={(event) => updateField('weight', event.target.value)}
+            error={fieldErrors.weight}
           />
           <MeasurementField
             label="Body Fat"
             unit="%"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.body_fat}
             onChange={(event) => updateField('body_fat', event.target.value)}
+            error={fieldErrors.body_fat}
           />
           <MeasurementField
             label="Waist"
             unit="cm"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.waist}
             onChange={(event) => updateField('waist', event.target.value)}
+            error={fieldErrors.waist}
           />
         </div>
       </div>
@@ -625,52 +630,47 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
           <MeasurementField
             label="Chest"
             unit="cm"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.chest}
             onChange={(event) => updateField('chest', event.target.value)}
+            error={fieldErrors.chest}
           />
           <MeasurementField
             label="Arms"
             unit="cm"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.arms}
             onChange={(event) => updateField('arms', event.target.value)}
+            error={fieldErrors.arms}
           />
           <MeasurementField
             label="Thighs"
             unit="cm"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.thighs}
             onChange={(event) => updateField('thighs', event.target.value)}
+            error={fieldErrors.thighs}
           />
           <MeasurementField
             label="Hips"
             unit="cm"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.hips}
             onChange={(event) => updateField('hips', event.target.value)}
+            error={fieldErrors.hips}
           />
           <MeasurementField
             label="Neck"
             unit="cm"
-            type="number"
-            step="0.1"
-            min="0"
+            type="text"
             inputMode="decimal"
             value={form.neck}
             onChange={(event) => updateField('neck', event.target.value)}
+            error={fieldErrors.neck}
           />
         </div>
       </div>
@@ -691,11 +691,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit }) {
         <SecondaryButton type="button" onClick={onCancel}>
           Cancel
         </SecondaryButton>
-        <PrimaryButton type="submit">
-          {measurement ? 'Save checkpoint' : 'Log checkpoint'}
+        <PrimaryButton type="submit" disabled={!canSubmit}>
+          {isSaving ? 'Saving...' : measurement ? 'Save checkpoint' : 'Log checkpoint'}
         </PrimaryButton>
       </div>
-      {/* Note: submit button disabling on in-flight mutations is handled in parent via isMutating */}
     </form>
   );
 }
@@ -751,8 +750,11 @@ function MeasurementsContent({ embedded = false }) {
       setEditingMeasurement(null);
       setNotice({ tone: 'success', message: 'Body checkpoint recorded.' });
     },
-    onError: () =>
-      setNotice({ tone: 'error', message: 'Error recording checkpoint. Please try again.' }),
+    onError: (error) =>
+      setNotice({
+        tone: 'error',
+        message: `Could not record the checkpoint. ${getMutationErrorMessage(error, 'Please try again.')}`,
+      }),
   });
 
   const updateMutation = useMutation({
@@ -763,8 +765,11 @@ function MeasurementsContent({ embedded = false }) {
       setEditingMeasurement(null);
       setNotice({ tone: 'success', message: 'Body checkpoint updated.' });
     },
-    onError: () =>
-      setNotice({ tone: 'error', message: 'Error updating checkpoint. Please try again.' }),
+    onError: (error) =>
+      setNotice({
+        tone: 'error',
+        message: `Could not update the checkpoint. ${getMutationErrorMessage(error, 'Please try again.')}`,
+      }),
   });
 
   const deleteMutation = useMutation({
@@ -773,8 +778,11 @@ function MeasurementsContent({ embedded = false }) {
       invalidateMeasurements();
       setNotice({ tone: 'success', message: 'Body checkpoint removed.' });
     },
-    onError: () =>
-      setNotice({ tone: 'error', message: 'Error removing checkpoint. Please try again.' }),
+    onError: (error) =>
+      setNotice({
+        tone: 'error',
+        message: `Could not remove the checkpoint. ${getMutationErrorMessage(error, 'Please try again.')}`,
+      }),
   });
 
   const sortedMeasurements = useMemo(() => {
@@ -843,6 +851,8 @@ function MeasurementsContent({ embedded = false }) {
     value: measurement[metricKey],
   }));
 
+  const isSavingMeasurement = createMutation.isPending || updateMutation.isPending;
+
   const handleCreate = () => {
     setNotice(null);
     setEditingMeasurement(null);
@@ -864,18 +874,17 @@ function MeasurementsContent({ embedded = false }) {
   };
 
   const handleSaveMeasurement = (payload) => {
-    const filledMetricCount = BODY_FIELD_KEYS.filter((field) => Number(payload?.[field]) > 0).length;
-
-    if (!payload.date || filledMetricCount === 0) {
+    const validation = measurementFormSchema.safeParse(payload);
+    if (!validation.success) {
+      const validationNotice = getMeasurementValidationSummary(validation, payload);
       setNotice({
-        tone: 'warning',
-        message: 'Please provide a date and at least one measurement to save the checkpoint.',
+        tone: validationNotice?.tone === 'error' ? 'error' : 'warning',
+        message: validationNotice?.message || 'Please check the highlighted fields before saving.',
       });
       return;
     }
 
-    // Strip local id before sending to backend — backend assigns real ids
-    const { id, ...data } = payload;
+    const data = validation.data;
 
     if (editingMeasurement?.id) {
       updateMutation.mutate({ id: editingMeasurement.id, data });
@@ -1301,6 +1310,13 @@ function MeasurementsContent({ embedded = false }) {
             <MeasurementForm
               key={editingMeasurement?.id || 'new-measurement'}
               measurement={editingMeasurement}
+              isSaving={isSavingMeasurement}
+              submitError={notice?.tone === 'error' ? notice.message : null}
+              onClearError={() => {
+                if (notice?.tone === 'error') {
+                  setNotice(null);
+                }
+              }}
               onCancel={() => {
                 setIsFormOpen(false);
                 setEditingMeasurement(null);

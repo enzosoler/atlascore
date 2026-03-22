@@ -57,7 +57,7 @@ function MealCard({ meal }) {
             </div>
           ))}
           {(!meal.foods || meal.foods.length === 0) && (
-            <p className="t-caption">Sem alimentos detalhados.</p>
+            <p className="t-caption">No detailed foods listed.</p>
           )}
         </div>
       )}
@@ -119,8 +119,8 @@ export default function MyDiet() {
 - Target calories: ${profile?.calories_target || 0} kcal
 - Target protein: ${profile?.protein_target || 160}g
 - Target carbs: ${profile?.carbs_target || 250}g
-- Gordura alvo: ${profile?.fat_target || 70}g
-- Estilo alimentar: ${profile?.dietary_style || 'balanceado'}
+- Target fat: ${profile?.fat_target || 70}g
+- Dietary style: ${profile?.dietary_style || 'balanced'}
 
 Create a plan with 5-6 meals distributed throughout the day, with real foods and quantities in grams/units.`,
         response_json_schema: {

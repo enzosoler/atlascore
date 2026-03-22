@@ -41,7 +41,7 @@ interface UserEmailTarget {
   userId: string;
   email: string;
   firstName: string;
-  language: 'en' | 'pt';
+  language: 'en';
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -52,9 +52,8 @@ function nameFromMeta(meta: Record<string, unknown>, email: string): string {
   return email.split('@')[0] || '';
 }
 
-function langFromMeta(meta: Record<string, unknown>): 'en' | 'pt' {
-  const lang = (meta?.language || meta?.locale || '') as string;
-  return /^pt/i.test(lang) ? 'pt' : 'en';
+function langFromMeta(_meta: Record<string, unknown>): 'en' {
+  return 'en';
 }
 
 async function sendEmail(opts: {

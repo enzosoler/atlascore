@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { ROUTES } from '@/lib/routes';
 
 /**
- * RoleGate — verifica autorização e redireciona se necessário.
+ * RoleGate - checks authorization and redirects when needed.
  * Hooks chamados incondicionalmente (React Rules of Hooks).
  */
 export default function RoleGate({ page, roles, redirect = true, children }) {

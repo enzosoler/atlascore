@@ -24,7 +24,7 @@ const UNIT_OPTIONS = [
   { value: 'UI',   label: 'UI' },
   { value: 'caps', label: 'capsules' },
   { value: 'comp', label: 'tablets' },
-  { value: 'outro', label: 'other' },
+  { value: 'other', label: 'other' },
 ];
 
 const STATUS_OPTIONS = [
