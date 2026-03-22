@@ -556,7 +556,7 @@ function ProtocolsContent() {
 
       {/* Half-Life Curve Visualization (Performance Plan) */}
       <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
-        <SectionCard title="Curvas de Meia-Vida" subtitle="Visualização da concentração ativa ao longo do tempo para protocolos ativos.">
+        <SectionCard title="Half-Life Curves" subtitle="Visualize active concentration over time for current protocols.">
           <HalfLifeCurveChart protocols={groupedProtocols.active} />
         </SectionCard>
       </UpgradeGate>

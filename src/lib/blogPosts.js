@@ -9,180 +9,150 @@ export const BLOG_POSTS = [
   {
     slug: 'best-fitness-tracking-apps',
     title: {
-      'en-US': 'The 8 Best Fitness Tracking Apps in 2025 (And Why Most Serious Users Outgrow Them)',
-      'pt-BR': 'Os 8 Melhores Apps de Fitness em 2025 (E por que atletas sérios acabam abandonando-os)'
+      'en-US': 'The 8 Best Fitness Tracking Apps in 2025 (And Why Most Serious Users Outgrow Them)'
     },
     excerpt: {
-      'en-US': 'An honest breakdown of what\'s out there, who each app is built for, and what they\'re missing for anyone serious about long-term progress.',
-      'pt-BR': 'Uma análise honesta do que existe no mercado, para quem cada app foi feito e o que falta para quem busca progresso real de longo prazo.'
+      'en-US': 'An honest breakdown of what\'s out there, who each app is built for, and what they\'re missing for anyone serious about long-term progress.'
     },
     publishedAt: '2025-01-15',
     readingTime: 8,
     category: {
-      'en-US': 'Tools',
-      'pt-BR': 'Ferramentas'
+      'en-US': 'Tools'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'track-body-transformation',
     title: {
-      'en-US': 'How to Track Your Body Transformation the Right Way (Most People Are Doing It Wrong)',
-      'pt-BR': 'Como Monitorar sua Transformação Corporal do Jeito Certo (A maioria faz errado)'
+      'en-US': 'How to Track Your Body Transformation the Right Way (Most People Are Doing It Wrong)'
     },
     excerpt: {
-      'en-US': 'Tracking your transformation isn\'t just about collecting data. It\'s about collecting the right data, at the right time, in a way that actually tells a coherent story.',
-      'pt-BR': 'Monitorar sua transformação não é apenas coletar dados. É coletar os dados certos, no momento certo, de uma forma que conte uma história coerente.'
+      'en-US': 'Tracking your transformation isn\'t just about collecting data. It\'s about collecting the right data, at the right time, in a way that actually tells a coherent story.'
     },
     publishedAt: '2025-01-22',
     readingTime: 7,
     category: {
-      'en-US': 'Tracking',
-      'pt-BR': 'Monitoramento'
+      'en-US': 'Tracking'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'why-no-fitness-progress',
     title: {
-      'en-US': 'Why Most People Never See Real Fitness Progress (It\'s Not What You Think)',
-      'pt-BR': 'Por que a Maioria das Pessoas Nunca Vê Progresso Real (Não é o que você pensa)'
+      'en-US': 'Why Most People Never See Real Fitness Progress (It\'s Not What You Think)'
     },
     excerpt: {
-      'en-US': 'The gyms are packed, supplements are a multi-billion dollar industry — and yet most people who train look almost identical to when they started. This is a systems problem.',
-      'pt-BR': 'As academias estão cheias, suplementos são uma indústria bilionária — e ainda assim a maioria das pessoas continua com a mesma aparência de quando começou. Isso é um problema de sistema.'
+      'en-US': 'The gyms are packed, supplements are a multi-billion dollar industry — and yet most people who train look almost identical to when they started. This is a systems problem.'
     },
     publishedAt: '2025-01-29',
     readingTime: 6,
     category: {
-      'en-US': 'Mindset',
-      'pt-BR': 'Mentalidade'
+      'en-US': 'Mindset'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'not-the-program',
     title: {
-      'en-US': 'The Real Reason You\'re Not Making Progress Has Nothing to Do With Your Program',
-      'pt-BR': 'A Real Razão pela qual Você Não Está Evoluindo Não Tem Nada a Ver com seu Treino'
+      'en-US': 'The Real Reason You\'re Not Making Progress Has Nothing to Do With Your Program'
     },
     excerpt: {
-      'en-US': 'You\'ve changed programs three times this year. Your program is almost certainly not the problem. Here\'s what actually is.',
-      'pt-BR': 'Você mudou de treino três vezes este ano. Seu treino quase certamente não é o problema. Aqui está o que realmente é.'
+      'en-US': 'You\'ve changed programs three times this year. Your program is almost certainly not the problem. Here\'s what actually is.'
     },
     publishedAt: '2025-02-05',
     readingTime: 6,
     category: {
-      'en-US': 'Training',
-      'pt-BR': 'Treinamento'
+      'en-US': 'Training'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'spreadsheets-vs-apps-vs-allinone',
     title: {
-      'en-US': 'Tracking Your Fitness on Spreadsheets vs. Apps vs. All-in-One Systems: Which Actually Works?',
-      'pt-BR': 'Planilhas vs. Apps vs. Sistemas All-in-One: O que Realmente Funciona?'
+      'en-US': 'Tracking Your Fitness on Spreadsheets vs. Apps vs. All-in-One Systems: Which Actually Works?'
     },
     excerpt: {
-      'en-US': 'An honest, no-nonsense breakdown of what each tracking approach actually looks like in practice — and who each one is right for.',
-      'pt-BR': 'Uma análise direta e sem rodeios sobre como cada abordagem de monitoramento funciona na prática — e qual é a ideal para você.'
+      'en-US': 'An honest, no-nonsense breakdown of what each tracking approach actually looks like in practice — and who each one is right for.'
     },
     publishedAt: '2025-02-12',
     readingTime: 7,
     category: {
-      'en-US': 'Tools',
-      'pt-BR': 'Ferramentas'
+      'en-US': 'Tools'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'discipline-is-overrated',
     title: {
-      'en-US': 'Why Discipline Is Overrated (And What Actually Keeps Serious Athletes Consistent)',
-      'pt-BR': 'Por que a Disciplina é Superestimada (E o que realmente mantém atletas consistentes)'
+      'en-US': 'Why Discipline Is Overrated (And What Actually Keeps Serious Athletes Consistent)'
     },
     excerpt: {
-      'en-US': 'The athletes who stay consistent for years aren\'t running on discipline. They\'re running on something far more reliable — and far less exhausting.',
-      'pt-BR': 'Atletas que mantêm a consistência por anos não dependem apenas de disciplina. Eles dependem de algo muito mais confiável — e muito menos exaustivo.'
+      'en-US': 'The athletes who stay consistent for years aren\'t running on discipline. They\'re running on something far more reliable — and far less exhausting.'
     },
     publishedAt: '2025-02-19',
     readingTime: 7,
     category: {
-      'en-US': 'Mindset',
-      'pt-BR': 'Mentalidade'
+      'en-US': 'Mindset'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'what-serious-athletes-track',
     title: {
-      'en-US': '10 Things Serious Athletes Track That Beginners Don\'t (And Why Each One Changes Everything)',
-      'pt-BR': '10 Coisas que Atletas Sérios Monitoram e Iniciantes Não (E por que isso muda tudo)'
+      'en-US': '10 Things Serious Athletes Track That Beginners Don\'t (And Why Each One Changes Everything)'
     },
     excerpt: {
-      'en-US': 'The difference between who makes consistent progress and who doesn\'t isn\'t effort or genetics. It\'s information.',
-      'pt-BR': 'A diferença entre quem tem progresso constante e quem não tem não é esforço ou genética. É informação.'
+      'en-US': 'The difference between who makes consistent progress and who doesn\'t isn\'t effort or genetics. It\'s information.'
     },
     publishedAt: '2025-02-26',
     readingTime: 9,
     category: {
-      'en-US': 'Tracking',
-      'pt-BR': 'Monitoramento'
+      'en-US': 'Tracking'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'how-to-follow-a-meal-plan',
     title: {
-      'en-US': 'How to Actually Follow a Meal Plan in Real Life (Without Obsessing or Failing by Thursday)',
-      'pt-BR': 'Como Realmente Seguir um Plano Alimentar na Vida Real (Sem obsessão ou falhas na quinta-feira)'
+      'en-US': 'How to Actually Follow a Meal Plan in Real Life (Without Obsessing or Failing by Thursday)'
     },
     excerpt: {
-      'en-US': 'Meal plans look great on paper. Then real life happens. This isn\'t a discipline problem — it\'s a design problem.',
-      'pt-BR': 'Planos alimentares parecem ótimos no papel. Então a vida real acontece. Isso não é um problema de disciplina — é um problema de design.'
+      'en-US': 'Meal plans look great on paper. Then real life happens. This isn\'t a discipline problem — it\'s a design problem.'
     },
     publishedAt: '2025-03-05',
     readingTime: 8,
     category: {
-      'en-US': 'Nutrition',
-      'pt-BR': 'Nutrição'
+      'en-US': 'Nutrition'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'tracking-vs-guessing',
     title: {
-      'en-US': 'Tracking vs. Guessing: Why the Data Gap Is Quietly Destroying Your Progress',
-      'pt-BR': 'Monitorar vs. Adivinhar: Por que a Falta de Dados está Destruindo seu Progresso'
+      'en-US': 'Tracking vs. Guessing: Why the Data Gap Is Quietly Destroying Your Progress'
     },
     excerpt: {
-      'en-US': 'The gap between what you think you\'re doing and what you\'re actually doing is not small — and it\'s the root cause of most failed fitness attempts.',
-      'pt-BR': 'A lacuna entre o que você acha que está fazendo e o que realmente está fazendo não é pequena — e é a causa raiz da maioria das falhas no fitness.'
+      'en-US': 'The gap between what you think you\'re doing and what you\'re actually doing is not small — and it\'s the root cause of most failed fitness attempts.'
     },
     publishedAt: '2025-03-12',
     readingTime: 8,
     category: {
-      'en-US': 'Tracking',
-      'pt-BR': 'Monitoramento'
+      'en-US': 'Tracking'
     },
     author: 'Atlas Core',
   },
   {
     slug: 'hidden-reason-diet-not-working',
     title: {
-      'en-US': 'The Hidden Reason Your Diet Isn\'t Working Has Nothing to Do With Your Diet',
-      'pt-BR': 'A Razão Oculta pela qual sua Dieta Não Funciona Não Tem Nada a Ver com a Dieta'
+      'en-US': 'The Hidden Reason Your Diet Isn\'t Working Has Nothing to Do With Your Diet'
     },
     excerpt: {
-      'en-US': 'You\'ve tried every diet. The reason it\'s not working is almost certainly not the diet itself — and the fix is simpler than any new approach.',
-      'pt-BR': 'Você já tentou todas as dietas. A razão pela qual não funciona quase certamente não é a dieta em si — e a solução é mais simples do que qualquer nova abordagem.'
+      'en-US': 'You\'ve tried every diet. The reason it\'s not working is almost certainly not the diet itself — and the fix is simpler than any new approach.'
     },
     publishedAt: '2025-03-19',
     readingTime: 8,
     category: {
-      'en-US': 'Nutrition',
-      'pt-BR': 'Nutrição'
+      'en-US': 'Nutrition'
     },
     author: 'Atlas Core',
   },

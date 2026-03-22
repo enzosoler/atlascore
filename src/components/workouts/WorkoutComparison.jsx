@@ -10,7 +10,7 @@ export default function WorkoutComparison({ planned, logged }) {
     return (
       <div className="surface p-6 text-center">
         <Clock className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" strokeWidth={1.5} />
-        <p className="text-[13px] text-muted-foreground">Nenhum treino planejado ou registrado</p>
+        <p className="text-[13px] text-muted-foreground">No planned or logged workout yet</p>
       </div>
     );
   }
@@ -24,7 +24,7 @@ export default function WorkoutComparison({ planned, logged }) {
       <div className="surface p-5">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-2 h-2 rounded-full bg-[hsl(var(--fg-2))]" />
-          <h3 className="text-[14px] font-semibold">Planejado</h3>
+          <h3 className="text-[14px] font-semibold">Planned</h3>
           {planned && <span className="badge badge-neutral">{plannedExercises.length} exerc.</span>}
         </div>
         {planned ? (
@@ -55,7 +55,7 @@ export default function WorkoutComparison({ planned, logged }) {
       <div className="surface p-5 border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.02)]">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))]" strokeWidth={2} />
-          <h3 className="text-[14px] font-semibold">Executado</h3>
+          <h3 className="text-[14px] font-semibold">Logged</h3>
           {logged && <span className="badge badge-ok">{loggedExercises.length} exerc.</span>}
         </div>
         {logged ? (
@@ -79,7 +79,7 @@ export default function WorkoutComparison({ planned, logged }) {
             )}
           </div>
         ) : (
-          <p className="text-[12px] text-muted-foreground italic">Nada registrado ainda</p>
+          <p className="text-[12px] text-muted-foreground italic">Nothing logged yet</p>
         )}
       </div>
 

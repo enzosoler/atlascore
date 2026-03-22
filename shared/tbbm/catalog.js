@@ -19,9 +19,9 @@ const ROLE_LABELS = {
     patient: 'patient',
   },
   'pt-BR': {
-    student: 'aluno',
-    client: 'cliente',
-    patient: 'paciente',
+    student: 'student',
+    client: 'client',
+    patient: 'patient',
   },
 };
 
@@ -39,11 +39,11 @@ function resolveFirstName(firstName, locale) {
     return firstName.trim();
   }
 
-  return locale === 'pt-BR' ? 'atleta' : 'athlete';
+  return 'athlete';
 }
 
 function formatTrialEndDate(locale, trialEndDate) {
-  return formatDateValue(trialEndDate, locale, {
+  return formatDateValue(trialEndDate, 'en-US', {
     dateStyle: 'long',
     timeZone: 'UTC',
   });
@@ -52,10 +52,6 @@ function formatTrialEndDate(locale, trialEndDate) {
 function formatDays(locale, days) {
   const pluralRules = new Intl.PluralRules(locale);
   const category = pluralRules.select(days);
-
-  if (locale === 'pt-BR') {
-    return `${days} ${category === 'one' ? 'dia' : 'dias'}`;
-  }
 
   return `${days} ${category === 'one' ? 'day' : 'days'}`;
 }
@@ -95,14 +91,14 @@ function buildWelcomeCopy(locale, vars) {
   const appUrl = vars.appUrl || 'https://atlascore.app';
 
   if (locale === 'pt-BR') {
-    const subject = 'Boas-vindas ao Atlas Core';
+    const subject = 'Welcome to Atlas Core';
     const bodyText = [
-      `Olá ${firstName},`,
+      `Hi ${firstName},`,
       '',
-      'Sua conta está pronta.',
-      'O Atlas Core organiza treino, nutrição, progresso e protocolos em um sistema só.',
+      'Your account is ready.',
+      'Atlas Core keeps training, nutrition, progress, and protocols in one clear system.',
       '',
-      `Abrir o app: ${appUrl}`,
+      `Open the app: ${appUrl}`,
     ].join('\n');
 
     return {
@@ -112,19 +108,19 @@ function buildWelcomeCopy(locale, vars) {
         locale,
         subject,
         paragraphs: [
-          `Olá ${firstName},`,
-          'Sua conta está pronta.',
-          'O Atlas Core organiza treino, nutrição, progresso e protocolos em um sistema só.',
+          `Hi ${firstName},`,
+          'Your account is ready.',
+          'Atlas Core keeps training, nutrition, progress, and protocols in one clear system.',
         ],
-        ctaLabel: 'Abrir Atlas Core',
+        ctaLabel: 'Open Atlas Core',
         ctaUrl: appUrl,
       }),
-      pushTitle: 'Conta criada',
-      pushBody: 'Seu Atlas Core já está pronto para uso.',
-      smsBody: `Atlas Core: sua conta está pronta. Abra ${appUrl}`,
-      inAppTitle: 'Bem-vindo ao Atlas Core',
-      inAppBody: 'Seu ambiente está pronto. Comece pelo Today e finalize o onboarding.',
-      ctaLabel: 'Abrir app',
+      pushTitle: 'Account ready',
+      pushBody: 'Your Atlas Core workspace is ready to go.',
+      smsBody: `Atlas Core: your account is ready. Open ${appUrl}`,
+      inAppTitle: 'Welcome to Atlas Core',
+      inAppBody: 'Your workspace is ready. Start with Today and finish onboarding.',
+      ctaLabel: 'Open app',
       ctaUrl: appUrl,
     };
   }
@@ -171,14 +167,14 @@ function buildTrialEndingCopy(locale, vars) {
   const daysLabel = formatDays(locale, days);
 
   if (locale === 'pt-BR') {
-    const subject = `Seu trial termina em ${daysLabel}`;
+    const subject = `Your trial ends in ${daysLabel}`;
     const bodyText = [
-      `Olá ${firstName},`,
+      `Hi ${firstName},`,
       '',
-      `Seu trial termina em ${daysLabel}, em ${trialEndDate}.`,
-      'Faça o upgrade para manter acesso aos recursos premium.',
+      `Your trial ends in ${daysLabel}, on ${trialEndDate}.`,
+      'Upgrade now to keep access to premium features.',
       '',
-      `Atualizar plano: ${billingUrl}`,
+      `Update plan: ${billingUrl}`,
     ].join('\n');
 
     return {
@@ -188,19 +184,19 @@ function buildTrialEndingCopy(locale, vars) {
         locale,
         subject,
         paragraphs: [
-          `Olá ${firstName},`,
-          `Seu trial termina em ${daysLabel}, em ${trialEndDate}.`,
-          'Faça o upgrade para manter acesso aos recursos premium.',
+          `Hi ${firstName},`,
+          `Your trial ends in ${daysLabel}, on ${trialEndDate}.`,
+          'Upgrade now to keep access to premium features.',
         ],
-        ctaLabel: 'Atualizar plano',
+        ctaLabel: 'Update plan',
         ctaUrl: billingUrl,
       }),
-      pushTitle: 'Trial perto do fim',
-      pushBody: `Seu trial termina em ${daysLabel}.`,
-      smsBody: `Atlas Core: seu trial termina em ${daysLabel}. Atualize em ${billingUrl}`,
-      inAppTitle: 'Trial expira em breve',
-      inAppBody: `Seu trial termina em ${daysLabel}. Faça upgrade para continuar com acesso premium.`,
-      ctaLabel: 'Atualizar plano',
+      pushTitle: 'Trial ending soon',
+      pushBody: `Your trial ends in ${daysLabel}.`,
+      smsBody: `Atlas Core: your trial ends in ${daysLabel}. Upgrade at ${billingUrl}`,
+      inAppTitle: 'Trial expires soon',
+      inAppBody: `Your trial ends in ${daysLabel}. Upgrade now to keep premium access.`,
+      ctaLabel: 'Update plan',
       ctaUrl: billingUrl,
     };
   }
@@ -240,19 +236,19 @@ function buildTrialEndingCopy(locale, vars) {
 }
 
 function buildInviteCopy(locale, vars) {
-  const recipientName = vars.recipientName?.trim() || (locale === 'pt-BR' ? 'profissional' : 'professional');
+  const recipientName = vars.recipientName?.trim() || 'professional';
   const inviterName = vars.inviterName?.trim() || APP_NAME;
   const inviteLink = vars.inviteLink || 'https://atlascore.app/auth?mode=signup';
   const roleLabel = resolveRoleLabel(locale, vars.recipientRole);
 
   if (locale === 'pt-BR') {
-    const subject = `${inviterName} convidou você para o Atlas Core`;
+    const subject = `${inviterName} invited you to Atlas Core`;
     const bodyText = [
-      `Olá ${recipientName},`,
+      `Hi ${recipientName},`,
       '',
-      `${inviterName} convidou você para entrar no Atlas Core como ${roleLabel}.`,
+      `${inviterName} invited you to join Atlas Core as a ${roleLabel}.`,
       '',
-      `Aceitar convite: ${inviteLink}`,
+      `Accept invite: ${inviteLink}`,
     ].join('\n');
 
     return {
@@ -262,19 +258,19 @@ function buildInviteCopy(locale, vars) {
         locale,
         subject,
         paragraphs: [
-          `Olá ${recipientName},`,
-          `${inviterName} convidou você para entrar no Atlas Core como ${roleLabel}.`,
-          'Use o link abaixo para aceitar o convite.',
+          `Hi ${recipientName},`,
+          `${inviterName} invited you to join Atlas Core as a ${roleLabel}.`,
+          'Use the link below to accept the invite.',
         ],
-        ctaLabel: 'Aceitar convite',
+        ctaLabel: 'Accept invite',
         ctaUrl: inviteLink,
       }),
-      pushTitle: 'Novo convite',
-      pushBody: `${inviterName} convidou você para o Atlas Core.`,
-      smsBody: `Atlas Core: ${inviterName} enviou um convite. Aceite em ${inviteLink}`,
-      inAppTitle: 'Convite disponível',
-      inAppBody: `${inviterName} convidou você para entrar como ${roleLabel}.`,
-      ctaLabel: 'Aceitar convite',
+      pushTitle: 'New invite',
+      pushBody: `${inviterName} invited you to Atlas Core.`,
+      smsBody: `Atlas Core: ${inviterName} sent you an invite. Accept it at ${inviteLink}`,
+      inAppTitle: 'Invite ready',
+      inAppBody: `${inviterName} invited you to join as a ${roleLabel}.`,
+      ctaLabel: 'Accept invite',
       ctaUrl: inviteLink,
     };
   }

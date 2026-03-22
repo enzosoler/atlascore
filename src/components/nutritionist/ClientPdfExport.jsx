@@ -32,8 +32,8 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
       doc.text('Atlas Core', margin, 16);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text('Relatório Nutricional do Paciente', margin, 26);
-      doc.text(new Date().toLocaleDateString('pt-BR'), pageW - margin, 26, { align: 'right' });
+      doc.text('Client Nutrition Report', margin, 26);
+      doc.text(new Date().toLocaleDateString('en-US'), pageW - margin, 26, { align: 'right' });
 
       y = 50;
 
@@ -48,7 +48,7 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
       doc.setTextColor(...muted);
       doc.text(link.client_email, margin, y);
       y += 5;
-      doc.text(`Vínculo desde: ${link.invited_at || '—'} · Status: ${link.status === 'accepted' ? 'Ativo' : link.status}`, margin, y);
+      doc.text(`Connected since: ${link.invited_at || '—'} · Status: ${link.status === 'accepted' ? 'Active' : link.status}`, margin, y);
       y += 12;
 
       doc.setDrawColor(...divider);
@@ -60,19 +60,19 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
       doc.setTextColor(...textColor);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
-      doc.text('Resumo', margin, y);
+      doc.text('Summary', margin, y);
       y += 8;
 
       const latestM = [...measurements].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
       const activeDiet = diets.find(d => d.active) || diets[0];
       const stats = [
-        ['Peso atual', latestM?.weight ? `${latestM.weight} kg` : '—'],
-        ['Gordura corporal', latestM?.body_fat ? `${latestM.body_fat}%` : '—'],
-        ['Refeições registradas', meals.length],
-        ['Medições registradas', measurements.length],
-        ['Plano alimentar ativo', activeDiet ? activeDiet.name : 'Nenhum'],
-        ['Exames laboratoriais', exams.length],
-        ['Fotos de progresso', photos.length],
+        ['Current weight', latestM?.weight ? `${latestM.weight} kg` : '—'],
+        ['Body fat', latestM?.body_fat ? `${latestM.body_fat}%` : '—'],
+        ['Meals logged', meals.length],
+        ['Measurements logged', measurements.length],
+        ['Active diet plan', activeDiet ? activeDiet.name : 'None'],
+        ['Lab exams', exams.length],
+        ['Progress photos', photos.length],
       ];
 
       const colW = (contentW - 4) / 2;
@@ -105,15 +105,15 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(...textColor);
-        doc.text('Plano Alimentar Ativo', margin, y);
+        doc.text('Active Diet Plan', margin, y);
         y += 6;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
         doc.setTextColor(...muted);
-        doc.text(`${activeDiet.name} · Criado em: ${activeDiet.start_date || '—'} · Objetivo: ${activeDiet.objective || '—'}`, margin, y);
+        doc.text(`${activeDiet.name} · Created: ${activeDiet.start_date || '—'} · Goal: ${activeDiet.objective || '—'}`, margin, y);
         y += 6;
         if (activeDiet.total_calories) {
-          doc.text(`Metas: ${activeDiet.total_calories} kcal · P:${activeDiet.total_protein}g · C:${activeDiet.total_carbs}g · G:${activeDiet.total_fat}g`, margin, y);
+          doc.text(`Targets: ${activeDiet.total_calories} kcal · P:${activeDiet.total_protein}g · C:${activeDiet.total_carbs}g · F:${activeDiet.total_fat}g`, margin, y);
           y += 6;
         }
 
@@ -146,7 +146,7 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(...textColor);
-        doc.text('Histórico de Medidas', margin, y);
+        doc.text('Measurement History', margin, y);
         y += 7;
 
         const sorted = [...measurements].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
@@ -158,8 +158,8 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
           const parts = [m.date];
           if (m.weight) parts.push(`${m.weight}kg`);
           if (m.body_fat) parts.push(`${m.body_fat}% BF`);
-          if (m.waist) parts.push(`cintura ${m.waist}cm`);
-          if (m.arms) parts.push(`braços ${m.arms}cm`);
+          if (m.waist) parts.push(`waist ${m.waist}cm`);
+          if (m.arms) parts.push(`arms ${m.arms}cm`);
           doc.text(parts.join(' · '), margin, y);
           y += 6;
         });
@@ -175,7 +175,7 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(...textColor);
-        doc.text('Exames Laboratoriais', margin, y);
+        doc.text('Lab Exams', margin, y);
         y += 7;
 
         exams.slice(0, 5).forEach(e => {
@@ -208,16 +208,16 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(...muted);
-        doc.text('Gerado por Atlas Core', margin, 291);
-        doc.text(`Página ${p} de ${totalPages}`, pageW - margin, 291, { align: 'right' });
+        doc.text('Generated by Atlas Core', margin, 291);
+        doc.text(`Page ${p} of ${totalPages}`, pageW - margin, 291, { align: 'right' });
       }
 
       const safeName = (link.client_name || link.client_email).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-      doc.save(`atlas-core_relatorio_${safeName}_${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('PDF gerado com sucesso!');
+      doc.save(`atlas-core_report_${safeName}_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('PDF generated successfully');
     } catch (err) {
       console.error(err);
-      toast.error('Erro ao gerar PDF');
+      toast.error('Could not generate the PDF');
     } finally {
       setLoading(false);
     }
@@ -228,12 +228,12 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
       onClick={generate}
       disabled={loading}
       className="btn btn-secondary gap-1.5 h-9"
-      title="Exportar relatório em PDF"
+      title="Export report as PDF"
     >
       {loading
         ? <Loader2 className="w-4 h-4 animate-spin" />
         : <FileDown className="w-4 h-4" />}
-      Exportar PDF
+      Export PDF
     </button>
   );
 }

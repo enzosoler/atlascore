@@ -393,7 +393,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(isActive(ROUTES.settings), collapsed)}
             >
               <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>Configurações</span> : null}
+              {!collapsed ? <span>Settings</span> : null}
             </Link>
             <ThemeToggleButton
               compact={collapsed}
@@ -404,7 +404,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(false, collapsed, true)}
             >
               <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>Sair</span> : null}
+              {!collapsed ? <span>Sign out</span> : null}
             </button>
             <button
               onClick={() => setCollapsed((value) => !value)}
@@ -417,7 +417,7 @@ export default function AppLayout() {
                 )}
                 strokeWidth={1.95}
               />
-              {!collapsed ? <span>Recolher</span> : null}
+              {!collapsed ? <span>Collapse</span> : null}
             </button>
           </div>
         </div>
@@ -434,7 +434,7 @@ export default function AppLayout() {
           <button
             onClick={() => setMobileOpen((value) => !value)}
             className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
-            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -543,11 +543,11 @@ export default function AppLayout() {
                 </div>
                 <Link to={ROUTES.settings} className={getMobileNavItemClass(isActive(ROUTES.settings))}>
                   <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>Configurações</span>
+                  <span>Settings</span>
                 </Link>
                 <button onClick={() => logout()} className={getMobileNavItemClass(false, true)}>
                   <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>Sair</span>
+                  <span>Sign out</span>
                 </button>
               </div>
             </motion.div>

@@ -68,7 +68,7 @@ export default function StudentProgressMetrics({ measurements = [], checkins = [
         {/* Weight */}
         <div className="surface p-4 rounded-xl">
           <div className="flex items-center justify-between mb-1.5">
-            <p className="t-label">Peso</p>
+            <p className="t-label">Weight</p>
             <Scale className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={2} />
           </div>
           {metrics.weight.current ? (
@@ -91,7 +91,7 @@ export default function StudentProgressMetrics({ measurements = [], checkins = [
         {/* Body Fat */}
         <div className="surface p-4 rounded-xl">
           <div className="flex items-center justify-between mb-1.5">
-            <p className="t-label">Gordura</p>
+            <p className="t-label">Body fat</p>
             <Scale className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={2} />
           </div>
           {metrics.bodyFat.current ? (
@@ -114,7 +114,7 @@ export default function StudentProgressMetrics({ measurements = [], checkins = [
         {/* Energy */}
         <div className="surface p-4 rounded-xl">
           <div className="flex items-center justify-between mb-1.5">
-            <p className="t-label">Energia</p>
+            <p className="t-label">Energy</p>
             <Zap className="w-3.5 h-3.5 text-[hsl(var(--warn))]" strokeWidth={2} />
           </div>
           {metrics.energy ? (
@@ -127,7 +127,7 @@ export default function StudentProgressMetrics({ measurements = [], checkins = [
         {/* Sleep */}
         <div className="surface p-4 rounded-xl">
           <div className="flex items-center justify-between mb-1.5">
-            <p className="t-label">Sono</p>
+            <p className="t-label">Sleep</p>
             <Moon className="w-3.5 h-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
           </div>
           {metrics.sleep ? (
@@ -139,7 +139,7 @@ export default function StudentProgressMetrics({ measurements = [], checkins = [
 
         {/* Completed Workouts */}
         <div className="surface p-4 rounded-xl">
-          <p className="t-label mb-1.5">Treinos</p>
+          <p className="t-label mb-1.5">Workouts</p>
           <p className="text-[20px] font-bold">{metrics.completedWorkouts}</p>
         </div>
 
@@ -153,41 +153,41 @@ export default function StudentProgressMetrics({ measurements = [], checkins = [
       {/* Latest measurements detail */}
       {metrics.latest && (
         <div className="surface p-5 rounded-xl">
-          <p className="t-label mb-3">Últimas Medidas</p>
+          <p className="t-label mb-3">Latest measurements</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
             {metrics.latest.weight && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
-                <p className="text-muted-foreground mb-1">Peso</p>
+                <p className="text-muted-foreground mb-1">Weight</p>
                 <p className="font-bold">{metrics.latest.weight} kg</p>
               </div>
             )}
             {metrics.latest.body_fat && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
-                <p className="text-muted-foreground mb-1">Gordura</p>
+                <p className="text-muted-foreground mb-1">Body fat</p>
                 <p className="font-bold">{metrics.latest.body_fat}%</p>
               </div>
             )}
             {metrics.latest.waist && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
-                <p className="text-muted-foreground mb-1">Cintura</p>
+                <p className="text-muted-foreground mb-1">Waist</p>
                 <p className="font-bold">{metrics.latest.waist} cm</p>
               </div>
             )}
             {metrics.latest.chest && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
-                <p className="text-muted-foreground mb-1">Peitoral</p>
+                <p className="text-muted-foreground mb-1">Chest</p>
                 <p className="font-bold">{metrics.latest.chest} cm</p>
               </div>
             )}
             {metrics.latest.arms && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
-                <p className="text-muted-foreground mb-1">Braços</p>
+                <p className="text-muted-foreground mb-1">Arms</p>
                 <p className="font-bold">{metrics.latest.arms} cm</p>
               </div>
             )}
             {metrics.latest.thighs && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
-                <p className="text-muted-foreground mb-1">Coxas</p>
+                <p className="text-muted-foreground mb-1">Thighs</p>
                 <p className="font-bold">{metrics.latest.thighs} cm</p>
               </div>
             )}

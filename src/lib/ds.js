@@ -16,13 +16,13 @@ export const MACRO_COLORS = {
 export const AUTHOR = {
   ai:           { label: 'Atlas AI',  cls: 'badge badge-ai' },
   coach:        { label: 'Coach',     cls: 'badge badge-blue' },
-  user:         { label: 'Você',      cls: 'badge badge-neutral' },
-  prescription: { label: 'Prescrito', cls: 'badge badge-ok' },
+  user:         { label: 'You',       cls: 'badge badge-neutral' },
+  prescription: { label: 'Prescribed', cls: 'badge badge-ok' },
 };
 
 // Plan status badge
 export const PLAN_STATUS = {
-  active:   { label: 'Ativo',     cls: 'badge badge-ok' },
-  archived: { label: 'Arquivado', cls: 'badge badge-neutral' },
-  draft:    { label: 'Rascunho',  cls: 'badge badge-warn' },
+  active:   { label: 'Active',   cls: 'badge badge-ok' },
+  archived: { label: 'Archived', cls: 'badge badge-neutral' },
+  draft:    { label: 'Draft',    cls: 'badge badge-warn' },
 };

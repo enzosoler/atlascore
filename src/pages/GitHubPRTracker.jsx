@@ -36,7 +36,7 @@ export default function GitHubPRTracker() {
         setSelectedRepo(res.data.repos[0].full_name);
       }
     } catch (e) {
-      setError('Erro ao carregar repositórios: ' + e.message);
+      setError('Could not load repositories: ' + e.message);
     } finally {
       setLoadingRepos(false);
     }
@@ -50,7 +50,7 @@ export default function GitHubPRTracker() {
       const res = await base44.functions.invoke('githubPRs', { owner, repo, state: 'all' });
       setPRs(res.data?.prs || []);
     } catch (e) {
-      setError('Erro ao carregar PRs: ' + e.message);
+      setError('Could not load pull requests: ' + e.message);
     } finally {
       setLoadingPRs(false);
     }
@@ -81,7 +81,7 @@ export default function GitHubPRTracker() {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Pull Requests</h1>
-            <p className="text-[13px] text-[hsl(var(--fg-2))] mt-0.5">Acompanhe o progresso de implementação de features</p>
+            <p className="text-[13px] text-[hsl(var(--fg-2))] mt-0.5">Track implementation progress across feature work</p>
           </div>
         </div>
         <button
@@ -90,21 +90,21 @@ export default function GitHubPRTracker() {
           className="btn btn-secondary gap-1.5"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loadingPRs ? 'animate-spin' : ''}`} />
-          Atualizar
+          Refresh
         </button>
       </div>
 
       {/* Repo selector */}
       {loadingRepos ? (
         <div className="flex items-center gap-2 text-[hsl(var(--fg-2))] text-[13px]">
-          <Loader2 className="w-4 h-4 animate-spin" /> Carregando repositórios…
+          <Loader2 className="w-4 h-4 animate-spin" /> Loading repositories...
         </div>
       ) : repos.length > 0 ? (
         <div className="flex items-center gap-3 flex-wrap">
-          <label className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">Repositório</label>
+          <label className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">Repository</label>
           <Select value={selectedRepo || ''} onValueChange={setSelectedRepo}>
             <SelectTrigger className="w-72 h-9 rounded-lg text-base">
-              <SelectValue placeholder="Selecionar repositório…" />
+              <SelectValue placeholder="Select repository..." />
             </SelectTrigger>
             <SelectContent>
               {repos.map((r) => (
@@ -131,11 +131,11 @@ export default function GitHubPRTracker() {
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex gap-1 p-1 bg-[hsl(var(--card-hi))] border border-[hsl(var(--border-h))] rounded-xl">
             {[
-              { key: 'all', label: 'Todos' },
-              { key: 'open', label: 'Abertos' },
+              { key: 'all', label: 'All' },
+              { key: 'open', label: 'Open' },
               { key: 'draft', label: 'Drafts' },
               { key: 'merged', label: 'Merged' },
-              { key: 'closed', label: 'Fechados' },
+              { key: 'closed', label: 'Closed' },
             ].map((f) => (
               <button
                 key={f.key}
@@ -152,7 +152,7 @@ export default function GitHubPRTracker() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por título, branch ou autor…"
+              placeholder="Search by title, branch, or author..."
               className="pl-8 h-9 rounded-lg text-base"
             />
           </div>
@@ -162,15 +162,15 @@ export default function GitHubPRTracker() {
       {/* PR List */}
       {loadingPRs ? (
         <div className="flex items-center justify-center py-16 gap-2 text-[hsl(var(--fg-2))]">
-          <Loader2 className="w-4 h-4 animate-spin" /> Carregando pull requests…
+          <Loader2 className="w-4 h-4 animate-spin" /> Loading pull requests...
         </div>
       ) : filteredPRs.length === 0 && selectedRepo ? (
         <div className="empty-state">
           <div className="empty-state-icon">
             <Github className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} />
           </div>
-          <p className="t-subtitle mb-1">Nenhum PR encontrado</p>
-          <p className="t-caption">Tente mudar o filtro ou busca</p>
+          <p className="t-subtitle mb-1">No pull requests found</p>
+          <p className="t-caption">Try changing the filter or search query</p>
         </div>
       ) : (
         <div className="space-y-2">

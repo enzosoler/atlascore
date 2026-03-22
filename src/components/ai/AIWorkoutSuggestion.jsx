@@ -17,14 +17,14 @@ export default function AIWorkoutSuggestion({ loggedExercises, profile }) {
 
     try {
       setLoading(true);
-      const doneExercises = loggedExercises?.map(ex => ex.name).join(', ') || 'nenhum';
+      const doneExercises = loggedExercises?.map(ex => ex.name).join(', ') || 'none';
 
-      const text = await invokeLLM(`Sugira UM exercício PRÁTICO para continuar o treino, baseado em:
+      const text = await invokeLLM(`Suggest ONE practical next exercise to continue this workout, based on:
 
-- Exercícios já feitos: ${doneExercises}
-- Meta de treino: ${profile?.training_goal || 'ganho de força'}
+- Exercises already completed: ${doneExercises}
+- Training goal: ${profile?.training_goal || 'strength gain'}
 
-Responda com APENAS o nome do exercício + 1 linha (ex: "Supino dumbbell — 3x8, foco no controle").`);
+Reply with ONLY the exercise name plus one line of guidance (example: "Dumbbell bench press - 3x8, focus on control").`);
 
       setSuggestion(text);
     } finally {
@@ -39,7 +39,7 @@ Responda com APENAS o nome do exercício + 1 linha (ex: "Supino dumbbell — 3x8
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Próximo Exercício</span>
+          <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Next exercise</span>
         </div>
       </div>
       {suggestion ? (
@@ -51,7 +51,7 @@ Responda com APENAS o nome do exercício + 1 linha (ex: "Supino dumbbell — 3x8
           className="mt-2 px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
         >
           {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-          {loading ? 'Gerando...' : 'Sugerir exercício'}
+          {loading ? 'Generating...' : 'Suggest exercise'}
         </button>
       )}
     </div>

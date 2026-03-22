@@ -36,7 +36,7 @@ async function assertFeatureAccess(base44, user, featureKey) {
   }
 
   if (!allowed.has(featureKey)) {
-    throw Object.assign(new Error(`Plano atual (${effectivePlan}) não inclui ${featureKey}. Faça upgrade para continuar.`), { status: 403 });
+    throw Object.assign(new Error(`Current plan (${effectivePlan}) does not include ${featureKey}. Upgrade to continue.`), { status: 403 });
   }
 }
 
@@ -68,23 +68,23 @@ Deno.serve(async (req) => {
     const hasData = measurements.length > 0 || meals.length > 0 || workouts.length > 0;
 
     const prompt = hasData
-      ? `Gere um resumo executivo profissional para relatório de saúde e performance.
+      ? `Create a professional executive summary for a health and performance report.
 
-Período: ${start} a ${end}
-Usuário: ${user.full_name}${profile.age ? `, ${profile.age} anos` : ''}${profile.current_weight ? `, ${profile.current_weight}kg` : ''}
+Period: ${start} to ${end}
+User: ${user.full_name}${profile.age ? `, ${profile.age} years old` : ''}${profile.current_weight ? `, ${profile.current_weight}kg` : ''}
 
-Dados registrados:
-- Refeições: ${meals.length}
-- Treinos: ${workouts.length} (${workouts.filter(w => w.completed).length} concluídos)
-- Medições: ${measurements.length}
-- Exames: ${labExams.length}
-- Protocolos: ${protocols.length}
+Recorded data:
+- Meals: ${meals.length}
+- Workouts: ${workouts.length} (${workouts.filter(w => w.completed).length} completed)
+- Measurements: ${measurements.length}
+- Lab exams: ${labExams.length}
+- Protocols: ${protocols.length}
 - Check-ins: ${checkins.length}
 
-${measurements.length > 0 ? `Últimas medições: ${measurements.slice(0, 2).map(m => `${m.date}: ${m.weight ? m.weight + 'kg' : ''}`).join(', ')}` : ''}
+${measurements.length > 0 ? `Latest measurements: ${measurements.slice(0, 2).map(m => `${m.date}: ${m.weight ? m.weight + 'kg' : ''}`).join(', ')}` : ''}
 
-Estruture em: (1) Período & Contexto breve, (2) Destaques da Evolução, (3) Aderência, (4) Próximos Passos. Linguagem profissional, dados-driven, sem pessimismo.`
-      : `Gere um resumo inicial para um período sem dados ainda registrados. Período: ${start} a ${end}. Usuário: ${user.full_name}. Tom encorajador e premium.`;
+Structure the summary as: (1) Brief period and context, (2) Main progress highlights, (3) Adherence, (4) Next steps. Use professional, data-driven language with a premium tone and no pessimism.`
+      : `Create an opening summary for a period with no recorded data yet. Period: ${start} to ${end}. User: ${user.full_name}. Use an encouraging premium tone.`;
 
     const summary = await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
 

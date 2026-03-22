@@ -48,7 +48,7 @@ function getPreferredName(displayName) {
 }
 
 function getDateLabel(locale) {
-  return new Intl.DateTimeFormat(locale === 'en-US' ? 'en-US' : 'pt-BR', {
+  return new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -86,12 +86,10 @@ function getHeroAmbientClassName(date = new Date(), weatherTone = 'default') {
 }
 
 function getWeatherPresentation(code, locale) {
-  const isEnglish = locale === 'en-US';
-
   if (code === 0) {
     return {
       Icon: SunMedium,
-      label: isEnglish ? 'Clear' : 'Sol',
+      label: 'Clear',
       tone: 'clear',
       iconClassName: 'text-[hsl(var(--warn))]',
     };
@@ -100,7 +98,7 @@ function getWeatherPresentation(code, locale) {
   if (code === 1) {
     return {
       Icon: CloudSun,
-      label: isEnglish ? 'Mostly clear' : 'Sol entre nuvens',
+      label: 'Mostly clear',
       tone: 'clear',
       iconClassName: 'text-[hsl(var(--warn))]',
     };
@@ -109,7 +107,7 @@ function getWeatherPresentation(code, locale) {
   if (code === 2) {
     return {
       Icon: CloudSun,
-      label: isEnglish ? 'Partly cloudy' : 'Parcialmente nublado',
+      label: 'Partly cloudy',
       tone: 'cloud',
       iconClassName: 'text-[hsl(var(--accent-secondary))]',
     };
@@ -118,7 +116,7 @@ function getWeatherPresentation(code, locale) {
   if (code === 3) {
     return {
       Icon: Cloud,
-      label: isEnglish ? 'Cloudy' : 'Nublado',
+      label: 'Cloudy',
       tone: 'cloud',
       iconClassName: 'text-[hsl(var(--fg-2))]',
     };
@@ -127,7 +125,7 @@ function getWeatherPresentation(code, locale) {
   if (code === 45 || code === 48) {
     return {
       Icon: CloudFog,
-      label: isEnglish ? 'Fog' : 'Névoa',
+      label: 'Fog',
       tone: 'fog',
       iconClassName: 'text-[hsl(var(--fg-2))]',
     };
@@ -136,7 +134,7 @@ function getWeatherPresentation(code, locale) {
   if ((code >= 51 && code <= 57) || (code >= 80 && code <= 82)) {
     return {
       Icon: CloudDrizzle,
-      label: isEnglish ? 'Drizzle' : 'Garoa',
+      label: 'Drizzle',
       tone: 'rain',
       iconClassName: 'text-[hsl(var(--accent-secondary))]',
     };
@@ -145,7 +143,7 @@ function getWeatherPresentation(code, locale) {
   if (code >= 61 && code <= 67) {
     return {
       Icon: CloudRain,
-      label: isEnglish ? 'Rain' : 'Chuva',
+      label: 'Rain',
       tone: 'rain',
       iconClassName: 'text-[hsl(var(--accent-secondary))]',
     };
@@ -154,7 +152,7 @@ function getWeatherPresentation(code, locale) {
   if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
     return {
       Icon: CloudSnow,
-      label: isEnglish ? 'Snow' : 'Neve',
+      label: 'Snow',
       tone: 'snow',
       iconClassName: 'text-[hsl(var(--fg))]',
     };
@@ -163,7 +161,7 @@ function getWeatherPresentation(code, locale) {
   if (code >= 95) {
     return {
       Icon: CloudLightning,
-      label: isEnglish ? 'Storm' : 'Tempestade',
+      label: 'Storm',
       tone: 'storm',
       iconClassName: 'text-[hsl(var(--warn))]',
     };
@@ -171,7 +169,7 @@ function getWeatherPresentation(code, locale) {
 
   return {
     Icon: Cloud,
-    label: isEnglish ? 'Conditions' : 'Clima',
+    label: 'Conditions',
     tone: 'default',
     iconClassName: 'text-[hsl(var(--fg-2))]',
   };
@@ -184,16 +182,12 @@ function getNextSteps(t, locale, ROUTES, {
   recentMeasurementsCount,
   progressPhotosCount,
 }) {
-  const isEnglish = locale === 'en-US';
-
   return [
     {
       to: ROUTES.nutrition,
-      title: todayMealsCount > 0 ? (isEnglish ? 'Review nutrition' : 'Revisar nutrição') : t('today_page.nextSteps.nutritionTitle'),
+      title: todayMealsCount > 0 ? 'Review nutrition' : t('today_page.nextSteps.nutritionTitle'),
       description: todayMealsCount > 0
-        ? isEnglish
-          ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
-          : `Você já registrou ${todayMealsCount} alimento${todayMealsCount > 1 ? 's' : ''} hoje. Mantenha o dia completo.`
+        ? `You already logged ${todayMealsCount} food item${todayMealsCount > 1 ? 's' : ''} today. Keep the day complete.`
         : t('today_page.nextSteps.nutritionDesc'),
       icon: UtensilsCrossed,
       phase: t('today_page.nextSteps.nutritionPhase'),
@@ -201,49 +195,37 @@ function getNextSteps(t, locale, ROUTES, {
     {
       to: ROUTES.workouts,
       title: !activeWorkoutPlan
-        ? isEnglish ? 'Create workout plan' : 'Criar plano de treino'
+        ? 'Create workout plan'
         : todaySession?.status === 'completed'
-          ? isEnglish ? 'Review workout log' : 'Revisar treino registrado'
-          : isEnglish ? 'Start workout' : 'Iniciar treino',
+          ? 'Review workout log'
+          : 'Start workout',
       description: !activeWorkoutPlan
-        ? isEnglish
-          ? 'Build your active training plan first so Today, history and execution all point to the same structure.'
-          : 'Monte primeiro seu plano de treino ativo para que Hoje, histórico e execução apontem para a mesma estrutura.'
+        ? 'Build your active training plan first so Today, history, and execution all point to the same structure.'
         : todaySession?.status === 'completed'
-          ? isEnglish
-            ? 'Open the completed session, review the numbers and prepare the next training day.'
-            : 'Abra a sessão concluída, revise os números e prepare o próximo dia de treino.'
-          : isEnglish
-            ? 'Launch the active plan and log sets, reps and load from the structured session.'
-            : 'Abra o plano ativo e registre séries, repetições e carga a partir da sessão estruturada.',
+          ? 'Open the completed session, review the numbers, and prepare the next training day.'
+          : 'Launch the active plan and log sets, reps, and load from the structured session.',
       icon: Dumbbell,
       phase: t('today_page.nextSteps.workoutPhase'),
     },
     {
       to: ROUTES.measurements,
       title: recentMeasurementsCount > 0
-        ? isEnglish ? 'Review measurements' : 'Revisar medidas'
-        : isEnglish ? 'Log measurement' : 'Registrar medida',
+        ? 'Review measurements'
+        : 'Log measurement',
       description: recentMeasurementsCount > 0
-        ? isEnglish
-          ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
-          : 'Mantenha peso e circunferências atualizados para que as tendências de progresso continuem confiáveis.'
-        : isEnglish
-          ? 'Add body weight and body measurements so progress tracking starts with a real baseline.'
-          : 'Adicione peso e medidas corporais para que o acompanhamento de progresso comece com uma base real.',
+        ? 'Keep body weight and circumference checkpoints current so progress trends stay trustworthy.'
+        : 'Add body weight and body measurements so progress tracking starts with a real baseline.',
       icon: Scale,
-      phase: isEnglish ? 'Body' : 'Corpo',
+      phase: 'Body',
     },
     {
       to: progressPhotosCount > 0 ? ROUTES.atlasAI : ROUTES.progressPhotos,
-      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : isEnglish ? 'Add progress photo' : 'Adicionar foto de progresso',
+      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : 'Add progress photo',
       description: progressPhotosCount > 0
         ? t('today_page.nextSteps.aiDesc')
-        : isEnglish
-          ? 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.'
-          : 'Capture um checkpoint visual com data para que sua linha do tempo de fotos evolua junto com o restante dos dados.',
+        : 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.',
       icon: progressPhotosCount > 0 ? Brain : Sparkles,
-      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : isEnglish ? 'Photos' : 'Fotos',
+      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : 'Photos',
     },
   ];
 }
@@ -311,19 +293,13 @@ function buildInsight(
   // 5. Great workout consistency this week
   if (completedLast7 >= 4) {
     return {
-      title:
-        locale === 'en-US'
-          ? `${completedLast7} workouts completed in the last 7 days.`
-          : `${completedLast7} treinos concluídos nos últimos 7 dias.`,
+      title: `${completedLast7} workouts completed in the last 7 days.`,
       description: t('today_page.insight.workoutConsistencyDesc'),
     };
   }
   if (completedLast7 >= 2) {
     return {
-      title:
-        locale === 'en-US'
-          ? `${completedLast7} workouts completed this week.`
-          : `${completedLast7} treinos concluídos esta semana.`,
+      title: `${completedLast7} workouts completed this week.`,
       description: t('today_page.insight.workoutGoodDesc'),
     };
   }
@@ -333,7 +309,7 @@ function buildInsight(
     const p = activeProtocolsList[0];
     const since = p.start_date
       ? new Date(`${p.start_date}T12:00:00`).toLocaleDateString(
-          locale === 'en-US' ? 'en-US' : 'pt-BR',
+          'en-US',
           {
             day: 'numeric',
             month: 'short',
@@ -341,14 +317,11 @@ function buildInsight(
         )
       : null;
     const count = activeProtocolsList.length;
-    const protocolWord =
-      locale === 'en-US'
-        ? `${count} active protocol${count > 1 ? 's' : ''}.`
-        : `${count} protocolo${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}.`;
+    const protocolWord = `${count} active protocol${count > 1 ? 's' : ''}.`;
     return {
       title: protocolWord,
       description: since
-        ? `${p.name || (locale === 'en-US' ? 'Protocol' : 'Protocolo')} ${t('today_page.insight.protocolDescWith').replace('{date}', since)}`
+        ? `${p.name || 'Protocol'} ${t('today_page.insight.protocolDescWith').replace('{date}', since)}`
         : t('today_page.insight.protocolDescDefault'),
     };
   }
@@ -389,9 +362,7 @@ function TodayContent() {
     ? getWeatherPresentation(weather.weathercode, locale)
     : null;
   const heroGreeting = `${greeting}, ${preferredName}`;
-  const heroTagline = isEN
-    ? 'See what’s on track, what needs attention, and the next move that matters.'
-    : 'Veja o que está em dia, o que pede atenção e o próximo passo que mais importa.';
+  const heroTagline = 'See what’s on track, what needs attention, and the next move that matters.';
   const heroAmbientClassName = getHeroAmbientClassName(
     new Date(),
     weatherPresentation?.tone || 'default'
@@ -604,7 +575,7 @@ function TodayContent() {
   const progressValue = latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—';
   const progressMeta = latestMeasurement
     ? new Date(`${latestMeasurement.date}T12:00:00`).toLocaleDateString(
-        locale === 'en-US' ? 'en-US' : 'pt-BR',
+        'en-US',
         {
           day: 'numeric',
           month: 'short',
@@ -615,7 +586,7 @@ function TodayContent() {
   const protocolsValue = String(activeProtocolsList.length);
   const protocolsMeta =
     activeProtocolsList.length > 0
-      ? `${activeProtocolsList.length} ${activeProtocolsList.length > 1 ? (locale === 'en-US' ? 'active' : 'ativos') : (locale === 'en-US' ? 'active' : 'ativo')}`
+      ? `${activeProtocolsList.length} active`
       : t('today_page.noActive');
 
   const NEXT_STEPS = getNextSteps(t, locale, ROUTES, {
@@ -638,9 +609,7 @@ function TodayContent() {
       icon: UtensilsCrossed,
       tone: 'blue',
       done: nutritionDone,
-      ctaLabel: nutritionDone
-        ? (isEN ? 'Review today' : 'Revisar hoje')
-        : (isEN ? 'Log meals' : 'Registrar refeições'),
+      ctaLabel: nutritionDone ? 'Review today' : 'Log meals',
     },
     {
       to: ROUTES.workouts,
@@ -654,10 +623,10 @@ function TodayContent() {
       tone: 'orange',
       done: workoutDone,
       ctaLabel: workoutDone
-        ? (isEN ? 'Review session' : 'Ver sessão')
+        ? 'Review session'
         : !activeWorkoutPlan
-          ? (isEN ? 'Create plan' : 'Criar plano')
-          : (isEN ? 'Start session' : 'Iniciar sessão'),
+          ? 'Create plan'
+          : 'Start session',
     },
     {
       to: ROUTES.measurements,
@@ -670,9 +639,7 @@ function TodayContent() {
       icon: Scale,
       tone: 'green',
       done: measurementsDone,
-      ctaLabel: measurementsDone
-        ? (isEN ? 'View body' : 'Ver medidas')
-        : (isEN ? 'Log weight' : 'Registrar peso'),
+      ctaLabel: measurementsDone ? 'View body' : 'Log weight',
     },
     {
       to: ROUTES.protocols,
@@ -686,7 +653,7 @@ function TodayContent() {
       icon: Shield,
       tone: 'teal',
       done: protocolsDone,
-      ctaLabel: isEN ? 'View protocols' : 'Ver protocolos',
+      ctaLabel: 'View protocols',
     },
   ];
 
@@ -765,7 +732,7 @@ function TodayContent() {
         <div className="relative flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <p className="atlas-overline text-[hsl(var(--fg-3))]">
-              {isEN ? 'Daily brief' : 'Resumo do dia'}
+              Daily brief
             </p>
             <p className="mt-4 text-[clamp(1.9rem,1.55rem+1.4vw,2.45rem)] font-bold tracking-[-0.07em] text-[hsl(var(--fg))]">
               {heroGreeting}
@@ -827,12 +794,12 @@ function TodayContent() {
       {showDailySummary && (
         <div className="rounded-2xl border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.05)] px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--ok))] shrink-0">
-            {isEN ? 'Today so far' : 'Hoje até agora'}
+            Today so far
           </p>
           {[
-            { label: isEN ? 'Nutrition' : 'Nutrição', done: nutritionDone, detail: nutritionDone ? `${todayMeals.length} ${isEN ? 'entries' : 'entradas'}` : null },
-            { label: isEN ? 'Workout' : 'Treino', done: workoutDone, detail: workoutDone ? (isEN ? 'completed' : 'concluído') : null },
-            { label: isEN ? 'Measurements' : 'Medidas', done: measurementsDone, detail: measurementsDone ? (isEN ? 'up to date' : 'em dia') : null },
+            { label: 'Nutrition', done: nutritionDone, detail: nutritionDone ? `${todayMeals.length} entries` : null },
+            { label: 'Workout', done: workoutDone, detail: workoutDone ? 'completed' : null },
+            { label: 'Measurements', done: measurementsDone, detail: measurementsDone ? 'up to date' : null },
           ].map(({ label, done, detail }) => (
             <span key={label} className={cn(
               'flex items-center gap-1 text-[12px] font-medium',
@@ -893,7 +860,7 @@ function TodayContent() {
                 const isCompleted = session.status === 'completed';
                 const sessionDate = session.date
                   ? new Date(`${session.date}T12:00:00`).toLocaleDateString(
-                      locale === 'en-US' ? 'en-US' : 'pt-BR',
+                      'en-US',
                       {
                         weekday: 'short',
                         day: 'numeric',
@@ -983,10 +950,10 @@ function TodayContent() {
           </div>
           <div className="min-w-0">
             <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {isEN ? 'Weekly check-in' : 'Check-in semanal'}
+              Weekly check-in
             </p>
             <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              {isEN ? 'Energy, mood, sleep — 30 sec' : 'Energia, humor, sono — 30 seg'}
+              Energy, mood, sleep - 30 sec
             </p>
           </div>
         </button>
@@ -1000,10 +967,10 @@ function TodayContent() {
           </div>
           <div className="min-w-0">
             <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {isEN ? 'Review last 4 weeks' : 'Revisar últimas 4 semanas'}
+              Review last 4 weeks
             </p>
             <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              {isEN ? 'See what actually worked' : 'Veja o que realmente funcionou'}
+              See what actually worked
             </p>
           </div>
         </Link>

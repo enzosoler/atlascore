@@ -55,7 +55,7 @@ function NoMediaPlaceholder({ exercise, size }) {
         <span className="text-[15px] font-bold text-[hsl(var(--fg-2))]">{initials}</span>
       </div>
       <p className="text-[10px] text-[hsl(var(--fg-2))] font-medium uppercase tracking-wider">
-        Sem mídia
+        No media
       </p>
     </div>
   );
@@ -99,7 +99,7 @@ export default function ExerciseMedia({
       {status !== 'error' && (
         <img
           src={mediaUrl}
-          alt={`Demonstração: ${exercise?.canonical_name_pt || exercise?.canonical_name_en || ''}`}
+          alt={`Demonstration: ${exercise?.canonical_name_pt || exercise?.canonical_name_en || ''}`}
           loading="lazy"
           decoding="async"
           onLoad={() => setStatus('loaded')}
@@ -114,7 +114,7 @@ export default function ExerciseMedia({
       {status === 'error' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[hsl(var(--shell))]">
           <Dumbbell className="w-6 h-6 text-[hsl(var(--fg-2))]" strokeWidth={1.5} />
-          <p className="text-[10px] text-[hsl(var(--fg-2))] font-medium">Mídia indisponível</p>
+          <p className="text-[10px] text-[hsl(var(--fg-2))] font-medium">Media unavailable</p>
         </div>
       )}
 

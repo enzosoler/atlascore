@@ -1,17 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, Globe } from 'lucide-react';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import ThemeToggleButton from '@/components/shared/ThemeToggleButton';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
-import { useTranslation } from '@/hooks/useTranslation';
 
 const DEFAULT_FOOTER_LINKS = [
   { href: ROUTES.home, label: 'Home' },
@@ -22,81 +14,7 @@ const DEFAULT_FOOTER_LINKS = [
 ];
 
 export function PublicLanguageSwitcher({ className = '', align = 'end' }) {
-  const { language, setLanguage } = useTranslation();
-  const [open, setOpen] = React.useState(false);
-  const currentLanguageLabel = language === 'pt-BR' ? 'PT' : 'EN';
-
-  const handleLanguageSelect = React.useCallback((nextLanguage) => {
-    setOpen(false);
-
-    if (nextLanguage === language) return;
-
-    if (typeof window === 'undefined') {
-      setLanguage(nextLanguage);
-      return;
-    }
-
-    window.requestAnimationFrame(() => {
-      setLanguage(nextLanguage);
-    });
-  }, [language, setLanguage]);
-
-  return (
-    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label="Change language"
-          className={cn(
-            'atlas-button atlas-button-secondary h-10 rounded-full px-3.5 text-[12px] shadow-[var(--shadow-xs)]',
-            className
-          )}
-        >
-          <Globe className="h-3.5 w-3.5" strokeWidth={1.8} />
-          <span>{currentLanguageLabel}</span>
-          <ChevronDown className="h-3.5 w-3.5 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
-        </button>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent
-        align={align}
-        sideOffset={10}
-        className="atlas-popover-panel w-44 p-1.5"
-      >
-        <DropdownMenuItem
-          onSelect={() => handleLanguageSelect('pt-BR')}
-          className={cn(
-            'rounded-[14px] px-3 py-2 text-[13px]',
-            language === 'pt-BR'
-              ? 'bg-[hsl(var(--fill))] text-[hsl(var(--fg))]'
-              : 'text-[hsl(var(--fg-2))]'
-          )}
-        >
-          <Globe className="h-3.5 w-3.5" strokeWidth={1.8} />
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-            <span>Português</span>
-            <span className="text-[12px] text-[hsl(var(--fg-3))]">PT</span>
-          </div>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onSelect={() => handleLanguageSelect('en-US')}
-          className={cn(
-            'rounded-[14px] px-3 py-2 text-[13px]',
-            language === 'en-US'
-              ? 'bg-[hsl(var(--fill))] text-[hsl(var(--fg))]'
-              : 'text-[hsl(var(--fg-2))]'
-          )}
-        >
-          <Globe className="h-3.5 w-3.5" strokeWidth={1.8} />
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-            <span>English</span>
-            <span className="text-[12px] text-[hsl(var(--fg-3))]">EN</span>
-          </div>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+  return null;
 }
 
 export function PublicSectionHeader({

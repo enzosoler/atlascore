@@ -18,19 +18,19 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
   const roleLabels = {
     coach: {
-      title: 'Convidar aluno',
-      subtitle: 'Envie um convite seguro para liberar acompanhamento, prescrição e aderência em um único histórico.',
-      placeholder: 'aluno@example.com',
+      title: 'Invite student',
+      subtitle: 'Send a secure invite to unlock tracking, prescription, and adherence inside one shared history.',
+      placeholder: 'student@example.com',
     },
     nutritionist: {
-      title: 'Convidar cliente',
-      subtitle: 'Convide um cliente para compartilhar refeições, medidas, exames e planos prescritos.',
-      placeholder: 'cliente@example.com',
+      title: 'Invite client',
+      subtitle: 'Invite a client to share meals, measurements, labs, and prescribed plans.',
+      placeholder: 'client@example.com',
     },
     clinician: {
-      title: 'Convidar paciente',
-      subtitle: 'Crie um vínculo clínico com acesso claro a protocolos, exames e composição corporal.',
-      placeholder: 'paciente@example.com',
+      title: 'Invite patient',
+      subtitle: 'Create a clinical connection with clear access to protocols, lab data, and body composition.',
+      placeholder: 'patient@example.com',
     },
   };
 
@@ -38,7 +38,7 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
   const handleSend = async () => {
     if (!email.trim() || !name.trim()) {
-      toast.error('Preencha email e nome');
+      toast.error('Enter both name and email');
       return;
     }
 
@@ -51,16 +51,16 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
       });
 
       if (res.data?.success) {
-        toast.success(`Convite enviado para ${email}`);
+        toast.success(`Invite sent to ${email}`);
         qc.invalidateQueries({ queryKey: ['invites'] });
         setEmail('');
         setName('');
         onOpenChange(false);
       } else {
-        toast.error(res.data?.error || 'Erro ao enviar convite');
+        toast.error(res.data?.error || 'Error sending invite');
       }
     } catch (err) {
-      toast.error('Erro ao enviar convite');
+      toast.error('Error sending invite');
       console.error(err);
     } finally {
       setSending(false);
@@ -84,13 +84,13 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
         <div className="space-y-5 px-6 pb-6 pt-2">
           <div className="atlas-field px-4 py-3">
             <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Nome completo
+              Full name
             </label>
             <div className="flex items-center gap-3">
               <User className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
               <input
                 type="text"
-                placeholder="Nome completo"
+                placeholder="Full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="flex-1 bg-transparent text-[14px] text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
@@ -116,16 +116,16 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
           <div className="rounded-[16px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.52)] px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Convite
+              Invite
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              O convite expira em 30 dias se não for aceito. O vínculo só fica ativo após confirmação.
+              The invite expires in 30 days if it is not accepted. The connection only becomes active after confirmation.
             </p>
           </div>
 
           <div className="flex gap-3">
             <SecondaryButton type="button" className="flex-1" onClick={() => onOpenChange(false)}>
-              Cancelar
+              Cancel
             </SecondaryButton>
             <PrimaryButton
               type="button"
@@ -134,7 +134,7 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
               className="flex-1 justify-center"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {sending ? 'Enviando...' : 'Enviar convite'}
+              {sending ? 'Sending...' : 'Send invite'}
             </PrimaryButton>
           </div>
         </div>

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
 import { toast } from 'sonner';
-import { useI18n } from '@/lib/i18nContext';
 import { getLastSession, checkSetIsPR } from '@/services/workoutHistoryService';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -89,9 +88,6 @@ function FieldInput({ label, value, onChange, placeholder }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function WorkoutExecutionScreen({ workout, onComplete, workoutHistory = [], personalRecords = {} }) {
-  const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
-
   // Local exercises list — starts from workout.exercises, user can extend it
   const [exercises, setExercises] = useState(() => workout.exercises || []);
   const [exerciseIdx, setExerciseIdx] = useState(0);
@@ -260,7 +256,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
 
   const handleFinish = () => {
     const payload = buildCompletedPayload();
-    toast.success(isPt ? 'Treino concluído e salvo! 💪' : 'Workout completed and saved! 💪');
+    toast.success('Workout completed and saved! 💪');
     onComplete?.(payload);
   };
 
@@ -273,12 +269,12 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
         <div className="atlas-card space-y-4 rounded-[22px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="atlas-overline">{isPt ? 'Sessão' : 'Session'}</p>
+              <p className="atlas-overline">Session</p>
               <h2 className="mt-2 text-[1.3rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                {isPt ? 'Adicionar exercício' : 'Add exercise'}
+                Add exercise
               </h2>
               <p className="mt-1 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                {isPt ? 'Busque na biblioteca ou adicione manualmente.' : 'Search the library or add manually.'}
+                Search the library or add manually.
               </p>
             </div>
             {exercises.length > 0 && (
@@ -286,7 +282,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
                 onClick={() => setShowAddExercise(false)}
                 className="shrink-0 text-[12px] font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors pt-1"
               >
-                ← {isPt ? 'Cancelar' : 'Cancel'}
+                ← Cancel
               </button>
             )}
           </div>
@@ -313,14 +309,14 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
           </div>
           <div>
             <p className="text-[1.5rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-              {isPt ? 'Treino Concluído!' : 'Workout Completed!'}
+              Workout Completed!
             </p>
             <p className="mt-1 text-sm text-[hsl(var(--fg-2))]">{workout.name}</p>
           </div>
           <div className="grid w-full grid-cols-3 gap-3">
             <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
-                {isPt ? 'Exercícios' : 'Exercises'}
+                Exercises
               </p>
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">
                 {exercises.length}
@@ -328,23 +324,23 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
             </div>
             <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
-                {isPt ? 'Séries' : 'Sets'}
+                Sets
               </p>
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{totalSets}</p>
             </div>
             <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
-                {isPt ? 'Tempo' : 'Time'}
+                Time
               </p>
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{durationMin}min</p>
             </div>
           </div>
           <div className="flex w-full gap-3">
             <Button variant="outline" className="h-12 flex-1 rounded-[12px]" onClick={() => setShowAddExercise(true)}>
-              {isPt ? 'Adicionar mais' : 'Add more'}
+              Add more
             </Button>
             <Button className="h-12 flex-1 rounded-[12px]" onClick={handleFinish}>
-              {isPt ? 'Salvar e fechar' : 'Save and close'}
+              Save and close
             </Button>
           </div>
         </div>
@@ -359,9 +355,9 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
       <div className="fixed inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.1),transparent_40%),hsl(var(--bg))] p-5">
         <div className="flex w-full max-w-sm flex-col items-center gap-8 text-center">
           <div className="space-y-2">
-            <p className="atlas-overline">{isPt ? 'Descanso' : 'Rest'}</p>
+            <p className="atlas-overline">Rest</p>
             <p className="text-sm text-[hsl(var(--fg-2))]">
-              {isPt ? 'Próxima série:' : 'Next set:'} {exercise.name} ({isPt ? 'Série' : 'Set'} {setIdx + 1})
+              Next set: {exercise.name} (Set {setIdx + 1})
             </p>
           </div>
           <div className="relative flex h-48 w-48 items-center justify-center">
@@ -401,7 +397,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
                 setResting(false);
               }}
             >
-              {isPt ? 'Pular' : 'Skip'}
+              Skip
             </Button>
           </div>
         </div>
@@ -419,7 +415,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
             <div className="min-w-0">
               <p className="atlas-overline">{workout.name}</p>
               <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-                {isPt ? 'Sessão em andamento' : 'Workout in progress'}
+                Workout in progress
               </p>
             </div>
             <span className="font-mono text-[11px] font-bold text-[hsl(var(--fg-3))]">
@@ -441,7 +437,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <p className="atlas-overline">
-              {isPt ? 'Exercício' : 'Exercise'} {exerciseIdx + 1} {isPt ? 'de' : 'of'} {exercises.length}
+              Exercise {exerciseIdx + 1} of {exercises.length}
             </p>
             <h1 className="text-[1.6rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
               {exercise.name}
@@ -466,7 +462,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
             ) : null}
             {exercise.rest_seconds ? (
               <span className="badge badge-neutral text-[11px]">
-                {exercise.rest_seconds}s {isPt ? 'descanso' : 'rest'}
+                {exercise.rest_seconds}s rest
               </span>
             ) : null}
           </div>
@@ -479,12 +475,12 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
 
           <div className="grid gap-3 md:grid-cols-3">
             <MetricTile
-              label={isPt ? 'Repetições alvo' : 'Target reps'}
+              label="Target reps"
               value={currentSet?.target_reps ?? exercise.target_reps ?? '—'}
               accent
             />
             <MetricTile
-              label={isPt ? 'Carga alvo' : 'Target load'}
+              label="Target load"
               value={
                 (currentSet?.target_weight ?? exercise.target_weight)
                   ? `${currentSet?.target_weight ?? exercise.target_weight} kg`
@@ -492,7 +488,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
               }
             />
             <MetricTile
-              label={isPt ? 'Séries' : 'Sets'}
+              label="Sets"
               value={currentSet?.target_sets ?? exercise.target_sets ?? '—'}
             />
           </div>
@@ -504,14 +500,14 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
         <div className="flex items-center gap-2.5 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-4 py-2.5">
           <Clock className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2} />
           <span className="text-[12px] text-[hsl(var(--fg-2))]">
-            {isPt ? 'Última vez:' : 'Last time:'}
+            Last time:
             {' '}
             <span className="font-semibold text-[hsl(var(--fg))]">
               {lastSession.setCount}×{lastSession.maxWeight > 0 ? ` ${lastSession.maxWeight}kg` : ''}
-              {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} ${isPt ? 'reps' : 'reps'}` : ''}
+              {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} reps` : ''}
             </span>
             <span className="ml-1.5 text-[hsl(var(--fg-3))]">
-              {new Date(lastSession.date).toLocaleDateString(isPt ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
+              {new Date(lastSession.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           </span>
         </div>
@@ -523,7 +519,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="atlas-overline">
-                {isPt ? 'Registrar set' : 'Log set'} {setIdx + 1}/{sets.length}
+                Log set {setIdx + 1}/{sets.length}
               </p>
             </div>
             {/* Live PR badge — shown when current inputs would be a PR */}
@@ -531,14 +527,14 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
               <div className="flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] border border-[hsl(var(--ok)/0.3)] px-2.5 py-1">
                 <Trophy className="h-3 w-3 text-[hsl(var(--ok))]" strokeWidth={2.5} />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--ok))]">
-                  {livePR === 'weight' ? (isPt ? 'Novo PR de carga!' : 'New weight PR!') : (isPt ? 'Novo PR de volume!' : 'New volume PR!')}
+                  {livePR === 'weight' ? 'New weight PR!' : 'New volume PR!'}
                 </span>
               </div>
             )}
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <FieldInput
-              label={isPt ? 'Peso (kg)' : 'Weight (kg)'}
+              label="Weight (kg)"
               value={formData.weight}
               placeholder="0"
               onChange={(value) => setFormData((prev) => ({ ...prev, weight: value }))}
@@ -557,7 +553,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
             />
           </div>
           <Button className="h-12 w-full rounded-[12px] sm:w-auto" onClick={handleSetComplete}>
-            {setIdx < sets.length - 1 ? (isPt ? 'Salvar e ir ao próximo set' : 'Save and next set') : (isPt ? 'Concluir exercício' : 'Finish exercise')}
+            {setIdx < sets.length - 1 ? 'Save and next set' : 'Finish exercise'}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
@@ -568,9 +564,9 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
         <section className="atlas-card rounded-[22px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
           <div className="space-y-3">
             <div>
-              <p className="atlas-overline">{isPt ? 'Histórico imediato' : 'Immediate history'}</p>
+              <p className="atlas-overline">Immediate history</p>
               <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                {isPt ? 'Resumo dos sets já logados para o exercício atual.' : 'Summary of sets already logged for the current exercise.'}
+                Summary of sets already logged for the current exercise.
               </p>
             </div>
             <div className="space-y-2">
@@ -599,7 +595,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
           className="flex items-center gap-1.5 rounded-[12px] px-4 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--shell))] hover:text-[hsl(var(--fg))]"
         >
           <Plus className="h-3.5 w-3.5" />
-          {isPt ? 'Adicionar exercício' : 'Add exercise'}
+          Add exercise
         </button>
       </div>
 

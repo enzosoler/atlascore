@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
 
-const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'Você' };
+const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'You' };
 const CREATOR_BADGE = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutral' };
 
 function ExerciseCard({ exercise, index }) {
@@ -34,10 +34,10 @@ function ExerciseCard({ exercise, index }) {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex gap-3 t-caption">
-            {exercise.sets > 0 && <span>{exercise.sets} séries</span>}
+            {exercise.sets > 0 && <span>{exercise.sets} sets</span>}
             {exercise.reps && <span className="hidden sm:inline">{exercise.reps} reps</span>}
             {exercise.rest_seconds > 0 && (
-              <span className="hidden sm:inline">{exercise.rest_seconds}s descanso</span>
+              <span className="hidden sm:inline">{exercise.rest_seconds}s rest</span>
             )}
           </div>
           {open ? (
@@ -52,7 +52,7 @@ function ExerciseCard({ exercise, index }) {
           <div className="grid grid-cols-3 gap-2 text-[12px]">
             {exercise.sets > 0 && (
             <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
-                <p className="t-label">Séries</p>
+                <p className="t-label">Sets</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.sets}</p>
               </div>
             )}
@@ -64,7 +64,7 @@ function ExerciseCard({ exercise, index }) {
             )}
             {exercise.rest_seconds > 0 && (
             <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
-                <p className="t-label">Descanso</p>
+                <p className="t-label">Rest</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.rest_seconds}s</p>
               </div>
             )}
@@ -74,7 +74,7 @@ function ExerciseCard({ exercise, index }) {
           )}
           {exercise.technique && (
             <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              <span className="font-semibold">Técnica:</span> {exercise.technique}
+              <span className="font-semibold">Technique:</span> {exercise.technique}
             </p>
           )}
         </div>
@@ -94,12 +94,12 @@ function WorkoutDayCard({ day }) {
       >
         <div>
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-            {day.name || day.day || 'Sessão'}
+            {day.name || day.day || 'Session'}
           </p>
           {day.focus && <p className="t-caption mt-0.5">{day.focus}</p>}
         </div>
         <div className="flex items-center gap-3">
-          <span className="t-caption">{exercises.length} exercício{exercises.length !== 1 ? 's' : ''}</span>
+          <span className="t-caption">{exercises.length} exercise{exercises.length !== 1 ? 's' : ''}</span>
           {open ? (
             <ChevronUp className="w-4 h-4 text-[hsl(var(--fg-2))] shrink-0" />
           ) : (
@@ -116,7 +116,7 @@ function WorkoutDayCard({ day }) {
       )}
       {open && exercises.length === 0 && (
         <div className="border-t border-[hsl(var(--border-h))] px-5 py-4">
-          <p className="t-caption">Sem exercícios detalhados.</p>
+          <p className="t-caption">No detailed exercises yet.</p>
         </div>
       )}
     </div>
@@ -171,13 +171,13 @@ export default function MyWorkout() {
 
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Crie um plano de treino semanal detalhado em português brasileiro para um usuário com o seguinte perfil:
-- Objetivo: ${profile?.training_goal || 'hipertrofia'}
-- Nível: ${profile?.fitness_level || 'intermediário'}
-- Frequência: ${profile?.workout_frequency || '4x por semana'}
-- Restrições: ${profile?.health_restrictions || 'nenhuma'}
+        prompt: `Create a detailed weekly workout plan in polished English for a user with the following profile:
+- Goal: ${profile?.training_goal || 'muscle gain'}
+- Level: ${profile?.fitness_level || 'intermediate'}
+- Frequency: ${profile?.workout_frequency || '4x per week'}
+- Restrictions: ${profile?.health_restrictions || 'none'}
 
-Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetições e tempo de descanso.`,
+Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
         response_json_schema: {
           type: 'object',
           properties: {
@@ -229,19 +229,19 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
         });
         qc.invalidateQueries({ queryKey: ['workout-plans'] });
         qc.invalidateQueries({ queryKey: ['workout-plans-active'] });
-        toast.success('Plano de treino gerado com sucesso!');
+        toast.success('Workout plan generated successfully.');
       } else {
-        setGenError('A resposta da IA não continha um plano válido. Tente novamente.');
-        toast.error('Erro ao gerar plano. Tente novamente.');
+        setGenError('The AI response did not include a valid plan. Please try again.');
+        toast.error('Could not generate the plan. Please try again.');
       }
     } catch (err) {
       clearTimeout(timeoutId);
       if (err?.name === 'AbortError' || controller.signal.aborted) {
-        setGenError('A geração demorou muito (>15s). Verifique sua conexão e tente novamente.');
-        toast.error('Tempo limite atingido. Tente novamente.');
+        setGenError('Generation took too long (>15s). Check your connection and try again.');
+        toast.error('Request timed out. Please try again.');
       } else {
-        setGenError('Erro ao conectar com a IA. Tente novamente em alguns instantes.');
-        toast.error('Erro ao gerar plano.');
+        setGenError('Could not connect to Atlas AI. Please try again in a moment.');
+        toast.error('Error generating plan.');
       }
     } finally {
       setGenerating(false);
@@ -251,7 +251,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
   if (isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center gap-2 t-small text-[hsl(var(--fg-2))]">
-        <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading...
       </div>
     );
   }
@@ -260,8 +260,8 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
     <AppContainer maxWidth="max-w-3xl">
       <PageHeader
         eyebrow="Train"
-        title="Meu Treino"
-        subtitle="Visualize o plano ativo, compare origem e revise a estrutura de dias e exercícios com leitura rápida."
+        title="My Workout"
+        subtitle="Review the active plan, compare its origin, and scan the structure of days and exercises quickly."
         actions={(
           <div className="flex flex-wrap gap-2">
             <SecondaryButton
@@ -269,7 +269,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
-              Criar Manual
+              Create manually
             </SecondaryButton>
             <PrimaryButton
               onClick={generate}
@@ -281,7 +281,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {plan ? 'Gerar novo plano' : 'Gerar plano por IA'}
+              {plan ? 'Generate new plan' : 'Generate plan with AI'}
             </PrimaryButton>
           </div>
         )}
@@ -295,8 +295,8 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
         <Card className="px-5 py-4">
           <EmptyState
             icon={Dumbbell}
-            title="Nenhum plano de treino ativo"
-            description="Crie um plano manual ou gere uma estrutura com IA baseada no seu perfil e objetivos."
+            title="No active workout plan"
+            description="Create one manually or generate a structure with AI based on your profile and goals."
             action={(
               <div className="flex flex-col gap-3 sm:flex-row">
                 <SecondaryButton
@@ -304,7 +304,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
                   className="gap-2"
                 >
                   <Plus className="h-4 w-4" />
-                  Criar Manualmente
+                  Create manually
                 </SecondaryButton>
                 <PrimaryButton
                   onClick={generate}
@@ -316,7 +316,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
                   ) : (
                     <Sparkles className="h-4 w-4" />
                   )}
-                  Gerar com IA
+                  Generate with AI
                 </PrimaryButton>
               </div>
             )}
@@ -324,7 +324,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
         </Card>
       ) : (
         <>
-          <Section eyebrow="Plan" title={plan.name} subtitle={plan.objective || 'Plano ativo pronto para execução.'}>
+          <Section eyebrow="Plan" title={plan.name} subtitle={plan.objective || 'Active plan ready to execute.'}>
             <Card className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
               <span
@@ -339,13 +339,13 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
             )}
             {plan.frequency && (
               <p className="t-caption">
-                <span className="font-semibold">Frequência:</span> {plan.frequency}
+                <span className="font-semibold">Frequency:</span> {plan.frequency}
               </p>
             )}
             {plan.start_date && (
               <p className="t-caption">
-                Desde{' '}
-                {new Date(plan.start_date + 'T12:00').toLocaleDateString('pt-BR')}
+                Since{' '}
+                {new Date(plan.start_date + 'T12:00').toLocaleDateString('en-US')}
               </p>
             )}
             </Card>
@@ -353,8 +353,8 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
 
           <Section
             eyebrow="Structure"
-            title={`Dias de treino (${(plan.days || []).length})`}
-            subtitle="Cada card mostra o foco do dia e abre os exercícios detalhados."
+            title={`Training days (${(plan.days || []).length})`}
+            subtitle="Each card shows the day's focus and opens the detailed exercises."
           >
             <div className="space-y-2">
               {(plan.days || []).map((day, i) => (
@@ -365,7 +365,7 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
 
           {plan.notes && (
             <Card className="p-4">
-              <p className="t-label mb-1">Observações</p>
+              <p className="t-label mb-1">Notes</p>
               <p className="t-body text-[hsl(var(--fg-2))]">{plan.notes}</p>
             </Card>
           )}

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 function formatPublishedDate(date) {
   if (!date) return '--';
 
-  return new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR', {
+  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -44,7 +44,7 @@ export default function BlogPostLayout({
                 className="inline-flex items-center gap-2 text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
               >
                 <ArrowLeft className="h-4 w-4" strokeWidth={1.9} />
-                {breadcrumb.label || 'Voltar'}
+                {breadcrumb.label || 'Back'}
               </Link>
             ) : null}
 

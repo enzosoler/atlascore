@@ -3,9 +3,9 @@ import { subDays } from 'date-fns';
 import { Zap, Moon, Droplets } from 'lucide-react';
 
 const MOODS = ['😞', '😕', '😐', '🙂', '😄'];
-const MOOD_LABELS = { 1: 'Muito ruim', 2: 'Ruim', 3: 'Neutro', 4: 'Bom', 5: 'Ótimo' };
-const DAY_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const MONTH_SHORT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const MOOD_LABELS = { 1: 'Very poor', 2: 'Poor', 3: 'Neutral', 4: 'Good', 5: 'Excellent' };
+const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export default function CheckinHistory({ checkins }) {
   // Last 7 days
@@ -18,7 +18,7 @@ export default function CheckinHistory({ checkins }) {
 
   return (
     <div className="space-y-3">
-      <p className="t-label">Últimos 7 dias</p>
+      <p className="t-label">Last 7 days</p>
       <div className="grid grid-cols-7 gap-1.5">
         {days.map(({ date, checkin }) => {
           const dayLabel = DAY_SHORT[date.getDay()];

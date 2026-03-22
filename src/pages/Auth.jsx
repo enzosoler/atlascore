@@ -14,7 +14,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/lib/AuthContext';
 import { ROLE_HOME, ROUTES } from '@/lib/routes';
 import { supabase } from '@/lib/supabaseClient';
-import PublicSiteShell, { PublicLanguageSwitcher } from '@/components/public/PublicSiteShell';
+import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
@@ -40,34 +40,29 @@ function buildAuthHref({ mode, next }) {
   return query ? `/auth?${query}` : '/auth';
 }
 
-function getAuthErrorMessage(error, language) {
+function getAuthErrorMessage(error) {
   const message = error?.message || '';
-  const isPt = language === 'pt-BR';
 
   if (/invalid login credentials/i.test(message)) {
-    return isPt ? 'Email ou senha inválidos.' : 'Invalid email or password.';
+    return 'Invalid email or password.';
   }
 
   if (/email not confirmed/i.test(message)) {
-    return isPt ? 'Confirme seu email antes de entrar.' : 'Confirm your email before signing in.';
+    return 'Confirm your email before signing in.';
   }
 
   if (/user already registered/i.test(message)) {
-    return isPt ? 'Já existe uma conta com esse email.' : 'An account with this email already exists.';
+    return 'An account with this email already exists.';
   }
 
   if (/password/i.test(message) && /least/i.test(message)) {
-    return isPt
-      ? 'A senha precisa ter pelo menos 6 caracteres.'
-      : 'Your password must be at least 6 characters long.';
+    return 'Your password must be at least 6 characters long.';
   }
 
-  return isPt
-    ? message || 'Não foi possível autenticar agora. Tente novamente.'
-    : message || 'We could not authenticate you right now. Please try again.';
+  return message || 'We could not authenticate you right now. Please try again.';
 }
 
-function getDestinationLabel(destination, language) {
+function getDestinationLabel(destination) {
   if (!destination) return null;
 
   let pathname = ROUTES.today;
@@ -78,49 +73,28 @@ function getDestinationLabel(destination, language) {
     pathname = destination.startsWith('/') ? destination.split('?')[0].split('#')[0] : ROUTES.today;
   }
 
-  const labels = language === 'pt-BR'
-    ? {
-        [ROUTES.home]: 'a página inicial',
-        [ROUTES.today]: 'o painel de hoje',
-        [ROUTES.nutrition]: 'Nutrição',
-        [ROUTES.workouts]: 'Treinos',
-        [ROUTES.routines]: 'Rotinas',
-        [ROUTES.protocols]: 'Protocolos',
-        [ROUTES.measurements]: 'Medidas',
-        [ROUTES.labExams]: 'Exames',
-        [ROUTES.atlasAI]: 'Atlas AI',
-        [ROUTES.insights]: 'Insights',
-        [ROUTES.progress]: 'Progresso',
-        [ROUTES.body]: 'Body',
-        [ROUTES.profile]: 'Perfil',
-        [ROUTES.pricing]: 'Planos',
-        [ROUTES.coachDashboard]: 'o dashboard do coach',
-        [ROUTES.nutritionistDashboard]: 'o dashboard da nutricionista',
-        [ROUTES.clinicianDashboard]: 'o dashboard clínico',
-        [ROUTES.admin]: 'o painel administrativo',
-      }
-    : {
-        [ROUTES.home]: 'the home page',
-        [ROUTES.today]: 'the Today dashboard',
-        [ROUTES.nutrition]: 'Nutrition',
-        [ROUTES.workouts]: 'Workouts',
-        [ROUTES.routines]: 'Routines',
-        [ROUTES.protocols]: 'Protocols',
-        [ROUTES.measurements]: 'Measurements',
-        [ROUTES.labExams]: 'Labs',
-        [ROUTES.atlasAI]: 'Atlas AI',
-        [ROUTES.insights]: 'Insights',
-        [ROUTES.progress]: 'Progress',
-        [ROUTES.body]: 'Body',
-        [ROUTES.profile]: 'Profile',
-        [ROUTES.pricing]: 'Pricing',
-        [ROUTES.coachDashboard]: 'the coach dashboard',
-        [ROUTES.nutritionistDashboard]: 'the nutritionist dashboard',
-        [ROUTES.clinicianDashboard]: 'the clinician dashboard',
-        [ROUTES.admin]: 'the admin panel',
-      };
+  const labels = {
+    [ROUTES.home]: 'the home page',
+    [ROUTES.today]: 'the Today dashboard',
+    [ROUTES.nutrition]: 'Nutrition',
+    [ROUTES.workouts]: 'Workouts',
+    [ROUTES.routines]: 'Routines',
+    [ROUTES.protocols]: 'Protocols',
+    [ROUTES.measurements]: 'Measurements',
+    [ROUTES.labExams]: 'Labs',
+    [ROUTES.atlasAI]: 'Atlas AI',
+    [ROUTES.insights]: 'Insights',
+    [ROUTES.progress]: 'Progress',
+    [ROUTES.body]: 'Body',
+    [ROUTES.profile]: 'Profile',
+    [ROUTES.pricing]: 'Pricing',
+    [ROUTES.coachDashboard]: 'the coach dashboard',
+    [ROUTES.nutritionistDashboard]: 'the nutritionist dashboard',
+    [ROUTES.clinicianDashboard]: 'the clinician dashboard',
+    [ROUTES.admin]: 'the admin panel',
+  };
 
-  return labels[pathname] || (language === 'pt-BR' ? 'a próxima etapa' : 'your next step');
+  return labels[pathname] || 'your next step';
 }
 
 function FeatureCard({ icon: Icon, text }) {
@@ -176,7 +150,7 @@ export default function Auth() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const { signIn, signUp, isAuthenticated, user } = useAuth();
 
   const modeParam = searchParams.get('mode');
@@ -200,67 +174,35 @@ export default function Auth() {
   const [forgotPassword, setForgotPassword] = React.useState(false);
   const [resetSent, setResetSent] = React.useState(false);
 
-  const isPt = language === 'pt-BR';
-
   const ui = React.useMemo(
-    () => (
-      language === 'pt-BR'
-        ? {
-            secureLabel: 'Acesso seguro',
-            heroTitle: 'Entre e continue seu progresso com tudo no mesmo lugar.',
-            heroCopy:
-              'Treino, nutrição, exames, medidas e Atlas AI seguem conectados para você retomar o contexto sem fricção.',
-            authHint: isLogin
-              ? 'Entre para retomar seu histórico, aderência e contexto sem perder o ritmo.'
-              : 'Crie sua conta para começar com treino, nutrição e progresso organizados desde o primeiro dia.',
-            fullNameLabel: 'Nome completo',
-            fullNamePlaceholder: 'Seu nome',
-            emailPlaceholder: 'voce@exemplo.com',
-            passwordPlaceholder: 'Sua senha',
-            recoveryTitle: 'Precisa recuperar o acesso?',
-            recoveryCopy:
-              'Envie um email com o endereço da sua conta e ajudamos você a voltar para o app.',
-            recoveryCta: 'Falar com o suporte',
-            supportLink: 'Esqueceu a senha? Fale com o suporte.',
-            missingCredentials: 'Preencha email e senha para continuar.',
-            missingName: 'Informe seu nome completo para criar a conta.',
-            emailConfirmation:
-              'Conta criada. Confira seu email para confirmar o acesso antes do login.',
-            signInCta: 'Entrar',
-            signInBusy: 'Entrando...',
-            signUpCta: 'Criar conta',
-            signUpBusy: 'Criando conta...',
-            backHome: 'Voltar para a página inicial',
-          }
-        : {
-            secureLabel: 'Secure access',
-            heroTitle: 'Sign in and keep your progress connected in one place.',
-            heroCopy:
-              'Workouts, nutrition, labs, measurements and Atlas AI stay tied to the same context so you can pick up without friction.',
-            authHint: isLogin
-              ? 'Sign back in to pick up your history, adherence and context without losing momentum.'
-              : 'Create your account to start with training, nutrition and progress organized from day one.',
-            fullNameLabel: 'Full name',
-            fullNamePlaceholder: 'Your name',
-            emailPlaceholder: 'you@example.com',
-            passwordPlaceholder: 'Your password',
-            recoveryTitle: 'Need help accessing your account?',
-            recoveryCopy:
-              'Email us from the address tied to your account and we will help you get back in.',
-            recoveryCta: 'Contact support',
-            supportLink: 'Forgot your password? Contact support.',
-            missingCredentials: 'Enter your email and password to continue.',
-            missingName: 'Enter your full name to create your account.',
-            emailConfirmation:
-              'Account created. Check your email to confirm access before signing in.',
-            signInCta: 'Sign in',
-            signInBusy: 'Signing in...',
-            signUpCta: 'Create account',
-            signUpBusy: 'Creating account...',
-            backHome: 'Back to home',
-          }
-    ),
-    [isLogin, language]
+    () => ({
+      secureLabel: 'Secure access',
+      heroTitle: 'Sign in and keep your progress connected in one place.',
+      heroCopy:
+        'Workouts, nutrition, labs, measurements and Atlas AI stay tied to the same context so you can pick up without friction.',
+      authHint: isLogin
+        ? 'Sign back in to pick up your history, adherence and context without losing momentum.'
+        : 'Create your account to start with training, nutrition and progress organized from day one.',
+      fullNameLabel: 'Full name',
+      fullNamePlaceholder: 'Your name',
+      emailPlaceholder: 'you@example.com',
+      passwordPlaceholder: 'Your password',
+      recoveryTitle: 'Need help accessing your account?',
+      recoveryCopy:
+        'Email us from the address tied to your account and we will help you get back in.',
+      recoveryCta: 'Contact support',
+      supportLink: 'Forgot your password? Contact support.',
+      missingCredentials: 'Enter your email and password to continue.',
+      missingName: 'Enter your full name to create your account.',
+      emailConfirmation:
+        'Account created. Check your email to confirm access before signing in.',
+      signInCta: 'Sign in',
+      signInBusy: 'Signing in...',
+      signUpCta: 'Create account',
+      signUpBusy: 'Creating account...',
+      backHome: 'Back to home',
+    }),
+    [isLogin]
   );
 
   const features = [
@@ -282,12 +224,10 @@ export default function Auth() {
   const destinationNote = React.useMemo(() => {
     if (!nextParam) return '';
 
-    const destinationLabel = getDestinationLabel(requestedDestination, language);
+    const destinationLabel = getDestinationLabel(requestedDestination);
 
-    return language === 'pt-BR'
-      ? `${isLogin ? 'Depois do login' : 'Depois de criar a conta'}, você segue para ${destinationLabel}.`
-      : `${isLogin ? 'After sign-in' : 'After you create your account'}, you will continue to ${destinationLabel}.`;
-  }, [isLogin, language, nextParam, requestedDestination]);
+    return `${isLogin ? 'After sign-in' : 'After you create your account'}, you will continue to ${destinationLabel}.`;
+  }, [isLogin, nextParam, requestedDestination]);
 
   React.useEffect(() => {
     setErrorMessage('');
@@ -349,7 +289,7 @@ export default function Auth() {
 
       navigate(requestedDestination || ROUTES.today, { replace: true });
     } catch (error) {
-      setErrorMessage(getAuthErrorMessage(error, language));
+      setErrorMessage(getAuthErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -359,7 +299,7 @@ export default function Auth() {
     event.preventDefault();
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
-      setErrorMessage(isPt ? 'Digite seu email para continuar.' : 'Enter your email to continue.');
+      setErrorMessage('Enter your email to continue.');
       return;
     }
     setIsSubmitting(true);
@@ -371,11 +311,7 @@ export default function Auth() {
       if (error) throw error;
       setResetSent(true);
     } catch {
-      setErrorMessage(
-        isPt
-          ? 'Não foi possível enviar o link. Tente novamente.'
-          : 'Could not send the reset link. Please try again.'
-      );
+      setErrorMessage('Could not send the reset link. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -387,7 +323,6 @@ export default function Auth() {
       showFooter={false}
       actions={(
         <>
-          <PublicLanguageSwitcher />
           <Button asChild variant="ghost" className="hidden sm:inline-flex">
             <Link to={ROUTES.home}>{ui.backHome}</Link>
           </Button>
@@ -450,9 +385,7 @@ export default function Auth() {
                       {ui.recoveryTitle}
                     </p>
                     <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      {isPt
-                        ? 'Informe seu email e enviaremos um link para redefinir sua senha.'
-                        : 'Enter your email and we will send you a link to reset your password.'}
+                      Enter your email and we will send you a link to reset your password.
                     </p>
                   </div>
                   <AuthField
@@ -470,9 +403,7 @@ export default function Auth() {
                     </div>
                   ) : null}
                   <Button type="submit" size="lg" className="h-11 w-full" disabled={isSubmitting}>
-                    {isSubmitting
-                      ? (isPt ? 'Enviando...' : 'Sending...')
-                      : (isPt ? 'Enviar link de recuperação' : 'Send reset link')}
+                    {isSubmitting ? 'Sending...' : 'Send reset link'}
                     {!isSubmitting ? <ArrowRight className="h-4 w-4" strokeWidth={2} /> : null}
                   </Button>
                   <button
@@ -481,7 +412,7 @@ export default function Auth() {
                     className="flex w-full items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-                    {isPt ? 'Voltar para o login' : 'Back to sign in'}
+                    Back to sign in
                   </button>
                 </form>
               )}
@@ -489,9 +420,7 @@ export default function Auth() {
               {isLogin && forgotPassword && resetSent && (
                 <div className="mt-7 space-y-5">
                   <div className="atlas-banner px-4 py-4 text-[13px]" data-tone="success">
-                    {isPt
-                      ? 'Link enviado! Verifique seu email para redefinir sua senha.'
-                      : 'Reset link sent! Check your email to reset your password.'}
+                    Reset link sent! Check your email to reset your password.
                   </div>
                   <button
                     type="button"
@@ -499,7 +428,7 @@ export default function Auth() {
                     className="flex w-full items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-                    {isPt ? 'Voltar para o login' : 'Back to sign in'}
+                    Back to sign in
                   </button>
                 </div>
               )}
@@ -606,7 +535,7 @@ export default function Auth() {
                         onClick={() => { setForgotPassword(true); setErrorMessage(''); setSuccessMessage(''); }}
                         className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] hover:underline underline-offset-2"
                       >
-                        {isPt ? 'Esqueceu a senha?' : 'Forgot your password?'}
+                        Forgot your password?
                       </button>
                     </div>
                   ) : null}

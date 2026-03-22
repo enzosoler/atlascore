@@ -31,11 +31,8 @@ test('TBBM catalog covers all required locales and channels', () => {
 test('TBBM snapshots are stable for representative locale and channel combinations', () => {
   const cases = [
     ['welcome_user', 'en-US', 'email'],
-    ['welcome_user', 'pt-BR', 'email'],
     ['trial_ends_soon', 'en-US', 'email'],
-    ['trial_ends_soon', 'pt-BR', 'email'],
     ['invite_user', 'en-US', 'push'],
-    ['invite_user', 'pt-BR', 'push'],
   ];
 
   for (const [templateId, locale, channel] of cases) {
@@ -46,7 +43,7 @@ test('TBBM snapshots are stable for representative locale and channel combinatio
 });
 
 test('envelope validation fails when required variables are missing', () => {
-  const invalidEnvelope = buildSampleEnvelope('trial_ends_soon', 'pt-BR', 'email', {
+  const invalidEnvelope = buildSampleEnvelope('trial_ends_soon', 'en-US', 'email', {
     vars: {
       firstName: 'Alex',
       days: 3,

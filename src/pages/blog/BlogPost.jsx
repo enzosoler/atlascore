@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import PublicSiteShell, {
-  PublicLanguageSwitcher,
   PublicSectionHeader,
 } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
@@ -12,21 +11,20 @@ import { BLOG_POSTS, getPostBySlug, getLocalizedPost, getLocalizedContent } from
 import { ROUTES } from '@/lib/routes';
 import { useI18n } from '@/lib/i18nContext';
 
-function BlogActions({ isPt }) {
+function BlogActions() {
   return (
     <>
-      <PublicLanguageSwitcher />
       <Link
         to={`${ROUTES.auth}?mode=login`}
         className="atlas-button atlas-button-secondary h-9 rounded-full px-4 text-[13px]"
       >
-        {isPt ? 'Entrar' : 'Log in'}
+        Log in
       </Link>
       <Link
         to={`${ROUTES.auth}?mode=signup`}
         className="atlas-button atlas-button-primary h-9 rounded-full px-4 text-[13px]"
       >
-        {isPt ? 'Começar' : 'Get started'}
+        Get started
       </Link>
     </>
   );
@@ -53,7 +51,6 @@ function RelatedPostCard({ post, locale }) {
 export default function BlogPost() {
   const { slug } = useParams();
   const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
   
   const rawPost = getPostBySlug(slug);
   const post = getLocalizedPost(rawPost, locale);
@@ -64,17 +61,7 @@ export default function BlogPost() {
     [slug]
   );
 
-  const ui = isPt ? {
-    notFoundTitle: 'Post não encontrado.',
-    notFoundDesc: 'Este artigo não existe mais ou a URL está incorreta.',
-    backToBlog: 'Voltar para o blog',
-    moreFromBlog: 'Mais do blog',
-    moreTitle: 'Continue explorando o conhecimento público.',
-    moreDesc: 'Mais textos práticos sobre treino, nutrição, sistemas e progresso mensurável.',
-    home: 'Início',
-    pricing: 'Planos',
-    help: 'Ajuda'
-  } : {
+  const ui = {
     notFoundTitle: 'Post not found.',
     notFoundDesc: 'That article does not exist anymore or the URL is incorrect.',
     backToBlog: 'Back to blog',
@@ -94,7 +81,7 @@ export default function BlogPost() {
           { href: ROUTES.blog, label: 'Blog' },
           { href: ROUTES.pricing, label: ui.pricing },
         ]}
-        actions={<BlogActions isPt={isPt} />}
+        actions={<BlogActions />}
       >
         <PublicMetadata
           title="Blog Post Not Found — Atlas Core"
@@ -130,7 +117,7 @@ export default function BlogPost() {
         { href: ROUTES.pricing, label: ui.pricing },
         { href: ROUTES.help, label: ui.help },
       ]}
-      actions={<BlogActions isPt={isPt} />}
+      actions={<BlogActions />}
     >
       <PublicMetadata
         title={`${post.title} — Atlas Core`}

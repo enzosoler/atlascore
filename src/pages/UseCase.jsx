@@ -11,7 +11,6 @@ import {
   Zap,
 } from 'lucide-react';
 import PublicSiteShell, {
-  PublicLanguageSwitcher,
   PublicSectionHeader,
 } from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
@@ -19,120 +18,120 @@ import { ROUTES } from '@/lib/routes';
 
 const USE_CASES = {
   athlete: {
-    eyebrow: 'Atleta',
-    title: 'Para atletas e entusiastas que querem histórico real.',
-    heroSubtitle: 'Treino, nutrição, progresso e contexto de decisão em um único sistema.',
+    eyebrow: 'Athlete',
+    title: 'For athletes and serious lifters who want real history.',
+    heroSubtitle: 'Training, nutrition, progress, and decision context in one connected system.',
     features: [
       {
         icon: Target,
-        title: 'Tracking detalhado',
-        description: 'Registre treino, dieta e evolução sem espalhar dados por ferramentas diferentes.',
+        title: 'Detailed tracking',
+        description: 'Log training, nutrition, and progress without scattering data across different tools.',
       },
       {
         icon: TrendingUp,
-        title: 'Leitura de tendência',
-        description: 'Veja como peso, força, aderência e rotina realmente evoluem ao longo do tempo.',
+        title: 'Trend visibility',
+        description: 'See how body weight, strength, adherence, and routine evolve over time.',
       },
       {
         icon: BarChart3,
-        title: 'Contexto para ajustar',
-        description: 'Entenda o que está funcionando e onde a execução foge do plano.',
+        title: 'Context for adjustment',
+        description: 'Understand what is working and where execution drifts away from the plan.',
       },
     ],
     benefits: [
-      'Fotos, medidas e histórico no mesmo lugar',
-      'Atlas AI com contexto do seu uso real',
-      'Plano vs execução visível no dia a dia',
-      'Exportações para guardar ou compartilhar',
+      'Photos, measurements, and history in one place',
+      'Atlas AI grounded in your real usage',
+      'Plan versus execution, visible every day',
+      'Exports you can save or share',
     ],
-    cta: 'Criar conta de atleta',
+    cta: 'Create athlete account',
   },
   coach: {
     eyebrow: 'Coach',
-    title: 'Para coaches que precisam acompanhar aderência sem depender de prints.',
-    heroSubtitle: 'Prescreva, acompanhe e interprete a execução dos alunos a partir do mesmo histórico.',
+    title: 'For coaches who need adherence visibility without relying on screenshots.',
+    heroSubtitle: 'Prescribe, track, and interpret athlete execution from a shared history.',
     features: [
       {
         icon: Users,
-        title: 'Visão de alunos',
-        description: 'Centralize progresso, aderência e contexto de cada atleta em uma mesma base.',
+        title: 'Athlete overview',
+        description: 'Centralize progress, adherence, and context for every athlete in one place.',
       },
       {
         icon: Target,
-        title: 'Prescrição clara',
-        description: 'Transforme o plano em rotina executável, com comparação direta entre prescrito e realizado.',
+        title: 'Clear prescription',
+        description: 'Turn the plan into an executable routine with direct plan-versus-actual comparison.',
       },
       {
         icon: BarChart3,
-        title: 'Leitura prática',
-        description: 'Identifique quem está travando, onde a execução cai e o que precisa de ajuste.',
+        title: 'Practical insight',
+        description: 'Spot who is stalling, where execution drops, and what needs adjustment.',
       },
     ],
     benefits: [
-      'Dashboard profissional com múltiplos alunos',
-      'Acompanhamento de aderência em tempo real',
-      'Treino, dieta e check-ins no mesmo fluxo',
-      'Resumo exportável para acompanhamento',
+      'Professional dashboard for multiple athletes',
+      'Real-time adherence monitoring',
+      'Training, nutrition, and check-ins in one workflow',
+      'Exportable summaries for follow-up',
     ],
-    cta: 'Começar como coach',
+    cta: 'Start as a coach',
   },
   nutritionist: {
-    eyebrow: 'Nutricionista',
-    title: 'Para nutricionistas que querem contexto além do plano alimentar.',
-    heroSubtitle: 'Dieta prescrita, refeições reais, medidas e evolução conectadas na mesma narrativa.',
+    eyebrow: 'Nutritionist',
+    title: 'For nutritionists who need context beyond the meal plan.',
+    heroSubtitle: 'Prescribed nutrition, real meals, body metrics, and progress in one shared story.',
     features: [
       {
         icon: UtensilsCrossed,
-        title: 'Plano e ingestão lado a lado',
-        description: 'Compare o planejado com o consumido e entenda aderência de forma concreta.',
+        title: 'Plan and intake side by side',
+        description: 'Compare what was planned with what was actually eaten and understand adherence clearly.',
       },
       {
         icon: BarChart3,
-        title: 'Histórico confiável',
-        description: 'Veja refeições, progresso, sinais de consistência e lacunas com menos ruído.',
+        title: 'Reliable history',
+        description: 'Review meals, progress, consistency, and gaps with less noise.',
       },
       {
         icon: TrendingUp,
-        title: 'Ajuste com evidência',
-        description: 'Refine o plano com base na execução real e na evolução do cliente.',
+        title: 'Evidence-based adjustment',
+        description: 'Refine the plan using real execution data and client progress.',
       },
     ],
     benefits: [
-      'Clientes e prescrições no mesmo ambiente',
-      'Leitura de medidas e progresso corporal',
-      'Relatórios nutricionais com mais contexto',
-      'Geração de dieta com apoio de IA quando necessário',
+      'Clients and prescriptions in one workspace',
+      'Body metrics and progress tracking',
+      'Nutrition reports with richer context',
+      'AI-assisted meal-plan generation when needed',
     ],
-    cta: 'Começar como nutricionista',
+    cta: 'Start as a nutritionist',
   },
   clinician: {
-    eyebrow: 'Clínico',
-    title: 'Para clínicos que precisam de uma visão integrada do paciente.',
-    heroSubtitle: 'Exames, protocolos, medidas e rotina registrados de forma contínua e compartilhável.',
+    eyebrow: 'Clinician',
+    title: 'For clinicians who need an integrated patient view.',
+    heroSubtitle: 'Labs, protocols, measurements, and routine logged in a continuous, shareable record.',
     features: [
       {
         icon: BarChart3,
-        title: 'Histórico consolidado',
-        description: 'Acompanhe dados laboratoriais, biometria e sinais de rotina sem fragmentação.',
+        title: 'Consolidated history',
+        description: 'Track labs, biometrics, and lifestyle signals without fragmentation.',
       },
       {
         icon: Target,
-        title: 'Protocolos com contexto',
-        description: 'Ligue decisões clínicas ao comportamento real do paciente ao longo do tempo.',
+        title: 'Protocols with context',
+        description: 'Connect clinical decisions to real patient behavior over time.',
       },
       {
         icon: Users,
-        title: 'Acompanhamento contínuo',
-        description: 'Tenha uma base comum para monitorar adesão, evolução e próximos ajustes.',
+        title: 'Continuous follow-up',
+        description: 'Use one shared foundation to monitor adherence, progress, and next adjustments.',
       },
     ],
     benefits: [
-      'Visão clínica com histórico contínuo',
-      'Protocolos e logs em um só lugar',
-      'Medidas e evolução corporal conectadas',
-      'Relatórios consolidados para acompanhamento',
+      'Clinical view with continuous history',
+      'Protocols and logs in one place',
+      'Body metrics connected to progress',
+      'Consolidated reports for follow-up',
     ],
-    cta: 'Começar como clínico',
+    cta: 'Start as a clinician',
   },
 };
 
@@ -161,18 +160,17 @@ export default function UseCase() {
     return (
       <PublicSiteShell
         compactNav
-        actions={<PublicLanguageSwitcher />}
       >
         <section className="mx-auto max-w-4xl px-5 pb-6 pt-16 lg:px-8">
           <div className="atlas-page-header px-6 py-8 text-center lg:px-8 lg:py-10">
             <p className="atlas-overline justify-center">Use Case</p>
-            <h1 className="atlas-display-title mt-4">Use case não encontrado.</h1>
+            <h1 className="atlas-display-title mt-4">Use case not found.</h1>
             <p className="atlas-public-copy mx-auto mt-4 max-w-xl">
-              Esse cenário ainda não existe nesta versão pública do <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core.
+              This scenario is not available in the public version of <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core yet.
             </p>
             <div className="mt-8 flex justify-center">
               <Button asChild>
-                <Link to={ROUTES.home}>Voltar para home</Link>
+                <Link to={ROUTES.home}>Back to home</Link>
               </Button>
             </div>
           </div>
@@ -186,12 +184,11 @@ export default function UseCase() {
       compactNav
       actions={(
         <>
-          <PublicLanguageSwitcher />
           <Button asChild variant="ghost" className="hidden sm:inline-flex">
             <Link to={ROUTES.help}>Help</Link>
           </Button>
           <Button asChild>
-            <Link to={`${ROUTES.auth}?mode=signup`}>Criar conta</Link>
+            <Link to={`${ROUTES.auth}?mode=signup`}>Create account</Link>
           </Button>
         </>
       )}
@@ -204,7 +201,7 @@ export default function UseCase() {
             className="atlas-overline transition-colors hover:text-[hsl(var(--fg-2))]"
           >
             <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2} />
-            Voltar
+            Back
           </button>
 
           <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
@@ -217,9 +214,9 @@ export default function UseCase() {
             </div>
 
             <div className="atlas-public-panel-muted p-4">
-              <p className="atlas-metric-label">Por que <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core</p>
+              <p className="atlas-metric-label">Why <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core</p>
               <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                O valor não está só em registrar. Está em transformar tudo em uma linha do tempo confiável.
+                The value is not just in logging. It is in turning everything into a timeline you can trust.
               </p>
             </div>
           </div>
@@ -229,9 +226,9 @@ export default function UseCase() {
       <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
           <PublicSectionHeader
-            eyebrow="Capacidades"
-            title="O que muda nesse cenário."
-            description="Cada perfil usa o mesmo produto, mas com leituras e ações ajustadas ao seu papel."
+            eyebrow="Capabilities"
+            title="What changes in this scenario."
+            description="Each role uses the same product, but with views and actions tailored to the job."
             className="mb-10"
           />
 
@@ -246,9 +243,9 @@ export default function UseCase() {
       <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
         <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-10">
           <PublicSectionHeader
-            eyebrow="Benefícios"
-            title="Benefícios práticos."
-            description="Resultados de produto quando os dados deixam de ficar espalhados."
+            eyebrow="Benefits"
+            title="Practical benefits."
+            description="What the product unlocks when data stops living in different places."
           />
 
           <div className="atlas-public-panel-muted p-5 lg:p-6">
@@ -268,12 +265,12 @@ export default function UseCase() {
 
       <section className="mx-auto max-w-4xl px-5 pb-6 lg:px-8">
         <div className="atlas-page-header px-6 py-8 text-center lg:px-8 lg:py-10">
-          <p className="atlas-overline justify-center">Começar</p>
+          <p className="atlas-overline justify-center">Get started</p>
           <h2 className="atlas-display-title mt-4 text-[clamp(2.2rem,1.9rem+1.3vw,3.3rem)]">
             {caseData.cta}
           </h2>
           <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
-            Entre no <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core e continue a partir do mesmo sistema visual, sem mudar de contexto entre público e produto.
+            Enter <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core and continue inside the same visual system without switching context between marketing and product.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
@@ -283,7 +280,7 @@ export default function UseCase() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to={ROUTES.pricing}>Ver pricing</Link>
+              <Link to={ROUTES.pricing}>View pricing</Link>
             </Button>
           </div>
         </div>

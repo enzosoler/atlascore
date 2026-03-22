@@ -17,16 +17,16 @@ export default function AIMealSuggestion({ loggedMeals, profile, remaining }) {
 
     try {
       setLoading(true);
-      const meals = loggedMeals?.map(m => m.meal_type).join(', ') || 'nenhuma';
+      const meals = loggedMeals?.map(m => m.meal_type).join(', ') || 'none';
 
-      const text = await invokeLLM(`Sugira UMA refeição PRÁTICA, baseado em:
+      const text = await invokeLLM(`Suggest ONE practical next meal based on:
 
-- Refeições já feitas: ${meals}
-- Calorias restantes: ${remaining?.cal ?? 0} kcal
-- Proteína a atingir: ${remaining?.pro ?? 0}g
-- Objetivos: ${profile?.training_goal || 'saúde geral'}
+- Meals already logged: ${meals}
+- Remaining calories: ${remaining?.cal ?? 0} kcal
+- Remaining protein target: ${remaining?.pro ?? 0}g
+- Goal: ${profile?.training_goal || 'general health'}
 
-Responda com: "Próxima refeição: [nome] — [ingredientes simples, ~cal kcal]".`);
+Reply with: "Next meal: [name] - [simple ingredients, ~cal kcal]".`);
 
       setSuggestion(text);
     } finally {
@@ -41,7 +41,7 @@ Responda com: "Próxima refeição: [nome] — [ingredientes simples, ~cal kcal]
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Próxima Refeição</span>
+          <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Next meal</span>
         </div>
       </div>
       {suggestion ? (
@@ -53,7 +53,7 @@ Responda com: "Próxima refeição: [nome] — [ingredientes simples, ~cal kcal]
           className="mt-2 px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
         >
           {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-          {loading ? 'Gerando...' : 'Sugerir refeição'}
+          {loading ? 'Generating...' : 'Suggest meal'}
         </button>
       )}
     </div>
