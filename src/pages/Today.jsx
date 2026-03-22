@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Brain,
   CheckCircle2,
@@ -9,7 +9,10 @@ import {
   Shield,
   Sparkles,
   UtensilsCrossed,
+  CalendarCheck,
+  BarChart3,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
@@ -28,6 +31,7 @@ import {
   TodaySection,
   TodayStatCard,
 } from '@/components/today/TodayMobileUI';
+import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
 
 function getPreferredName(displayName) {
   if (!displayName) return null;
@@ -244,6 +248,7 @@ function TodayContent() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
   const { role, loading: isRoleLoading } = useRole(user);
+  const [checkinOpen, setCheckinOpen] = useState(false);
   const displayName = user?.full_name || user?.email || t('today_page.fallbackName');
   const preferredName = getPreferredName(displayName) || t('today_page.fallbackName');
   const greeting = getGreeting(locale);
@@ -358,6 +363,22 @@ function TodayContent() {
   const latestMeasurement = recentMeasurements[0] || null;
   const todaySession = recentSessions.find((s) => s.date === todayStr);
 
+  // ── "Done" flags for each pillar ──────────────────────────────────────────
+
+  const nutritionDone = todayMeals.length > 0;
+  const workoutDone = todaySession?.status === 'completed';
+  // Measurements: any log in the last 7 days counts as "up to date"
+  const sevenAgoStr = (() => {
+    const d = new Date(todayStr);
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().split('T')[0];
+  })();
+  const measurementsDone = recentMeasurements.some((m) => m.date && m.date >= sevenAgoStr);
+  const protocolsDone = activeProtocolsList.length > 0;
+
+  const allDoneCount = [nutritionDone, workoutDone, measurementsDone].filter(Boolean).length;
+  const showDailySummary = !isLoading && allDoneCount >= 2;
+
   // ── Snapshot card values ─────────────────────────────────────────────────
 
   const nutritionValue = activeDietPlan
@@ -403,6 +424,8 @@ function TodayContent() {
     progressPhotosCount: recentProgressPhotos.length,
   });
 
+  const isEN = locale === 'en-US';
+
   const snapshotCards = [
     {
       to: ROUTES.nutrition,
@@ -414,6 +437,10 @@ function TodayContent() {
       meta: isLoading ? '...' : nutritionMeta,
       icon: UtensilsCrossed,
       tone: 'blue',
+      done: nutritionDone,
+      ctaLabel: nutritionDone
+        ? (isEN ? 'Review today' : 'Revisar hoje')
+        : (isEN ? 'Log meals' : 'Registrar refeições'),
     },
     {
       to: ROUTES.workouts,
@@ -425,6 +452,12 @@ function TodayContent() {
       meta: isLoading ? '...' : workoutMeta,
       icon: Dumbbell,
       tone: 'orange',
+      done: workoutDone,
+      ctaLabel: workoutDone
+        ? (isEN ? 'Review session' : 'Ver sessão')
+        : !activeWorkoutPlan
+          ? (isEN ? 'Create plan' : 'Criar plano')
+          : (isEN ? 'Start session' : 'Iniciar sessão'),
     },
     {
       to: ROUTES.measurements,
@@ -436,6 +469,10 @@ function TodayContent() {
       meta: isLoading ? '...' : progressMeta,
       icon: Scale,
       tone: 'green',
+      done: measurementsDone,
+      ctaLabel: measurementsDone
+        ? (isEN ? 'View body' : 'Ver medidas')
+        : (isEN ? 'Log weight' : 'Registrar peso'),
     },
     {
       to: ROUTES.protocols,
@@ -448,6 +485,8 @@ function TodayContent() {
       meta: isLoading ? '...' : protocolsMeta,
       icon: Shield,
       tone: 'teal',
+      done: protocolsDone,
+      ctaLabel: isEN ? 'View protocols' : 'Ver protocolos',
     },
   ];
 
@@ -549,11 +588,35 @@ function TodayContent() {
                 meta={item.meta}
                 icon={item.icon}
                 tone={item.tone}
+                done={item.done}
+                ctaLabel={item.ctaLabel}
               />
             ))}
           </div>
         )}
       </TodaySection>
+
+      {/* ── Daily summary strip — shown once ≥ 2 pillars are done ── */}
+      {showDailySummary && (
+        <div className="rounded-2xl border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.05)] px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--ok))] shrink-0">
+            {isEN ? 'Today so far' : 'Hoje até agora'}
+          </p>
+          {[
+            { label: isEN ? 'Nutrition' : 'Nutrição', done: nutritionDone, detail: nutritionDone ? `${todayMeals.length} ${isEN ? 'entries' : 'entradas'}` : null },
+            { label: isEN ? 'Workout' : 'Treino', done: workoutDone, detail: workoutDone ? (isEN ? 'completed' : 'concluído') : null },
+            { label: isEN ? 'Measurements' : 'Medidas', done: measurementsDone, detail: measurementsDone ? (isEN ? 'up to date' : 'em dia') : null },
+          ].map(({ label, done, detail }) => (
+            <span key={label} className={cn(
+              'flex items-center gap-1 text-[12px] font-medium',
+              done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-3))]'
+            )}>
+              <span>{done ? '✓' : '—'}</span>
+              <span>{label}{detail ? ` · ${detail}` : ''}</span>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* ── Adherence + Insight side by side ── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -681,6 +744,45 @@ function TodayContent() {
           ))}
         </div>
       </TodaySection>
+
+      {/* ── Quick actions: check-in + block review ── */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <button
+          onClick={() => setCheckinOpen(true)}
+          className="atlas-card rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)] flex items-center gap-3 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+            <CalendarCheck className="h-[18px] w-[18px]" strokeWidth={2} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {isEN ? 'Weekly check-in' : 'Check-in semanal'}
+            </p>
+            <p className="text-[12px] text-[hsl(var(--fg-2))]">
+              {isEN ? 'Energy, mood, sleep — 30 sec' : 'Energia, humor, sono — 30 seg'}
+            </p>
+          </div>
+        </button>
+
+        <Link
+          to={ROUTES.blockReview}
+          className="atlas-card rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)] flex items-center gap-3 p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--accent-secondary)/0.22)] bg-[hsl(var(--accent-secondary)/0.14)] text-[hsl(var(--accent-secondary))]">
+            <BarChart3 className="h-[18px] w-[18px]" strokeWidth={2} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {isEN ? 'Review last 4 weeks' : 'Revisar últimas 4 semanas'}
+            </p>
+            <p className="text-[12px] text-[hsl(var(--fg-2))]">
+              {isEN ? 'See what actually worked' : 'Veja o que realmente funcionou'}
+            </p>
+          </div>
+        </Link>
+      </div>
+
+      <WeeklyCheckinModal open={checkinOpen} onClose={() => setCheckinOpen(false)} />
     </TodayScreen>
   );
 }
