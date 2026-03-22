@@ -125,6 +125,8 @@ export function TodayStatCard({
   meta,
   icon: Icon,
   tone = 'blue',
+  ctaLabel,
+  done = false,
 }) {
   const styles = toneStyles[tone] || toneStyles.blue;
 
@@ -133,8 +135,10 @@ export function TodayStatCard({
       to={to}
       className={cn(
         surfaceClassName,
-        'block p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
-        styles.glow
+        'flex flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+        done
+          ? 'border-[hsl(var(--ok)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.08),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]'
+          : styles.glow
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -142,18 +146,36 @@ export function TodayStatCard({
           <p className="atlas-overline">{label}</p>
           <p className="mt-3 text-[28px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{value}</p>
         </div>
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border', styles.icon)}>
+        <div className={cn(
+          'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border',
+          done
+            ? 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
+            : styles.icon
+        )}>
           <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
         </div>
       </div>
 
       <p className="mt-3 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
 
-      {meta ? (
-        <span className={cn('mt-4 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold', styles.pill)}>
-          {meta}
-        </span>
-      ) : null}
+      <div className="mt-auto pt-4 flex items-center justify-between gap-2">
+        {meta ? (
+          <span className={cn('inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold', done ? 'border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]' : styles.pill)}>
+            {meta}
+          </span>
+        ) : <span />}
+        {ctaLabel ? (
+          <span className={cn(
+            'inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-colors',
+            done
+              ? 'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
+              : 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-fg,var(--bg)))]'
+          )}>
+            {ctaLabel}
+            <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          </span>
+        ) : null}
+      </div>
     </Link>
   );
 }
