@@ -99,7 +99,7 @@
 
 ## Subagent ownership
 - Design System Agent
-  - Audited `design/index.html` and the four gallery files.
+  - Audited `design/handoff/index.html` and the four gallery files.
   - Extracted tokens, spacing, radii, shared patterns, and theme mismatches.
 - Navigation + Architecture Agent
   - Audited the current route tree and proposed the route/state mapping used in this implementation note.

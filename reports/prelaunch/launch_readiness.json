@@ -46,7 +46,7 @@
         "description": "E2E smoke tests pass for critical auth flows (signup, login, logout, session refresh)",
         "status": "BLOCKED",
         "severity_if_fail": "P0",
-        "evidence": ["No E2E runner configured", "No staging environment defined in repo", "docs/prelaunch/README.md: no E2E suite exists yet"]
+        "evidence": ["No E2E runner configured", "No staging environment defined in repo", "docs/implementation/prelaunch/README.md: no E2E suite exists yet"]
       },
       {
         "id": "MVP-007",
@@ -99,7 +99,7 @@
       }
     ],
     "verdict": "NO_GO",
-    "notes": "MVP criteria were INFERRED from README.md, docs/prelaunch/README.md, project instruction comments, and engineering rules. Formal acceptance criteria document not found in repo. 6 P0 criteria FAIL or BLOCKED; 4 P1 criteria FAIL or BLOCKED."
+    "notes": "MVP criteria were INFERRED from README.md, docs/implementation/prelaunch/README.md, project instruction comments, and engineering rules. Formal acceptance criteria document not found in repo. 6 P0 criteria FAIL or BLOCKED; 4 P1 criteria FAIL or BLOCKED."
   },
   "checks": [
     {
@@ -192,7 +192,7 @@
       "status": "BLOCKED",
       "summary": "No E2E runner configured in the repo. Critical flows (signup, login, logout, session refresh, role-based navigation) have not been smoke-tested end-to-end.",
       "evidence": [
-        "docs/prelaunch/README.md: 'ainda nao existe suite E2E/staging dentro do repo'",
+        "docs/implementation/prelaunch/README.md: 'ainda nao existe suite E2E/staging dentro do repo'",
         "No playwright.config.js, cypress.config.js, or equivalent",
         "Critical route files: src/App.jsx, src/pages/Auth.jsx, src/components/rbac/RouteGuard.jsx"
       ],
@@ -690,7 +690,7 @@
       "title": "grant_admin_*.mjs scripts hardcode admin email and accept SERVICE_ROLE_KEY as CLI arg",
       "severity": "P2",
       "status": "open",
-      "files": ["grant_admin_local.mjs", "grant_admin_simple.mjs"],
+      "files": ["scripts/admin/grant_admin_local.mjs", "scripts/admin/grant_admin_simple.mjs"],
       "mitigation": "Add to .gitignore or delete from repo. Use Supabase Dashboard for admin grants."
     }
   ],
@@ -746,7 +746,7 @@
     { "kind": "file", "path_or_ref": "src/lib/account.js", "description": "deleteCurrentAccount() — calls Base44 DELETE, not Supabase" },
     { "kind": "file", "path_or_ref": "src/lib/i18nContext.jsx", "description": "I18nProvider — missing html[lang] dynamic update" },
     { "kind": "file", "path_or_ref": "src/components/ui/chart.jsx:61", "description": "dangerouslySetInnerHTML — developer-controlled CSS vars only; justifies unsafe-inline in CSP" },
-    { "kind": "file", "path_or_ref": "grant_admin_local.mjs", "description": "Admin grant script with hardcoded email — should not be tracked in git" },
+    { "kind": "file", "path_or_ref": "scripts/admin/grant_admin_local.mjs", "description": "Admin grant script with hardcoded email — should not be tracked in git" },
     { "kind": "file", "path_or_ref": "package.json", "description": "Dependencies: React 18, Vite 6, Supabase JS 2.99.3, @base44/sdk 0.8.0, TanStack Query 5" }
   ]
 }
