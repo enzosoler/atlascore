@@ -2,18 +2,24 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAuth } from '@/lib/AuthContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
-import { FilterChip, StatusBanner } from '@/components/shared/StablePage';
+import { StatusBanner } from '@/components/shared/StablePage';
 import {
   Activity,
   ArrowUpRight,
   Brain,
+  CalendarDays,
+  ClipboardCheck,
   Clock3,
+  Lightbulb,
   Loader2,
+  Lock,
   MessageSquare,
   Plus,
+  Scale,
   Send,
   Sparkles,
   Target,
+  Utensils,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MessageBubble from '@/components/ai/MessageBubble';
@@ -23,44 +29,40 @@ import { supabase } from '@/lib/supabaseClient';
 const LOCAL_ATLAS_AI_STORAGE_KEY = 'atlas-ai-local-conversations';
 const LOCAL_PROFILE_STORAGE_KEY = 'atlas_local_profile_store';
 const LOCAL_FREE_PROMPTS_KEY = 'atlas-ai-free-prompts';
+const LOCAL_JOB_WEEK_KEY = 'atlas-ai-jobs-week';
 const FREE_PROMPT_LIMIT = 3;
+const JOB_WEEK_LIMIT_FREE = 2;
 
-const PROMPTS = [
+const JOB_BUTTONS = [
   {
-    id: 'nutrition',
-    title: 'Nutrition adherence',
-    prompt: 'How is my nutrition adherence?',
-    description: 'See where your diet is sustaining or blocking the week.',
+    id: 'review-week',
+    icon: CalendarDays,
+    title: 'Revisar meus últimos 7 dias',
+    description: 'Treino, nutrição, peso e energia numa leitura só.',
   },
   {
-    id: 'weight',
-    title: 'Weight Progress',
-    prompt: 'Analyze my weight progress',
-    description: 'Read trend, distance to goal and next adjustments clearly.',
+    id: 'weight-stuck',
+    icon: Scale,
+    title: 'Por que meu peso está parado?',
+    description: 'Hipóteses + ação concreta para testar esta semana.',
   },
   {
-    id: 'labs',
-    title: 'Lab Results Reading',
-    prompt: 'What do my lab exams indicate?',
-    description: 'Get a guided and contextual interpretation of what deserves attention.',
+    id: 'protocol-check',
+    icon: ClipboardCheck,
+    title: 'Checar aderência ao protocolo',
+    description: 'Plano vs execução nas últimas 2 semanas.',
   },
   {
-    id: 'supplements',
-    title: 'Supplementation',
-    prompt: 'Which supplements match my goals?',
-    description: 'Prioritize what makes sense for your goal before stacking interventions.',
+    id: 'next-week-tweak',
+    icon: Lightbulb,
+    title: 'Sugerir ajuste para a próxima semana',
+    description: 'Uma mudança de alto impacto com raciocínio claro.',
   },
   {
-    id: 'weekly',
-    title: 'Weekly Summary',
-    prompt: 'Generate a weekly summary',
-    description: 'Condense the week into a quick read, focused on the next decision.',
-  },
-  {
-    id: 'plan',
-    title: 'Plan vs Execution',
-    prompt: 'Compare my plan vs execution',
-    description: 'Understand intention versus real consistency without opening multiple screens.',
+    id: 'nutrition-check',
+    icon: Utensils,
+    title: 'Reality check de nutrição',
+    description: 'Calorias, macros e lacunas em relação à meta.',
   },
 ];
 
@@ -157,6 +159,56 @@ function writeFreePromptCount(user, count) {
   const store = readJsonStorage(LOCAL_FREE_PROMPTS_KEY, {});
   store[getAtlasScope(user)] = count;
   writeJsonStorage(LOCAL_FREE_PROMPTS_KEY, store);
+}
+
+// ── Job-button weekly rate-limit helpers ──────────────────────────────────────
+
+function getCurrentWeekKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const jan1 = new Date(year, 0, 1);
+  const week = Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  return `${year}-W${String(week).padStart(2, '0')}`;
+}
+
+function readJobWeekData(user) {
+  const store = readJsonStorage(LOCAL_JOB_WEEK_KEY, {});
+  const entry = store[getAtlasScope(user)];
+  const currentWeek = getCurrentWeekKey();
+  if (!entry || entry.week !== currentWeek) return { week: currentWeek, count: 0 };
+  return entry;
+}
+
+function writeJobWeekData(user, data) {
+  const store = readJsonStorage(LOCAL_JOB_WEEK_KEY, {});
+  store[getAtlasScope(user)] = data;
+  writeJsonStorage(LOCAL_JOB_WEEK_KEY, store);
+}
+
+function buildJobPrompt(jobId, profile) {
+  const goal = profile?.training_goal;
+  const cw = Number(profile?.current_weight);
+  const tw = Number(profile?.target_weight);
+  const kcal = profile?.calories_target;
+  const prot = profile?.protein_target;
+  const ctx = profile
+    ? `[Perfil: objetivo=${goal || 'n/d'}${Number.isFinite(cw) ? `, peso atual=${cw}kg` : ''}${Number.isFinite(tw) ? `, meta=${tw}kg` : ''}${kcal ? `, meta kcal=${kcal}` : ''}${prot ? `, proteína-alvo=${prot}g` : ''}]\n\n`
+    : '';
+
+  switch (jobId) {
+    case 'review-week':
+      return `${ctx}Faça uma revisão completa dos meus últimos 7 dias. Avalie: (1) consistência de treino em relação ao plano, (2) aderência nutricional à meta calórica e de proteína, (3) tendência de peso vs meta, (4) sinais de energia/humor dos check-ins. Termine com o ajuste mais importante que devo fazer agora.`;
+    case 'weight-stuck':
+      return `${ctx}Meu peso parece estagnado. Liste as 3 hipóteses mais prováveis considerando: déficit calórico real vs estimado, adaptação metabólica, retenção hídrica, volume/intensidade de treino. Para cada hipótese, dê uma ação concreta e mensurável para testar esta semana.`;
+    case 'protocol-check':
+      return `${ctx}Avalie minha aderência ao protocolo atual nas últimas 2 semanas. Analise: sessões realizadas vs planejadas, distribuição dos dias, e principais padrões de ruptura (dia da semana, período do dia). Conclua com o maior ponto de falha e como corrigi-lo.`;
+    case 'next-week-tweak':
+      return `${ctx}Com base na minha rotina recente, sugira um único ajuste de alto impacto para a próxima semana — pode ser de treino, nutrição, sono ou recuperação. Explique o raciocínio em 3 linhas e como medir se funcionou.`;
+    case 'nutrition-check':
+      return `${ctx}Faça um reality check da minha nutrição. Analise: aderência à meta calórica, distribuição de macros vs alvo, consistência nos dias de treino vs descanso, e hidratação. Aponte o gap mais crítico e a correção mais simples.`;
+    default:
+      return `${ctx}${jobId}`;
+  }
 }
 
 function appendMessage(list, conversationId, message) {
@@ -520,27 +572,50 @@ function ConversationListItem({ conversation, active, onClick, compact = false }
   );
 }
 
-function PromptCard({ item, onSelect }) {
+function JobButton({ item, onSelect, locked = false, hasPaidAccess, jobsRemaining }) {
+  const Icon = item.icon;
   return (
     <button
-      onClick={() => onSelect(item.prompt)}
-      className="atlas-chat-panel group relative overflow-hidden rounded-[26px] border border-[hsl(var(--border)/0.92)] px-4 py-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--separator-strong))] hover:shadow-[var(--shadow-sm)]"
+      onClick={() => !locked && onSelect(item.id)}
+      disabled={locked}
+      className={cn(
+        'group relative flex items-start gap-3 rounded-[20px] border p-3.5 text-left transition-all duration-200',
+        locked
+          ? 'cursor-not-allowed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.36)] opacity-55'
+          : 'cursor-pointer border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card)/0.76)] hover:-translate-y-0.5 hover:border-[hsl(var(--brand-ai)/0.32)] hover:bg-[hsl(var(--brand-ai)/0.06)] hover:shadow-[var(--shadow-sm)]'
+      )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand-ai)/0.08)] to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+      <div
+        className={cn(
+          'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border transition-colors',
+          locked
+            ? 'border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-3))]'
+            : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.7)] text-[hsl(var(--brand-ai))] group-hover:bg-[hsl(var(--brand-ai)/0.12)]'
+        )}
+      >
+        {locked
+          ? <Lock className="h-3.5 w-3.5" strokeWidth={2} />
+          : <Icon className="h-4 w-4" strokeWidth={1.8} />
+        }
+      </div>
 
-      <div className="relative">
-        <div className="flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))]">
-            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-[13px] font-semibold leading-5 tracking-[-0.02em] text-[hsl(var(--fg))]">
             {item.title}
-          </span>
-          <ArrowUpRight className="h-4 w-4 text-[hsl(var(--fg-3))] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={1.8} />
+          </p>
+          {!hasPaidAccess && !locked && jobsRemaining !== undefined && (
+            <span className="shrink-0 rounded-full bg-[hsl(var(--brand-ai)/0.1)] px-2 py-0.5 text-[10px] font-semibold text-[hsl(var(--brand-ai))]">
+              {jobsRemaining}/sem
+            </span>
+          )}
+          {!hasPaidAccess && locked && (
+            <span className="shrink-0 rounded-full bg-[hsl(var(--fill)/0.7)] px-2 py-0.5 text-[10px] font-semibold text-[hsl(var(--fg-3))]">
+              Pro
+            </span>
+          )}
         </div>
-
-        <p className="mt-4 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-          {item.prompt}
-        </p>
-        <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{item.description}</p>
+        <p className="mt-0.5 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{item.description}</p>
       </div>
     </button>
   );
@@ -565,10 +640,26 @@ export default function AtlasAI() {
 
   const localProfile = useMemo(() => readLocalProfile(user), [user]);
   const profileContext = useMemo(() => buildProfileContext(localProfile), [localProfile]);
+  const [jobWeekData, setJobWeekData] = useState({ week: getCurrentWeekKey(), count: 0 });
 
   useEffect(() => {
     setFreePromptsUsed(readFreePromptCount(user));
+    setJobWeekData(readJobWeekData(user));
   }, [user]);
+
+  const jobsUsedThisWeek = jobWeekData.week === getCurrentWeekKey() ? jobWeekData.count : 0;
+  const jobsRemainingThisWeek = hasPaidAccess ? Infinity : Math.max(0, JOB_WEEK_LIMIT_FREE - jobsUsedThisWeek);
+
+  const handleJobSelect = (jobId) => {
+    if (!hasPaidAccess && jobsRemainingThisWeek <= 0) return;
+    const prompt = buildJobPrompt(jobId, localProfile);
+    if (!hasPaidAccess) {
+      const newData = { week: getCurrentWeekKey(), count: jobsUsedThisWeek + 1 };
+      setJobWeekData(newData);
+      writeJobWeekData(user, newData);
+    }
+    send(prompt);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -1017,10 +1108,17 @@ export default function AtlasAI() {
                         </p>
                       </div>
 
-                      {/* Prompt grid — primary CTA */}
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {PROMPTS.map(item => (
-                          <PromptCard key={item.id} item={item} onSelect={send} />
+                      {/* Job buttons grid — primary CTA */}
+                      <div className="grid gap-2.5 sm:grid-cols-2">
+                        {JOB_BUTTONS.map(item => (
+                          <JobButton
+                            key={item.id}
+                            item={item}
+                            onSelect={handleJobSelect}
+                            locked={!hasPaidAccess && jobsRemainingThisWeek <= 0}
+                            hasPaidAccess={hasPaidAccess}
+                            jobsRemaining={hasPaidAccess ? undefined : jobsRemainingThisWeek}
+                          />
                         ))}
                       </div>
 
@@ -1089,17 +1187,35 @@ export default function AtlasAI() {
             {/* ── COMPOSER ── */}
             <div className="shrink-0 border-t border-[hsl(var(--border)/0.78)] px-4 py-4 lg:px-6 lg:py-4">
               <div className="mx-auto max-w-3xl space-y-3">
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {PROMPTS.slice(0, 3).map(item => (
-                    <FilterChip
-                      key={`${item.id}-composer`}
-                      onClick={() => send(item.prompt)}
-                      className="whitespace-nowrap"
-                    >
-                      <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={1.9} />
-                      {item.title}
-                    </FilterChip>
-                  ))}
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  {JOB_BUTTONS.map(item => {
+                    const Icon = item.icon;
+                    const isLocked = !hasPaidAccess && jobsRemainingThisWeek <= 0;
+                    return (
+                      <button
+                        key={`${item.id}-chip`}
+                        onClick={() => !isLocked && handleJobSelect(item.id)}
+                        disabled={isLocked}
+                        className={cn(
+                          'flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-all duration-150',
+                          isLocked
+                            ? 'cursor-not-allowed border-[hsl(var(--border)/0.5)] text-[hsl(var(--fg-3))] opacity-55'
+                            : 'cursor-pointer border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card)/0.76)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--brand-ai)/0.08)] hover:border-[hsl(var(--brand-ai)/0.3)] hover:text-[hsl(var(--brand-ai))]'
+                        )}
+                      >
+                        {isLocked
+                          ? <Lock className="h-3 w-3 shrink-0" strokeWidth={2} />
+                          : <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.9} />
+                        }
+                        {item.title}
+                        {!hasPaidAccess && !isLocked && (
+                          <span className="ml-0.5 rounded-full bg-[hsl(var(--brand-ai)/0.12)] px-1.5 text-[10px] text-[hsl(var(--brand-ai))]">
+                            {jobsRemainingThisWeek}/sem
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="atlas-chat-panel relative overflow-hidden rounded-[28px] border border-[hsl(var(--border)/0.92)] px-3 py-3 shadow-[var(--shadow-md)] lg:px-4">
