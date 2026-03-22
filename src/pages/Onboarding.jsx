@@ -18,6 +18,9 @@ import {
   Dumbbell,
   Scale,
   Compass,
+  Star,
+  ShieldCheck,
+  Crown,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
@@ -41,6 +44,16 @@ const ACTIVITY_LEVELS = [
   { id: 'very_active', label: 'Muito ativo',   desc: '2× ao dia / atleta' },
 ];
 
+// Remarketing data — collected for retargeting (transcript 2 playbook)
+const HEAR_ABOUT_US = [
+  { id: 'instagram',     label: 'Instagram / TikTok' },
+  { id: 'youtube',       label: 'YouTube' },
+  { id: 'google',        label: 'Google' },
+  { id: 'indication',    label: 'Indicação' },
+  { id: 'coach',         label: 'Meu coach / nutricionista' },
+  { id: 'other',         label: 'Outro' },
+];
+
 const SETUP_MESSAGES = [
   'Calculando suas metas nutricionais...',
   'Registrando primeiro checkpoint...',
@@ -58,6 +71,7 @@ const INITIAL_FORM = {
   target_weight: '',
   health_goals: [],
   activity_level: 'moderate',
+  hear_about_us: '',          // remarketing data
   // Step 2 — first checkpoint
   checkpoint_weight: '',
   checkpoint_body_fat: '',
@@ -288,6 +302,32 @@ function StepProfileAndGoals({ form, set, toggle }) {
           </div>
         </div>
       </div>
+
+      {/* ── Remarketing data collection (transcript 2 playbook) ── */}
+      <div className="border-t border-[hsl(var(--border-h))] pt-4 space-y-2.5">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">
+          Como você nos encontrou? <OptionalBadge />
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {HEAR_ABOUT_US.map((option) => {
+            const selected = form.hear_about_us === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => set('hear_about_us', selected ? '' : option.id)}
+                className={`px-3 py-1.5 rounded-full border text-[12px] font-medium transition-all
+                  ${selected
+                    ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--fg))]'
+                    : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card-hi))]'
+                  }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -441,6 +481,124 @@ function StepPathChoice({ form, set }) {
   );
 }
 
+// ─── Paywall priming screen (transcript 2 playbook) ───────────────────────────
+// Shows BEFORE the actual setup generation. Builds trust, explains the trial,
+// and primes users toward the annual plan without hard-selling.
+
+function PaywallPrimingScreen({ onContinue }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="space-y-5 py-2"
+    >
+      {/* Header */}
+      <div className="text-center">
+        <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
+          <ShieldCheck className="w-7 h-7 text-[hsl(var(--brand))]" strokeWidth={1.75} />
+        </div>
+        <h2 className="text-[20px] font-bold tracking-tight mb-1">
+          Como seu período gratuito funciona
+        </h2>
+        <p className="text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
+          7 dias com acesso completo. Sem cartão de crédito agora.
+        </p>
+      </div>
+
+      {/* Trial timeline */}
+      <div className="space-y-2">
+        {[
+          {
+            day: 'Hoje',
+            title: 'Acesso completo desbloqueado',
+            desc: 'Treinos, nutrição, IA e exames — tudo disponível desde o primeiro dia.',
+            icon: '🚀',
+            highlight: true,
+          },
+          {
+            day: 'Dia 5',
+            title: 'Lembrete por email',
+            desc: 'Avisamos antes do seu período gratuito encerrar.',
+            icon: '📧',
+            highlight: false,
+          },
+          {
+            day: 'Dia 7',
+            title: 'Período gratuito encerra',
+            desc: 'Escolha um plano para continuar ou perca o acesso.',
+            icon: '⏰',
+            highlight: false,
+          },
+        ].map(({ day, title, desc, icon, highlight }) => (
+          <div
+            key={day}
+            className={`flex items-start gap-3 p-3 rounded-xl border transition-all
+              ${highlight
+                ? 'bg-[hsl(var(--brand)/0.06)] border-[hsl(var(--brand)/0.2)]'
+                : 'bg-[hsl(var(--card-hi))] border-[hsl(var(--border-h))]'
+              }`}
+          >
+            <span className="text-[18px] shrink-0 mt-0.5">{icon}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-[10px] font-bold uppercase tracking-wider shrink-0
+                  ${highlight ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--fg-3))]'}`}>
+                  {day}
+                </span>
+                <span className="text-[13px] font-semibold leading-snug">{title}</span>
+              </div>
+              <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5 leading-relaxed">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Annual plan highlight — pushes LTV (transcript 2 playbook) */}
+      <div className="rounded-xl border border-[hsl(var(--brand)/0.25)] bg-[hsl(var(--brand)/0.04)] p-3">
+        <div className="flex items-start gap-2.5">
+          <Crown className="w-4 h-4 text-[hsl(var(--brand))] shrink-0 mt-0.5" strokeWidth={1.75} />
+          <div>
+            <p className="text-[12px] font-semibold text-[hsl(var(--fg))] leading-snug">
+              Plano Anual — economize até 40%
+            </p>
+            <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">
+              Após o período gratuito, o plano anual garante o menor custo por mês. Você pode escolher na hora de ativar.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Social proof */}
+      <div className="rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] px-3 py-2.5">
+        <div className="flex items-center gap-1 mb-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" strokeWidth={1.5} />
+          ))}
+          <span className="text-[11px] font-semibold ml-1 text-[hsl(var(--fg-2))]">
+            4.9 · 500+ atletas
+          </span>
+        </div>
+        <p className="text-[12px] text-[hsl(var(--fg-2))] italic leading-relaxed">
+          "Finalmente um app que centraliza treino, nutrição e exames no mesmo lugar."
+        </p>
+      </div>
+
+      {/* CTA */}
+      <button
+        onClick={onContinue}
+        className="btn btn-primary w-full h-12 rounded-2xl text-[14px] gap-2"
+      >
+        Começar meu período gratuito <ArrowRight className="w-4 h-4" strokeWidth={2} />
+      </button>
+
+      <p className="text-center text-[11px] text-[hsl(var(--fg-3))]">
+        Sem cartão de crédito · Cancele quando quiser
+      </p>
+    </motion.div>
+  );
+}
+
 // ─── Setup generation ─────────────────────────────────────────────────────────
 
 function SetupGenerationScreen({ onDone }) {
@@ -588,6 +746,7 @@ export default function Onboarding() {
   const { isAuthenticated, user } = useAuth();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [showPaywallPriming, setShowPaywallPriming] = useState(false);
   const [showGeneration, setShowGeneration] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
@@ -644,6 +803,13 @@ export default function Onboarding() {
         .from('profiles')
         .upsert({ ...payload, id: user.id, updated_at: new Date().toISOString() }, { onConflict: 'id' });
 
+      // Store remarketing data in user metadata (no schema change needed)
+      if (form.hear_about_us) {
+        await supabase.auth.updateUser({
+          data: { hear_about_us: form.hear_about_us },
+        });
+      }
+
       // Insert first measurement checkpoint
       const checkpointWeight = Number(form.checkpoint_weight) || Number(form.current_weight);
       if (checkpointWeight) {
@@ -667,8 +833,15 @@ export default function Onboarding() {
     }
   };
 
+  // Step 3 finish → save → show paywall priming
   const handleFinish = async () => {
     await saveAndFinish();
+    setShowPaywallPriming(true);
+  };
+
+  // Paywall priming CTA → setup generation
+  const handlePrimingContinue = () => {
+    setShowPaywallPriming(false);
     setShowGeneration(true);
   };
 
@@ -695,29 +868,49 @@ export default function Onboarding() {
     <div className="min-h-screen bg-[hsl(var(--bg))] flex items-center justify-center p-5">
       <div className="w-full max-w-md">
 
-        {!showGeneration && !showSuccess && (
-          <div className="flex justify-end mb-1">
-            <button
-              onClick={() => navigate(ROUTES.home, { replace: true })}
-              className="p-2 rounded-lg hover:bg-[hsl(var(--shell))] transition-colors text-[hsl(var(--fg-2))]"
-            >
-              <X className="w-4 h-4" strokeWidth={2} />
-            </button>
-          </div>
+        {/* ── Paywall priming screen ── */}
+        {showPaywallPriming && (
+          <>
+            <Logo />
+            <div className="surface rounded-2xl p-6">
+              <PaywallPrimingScreen onContinue={handlePrimingContinue} />
+            </div>
+          </>
         )}
 
-        <Logo />
-
-        {showSuccess ? (
-          <div className="surface rounded-2xl p-8">
-            <SuccessScreen chosenPath={form.chosen_path} onDone={handleSuccessDone} />
-          </div>
-        ) : showGeneration ? (
-          <div className="surface rounded-2xl p-8">
-            <SetupGenerationScreen onDone={handleGenerationDone} />
-          </div>
-        ) : (
+        {/* ── Setup generation screen ── */}
+        {!showPaywallPriming && showGeneration && (
           <>
+            <Logo />
+            <div className="surface rounded-2xl p-8">
+              <SetupGenerationScreen onDone={handleGenerationDone} />
+            </div>
+          </>
+        )}
+
+        {/* ── Success screen ── */}
+        {!showPaywallPriming && !showGeneration && showSuccess && (
+          <>
+            <Logo />
+            <div className="surface rounded-2xl p-8">
+              <SuccessScreen chosenPath={form.chosen_path} onDone={handleSuccessDone} />
+            </div>
+          </>
+        )}
+
+        {/* ── Main onboarding steps ── */}
+        {!showPaywallPriming && !showGeneration && !showSuccess && (
+          <>
+            <div className="flex justify-end mb-1">
+              <button
+                onClick={() => navigate(ROUTES.home, { replace: true })}
+                className="p-2 rounded-lg hover:bg-[hsl(var(--shell))] transition-colors text-[hsl(var(--fg-2))]"
+              >
+                <X className="w-4 h-4" strokeWidth={2} />
+              </button>
+            </div>
+
+            <Logo />
             <StepDots step={step} total={TOTAL_STEPS} />
 
             <AnimatePresence mode="wait">
