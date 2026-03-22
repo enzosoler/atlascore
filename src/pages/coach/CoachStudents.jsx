@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Loader2, Trash2, Users } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import InviteModal from '@/components/shared/InviteModal';
-import { Link } from 'react-router-dom';
 import RoleGate from '@/components/rbac/RoleGate';
-import { Users, Plus, ChevronRight, X, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { PageShell, SectionCard } from '@/components/shared/StablePage';
+import {
+  WorkspaceHeader,
+  WorkspaceInviteAction,
+  WorkspacePersonRow,
+  WorkspaceRosterSection,
+} from '@/components/shared/ProfessionalUI';
 
 export default function CoachStudents() {
   const { user } = useAuth();
@@ -26,55 +31,68 @@ export default function CoachStudents() {
 
   return (
     <RoleGate roles={['coach', 'admin']}>
-      <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
-        <div className="flex items-start justify-between gap-4 pb-5 border-b border-[hsl(var(--border-h))]">
-          <div>
-            <h1 className="t-headline">Meus Alunos</h1>
-            <p className="t-small mt-1">{students.length} aluno{students.length !== 1 ? 's' : ''} vinculado{students.length !== 1 ? 's' : ''}</p>
-          </div>
-          <button onClick={() => setShowInvite(true)} className="btn btn-primary gap-1.5">
-            <Plus className="w-3.5 h-3.5" /> Adicionar aluno
-          </button>
-        </div>
+      <PageShell title="Students" subtitle="Manage active coaching relationships and pending invites." maxWidth="max-w-4xl">
+        <WorkspaceHeader
+          eyebrow="Coach role"
+          title="Students"
+          subtitle="Invite athletes, monitor acceptance, and jump into individual profiles."
+          icon={Users}
+          tone="brand"
+          badge={`${students.length} linked`}
+          actions={<WorkspaceInviteAction label="Invite student" onClick={() => setShowInvite(true)} />}
+        />
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12 gap-2 t-small text-[hsl(var(--fg-2))]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
-          </div>
-        ) : students.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon"><Users className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} /></div>
-            <p className="t-subtitle mb-1">Nenhum aluno ainda</p>
-            <p className="t-caption mb-4">Adicione alunos para começar a acompanhá-los.</p>
-            <button onClick={() => setShowInvite(true)} className="btn btn-primary gap-1.5"><Plus className="w-3.5 h-3.5" /> Adicionar aluno</button>
-          </div>
+          <SectionCard title="Loading students" subtitle="Fetching your active and pending links.">
+            <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading student roster...
+            </div>
+          </SectionCard>
         ) : (
-          <div className="space-y-2">
-            {students.map(s => (
-              <div key={s.id} className="surface flex items-center gap-3 px-4 py-3">
-                <div className="w-10 h-10 rounded-xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center font-bold text-[hsl(var(--brand))] text-[15px] shrink-0">
-                  {(s.student_name || s.student_email)?.[0]?.toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-semibold truncate">{s.student_name || s.student_email}</p>
-                  <p className="t-caption truncate">{s.student_email}</p>
-                </div>
-                <span className={`badge ${s.status === 'accepted' ? 'badge-ok' : s.status === 'pending' ? 'badge-warn' : 'badge-neutral'}`}>
-                  {s.status === 'accepted' ? 'Ativo' : s.status === 'pending' ? 'Pendente' : s.status}
-                </span>
-                <Link to={`/coach/student/${s.student_email}`} className={`w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[hsl(var(--shell))] transition-colors ${s.status !== 'accepted' ? 'opacity-30 pointer-events-none' : ''}`}>
-                  <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-2))]" strokeWidth={2} />
-                </Link>
-                <button onClick={() => removeM.mutate(s.id)} className="w-8 h-8 rounded-lg flex items-center justify-center text-[hsl(var(--fg-2)/0.4)] hover:text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.07)] transition-colors">
-                  <X className="w-3.5 h-3.5" strokeWidth={2} />
-                </button>
-              </div>
+          <WorkspaceRosterSection
+            eyebrow="Roster"
+            title="All linked students"
+            subtitle="Accepted athletes are ready for profile review. Pending invites stay visible until confirmed."
+            emptyIcon={Users}
+            emptyTitle="No students yet"
+            emptyDescription="Invite your first athlete to start prescribing and reviewing adherence."
+            emptyAction={<WorkspaceInviteAction label="Invite student" onClick={() => setShowInvite(true)} />}
+          >
+            {students.map((student) => (
+              <WorkspacePersonRow
+                key={student.id}
+                to={student.status === 'accepted' ? `/coach/student/${student.student_email}` : undefined}
+                initial={(student.student_name || student.student_email)?.[0]?.toUpperCase() || 'A'}
+                title={student.student_name || student.student_email}
+                subtitle={student.student_email}
+                meta={
+                  student.status === 'accepted'
+                    ? 'Accepted and ready for programming'
+                    : 'Invite sent, awaiting acceptance'
+                }
+                badge={student.status === 'accepted' ? 'Active' : 'Pending'}
+                badgeTone={student.status === 'accepted' ? 'success' : 'warning'}
+                accentTone="brand"
+                actions={
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      removeM.mutate(student.id);
+                    }}
+                    className="flex h-9 w-9 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg-3))] transition-colors hover:border-[hsl(var(--err)/0.2)] hover:bg-[hsl(var(--err)/0.08)] hover:text-[hsl(var(--err))]"
+                  >
+                    <Trash2 className="h-4 w-4" strokeWidth={1.9} />
+                  </button>
+                }
+              />
             ))}
-          </div>
+          </WorkspaceRosterSection>
         )}
 
         <InviteModal open={showInvite} onOpenChange={setShowInvite} role="coach" />
-      </div>
+      </PageShell>
     </RoleGate>
   );
 }

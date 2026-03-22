@@ -56,14 +56,14 @@ function formatRestCountdown(seconds) {
 function MetricTile({ label, value, accent = false }) {
   return (
     <div
-      className={`rounded-[20px] border px-4 py-3 ${
+      className={`rounded-[16px] border px-4 py-3 ${
         accent
           ? 'border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)]'
           : 'border-[hsl(var(--border)/0.88)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.76)_0%,hsl(var(--card))_100%)]'
       }`}
     >
       <p className="atlas-overline">{label}</p>
-      <p className="mt-2 text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+      <p className="mt-2 font-mono text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
         {value}
       </p>
     </div>
@@ -80,7 +80,7 @@ function FieldInput({ label, value, onChange, placeholder }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-12 text-center text-base"
+        className="atlas-field h-14 rounded-[12px] border-0 text-center text-base font-medium"
       />
     </div>
   );
@@ -270,7 +270,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
   if (showAddExercise) {
     return (
       <div className="mx-auto max-w-3xl space-y-6 px-5 pb-8 pt-4 lg:px-8">
-        <div className="atlas-card rounded-[28px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6 space-y-4">
+        <div className="atlas-card space-y-4 rounded-[22px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="atlas-overline">{isPt ? 'Sessão' : 'Session'}</p>
@@ -306,8 +306,8 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
     const durationMin = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.14),transparent_32%),linear-gradient(180deg,hsl(var(--bg))_0%,hsl(var(--shell))_100%)] p-5 z-10">
-        <div className="atlas-card flex w-full max-w-md flex-col items-center gap-6 rounded-[32px] px-6 py-8 text-center">
+      <div className="fixed inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.14),transparent_32%),linear-gradient(180deg,hsl(var(--bg))_0%,hsl(var(--shell))_100%)] p-5">
+        <div className="atlas-card flex w-full max-w-md flex-col items-center gap-6 rounded-[28px] px-6 py-8 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--ok)/0.15)]">
             <Trophy className="h-8 w-8 text-[hsl(var(--ok))]" />
           </div>
@@ -317,33 +317,33 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
             </p>
             <p className="mt-1 text-sm text-[hsl(var(--fg-2))]">{workout.name}</p>
           </div>
-          <div className="grid grid-cols-3 gap-3 w-full">
-            <div className="rounded-xl bg-[hsl(var(--shell))] p-3 text-center">
+          <div className="grid w-full grid-cols-3 gap-3">
+            <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
                 {isPt ? 'Exercícios' : 'Exercises'}
               </p>
-              <p className="mt-1 text-[18px] font-bold text-[hsl(var(--fg))]">
+              <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">
                 {exercises.length}
               </p>
             </div>
-            <div className="rounded-xl bg-[hsl(var(--shell))] p-3 text-center">
+            <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
                 {isPt ? 'Séries' : 'Sets'}
               </p>
-              <p className="mt-1 text-[18px] font-bold text-[hsl(var(--fg))]">{totalSets}</p>
+              <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{totalSets}</p>
             </div>
-            <div className="rounded-xl bg-[hsl(var(--shell))] p-3 text-center">
+            <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
                 {isPt ? 'Tempo' : 'Time'}
               </p>
-              <p className="mt-1 text-[18px] font-bold text-[hsl(var(--fg))]">{durationMin}min</p>
+              <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{durationMin}min</p>
             </div>
           </div>
-          <div className="flex gap-3 w-full">
-            <Button variant="outline" className="flex-1" onClick={() => setShowAddExercise(true)}>
+          <div className="flex w-full gap-3">
+            <Button variant="outline" className="h-12 flex-1 rounded-[12px]" onClick={() => setShowAddExercise(true)}>
               {isPt ? 'Adicionar mais' : 'Add more'}
             </Button>
-            <Button className="flex-1" onClick={handleFinish}>
+            <Button className="h-12 flex-1 rounded-[12px]" onClick={handleFinish}>
               {isPt ? 'Salvar e fechar' : 'Save and close'}
             </Button>
           </div>
@@ -356,7 +356,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
 
   if (resting) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.1),transparent_40%),hsl(var(--bg))] p-5 z-10">
+      <div className="fixed inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.1),transparent_40%),hsl(var(--bg))] p-5">
         <div className="flex w-full max-w-sm flex-col items-center gap-8 text-center">
           <div className="space-y-2">
             <p className="atlas-overline">{isPt ? 'Descanso' : 'Rest'}</p>
@@ -386,16 +386,16 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
                 className="transition-all duration-1000 ease-linear"
               />
             </svg>
-            <span className="text-[4rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
+            <span className="font-mono text-[4rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
               {formatRestCountdown(restTime)}
             </span>
           </div>
-          <div className="flex gap-3 w-full">
-            <Button variant="outline" className="flex-1" onClick={() => setRestTime((v) => v + 30)}>
+          <div className="flex w-full gap-3">
+            <Button variant="outline" className="h-12 flex-1 rounded-[12px]" onClick={() => setRestTime((v) => v + 30)}>
               +30s
             </Button>
             <Button
-              className="flex-1"
+              className="h-12 flex-1 rounded-[12px]"
               onClick={() => {
                 setRestTime(0);
                 setResting(false);
@@ -413,9 +413,19 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-5 pb-24 pt-4 lg:px-8">
-      {/* Progress bar */}
       <div className="sticky top-0 z-10 -mx-5 bg-[hsl(var(--bg)/0.8)] px-5 py-3 backdrop-blur-md lg:-mx-8 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
+        <div className="atlas-card rounded-[18px] px-4 py-3">
+          <div className="mb-3 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="atlas-overline">{workout.name}</p>
+              <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+                {isPt ? 'Sessão em andamento' : 'Workout in progress'}
+              </p>
+            </div>
+            <span className="font-mono text-[11px] font-bold text-[hsl(var(--fg-3))]">
+              {Math.round(completionRatio)}%
+            </span>
+          </div>
           <div className="flex-1">
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-[hsl(var(--border)/0.5)]">
               <div
@@ -424,13 +434,9 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
               />
             </div>
           </div>
-          <span className="text-[11px] font-bold tabular-nums text-[hsl(var(--fg-3))]">
-            {Math.round(completionRatio)}%
-          </span>
         </div>
       </div>
 
-      {/* Exercise header */}
       <section className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
@@ -512,7 +518,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
       )}
 
       {/* Set logging form */}
-      <section className={`atlas-card rounded-[28px] p-5 sm:p-6 transition-all duration-300 ${prFlash === exerciseIdx ? 'border-[hsl(var(--ok)/0.7)] bg-[hsl(var(--ok)/0.04)]' : 'border-[hsl(var(--border)/0.92)]'}`}>
+      <section className={`atlas-card rounded-[22px] p-5 sm:p-6 transition-all duration-300 ${prFlash === exerciseIdx ? 'border-[hsl(var(--ok)/0.7)] bg-[hsl(var(--ok)/0.04)]' : 'border-[hsl(var(--border)/0.92)]'}`}>
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -550,7 +556,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
               onChange={(value) => setFormData((prev) => ({ ...prev, rir: value }))}
             />
           </div>
-          <Button className="w-full sm:w-auto" onClick={handleSetComplete}>
+          <Button className="h-12 w-full rounded-[12px] sm:w-auto" onClick={handleSetComplete}>
             {setIdx < sets.length - 1 ? (isPt ? 'Salvar e ir ao próximo set' : 'Save and next set') : (isPt ? 'Concluir exercício' : 'Finish exercise')}
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -559,7 +565,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
 
       {/* Logged sets history for the current exercise */}
       {Object.keys(completedSets[exerciseIdx] || {}).length > 0 ? (
-        <section className="atlas-card rounded-[28px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
+        <section className="atlas-card rounded-[22px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
           <div className="space-y-3">
             <div>
               <p className="atlas-overline">{isPt ? 'Histórico imediato' : 'Immediate history'}</p>
@@ -571,7 +577,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
               {Object.entries(completedSets[exerciseIdx]).map(([si, data]) => (
                 <div
                   key={si}
-                  className="flex flex-wrap items-center gap-3 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.68)_0%,hsl(var(--card))_100%)] px-4 py-3 text-[13px] text-[hsl(var(--fg-2))]"
+                  className="flex flex-wrap items-center gap-3 rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.68)_0%,hsl(var(--card))_100%)] px-4 py-3 text-[13px] text-[hsl(var(--fg-2))]"
                 >
                   <span className="inline-flex items-center gap-1 font-semibold text-[hsl(var(--fg))]">
                     Set {Number(si) + 1}
@@ -590,7 +596,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
       <div className="flex justify-center pb-2">
         <button
           onClick={() => setShowAddExercise(true)}
-          className="flex items-center gap-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors py-2 px-4 rounded-lg hover:bg-[hsl(var(--shell))]"
+          className="flex items-center gap-1.5 rounded-[12px] px-4 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--shell))] hover:text-[hsl(var(--fg))]"
         >
           <Plus className="h-3.5 w-3.5" />
           {isPt ? 'Adicionar exercício' : 'Add exercise'}

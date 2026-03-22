@@ -88,7 +88,7 @@ export default function WorkoutComparison({ planned, logged }) {
         <div className="lg:col-span-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-[hsl(var(--brand)/0.05)] border border-[hsl(var(--brand)/0.1)]">
           <AlertCircle className="w-4 h-4 text-[hsl(var(--brand))]" strokeWidth={2} />
           <span className="text-[12px] text-[hsl(var(--brand))] font-medium">
-            {loggedExercises.length >= plannedExercises.length ? '✓ Todas as séries completadas' : `${loggedExercises.length}/${plannedExercises.length} exercícios realizados`}
+            {loggedExercises.length >= plannedExercises.length ? '✓ All sets completed' : `${loggedExercises.length}/${plannedExercises.length} exercises done`}
           </span>
         </div>
       )}

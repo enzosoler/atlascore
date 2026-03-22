@@ -8,6 +8,8 @@ import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, Bot, User, 
 import { toast } from 'sonner';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
+import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
+import { EmptyState, PrimaryButton, StatusBanner } from '@/components/shared/StablePage';
 // Supabase diet plan services removed — base44 is now the single source of truth
 
 const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'You' };
@@ -16,7 +18,7 @@ const CREATOR_ICONS  = { ai: Bot, coach: Users, user: User };
 
 function MacroChip({ label, value, unit, color }) {
   return (
-    <div className="flex flex-col items-center px-4 py-3 rounded-xl bg-[hsl(var(--shell))]">
+    <div className="flex flex-col items-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] px-4 py-3">
       <span className="kpi-sm" style={{ color }}>{value ?? '—'}</span>
       <span className="t-caption mt-0.5">{unit}</span>
       <span className="t-label mt-0.5">{label}</span>
@@ -27,7 +29,7 @@ function MacroChip({ label, value, unit, color }) {
 function MealCard({ meal }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="surface">
+    <div className="atlas-card rounded-[18px]">
       <button onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-4 py-3 text-left">
         <div className="flex items-center gap-3">
@@ -47,7 +49,7 @@ function MealCard({ meal }) {
         </div>
       </button>
       {open && (
-        <div className="px-4 pb-3 space-y-1.5 border-t border-[hsl(var(--border-h))] pt-2">
+        <div className="border-t border-[hsl(var(--border-h))] px-4 pb-3 pt-2 space-y-1.5">
           {(meal.foods || []).map((f, i) => (
             <div key={i} className="flex items-center justify-between text-[12px]">
               <span className="text-[hsl(var(--fg))]">{f.name}</span>
@@ -201,7 +203,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
   };
 
   if (isLoading) return (
-    <div className="flex items-center justify-center min-h-[50vh] gap-2 t-small text-[hsl(var(--fg-2))]">
+    <div className="flex min-h-[50vh] items-center justify-center gap-2 t-small text-[hsl(var(--fg-2))]">
       <Loader2 className="w-4 h-4 animate-spin" /> Loading…
     </div>
   );
@@ -209,88 +211,81 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
   const CreatorIcon = plan ? (CREATOR_ICONS[plan.created_by_type] || Bot) : null;
 
   return (
-    <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap pb-5 border-b border-[hsl(var(--border-h))]">
-        <div>
-          <h1 className="t-headline">My Diet</h1>
-          <p className="t-small mt-1">Active prescribed diet plan</p>
-        </div>
-        {can('ai_diet_generation') ? (
-          <button onClick={generate} disabled={generating} className="btn btn-secondary gap-1.5">
-            {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+    <AppContainer maxWidth="max-w-3xl">
+      <PageHeader
+        eyebrow="Nutrition"
+        title="My Diet"
+        subtitle="Review the active diet plan, compare creator source, and keep meal structure readable without visual overload."
+        actions={can('ai_diet_generation') ? (
+          <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
+            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {plan ? 'Generate new plan' : 'Generate AI plan'}
-          </button>
+          </PrimaryButton>
         ) : (
           <UpgradeGate feature="ai_diet_generation" plan="Pro" />
         )}
-      </div>
+      />
 
       {genError && (
-        <div className="rounded-xl border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.06)] px-4 py-3">
-          <p className="text-[13px] text-[hsl(var(--err))]">{genError}</p>
-        </div>
+        <StatusBanner tone="error">{genError}</StatusBanner>
       )}
 
       {!plan ? (
-        <div className="empty-state">
-          <div className="empty-state-icon"><UtensilsCrossed className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} /></div>
-          <p className="t-subtitle mb-1">No active diet plan</p>
-          <p className="t-caption mb-4">Generate a personalized plan with AI based on your profile.</p>
-          {can('ai_diet_generation') ? (
-            <button onClick={generate} disabled={generating} className="btn btn-primary gap-1.5">
-              {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-              Generate with AI
-            </button>
-          ) : (
-            <UpgradeGate feature="ai_diet_generation" plan="Pro" />
-          )}
-        </div>
+        <Card className="px-5 py-4">
+          <EmptyState
+            icon={UtensilsCrossed}
+            title="No active diet plan"
+            description="Generate a personalized plan with AI based on your profile, targets, and food style."
+            action={can('ai_diet_generation') ? (
+              <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
+                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                Generate with AI
+              </PrimaryButton>
+            ) : (
+              <UpgradeGate feature="ai_diet_generation" plan="Pro" />
+            )}
+          />
+        </Card>
       ) : (
         <>
-          {/* Plan header */}
-          <div className="surface p-5 space-y-3">
+          <Section eyebrow="Plan" title={plan.name} subtitle={plan.objective || 'Active nutrition structure'}>
+            <Card className="space-y-4 p-5">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="t-title flex-1">{plan.name}</p>
               <span className={`badge ${CREATOR_BADGE[plan.created_by_type] || 'badge-neutral'} gap-1`}>
                 {CreatorIcon && <CreatorIcon className="w-3 h-3" />}
                 {CREATOR_LABELS[plan.created_by_type] || 'AI'}
               </span>
               <span className="badge badge-neutral">v{plan.version || 1}</span>
             </div>
-            {plan.objective && <p className="t-body text-[hsl(var(--fg-2))]">{plan.objective}</p>}
             {plan.start_date && (
               <p className="t-caption">Since {new Date(plan.start_date + 'T12:00').toLocaleDateString('en-US')}</p>
             )}
-          </div>
+            </Card>
+          </Section>
 
-          {/* Macros */}
-          <div>
-            <p className="t-label mb-3">Daily totals</p>
+          <Section eyebrow="Totals" title="Daily totals" subtitle="Macro targets planned for the current version.">
             <div className="grid grid-cols-4 gap-2">
               <MacroChip label="Calories" value={plan.total_calories ?? plan.target_calories} unit="kcal" color="hsl(var(--brand))" />
               <MacroChip label="Protein" value={plan.total_protein ?? plan.target_protein} unit="g" color="hsl(var(--accent-primary))" />
               <MacroChip label="Carbs" value={plan.total_carbs ?? plan.target_carbs} unit="g" color="hsl(var(--accent-secondary))" />
               <MacroChip label="Fat" value={plan.total_fat ?? plan.target_fat} unit="g" color="hsl(var(--status-warning))" />
             </div>
-          </div>
+          </Section>
 
-          {/* Meals */}
-          <div>
-            <p className="t-label mb-3">Planned meals ({(plan.meals || []).length})</p>
+          <Section eyebrow="Meals" title={`Planned meals (${(plan.meals || []).length})`} subtitle="Expandable meal cards with foods and inline macros.">
             <div className="space-y-2">
               {(plan.meals || []).map((meal, i) => <MealCard key={i} meal={meal} />)}
             </div>
-          </div>
+          </Section>
 
           {plan.notes && (
-            <div className="surface p-4">
+            <Card className="p-4">
               <p className="t-label mb-1">Notes</p>
               <p className="t-body text-[hsl(var(--fg-2))]">{plan.notes}</p>
-            </div>
+            </Card>
           )}
         </>
       )}
-    </div>
+    </AppContainer>
   );
 }

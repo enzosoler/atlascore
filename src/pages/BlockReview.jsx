@@ -19,6 +19,7 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
 import {
   ErrorState,
+  EmptyState,
   FilterChip,
   LoadingState,
   MetricCard,
@@ -507,13 +508,14 @@ function BlockReviewContent() {
 
       {/* Free plan notice */}
       {planCode === 'free' && (
-        <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--brand)/0.06)] px-4 py-3 text-sm text-[hsl(var(--fg-2))]">
-          <p>
-            Bloco limitado a 4 semanas no plano Free.{' '}
+        <div className="atlas-banner px-4 py-3 text-sm leading-6">
+          <p className="font-semibold text-[hsl(var(--fg))]">Free plan block limit</p>
+          <p className="mt-1">
+            Free accounts can review only 4-week blocks.{' '}
             <Link to={ROUTES.pricing} className="font-semibold text-[hsl(var(--brand))] hover:opacity-80">
-              Upgrade para Pro
+              Upgrade to Pro
             </Link>{' '}
-            para desbloquear blocos de 8 e 12 semanas.
+            to unlock 8-week and 12-week reviews.
           </p>
         </div>
       )}
@@ -533,21 +535,18 @@ function BlockReviewContent() {
       )}
 
       {!isLoading && !hasAnyData && (
-        <div className="surface rounded-2xl p-10 text-center space-y-4">
-          <BarChart3
-            className="h-10 w-10 mx-auto text-[hsl(var(--brand)/0.5)]"
-            strokeWidth={1.5}
+        <SectionCard title="Insufficient data for this block" subtitle="Block review needs repeated checkpoints and routine logs to say something credible.">
+          <EmptyState
+            icon={BarChart3}
+            title="No data in this block"
+            description="Log measurements, meals, or workouts inside the selected period to generate a useful block review."
+            action={
+              <Button asChild size="default">
+                <Link to={ROUTES.today}>Go to Today</Link>
+              </Button>
+            }
           />
-          <h2 className="text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-            Sem dados neste bloco
-          </h2>
-          <p className="text-[13px] text-[hsl(var(--fg-2))]">
-            Registre medições, refeições ou treinos para gerar a revisão do bloco.
-          </p>
-          <Button asChild size="default" className="mx-auto">
-            <Link to={ROUTES.today}>Ir para Today →</Link>
-          </Button>
-        </div>
+        </SectionCard>
       )}
 
       {!isLoading && hasAnyData && (
@@ -680,7 +679,7 @@ function BlockReviewContent() {
           )}
 
           {/* ── Do this next ── */}
-          <div className="rounded-2xl border border-[hsl(var(--brand)/0.25)] bg-[hsl(var(--brand)/0.04)] p-5 space-y-3">
+          <div className="rounded-[20px] border border-[hsl(var(--brand)/0.25)] bg-[linear-gradient(180deg,hsl(var(--brand)/0.08)_0%,hsl(var(--card)/0.92)_100%)] p-5 space-y-3">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--brand)/0.12)]">
                 <ArrowRight className="h-4 w-4 text-[hsl(var(--brand))]" />

@@ -278,9 +278,12 @@ function InsightsContent() {
     >
       {/* Free plan notice */}
       {planCode === 'free' && (
-        <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--brand)/0.06)] px-4 py-3 text-sm text-[hsl(var(--fg-2))]">
-          <p>Histórico limitado aos últimos 30 dias. <a href="/pricing" className="font-semibold text-[hsl(var(--brand))] hover:opacity-80">Upgrade para Pro</a> para ver até 1 ano.</p>
-        </div>
+        <StatusBanner tone="neutral">
+          <p className="font-semibold text-[hsl(var(--fg))]">History window limited on Free</p>
+          <p className="mt-1">
+            Recent insights are limited to the last 30 days. <a href="/pricing" className="font-semibold text-[hsl(var(--brand))] hover:opacity-80">Upgrade to Pro</a> to expand this range up to one year.
+          </p>
+        </StatusBanner>
       )}
 
       {loading ? (
@@ -299,18 +302,18 @@ function InsightsContent() {
 
       {/* Empty state — shown only when there is genuinely no data */}
       {!loading && !hasAnyData ? (
-        <div className="surface rounded-2xl p-10 text-center space-y-4">
-          <BarChart3 className="h-10 w-10 mx-auto text-[hsl(var(--brand)/0.5)]" strokeWidth={1.5} />
-          <h2 className="text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-            No data to show yet
-          </h2>
-          <Button asChild size="default" className="mx-auto">
-            <Link to={ROUTES.body}>Add your first measurement →</Link>
-          </Button>
-          <p className="text-[13px] text-[hsl(var(--fg-2))]">
-            Log at least 7 days of workouts, nutrition, or measurements to generate your first insight.
-          </p>
-        </div>
+        <SectionCard title="Waiting for your first trend" subtitle="Insights become useful once the app has enough signal to compare recent behavior.">
+          <EmptyState
+            icon={BarChart3}
+            title="No data to show yet"
+            description="Log at least a few days of workouts, nutrition, or measurements to generate your first meaningful insight."
+            action={
+              <Button asChild size="default">
+                <Link to={ROUTES.body}>Add your first measurement</Link>
+              </Button>
+            }
+          />
+        </SectionCard>
       ) : null}
 
       {/* Metrics and text sections — shown only when there is actual data */}
@@ -418,7 +421,7 @@ function InsightsContent() {
           ) : null}
 
           {/* Block Review entry point */}
-          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--shell))] px-5 py-4 flex items-center justify-between gap-4">
+          <div className="rounded-[20px] border border-[hsl(var(--brand)/0.18)] bg-[linear-gradient(180deg,hsl(var(--brand)/0.08)_0%,hsl(var(--card)/0.92)_100%)] px-5 py-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Block Review</p>
               <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">

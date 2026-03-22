@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>91 · Coach — Students · atlas.core</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  :root {
+    --bg: #080E0E; --card: #111A1A; --card-hi: #162020; --border: #1E2C2C;
+    --teal: #4A9B9B; --teal-dim: rgba(74,155,155,0.12); --teal-mid: rgba(74,155,155,0.22);
+    --white: #FFFFFF; --sub: #8A9A9A;
+    --ok: #4CAF7D; --ok-dim: rgba(76,175,125,0.12);
+    --warn: #E8A838; --warn-dim: rgba(232,168,56,0.12);
+    --err: #E05C5C; --err-dim: rgba(224,92,92,0.12);
+  }
+  body {
+    background: #1a1a1a; display: flex; justify-content: center;
+    align-items: flex-start; min-height: 100vh; padding: 40px 20px;
+    font-family: -apple-system, "SF Pro Display", BlinkMacSystemFont, sans-serif;
+  }
+  .phone {
+    width: 375px; min-height: 812px; background: var(--bg);
+    border-radius: 44px; overflow: hidden; position: relative;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+  }
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 28px 0; height: 44px;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: var(--white); letter-spacing: -0.3px; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+
+  /* Nav */
+  .nav { padding: 8px 20px 0; display: flex; justify-content: space-between; align-items: flex-end; }
+  .nav-left {}
+  .nav-title { font-size: 34px; font-weight: 700; color: var(--white); letter-spacing: -0.8px; line-height: 1.05; }
+  .nav-count { font-size: 13px; color: var(--sub); margin-top: 3px; }
+  .btn-invite {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--teal); color: var(--white);
+    border: none; border-radius: 10px;
+    padding: 9px 16px; font-size: 14px; font-weight: 600;
+    cursor: pointer; letter-spacing: -0.2px;
+    box-shadow: 0 4px 16px rgba(74,155,155,0.3);
+  }
+
+  /* Search */
+  .search-wrap { padding: 12px 20px 0; }
+  .search-bar {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+  }
+  .search-bar input {
+    background: transparent; border: none; outline: none;
+    font-size: 15px; color: var(--white); flex: 1;
+    font-family: inherit;
+  }
+  .search-bar input::placeholder { color: var(--sub); }
+
+  /* Filter Pills */
+  .filters { display: flex; gap: 8px; padding: 12px 20px 0; overflow-x: auto; }
+  .filters::-webkit-scrollbar { display: none; }
+  .pill {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+    font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer;
+    color: var(--sub);
+  }
+  .pill.active {
+    background: var(--teal-dim); border-color: rgba(74,155,155,0.35);
+    color: var(--teal);
+  }
+
+  /* Student List */
+  .list { padding: 14px 20px 120px; display: flex; flex-direction: column; gap: 8px;
+    overflow-y: auto; max-height: 560px; }
+  .list::-webkit-scrollbar { display: none; }
+
+  .student-row {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: border-color 0.15s;
+  }
+  .student-row:active { border-color: var(--teal); }
+
+  .avatar {
+    width: 44px; height: 44px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; flex-shrink: 0;
+  }
+  .av-teal { background: var(--teal-dim); color: var(--teal); }
+  .av-ok { background: var(--ok-dim); color: var(--ok); }
+  .av-warn { background: var(--warn-dim); color: var(--warn); }
+  .av-err { background: var(--err-dim); color: var(--err); }
+
+  .info { flex: 1; min-width: 0; }
+  .student-name { font-size: 15px; font-weight: 600; color: var(--white); letter-spacing: -0.2px; }
+  .student-meta { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+  .right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .badge-active { background: var(--ok-dim); color: var(--ok); }
+  .badge-pending { background: var(--warn-dim); color: var(--warn); }
+  .badge-at-risk { background: var(--err-dim); color: var(--err); }
+
+  .adherence-small {
+    font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .pct-ok { color: var(--ok); }
+  .pct-warn { color: var(--warn); }
+  .pct-err { color: var(--err); }
+  .pct-sub { color: var(--sub); }
+
+  .chevron { color: var(--border); }
+
+  /* List section label */
+  .list-section-label {
+    font-size: 11px; font-weight: 600; color: var(--sub);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0 0 8px;
+  }
+
+  /* Tab Bar */
+  .tabbar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 84px;
+    background: rgba(8,14,14,0.92); backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border);
+    display: flex; align-items: flex-start; padding-top: 10px;
+  }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding-top: 2px; }
+  .tab-label { font-size: 10px; font-weight: 500; }
+  .tab-item.active .tab-label { color: var(--teal); }
+  .tab-item.active svg { stroke: var(--teal); }
+  .tab-item:not(.active) .tab-label { color: var(--sub); }
+  .tab-item:not(.active) svg { stroke: var(--sub); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+        <rect x="0" y="3" width="3" height="9" rx="1" fill="white"/>
+        <rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/>
+        <rect x="9" y="0" width="3" height="12" rx="1" fill="white"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="1" fill="white" opacity="0.35"/>
+      </svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+        <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/>
+        <rect x="2" y="2" width="16" height="8" rx="2" fill="white"/>
+        <path d="M23 4.5V7.5C23.83 7.22 24.5 6.66 24.5 6C24.5 5.34 23.83 4.78 23 4.5Z" fill="white" opacity="0.4"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="nav">
+    <div class="nav-left">
+      <div class="nav-title">Students</div>
+      <div class="nav-count">8 active</div>
+    </div>
+    <button class="btn-invite">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Invite
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A9A9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search students…">
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="pill active">All (8)</div>
+    <div class="pill">Active (6)</div>
+    <div class="pill">Pending (2)</div>
+    <div class="pill">At Risk (2)</div>
+  </div>
+
+  <!-- Student List -->
+  <div class="list">
+
+    <div class="list-section-label">At Risk · Needs Attention</div>
+
+    <div class="student-row">
+      <div class="avatar av-err">M</div>
+      <div class="info">
+        <div class="student-name">Marcus T.</div>
+        <div class="student-meta">Last active 5 days ago</div>
+      </div>
+      <div class="right">
+        <span class="badge badge-at-risk">At Risk</span>
+        <span class="adherence-small pct-err">48%</span>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="student-row">
+      <div class="avatar av-warn">S</div>
+      <div class="info">
+        <div class="student-name">Sofia R.</div>
+        <div class="student-meta">Missing check-ins · 3 days</div>
+      </div>
+      <div class="right">
+        <span class="badge badge-at-risk">At Risk</span>
+        <span class="adherence-small pct-err">54%</span>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="list-section-label" style="padding-top:8px;">Active</div>
+
+    <div class="student-row">
+      <div class="avatar av-teal">J</div>
+      <div class="info">
+        <div class="student-name">Julia M.</div>
+        <div class="student-meta">Strength Block · Week 3</div>
+      </div>
+      <div class="right">
+        <span class="badge badge-active">Active</span>
+        <span class="adherence-small pct-ok">92%</span>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="student-row">
+      <div class="avatar av-ok">A</div>
+      <div class="info">
+        <div class="student-name">Andre L.</div>
+        <div class="student-meta">Hypertrophy Block · Week 5</div>
+      </div>
+      <div class="right">
+        <span class="badge badge-active">Active</span>
+        <span class="adherence-small pct-ok">87%</span>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="student-row">
+      <div class="avatar av-teal">C</div>
+      <div class="info">
+        <div class="student-name">Camila F.</div>
+        <div class="student-meta">General Fitness · Week 2</div>
+      </div>
+      <div class="right">
+        <span class="badge badge-active">Active</span>
+        <span class="adherence-small pct-ok">78%</span>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="student-row">
+      <div class="avatar av-warn">R</div>
+      <div class="info">
+        <div class="student-name">Ricardo P.</div>
+        <div class="student-meta">Conditioning · Week 1</div>
+      </div>
+      <div class="right">
+        <span class="badge badge-active">Active</span>
+        <span class="adherence-small pct-warn">65%</span>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <div class="list-section-label" style="padding-top:8px;">Pending Invite</div>
+
+    <div class="student-row" style="opacity:0.6;">
+      <div class="avatar" style="background:rgba(138,154,154,0.1);color:#8A9A9A;">L</div>
+      <div class="info">
+        <div class="student-name">Lena K.</div>
+        <div class="student-meta">lena.k@email.com</div>
+      </div>
+      <div class="right">
+        <span class="badge badge-pending">Pending</span>
+      </div>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tabbar">
+    <div class="tab-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>
+      </svg>
+      <div class="tab-label">Today</div>
+    </div>
+    <div class="tab-item active">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <div class="tab-label">Coach</div>
+    </div>
+    <div class="tab-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+      </svg>
+      <div class="tab-label">Train</div>
+    </div>
+    <div class="tab-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+      </svg>
+      <div class="tab-label">Body</div>
+    </div>
+    <div class="tab-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+      </svg>
+      <div class="tab-label">More</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

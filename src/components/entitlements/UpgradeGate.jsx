@@ -21,25 +21,25 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
   }
 
   const planNames = {
-    Pro: 'Plano Pro',
-    Performance: 'Plano Performance',
-    Coach: 'Plano Coach',
-    Nutrition: 'Plano Nutricionista',
-    Clinical: 'Plano Clínico',
+    Pro: 'Pro Plan',
+    Performance: 'Performance Plan',
+    Coach: 'Coach Plan',
+    Nutrition: 'Nutrition Plan',
+    Clinical: 'Clinical Plan',
   };
 
   const featureNames = {
     atlas_ai: 'Atlas AI',
-    lab_exams: 'Exames Laboratoriais',
-    progress_photos: 'Fotos de Progresso',
-    ai_diet_generation: 'Geração de Dieta por IA',
-    ai_workout_generation: 'Geração de Treino por IA',
-    advanced_protocol_tracking: 'Protocolo Avançado',
-    premium_exports: 'Exportação Premium',
-    standard_exports: 'Exportação de Relatórios',
+    lab_exams: 'Lab Exams',
+    progress_photos: 'Progress Photos',
+    ai_diet_generation: 'AI Diet Generation',
+    ai_workout_generation: 'AI Workout Generation',
+    advanced_protocol_tracking: 'Advanced Protocol Tracking',
+    premium_exports: 'Premium Export',
+    standard_exports: 'Report Export',
   };
 
-  const featureName = featureNames[feature] || 'Este recurso';
+  const featureName = featureNames[feature] || 'This feature';
   const planName = planNames[plan] || plan;
 
   // Show trial expired message if trial is expired
@@ -52,16 +52,16 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
         
         <div>
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))] mb-1">
-            Trial de {featureName} encerrou
+            {featureName} trial ended
           </p>
           <p className="text-[13px] text-[hsl(var(--fg-2))]">
-            Continue com {planName} para seguir usando.
+            Continue with {planName} to keep using it.
           </p>
         </div>
 
         <Link to={ROUTES.pricing}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[hsl(var(--err))] text-white text-[13px] font-semibold hover:bg-[hsl(var(--err)/0.88)] transition-colors">
-          Continuar assinatura <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+          Continue subscription <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
         </Link>
       </div>
     );
@@ -78,13 +78,13 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
           {title || `${featureName} — ${planName}+`}
         </p>
         <p className="text-[13px] text-[hsl(var(--fg-2))]">
-          {description || 'Upgrade para desbloquear este recurso'}
+          {description || 'Upgrade to unlock this feature'}
         </p>
       </div>
 
       <Link to={ROUTES.pricing}
         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[hsl(var(--brand))] text-white text-[13px] font-semibold hover:bg-[hsl(var(--brand)/0.88)] transition-colors">
-        Ver planos <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+        View plans <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
       </Link>
     </div>
   );

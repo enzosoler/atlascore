@@ -11,8 +11,8 @@ import { toast } from 'sonner';
 
 const PROF_LABELS = {
   coach: { label: 'Coach / Personal', badge: 'badge-blue', icon: '🏋️' },
-  nutritionist: { label: 'Nutricionista', badge: 'badge-ok', icon: '🥗' },
-  clinician: { label: 'Clínico / Médico', badge: 'badge-ai', icon: '⚕️' },
+  nutritionist: { label: 'Nutritionist', badge: 'badge-ok', icon: '🥗' },
+  clinician: { label: 'Clinician / Doctor', badge: 'badge-ai', icon: '⚕️' },
 };
 
 export default function ProfessionalLinks({ showPending = true, showActive = true, user: userProp }) {
@@ -45,7 +45,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
     qc.invalidateQueries({ queryKey: ['my-coach-links'] });
     qc.invalidateQueries({ queryKey: ['my-nutri-links'] });
     qc.invalidateQueries({ queryKey: ['my-clinic-links'] });
-    toast.success(status === 'accepted' ? 'Vínculo aceito!' : 'Convite recusado');
+    toast.success(status === 'accepted' ? 'Connection accepted!' : 'Invite declined');
   };
 
   const allLinks = [

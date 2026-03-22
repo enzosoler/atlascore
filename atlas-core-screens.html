@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>atlas.core — Public Flow Screens</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080E0E;
+    --card: #111A1A;
+    --border: #1E2C2C;
+    --teal: #4A9B9B;
+    --teal-dim: rgba(74,155,155,0.15);
+    --teal-mid: rgba(74,155,155,0.4);
+    --white: #FFFFFF;
+    --secondary: #8A9A9A;
+    --red: #E05C5C;
+    --green: #4CAF7D;
+    --card2: #162020;
+  }
+
+  body {
+    background: #05090D;
+    font-family: -apple-system, 'Inter', BlinkMacSystemFont, sans-serif;
+    color: var(--white);
+    min-height: 100vh;
+    padding: 60px 40px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .page-header .app-icon {
+    width: 72px; height: 72px;
+    background: var(--card);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    border: 1px solid var(--border);
+  }
+  .page-header .app-icon svg { width: 44px; height: 44px; }
+  .page-header h1 {
+    font-size: 32px; font-weight: 700; letter-spacing: -0.5px;
+    color: var(--white);
+  }
+  .page-header p {
+    font-size: 15px; color: var(--secondary); margin-top: 8px;
+    font-weight: 400;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    color: var(--secondary); text-transform: uppercase;
+    margin-bottom: 24px; padding-left: 4px;
+  }
+
+  .screens-grid {
+    display: flex; flex-wrap: wrap; gap: 40px;
+    justify-content: center;
+  }
+
+  .screen-wrapper {
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .screen-label {
+    font-size: 12px; font-weight: 500; color: var(--secondary);
+    letter-spacing: 0.3px; text-align: center;
+  }
+  .screen-num {
+    display: inline-block;
+    background: var(--teal-dim); color: var(--teal);
+    border-radius: 20px; padding: 2px 8px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  /* iPhone Frame */
+  .iphone {
+    width: 390px;
+    height: 844px;
+    background: #000;
+    border-radius: 54px;
+    position: relative;
+    box-shadow:
+      0 0 0 1px #2A2A2A,
+      0 0 0 3px #1A1A1A,
+      0 40px 80px rgba(0,0,0,0.7),
+      0 0 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute; top: 14px; left: 50%;
+    transform: translateX(-50%);
+    width: 126px; height: 37px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 100;
+  }
+
+  /* Screen content */
+  .screen {
+    position: absolute; inset: 0;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 59px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 8px;
+    position: relative; z-index: 10;
+  }
+  .status-time {
+    font-size: 15px; font-weight: 600; color: var(--white);
+    letter-spacing: -0.3px;
+  }
+  .status-icons {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .status-icons svg { color: var(--white); }
+
+  /* Safe area bottom */
+  .home-indicator {
+    position: absolute; bottom: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 134px; height: 5px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    z-index: 100;
+  }
+
+  /* Tab Bar */
+  .tab-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 83px;
+    background: rgba(8,14,14,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-around;
+    padding-top: 12px;
+    z-index: 50;
+  }
+  .tab-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    flex: 1;
+  }
+  .tab-icon { width: 24px; height: 24px; }
+  .tab-label { font-size: 10px; font-weight: 500; color: var(--secondary); }
+  .tab-item.active .tab-label { color: var(--teal); }
+  .tab-item.active .tab-icon path,
+  .tab-item.active .tab-icon circle,
+  .tab-item.active .tab-icon rect { stroke: var(--teal); }
+
+  /* Typography helpers */
+  .large-title {
+    font-size: 34px; font-weight: 700; letter-spacing: -0.5px;
+    line-height: 1.15; color: var(--white);
+  }
+  .title-1 { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; color: var(--white); }
+  .title-2 { font-size: 22px; font-weight: 600; letter-spacing: -0.2px; color: var(--white); }
+  .title-3 { font-size: 20px; font-weight: 600; color: var(--white); }
+  .headline { font-size: 17px; font-weight: 600; color: var(--white); }
+  .body-text { font-size: 17px; font-weight: 400; color: var(--white); }
+  .callout { font-size: 16px; font-weight: 400; color: var(--white); }
+  .subhead { font-size: 15px; font-weight: 400; color: var(--white); }
+  .footnote { font-size: 13px; font-weight: 400; color: var(--secondary); }
+  .caption { font-size: 12px; font-weight: 400; color: var(--secondary); }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%; height: 56px;
+    background: var(--teal);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 600; color: #fff;
+    letter-spacing: -0.2px; cursor: pointer; border: none;
+  }
+  .btn-secondary {
+    width: 100%; height: 56px;
+    background: transparent;
+    border: 1.5px solid var(--teal);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 600; color: var(--teal);
+    letter-spacing: -0.2px; cursor: pointer;
+  }
+  .btn-ghost {
+    width: 100%; height: 56px;
+    background: transparent;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 400; color: var(--secondary);
+    cursor: pointer; border: none;
+  }
+  .btn-destructive {
+    width: 100%; height: 56px;
+    background: var(--red);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 600; color: #fff;
+    cursor: pointer; border: none;
+  }
+
+  /* Input field */
+  .input-wrap {
+    position: relative; width: 100%;
+  }
+  .input-field {
+    width: 100%; height: 56px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 16px 8px;
+    font-size: 17px; color: var(--white);
+    outline: none;
+    font-family: inherit;
+  }
+  .input-field.focused { border-color: var(--teal); }
+  .input-label {
+    position: absolute; top: 8px; left: 16px;
+    font-size: 11px; font-weight: 500; color: var(--teal);
+    letter-spacing: 0.3px;
+  }
+  .input-label-empty {
+    position: absolute; top: 50%; left: 16px;
+    transform: translateY(-50%);
+    font-size: 17px; color: var(--secondary);
+    pointer-events: none;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+
+  /* Pill badge */
+  .badge {
+    display: inline-flex; align-items: center;
+    border-radius: 20px; padding: 3px 10px;
+    font-size: 12px; font-weight: 600;
+  }
+  .badge-teal { background: var(--teal-dim); color: var(--teal); }
+  .badge-green { background: rgba(76,175,125,0.15); color: var(--green); }
+  .badge-red { background: rgba(224,92,92,0.15); color: var(--red); }
+  .badge-gray { background: rgba(138,154,154,0.15); color: var(--secondary); }
+
+  /* Progress bar */
+  .progress-track {
+    width: 100%; height: 3px;
+    background: var(--border);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--teal);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  /* Drag handle */
+  .drag-handle {
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  /* Divider */
+  .divider {
+    width: 100%; height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--card) 25%, #1A2626 50%, var(--card) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  /* ======================== SCREEN STYLES ======================== */
+
+  /* -- SCREEN 1: Splash -- */
+  .splash-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(74,155,155,0.12) 0%, var(--bg) 65%);
+  }
+
+  /* -- Onboarding progress dots -- */
+  .progress-dots {
+    display: flex; gap: 6px; justify-content: center;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    transition: all 0.3s ease;
+  }
+  .dot.active {
+    width: 20px;
+    background: var(--teal);
+  }
+  .dot.done { background: var(--teal); opacity: 0.5; }
+
+  /* -- Goal cards -- */
+  .goal-card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer;
+  }
+  .goal-card.selected {
+    border-color: var(--teal);
+    background: var(--teal-dim);
+  }
+  .goal-icon {
+    width: 44px; height: 44px;
+    background: rgba(138,154,154,0.1);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+  }
+  .goal-card.selected .goal-icon {
+    background: rgba(74,155,155,0.2);
+  }
+  .goal-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    margin-left: auto; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .goal-card.selected .goal-check {
+    background: var(--teal); border-color: var(--teal);
+  }
+
+  /* -- Segmented control -- */
+  .seg-control {
+    display: flex;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 3px; gap: 2px;
+    border: 1px solid var(--border);
+  }
+  .seg-item {
+    flex: 1; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; color: var(--secondary);
+    border-radius: 8px; cursor: pointer;
+  }
+  .seg-item.active {
+    background: var(--teal);
+    color: #fff;
+  }
+
+  /* Stepper */
+  .stepper {
+    display: flex; align-items: center;
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .stepper-btn {
+    width: 52px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: var(--teal); cursor: pointer;
+    flex-shrink: 0;
+  }
+  .stepper-val {
+    flex: 1; text-align: center;
+    font-size: 22px; font-weight: 600;
+    font-family: 'SF Mono', monospace;
+    color: var(--white);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    height: 56px; line-height: 56px;
+  }
+
+  /* Path cards */
+  .path-card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    padding: 20px;
+    cursor: pointer; position: relative;
+    overflow: hidden;
+  }
+  .path-card.recommended {
+    border-color: var(--teal);
+  }
+  .path-card .rec-badge {
+    position: absolute; top: 0; right: 0;
+    background: var(--teal);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    color: #fff; padding: 4px 12px;
+    border-bottom-left-radius: 10px;
+  }
+
+  /* Paywall feature row */
+  .feature-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0;
+  }
+  .feature-icon {
+    width: 36px; height: 36px;
+    background: var(--teal-dim);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Generation screen */
+  .gen-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0;
+  }
+  .gen-indicator {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px; font-weight: 600;
+  }
+  .gen-indicator.done { background: var(--green); }
+  .gen-indicator.active {
+    background: var(--teal-dim);
+    border: 1.5px solid var(--teal);
+  }
+  .gen-indicator.pending { background: var(--card2); }
+
+  /* Social divider */
+  .social-divider {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .social-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .social-divider-text { font-size: 13px; color: var(--secondary); }
+
+  .social-btn {
+    width: 100%; height: 52px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-size: 16px; font-weight: 500; color: var(--white);
+    cursor: pointer;
+  }
+
+  /* Success checkmark */
+  @keyframes check-draw {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+  }
+  .success-ring {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(76,175,125,0.12);
+    border: 2px solid var(--green);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Email confirmation */
+  .email-icon-wrap {
+    width: 88px; height: 88px;
+    background: var(--teal-dim);
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto;
+  }
+
+  /* Nav bar */
+  .nav-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px;
+    height: 44px;
+  }
+  .nav-title {
+    font-size: 17px; font-weight: 600; color: var(--white);
+    letter-spacing: -0.2px;
+  }
+  .nav-back {
+    display: flex; align-items: center; gap: 4px;
+    color: var(--teal); font-size: 17px; cursor: pointer;
+  }
+
+  /* Checkbox row */
+  .check-row {
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .checkbox {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .checkbox.checked { background: var(--teal); border-color: var(--teal); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="app-icon">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="16" stroke="#4A9B9B" stroke-width="1.5" opacity="0.3"/>
+      <circle cx="22" cy="22" r="9" stroke="#4A9B9B" stroke-width="1.5" opacity="0.5"/>
+      <path d="M22 8L22 36" stroke="#4A9B9B" stroke-width="1.5" opacity="0.3"/>
+      <path d="M8 22L36 22" stroke="#4A9B9B" stroke-width="1.5" opacity="0.3"/>
+      <path d="M15 12L22 28L29 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M17.5 22H26.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1>atlas.core</h1>
+  <p>Public / Unauthenticated Flow · 14 Screens · iOS Dark</p>
+</div>
+
+<div class="screens-grid">
+
+<!-- ==================== SCREEN 1: SPLASH ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">01</div>
+  <div class="screen-label">Splash Screen</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen" style="background: var(--bg);">
+      <div class="splash-bg"></div>
+      <!-- Radial glow -->
+      <div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:320px;height:320px;background:radial-gradient(circle,rgba(74,155,155,0.08) 0%,transparent 70%);pointer-events:none;"></div>
+      <!-- Center content -->
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+        <!-- App Icon -->
+        <div style="width:96px;height:96px;background:#111A1A;border-radius:26px;border:1px solid #1E2C2C;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 40px rgba(0,0,0,0.5),0 0 40px rgba(74,155,155,0.08);">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <circle cx="30" cy="30" r="22" stroke="#4A9B9B" stroke-width="1.5" opacity="0.25"/>
+            <circle cx="30" cy="30" r="12" stroke="#4A9B9B" stroke-width="1.5" opacity="0.45"/>
+            <circle cx="30" cy="30" r="3" fill="#4A9B9B"/>
+            <path d="M20 14L30 38L40 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M23 28H37" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.5px;color:#fff;">atlas.core</div>
+          <div style="font-size:14px;color:#8A9A9A;margin-top:4px;letter-spacing:1.5px;text-transform:uppercase;font-weight:500;">Performance · Health · Precision</div>
+        </div>
+      </div>
+      <!-- Loading bar bottom -->
+      <div style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);width:120px;">
+        <div style="height:2px;background:#1E2C2C;border-radius:1px;overflow:hidden;">
+          <div style="width:65%;height:100%;background:linear-gradient(90deg,#4A9B9B,rgba(74,155,155,0.3));border-radius:1px;"></div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 2: ONBOARDING WELCOME ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">02</div>
+  <div class="screen-label">Onboarding Welcome</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <!-- Hero gradient -->
+      <div style="position:absolute;top:0;left:0;right:0;height:340px;background:linear-gradient(180deg,rgba(74,155,155,0.07) 0%,transparent 100%);pointer-events:none;"></div>
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" opacity="0.3"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 2.5C10.5 2.5 12.7 3.7 14.1 5.5L15.5 4C13.7 1.8 11 0.5 8 0.5C5 0.5 2.3 1.8 0.5 4L1.9 5.5C3.3 3.7 5.5 2.5 8 2.5Z" fill="white"/><path d="M8 6C9.7 6 11.2 6.9 12.1 8.2L13.5 6.7C12.2 4.9 10.2 3.8 8 3.8C5.8 3.8 3.8 4.9 2.5 6.7L3.9 8.2C4.8 6.9 6.3 6 8 6Z" fill="white"/><circle cx="8" cy="11" r="1.5" fill="white"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/><path d="M23 4.5V7.5C23.8 7.2 24.5 6.7 24.5 6C24.5 5.3 23.8 4.8 23 4.5Z" fill="white" fill-opacity="0.4"/></svg>
+        </div>
+      </div>
+      <!-- Content -->
+      <div style="padding:24px 24px 0;display:flex;flex-direction:column;height:calc(100% - 59px);">
+        <!-- Logo small -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:48px;">
+          <div style="width:28px;height:28px;background:#111A1A;border-radius:8px;border:1px solid #1E2C2C;display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M6 4L9 12L12 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 9H11" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span style="font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.2px;">atlas.core</span>
+        </div>
+
+        <!-- Hero -->
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:32px;">
+          <div style="margin-bottom:24px;">
+            <div style="font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1;color:#fff;">Train with<br><span style="color:#4A9B9B;">precision.</span><br>Live with<br>purpose.</div>
+          </div>
+          <div style="font-size:17px;color:#8A9A9A;line-height:1.6;max-width:300px;">The complete performance platform for athletes who demand more from their data.</div>
+        </div>
+
+        <!-- 3 value props -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:32px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:6px;height:6px;border-radius:50%;background:#4A9B9B;flex-shrink:0;"></div>
+            <span style="font-size:15px;color:#8A9A9A;">Smart training plans built around you</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:6px;height:6px;border-radius:50%;background:#4A9B9B;flex-shrink:0;"></div>
+            <span style="font-size:15px;color:#8A9A9A;">Nutrition tracking that fits your goals</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:6px;height:6px;border-radius:50%;background:#4A9B9B;flex-shrink:0;"></div>
+            <span style="font-size:15px;color:#8A9A9A;">Body metrics and progress over time</span>
+          </div>
+        </div>
+
+        <!-- CTAs -->
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:48px;">
+          <button class="btn-primary">Get Started</button>
+          <button class="btn-ghost">I already have an account</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 3: GOAL SELECTION ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">03</div>
+  <div class="screen-label">Goal Selection · Step 1 of 4</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/><path d="M23 4.5V7.5C23.8 7.2 24.5 6.7 24.5 6C24.5 5.3 23.8 4.8 23 4.5Z" fill="white" fill-opacity="0.4"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 24px;height:calc(100% - 59px);display:flex;flex-direction:column;">
+        <!-- Progress -->
+        <div style="margin-bottom:28px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:13px;color:#8A9A9A;font-weight:500;">Step 1 of 4</span>
+            <span style="font-size:13px;color:#4A9B9B;font-weight:600;">25%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:25%;"></div>
+          </div>
+        </div>
+
+        <!-- Heading -->
+        <div style="margin-bottom:32px;">
+          <div style="font-size:30px;font-weight:700;letter-spacing:-0.5px;color:#fff;line-height:1.2;margin-bottom:8px;">What's your<br>primary goal?</div>
+          <div style="font-size:15px;color:#8A9A9A;line-height:1.5;">We'll build your program around what matters most to you.</div>
+        </div>
+
+        <!-- Goal options -->
+        <div style="display:flex;flex-direction:column;gap:10px;flex:1;">
+          <div class="goal-card selected">
+            <div class="goal-icon">💪</div>
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;">Build Muscle</div>
+              <div style="font-size:13px;color:#8A9A9A;">Hypertrophy-focused training</div>
+            </div>
+            <div class="goal-check">
+              <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="goal-card">
+            <div class="goal-icon">🔥</div>
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;">Lose Body Fat</div>
+              <div style="font-size:13px;color:#8A9A9A;">Caloric deficit + cardio blend</div>
+            </div>
+            <div class="goal-check"></div>
+          </div>
+          <div class="goal-card">
+            <div class="goal-icon">⚡</div>
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;">Improve Performance</div>
+              <div style="font-size:13px;color:#8A9A9A;">Strength, speed, endurance</div>
+            </div>
+            <div class="goal-check"></div>
+          </div>
+          <div class="goal-card">
+            <div class="goal-icon">🏃</div>
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;">General Health</div>
+              <div style="font-size:13px;color:#8A9A9A;">Balanced wellness approach</div>
+            </div>
+            <div class="goal-check"></div>
+          </div>
+          <div class="goal-card">
+            <div class="goal-icon">🩺</div>
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;">Clinical / Professional</div>
+              <div style="font-size:13px;color:#8A9A9A;">Health professional mode</div>
+            </div>
+            <div class="goal-check"></div>
+          </div>
+        </div>
+
+        <div style="padding:16px 0 40px;">
+          <button class="btn-primary">Continue</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 4: PROFILE BASELINE ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">04</div>
+  <div class="screen-label">Profile Baseline · Step 2 of 4</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 24px;height:calc(100% - 59px);display:flex;flex-direction:column;overflow:hidden;">
+        <!-- Progress -->
+        <div style="margin-bottom:24px;flex-shrink:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:13px;color:#8A9A9A;font-weight:500;">Step 2 of 4</span>
+            <span style="font-size:13px;color:#4A9B9B;font-weight:600;">50%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:50%;"></div></div>
+        </div>
+        <!-- Heading -->
+        <div style="margin-bottom:24px;flex-shrink:0;">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.4px;color:#fff;line-height:1.2;margin-bottom:6px;">Your baseline</div>
+          <div style="font-size:15px;color:#8A9A9A;">This helps us calibrate your program accurately.</div>
+        </div>
+        <!-- Fields -->
+        <div style="display:flex;flex-direction:column;gap:12px;flex:1;overflow:hidden;">
+          <!-- Name -->
+          <div class="input-wrap">
+            <div class="input-label">Full Name</div>
+            <div class="input-field" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">Alex Morgan</div>
+          </div>
+          <!-- Birthday row -->
+          <div style="display:flex;gap:10px;">
+            <div class="input-wrap" style="flex:1;">
+              <div class="input-label">Date of Birth</div>
+              <div class="input-field" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">May 12, 1993</div>
+            </div>
+            <div style="flex:0.7;">
+              <div style="margin-bottom:4px;">
+                <div style="font-size:13px;color:#8A9A9A;font-weight:500;margin-bottom:6px;">Sex at birth</div>
+                <div class="seg-control">
+                  <div class="seg-item active">Male</div>
+                  <div class="seg-item">Female</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Height & Weight -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <div style="font-size:13px;color:#8A9A9A;margin-bottom:6px;font-weight:500;">Height</div>
+              <div class="stepper" style="height:52px;">
+                <div class="stepper-btn" style="height:52px;line-height:52px;">−</div>
+                <div class="stepper-val" style="height:52px;line-height:52px;font-size:18px;">5'11"</div>
+                <div class="stepper-btn" style="height:52px;line-height:52px;">+</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:13px;color:#8A9A9A;margin-bottom:6px;font-weight:500;">Weight</div>
+              <div class="stepper" style="height:52px;">
+                <div class="stepper-btn" style="height:52px;line-height:52px;">−</div>
+                <div class="stepper-val" style="height:52px;line-height:52px;font-size:18px;">178lb</div>
+                <div class="stepper-btn" style="height:52px;line-height:52px;">+</div>
+              </div>
+            </div>
+          </div>
+          <!-- Activity level -->
+          <div>
+            <div style="font-size:13px;color:#8A9A9A;margin-bottom:6px;font-weight:500;">Activity Level</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="background:#162020;border-radius:10px;border:1.5px solid #4A9B9B;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:15px;color:#fff;font-weight:500;">Moderately Active</span>
+                <span style="font-size:12px;color:#4A9B9B;">3–5x/week</span>
+              </div>
+            </div>
+          </div>
+          <!-- Unit preference -->
+          <div>
+            <div style="font-size:13px;color:#8A9A9A;margin-bottom:6px;font-weight:500;">Units</div>
+            <div class="seg-control">
+              <div class="seg-item active">Imperial</div>
+              <div class="seg-item">Metric</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:16px 0 40px;flex-shrink:0;">
+          <button class="btn-primary">Continue</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 5: FIRST CHECKPOINT ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">05</div>
+  <div class="screen-label">First Checkpoint · Step 3 of 4</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 24px;height:calc(100% - 59px);display:flex;flex-direction:column;">
+        <!-- Progress -->
+        <div style="margin-bottom:24px;flex-shrink:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:13px;color:#8A9A9A;font-weight:500;">Step 3 of 4</span>
+            <span style="font-size:13px;color:#4A9B9B;font-weight:600;">75%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:75%;"></div></div>
+        </div>
+        <!-- Heading -->
+        <div style="margin-bottom:24px;flex-shrink:0;">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.4px;color:#fff;line-height:1.2;margin-bottom:6px;">Current metrics</div>
+          <div style="font-size:15px;color:#8A9A9A;">Set your starting point for progress tracking.</div>
+        </div>
+        <!-- Metric cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div class="card" style="text-align:center;padding:16px 12px;">
+            <div style="font-size:11px;color:#8A9A9A;font-weight:500;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Body Fat %</div>
+            <div style="font-size:28px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;letter-spacing:-0.5px;">16.4<span style="font-size:14px;color:#8A9A9A;font-weight:400;">%</span></div>
+            <div class="badge badge-teal" style="margin-top:6px;justify-content:center;font-size:11px;">Within Range</div>
+          </div>
+          <div class="card" style="text-align:center;padding:16px 12px;">
+            <div style="font-size:11px;color:#8A9A9A;font-weight:500;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Muscle Mass</div>
+            <div style="font-size:28px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;letter-spacing:-0.5px;">142<span style="font-size:14px;color:#8A9A9A;font-weight:400;">lb</span></div>
+            <div class="badge badge-green" style="margin-top:6px;justify-content:center;font-size:11px;">Good</div>
+          </div>
+        </div>
+
+        <!-- Additional measurements -->
+        <div style="display:flex;flex-direction:column;gap:10px;flex:1;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div class="card" style="padding:12px;text-align:center;">
+              <div style="font-size:10px;color:#8A9A9A;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Chest</div>
+              <div style="font-size:18px;font-weight:600;color:#fff;font-family:'SF Mono',monospace;">40"</div>
+            </div>
+            <div class="card" style="padding:12px;text-align:center;">
+              <div style="font-size:10px;color:#8A9A9A;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Waist</div>
+              <div style="font-size:18px;font-weight:600;color:#fff;font-family:'SF Mono',monospace;">32"</div>
+            </div>
+            <div class="card" style="padding:12px;text-align:center;">
+              <div style="font-size:10px;color:#8A9A9A;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Hips</div>
+              <div style="font-size:18px;font-weight:600;color:#fff;font-family:'SF Mono',monospace;">38"</div>
+            </div>
+          </div>
+
+          <!-- Optional note -->
+          <div style="background:#111A1A;border:1px dashed #1E2C2C;border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#4A9B9B" stroke-width="1.5" opacity="0.5"/><path d="M9 5V9.5" stroke="#4A9B9B" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="12.5" r="1" fill="#4A9B9B"/></svg>
+            <span style="font-size:13px;color:#8A9A9A;line-height:1.4;">These measurements are optional. You can add or update them anytime from Body tracking.</span>
+          </div>
+
+          <!-- Skip option -->
+          <div style="text-align:center;margin-top:4px;">
+            <span style="font-size:15px;color:#4A9B9B;font-weight:500;">Skip for now</span>
+          </div>
+        </div>
+        <div style="padding:16px 0 40px;flex-shrink:0;">
+          <button class="btn-primary">Continue</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 6: PATH CHOICE ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">06</div>
+  <div class="screen-label">Path Choice · Step 4 of 4</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 24px;height:calc(100% - 59px);display:flex;flex-direction:column;">
+        <div style="margin-bottom:24px;flex-shrink:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:13px;color:#8A9A9A;font-weight:500;">Step 4 of 4</span>
+            <span style="font-size:13px;color:#4A9B9B;font-weight:600;">100%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:100%;"></div></div>
+        </div>
+        <div style="margin-bottom:28px;flex-shrink:0;">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.4px;color:#fff;line-height:1.2;margin-bottom:6px;">Choose your path</div>
+          <div style="font-size:15px;color:#8A9A9A;">Start free or unlock everything from day one.</div>
+        </div>
+        <!-- Path cards -->
+        <div style="display:flex;flex-direction:column;gap:12px;flex:1;">
+          <div class="path-card recommended">
+            <div class="rec-badge">RECOMMENDED</div>
+            <div style="display:flex;align-items:flex-start;gap:14px;">
+              <div style="width:44px;height:44px;background:rgba(74,155,155,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L13.5 8H20L14.5 12L17 18L11 14L5 18L7.5 12L2 8H8.5L11 2Z" stroke="#4A9B9B" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="flex:1;padding-right:60px;">
+                <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:2px;">Pro Plan</div>
+                <div style="font-size:13px;color:#8A9A9A;margin-bottom:10px;">Full access to all features</div>
+                <div style="font-size:24px;font-weight:700;color:#4A9B9B;font-family:'SF Mono',monospace;">$14.99<span style="font-size:14px;color:#8A9A9A;font-family:inherit;font-weight:400;">/mo</span></div>
+                <div style="font-size:12px;color:#4CAF7D;margin-top:2px;">7-day free trial included</div>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#4CAF7D" opacity="0.2"/><path d="M4 7L6 9L10 5" stroke="#4CAF7D" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span style="font-size:13px;color:#8A9A9A;">AI-generated training programs</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#4CAF7D" opacity="0.2"/><path d="M4 7L6 9L10 5" stroke="#4CAF7D" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span style="font-size:13px;color:#8A9A9A;">Advanced nutrition tracking</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#4CAF7D" opacity="0.2"/><path d="M4 7L6 9L10 5" stroke="#4CAF7D" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span style="font-size:13px;color:#8A9A9A;">Protocol & supplement tracking</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="path-card">
+            <div style="display:flex;align-items:flex-start;gap:14px;">
+              <div style="width:44px;height:44px;background:rgba(138,154,154,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3V19M3 11H19" stroke="#8A9A9A" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:2px;">Free</div>
+                <div style="font-size:13px;color:#8A9A9A;">Basic tracking, limited features</div>
+                <div style="font-size:22px;font-weight:700;color:#8A9A9A;font-family:'SF Mono',monospace;margin-top:6px;">$0<span style="font-size:14px;font-family:inherit;font-weight:400;">/forever</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:16px 0 40px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
+          <button class="btn-primary">Start Free Trial</button>
+          <button class="btn-ghost">Continue with Free</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 7: PAYWALL PRIMING ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">07</div>
+  <div class="screen-label">Paywall Priming</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <!-- Top gradient hero -->
+      <div style="position:absolute;top:0;left:0;right:0;height:200px;background:linear-gradient(180deg,rgba(74,155,155,0.1) 0%,transparent 100%);pointer-events:none;"></div>
+      <div style="padding:8px 24px 0;height:calc(100% - 59px);display:flex;flex-direction:column;overflow:hidden;">
+        <!-- Close button top right -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+          <div style="width:32px;height:32px;background:#1E2C2C;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1L11 11M11 1L1 11" stroke="#8A9A9A" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <!-- Plan badge + headline -->
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(74,155,155,0.12);border:1px solid rgba(74,155,155,0.25);border-radius:20px;padding:4px 14px;margin-bottom:16px;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L8.5 5H13L9.5 7.5L11 11.5L7 9L3 11.5L4.5 7.5L1 5H5.5L7 1Z" stroke="#4A9B9B" stroke-width="1.3" stroke-linejoin="round" fill="rgba(74,155,155,0.2)"/></svg>
+            <span style="font-size:12px;font-weight:600;color:#4A9B9B;letter-spacing:0.5px;">ATLAS PRO</span>
+          </div>
+          <div style="font-size:30px;font-weight:800;letter-spacing:-0.5px;color:#fff;line-height:1.1;margin-bottom:8px;">Unlock your full<br>potential</div>
+          <div style="font-size:15px;color:#8A9A9A;line-height:1.5;">Everything you need to perform, recover, and grow.</div>
+        </div>
+        <!-- Feature list -->
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;overflow:hidden;">
+          <div class="feature-row">
+            <div class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2L16 6V12L9 16L2 12V6L9 2Z" stroke="#4A9B9B" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:1px;">AI Training Programs</div>
+              <div style="font-size:13px;color:#8A9A9A;">Personalized plans that adapt to your progress</div>
+            </div>
+          </div>
+          <div style="height:1px;background:#1E2C2C;margin:2px 0;"></div>
+          <div class="feature-row">
+            <div class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#4A9B9B" stroke-width="1.5"/><path d="M9 5V9L12 11" stroke="#4A9B9B" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:1px;">Protocol Tracking</div>
+              <div style="font-size:13px;color:#8A9A9A;">Supplements, medications, and timing</div>
+            </div>
+          </div>
+          <div style="height:1px;background:#1E2C2C;margin:2px 0;"></div>
+          <div class="feature-row">
+            <div class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 14L7 9L10 12L14 7L16 9" stroke="#4A9B9B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:1px;">Advanced Body Analytics</div>
+              <div style="font-size:13px;color:#8A9A9A;">Full composition history and trend charts</div>
+            </div>
+          </div>
+          <div style="height:1px;background:#1E2C2C;margin:2px 0;"></div>
+          <div class="feature-row">
+            <div class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2C5.1 2 2 5.1 2 9s3.1 7 7 7 7-3.1 7-7-3.1-7-7-7Z" stroke="#4A9B9B" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="#4A9B9B" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:1px;">Unlimited Nutrition Logs</div>
+              <div style="font-size:13px;color:#8A9A9A;">No caps on meal entries or custom foods</div>
+            </div>
+          </div>
+        </div>
+        <!-- Pricing + CTA -->
+        <div style="flex-shrink:0;margin-bottom:40px;">
+          <div style="background:#111A1A;border:1px solid #1E2C2C;border-radius:14px;padding:16px;text-align:center;margin-bottom:12px;">
+            <div style="font-size:12px;color:#4CAF7D;font-weight:600;letter-spacing:0.3px;margin-bottom:6px;">7 DAYS FREE · THEN</div>
+            <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;">
+              <span style="font-size:38px;font-weight:800;color:#fff;font-family:'SF Mono',monospace;letter-spacing:-1px;">$14.99</span>
+              <span style="font-size:16px;color:#8A9A9A;">/month</span>
+            </div>
+            <div style="font-size:12px;color:#8A9A9A;margin-top:4px;">Cancel anytime · No commitment</div>
+          </div>
+          <button class="btn-primary" style="margin-bottom:8px;">Start Free Trial</button>
+          <button class="btn-ghost" style="height:44px;font-size:15px;color:#8A9A9A;">Not now</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 8: SETUP GENERATION ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">08</div>
+  <div class="screen-label">Setup Generation</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div style="position:absolute;top:0;left:0;right:0;height:100%;background:radial-gradient(ellipse at 50% 30%,rgba(74,155,155,0.06) 0%,transparent 60%);pointer-events:none;"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:24px 24px 0;height:calc(100% - 59px);display:flex;flex-direction:column;align-items:center;">
+        <!-- Animated orb -->
+        <div style="margin-top:24px;margin-bottom:36px;position:relative;">
+          <div style="width:100px;height:100px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(74,155,155,0.3) 0%,rgba(74,155,155,0.05) 70%);border:1.5px solid rgba(74,155,155,0.35);display:flex;align-items:center;justify-content:center;">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+              <path d="M22 4L26.5 16H40L29 24L33.5 36L22 28L10.5 36L15 24L4 16H17.5L22 4Z" stroke="#4A9B9B" stroke-width="2" stroke-linejoin="round" fill="rgba(74,155,155,0.15)"/>
+            </svg>
+          </div>
+          <!-- Orbit rings -->
+          <div style="position:absolute;inset:-16px;border-radius:50%;border:1px solid rgba(74,155,155,0.12);animation:spin 4s linear infinite;" ></div>
+          <div style="position:absolute;inset:-28px;border-radius:50%;border:1px solid rgba(74,155,155,0.07);"></div>
+        </div>
+
+        <div style="text-align:center;margin-bottom:36px;">
+          <div style="font-size:26px;font-weight:700;letter-spacing:-0.4px;color:#fff;margin-bottom:8px;">Building your program</div>
+          <div style="font-size:15px;color:#8A9A9A;line-height:1.5;">This takes just a moment. We're<br>personalizing everything for you.</div>
+        </div>
+
+        <!-- Generation steps -->
+        <div style="width:100%;background:#111A1A;border:1px solid #1E2C2C;border-radius:16px;padding:8px 16px;">
+          <div class="gen-step">
+            <div class="gen-indicator done">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L5.5 9.5L11 4" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:500;color:#fff;">Analyzing your profile</div>
+            </div>
+            <span style="font-size:12px;color:#4CAF7D;font-weight:500;">Done</span>
+          </div>
+          <div style="height:1px;background:#1E2C2C;margin:0 -16px;"></div>
+          <div class="gen-step">
+            <div class="gen-indicator done">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7L5.5 9.5L11 4" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:500;color:#fff;">Setting caloric targets</div>
+            </div>
+            <span style="font-size:12px;color:#4CAF7D;font-weight:500;">Done</span>
+          </div>
+          <div style="height:1px;background:#1E2C2C;margin:0 -16px;"></div>
+          <div class="gen-step">
+            <div class="gen-indicator active">
+              <div style="width:12px;height:12px;border-radius:50%;border:2px solid #4A9B9B;border-top-color:transparent;animation:spin 0.8s linear infinite;"></div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:500;color:#fff;">Generating training plan</div>
+              <div style="font-size:12px;color:#4A9B9B;margin-top:2px;">Selecting exercises...</div>
+            </div>
+          </div>
+          <div style="height:1px;background:#1E2C2C;margin:0 -16px;"></div>
+          <div class="gen-step">
+            <div class="gen-indicator pending">
+              <span style="font-size:12px;color:#8A9A9A;font-weight:600;">4</span>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:500;color:#8A9A9A;">Configuring dashboard</div>
+            </div>
+          </div>
+          <div style="height:1px;background:#1E2C2C;margin:0 -16px;"></div>
+          <div class="gen-step">
+            <div class="gen-indicator pending">
+              <span style="font-size:12px;color:#8A9A9A;font-weight:600;">5</span>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:500;color:#8A9A9A;">Finalizing your setup</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading skeleton preview -->
+        <div style="width:100%;margin-top:16px;display:flex;flex-direction:column;gap:8px;opacity:0.5;">
+          <div class="skeleton" style="height:48px;border-radius:12px;"></div>
+          <div style="display:flex;gap:8px;">
+            <div class="skeleton" style="height:36px;border-radius:10px;flex:1;"></div>
+            <div class="skeleton" style="height:36px;border-radius:10px;flex:1;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 9: ONBOARDING SUCCESS ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">09</div>
+  <div class="screen-label">Onboarding Success</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(76,175,125,0.07) 0%,transparent 60%);pointer-events:none;"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="14" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 24px;height:calc(100% - 59px);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <!-- Success checkmark -->
+        <div style="margin-bottom:28px;position:relative;">
+          <div style="width:88px;height:88px;border-radius:50%;background:rgba(76,175,125,0.1);border:2px solid rgba(76,175,125,0.4);display:flex;align-items:center;justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d="M8 20L16 28L32 12" stroke="#4CAF7D" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <!-- Sparkles -->
+          <div style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#4A9B9B;border-radius:50%;opacity:0.6;"></div>
+          <div style="position:absolute;bottom:0;left:-8px;width:10px;height:10px;background:#4CAF7D;border-radius:50%;opacity:0.5;"></div>
+        </div>
+        <!-- Text -->
+        <div style="text-align:center;margin-bottom:32px;">
+          <div style="font-size:32px;font-weight:800;letter-spacing:-0.5px;color:#fff;margin-bottom:8px;">You're all set,<br><span style="color:#4A9B9B;">Alex.</span></div>
+          <div style="font-size:16px;color:#8A9A9A;line-height:1.6;max-width:280px;margin:0 auto;">Your personalized program is ready. Let's get to work.</div>
+        </div>
+        <!-- Summary cards -->
+        <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:32px;">
+          <div class="card" style="text-align:center;padding:14px;">
+            <div style="font-size:10px;color:#8A9A9A;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Daily Calories</div>
+            <div style="font-size:22px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;">2,840</div>
+            <div style="font-size:11px;color:#4CAF7D;margin-top:2px;">Bulk Phase</div>
+          </div>
+          <div class="card" style="text-align:center;padding:14px;">
+            <div style="font-size:10px;color:#8A9A9A;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Training Days</div>
+            <div style="font-size:22px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;">4×</div>
+            <div style="font-size:11px;color:#4CAF7D;margin-top:2px;">Per Week</div>
+          </div>
+          <div class="card" style="text-align:center;padding:14px;">
+            <div style="font-size:10px;color:#8A9A9A;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Program</div>
+            <div style="font-size:16px;font-weight:600;color:#fff;">Push/Pull<br>Legs</div>
+          </div>
+          <div class="card" style="text-align:center;padding:14px;">
+            <div style="font-size:10px;color:#8A9A9A;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Goal</div>
+            <div style="font-size:16px;font-weight:600;color:#4A9B9B;">Build<br>Muscle</div>
+          </div>
+        </div>
+        <!-- CTA -->
+        <div style="width:100%;display:flex;flex-direction:column;gap:10px;">
+          <button class="btn-primary">Go to Dashboard</button>
+          <div style="text-align:center;">
+            <span style="font-size:14px;color:#8A9A9A;">You can customize your plan anytime</span>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 10: LOGIN ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">10</div>
+  <div class="screen-label">Login Screen</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:8px 24px 0;height:calc(100% - 59px);display:flex;flex-direction:column;">
+        <!-- Logo -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 0 48px;">
+          <div style="width:32px;height:32px;background:#111A1A;border-radius:9px;border:1px solid #1E2C2C;display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M7 4L10 13L13 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 10H12" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.3px;">atlas.core</span>
+        </div>
+
+        <!-- Heading -->
+        <div style="margin-bottom:36px;">
+          <div style="font-size:30px;font-weight:700;letter-spacing:-0.5px;color:#fff;margin-bottom:6px;">Welcome back</div>
+          <div style="font-size:16px;color:#8A9A9A;">Sign in to continue your journey.</div>
+        </div>
+
+        <!-- Fields -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+          <div class="input-wrap">
+            <div class="input-label">Email</div>
+            <div class="input-field focused" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">alex@example.com</div>
+          </div>
+          <div class="input-wrap" style="position:relative;">
+            <div class="input-label">Password</div>
+            <div class="input-field" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">••••••••••</div>
+            <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="8" ry="5" stroke="#8A9A9A" stroke-width="1.5"/><circle cx="10" cy="10" r="2" fill="#8A9A9A"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Forgot password -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:28px;">
+          <span style="font-size:15px;color:#4A9B9B;font-weight:500;">Forgot password?</span>
+        </div>
+
+        <!-- Sign in button -->
+        <button class="btn-primary" style="margin-bottom:20px;">Sign In</button>
+
+        <!-- Divider -->
+        <div class="social-divider" style="margin-bottom:16px;">
+          <div class="social-divider-line"></div>
+          <div class="social-divider-text">or continue with</div>
+          <div class="social-divider-line"></div>
+        </div>
+
+        <!-- Social buttons -->
+        <div style="display:flex;gap:10px;margin-bottom:auto;">
+          <div class="social-btn" style="flex:1;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M18.17 10.2c0-.63-.06-1.24-.17-1.83H10v3.45h4.59c-.2 1.05-.8 1.94-1.7 2.54v2.12h2.75c1.61-1.48 2.54-3.67 2.54-6.28Z" fill="#4285F4"/><path d="M10 18.5c2.3 0 4.23-.76 5.64-2.06l-2.75-2.12c-.76.5-1.73.8-2.89.8-2.22 0-4.1-1.5-4.77-3.52H2.39v2.19A8.5 8.5 0 0 0 10 18.5Z" fill="#34A853"/><path d="M5.23 11.6A5.1 5.1 0 0 1 4.96 10c0-.56.1-1.1.27-1.6V6.21H2.39A8.5 8.5 0 0 0 1.5 10c0 1.37.33 2.67.89 3.79l2.84-2.19Z" fill="#FBBC05"/><path d="M10 4.88c1.25 0 2.37.43 3.25 1.27l2.44-2.44C14.22 2.36 12.3 1.5 10 1.5A8.5 8.5 0 0 0 2.39 6.21l2.84 2.19C5.9 6.38 7.78 4.88 10 4.88Z" fill="#EA4335"/></svg>
+            <span style="font-size:15px;color:#fff;font-weight:500;">Google</span>
+          </div>
+          <div class="social-btn" style="flex:1;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="white"><path d="M14.5 1.5c.11 1.45-.41 2.88-1.26 3.92C12.4 6.5 11.1 7.2 9.77 7.1c-.14-1.42.5-2.88 1.3-3.82.86-1 2.22-1.7 3.43-1.78Zm4.37 14.5c-.63 1.4-1.38 2.1-2.27 2.1-.53 0-1.25-.34-2.18-.34-.97 0-1.72.35-2.27.35-.84 0-1.64-.76-2.39-2.27-1.02-2.05-1.53-4.43-1.53-5.64 0-3.1 2.06-4.74 4.1-4.74.9 0 1.75.32 2.53.97.5.42.95.62 1.34.62.35 0 .83-.22 1.44-.65.85-.6 1.7-.86 2.56-.77C20.91 6.1 22 7.3 22 9.1c0 .8-.3 1.7-1.17 2.48-.85.76-1.28 1.6-1.04 2.6.15.66.52 1.39 1.08 2.32Z"/></svg>
+            <span style="font-size:15px;color:#fff;font-weight:500;">Apple</span>
+          </div>
+        </div>
+
+        <!-- Sign up link -->
+        <div style="text-align:center;padding:24px 0 40px;flex-shrink:0;">
+          <span style="font-size:15px;color:#8A9A9A;">Don't have an account? </span>
+          <span style="font-size:15px;color:#4A9B9B;font-weight:600;">Sign up</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 11: SIGN UP ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">11</div>
+  <div class="screen-label">Sign Up Screen</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:8px 24px 0;height:calc(100% - 59px);display:flex;flex-direction:column;">
+        <!-- Back nav -->
+        <div class="nav-back" style="margin-bottom:24px;">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M8.5 1L2 8L8.5 15" stroke="#4A9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Back</span>
+        </div>
+
+        <!-- Heading -->
+        <div style="margin-bottom:28px;">
+          <div style="font-size:30px;font-weight:700;letter-spacing:-0.5px;color:#fff;margin-bottom:6px;">Create account</div>
+          <div style="font-size:16px;color:#8A9A9A;">Join thousands of athletes on atlas.core.</div>
+        </div>
+
+        <!-- Fields -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+          <div class="input-wrap">
+            <div class="input-label">Full Name</div>
+            <div class="input-field focused" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">Alex Morgan</div>
+          </div>
+          <div class="input-wrap">
+            <div class="input-label">Email Address</div>
+            <div class="input-field" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">alex@example.com</div>
+          </div>
+          <div class="input-wrap" style="position:relative;">
+            <div class="input-label">Password</div>
+            <div class="input-field" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">••••••••••</div>
+            <div style="position:absolute;right:16px;top:50%;transform:translateY(-50%);">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><ellipse cx="10" cy="10" rx="8" ry="5" stroke="#8A9A9A" stroke-width="1.5"/><circle cx="10" cy="10" r="2" fill="#8A9A9A"/></svg>
+            </div>
+          </div>
+          <!-- Password strength -->
+          <div>
+            <div style="display:flex;gap:4px;margin-bottom:4px;">
+              <div style="flex:1;height:3px;background:#4CAF7D;border-radius:2px;"></div>
+              <div style="flex:1;height:3px;background:#4CAF7D;border-radius:2px;"></div>
+              <div style="flex:1;height:3px;background:#4CAF7D;border-radius:2px;"></div>
+              <div style="flex:1;height:3px;background:#1E2C2C;border-radius:2px;"></div>
+            </div>
+            <span style="font-size:12px;color:#4CAF7D;font-weight:500;">Strong password</span>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="check-row" style="margin-bottom:24px;">
+          <div class="checkbox checked">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div style="font-size:13px;color:#8A9A9A;line-height:1.5;">I agree to the <span style="color:#4A9B9B;font-weight:500;">Terms of Service</span> and <span style="color:#4A9B9B;font-weight:500;">Privacy Policy</span></div>
+        </div>
+
+        <!-- CTA -->
+        <button class="btn-primary" style="margin-bottom:16px;">Create Account</button>
+
+        <!-- Divider -->
+        <div class="social-divider" style="margin-bottom:14px;">
+          <div class="social-divider-line"></div>
+          <div class="social-divider-text">or sign up with</div>
+          <div class="social-divider-line"></div>
+        </div>
+
+        <!-- Social -->
+        <div style="display:flex;gap:10px;margin-bottom:auto;">
+          <div class="social-btn" style="flex:1;">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M18.17 10.2c0-.63-.06-1.24-.17-1.83H10v3.45h4.59c-.2 1.05-.8 1.94-1.7 2.54v2.12h2.75c1.61-1.48 2.54-3.67 2.54-6.28Z" fill="#4285F4"/><path d="M10 18.5c2.3 0 4.23-.76 5.64-2.06l-2.75-2.12c-.76.5-1.73.8-2.89.8-2.22 0-4.1-1.5-4.77-3.52H2.39v2.19A8.5 8.5 0 0 0 10 18.5Z" fill="#34A853"/><path d="M5.23 11.6A5.1 5.1 0 0 1 4.96 10c0-.56.1-1.1.27-1.6V6.21H2.39A8.5 8.5 0 0 0 1.5 10c0 1.37.33 2.67.89 3.79l2.84-2.19Z" fill="#FBBC05"/><path d="M10 4.88c1.25 0 2.37.43 3.25 1.27l2.44-2.44C14.22 2.36 12.3 1.5 10 1.5A8.5 8.5 0 0 0 2.39 6.21l2.84 2.19C5.9 6.38 7.78 4.88 10 4.88Z" fill="#EA4335"/></svg>
+            <span style="font-size:15px;color:#fff;font-weight:500;">Google</span>
+          </div>
+          <div class="social-btn" style="flex:1;">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="white"><path d="M14.5 1.5c.11 1.45-.41 2.88-1.26 3.92C12.4 6.5 11.1 7.2 9.77 7.1c-.14-1.42.5-2.88 1.3-3.82.86-1 2.22-1.7 3.43-1.78Zm4.37 14.5c-.63 1.4-1.38 2.1-2.27 2.1-.53 0-1.25-.34-2.18-.34-.97 0-1.72.35-2.27.35-.84 0-1.64-.76-2.39-2.27-1.02-2.05-1.53-4.43-1.53-5.64 0-3.1 2.06-4.74 4.1-4.74.9 0 1.75.32 2.53.97.5.42.95.62 1.34.62.35 0 .83-.22 1.44-.65.85-.6 1.7-.86 2.56-.77C20.91 6.1 22 7.3 22 9.1c0 .8-.3 1.7-1.17 2.48-.85.76-1.28 1.6-1.04 2.6.15.66.52 1.39 1.08 2.32Z"/></svg>
+            <span style="font-size:15px;color:#fff;font-weight:500;">Apple</span>
+          </div>
+        </div>
+
+        <!-- Login link -->
+        <div style="text-align:center;padding:20px 0 40px;flex-shrink:0;">
+          <span style="font-size:15px;color:#8A9A9A;">Already have an account? </span>
+          <span style="font-size:15px;color:#4A9B9B;font-weight:600;">Sign in</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 12: FORGOT PASSWORD ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">12</div>
+  <div class="screen-label">Forgot Password</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:8px 24px 0;height:calc(100% - 59px);display:flex;flex-direction:column;">
+        <div class="nav-back" style="margin-bottom:40px;">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M8.5 1L2 8L8.5 15" stroke="#4A9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Back</span>
+        </div>
+
+        <!-- Icon -->
+        <div style="margin-bottom:28px;">
+          <div style="width:64px;height:64px;background:#111A1A;border-radius:18px;border:1px solid #1E2C2C;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M10 13V9C10 6.24 12.24 4 15 4C17.76 4 20 6.24 20 9V13" stroke="#4A9B9B" stroke-width="2" stroke-linecap="round"/><rect x="6" y="13" width="18" height="13" rx="3" stroke="#4A9B9B" stroke-width="2"/><circle cx="15" cy="20" r="2" fill="#4A9B9B"/></svg>
+          </div>
+          <div style="font-size:30px;font-weight:700;letter-spacing:-0.5px;color:#fff;margin-bottom:8px;">Forgot your<br>password?</div>
+          <div style="font-size:16px;color:#8A9A9A;line-height:1.6;">No worries. Enter your email and we'll send you a reset link.</div>
+        </div>
+
+        <!-- Email field -->
+        <div class="input-wrap" style="margin-bottom:12px;">
+          <div class="input-label">Email Address</div>
+          <div class="input-field focused" style="padding-top:20px;display:flex;align-items:flex-end;font-size:17px;color:#fff;">alex@example.com</div>
+        </div>
+
+        <div style="flex:1;"></div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:40px;">
+          <button class="btn-primary">Send Reset Link</button>
+          <button class="btn-ghost" style="height:48px;">Return to Sign In</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 13: RESET SENT ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">13</div>
+  <div class="screen-label">Password Reset Sent</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,rgba(74,155,155,0.06) 0%,transparent 60%);pointer-events:none;"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 24px;height:calc(100% - 59px);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <!-- Email sent icon -->
+        <div style="margin-bottom:32px;">
+          <div style="width:88px;height:88px;background:rgba(74,155,155,0.1);border-radius:24px;border:1px solid rgba(74,155,155,0.25);display:flex;align-items:center;justify-content:center;">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+              <path d="M6 12C6 10.9 6.9 10 8 10H36C37.1 10 38 10.9 38 12V32C38 33.1 37.1 34 36 34H8C6.9 34 6 33.1 6 32V12Z" stroke="#4A9B9B" stroke-width="2"/>
+              <path d="M6 12L22 24L38 12" stroke="#4A9B9B" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="33" cy="13" r="6" fill="#4CAF7D"/>
+              <path d="M30 13L32 15L36 11" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Text -->
+        <div style="text-align:center;margin-bottom:32px;">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.4px;color:#fff;margin-bottom:8px;">Check your<br>email</div>
+          <div style="font-size:16px;color:#8A9A9A;line-height:1.6;max-width:280px;margin:0 auto;">We sent a reset link to</div>
+          <div style="font-size:16px;color:#fff;font-weight:600;margin-top:2px;">alex@example.com</div>
+        </div>
+
+        <!-- Info card -->
+        <div style="width:100%;background:#111A1A;border:1px solid #1E2C2C;border-radius:14px;padding:16px;margin-bottom:32px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="9" cy="9" r="8" stroke="#4A9B9B" stroke-width="1.5" opacity="0.5"/><path d="M9 5V9.5" stroke="#4A9B9B" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="12.5" r="1" fill="#4A9B9B"/></svg>
+            <div style="font-size:14px;color:#8A9A9A;line-height:1.6;">The link expires in <span style="color:#fff;font-weight:500;">30 minutes</span>. Check your spam folder if you don't see it.</div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="width:100%;display:flex;flex-direction:column;gap:10px;">
+          <button class="btn-primary">Open Mail App</button>
+          <button class="btn-secondary">Resend Email</button>
+          <button class="btn-ghost" style="height:48px;font-size:15px;">Back to Sign In</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 14: EMAIL CONFIRMATION ==================== -->
+<div class="screen-wrapper">
+  <div class="screen-num">14</div>
+  <div class="screen-label">Email Confirmation</div>
+  <div class="iphone">
+    <div class="dynamic-island"></div>
+    <div class="screen">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(74,155,155,0.06) 0%,transparent 55%);pointer-events:none;"></div>
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="8" height="8" rx="2" fill="white"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 24px;height:calc(100% - 59px);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+
+        <!-- Icon -->
+        <div style="margin-bottom:28px;position:relative;">
+          <div class="email-icon-wrap">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+              <path d="M7 14C7 12.9 7.9 12 9 12H35C36.1 12 37 12.9 37 14V30C37 31.1 36.1 32 35 32H9C7.9 32 7 31.1 7 30V14Z" stroke="#4A9B9B" stroke-width="2"/>
+              <path d="M7 14L22 24L37 14" stroke="#4A9B9B" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <!-- Pulse rings -->
+          <div style="position:absolute;inset:-8px;border-radius:32px;border:1.5px solid rgba(74,155,155,0.2);pointer-events:none;"></div>
+          <div style="position:absolute;inset:-18px;border-radius:38px;border:1px solid rgba(74,155,155,0.1);pointer-events:none;"></div>
+        </div>
+
+        <!-- Text -->
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.4px;color:#fff;margin-bottom:8px;">Confirm your<br>email</div>
+          <div style="font-size:16px;color:#8A9A9A;line-height:1.6;max-width:290px;margin:0 auto;">We sent a confirmation link to verify your account.</div>
+          <div style="font-size:16px;color:#fff;font-weight:600;margin-top:6px;">alex@example.com</div>
+        </div>
+
+        <!-- OTP code entry option -->
+        <div style="width:100%;margin-bottom:28px;">
+          <div style="font-size:13px;color:#8A9A9A;text-align:center;margin-bottom:12px;font-weight:500;">Or enter the 6-digit code from your email</div>
+          <div style="display:flex;gap:10px;justify-content:center;">
+            <div style="width:48px;height:56px;background:#111A1A;border-radius:12px;border:1.5px solid #4A9B9B;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;">7</div>
+            <div style="width:48px;height:56px;background:#111A1A;border-radius:12px;border:1.5px solid #4A9B9B;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;">3</div>
+            <div style="width:48px;height:56px;background:#111A1A;border-radius:12px;border:1.5px solid #4A9B9B;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;">8</div>
+            <div style="width:48px;height:56px;background:#111A1A;border-radius:12px;border:1px solid #1E2C2C;display:flex;align-items:center;justify-content:center;">
+              <div style="width:2px;height:24px;background:#4A9B9B;border-radius:1px;animation:blink 1s infinite;"></div>
+            </div>
+            <div style="width:48px;height:56px;background:#111A1A;border-radius:12px;border:1px solid #1E2C2C;"></div>
+            <div style="width:48px;height:56px;background:#111A1A;border-radius:12px;border:1px solid #1E2C2C;"></div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="width:100%;display:flex;flex-direction:column;gap:10px;">
+          <button class="btn-primary">Verify Code</button>
+          <button class="btn-ghost" style="height:48px;font-size:15px;">
+            <span style="color:#8A9A9A;">Didn't get it? </span>
+            <span style="color:#4A9B9B;font-weight:600;">Resend</span>
+          </button>
+        </div>
+
+        <!-- Trust note -->
+        <div style="margin-top:20px;text-align:center;">
+          <span style="font-size:12px;color:#8A9A9A;line-height:1.5;">By confirming, you agree to our </span>
+          <span style="font-size:12px;color:#4A9B9B;">Terms</span>
+          <span style="font-size:12px;color:#8A9A9A;"> and </span>
+          <span style="font-size:12px;color:#4A9B9B;">Privacy Policy</span>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end screens-grid -->
+
+<!-- Footer -->
+<div style="text-align:center;margin-top:80px;padding-bottom:60px;">
+  <div style="width:40px;height:1px;background:#1E2C2C;margin:0 auto 16px;"></div>
+  <div style="font-size:13px;color:#8A9A9A;">atlas.core · Public Flow · 14 Screens</div>
+  <div style="font-size:12px;color:#4A9B9B;margin-top:4px;opacity:0.6;">iOS Dark · SF Pro · #4A9B9B Teal · #080E0E Background</div>
+</div>
+
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+</style>
+
+</body>
+</html>

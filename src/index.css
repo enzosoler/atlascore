@@ -21,14 +21,14 @@
     --border-default: 216 15% 90%;
     --border-strong: 216 15% 80%;
 
-    --accent-primary: 190 34% 30%;
-    --accent-primary-hover: 190 36% 26%;
-    --accent-secondary: 160 28% 42%;
+    --accent-primary: 180 35% 45%;
+    --accent-primary-hover: 180 35% 40%;
+    --accent-secondary: 180 8% 57%;
 
-    --status-success: 160 45% 45%;
+    --status-success: 150 40% 49%;
     --status-warning: 38 60% 55%;
-    --status-danger: 0 50% 60%;
-    --status-ai: 191 40% 55%;
+    --status-danger: 0 68% 62%;
+    --status-ai: 180 35% 45%;
 
     /* Legacy / compatibility aliases */
     --tint: var(--accent-primary);
@@ -72,20 +72,23 @@
     --space-16: 64px;
 
     /* Radius */
-    --atlas-radius: 20px;
+    --atlas-card-radius: 14px;
+    --atlas-control-radius: 10px;
+    --atlas-sheet-radius: 20px;
+    --atlas-radius: var(--atlas-card-radius);
     --r-xs: 10px;
-    --r-sm: 20px;
-    --r-md: 20px;
+    --r-sm: 14px;
+    --r-md: 14px;
     --r-lg: 20px;
     --r-xl: 20px;
-    --r-2xl: 20px;
+    --r-2xl: 24px;
     --r-pill: 999px;
 
     /* Shadows */
-    --shadow-xs: 0 1px 2px rgba(9, 14, 24, 0.04), 0 10px 24px rgba(9, 14, 24, 0.045);
-    --shadow-sm: 0 1px 3px rgba(9, 14, 24, 0.05), 0 18px 36px rgba(9, 14, 24, 0.07);
-    --shadow-md: 0 8px 20px rgba(9, 14, 24, 0.08), 0 24px 64px rgba(9, 14, 24, 0.1);
-    --shadow-lg: 0 14px 32px rgba(9, 14, 24, 0.12), 0 34px 80px rgba(9, 14, 24, 0.14);
+    --shadow-xs: 0 1px 2px rgba(9, 14, 24, 0.05), 0 8px 18px rgba(9, 14, 24, 0.06);
+    --shadow-sm: 0 8px 18px rgba(9, 14, 24, 0.08), 0 18px 42px rgba(9, 14, 24, 0.1);
+    --shadow-md: 0 14px 32px rgba(9, 14, 24, 0.12), 0 28px 72px rgba(9, 14, 24, 0.14);
+    --shadow-lg: 0 18px 44px rgba(9, 14, 24, 0.16), 0 36px 96px rgba(9, 14, 24, 0.2);
     --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.82);
 
     /* Buttons */
@@ -149,31 +152,35 @@
   [data-theme="dark"] {
     color-scheme: dark;
 
-    --bg-app: 220 8% 8%;
-    --bg-surface: 220 8% 11%;
-    --bg-surface-2: 220 8% 13%;
-    --bg-card-semantic: 220 8% 14%;
-    --bg-card-elevated: 220 8% 17%;
+    --bg-app: 180 27% 4%;
+    --bg-surface: 180 21% 8%;
+    --bg-surface-2: 180 18% 11%;
+    --bg-card-semantic: 180 21% 8%;
+    --bg-card-elevated: 180 18% 11%;
 
     --text-primary: 0 0% 100%;
-    --text-secondary: 216 10% 85%;
-    --text-muted: 216 10% 70%;
-    --text-subtle: 216 10% 50%;
+    --text-secondary: 180 8% 57%;
+    --text-muted: 180 8% 47%;
+    --text-subtle: 180 8% 35%;
 
-    --border-default: 216 10% 20%;
-    --border-strong: 216 10% 30%;
+    --border-default: 180 19% 15%;
+    --border-strong: 180 19% 20%;
 
-    --accent-primary: 190 36% 40%;
-    --accent-primary-hover: 190 38% 35%;
-    --accent-secondary: 160 34% 42%;
+    --accent-primary: 180 35% 45%;
+    --accent-primary-hover: 180 35% 40%;
+    --accent-secondary: 180 8% 57%;
+
+    --status-success: 150 40% 49%;
+    --status-danger: 0 68% 62%;
+    --status-ai: 180 35% 45%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
     --sys-bg3: var(--bg-surface-2);
     --card: var(--bg-card-semantic);
     --card-elevated: var(--bg-card-elevated);
-    --glass-bg: rgba(13, 17, 24, 0.82);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(8, 14, 14, 0.88);
+    --glass-border: rgba(30, 44, 44, 0.78);
 
     --label: var(--text-primary);
     --label-secondary: var(--text-secondary);
@@ -182,13 +189,13 @@
 
     --separator-opaque: var(--border-default);
     --separator-strong: var(--border-strong);
-    --fill: 220 8% 16%;
-    --fill-secondary: 220 8% 19%;
+    --fill: 180 18% 11%;
+    --fill-secondary: 180 19% 15%;
 
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.18);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18), 0 18px 40px rgba(0, 0, 0, 0.22);
-    --shadow-md: 0 10px 26px rgba(0, 0, 0, 0.24), 0 30px 80px rgba(0, 0, 0, 0.28);
-    --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.3), 0 40px 100px rgba(0, 0, 0, 0.34);
+    --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.16), 0 10px 28px rgba(0, 0, 0, 0.18);
+    --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.22), 0 18px 46px rgba(0, 0, 0, 0.24);
+    --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.28), 0 28px 80px rgba(0, 0, 0, 0.32);
+    --shadow-lg: 0 22px 48px rgba(0, 0, 0, 0.34), 0 40px 110px rgba(0, 0, 0, 0.4);
     --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
     --button-primary-bg: var(--accent-primary);
@@ -233,8 +240,8 @@
   body {
     min-height: 100%;
     background:
-      radial-gradient(circle at top, hsl(var(--accent-primary) / 0.08), transparent 45%),
-      radial-gradient(circle at 88% 16%, hsl(var(--accent-secondary) / 0.05), transparent 35%),
+      radial-gradient(circle at top, hsl(var(--accent-primary) / 0.12), transparent 34%),
+      radial-gradient(circle at 88% 16%, hsl(var(--accent-primary) / 0.06), transparent 26%),
       hsl(var(--sys-bg));
     background-attachment: fixed;
     color: hsl(var(--label));
@@ -483,17 +490,17 @@
   .card,
   .sys-card {
     background:
-      radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 34%),
+      radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 30%),
       linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.94);
-    border-radius: 24px;
-    box-shadow: var(--shadow-sm), var(--shadow-inset);
+    border-radius: var(--atlas-card-radius);
+    box-shadow: var(--shadow-sm), var(--shadow-inset), 0 0 0 1px hsl(var(--accent-primary) / 0.02);
   }
 
   .atlas-card-muted {
-    background: linear-gradient(180deg, hsl(var(--fill) / 0.86) 0%, hsl(var(--card) / 0.94) 100%);
+    background: linear-gradient(180deg, hsl(var(--fill-secondary) / 0.9) 0%, hsl(var(--card) / 0.96) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.9);
-    border-radius: 22px;
+    border-radius: var(--atlas-card-radius);
     box-shadow: var(--shadow-xs);
   }
 
@@ -531,14 +538,14 @@
       radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 32%),
       linear-gradient(160deg, hsl(var(--card-elevated) / 0.99) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.92);
-    border-radius: calc(var(--r-xl) + 2px);
+    border-radius: var(--atlas-sheet-radius);
     box-shadow: var(--shadow-md), var(--shadow-inset), 0 0 0 0.5px hsl(var(--tint) / 0.05);
   }
 
   .atlas-public-panel-muted {
     background: linear-gradient(160deg, hsl(var(--fill) / 0.76) 0%, hsl(var(--card) / 0.94) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.86);
-    border-radius: var(--r-lg);
+    border-radius: var(--atlas-card-radius);
     box-shadow: var(--shadow-xs), var(--shadow-inset);
   }
 
@@ -571,7 +578,7 @@
       radial-gradient(circle at 92% 12%, hsl(var(--accent-secondary) / 0.08), transparent 26%),
       linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.9);
-    border-radius: var(--atlas-radius);
+    border-radius: var(--atlas-sheet-radius);
     box-shadow: var(--shadow-sm), var(--shadow-inset);
   }
 
@@ -780,9 +787,9 @@
   }
 
   .atlas-banner {
-    border-radius: var(--atlas-radius);
+    border-radius: var(--atlas-card-radius);
     border: 1px solid hsl(var(--separator-opaque));
-    background: linear-gradient(180deg, hsl(var(--fill) / 0.92) 0%, hsl(var(--card) / 0.94) 100%);
+    background: linear-gradient(180deg, hsl(var(--fill-secondary) / 0.92) 0%, hsl(var(--card) / 0.98) 100%);
     box-shadow: var(--shadow-xs), var(--shadow-inset);
     color: hsl(var(--label-secondary));
   }
@@ -814,7 +821,7 @@
     text-align: center;
     padding: 56px 24px;
     border: 1px dashed hsl(var(--separator-strong));
-    border-radius: var(--atlas-radius);
+    border-radius: var(--atlas-sheet-radius);
     background:
       radial-gradient(circle at top, hsl(var(--accent-primary) / 0.08), transparent 34%),
       linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.76) 100%);
@@ -842,9 +849,9 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 40px;
+    min-height: 44px;
     padding: 0 18px;
-    border-radius: var(--atlas-radius);
+    border-radius: var(--atlas-control-radius);
     border: 1px solid transparent;
     font-size: 0.875rem;
     font-weight: 600;
@@ -876,16 +883,17 @@
 
   .atlas-button-secondary,
   .btn-secondary {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--fill) / 0.6) 100%);
-    color: hsl(var(--label));
-    border-color: hsl(var(--separator-opaque));
-    box-shadow: var(--shadow-xs), var(--shadow-inset);
+    background: transparent;
+    color: hsl(var(--accent-primary));
+    border-color: hsl(var(--accent-primary) / 0.42);
+    box-shadow: none;
   }
 
   .atlas-button-secondary:hover:not(:disabled),
   .btn-secondary:hover:not(:disabled) {
-    background: hsl(var(--fill));
-    border-color: hsl(var(--separator-strong));
+    background: hsl(var(--accent-primary) / 0.08);
+    border-color: hsl(var(--accent-primary) / 0.6);
+    color: hsl(var(--label));
   }
 
   .atlas-button-ghost,
@@ -912,9 +920,9 @@
 
   .atlas-field {
     width: 100%;
-    border-radius: var(--atlas-radius);
+    border-radius: var(--atlas-card-radius);
     border: 1px solid hsl(var(--input));
-    background: linear-gradient(180deg, hsl(var(--fill) / 0.84) 0%, hsl(var(--card)) 100%);
+    background: linear-gradient(180deg, hsl(var(--fill-secondary) / 0.92) 0%, hsl(var(--card)) 100%);
     color: hsl(var(--foreground));
     box-shadow: var(--shadow-xs), inset 0 1px 0 hsl(var(--label) / 0.02);
     transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
@@ -938,7 +946,7 @@
       radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 32%),
       linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
     border: 1px solid hsl(var(--separator-opaque) / 0.92);
-    border-radius: var(--r-xl);
+    border-radius: var(--atlas-sheet-radius);
     box-shadow: var(--shadow-lg), var(--shadow-inset);
   }
 

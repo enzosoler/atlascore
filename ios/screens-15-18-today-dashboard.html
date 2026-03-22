@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>atlas.core — Today / Dashboard · Screens 15–18</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #080E0E;
+    --card:     #111A1A;
+    --card-hi:  #152020;
+    --border:   #1E2C2C;
+    --brand:    #4A9B9B;
+    --brand-dim:#2E6B6B;
+    --fg:       #FFFFFF;
+    --fg2:      #8A9A9A;
+    --fg3:      #556060;
+    --ok:       #4CAF7D;
+    --warn:     #E8A838;
+    --err:      #E05C5C;
+    --teal:     #4A9B9B;
+  }
+
+  body {
+    background: #0A0F0F;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 80px;
+    gap: 0;
+    min-height: 100vh;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .page-header .suite-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 10px;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.04em;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    font-size: 14px;
+    color: var(--fg2);
+  }
+
+  /* ── Screen row ── */
+  .screen-row {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 1520px;
+  }
+
+  /* ── Phone frame ── */
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .screen-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg2);
+  }
+  .screen-number {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 2px;
+  }
+  .phone {
+    width: 375px;
+    min-height: 812px;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 1.5px solid #1E2C2C;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 6px #0D1515,
+      0 0 0 7px #1E2C2C,
+      0 40px 80px rgba(0,0,0,0.7),
+      0 8px 20px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Status bar ── */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 0;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .status-time {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-icons svg { width: 16px; height: 16px; fill: #fff; }
+
+  /* ── Dynamic island ── */
+  .dynamic-island {
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 20px;
+    margin: 0 auto 0;
+    flex-shrink: 0;
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    transform: translateX(-50%);
+  }
+
+  /* ── Scroll content ── */
+  .phone-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 52px 20px 100px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+  }
+  .phone-content::-webkit-scrollbar { display: none; }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 83px;
+    background: rgba(8,14,14,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .tab-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tab-icon svg { width: 22px; height: 22px; }
+  .tab-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .tab-item.active .tab-label { color: var(--brand); }
+  .tab-item.active .tab-icon svg { color: var(--brand); }
+  .tab-item:not(.active) .tab-label { color: var(--fg3); }
+  .tab-item:not(.active) .tab-icon svg { color: var(--fg3); }
+
+  /* ─────────────────────────────────
+     COMPONENT STYLES
+  ───────────────────────────────── */
+
+  /* Header */
+  .today-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .today-overline {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 6px;
+  }
+  .today-title {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    color: var(--fg);
+    line-height: 1;
+  }
+  .header-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #152020 0%, var(--card) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-btn svg { width: 18px; height: 18px; color: var(--brand); }
+
+  /* Greeting card */
+  .greeting-card {
+    background: linear-gradient(135deg, #152626 0%, var(--card) 45%, #0D1A1A 100%);
+    border: 1px solid rgba(74,155,155,0.22);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .greeting-card::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(74,155,155,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .greeting-card::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; right: 20px;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(74,155,155,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .greeting-name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    color: var(--fg);
+    position: relative;
+  }
+  .greeting-sub {
+    font-size: 13px;
+    color: var(--fg2);
+    margin-top: 6px;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 24px;
+  }
+  .section-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 4px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--fg);
+    margin-bottom: 12px;
+  }
+
+  /* Snapshot grid */
+  .snapshot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card.done {
+    border-color: rgba(76,175,125,0.2);
+    background: linear-gradient(135deg, rgba(76,175,125,0.06) 0%, var(--card) 100%);
+  }
+  .stat-icon-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .stat-icon {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat-icon svg { width: 14px; height: 14px; }
+  .stat-icon.blue   { background: rgba(74,155,200,0.12); border-color: rgba(74,155,200,0.22); color: #4A9BC8; }
+  .stat-icon.orange { background: rgba(230,140,80,0.12); border-color: rgba(230,140,80,0.22); color: #E68C50; }
+  .stat-icon.green  { background: rgba(76,175,125,0.12); border-color: rgba(76,175,125,0.22); color: var(--ok); }
+  .stat-icon.teal   { background: rgba(74,155,155,0.12); border-color: rgba(74,155,155,0.22); color: var(--brand); }
+  .done-badge {
+    width: 18px; height: 18px;
+    background: rgba(76,175,125,0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .done-badge svg { width: 10px; height: 10px; color: var(--ok); }
+  .stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    color: var(--fg);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 8px;
+  }
+  .stat-meta {
+    font-size: 11px;
+    color: var(--fg2);
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stat-cta {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand);
+    letter-spacing: 0.02em;
+  }
+
+  /* Daily summary strip */
+  .summary-strip {
+    background: rgba(76,175,125,0.05);
+    border: 1px solid rgba(76,175,125,0.18);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .summary-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ok);
+    flex-shrink: 0;
+  }
+  .summary-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ok);
+  }
+  .summary-pill.inactive { color: var(--fg3); }
+
+  /* Adherence card */
+  .adherence-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .adherence-score-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .score-ring {
+    width: 54px; height: 54px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .score-ring svg { width: 54px; height: 54px; transform: rotate(-90deg); }
+  .score-ring .track { fill: none; stroke: var(--border); stroke-width: 4; }
+  .score-ring .fill  { fill: none; stroke: var(--brand); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s; }
+  .score-val {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; letter-spacing: -0.04em; color: var(--fg);
+  }
+  .adherence-summary {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg2);
+    line-height: 1.4;
+  }
+  .adherence-bars { display: flex; flex-direction: column; gap: 8px; }
+  .adh-bar-row { display: flex; align-items: center; gap: 8px; }
+  .adh-bar-label { font-size: 11px; color: var(--fg2); width: 68px; flex-shrink: 0; }
+  .adh-bar-track {
+    flex: 1; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .adh-bar-fill {
+    height: 100%; background: var(--brand); border-radius: 4px;
+  }
+  .adh-bar-pct { font-size: 11px; font-weight: 600; color: var(--fg2); width: 30px; text-align: right; }
+
+  /* Insight card */
+  .insight-card {
+    background: linear-gradient(135deg, rgba(74,155,155,0.1) 0%, var(--card) 60%);
+    border: 1px solid rgba(74,155,155,0.2);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .insight-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .insight-icon {
+    width: 28px; height: 28px;
+    background: rgba(74,155,155,0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .insight-icon svg { width: 14px; height: 14px; color: var(--brand); }
+  .insight-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand);
+  }
+  .insight-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    margin-bottom: 4px;
+  }
+  .insight-desc {
+    font-size: 12px;
+    color: var(--fg2);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .insight-cta {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--brand);
+  }
+
+  /* Recent activity */
+  .activity-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .activity-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+  .activity-row + .activity-row {
+    border-top: 1px solid rgba(30,44,44,0.6);
+  }
+  .act-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .act-icon.done   { border-color: rgba(76,175,125,0.22); background: rgba(76,175,125,0.1); color: var(--ok); }
+  .act-icon.pending { border-color: var(--border); background: rgba(20,32,32,0.6); color: var(--fg3); }
+  .act-icon svg { width: 14px; height: 14px; }
+  .act-body { flex: 1; min-width: 0; }
+  .act-name {
+    font-size: 13px; font-weight: 600; color: var(--fg);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    letter-spacing: -0.02em;
+  }
+  .act-date { font-size: 11px; color: var(--fg3); margin-top: 1px; }
+  .act-status {
+    font-size: 10px; font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .act-status.done   { background: rgba(76,175,125,0.12); color: var(--ok); }
+  .act-status.pending { background: rgba(30,44,44,0.8); color: var(--fg3); }
+
+  /* Action cards */
+  .action-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .action-card.highlighted {
+    background: linear-gradient(135deg, rgba(74,155,155,0.1) 0%, var(--card) 60%);
+    border-color: rgba(74,155,155,0.22);
+  }
+  .action-card-icon {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(74,155,155,0.2);
+    background: rgba(74,155,155,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--brand);
+  }
+  .action-card-icon svg { width: 16px; height: 16px; }
+  .action-card-body { flex: 1; min-width: 0; }
+  .action-phase {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 3px;
+  }
+  .action-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    margin-bottom: 3px;
+  }
+  .action-desc {
+    font-size: 11px;
+    color: var(--fg2);
+    line-height: 1.4;
+  }
+  .action-chevron { color: var(--fg3); flex-shrink: 0; align-self: center; }
+  .action-chevron svg { width: 14px; height: 14px; }
+
+  /* Quick action cards */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .quick-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .quick-icon {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .quick-icon.teal   { background: rgba(74,155,155,0.12); border: 1px solid rgba(74,155,155,0.22); color: var(--brand); }
+  .quick-icon.purple { background: rgba(130,100,200,0.1); border: 1px solid rgba(130,100,200,0.2); color: #9B7ECD; }
+  .quick-icon svg { width: 16px; height: 16px; }
+  .quick-title {
+    font-size: 13px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg);
+  }
+  .quick-sub { font-size: 10px; color: var(--fg2); }
+
+  /* ── EMPTY STATE ── */
+  .empty-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 32px 16px;
+  }
+  .empty-icon {
+    width: 56px; height: 56px;
+    background: rgba(74,155,155,0.08);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .empty-icon svg { width: 26px; height: 26px; color: rgba(74,155,155,0.5); }
+  .empty-heading {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.03em; color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .empty-sub {
+    font-size: 13px; color: var(--fg2); line-height: 1.6; margin-bottom: 20px;
+  }
+  .empty-cta {
+    background: var(--brand);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding: 11px 22px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+  }
+  .setup-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .setup-icon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .setup-icon.orange { background: rgba(230,140,80,0.1); border-color: rgba(230,140,80,0.2); color: #E68C50; }
+  .setup-icon.blue   { background: rgba(74,155,200,0.1); border-color: rgba(74,155,200,0.2); color: #4A9BC8; }
+  .setup-icon.green  { background: rgba(76,175,125,0.1); border-color: rgba(76,175,125,0.2); color: var(--ok); }
+  .setup-icon svg { width: 15px; height: 15px; }
+  .setup-body { flex: 1; min-width: 0; }
+  .setup-title { font-size: 13px; font-weight: 600; color: var(--fg); letter-spacing: -0.02em; }
+  .setup-desc  { font-size: 11px; color: var(--fg2); margin-top: 1px; }
+  .setup-arrow { color: var(--fg3); }
+  .setup-arrow svg { width: 14px; height: 14px; }
+
+  /* Empty snapshot card (no data) */
+  .stat-card.empty {
+    background: rgba(17,26,26,0.6);
+    border-style: dashed;
+    border-color: rgba(30,44,44,0.8);
+  }
+  .stat-value.empty-val { color: var(--fg3); font-size: 14px; font-weight: 500; }
+
+  /* ── TRIAL BANNER ── */
+  .trial-banner {
+    background: linear-gradient(135deg, rgba(74,155,155,0.18) 0%, rgba(74,155,155,0.08) 100%);
+    border: 1px solid rgba(74,155,155,0.3);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .trial-icon {
+    width: 36px; height: 36px;
+    background: rgba(74,155,155,0.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .trial-icon svg { width: 16px; height: 16px; color: var(--brand); }
+  .trial-body { flex: 1; min-width: 0; }
+  .trial-title { font-size: 13px; font-weight: 700; color: var(--fg); letter-spacing: -0.02em; }
+  .trial-sub   { font-size: 11px; color: var(--fg2); margin-top: 2px; }
+  .trial-cta {
+    background: var(--brand);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 7px 12px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .modal-sheet {
+    background: #131F1F;
+    border-radius: 24px 24px 0 0;
+    padding: 0 0 40px;
+    border-top: 1px solid var(--border);
+    max-height: 85%;
+    overflow-y: auto;
+  }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: rgba(138,154,154,0.3);
+    border-radius: 2px;
+    margin: 12px auto 0;
+  }
+  .modal-header {
+    padding: 20px 24px 0;
+  }
+  .modal-title {
+    font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: var(--fg);
+  }
+  .modal-sub {
+    font-size: 13px; color: var(--fg2); margin-top: 4px; line-height: 1.5;
+  }
+  .modal-body {
+    padding: 20px 24px 0;
+  }
+  .rating-row { margin-bottom: 20px; }
+  .rating-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .rating-label {
+    font-size: 13px; font-weight: 700; color: var(--fg); letter-spacing: -0.02em;
+  }
+  .rating-hint { font-size: 10px; color: var(--fg3); }
+  .rating-btns { display: flex; gap: 6px; }
+  .rating-btn {
+    flex: 1; height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg2);
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .rating-btn.active {
+    border-color: rgba(74,155,155,0.5);
+    background: rgba(74,155,155,0.12);
+    color: var(--brand);
+  }
+  .modal-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--fg);
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 20px;
+    resize: none;
+  }
+  .modal-input::placeholder { color: var(--fg3); }
+  .modal-input:focus { outline: none; border-color: rgba(74,155,155,0.5); }
+  .modal-input-label {
+    font-size: 12px; font-weight: 600; color: var(--fg2);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .modal-footer {
+    padding: 16px 24px 0;
+    display: flex;
+    gap: 10px;
+  }
+  .btn-cancel {
+    flex: 1; height: 48px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg2);
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-save {
+    flex: 2; height: 48px;
+    border-radius: 14px;
+    border: none;
+    background: var(--brand);
+    color: #fff;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+  }
+  .btn-save.disabled {
+    opacity: 0.4;
+  }
+
+  /* Screen 15 blurred background for modal preview */
+  .blurred-bg { filter: blur(2px); }
+</style>
+</head>
+<body>
+
+<!-- Page header -->
+<div class="page-header">
+  <div class="suite-label">atlas.core · iOS Design System</div>
+  <h1>Today / Dashboard</h1>
+  <p>Screens 15 – 18 &nbsp;·&nbsp; Athlete Experience</p>
+</div>
+
+<div class="screen-row">
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 15 — Today Dashboard (Full Data State)
+══════════════════════════════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="screen-number">Screen 15</div>
+  <div class="screen-label">Today — Full Data</div>
+  <div class="phone">
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div style="position:absolute;left:50%;top:10px;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;"></div>
+      <div class="status-icons">
+        <!-- Signal -->
+        <svg viewBox="0 0 17 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="white"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" fill="white"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="white" opacity="0.3"/></svg>
+        <!-- WiFi -->
+        <svg viewBox="0 0 16 12" fill="none"><path d="M8 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" fill="white"/><path d="M8 6C6.2 6 4.6 6.8 3.5 8l1.1 1.1C5.4 8.4 6.6 7.8 8 7.8c1.4 0 2.6.6 3.4 1.4L12.5 8C11.4 6.8 9.8 6 8 6z" fill="white"/><path d="M8 2.5C5.2 2.5 2.7 3.7 1 5.7l1.1 1.1C3.5 4.9 5.6 3.8 8 3.8c2.4 0 4.5 1.1 5.9 2.9L15 5.6C13.3 3.7 10.8 2.5 8 2.5z" fill="white" opacity="0.6"/></svg>
+        <!-- Battery -->
+        <svg viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/><path d="M23 4v4a2 2 0 000-4z" fill="white" fill-opacity="0.4"/></svg>
+      </div>
+    </div>
+
+    <div class="phone-content">
+      <!-- Header -->
+      <div class="today-header">
+        <div>
+          <div class="today-overline">Sunday, March 22</div>
+          <div class="today-title">Today</div>
+        </div>
+        <div class="header-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Greeting card -->
+      <div class="greeting-card">
+        <div class="greeting-name">Good morning, Marcus</div>
+        <div class="greeting-sub">Your data's in. Let's make today count.</div>
+      </div>
+
+      <!-- Snapshot section -->
+      <div class="section">
+        <div class="section-eyebrow">Daily overview</div>
+        <div class="section-title">Your pillars</div>
+        <div class="snapshot-grid">
+          <!-- Nutrition -->
+          <div class="stat-card done">
+            <div class="stat-icon-row">
+              <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+              </div>
+              <div class="done-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">2,340</div>
+            <div class="stat-label">Nutrition</div>
+            <div class="stat-meta">kcal · High Protein</div>
+            <div class="stat-cta">Review today →</div>
+          </div>
+          <!-- Workout -->
+          <div class="stat-card done">
+            <div class="stat-icon-row">
+              <div class="stat-icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12M8.5 17.5h7"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>
+              </div>
+              <div class="done-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">Done</div>
+            <div class="stat-label">Workout</div>
+            <div class="stat-meta">Push A · Upper</div>
+            <div class="stat-cta">Review session →</div>
+          </div>
+          <!-- Progress -->
+          <div class="stat-card">
+            <div class="stat-icon-row">
+              <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">78.4 kg</div>
+            <div class="stat-label">Body</div>
+            <div class="stat-meta">Mar 20 · -0.3 kg</div>
+            <div class="stat-cta">Log weight →</div>
+          </div>
+          <!-- Protocols -->
+          <div class="stat-card done">
+            <div class="stat-icon-row">
+              <div class="stat-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div class="done-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">2</div>
+            <div class="stat-label">Protocols</div>
+            <div class="stat-meta">2 active</div>
+            <div class="stat-cta">View protocols →</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily summary strip -->
+      <div class="summary-strip">
+        <div class="summary-label">Today so far</div>
+        <div class="summary-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          Nutrition · 4 entries
+        </div>
+        <div class="summary-pill">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          Workout · completed
+        </div>
+        <div class="summary-pill inactive">
+          <span style="font-size:12px;">—</span>
+          Measurements
+        </div>
+      </div>
+
+      <!-- Adherence + Insight -->
+      <div class="section">
+        <div class="section-eyebrow">Week adherence</div>
+        <div class="section-title">Consistency</div>
+        <div class="adherence-card">
+          <div class="adherence-score-row">
+            <div class="score-ring">
+              <svg viewBox="0 0 54 54">
+                <circle class="track" cx="27" cy="27" r="22" />
+                <!-- 72% fill: circumference = 2π×22 ≈ 138.2, offset = 138.2×(1-0.72) ≈ 38.7 -->
+                <circle class="fill" cx="27" cy="27" r="22"
+                  stroke-dasharray="138.2"
+                  stroke-dashoffset="38.7" />
+              </svg>
+              <div class="score-val">72%</div>
+            </div>
+            <div class="adherence-summary">Strong week — workouts and nutrition on track. Keep the momentum through the weekend.</div>
+          </div>
+          <div class="adherence-bars">
+            <div class="adh-bar-row">
+              <div class="adh-bar-label">Nutrition</div>
+              <div class="adh-bar-track"><div class="adh-bar-fill" style="width:100%"></div></div>
+              <div class="adh-bar-pct">100%</div>
+            </div>
+            <div class="adh-bar-row">
+              <div class="adh-bar-label">Workout</div>
+              <div class="adh-bar-track"><div class="adh-bar-fill" style="width:44%"></div></div>
+              <div class="adh-bar-pct">44%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Insight -->
+      <div class="section">
+        <div class="section-eyebrow">Atlas AI</div>
+        <div class="section-title">Insight</div>
+        <div class="insight-card">
+          <div class="insight-icon-row">
+            <div class="insight-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            </div>
+            <div class="insight-badge">AI Insight</div>
+          </div>
+          <div class="insight-title">4 workouts completed in the last 7 days.</div>
+          <div class="insight-desc">Exceptional week. Your training volume and nutrition are aligned — ideal conditions for adaptation. Consider adding active recovery tomorrow.</div>
+          <div class="insight-cta">View full analysis →</div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="section">
+        <div class="section-eyebrow">Training log</div>
+        <div class="section-title">Recent activity</div>
+        <div class="activity-card">
+          <div class="activity-row">
+            <div class="act-icon done">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="act-body">
+              <div class="act-name">Push A — Upper Chest</div>
+              <div class="act-date">Today · Mar 22</div>
+            </div>
+            <div class="act-status done">Done</div>
+          </div>
+          <div class="activity-row">
+            <div class="act-icon done">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="act-body">
+              <div class="act-name">Pull B — Back & Biceps</div>
+              <div class="act-date">Fri · Mar 20</div>
+            </div>
+            <div class="act-status done">Done</div>
+          </div>
+          <div class="activity-row">
+            <div class="act-icon done">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="act-body">
+              <div class="act-name">Legs A — Squat Focus</div>
+              <div class="act-date">Wed · Mar 18</div>
+            </div>
+            <div class="act-status done">Done</div>
+          </div>
+          <div class="activity-row">
+            <div class="act-icon pending">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="act-body">
+              <div class="act-name">Push B — Shoulders</div>
+              <div class="act-date">Mon · Mar 16</div>
+            </div>
+            <div class="act-status pending">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next steps -->
+      <div class="section">
+        <div class="section-eyebrow">Action items</div>
+        <div class="section-title">Next steps</div>
+        <div class="action-card highlighted">
+          <div class="action-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-phase">Nutrition</div>
+            <div class="action-title">Review nutrition</div>
+            <div class="action-desc">You logged 4 food items today. Keep the day complete.</div>
+          </div>
+          <div class="action-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <div class="action-card">
+          <div class="action-card-icon" style="background:rgba(230,140,80,0.1);border-color:rgba(230,140,80,0.2);color:#E68C50;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12M8.5 17.5h7"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-phase" style="color:#E68C50;">Training</div>
+            <div class="action-title">Review workout log</div>
+            <div class="action-desc">Open the completed session and prepare the next training day.</div>
+          </div>
+          <div class="action-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+        <div class="action-card">
+          <div class="action-card-icon" style="background:rgba(76,175,125,0.1);border-color:rgba(76,175,125,0.2);color:var(--ok);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-phase" style="color:var(--ok);">Body</div>
+            <div class="action-title">Log weight</div>
+            <div class="action-desc">Add body weight and measurements to keep progress trends trustworthy.</div>
+          </div>
+          <div class="action-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="section-eyebrow" style="margin-bottom:10px;">Quick actions</div>
+      <div class="quick-grid">
+        <div class="quick-card">
+          <div class="quick-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
+          </div>
+          <div>
+            <div class="quick-title">Weekly check-in</div>
+            <div class="quick-sub">Energy, mood, sleep · 30 sec</div>
+          </div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <div>
+            <div class="quick-title">Review 4 weeks</div>
+            <div class="quick-sub">See what worked</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <div class="tab-item active">
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="tab-label">Today</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>
+        </div>
+        <div class="tab-label">Train</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        </div>
+        <div class="tab-label">Nutrition</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="tab-label">Body</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+        <div class="tab-label">More</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 16 — Today Empty State (First Day)
+══════════════════════════════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="screen-number">Screen 16</div>
+  <div class="screen-label">Today — Empty State</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div style="position:absolute;left:50%;top:10px;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;"></div>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="white"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" fill="white"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="white" opacity="0.3"/></svg>
+        <svg viewBox="0 0 16 12" fill="none"><path d="M8 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" fill="white"/><path d="M8 6C6.2 6 4.6 6.8 3.5 8l1.1 1.1C5.4 8.4 6.6 7.8 8 7.8c1.4 0 2.6.6 3.4 1.4L12.5 8C11.4 6.8 9.8 6 8 6z" fill="white"/></svg>
+        <svg viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/><path d="M23 4v4a2 2 0 000-4z" fill="white" fill-opacity="0.4"/></svg>
+      </div>
+    </div>
+
+    <div class="phone-content">
+      <!-- Header -->
+      <div class="today-header">
+        <div>
+          <div class="today-overline">Sunday, March 22</div>
+          <div class="today-title">Today</div>
+        </div>
+        <div class="header-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Welcome greeting -->
+      <div class="greeting-card">
+        <div class="greeting-name">Welcome to Atlas, Marcus</div>
+        <div class="greeting-sub">Your command center is ready. Set up your pillars and your data will live here every day.</div>
+      </div>
+
+      <!-- Empty snapshot cards -->
+      <div class="section">
+        <div class="section-eyebrow">Daily overview</div>
+        <div class="section-title">Your pillars</div>
+        <div class="snapshot-grid">
+          <div class="stat-card empty">
+            <div class="stat-icon-row">
+              <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+              </div>
+            </div>
+            <div class="stat-value empty-val">No plan</div>
+            <div class="stat-label">Nutrition</div>
+            <div class="stat-meta">Set up nutrition</div>
+            <div class="stat-cta">Create plan →</div>
+          </div>
+          <div class="stat-card empty">
+            <div class="stat-icon-row">
+              <div class="stat-icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12M8.5 17.5h7"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>
+              </div>
+            </div>
+            <div class="stat-value empty-val">No plan</div>
+            <div class="stat-label">Workout</div>
+            <div class="stat-meta">Set up training</div>
+            <div class="stat-cta">Create plan →</div>
+          </div>
+          <div class="stat-card empty">
+            <div class="stat-icon-row">
+              <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+            </div>
+            <div class="stat-value empty-val">—</div>
+            <div class="stat-label">Body</div>
+            <div class="stat-meta">Add measurement</div>
+            <div class="stat-cta">Log weight →</div>
+          </div>
+          <div class="stat-card empty">
+            <div class="stat-icon-row">
+              <div class="stat-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+            </div>
+            <div class="stat-value empty-val">0</div>
+            <div class="stat-label">Protocols</div>
+            <div class="stat-meta">None active</div>
+            <div class="stat-cta">View protocols →</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty AI insight -->
+      <div class="section">
+        <div class="section-eyebrow">Atlas AI</div>
+        <div class="section-title">Insight</div>
+        <div class="insight-card">
+          <div class="insight-icon-row">
+            <div class="insight-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            </div>
+            <div class="insight-badge">AI Insight</div>
+          </div>
+          <div class="insight-title">Add your first body measurement.</div>
+          <div class="insight-desc">Start with body weight and key measurements so Atlas can establish your baseline and begin tracking real progress.</div>
+          <div class="insight-cta">Log first measurement →</div>
+        </div>
+      </div>
+
+      <!-- Setup cards -->
+      <div class="section">
+        <div class="section-eyebrow">Get started</div>
+        <div class="section-title">Set up your pillars</div>
+        <div class="setup-card">
+          <div class="setup-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>
+          </div>
+          <div class="setup-body">
+            <div class="setup-title">Create workout plan</div>
+            <div class="setup-desc">Build your active training structure so Atlas can track sessions and execution.</div>
+          </div>
+          <div class="setup-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="setup-card">
+          <div class="setup-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+          </div>
+          <div class="setup-body">
+            <div class="setup-title">Set up nutrition plan</div>
+            <div class="setup-desc">Define your calorie and macro targets so every meal moves the needle.</div>
+          </div>
+          <div class="setup-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="setup-card">
+          <div class="setup-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="setup-body">
+            <div class="setup-title">Log your first measurement</div>
+            <div class="setup-desc">Add body weight and circumferences to start tracking real progress.</div>
+          </div>
+          <div class="setup-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="setup-card">
+          <div class="setup-icon" style="background:rgba(74,155,155,0.1);border-color:rgba(74,155,155,0.2);color:var(--brand);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+          </div>
+          <div class="setup-body">
+            <div class="setup-title">Add a progress photo</div>
+            <div class="setup-desc">Capture a dated visual baseline — your first data point in the photo timeline.</div>
+          </div>
+          <div class="setup-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </div>
+
+      <!-- Adherence empty -->
+      <div class="section">
+        <div class="section-eyebrow">Week adherence</div>
+        <div class="section-title">Consistency</div>
+        <div class="adherence-card">
+          <div class="adherence-score-row">
+            <div class="score-ring">
+              <svg viewBox="0 0 54 54">
+                <circle class="track" cx="27" cy="27" r="22" />
+                <circle class="fill" cx="27" cy="27" r="22"
+                  stroke-dasharray="138.2"
+                  stroke-dashoffset="138.2"
+                  stroke="var(--fg3)" />
+              </svg>
+              <div class="score-val" style="color:var(--fg3);">0%</div>
+            </div>
+            <div class="adherence-summary" style="color:var(--fg3);">Configure your plans to start tracking weekly consistency and adherence scores.</div>
+          </div>
+          <div class="adherence-bars">
+            <div class="adh-bar-row">
+              <div class="adh-bar-label">Nutrition</div>
+              <div class="adh-bar-track"><div class="adh-bar-fill" style="width:0%;background:var(--fg3)"></div></div>
+              <div class="adh-bar-pct" style="color:var(--fg3);">0%</div>
+            </div>
+            <div class="adh-bar-row">
+              <div class="adh-bar-label">Workout</div>
+              <div class="adh-bar-track"><div class="adh-bar-fill" style="width:0%;background:var(--fg3)"></div></div>
+              <div class="adh-bar-pct" style="color:var(--fg3);">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="section-eyebrow" style="margin-bottom:10px;">Quick actions</div>
+      <div class="quick-grid">
+        <div class="quick-card">
+          <div class="quick-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
+          </div>
+          <div>
+            <div class="quick-title">Weekly check-in</div>
+            <div class="quick-sub">Energy, mood, sleep · 30 sec</div>
+          </div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <div>
+            <div class="quick-title">Review 4 weeks</div>
+            <div class="quick-sub">See what worked</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item active">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="tab-label">Today</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg></div>
+        <div class="tab-label">Train</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></div>
+        <div class="tab-label">Nutrition</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div class="tab-label">Body</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+        <div class="tab-label">More</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 17 — Weekly Check-in Modal
+══════════════════════════════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="screen-number">Screen 17</div>
+  <div class="screen-label">Weekly Check-in Modal</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div style="position:absolute;left:50%;top:10px;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;"></div>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="white"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" fill="white"/></svg>
+        <svg viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+      </div>
+    </div>
+
+    <!-- Blurred background (simulated) -->
+    <div style="flex:1;position:relative;overflow:hidden;">
+      <!-- Background content (blurred) -->
+      <div style="padding:52px 20px 0;filter:blur(3px);opacity:0.4;pointer-events:none;">
+        <div class="today-header">
+          <div>
+            <div class="today-overline">Sunday, March 22</div>
+            <div class="today-title">Today</div>
+          </div>
+        </div>
+        <div class="greeting-card">
+          <div class="greeting-name">Good morning, Marcus</div>
+          <div class="greeting-sub">Your data's in. Let's make today count.</div>
+        </div>
+        <div class="snapshot-grid">
+          <div class="stat-card done"><div class="stat-value">2,340</div><div class="stat-label">Nutrition</div></div>
+          <div class="stat-card done"><div class="stat-value">Done</div><div class="stat-label">Workout</div></div>
+          <div class="stat-card"><div class="stat-value">78.4 kg</div><div class="stat-label">Body</div></div>
+          <div class="stat-card done"><div class="stat-value">2</div><div class="stat-label">Protocols</div></div>
+        </div>
+      </div>
+
+      <!-- Modal overlay -->
+      <div class="modal-overlay">
+        <div class="modal-sheet">
+          <div class="modal-handle"></div>
+
+          <div class="modal-header">
+            <div class="modal-title">Weekly check-in</div>
+            <div class="modal-sub">How are you feeling? Takes less than 30 seconds.</div>
+          </div>
+
+          <div class="modal-body">
+
+            <!-- Energy rating -->
+            <div class="rating-row">
+              <div class="rating-label-row">
+                <div class="rating-label">Energy</div>
+                <div class="rating-hint">1 = very low · 5 = peak</div>
+              </div>
+              <div class="rating-btns">
+                <div class="rating-btn">1</div>
+                <div class="rating-btn">2</div>
+                <div class="rating-btn">3</div>
+                <div class="rating-btn active">4</div>
+                <div class="rating-btn">5</div>
+              </div>
+              <div style="margin-top:6px;font-size:11px;color:var(--brand);">Good energy</div>
+            </div>
+
+            <!-- Mood rating -->
+            <div class="rating-row">
+              <div class="rating-label-row">
+                <div class="rating-label">Mood</div>
+                <div class="rating-hint">1 = very low · 5 = excellent</div>
+              </div>
+              <div class="rating-btns">
+                <div class="rating-btn">1</div>
+                <div class="rating-btn">2</div>
+                <div class="rating-btn active">3</div>
+                <div class="rating-btn">4</div>
+                <div class="rating-btn">5</div>
+              </div>
+              <div style="margin-top:6px;font-size:11px;color:var(--brand);">Mood ok</div>
+            </div>
+
+            <!-- Sleep hours -->
+            <div style="margin-bottom:20px;">
+              <div class="modal-input-label">Sleep hours (optional)</div>
+              <input
+                class="modal-input"
+                type="number"
+                placeholder="e.g. 7.5"
+                value="7"
+                style="display:block;"
+                readonly
+              />
+            </div>
+
+            <!-- Notes -->
+            <div>
+              <div class="modal-input-label">Notes (optional)</div>
+              <textarea
+                class="modal-input"
+                rows="2"
+                placeholder="Anything notable about today…"
+                readonly
+              >Legs feeling heavy after yesterday's session.</textarea>
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn-cancel">Cancel</button>
+            <button class="btn-save">Save check-in</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREEN 18 — Trial Banner State
+══════════════════════════════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="screen-number">Screen 18</div>
+  <div class="screen-label">Trial Banner State</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div style="position:absolute;left:50%;top:10px;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;"></div>
+      <div class="status-icons">
+        <svg viewBox="0 0 17 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="white"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" fill="white"/></svg>
+        <svg viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="10" height="8" rx="2" fill="white"/></svg>
+      </div>
+    </div>
+
+    <div class="phone-content">
+      <!-- Header -->
+      <div class="today-header">
+        <div>
+          <div class="today-overline">Sunday, March 22</div>
+          <div class="today-title">Today</div>
+        </div>
+        <div class="header-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Trial banner -->
+      <div class="trial-banner">
+        <div class="trial-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </div>
+        <div class="trial-body">
+          <div class="trial-title">5 days left in your trial</div>
+          <div class="trial-sub">Upgrade to keep full access to all features</div>
+        </div>
+        <div class="trial-cta">Upgrade</div>
+      </div>
+
+      <!-- Greeting card -->
+      <div class="greeting-card">
+        <div class="greeting-name">Good morning, Marcus</div>
+        <div class="greeting-sub">Your data's in. Let's make today count.</div>
+      </div>
+
+      <!-- Snapshot section -->
+      <div class="section">
+        <div class="section-eyebrow">Daily overview</div>
+        <div class="section-title">Your pillars</div>
+        <div class="snapshot-grid">
+          <div class="stat-card done">
+            <div class="stat-icon-row">
+              <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+              </div>
+              <div class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <div class="stat-value">2,340</div>
+            <div class="stat-label">Nutrition</div>
+            <div class="stat-meta">kcal · High Protein</div>
+            <div class="stat-cta">Review today →</div>
+          </div>
+          <div class="stat-card done">
+            <div class="stat-icon-row">
+              <div class="stat-icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12M8.5 17.5h7"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>
+              </div>
+              <div class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <div class="stat-value">Done</div>
+            <div class="stat-label">Workout</div>
+            <div class="stat-meta">Push A · Upper</div>
+            <div class="stat-cta">Review session →</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-row">
+              <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">78.4 kg</div>
+            <div class="stat-label">Body</div>
+            <div class="stat-meta">Mar 20 · -0.3 kg</div>
+            <div class="stat-cta">Log weight →</div>
+          </div>
+          <div class="stat-card done">
+            <div class="stat-icon-row">
+              <div class="stat-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <div class="stat-value">2</div>
+            <div class="stat-label">Protocols</div>
+            <div class="stat-meta">2 active</div>
+            <div class="stat-cta">View protocols →</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily summary strip -->
+      <div class="summary-strip">
+        <div class="summary-label">Today so far</div>
+        <div class="summary-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Nutrition · 4 entries</div>
+        <div class="summary-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Workout · completed</div>
+      </div>
+
+      <!-- Adherence -->
+      <div class="section">
+        <div class="section-eyebrow">Week adherence</div>
+        <div class="section-title">Consistency</div>
+        <div class="adherence-card">
+          <div class="adherence-score-row">
+            <div class="score-ring">
+              <svg viewBox="0 0 54 54">
+                <circle class="track" cx="27" cy="27" r="22" />
+                <circle class="fill" cx="27" cy="27" r="22"
+                  stroke-dasharray="138.2"
+                  stroke-dashoffset="38.7" />
+              </svg>
+              <div class="score-val">72%</div>
+            </div>
+            <div class="adherence-summary">Strong week — keep the momentum. Upgrade to unlock weekly trend analytics and protocol tracking.</div>
+          </div>
+          <div class="adherence-bars">
+            <div class="adh-bar-row">
+              <div class="adh-bar-label">Nutrition</div>
+              <div class="adh-bar-track"><div class="adh-bar-fill" style="width:100%"></div></div>
+              <div class="adh-bar-pct">100%</div>
+            </div>
+            <div class="adh-bar-row">
+              <div class="adh-bar-label">Workout</div>
+              <div class="adh-bar-track"><div class="adh-bar-fill" style="width:44%"></div></div>
+              <div class="adh-bar-pct">44%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Insight (with trial lock) -->
+      <div class="section">
+        <div class="section-eyebrow">Atlas AI</div>
+        <div class="section-title">Insight</div>
+        <div class="insight-card">
+          <div class="insight-icon-row">
+            <div class="insight-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            </div>
+            <div class="insight-badge">AI Insight</div>
+          </div>
+          <div class="insight-title">4 workouts completed in the last 7 days.</div>
+          <div class="insight-desc">Exceptional week. Your training volume and nutrition are aligned — ideal conditions for adaptation.</div>
+          <!-- Locked deeper analysis -->
+          <div style="background:rgba(74,155,155,0.08);border:1px solid rgba(74,155,155,0.18);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px;margin-top:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span style="font-size:11px;color:var(--fg2);">Full AI analysis unlocked with Pro. <span style="color:var(--brand);font-weight:600;">Upgrade →</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next steps -->
+      <div class="section">
+        <div class="section-eyebrow">Action items</div>
+        <div class="section-title">Next steps</div>
+        <div class="action-card highlighted">
+          <div class="action-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-phase">Nutrition</div>
+            <div class="action-title">Review nutrition</div>
+            <div class="action-desc">4 entries logged. Keep the day complete.</div>
+          </div>
+          <div class="action-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="action-card">
+          <div class="action-card-icon" style="background:rgba(230,140,80,0.1);border-color:rgba(230,140,80,0.2);color:#E68C50;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12M8.5 17.5h7"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg>
+          </div>
+          <div class="action-card-body">
+            <div class="action-phase" style="color:#E68C50;">Training</div>
+            <div class="action-title">Review workout log</div>
+            <div class="action-desc">Open the completed session and prepare the next training day.</div>
+          </div>
+          <div class="action-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="section-eyebrow" style="margin-bottom:10px;">Quick actions</div>
+      <div class="quick-grid">
+        <div class="quick-card">
+          <div class="quick-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
+          </div>
+          <div>
+            <div class="quick-title">Weekly check-in</div>
+            <div class="quick-sub">Energy, mood, sleep · 30 sec</div>
+          </div>
+        </div>
+        <div class="quick-card" style="position:relative;overflow:hidden;">
+          <div style="position:absolute;inset:0;background:rgba(8,14,14,0.5);display:flex;align-items:center;justify-content:center;border-radius:18px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span style="font-size:10px;color:var(--brand);font-weight:600;">Pro</span>
+            </div>
+          </div>
+          <div class="quick-icon purple" style="opacity:0.3;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <div style="opacity:0.3;">
+            <div class="quick-title">Review 4 weeks</div>
+            <div class="quick-sub">See what worked</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item active">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="tab-label">Today</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6 12h12"/><circle cx="4" cy="6.5" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="20" cy="6.5" r="1.5"/><circle cx="20" cy="12" r="1.5"/></svg></div>
+        <div class="tab-label">Train</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></div>
+        <div class="tab-label">Nutrition</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div class="tab-label">Body</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+        <div class="tab-label">More</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end screen-row -->
+
+<!-- Legend / annotation strip -->
+<div style="margin-top:64px;max-width:1200px;width:100%;background:#0D1616;border:1px solid var(--border);border-radius:20px;padding:28px 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;">
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--brand);margin-bottom:8px;">Screen 15</div>
+    <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">Today — Full Data</div>
+    <div style="font-size:11px;color:var(--fg2);line-height:1.6;">All 4 pillars populated. Summary strip active (2+ done). Adherence ring at 72%. AI insight from real session data. 4 recent activities shown. Next steps contextual to state.</div>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--brand);margin-bottom:8px;">Screen 16</div>
+    <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">Today — Empty State</div>
+    <div style="font-size:11px;color:var(--fg2);line-height:1.6;">First-day experience. All pillar cards show "no plan" with dashed borders. Adherence at 0%. AI insight nudges toward first measurement. 4 setup cards guide the user through onboarding.</div>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--brand);margin-bottom:8px;">Screen 17</div>
+    <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">Weekly Check-in Modal</div>
+    <div style="font-size:11px;color:var(--fg2);line-height:1.6;">Bottom sheet over blurred dashboard. Drag handle. Energy + Mood on 1–5 scale with live label feedback. Optional sleep hours and notes fields. Save button active once both ratings selected.</div>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--brand);margin-bottom:8px;">Screen 18</div>
+    <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">Trial Banner State</div>
+    <div style="font-size:11px;color:var(--fg2);line-height:1.6;">Teal trial banner below the header — premium-feel, not disruptive. Full data visible. "Review 4 weeks" locked with Pro overlay. AI insight shows locked deeper analysis nudge inline.</div>
+  </div>
+</div>
+
+</body>
+</html>

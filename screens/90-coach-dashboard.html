@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>90 · Coach — Dashboard · atlas.core</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+  :root {
+    --bg:       #080E0E;
+    --card:     #111A1A;
+    --card-hi:  #162020;
+    --border:   #1E2C2C;
+    --teal:     #4A9B9B;
+    --teal-dim: rgba(74,155,155,0.12);
+    --teal-mid: rgba(74,155,155,0.22);
+    --white:    #FFFFFF;
+    --sub:      #8A9A9A;
+    --ok:       #4CAF7D;
+    --ok-dim:   rgba(76,175,125,0.12);
+    --warn:     #E8A838;
+    --warn-dim: rgba(232,168,56,0.12);
+    --err:      #E05C5C;
+    --err-dim:  rgba(224,92,92,0.12);
+  }
+
+  body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont, sans-serif;
+  }
+
+  .phone {
+    width: 375px;
+    min-height: 812px;
+    background: var(--bg);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+  }
+
+  /* Status Bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 0;
+    height: 44px;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: var(--white); letter-spacing: -0.3px; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons svg { color: var(--white); }
+
+  /* Nav */
+  .nav {
+    padding: 8px 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .nav-title { font-size: 34px; font-weight: 700; color: var(--white); letter-spacing: -0.8px; line-height: 1.05; }
+  .nav-sub { font-size: 13px; color: var(--sub); margin-top: 3px; }
+  .nav-action {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--teal);
+    cursor: pointer;
+  }
+
+  /* Scroll area */
+  .scroll { padding: 16px 20px 120px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: 700px; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* Alert Banner */
+  .alert-banner {
+    background: rgba(224,92,92,0.1);
+    border: 1px solid rgba(224,92,92,0.25);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .alert-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--err);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px var(--err);
+  }
+  .alert-text { font-size: 13px; font-weight: 500; color: var(--err); flex: 1; }
+  .alert-cta { font-size: 12px; font-weight: 600; color: var(--err); white-space: nowrap; }
+
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .kpi-icon { margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: var(--white); letter-spacing: -0.8px; font-variant-numeric: tabular-nums; }
+  .kpi-label { font-size: 12px; color: var(--sub); font-weight: 500; }
+  .kpi-delta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .kpi-delta.up { color: var(--ok); }
+  .kpi-delta.down { color: var(--err); }
+  .kpi-delta.warn { color: var(--warn); }
+
+  /* Section Header */
+  .section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .section-title { font-size: 15px; font-weight: 600; color: var(--white); letter-spacing: -0.2px; }
+  .section-link { font-size: 13px; color: var(--teal); font-weight: 500; }
+
+  /* At-Risk Cards */
+  .at-risk-card {
+    background: var(--card);
+    border: 1px solid rgba(224,92,92,0.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .at-risk-card:last-child { margin-bottom: 0; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .avatar.red { background: var(--err-dim); color: var(--err); }
+  .avatar.teal { background: var(--teal-dim); color: var(--teal); }
+  .avatar.ok { background: var(--ok-dim); color: var(--ok); }
+  .avatar.warn { background: var(--warn-dim); color: var(--warn); }
+
+  .student-info { flex: 1; min-width: 0; }
+  .student-name { font-size: 14px; font-weight: 600; color: var(--white); letter-spacing: -0.2px; }
+  .student-meta { font-size: 12px; color: var(--sub); margin-top: 2px; }
+  .adherence-badge {
+    font-size: 13px; font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .adherence-badge.low { background: var(--err-dim); color: var(--err); }
+  .adherence-badge.mid { background: var(--warn-dim); color: var(--warn); }
+  .adherence-badge.high { background: var(--ok-dim); color: var(--ok); }
+  .chevron { color: var(--border); margin-left: 4px; }
+
+  /* Squad Overview */
+  .squad-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .squad-row:last-child { margin-bottom: 0; }
+
+  .adherence-bar-wrap { flex: 1; }
+  .adherence-bar-label {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 5px;
+  }
+  .adherence-bar-name { font-size: 13px; font-weight: 500; color: var(--white); }
+  .adherence-bar-pct { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bar-track {
+    height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 2px; }
+
+  /* Tab Bar */
+  .tabbar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 84px;
+    background: rgba(8,14,14,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 4px; cursor: pointer;
+    padding-top: 2px;
+  }
+  .tab-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+  .tab-label { font-size: 10px; font-weight: 500; }
+  .tab-item.active .tab-label { color: var(--teal); }
+  .tab-item.active .tab-icon svg { stroke: var(--teal); }
+  .tab-item:not(.active) .tab-label { color: var(--sub); }
+  .tab-item:not(.active) .tab-icon svg { stroke: var(--sub); }
+
+  /* Section label */
+  .section { margin-bottom: 0; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 0 -20px; }
+
+  /* Insight row */
+  .insight-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(74,155,155,0.2);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .insight-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .insight-text { font-size: 13px; color: var(--sub); line-height: 1.5; }
+  .insight-text strong { color: var(--teal); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+        <rect x="0" y="3" width="3" height="9" rx="1" fill="white"/>
+        <rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/>
+        <rect x="9" y="0" width="3" height="12" rx="1" fill="white"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="1" fill="white" opacity="0.35"/>
+      </svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <path d="M8 2.4C10.65 2.4 13.05 3.5 14.75 5.3L16 4C13.95 1.85 11.13 0.5 8 0.5C4.87 0.5 2.05 1.85 0 4L1.25 5.3C2.95 3.5 5.35 2.4 8 2.4Z" fill="white"/>
+        <path d="M8 5.5C9.82 5.5 11.47 6.27 12.65 7.5L13.9 6.2C12.37 4.65 10.29 3.7 8 3.7C5.71 3.7 3.63 4.65 2.1 6.2L3.35 7.5C4.53 6.27 6.18 5.5 8 5.5Z" fill="white"/>
+        <circle cx="8" cy="11" r="1.5" fill="white"/>
+      </svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+        <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/>
+        <rect x="2" y="2" width="16" height="8" rx="2" fill="white"/>
+        <path d="M23 4.5V7.5C23.83 7.22 24.5 6.66 24.5 6C24.5 5.34 23.83 4.78 23 4.5Z" fill="white" opacity="0.4"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Nav Header -->
+  <div class="nav">
+    <div>
+      <div class="nav-title">Coach</div>
+      <div class="nav-sub">Sunday, March 22</div>
+    </div>
+    <div class="nav-action">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Scrollable Content -->
+  <div class="scroll">
+
+    <!-- Alert Banner -->
+    <div class="alert-banner">
+      <div class="alert-dot"></div>
+      <div class="alert-text">2 students need attention — adherence below 60%</div>
+      <div class="alert-cta">Review →</div>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A9B9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-label">Active Students</div>
+        <div class="kpi-delta up">↑ 2 this month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4CAF7D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+          </svg>
+        </div>
+        <div class="kpi-value">74<span style="font-size:18px;font-weight:500;color:#8A9A9A">%</span></div>
+        <div class="kpi-label">Avg Adherence</div>
+        <div class="kpi-delta up">↑ 4% vs last week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E05C5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div class="kpi-value">2</div>
+        <div class="kpi-label">At Risk</div>
+        <div class="kpi-delta down">Needs review</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A838" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+        <div class="kpi-value">3</div>
+        <div class="kpi-label">Pending Plans</div>
+        <div class="kpi-delta warn">Unassigned</div>
+      </div>
+    </div>
+
+    <!-- Needs Attention -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">⚠️ Needs Attention</div>
+      </div>
+
+      <div class="at-risk-card">
+        <div class="avatar red">M</div>
+        <div class="student-info">
+          <div class="student-name">Marcus T.</div>
+          <div class="student-meta">No workout logged in 5 days</div>
+        </div>
+        <div class="adherence-badge low">48%</div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <div class="at-risk-card">
+        <div class="avatar warn">S</div>
+        <div class="student-info">
+          <div class="student-name">Sofia R.</div>
+          <div class="student-meta">Check-in missing 3 days</div>
+        </div>
+        <div class="adherence-badge low">54%</div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- Insight -->
+    <div class="insight-row">
+      <div class="insight-icon">💡</div>
+      <div class="insight-text"><strong>3 students</strong> have active workout plans expiring this week. Consider prescribing new cycles before Friday.</div>
+    </div>
+
+    <!-- Squad Overview -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Squad Overview</div>
+        <div class="section-link">See all →</div>
+      </div>
+
+      <div class="squad-row">
+        <div class="avatar teal">J</div>
+        <div class="adherence-bar-wrap">
+          <div class="adherence-bar-label">
+            <span class="adherence-bar-name">Julia M.</span>
+            <span class="adherence-bar-pct" style="color:#4CAF7D">92%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:92%;background:#4CAF7D;"></div></div>
+        </div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <div class="squad-row">
+        <div class="avatar ok">A</div>
+        <div class="adherence-bar-wrap">
+          <div class="adherence-bar-label">
+            <span class="adherence-bar-name">Andre L.</span>
+            <span class="adherence-bar-pct" style="color:#4CAF7D">87%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:87%;background:#4CAF7D;"></div></div>
+        </div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <div class="squad-row">
+        <div class="avatar teal">C</div>
+        <div class="adherence-bar-wrap">
+          <div class="adherence-bar-label">
+            <span class="adherence-bar-name">Camila F.</span>
+            <span class="adherence-bar-pct" style="color:#4A9B9B">78%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:78%;background:#4A9B9B;"></div></div>
+        </div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <div class="squad-row">
+        <div class="avatar warn">R</div>
+        <div class="adherence-bar-wrap">
+          <div class="adherence-bar-label">
+            <span class="adherence-bar-name">Ricardo P.</span>
+            <span class="adherence-bar-pct" style="color:#E8A838">65%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:65%;background:#E8A838;"></div></div>
+        </div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- Tab Bar -->
+  <div class="tabbar">
+    <div class="tab-item">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+      </div>
+      <div class="tab-label">Today</div>
+    </div>
+    <div class="tab-item active">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="tab-label">Coach</div>
+    </div>
+    <div class="tab-item">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+        </svg>
+      </div>
+      <div class="tab-label">Train</div>
+    </div>
+    <div class="tab-item">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+        </svg>
+      </div>
+      <div class="tab-label">Body</div>
+    </div>
+    <div class="tab-item">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+        </svg>
+      </div>
+      <div class="tab-label">More</div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+</body>
+</html>

@@ -14,9 +14,34 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, LayoutGrid, LayoutList, Heart, Clock, Loader2, SlidersHorizontal, X } from 'lucide-react';
+import {
+  Clock,
+  Heart,
+  LayoutGrid,
+  LayoutList,
+  Loader2,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  Target,
+  Wrench,
+  X,
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import ExerciseCard from '@/components/exercises/ExerciseCard.jsx';
+import {
+  ActionRow,
+  AppContainer,
+  Card,
+  PageHeader,
+  Section,
+} from '@/components/shared/AppContainer';
+import {
+  EmptyState,
+  FilterChip,
+  PrimaryButton,
+  SecondaryButton,
+} from '@/components/shared/StablePage';
 import {
   exerciseKeys,
   fetchExerciseLibrary,
@@ -26,28 +51,10 @@ import {
   fetchFavoriteExercises,
   fetchRecentExercises,
   searchExercises,
-  localSearch,
   bodyPartToPT,
   muscleToPT,
   equipmentToPT,
 } from '@/lib/exerciseDB/index.js';
-
-// ─── Filter panel ─────────────────────────────────────────────────────────────
-
-function FilterChip({ label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors capitalize truncate max-w-[140px] ${
-        active
-          ? 'bg-[hsl(var(--brand))] text-white border-[hsl(var(--brand))]'
-          : 'border-[hsl(var(--border-h))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--shell))]'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
@@ -166,6 +173,28 @@ export default function Exercises() {
   }, []);
 
   const hasActiveFilters = bodyPart || muscle || equipment || showFavorites || showRecent || search;
+  const summaryCards = [
+    {
+      label: isSearching ? 'Search results' : 'Library',
+      value: exercises.length,
+      detail: isSearching
+        ? `Results for "${debouncedSearch || search}"`
+        : 'Available exercises in the current view.',
+      icon: Search,
+    },
+    {
+      label: 'Body focus',
+      value: bodyPart ? bodyPartToPT(bodyPart) : 'All groups',
+      detail: bodyPart ? 'Filtered body region.' : 'Browse the full catalog.',
+      icon: Target,
+    },
+    {
+      label: 'Equipment',
+      value: equipment ? equipmentToPT(equipment) : 'Mixed',
+      detail: equipment ? 'Specific setup selected.' : 'Any available equipment.',
+      icon: Wrench,
+    },
+  ];
 
   const toggleBodyPart = (bp) => {
     setBodyPart((p) => (p === bp ? '' : bp));
@@ -194,208 +223,222 @@ export default function Exercises() {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="mx-auto max-w-7xl p-5 lg:p-8 space-y-5">
+    <AppContainer maxWidth="max-w-7xl">
+      <PageHeader
+        eyebrow="Exercises"
+        title="Exercise library built for quick browsing and clean selection."
+        subtitle="Search by name, filter by body region or equipment, and move from browsing into execution with minimal friction."
+        accentClassName="from-[hsl(var(--brand)/0.14)] via-[hsl(var(--brand)/0.04)]"
+        actions={
+          <ActionRow>
+            <SecondaryButton
+              type="button"
+              onClick={() => setShowFilters((f) => !f)}
+              className={showFilters || hasActiveFilters ? 'border-[hsl(var(--brand)/0.42)] text-[hsl(var(--brand))]' : ''}
+            >
+              <SlidersHorizontal className="h-4 w-4" strokeWidth={1.9} />
+              Filters
+            </SecondaryButton>
+            <SecondaryButton type="button" onClick={() => setCompactView((v) => !v)}>
+              {compactView ? <LayoutGrid className="h-4 w-4" strokeWidth={1.9} /> : <LayoutList className="h-4 w-4" strokeWidth={1.9} />}
+              {compactView ? 'Grid view' : 'List view'}
+            </SecondaryButton>
+          </ActionRow>
+        }
+      >
+        <div className="grid gap-3 md:grid-cols-3">
+          {summaryCards.map(({ label, value, detail, icon: Icon }) => (
+            <Card key={label} className="px-4 py-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="atlas-metric-label">{label}</p>
+                  <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
+                    {value}
+                  </p>
+                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--brand))]">
+                  <Icon className="h-4 w-4" strokeWidth={1.9} />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </PageHeader>
 
-      {/* Page header */}
-      <div>
-        <h1 className="t-headline mb-1">Biblioteca de Exercícios</h1>
-        <p className="t-caption">
-          {isSearching
-            ? `${exercises.length} resultado${exercises.length !== 1 ? 's' : ''} para "${debouncedSearch}"`
-            : `${exercises.length} exercício${exercises.length !== 1 ? 's' : ''}`}
-        </p>
-      </div>
+      <Section
+        eyebrow="Search"
+        title="Find the right movement"
+        subtitle="Search is bilingual, fast, and tuned for common athlete queries."
+      >
+        <Card className="space-y-4 px-4 py-4 sm:px-5">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-2))]" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, alias, movement pattern, or muscle group"
+                className="atlas-field h-11 rounded-[14px] border-[hsl(var(--border)/0.86)] pl-10 pr-10 text-base"
+              />
+              {isLoading ? (
+                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[hsl(var(--fg-2))]" />
+              ) : null}
+              {search && !isLoading ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
+            </div>
 
-      {/* Search + controls */}
-      <div className="surface rounded-xl p-4 space-y-3">
-        <div className="flex gap-2">
-          {/* Search input */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--fg-2))]" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar exercício… (supino, agachamento, pull-up)"
-              className="h-10 pl-10 pr-9 rounded-lg text-base"
-            />
-            {isLoading && (
-              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[hsl(var(--fg-2))]" />
-            )}
-            {search && !isLoading && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]"
+            <ActionRow className="sm:justify-end">
+              <SecondaryButton
+                type="button"
+                onClick={() => { setShowFavorites((f) => !f); setShowRecent(false); }}
+                className={showFavorites ? 'border-[hsl(var(--err)/0.32)] text-[hsl(var(--err))]' : ''}
               >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+                <Heart className="h-4 w-4" strokeWidth={1.9} />
+                Favorites
+              </SecondaryButton>
+              <SecondaryButton
+                type="button"
+                onClick={() => { setShowRecent((r) => !r); setShowFavorites(false); }}
+                className={showRecent ? 'border-[hsl(var(--brand)/0.32)] text-[hsl(var(--brand))]' : ''}
+              >
+                <Clock className="h-4 w-4" strokeWidth={1.9} />
+                Recents
+              </SecondaryButton>
+              {hasActiveFilters ? (
+                <SecondaryButton type="button" onClick={clearFilters}>
+                  <X className="h-4 w-4" strokeWidth={1.9} />
+                  Clear
+                </SecondaryButton>
+              ) : null}
+            </ActionRow>
           </div>
 
-          {/* Filter toggle */}
-          <button
-            onClick={() => setShowFilters((f) => !f)}
-            className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-colors shrink-0 ${
-              showFilters || hasActiveFilters
-                ? 'bg-[hsl(var(--brand)/0.1)] border-[hsl(var(--brand)/0.3)] text-[hsl(var(--brand))]'
-                : 'border-[hsl(var(--border-h))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--shell))]'
-            }`}
-          >
-            <SlidersHorizontal className="w-4 h-4" strokeWidth={2} />
-          </button>
+          {(bodyPart || muscle || equipment) ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[12px] font-medium text-[hsl(var(--fg-2))]">Active filters</span>
+              {bodyPart ? (
+                <FilterChip active onClick={() => setBodyPart('')}>
+                  {bodyPartToPT(bodyPart)}
+                </FilterChip>
+              ) : null}
+              {muscle ? (
+                <FilterChip active onClick={() => setMuscle('')}>
+                  {muscleToPT(muscle)}
+                </FilterChip>
+              ) : null}
+              {equipment ? (
+                <FilterChip active onClick={() => setEquipment('')}>
+                  {equipmentToPT(equipment)}
+                </FilterChip>
+              ) : null}
+            </div>
+          ) : null}
 
-          {/* View toggle */}
-          <button
-            onClick={() => setCompactView((v) => !v)}
-            className="w-10 h-10 rounded-lg flex items-center justify-center border border-[hsl(var(--border-h))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--shell))] transition-colors shrink-0"
-          >
-            {compactView
-              ? <LayoutGrid className="w-4 h-4" strokeWidth={2} />
-              : <LayoutList className="w-4 h-4" strokeWidth={2} />}
-          </button>
-        </div>
+          {showFilters && !isSearching ? (
+            <div className="grid gap-4 border-t border-[hsl(var(--border)/0.8)] pt-4 lg:grid-cols-3">
+              <div className="space-y-2.5">
+                <p className="atlas-metric-label">Body region</p>
+                <div className="flex flex-wrap gap-2">
+                  {bodyParts.map((bp) => (
+                    <FilterChip key={bp} active={bodyPart === bp} onClick={() => toggleBodyPart(bp)}>
+                      {bodyPartToPT(bp)}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
 
-        {/* Quick toggles */}
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => { setShowFavorites((f) => !f); setShowRecent(false); }}
-            className={`px-3 h-8 rounded-lg text-[12px] font-medium transition-colors flex items-center gap-1.5 ${
-              showFavorites
-                ? 'bg-[hsl(var(--err)/0.1)] text-[hsl(var(--err))]'
-                : 'bg-[hsl(var(--shell))] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
-            }`}
-          >
-            <Heart className="w-3 h-3" /> Favoritos
-          </button>
-          <button
-            onClick={() => { setShowRecent((r) => !r); setShowFavorites(false); }}
-            className={`px-3 h-8 rounded-lg text-[12px] font-medium transition-colors flex items-center gap-1.5 ${
-              showRecent
-                ? 'bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]'
-                : 'bg-[hsl(var(--shell))] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
-            }`}
-          >
-            <Clock className="w-3 h-3" /> Recentes
-          </button>
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="px-3 h-8 rounded-lg text-[12px] font-medium transition-colors flex items-center gap-1.5 bg-[hsl(var(--shell))] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--err))]"
-            >
-              <X className="w-3 h-3" /> Limpar
-            </button>
-          )}
-        </div>
+              <div className="space-y-2.5">
+                <p className="atlas-metric-label">Target muscle</p>
+                <div className="flex flex-wrap gap-2">
+                  {muscles.map((m) => (
+                    <FilterChip key={m} active={muscle === m} onClick={() => toggleMuscle(m)}>
+                      {muscleToPT(m)}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
 
-        {/* Filter panel */}
-        {showFilters && !isSearching && (
-          <div className="space-y-3 pt-1 border-t border-[hsl(var(--border-h))]">
-
-            {/* Body part */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">
-                Parte do corpo
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {bodyParts.map((bp) => (
-                  <FilterChip
-                    key={bp}
-                    label={bodyPartToPT(bp)}
-                    active={bodyPart === bp}
-                    onClick={() => toggleBodyPart(bp)}
-                  />
-                ))}
+              <div className="space-y-2.5">
+                <p className="atlas-metric-label">Equipment</p>
+                <div className="flex flex-wrap gap-2">
+                  {equipmentList.map((eq) => (
+                    <FilterChip key={eq} active={equipment === eq} onClick={() => toggleEquipment(eq)}>
+                      {equipmentToPT(eq)}
+                    </FilterChip>
+                  ))}
+                </div>
               </div>
             </div>
+          ) : null}
+        </Card>
+      </Section>
 
-            {/* Muscle */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">
-                Músculo alvo
+      <Section
+        eyebrow="Library"
+        title={
+          isSearching
+            ? `${exercises.length} result${exercises.length !== 1 ? 's' : ''} for "${debouncedSearch}"`
+            : `${exercises.length} exercise${exercises.length !== 1 ? 's' : ''} in view`
+        }
+        subtitle="Designed for fast scan: movement name first, muscle and equipment second, execution detail on entry."
+        actions={
+          <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.84)] px-3 py-1.5 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
+            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={1.9} />
+            {compactView ? 'Compact list' : 'Card grid'}
+          </div>
+        }
+      >
+        {isLoading && exercises.length === 0 ? (
+          <Card className="px-5 py-14">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={1.9} />
+              <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                Loading the library
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                {muscles.map((m) => (
-                  <FilterChip
-                    key={m}
-                    label={muscleToPT(m)}
-                    active={muscle === m}
-                    onClick={() => toggleMuscle(m)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Equipment */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">
-                Equipamento
+              <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                Pulling the latest exercise matches and metadata.
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                {equipmentList.map((eq) => (
-                  <FilterChip
-                    key={eq}
-                    label={equipmentToPT(eq)}
-                    active={equipment === eq}
-                    onClick={() => toggleEquipment(eq)}
-                  />
-                ))}
-              </div>
             </div>
+          </Card>
+        ) : exercises.length === 0 ? (
+          <Card className="px-0 py-0">
+            <EmptyState
+              icon={Search}
+              title="No exercises found"
+              description="Try a broader search term or clear the active filters to reopen the full catalog."
+              action={
+                hasActiveFilters ? (
+                  <PrimaryButton type="button" onClick={clearFilters}>
+                    Clear filters
+                  </PrimaryButton>
+                ) : null
+              }
+            />
+          </Card>
+        ) : compactView ? (
+          <Card className="overflow-hidden px-0 py-0">
+            <div className="divide-y divide-[hsl(var(--border)/0.72)]">
+              {exercises.map((ex) => (
+                <ExerciseCard key={ex.id} exercise={ex} compact />
+              ))}
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {exercises.map((ex) => (
+              <ExerciseCard key={ex.id} exercise={ex} />
+            ))}
           </div>
         )}
-      </div>
-
-      {/* Active filter pill */}
-      {(bodyPart || muscle || equipment) && (
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] text-[hsl(var(--fg-2))]">Filtrando por:</span>
-          {bodyPart && (
-            <span className="badge badge-blue text-[11px]">
-              {bodyPartToPT(bodyPart)}
-              <button onClick={() => setBodyPart('')} className="ml-1 opacity-60 hover:opacity-100">×</button>
-            </span>
-          )}
-          {muscle && (
-            <span className="badge badge-blue text-[11px]">
-              {muscleToPT(muscle)}
-              <button onClick={() => setMuscle('')} className="ml-1 opacity-60 hover:opacity-100">×</button>
-            </span>
-          )}
-          {equipment && (
-            <span className="badge badge-blue text-[11px]">
-              {equipmentToPT(equipment)}
-              <button onClick={() => setEquipment('')} className="ml-1 opacity-60 hover:opacity-100">×</button>
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Results */}
-      {isLoading && exercises.length === 0 ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-6 h-6 animate-spin text-[hsl(var(--brand))]" />
-        </div>
-      ) : exercises.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="t-caption">Nenhum exercício encontrado</p>
-          {hasActiveFilters && (
-            <button onClick={clearFilters} className="mt-3 text-[13px] text-[hsl(var(--brand))] font-medium hover:underline">
-              Limpar filtros
-            </button>
-          )}
-        </div>
-      ) : compactView ? (
-        <div className="surface rounded-xl overflow-hidden divide-y divide-[hsl(var(--border-h))]">
-          {exercises.map((ex) => (
-            <ExerciseCard key={ex.id} exercise={ex} compact />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {exercises.map((ex) => (
-            <ExerciseCard key={ex.id} exercise={ex} />
-          ))}
-        </div>
-      )}
-    </div>
+      </Section>
+    </AppContainer>
   );
 }

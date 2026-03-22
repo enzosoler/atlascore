@@ -8,12 +8,12 @@ import SubstancePicker from '@/components/protocols/SubstancePicker';
 // ── Option lists ──────────────────────────────────────────────────────────────
 
 const CATEGORY_OPTIONS = [
-  { value: 'supplement', label: 'Suplemento' },
-  { value: 'medication', label: 'Medicação' },
-  { value: 'hormone',    label: 'Hormônio' },
-  { value: 'peptide',    label: 'Peptídeo' },
-  { value: 'ancillary',  label: 'Auxiliar' },
-  { value: 'other',      label: 'Outro' },
+  { value: 'supplement', label: 'Supplement' },
+  { value: 'medication', label: 'Medication' },
+  { value: 'hormone',    label: 'Hormone' },
+  { value: 'peptide',    label: 'Peptide' },
+  { value: 'ancillary',  label: 'Ancillary' },
+  { value: 'other',      label: 'Other' },
 ];
 
 const UNIT_OPTIONS = [
@@ -22,15 +22,15 @@ const UNIT_OPTIONS = [
   { value: 'g',    label: 'g' },
   { value: 'ml',   label: 'ml' },
   { value: 'UI',   label: 'UI' },
-  { value: 'caps', label: 'cápsulas' },
-  { value: 'comp', label: 'comprimidos' },
-  { value: 'outro', label: 'outro' },
+  { value: 'caps', label: 'capsules' },
+  { value: 'comp', label: 'tablets' },
+  { value: 'outro', label: 'other' },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'active',   label: 'Ativo' },
-  { value: 'paused',   label: 'Pausado' },
-  { value: 'finished', label: 'Finalizado' },
+  { value: 'active',   label: 'Active' },
+  { value: 'paused',   label: 'Paused' },
+  { value: 'finished', label: 'Finished' },
 ];
 
 // ── Empty / default form state ────────────────────────────────────────────────
@@ -128,12 +128,12 @@ export default function ProtocolForm({
   const selectedStatus = form.status;
 
   const previewLabel = useMemo(
-    () => form.substance_name || form.name || 'Novo protocolo',
+    () => form.substance_name || form.name || 'New protocol',
     [form.substance_name, form.name]
   );
 
   const previewDose = useMemo(() => {
-    if (!form.dose) return 'Dose a definir';
+    if (!form.dose) return 'Dose to be defined';
     return form.unit ? `${form.dose} ${form.unit}` : form.dose;
   }, [form.dose, form.unit]);
 
@@ -166,13 +166,13 @@ export default function ProtocolForm({
     const nextErrors = {};
 
     if (!form.substance_name.trim() && !form.name.trim()) {
-      nextErrors.substance_name = 'Informe a substância principal ou um nome de protocolo.';
+      nextErrors.substance_name = 'Enter the main substance or a protocol name.';
     }
     if (!form.start_date) {
-      nextErrors.start_date = 'Defina a data inicial.';
+      nextErrors.start_date = 'Set the start date.';
     }
     if (form.status === 'finished' && !form.end_date) {
-      nextErrors.end_date = 'Defina a data final para protocolos concluídos.';
+      nextErrors.end_date = 'Set the end date for finished protocols.';
     }
 
     if (Object.keys(nextErrors).length > 0) {
@@ -209,17 +209,17 @@ export default function ProtocolForm({
         <p className="atlas-overline">Preview</p>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <span className="rounded-full border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.12)] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--brand))]">
-            {STATUS_OPTIONS.find((o) => o.value === selectedStatus)?.label || 'Ativo'}
+            {STATUS_OPTIONS.find((o) => o.value === selectedStatus)?.label || 'Active'}
           </span>
           <span className="rounded-full border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--fg-2))]">
-            {CATEGORY_OPTIONS.find((o) => o.value === form.category)?.label || 'Outro'}
+            {CATEGORY_OPTIONS.find((o) => o.value === form.category)?.label || 'Other'}
           </span>
         </div>
         <p className="mt-4 text-[1.25rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
           {previewLabel}
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          {previewDose} · {form.frequency || 'Frequência a definir'}
+          {previewDose} · {form.frequency || 'Frequency to be defined'}
         </p>
       </div>
 
@@ -227,9 +227,9 @@ export default function ProtocolForm({
       <section className="space-y-4">
         <SectionHeader
           icon={Pill}
-          eyebrow="Identidade"
-          title="Definição do protocolo"
-          description="Estruture a substância principal, categoria e o nome interno usado na operação clínica."
+          eyebrow="Identity"
+          title="Protocol definition"
+          description="Set the main substance, category, and internal name used in clinical operations."
         />
 
         {/* Substance picker + internal name */}
@@ -246,13 +246,13 @@ export default function ProtocolForm({
           </div>
 
           <FieldShell
-            label="Nome interno / stack"
-            description="Opcional, útil quando o protocolo faz parte de um bloco maior."
+            label="Internal name / stack"
+            description="Optional, useful when the protocol is part of a larger block."
           >
             <Input
               value={form.name}
               onChange={(e) => setField('name', e.target.value)}
-              placeholder="Ex: TRT Base, Base de recuperação"
+              placeholder="E.g.: TRT Base, Recovery base"
               className="h-12"
             />
           </FieldShell>
@@ -260,7 +260,7 @@ export default function ProtocolForm({
 
         {/* Category | Dose | Unit | Frequency — 4-col grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <FieldShell label="Categoria">
+          <FieldShell label="Category">
             <select
               value={form.category}
               onChange={(e) => setField('category', e.target.value)}
@@ -278,12 +278,12 @@ export default function ProtocolForm({
             <Input
               value={form.dose}
               onChange={(e) => setField('dose', e.target.value)}
-              placeholder="Ex: 200, 5, 0.5"
+              placeholder="E.g.: 200, 5, 0.5"
               className="h-12"
             />
           </FieldShell>
 
-          <FieldShell label="Unidade">
+          <FieldShell label="Unit">
             <select
               value={form.unit}
               onChange={(e) => setField('unit', e.target.value)}
@@ -297,11 +297,11 @@ export default function ProtocolForm({
             </select>
           </FieldShell>
 
-          <FieldShell label="Frequência">
+          <FieldShell label="Frequency">
             <Input
               value={form.frequency}
               onChange={(e) => setField('frequency', e.target.value)}
-              placeholder="Ex: 1x/semana, diário, dsdn"
+              placeholder="E.g.: 1x/week, daily, EOD"
               className="h-12"
             />
           </FieldShell>
@@ -312,23 +312,23 @@ export default function ProtocolForm({
       <section className="space-y-4">
         <SectionHeader
           icon={CalendarRange}
-          eyebrow="Cadência"
-          title="Janela e operação"
-          description="Defina o ritmo de uso, o status atual e a janela temporal do protocolo."
+          eyebrow="Cadence"
+          title="Window and operation"
+          description="Define the usage cadence, current status, and time window of the protocol."
         />
 
         {/* Schedule + Status buttons */}
         <div className="grid gap-4 md:grid-cols-2">
-          <FieldShell label="Horário / rotina">
+          <FieldShell label="Schedule / routine">
             <Input
               value={form.schedule}
               onChange={(e) => setField('schedule', e.target.value)}
-              placeholder="Ex: manhã, pré-treino, antes de dormir"
+              placeholder="E.g.: morning, pre-workout, before bed"
               className="h-12"
             />
           </FieldShell>
 
-          <FieldShell label="Status atual">
+          <FieldShell label="Current status">
             <div className="grid grid-cols-3 gap-2">
               {STATUS_OPTIONS.map((o) => (
                 <button
@@ -350,7 +350,7 @@ export default function ProtocolForm({
 
         {/* Date range */}
         <div className="grid gap-4 md:grid-cols-2">
-          <FieldShell label="Início">
+          <FieldShell label="Start">
             <Input
               type="date"
               value={form.start_date}
@@ -363,11 +363,11 @@ export default function ProtocolForm({
           </FieldShell>
 
           <FieldShell
-            label="Fim"
+            label="End"
             description={
               form.status === 'finished'
-                ? 'Obrigatório para protocolos concluídos.'
-                : 'Opcional enquanto o protocolo estiver ativo ou pausado.'
+                ? 'Required for finished protocols.'
+                : 'Optional while the protocol is active or paused.'
             }
           >
             <Input
@@ -387,16 +387,16 @@ export default function ProtocolForm({
       <section className="space-y-4">
         <SectionHeader
           icon={FlaskConical}
-          eyebrow="Notas"
-          title="Contexto clínico"
-          description="Adicione observações de monitoramento, resposta percebida ou instruções da equipe."
+          eyebrow="Notes"
+          title="Clinical context"
+          description="Add monitoring observations, perceived response, or team instructions."
         />
 
-        <FieldShell label="Observações">
+        <FieldShell label="Notes">
           <Textarea
             value={form.notes}
             onChange={(e) => setField('notes', e.target.value)}
-            placeholder="Ex: ajustar após novos exames, observar pressão, uso apenas em dias de treino..."
+            placeholder="E.g.: adjust after new labs, monitor blood pressure, use only on training days..."
             className="min-h-[140px] resize-y"
           />
         </FieldShell>
@@ -411,7 +411,7 @@ export default function ProtocolForm({
           onClick={onCancel}
           disabled={isSubmitting}
         >
-          Cancelar
+          Cancel
         </Button>
         <Button
           type="submit"
@@ -419,10 +419,10 @@ export default function ProtocolForm({
           disabled={isSubmitting}
         >
           {isSubmitting
-            ? 'Salvando...'
+            ? 'Saving...'
             : protocol
-            ? 'Salvar alterações'
-            : 'Criar protocolo'}
+            ? 'Save changes'
+            : 'Create protocol'}
         </Button>
       </div>
     </form>

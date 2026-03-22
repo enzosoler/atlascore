@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>96 — Nutritionist Clients List</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #080E0E; --card: #111A1A; --border: #1E2C2C;
+    --teal: #4A9B9B; --teal-dim: rgba(74,155,155,0.12); --teal-border: rgba(74,155,155,0.25);
+    --fg: #FFFFFF; --fg2: #8A9A9A; --fg3: #5A6E6E;
+    --ok: #4CAF7D; --ok-dim: rgba(76,175,125,0.12);
+    --warn: #E8A838; --warn-dim: rgba(232,168,56,0.1);
+    --err: #E05C5C; --err-dim: rgba(224,92,92,0.1);
+  }
+  body { background: #0F1414; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 20px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  .phone { width: 390px; min-height: 844px; background: var(--bg); border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 40px 80px rgba(0,0,0,0.7), 0 0 120px rgba(74,155,155,0.04); }
+  .status-bar { height: 54px; padding: 16px 28px 0; display: flex; align-items: center; justify-content: space-between; }
+  .status-time { font-size: 15px; font-weight: 600; color: var(--fg); letter-spacing: -0.3px; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .screen { height: calc(844px - 54px - 83px); overflow-y: auto; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* Nav Header */
+  .nav-header { padding: 8px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; }
+  .nav-title { font-size: 28px; font-weight: 700; color: var(--fg); letter-spacing: -0.6px; }
+  .btn-add {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--teal); color: #fff;
+    border-radius: 10px; padding: 8px 14px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    margin-top: 4px;
+  }
+
+  /* Segment Filter */
+  .filter-bar { padding: 14px 20px 0; display: flex; gap: 8px; }
+  .filter-chip {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  .filter-chip.active { background: var(--teal-dim); border-color: var(--teal-border); color: var(--teal); }
+  .filter-chip:not(.active) { color: var(--fg2); background: var(--card); }
+
+  /* Search */
+  .search-bar {
+    margin: 12px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .search-bar input {
+    flex: 1; background: none; border: none; outline: none;
+    font-size: 13px; color: var(--fg); font-family: inherit;
+  }
+  .search-bar input::placeholder { color: var(--fg3); }
+
+  /* Section Label */
+  .section-label {
+    font-size: 11px; font-weight: 600; color: var(--fg3);
+    letter-spacing: 0.8px; text-transform: uppercase;
+    padding: 0 24px; margin-bottom: 10px;
+  }
+
+  /* Client Row */
+  .client-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; }
+
+  .client-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .client-item:hover { border-color: var(--teal-border); }
+
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: var(--fg);
+    flex-shrink: 0;
+  }
+
+  .client-main { flex: 1; min-width: 0; }
+  .client-name { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 2px; }
+  .client-email { font-size: 11px; color: var(--fg3); margin-bottom: 8px; }
+
+  .client-perms { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .perm-tag {
+    font-size: 10px; font-weight: 500; color: var(--fg2);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 7px;
+  }
+
+  .client-stats { display: flex; gap: 16px; }
+  .client-stat-item { }
+  .client-stat-val { font-size: 13px; font-weight: 700; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .client-stat-val.high { color: var(--ok); }
+  .client-stat-val.mid { color: var(--warn); }
+  .client-stat-val.low { color: var(--err); }
+  .client-stat-lbl { font-size: 10px; color: var(--fg3); margin-top: 1px; }
+
+  .client-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+  .status-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+  }
+  .status-badge.active { background: var(--ok-dim); color: var(--ok); }
+  .status-badge.pending { background: var(--warn-dim); color: var(--warn); }
+
+  .adherence-mini {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+  }
+  .adherence-mini-val { font-size: 16px; font-weight: 700; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .adherence-mini-lbl { font-size: 9px; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.3px; }
+  .adherence-mini-bar { width: 44px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .adherence-mini-fill { height: 3px; border-radius: 2px; }
+
+  .chevron { color: var(--fg3); margin-top: 10px; }
+
+  /* Divider row */
+  .list-divider { padding: 16px 24px 8px; }
+
+  /* Tab Bar */
+  .tab-bar { height: 83px; background: rgba(17,26,26,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: flex-start; padding: 10px 0 0; position: absolute; bottom: 0; left: 0; right: 0; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0; cursor: pointer; }
+  .tab-label { font-size: 10px; font-weight: 500; color: var(--fg2); }
+  .tab-item.active .tab-label { color: var(--teal); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="white" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="white" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" fill="white"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="white"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="white"/><path d="M23 4.5V7.5C23.8 7.2 24.5 6.5 24.5 6C24.5 5.5 23.8 4.8 23 4.5Z" fill="white" opacity="0.4"/></svg>
+    </div>
+  </div>
+
+  <div class="screen">
+
+    <div class="nav-header">
+      <div class="nav-title">Clients</div>
+      <div class="btn-add">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1V12M1 6.5H12" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Invite
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <div class="filter-chip active">All (14)</div>
+      <div class="filter-chip">Active (12)</div>
+      <div class="filter-chip">Pending (2)</div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#5A6E6E" stroke-width="1.3"/><path d="M10 10L13 13" stroke="#5A6E6E" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Search clients…" />
+    </div>
+
+    <!-- List -->
+    <div class="list-divider">
+      <div class="section-label">Linked Clients · 14</div>
+    </div>
+
+    <div class="client-list">
+
+      <!-- Client 1 — High adherence -->
+      <div class="client-item">
+        <div class="avatar" style="background:#1A2E2A">LM</div>
+        <div class="client-main">
+          <div class="client-name">Lucas Mendes</div>
+          <div class="client-email">lucas@email.com</div>
+          <div class="client-perms">
+            <span class="perm-tag">Meals</span>
+            <span class="perm-tag">Body</span>
+            <span class="perm-tag">Plans</span>
+            <span class="perm-tag">Labs</span>
+          </div>
+          <div class="client-stats">
+            <div class="client-stat-item">
+              <div class="client-stat-val high">94%</div>
+              <div class="client-stat-lbl">Adherence</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--fg)">74.2kg</div>
+              <div class="client-stat-lbl">Latest</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--fg)">2h</div>
+              <div class="client-stat-lbl">Last log</div>
+            </div>
+          </div>
+        </div>
+        <div class="client-right">
+          <div class="status-badge active">Active</div>
+          <svg class="chevron" width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1L6 6L1 11" stroke="#5A6E6E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Client 2 -->
+      <div class="client-item">
+        <div class="avatar" style="background:#1A2A30">CR</div>
+        <div class="client-main">
+          <div class="client-name">Camila Ramos</div>
+          <div class="client-email">camila@email.com</div>
+          <div class="client-perms">
+            <span class="perm-tag">Meals</span>
+            <span class="perm-tag">Plans</span>
+            <span class="perm-tag">Photos</span>
+          </div>
+          <div class="client-stats">
+            <div class="client-stat-item">
+              <div class="client-stat-val high">87%</div>
+              <div class="client-stat-lbl">Adherence</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--fg)">58.8kg</div>
+              <div class="client-stat-lbl">Latest</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--fg)">5h</div>
+              <div class="client-stat-lbl">Last log</div>
+            </div>
+          </div>
+        </div>
+        <div class="client-right">
+          <div class="status-badge active">Active</div>
+          <svg class="chevron" width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1L6 6L1 11" stroke="#5A6E6E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Client 3 — Mid -->
+      <div class="client-item">
+        <div class="avatar" style="background:#2A2214">PT</div>
+        <div class="client-main">
+          <div class="client-name">Pedro Teixeira</div>
+          <div class="client-email">pedro@email.com</div>
+          <div class="client-perms">
+            <span class="perm-tag">Meals</span>
+            <span class="perm-tag">Body</span>
+          </div>
+          <div class="client-stats">
+            <div class="client-stat-item">
+              <div class="client-stat-val mid">62%</div>
+              <div class="client-stat-lbl">Adherence</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--fg)">82.1kg</div>
+              <div class="client-stat-lbl">Latest</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--warn)">1d</div>
+              <div class="client-stat-lbl">Last log</div>
+            </div>
+          </div>
+        </div>
+        <div class="client-right">
+          <div class="status-badge active">Active</div>
+          <svg class="chevron" width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1L6 6L1 11" stroke="#5A6E6E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Client 4 — Low -->
+      <div class="client-item" style="border-color: rgba(224,92,92,0.2); background: rgba(224,92,92,0.03);">
+        <div class="avatar" style="background:#2A1A1A">SR</div>
+        <div class="client-main">
+          <div class="client-name">Sofia Reyes</div>
+          <div class="client-email">sofia@email.com</div>
+          <div class="client-perms">
+            <span class="perm-tag">Meals</span>
+            <span class="perm-tag">Plans</span>
+            <span class="perm-tag">Labs</span>
+          </div>
+          <div class="client-stats">
+            <div class="client-stat-item">
+              <div class="client-stat-val low">18%</div>
+              <div class="client-stat-lbl">Adherence</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--fg)">61.4kg</div>
+              <div class="client-stat-lbl">Latest</div>
+            </div>
+            <div class="client-stat-item">
+              <div class="client-stat-val" style="color:var(--err)">5d</div>
+              <div class="client-stat-lbl">Last log</div>
+            </div>
+          </div>
+        </div>
+        <div class="client-right">
+          <div class="status-badge active">Active</div>
+          <svg class="chevron" width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1L6 6L1 11" stroke="#5A6E6E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Client 5 — Pending -->
+      <div class="client-item" style="border-color: rgba(232,168,56,0.2); background: rgba(232,168,56,0.03);">
+        <div class="avatar" style="background:#2A2114; opacity:0.7">MC</div>
+        <div class="client-main">
+          <div class="client-name" style="color:var(--fg2)">Marcus Chen</div>
+          <div class="client-email">marcus@email.com</div>
+          <div class="client-perms">
+            <span class="perm-tag" style="opacity:0.5">Meals</span>
+            <span class="perm-tag" style="opacity:0.5">Plans</span>
+          </div>
+          <div style="font-size:11px; color:var(--warn); margin-top:4px">Awaiting acceptance · Invited 2d ago</div>
+        </div>
+        <div class="client-right">
+          <div class="status-badge pending">Pending</div>
+          <svg class="chevron" width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1L6 6L1 11" stroke="#5A6E6E" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="height:16px"></div>
+
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="12" y="3" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="3" y="12" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="12" y="12" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">Today</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 18V8L11 3L18 8V18H14V13H8V18H4Z" stroke="#8A9A9A" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
+      <span class="tab-label">Train</span>
+    </div>
+    <div class="tab-item active">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11C3 7 5.5 5 8.5 5C10.5 5 11.5 6 11.5 6C11.5 6 12.5 5 14.5 5C17.5 5 19 7 19 11C19 15 14 18.5 11.5 19.5C9 18.5 3 15 3 11Z" stroke="#4A9B9B" stroke-width="1.5" fill="#4A9B9B" fill-opacity="0.15"/></svg>
+      </div>
+      <span class="tab-label" style="color:var(--teal)">Nutrition</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="9" r="4" stroke="#8A9A9A" stroke-width="1.5"/><path d="M4 19C4 15.7 7.1 13 11 13C14.9 13 18 15.7 18 19" stroke="#8A9A9A" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <span class="tab-label">Body</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="#8A9A9A" stroke-width="1.5"/><circle cx="11" cy="11" r="8" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">More</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

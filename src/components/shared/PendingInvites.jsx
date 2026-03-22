@@ -33,35 +33,35 @@ export default function PendingInvites() {
 
   const acceptCoach = useMutation({
     mutationFn: (id) => base44.entities.CoachStudent.update(id, { status: 'accepted', accepted_at: new Date().toISOString().split('T')[0] }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['coach-invites'] }); toast.success('Vínculo aceito'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['coach-invites'] }); toast.success('Connection accepted'); },
   });
   const rejectCoach = useMutation({
     mutationFn: (id) => base44.entities.CoachStudent.update(id, { status: 'rejected' }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['coach-invites'] }); toast.success('Convite recusado'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['coach-invites'] }); toast.success('Invite declined'); },
   });
 
   const acceptNutri = useMutation({
     mutationFn: (id) => base44.entities.NutritionistClientLink.update(id, { status: 'accepted', accepted_at: new Date().toISOString().split('T')[0] }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['nutri-invites'] }); toast.success('Vínculo aceito'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['nutri-invites'] }); toast.success('Connection accepted'); },
   });
   const rejectNutri = useMutation({
     mutationFn: (id) => base44.entities.NutritionistClientLink.update(id, { status: 'rejected' }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['nutri-invites'] }); toast.success('Convite recusado'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['nutri-invites'] }); toast.success('Invite declined'); },
   });
 
   const acceptClinic = useMutation({
     mutationFn: (id) => base44.entities.ClinicianPatient.update(id, { status: 'accepted', accepted_at: new Date().toISOString().split('T')[0] }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['clinic-invites'] }); toast.success('Vínculo aceito'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['clinic-invites'] }); toast.success('Connection accepted'); },
   });
   const rejectClinic = useMutation({
     mutationFn: (id) => base44.entities.ClinicianPatient.update(id, { status: 'rejected' }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['clinic-invites'] }); toast.success('Convite recusado'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['clinic-invites'] }); toast.success('Invite declined'); },
   });
 
   const allInvites = [
     ...coachInvites.map(i => ({ ...i, kind: 'coach', from: i.coach_email, label: 'Coach', accept: () => acceptCoach.mutate(i.id), reject: () => rejectCoach.mutate(i.id) })),
-    ...nutriInvites.map(i => ({ ...i, kind: 'nutri', from: i.nutritionist_email, label: 'Nutricionista', accept: () => acceptNutri.mutate(i.id), reject: () => rejectNutri.mutate(i.id) })),
-    ...clinicInvites.map(i => ({ ...i, kind: 'clinic', from: i.clinician_email, label: 'Clínico', accept: () => acceptClinic.mutate(i.id), reject: () => rejectClinic.mutate(i.id) })),
+    ...nutriInvites.map(i => ({ ...i, kind: 'nutri', from: i.nutritionist_email, label: 'Nutritionist', accept: () => acceptNutri.mutate(i.id), reject: () => rejectNutri.mutate(i.id) })),
+    ...clinicInvites.map(i => ({ ...i, kind: 'clinic', from: i.clinician_email, label: 'Clinician', accept: () => acceptClinic.mutate(i.id), reject: () => rejectClinic.mutate(i.id) })),
   ];
 
   if (allInvites.length === 0) return null;
@@ -70,7 +70,7 @@ export default function PendingInvites() {
     <div className="surface border-[hsl(var(--warn)/0.3)] p-4 space-y-3" style={{ borderColor: 'hsl(var(--warn)/0.4)' }}>
       <div className="flex items-center gap-2">
         <UserCheck className="w-4 h-4 text-[hsl(var(--warn))]" strokeWidth={2} />
-        <p className="t-subtitle text-[hsl(var(--warn))]">Convites pendentes ({allInvites.length})</p>
+        <p className="t-subtitle text-[hsl(var(--warn))]">Pending invites ({allInvites.length})</p>
       </div>
       <div className="space-y-2">
         {allInvites.map(invite => (
@@ -85,13 +85,13 @@ export default function PendingInvites() {
                 onClick={invite.accept}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))] border border-[hsl(var(--ok)/0.2)] text-[12px] font-semibold hover:bg-[hsl(var(--ok)/0.2)] transition-colors"
               >
-                <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> Aceitar
+                <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> Accept
               </button>
               <button
                 onClick={invite.reject}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[hsl(var(--err)/0.07)] text-[hsl(var(--err))] border border-[hsl(var(--err)/0.2)] text-[12px] font-semibold hover:bg-[hsl(var(--err)/0.15)] transition-colors"
               >
-                <X className="w-3.5 h-3.5" strokeWidth={2.5} /> Recusar
+                <X className="w-3.5 h-3.5" strokeWidth={2.5} /> Decline
               </button>
             </div>
           </div>

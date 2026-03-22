@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>99 — Nutritionist PDF Export State</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #080E0E; --card: #111A1A; --card-hi: #162020; --border: #1E2C2C;
+    --teal: #4A9B9B; --teal-dim: rgba(74,155,155,0.12); --teal-border: rgba(74,155,155,0.25);
+    --fg: #FFFFFF; --fg2: #8A9A9A; --fg3: #5A6E6E;
+    --ok: #4CAF7D; --ok-dim: rgba(76,175,125,0.12);
+    --warn: #E8A838;
+  }
+  body { background: #0F1414; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 20px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  .phone { width: 390px; height: 844px; background: var(--bg); border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 40px 80px rgba(0,0,0,0.7); }
+  .status-bar { height: 54px; padding: 16px 28px 0; display: flex; align-items: center; justify-content: space-between; }
+  .status-time { font-size: 15px; font-weight: 600; color: var(--fg); }
+
+  /* Background client profile (dim) */
+  .bg-layer {
+    position: absolute; top: 54px; left: 0; right: 0; bottom: 83px;
+    padding: 12px 20px 0;
+    opacity: 0.2;
+    filter: blur(2px);
+  }
+  .bg-card { height: 80px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 8px; }
+
+  /* Scrim */
+  .scrim {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(8,14,14,0.78);
+    z-index: 20;
+  }
+
+  /* Sheet */
+  .sheet {
+    position: absolute; bottom: 83px; left: 0; right: 0;
+    background: var(--card-hi);
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--border);
+    z-index: 30;
+    padding-bottom: 8px;
+  }
+
+  .drag-handle { display: flex; justify-content: center; padding: 12px 0 16px; }
+  .handle-bar { width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.12); }
+
+  /* Sheet Content */
+  .sheet-body { padding: 0 24px 20px; }
+
+  /* Header */
+  .export-icon-row { display: flex; justify-content: center; margin-bottom: 16px; }
+  .export-icon-wrap {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-border);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  /* Generating spinner ring */
+  .spinner-ring {
+    position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+    border-radius: 22px;
+    border: 2px solid transparent;
+    border-top-color: var(--teal);
+    border-right-color: rgba(74,155,155,0.3);
+    animation: spin 1.2s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .export-title { font-size: 20px; font-weight: 700; color: var(--fg); text-align: center; letter-spacing: -0.4px; margin-bottom: 6px; }
+  .export-sub { font-size: 13px; color: var(--fg2); text-align: center; margin-bottom: 20px; }
+
+  /* Progress Steps */
+  .steps-list { display: flex; flex-direction: column; gap: 0; }
+  .step-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-icon {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-icon.done { background: var(--ok-dim); }
+  .step-icon.active { background: var(--teal-dim); }
+  .step-icon.pending { background: rgba(255,255,255,0.04); }
+  .step-body { flex: 1; }
+  .step-label { font-size: 13px; font-weight: 600; }
+  .step-label.done { color: var(--ok); }
+  .step-label.active { color: var(--fg); }
+  .step-label.pending { color: var(--fg3); }
+  .step-sub { font-size: 11px; color: var(--fg3); margin-top: 2px; }
+  .step-sub.active { color: var(--fg2); }
+  .step-status { flex-shrink: 0; }
+
+  /* Inline spinner */
+  .inline-spin {
+    width: 16px; height: 16px;
+    border: 1.5px solid rgba(74,155,155,0.3);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* Progress Bar */
+  .progress-section { margin: 16px 0; }
+  .progress-bar-label { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .progress-bar-title { font-size: 12px; font-weight: 600; color: var(--fg2); }
+  .progress-bar-pct { font-size: 12px; font-weight: 700; color: var(--teal); }
+  .progress-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--teal), #5BC5C5); width: 65%; transition: width 0.5s; }
+
+  /* Report Preview Card */
+  .preview-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .pdf-thumb {
+    width: 36px; height: 44px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #1A2626, #1E3030);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 9px; font-weight: 700; color: var(--teal);
+    letter-spacing: 0.3px;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pdf-meta { flex: 1; }
+  .pdf-name { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .pdf-detail { font-size: 11px; color: var(--fg3); margin-top: 2px; }
+  .pdf-sections { font-size: 10px; color: var(--fg2); margin-top: 4px; }
+
+  /* Cancel Btn */
+  .cancel-btn {
+    width: 100%; height: 44px; border-radius: 12px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--fg3); font-size: 14px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-family: inherit;
+  }
+
+  /* Tab Bar */
+  .tab-bar { height: 83px; background: rgba(17,26,26,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: flex-start; padding: 10px 0 0; position: absolute; bottom: 0; left: 0; right: 0; z-index: 10; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0; cursor: pointer; }
+  .tab-label { font-size: 10px; font-weight: 500; color: var(--fg2); }
+  .tab-item.active .tab-label { color: var(--teal); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="9" y="0" width="3" height="12" rx="1" fill="white"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="white"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="white"/></svg>
+    </div>
+  </div>
+
+  <!-- BG Layer -->
+  <div class="bg-layer">
+    <div style="height:48px;background:linear-gradient(90deg,#1A2626,transparent);border-radius:14px;margin-bottom:10px"></div>
+    <div class="bg-card"></div>
+    <div class="bg-card"></div>
+    <div class="bg-card"></div>
+    <div class="bg-card"></div>
+  </div>
+
+  <!-- Scrim -->
+  <div class="scrim"></div>
+
+  <!-- Sheet -->
+  <div class="sheet">
+    <div class="drag-handle"><div class="handle-bar"></div></div>
+
+    <div class="sheet-body">
+
+      <!-- Icon + Title -->
+      <div class="export-icon-row">
+        <div class="export-icon-wrap">
+          <div class="spinner-ring"></div>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M7 22H21M14 5V18M10 14L14 18L18 14" stroke="#4A9B9B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="export-title">Generating Report</div>
+      <div class="export-sub">Lucas Mendes · Nutritional Report PDF</div>
+
+      <!-- Progress Bar -->
+      <div class="progress-section">
+        <div class="progress-bar-label">
+          <span class="progress-bar-title">Building document…</span>
+          <span class="progress-bar-pct">65%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-icon done">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 4" stroke="#4CAF7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="step-body">
+            <div class="step-label done">Patient Summary</div>
+            <div class="step-sub">Name, email, link date</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 4" stroke="#4CAF7D" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="step-item">
+          <div class="step-icon done">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 4" stroke="#4CAF7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="step-body">
+            <div class="step-label done">Body Measurements</div>
+            <div class="step-sub">8 entries included</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 4" stroke="#4CAF7D" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="step-item">
+          <div class="step-icon done">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 4" stroke="#4CAF7D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="step-body">
+            <div class="step-label done">Active Diet Plan</div>
+            <div class="step-sub">Lean Bulk Protocol · 6 meals</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 4" stroke="#4CAF7D" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="step-item">
+          <div class="step-icon active">
+            <div class="inline-spin"></div>
+          </div>
+          <div class="step-body">
+            <div class="step-label active">Lab Exams</div>
+            <div class="step-sub active">Formatting 3 panels…</div>
+          </div>
+          <div class="inline-spin" style="width:14px;height:14px;border-width:1.5px"></div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-icon pending">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#2A3E3E" stroke-width="1.3"/></svg>
+          </div>
+          <div class="step-body">
+            <div class="step-label pending">Macro Analysis</div>
+            <div class="step-sub">7-day averages chart</div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-icon pending">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#2A3E3E" stroke-width="1.3"/></svg>
+          </div>
+          <div class="step-body">
+            <div class="step-label pending">Export & Save</div>
+            <div class="step-sub">PDF to device</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- File Preview -->
+      <div class="preview-card" style="margin-top:16px">
+        <div class="pdf-thumb">
+          <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><rect x="1" y="1" width="14" height="18" rx="2" stroke="#4A9B9B" stroke-width="1.2"/><path d="M4 5H12M4 8H9M4 11H10" stroke="#4A9B9B" stroke-width="1" stroke-linecap="round"/></svg>
+          <span>PDF</span>
+        </div>
+        <div class="pdf-meta">
+          <div class="pdf-name">atlas-core_lucas-mendes.pdf</div>
+          <div class="pdf-detail">~2.4 MB · Mar 22, 2026</div>
+          <div class="pdf-sections">Summary · Measurements · Diet Plan · Labs · Macros</div>
+        </div>
+      </div>
+
+      <button class="cancel-btn">Cancel Export</button>
+
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="12" y="3" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="3" y="12" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="12" y="12" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">Today</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 18V8L11 3L18 8V18H14V13H8V18H4Z" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">Train</span>
+    </div>
+    <div class="tab-item active">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11C3 7 5.5 5 8.5 5C10.5 5 11.5 6 11.5 6C11.5 6 12.5 5 14.5 5C17.5 5 19 7 19 11C19 15 14 18.5 11.5 19.5C9 18.5 3 15 3 11Z" stroke="#4A9B9B" stroke-width="1.5" fill="#4A9B9B" fill-opacity="0.15"/></svg>
+      </div>
+      <span class="tab-label" style="color:var(--teal)">Nutrition</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="9" r="4" stroke="#8A9A9A" stroke-width="1.5"/><path d="M4 19C4 15.7 7.1 13 11 13C14.9 13 18 15.7 18 19" stroke="#8A9A9A" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <span class="tab-label">Body</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="#8A9A9A" stroke-width="1.5"/><circle cx="11" cy="11" r="8" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">More</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:,">
+  <title>atlas.core - Screens 104-130</title>
+  <style>
+    :root {
+      --bg: #080E0E;
+      --card: #111A1A;
+      --card2: #0D1515;
+      --border: #1E2C2C;
+      --teal: #4A9B9B;
+      --teal-dim: rgba(74,155,155,0.12);
+      --teal-mid: rgba(74,155,155,0.22);
+      --white: #FFFFFF;
+      --secondary: #8A9A9A;
+      --red: #E05C5C;
+      --red-dim: rgba(224,92,92,0.12);
+      --green: #4CAF7D;
+      --green-dim: rgba(76,175,125,0.12);
+      --amber: #E0A84A;
+      --sheet: #0B1111;
+      --shadow: 0 30px 70px rgba(0,0,0,0.62);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(74,155,155,0.08), transparent 24%),
+        radial-gradient(circle at top right, rgba(76,175,125,0.05), transparent 18%),
+        linear-gradient(180deg, #050909 0%, #050808 100%);
+      color: var(--white);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+      padding: 32px 20px 48px;
+    }
+
+    .page-header {
+      max-width: 1240px;
+      margin: 0 auto 28px;
+      padding: 12px 4px 24px;
+      text-align: center;
+    }
+    .app-icon {
+      width: 76px;
+      height: 76px;
+      border-radius: 20px;
+      margin: 0 auto 14px;
+      background: linear-gradient(180deg, #101919, #0C1212);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow);
+    }
+    .app-icon .mark {
+      width: 42px;
+      height: 42px;
+      border: 2px solid var(--white);
+      border-radius: 12px;
+      position: relative;
+      transform: rotate(8deg);
+      opacity: 0.96;
+    }
+    .app-icon .mark::before,
+    .app-icon .mark::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 999px;
+    }
+    .app-icon .mark::after {
+      inset: 16px 8px;
+      border-radius: 12px;
+      transform: rotate(-35deg);
+    }
+    .page-eyebrow {
+      color: var(--teal);
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin: 0 0 10px;
+    }
+    .page-title {
+      font-size: clamp(32px, 2.4rem + 1vw, 46px);
+      line-height: 1.02;
+      letter-spacing: -0.06em;
+      margin: 0;
+      font-weight: 800;
+    }
+    .page-copy {
+      max-width: 760px;
+      margin: 14px auto 0;
+      color: var(--secondary);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .gallery {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 26px;
+      align-items: start;
+    }
+
+    .screen-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .screen-label {
+      text-align: center;
+      color: var(--secondary);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .phone {
+      width: 360px;
+      height: 780px;
+      border-radius: 46px;
+      border: 1.5px solid rgba(255,255,255,0.06);
+      background: #000;
+      overflow: hidden;
+      position: relative;
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      display: flex;
+      flex-direction: column;
+    }
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 124px;
+      height: 34px;
+      background: #050909;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      z-index: 20;
+    }
+    .screen {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .status-bar {
+      height: 44px;
+      padding: 10px 22px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .signal, .wifi, .battery {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+    }
+    .signal span {
+      width: 3px;
+      background: var(--white);
+      border-radius: 2px;
+      display: block;
+    }
+    .signal span:nth-child(1) { height: 5px; opacity: 0.42; }
+    .signal span:nth-child(2) { height: 7px; opacity: 0.62; }
+    .signal span:nth-child(3) { height: 9px; opacity: 0.82; }
+    .signal span:nth-child(4) { height: 11px; }
+    .wifi svg, .battery svg { display: block; }
+
+    .nav {
+      padding: 2px 16px 10px;
+      flex-shrink: 0;
+    }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--teal);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .back .chev {
+      width: 8px;
+      height: 8px;
+      border-left: 2px solid var(--teal);
+      border-bottom: 2px solid var(--teal);
+      transform: rotate(45deg);
+      margin-left: 2px;
+    }
+    .nav-top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .nav-title {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      line-height: 1.06;
+      color: var(--white);
+    }
+    .nav-subtitle {
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--secondary);
+      line-height: 1.45;
+    }
+
+    .body {
+      flex: 1;
+      overflow: hidden;
+      overflow-y: auto;
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      scrollbar-width: none;
+    }
+    .body::-webkit-scrollbar { width: 0; height: 0; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 0 16px 10px;
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { width: 0; height: 0; }
+    .tab {
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(17,26,26,0.86);
+      color: var(--secondary);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tab.active {
+      background: var(--teal-dim);
+      border-color: rgba(74,155,155,0.28);
+      color: var(--teal);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .card.soft {
+      background: linear-gradient(180deg, rgba(17,26,26,0.94), rgba(13,21,21,0.94));
+    }
+    .card.tight { padding: 12px; }
+    .card.sheet {
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(15,22,22,0.98), rgba(11,17,17,0.98));
+    }
+
+    .section {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 2px 0;
+    }
+    .eyebrow {
+      color: var(--secondary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 6px;
+    }
+    .section h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+    .section p {
+      margin: 4px 0 0;
+      color: var(--secondary);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .teal {
+      color: var(--teal);
+      background: var(--teal-dim);
+      border-color: rgba(74,155,155,0.22);
+    }
+    .green {
+      color: var(--green);
+      background: var(--green-dim);
+      border-color: rgba(76,175,125,0.22);
+    }
+    .red {
+      color: var(--red);
+      background: var(--red-dim);
+      border-color: rgba(224,92,92,0.2);
+    }
+    .gray {
+      color: var(--secondary);
+      background: rgba(138,154,154,0.12);
+      border-color: rgba(138,154,154,0.18);
+    }
+    .amber {
+      color: var(--amber);
+      background: rgba(224,168,74,0.12);
+      border-color: rgba(224,168,74,0.2);
+    }
+
+    .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      background: var(--card2);
+      color: var(--secondary);
+    }
+    .icon.teal {
+      background: var(--teal-dim);
+      color: var(--teal);
+      border-color: rgba(74,155,155,0.22);
+    }
+    .icon.green {
+      background: var(--green-dim);
+      color: var(--green);
+      border-color: rgba(76,175,125,0.22);
+    }
+    .icon.red {
+      background: var(--red-dim);
+      color: var(--red);
+      border-color: rgba(224,92,92,0.22);
+    }
+    .icon.gray {
+      background: rgba(138,154,154,0.12);
+      color: var(--secondary);
+      border-color: rgba(138,154,154,0.16);
+    }
+    .icon.big {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      font-size: 20px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .metric {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      min-height: 94px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .metric .label {
+      color: var(--secondary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+    .metric .value {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.08em;
+      font-family: "SF Mono", ui-monospace, monospace;
+      line-height: 1;
+    }
+    .metric .sub {
+      color: var(--secondary);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .spark {
+      height: 30px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .spark span {
+      width: 8px;
+      border-radius: 999px 999px 3px 3px;
+      background: linear-gradient(180deg, rgba(74,155,155,0.9), rgba(74,155,155,0.25));
+    }
+    .spark.green span { background: linear-gradient(180deg, rgba(76,175,125,0.9), rgba(76,175,125,0.28)); }
+    .spark.red span { background: linear-gradient(180deg, rgba(224,92,92,0.9), rgba(224,92,92,0.28)); }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+    }
+    .row + .row { border-top: 1px solid var(--border); }
+    .row.compact { padding: 10px 0; }
+    .row .left {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .row .title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .row .meta {
+      margin: 3px 0 0;
+      font-size: 11px;
+      color: var(--secondary);
+      line-height: 1.35;
+    }
+    .row .right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .row .right .stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .pill-toggle {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .pill-toggle span {
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--secondary);
+    }
+    .pill-toggle .active {
+      background: var(--teal-dim);
+      color: var(--teal);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn.primary {
+      background: var(--teal);
+      color: var(--white);
+      box-shadow: 0 8px 22px rgba(74,155,155,0.22);
+    }
+    .btn.secondary {
+      background: transparent;
+      border-color: rgba(74,155,155,0.35);
+      color: var(--teal);
+    }
+    .btn.destructive {
+      background: var(--red);
+      color: var(--white);
+    }
+    .btn.ghost {
+      background: transparent;
+      color: var(--secondary);
+      border-color: var(--border);
+    }
+
+    .input {
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--secondary);
+      font-size: 13px;
+    }
+    .input.focus {
+      border-color: rgba(74,155,155,0.5);
+      box-shadow: 0 0 0 3px rgba(74,155,155,0.08);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2px 0;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(138,154,154,0.12);
+      overflow: hidden;
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(74,155,155,0.9), rgba(74,155,155,0.55));
+    }
+    .progress.green > span {
+      background: linear-gradient(90deg, rgba(76,175,125,0.9), rgba(76,175,125,0.6));
+    }
+    .progress.red > span {
+      background: linear-gradient(90deg, rgba(224,92,92,0.9), rgba(224,92,92,0.6));
+    }
+
+    .sheet {
+      border-radius: 20px;
+      background: var(--sheet);
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+    .sheet-handle {
+      width: 44px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      margin: 0 auto 12px;
+    }
+
+    .empty-state {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 22px 16px 18px;
+      gap: 14px;
+    }
+    .empty-state h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.05em;
+      line-height: 1.15;
+    }
+    .empty-state p {
+      margin: 0;
+      color: var(--secondary);
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 24ch;
+    }
+
+    .overlay-phone {
+      background:
+        radial-gradient(circle at 50% 18%, rgba(74,155,155,0.12), transparent 24%),
+        linear-gradient(180deg, rgba(4,8,8,0.88), rgba(4,8,8,0.96));
+    }
+    .blur-card {
+      background: rgba(17,26,26,0.86);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .skeleton {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(90deg, #111a1a 0%, #132020 50%, #111a1a 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s linear infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .sk-line {
+      height: 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+    }
+    .sk-box { border-radius: 14px; background: rgba(255,255,255,0.05); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .center { display: flex; align-items: center; justify-content: center; text-align: center; }
+    .muted { color: var(--secondary); }
+    .mono { font-family: "SF Mono", ui-monospace, monospace; }
+    .small { font-size: 11px; }
+
+    .chart {
+      height: 88px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(180deg, rgba(17,26,26,0.92), rgba(13,21,21,0.92));
+      padding: 12px;
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .chart span {
+      flex: 1;
+      border-radius: 999px 999px 4px 4px;
+      background: linear-gradient(180deg, rgba(74,155,155,0.9), rgba(74,155,155,0.14));
+    }
+
+    .list-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 2px;
+      margin-bottom: 4px;
+    }
+    .list-title h4 {
+      margin: 0;
+      font-size: 12px;
+      color: var(--secondary);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .hint {
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      color: var(--secondary);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .compare .comp {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .compare .comp strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .compare .comp p {
+      margin: 0;
+      color: var(--secondary);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="app-icon"><div class="mark"></div></div>
+    <p class="page-eyebrow">atlas.core</p>
+    <h1 class="page-title">Admin, pricing, notifications, help, and edge states</h1>
+    <p class="page-copy">
+      Screens 104-130 rendered as a dark-mode-first iOS mockup gallery using the atlas.core design system:
+      SF Pro feel, muted teal accent, strong card hierarchy, premium sheets, and deliberate system states.
+    </p>
+  </header>
+
+  <main id="gallery" class="gallery"></main>
+
+  <script>
+    const tabs = [
+      { id: 'today', label: 'Today' },
+      { id: 'train', label: 'Train' },
+      { id: 'nutrition', label: 'Nutrition' },
+      { id: 'body', label: 'Body' },
+      { id: 'more', label: 'More' },
+    ];
+
+    const tabBar = (active = 'more') => `
+      <div class="tabs">
+        ${tabs.map((tab) => `<span class="tab ${tab.id === active ? 'active' : ''}">${tab.label}</span>`).join('')}
+      </div>
+    `;
+
+    const statusBar = () => `
+      <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons">
+          <div class="signal"><span></span><span></span><span></span><span></span></div>
+          <div class="wifi">
+            <svg width="15" height="12" viewBox="0 0 16 12" fill="none" aria-hidden="true">
+              <path d="M8 10.8a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" fill="white" opacity="0.92"/>
+              <path d="M4.5 7.2a5 5 0 0 1 7 0" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M1.5 4a9 9 0 0 1 13 0" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.42"/>
+            </svg>
+          </div>
+          <div class="battery">
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none" aria-hidden="true">
+              <rect x="0.75" y="0.75" width="21" height="10.5" rx="3.25" stroke="white" stroke-opacity="0.35"/>
+              <rect x="2.15" y="2.15" width="17.1" height="7.7" rx="2.2" fill="white"/>
+              <rect x="22.2" y="4" width="2.2" height="4" rx="1" fill="white" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const shell = ({ title, subtitle = '', back = '', activeTab = 'more', body, after = '', centered = false, noNav = false, overlay = false }) => `
+      <div class="phone ${overlay ? 'overlay-phone' : ''}">
+        <div class="notch"></div>
+        <div class="screen">
+          ${statusBar()}
+          ${noNav ? '' : `
+            <div class="nav">
+              ${back ? `<div class="back"><span class="chev"></span>${back}</div>` : ''}
+              <div class="nav-top">
+                <div>
+                  <h2 class="nav-title">${title}</h2>
+                  ${subtitle ? `<p class="nav-subtitle">${subtitle}</p>` : ''}
+                </div>
+                ${after || ''}
+              </div>
+            </div>
+          `}
+          ${body}
+          ${activeTab ? tabBar(activeTab) : ''}
+          <div style="height: 10px;"></div>
+        </div>
+      </div>
+    `;
+
+    const badge = (text, tone = 'gray') => `<span class="badge ${tone}">${text}</span>`;
+    const icon = (label, tone = 'gray', big = false) => `<span class="icon ${tone} ${big ? 'big' : ''}">${label}</span>`;
+    const button = (text, cls = 'primary') => `<a href="#" class="btn ${cls}">${text}</a>`;
+    const metric = (label, value, sub = '', tone = 'teal', spark = '') => `
+      <div class="metric">
+        <div class="label">${label}</div>
+        <p class="value">${value}</p>
+        <div class="sub">${sub}</div>
+        ${spark ? `<div class="spark ${tone === 'green' ? 'green' : tone === 'red' ? 'red' : ''}">${spark}</div>` : ''}
+      </div>
+    `;
+    const row = ({ iconLabel = '-', iconTone = 'gray', title, meta = '', right = '', rightTone = '' }) => `
+      <div class="row">
+        <div class="left">
+          ${icon(iconLabel, iconTone)}
+          <div style="min-width:0">
+            <p class="title">${title}</p>
+            ${meta ? `<p class="meta">${meta}</p>` : ''}
+          </div>
+        </div>
+        <div class="right ${rightTone}">${right}</div>
+      </div>
+    `;
+    const section = ({ eyebrow = '', title, text = '', action = '' }) => `
+      <div class="section">
+        <div>
+          ${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ''}
+          <h3>${title}</h3>
+          ${text ? `<p>${text}</p>` : ''}
+        </div>
+        ${action}
+      </div>
+    `;
+    const input = (label, value = '') => `<div class="input ${value ? 'focus' : ''}">${label}${value ? `<span style="color:var(--white);margin-left:auto;font-weight:600;">${value}</span>` : ''}</div>`;
+    const progress = (value, tone = 'teal') => `<div class="progress ${tone}"><span style="width:${value}%"></span></div>`;
+    const sheet = (content) => `<div class="sheet"><div class="sheet-handle"></div>${content}</div>`;
+    const empty = ({ iconLabel, title, text, cta }) => `
+      <div class="empty-state">
+        ${icon(iconLabel, 'teal', true)}
+        <div>
+          <h2>${title}</h2>
+          <p>${text}</p>
+        </div>
+        ${cta ? `<div>${cta}</div>` : ''}
+      </div>
+    `;
+
+    function adminOverviewTab() {
+      return shell({
+        title: 'Admin',
+        subtitle: 'Operational control center',
+        activeTab: 'more',
+        after: badge('Live', 'teal'),
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="list-title">
+                <h4>Overview</h4>
+                <span class="hint">5 tabs</span>
+              </div>
+              <div class="metric-grid">
+                ${metric('Users', '1,842', '124 active today', 'teal')}
+                ${metric('Trials', '38', 'Ending in 7 days', 'amber')}
+                ${metric('Billing', '$18.4k', 'MRR this month', 'green')}
+                ${metric('Flags', '6', 'Needs attention', 'red')}
+              </div>
+            </div>
+
+            <div class="card">
+              ${section({ eyebrow: 'System Health', title: 'All core services are stable.', text: 'Realtime sync, auth, and billing are within normal range.' })}
+              <div class="stack" style="margin-top:8px">
+                ${row({ iconLabel: 'A', iconTone: 'green', title: 'Auth service', meta: '99.98% uptime today', right: badge('Healthy', 'green') })}
+                ${row({ iconLabel: 'B', iconTone: 'teal', title: 'Billing sync', meta: '2 invoices pending reconciliation', right: badge('Watch', 'amber') })}
+                ${row({ iconLabel: 'C', iconTone: 'red', title: 'Audit queue', meta: '3 high priority events', right: badge('Review', 'red') })}
+              </div>
+            </div>
+
+            <div class="card">
+              ${section({ eyebrow: 'Quick actions', title: 'Shortcuts for high-trust admin tasks.', text: 'Keep the account system clean without hunting through menus.' })}
+              <div class="btn-row" style="margin-top:12px;flex-wrap:wrap">
+                ${button('Resync billing')}
+                ${button('Reset onboarding', 'secondary')}
+                ${button('Grant access', 'secondary')}
+                ${button('Audit log', 'ghost')}
+              </div>
+            </div>
+
+            <div class="card">
+              ${row({ iconLabel: '!', iconTone: 'amber', title: '3 subscriptions are past due', meta: 'Follow up before trial access expires', right: badge('Review now', 'amber') })}
+              ${row({ iconLabel: 'U', iconTone: 'gray', title: '12 users invited yesterday', meta: '4 pending role assignment', right: badge('Pending', 'gray') })}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function adminUsersTab() {
+      return shell({
+        title: 'Users',
+        subtitle: 'Search, suspend, and adjust access',
+        activeTab: 'more',
+        body: `
+          <div class="body">
+            <div class="input focus">Search users, emails, roles</div>
+            <div class="tabs" style="padding:0; margin-top:2px">
+              <span class="tab active">All</span>
+              <span class="tab">Coach</span>
+              <span class="tab">Nutritionist</span>
+              <span class="tab">Clinician</span>
+              <span class="tab">Suspended</span>
+            </div>
+            <div class="card">
+              ${row({ iconLabel: 'ES', iconTone: 'teal', title: 'Enzo Soler', meta: 'enzo@atlas.core | admin', right: `${badge('Active', 'green')} ${badge('Pro', 'teal')}` })}
+              ${row({ iconLabel: 'AC', iconTone: 'gray', title: 'Ana Costa', meta: 'ana@studio.com | coach', right: `${badge('Trialing', 'amber')} ${badge('Coach', 'teal')}` })}
+              ${row({ iconLabel: 'JM', iconTone: 'red', title: 'Joao Mendes', meta: 'jm@team.com | suspended', right: `${badge('Suspended', 'red')} ${badge('Free', 'gray')}` })}
+              ${row({ iconLabel: 'LR', iconTone: 'green', title: 'Lia Rocha', meta: 'lia@clinic.com | clinician', right: `${badge('Active', 'green')} ${badge('Clinical', 'green')}` })}
+            </div>
+
+            <div class="card">
+              ${section({ eyebrow: 'Bulk actions', title: 'Operate on multiple users safely.', text: 'Toggle roles, suspend accounts, or resend onboarding from one place.' })}
+              <div class="btn-row" style="margin-top:12px;flex-wrap:wrap">
+                ${button('Resend invite', 'secondary')}
+                ${button('Suspend', 'destructive')}
+                ${button('Update role', 'secondary')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function adminSubscriptionsTab() {
+      return shell({
+        title: 'Subscriptions',
+        subtitle: 'Billing state and renewal control',
+        activeTab: 'more',
+        body: `
+          <div class="body">
+            <div class="metric-grid">
+              ${metric('Active', '1,294', 'Current subscriptions', 'green')}
+              ${metric('Trialing', '38', 'Need conversion follow-up', 'amber')}
+              ${metric('Past due', '14', 'At risk of churn', 'red')}
+              ${metric('Revenue', '$18.4k', 'Net monthly recurring', 'teal')}
+            </div>
+            <div class="card">
+              ${row({ iconLabel: 'P', iconTone: 'teal', title: 'Pro annual', meta: '124 accounts | renews Mar 30', right: `${badge('$29/mo', 'teal')} ${badge('Active', 'green')}` })}
+              ${row({ iconLabel: 'C', iconTone: 'green', title: 'Coach plan', meta: '86 accounts | 7 pending invoices', right: `${badge('$49/mo', 'green')} ${badge('Watch', 'amber')}` })}
+              ${row({ iconLabel: 'L', iconTone: 'red', title: 'Clinical plan', meta: '11 accounts | 2 past due', right: `${badge('$69/mo', 'red')} ${badge('Past due', 'red')}` })}
+              ${row({ iconLabel: 'F', iconTone: 'gray', title: 'Free', meta: '1,073 accounts | no renewal', right: `${badge('Free', 'gray')} ${badge('N/A', 'gray')}` })}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Billing tools', title: 'Keep renewals and trials under control.', text: 'Reconcile payment state, extend trials, and re-run billing sync without leaving the panel.' })}
+              <div class="btn-row" style="margin-top:12px;flex-wrap:wrap">
+                ${button('Extend trial')}
+                ${button('Resync billing', 'secondary')}
+                ${button('Export report', 'ghost')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function adminRolesTab() {
+      return shell({
+        title: 'Roles',
+        subtitle: 'Permissions, access, and assignment',
+        activeTab: 'more',
+        body: `
+          <div class="body">
+            <div class="card">
+              <div class="grid-2">
+                <div class="card tight">
+                  <div class="eyebrow">Coach</div>
+                  <h3 style="margin:0 0 6px">Performance coaching</h3>
+                  <p style="margin:0;color:var(--secondary);font-size:12px;line-height:1.5">Workout plans, adherence, invites, and student profiles.</p>
+                  <div style="margin-top:10px">${badge('Active', 'teal')}</div>
+                </div>
+                <div class="card tight">
+                  <div class="eyebrow">Nutritionist</div>
+                  <h3 style="margin:0 0 6px">Diet oversight</h3>
+                  <p style="margin:0;color:var(--secondary);font-size:12px;line-height:1.5">Meal plans, food logs, exports, and macro adherence.</p>
+                  <div style="margin-top:10px">${badge('Active', 'green')}</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              ${row({ iconLabel: 'A', iconTone: 'red', title: 'Admin', meta: 'Full access to system settings', right: badge('Restricted', 'red') })}
+              ${row({ iconLabel: 'C', iconTone: 'teal', title: 'Clinician', meta: 'Labs, protocols, patient tracking', right: badge('Granted', 'green') })}
+              ${row({ iconLabel: 'U', iconTone: 'gray', title: 'User', meta: 'Default account with no elevated tools', right: badge('Standard', 'gray') })}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Assignments', title: 'Invite by role and keep permissions narrow.', text: 'Every role maps to a clean, explicit access model.' })}
+              <div class="btn-row" style="margin-top:12px">
+                ${button('Invite admin')}
+                ${button('Invite coach', 'secondary')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function adminAuditTab() {
+      return shell({
+        title: 'Audit Log',
+        subtitle: 'Every system action is recorded',
+        activeTab: 'more',
+        body: `
+          <div class="body">
+            <div class="input">Filter by user, action, or date</div>
+            <div class="card">
+              <div class="list-title"><h4>Recent events</h4><span class="hint">Live</span></div>
+              ${row({ iconLabel: '9:42', iconTone: 'gray', title: 'Role updated', meta: 'Enzo Soler changed Lia Rocha to clinician', right: badge('Success', 'green') })}
+              ${row({ iconLabel: '9:31', iconTone: 'amber', title: 'Trial extended', meta: 'Auto-granted 7 days to Ana Costa', right: badge('Manual', 'amber') })}
+              ${row({ iconLabel: '9:12', iconTone: 'red', title: 'User suspended', meta: 'Joao Mendes flagged for billing review', right: badge('Critical', 'red') })}
+              ${row({ iconLabel: '8:55', iconTone: 'teal', title: 'Subscription synced', meta: 'Stripe reconciliation completed', right: badge('Synced', 'teal') })}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Traceability', title: 'Changes are searchable and accountable.', text: 'Use this log when the support team needs a clear history of account changes.' })}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function adminPanel() {
+      return shell({
+        title: 'Admin Panel',
+        subtitle: 'Operational overview and system controls',
+        activeTab: 'more',
+        after: badge('Root access', 'teal'),
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="eyebrow">Control center</div>
+              <h3 style="margin:0 0 6px;font-size:20px">Maintain the account system with calm precision.</h3>
+              <p class="muted" style="margin:0;font-size:12px;line-height:1.55">Search users, reconcile billing, track role assignment, and review every event from one place.</p>
+              <div class="btn-row" style="margin-top:12px;flex-wrap:wrap">
+                ${button('Overview')}
+                ${button('Users', 'secondary')}
+                ${button('Subscriptions', 'secondary')}
+                ${button('Audit log', 'ghost')}
+              </div>
+            </div>
+            <div class="metric-grid">
+              ${metric('Users', '1,842', '126 new this month', 'teal')}
+              ${metric('Subscriptions', '1,294', '92 are paid annually', 'green')}
+              ${metric('Trials', '38', '7 expire in 48h', 'amber')}
+              ${metric('Alerts', '6', 'Needs review today', 'red')}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Priority', title: 'Attention needed on billing and access.', text: 'The system is healthy, but a few accounts require manual review.' })}
+              <div style="margin-top:10px" class="stack">
+                ${row({ iconLabel: '!', iconTone: 'amber', title: '3 invoices need reconciliation', meta: 'Link billing and keep access accurate', right: badge('Review', 'amber') })}
+                ${row({ iconLabel: 'U', iconTone: 'teal', title: '12 users need role confirmation', meta: 'Assigned from invites but not finalized', right: badge('Action', 'teal') })}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function pricingPage() {
+      return shell({
+        title: 'Pricing',
+        subtitle: 'Premium plans for athletes and professionals',
+        noNav: false,
+        activeTab: null,
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="eyebrow">Choose your path</div>
+              <h3 style="margin:0 0 6px;font-size:20px;line-height:1.15">Start free, then expand into AI, context, and professional collaboration.</h3>
+              <p class="muted" style="margin:0;font-size:12px;line-height:1.55">The same calm, premium product language carries from marketing into the app itself.</p>
+              <div class="pill-toggle" style="margin-top:12px">
+                <span class="active">Monthly</span><span>Yearly</span>
+              </div>
+            </div>
+
+            <div class="card">
+              ${section({ eyebrow: 'Athlete', title: 'Free', text: 'Track the essentials and preview the product.' })}
+              <div style="margin-top:10px" class="grid-2">
+                <div>
+                  <p class="value mono" style="font-size:30px;margin:0">0</p>
+                  <p class="muted small" style="margin:4px 0 0">Always free</p>
+                </div>
+                <div style="text-align:right">${badge('Current plan', 'gray')}</div>
+              </div>
+              <div class="stack" style="margin-top:10px">${row({ iconLabel: 'OK', iconTone: 'green', title: 'Workout logging', meta: 'Basic usage and daily tracking', right: '' })}</div>
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Athlete', title: 'Pro', text: 'AI context, advanced tracking, and better reports.' })}
+              <div style="display:flex;align-items:end;gap:6px;margin-top:10px">
+                <p class="value mono" style="font-size:34px;margin:0">$19</p><span class="muted small" style="padding-bottom:4px">/mo</span>
+              </div>
+              <div class="stack" style="margin-top:10px">
+                ${row({ iconLabel: 'A', iconTone: 'teal', title: 'Atlas AI prompts', meta: 'Daily coaching and insight generation', right: badge('Popular', 'teal') })}
+                ${row({ iconLabel: 'B', iconTone: 'green', title: 'Premium exports', meta: 'PDF, share cards, and deeper history', right: badge('Included', 'green') })}
+              </div>
+              <div style="margin-top:12px">${button('Start Pro', 'primary')}</div>
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Athlete', title: 'Performance', text: 'More analysis, more context, more automation.' })}
+              <div style="display:flex;align-items:end;gap:6px;margin-top:10px">
+                <p class="value mono" style="font-size:34px;margin:0">$39</p><span class="muted small" style="padding-bottom:4px">/mo</span>
+              </div>
+              <div class="stack" style="margin-top:10px">
+                ${row({ iconLabel: 'R', iconTone: 'teal', title: 'Deep insights', meta: 'Trend review and performance analysis', right: badge('Advanced', 'teal') })}
+                ${row({ iconLabel: 'S', iconTone: 'green', title: 'Professional sharing', meta: 'Coach and clinician collaboration', right: badge('Best value', 'green') })}
+              </div>
+              <div style="margin-top:12px">${button('Upgrade to Performance', 'secondary')}</div>
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Trust', title: 'Built for a premium checkout.', text: 'Secure billing, clear plan hierarchy, and low-friction upgrades.' })}
+              <div class="grid-2" style="margin-top:10px">
+                <div class="card tight"><span class="badge green">7-day trial</span></div>
+                <div class="card tight"><span class="badge teal">Change anytime</span></div>
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function upgradeGateOverlay() {
+      return shell({
+        title: 'Upgrade',
+        subtitle: 'Locked feature gate',
+        activeTab: null,
+        overlay: true,
+        body: `
+          <div class="body center" style="padding:18px 16px">
+            <div class="sheet" style="width:100%;margin-top:16px">
+              <div class="sheet-handle"></div>
+              <div class="center" style="flex-direction:column;gap:12px;padding:4px 6px 2px">
+                ${icon('AI', 'teal', true)}
+                <div>
+                  <h2 style="margin:0;font-size:22px;letter-spacing:-0.05em;line-height:1.12">Atlas AI is part of Pro</h2>
+                  <p class="muted" style="margin:8px 0 0;font-size:13px;line-height:1.55">Upgrade to unlock the assistant, deeper analysis, and premium workflows.</p>
+                </div>
+              </div>
+              <div class="card" style="margin-top:14px">
+                <div class="list-title"><h4>Included</h4><span class="hint">Pro</span></div>
+                ${row({ iconLabel: 'OK', iconTone: 'green', title: 'Atlas AI prompts', meta: 'Ask questions and generate plans', right: '' })}
+                ${row({ iconLabel: 'OK', iconTone: 'green', title: 'Premium exports', meta: 'Reports, share cards, and more', right: '' })}
+                ${row({ iconLabel: 'OK', iconTone: 'green', title: 'Advanced history', meta: 'Longer time ranges and comparison views', right: '' })}
+              </div>
+              <div class="btn-row" style="margin-top:14px">
+                ${button('View plans')}
+                ${button('Dismiss', 'ghost')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function subscriptionSuccess() {
+      return shell({
+        title: 'Subscription',
+        subtitle: 'Success',
+        activeTab: null,
+        body: `
+          <div class="body center" style="padding:24px 16px">
+            <div class="card sheet" style="width:100%;padding:18px">
+              <div class="center" style="flex-direction:column;gap:12px">
+                ${icon('OK', 'green', true)}
+                <div>
+                  <h2 style="margin:0;font-size:22px;letter-spacing:-0.05em">You are now on Performance.</h2>
+                  <p class="muted" style="margin:8px 0 0;font-size:13px;line-height:1.55">Your billing is active and premium features are ready right away.</p>
+                </div>
+              </div>
+              <div class="card" style="margin-top:14px">
+                ${row({ iconLabel: 'P', iconTone: 'teal', title: 'Performance plan', meta: 'Billed monthly | starts today', right: badge('$39/mo', 'teal') })}
+                ${row({ iconLabel: 'D', iconTone: 'green', title: 'Next renewal', meta: 'Apr 22, 2026', right: badge('Active', 'green') })}
+                ${row({ iconLabel: 'I', iconTone: 'gray', title: 'Receipt sent', meta: 'Payment confirmation delivered by email', right: badge('Done', 'gray') })}
+              </div>
+              <div class="btn-row" style="margin-top:14px">
+                ${button('Continue to app')}
+                ${button('Manage billing', 'secondary')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function pushNotification() {
+      return shell({
+        title: 'Notification',
+        subtitle: 'Push preview',
+        activeTab: null,
+        noNav: true,
+        body: `
+          <div class="body" style="padding:18px 16px 16px">
+            <div class="card soft" style="min-height:100%;display:flex;flex-direction:column;justify-content:space-between">
+              <div>
+                <div class="center" style="flex-direction:column;gap:8px;padding-top:10px">
+                  <div class="eyebrow">Wednesday, 9:41 PM</div>
+                  <h2 style="margin:0;font-size:24px;letter-spacing:-0.06em">5 days left in your trial</h2>
+                </div>
+                <div class="card blur-card" style="margin-top:18px">
+                  <div class="row compact" style="border-top:none;padding-top:0">
+                    <div class="left">
+                      ${icon('A', 'teal')}
+                      <div style="min-width:0">
+                        <p class="title">atlas.core</p>
+                        <p class="meta">Your trial is ending soon. Review plans before access changes.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="btn-row" style="margin-top:10px">
+                    ${button('View plans', 'secondary')}
+                    ${button('Open app', 'primary')}
+                  </div>
+                </div>
+              </div>
+              <div class="muted small center" style="padding-bottom:6px">Push notifications stay calm, clear, and conversion-aware.</div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function notificationCenter() {
+      return shell({
+        title: 'Notifications',
+        subtitle: 'In-app center',
+        activeTab: 'more',
+        after: badge('3 unread', 'teal'),
+        body: `
+          <div class="body">
+            <div class="tabs" style="padding:0">
+              <span class="tab active">All</span>
+              <span class="tab">System</span>
+              <span class="tab">Mentions</span>
+              <span class="tab">Billing</span>
+            </div>
+            <div class="card">
+              ${row({ iconLabel: '!', iconTone: 'amber', title: 'Trial ends in 5 days', meta: 'Review plans or keep tracking with limited access', right: badge('Now', 'amber') })}
+              ${row({ iconLabel: 'A', iconTone: 'teal', title: 'Atlas AI generated your summary', meta: 'Today\'s readiness score is ready to read', right: badge('Unread', 'teal') })}
+              ${row({ iconLabel: 'OK', iconTone: 'green', title: 'Workout synced', meta: 'Your rest timer and set history were saved', right: badge('Seen', 'green') })}
+              ${row({ iconLabel: 'P', iconTone: 'red', title: 'Payment issue detected', meta: 'Update billing to restore full access', right: badge('Billing', 'red') })}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Tip', title: 'Swipe to manage each item.', text: 'The center stays compact so the user can scan and act quickly.' })}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function deepLinkCheckIn() {
+      return shell({
+        title: 'Check-in',
+        subtitle: 'Deep link landing',
+        activeTab: null,
+        body: `
+          <div class="body center" style="padding:22px 16px">
+            <div class="sheet" style="width:100%">
+              <div class="sheet-handle"></div>
+              <div class="center" style="flex-direction:column;gap:12px">
+                ${icon('D', 'teal', true)}
+                <div>
+                  <h2 style="margin:0;font-size:22px;letter-spacing:-0.05em">Quick check-in for today</h2>
+                  <p class="muted" style="margin:8px 0 0;font-size:13px;line-height:1.55">You can log energy, mood, and sleep in under 30 seconds.</p>
+                </div>
+              </div>
+              <div class="metric-grid" style="margin-top:14px">
+                ${metric('Energy', '4/5', 'Steady this morning', 'green')}
+                ${metric('Mood', '3/5', 'Neutral and focused', 'teal')}
+                ${metric('Sleep', '7.4h', 'One short wake-up', 'amber')}
+                ${metric('Readiness', '82', 'Good day for training', 'green')}
+              </div>
+              <div class="btn-row" style="margin-top:14px">
+                ${button('Log now')}
+                ${button('Remind me later', 'secondary')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function helpCenter() {
+      return shell({
+        title: 'Help Center',
+        subtitle: 'Guides, FAQs, and product support',
+        activeTab: 'more',
+        body: `
+          <div class="body">
+            <div class="input focus">Search help articles</div>
+            <div class="card">
+              ${section({ eyebrow: 'Start here', title: 'Learn the product in clear steps.', text: 'The help center stays friendly, searchable, and on-brand.' })}
+            </div>
+            <div class="card">
+              ${row({ iconLabel: '1', iconTone: 'teal', title: 'Getting Started', meta: 'Create account, onboarding, and setup', right: badge('5 min', 'gray') })}
+              ${row({ iconLabel: '2', iconTone: 'green', title: 'Workout Logging', meta: 'How to record sets, reps, load, and notes', right: badge('8 min', 'gray') })}
+              ${row({ iconLabel: '3', iconTone: 'amber', title: 'Plan vs Execution', meta: 'Read adherence and adjust with context', right: badge('7 min', 'gray') })}
+            </div>
+            <div class="card">
+              <div class="list-title"><h4>FAQ</h4><span class="hint">4 answers</span></div>
+              ${row({ iconLabel: '?', iconTone: 'gray', title: 'How do I start a trial?', meta: 'Free sign-up and guided onboarding are both supported', right: '' })}
+              ${row({ iconLabel: '?', iconTone: 'gray', title: 'Can I share with a coach?', meta: 'Yes, with role-based account linking', right: '' })}
+            </div>
+            <div class="card">
+              ${button('Contact support')}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function guideScreen({ title, subtitle, steps, note, cta = 'Open guide' }) {
+      return shell({
+        title,
+        subtitle,
+        back: 'Help Center',
+        activeTab: 'more',
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="eyebrow">Guide</div>
+              <h3 style="margin:0 0 6px;font-size:20px;line-height:1.15">${title}</h3>
+              <p class="muted" style="margin:0;font-size:12px;line-height:1.55">${note}</p>
+            </div>
+            <div class="card">
+              ${steps.map((step, index) => row({
+                iconLabel: String(index + 1),
+                iconTone: index === 0 ? 'teal' : index === steps.length - 1 ? 'green' : 'gray',
+                title: step.title,
+                meta: step.meta,
+                right: step.badge ? badge(step.badge.text, step.badge.tone) : ''
+              })).join('')}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Next step', title: 'Keep the context close.', text: stepNoteMap(title) })}
+              <div class="btn-row" style="margin-top:12px">${button(cta)}${button('Back to help', 'secondary')}</div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function stepNoteMap(name) {
+      if (name.includes('Getting Started')) return 'The first run experience should feel calm, premium, and obvious.';
+      if (name.includes('Workout Logging')) return 'Logging should be fast enough to use under fatigue.';
+      return 'The user should understand what was prescribed, what was done, and why the difference matters.';
+    }
+
+    function guideGettingStarted() {
+      return guideScreen({
+        title: 'Getting Started',
+        subtitle: 'Onboarding guide',
+        note: 'Create your account, choose a path, and reach a useful first day without friction.',
+        steps: [
+          { title: 'Create the account', meta: 'Email, password, and secure sign-in.' },
+          { title: 'Select your goal', meta: 'Training, nutrition, body progress, or support.' },
+          { title: 'Baseline your profile', meta: 'Height, weight, and starting checkpoint.' },
+          { title: 'Choose your path', meta: 'Athlete, coach, nutritionist, or clinician.', badge: { text: '4 steps', tone: 'gray' } },
+        ],
+        cta: 'Start onboarding'
+      });
+    }
+
+    function guideWorkoutLogging() {
+      return guideScreen({
+        title: 'Workout Logging',
+        subtitle: 'Training guide',
+        note: 'Record sets and progress without breaking the session flow.',
+        steps: [
+          { title: 'Open the workout', meta: 'Pick the active plan or routine.' },
+          { title: 'Log each set', meta: 'Weight, reps, and completion state.' },
+          { title: 'Use rest timer', meta: 'Keep pacing visible under fatigue.' },
+          { title: 'Mark completion', meta: 'Finish with a clear summary and notes.', badge: { text: 'Execution', tone: 'teal' } },
+        ],
+        cta: 'Open workout logging'
+      });
+    }
+
+    function guidePlanVsExecution() {
+      return guideScreen({
+        title: 'Plan vs Execution',
+        subtitle: 'Adherence guide',
+        note: 'A clean way to understand whether a plan needs patience, support, or adjustment.',
+        steps: [
+          { title: 'Read the plan', meta: 'What was prescribed by coach or system.' },
+          { title: 'Review execution', meta: 'What was actually completed.' },
+          { title: 'Compare the gap', meta: 'Find missed sets, meals, or protocol steps.' },
+          { title: 'Act on the trend', meta: 'Adjust the next block with context.', badge: { text: 'Review', tone: 'amber' } },
+        ],
+        cta: 'Review adherence'
+      });
+    }
+
+    function found404() {
+      return shell({
+        title: '404',
+        subtitle: 'Page not found',
+        activeTab: null,
+        body: `
+          <div class="empty-state">
+            ${icon('404', 'teal', true)}
+            <div>
+              <h2>This route does not exist.</h2>
+              <p>The page may have moved or the link may be out of date.</p>
+            </div>
+            <div class="btn-row">
+              ${button('Go to Today')}
+              ${button('Search help', 'secondary')}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function errorState() {
+      return shell({
+        title: 'Error',
+        subtitle: 'Something interrupted the flow',
+        activeTab: null,
+        body: `
+          <div class="body center" style="padding:24px 16px">
+            <div class="sheet" style="width:100%">
+              <div class="center" style="flex-direction:column;gap:12px">
+                ${icon('!', 'red', true)}
+                <div>
+                  <h2 style="margin:0;font-size:22px;letter-spacing:-0.05em">We could not complete that action.</h2>
+                  <p class="muted" style="margin:8px 0 0;font-size:13px;line-height:1.55">Try again in a moment or inspect the error details if the issue persists.</p>
+                </div>
+              </div>
+              <div class="card" style="margin-top:14px">
+                <div class="row compact" style="border-top:none;padding-top:0">
+                  <div class="left">
+                    ${icon('Code', 'gray')}
+                    <div>
+                      <p class="title">Error code</p>
+                      <p class="meta mono">SYNC_408 | request timed out</p>
+                    </div>
+                  </div>
+                  ${badge('Retryable', 'gray')}
+                </div>
+              </div>
+              <div class="btn-row" style="margin-top:14px">
+                ${button('Try again')}
+                ${button('Copy details', 'secondary')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function offlineState() {
+      return shell({
+        title: 'Offline',
+        subtitle: 'No connection detected',
+        activeTab: null,
+        body: `
+          <div class="empty-state">
+            ${icon('OFF', 'amber', true)}
+            <div>
+              <h2>You are offline.</h2>
+              <p>Cached data is still visible. Sync will resume automatically when the connection returns.</p>
+            </div>
+            <div class="card" style="width:100%">
+              ${row({ iconLabel: 'OK', iconTone: 'green', title: 'Last synced 4 min ago', meta: 'Today dashboard and recent logs are cached', right: badge('Ready', 'green') })}
+              ${row({ iconLabel: '!', iconTone: 'amber', title: '2 changes pending', meta: 'Workout set and body note will upload later', right: badge('Queued', 'amber') })}
+            </div>
+            <div class="btn-row">
+              ${button('Retry connection')}
+              ${button('Keep working', 'secondary')}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function sessionExpired() {
+      return shell({
+        title: 'Session expired',
+        subtitle: 'Logged out for security',
+        activeTab: null,
+        body: `
+          <div class="empty-state">
+            ${icon('LOCK', 'red', true)}
+            <div>
+              <h2>Your session ended.</h2>
+              <p>Please sign in again to continue using atlas.core.</p>
+            </div>
+            <div class="btn-row">
+              ${button('Sign in again')}
+              ${button('Switch account', 'secondary')}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function passwordChanged() {
+      return shell({
+        title: 'Success',
+        subtitle: 'Password changed',
+        activeTab: null,
+        body: `
+          <div class="empty-state">
+            ${icon('OK', 'green', true)}
+            <div>
+              <h2>Password updated.</h2>
+              <p>Your account is secure again. Continue by signing in with the new password.</p>
+            </div>
+            <div class="btn-row">
+              ${button('Continue to sign in')}
+              ${button('Back to login', 'secondary')}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function roleDetection() {
+      return shell({
+        title: 'Choose your role',
+        subtitle: 'First login setup',
+        activeTab: null,
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="eyebrow">Welcome</div>
+              <h3 style="margin:0 0 6px;font-size:20px;line-height:1.15">What best describes how you will use atlas.core?</h3>
+              <p class="muted" style="margin:0;font-size:12px;line-height:1.55">This chooses the default dashboard, data model, and tools you see first.</p>
+            </div>
+            <div class="card">
+              ${row({ iconLabel: 'A', iconTone: 'teal', title: 'Athlete', meta: 'Track training, nutrition, body metrics, and AI insight', right: badge('Recommended', 'teal') })}
+              ${row({ iconLabel: 'C', iconTone: 'green', title: 'Coach', meta: 'Prescribe workouts and monitor students', right: badge('Role', 'green') })}
+              ${row({ iconLabel: 'N', iconTone: 'amber', title: 'Nutritionist', meta: 'Prescribe diets and review food adherence', right: badge('Role', 'amber') })}
+              ${row({ iconLabel: 'L', iconTone: 'gray', title: 'Clinician', meta: 'Track labs, protocols, and patient status', right: badge('Role', 'gray') })}
+              ${row({ iconLabel: 'M', iconTone: 'red', title: 'Admin', meta: 'Manage users, subscriptions, and audits', right: badge('Power user', 'red') })}
+            </div>
+            <div class="card">
+              ${button('Continue')}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function inviteReceived() {
+      return shell({
+        title: 'Account linking',
+        subtitle: 'Received invite',
+        activeTab: null,
+        body: `
+          <div class="body center" style="padding:18px 16px">
+            <div class="sheet" style="width:100%">
+              <div class="sheet-handle"></div>
+              <div class="card" style="margin-bottom:12px">
+                ${row({ iconLabel: 'AC', iconTone: 'teal', title: 'Ana Costa invited you', meta: 'Coach role | atlas.core access', right: badge('Pending', 'amber') })}
+              </div>
+              <div class="card">
+                ${section({ eyebrow: 'What this unlocks', title: 'Shared workout plans and progress context.', text: 'The invite is specific, explicit, and easy to accept or decline.' })}
+              </div>
+              <div class="btn-row" style="margin-top:14px">
+                ${button('Accept invite')}
+                ${button('Decline', 'destructive')}
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function pendingInvites() {
+      return shell({
+        title: 'Invites',
+        subtitle: 'Pending account links',
+        activeTab: null,
+        body: `
+          <div class="body">
+            <div class="card">
+              ${row({ iconLabel: 'AC', iconTone: 'teal', title: 'Ana Costa', meta: 'Coach invite | sent 2 days ago', right: `${badge('Pending', 'amber')} ${button('Accept', 'secondary')}` })}
+              ${row({ iconLabel: 'LR', iconTone: 'green', title: 'Lia Rocha', meta: 'Clinician invite | sent today', right: `${badge('Pending', 'amber')} ${button('Accept', 'secondary')}` })}
+              ${row({ iconLabel: 'JM', iconTone: 'gray', title: 'Joao Mendes', meta: 'Expired invite | no action yet', right: badge('Expired', 'red') })}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Linked access', title: 'Keep each invite narrow and traceable.', text: 'The pending list is for confirmation, not broad account management.' })}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function languageSelector() {
+      return shell({
+        title: 'Language',
+        subtitle: 'Choose your display language',
+        activeTab: null,
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="eyebrow">Localization</div>
+              <h3 style="margin:0 0 6px;font-size:20px;line-height:1.15">Select the language that matches your workflow.</h3>
+              <p class="muted" style="margin:0;font-size:12px;line-height:1.55">The interface preview updates to show the active language and tone.</p>
+            </div>
+            <div class="card">
+              ${row({ iconLabel: 'EN', iconTone: 'teal', title: 'English', meta: 'Global default', right: badge('Selected', 'green') })}
+              ${row({ iconLabel: 'PT', iconTone: 'green', title: 'Portugues', meta: 'Brazilian Portuguese', right: button('Use', 'secondary') })}
+              ${row({ iconLabel: 'ES', iconTone: 'amber', title: 'Espanol', meta: 'Latin American Spanish', right: button('Use', 'secondary') })}
+              ${row({ iconLabel: 'FR', iconTone: 'gray', title: 'Francais', meta: 'Coming soon', right: badge('Soon', 'gray') })}
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Preview', title: 'Clear and culturally neutral.', text: 'Language switching should feel like a system preference, not a separate flow.' })}
+            </div>
+            <div class="card">${button('Save language')}</div>
+          </div>
+        `
+      });
+    }
+
+    function themePreview() {
+      return shell({
+        title: 'Theme',
+        subtitle: 'Preview mode',
+        activeTab: null,
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="eyebrow">Appearance</div>
+              <h3 style="margin:0 0 6px;font-size:20px;line-height:1.15">Dark mode is active and tuned for low-glare reading.</h3>
+              <p class="muted" style="margin:0;font-size:12px;line-height:1.55">Accent usage stays sparse and keeps the product calm.</p>
+            </div>
+            <div class="grid-2">
+              <div class="card">
+                <div class="eyebrow">Dark</div>
+                <div class="card tight" style="margin-top:10px;background:#0a1010">
+                  <div class="stack">
+                    <span class="badge teal">Active</span>
+                    <div class="row compact" style="border-top:none;padding:0">
+                      <div class="left">
+                        ${icon('A', 'teal')}
+                        <div>
+                          <p class="title">atlas.core</p>
+                          <p class="meta">Teal action states and neutral surfaces</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="eyebrow">High contrast</div>
+                <div class="card tight" style="margin-top:10px;background:#141414">
+                  <div class="stack">
+                    <span class="badge gray">Preview</span>
+                    <div class="row compact" style="border-top:none;padding:0">
+                      <div class="left">
+                        ${icon('A', 'gray')}
+                        <div>
+                          <p class="title">Alternate</p>
+                          <p class="meta">Useful for accessibility checks</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              ${button('Apply theme')}
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function loadingSkeleton() {
+      return shell({
+        title: 'Loading',
+        subtitle: 'Skeleton state',
+        activeTab: 'more',
+        body: `
+          <div class="body">
+            <div class="card">
+              <div class="skeleton" style="height:22px;width:42%;border-radius:999px"></div>
+              <div class="skeleton" style="height:12px;width:70%;border-radius:999px;margin-top:10px"></div>
+            </div>
+            <div class="metric-grid">
+              <div class="metric"><div class="sk-line skeleton" style="width:50%"></div><div class="sk-box skeleton" style="height:30px"></div><div class="sk-line skeleton" style="width:70%"></div></div>
+              <div class="metric"><div class="sk-line skeleton" style="width:50%"></div><div class="sk-box skeleton" style="height:30px"></div><div class="sk-line skeleton" style="width:70%"></div></div>
+              <div class="metric"><div class="sk-line skeleton" style="width:50%"></div><div class="sk-box skeleton" style="height:30px"></div><div class="sk-line skeleton" style="width:70%"></div></div>
+              <div class="metric"><div class="sk-line skeleton" style="width:50%"></div><div class="sk-box skeleton" style="height:30px"></div><div class="sk-line skeleton" style="width:70%"></div></div>
+            </div>
+            <div class="card">
+              <div class="sk-line skeleton" style="width:35%"></div>
+              <div class="stack" style="margin-top:12px">
+                <div class="sk-box skeleton" style="height:56px"></div>
+                <div class="sk-box skeleton" style="height:56px"></div>
+                <div class="sk-box skeleton" style="height:56px"></div>
+              </div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    function marketingHome() {
+      return shell({
+        title: 'Pricing',
+        subtitle: 'Subscription flow',
+        activeTab: null,
+        body: `
+          <div class="body">
+            <div class="card soft">
+              <div class="eyebrow">Premium checkout</div>
+              <h3 style="margin:0 0 6px;font-size:20px;line-height:1.15">Stay with the free plan or unlock the layers that matter most.</h3>
+              <p class="muted" style="margin:0;font-size:12px;line-height:1.55">The page stays persuasive without becoming aggressive.</p>
+              <div class="pill-toggle" style="margin-top:12px"><span class="active">Monthly</span><span>Yearly</span></div>
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Free', title: 'Start here', text: 'Keep the core product and daily tracking.' })}
+              <div class="btn-row" style="margin-top:12px">${button('Current plan', 'ghost')}</div>
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Pro', title: '$19 / mo', text: 'AI prompts, premium exports, and deeper analysis.' })}
+              <div class="btn-row" style="margin-top:12px">${button('Choose Pro')}</div>
+            </div>
+            <div class="card">
+              ${section({ eyebrow: 'Performance', title: '$39 / mo', text: 'Longer history, more automation, and richer comparisons.' })}
+              <div class="btn-row" style="margin-top:12px">${button('Choose Performance', 'secondary')}</div>
+            </div>
+          </div>
+        `
+      });
+    }
+
+    const screens = [
+      { id: 104, label: 'Admin Panel', render: adminPanel },
+      { id: 105, label: 'Admin - Overview Tab', render: adminOverviewTab },
+      { id: 106, label: 'Admin - Users Tab', render: adminUsersTab },
+      { id: 107, label: 'Admin - Subscriptions Tab', render: adminSubscriptionsTab },
+      { id: 108, label: 'Admin - Roles Tab', render: adminRolesTab },
+      { id: 109, label: 'Admin - Audit Log Tab', render: adminAuditTab },
+      { id: 110, label: 'Upgrade Gate - Overlay', render: upgradeGateOverlay },
+      { id: 111, label: 'Pricing Page', render: pricingPage },
+      { id: 112, label: 'Subscription Success Screen', render: subscriptionSuccess },
+      { id: 113, label: 'Push Notification - Trial Ending', render: pushNotification },
+      { id: 114, label: 'In-App Notification Center', render: notificationCenter },
+      { id: 115, label: 'Deep Link Landing - Check-In Prompt', render: deepLinkCheckIn },
+      { id: 116, label: 'Help Center', render: helpCenter },
+      { id: 117, label: 'Getting Started Guide', render: guideGettingStarted },
+      { id: 118, label: 'Workout Logging Guide', render: guideWorkoutLogging },
+      { id: 119, label: 'Plan vs Execution Guide', render: guidePlanVsExecution },
+      { id: 120, label: '404 / Not Found Page', render: found404 },
+      { id: 121, label: 'Error State', render: errorState },
+      { id: 122, label: 'Offline / No Connection State', render: offlineState },
+      { id: 123, label: 'First Login - Role Detection Screen', render: roleDetection },
+      { id: 124, label: 'Account Linking - Received Invite', render: inviteReceived },
+      { id: 125, label: 'Account Linking - Pending Invites List', render: pendingInvites },
+      { id: 126, label: 'Language Selector', render: languageSelector },
+      { id: 127, label: 'Theme Preview Screen', render: themePreview },
+      { id: 128, label: 'Loading App - Skeleton State', render: loadingSkeleton },
+      { id: 129, label: 'Session Expired / Logged Out', render: sessionExpired },
+      { id: 130, label: 'Password Changed Success', render: passwordChanged },
+    ];
+
+    document.getElementById('gallery').innerHTML = screens.map((screen) => `
+      <section class="screen-card">
+        <div class="screen-label">${screen.id}. ${screen.label}</div>
+        ${screen.render()}
+      </section>
+    `).join('');
+  </script>
+</body>
+</html>

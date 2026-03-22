@@ -1,30 +1,17 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { BarChart3, Loader2, TrendingUp, Users, Utensils } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { Link } from 'react-router-dom';
-import { BarChart3, Users, TrendingUp, Loader2, Utensils, AlertTriangle } from 'lucide-react';
 import RoleGate from '@/components/rbac/RoleGate';
 import NutritionistAlertsPanel from '@/components/nutritionist/NutritionistAlertsPanel';
 import ClientListWithAdherence from '@/components/nutritionist/ClientListWithAdherence';
-
-function KPI({ icon: Icon, label, value, detail, link }) {
-  const Component = link ? Link : 'div';
-  const className = "surface rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:border-[hsl(var(--brand)/0.3)] transition-colors group";
-  
-  return (
-    <Component to={link || '#'} className={link ? className : className.replace('cursor-pointer hover:border', '')}>
-      <div className="w-10 h-10 rounded-lg bg-[hsl(var(--brand)/0.08)] flex items-center justify-center shrink-0">
-        <Icon className="w-5 h-5 text-[hsl(var(--brand))]" strokeWidth={1.75} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[11px] text-[hsl(var(--fg-2))] font-medium uppercase tracking-wider mb-1">{label}</p>
-        <p className="text-[24px] font-bold text-[hsl(var(--fg))] leading-tight">{value}</p>
-        {detail && <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">{detail}</p>}
-      </div>
-    </Component>
-  );
-}
+import { PageShell, SectionCard } from '@/components/shared/StablePage';
+import {
+  WorkspaceHeader,
+  WorkspaceMetricGrid,
+  WorkspaceMetricTile,
+} from '@/components/shared/ProfessionalUI';
 
 export default function NutritionistDashboard() {
   const { user } = useAuth();
@@ -49,68 +36,76 @@ export default function NutritionistDashboard() {
     queryFn: () => base44.entities.Measurement.list('-date', 100),
   });
 
-  const activeClients = links.filter(l => l.status === 'accepted').length;
-  const activeDiets = diets.filter(d => d.active).length;
+  const activeClients = links.filter((link) => link.status === 'accepted').length;
+  const activeDiets = diets.filter((diet) => diet.active).length;
+  const adherenceRate = links.length > 0 ? Math.round((activeClients / links.length) * 100) : 0;
 
   return (
     <RoleGate page="NutritionistDashboard">
-      <div className="mx-auto max-w-5xl p-5 lg:p-8 space-y-6">
-        {/* Header with Atlas Nutrition branding */}
-        <div className="pb-5 border-b border-[hsl(var(--border-h))]">
-          <div className="flex items-start gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-[hsl(var(--brand)/0.1)] flex items-center justify-center">
-              <Utensils className="w-6 h-6 text-[hsl(var(--brand))]" strokeWidth={1.5} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Atlas Nutrition</h1>
-              <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1">Gerenciamento de clientes e planos nutricionais</p>
-            </div>
-          </div>
-        </div>
+      <PageShell
+        title="Nutritionist"
+        subtitle="Professional oversight for adherence, body change, and active diet plans."
+        maxWidth="max-w-6xl"
+      >
+        <WorkspaceHeader
+          eyebrow="Nutritionist role"
+          title="Nutrition dashboard"
+          subtitle="Keep macro adherence, client changes, and active prescriptions easy to scan."
+          icon={Utensils}
+          tone="brand"
+          badge={`${activeClients} active clients`}
+        />
 
-        {/* KPI grid */}
         {loadingLinks || loadingDiets ? (
-          <div className="flex items-center justify-center py-16 gap-2 text-[hsl(var(--fg-2))]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
-          </div>
+          <SectionCard title="Loading workspace" subtitle="Bringing client and plan data into view.">
+            <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading nutrition workspace...
+            </div>
+          </SectionCard>
         ) : (
-          <div className="grid md:grid-cols-3 gap-4">
-            <KPI
-              icon={Users}
-              label="Clientes Ativos"
-              value={activeClients}
-              detail={`${links.length} total`}
-              link="/nutritionist/clients"
-            />
-            <KPI
-              icon={BarChart3}
-              label="Planos Ativos"
-              value={activeDiets}
-              detail={`${diets.length} total`}
-            />
-            <KPI
-              icon={TrendingUp}
-              label="Taxa de Aderência"
-              value={links.length > 0 ? Math.round((activeClients / links.length) * 100) : 0}
-              detail="%"
-            />
-          </div>
+          <>
+            <WorkspaceMetricGrid className="xl:grid-cols-3">
+              <WorkspaceMetricTile
+                label="Active clients"
+                value={activeClients}
+                hint={`${links.length} total linked clients`}
+                icon={Users}
+              />
+              <WorkspaceMetricTile
+                label="Active diets"
+                value={activeDiets}
+                hint="Prescriptions currently marked active"
+                icon={BarChart3}
+                tone="success"
+              />
+              <WorkspaceMetricTile
+                label="Acceptance rate"
+                value={`${adherenceRate}%`}
+                hint="Accepted links relative to all invitations"
+                icon={TrendingUp}
+                tone="warning"
+              />
+            </WorkspaceMetricGrid>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <SectionCard
+                title="Attention needed"
+                subtitle="Clients or plans that likely need follow-up."
+              >
+                <NutritionistAlertsPanel links={links} meals={meals} />
+              </SectionCard>
+
+              <SectionCard
+                title="Client adherence"
+                subtitle="A quick scan of who is logging and progressing."
+              >
+                <ClientListWithAdherence links={links} meals={meals} measurements={measurements} />
+              </SectionCard>
+            </div>
+          </>
         )}
-
-        {/* Alerts & Clientes com Aderência */}
-        <div className="grid lg:grid-cols-2 gap-4">
-          {/* Alerts panel */}
-          <div className="space-y-2">
-            <NutritionistAlertsPanel links={links} meals={meals} />
-          </div>
-
-          {/* Clients list */}
-          <div className="space-y-3">
-            <p className="t-label">Clientes com Aderência</p>
-            <ClientListWithAdherence links={links} meals={meals} measurements={measurements} />
-          </div>
-        </div>
-      </div>
+      </PageShell>
     </RoleGate>
   );
 }

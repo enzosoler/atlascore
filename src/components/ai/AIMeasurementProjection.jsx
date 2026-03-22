@@ -3,7 +3,7 @@
  * Shows in /Measurements page
  */
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeLLM } from '@/lib/llm';
 import { TrendingUp, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 
@@ -22,19 +22,16 @@ export default function AIMeasurementProjection({ latest, measurements, profile 
       const oldAvg = sorted.slice(0, 3).reduce((s, m) => s + m.weight, 0) / 3;
       const weeklyRate = (recentAvg - oldAvg) / Math.max(1, (sorted.length - 1) / 7);
       
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Project when the user will reach their goal, based on:
+      const text = await invokeLLM(`Project when the user will reach their goal, based on:
 
 - Current weight: ${latest.weight}kg
 - Goal: ${profile?.target_weight}kg
 - Average weekly rate: ${weeklyRate.toFixed(2)}kg/week
 - Weeks of tracking: ${Math.round((sorted.length - 1) / 7)}
 
-Answer with: "In ~X weeks" or "already achieved!" + motivating tip.`,
-        model: 'gemini_3_flash',
-      });
+Answer with: "In ~X weeks" or "already achieved!" + motivating tip.`);
 
-      setProjection(res.data);
+      setProjection(text);
     } finally {
       setLoading(false);
     }

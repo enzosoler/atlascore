@@ -3,7 +3,7 @@
  * Shows in /Nutrition page
  */
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeLLM } from '@/lib/llm';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 
@@ -14,24 +14,21 @@ export default function AIMealSuggestion({ loggedMeals, profile, remaining }) {
 
   const generateSuggestion = async () => {
     if (!can('atlas_ai')) return;
-    
+
     try {
       setLoading(true);
       const meals = loggedMeals?.map(m => m.meal_type).join(', ') || 'nenhuma';
-      
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Sugira UMA refeição PRÁTICA, baseado em:
-        
+
+      const text = await invokeLLM(`Sugira UMA refeição PRÁTICA, baseado em:
+
 - Refeições já feitas: ${meals}
-- Calorias restantes: ${remaining.cal} kcal
-- Proteína a atingir: ${remaining.pro}g
+- Calorias restantes: ${remaining?.cal ?? 0} kcal
+- Proteína a atingir: ${remaining?.pro ?? 0}g
 - Objetivos: ${profile?.training_goal || 'saúde geral'}
 
-Responda com: "Próxima refeição: [nome] — [ingredientes simples, ~cal kcal]".`,
-        model: 'gemini_3_flash',
-      });
+Responda com: "Próxima refeição: [nome] — [ingredientes simples, ~cal kcal]".`);
 
-      setSuggestion(res.data);
+      setSuggestion(text);
     } finally {
       setLoading(false);
     }

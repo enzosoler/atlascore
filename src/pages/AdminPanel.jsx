@@ -316,15 +316,15 @@ function ActionMenu({ items }) {
 
 function MetricCard({ label, value, icon: Icon, trend, sub }) {
   return (
-    <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 space-y-3">
+    <div className="atlas-card px-5 py-5 space-y-3">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[12px] font-medium uppercase tracking-widest text-[hsl(var(--fg-2))]">{label}</p>
-          <p className="mt-2 text-[28px] font-bold tracking-tight text-[hsl(var(--fg))]">{value ?? '—'}</p>
+          <p className="atlas-metric-label">{label}</p>
+          <p className="mt-3 text-[28px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{value ?? '—'}</p>
         </div>
         {Icon && (
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--shell))]">
-            <Icon className="h-4.5 w-4.5 text-[hsl(var(--fg-2))]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+            <Icon className="h-4.5 w-4.5" />
           </div>
         )}
       </div>
@@ -358,7 +358,7 @@ function ErrorState({ message, onRetry }) {
 
 function EmptyState({ message }) {
   return (
-    <div className="py-16 text-center">
+    <div className="atlas-empty py-16 text-center">
       <p className="text-[14px] text-[hsl(var(--fg-2))]">{message}</p>
     </div>
   );
@@ -368,7 +368,7 @@ function EmptyState({ message }) {
 
 function TableWrap({ children }) {
   return (
-    <div className="rounded-2xl border border-[hsl(var(--border))] overflow-hidden">
+    <div className="overflow-hidden rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.82)] shadow-[var(--shadow-xs)]">
       <div className="overflow-x-auto">
         <table className="w-full text-[13px]">{children}</table>
       </div>
@@ -1192,37 +1192,39 @@ export default function AdminPanel() {
 
   return (
     <StablePage>
-      <div className="max-w-[1280px] mx-auto px-4 py-8 space-y-6">
+      <div className="mx-auto max-w-[1280px] space-y-6 px-4 py-6 lg:px-8 lg:py-8">
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-4">
+        <div className="atlas-page-header px-5 py-6 sm:px-6">
+          <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5 mb-1">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[hsl(var(--err)/0.1)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))] shadow-[var(--shadow-xs)]">
                 <ShieldCheck className="h-4 w-4 text-[hsl(var(--err))]" />
               </div>
-              <h1 className="text-[22px] font-bold tracking-tight text-[hsl(var(--fg))]">Admin Console</h1>
+              <h1 className="text-[22px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">Admin Console</h1>
             </div>
-            <p className="text-[13px] text-[hsl(var(--fg-2))] ml-[42px]">
+            <p className="ml-[50px] text-[13px] leading-6 text-[hsl(var(--fg-2))]">
               Manage users, subscriptions, roles, and audit activity
             </p>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--err)/0.08)] px-2.5 py-1 text-[11px] font-medium text-[hsl(var(--err))]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] px-3 py-1.5 text-[11px] font-medium text-[hsl(var(--err))]">
               <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--err))] animate-pulse" />
               Admin
             </span>
           </div>
         </div>
+        </div>
 
         {/* Tab navigation */}
-        <div className="flex gap-1 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--shell)/0.6)] p-1">
+        <div className="flex gap-1 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.46)] p-1.5">
           {TABS.map((tab, idx) => (
             <button
               key={tab}
               onClick={() => setActiveTab(idx)}
               className={cn(
-                'flex-1 h-8 rounded-[14px] text-[12px] font-medium transition-all duration-150',
+                'flex-1 h-9 rounded-[14px] px-2 text-[12px] font-medium transition-all duration-150',
                 activeTab === idx
                   ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
                   : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'

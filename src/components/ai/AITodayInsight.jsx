@@ -3,7 +3,7 @@
  * Shows on /Today page
  */
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeLLM } from '@/lib/llm';
 import { Brain, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 
@@ -24,19 +24,16 @@ export default function AITodayInsight({ checkin, meals, workouts, profile }) {
         const mealsCount = meals?.length || 0;
         const workoutLogged = workouts?.some(w => w.completed);
         
-        const res = await base44.integrations.Core.InvokeLLM({
-          prompt: `Provide a VERY SHORT contextual recommendation (max 2 lines) for the user TODAY based on:
+        const text = await invokeLLM(`Provide a VERY SHORT contextual recommendation (max 2 lines) for the user TODAY based on:
 
 - Meals logged: ${mealsCount}
 - Workout completed: ${workoutLogged ? 'yes' : 'no'}
 - Calorie target: ${profile?.calories_target || 0} kcal
 - Mood/energy (if check-in): ${checkin ? `${checkin.mood}/5 mood, ${checkin.energy}/5 energy` : 'not filled'}
 
-Be motivating, practical, a concrete action for the next few hours.`,
-          model: 'gemini_3_flash',
-        });
+Be motivating, practical, a concrete action for the next few hours.`);
 
-        setInsight(typeof res === 'string' ? res : res?.data || res);
+        setInsight(text);
       } catch (err) {
         console.error('AITodayInsight error:', err.message);
         setError('Could not generate insight');

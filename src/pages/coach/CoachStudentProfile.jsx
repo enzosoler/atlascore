@@ -1,431 +1,345 @@
-import React, { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Activity,
+  ArrowLeft,
+  Camera,
+  ClipboardList,
+  Dumbbell,
+  Loader2,
+  Scale,
+} from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import ProtocolCard from '@/components/protocols/ProtocolCard';
-import ProtocolForm from '@/components/protocols/ProtocolForm';
+import { useAuth } from '@/lib/AuthContext';
+import RoleGate from '@/components/rbac/RoleGate';
 import {
   EmptyState,
-  ErrorState,
-  LoadingState,
   PageShell,
   PrimaryButton,
-  SafePageBoundary,
+  SecondaryButton,
   SectionCard,
-  StatusBanner,
-  toArray,
 } from '@/components/shared/StablePage';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  WorkspaceMetricGrid,
+  WorkspaceMetricTile,
+} from '@/components/shared/ProfessionalUI';
+import CoachStudentAdherence from '@/components/coach/CoachStudentAdherence';
+import { flattenPrescribedWorkoutExercises } from '@/lib/prescribedWorkout';
 
-const PROTOCOLS_QUERY_KEY = ['protocols-stable'];
-const FILTERS = ['all', 'active', 'paused', 'finished'];
-
-function getToday() {
-  return new Date().toISOString().split('T')[0];
+function formatDate(date) {
+  if (!date) return 'No date';
+  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
-function getProtocolStatus(protocol) {
-  if (protocol?.end_date) return 'finished';
-  if (protocol?.active === false) return 'paused';
-  return 'active';
+function formatShortDate(date) {
+  if (!date) return 'No date';
+  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+  });
 }
 
-function SummaryTile({ label, value, hint, icon: Icon }) {
+function SummaryRow({ label, value }) {
   return (
-    <article className="rounded-[28px] border border-zinc-200/90 bg-white px-5 py-5 shadow-[0_18px_48px_rgba(15,23,42,0.04)]">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-            {label}
-          </p>
-          <p className="mt-3 text-[30px] font-semibold tracking-[-0.04em] text-zinc-950">
-            {value}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-zinc-600">{hint}</p>
-        </div>
-        {Icon ? (
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-600">
-            <Icon className="h-5 w-5" strokeWidth={2} />
-          </div>
-        ) : null}
-      </div>
-    </article>
+    <div className="flex items-center justify-between gap-3 border-b border-[hsl(var(--border)/0.72)] py-3 last:border-b-0 last:pb-0 first:pt-0">
+      <span className="text-[13px] text-[hsl(var(--fg-2))]">{label}</span>
+      <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">{value || '--'}</span>
+    </div>
   );
 }
 
-export default function Protocols() {
-  return (
-    <SafePageBoundary
-      title="Protocolos"
-      subtitle="Gerencie medicamentos, hormônios, peptídeos, suplementos e outros compostos que você usa ou acompanha."
-      maxWidth="max-w-6xl"
-      fallbackDescription="The Protocols route stayed available in safe mode even though the main content failed."
-    >
-      <ProtocolsContent />
-    </SafePageBoundary>
+export default function CoachStudentProfile() {
+  const { id: studentEmail } = useParams();
+  const { user } = useAuth();
+
+  const { data: coachLinks = [], isLoading: loadingLink } = useQuery({
+    queryKey: ['coach-students', user?.email],
+    queryFn: () => base44.entities.CoachStudent.filter({ coach_email: user?.email }, '-created_date', 100),
+    enabled: !!user?.email,
+  });
+
+  const studentLink = useMemo(
+    () => coachLinks.find((item) => item.student_email === studentEmail) || null,
+    [coachLinks, studentEmail]
   );
-}
 
-function ProtocolsContent() {
-  const qc = useQueryClient();
-  const [filter, setFilter] = useState('active');
-  const [notice, setNotice] = useState(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingProtocol, setEditingProtocol] = useState(null);
-  const [pendingActionKey, setPendingActionKey] = useState('');
-
-  const protocolsQuery = useQuery({
-    queryKey: PROTOCOLS_QUERY_KEY,
-    queryFn: () => base44.entities.Protocol.list('-start_date', 100),
-    retry: 1,
+  const { data: workouts = [], isLoading: loadingWorkouts } = useQuery({
+    queryKey: ['coach-student-workouts', studentEmail],
+    queryFn: () => base44.entities.Workout.list('-date', 50).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    enabled: !!studentEmail,
   });
 
-  const saveProtocol = useMutation({
-    mutationFn: ({ protocolId, payload }) =>
-      protocolId
-        ? base44.entities.Protocol.update(protocolId, payload)
-        : base44.entities.Protocol.create(payload),
-    onSuccess: (_, variables) => {
-      qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setIsFormOpen(false);
-      setEditingProtocol(null);
-      setNotice({
-        tone: 'success',
-        message: variables.protocolId
-          ? 'Protocolo atualizado.'
-          : 'Protocolo adicionado.',
-      });
-    },
-    onError: () => {
-      setNotice({
-        tone: 'warning',
-        message:
-          'Não foi possível salvar o protocolo. Tente novamente.',
-      });
-    },
+  const { data: checkins = [], isLoading: loadingCheckins } = useQuery({
+    queryKey: ['coach-student-checkins', studentEmail],
+    queryFn: () => base44.entities.DailyCheckin.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    enabled: !!studentEmail,
   });
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, payload }) => base44.entities.Protocol.update(id, payload),
-    onMutate: ({ actionKey }) => {
-      setPendingActionKey(actionKey);
-    },
-    onSuccess: (_, variables) => {
-      qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setNotice({
-        tone: 'success',
-        message: variables.successMessage,
-      });
-    },
-    onError: () => {
-      setNotice({
-        tone: 'warning',
-        message:
-          'Não foi possível atualizar o status. Tente novamente.',
-      });
-    },
-    onSettled: () => {
-      setPendingActionKey('');
-    },
+  const { data: measurements = [], isLoading: loadingMeasurements } = useQuery({
+    queryKey: ['coach-student-measurements', studentEmail],
+    queryFn: () => base44.entities.Measurement.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    enabled: !!studentEmail,
   });
 
-  const deleteProtocol = useMutation({
-    mutationFn: ({ id }) => base44.entities.Protocol.delete(id),
-    onMutate: ({ actionKey }) => {
-      setPendingActionKey(actionKey);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setNotice({
-        tone: 'success',
-        message: 'Protocolo excluído.',
-      });
-    },
-    onError: () => {
-      setNotice({
-        tone: 'warning',
-        message:
-          'Não foi possível excluir o protocolo. Tente novamente.',
-      });
-    },
-    onSettled: () => {
-      setPendingActionKey('');
-    },
+  const { data: photos = [], isLoading: loadingPhotos } = useQuery({
+    queryKey: ['coach-student-photos', studentEmail],
+    queryFn: () => base44.entities.ProgressPhoto.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    enabled: !!studentEmail,
   });
 
-  const protocols = toArray(protocolsQuery.data);
-  const isLoading = protocolsQuery.isPending;
-  const hasLoadError = protocolsQuery.isError;
+  const { data: prescribedWorkouts = [], isLoading: loadingPrescribed } = useQuery({
+    queryKey: ['coach-prescribed-workouts', studentEmail],
+    queryFn: () =>
+      base44.entities.PrescribedWorkout
+        .filter({ athlete_email: studentEmail }, '-created_date', 20)
+        .then((items) => items.filter((item) => item.athlete_email === studentEmail)),
+    enabled: !!studentEmail,
+  });
 
-  const groupedProtocols = useMemo(() => {
-    const active = protocols.filter((item) => item?.active && !item?.end_date);
-    const paused = protocols.filter((item) => !item?.active && !item?.end_date);
-    const finished = protocols.filter((item) => Boolean(item?.end_date));
-
-    return {
-      all: protocols,
-      active,
-      paused,
-      finished,
-    };
-  }, [protocols]);
-
-  const filteredProtocols = groupedProtocols[filter] || [];
-  const hasAnyProtocols = protocols.length > 0;
-
-  const handleCreate = () => {
-    setNotice(null);
-    setEditingProtocol(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEdit = (protocol) => {
-    setNotice(null);
-    setEditingProtocol(protocol);
-    setIsFormOpen(true);
-  };
-
-  const handleStatusChange = (protocol, nextStatus) => {
-    if (!protocol?.id) return;
-
-    const payloads = {
-      active: {
-        active: true,
-        end_date: '',
-      },
-      paused: {
-        active: false,
-        end_date: '',
-      },
-      finished: {
-        active: false,
-        end_date: protocol?.end_date || getToday(),
-      },
-    };
-
-    const successMessages = {
-      active: 'Protocolo reativado.',
-      paused: 'Protocolo pausado.',
-      finished: 'Protocolo marcado como finalizado.',
-    };
-
-    statusMutation.mutate({
-      id: protocol.id,
-      payload: payloads[nextStatus],
-      actionKey: `${protocol.id}-${nextStatus}`,
-      successMessage: successMessages[nextStatus],
-    });
-  };
-
-  const handleDelete = (protocol) => {
-    if (!protocol?.id) return;
-
-    const protocolLabel = protocol?.substance_name || protocol?.name || 'este protocolo';
-    const confirmed = window.confirm(`Excluir ${protocolLabel}?`);
-
-    if (!confirmed) return;
-
-    deleteProtocol.mutate({
-      id: protocol.id,
-      actionKey: `${protocol.id}-delete`,
-    });
-  };
+  const latestMeasurement = measurements[0] || null;
+  const latestCheckin = checkins[0] || null;
+  const latestPhoto = photos[0] || null;
+  const activePlans = prescribedWorkouts.filter((plan) => plan.active !== false);
+  const recentCompletedWorkouts = workouts.filter((workout) => workout.status === 'completed').slice(0, 5);
+  const loading =
+    loadingLink ||
+    loadingWorkouts ||
+    loadingCheckins ||
+    loadingMeasurements ||
+    loadingPhotos ||
+    loadingPrescribed;
 
   return (
-    <PageShell
-      title="Protocolos"
-      subtitle="A focused V1 workspace for current compounds, simple scheduling, status control, and visible adherence context without breaking the stable app shell."
-      actions={
-        <PrimaryButton
-          type="button"
-          onClick={handleCreate}
-          className="inline-flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2} />
-          Adicionar protocolo
-        </PrimaryButton>
-      }
-      maxWidth="max-w-6xl"
-    >
-      {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
-
-      {isLoading ? (
-        <LoadingState
-          title="Carregando protocolos"
-          description="The page is already open in safe mode while your current protocol items load."
-        />
-      ) : null}
-
-      {!isLoading && hasLoadError ? (
-        <ErrorState
-          title="Protocolos em modo seguro"
-          description="Existing protocol data did not fully load, but you can still open the page and create new items."
-        />
-      ) : null}
-
-      <section className="grid gap-3 md:grid-cols-3">
-        <SummaryTile
-          label="Ativo"
-          value={groupedProtocols.active.length}
-          hint="Current compounds still in rotation right now."
-          icon={FlaskConical}
-        />
-        <SummaryTile
-          label="Pausado"
-          value={groupedProtocols.paused.length}
-          hint="Items temporarily stopped but still being tracked."
-          icon={PauseCircle}
-        />
-        <SummaryTile
-          label="Finalizado"
-          value={groupedProtocols.finished.length}
-          hint="Completed cycles and protocols kept in history."
-          icon={Clock3}
-        />
-      </section>
-
-      <SectionCard
-        title="Itens do protocolo atual"
-        subtitle="Clean, status-driven tracking for the substances you are currently using or still monitoring."
+    <RoleGate roles={['coach', 'admin']}>
+      <PageShell
+        eyebrow="Coach role"
+        title={studentLink?.student_name || studentEmail || 'Athlete'}
+        subtitle="Review adherence, recent body checkpoints, and active prescribed work from one calm profile surface."
+        maxWidth="max-w-6xl"
         actions={
           <div className="flex flex-wrap gap-2">
-            {FILTERS.map((option) => {
-              const count =
-                option === 'all'
-                  ? groupedProtocols.all.length
-                  : groupedProtocols[option]?.length || 0;
-
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setFilter(option)}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                    filter === option
-                      ? 'border-zinc-900 bg-zinc-900 text-white'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'
-                  }`}
-                >
-                  {({'all': 'Todos', 'active': 'Ativo', 'paused': 'Pausado', 'finished': 'Finalizado'}[option] || option)} ({count})
-                </button>
-              );
-            })}
+            <SecondaryButton type="button" asChild={false} onClick={() => window.history.back()}>
+              <ArrowLeft className="h-4 w-4" strokeWidth={2} />
+              Back
+            </SecondaryButton>
+            <Link to={`/coach/prescribe-workout/${studentEmail}`}>
+              <PrimaryButton type="button">
+                <ClipboardList className="h-4 w-4" strokeWidth={2} />
+                Prescribe workout
+              </PrimaryButton>
+            </Link>
           </div>
         }
       >
-        {isLoading ? (
-          <div className="space-y-4">
-            {[0, 1].map((index) => (
-              <div
-                key={index}
-                className="animate-pulse rounded-[28px] border border-zinc-200 bg-zinc-50 p-5"
-              >
-                <div className="h-5 w-40 rounded-full bg-zinc-200" />
-                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  {[0, 1, 2, 3].map((block) => (
-                    <div key={block} className="h-20 rounded-2xl bg-white" />
-                  ))}
+        {loading ? (
+          <SectionCard title="Loading athlete profile" subtitle="Collecting adherence, recent checkpoints, and plan data.">
+            <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading athlete profile...
+            </div>
+          </SectionCard>
+        ) : !studentLink ? (
+          <SectionCard title="Athlete not available" subtitle="This athlete is not linked to your coach account.">
+            <EmptyState
+              title="No linked athlete found"
+              description="Open the students list and use an accepted athlete link to access this profile."
+              action={
+                <Link to="/coach/students">
+                  <PrimaryButton type="button">Go to students</PrimaryButton>
+                </Link>
+              }
+              icon={Activity}
+            />
+          </SectionCard>
+        ) : (
+          <>
+            <WorkspaceMetricGrid className="xl:grid-cols-4">
+              <WorkspaceMetricTile
+                label="Completed sessions"
+                value={workouts.filter((item) => item.status === 'completed').length}
+                hint="Recent logged workouts"
+                icon={Dumbbell}
+                tone="brand"
+              />
+              <WorkspaceMetricTile
+                label="Active plans"
+                value={activePlans.length}
+                hint="Coach-prescribed workouts currently live"
+                icon={ClipboardList}
+                tone="warning"
+              />
+              <WorkspaceMetricTile
+                label="Latest weight"
+                value={latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '--'}
+                hint={latestMeasurement?.date ? formatDate(latestMeasurement.date) : 'No measurement yet'}
+                icon={Scale}
+                tone="success"
+              />
+              <WorkspaceMetricTile
+                label="Progress photos"
+                value={photos.length}
+                hint={latestPhoto?.date ? `Last added ${formatShortDate(latestPhoto.date)}` : 'No photos uploaded'}
+                icon={Camera}
+                tone="neutral"
+              />
+            </WorkspaceMetricGrid>
+
+            <SectionCard
+              title="Current status"
+              subtitle="A compact snapshot of the latest body checkpoint and check-in context."
+            >
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-5 py-5">
+                  <p className="atlas-overline">Latest checkpoint</p>
+                  <div className="mt-4 space-y-1">
+                    <p className="text-[20px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+                      {latestMeasurement?.date ? formatDate(latestMeasurement.date) : 'No body data yet'}
+                    </p>
+                    <p className="text-[13px] text-[hsl(var(--fg-2))]">
+                      Use this alongside adherence trends before changing workload.
+                    </p>
+                  </div>
+                  <div className="mt-5">
+                    <SummaryRow label="Weight" value={latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '--'} />
+                    <SummaryRow label="Body fat" value={latestMeasurement?.body_fat ? `${latestMeasurement.body_fat}%` : '--'} />
+                    <SummaryRow label="Waist" value={latestMeasurement?.waist ? `${latestMeasurement.waist} cm` : '--'} />
+                    <SummaryRow label="Check-in mood" value={latestCheckin?.mood ? `${latestCheckin.mood}/5` : '--'} />
+                    <SummaryRow label="Check-in energy" value={latestCheckin?.energy ? `${latestCheckin.energy}/5` : '--'} />
+                  </div>
+                </div>
+
+                <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] px-5 py-5">
+                  <p className="atlas-overline">Coach actions</p>
+                  <div className="mt-4 space-y-3">
+                    <Link to={`/coach/prescribe-workout/${studentEmail}`} className="block">
+                      <PrimaryButton type="button" className="w-full justify-center">
+                        <ClipboardList className="h-4 w-4" strokeWidth={2} />
+                        Create or replace plan
+                      </PrimaryButton>
+                    </Link>
+                    <Link to="/coach/students" className="block">
+                      <SecondaryButton type="button" className="w-full justify-center">
+                        <ArrowLeft className="h-4 w-4" strokeWidth={2} />
+                        Back to roster
+                      </SecondaryButton>
+                    </Link>
+                  </div>
+                  <div className="mt-5 rounded-[16px] border border-[hsl(var(--border)/0.78)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Access level</p>
+                    <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                      {studentLink.status === 'accepted'
+                        ? 'Accepted link. You can review athlete progress and prescribe training.'
+                        : 'Pending link. Profile data may remain limited until the invite is accepted.'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : null}
+            </SectionCard>
 
-        {!isLoading && !hasAnyProtocols ? (
-          <EmptyState
-            title="Nenhum item no protocolo"
-            description={
-              hasLoadError
-                ? 'A lista não pôde ser carregada. Você ainda pode adicionar novos protocolos.'
-                : 'Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto rastreado.'
-            }
-            action={
-              <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar protocolo
-              </PrimaryButton>
-            }
-          />
-        ) : null}
+            <SectionCard
+              title="Adherence"
+              subtitle="Compare completed training against the current prescription before adjusting volume."
+            >
+              <CoachStudentAdherence studentEmail={studentEmail} />
+            </SectionCard>
 
-        {!isLoading && hasAnyProtocols && filteredProtocols.length === 0 ? (
-          <EmptyState
-            title={`No ${filter} protocol items`}
-            description="Try another status filter or add a new protocol item."
-            action={
-              <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar protocolo
-              </PrimaryButton>
-            }
-          />
-        ) : null}
-
-        {!isLoading && filteredProtocols.length > 0 ? (
-          <div className="space-y-4">
-            {filteredProtocols.map((protocol) => {
-              const status = getProtocolStatus(protocol);
-
-              return (
-                <ProtocolCard
-                  key={protocol?.id || `${protocol?.name}-${protocol?.start_date || 'date'}`}
-                  protocol={protocol}
-                  status={status}
-                  busyActionKey={pendingActionKey}
-                  onEdit={() => handleEdit(protocol)}
-                  onPause={status === 'active' ? () => handleStatusChange(protocol, 'paused') : null}
-                  onResume={status === 'paused' ? () => handleStatusChange(protocol, 'active') : null}
-                  onFinish={
-                    status !== 'finished' ? () => handleStatusChange(protocol, 'finished') : null
+            <SectionCard
+              title="Active prescribed workouts"
+              subtitle="Current plans assigned to this athlete."
+              actions={
+                <Link to={`/coach/prescribe-workout/${studentEmail}`}>
+                  <PrimaryButton type="button">
+                    <ClipboardList className="h-4 w-4" strokeWidth={2} />
+                    New prescription
+                  </PrimaryButton>
+                </Link>
+              }
+            >
+              {activePlans.length ? (
+                <div className="space-y-3">
+                  {activePlans.map((plan) => {
+                    const exerciseCount = flattenPrescribedWorkoutExercises(plan).length;
+                    return (
+                      <div
+                        key={plan.id}
+                        className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-5 py-4"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                              {plan.name || 'Untitled plan'}
+                            </p>
+                            <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+                              {plan.objective || plan.notes || 'Structured coach prescription for upcoming sessions.'}
+                            </p>
+                          </div>
+                          <span className="inline-flex rounded-full border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.14)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
+                            {plan.frequency || 'Custom frequency'}
+                          </span>
+                        </div>
+                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                          <SummaryRow label="Exercises" value={exerciseCount ? `${exerciseCount}` : '--'} />
+                          <SummaryRow label="Start date" value={plan.start_date ? formatDate(plan.start_date) : '--'} />
+                          <SummaryRow label="Status" value={plan.active !== false ? 'Active' : 'Paused'} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No active plan yet"
+                  description="Create the first workout prescription to give this athlete a clear execution target."
+                  action={
+                    <Link to={`/coach/prescribe-workout/${studentEmail}`}>
+                      <PrimaryButton type="button">Prescribe workout</PrimaryButton>
+                    </Link>
                   }
-                  onDelete={() => handleDelete(protocol)}
+                  icon={ClipboardList}
                 />
-              );
-            })}
-          </div>
-        ) : null}
-      </SectionCard>
+              )}
+            </SectionCard>
 
-      <Dialog
-        open={isFormOpen}
-        onOpenChange={(open) => {
-          if (saveProtocol.isPending) return;
-          setIsFormOpen(open);
-          if (!open) setEditingProtocol(null);
-        }}
-      >
-        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[32px] border-zinc-200 bg-white p-0 shadow-[0_28px_90px_rgba(15,23,42,0.18)] sm:max-w-3xl">
-          <DialogHeader className="border-b border-zinc-200 px-6 pb-5 pt-6 text-left">
-            <DialogTitle className="text-[28px] font-semibold tracking-[-0.04em] text-zinc-950">
-              {editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
-            </DialogTitle>
-            <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-              Capture the core details that make this protocol useful right away: substance,
-              category, dose, frequency, schedule, notes, and current status handling.
-            </DialogDescription>
-          </DialogHeader>
-
-          <ProtocolForm
-            protocol={editingProtocol}
-            isSubmitting={saveProtocol.isPending}
-            onCancel={() => {
-              if (saveProtocol.isPending) return;
-              setIsFormOpen(false);
-              setEditingProtocol(null);
-            }}
-            onSubmit={(payload) =>
-              saveProtocol.mutate({
-                protocolId: editingProtocol?.id,
-                payload,
-              })
-            }
-          />
-        </DialogContent>
-      </Dialog>
-    </PageShell>
+            <SectionCard title="Recent workouts" subtitle="Last completed or logged training sessions for fast review.">
+              {recentCompletedWorkouts.length ? (
+                <div className="space-y-3">
+                  {recentCompletedWorkouts.map((workout) => (
+                    <div
+                      key={workout.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+                          {workout.name || 'Workout session'}
+                        </p>
+                        <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
+                          {workout.date ? formatDate(workout.date) : 'No recorded date'}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-[12px] text-[hsl(var(--fg-2))]">
+                        <span>{workout.duration_minutes ? `${workout.duration_minutes} min` : 'Duration --'}</span>
+                        <span>{workout.volume_load ? `${workout.volume_load} kg` : 'Volume --'}</span>
+                        <span>{workout.perceived_effort ? `RPE ${workout.perceived_effort}` : 'RPE --'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No logged workouts yet"
+                  description="Completed sessions will appear here once the athlete starts executing the plan."
+                  icon={Dumbbell}
+                />
+              )}
+            </SectionCard>
+          </>
+        )}
+      </PageShell>
+    </RoleGate>
   );
 }

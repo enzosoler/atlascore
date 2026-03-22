@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlas AI — Screen Family (63–68)</title>
+  <style>
+    /* ─── Design Tokens ─────────────────────────── */
+    :root {
+      --bg:        #080E0E;
+      --surface:   #111A1A;
+      --surface2:  #162020;
+      --border:    #1E2C2C;
+      --border2:   #263636;
+      --teal:      #4A9B9B;
+      --teal-dim:  rgba(74,155,155,0.12);
+      --teal-glow: rgba(74,155,155,0.25);
+      --white:     #FFFFFF;
+      --gray1:     #8A9A9A;
+      --gray2:     #4A5A5A;
+      --gray3:     #2A3A3A;
+      --red:       #E05C5C;
+      --green:     #4CAF7D;
+      --gold:      #C9943A;
+      --r-card:    14px;
+      --r-btn:     10px;
+      --r-sheet:   20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #040A0A;
+      font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      color: var(--white);
+      padding: 48px 32px;
+      min-height: 100vh;
+    }
+
+    /* ─── Page Header ────────────────────────────── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .page-header h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+    .page-header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: var(--gray1);
+      margin-top: 8px;
+    }
+
+    /* ─── Screen Grid ────────────────────────────── */
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ─── Phone Frame ────────────────────────────── */
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .screen-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray1);
+    }
+    .screen-num {
+      font-size: 10px;
+      color: var(--gray2);
+      margin-bottom: 2px;
+      letter-spacing: 0.08em;
+    }
+
+    .phone {
+      width: 320px;
+      height: 693px;
+      background: var(--bg);
+      border-radius: 44px;
+      border: 1.5px solid var(--border2);
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 6px #0d1515,
+        0 32px 80px rgba(0,0,0,0.7),
+        0 0 40px rgba(74,155,155,0.06);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Notch */
+    .notch {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 120px; height: 30px;
+      background: #0a1010;
+      border-radius: 0 0 18px 18px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .notch-pill {
+      width: 76px; height: 22px;
+      background: #050c0c;
+      border-radius: 20px;
+    }
+
+    /* Status bar */
+    .status-bar {
+      height: 44px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 28px 6px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .status-time {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--white);
+    }
+    .status-icons svg { width: 14px; height: 14px; }
+
+    /* Screen content */
+    .screen-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─── Navigation Bar ─────────────────────────── */
+    .nav-bar {
+      padding: 10px 20px 6px;
+      flex-shrink: 0;
+    }
+    .nav-bar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--teal);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .nav-back svg { width: 18px; height: 18px; }
+    .nav-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .nav-action {
+      color: var(--teal);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-action svg { width: 16px; height: 16px; }
+
+    /* Large title */
+    .large-title-section {
+      padding: 4px 20px 12px;
+      flex-shrink: 0;
+    }
+    .large-title {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .large-title-sub {
+      font-size: 13px;
+      color: var(--gray1);
+      margin-top: 4px;
+    }
+
+    /* ─── Tab Bar ────────────────────────────────── */
+    .tab-bar {
+      height: 80px;
+      background: rgba(10,18,18,0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      padding-top: 10px;
+      flex-shrink: 0;
+      backdrop-filter: blur(20px);
+    }
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      opacity: 0.45;
+    }
+    .tab-item.active { opacity: 1; }
+    .tab-item svg { width: 22px; height: 22px; color: var(--gray1); }
+    .tab-item.active svg { color: var(--teal); }
+    .tab-label {
+      font-size: 9.5px;
+      font-weight: 500;
+      color: var(--gray1);
+      letter-spacing: 0.03em;
+    }
+    .tab-item.active .tab-label { color: var(--teal); }
+
+    /* ─── Divider ────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 20px;
+    }
+
+    /* ─── Scroll area ────────────────────────────── */
+    .scroll {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Search Bar ─────────────────────────────── */
+    .search-bar {
+      margin: 0 20px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .search-bar svg { width: 14px; height: 14px; color: var(--gray2); flex-shrink: 0; }
+    .search-text { font-size: 13px; color: var(--gray2); }
+
+    /* ─── Conversation List ──────────────────────── */
+    .convo-list { padding: 0 0 8px; }
+    .convo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .convo-item:last-child { border-bottom: none; }
+    .convo-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--teal-dim);
+      border: 1px solid var(--teal-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .convo-avatar svg { width: 18px; height: 18px; color: var(--teal); }
+    .convo-body { flex: 1; min-width: 0; }
+    .convo-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+    .convo-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 170px;
+    }
+    .convo-time {
+      font-size: 11px;
+      color: var(--gray1);
+      flex-shrink: 0;
+    }
+    .convo-preview {
+      font-size: 12px;
+      color: var(--gray1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+    }
+    .convo-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 5px;
+    }
+    .msg-count {
+      font-size: 10px;
+      color: var(--gray2);
+      background: var(--surface2);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    /* ─── Section Header ─────────────────────────── */
+    .section-header {
+      padding: 14px 20px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray1);
+      flex-shrink: 0;
+    }
+
+    /* ─── Job Buttons ────────────────────────────── */
+    .job-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 0 20px;
+    }
+    .job-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-card);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .job-btn::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--teal);
+      border-radius: 0 2px 2px 0;
+    }
+    .job-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--teal-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .job-icon svg { width: 15px; height: 15px; color: var(--teal); }
+    .job-text { flex: 1; min-width: 0; }
+    .job-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+    .job-desc {
+      font-size: 11px;
+      color: var(--gray1);
+      line-height: 1.3;
+    }
+    .job-arrow svg { width: 14px; height: 14px; color: var(--gray2); }
+
+    /* ─── SCREEN 65: Locked Job Btn ─────────────── */
+    .job-btn.locked {
+      opacity: 0.48;
+    }
+    .job-btn.locked::before { background: var(--gray2); }
+    .job-btn.locked .job-icon { background: rgba(100,120,120,0.1); }
+    .job-btn.locked .job-icon svg { color: var(--gray2); }
+    .lock-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lock-badge svg { width: 11px; height: 11px; color: var(--gray1); }
+    .locked-banner {
+      margin: 8px 20px 0;
+      background: rgba(74,155,155,0.06);
+      border: 1px solid rgba(74,155,155,0.18);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .locked-banner svg { width: 14px; height: 14px; color: var(--teal); flex-shrink: 0; }
+    .locked-banner-text {
+      font-size: 12px;
+      color: var(--gray1);
+      flex: 1;
+    }
+    .locked-banner-text strong { color: var(--teal); font-weight: 600; }
+    .locked-banner-cta {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--teal);
+    }
+
+    /* ─── Chat Interface ─────────────────────────── */
+    .chat-area {
+      flex: 1;
+      padding: 12px 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg-row {
+      display: flex;
+      gap: 8px;
+    }
+    .msg-row.user { justify-content: flex-end; }
+    .msg-row.assistant { justify-content: flex-start; }
+
+    .msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--teal-dim);
+      border: 1px solid var(--teal-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      align-self: flex-end;
+    }
+    .msg-avatar svg { width: 14px; height: 14px; color: var(--teal); }
+
+    .bubble {
+      max-width: 220px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .bubble.user {
+      background: var(--teal);
+      color: var(--white);
+      border-bottom-right-radius: 4px;
+      font-weight: 500;
+    }
+    .bubble.assistant {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--white);
+      border-bottom-left-radius: 4px;
+    }
+    .bubble strong { font-weight: 700; }
+    .bubble .highlight { color: var(--teal); }
+
+    .msg-time {
+      font-size: 10px;
+      color: var(--gray2);
+      margin-top: 3px;
+      text-align: right;
+    }
+    .msg-time.left { text-align: left; margin-left: 36px; }
+
+    /* ─── Job Pills (horizontal scroll) ─────────── */
+    .job-pills-wrap {
+      padding: 10px 16px;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+    }
+    .job-pills-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray2);
+      margin-bottom: 8px;
+    }
+    .job-pills {
+      display: flex;
+      gap: 6px;
+      overflow: hidden;
+    }
+    .job-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .job-pill svg { width: 12px; height: 12px; color: var(--teal); }
+    .job-pill-text { font-size: 11px; font-weight: 500; color: var(--white); }
+
+    /* ─── Chat Input ─────────────────────────────── */
+    .chat-input-wrap {
+      padding: 10px 16px 8px;
+      flex-shrink: 0;
+    }
+    .chat-input {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 22px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 6px 0 14px;
+      gap: 6px;
+    }
+    .chat-input.focused { border-color: var(--teal); }
+    .chat-input.disabled { opacity: 0.4; }
+    .input-placeholder {
+      flex: 1;
+      font-size: 13px;
+      color: var(--gray2);
+    }
+    .send-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .send-btn.disabled { background: var(--gray3); }
+    .send-btn svg { width: 15px; height: 15px; color: var(--white); }
+
+    /* ─── Limit Banner ───────────────────────────── */
+    .limit-banner {
+      margin: 10px 16px;
+      background: rgba(201,148,58,0.08);
+      border: 1px solid rgba(201,148,58,0.28);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .limit-banner-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(201,148,58,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .limit-banner-icon svg { width: 14px; height: 14px; color: var(--gold); }
+    .limit-banner-body { flex: 1; }
+    .limit-banner-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 2px;
+    }
+    .limit-banner-sub {
+      font-size: 11.5px;
+      color: var(--gray1);
+      line-height: 1.4;
+    }
+    .limit-banner-dots {
+      display: flex;
+      gap: 3px;
+      margin-top: 8px;
+    }
+    .limit-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    .limit-dot.empty {
+      background: transparent;
+      border: 1.5px solid var(--gray2);
+    }
+    .limit-banner-cta {
+      margin-top: 10px;
+      background: var(--gold);
+      color: #1a0e00;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-block;
+      letter-spacing: 0.01em;
+    }
+
+    /* ─── Upgrade Gate ───────────────────────────── */
+    .upgrade-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(8,14,14,0.88);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      z-index: 30;
+    }
+    .upgrade-handle-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0 0;
+    }
+    .upgrade-handle {
+      width: 36px; height: 4px;
+      border-radius: 2px;
+      background: var(--border2);
+    }
+    .upgrade-sheet {
+      flex: 1;
+      padding: 16px 20px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .upgrade-badge {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--teal-dim), rgba(74,155,155,0.06));
+      border: 1px solid var(--teal-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    .upgrade-badge svg { width: 26px; height: 26px; color: var(--teal); }
+    .upgrade-heading {
+      text-align: center;
+    }
+    .upgrade-heading h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .upgrade-heading p {
+      font-size: 13px;
+      color: var(--gray1);
+      line-height: 1.5;
+    }
+    .upgrade-features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .upgrade-feat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .upgrade-feat-icon {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: var(--teal-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .upgrade-feat-icon svg { width: 13px; height: 13px; color: var(--teal); }
+    .upgrade-feat-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--white);
+    }
+    .upgrade-feat-check { margin-left: auto; }
+    .upgrade-feat-check svg { width: 14px; height: 14px; color: var(--green); }
+
+    .upgrade-plan-row {
+      display: flex;
+      gap: 8px;
+    }
+    .upgrade-plan {
+      flex: 1;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 10px;
+      text-align: center;
+      position: relative;
+    }
+    .upgrade-plan.selected {
+      border-color: var(--teal);
+      background: rgba(74,155,155,0.06);
+    }
+    .plan-badge {
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--teal);
+      color: #010e0e;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .plan-period {
+      font-size: 11px;
+      color: var(--gray1);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .plan-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+    .plan-price span {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--gray1);
+    }
+    .plan-note {
+      font-size: 10px;
+      color: var(--gray2);
+      margin-top: 3px;
+    }
+
+    .upgrade-cta-btn {
+      background: var(--teal);
+      color: #010e0e;
+      border-radius: var(--r-btn);
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .upgrade-cancel {
+      text-align: center;
+      font-size: 12px;
+      color: var(--gray2);
+      padding-top: 4px;
+    }
+
+    /* ─── Generating State ───────────────────────── */
+    .generating-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .thinking-bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      border-bottom-left-radius: 4px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .thinking-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+    .thinking-dot:nth-child(1) { opacity: 0.3; }
+    .thinking-dot:nth-child(2) { opacity: 0.6; }
+    .thinking-dot:nth-child(3) { opacity: 1; }
+    .generating-label {
+      font-size: 10px;
+      color: var(--gray2);
+      margin-top: 4px;
+      margin-left: 36px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .generating-label svg {
+      width: 10px; height: 10px;
+      color: var(--teal);
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .shimmer-line {
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(90deg, var(--surface) 0%, var(--border2) 50%, var(--surface) 100%);
+      background-size: 200% 100%;
+      margin-bottom: 6px;
+    }
+    .shimmer-line:last-child { margin-bottom: 0; width: 65%; }
+
+    .generating-status-bar {
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(8,14,14,0.6);
+      flex-shrink: 0;
+    }
+    .gen-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+    .gen-status-text {
+      font-size: 11px;
+      color: var(--teal);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .gen-status-cancel {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--gray2);
+    }
+
+    /* ─── Context Pills ──────────────────────────── */
+    .context-pills {
+      display: flex;
+      gap: 5px;
+      padding: 8px 16px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .ctx-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 10px;
+      color: var(--gray1);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .ctx-pill svg { width: 10px; height: 10px; color: var(--teal); }
+    .ctx-label { color: var(--gray2); }
+
+    /* ─── Empty State ────────────────────────────── */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      gap: 10px;
+    }
+    .empty-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: var(--teal-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .empty-icon svg { width: 26px; height: 26px; color: var(--teal); opacity: 0.6; }
+    .empty-h { font-size: 16px; font-weight: 600; color: var(--white); text-align: center; letter-spacing: -0.01em; }
+    .empty-p { font-size: 13px; color: var(--gray1); text-align: center; line-height: 1.5; }
+
+    /* ─── Profile context bar ────────────────────── */
+    .profile-ctx-bar {
+      padding: 0 16px 10px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .pctx-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .pctx-label { color: var(--gray2); }
+    .pctx-val { color: var(--white); font-weight: 600; }
+
+    /* New chat button */
+    .new-chat-btn {
+      background: var(--teal);
+      color: #010e0e;
+      border-radius: var(--r-btn);
+      height: 34px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .new-chat-btn svg { width: 14px; height: 14px; }
+
+    /* ─── Responsive ─────────────────────────────── */
+    @media (max-width: 1050px) {
+      .screen-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .screen-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Atlas · Screen Design</h1>
+    <h2>Atlas AI — Screen Family</h2>
+    <p>Screens 63–68 · High-Fidelity Mobile Mockups</p>
+  </div>
+
+  <div class="screen-grid">
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 63. Conversation List                           -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="screen-num">63</div>
+      <div class="screen-label">Conversation List</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-pill"></div></div>
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <!-- Signal -->
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="15" width="3" height="6" rx="1" fill="white"/><rect x="7" y="11" width="3" height="10" rx="1" fill="white"/><rect x="12" y="7" width="3" height="14" rx="1" fill="white"/><rect x="17" y="3" width="3" height="18" rx="1" fill="white"/></svg>
+            <!-- WiFi -->
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5C7.2 10.3 10 9 12 9s4.8 1.3 7 3.5" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8.5 15.5c1-.9 2.2-1.5 3.5-1.5s2.5.6 3.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="white"/></svg>
+            <!-- Battery -->
+            <svg viewBox="0 0 28 14" fill="none"><rect x="0.5" y="0.5" width="23" height="13" rx="3.5" stroke="white"/><rect x="2" y="2" width="18" height="10" rx="2" fill="white"/><path d="M25 4.5v5c1.1-.5 1.1-4.5 0-5z" fill="white"/></svg>
+          </div>
+        </div>
+
+        <div class="screen-content">
+          <div class="nav-bar">
+            <div class="nav-bar-inner">
+              <div style="width:60px"></div>
+              <div class="nav-title">Atlas AI</div>
+              <div class="new-chat-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New
+              </div>
+            </div>
+          </div>
+
+          <div class="large-title-section">
+            <div class="large-title">Atlas AI</div>
+            <div class="large-title-sub">Your intelligent training companion</div>
+          </div>
+
+          <div style="padding: 0 20px 10px; flex-shrink:0">
+            <div class="search-bar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <span class="search-text">Search conversations…</span>
+            </div>
+          </div>
+
+          <div class="scroll">
+            <div class="section-header">RECENT</div>
+            <div class="convo-list">
+              <div class="convo-item">
+                <div class="convo-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="convo-body">
+                  <div class="convo-top">
+                    <div class="convo-name">Revisão dos últimos 7 dias</div>
+                    <div class="convo-time">09:12</div>
+                  </div>
+                  <div class="convo-preview">Seu déficit médio foi de 312 kcal, mas o volume de treino aumentou...</div>
+                  <div class="convo-meta"><span class="msg-count">6 messages</span></div>
+                </div>
+              </div>
+              <div class="convo-item">
+                <div class="convo-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="convo-body">
+                  <div class="convo-top">
+                    <div class="convo-name">Por que meu peso parou?</div>
+                    <div class="convo-time">Mar 20</div>
+                  </div>
+                  <div class="convo-preview">3 hipóteses mais prováveis: adaptação metabólica, retenção hídrica...</div>
+                  <div class="convo-meta"><span class="msg-count">4 messages</span></div>
+                </div>
+              </div>
+              <div class="convo-item">
+                <div class="convo-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="convo-body">
+                  <div class="convo-top">
+                    <div class="convo-name">Ajuste semana 12</div>
+                    <div class="convo-time">Mar 18</div>
+                  </div>
+                  <div class="convo-preview">Reduzir volume de pernas em 15% e adicionar 30g de proteína no jantar...</div>
+                  <div class="convo-meta"><span class="msg-count">8 messages</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-header">QUICK ANALYSIS</div>
+            <div class="job-grid" style="padding-bottom:8px">
+              <div class="job-btn">
+                <div class="job-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="job-text">
+                  <div class="job-title">Review last 7 days</div>
+                  <div class="job-desc">Training, nutrition, weight & energy in one read.</div>
+                </div>
+                <div class="job-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <div class="job-btn">
+                <div class="job-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </div>
+                <div class="job-text">
+                  <div class="job-title">Nutrition reality check</div>
+                  <div class="job-desc">Calories, macros & gaps against your goal.</div>
+                </div>
+                <div class="job-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-bar">
+            <div class="tab-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span class="tab-label">Today</span>
+            </div>
+            <div class="tab-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4v16M18 4v16M6 8h12M6 16h12"/></svg>
+              <span class="tab-label">Train</span>
+            </div>
+            <div class="tab-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 2l1.5 4.5M20.5 2 19 6.5M7 13c0 2.8 2.2 5 5 5s5-2.2 5-5-2.2-5-5-5-5 2.2-5 5zM12 8V6M6.5 6.5l1.5 1.5M17.5 6.5 16 8"/></svg>
+              <span class="tab-label">Nutrition</span>
+            </div>
+            <div class="tab-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span class="tab-label">Body</span>
+            </div>
+            <div class="tab-item active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              <span class="tab-label">More</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 64. Chat View                                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="screen-num">64</div>
+      <div class="screen-label">Chat View</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-pill"></div></div>
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="15" width="3" height="6" rx="1" fill="white"/><rect x="7" y="11" width="3" height="10" rx="1" fill="white"/><rect x="12" y="7" width="3" height="14" rx="1" fill="white"/><rect x="17" y="3" width="3" height="18" rx="1" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5C7.2 10.3 10 9 12 9s4.8 1.3 7 3.5" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8.5 15.5c1-.9 2.2-1.5 3.5-1.5s2.5.6 3.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="white"/></svg>
+            <svg viewBox="0 0 28 14" fill="none"><rect x="0.5" y="0.5" width="23" height="13" rx="3.5" stroke="white"/><rect x="2" y="2" width="18" height="10" rx="2" fill="white"/><path d="M25 4.5v5c1.1-.5 1.1-4.5 0-5z" fill="white"/></svg>
+          </div>
+        </div>
+
+        <div class="screen-content">
+          <div class="nav-bar">
+            <div class="nav-bar-inner">
+              <div class="nav-back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+                AI
+              </div>
+              <div style="text-align:center">
+                <div class="nav-title">Revisão 7 dias</div>
+                <div style="font-size:10px; color:var(--gray2); margin-top:1px">6 messages</div>
+              </div>
+              <div class="nav-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Context pills -->
+          <div class="context-pills">
+            <div class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="ctx-label">Goal:</span> Fat Loss</div>
+            <div class="ctx-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span class="ctx-label">2100</span> kcal</div>
+            <div class="ctx-pill"><span class="ctx-label">87.3</span> kg</div>
+          </div>
+
+          <div class="divider" style="margin:0 16px"></div>
+
+          <div class="chat-area" style="gap:14px">
+            <!-- User message -->
+            <div class="msg-row user">
+              <div>
+                <div class="bubble user">Revisa meus últimos 7 dias e me diz o que ajustar.</div>
+                <div class="msg-time">09:08</div>
+              </div>
+            </div>
+
+            <!-- Assistant message -->
+            <div class="msg-row assistant">
+              <div class="msg-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              </div>
+              <div>
+                <div class="bubble assistant">
+                  <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:6px;letter-spacing:0.03em">WEEKLY REVIEW</div>
+                  <strong>Training</strong> — 4/5 sessions completed. Volume was <span class="highlight">+8%</span> vs plan.<br><br>
+                  <strong>Nutrition</strong> — Avg deficit <span class="highlight">−312 kcal</span>. Protein hit target 5/7 days.<br><br>
+                  <strong>Key adjustment:</strong> reduce leg volume by 1 set per exercise this week to recover for the cardio block.
+                </div>
+                <div class="msg-time left">09:10</div>
+              </div>
+            </div>
+
+            <!-- User follow-up -->
+            <div class="msg-row user">
+              <div>
+                <div class="bubble user">E a proteína nos dias de descanso?</div>
+                <div class="msg-time">09:11</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job Pills -->
+          <div class="job-pills-wrap">
+            <div class="job-pills-label">QUICK ANALYSIS</div>
+            <div class="job-pills">
+              <div class="job-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span class="job-pill-text">Weight stuck?</span>
+              </div>
+              <div class="job-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span class="job-pill-text">Protocol check</span>
+              </div>
+              <div class="job-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span class="job-pill-text">Next week tweak</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="chat-input-wrap">
+            <div class="chat-input focused">
+              <span class="input-placeholder">Ask Atlas anything…</span>
+              <div class="send-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:6px;flex-shrink:0"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 65. Job Button Locked State                     -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="screen-num">65</div>
+      <div class="screen-label">Job Button Locked</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-pill"></div></div>
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="15" width="3" height="6" rx="1" fill="white"/><rect x="7" y="11" width="3" height="10" rx="1" fill="white"/><rect x="12" y="7" width="3" height="14" rx="1" fill="white"/><rect x="17" y="3" width="3" height="18" rx="1" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5C7.2 10.3 10 9 12 9s4.8 1.3 7 3.5" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8.5 15.5c1-.9 2.2-1.5 3.5-1.5s2.5.6 3.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="white"/></svg>
+            <svg viewBox="0 0 28 14" fill="none"><rect x="0.5" y="0.5" width="23" height="13" rx="3.5" stroke="white"/><rect x="2" y="2" width="18" height="10" rx="2" fill="white"/><path d="M25 4.5v5c1.1-.5 1.1-4.5 0-5z" fill="white"/></svg>
+          </div>
+        </div>
+
+        <div class="screen-content">
+          <div class="nav-bar">
+            <div class="nav-bar-inner">
+              <div class="nav-back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+                AI
+              </div>
+              <div class="nav-title">Atlas AI</div>
+              <div class="new-chat-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New
+              </div>
+            </div>
+          </div>
+
+          <div class="large-title-section">
+            <div class="large-title">Atlas AI</div>
+            <div class="large-title-sub">Quick analysis, one tap</div>
+          </div>
+
+          <div class="scroll">
+            <div class="section-header">QUICK ANALYSIS</div>
+
+            <div class="job-grid">
+              <!-- Unlocked -->
+              <div class="job-btn">
+                <div class="job-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="job-text">
+                  <div class="job-title">Review last 7 days</div>
+                  <div class="job-desc">Training, nutrition, weight & energy.</div>
+                </div>
+                <div class="job-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+              <!-- Unlocked -->
+              <div class="job-btn">
+                <div class="job-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </div>
+                <div class="job-text">
+                  <div class="job-title">Nutrition reality check</div>
+                  <div class="job-desc">Calories, macros & gaps vs goal.</div>
+                </div>
+                <div class="job-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+              </div>
+
+              <!-- Locked -->
+              <div class="job-btn locked">
+                <div class="job-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.364 5.636a9 9 0 1 1-12.728 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                </div>
+                <div class="job-text">
+                  <div class="job-title">Why is my weight stuck?</div>
+                  <div class="job-desc">Hypotheses + concrete action to test.</div>
+                </div>
+                <div class="lock-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+              </div>
+              <!-- Locked -->
+              <div class="job-btn locked">
+                <div class="job-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div class="job-text">
+                  <div class="job-title">Check protocol adherence</div>
+                  <div class="job-desc">Plan vs execution, last 2 weeks.</div>
+                </div>
+                <div class="lock-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+              </div>
+              <!-- Locked -->
+              <div class="job-btn locked">
+                <div class="job-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div class="job-text">
+                  <div class="job-title">Suggest next week tweak</div>
+                  <div class="job-desc">One high-impact change with clear logic.</div>
+                </div>
+                <div class="lock-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Locked notice -->
+            <div class="locked-banner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <div class="locked-banner-text"><strong>2/2</strong> quick analyses used this week. Upgrade for unlimited access.</div>
+              <div class="locked-banner-cta">Upgrade</div>
+            </div>
+          </div>
+
+          <div class="tab-bar">
+            <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="tab-label">Today</span></div>
+            <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4v16M18 4v16M6 8h12M6 16h12"/></svg><span class="tab-label">Train</span></div>
+            <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 2l1.5 4.5M20.5 2 19 6.5M7 13c0 2.8 2.2 5 5 5s5-2.2 5-5-2.2-5-5-5-5 2.2-5 5zM12 8V6M6.5 6.5l1.5 1.5M17.5 6.5 16 8"/></svg><span class="tab-label">Nutrition</span></div>
+            <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tab-label">Body</span></div>
+            <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span class="tab-label">More</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 66. Free Prompt Limit Banner                    -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="screen-num">66</div>
+      <div class="screen-label">Free Prompt Limit</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-pill"></div></div>
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="15" width="3" height="6" rx="1" fill="white"/><rect x="7" y="11" width="3" height="10" rx="1" fill="white"/><rect x="12" y="7" width="3" height="14" rx="1" fill="white"/><rect x="17" y="3" width="3" height="18" rx="1" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5C7.2 10.3 10 9 12 9s4.8 1.3 7 3.5" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8.5 15.5c1-.9 2.2-1.5 3.5-1.5s2.5.6 3.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="white"/></svg>
+            <svg viewBox="0 0 28 14" fill="none"><rect x="0.5" y="0.5" width="23" height="13" rx="3.5" stroke="white"/><rect x="2" y="2" width="18" height="10" rx="2" fill="white"/><path d="M25 4.5v5c1.1-.5 1.1-4.5 0-5z" fill="white"/></svg>
+          </div>
+        </div>
+
+        <div class="screen-content">
+          <div class="nav-bar">
+            <div class="nav-bar-inner">
+              <div class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>AI</div>
+              <div style="text-align:center">
+                <div class="nav-title">Semana passada</div>
+                <div style="font-size:10px; color:var(--gray2); margin-top:1px">3 messages</div>
+              </div>
+              <div style="width:40px"></div>
+            </div>
+          </div>
+
+          <div class="context-pills">
+            <div class="ctx-pill"><span class="ctx-label">Goal:</span> Fat Loss</div>
+            <div class="ctx-pill"><span class="ctx-label">2100</span> kcal</div>
+            <div class="ctx-pill"><span class="ctx-label">87.3</span> kg</div>
+          </div>
+          <div class="divider" style="margin:0 16px"></div>
+
+          <div class="chat-area" style="gap:14px">
+            <div class="msg-row user">
+              <div>
+                <div class="bubble user">Quais foram meus pontos fracos esta semana?</div>
+                <div class="msg-time">09:05</div>
+              </div>
+            </div>
+
+            <div class="msg-row assistant">
+              <div class="msg-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              </div>
+              <div>
+                <div class="bubble assistant">
+                  Dois padrões críticos: <strong>proteína abaixo da meta</strong> em 3 dias (média −24g) e <strong>treino perdido na quinta</strong>. Esses dois gaps custam cerca de 200g de músculo na escala de meses.
+                </div>
+                <div class="msg-time left">09:06</div>
+              </div>
+            </div>
+
+            <div class="msg-row user">
+              <div>
+                <div class="bubble user">Como corrijo isso?</div>
+                <div class="msg-time">09:07</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LIMIT BANNER -->
+          <div class="limit-banner">
+            <div class="limit-banner-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="limit-banner-body">
+              <div class="limit-banner-title">Free prompt limit reached</div>
+              <div class="limit-banner-sub">You've used all 3 free prompts. Upgrade to continue this conversation.</div>
+              <div class="limit-banner-dots">
+                <div class="limit-dot"></div>
+                <div class="limit-dot"></div>
+                <div class="limit-dot"></div>
+              </div>
+              <div class="limit-banner-cta">Upgrade to Atlas Pro</div>
+            </div>
+          </div>
+
+          <!-- Disabled input -->
+          <div class="chat-input-wrap">
+            <div class="chat-input disabled">
+              <span class="input-placeholder">Upgrade to send more messages</span>
+              <div class="send-btn disabled">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+            </div>
+          </div>
+          <div style="height:6px;flex-shrink:0"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 67. Upgrade Gate                                -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="screen-num">67</div>
+      <div class="screen-label">Upgrade Gate</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-pill"></div></div>
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="15" width="3" height="6" rx="1" fill="white"/><rect x="7" y="11" width="3" height="10" rx="1" fill="white"/><rect x="12" y="7" width="3" height="14" rx="1" fill="white"/><rect x="17" y="3" width="3" height="18" rx="1" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5C7.2 10.3 10 9 12 9s4.8 1.3 7 3.5" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8.5 15.5c1-.9 2.2-1.5 3.5-1.5s2.5.6 3.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="white"/></svg>
+            <svg viewBox="0 0 28 14" fill="none"><rect x="0.5" y="0.5" width="23" height="13" rx="3.5" stroke="white"/><rect x="2" y="2" width="18" height="10" rx="2" fill="white"/><path d="M25 4.5v5c1.1-.5 1.1-4.5 0-5z" fill="white"/></svg>
+          </div>
+        </div>
+
+        <!-- Blurred chat behind -->
+        <div class="screen-content">
+          <div class="nav-bar">
+            <div class="nav-bar-inner" style="opacity:0.25">
+              <div class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>AI</div>
+              <div class="nav-title">Semana passada</div>
+              <div style="width:40px"></div>
+            </div>
+          </div>
+          <div class="chat-area" style="opacity:0.15; gap:14px">
+            <div class="msg-row user"><div><div class="bubble user">Como corrijo isso?</div></div></div>
+            <div class="msg-row assistant">
+              <div class="msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div>
+              <div><div class="bubble assistant" style="background:var(--surface)">Dois ajustes simples…</div></div>
+            </div>
+          </div>
+
+          <!-- Upgrade overlay (sheet modal) -->
+          <div class="upgrade-overlay">
+            <div class="upgrade-handle-wrap">
+              <div class="upgrade-handle"></div>
+            </div>
+            <div class="upgrade-sheet">
+              <div class="upgrade-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+
+              <div class="upgrade-heading">
+                <h3>Unlock Atlas Pro</h3>
+                <p>Unlimited AI conversations, all quick analyses, and full context access across every feature.</p>
+              </div>
+
+              <div class="upgrade-features">
+                <div class="upgrade-feat">
+                  <div class="upgrade-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                  <div class="upgrade-feat-text">Unlimited AI messages</div>
+                  <div class="upgrade-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+                <div class="upgrade-feat">
+                  <div class="upgrade-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                  <div class="upgrade-feat-text">All 5 quick analyses/week</div>
+                  <div class="upgrade-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+                <div class="upgrade-feat">
+                  <div class="upgrade-feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg></div>
+                  <div class="upgrade-feat-text">Full data context (30 days)</div>
+                  <div class="upgrade-feat-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+              </div>
+
+              <div class="upgrade-plan-row">
+                <div class="upgrade-plan">
+                  <div class="plan-period">Monthly</div>
+                  <div class="plan-price">$9<span>/mo</span></div>
+                  <div class="plan-note">Billed monthly</div>
+                </div>
+                <div class="upgrade-plan selected">
+                  <div class="plan-badge">BEST VALUE</div>
+                  <div class="plan-period">Annual</div>
+                  <div class="plan-price">$6<span>/mo</span></div>
+                  <div class="plan-note">$72 billed yearly</div>
+                </div>
+              </div>
+
+              <div class="upgrade-cta-btn">Start 7-Day Free Trial</div>
+              <div class="upgrade-cancel">Cancel anytime · No commitment</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 68. Generating Response State                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="screen-num">68</div>
+      <div class="screen-label">Generating Response</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-pill"></div></div>
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="15" width="3" height="6" rx="1" fill="white"/><rect x="7" y="11" width="3" height="10" rx="1" fill="white"/><rect x="12" y="7" width="3" height="14" rx="1" fill="white"/><rect x="17" y="3" width="3" height="18" rx="1" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5C7.2 10.3 10 9 12 9s4.8 1.3 7 3.5" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M8.5 15.5c1-.9 2.2-1.5 3.5-1.5s2.5.6 3.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="white"/></svg>
+            <svg viewBox="0 0 28 14" fill="none"><rect x="0.5" y="0.5" width="23" height="13" rx="3.5" stroke="white"/><rect x="2" y="2" width="18" height="10" rx="2" fill="white"/><path d="M25 4.5v5c1.1-.5 1.1-4.5 0-5z" fill="white"/></svg>
+          </div>
+        </div>
+
+        <div class="screen-content">
+          <div class="nav-bar">
+            <div class="nav-bar-inner">
+              <div class="nav-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>AI</div>
+              <div style="text-align:center">
+                <div class="nav-title">Ajuste semana 12</div>
+                <div style="font-size:10px; color:var(--teal); margin-top:1px; font-weight:500">Analyzing your data…</div>
+              </div>
+              <div class="nav-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="context-pills">
+            <div class="ctx-pill"><span class="ctx-label">Goal:</span> Fat Loss</div>
+            <div class="ctx-pill"><span class="ctx-label">2100</span> kcal</div>
+            <div class="ctx-pill"><span class="ctx-label">87.3</span> kg</div>
+          </div>
+          <div class="divider" style="margin:0 16px"></div>
+
+          <!-- Generating status bar -->
+          <div class="generating-status-bar">
+            <div class="gen-status-dot"></div>
+            <span class="gen-status-text">Reading training logs & nutrition data…</span>
+            <span class="gen-status-cancel">Stop</span>
+          </div>
+
+          <div class="chat-area" style="gap:14px">
+            <div class="msg-row user">
+              <div>
+                <div class="bubble user">Faz uma revisão completa dos últimos 7 dias. Treino, nutrição e o que ajustar.</div>
+                <div class="msg-time">09:08</div>
+              </div>
+            </div>
+
+            <div class="msg-row assistant">
+              <div class="msg-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              </div>
+              <div>
+                <div class="bubble assistant">
+                  <strong>Training</strong> — 4/5 sessions completed. Volume up <span class="highlight">+8%</span> vs planned target.
+                </div>
+                <div class="msg-time left">09:09</div>
+              </div>
+            </div>
+
+            <!-- Partial / streaming message -->
+            <div class="msg-row assistant">
+              <div class="msg-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              </div>
+              <div style="flex:1">
+                <div class="bubble assistant" style="max-width:230px">
+                  <div class="shimmer-line" style="width:100%"></div>
+                  <div class="shimmer-line" style="width:85%"></div>
+                  <div class="shimmer-line" style="width:92%"></div>
+                  <div class="shimmer-line"></div>
+                </div>
+                <div class="msg-time left">now</div>
+              </div>
+            </div>
+
+            <!-- Thinking dots -->
+            <div class="generating-row" style="margin-top:4px">
+              <div class="msg-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              </div>
+              <div class="thinking-bubble">
+                <div class="thinking-dot"></div>
+                <div class="thinking-dot"></div>
+                <div class="thinking-dot"></div>
+              </div>
+            </div>
+            <div class="generating-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.51"/></svg>
+              Analyzing nutrition data…
+            </div>
+          </div>
+
+          <!-- Job Pills disabled -->
+          <div class="job-pills-wrap" style="opacity:0.35">
+            <div class="job-pills-label">QUICK ANALYSIS</div>
+            <div class="job-pills">
+              <div class="job-pill"><span class="job-pill-text">Weight stuck?</span></div>
+              <div class="job-pill"><span class="job-pill-text">Protocol check</span></div>
+              <div class="job-pill"><span class="job-pill-text">Next week tweak</span></div>
+            </div>
+          </div>
+
+          <!-- Input disabled -->
+          <div class="chat-input-wrap">
+            <div class="chat-input disabled">
+              <span class="input-placeholder">Atlas is thinking…</span>
+              <div class="send-btn disabled">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+            </div>
+          </div>
+          <div style="height:6px;flex-shrink:0"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screen-grid -->
+
+  <!-- Design Token Legend -->
+  <div style="max-width:1100px; margin:56px auto 0; padding-bottom:56px">
+    <div style="font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--gray2); margin-bottom:16px">Design System Reference</div>
+    <div style="display:flex; flex-wrap:wrap; gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#080E0E;border:1px solid var(--border2)"></div>
+        <span style="font-size:11px;color:var(--gray1)">Background #080E0E</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#111A1A;border:1px solid var(--border2)"></div>
+        <span style="font-size:11px;color:var(--gray1)">Surface #111A1A</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#4A9B9B"></div>
+        <span style="font-size:11px;color:var(--gray1)">Teal Accent #4A9B9B</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#8A9A9A"></div>
+        <span style="font-size:11px;color:var(--gray1)">Secondary #8A9A9A</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#1E2C2C"></div>
+        <span style="font-size:11px;color:var(--gray1)">Border #1E2C2C</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#E05C5C"></div>
+        <span style="font-size:11px;color:var(--gray1)">Destructive #E05C5C</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px">
+        <div style="width:14px;height:14px;border-radius:4px;background:#4CAF7D"></div>
+        <span style="font-size:11px;color:var(--gray1)">Success #4CAF7D</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -61,11 +61,16 @@ const ICON_MAP = {
 };
 
 const BOTTOM_PATHS_BY_ROLE = {
-  athlete: [ROUTES.today, ROUTES.nutrition, ROUTES.workouts, ROUTES.atlasAI],
+  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.body, ROUTES.profile],
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.profile],
-  admin: [ROUTES.today, ROUTES.nutrition, ROUTES.workouts, ROUTES.profile],
+  admin: [ROUTES.today, ROUTES.admin, ROUTES.social, ROUTES.profile],
+};
+
+const MOBILE_TAB_LABEL_OVERRIDES = {
+  [ROUTES.workouts]: 'Train',
+  [ROUTES.profile]: 'More',
 };
 
 const MOBILE_TAB_HISTORY_KEY = 'atlas_mobile_tab_history_v1';
@@ -182,7 +187,10 @@ export default function AppLayout() {
 
   const bottomPaths = BOTTOM_PATHS_BY_ROLE[role] || BOTTOM_PATHS_BY_ROLE.athlete;
   const bottomNav = useMemo(
-    () => nav.filter((item) => bottomPaths.includes(item.path)),
+    () =>
+      nav
+        .filter((item) => bottomPaths.includes(item.path))
+        .sort((left, right) => bottomPaths.indexOf(left.path) - bottomPaths.indexOf(right.path)),
     [bottomPaths, nav]
   );
   const currentTabRoot = resolveTabRoot(pathname, bottomPaths);
@@ -343,7 +351,7 @@ export default function AppLayout() {
             const active = isActive(path);
             const tourId = path === ROUTES.nutrition ? 'nutrition' :
                            path === ROUTES.workouts ? 'workouts' :
-                           path === ROUTES.progress ? 'progress' :
+                           path === ROUTES.progress || path === ROUTES.body ? 'progress' :
                            path === ROUTES.profile ? 'profile' : undefined;
 
             return (
@@ -499,7 +507,7 @@ export default function AppLayout() {
                   const active = isActive(path);
                   const tourId = path === ROUTES.nutrition ? 'nutrition' :
                                  path === ROUTES.workouts ? 'workouts' :
-                                 path === ROUTES.progress ? 'progress' :
+                                 path === ROUTES.progress || path === ROUTES.body ? 'progress' :
                                  path === ROUTES.profile ? 'profile' : undefined;
 
                   return (
@@ -551,7 +559,7 @@ export default function AppLayout() {
             key: path,
             to: getBottomTabTarget(path),
             onClick: (event) => handleBottomTabPress(event, path),
-            label,
+            label: MOBILE_TAB_LABEL_OVERRIDES[path] || label,
             icon: ICON_MAP[icon] || Home,
             active: currentTabRoot === path,
           })),

@@ -7,20 +7,20 @@ const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'S
 
 export default function RoutineCard({ routine, isPrescribed, onDelete, onClone }) {
   const daysWithWorkout = routine.days_of_week?.filter(d => d.workout_id) || [];
-  const activeDays = daysWithWorkout.map(d => DAYS_ABBR[d.day]).join(', ');
 
   return (
-    <div className="surface p-5 hover:border-[hsl(var(--brand)/0.2)] transition-colors flex flex-col gap-4">
-      {/* Header */}
+    <div className="atlas-card flex flex-col gap-4 rounded-[18px] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--brand)/0.24)] hover:shadow-[var(--shadow-md)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-[14px] font-bold truncate">{routine.name}</h3>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {routine.name}
+            </h3>
             {isPrescribed && <span className="badge badge-blue text-[10px]">Prescrita</span>}
             {routine.active && <span className="badge badge-ok text-[10px]">Ativa</span>}
           </div>
           {routine.description && (
-            <p className="text-[12px] text-muted-foreground line-clamp-2">{routine.description}</p>
+            <p className="line-clamp-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{routine.description}</p>
           )}
         </div>
         {!isPrescribed && (
@@ -28,14 +28,14 @@ export default function RoutineCard({ routine, isPrescribed, onDelete, onClone }
             <button
               onClick={onClone}
               title="Clonar"
-              className="p-1.5 text-muted-foreground/60 hover:text-[hsl(var(--brand))] transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--brand))]"
             >
               <Copy className="w-3.5 h-3.5" strokeWidth={2} />
             </button>
             <button
               onClick={onDelete}
               title="Deletar"
-              className="p-1.5 text-muted-foreground/60 hover:text-[hsl(var(--err))] transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--err)/0.08)] hover:text-[hsl(var(--err))]"
             >
               <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
             </button>
@@ -43,17 +43,17 @@ export default function RoutineCard({ routine, isPrescribed, onDelete, onClone }
         )}
       </div>
 
-      {/* Days of Week Grid */}
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-1">
         {DAYS_ABBR.map((abbr, i) => {
           const hasWorkout = daysWithWorkout.some(d => d.day === i);
           return (
             <div
               key={i}
-              className={`flex items-center justify-center h-7 rounded-lg text-[10px] font-semibold transition-colors ${
+              title={DAYS_PT[i]}
+              className={`flex h-8 items-center justify-center rounded-[10px] text-[10px] font-semibold transition-colors ${
                 hasWorkout
-                  ? 'bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))] border border-[hsl(var(--brand)/0.2)]'
-                  : 'bg-[hsl(var(--secondary))] text-muted-foreground'
+                  ? 'border border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]'
+                  : 'border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-3))]'
               }`}
             >
               {abbr}
@@ -62,8 +62,7 @@ export default function RoutineCard({ routine, isPrescribed, onDelete, onClone }
         })}
       </div>
 
-      {/* Stats */}
-      <div className="flex gap-3 text-[11px] text-muted-foreground">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-[hsl(var(--fg-2))]">
         {routine.estimated_duration_minutes && (
           <div className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" strokeWidth={2} />
@@ -84,13 +83,15 @@ export default function RoutineCard({ routine, isPrescribed, onDelete, onClone }
         )}
       </div>
 
-      {/* CTA */}
       <Link
         to={`/workouts?routine=${routine.id}`}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(var(--primary)/0.08)] text-[hsl(var(--primary))] text-[12px] font-semibold hover:bg-[hsl(var(--primary)/0.15)] transition-colors group"
+        className="group flex items-center justify-between rounded-[12px] border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.1)] px-3.5 py-3 text-[12px] font-semibold text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.16)]"
       >
-        Iniciar hoje
-        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" strokeWidth={2} />
+        <span className="flex items-center gap-2">
+          <Dumbbell className="h-3.5 w-3.5" strokeWidth={2} />
+          Iniciar hoje
+        </span>
+        <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
       </Link>
     </div>
   );

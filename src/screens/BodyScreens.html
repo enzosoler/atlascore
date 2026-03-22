@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>atlas.core · Body & Progress Tracking · Screens 39–45</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #030808;
+    font-family: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 56px 0 100px;
+  }
+  ::-webkit-scrollbar { display: none; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
+  .spin { animation: spin 1.2s linear infinite; }
+  .upload-bar { animation: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { useState, useRef, useEffect } = React;
+const {
+  AreaChart, Area, LineChart, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, ResponsiveContainer
+} = Recharts;
+
+// ─── Design Tokens ──────────────────────────────────────────────
+const DS = {
+  bg:       "#080E0E",
+  card:     "#111A1A",
+  card2:    "#0D1515",
+  border:   "#1E2C2C",
+  accent:   "#4A9B9B",
+  accentDim:"rgba(74,155,155,0.12)",
+  accentMid:"rgba(74,155,155,0.25)",
+  fg:       "#FFFFFF",
+  fg2:      "#8A9A9A",
+  fg3:      "#556060",
+  ok:       "#4CAF7D",
+  err:      "#E05C5C",
+  warn:     "#E0A25C",
+};
+
+// ─── Sample Data ─────────────────────────────────────────────────
+const WEIGHT_DATA = [
+  {w:"Jan 6",v:84.2},{w:"Jan 13",v:83.8},{w:"Jan 20",v:83.4},
+  {w:"Jan 27",v:83.1},{w:"Feb 3",v:82.7},{w:"Feb 10",v:82.9},
+  {w:"Feb 17",v:82.3},{w:"Feb 24",v:81.8},{w:"Mar 3",v:81.4},
+  {w:"Mar 10",v:81.1},{w:"Mar 17",v:80.8},{w:"Mar 22",v:80.5},
+];
+const FAT_DATA = [
+  {w:"Jan 6",v:18.4},{w:"Jan 13",v:18.2},{w:"Jan 20",v:17.9},
+  {w:"Jan 27",v:17.7},{w:"Feb 3",v:17.5},{w:"Feb 10",v:17.6},
+  {w:"Feb 17",v:17.3},{w:"Feb 24",v:17.0},{w:"Mar 3",v:16.8},
+  {w:"Mar 10",v:16.6},{w:"Mar 17",v:16.4},{w:"Mar 22",v:16.1},
+];
+const WAIST_DATA = [
+  {w:"Jan",v:86},{w:"Feb",v:84.5},{w:"Mar",v:83.2},
+];
+const MEASUREMENTS = [
+  {key:"weight",  label:"Weight",   unit:"kg",current:80.5, prev:84.2, color:DS.accent},
+  {key:"body_fat",label:"Body Fat", unit:"%", current:16.1, prev:18.4, color:"#6B9FFF"},
+  {key:"waist",   label:"Waist",    unit:"cm",current:83.2, prev:86.0, color:DS.accent},
+  {key:"chest",   label:"Chest",    unit:"cm",current:101.4,prev:100.2,color:"#6B9FFF"},
+  {key:"arms",    label:"Arms",     unit:"cm",current:38.2, prev:37.1, color:DS.ok},
+  {key:"thighs",  label:"Thighs",   unit:"cm",current:59.6, prev:61.0, color:DS.accent},
+  {key:"hips",    label:"Hips",     unit:"cm",current:96.2, prev:97.8, color:"#6B9FFF"},
+  {key:"neck",    label:"Neck",     unit:"cm",current:38.5, prev:38.3, color:DS.ok},
+];
+
+// ─── Shared Primitives ───────────────────────────────────────────
+function Phone({children, label, screenNum}) {
+  return React.createElement("div", {style:{display:"flex",flexDirection:"column",alignItems:"center",gap:20}},
+    React.createElement("div", {style:{textAlign:"center"}},
+      React.createElement("p", {style:{fontSize:10,fontWeight:700,color:DS.accent,letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:4}}, `Screen ${screenNum}`),
+      React.createElement("p", {style:{fontSize:14,fontWeight:600,color:"rgba(255,255,255,0.7)"}}, label)
+    ),
+    React.createElement("div", {
+      style:{
+        width:390, minHeight:844, background:DS.bg,
+        borderRadius:48, overflow:"hidden",
+        border:`1.5px solid ${DS.border}`,
+        boxShadow:"0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(74,155,155,0.06)",
+        display:"flex", flexDirection:"column",
+        position:"relative",
+      }
+    },
+      // Status bar
+      React.createElement("div", {style:{
+        height:44, flexShrink:0, display:"flex", alignItems:"center",
+        justifyContent:"space-between", padding:"0 28px",
+        background:DS.bg,
+      }},
+        React.createElement("span", {style:{fontSize:15,fontWeight:600,color:DS.fg,letterSpacing:-0.3}}, "9:41"),
+        React.createElement("div", {style:{display:"flex",alignItems:"center",gap:6}},
+          React.createElement("div", {style:{display:"flex",gap:2,alignItems:"flex-end"}},
+            [3,4,5,6].map((h,i)=>React.createElement("div",{key:i,style:{width:3,height:h,background:i<3?DS.fg:"rgba(255,255,255,0.3)",borderRadius:1.5}}))
+          ),
+          React.createElement("div", {style:{width:16,height:12,border:`1.5px solid ${DS.fg}`,borderRadius:2,padding:1.5}},
+            React.createElement("div", {style:{height:"100%",width:"75%",background:DS.ok,borderRadius:0.5}})
+          )
+        )
+      ),
+      // Content
+      React.createElement("div", {style:{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}, children)
+    )
+  );
+}
+
+function TabBar({active}) {
+  const tabs = [
+    {id:"progress",label:"Progress"},
+    {id:"measurements",label:"Measurements"},
+    {id:"photos",label:"Photos"},
+  ];
+  return React.createElement("div", {
+    style:{display:"flex",borderBottom:`1px solid ${DS.border}`,margin:"0 20px",flexShrink:0}
+  },
+    tabs.map(t => React.createElement("button", {
+      key:t.id,
+      style:{
+        padding:"10px 16px 13px", fontSize:13,
+        fontWeight: t.id===active ? 600 : 500,
+        color: t.id===active ? DS.fg : DS.fg2,
+        borderBottom:`2px solid ${t.id===active ? DS.accent : "transparent"}`,
+        background:"none", border:"none", cursor:"pointer",
+        letterSpacing:-0.1,
+      }
+    }, t.label))
+  );
+}
+
+function BottomNav() {
+  const tabs = ["Today","Train","Nutrition","Body","More"];
+  const icons = ["◎","⬡","◈","◉","···"];
+  return React.createElement("div", {
+    style:{
+      height:83, background:DS.card2, borderTop:`1px solid ${DS.border}`,
+      display:"flex", alignItems:"flex-start", paddingTop:10,
+      flexShrink:0,
+    }
+  },
+    tabs.map((t,i) => React.createElement("div", {
+      key:t, style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}
+    },
+      React.createElement("div", {style:{
+        width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",
+        borderRadius:8, background:i===3 ? DS.accentDim : "transparent"
+      }},
+        React.createElement("span", {style:{fontSize:i===4?10:16, color:i===3?DS.accent:DS.fg3}}, icons[i])
+      ),
+      React.createElement("span", {style:{fontSize:10,fontWeight:i===3?700:500,color:i===3?DS.accent:DS.fg3}}, t)
+    ))
+  );
+}
+
+function ChartTip({active, payload, label}) {
+  if (!active||!payload?.length) return null;
+  const unit = payload[0]?.name==="v" ? "" : "";
+  return React.createElement("div", {style:{background:DS.card,border:`1px solid ${DS.border}`,borderRadius:10,padding:"8px 12px"}},
+    React.createElement("p", {style:{fontSize:13,fontWeight:700,color:DS.fg}}, payload[0].value?.toFixed(1))
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SCREEN 39 — Body Hub
+// ══════════════════════════════════════════════════
+function S39() {
+  const wD = WEIGHT_DATA[WEIGHT_DATA.length-1].v, wS = WEIGHT_DATA[0].v;
+  const fD = FAT_DATA[FAT_DATA.length-1].v,   fS = FAT_DATA[0].v;
+
+  return React.createElement(Phone, {label:"Body Hub", screenNum:39},
+
+    // Large title
+    React.createElement("div", {style:{padding:"12px 20px 0"}},
+      React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:6}}, "Body"),
+      React.createElement("h1", {style:{fontSize:32,fontWeight:700,color:DS.fg,letterSpacing:-1,lineHeight:1.1,marginBottom:4}}, "Body Progress"),
+      React.createElement("p", {style:{fontSize:13,color:DS.fg2,marginBottom:16,lineHeight:1.5}}, "Track your evolution across metrics, measurements & photos.")
+    ),
+
+    // Hero card
+    React.createElement("div", {style:{
+      margin:"0 20px 16px",
+      background:"linear-gradient(135deg,#0D1E1E 0%,#0A1616 100%)",
+      borderRadius:20, border:`1px solid ${DS.border}`, padding:20,
+      position:"relative", overflow:"hidden",
+    }},
+      React.createElement("div", {style:{position:"absolute",top:-40,right:-40,width:160,height:160,background:`radial-gradient(circle, rgba(74,155,155,0.2) 0%, transparent 70%)`,pointerEvents:"none"}}),
+      React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:14}}, "12-Week Summary"),
+      React.createElement("div", {style:{display:"flex",gap:12,marginBottom:20}},
+        React.createElement("div", {style:{flex:1}},
+          React.createElement("p", {style:{fontSize:11,color:DS.fg2,marginBottom:4}}, "Current Weight"),
+          React.createElement("div", {style:{display:"flex",alignItems:"baseline",gap:3}},
+            React.createElement("span", {style:{fontSize:36,fontWeight:700,color:DS.fg,letterSpacing:-1.5}}, wD),
+            React.createElement("span", {style:{fontSize:15,color:DS.fg2}}, " kg")
+          ),
+          React.createElement("div", {style:{display:"flex",alignItems:"center",gap:4,marginTop:6}},
+            React.createElement("span", {style:{fontSize:16,color:DS.ok}}, "↙"),
+            React.createElement("span", {style:{fontSize:12,fontWeight:600,color:DS.ok}}, `−${(wS-wD).toFixed(1)} kg since Jan`)
+          )
+        ),
+        React.createElement("div", {style:{flex:1}},
+          React.createElement("p", {style:{fontSize:11,color:DS.fg2,marginBottom:4}}, "Body Fat"),
+          React.createElement("div", {style:{display:"flex",alignItems:"baseline",gap:3}},
+            React.createElement("span", {style:{fontSize:36,fontWeight:700,color:DS.fg,letterSpacing:-1.5}}, fD),
+            React.createElement("span", {style:{fontSize:15,color:DS.fg2}}, " %")
+          ),
+          React.createElement("div", {style:{display:"flex",alignItems:"center",gap:4,marginTop:6}},
+            React.createElement("span", {style:{fontSize:16,color:DS.ok}}, "↙"),
+            React.createElement("span", {style:{fontSize:12,fontWeight:600,color:DS.ok}}, `−${(fS-fD).toFixed(1)}% since Jan`)
+          )
+        )
+      ),
+      React.createElement(ResponsiveContainer, {width:"100%",height:52},
+        React.createElement(AreaChart, {data:WEIGHT_DATA,margin:{top:0,right:0,left:0,bottom:0}},
+          React.createElement("defs",{},
+            React.createElement("linearGradient",{id:"g39",x1:"0",y1:"0",x2:"0",y2:"1"},
+              React.createElement("stop",{offset:"0%",stopColor:DS.accent,stopOpacity:0.3}),
+              React.createElement("stop",{offset:"100%",stopColor:DS.accent,stopOpacity:0})
+            )
+          ),
+          React.createElement(Area,{type:"monotone",dataKey:"v",stroke:DS.accent,strokeWidth:2.5,fill:"url(#g39)",dot:false})
+        )
+      )
+    ),
+
+    // Quick nav tiles
+    React.createElement("div", {style:{margin:"0 20px 16px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}},
+      [{icon:"📈",label:"Progress",sub:"Trends & charts",color:DS.accent},
+       {icon:"📊",label:"Measures",sub:"8 metrics",color:"#6B9FFF"},
+       {icon:"📷",label:"Photos",sub:"3 checkpoints",color:DS.ok}
+      ].map(t => React.createElement("div", {key:t.label, style:{
+        background:DS.card, borderRadius:16, border:`1px solid ${DS.border}`,
+        padding:"14px 12px", cursor:"pointer",
+      }},
+        React.createElement("div", {style:{
+          width:32,height:32,borderRadius:10,
+          background:`${t.color}18`,display:"flex",alignItems:"center",justifyContent:"center",
+          marginBottom:10,fontSize:16,
+        }}, t.icon),
+        React.createElement("p", {style:{fontSize:12,fontWeight:700,color:DS.fg,marginBottom:2}}, t.label),
+        React.createElement("p", {style:{fontSize:10,color:DS.fg2}}, t.sub)
+      ))
+    ),
+
+    // Recent measurements
+    React.createElement("div", {style:{padding:"0 20px 16px"}},
+      React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
+        React.createElement("p", {style:{fontSize:11,fontWeight:700,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase"}}, "Recent Measurements"),
+        React.createElement("button", {style:{fontSize:13,fontWeight:600,color:DS.accent,background:"none",border:"none",cursor:"pointer"}}, "See all")
+      ),
+      React.createElement("div", {style:{background:DS.card,borderRadius:16,border:`1px solid ${DS.border}`,overflow:"hidden"}},
+        MEASUREMENTS.slice(0,4).map((m,i) => {
+          const delta = m.current - m.prev;
+          const isDown = delta < 0;
+          const isGood = ["weight","body_fat","waist","hips"].includes(m.key) ? isDown : !isDown;
+          return React.createElement("div", {key:m.key, style:{
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+            padding:"13px 16px",
+            borderBottom: i<3 ? `1px solid ${DS.border}` : "none",
+          }},
+            React.createElement("div", {style:{display:"flex",alignItems:"center",gap:10}},
+              React.createElement("div", {style:{width:6,height:6,borderRadius:"50%",background:m.color,opacity:0.8}}),
+              React.createElement("span", {style:{fontSize:14,fontWeight:500,color:DS.fg}}, m.label)
+            ),
+            React.createElement("div", {style:{display:"flex",alignItems:"center",gap:10}},
+              React.createElement("span", {style:{fontSize:11,fontWeight:600,color:isGood?DS.ok:DS.err}},
+                `${isGood?"↙":"↗"} ${Math.abs(delta).toFixed(1)}${m.unit}`
+              ),
+              React.createElement("span", {style:{fontSize:14,fontWeight:600,color:DS.fg,fontVariantNumeric:"tabular-nums"}},
+                `${m.current}`, React.createElement("span",{style:{fontSize:11,color:DS.fg2,marginLeft:2}}, m.unit)
+              )
+            )
+          );
+        })
+      )
+    ),
+
+    // Latest checkpoint
+    React.createElement("div", {style:{padding:"0 20px 20px"}},
+      React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
+        React.createElement("p", {style:{fontSize:11,fontWeight:700,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase"}}, "Latest Checkpoint"),
+        React.createElement("button", {style:{fontSize:13,fontWeight:600,color:DS.accent,background:"none",border:"none",cursor:"pointer"}}, "See all")
+      ),
+      React.createElement("div", {style:{background:DS.card,borderRadius:16,border:`1px solid ${DS.border}`,padding:"14px 16px"}},
+        React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
+          React.createElement("div", {},
+            React.createElement("p", {style:{fontSize:13,fontWeight:600,color:DS.fg}}, "March 22, 2026"),
+            React.createElement("p", {style:{fontSize:11,color:DS.fg2}}, "4 of 4 poses recorded")
+          ),
+          React.createElement("div", {style:{display:"flex",alignItems:"center",gap:4,background:`${DS.ok}18`,borderRadius:20,padding:"4px 10px"}},
+            React.createElement("span", {style:{fontSize:11,color:DS.ok}}, "✓"),
+            React.createElement("span", {style:{fontSize:11,fontWeight:700,color:DS.ok}}, " Complete")
+          )
+        ),
+        React.createElement("div", {style:{display:"flex",gap:8}},
+          ["Front","Side","Back","Free"].map(pose => React.createElement("div", {key:pose, style:{
+            flex:1, aspectRatio:"3/4", borderRadius:10,
+            background:"linear-gradient(160deg,#1A2E2E 0%,#0F1E1E 100%)",
+            border:`1px solid ${DS.border}`,
+            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+            cursor:"pointer",
+          }},
+            React.createElement("span", {style:{fontSize:16,opacity:0.4}}, "📷"),
+            React.createElement("p", {style:{fontSize:9,color:DS.fg3,marginTop:4,fontWeight:500}}, pose)
+          ))
+        )
+      )
+    ),
+
+    React.createElement(BottomNav)
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SCREEN 40 — Progress Tab
+// ══════════════════════════════════════════════════
+function S40() {
+  return React.createElement(Phone, {label:"Progress Tab", screenNum:40},
+    React.createElement("div", {style:{padding:"12px 20px 0"}},
+      React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:6}}, "Body"),
+      React.createElement("h1", {style:{fontSize:28,fontWeight:700,color:DS.fg,letterSpacing:-0.8,lineHeight:1.15,marginBottom:12}}, "Body Progress")
+    ),
+    React.createElement(TabBar, {active:"progress"}),
+    React.createElement("div", {style:{flex:1,padding:"20px",overflowY:"auto"}},
+
+      // Time selector
+      React.createElement("div", {style:{display:"flex",gap:6,marginBottom:20}},
+        ["4W","8W","12W","All"].map((t,i) => React.createElement("button", {key:t, style:{
+          padding:"6px 14px", borderRadius:20,
+          background: i===2 ? DS.accent : DS.card,
+          border:`1px solid ${i===2 ? DS.accent : DS.border}`,
+          color: i===2 ? "#fff" : DS.fg2,
+          fontSize:12, fontWeight: i===2 ? 700 : 500, cursor:"pointer",
+        }}, t))
+      ),
+
+      // Weight chart card
+      React.createElement("div", {style:{background:DS.card,borderRadius:16,border:`1px solid ${DS.border}`,padding:"18px 16px 14px",marginBottom:16}},
+        React.createElement("div", {style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:16}},
+          React.createElement("div", {},
+            React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}, "Weight"),
+            React.createElement("div", {style:{display:"flex",alignItems:"baseline",gap:4}},
+              React.createElement("span", {style:{fontSize:28,fontWeight:700,color:DS.fg,letterSpacing:-0.8}}, "80.5"),
+              React.createElement("span", {style:{fontSize:13,color:DS.fg2}}, " kg")
+            )
+          ),
+          React.createElement("div", {style:{textAlign:"right"}},
+            React.createElement("div", {style:{display:"flex",alignItems:"center",gap:4,justifyContent:"flex-end"}},
+              React.createElement("span", {style:{fontSize:14,color:DS.ok}}, "↙"),
+              React.createElement("span", {style:{fontSize:13,fontWeight:700,color:DS.ok}}, "−3.7 kg")
+            ),
+            React.createElement("p", {style:{fontSize:11,color:DS.fg2,marginTop:2}}, "vs 12 weeks ago")
+          )
+        ),
+        React.createElement(ResponsiveContainer, {width:"100%",height:130},
+          React.createElement(AreaChart, {data:WEIGHT_DATA,margin:{top:4,right:4,left:-24,bottom:0}},
+            React.createElement("defs",{},
+              React.createElement("linearGradient",{id:"gW40",x1:"0",y1:"0",x2:"0",y2:"1"},
+                React.createElement("stop",{offset:"0%",stopColor:DS.accent,stopOpacity:0.25}),
+                React.createElement("stop",{offset:"100%",stopColor:DS.accent,stopOpacity:0})
+              )
+            ),
+            React.createElement(CartesianGrid,{stroke:DS.border,strokeDasharray:"3 3",vertical:false}),
+            React.createElement(XAxis,{dataKey:"w",tick:{fill:DS.fg3,fontSize:9},tickLine:false,axisLine:false,interval:2}),
+            React.createElement(YAxis,{tick:{fill:DS.fg3,fontSize:9},tickLine:false,axisLine:false,domain:["auto","auto"]}),
+            React.createElement(Tooltip,{content:React.createElement(ChartTip)}),
+            React.createElement(Area,{type:"monotone",dataKey:"v",stroke:DS.accent,strokeWidth:2.5,fill:"url(#gW40)",dot:false,activeDot:{r:5,fill:DS.accent,stroke:DS.bg,strokeWidth:2}})
+          )
+        ),
+        // Goal bar
+        React.createElement("div", {style:{marginTop:14,paddingTop:14,borderTop:`1px solid ${DS.border}`}},
+          React.createElement("div", {style:{display:"flex",justifyContent:"space-between",marginBottom:6}},
+            React.createElement("span", {style:{fontSize:12,color:DS.fg2}}, "Goal: 78 kg"),
+            React.createElement("span", {style:{fontSize:12,fontWeight:600,color:DS.accent}}, "2.5 kg to go")
+          ),
+          React.createElement("div", {style:{height:4,background:DS.border,borderRadius:2,overflow:"hidden"}},
+            React.createElement("div", {style:{height:"100%",width:"60%",background:`linear-gradient(90deg,${DS.accent},rgba(74,155,155,0.4))`,borderRadius:2}})
+          )
+        )
+      ),
+
+      // Body fat chart
+      React.createElement("div", {style:{background:DS.card,borderRadius:16,border:`1px solid ${DS.border}`,padding:"18px 16px 14px",marginBottom:16}},
+        React.createElement("div", {style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:16}},
+          React.createElement("div", {},
+            React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}, "Body Fat"),
+            React.createElement("div", {style:{display:"flex",alignItems:"baseline",gap:4}},
+              React.createElement("span", {style:{fontSize:28,fontWeight:700,color:DS.fg,letterSpacing:-0.8}}, "16.1"),
+              React.createElement("span", {style:{fontSize:13,color:DS.fg2}}, " %")
+            )
+          ),
+          React.createElement("div", {style:{textAlign:"right"}},
+            React.createElement("div", {style:{display:"flex",alignItems:"center",gap:4,justifyContent:"flex-end"}},
+              React.createElement("span", {style:{fontSize:14,color:DS.ok}}, "↙"),
+              React.createElement("span", {style:{fontSize:13,fontWeight:700,color:DS.ok}}, "−2.3%")
+            ),
+            React.createElement("p", {style:{fontSize:11,color:DS.fg2,marginTop:2}}, "vs 12 weeks ago")
+          )
+        ),
+        React.createElement(ResponsiveContainer, {width:"100%",height:110},
+          React.createElement(AreaChart, {data:FAT_DATA,margin:{top:4,right:4,left:-24,bottom:0}},
+            React.createElement("defs",{},
+              React.createElement("linearGradient",{id:"gF40",x1:"0",y1:"0",x2:"0",y2:"1"},
+                React.createElement("stop",{offset:"0%",stopColor:"#6B9FFF",stopOpacity:0.25}),
+                React.createElement("stop",{offset:"100%",stopColor:"#6B9FFF",stopOpacity:0})
+              )
+            ),
+            React.createElement(CartesianGrid,{stroke:DS.border,strokeDasharray:"3 3",vertical:false}),
+            React.createElement(XAxis,{dataKey:"w",tick:{fill:DS.fg3,fontSize:9},tickLine:false,axisLine:false,interval:2}),
+            React.createElement(YAxis,{tick:{fill:DS.fg3,fontSize:9},tickLine:false,axisLine:false,domain:["auto","auto"]}),
+            React.createElement(Tooltip,{content:React.createElement(ChartTip)}),
+            React.createElement(Area,{type:"monotone",dataKey:"v",stroke:"#6B9FFF",strokeWidth:2.5,fill:"url(#gF40)",dot:false,activeDot:{r:5,fill:"#6B9FFF",stroke:DS.bg,strokeWidth:2}})
+          )
+        )
+      ),
+
+      // Waist card
+      React.createElement("div", {style:{background:DS.card,borderRadius:16,border:`1px solid ${DS.border}`,padding:16,marginBottom:16}},
+        React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
+          React.createElement("div", {},
+            React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:3}}, "Waist"),
+            React.createElement("div", {style:{display:"flex",alignItems:"baseline",gap:3}},
+              React.createElement("span", {style:{fontSize:22,fontWeight:700,color:DS.fg,letterSpacing:-0.6}}, "83.2"),
+              React.createElement("span", {style:{fontSize:12,color:DS.fg2}}, " cm")
+            )
+          ),
+          React.createElement("div", {style:{display:"flex",alignItems:"center",gap:3}},
+            React.createElement("span", {style:{fontSize:13,color:DS.ok}}, "↙"),
+            React.createElement("span", {style:{fontSize:12,fontWeight:700,color:DS.ok}}, "−2.8 cm")
+          )
+        ),
+        React.createElement(ResponsiveContainer, {width:"100%",height:56},
+          React.createElement(AreaChart, {data:WAIST_DATA,margin:{top:0,right:0,left:-30,bottom:0}},
+            React.createElement("defs",{},
+              React.createElement("linearGradient",{id:"gWZ",x1:"0",y1:"0",x2:"0",y2:"1"},
+                React.createElement("stop",{offset:"0%",stopColor:DS.accent,stopOpacity:0.2}),
+                React.createElement("stop",{offset:"100%",stopColor:DS.accent,stopOpacity:0})
+              )
+            ),
+            React.createElement(XAxis,{dataKey:"w",tick:{fill:DS.fg3,fontSize:10},tickLine:false,axisLine:false}),
+            React.createElement(Area,{type:"monotone",dataKey:"v",stroke:DS.accent,strokeWidth:2,fill:"url(#gWZ)",dot:{r:4,fill:DS.accent,stroke:DS.bg,strokeWidth:2}})
+          )
+        )
+      ),
+
+      // AI Insight
+      React.createElement("div", {style:{
+        background:`linear-gradient(135deg,${DS.accentDim},rgba(74,155,155,0.06))`,
+        borderRadius:14, border:`1px solid ${DS.accentMid}`, padding:"14px 16px"
+      }},
+        React.createElement("div", {style:{display:"flex",alignItems:"flex-start",gap:10}},
+          React.createElement("div", {style:{
+            width:28,height:28,borderRadius:8,background:DS.accentMid,
+            display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1,fontSize:14
+          }}, "✦"),
+          React.createElement("div", {},
+            React.createElement("p", {style:{fontSize:12,fontWeight:700,color:DS.accent,marginBottom:4,letterSpacing:0.1}}, "Atlas AI Insight"),
+            React.createElement("p", {style:{fontSize:13,color:DS.fg2,lineHeight:1.55}},
+              "Consistent 0.31 kg/week loss over 12 weeks. Body fat trending down while waist reduced 2.8 cm — strong recomp signal."
+            )
+          )
+        )
+      )
+    ),
+    React.createElement(BottomNav)
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SCREEN 41 — Measurements Tab
+// ══════════════════════════════════════════════════
+function S41() {
+  return React.createElement(Phone, {label:"Measurements Tab", screenNum:41},
+    React.createElement("div", {style:{padding:"12px 20px 0"}},
+      React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:6}}, "Body"),
+      React.createElement("h1", {style:{fontSize:28,fontWeight:700,color:DS.fg,letterSpacing:-0.8,lineHeight:1.15,marginBottom:12}}, "Measurements")
+    ),
+    React.createElement(TabBar, {active:"measurements"}),
+    React.createElement("div", {style:{flex:1,padding:"20px",overflowY:"auto"}},
+
+      // Header row
+      React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}},
+        React.createElement("div", {},
+          React.createElement("p", {style:{fontSize:12,color:DS.fg2,marginBottom:2}}, "Last recorded"),
+          React.createElement("p", {style:{fontSize:13,fontWeight:600,color:DS.fg}}, "Today · Mar 22")
+        ),
+        React.createElement("button", {style:{
+          display:"flex",alignItems:"center",gap:6,
+          background:DS.accent,color:"#fff",border:"none",
+          borderRadius:22,padding:"9px 16px",
+          fontSize:13,fontWeight:700,cursor:"pointer",
+        }},
+          React.createElement("span", {style:{fontSize:16}}, "+"), " Log Today"
+        )
+      ),
+
+      // Measurements list
+      React.createElement("div", {style:{background:DS.card,borderRadius:16,border:`1px solid ${DS.border}`,overflow:"hidden",marginBottom:20}},
+        MEASUREMENTS.map((m,i) => {
+          const delta = m.current - m.prev;
+          const isDown = delta < 0;
+          const isGood = ["weight","body_fat","waist","hips"].includes(m.key) ? isDown : !isDown;
+          const icons = {weight:"⚖",body_fat:"💧",waist:"📏",chest:"📏",arms:"📏",thighs:"📏",hips:"📏",neck:"📏"};
+          return React.createElement("div", {key:m.key, style:{
+            display:"flex",alignItems:"center",
+            padding:"13px 16px",
+            borderBottom: i<MEASUREMENTS.length-1 ? `1px solid ${DS.border}` : "none",
+          }},
+            // Icon
+            React.createElement("div", {style:{
+              width:34,height:34,borderRadius:10,
+              background:`${m.color}15`,display:"flex",alignItems:"center",
+              justifyContent:"center",marginRight:12,flexShrink:0,fontSize:14,
+            }}, icons[m.key]),
+            // Label + delta
+            React.createElement("div", {style:{flex:1,minWidth:0}},
+              React.createElement("p", {style:{fontSize:13,fontWeight:600,color:DS.fg,marginBottom:1}}, m.label),
+              React.createElement("div", {style:{display:"flex",alignItems:"center",gap:4}},
+                React.createElement("span", {style:{fontSize:11,fontWeight:600,color:isGood?DS.ok:DS.err}},
+                  `${isGood?"↙":"↗"} ${delta>0?"+":""}${delta.toFixed(1)}${m.unit}`
+                ),
+                React.createElement("span", {style:{fontSize:10,color:DS.fg3}}, "vs start")
+              )
+            ),
+            // Value
+            React.createElement("div", {style:{textAlign:"right",flexShrink:0}},
+              React.createElement("div", {style:{display:"flex",alignItems:"baseline",gap:2,justifyContent:"flex-end"}},
+                React.createElement("span", {style:{fontSize:18,fontWeight:700,color:DS.fg,fontVariantNumeric:"tabular-nums",letterSpacing:-0.5}}, m.current),
+                React.createElement("span", {style:{fontSize:11,color:DS.fg2}}, " "+m.unit)
+              ),
+              React.createElement("p", {style:{fontSize:10,color:DS.fg3,marginTop:1}}, `was ${m.prev}`)
+            )
+          );
+        })
+      ),
+
+      // History
+      React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
+        React.createElement("p", {style:{fontSize:11,fontWeight:700,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase"}}, "History"),
+        React.createElement("button", {style:{fontSize:13,fontWeight:600,color:DS.accent,background:"none",border:"none",cursor:"pointer"}}, "Export")
+      ),
+      ...[
+        {date:"Mar 22, 2026",weight:"80.5",fat:"16.1%",latest:true},
+        {date:"Mar 8, 2026", weight:"81.4",fat:"16.6%",latest:false},
+        {date:"Feb 22, 2026",weight:"82.3",fat:"17.3%",latest:false},
+        {date:"Feb 8, 2026", weight:"82.9",fat:"17.6%",latest:false},
+      ].map((e,i) => React.createElement("div", {key:i, style:{
+        background:DS.card,borderRadius:14,border:`1px solid ${DS.border}`,
+        padding:"14px 16px",marginBottom:8,
+        display:"flex",alignItems:"center",justifyContent:"space-between",
+      }},
+        React.createElement("div", {},
+          React.createElement("p", {style:{fontSize:13,fontWeight:600,color:DS.fg,marginBottom:2}}, e.date),
+          React.createElement("p", {style:{fontSize:11,color:DS.fg2}}, `Weight ${e.weight} kg · Fat ${e.fat}`)
+        ),
+        React.createElement("div", {style:{display:"flex",alignItems:"center",gap:8}},
+          e.latest && React.createElement("span", {style:{
+            fontSize:10,fontWeight:700,color:DS.accent,
+            background:DS.accentDim,borderRadius:12,padding:"3px 8px"
+          }}, "Latest"),
+          React.createElement("span", {style:{color:DS.fg3,fontSize:14}}, "›")
+        )
+      ))
+    ),
+    React.createElement(BottomNav)
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SCREEN 42 — Add Measurement Modal
+// ══════════════════════════════════════════════════
+function S42() {
+  return React.createElement(Phone, {label:"Add Measurement Modal", screenNum:42},
+    // Dimmed background
+    React.createElement("div", {style:{flex:1,background:"rgba(8,14,14,0.65)",backdropFilter:"blur(6px)",display:"flex",flexDirection:"column",justifyContent:"flex-end"}},
+      // Bottom sheet
+      React.createElement("div", {style:{
+        background:DS.card, borderRadius:"24px 24px 0 0",
+        border:`1px solid ${DS.border}`, borderBottom:"none",
+        boxShadow:"0 -20px 60px rgba(0,0,0,0.5)",
+        maxHeight:740, overflowY:"auto",
+      }},
+        // Handle
+        React.createElement("div", {style:{display:"flex",justifyContent:"center",padding:"12px 0 6px"}},
+          React.createElement("div", {style:{width:36,height:4,borderRadius:2,background:DS.border}})
+        ),
+        // Header
+        React.createElement("div", {style:{padding:"8px 20px 16px",display:"flex",alignItems:"flex-start",justifyContent:"space-between"}},
+          React.createElement("div", {},
+            React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:6}}, "Measurements"),
+            React.createElement("h2", {style:{fontSize:22,fontWeight:700,color:DS.fg,letterSpacing:-0.6,margin:0}}, "Log Entry"),
+            React.createElement("p", {style:{fontSize:13,color:DS.fg2,marginTop:4}}, "March 22, 2026 · Today")
+          ),
+          React.createElement("div", {style:{
+            width:32,height:32,borderRadius:"50%",background:DS.border,
+            display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:DS.fg2,
+          }}, "✕")
+        ),
+        // Form
+        React.createElement("div", {style:{padding:"0 20px 28px"}},
+          // Date
+          React.createElement("div", {style:{marginBottom:20}},
+            React.createElement("label", {style:{display:"block",fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}, "Date"),
+            React.createElement("div", {style:{
+              background:"#0A1616",border:`1.5px solid ${DS.accent}`,borderRadius:12,
+              padding:"12px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"
+            }},
+              React.createElement("span", {style:{fontSize:15,fontWeight:500,color:DS.fg}}, "Mar 22, 2026"),
+              React.createElement("span", {style:{color:DS.fg3,fontSize:14}}, "⌄")
+            )
+          ),
+          // Weight + Fat
+          React.createElement("div", {style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20}},
+            [{label:"Weight",unit:"kg",value:"80.5",accent:true},{label:"Body Fat",unit:"%",value:"16.1",accent:false}].map(f =>
+              React.createElement("div", {key:f.label},
+                React.createElement("label", {style:{display:"block",fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}, f.label),
+                React.createElement("div", {style:{
+                  background:"#0A1616",
+                  border:`1.5px solid ${f.accent ? DS.accent : DS.border}`,
+                  borderRadius:12,padding:"12px 14px",
+                  display:"flex",alignItems:"center",justifyContent:"space-between"
+                }},
+                  React.createElement("span", {style:{fontSize:18,fontWeight:700,color:DS.fg,fontVariantNumeric:"tabular-nums"}}, f.value),
+                  React.createElement("span", {style:{fontSize:12,color:DS.fg3}}, f.unit)
+                )
+              )
+            )
+          ),
+          // Circumferences
+          React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}, "Circumferences"),
+          React.createElement("div", {style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}},
+            [
+              {label:"Waist",unit:"cm",value:"83.2"},
+              {label:"Chest",unit:"cm",value:"101.4"},
+              {label:"Arms", unit:"cm",value:"38.2"},
+              {label:"Thighs",unit:"cm",value:"59.6"},
+              {label:"Hips", unit:"cm",value:"96.2"},
+              {label:"Neck", unit:"cm",value:"38.5"},
+            ].map(f => React.createElement("div", {key:f.label},
+              React.createElement("label", {style:{display:"block",fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:6}}, f.label),
+              React.createElement("div", {style:{
+                background:"#0A1616",border:`1.5px solid ${DS.border}`,borderRadius:12,
+                padding:"11px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"
+              }},
+                React.createElement("span", {style:{fontSize:15,fontWeight:600,color:DS.fg,fontVariantNumeric:"tabular-nums"}}, f.value),
+                React.createElement("span", {style:{fontSize:11,color:DS.fg3}}, f.unit)
+              )
+            ))
+          ),
+          // Notes
+          React.createElement("div", {style:{marginBottom:24}},
+            React.createElement("label", {style:{display:"block",fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}, "Notes (optional)"),
+            React.createElement("div", {style:{
+              background:"#0A1616",border:`1.5px solid ${DS.border}`,borderRadius:12,
+              padding:"12px 14px",minHeight:64,
+            }},
+              React.createElement("span", {style:{fontSize:13,color:DS.fg3}}, "Morning, fasted…")
+            )
+          ),
+          // Save
+          React.createElement("button", {style:{
+            width:"100%",padding:15,borderRadius:14,
+            background:DS.accent,color:"#fff",border:"none",
+            fontSize:15,fontWeight:700,cursor:"pointer",letterSpacing:0.2,
+          }}, "Save Entry")
+        )
+      )
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SCREEN 43 — Photos Tab
+// ══════════════════════════════════════════════════
+function S43() {
+  const CHECKPOINTS = [
+    {date:"March 22, 2026",today:true, filled:4, poses:[true,true,true,true]},
+    {date:"March 8, 2026", today:false,filled:4, poses:[true,true,true,true]},
+    {date:"Feb 22, 2026",  today:false,filled:3, poses:[true,true,true,false]},
+  ];
+  return React.createElement(Phone, {label:"Progress Photos Tab", screenNum:43},
+    React.createElement("div", {style:{padding:"12px 20px 0",display:"flex",alignItems:"flex-end",justifyContent:"space-between"}},
+      React.createElement("div", {},
+        React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:6}}, "Body"),
+        React.createElement("h1", {style:{fontSize:28,fontWeight:700,color:DS.fg,letterSpacing:-0.8,lineHeight:1.15,marginBottom:12}}, "Photos")
+      ),
+      React.createElement("button", {style:{
+        width:36,height:36,borderRadius:10,background:DS.accent,
+        display:"flex",alignItems:"center",justifyContent:"center",
+        border:"none",cursor:"pointer",fontSize:18,color:"#fff",marginBottom:12,
+      }}, "+")
+    ),
+    React.createElement(TabBar, {active:"photos"}),
+    React.createElement("div", {style:{flex:1,padding:"20px",overflowY:"auto"}},
+
+      // Stats
+      React.createElement("div", {style:{display:"flex",gap:10,marginBottom:20}},
+        React.createElement("div", {style:{flex:1,background:DS.card,borderRadius:14,border:`1px solid ${DS.border}`,padding:14}},
+          React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6}}, "Checkpoints"),
+          React.createElement("p", {style:{fontSize:24,fontWeight:700,color:DS.fg,letterSpacing:-0.8}}, "3"),
+          React.createElement("p", {style:{fontSize:11,color:DS.fg2,marginTop:3}}, "Since January")
+        ),
+        React.createElement("div", {style:{flex:1,background:DS.card,borderRadius:14,border:`1px solid ${DS.border}`,padding:14}},
+          React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6}}, "Total Photos"),
+          React.createElement("p", {style:{fontSize:24,fontWeight:700,color:DS.fg,letterSpacing:-0.8}}, "11"),
+          React.createElement("p", {style:{fontSize:11,color:DS.fg2,marginTop:3}}, "4 poses / checkpoint")
+        ),
+        // Compare
+        React.createElement("div", {style:{
+          background:DS.accentDim,borderRadius:14,border:`1px solid ${DS.accentMid}`,
+          padding:"14px 12px",display:"flex",flexDirection:"column",
+          alignItems:"center",justifyContent:"center",gap:4,
+          cursor:"pointer",flexShrink:0,width:72,
+        }},
+          React.createElement("span", {style:{fontSize:18}}, "⇄"),
+          React.createElement("p", {style:{fontSize:10,fontWeight:700,color:DS.accent,textAlign:"center",lineHeight:1.2}}, "Compare")
+        )
+      ),
+
+      // Checkpoint cards
+      ...CHECKPOINTS.map((cp,ci) => React.createElement("div", {key:ci, style:{
+        background:DS.card,borderRadius:16,border:`1px solid ${DS.border}`,
+        marginBottom:12,overflow:"hidden"
+      }},
+        // Header
+        React.createElement("div", {style:{
+          padding:"14px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",
+          borderBottom:`1px solid ${DS.border}`
+        }},
+          React.createElement("div", {style:{display:"flex",alignItems:"center",gap:10}},
+            React.createElement("div", {style:{
+              width:36,height:36,borderRadius:10,background:DS.accentDim,
+              display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,
+            }}, "📷"),
+            React.createElement("div", {},
+              React.createElement("div", {style:{display:"flex",alignItems:"center",gap:6}},
+                React.createElement("p", {style:{fontSize:13,fontWeight:600,color:DS.fg}}, cp.date),
+                cp.today && React.createElement("span", {style:{
+                  fontSize:10,fontWeight:700,color:DS.accent,background:DS.accentDim,borderRadius:10,padding:"2px 8px"
+                }}, "Today")
+              ),
+              React.createElement("p", {style:{fontSize:11,color:DS.fg2}}, `${cp.filled} of 4 poses recorded`)
+            )
+          ),
+          React.createElement("div", {style:{display:"flex",alignItems:"center",gap:8}},
+            cp.filled === 4 && React.createElement("div", {style:{
+              width:22,height:22,borderRadius:"50%",
+              background:`${DS.ok}20`,display:"flex",alignItems:"center",justifyContent:"center",
+              fontSize:11,color:DS.ok
+            }}, "✓"),
+            React.createElement("span", {style:{color:DS.fg3,fontSize:16}}, "⌄")
+          )
+        ),
+        // Photos grid
+        React.createElement("div", {style:{padding:"14px 16px",display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}},
+          ["Front","Side","Back","Free"].map((pose,pi) => React.createElement("div", {key:pose, style:{aspectRatio:"3/4",position:"relative"}},
+            React.createElement("div", {style:{
+              height:"100%",borderRadius:10,
+              background: cp.poses[pi]
+                ? "linear-gradient(160deg,#1C3030 0%,#0E1E1E 100%)"
+                : "#0A1414",
+              border:`1px solid ${DS.border}`,
+              display:"flex",flexDirection:"column",
+              alignItems:"center",justifyContent:"center",
+              overflow:"hidden",position:"relative",cursor:"pointer",
+            }},
+              cp.poses[pi] ? React.createElement(React.Fragment, {},
+                React.createElement("div", {style:{position:"absolute",inset:0,background:"linear-gradient(160deg,#1A3232 0%,#061010 100%)"}}),
+                React.createElement("div", {style:{position:"absolute",bottom:0,left:0,right:0,padding:"6px 4px 4px",background:"linear-gradient(transparent,rgba(0,0,0,0.65))"}}
+                  ,React.createElement("p", {style:{fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.75)",textAlign:"center"}}, pose)
+                ),
+                React.createElement("div", {style:{position:"absolute",top:4,right:4,width:16,height:16,borderRadius:4,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"rgba(255,255,255,0.7)"}}, "⊕")
+              ) : React.createElement(React.Fragment, {},
+                React.createElement("span", {style:{fontSize:14,opacity:0.3}}, "📷"),
+                React.createElement("p", {style:{fontSize:8,color:DS.fg3,marginTop:4,fontWeight:500,opacity:0.5}}, pose),
+                React.createElement("div", {style:{position:"absolute",bottom:6,width:16,height:16,borderRadius:"50%",border:`1.5px dashed ${DS.fg3}`,display:"flex",alignItems:"center",justifyContent:"center",opacity:0.3,fontSize:10,color:DS.fg3}}, "+")
+              )
+            )
+          ))
+        )
+      )),
+
+      // Pose guide
+      React.createElement("div", {style:{background:DS.card,borderRadius:14,border:`1px solid ${DS.border}`,padding:"14px 16px",marginBottom:8}},
+        React.createElement("p", {style:{fontSize:11,fontWeight:700,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}, "Pose Guide"),
+        ...[
+          {n:1,label:"Front",hint:"Arms to sides, looking at camera"},
+          {n:2,label:"Side",hint:"Right profile, arms relaxed"},
+          {n:3,label:"Back",hint:"Back to camera, arms at sides"},
+          {n:4,label:"Free Pose",hint:"Pose of your choice"},
+        ].map(p => React.createElement("div", {key:p.n, style:{display:"flex",alignItems:"center",gap:10,marginBottom:10}},
+          React.createElement("div", {style:{width:22,height:22,borderRadius:"50%",background:DS.accentDim,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},
+            React.createElement("span", {style:{fontSize:10,fontWeight:700,color:DS.accent}}, p.n)
+          ),
+          React.createElement("div", {},
+            React.createElement("span", {style:{fontSize:12,fontWeight:600,color:DS.fg}}, p.label),
+            React.createElement("span", {style:{fontSize:11,color:DS.fg2}}, ` — ${p.hint}`)
+          )
+        ))
+      )
+    ),
+    React.createElement(BottomNav)
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SCREEN 44 — Full-Screen Viewer
+// ══════════════════════════════════════════════════
+function S44() {
+  return React.createElement(Phone, {label:"Full-Screen Viewer", screenNum:44},
+    React.createElement("div", {style:{flex:1,background:"#040A0A",display:"flex",flexDirection:"column",position:"relative"}},
+      // Top overlay nav
+      React.createElement("div", {style:{
+        position:"absolute",top:0,left:0,right:0,
+        background:"linear-gradient(180deg,rgba(4,10,10,0.9) 0%,transparent 100%)",
+        padding:"12px 20px 48px",
+        display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:10,
+      }},
+        React.createElement("button", {style:{display:"flex",alignItems:"center",gap:6,color:"rgba(255,255,255,0.9)",fontSize:15,fontWeight:500,background:"none",border:"none",cursor:"pointer"}},
+          "‹ Back"
+        ),
+        React.createElement("div", {style:{display:"flex",alignItems:"center",gap:8}},
+          React.createElement("button", {style:{
+            display:"flex",alignItems:"center",gap:5,
+            background:DS.accentMid,border:`1px solid ${DS.accent}`,
+            borderRadius:20,padding:"6px 12px",
+            color:DS.accent,fontSize:12,fontWeight:700,cursor:"pointer",
+          }}, "⇄ Compare"),
+          React.createElement("button", {style:{
+            width:32,height:32,borderRadius:"50%",background:"rgba(255,255,255,0.1)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            border:"none",cursor:"pointer",fontSize:16,color:"rgba(255,255,255,0.8)"
+          }}, "…")
+        )
+      ),
+
+      // Side-by-side photos
+      React.createElement("div", {style:{flex:1,display:"flex",gap:2,paddingTop:0}},
+        // Before
+        React.createElement("div", {style:{flex:1,position:"relative",background:"linear-gradient(160deg,#0E2020 0%,#060E0E 100%)"}},
+          React.createElement("div", {style:{position:"absolute",bottom:0,left:0,right:0,padding:"60px 14px 14px",background:"linear-gradient(transparent,rgba(0,0,0,0.85))"}},
+            React.createElement("p", {style:{fontSize:11,fontWeight:700,color:"rgba(255,255,255,0.45)",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:3}}, "Before"),
+            React.createElement("p", {style:{fontSize:13,fontWeight:600,color:"rgba(255,255,255,0.9)"}}, "Jan 6, 2026"),
+            React.createElement("p", {style:{fontSize:12,color:"rgba(255,255,255,0.45)"}}, "84.2 kg · 18.4%")
+          ),
+          React.createElement("div", {style:{position:"absolute",inset:"15% 20%",background:"radial-gradient(ellipse at 50% 40%,rgba(74,155,155,0.05) 0%,transparent 70%)"}})
+        ),
+        // After
+        React.createElement("div", {style:{flex:1,position:"relative",background:"linear-gradient(160deg,#122525 0%,#060E0E 100%)"}},
+          React.createElement("div", {style:{position:"absolute",bottom:0,left:0,right:0,padding:"60px 14px 14px",background:"linear-gradient(transparent,rgba(0,0,0,0.85))"}},
+            React.createElement("p", {style:{fontSize:11,fontWeight:700,color:DS.accent,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:3}}, "After"),
+            React.createElement("p", {style:{fontSize:13,fontWeight:600,color:"rgba(255,255,255,0.9)"}}, "Mar 22, 2026"),
+            React.createElement("p", {style:{fontSize:12,color:DS.accent}}, "80.5 kg · 16.1%")
+          ),
+          React.createElement("div", {style:{position:"absolute",inset:"15% 20%",background:"radial-gradient(ellipse at 50% 40%,rgba(74,155,155,0.10) 0%,transparent 70%)"}})
+        )
+      ),
+
+      // Center divider line
+      React.createElement("div", {style:{
+        position:"absolute",top:60,bottom:200,left:"50%",
+        transform:"translateX(-50%)",width:2,
+        background:`linear-gradient(180deg,transparent,${DS.accent},transparent)`,
+        zIndex:5
+      }}),
+
+      // Bottom panel
+      React.createElement("div", {style:{
+        background:"rgba(8,14,14,0.97)",backdropFilter:"blur(20px)",
+        borderTop:`1px solid ${DS.border}`,padding:"16px 20px 24px",
+      }},
+        // Pose selector
+        React.createElement("div", {style:{display:"flex",gap:8,marginBottom:16,justifyContent:"center"}},
+          ["Front","Side","Back","Free"].map((p,i) => React.createElement("button", {key:p, style:{
+            padding:"6px 14px",borderRadius:20,
+            background: i===0 ? DS.accent : DS.card,
+            border:`1px solid ${i===0 ? DS.accent : DS.border}`,
+            color: i===0 ? "#fff" : DS.fg2,
+            fontSize:12,fontWeight:i===0?700:500,cursor:"pointer",
+          }}, p))
+        ),
+        // Δ stats
+        React.createElement("div", {style:{display:"flex",gap:12,marginBottom:16}},
+          [
+            {label:"Weight",delta:"−3.7 kg",from:"84.2 kg",to:"80.5 kg"},
+            {label:"Body Fat",delta:"−2.3%",from:"18.4%",to:"16.1%"},
+            {label:"Waist",delta:"−2.8 cm",from:"86 cm",to:"83.2 cm"},
+          ].map(s => React.createElement("div", {key:s.label, style:{
+            flex:1,background:DS.card,borderRadius:10,padding:"10px",border:`1px solid ${DS.border}`
+          }},
+            React.createElement("p", {style:{fontSize:10,color:DS.fg3,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:"0.1em"}}, s.label),
+            React.createElement("p", {style:{fontSize:13,fontWeight:700,color:DS.ok,marginBottom:2}}, s.delta),
+            React.createElement("p", {style:{fontSize:10,color:DS.fg2}}, `${s.from} → ${s.to}`)
+          ))
+        ),
+        // Checkpoint nav
+        React.createElement("div", {style:{display:"flex",alignItems:"center",gap:8}},
+          React.createElement("button", {style:{width:34,height:34,borderRadius:"50%",border:`1px solid ${DS.border}`,background:DS.card,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:DS.fg2}}, "‹"),
+          React.createElement("div", {style:{flex:1,display:"flex",gap:6,overflowX:"auto"}},
+            ["Jan 6","Mar 8","Mar 22"].map((d,i) => React.createElement("button", {key:d, style:{
+              flexShrink:0,padding:"6px 12px",
+              background: i===2 ? DS.accentMid : "transparent",
+              border:`1px solid ${i===2 ? DS.accent : DS.border}`,
+              borderRadius:8,color:i===2 ? DS.accent : DS.fg2,
+              fontSize:11,fontWeight:i===2?700:500,cursor:"pointer",
+            }}, d))
+          ),
+          React.createElement("button", {style:{width:34,height:34,borderRadius:"50%",border:`1px solid ${DS.border}`,background:DS.card,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:14,color:DS.fg2}}, "›")
+        )
+      )
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// SCREEN 45 — Upload State
+// ══════════════════════════════════════════════════
+function S45() {
+  const poses = [
+    {label:"Front",hint:"Arms to sides",state:"done"},
+    {label:"Side", hint:"Right profile", state:"uploading"},
+    {label:"Back", hint:"Back to camera",state:"empty"},
+    {label:"Free", hint:"Your choice",   state:"empty"},
+  ];
+  return React.createElement(Phone, {label:"Upload State", screenNum:45},
+    // Nav
+    React.createElement("div", {style:{padding:"12px 20px 0"}},
+      React.createElement("button", {style:{display:"flex",alignItems:"center",gap:6,color:DS.accent,fontSize:15,fontWeight:500,marginBottom:6,background:"none",border:"none",cursor:"pointer"}},
+        "‹ Photos"
+      ),
+      React.createElement("h1", {style:{fontSize:26,fontWeight:700,color:DS.fg,letterSpacing:-0.7,lineHeight:1.15,marginBottom:16}}, "New Checkpoint")
+    ),
+
+    React.createElement("div", {style:{flex:1,padding:"4px 20px 20px",overflowY:"auto"}},
+      // Date row
+      React.createElement("div", {style:{display:"flex",alignItems:"center",gap:8,marginBottom:20}},
+        React.createElement("div", {style:{
+          flex:1,background:DS.card,borderRadius:12,border:`1px solid ${DS.border}`,
+          padding:"11px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"
+        }},
+          React.createElement("span", {style:{fontSize:14,fontWeight:600,color:DS.fg}}, "March 22, 2026"),
+          React.createElement("span", {style:{color:DS.fg3,fontSize:14}}, "⌄")
+        ),
+        React.createElement("span", {style:{
+          fontSize:11,fontWeight:700,color:DS.accent,
+          background:DS.accentDim,borderRadius:10,padding:"5px 10px",flexShrink:0
+        }}, "Today")
+      ),
+
+      React.createElement("p", {style:{fontSize:12,color:DS.fg2,marginBottom:16,lineHeight:1.55}},
+        "Record each pose in consistent lighting for accurate comparisons over time."
+      ),
+
+      // 2×2 photo grid
+      React.createElement("div", {style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24}},
+        poses.map(pose => React.createElement("div", {key:pose.label},
+          React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}},
+            React.createElement("p", {style:{fontSize:11,fontWeight:700,color:DS.fg3,letterSpacing:"0.12em",textTransform:"uppercase"}}, pose.label),
+            pose.state==="done" && React.createElement("span", {style:{color:DS.ok,fontSize:13}}, "✓"),
+            pose.state==="uploading" && React.createElement("span", {style:{color:DS.accent,fontSize:11,fontWeight:600}}, "↑")
+          ),
+          React.createElement("div", {style:{
+            aspectRatio:"3/4",borderRadius:16,
+            border:`1.5px ${pose.state==="uploading" ? "solid" : pose.state==="done" ? "solid" : "dashed"} ${
+              pose.state==="uploading" ? DS.accent :
+              pose.state==="done" ? `${DS.ok}70` :
+              DS.border}`,
+            background: pose.state==="done"
+              ? "linear-gradient(160deg,#1A3030 0%,#0C1A1A 100%)"
+              : pose.state==="uploading"
+              ? "linear-gradient(160deg,#0D1E1E 0%,#090F0F 100%)"
+              : "#0A1414",
+            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+            position:"relative",overflow:"hidden",cursor:"pointer",
+          }},
+            pose.state==="done" && React.createElement(React.Fragment, {},
+              React.createElement("div", {style:{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 35%,rgba(74,155,155,0.08) 0%,transparent 70%)"}}),
+              React.createElement("div", {style:{position:"absolute",top:8,right:8,width:22,height:22,borderRadius:"50%",background:`${DS.ok}25`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:DS.ok}}, "✓"),
+              React.createElement("div", {style:{position:"absolute",bottom:0,left:0,right:0,padding:"28px 8px 8px",background:"linear-gradient(transparent,rgba(0,0,0,0.65))"}},
+                React.createElement("p", {style:{fontSize:10,fontWeight:600,color:"rgba(255,255,255,0.75)",textAlign:"center"}}, "Saved")
+              )
+            ),
+            pose.state==="uploading" && React.createElement(React.Fragment, {},
+              // SVG progress ring
+              React.createElement("div", {style:{marginBottom:8}},
+                React.createElement("svg", {viewBox:"0 0 44 44",style:{width:44,height:44}},
+                  React.createElement("circle", {cx:22,cy:22,r:18,fill:"none",stroke:DS.border,strokeWidth:3}),
+                  React.createElement("circle", {cx:22,cy:22,r:18,fill:"none",stroke:DS.accent,strokeWidth:3,
+                    strokeDasharray:113,strokeDashoffset:40,strokeLinecap:"round",
+                    transform:"rotate(-90 22 22)"})
+                ),
+                React.createElement("div", {style:{
+                  position:"absolute",width:44,height:44,
+                  top:"calc(50% - 36px)",left:"calc(50% - 22px)",
+                  display:"flex",alignItems:"center",justifyContent:"center"
+                }},
+                  React.createElement("span", {style:{fontSize:11,fontWeight:700,color:DS.accent}}, "65%")
+                )
+              ),
+              React.createElement("p", {style:{fontSize:11,fontWeight:600,color:DS.accent}}, "Uploading…"),
+              React.createElement("p", {style:{fontSize:10,color:DS.fg3,marginTop:2}}, "3.2 MB"),
+              React.createElement("div", {style:{position:"absolute",bottom:0,left:0,right:0,height:3,background:DS.border}},
+                React.createElement("div", {style:{height:"100%",width:"65%",background:DS.accent,borderRadius:1.5}})
+              )
+            ),
+            pose.state==="empty" && React.createElement(React.Fragment, {},
+              React.createElement("div", {style:{
+                width:40,height:40,borderRadius:"50%",
+                border:`1.5px dashed ${DS.fg3}`,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                marginBottom:8,opacity:0.35,fontSize:18,color:DS.fg3,
+              }}, "+"),
+              React.createElement("p", {style:{fontSize:12,fontWeight:500,color:DS.fg3,opacity:0.45}}, "Tap to add"),
+              React.createElement("p", {style:{fontSize:10,color:DS.fg3,opacity:0.3,marginTop:4}}, pose.hint)
+            )
+          )
+        ))
+      ),
+
+      // Progress summary
+      React.createElement("div", {style:{background:DS.card,borderRadius:14,border:`1px solid ${DS.border}`,padding:"14px 16px",marginBottom:20}},
+        React.createElement("div", {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}},
+          React.createElement("p", {style:{fontSize:13,fontWeight:600,color:DS.fg}}, "Checkpoint progress"),
+          React.createElement("p", {style:{fontSize:13,fontWeight:700,color:DS.accent}}, "2 / 4")
+        ),
+        React.createElement("div", {style:{height:6,background:DS.border,borderRadius:3,overflow:"hidden"}},
+          React.createElement("div", {style:{height:"100%",width:"50%",background:`linear-gradient(90deg,${DS.accent},${DS.ok})`,borderRadius:3}})
+        ),
+        React.createElement("p", {style:{fontSize:11,color:DS.fg2,marginTop:8}},
+          React.createElement("span", {style:{color:DS.ok,fontWeight:600}}, "Front"),
+          " saved · ",
+          React.createElement("span", {style:{color:DS.accent,fontWeight:600}}, "Side"),
+          " uploading · Back & Free pending"
+        )
+      ),
+
+      // Tips
+      React.createElement("div", {style:{
+        background:DS.accentDim,borderRadius:14,
+        border:`1px solid ${DS.accentMid}`,padding:"14px 16px"
+      }},
+        React.createElement("div", {style:{display:"flex",alignItems:"flex-start",gap:10}},
+          React.createElement("span", {style:{fontSize:15,flexShrink:0,marginTop:1}}, "📷"),
+          React.createElement("div", {},
+            React.createElement("p", {style:{fontSize:12,fontWeight:700,color:DS.accent,marginBottom:4}}, "Photo tips"),
+            React.createElement("p", {style:{fontSize:12,color:DS.fg2,lineHeight:1.55}},
+              "Shoot in natural light near a window. Keep the same distance and framing each session for accurate visual comparisons."
+            )
+          )
+        )
+      )
+    ),
+
+    // Sticky footer
+    React.createElement("div", {style:{padding:"14px 20px 24px",borderTop:`1px solid ${DS.border}`,background:DS.card2}},
+      React.createElement("button", {style:{
+        width:"100%",padding:15,borderRadius:14,
+        background:"rgba(74,155,155,0.25)",
+        border:`1px solid ${DS.accentMid}`,
+        color:DS.accent,fontSize:15,fontWeight:700,cursor:"pointer",
+      }}, "Save checkpoint (2/4)")
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════
+// MAIN SHOWCASE
+// ══════════════════════════════════════════════════
+function App() {
+  return React.createElement("div", {style:{
+    background:"#030808",
+    minHeight:"100vh",
+    fontFamily:"-apple-system,'SF Pro Display',system-ui,sans-serif",
+    WebkitFontSmoothing:"antialiased",
+  }},
+
+    // Header
+    React.createElement("div", {style:{textAlign:"center",padding:"56px 40px 48px"}},
+      React.createElement("p", {style:{fontSize:11,fontWeight:700,color:"#4A9B9B",letterSpacing:"0.22em",textTransform:"uppercase",marginBottom:14}},
+        "atlas.core · Design System"
+      ),
+      React.createElement("h1", {style:{
+        fontSize:40,fontWeight:800,color:"#fff",letterSpacing:-1.4,
+        lineHeight:1.1,margin:"0 0 12px",
+      }},
+        "Body & Progress Tracking"
+      ),
+      React.createElement("p", {style:{fontSize:16,color:"#8A9A9A",lineHeight:1.6}},
+        "Screens 39–45 · High-fidelity iOS mobile UI"
+      ),
+      React.createElement("div", {style:{
+        display:"flex",alignItems:"center",justifyContent:"center",gap:8,
+        marginTop:20,flexWrap:"wrap",
+      }},
+        ["39 Body Hub","40 Progress Tab","41 Measurements Tab","42 Add Modal",
+         "43 Photos Tab","44 Full-Screen Viewer","45 Upload State"].map(s =>
+          React.createElement("span", {key:s, style:{
+            fontSize:11,fontWeight:600,color:"#4A9B9B",
+            background:"rgba(74,155,155,0.1)",
+            border:"1px solid rgba(74,155,155,0.2)",
+            borderRadius:20,padding:"4px 12px",
+          }}, s)
+        )
+      )
+    ),
+
+    // Screens
+    React.createElement("div", {style:{
+      display:"flex",flexDirection:"column",alignItems:"center",
+      gap:96,paddingBottom:100,
+    }},
+      React.createElement(S39),
+      React.createElement(S40),
+      React.createElement(S41),
+      React.createElement(S42),
+      React.createElement(S43),
+      React.createElement(S44),
+      React.createElement(S45),
+    ),
+
+    // Footer
+    React.createElement("div", {style:{textAlign:"center",padding:"40px",borderTop:"1px solid #1E2C2C",marginTop:40}},
+      React.createElement("p", {style:{fontSize:12,color:"#333F3F"}}, "atlas.core · Body & Progress Tracking · Screens 39–45")
+    )
+  );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById("root"));
+</script>
+</body>
+</html>

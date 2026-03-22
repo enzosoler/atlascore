@@ -327,22 +327,26 @@ function ExportContent() {
 
       <SectionCard title="Período de exportação" subtitle="Escolha o intervalo que você quer baixar.">
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="text-sm text-zinc-700">
-            Data inicial
+          <label className="atlas-field px-4 py-3 text-sm text-[hsl(var(--fg-2))]">
+            <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+              Data inicial
+            </span>
             <input
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
-              className="mt-1 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 outline-none focus:border-zinc-400"
+              className="w-full bg-transparent text-[14px] font-medium text-[hsl(var(--fg))] outline-none"
             />
           </label>
-          <label className="text-sm text-zinc-700">
-            Data final
+          <label className="atlas-field px-4 py-3 text-sm text-[hsl(var(--fg-2))]">
+            <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+              Data final
+            </span>
             <input
               type="date"
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
-              className="mt-1 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 outline-none focus:border-zinc-400"
+              className="w-full bg-transparent text-[14px] font-medium text-[hsl(var(--fg))] outline-none"
             />
           </label>
         </div>
@@ -380,11 +384,13 @@ function ExportContent() {
               type="button"
               disabled={busy || invalidRange}
               onClick={exportJson}
-              className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="atlas-card rounded-[24px] p-5 text-left transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <FileJson className="h-6 w-6 text-zinc-700" strokeWidth={2} />
-              <p className="mt-4 text-base font-semibold text-zinc-950">Exportar JSON completo</p>
-              <p className="mt-2 text-sm text-zinc-600">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+                <FileJson className="h-5 w-5" strokeWidth={2} />
+              </div>
+              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Exportar JSON completo</p>
+              <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
                 Baixa todas as entidades principais filtradas pelo período escolhido.
               </p>
             </button>
@@ -393,11 +399,13 @@ function ExportContent() {
               type="button"
               disabled={busy || invalidRange}
               onClick={exportCsv}
-              className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="atlas-card rounded-[24px] p-5 text-left transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <FileSpreadsheet className="h-6 w-6 text-zinc-700" strokeWidth={2} />
-              <p className="mt-4 text-base font-semibold text-zinc-950">Exportar CSV</p>
-              <p className="mt-2 text-sm text-zinc-600">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+                <FileSpreadsheet className="h-5 w-5" strokeWidth={2} />
+              </div>
+              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Exportar CSV</p>
+              <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
                 Planilha com registros de treinos e refeições no período.
               </p>
             </button>
@@ -406,11 +414,13 @@ function ExportContent() {
               type="button"
               disabled={busy || invalidRange}
               onClick={exportPdf}
-              className="rounded-3xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="atlas-card rounded-[24px] p-5 text-left transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <FileText className="h-6 w-6 text-zinc-700" strokeWidth={2} />
-              <p className="mt-4 text-base font-semibold text-zinc-950">Exportar PDF</p>
-              <p className="mt-2 text-sm text-zinc-600">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+                <FileText className="h-5 w-5" strokeWidth={2} />
+              </div>
+              <p className="mt-4 text-base font-semibold tracking-[-0.025em] text-[hsl(var(--fg))]">Exportar PDF</p>
+              <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
                 Relatório formatado com resumo de treinos, nutrição, medições e protocolos.
               </p>
             </button>
@@ -429,14 +439,14 @@ function ExportContent() {
 
       <SectionCard title="O que entra no arquivo" subtitle="Escopo da exportação reconstruída.">
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <Calendar className="mb-3 h-5 w-5 text-zinc-700" strokeWidth={2} />
+          <div className="rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] p-4 text-sm text-[hsl(var(--fg-2))]">
+            <Calendar className="mb-3 h-5 w-5 text-[hsl(var(--brand))]" strokeWidth={2} />
             Refeições, check-ins, treinos e medições dentro do período selecionado.
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
+          <div className="rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] p-4 text-sm text-[hsl(var(--fg-2))]">
             Protocolos, exames laboratoriais e fotos de progresso também entram.
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
+          <div className="rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] p-4 text-sm text-[hsl(var(--fg-2))]">
             O arquivo inclui nome, email e o período usado na geração.
           </div>
         </div>

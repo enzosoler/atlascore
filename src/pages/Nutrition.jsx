@@ -496,7 +496,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
       {/* Date + Meal type */}
       <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
         <label className={FIELD_LABEL_CLASS}>
-          Data da refeição
+          Meal date
           <input
             type="date"
             value={formatDateKey(date)}
@@ -505,7 +505,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
           />
         </label>
         <label className={FIELD_LABEL_CLASS}>
-          Tipo de refeição
+          Meal type
           <select
             value={mealType}
             onChange={(e) => setMealType(e.target.value)}
@@ -522,21 +522,21 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
       {/* FatSecret food search */}
       <div className="mt-5">
-        <p className={FIELD_LABEL_CLASS}>Buscar alimento</p>
+        <p className={FIELD_LABEL_CLASS}>Search food</p>
         <div className="relative mt-2">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Ex: frango grelhado, arroz integral, banana..."
+            placeholder="E.g.: grilled chicken, brown rice, banana..."
             className={cn(INPUT_CLASS_NAME, 'pl-11')}
           />
         </div>
 
         {isSearching ? (
           <div className="mt-3 flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
-            <Loader2 className="h-4 w-4 animate-spin" /> Não achei no TACO, buscando na FatSecret...
+            <Loader2 className="h-4 w-4 animate-spin" /> Not found locally, searching FatSecret...
           </div>
         ) : null}
 
@@ -979,7 +979,7 @@ export default function NutritionPage() {
       }
     } catch (error) {
       console.error('[Nutrition] Failed to save meal to Supabase:', error);
-      setNotice({ tone: 'error', message: `Erro ao salvar refeição. Verifique sua conexão e tente novamente.` });
+      setNotice({ tone: 'error', message: `Error saving meal. Check your connection and try again.` });
       return;
     }
 

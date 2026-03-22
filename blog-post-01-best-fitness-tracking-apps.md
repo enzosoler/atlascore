@@ -17,7 +17,19 @@ Most apps fail at least two of these. Here's the list.
 
 ---
 
-## 1. MyFitnessPal — The OG That Still Dominates Nutrition Logging
+## 1. Atlas Core — The All-in-One Performance System
+
+Atlas Core was built specifically to solve the fragmentation problem. Instead of using one app for workouts, another for macros, a spreadsheet for measurements, and your camera roll for progress photos, everything lives in one system with shared context.
+
+**Where it excels:** workout logging + nutrition + supplement management + body measurements + progress photos + lab tracking + AI insights that connect all of it. It's the only app on this list where your food choices, training load, supplement protocol, and body composition history inform each other.
+
+**Where it's still growing:** it's a newer platform, which means the community features and integrations library are smaller than established players — but it's growing fast.
+
+**Best for:** serious athletes and enthusiasts who are tired of managing 4–6 apps and want their data to actually mean something together.
+
+---
+
+## 2. MyFitnessPal — The OG That Still Dominates Nutrition Logging
 
 MyFitnessPal has the largest food database on the planet. Full stop. If you need to log calories and macros with minimal friction, it's still one of the best tools available.
 
@@ -29,7 +41,7 @@ MyFitnessPal has the largest food database on the planet. Full stop. If you need
 
 ---
 
-## 2. Strong — The Gold Standard for Lifting Logs
+## 3. Strong — The Gold Standard for Lifting Logs
 
 If you're a lifter, Strong is probably the cleanest workout logging experience available on mobile. It's fast, it tracks volume, it remembers your history, and it visualizes PRs well.
 
@@ -41,7 +53,7 @@ If you're a lifter, Strong is probably the cleanest workout logging experience a
 
 ---
 
-## 3. Cronometer — The Micronutrient Nerd's Best Friend
+## 4. Cronometer — The Micronutrient Nerd's Best Friend
 
 Cronometer goes deeper on nutritional data than almost any other app. You can track vitamins, minerals, amino acids, and fatty acids with granular detail. For people managing specific deficiencies or following therapeutic diets, it's excellent.
 
@@ -53,7 +65,7 @@ Cronometer goes deeper on nutritional data than almost any other app. You can tr
 
 ---
 
-## 4. Whoop — The Recovery and Readiness Machine
+## 5. Whoop — The Recovery and Readiness Machine
 
 Whoop is a wearable-first platform built around HRV, sleep, and recovery. It answers one question really well: "Should I push hard today or recover?" For endurance athletes and people who take recovery seriously, it's excellent.
 
@@ -65,7 +77,7 @@ Whoop is a wearable-first platform built around HRV, sleep, and recovery. It ans
 
 ---
 
-## 5. MacroFactor — The Smartest Nutrition App for Serious Dieters
+## 6. MacroFactor — The Smartest Nutrition App for Serious Dieters
 
 MacroFactor is built differently. Instead of giving you a static calorie target, it adjusts your macros week-to-week based on your actual weight trend and how your body is responding. It's the closest thing to having a smart nutrition coach in your pocket.
 
@@ -77,7 +89,7 @@ MacroFactor is built differently. Instead of giving you a static calorie target,
 
 ---
 
-## 6. Garmin Connect / Apple Health — Your Data Aggregator
+## 7. Garmin Connect / Apple Health — Your Data Aggregator
 
 These platforms collect data from multiple sources — your watch, your scale, third-party apps — and attempt to show you a unified picture. They're useful as hubs, but they're aggregators, not trackers.
 
@@ -89,7 +101,7 @@ These platforms collect data from multiple sources — your watch, your scale, t
 
 ---
 
-## 7. Trainerize / TrueCoach — Built for Coaches, Not Athletes
+## 8. Trainerize / TrueCoach — Built for Coaches, Not Athletes
 
 These are coaching platforms where a trainer programs your workouts and monitors your adherence. They're excellent for the coach-client relationship.
 
@@ -98,18 +110,6 @@ These are coaching platforms where a trainer programs your workouts and monitors
 **Where they fall short:** if you're self-directed, you're paying for features you don't use. The athlete has no real agency in the data. Progress tracking is shallow. Nutrition is basic.
 
 **Best for:** people working with an online coach who uses one of these platforms.
-
----
-
-## 8. Atlas Core — The All-in-One Performance System
-
-Atlas Core was built specifically to solve the fragmentation problem. Instead of using one app for workouts, another for macros, a spreadsheet for measurements, and your camera roll for progress photos, everything lives in one system with shared context.
-
-**Where it excels:** workout logging + nutrition + supplement management + body measurements + progress photos + lab tracking + AI insights that connect all of it. It's the only app on this list where your food choices, training load, supplement protocol, and body composition history inform each other.
-
-**Where it's still growing:** it's a newer platform, which means the community features and integrations library are smaller than established players.
-
-**Best for:** serious athletes and enthusiasts who are tired of managing 4–6 apps and want their data to actually mean something together.
 
 ---
 
@@ -125,6 +125,7 @@ The apps that win long-term will be the ones that connect the dots, not just col
 
 ## Practical Takeaways
 
+- **Atlas Core** if you're serious about your performance and want everything — workouts, nutrition, measurements, photos, protocols, and AI insights — in one connected system.
 - **MyFitnessPal** if you only care about calorie/macro logging and want the biggest food database.
 - **Strong** if you need a dedicated, clean workout log and nothing else.
 - **Cronometer** if micronutrient precision is your priority (clinical or therapeutic use).
@@ -132,7 +133,6 @@ The apps that win long-term will be the ones that connect the dots, not just col
 - **MacroFactor** if you're in an active cut or bulk and want adaptive macro coaching.
 - **Apple Health/Garmin** as a passive aggregator alongside your main tools.
 - **Trainerize/TrueCoach** if you work with an online coach.
-- **Atlas Core** if you're serious about your performance and tired of managing a stack of apps that don't talk to each other.
 
 ---
 

@@ -1,26 +1,18 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ClipboardList, FlaskConical, Loader2, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { Link } from 'react-router-dom';
 import RoleGate from '@/components/rbac/RoleGate';
-import { Users, FlaskConical, ClipboardList, ChevronRight, Loader2 } from 'lucide-react';
-
-function KpiCard({ icon: Icon, label, value, color, href }) {
-  const inner = (
-    <div className="surface p-5 flex items-center gap-4 hover:border-[hsl(var(--brand)/0.3)] transition-colors">
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}18` }}>
-        <Icon className="w-5 h-5" style={{ color }} strokeWidth={2} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="kpi-sm">{value ?? '—'}</p>
-        <p className="t-caption">{label}</p>
-      </div>
-      {href && <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-2)/0.4)] shrink-0" strokeWidth={2} />}
-    </div>
-  );
-  return href ? <Link to={href}>{inner}</Link> : inner;
-}
+import { PageShell, SectionCard } from '@/components/shared/StablePage';
+import {
+  WorkspaceHeader,
+  WorkspaceMetricGrid,
+  WorkspaceMetricTile,
+  WorkspaceRosterSection,
+  WorkspacePersonRow,
+} from '@/components/shared/ProfessionalUI';
 
 export default function ClinicianDashboard() {
   const { user } = useAuth();
@@ -31,74 +23,107 @@ export default function ClinicianDashboard() {
     enabled: !!user?.email,
   });
 
-  const patientEmails = patients.map(p => p.patient_email);
+  const patientEmails = patients.map((patient) => patient.patient_email);
 
   const { data: exams = [] } = useQuery({
-    queryKey: ['clinician-exams'],
+    queryKey: ['clinician-exams', patientEmails],
     queryFn: () => base44.entities.LabExam.list('-exam_date', 50),
     enabled: patientEmails.length > 0,
   });
 
   const { data: protocols = [] } = useQuery({
-    queryKey: ['clinician-protocols'],
+    queryKey: ['clinician-protocols', patientEmails],
     queryFn: () => base44.entities.Protocol.list('-created_date', 100),
     enabled: patientEmails.length > 0,
   });
 
-  const patientExams = exams.filter(e => patientEmails.includes(e.created_by));
-  const patientProtocols = protocols.filter(p => patientEmails.includes(p.created_by) && p.active);
+  const patientExams = exams.filter((exam) => patientEmails.includes(exam.created_by));
+  const patientProtocols = protocols.filter(
+    (protocol) => patientEmails.includes(protocol.created_by) && protocol.active
+  );
 
   return (
     <RoleGate roles={['clinician', 'admin']}>
-      <div className="mx-auto max-w-4xl p-5 lg:p-8 space-y-6">
-        <div className="pb-5 border-b border-[hsl(var(--border-h))]">
-          <h1 className="t-headline">Dashboard Clínico</h1>
-          <p className="t-small mt-1">Visão geral dos seus pacientes</p>
-        </div>
+      <PageShell
+        title="Clinician"
+        subtitle="Authority-driven overview of patient status, lab context, and protocol compliance."
+        maxWidth="max-w-6xl"
+      >
+        <WorkspaceHeader
+          eyebrow="Clinician role"
+          title="Clinical dashboard"
+          subtitle="Keep patient status, abnormal markers, and active protocols legible and restrained."
+          icon={FlaskConical}
+          tone="success"
+          badge={`${patients.length} active patients`}
+        />
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12 gap-2 t-small text-[hsl(var(--fg-2))]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
-          </div>
+          <SectionCard title="Loading workspace" subtitle="Collecting patient, lab, and protocol records.">
+            <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading clinician workspace...
+            </div>
+          </SectionCard>
         ) : (
           <>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <KpiCard icon={Users} label="Pacientes ativos" value={patients.length} color="hsl(var(--ok))" href="/clinician/patients" />
-              <KpiCard icon={FlaskConical} label="Exames registrados" value={patientExams.length} color="hsl(var(--brand))" />
-              <KpiCard icon={ClipboardList} label="Protocolos ativos" value={patientProtocols.length} color="hsl(var(--brand-ai))" />
-            </div>
+            <WorkspaceMetricGrid className="xl:grid-cols-3">
+              <WorkspaceMetricTile
+                label="Active patients"
+                value={patients.length}
+                hint="Linked patients currently in your panel"
+                icon={Users}
+                tone="success"
+              />
+              <WorkspaceMetricTile
+                label="Lab records"
+                value={patientExams.length}
+                hint="Recent exams tied to your patient list"
+                icon={FlaskConical}
+                tone="brand"
+              />
+              <WorkspaceMetricTile
+                label="Active protocols"
+                value={patientProtocols.length}
+                hint="Current tracked protocol records"
+                icon={ClipboardList}
+                tone="warning"
+              />
+            </WorkspaceMetricGrid>
 
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="t-label">Pacientes recentes</p>
-                <Link to="/clinician/patients" className="t-caption text-[hsl(var(--brand))] hover:underline">Ver todos →</Link>
-              </div>
-              {patients.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-state-icon"><Users className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} /></div>
-                  <p className="t-subtitle mb-1">Nenhum paciente vinculado</p>
-                  <p className="t-caption">Adicione pacientes para acompanhá-los aqui.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {patients.slice(0, 5).map(p => (
-                    <Link key={p.id} to={`/clinician/patient/${p.patient_email}`} className="surface flex items-center gap-3 px-4 py-3 hover:border-[hsl(var(--ok)/0.2)] transition-colors">
-                      <div className="w-9 h-9 rounded-xl bg-[hsl(var(--ok)/0.1)] flex items-center justify-center font-bold text-[hsl(var(--ok))] text-[14px] shrink-0">
-                        {(p.patient_name || p.patient_email)?.[0]?.toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold truncate">{p.patient_name || p.patient_email}</p>
-                        <p className="t-caption truncate">{p.patient_email}</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-2)/0.4)] shrink-0" strokeWidth={2} />
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            <WorkspaceRosterSection
+              eyebrow="Patients"
+              title="Recent patient links"
+              subtitle="Jump directly into a patient profile to review measurements, photos, labs, and protocols."
+              action={
+                <Link
+                  to="/clinician/patients"
+                  className="text-[13px] font-semibold text-[hsl(var(--brand))]"
+                >
+                  View all
+                </Link>
+              }
+              emptyIcon={Users}
+              emptyTitle="No patients linked"
+              emptyDescription="Invite patients to start reviewing labs, body composition, and protocol compliance."
+            >
+              {patients.slice(0, 5).map((patient) => (
+                <WorkspacePersonRow
+                  key={patient.id}
+                  to={`/clinician/patient/${patient.patient_email}`}
+                  initial={(patient.patient_name || patient.patient_email)?.[0]?.toUpperCase() || 'P'}
+                  title={patient.patient_name || patient.patient_email}
+                  subtitle={patient.patient_email}
+                  meta="Clinical record available"
+                  badge="Active"
+                  badgeTone="success"
+                  accentTone="success"
+                />
+              ))}
+            </WorkspaceRosterSection>
           </>
         )}
-      </div>
+      </PageShell>
     </RoleGate>
   );
 }
