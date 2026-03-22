@@ -5,9 +5,9 @@ const serviceRoleKey = process.argv[3]
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('❌ Missing arguments!')
-  console.error('Usage: node grant_admin_simple.mjs <SUPABASE_URL> <SERVICE_ROLE_KEY>')
+  console.error('Usage: node scripts/admin/grant_admin_simple.mjs <SUPABASE_URL> <SERVICE_ROLE_KEY>')
   console.error('\nExample:')
-  console.error('  node grant_admin_simple.mjs "https://xrytqwdpjzgdomqebmfkk.supabase.co" "eyJhbGc..."')
+  console.error('  node scripts/admin/grant_admin_simple.mjs "https://xrytqwdpjzgdomqebmfkk.supabase.co" "eyJhbGc..."')
   process.exit(1)
 }
 
