@@ -7,19 +7,19 @@
     color-scheme: light;
 
     /* Semantic theme tokens */
-    --bg-app: 216 33% 98%;
-    --bg-surface: 216 33% 96%;
-    --bg-surface-2: 216 33% 94%;
+    --bg-app: 204 20% 96%;
+    --bg-surface: 204 18% 94.5%;
+    --bg-surface-2: 204 16% 92.5%;
     --bg-card-semantic: 0 0% 100%;
-    --bg-card-elevated: 0 0% 100%;
+    --bg-card-elevated: 204 24% 98.4%;
 
     --text-primary: 216 33% 3%;
-    --text-secondary: 216 20% 25%;
-    --text-muted: 216 15% 45%;
-    --text-subtle: 216 10% 65%;
+    --text-secondary: 204 11% 41%;
+    --text-muted: 204 10% 47%;
+    --text-subtle: 204 8% 63%;
 
-    --border-default: 216 15% 90%;
-    --border-strong: 216 15% 80%;
+    --border-default: 204 14% 87%;
+    --border-strong: 204 14% 78%;
 
     --accent-primary: 180 35% 45%;
     --accent-primary-hover: 180 35% 40%;
@@ -33,15 +33,15 @@
     /* Legacy / compatibility aliases */
     --tint: var(--accent-primary);
     --tint-hover: var(--accent-primary-hover);
-    --tint-soft: 214 30% 98%;
+    --tint-soft: 214 30% 97%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
     --sys-bg3: var(--bg-surface-2);
     --card: var(--bg-card-semantic);
     --card-elevated: var(--bg-card-elevated);
-    --glass-bg: rgba(244, 247, 251, 0.78);
-    --glass-border: rgba(20, 24, 33, 0.08);
+    --glass-bg: rgba(246, 249, 251, 0.88);
+    --glass-border: rgba(20, 24, 33, 0.1);
 
     --label: var(--text-primary);
     --label-secondary: var(--text-secondary);
@@ -50,8 +50,8 @@
 
     --separator-opaque: var(--border-default);
     --separator-strong: var(--border-strong);
-    --fill: 214 31% 95%;
-    --fill-secondary: 214 25% 92%;
+    --fill: 204 18% 93.5%;
+    --fill-secondary: 204 16% 90.5%;
 
     --sys-green: var(--status-success);
     --sys-orange: var(--status-warning);
@@ -85,11 +85,11 @@
     --r-pill: 999px;
 
     /* Shadows */
-    --shadow-xs: 0 1px 2px rgba(9, 14, 24, 0.05), 0 8px 18px rgba(9, 14, 24, 0.06);
-    --shadow-sm: 0 8px 18px rgba(9, 14, 24, 0.08), 0 18px 42px rgba(9, 14, 24, 0.1);
-    --shadow-md: 0 14px 32px rgba(9, 14, 24, 0.12), 0 28px 72px rgba(9, 14, 24, 0.14);
-    --shadow-lg: 0 18px 44px rgba(9, 14, 24, 0.16), 0 36px 96px rgba(9, 14, 24, 0.2);
-    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    --shadow-xs: 0 1px 2px rgba(9, 14, 24, 0.04), 0 4px 10px rgba(9, 14, 24, 0.04);
+    --shadow-sm: 0 4px 10px rgba(9, 14, 24, 0.06), 0 10px 24px rgba(9, 14, 24, 0.08);
+    --shadow-md: 0 8px 20px rgba(9, 14, 24, 0.08), 0 18px 42px rgba(9, 14, 24, 0.1);
+    --shadow-lg: 0 12px 28px rgba(9, 14, 24, 0.1), 0 24px 64px rgba(9, 14, 24, 0.12);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.76);
 
     /* Buttons */
     --button-primary-bg: var(--accent-primary);
@@ -499,11 +499,11 @@
   .card,
   .sys-card {
     background:
-      radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.08), transparent 30%),
+      radial-gradient(circle at top right, hsl(var(--accent-primary) / 0.06), transparent 30%),
       linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
-    border: 1px solid hsl(var(--separator-opaque) / 0.94);
+    border: 1px solid hsl(var(--separator-opaque) / 0.98);
     border-radius: var(--atlas-card-radius);
-    box-shadow: var(--shadow-sm), var(--shadow-inset), 0 0 0 1px hsl(var(--accent-primary) / 0.02);
+    box-shadow: var(--shadow-xs), var(--shadow-inset), 0 0 0 1px hsl(var(--accent-primary) / 0.015);
   }
 
   .atlas-card-muted {
@@ -583,10 +583,10 @@
 
   .atlas-page-header {
     background:
-      radial-gradient(ellipse 72% 62% at 50% 0%, hsl(var(--accent-primary) / 0.12), transparent 72%),
-      radial-gradient(circle at 92% 12%, hsl(var(--accent-secondary) / 0.08), transparent 26%),
+      radial-gradient(ellipse 72% 62% at 50% 0%, hsl(var(--accent-primary) / 0.15), transparent 72%),
+      radial-gradient(circle at 92% 12%, hsl(var(--accent-secondary) / 0.1), transparent 26%),
       linear-gradient(180deg, hsl(var(--card-elevated)) 0%, hsl(var(--card)) 100%);
-    border: 1px solid hsl(var(--separator-opaque) / 0.9);
+    border: 1px solid hsl(var(--separator-opaque) / 0.96);
     border-radius: var(--atlas-sheet-radius);
     box-shadow: var(--shadow-sm), var(--shadow-inset), 0 0 0 1px hsl(var(--accent-primary) / 0.03);
   }

@@ -5,7 +5,7 @@ const THEME_EXPLICIT_KEY = 'atlas-theme-explicit';
 const DEFAULT_THEME = 'dark';
 
 const ThemeContext = createContext({ theme: DEFAULT_THEME, setTheme: () => {} });
-const LIGHT_THEME_COLOR = '#F4F7FB';
+const LIGHT_THEME_COLOR = '#F3F5F6';
 const DARK_THEME_COLOR = '#080E0E';
 
 function getInitialTheme() {

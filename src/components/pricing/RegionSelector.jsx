@@ -66,7 +66,7 @@ export default function RegionSelector({ onRegionChange }) {
         className="relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-[hsl(var(--brand))] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--brand))]"
       >
         <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+          className={`absolute top-0.5 h-5 w-5 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] shadow-[var(--shadow-xs)] transition-transform duration-200 ${
             isBRL ? 'translate-x-5' : 'translate-x-0.5'
           }`}
         />
