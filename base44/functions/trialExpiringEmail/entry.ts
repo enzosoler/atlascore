@@ -1,7 +1,7 @@
 /**
- * trialExpiringEmail — cron job que roda DIARIAMENTE
- * Envia email 3 dias ANTES do trial expirar
- * Chamada via: create_automation com schedule_type=simple, repeat_unit=days, repeat_interval=1
+ * trialExpiringEmail - daily cron job
+ * Sends reminder email 3 days before a trial expires
+ * Called via create_automation with schedule_type=simple, repeat_unit=days, repeat_interval=1
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
@@ -32,24 +32,24 @@ Deno.serve(async (req) => {
     const emails = expiringSoon.map(sub =>
       base44.integrations.Core.SendEmail({
         to: sub.user_email,
-        subject: 'Seu trial do Atlas Core expira em 3 dias',
+        subject: 'Your Atlas Core trial ends in 3 days',
         body: `
-Olá,
+Hi,
 
-Seu trial do Atlas Core expira em 3 dias (${sub.trial_ends_at}).
+Your Atlas Core trial ends in 3 days (${sub.trial_ends_at}).
 
-Atualize agora para continuar usando:
-• Atlas AI
-• Geração de treino e dieta por IA
-• Exames laboratoriais
-• Fotos de progresso
-• E muito mais!
+Upgrade now to keep access to:
+- Atlas AI
+- AI workout and diet generation
+- Lab exam tracking
+- Progress photos
+- And more
 
-Acesse: https://atlascore.app/Pricing
+Upgrade here: https://atlascore.app/Pricing
 
-Qualquer dúvida, responda este email.
+If you have any questions, just reply to this email.
 
-Obrigado,
+Thanks,
 Atlas Core
         `.trim(),
         from_name: 'Atlas Core',

@@ -62,8 +62,8 @@ function SummaryTile({ label, value, hint, icon: Icon }) {
 export default function Protocols() {
   return (
     <SafePageBoundary
-      title="Protocolos"
-      subtitle="Gerencie medicamentos, hormônios, peptídeos, suplementos e outros compostos que você usa ou acompanha."
+      title="Protocols"
+      subtitle="Manage medications, hormones, peptides, supplements, and other compounds you use or monitor."
       maxWidth="max-w-6xl"
       fallbackDescription="The Protocols route stayed available in safe mode even though the main content failed."
     >
@@ -98,15 +98,15 @@ function ProtocolsContent() {
       setNotice({
         tone: 'success',
         message: variables.protocolId
-          ? 'Protocolo atualizado.'
-          : 'Protocolo adicionado.',
+          ? 'Protocol updated.'
+          : 'Protocol added.',
       });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
         message:
-          'Não foi possível salvar o protocolo. Tente novamente.',
+          'Could not save the protocol. Try again.',
       });
     },
   });
@@ -127,7 +127,7 @@ function ProtocolsContent() {
       setNotice({
         tone: 'warning',
         message:
-          'Não foi possível atualizar o status. Tente novamente.',
+          'Could not update the status. Try again.',
       });
     },
     onSettled: () => {
@@ -144,14 +144,14 @@ function ProtocolsContent() {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
       setNotice({
         tone: 'success',
-        message: 'Protocolo excluído.',
+        message: 'Protocol deleted.',
       });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
         message:
-          'Não foi possível excluir o protocolo. Tente novamente.',
+          'Could not delete the protocol. Try again.',
       });
     },
     onSettled: () => {
@@ -210,9 +210,9 @@ function ProtocolsContent() {
     };
 
     const successMessages = {
-      active: 'Protocolo reativado.',
-      paused: 'Protocolo pausado.',
-      finished: 'Protocolo marcado como finalizado.',
+      active: 'Protocol reactivated.',
+      paused: 'Protocol paused.',
+      finished: 'Protocol marked as finished.',
     };
 
     statusMutation.mutate({
@@ -226,8 +226,8 @@ function ProtocolsContent() {
   const handleDelete = (protocol) => {
     if (!protocol?.id) return;
 
-    const protocolLabel = protocol?.substance_name || protocol?.name || 'este protocolo';
-    const confirmed = window.confirm(`Excluir ${protocolLabel}?`);
+    const protocolLabel = protocol?.substance_name || protocol?.name || 'this protocol';
+    const confirmed = window.confirm(`Delete ${protocolLabel}?`);
 
     if (!confirmed) return;
 
@@ -239,7 +239,7 @@ function ProtocolsContent() {
 
   return (
     <PageShell
-      title="Protocolos"
+      title="Protocols"
       subtitle="A focused V1 workspace for current compounds, simple scheduling, status control, and visible adherence context without breaking the stable app shell."
       actions={
         <PrimaryButton
@@ -248,7 +248,7 @@ function ProtocolsContent() {
           className="inline-flex items-center gap-2"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
-          Adicionar protocolo
+          Add protocol
         </PrimaryButton>
       }
       maxWidth="max-w-6xl"
@@ -257,33 +257,33 @@ function ProtocolsContent() {
 
       {isLoading ? (
         <LoadingState
-          title="Carregando protocolos"
+          title="Loading protocols"
           description="The page is already open in safe mode while your current protocol items load."
         />
       ) : null}
 
       {!isLoading && hasLoadError ? (
         <ErrorState
-          title="Protocolos em modo seguro"
+          title="Protocols in safe mode"
           description="Existing protocol data did not fully load, but you can still open the page and create new items."
         />
       ) : null}
 
       <section className="grid gap-3 md:grid-cols-3">
         <SummaryTile
-          label="Ativo"
+          label="Active"
           value={groupedProtocols.active.length}
           hint="Current compounds still in rotation right now."
           icon={FlaskConical}
         />
         <SummaryTile
-          label="Pausado"
+          label="Paused"
           value={groupedProtocols.paused.length}
           hint="Items temporarily stopped but still being tracked."
           icon={PauseCircle}
         />
         <SummaryTile
-          label="Finalizado"
+          label="Finished"
           value={groupedProtocols.finished.length}
           hint="Completed cycles and protocols kept in history."
           icon={Clock3}
@@ -291,7 +291,7 @@ function ProtocolsContent() {
       </section>
 
       <SectionCard
-        title="Itens do protocolo atual"
+        title="Current protocol items"
         subtitle="Clean, status-driven tracking for the substances you are currently using or still monitoring."
         actions={
           <div className="flex flex-wrap gap-2">
@@ -312,7 +312,7 @@ function ProtocolsContent() {
                       : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'
                   }`}
                 >
-                  {({'all': 'Todos', 'active': 'Ativo', 'paused': 'Pausado', 'finished': 'Finalizado'}[option] || option)} ({count})
+                  {({'all': 'All', 'active': 'Active', 'paused': 'Paused', 'finished': 'Finished'}[option] || option)} ({count})
                 </button>
               );
             })}
@@ -339,15 +339,15 @@ function ProtocolsContent() {
 
         {!isLoading && !hasAnyProtocols ? (
           <EmptyState
-            title="Nenhum item no protocolo"
+            title="No protocol items yet"
             description={
               hasLoadError
-                ? 'A lista não pôde ser carregada. Você ainda pode adicionar novos protocolos.'
-                : 'Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto rastreado.'
+                ? 'The list could not be loaded, but you can still add new protocols.'
+                : 'Start with a medication, hormone, peptide, supplement, or another tracked compound.'
             }
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar protocolo
+                Add protocol
               </PrimaryButton>
             }
           />
@@ -359,7 +359,7 @@ function ProtocolsContent() {
             description="Try another status filter or add a new protocol item."
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Adicionar protocolo
+                Add protocol
               </PrimaryButton>
             }
           />
@@ -401,7 +401,7 @@ function ProtocolsContent() {
         <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[32px] border-zinc-200 bg-white p-0 shadow-[0_28px_90px_rgba(15,23,42,0.18)] sm:max-w-3xl">
           <DialogHeader className="border-b border-zinc-200 px-6 pb-5 pt-6 text-left">
             <DialogTitle className="text-[28px] font-semibold tracking-[-0.04em] text-zinc-950">
-              {editingProtocol ? 'Editar protocolo' : 'Adicionar protocolo'}
+              {editingProtocol ? 'Edit protocol' : 'Add protocol'}
             </DialogTitle>
             <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
               Capture the core details that make this protocol useful right away: substance,

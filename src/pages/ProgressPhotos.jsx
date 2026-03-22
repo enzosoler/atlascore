@@ -35,7 +35,7 @@ import {
 } from '@/services/bodyProgressService';
 
 // ─────────────────────────────────────────────────────────────────
-// Poses padrão para acompanhamento corporal
+// Standard poses for physique tracking
 // ─────────────────────────────────────────────────────────────────
 
 const POSES = [
@@ -46,7 +46,7 @@ const POSES = [
 ];
 
 // ─────────────────────────────────────────────────────────────────
-// Formata data legível
+// Formats a readable date label
 // ─────────────────────────────────────────────────────────────────
 
 function formatCheckpointDate(dateStr) {
@@ -57,7 +57,7 @@ function formatCheckpointDate(dateStr) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Slot de pose individual
+// Individual pose slot
 // ─────────────────────────────────────────────────────────────────
 
 function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
@@ -65,12 +65,12 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Rótulo da pose */}
+      {/* Pose label */}
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
         {pose.label}
       </p>
 
-      {/* Área da foto */}
+      {/* Photo area */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)]">
         {photo?.photo_url ? (
           <>
@@ -79,7 +79,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
               alt={pose.label}
               className="h-full w-full object-cover"
             />
-            {/* Overlay com ações */}
+            {/* Action overlay */}
             <div className="absolute inset-0 flex flex-col items-end justify-start gap-2 bg-gradient-to-b from-black/30 to-transparent p-2 opacity-0 transition-opacity hover:opacity-100">
               <button
                 type="button"
@@ -91,7 +91,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
             </div>
           </>
         ) : (
-          /* Placeholder de upload */
+          /* Upload placeholder */
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -109,7 +109,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
           </button>
         )}
 
-        {/* Input oculto */}
+        {/* Hidden input */}
         <input
           ref={inputRef}
           type="file"
@@ -134,7 +134,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Card de checkpoint (agrupamento por data)
+// Checkpoint card (grouped by date)
 // ─────────────────────────────────────────────────────────────────
 
 function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose }) {
@@ -144,7 +144,7 @@ function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose }) {
 
   return (
     <Card className="overflow-hidden px-0 py-0">
-      {/* Cabeçalho do checkpoint */}
+      {/* Checkpoint header */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
@@ -171,7 +171,7 @@ function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose }) {
           </div>
         </div>
 
-        {/* Miniaturas + expand */}
+        {/* Thumbnails + expand */}
         <div className="flex shrink-0 items-center gap-2">
           <div className="hidden gap-1 sm:flex">
             {photos.map((photo, i) => (
@@ -202,7 +202,7 @@ function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose }) {
         </div>
       </button>
 
-      {/* Grid de poses */}
+      {/* Pose grid */}
       {expanded && (
         <div className="border-t border-[hsl(var(--border)/0.5)] px-5 py-5">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -289,7 +289,7 @@ function NewCheckpointModal({ onConfirm, onClose }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Página principal
+// Main page
 // ─────────────────────────────────────────────────────────────────
 
 export default function ProgressPhotos({ embedded = false }) {
@@ -333,7 +333,7 @@ function ProgressPhotosContent({ embedded = false }) {
     enabled: !!user?.id,
   });
 
-  // ── Mutações ────────────────────────────────────────────────────
+  // ── Mutations ───────────────────────────────────────────────────
 
   const deleteMutation = useMutation({
     mutationFn: ({ id, photoUrl }) => deleteProgressPhoto(user.id, id, photoUrl),
@@ -443,7 +443,7 @@ function ProgressPhotosContent({ embedded = false }) {
           </PrimaryButton>
           )}
       >
-        {/* Resumo rápido */}
+        {/* Quick summary */}
         <div className="grid gap-3 sm:grid-cols-2">
           <Card className="px-4 py-4">
             <p className="atlas-metric-label">Checkpoints</p>
@@ -503,7 +503,7 @@ function ProgressPhotosContent({ embedded = false }) {
         </div>
       )}
 
-      {/* ── Instruções de pose ───────────────────────────────────── */}
+      {/* ── Pose instructions ────────────────────────────────────── */}
       <Section
         eyebrow="Guide"
         title="How to record"

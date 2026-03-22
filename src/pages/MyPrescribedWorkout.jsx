@@ -59,16 +59,16 @@ export default function CoachStudentAdherence({ studentEmail, weeks = 4 }) {
     <div className="space-y-4">
       <div>
         <p className="t-subtitle flex items-center gap-2 mb-3">
-          <Activity className="w-4 h-4" /> Aderência a Treinos
+          <Activity className="w-4 h-4" /> Workout adherence
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AdherenceComparison
-          label="Sessões completadas"
+          label="Completed sessions"
           actual={completedCount}
           prescribed={expectedCount}
-          unit="sessões"
+          unit="sessions"
         />
         {prescribedVolume > 0 && (
           <AdherenceComparison
@@ -82,7 +82,7 @@ export default function CoachStudentAdherence({ studentEmail, weeks = 4 }) {
 
       {prescribed.length === 0 && (
         <div className="p-4 rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] text-center">
-          <p className="t-small text-[hsl(var(--fg-2))]">Nenhum treino prescrito ainda</p>
+          <p className="t-small text-[hsl(var(--fg-2))]">No prescribed workout yet</p>
         </div>
       )}
     </div>

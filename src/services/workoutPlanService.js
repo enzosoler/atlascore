@@ -1,6 +1,6 @@
 /**
  * Atlas Core — Workout Plan Service (Supabase)
- * Substitui base44.entities.WorkoutPlan nas páginas MyWorkout e afins.
+ * Replaces base44.entities.WorkoutPlan in MyWorkout and related pages.
  * Tabela: workout_plans
  * Colunas esperadas: id, user_id, name, objective, frequency, days (jsonb),
  *   active, created_by_type, version, start_date, notes, created_at
@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 const TABLE = 'workout_plans';
 
-/** Lista os planos ativos do usuário (mais recente primeiro) */
+/** List the user's active plans (most recent first). */
 export async function getActiveWorkoutPlans(userId) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -21,7 +21,7 @@ export async function getActiveWorkoutPlans(userId) {
   return data || [];
 }
 
-/** Cria um novo plano */
+/** Create a new plan. */
 export async function createWorkoutPlan(userId, plan) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -32,7 +32,7 @@ export async function createWorkoutPlan(userId, plan) {
   return data;
 }
 
-/** Atualiza um plano existente */
+/** Update an existing plan. */
 export async function updateWorkoutPlan(id, patch) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -44,7 +44,7 @@ export async function updateWorkoutPlan(id, patch) {
   return data;
 }
 
-/** Desativa todos os planos ativos do usuário (usado antes de criar novo) */
+/** Deactivate all active plans for the user (used before creating a new one). */
 export async function deactivateAllWorkoutPlans(userId) {
   const { error } = await supabase
     .from(TABLE)

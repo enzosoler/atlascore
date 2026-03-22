@@ -84,9 +84,9 @@ export default function Social() {
   return (
     <SafePageBoundary
       title="Social"
-      subtitle="Compartilhe seu progresso"
+      subtitle="Share your progress"
       maxWidth="max-w-4xl"
-      fallbackDescription="A página Social abriu em modo seguro."
+      fallbackDescription="The Social page loaded in safe mode."
     >
       <SocialContent />
     </SafePageBoundary>
@@ -176,46 +176,46 @@ function SocialContent() {
   const totalProtToday = meals.reduce((s, m) => s + (m.total_protein || 0), 0);
   const completedWorkouts = workoutsWeek.filter((w) => w.completed).length;
   const latestMeasurement = measurements[0] || null;
-  const displayName = user?.full_name || user?.email?.split('@')[0] || 'Atleta';
+  const displayName = user?.full_name || user?.email?.split('@')[0] || 'Athlete';
 
   const shareCards = [
     {
       id: 'nutrition',
-      title: 'Nutrição de hoje',
-      subtitle: `${meals.length} refeições registradas`,
+      title: 'Today\'s nutrition',
+      subtitle: `${meals.length} meals logged`,
       value: totalCalToday,
       unit: 'kcal',
-      detail: `Proteína: ${totalProtToday}g`,
+      detail: `Protein: ${totalProtToday}g`,
       icon: UtensilsCrossed,
       gradient: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
     },
     {
       id: 'workout',
-      title: 'Treinos esta semana',
-      subtitle: 'Sessões concluídas',
+      title: 'Workouts this week',
+      subtitle: 'Completed sessions',
       value: completedWorkouts,
-      unit: 'treinos',
-      detail: 'Esta semana',
+      unit: 'workouts',
+      detail: 'This week',
       icon: Dumbbell,
       gradient: 'linear-gradient(135deg, #FFF7ED 0%, #FED7AA 100%)',
     },
     {
       id: 'mood',
-      title: 'Check-in de hoje',
-      subtitle: checkin ? 'Humor e energia registrados' : 'Sem registro hoje',
+      title: 'Today\'s check-in',
+      subtitle: checkin ? 'Mood and energy logged' : 'No entry today',
       value: checkin ? checkin.mood : '—',
       unit: checkin ? '/5' : '',
-      detail: checkin ? `Energia: ${checkin.energy}/5 · Sono: ${checkin.sleep_hours}h` : null,
+      detail: checkin ? `Energy: ${checkin.energy}/5 · Sleep: ${checkin.sleep_hours}h` : null,
       icon: Trophy,
       gradient: 'linear-gradient(135deg, #ECFDF5 0%, #BBF7D0 100%)',
     },
     {
       id: 'weight',
-      title: 'Peso atual',
-      subtitle: latestMeasurement ? 'Última medida registrada' : 'Nenhuma medida registrada',
+      title: 'Current weight',
+      subtitle: latestMeasurement ? 'Latest measurement logged' : 'No measurements logged',
       value: latestMeasurement?.weight ?? '—',
       unit: latestMeasurement ? 'kg' : '',
-      detail: latestMeasurement?.body_fat ? `Gordura: ${latestMeasurement.body_fat}%` : null,
+      detail: latestMeasurement?.body_fat ? `Body fat: ${latestMeasurement.body_fat}%` : null,
       icon: BarChart3,
       gradient: 'linear-gradient(135deg, #F5F3FF 0%, #E9D5FF 100%)',
     },
@@ -224,30 +224,30 @@ function SocialContent() {
   const previewStats =
     selectedCard === 'nutrition'
       ? [
-          { label: 'Calorias', value: `${totalCalToday} kcal` },
-          { label: 'Proteína', value: `${totalProtToday}g` },
-          { label: 'Refeições', value: `${meals.length}` },
-          { label: 'Carb', value: `${meals.reduce((s, m) => s + (m.total_carbs || 0), 0)}g` },
+          { label: 'Calories', value: `${totalCalToday} kcal` },
+          { label: 'Protein', value: `${totalProtToday}g` },
+          { label: 'Meals', value: `${meals.length}` },
+          { label: 'Carbs', value: `${meals.reduce((s, m) => s + (m.total_carbs || 0), 0)}g` },
         ]
       : selectedCard === 'workout'
       ? [
-          { label: 'Treinos', value: completedWorkouts },
-          { label: 'Esta semana', value: workoutsWeek.length },
-          { label: 'Taxa', value: workoutsWeek.length > 0 ? `${Math.round((completedWorkouts / workoutsWeek.length) * 100)}%` : '—' },
-          { label: 'Atleta', value: displayName.split(' ')[0] },
+          { label: 'Workouts', value: completedWorkouts },
+          { label: 'This week', value: workoutsWeek.length },
+          { label: 'Rate', value: workoutsWeek.length > 0 ? `${Math.round((completedWorkouts / workoutsWeek.length) * 100)}%` : '—' },
+          { label: 'Athlete', value: displayName.split(' ')[0] },
         ]
       : selectedCard === 'mood'
       ? [
-          { label: 'Humor', value: checkin ? `${checkin.mood}/5` : '—' },
-          { label: 'Energia', value: checkin ? `${checkin.energy}/5` : '—' },
-          { label: 'Sono', value: checkin ? `${checkin.sleep_hours}h` : '—' },
-          { label: 'Água', value: checkin ? `${checkin.hydration_liters}L` : '—' },
+          { label: 'Mood', value: checkin ? `${checkin.mood}/5` : '—' },
+          { label: 'Energy', value: checkin ? `${checkin.energy}/5` : '—' },
+          { label: 'Sleep', value: checkin ? `${checkin.sleep_hours}h` : '—' },
+          { label: 'Water', value: checkin ? `${checkin.hydration_liters}L` : '—' },
         ]
       : [
-          { label: 'Peso', value: latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—' },
-          { label: 'Gordura', value: latestMeasurement?.body_fat ? `${latestMeasurement.body_fat}%` : '—' },
-          { label: 'Cintura', value: latestMeasurement?.waist ? `${latestMeasurement.waist} cm` : '—' },
-          { label: 'Atleta', value: displayName.split(' ')[0] },
+          { label: 'Weight', value: latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—' },
+          { label: 'Body fat', value: latestMeasurement?.body_fat ? `${latestMeasurement.body_fat}%` : '—' },
+          { label: 'Waist', value: latestMeasurement?.waist ? `${latestMeasurement.waist} cm` : '—' },
+          { label: 'Athlete', value: displayName.split(' ')[0] },
         ];
 
   const cardColors = {
@@ -258,22 +258,22 @@ function SocialContent() {
   };
 
   const cardTitles = {
-    nutrition: `Nutrição · ${displayName.split(' ')[0]}`,
-    workout: `Treinos · ${displayName.split(' ')[0]}`,
+    nutrition: `Nutrition · ${displayName.split(' ')[0]}`,
+    workout: `Workouts · ${displayName.split(' ')[0]}`,
     mood: `Check-in · ${displayName.split(' ')[0]}`,
-    weight: `Progresso · ${displayName.split(' ')[0]}`,
+    weight: `Progress · ${displayName.split(' ')[0]}`,
   };
 
   return (
     <PageShell
       title="Social"
-      subtitle="Compartilhe seu progresso com o mundo. Selecione um card para gerar uma imagem para redes sociais."
+      subtitle="Share your progress with the world. Select a card to generate an image for social media."
       maxWidth="max-w-4xl"
     >
       {isLoading ? (
         <LoadingState
-          title="Carregando dados"
-          description="Buscando seus dados mais recentes para gerar os cards."
+          title="Loading data"
+          description="Fetching your latest activity to generate the cards."
         />
       ) : null}
 
@@ -282,7 +282,7 @@ function SocialContent() {
           {/* Left: stat cards */}
           <div className="space-y-4">
             <p className="px-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-              Selecione um card para compartilhar
+              Select a card to share
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {shareCards.map((card) => (
@@ -298,7 +298,7 @@ function SocialContent() {
           {/* Right: preview */}
           <div className="space-y-4">
             <p className="px-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-              Pré-visualização do card
+              Card preview
             </p>
 
             {selectedCard ? (
@@ -315,14 +315,14 @@ function SocialContent() {
                       if (navigator.share) {
                         navigator.share({
                           title: cardTitles[selectedCard],
-                          text: 'Confira meu progresso no Atlas Core!',
+                          text: 'Check out my progress in Atlas Core.',
                           url: 'https://useatlascore.com',
                         });
                       }
                     }}
                   >
                     <Share2 className="h-4 w-4" strokeWidth={2} />
-                    Compartilhar
+                    Share
                   </button>
                   <button
                     className="atlas-button atlas-button-primary"
@@ -331,7 +331,7 @@ function SocialContent() {
                     }}
                   >
                     <Download className="h-4 w-4" strokeWidth={2} />
-                    Baixar
+                    Download
                   </button>
                 </div>
               </div>
@@ -339,10 +339,10 @@ function SocialContent() {
               <div className="flex flex-col items-center justify-center rounded-[28px] border border-dashed border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.42)] px-6 py-16 text-center">
                 <ImageIcon className="h-10 w-10 text-[hsl(var(--brand)/0.4)]" strokeWidth={1.5} />
                 <p className="mt-4 text-[15px] font-semibold text-[hsl(var(--fg))]">
-                  Nenhum card selecionado
+                  No card selected
                 </p>
                 <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))]">
-                  Clique em um card à esquerda para visualizar e compartilhar.
+                  Click a card on the left to preview and share it.
                 </p>
               </div>
             )}

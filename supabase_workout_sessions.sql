@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS workout_sessions (
   user_id             uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
 
   -- Session identity
-  name                text NOT NULL DEFAULT 'Sessão de Treino',
+  name                text NOT NULL DEFAULT 'Workout Session',
   date                date NOT NULL DEFAULT CURRENT_DATE,
   status              text NOT NULL DEFAULT 'in_progress'
                         CHECK (status IN ('in_progress', 'completed', 'abandoned')),

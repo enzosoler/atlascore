@@ -75,21 +75,21 @@ export class SafePageBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      const title = this.props.title || 'Pagina';
+      const title = this.props.title || 'Page';
       const subtitle =
-        this.props.subtitle || 'Modo seguro ativado para evitar tela em branco.';
+        this.props.subtitle || 'Safe mode is active to avoid a blank screen.';
 
       return (
         <PageShell title={title} subtitle={subtitle} maxWidth={this.props.maxWidth || 'max-w-5xl'}>
           <StatusBanner tone="warning">
-            Detectamos uma falha de renderizacao e abrimos o fallback de seguranca da pagina.
+            We detected a rendering failure and opened the page safety fallback.
           </StatusBanner>
-          <SectionCard title={`${title} page loaded`} subtitle="Fallback minimo garantido.">
+          <SectionCard title={`${title} page loaded`} subtitle="Minimal fallback guaranteed.">
             <EmptyState
               title={`${title} page loaded`}
               description={
                 this.props.fallbackDescription ||
-                'O conteudo principal falhou, mas a rota continua acessivel.'
+                'The main content failed, but the route remains accessible.'
               }
             />
           </SectionCard>
@@ -139,7 +139,7 @@ export function LoadingState({
         </div>
         <div>
           <p className="text-sm font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-            Carregando...
+            Loading...
           </p>
           <p className="atlas-copy mt-1">{description}</p>
         </div>

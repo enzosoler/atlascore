@@ -28,9 +28,8 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-function detectLanguage(meta: Record<string, unknown>): 'en' | 'pt' {
-  const lang = (meta.language || meta.locale || meta.preferred_language || '') as string;
-  return /^pt/i.test(lang) ? 'pt' : 'en';
+function detectLanguage(_meta: Record<string, unknown>): 'en' {
+  return 'en';
 }
 
 function firstNameFrom(fullName: string | undefined, email: string): string {

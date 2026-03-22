@@ -10,11 +10,11 @@ export const REGIONAL_PRICING = {
     symbol: 'R$',
     stripe_prices: {
       free: null,
-      athlete_pro: 'price_1Q5tJxLJhPVfVPqNjXYZ', // R$29/mês
-      athlete_performance: 'price_1Q5tJxLJhPVfVPqNjABC', // R$59/mês
-      coach: 'price_1Q5tJxLJhPVfVPqNjDEF', // R$99/mês
-      nutritionist: 'price_1Q5tJxLJhPVfVPqNjGHI', // R$79/mês
-      clinician: 'price_1Q5tJxLJhPVfVPqNjJKL', // R$129/mês
+      athlete_pro: 'price_1Q5tJxLJhPVfVPqNjXYZ', // R$29/month
+      athlete_performance: 'price_1Q5tJxLJhPVfVPqNjABC', // R$59/month
+      coach: 'price_1Q5tJxLJhPVfVPqNjDEF', // R$99/month
+      nutritionist: 'price_1Q5tJxLJhPVfVPqNjGHI', // R$79/month
+      clinician: 'price_1Q5tJxLJhPVfVPqNjJKL', // R$129/month
     },
     // Yearly Stripe price IDs — set via env vars after creating in Stripe
     stripe_prices_yearly: {

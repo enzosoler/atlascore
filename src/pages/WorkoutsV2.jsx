@@ -149,7 +149,7 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
 
   const handleSelect = (searchResult) => {
     // searchResult comes from ExerciseSearch.onSelect — unified shape
-    const name = searchResult.canonical_name_pt || searchResult.canonical_name_en || searchResult.name || '';
+    const name = searchResult.canonical_name_en || searchResult.canonical_name_pt || searchResult.name || '';
     const muscle = (searchResult.primary_muscles || [])[0] || '';
     const sets = searchResult.default_set_range || 3;
     const reps = searchResult.default_rep_range || '8-12';
@@ -259,11 +259,11 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
   const validationErrors = [];
 
   if (!name.trim()) {
-    validationErrors.push(isEnglish ? 'Plan name is required.' : 'O nome do plano é obrigatório.');
+    validationErrors.push('Plan name is required.');
   }
 
   if (totalExercises === 0) {
-    validationErrors.push(isEnglish ? 'Add at least one exercise before saving.' : 'Adicione pelo menos um exercício antes de salvar.');
+    validationErrors.push('Add at least one exercise before saving.');
   }
 
   const isPlanValid = validationErrors.length === 0;
@@ -302,12 +302,12 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error(isEnglish ? 'Please enter a plan name.' : 'Informe o nome do plano.');
+      toast.error('Please enter a plan name.');
       return;
     }
 
     if (totalExercises === 0) {
-      toast.error(isEnglish ? 'Add at least one exercise before saving the plan.' : 'Adicione pelo menos um exercício antes de salvar o plano.');
+      toast.error('Add at least one exercise before saving the plan.');
       return;
     }
 
@@ -328,7 +328,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
       });
       onCreated();
     } catch (err) {
-      toast.error(err.message || (isEnglish ? 'Failed to create plan.' : 'Não foi possível criar o plano.'));
+      toast.error(err.message || 'Failed to create plan.');
     } finally {
       setSaving(false);
     }
@@ -341,8 +341,8 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[hsl(var(--border))] flex-shrink-0">
           <div>
-            <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">{isEnglish ? 'New Plan' : 'Novo plano'}</p>
-            <h2 className="text-lg font-bold text-[hsl(var(--fg))] mt-0.5">{isEnglish ? 'Create Training Plan' : 'Criar plano de treino'}</h2>
+            <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">New plan</p>
+            <h2 className="text-lg font-bold text-[hsl(var(--fg))] mt-0.5">Create training plan</h2>
           </div>
           <button
             onClick={onClose}
@@ -358,7 +358,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
           {validationErrors.length > 0 && (
             <div className="rounded-xl border border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--warn)/0.08)] px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--warn))]">
-                {isEnglish ? 'Plan validation' : 'Validação do plano'}
+                Plan validation
               </p>
               <div className="mt-2 space-y-1">
                 {validationErrors.map((error) => (
@@ -372,11 +372,11 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
           <div>
             <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
-              {isEnglish ? 'Plan name' : 'Nome do plano'} <span className="text-red-400">*</span>
+              Plan name <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
-              placeholder={isEnglish ? 'e.g. Push Pull Legs · 3×/week' : 'Ex.: Push Pull Legs · 3×/semana'}
+              placeholder="e.g. Push Pull Legs · 3×/week"
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
@@ -386,11 +386,11 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
           <div>
             <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
-              {isEnglish ? 'Objective' : 'Objetivo'} <span className="text-[hsl(var(--fg-3))] font-normal normal-case">({isEnglish ? 'optional' : 'opcional'})</span>
+              Objective <span className="text-[hsl(var(--fg-3))] font-normal normal-case">(optional)</span>
             </label>
             <input
               type="text"
-              placeholder={isEnglish ? 'e.g. Hypertrophy, strength, fat loss…' : 'Ex.: hipertrofia, força, perda de gordura…'}
+              placeholder="e.g. Hypertrophy, strength, fat loss..."
               value={objective}
               onChange={(e) => setObjective(e.target.value)}
               className="atlas-field h-11 w-full rounded-[12px] border-0 px-4 text-sm"
@@ -399,7 +399,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
           <div>
             <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
-              {isEnglish ? 'Sessions per week' : 'Sessões por semana'}
+              Sessions per week
             </label>
             <div className="flex gap-2">
               {[2, 3, 4, 5, 6].map((f) => (
@@ -420,7 +420,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
           <div>
             <label className="block text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">
-              {isEnglish ? 'Training days' : 'Dias de treino'}
+              Training days
             </label>
             <div className="space-y-2">
               {days.map((day, i) => (
@@ -446,14 +446,14 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
             disabled={saving}
             className="flex-1 h-11 rounded-[12px] bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm font-semibold text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill-secondary))] transition-colors disabled:opacity-40"
           >
-            {isEnglish ? 'Cancel' : 'Cancelar'}
+            Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving || !isPlanValid}
             className="flex flex-1 items-center justify-center gap-2 h-11 rounded-[12px] bg-[hsl(var(--brand))] text-sm font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-40"
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : isEnglish ? 'Save Plan' : 'Salvar plano'}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Plan'}
           </button>
         </div>
 
@@ -599,10 +599,10 @@ export default function WorkoutsV2() {
       qc.invalidateQueries({ queryKey: ['today-sessions', user?.id] });
       setMode('list');
       setActiveSession(null);
-      toast.success(isEnglish ? 'Session saved!' : 'Sessão salva!');
+      toast.success('Session saved!');
     },
     onError: () => {
-      toast.error(isEnglish ? 'Error saving workout. Check your connection.' : 'Erro ao salvar o treino. Verifique sua conexão.');
+      toast.error('Error saving workout. Check your connection.');
     },
   });
 
@@ -613,7 +613,7 @@ export default function WorkoutsV2() {
   };
 
   const handleStartEmpty = () => {
-    setActiveSession({ name: isEnglish ? 'Free Workout' : 'Treino livre', exercises: [] });
+    setActiveSession({ name: 'Free Workout', exercises: [] });
     setMode('execution');
   };
 
@@ -627,7 +627,7 @@ export default function WorkoutsV2() {
     qc.invalidateQueries({ queryKey: ['active-workout-plan', user?.id] });
     qc.invalidateQueries({ queryKey: ['today-workout-plan', user?.id] });
     qc.invalidateQueries({ queryKey: ['workout-history', user?.id] });
-    toast.success(isEnglish ? 'Plan created! Start a session from any day.' : 'Plano criado! Você já pode iniciar uma sessão de qualquer dia.');
+    toast.success('Plan created! Start a session from any day.');
   };
 
   const generateAIPlan = async () => {
@@ -636,7 +636,7 @@ export default function WorkoutsV2() {
       const profileData = await supabase.from('profiles').select('*').eq('id', user.id).single();
       const profile = profileData?.data || {};
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Create a detailed weekly workout plan in ${isEnglish ? 'English' : 'Portuguese'} for an athlete with the following profile:
+        prompt: `Create a detailed weekly workout plan in English for an athlete with the following profile:
 - Goal: ${profile.training_goal || 'general fitness'}
 - Experience: ${profile.training_experience || 'intermediate'}
 - Location: ${profile.training_location || 'gym'}
@@ -687,14 +687,14 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
         });
         qc.invalidateQueries({ queryKey: ['active-workout-plan', user?.id] });
         qc.invalidateQueries({ queryKey: ['today-workout-plan', user?.id] });
-        toast.success(isEnglish ? 'AI plan generated!' : 'Plano gerado pela IA!');
+        toast.success('AI plan generated!');
         setShowAIGen(false);
       } else {
-        toast.error(isEnglish ? 'Could not generate plan. Try again.' : 'Não foi possível gerar. Tente novamente.');
+        toast.error('Could not generate plan. Try again.');
       }
     } catch (err) {
       console.error(err);
-      toast.error(isEnglish ? 'Error generating plan.' : 'Erro ao gerar plano.');
+      toast.error('Error generating plan.');
     } finally {
       setAiGenerating(false);
     }
@@ -720,26 +720,24 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
   return (
     <AppContainer maxWidth="max-w-3xl">
       <PageHeader
-        eyebrow={isEnglish ? 'Training' : 'Treino'}
-        title={isEnglish ? 'Workouts' : 'Treinos'}
-        subtitle={isEnglish
-          ? 'Manage your active plan, launch focused sessions, and keep recent training history easy to scan.'
-          : 'Gerencie o plano ativo, inicie sessões focadas e acompanhe o histórico recente com leitura rápida.'}
+        eyebrow="Training"
+        title="Workouts"
+        subtitle="Manage your active plan, launch focused sessions, and keep recent training history easy to scan."
         actions={(
           <ActionRow>
             {can('ai_workout_generation') ? (
               <SecondaryButton className="gap-2" onClick={() => setShowAIGen(true)}>
                 <Sparkles className="h-4 w-4" />
-                {isEnglish ? 'AI Plan' : 'Plano IA'}
+                AI Plan
               </SecondaryButton>
             ) : null}
             <PrimaryButton className="gap-2" onClick={() => setShowCreatePlan(true)}>
               <Plus className="h-4 w-4" />
-              {isEnglish ? 'New Plan' : 'Novo plano'}
+              New Plan
             </PrimaryButton>
             <SecondaryButton className="gap-2" onClick={handleStartEmpty}>
               <Zap className="h-4 w-4" />
-              {isEnglish ? 'Free Workout' : 'Treino livre'}
+              Free Workout
             </SecondaryButton>
           </ActionRow>
         )}
@@ -748,30 +746,30 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
           <Card className="px-4 py-4">
             <p className="atlas-overline">{isEnglish ? 'Status' : 'Status'}</p>
             <p className="mt-3 text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {activePlan ? activePlan.name : (isEnglish ? 'No active plan' : 'Sem plano ativo')}
+              {activePlan ? activePlan.name : 'No active plan'}
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
               {activePlan
-                ? `${days.length} ${isEnglish ? 'days ready to execute' : 'dias prontos para executar'}`
-                : (isEnglish ? 'Create a plan or jump into a free workout.' : 'Crie um plano ou comece um treino livre.')}
+                ? `${days.length} days ready to execute`
+                : 'Create a plan or jump into a free workout.'}
             </p>
           </Card>
           <Card className="px-4 py-4">
-            <p className="atlas-overline">{isEnglish ? 'Recent sessions' : 'Sessões recentes'}</p>
+            <p className="atlas-overline">Recent sessions</p>
             <p className="mt-3 text-[24px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
               {recentSessions.length}
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              {isEnglish ? 'Logged and ready for comparison.' : 'Registradas e prontas para comparação.'}
+              Logged and ready for comparison.
             </p>
           </Card>
           <Card className="px-4 py-4">
-            <p className="atlas-overline">{isEnglish ? 'Personal records' : 'Records'}</p>
+            <p className="atlas-overline">Personal records</p>
             <p className="mt-3 text-[24px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
               {Object.keys(personalRecords || {}).length}
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              {isEnglish ? 'Available during execution as live feedback.' : 'Disponíveis durante a execução como feedback ao vivo.'}
+              Available during execution as live feedback.
             </p>
           </Card>
         </div>
@@ -786,9 +784,9 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
 
         {!isLoading && activePlan && (
           <Section
-            eyebrow={isEnglish ? 'Active plan' : 'Plano ativo'}
+            eyebrow="Active plan"
             title={activePlan.name}
-            subtitle={activePlan.objective || (isEnglish ? 'Structured plan ready for execution.' : 'Plano estruturado pronto para execução.')}
+            subtitle={activePlan.objective || 'Structured plan ready for execution.'}
           >
             <Card className="mb-4 border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.12),transparent_34%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-4 py-4">
               <div className="flex items-start justify-between gap-3">
@@ -797,14 +795,14 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
                     <Zap className="w-4 h-4 text-[hsl(var(--brand))]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold tracking-widest text-[hsl(var(--brand))] uppercase">{isEnglish ? 'Active Plan' : 'Plano ativo'}</p>
+                    <p className="text-xs font-semibold tracking-widest text-[hsl(var(--brand))] uppercase">Active plan</p>
                     <p className="text-base font-bold text-[hsl(var(--fg))] mt-0.5 truncate">{activePlan.name}</p>
                     <div className="flex items-center gap-3 mt-1.5">
                       <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
-                        <Calendar className="w-3 h-3" />{activePlan.frequency}× / {isEnglish ? 'week' : 'semana'}
+                        <Calendar className="w-3 h-3" />{activePlan.frequency}× / week
                       </span>
                       <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
-                        <Dumbbell className="w-3 h-3" />{days.length} {isEnglish ? 'days' : 'dias'}
+                        <Dumbbell className="w-3 h-3" />{days.length} days
                       </span>
                     </div>
                     {activePlan.objective && (
@@ -817,7 +815,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
                   onClick={() => setShowCreatePlan(true)}
                   className="shrink-0"
                 >
-                  {isEnglish ? 'Replace' : 'Substituir'}
+                  Replace
                 </SecondaryButton>
               </div>
             </Card>
@@ -834,17 +832,17 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
           <Card className="px-5 py-4">
             <EmptyState
               icon={Dumbbell}
-              title={isEnglish ? 'No active plan' : 'Nenhum plano ativo'}
-              description={isEnglish ? 'Create a structured plan or jump straight into a free workout.' : 'Crie um plano estruturado ou comece direto em um treino livre.'}
+              title="No active plan"
+              description="Create a structured plan or jump straight into a free workout."
               action={(
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <PrimaryButton className="gap-2" onClick={() => setShowCreatePlan(true)}>
                     <Plus className="h-4 w-4" />
-                    {isEnglish ? 'Create Plan' : 'Criar plano'}
+                    Create Plan
                   </PrimaryButton>
                   <SecondaryButton className="gap-2" onClick={handleStartEmpty}>
                     <Play className="h-4 w-4 fill-current" />
-                    {isEnglish ? 'Free Workout' : 'Treino livre'}
+                    Free Workout
                   </SecondaryButton>
                 </div>
               )}
@@ -854,15 +852,15 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
 
         {!isLoading && recentSessions.length > 0 && (
           <Section
-            eyebrow={isEnglish ? 'History' : 'Histórico'}
-            title={isEnglish ? 'Recent Sessions' : 'Sessões recentes'}
-            subtitle={isEnglish ? 'Latest logs from completed workouts.' : 'Últimos registros de treinos concluídos.'}
+            eyebrow="History"
+            title="Recent sessions"
+            subtitle="Latest logs from completed workouts."
           >
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">{isEnglish ? 'Recent Sessions' : 'Sessões recentes'}</p>
+              <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">Recent sessions</p>
               <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
                 <Flame className="w-3 h-3 text-orange-400" />
-                {recentSessions.length} {isEnglish ? 'logged' : 'registradas'}
+                {recentSessions.length} logged
               </span>
             </div>
             <div className="space-y-2.5">
@@ -888,16 +886,16 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
       {showAIGen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="relative mx-4 w-full max-w-sm rounded-[24px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6 shadow-lg">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">{isEnglish ? 'Atlas AI' : 'Atlas IA'}</p>
-            <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">{isEnglish ? 'Generate AI Workout Plan' : 'Gerar Plano de Treino com IA'}</h2>
-            <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">{isEnglish ? 'Atlas AI will create a personalized training plan based on your profile. Your current active plan will be replaced.' : 'O Atlas IA criará um plano de treino personalizado baseado no seu perfil. O plano ativo atual será substituído.'}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Atlas AI</p>
+            <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">Generate AI workout plan</h2>
+            <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">Atlas AI will create a personalized training plan based on your profile. Your current active plan will be replaced.</p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <SecondaryButton type="button" onClick={() => setShowAIGen(false)} className="flex-1">
-                {isEnglish ? 'Cancel' : 'Cancelar'}
+                Cancel
               </SecondaryButton>
               <PrimaryButton type="button" onClick={generateAIPlan} disabled={aiGenerating} className="flex-1 gap-2">
                 {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {aiGenerating ? (isEnglish ? 'Generating...' : 'Gerando...') : (isEnglish ? 'Generate' : 'Gerar')}
+                {aiGenerating ? 'Generating...' : 'Generate'}
               </PrimaryButton>
             </div>
           </div>

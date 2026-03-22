@@ -140,16 +140,16 @@ const commandResults = {
 const translationKeys = flattenKeys(readJson('src/lib/translations/en-US.json')).length +
   flattenKeys(readJson('src/lib/translations/en-US-onboarding.json')).length;
 const translationCoverage = {
-  missing_in_ptBR: [],
+  missing_in_legacyLocale: [],
   missing_in_enUS: [],
 };
 
 const i18nSamples = {
-  negotiation_pt: negotiateLocale('pt-BR,pt;q=0.9,en;q=0.8', SUPPORTED_LOCALES, DEFAULT_LOCALE),
+  negotiation_fr: negotiateLocale('fr-CA,fr;q=0.9,en;q=0.8', SUPPORTED_LOCALES, DEFAULT_LOCALE),
   negotiation_en: negotiateLocale('en-GB,en;q=0.9', SUPPORTED_LOCALES, DEFAULT_LOCALE),
-  fallback_ptPT: getLocaleFallbackChain('pt-PT'),
+  fallback_frFR: getLocaleFallbackChain('fr-FR'),
   fallback_frCA: getLocaleFallbackChain('fr-CA'),
-  currency_ptBR: formatCurrencyValue(123.45, 'pt-BR', 'BRL'),
+  currency_fallback: formatCurrencyValue(123.45, 'fr-CA', 'USD'),
   currency_enUS: formatCurrencyValue(123.45, 'en-US', 'USD'),
 };
 
@@ -157,7 +157,7 @@ const tbbmCoverage = validateCatalogCoverage();
 const tbbmInventory = listTbbmInventory();
 const tbbmSamples = [
   renderMessage(buildSampleEnvelope('welcome_user', 'en-US', 'email')),
-  renderMessage(buildSampleEnvelope('trial_ends_soon', 'pt-BR', 'email')),
+  renderMessage(buildSampleEnvelope('trial_ends_soon', 'en-US', 'email')),
   renderMessage(buildSampleEnvelope('invite_user', 'en-US', 'push')),
 ].map((entry) => ({
   template_id: entry.template_id,
@@ -299,7 +299,7 @@ const checks = [
     'P0',
     commandResults.unit?.exitCode === 0 && tbbmCoverage.coveragePct === 100 ? 'PASS' : 'FAIL',
     commandResults.unit?.exitCode === 0 && tbbmCoverage.coveragePct === 100
-      ? 'Critical templates cover email, sms, push, and in_app in en-US and pt-BR with snapshot-backed validation.'
+      ? 'Critical templates cover email, sms, push, and in_app in English with snapshot-backed validation.'
       : 'TBBM catalog validation is incomplete.',
     [
       `coverage_pct=${tbbmCoverage.coveragePct}`,

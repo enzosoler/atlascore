@@ -263,7 +263,7 @@ function buildMockReply(user, content) {
   const weightGap = formatWeightGap(currentWeight, targetWeight);
   const modeLine = 'Local mode: simulated response without Base44, using only the profile saved in this migration.';
 
-  if (normalized.includes('ader') || normalized.includes('nutri')) {
+  if (normalized.includes('adherence') || normalized.includes('nutrition')) {
     return [
       'Local simulated nutrition adherence summary:',
       calories
@@ -280,7 +280,7 @@ function buildMockReply(user, content) {
     ].join('\n');
   }
 
-  if (normalized.includes('peso') || normalized.includes('progresso')) {
+  if (normalized.includes('weight') || normalized.includes('progress')) {
     return [
       'Local simulated weight progress reading:',
       Number.isFinite(currentWeight)
@@ -297,7 +297,7 @@ function buildMockReply(user, content) {
     ].join('\n');
   }
 
-  if (normalized.includes('exame')) {
+  if (normalized.includes('exam')) {
     return [
       'Local simulated exam analysis:',
       '- At this local stage I do not have exams synced to this route yet.',
@@ -310,7 +310,7 @@ function buildMockReply(user, content) {
     ].join('\n');
   }
 
-  if (normalized.includes('suplement')) {
+  if (normalized.includes('supplement')) {
     return [
       'Local simulated supplementation suggestion:',
       goal
@@ -326,7 +326,7 @@ function buildMockReply(user, content) {
     ].join('\n');
   }
 
-  if (normalized.includes('resumo') || normalized.includes('semana')) {
+  if (normalized.includes('summary') || normalized.includes('week')) {
     return [
       'Local simulated weekly summary:',
       goal
@@ -605,7 +605,7 @@ function JobButton({ item, onSelect, locked = false, hasPaidAccess, jobsRemainin
           </p>
           {!hasPaidAccess && !locked && jobsRemaining !== undefined && (
             <span className="shrink-0 rounded-full bg-[hsl(var(--brand-ai)/0.1)] px-2 py-0.5 text-[10px] font-semibold text-[hsl(var(--brand-ai))]">
-              {jobsRemaining}/sem
+              {jobsRemaining}/wk
             </span>
           )}
           {!hasPaidAccess && locked && (
@@ -1220,7 +1220,7 @@ export default function AtlasAI() {
                         {item.title}
                         {!hasPaidAccess && !isLocked && (
                           <span className="ml-0.5 rounded-full bg-[hsl(var(--brand-ai)/0.12)] px-1.5 text-[10px] text-[hsl(var(--brand-ai))]">
-                            {jobsRemainingThisWeek}/sem
+                            {jobsRemainingThisWeek}/wk
                           </span>
                         )}
                       </button>

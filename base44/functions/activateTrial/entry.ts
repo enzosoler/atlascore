@@ -1,6 +1,6 @@
 /**
- * activateTrial — Ativado via automation quando um novo usuário se registra
- * Cria um Subscription com status=trialing por 7 dias do plano performance
+ * activateTrial — triggered by automation when a new user signs up
+ * Creates a 7-day trial Subscription for the mapped role plan
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       started_at: now.toISOString().split('T')[0],
       trial_ends_at: trialEnd.toISOString().split('T')[0],
       ends_at: trialEnd.toISOString().split('T')[0],
-      notes: `Trial automático 7 dias (${userRole}) — criado no registro`,
+      notes: `Automatic 7-day trial (${userRole}) created on signup`,
     });
 
     console.log(`activateTrial: trial created for ${userEmail} (role=${userRole}, plan=${planCode}), ends ${trialEnd.toISOString().split('T')[0]}`);

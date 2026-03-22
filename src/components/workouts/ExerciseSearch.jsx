@@ -60,8 +60,10 @@ const DIFFICULTY_LABEL = {
 
 function ExerciseRow({ exercise, onSelect }) {
   // Support both unified model and legacy shape
-  const namePT     = exercise.canonical_name_pt || exercise.name || '—';
-  const nameEN     = exercise.canonical_name_en || '';
+  const displayName = exercise.canonical_name_en || exercise.name || exercise.canonical_name_pt || '—';
+  const secondaryName = exercise.canonical_name_en && exercise.canonical_name_en !== displayName
+    ? exercise.canonical_name_en
+    : '';
   const muscles    = (exercise.primary_muscles || []).slice(0, 2).join(', ');
   const equip      = typeof exercise.equipment === 'string'
     ? exercise.equipment
@@ -83,16 +85,16 @@ function ExerciseRow({ exercise, onSelect }) {
       {/* Text */}
       <div className="flex-1 min-w-0 pr-2">
         <div className="flex items-center gap-1.5">
-          <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{namePT}</p>
+          <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{displayName}</p>
           {exercise.is_compound && (
             <span className="badge badge-blue shrink-0" style={{ fontSize: 9, padding: '1px 5px' }}>
               Comp.
             </span>
           )}
         </div>
-        {(nameEN || muscles || equip) && (
+        {(secondaryName || muscles || equip) && (
           <p className="text-[11px] text-[hsl(var(--fg-2))] truncate mt-0.5">
-            {[nameEN, muscles, exercise.default_rep_range ? `${exercise.default_rep_range} reps` : null]
+            {[secondaryName, muscles, exercise.default_rep_range ? `${exercise.default_rep_range} reps` : null]
               .filter(Boolean).join(' · ')}
           </p>
         )}
@@ -150,7 +152,7 @@ function ManualEntry({ onAdd, onBack }) {
           if (name.trim()) {
             onAdd({
               canonical_name_pt: name.trim(),
-              canonical_name_en: '',
+              canonical_name_en: name.trim(),
               primary_muscles: [],
               equipment: '',
               _manual: true,

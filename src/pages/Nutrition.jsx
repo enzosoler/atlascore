@@ -232,7 +232,7 @@ function mapFoodLogToMeal(log) {
   };
 }
 
-function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail, locale = 'pt-BR' }) {
+function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail, locale = 'en-US' }) {
   const pct = getProgressPercent(consumed, target);
   const remaining = getRemainingValue(target, consumed);
   const isEnglish = locale === 'en-US';
@@ -403,7 +403,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
 
-  // Busca: TACO instantâneo → FatSecret fallback
+  // Search flow: instant TACO results → FatSecret fallback
   useEffect(() => {
     const q = searchQuery.trim();
     if (q.length < 2) {
@@ -413,7 +413,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
       return;
     }
 
-    // 1. TACO (offline, imediato)
+    // 1. TACO (offline, instant)
     const tacoHits = searchTaco(q, 8);
     if (tacoHits.length > 0) {
       setSearchResults(tacoHits);
@@ -422,16 +422,15 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
       return;
     }
 
-    // 2. FatSecret (industrializados não cobertos pelo TACO)
+    // 2. FatSecret (packaged foods not covered by TACO)
     setIsSearching(true);
     setSearchError('');
     const timer = setTimeout(async () => {
       try {
-        let results = await searchFatSecretFoods(q, 'pt');
-        if (results.length === 0) results = await searchFatSecretFoods(q, 'en');
+        const results = await searchFatSecretFoods(q, 'en');
         setSearchResults(results.slice(0, 8));
       } catch {
-        setSearchError('Erro ao buscar. Tente outro nome.');
+        setSearchError('Search failed. Try a different food name.');
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -565,7 +564,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
         {!isSearching && !searchError && searchQuery.trim().length >= 2 && searchResults.length === 0 ? (
           <p className="mt-3 text-[13px] text-[hsl(var(--fg-2))]">
-            Nenhum resultado para &quot;{searchQuery}&quot;. Tente outro nome.
+            No results for &quot;{searchQuery}&quot;. Try another name.
           </p>
         ) : null}
       </div>
@@ -574,7 +573,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
       {foods.length > 0 ? (
         <div className="mt-5">
           <p className={FIELD_LABEL_CLASS}>
-            Alimentos adicionados ({foods.length})
+            Added foods ({foods.length})
           </p>
           <div className="mt-2 space-y-2">
             {foods.map((food, idx) => (
@@ -834,7 +833,7 @@ export default function NutritionPage() {
       return;
     }
 
-    // Passo 1: busca instantânea no TACO (offline, sem custo)
+    // Step 1: instant TACO search (offline, no cost)
     const tacoResults = searchTaco(q, 10);
     if (tacoResults.length > 0) {
       setFoodResults(tacoResults);
@@ -843,7 +842,7 @@ export default function NutritionPage() {
       return;
     }
 
-    // Passo 2: fallback FatSecret para industrializados não cobertos pelo TACO
+    // Step 2: FatSecret fallback for packaged foods not covered by TACO
     setIsSearchingFoods(true);
     setFoodSearchError('');
     let active = true;
@@ -994,8 +993,8 @@ export default function NutritionPage() {
     setNotice({
       tone: 'success',
       message: editingMeal?.id
-        ? `${foods.length} alimento(s) atualizado(s) em ${mealLabel}.`
-        : `${foods.length} alimento(s) adicionado(s) em ${mealLabel}.`,
+        ? `${foods.length} food item(s) updated in ${mealLabel}.`
+        : `${foods.length} food item(s) added to ${mealLabel}.`,
     });
   };
 
@@ -1010,12 +1009,12 @@ export default function NutritionPage() {
         if (error) throw error;
       } catch (error) {
         console.error('Failed to delete meal from Supabase:', error);
-        setNotice({ tone: 'error', message: `Erro ao remover ${meal.title}. Tente novamente.` });
+        setNotice({ tone: 'error', message: `Could not remove ${meal.title}. Please try again.` });
         return;
       }
     }
     setMeals((current) => current.filter((m) => m.id !== meal.id));
-    setNotice({ tone: 'success', message: `${meal.title} foi removida.` });
+    setNotice({ tone: 'success', message: `${meal.title} was removed.` });
   };
 
   const handleDateChange = (delta) => {

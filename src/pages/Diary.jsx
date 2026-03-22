@@ -29,7 +29,7 @@ import {
 import { cn } from '@/lib/utils';
 
 // ─────────────────────────────────────────────────────────────────
-// Sub-components reutilizando os mesmos padrões das outras páginas
+// Sub-components reusing the same patterns as the other pages
 // ─────────────────────────────────────────────────────────────────
 
 function HeroStat({ label, value, detail }) {
@@ -102,7 +102,7 @@ function SectionIconHeader({ icon: Icon, color, label }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Página principal
+// Main page
 // ─────────────────────────────────────────────────────────────────
 
 export default function Diary() {
@@ -182,7 +182,7 @@ function DiaryContent() {
       return (data || []).map(w => ({
         ...w,
         date,
-        name: w.status || 'Treino',
+        name: w.status || 'Workout',
       }));
     },
     enabled: !!user?.id,
@@ -217,7 +217,7 @@ function DiaryContent() {
         .limit(20);
       return (data || []).map(p => ({
         id: p.id,
-        name: p.substance_name || p.name || 'Protocolo',
+        name: p.substance_name || p.name || 'Protocol',
         dose: p.dose,
         unit: p.unit,
         frequency: p.frequency,
@@ -295,7 +295,7 @@ function DiaryContent() {
         </div>
       </PageHeader>
 
-      {/* ── Nutrição ────────────────────────────────────────────── */}
+      {/* ── Nutrition ───────────────────────────────────────────── */}
       <Section
         eyebrow="Diary"
         title={meals.length > 0 ? `Nutrition · ${Math.round(totalCal)} kcal` : 'Nutrition'}
@@ -424,7 +424,7 @@ function DiaryContent() {
         </Card>
       </Section>
 
-      {/* ── Treinos ─────────────────────────────────────────────── */}
+      {/* ── Workouts ─────────────────────────────────────────────── */}
       <Section
         eyebrow="Diary"
         title={workouts.length > 0 ? `Workouts · ${workouts.length} session(s)` : 'Workouts'}
@@ -480,7 +480,7 @@ function DiaryContent() {
         </Card>
       </Section>
 
-      {/* ── Medidas ─────────────────────────────────────────────── */}
+      {/* ── Measurements ─────────────────────────────────────────── */}
       <Section
         eyebrow="Diary"
         title="Measurements"

@@ -1,19 +1,19 @@
 /**
  * TACO Search Service
  *
- * Busca instantânea e offline na Tabela Brasileira de Composição de Alimentos.
- * Sem API, sem custo, sem latência.
+ * Instant offline search over the Brazilian TACO food composition table.
+ * No API, no cost, no latency.
  *
- * Suporta:
- *  - Acentos opcionais ("açúcar" == "acucar")
- *  - Busca parcial por múltiplas palavras ("frango gre" → "Frango, peito, grelhado")
- *  - Aliases (sinônimos e nomes populares)
- *  - Retorna resultados no mesmo formato que FatSecret/USDA para substituição direta
+ * Supports:
+ *  - Optional accents
+ *  - Multi-word partial matching
+ *  - Aliases and common names
+ *  - Results in the same shape used by FatSecret/USDA integrations
  */
 
 import { TACO } from '@/lib/tacoDatabase';
 
-/** Remove acentos e normaliza para minúsculas */
+/** Remove accents and normalize to lowercase. */
 function normalize(str) {
   return (str || '')
     .toLowerCase()
@@ -22,7 +22,7 @@ function normalize(str) {
     .trim();
 }
 
-/** Cache de strings normalizadas para performance */
+/** Cache normalized strings for performance. */
 const _indexCache = new Map();
 
 function getSearchText(food) {
@@ -35,11 +35,11 @@ function getSearchText(food) {
 }
 
 /**
- * Busca alimentos no banco TACO.
+ * Search foods in the TACO database.
  *
- * @param {string} query - Texto digitado pelo usuário (PT ou EN, com ou sem acento)
- * @param {number} limit - Máximo de resultados (padrão: 10)
- * @returns {Array} - Array de objetos { id, name, calories, protein, carbs, fat, brand }
+ * @param {string} query - User-entered text.
+ * @param {number} limit - Maximum number of results.
+ * @returns {Array} - Array of objects { id, name, calories, protein, carbs, fat, brand }
  */
 export function searchTaco(query, limit = 10) {
   if (!query || query.trim().length < 2) return [];
@@ -51,7 +51,7 @@ export function searchTaco(query, limit = 10) {
     return words.every((w) => text.includes(w));
   });
 
-  // Ordenação: menor nome primeiro (mais específico) depois de filtrar
+  // Sort by shorter names first after filtering for more specific matches.
   results.sort((a, b) => a.name.length - b.name.length);
 
   return results.slice(0, limit).map((food) => ({
@@ -61,7 +61,7 @@ export function searchTaco(query, limit = 10) {
     protein: food.protein,
     carbs: food.carbs,
     fat: food.fat,
-    brand: 'TACO',    // identifica a fonte na UI
+    brand: 'TACO',
     category: food.category,
   }));
 }

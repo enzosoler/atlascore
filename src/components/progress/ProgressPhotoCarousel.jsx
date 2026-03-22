@@ -56,8 +56,8 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="t-subtitle">Evolução Visual</p>
-          <p className="t-caption mt-1">Acompanhe sua transformação ao longo do tempo</p>
+          <p className="t-subtitle">Visual Progress</p>
+          <p className="t-caption mt-1">Track your transformation over time</p>
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
             {safeFormatDate(currentPhoto?.date || currentPhoto?.created_date)}
           </p>
           <p className="text-xs text-[hsl(var(--fg-3))]">
-            {currentIndex + 1} de {sortedPhotos.length}
+            {currentIndex + 1} of {sortedPhotos.length}
           </p>
         </div>
       </div>
@@ -134,7 +134,7 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
       {sortedPhotos.length > 1 && (
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-            Linha do Tempo
+            Timeline
           </p>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {sortedPhotos.map((photo, idx) => (
@@ -168,19 +168,19 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[hsl(var(--border-h))]">
         <div className="text-center">
-          <p className="text-xs text-[hsl(var(--fg-3))]">Total de Fotos</p>
+          <p className="text-xs text-[hsl(var(--fg-3))]">Total photos</p>
           <p className="text-lg font-semibold text-[hsl(var(--fg))]">{sortedPhotos.length}</p>
         </div>
         <div className="text-center">
-          <p className="text-xs text-[hsl(var(--fg-3))]">Período</p>
+          <p className="text-xs text-[hsl(var(--fg-3))]">Period</p>
           <p className="text-xs font-semibold text-[hsl(var(--fg))]">
             {sortedPhotos.length > 1
-              ? `${Math.round((new Date(sortedPhotos[sortedPhotos.length - 1].date || sortedPhotos[sortedPhotos.length - 1].created_date) - new Date(sortedPhotos[0].date || sortedPhotos[0].created_date)) / (1000 * 60 * 60 * 24))} dias`
+              ? `${Math.round((new Date(sortedPhotos[sortedPhotos.length - 1].date || sortedPhotos[sortedPhotos.length - 1].created_date) - new Date(sortedPhotos[0].date || sortedPhotos[0].created_date)) / (1000 * 60 * 60 * 24))} days`
               : '—'}
           </p>
         </div>
         <div className="text-center">
-          <p className="text-xs text-[hsl(var(--fg-3))]">Atual</p>
+          <p className="text-xs text-[hsl(var(--fg-3))]">Current</p>
           <p className="text-xs font-semibold text-[hsl(var(--accent-primary))]">
             {currentIndex + 1}/{sortedPhotos.length}
           </p>

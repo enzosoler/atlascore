@@ -1,33 +1,33 @@
 -- ============================================================
--- Atlas Core — Supabase RLS para a tabela food_logs
--- Execute no SQL Editor do painel Supabase:
--- https://supabase.com/dashboard/project/<seu-projeto>/sql/new
+-- Atlas Core — Supabase RLS for the food_logs table
+-- Run in the Supabase SQL Editor:
+-- https://supabase.com/dashboard/project/<your-project>/sql/new
 -- ============================================================
 
--- 1. Habilitar RLS na tabela (caso ainda não esteja habilitado)
+-- 1. Enable RLS on the table (if not already enabled)
 ALTER TABLE food_logs ENABLE ROW LEVEL SECURITY;
 
--- 2. Remover políticas antigas conflitantes (se existirem)
+-- 2. Remove old conflicting policies (if they exist)
 DROP POLICY IF EXISTS "food_logs_select_own" ON food_logs;
 DROP POLICY IF EXISTS "food_logs_insert_own" ON food_logs;
 DROP POLICY IF EXISTS "food_logs_update_own" ON food_logs;
 DROP POLICY IF EXISTS "food_logs_delete_own" ON food_logs;
 
--- 3. SELECT: cada usuário autenticado vê apenas seus próprios registros
+-- 3. SELECT: each authenticated user can view only their own records
 CREATE POLICY "food_logs_select_own"
   ON food_logs
   FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id);
 
--- 4. INSERT: cada usuário autenticado pode inserir somente com seu próprio user_id
+-- 4. INSERT: each authenticated user can insert only with their own user_id
 CREATE POLICY "food_logs_insert_own"
   ON food_logs
   FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
--- 5. UPDATE: cada usuário atualiza somente seus próprios registros
+-- 5. UPDATE: each authenticated user can update only their own records
 CREATE POLICY "food_logs_update_own"
   ON food_logs
   FOR UPDATE
@@ -35,7 +35,7 @@ CREATE POLICY "food_logs_update_own"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
--- 6. DELETE: cada usuário deleta somente seus próprios registros
+-- 6. DELETE: each authenticated user can delete only their own records
 CREATE POLICY "food_logs_delete_own"
   ON food_logs
   FOR DELETE
@@ -43,7 +43,7 @@ CREATE POLICY "food_logs_delete_own"
   USING (auth.uid() = user_id);
 
 -- ============================================================
--- Verificação: listar políticas ativas na tabela
+-- Verification: list active policies on the table
 -- ============================================================
 SELECT policyname, cmd, qual, with_check
 FROM pg_policies
@@ -59,7 +59,7 @@ ORDER BY policyname;
 CREATE TABLE IF NOT EXISTS diet_plans (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name          text NOT NULL DEFAULT 'Plano alimentar',
+  name          text NOT NULL DEFAULT 'Meal plan',
   objective     text,
   total_calories numeric(7,1),
   total_protein  numeric(6,1),
@@ -89,7 +89,7 @@ CREATE POLICY "diet_plans_delete_own" ON diet_plans FOR DELETE TO authenticated 
 CREATE TABLE IF NOT EXISTS workout_plans (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name          text NOT NULL DEFAULT 'Plano de treino',
+  name          text NOT NULL DEFAULT 'Workout plan',
   objective     text,
   frequency     text,
   days          jsonb DEFAULT '[]'::jsonb,

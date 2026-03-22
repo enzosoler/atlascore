@@ -131,7 +131,7 @@ export default function ExerciseDetail() {
   const toggleFavorite = useMutation({
     mutationFn: async () => {
       const nextFavorite = !isFavorite;
-      const exerciseName = exercise?.canonical_name_pt || exercise?.name || '';
+      const exerciseName = exercise?.canonical_name_en || exercise?.name || exercise?.canonical_name_pt || '';
 
       if (!log?.id) {
         await base44.entities.ExerciseLog.create({
@@ -189,13 +189,12 @@ export default function ExerciseDetail() {
     );
   }
 
-  const namePT = exercise.canonical_name_pt || exercise.name || 'Exercise';
-  const nameEN = exercise.canonical_name_en || '';
+  const displayName = exercise.canonical_name_en || exercise.name || exercise.canonical_name_pt || 'Exercise';
   const primaryMuscles = exercise.primary_muscles || [];
   const secondaryMuscles = exercise.secondary_muscles || [];
   const instructionsEN = exercise.instructions?.en || [];
-  const formCuesPT = exercise.instructions?.pt || exercise.form_cues_pt || [];
-  const commonMistakes = exercise.common_mistakes_pt || [];
+  const formCues = exercise.form_cues_en || [];
+  const commonMistakes = exercise.common_mistakes_en || [];
   const difficultyLabel =
     exercise.difficulty_level === 'beginner'
       ? 'Beginner'
@@ -215,12 +214,8 @@ export default function ExerciseDetail() {
     <AppContainer maxWidth="max-w-4xl">
       <PageHeader
         eyebrow="Exercise detail"
-        title={namePT}
-        subtitle={
-          nameEN
-            ? `${nameEN}. Structured execution cues, prescription defaults, and your personal history in one place.`
-            : 'Structured execution cues, prescription defaults, and your personal history in one place.'
-        }
+        title={displayName}
+        subtitle="Structured execution cues, prescription defaults, and your personal history in one place."
         accentClassName="from-[hsl(var(--brand)/0.14)] via-[hsl(var(--brand)/0.04)]"
         actions={
           <ActionRow>
@@ -335,10 +330,10 @@ export default function ExerciseDetail() {
         </Section>
       ) : null}
 
-      {formCuesPT.length ? (
+      {formCues.length ? (
         <Section eyebrow="Coaching cues" title="What to keep in mind" subtitle="Short form reminders for better execution quality and repeatability.">
           <Card className="px-5 py-5">
-            <BulletList items={formCuesPT} />
+            <BulletList items={formCues} />
           </Card>
         </Section>
       ) : null}

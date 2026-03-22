@@ -1,22 +1,22 @@
-# Plan vs Execution — Separação Clara
+# Plan vs Execution — Clear Separation
 
 ## Overview
 
-Atlas Core agora separa claramente **planos** (criados por coaches/nutricionistas ou IA) de **execução** (treinos/refeições registrados diariamente).
+Atlas Core now clearly separates **plans** (created by coaches, nutritionists, or AI) from **execution** (workouts and meals logged day to day).
 
 ## Pages Structure
 
 ### Workouts
 - **URL**: `/Workouts`
 - **Tabs**:
-  - **Plano vs Execução** (default) — Side-by-side comparison
-    - Left: `PrescribedWorkout` para hoje (se existe e matches frequency)
-    - Right: `Workout` registrado hoje
+  - **Plan vs Execution** (default) — Side-by-side comparison
+    - Left: today's `PrescribedWorkout` (if one exists and matches the schedule)
+    - Right: today's logged `Workout`
     - Shows adherence %
-  - **Registrado** — All workouts logged for the day
+  - **Logged** — All workouts logged for the day
     - Create, edit, delete workouts
     - Manual entry or AI generation
-  - **Planejado** — All active prescribed workouts
+  - **Planned** — All active prescribed workouts
     - View coach-created plans
     - Frequency, exercises, notes
     - Read-only (managed by coach)
@@ -30,16 +30,16 @@ Atlas Core agora separa claramente **planos** (criados por coaches/nutricionista
 ### Nutrition
 - **URL**: `/Nutrition`
 - **Tabs**:
-  - **Meta vs Registrado** (default) — Logged intake vs targets
+  - **Target vs Logged** (default) — Logged intake vs targets
     - Shows profile targets (calories, macros)
     - Current day's logged meals
     - Prescribed diet (if exists) as reference
     - Adherence %
-  - **Registrado** — All meals logged for the day
+  - **Logged** — All meals logged for the day
     - Add, edit, delete meals
     - Food search + quick log
     - AI diet generation
-  - **Plano Alimentar** — Prescribed diet details
+  - **Meal Plan** — Prescribed diet details
     - Nutritionist-created plan
     - Meals breakdown by type
     - Macro targets
@@ -100,7 +100,7 @@ Atlas Core agora separa claramente **planos** (criados por coaches/nutricionista
 1. Coach visits `/coach/prescribe-workout/:studentId`
 2. Fills form: name, exercises, frequency (Mon/Wed/Fri, etc.)
 3. Saves to `PrescribedWorkout` with coach_email, athlete_email
-4. Athlete sees it in `/Workouts` → "Planejado" tab
+4. Athlete sees it in `/Workouts` → "Planned" tab
 5. Athlete executes today's workout → logs to `Workout`
 6. Comparison shows plan vs execution
 
@@ -108,7 +108,7 @@ Atlas Core agora separa claramente **planos** (criados por coaches/nutricionista
 1. Nutritionist visits `/nutritionist/prescribe-diet/:clientId`
 2. Fills form: name, meals (breakfast/lunch/dinner, etc.), macros
 3. Saves to `PrescribedDiet` with nutritionist_email, client_email
-4. Client sees it in `/Nutrition` → "Plano Alimentar" tab
+4. Client sees it in `/Nutrition` → "Meal Plan" tab
 5. Client logs meals throughout day → saved to `Meal`
 6. Comparison shows targets vs logged
 
@@ -117,7 +117,7 @@ Atlas Core agora separa claramente **planos** (criados por coaches/nutricionista
 ## UI Changes
 
 - `/Workouts` and `/Nutrition` now have **3 tabs** at top
-- "Plano vs Execução" / "Meta vs Registrado" is **default tab**
+- "Plan vs Execution" / "Target vs Logged" is the **default tab**
 - Tabs color-coded: blue for plan info, green for completion
 - Side-by-side layout on larger screens
 - Empty states for missing plans

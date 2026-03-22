@@ -34,7 +34,7 @@ export default function StreakBadge({ streak, checkins }) {
         : 'bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]'
     }`}>
       <Flame className="w-4 h-4" fill="currentColor" />
-      <span className="text-[12px] font-bold">{count} dia{count !== 1 ? 's' : ''}</span>
+      <span className="text-[12px] font-bold">{count} day{count !== 1 ? 's' : ''}</span>
     </div>
   );
 }

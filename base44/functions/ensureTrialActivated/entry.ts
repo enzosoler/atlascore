@@ -1,7 +1,7 @@
 /**
- * ensureTrialActivated — verifica se usuário tem subscription
- * Se não tiver, ativa trial de 7 dias
- * Chamado quando user visita /Today (via frontend fetch)
+ * ensureTrialActivated — checks whether the user already has a subscription
+ * If not, activates a 7-day trial
+ * Called when the user visits /Today (via frontend fetch)
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 

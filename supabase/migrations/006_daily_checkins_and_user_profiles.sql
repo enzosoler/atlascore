@@ -52,7 +52,7 @@ alter table public.profiles
   add column if not exists training_frequency integer,
   add column if not exists training_session_minutes integer,
   add column if not exists onboarding_done    boolean default false,
-  add column if not exists preferred_language text default 'pt-BR';
+  add column if not exists preferred_language text default 'en-US';
 
 -- Allow users to update their own profile fitness fields
 drop policy if exists "Users can update own profile" on public.profiles;

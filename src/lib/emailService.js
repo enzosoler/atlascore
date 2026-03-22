@@ -9,7 +9,7 @@
  *   Frontend → supabase.functions.invoke('send-password-reset') → Resend → User inbox
  *
  * All helpers are fire-and-forget (never throw, never block UI flows).
- * Language is inferred from the user profile or browser locale.
+ * Email output is always English.
  *
  * Usage:
  *   import { email } from '@/lib/emailService';
@@ -27,18 +27,14 @@ const APP_URL = import.meta.env.VITE_APP_URL || 'https://atlascore.app';
 // ─── Language Helper ────────────────────────────────────────────────────────
 
 /**
- * Normalise any locale string to the two values the email system accepts.
- * 'pt-BR', 'pt-PT', 'pt', 'PT' → 'pt'
- * everything else              → 'en'
+ * Normalize any locale input to the single language the email system accepts.
  */
 function normaliseLang(lang) {
-  if (!lang) return detectBrowserLang();
-  return /^pt/i.test(lang) ? 'pt' : 'en';
+  return 'en';
 }
 
 function detectBrowserLang() {
-  const locale = detectPreferredLanguage?.() || navigator.language || 'en';
-  return /^pt/i.test(locale) ? 'pt' : 'en';
+  return detectPreferredLanguage?.() || navigator.language || 'en';
 }
 
 // ─── Core Dispatcher ────────────────────────────────────────────────────────
@@ -50,7 +46,7 @@ function detectBrowserLang() {
  * @param {object} opts
  * @param {string} opts.type       - Email type (see EmailType in send-email/index.ts)
  * @param {string} opts.to         - Recipient email address
- * @param {string} [opts.language] - 'en' | 'pt' (auto-detected if omitted)
+ * @param {string} [opts.language] - Ignored; email output is always English
  * @param {string} [opts.userId]   - Supabase user ID (for audit log)
  * @param {object} [opts.payload]  - Type-specific payload
  */
@@ -87,7 +83,7 @@ function dispatch({ type, to, language, userId, payload = {} }) {
  *
  * @param {object} params
  * @param {string} params.email    - User email address
- * @param {string} [params.language] - 'en' | 'pt' (auto-detected if omitted)
+ * @param {string} [params.language] - Ignored; email output is always English
  * @returns {Promise<void>}
  */
 async function sendPasswordReset({ email, language } = {}) {
@@ -127,7 +123,7 @@ export const MILESTONE_KEYS = /** @type {const} */ ({
 //
 // Use these in your app code:
 //   import { email } from '@/lib/emailService';
-//   email.welcome({ email: user.email, firstName: 'João', language: 'pt' });
+//   email.welcome({ email: user.email, firstName: 'Alex', language: 'en' });
 //
 
 export const email = {

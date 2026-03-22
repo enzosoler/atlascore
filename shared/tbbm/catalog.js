@@ -18,11 +18,6 @@ const ROLE_LABELS = {
     client: 'client',
     patient: 'patient',
   },
-  'pt-BR': {
-    student: 'student',
-    client: 'client',
-    patient: 'patient',
-  },
 };
 
 function escapeHtml(value) {
@@ -90,41 +85,6 @@ function buildWelcomeCopy(locale, vars) {
   const firstName = resolveFirstName(vars.firstName, locale);
   const appUrl = vars.appUrl || 'https://atlascore.app';
 
-  if (locale === 'pt-BR') {
-    const subject = 'Welcome to Atlas Core';
-    const bodyText = [
-      `Hi ${firstName},`,
-      '',
-      'Your account is ready.',
-      'Atlas Core keeps training, nutrition, progress, and protocols in one clear system.',
-      '',
-      `Open the app: ${appUrl}`,
-    ].join('\n');
-
-    return {
-      subject,
-      bodyText,
-      bodyHtml: buildEmailHtml({
-        locale,
-        subject,
-        paragraphs: [
-          `Hi ${firstName},`,
-          'Your account is ready.',
-          'Atlas Core keeps training, nutrition, progress, and protocols in one clear system.',
-        ],
-        ctaLabel: 'Open Atlas Core',
-        ctaUrl: appUrl,
-      }),
-      pushTitle: 'Account ready',
-      pushBody: 'Your Atlas Core workspace is ready to go.',
-      smsBody: `Atlas Core: your account is ready. Open ${appUrl}`,
-      inAppTitle: 'Welcome to Atlas Core',
-      inAppBody: 'Your workspace is ready. Start with Today and finish onboarding.',
-      ctaLabel: 'Open app',
-      ctaUrl: appUrl,
-    };
-  }
-
   const subject = 'Welcome to Atlas Core';
   const bodyText = [
     `Hi ${firstName},`,
@@ -166,41 +126,6 @@ function buildTrialEndingCopy(locale, vars) {
   const billingUrl = vars.billingUrl || 'https://atlascore.app/pricing';
   const daysLabel = formatDays(locale, days);
 
-  if (locale === 'pt-BR') {
-    const subject = `Your trial ends in ${daysLabel}`;
-    const bodyText = [
-      `Hi ${firstName},`,
-      '',
-      `Your trial ends in ${daysLabel}, on ${trialEndDate}.`,
-      'Upgrade now to keep access to premium features.',
-      '',
-      `Update plan: ${billingUrl}`,
-    ].join('\n');
-
-    return {
-      subject,
-      bodyText,
-      bodyHtml: buildEmailHtml({
-        locale,
-        subject,
-        paragraphs: [
-          `Hi ${firstName},`,
-          `Your trial ends in ${daysLabel}, on ${trialEndDate}.`,
-          'Upgrade now to keep access to premium features.',
-        ],
-        ctaLabel: 'Update plan',
-        ctaUrl: billingUrl,
-      }),
-      pushTitle: 'Trial ending soon',
-      pushBody: `Your trial ends in ${daysLabel}.`,
-      smsBody: `Atlas Core: your trial ends in ${daysLabel}. Upgrade at ${billingUrl}`,
-      inAppTitle: 'Trial expires soon',
-      inAppBody: `Your trial ends in ${daysLabel}. Upgrade now to keep premium access.`,
-      ctaLabel: 'Update plan',
-      ctaUrl: billingUrl,
-    };
-  }
-
   const subject = `Your trial ends in ${daysLabel}`;
   const bodyText = [
     `Hi ${firstName},`,
@@ -240,40 +165,6 @@ function buildInviteCopy(locale, vars) {
   const inviterName = vars.inviterName?.trim() || APP_NAME;
   const inviteLink = vars.inviteLink || 'https://atlascore.app/auth?mode=signup';
   const roleLabel = resolveRoleLabel(locale, vars.recipientRole);
-
-  if (locale === 'pt-BR') {
-    const subject = `${inviterName} invited you to Atlas Core`;
-    const bodyText = [
-      `Hi ${recipientName},`,
-      '',
-      `${inviterName} invited you to join Atlas Core as a ${roleLabel}.`,
-      '',
-      `Accept invite: ${inviteLink}`,
-    ].join('\n');
-
-    return {
-      subject,
-      bodyText,
-      bodyHtml: buildEmailHtml({
-        locale,
-        subject,
-        paragraphs: [
-          `Hi ${recipientName},`,
-          `${inviterName} invited you to join Atlas Core as a ${roleLabel}.`,
-          'Use the link below to accept the invite.',
-        ],
-        ctaLabel: 'Accept invite',
-        ctaUrl: inviteLink,
-      }),
-      pushTitle: 'New invite',
-      pushBody: `${inviterName} invited you to Atlas Core.`,
-      smsBody: `Atlas Core: ${inviterName} sent you an invite. Accept it at ${inviteLink}`,
-      inAppTitle: 'Invite ready',
-      inAppBody: `${inviterName} invited you to join as a ${roleLabel}.`,
-      ctaLabel: 'Accept invite',
-      ctaUrl: inviteLink,
-    };
-  }
 
   const subject = `${inviterName} invited you to Atlas Core`;
   const bodyText = [

@@ -1,16 +1,16 @@
 /**
  * Atlas Core — Daily Data Store
- * Compartilha dados de nutrição e treinos do dia entre Nutrition, Workouts e Diary.
- * Usa React Context + useReducer para evitar dependência de Zustand.
+ * Shares current-day nutrition and workout data between Nutrition, Workouts, and Diary.
+ * Uses React Context + useReducer to avoid a Zustand dependency.
  */
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
 
 const DailyStoreContext = createContext(null);
 
 const initialState = {
-  /** Map<dateStr, Meal[]> — refeições indexadas por data (YYYY-MM-DD) */
+  /** Map<dateStr, Meal[]> - meals indexed by date (YYYY-MM-DD) */
   mealsByDate: {},
-  /** Map<dateStr, Workout[]> — treinos indexados por data */
+  /** Map<dateStr, Workout[]> - workouts indexed by date */
   workoutsByDate: {},
 };
 

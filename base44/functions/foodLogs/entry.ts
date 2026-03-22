@@ -1,11 +1,11 @@
 /**
- * Food Logs API — recentes e favoritos por usuário
- * 
+ * Food Logs API - recents and favorites per user
+ *
  * Routes:
- *   POST { action: 'recent' }                                → get recent foods
- *   POST { action: 'favorites' }                             → get favorite foods
- *   POST { action: 'toggle_favorite', food_master_id }      → toggle favorite
- *   POST { action: 'log_use', food_master_id, food_name }   → register food use
+ *   POST { action: 'recent' }                               -> get recent foods
+ *   POST { action: 'favorites' }                            -> get favorite foods
+ *   POST { action: 'toggle_favorite', food_master_id }      -> toggle favorite
+ *   POST { action: 'log_use', food_master_id, food_name }   -> register food use
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
       } else {
         await base44.entities.FoodLog.create({
           food_master_id,
-          food_name: food_name || 'Alimento',
+          food_name: food_name || 'Food',
           last_used_at: now,
           use_count: 1,
           is_favorite: false,

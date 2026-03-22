@@ -2,18 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Dumbbell, Sparkles, Target } from 'lucide-react';
 import GuideCard from '@/components/content/GuideCard';
-import PublicSiteShell, {
-  PublicLanguageSwitcher,
-  PublicSectionHeader,
-} from '@/components/public/PublicSiteShell';
+import PublicSiteShell, { PublicSectionHeader } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/routes';
 
 const START_GUIDES = [
   {
-    title: 'Primeiros Passos',
-    excerpt: 'Criar conta, completar onboarding e entender como o Atlas Core organiza sua rotina desde o primeiro dia.',
+    title: 'Getting Started',
+    excerpt: 'Create your account, complete onboarding, and understand how Atlas Core organizes your routine from day one.',
     readingTime: 5,
     icon: BookOpen,
     href: '/guides/getting-started',
@@ -23,39 +20,39 @@ const START_GUIDES = [
 
 const TRACKING_GUIDES = [
   {
-    title: 'Logging de Treinos',
-    excerpt: 'Como registrar exercícios, séries, reps, peso e progressão com precisão.',
+    title: 'Workout Logging',
+    excerpt: 'How to log exercises, sets, reps, load, and progression with precision.',
     readingTime: 8,
     icon: Dumbbell,
     href: '/guides/workout-logging',
-    category: 'Treino',
+    category: 'Training',
   },
   {
-    title: 'Plano vs Execução',
-    excerpt: 'Entenda aderência com clareza: o que foi prescrito, o que foi feito e onde ajustar.',
+    title: 'Plan vs Execution',
+    excerpt: 'Understand adherence clearly: what was prescribed, what was done, and what to adjust.',
     readingTime: 7,
     icon: Target,
     href: '/guides/plan-vs-execution',
-    category: 'Análise',
+    category: 'Analysis',
   },
 ];
 
 const FAQ_ITEMS = [
   {
-    q: 'Quanto custa o Atlas Core?',
-    a: 'Existe um plano gratuito para começar e camadas pagas para IA, relatórios e contexto profissional. A comparação completa fica na página de pricing.',
+    q: 'How much does Atlas Core cost?',
+    a: 'There is a free plan to get started, plus paid tiers for AI, exports, reports, and professional workflows. The full comparison lives on the pricing page.',
   },
   {
-    q: 'O produto funciona no celular?',
-    a: 'Sim. As experiências principais foram pensadas para desktop e mobile sem perder a mesma linguagem visual nem a mesma clareza de navegação.',
+    q: 'Does the product work on mobile?',
+    a: 'Yes. The core experiences are designed for both desktop and mobile without losing the same visual language or navigational clarity.',
   },
   {
-    q: 'Posso compartilhar com coach ou nutricionista?',
-    a: 'Sim. O Atlas Core foi desenhado para manter o mesmo histórico acessível a atleta e profissionais, sem depender de prints soltos.',
+    q: 'Can I share data with a coach or nutritionist?',
+    a: 'Yes. Atlas Core is designed to keep the same history accessible to both athletes and professionals, without relying on scattered screenshots.',
   },
   {
-    q: 'Consigo exportar meus dados?',
-    a: 'Sim. Os planos pagos expandem exportações e relatórios, mantendo a lógica de um sistema único para acompanhar a evolução.',
+    q: 'Can I export my data?',
+    a: 'Yes. Paid plans expand exports and reporting while preserving the logic of one connected system for tracking progress.',
   },
 ];
 
@@ -64,17 +61,16 @@ export default function HelpCenter() {
     <PublicSiteShell
       navLinks={[
         { href: ROUTES.blog, label: 'Blog' },
-        { href: '#guides', label: 'Guias' },
+        { href: '#guides', label: 'Guides' },
         { href: '#faq', label: 'FAQ' },
       ]}
       actions={(
         <>
-          <PublicLanguageSwitcher />
           <Button asChild variant="ghost" className="hidden sm:inline-flex">
-            <Link to={ROUTES.pricing}>Planos</Link>
+            <Link to={ROUTES.pricing}>Pricing</Link>
           </Button>
           <Button asChild>
-            <Link to={`${ROUTES.auth}?mode=signup`}>Criar conta</Link>
+            <Link to={`${ROUTES.auth}?mode=signup`}>Create account</Link>
           </Button>
         </>
       )}
@@ -92,10 +88,10 @@ export default function HelpCenter() {
             Help Center
           </span>
           <h1 className="atlas-display-title mt-5 max-w-4xl text-[clamp(2.6rem,2rem+1.6vw,4rem)]">
-            Guias diretos para entrar, registrar e acompanhar com clareza.
+            Straightforward guides to join, log, and track with clarity.
           </h1>
           <p className="atlas-public-copy mt-4 max-w-2xl">
-            Conteúdo objetivo para abrir a conta, registrar treino e entender aderência sem precisar adivinhar o próximo passo.
+            Practical content for opening your account, logging training, and understanding adherence without guessing the next step.
           </p>
         </div>
       </section>
@@ -105,9 +101,9 @@ export default function HelpCenter() {
           <div className="space-y-10">
             <div className="space-y-6">
               <PublicSectionHeader
-                eyebrow="Comece Aqui"
-                title="Abra sua conta e entenda a base do produto."
-                description="O essencial para sair do zero e chegar ao primeiro uso com contexto."
+                eyebrow="Start Here"
+                title="Open your account and understand the product foundation."
+                description="The essentials for getting from zero to your first meaningful use."
               />
 
               <div className="grid gap-4 lg:grid-cols-2">
@@ -120,8 +116,8 @@ export default function HelpCenter() {
             <div className="space-y-6 border-t border-[hsl(var(--border)/0.76)] pt-8">
               <PublicSectionHeader
                 eyebrow="Tracking"
-                title="Registre execução e leia aderência com clareza."
-                description="Esses guias cobrem o núcleo do uso diário para treino e análise."
+                title="Log execution and read adherence clearly."
+                description="These guides cover the core of daily use for training and analysis."
               />
 
               <div className="grid gap-4 lg:grid-cols-2">
@@ -137,8 +133,8 @@ export default function HelpCenter() {
       <section id="faq" className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
         <PublicSectionHeader
           eyebrow="FAQ"
-          title="Perguntas rápidas antes de entrar."
-          description="Respostas diretas para as dúvidas mais comuns da jornada pública."
+          title="Quick questions before you jump in."
+          description="Direct answers to the most common questions from public visitors."
           align="center"
           className="mb-10"
         />
@@ -155,19 +151,19 @@ export default function HelpCenter() {
 
       <section className="mx-auto max-w-4xl px-5 pb-6 lg:px-8">
         <div className="atlas-page-header px-6 py-8 text-center lg:px-8 lg:py-10">
-          <p className="atlas-overline justify-center">Próximo passo</p>
+          <p className="atlas-overline justify-center">Next step</p>
           <h2 className="atlas-display-title mt-4 text-[clamp(2.2rem,1.9rem+1.4vw,3.3rem)]">
-            Explore o produto com contexto.
+            Explore the product with context.
           </h2>
           <p className="atlas-public-copy mx-auto mt-4 max-w-2xl">
-            Se quiser ver os planos ou abrir sua conta agora, você entra direto no produto e continua daqui com contexto.
+            If you want to review pricing or open your account now, you can jump straight into the product and continue from here with context.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
-              <Link to={`${ROUTES.auth}?mode=signup`}>Criar conta</Link>
+              <Link to={`${ROUTES.auth}?mode=signup`}>Create account</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to={ROUTES.pricing}>Ver pricing</Link>
+              <Link to={ROUTES.pricing}>View pricing</Link>
             </Button>
           </div>
         </div>

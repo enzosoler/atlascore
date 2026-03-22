@@ -6,10 +6,10 @@ import { CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
  * 
  * Usage:
  * <AdherenceComparison
- *   label="Treino desta semana"
+ *   label="Workouts this week"
  *   actual={5}
  *   prescribed={6}
- *   unit="sessões"
+ *   unit="sessions"
  * />
  */
 export default function AdherenceComparison({ label, actual, prescribed, unit = '' }) {
@@ -41,8 +41,8 @@ export default function AdherenceComparison({ label, actual, prescribed, unit = 
 
       <div className="space-y-1">
         <div className="flex items-center justify-between text-[12px]">
-          <span className="text-[hsl(var(--fg-2))]">Meta: {prescribed} {unit}</span>
-          {isExceeded && <span className="text-[hsl(var(--ok))] font-medium flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Acima!</span>}
+          <span className="text-[hsl(var(--fg-2))]">Target: {prescribed} {unit}</span>
+          {isExceeded && <span className="text-[hsl(var(--ok))] font-medium flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Ahead</span>}
         </div>
         <div className="h-2 bg-[hsl(var(--shell))] rounded-full overflow-hidden">
           <div

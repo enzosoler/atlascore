@@ -104,7 +104,7 @@ function FunctionDisplay({ toolCall }) {
             </pre>
           ) : (
             <p className="text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-              Nenhum resultado disponivel.
+              No result available.
             </p>
           )}
         </div>
@@ -176,7 +176,7 @@ export default function MessageBubble({ message }) {
           >
             {isUser ? (
               <>
-                <span>Voce</span>
+                <span>You</span>
                 <span className="h-1 w-1 rounded-full bg-current" />
                 <span>Prompt</span>
               </>

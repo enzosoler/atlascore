@@ -160,7 +160,7 @@ function HalfLifeCurveChart({ protocols }) {
   if (!protocols || protocols.length === 0) {
     return (
       <div className="flex items-center justify-center rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.4)] px-6 py-12 text-center">
-        <p className="text-[14px] text-[hsl(var(--fg-2))]">Nenhum protocolo ativo para visualizar.</p>
+        <p className="text-[14px] text-[hsl(var(--fg-2))]">No active protocol available to preview.</p>
       </div>
     );
   }

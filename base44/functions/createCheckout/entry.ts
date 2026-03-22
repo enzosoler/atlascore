@@ -6,11 +6,11 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 // ─── Price maps ────────────────────────────────────────────────────────────────
 // Monthly — BRL (hardcoded, already live in Stripe)
 const PRICE_MAP_BR_MONTHLY: Record<string, string> = {
-  athlete_pro:         'price_1TBonPRieY0K8YEguhFtOLGB', // R$29/mês
-  athlete_performance: 'price_1TBonPRieY0K8YEgJb2sbJ2e', // R$59/mês
-  coach:               'price_1TBonPRieY0K8YEg6A2FWB50', // R$99/mês
-  nutritionist:        'price_1TBonPRieY0K8YEgZSEcQ7n0', // R$79/mês
-  clinician:           'price_1TBonPRieY0K8YEgR4CNK6VA', // R$129/mês
+  athlete_pro:         'price_1TBonPRieY0K8YEguhFtOLGB', // R$29/month
+  athlete_performance: 'price_1TBonPRieY0K8YEgJb2sbJ2e', // R$59/month
+  coach:               'price_1TBonPRieY0K8YEg6A2FWB50', // R$99/month
+  nutritionist:        'price_1TBonPRieY0K8YEgZSEcQ7n0', // R$79/month
+  clinician:           'price_1TBonPRieY0K8YEgR4CNK6VA', // R$129/month
 };
 
 // Monthly — USD (set env vars after creating in Stripe)
@@ -47,8 +47,8 @@ Deno.serve(async (req) => {
     const { plan, success_url, cancel_url, email, region, billing } = await req.json();
 
     if (!plan || !VALID_PLANS.includes(plan)) {
-      console.error(`createCheckout: plano inválido recebido: "${plan}". Planos válidos: ${VALID_PLANS.join(', ')}`);
-      return Response.json({ error: `Plano inválido: "${plan}". Planos disponíveis: ${VALID_PLANS.join(', ')}` }, { status: 400 });
+      console.error(`createCheckout: invalid plan received: "${plan}". Valid plans: ${VALID_PLANS.join(', ')}`);
+      return Response.json({ error: `Invalid plan: "${plan}". Available plans: ${VALID_PLANS.join(', ')}` }, { status: 400 });
     }
 
     // Select price map: region (BR|US) × billing (monthly|yearly)
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
 
     if (!priceId) {
       console.error(`createCheckout: price ID not configured for plan="${plan}" region="${region}" billing="${billing || 'monthly'}"`);
-      return Response.json({ error: 'Preço não configurado para esta opção.' }, { status: 500 });
+      return Response.json({ error: 'Price not configured for this option.' }, { status: 500 });
     }
     const origin = req.headers.get('origin') || 'https://app.atlascore.com';
 

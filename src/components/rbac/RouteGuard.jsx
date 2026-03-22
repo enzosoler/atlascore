@@ -6,7 +6,7 @@ import { ROUTES } from '@/lib/routes';
 
 /**
  * RouteGuard — proteger rotas com estados bem definidos.
- * Todos os hooks são chamados incondicionalmente (React Rules of Hooks).
+ * All hooks are called unconditionally (React Rules of Hooks).
  */
 export default function RouteGuard({ 
   page, 

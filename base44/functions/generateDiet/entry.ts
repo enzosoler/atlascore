@@ -27,7 +27,7 @@ async function assertFeatureAccess(base44, user, featureKey) {
     else allowed.delete(featureKey);
   }
   if (!allowed.has(featureKey)) {
-    throw Object.assign(new Error(`Plano atual (${effectivePlan}) não inclui ${featureKey}. Faça upgrade para continuar.`), { status: 403 });
+    throw Object.assign(new Error(`Your current plan (${effectivePlan}) does not include ${featureKey}. Upgrade to continue.`), { status: 403 });
   }
 }
 
@@ -47,56 +47,56 @@ Deno.serve(async (req) => {
     const w = wizard || {};
 
     const mealsPerDay = w.meals_per_day || profile?.meals_per_day || 5;
-    const restrictions = w.restrictions || profile?.food_restrictions || profile?.dietary_style || 'nenhuma restrição';
-    const allergies = w.allergies || profile?.allergies || 'nenhuma';
-    const preferences = w.preferences || profile?.food_preferences || 'variado';
-    const avoidances = w.avoidances || profile?.food_avoidances || 'nenhum';
-    const objective = w.objective || (profile?.health_goals?.join(', ')) || 'saúde geral';
+    const restrictions = w.restrictions || profile?.food_restrictions || profile?.dietary_style || 'none';
+    const allergies = w.allergies || profile?.allergies || 'none';
+    const preferences = w.preferences || profile?.food_preferences || 'balanced';
+    const avoidances = w.avoidances || profile?.food_avoidances || 'none';
+    const objective = w.objective || (profile?.health_goals?.join(', ')) || 'general health';
     const activityLevel = profile?.activity_level || 'moderate';
     const trainingToday = w.training_today !== undefined ? w.training_today : true;
 
     // Build a rich user context string for the AI
     const userContext = [
-      `Idade: ${profile?.age || 30} anos`,
-      `Sexo: ${profile?.sex === 'female' ? 'Feminino' : 'Masculino'}`,
-      `Peso: ${profile?.current_weight || 80}kg`,
-      `Altura: ${profile?.height || 175}cm`,
-      `Objetivo: ${objective}`,
-      `Nível de atividade: ${activityLevel}`,
-      `Experiência de treino: ${profile?.training_experience || 'intermediário'}`,
-      `Treinos por semana: ${profile?.training_days_per_week || 4}x`,
-      `Tem treino hoje: ${trainingToday ? 'Sim' : 'Não'}`,
-      profile?.health_goals?.length ? `Metas de saúde: ${profile.health_goals.join(', ')}` : '',
+      `Age: ${profile?.age || 30}`,
+      `Sex: ${profile?.sex === 'female' ? 'Female' : 'Male'}`,
+      `Weight: ${profile?.current_weight || 80}kg`,
+      `Height: ${profile?.height || 175}cm`,
+      `Goal: ${objective}`,
+      `Activity level: ${activityLevel}`,
+      `Training experience: ${profile?.training_experience || 'intermediate'}`,
+      `Workouts per week: ${profile?.training_days_per_week || 4}`,
+      `Training today: ${trainingToday ? 'Yes' : 'No'}`,
+      profile?.health_goals?.length ? `Health goals: ${profile.health_goals.join(', ')}` : '',
     ].filter(Boolean).join('\n- ');
 
-    const prompt = `Você é um nutricionista especialista em performance e composição corporal. Gere um plano alimentar COMPLETO para um dia inteiro em português brasileiro.
+    const prompt = `You are a nutrition coach specializing in performance and body composition. Generate a COMPLETE one-day meal plan in polished natural English.
 
-CONTEXTO DO PACIENTE (use TODOS estes dados, não peça novamente):
+PATIENT CONTEXT (use ALL of this information and do not ask for it again):
 - ${userContext}
 
-METAS NUTRICIONAIS PERSONALIZADAS:
-- Calorias alvo: ${profile?.calories_target || 2200} kcal
-- Proteína alvo: ${profile?.protein_target || 160}g
-- Carboidratos alvo: ${profile?.carbs_target || 250}g
-- Gordura alvo: ${profile?.fat_target || 70}g
+PERSONALIZED NUTRITION TARGETS:
+- Target calories: ${profile?.calories_target || 2200} kcal
+- Target protein: ${profile?.protein_target || 160}g
+- Target carbohydrates: ${profile?.carbs_target || 250}g
+- Target fat: ${profile?.fat_target || 70}g
 
-PREFERÊNCIAS E RESTRIÇÕES:
-- Restrições alimentares: ${restrictions}
-- Alergias: ${allergies}
-- Preferências: ${preferences}
-- Evitar: ${avoidances}
-- Número de refeições: ${mealsPerDay}
+PREFERENCES AND RESTRICTIONS:
+- Dietary restrictions: ${restrictions}
+- Allergies: ${allergies}
+- Preferences: ${preferences}
+- Avoid: ${avoidances}
+- Number of meals: ${mealsPerDay}
 
-REGRAS CRÍTICAS:
-1. Gere EXATAMENTE ${mealsPerDay} refeições distribuídas ao longo do dia — NUNCA menos que 3
-2. Distribuição: café da manhã, lanche matinal (se >=4 refeições), almoço, lanche da tarde, jantar (ceia se >=6)
-3. Se há treino hoje, inclua pré-treino e/ou pós-treino adequados
-4. Cada refeição DEVE ter pelo menos 3 alimentos com quantidades em gramas e macros precisos
-5. Macros totais do dia devem atingir ≥90% das metas estabelecidas
-6. Adapte a quantidade e tipo de carboidratos ao objetivo (${objective})
-7. Proteína deve ser distribuída igualmente entre as refeições
-8. Use alimentos brasileiros acessíveis e compatíveis com as preferências do paciente
-9. PROIBIDO: gerar plano com apenas 1 ou 2 refeições`;
+CRITICAL RULES:
+1. Generate EXACTLY ${mealsPerDay} meals across the day, and never fewer than 3.
+2. Use a sensible meal distribution such as breakfast, morning snack when needed, lunch, afternoon snack, dinner, and an evening meal when needed.
+3. If there is training today, include appropriate pre-workout and/or post-workout support.
+4. Every meal must include at least 3 food items with gram-based quantities and realistic macro estimates.
+5. Total daily macros should reach at least 90% of the stated targets.
+6. Adapt carbohydrate quantity and food choice to the goal (${objective}).
+7. Distribute protein fairly evenly across the meals.
+8. Use practical, accessible foods that fit the athlete's preferences.
+9. Do not generate a 1-meal or 2-meal plan.`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
@@ -131,7 +131,7 @@ REGRAS CRÍTICAS:
 
     const meals = result?.meals || [];
     if (meals.length < 3) {
-      throw new Error(`A IA gerou apenas ${meals.length} refeição(ões). Mínimo obrigatório é 3. Tente novamente.`);
+      throw new Error(`The AI generated only ${meals.length} meal(s). The minimum required is 3. Please try again.`);
     }
 
     const saved = [];

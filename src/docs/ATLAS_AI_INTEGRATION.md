@@ -137,10 +137,10 @@ The full Atlas AI chat page remains at `/AtlasAI`:
 
 ### Athlete Flow
 1. Opens `/Today` → sees AI insight for the day ("Complete your 3 meals today to hit protein goal")
-2. Opens `/Workouts` → logs exercises → clicks "Sugerir exercício" → gets next move
-3. Opens `/Nutrition` → logs meals → clicks "Sugerir refeição" → gets meal idea
-4. Opens `/Progress` → clicks "Analisar trends" → gets assessment
-5. Opens `/Measurements` → clicks "Gerar projeção" → sees goal timeline
+2. Opens `/Workouts` → logs exercises → clicks "Suggest Exercise" → gets the next move
+3. Opens `/Nutrition` → logs meals → clicks "Suggest Meal" → gets a meal idea
+4. Opens `/Progress` → clicks "Analyze Trends" → gets an assessment
+5. Opens `/Measurements` → clicks "Generate Projection" → sees the goal timeline
 6. Opens `/AtlasAI` → deep chat with data
 
 ### Coach/Nutritionist Flow
@@ -176,10 +176,10 @@ The full Atlas AI chat page remains at `/AtlasAI`:
 1. Create trial user with Pro plan
 2. Log data: meal, workout, measurement, checkin
 3. Visit `/Today` → should show insight auto
-4. Visit `/Workouts` → click "Sugerir exercício" → should generate
-5. Visit `/Nutrition` → click "Sugerir refeição" → should generate
-6. Visit `/Progress` → click "Analisar trends" → should generate
-7. Visit `/Measurements` → click "Gerar projeção" → should generate
+4. Visit `/Workouts` → click "Suggest Exercise" → should generate
+5. Visit `/Nutrition` → click "Suggest Meal" → should generate
+6. Visit `/Progress` → click "Analyze Trends" → should generate
+7. Visit `/Measurements` → click "Generate Projection" → should generate
 8. Visit `/AtlasAI` → should load chat interface
 
 ### Debug

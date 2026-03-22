@@ -4,154 +4,154 @@ import BlogPostLayout from '@/components/content/BlogPostLayout';
 export default function WorkoutLoggingGuide() {
   return (
     <BlogPostLayout
-      title="Guia Completo: Logging de Treinos"
-      excerpt="Registre treinos com precisão profissional — séries, repetições, peso e RPE. Entenda cada detalhe."
+      title="Complete Guide: Workout Logging"
+      excerpt="Log workouts with professional precision — sets, reps, load, and RPE. Understand each detail."
       publishedAt="2026-03-15"
       readingTime={8}
       author="Team Atlas"
       breadcrumb={{ href: '/help', label: 'Help Center' }}
     >
-      <h2>Por que Rastrear Treinos?</h2>
+      <h2>Why Track Workouts?</h2>
       <p>
-        Rastrear seus treinos é essencial para:
+        Tracking workouts matters because it helps with:
       </p>
       <ul>
-        <li><strong>Progressão</strong> — veja se você está ficando mais forte semana a semana</li>
-        <li><strong>Aderência</strong> — mantenha-se consistente com seus planos prescritos</li>
-        <li><strong>Análise</strong> — identifique quais exercícios funcionam melhor para você</li>
-        <li><strong>Prevenção de Lesões</strong> — veja volumes e RPE para evitar overtraining</li>
+        <li><strong>Progression</strong> — see whether you are getting stronger week by week</li>
+        <li><strong>Adherence</strong> — stay consistent with your prescribed plan</li>
+        <li><strong>Analysis</strong> — identify which exercises work best for you</li>
+        <li><strong>Injury prevention</strong> — monitor volume and RPE to avoid overtraining</li>
       </ul>
 
-      <h2>Anatomia de um Registro de Treino</h2>
+      <h2>Anatomy of a Workout Log</h2>
       <p>
-        Cada exercício tem os seguintes componentes:
+        Each exercise has the following components:
       </p>
       
-      <h3>1. Nome do Exercício</h3>
+      <h3>1. Exercise Name</h3>
       <p>
-        Procure no banco de dados de Atlas (supino, leg press, agachamento, etc.). 
-        Atlas sugere exercícios baseado em histórico recente e favoritos.
+        Search the Atlas exercise database (bench press, leg press, squat, and more).
+        Atlas suggests exercises based on recent history and favorites.
       </p>
 
-      <h3>2. Séries</h3>
+      <h3>2. Sets</h3>
       <p>
-        Quantas séries você completou. Exemplo: 4 séries de supino.
+        How many sets you completed. Example: 4 sets of bench press.
       </p>
 
-      <h3>3. Repetições</h3>
+      <h3>3. Repetitions</h3>
       <p>
-        O número de repetições por série. Você pode registrar:
+        The number of repetitions per set. You can log:
       </p>
       <ul>
-        <li><strong>Exato:</strong> "10 reps" se todas as séries foram 10</li>
-        <li><strong>Intervalo:</strong> "8-12 reps" se variou</li>
+        <li><strong>Exact:</strong> "10 reps" if all sets were 10</li>
+        <li><strong>Range:</strong> "8-12 reps" if it varied</li>
       </ul>
 
-      <h3>4. Peso</h3>
+      <h3>4. Load</h3>
       <p>
-        Em kg ou lbs (você escolhe na configuração). Deixe em branco para exercícios de peso corporal.
+        In kg or lbs, depending on your settings. Leave it blank for bodyweight exercises.
       </p>
 
       <h3>5. RPE (Rate of Perceived Exertion)</h3>
       <p>
-        De 1-10, o quanto esforço você percebeu. Isso ajuda a diferenciar treinos de força vs hipertrofia vs cardio.
+        From 1–10, how hard the effort felt. This helps distinguish strength work, hypertrophy work, and cardio.
       </p>
       <ul>
-        <li><strong>6-7:</strong> treino leve, muito ainda na reserve</li>
-        <li><strong>8-9:</strong> treino moderado a pesado</li>
-        <li><strong>9-10:</strong> treino máximo, poucas reps na reserva</li>
+        <li><strong>6-7:</strong> light training, plenty left in reserve</li>
+        <li><strong>8-9:</strong> moderate to heavy training</li>
+        <li><strong>9-10:</strong> near-max effort, very few reps in reserve</li>
       </ul>
 
-      <h2>Passo a Passo: Registrar um Treino Completo</h2>
+      <h2>Step by Step: Log a Complete Workout</h2>
 
-      <h3>1. Ir para Workouts</h3>
+      <h3>1. Go to Workouts</h3>
       <p>
-        Clique em "Workouts" na sidebar. Você verá um resumo de treinos recentes e uma opção "Novo Treino".
+        Click "Workouts" in the sidebar. You will see a summary of recent sessions and a "New Workout" option.
       </p>
 
-      <h3>2. Criar Novo Treino</h3>
+      <h3>2. Create a New Workout</h3>
       <p>
-        Clique em "Novo Treino" ou escolha uma data anterior se estiver registrando retroativamente.
+        Click "New Workout" or choose an earlier date if you are logging retroactively.
       </p>
 
-      <h3>3. Procurar Exercício</h3>
+      <h3>3. Search for an Exercise</h3>
       <p>
-        Comece a digitar o nome do exercício. Atlas sugere:
+        Start typing the exercise name. Atlas suggests:
       </p>
       <ul>
-        <li>Exercícios <strong>favoritos</strong> (ao topo)</li>
-        <li>Exercícios <strong>recentes</strong></li>
-        <li>Resultados de <strong>busca completa</strong></li>
+        <li><strong>Favorite</strong> exercises at the top</li>
+        <li><strong>Recent</strong> exercises</li>
+        <li><strong>Full-search</strong> results</li>
       </ul>
       <p>
-        Se o exercício não existir, você pode criar um <strong>exercício customizado</strong>.
+        If the exercise does not exist, you can create a <strong>custom exercise</strong>.
       </p>
 
-      <h3>4. Registrar Séries e Reps</h3>
+      <h3>4. Log Sets and Reps</h3>
       <p>
-        Digite:
+        Enter:
       </p>
       <ul>
-        <li><strong>Séries:</strong> 4</li>
+        <li><strong>Sets:</strong> 4</li>
         <li><strong>Reps:</strong> 8-12 (ou exato, ex: 10)</li>
-        <li><strong>Peso:</strong> 100 kg</li>
+        <li><strong>Load:</strong> 100 kg</li>
         <li><strong>RPE:</strong> 8</li>
-        <li><strong>Notas (opcional):</strong> "Senti fraco hoje", "Pronto para aumentar peso"</li>
+        <li><strong>Notes (optional):</strong> "Felt weak today", "Ready to increase the load"</li>
       </ul>
 
-      <h3>5. Adicionar Mais Exercícios</h3>
+      <h3>5. Add More Exercises</h3>
       <p>
-        Clique em "Adicionar Exercício" para continuar sua sessão.
+        Click "Add Exercise" to continue building the session.
       </p>
 
-      <h3>6. Finalizar e Salvar</h3>
+      <h3>6. Finish and Save</h3>
       <p>
-        Clique em "Salvar Treino". Atlas calcula:
+        Click "Save Workout". Atlas calculates:
       </p>
       <ul>
-        <li><strong>Volume Total:</strong> séries × reps × peso</li>
-        <li><strong>Duração Estimada:</strong> baseado em exercícios</li>
-        <li><strong>RPE Médio:</strong> média de todos os exercícios</li>
+        <li><strong>Total volume:</strong> sets × reps × load</li>
+        <li><strong>Estimated duration:</strong> based on the exercise list</li>
+        <li><strong>Average RPE:</strong> average across all exercises</li>
       </ul>
 
-      <h2>Dicas Profissionais</h2>
+      <h2>Professional Tips</h2>
 
-      <h3>Use Favoritos</h3>
+      <h3>Use Favorites</h3>
       <p>
-        Clique na estrela para marcar exercícios que você usa frequentemente. Eles aparecem ao topo na próxima vez.
+        Click the star to save exercises you use often. They appear at the top next time.
       </p>
 
-      <h3>Registre Progressão</h3>
+      <h3>Track Progression</h3>
       <p>
-        Aumentar peso, reps ou volume é progressão. Use Atlas para ver tendências de força ao longo de meses.
+        Increasing load, reps, or volume is progression. Use Atlas to spot strength trends over time.
       </p>
 
-      <h3>Notas São Ouro</h3>
+      <h3>Notes Matter</h3>
       <p>
-        "Senti forte", "Técnica sofrível", "Lesão leve no ombro" — essas notas ajudam você a identificar padrões.
+        "Felt strong", "Technique broke down", "Mild shoulder irritation" — these notes help you identify patterns.
       </p>
 
-      <h3>Compare com Prescrição</h3>
+      <h3>Compare with Prescription</h3>
       <p>
-        Se seu coach prescreveu um treino, Atlas mostra "Plano vs Execução". Você registrou o que foi prescrito?
+        If your coach prescribed a workout, Atlas shows "Plan vs Execution". Did you perform what was prescribed?
       </p>
 
-      <h2>Integração com Check-ins</h2>
+      <h2>Integration with Check-ins</h2>
       <p>
-        Atlas correlaciona seus registros de treino com:
+        Atlas correlates workout logs with:
       </p>
       <ul>
-        <li>Sono (você dormiu o suficiente?)</li>
-        <li>Energia (você estava energizado?)</li>
-        <li>Nutrição (comeu o suficiente?)</li>
+        <li>Sleep (did you recover enough?)</li>
+        <li>Energy (did you feel ready to train?)</li>
+        <li>Nutrition (did you eat enough?)</li>
       </ul>
       <p>
-        Com 30+ dias de dados, o Atlas AI pode sugerir "você treina melhor quando dorme 8+ horas".
+        With 30+ days of data, Atlas AI can surface patterns like "you train better when you sleep 8+ hours."
       </p>
 
       <blockquote>
-        <strong>Lembre-se:</strong> Consistência bate intensidade. Um treino registrado todos os dias é mais valioso 
-        que um mega-treino que você esquece. Comece hoje, mantenha o padrão.
+        <strong>Remember:</strong> Consistency beats intensity. A workout you log every time is more valuable
+        than a heroic session you never document. Start today and keep the pattern going.
       </blockquote>
     </BlogPostLayout>
   );

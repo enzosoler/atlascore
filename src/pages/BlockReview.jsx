@@ -34,9 +34,9 @@ import { listMeasurements } from '@/services/bodyProgressService';
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const BLOCK_SIZES = [
-  { key: '4w', weeks: 4, label: '4 semanas', minPlan: 'free' },
-  { key: '8w', weeks: 8, label: '8 semanas', minPlan: 'pro' },
-  { key: '12w', weeks: 12, label: '12 semanas', minPlan: 'performance' },
+  { key: '4w', weeks: 4, label: '4 weeks', minPlan: 'free' },
+  { key: '8w', weeks: 8, label: '8 weeks', minPlan: 'pro' },
+  { key: '12w', weeks: 12, label: '12 weeks', minPlan: 'performance' },
 ];
 
 const PLAN_LEVELS = {
@@ -57,7 +57,7 @@ function toDateStr(date) {
 
 function formatDateRange(start, end) {
   const opts = { month: 'short', day: 'numeric' };
-  const locale = navigator.language || 'pt-BR';
+  const locale = navigator.language || 'en-US';
   return `${start.toLocaleDateString(locale, opts)} – ${end.toLocaleDateString(locale, opts)}`;
 }
 
@@ -117,9 +117,9 @@ export default function BlockReview() {
   return (
     <SafePageBoundary
       title="Block Review"
-      subtitle="Leitura consolidada de um bloco de tempo."
+      subtitle="Consolidated readout of a defined time block."
       maxWidth="max-w-5xl"
-      fallbackDescription="A página Block Review abriu em modo seguro. O conteúdo principal falhou, mas a rota continua acessível."
+      fallbackDescription="The Block Review page opened in safe mode. The main content failed, but the route remains accessible."
     >
       <BlockReviewContent />
     </SafePageBoundary>
@@ -324,17 +324,17 @@ function BlockReviewContent() {
       if (Math.abs(weightDelta) < 0.3) {
         list.push({
           tone: 'neutral',
-          text: 'Peso estável neste bloco. Se a meta é perda, vale revisar o déficit calórico ou aumentar a precisão nos registros.',
+          text: 'Weight stayed stable in this block. If the goal is fat loss, it may be time to review the calorie deficit or improve logging precision.',
         });
       } else if (weightDelta < 0) {
         list.push({
           tone: 'ok',
-          text: `Perda de ${Math.abs(weightDelta).toFixed(1)} kg neste bloco — tendência positiva para quem busca redução de peso.`,
+          text: `Loss of ${Math.abs(weightDelta).toFixed(1)} kg in this block — a positive trend for anyone aiming to reduce body weight.`,
         });
       } else {
         list.push({
           tone: 'neutral',
-          text: `Ganho de ${weightDelta.toFixed(1)} kg neste bloco. Verifique se está alinhado com o objetivo (ganho muscular planejado ou fora do plano).`,
+          text: `Gain of ${weightDelta.toFixed(1)} kg in this block. Check whether that aligns with the goal (planned muscle gain or off-plan weight gain).`,
         });
       }
     }
@@ -344,17 +344,17 @@ function BlockReviewContent() {
       if (nutritionAdherence < 50) {
         list.push({
           tone: 'warn',
-          text: `Refeições registradas em apenas ${nutritionAdherence.toFixed(0)}% dos dias. Sem log consistente, fica difícil identificar o que está travando o progresso.`,
+          text: `Meals were logged on only ${nutritionAdherence.toFixed(0)}% of days. Without consistent logging, it is hard to identify what is limiting progress.`,
         });
       } else if (nutritionAdherence < 70) {
         list.push({
           tone: 'warn',
-          text: `Adesão ao log alimentar abaixo de 70% (${nutritionAdherence.toFixed(0)}%). Aumentar a consistência nos registros melhora a qualidade da análise.`,
+          text: `Food logging adherence is below 70% (${nutritionAdherence.toFixed(0)}%). More consistent logging improves the quality of the analysis.`,
         });
       } else {
         list.push({
           tone: 'ok',
-          text: `Boa consistência nos registros alimentares — ${nutritionAdherence.toFixed(0)}% dos dias do bloco logados.`,
+          text: `Strong food logging consistency — ${nutritionAdherence.toFixed(0)}% of days in this block were logged.`,
         });
       }
     }
@@ -364,12 +364,12 @@ function BlockReviewContent() {
       if (workoutsPerWeek < 1.5) {
         list.push({
           tone: 'warn',
-          text: `Frequência de treino baixa: ${workoutsPerWeek.toFixed(1)} sessões/semana. Para a maioria dos objetivos, 3+ sessões/semana geram adaptações mais consistentes.`,
+          text: `Low training frequency: ${workoutsPerWeek.toFixed(1)} sessions/week. For most goals, 3+ sessions per week creates more consistent adaptation.`,
         });
       } else if (workoutsPerWeek >= 3) {
         list.push({
           tone: 'ok',
-          text: `Frequência de treino consistente: ${workoutsPerWeek.toFixed(1)} sessões/semana — bom volume para adaptação progressiva.`,
+          text: `Consistent training frequency: ${workoutsPerWeek.toFixed(1)} sessions/week — solid volume for progressive adaptation.`,
         });
       }
     }
@@ -378,7 +378,7 @@ function BlockReviewContent() {
     if (blockProtocols.length > 0 && weightDelta !== null) {
       list.push({
         tone: 'neutral',
-        text: `${blockProtocols.length} protocolo${blockProtocols.length !== 1 ? 's' : ''} ativo${blockProtocols.length !== 1 ? 's' : ''} durante o bloco. Considere correlacionar com as tendências de peso e composição.`,
+        text: `${blockProtocols.length} active protocol${blockProtocols.length !== 1 ? 's' : ''} during this block. Consider correlating them with weight and composition trends.`,
       });
     }
 
@@ -398,46 +398,46 @@ function BlockReviewContent() {
   const doThisNext = useMemo(() => {
     if (nutritionAdherence < 60 && blockMeals.length > 0) {
       return {
-        action: 'Aumentar consistência no log alimentar',
+        action: 'Increase food logging consistency',
         reason:
-          'Sem dados de nutrição suficientes, é impossível diagnosticar o que está travando o progresso. Foque em registrar ao menos 5 em 7 dias.',
+          'Without enough nutrition data, it is impossible to diagnose what is limiting progress. Focus on logging at least 5 of 7 days.',
         route: ROUTES.nutrition,
-        label: 'Ir para Nutrição',
+        label: 'Go to Nutrition',
       };
     }
     if (workoutsPerWeek < 2 && (blockWorkouts.length > 0 || blockMeals.length > 0)) {
       return {
-        action: 'Reforçar frequência de treino',
+        action: 'Increase workout frequency',
         reason:
-          'O volume de treino neste bloco ficou abaixo do ideal para adaptação. Adicione 1–2 sessões semanais no próximo bloco.',
+          'Training volume in this block stayed below the ideal level for adaptation. Add 1–2 sessions per week in the next block.',
         route: ROUTES.workouts,
-        label: 'Ir para Treinos',
+        label: 'Go to Workouts',
       };
     }
     if (blockMeasurements.length < 2) {
       return {
-        action: 'Registrar medições com mais frequência',
+        action: 'Log measurements more often',
         reason:
-          'Sem checkpoints de composição corporal, fica impossível rastrear mudanças reais ao longo do bloco.',
+          'Without body composition checkpoints, real changes across the block are impossible to track.',
         route: ROUTES.measurements,
-        label: 'Registrar medição',
+        label: 'Log measurement',
       };
     }
     if (weightDelta !== null && Math.abs(weightDelta) < 0.3 && nutritionAdherence > 70) {
       return {
-        action: 'Revisar meta calórica',
+        action: 'Review calorie target',
         reason:
-          'Peso estável com boa adesão alimentar registrada. Se a meta é mudança de composição, vale ajustar o déficit ou superávit.',
+          'Weight is stable with strong nutrition adherence. If the goal is body composition change, it may be time to adjust the deficit or surplus.',
         route: ROUTES.myDiet,
-        label: 'Ver plano alimentar',
+        label: 'Open nutrition plan',
       };
     }
     return {
-      action: 'Manter consistência no próximo bloco',
+      action: 'Maintain consistency in the next block',
       reason:
-        'Os dados deste bloco estão em boa ordem. Continue com a mesma frequência para construir um histórico comparativo sólido.',
+        'The data in this block is in good shape. Keep the same rhythm to build a stronger comparative history.',
       route: ROUTES.today,
-      label: 'Ir para Today',
+      label: 'Go to Today',
     };
   }, [
     nutritionAdherence,
@@ -456,7 +456,7 @@ function BlockReviewContent() {
   return (
     <PageShell
       title="Block Review"
-      subtitle="Leitura consolidada de um bloco de tempo — o que funcionou, o que não funcionou, o que fazer a seguir."
+      subtitle="Consolidated review of a time block — what worked, what did not, and what to do next."
       actions={
         <>
           {BLOCK_SIZES.map((bs) => {
@@ -471,7 +471,7 @@ function BlockReviewContent() {
                 }}
                 active={blockKey === bs.key}
                 className={locked ? 'opacity-40 cursor-not-allowed' : ''}
-                title={locked ? `Disponível no plano ${bs.minPlan}` : undefined}
+                title={locked ? `Available on the ${bs.minPlan} plan` : undefined}
               >
                 {bs.label}
                 {locked ? ' 🔒' : ''}
@@ -489,7 +489,7 @@ function BlockReviewContent() {
           className="flex items-center gap-1.5 text-sm font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
-          Bloco anterior
+          Previous block
         </button>
 
         <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">
@@ -501,7 +501,7 @@ function BlockReviewContent() {
           disabled={blockOffset === 0}
           className="flex items-center gap-1.5 text-sm font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          Bloco seguinte
+          Next block
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -522,15 +522,15 @@ function BlockReviewContent() {
 
       {isLoading && (
         <LoadingState
-          title="Carregando bloco"
-          description="Agregando dados do período selecionado."
+          title="Loading block"
+          description="Aggregating data for the selected period."
         />
       )}
 
       {!isLoading && hasError && (
         <ErrorState
-          title="Erro ao carregar bloco"
-          description="Alguns dados podem estar incompletos. Tente atualizar a página."
+          title="Could not load block"
+          description="Some data may be incomplete. Try refreshing the page."
         />
       )}
 
@@ -554,7 +554,7 @@ function BlockReviewContent() {
           {/* ── Top-line metrics ── */}
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Variação de peso"
+              label="Weight change"
               value={
                 weightDelta !== null
                   ? `${weightDelta >= 0 ? '+' : ''}${weightDelta.toFixed(1)} kg`
@@ -562,13 +562,13 @@ function BlockReviewContent() {
               }
               hint={
                 blockMeasurements.length < 2
-                  ? 'Precisa de 2+ medições no bloco'
-                  : `${blockMeasurements.length} checkpoints registrados`
+                  ? 'Requires 2+ measurements in the block'
+                  : `${blockMeasurements.length} checkpoints recorded`
               }
               icon={Scale}
             />
             <MetricCard
-              label="Variação de gordura"
+              label="Body fat change"
               value={
                 bodyFatDelta !== null
                   ? `${bodyFatDelta >= 0 ? '+' : ''}${bodyFatDelta.toFixed(1)}%`
@@ -576,47 +576,47 @@ function BlockReviewContent() {
               }
               hint={
                 bodyFatDelta !== null
-                  ? 'Baseado nas medições com % gordura'
-                  : 'Sem dados de % gordura no bloco'
+                  ? 'Based on measurements with body fat %'
+                  : 'No body fat % data in this block'
               }
               icon={TrendingDown}
             />
             <MetricCard
-              label="Treinos concluídos"
+              label="Completed workouts"
               value={formatNumber(completedWorkouts.length)}
-              hint={`${workoutsPerWeek.toFixed(1)} sessões/semana`}
+              hint={`${workoutsPerWeek.toFixed(1)} sessions/week`}
               icon={Dumbbell}
             />
             <MetricCard
-              label="Consistência geral"
+              label="Overall consistency"
               value={`${overallAdherence.toFixed(0)}%`}
-              hint="Média: adesão alimentar + frequência de treino"
+              hint="Average of nutrition adherence and workout frequency"
               icon={Target}
             />
           </section>
 
           {/* ── Adherence breakdown ── */}
           <SectionCard
-            title="Adesão por área"
-            subtitle="Como foi o engajamento em cada pilar do bloco."
+            title="Adherence by area"
+            subtitle="How engagement looked across each pillar in the block."
           >
             <div className="grid gap-4 md:grid-cols-3">
               {/* Nutrition */}
               <div className="atlas-card-muted p-4 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Nutrição
+                  Nutrition
                 </p>
                 <p className="text-2xl font-bold text-[hsl(var(--fg))]">
                   {nutritionAdherence.toFixed(0)}%
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                  {new Set(blockMeals.map((m) => m.date)).size} de {blockDays} dias com log
+                  {new Set(blockMeals.map((m) => m.date)).size} of {blockDays} days logged
                 </p>
                 <AdherenceBar value={nutritionAdherence} />
                 {avgDailyCalories > 0 && (
                   <p className="text-[12px] text-[hsl(var(--fg-2))] pt-1 leading-5">
-                    Média: {formatNumber(avgDailyCalories)} kcal/dia
-                    {avgDailyProtein > 0 && ` · ${avgDailyProtein.toFixed(0)}g prot.`}
+                    Average: {formatNumber(avgDailyCalories)} kcal/day
+                    {avgDailyProtein > 0 && ` · ${avgDailyProtein.toFixed(0)}g protein`}
                   </p>
                 )}
               </div>
@@ -624,40 +624,40 @@ function BlockReviewContent() {
               {/* Workouts */}
               <div className="atlas-card-muted p-4 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Treinos
+                  Workouts
                 </p>
                 <p className="text-2xl font-bold text-[hsl(var(--fg))]">
                   {completedWorkouts.length}
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                  {workoutsPerWeek.toFixed(1)} sessões/semana
+                  {workoutsPerWeek.toFixed(1)} sessions/week
                 </p>
                 <AdherenceBar value={workoutAdherenceScore} />
                 <p className="text-[12px] text-[hsl(var(--fg-2))] pt-1 leading-5">
-                  Score em relação à meta de 3× /semana
+                  Score relative to a 3× /week target
                 </p>
               </div>
 
               {/* Protocols */}
               <div className="atlas-card-muted p-4 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Protocolos
+                  Protocols
                 </p>
                 <p className="text-2xl font-bold text-[hsl(var(--fg))]">
                   {blockProtocols.length}
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
                   {blockProtocols.length === 0
-                    ? 'Nenhum protocolo ativo neste bloco'
-                    : `protocolo${blockProtocols.length !== 1 ? 's' : ''} ativo${blockProtocols.length !== 1 ? 's' : ''}`}
+                    ? 'No active protocols in this block'
+                    : `${blockProtocols.length} active protocol${blockProtocols.length !== 1 ? 's' : ''}`}
                 </p>
                 {blockProtocols.length > 0 && (
                   <p className="text-[12px] text-[hsl(var(--fg-2))] pt-2 leading-5">
                     {blockProtocols
                       .slice(0, 3)
-                      .map((p) => p.substance_name || 'Protocolo')
+                      .map((p) => p.substance_name || 'Protocol')
                       .join(', ')}
-                    {blockProtocols.length > 3 && ` e mais ${blockProtocols.length - 3}`}
+                    {blockProtocols.length > 3 && ` and ${blockProtocols.length - 3} more`}
                   </p>
                 )}
               </div>
@@ -667,8 +667,8 @@ function BlockReviewContent() {
           {/* ── Opinionated insights ── */}
           {insights.length > 0 && (
             <SectionCard
-              title="Leituras do bloco"
-              subtitle="Análise objetiva baseada nos dados registrados no período."
+              title="Block insights"
+              subtitle="Objective analysis based on the data logged in this period."
             >
               <div className="space-y-3">
                 {insights.map((insight, i) => (
@@ -686,7 +686,7 @@ function BlockReviewContent() {
               </div>
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--brand))]">
-                  Próximo passo
+                  Next step
                 </p>
                 <p className="text-[16px] font-semibold text-[hsl(var(--fg))] leading-snug">
                   {doThisNext.action}

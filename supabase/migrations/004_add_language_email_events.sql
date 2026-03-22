@@ -6,12 +6,12 @@
 
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'en'
-    CHECK (language IN ('en', 'pt')),
+    CHECK (language IN ('en')),
   ADD COLUMN IF NOT EXISTS full_name TEXT,
   ADD COLUMN IF NOT EXISTS email_confirmed_at TIMESTAMP WITH TIME ZONE;
 
 COMMENT ON COLUMN public.profiles.language IS
-  'User preferred language for transactional emails: en (English) or pt (Portuguese / PT-BR)';
+  'User preferred language for transactional emails. English only.';
 
 -- ─── EMAIL EVENTS TABLE ────────────────────────────────────────────────────
 -- Audit log for every email sent. Used to:

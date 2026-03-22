@@ -52,9 +52,9 @@ function summarizeWeight(measurements, t) {
     return t('pages.insights.weight_stable');
   }
   if (delta > 0) {
-    return `Seu peso subiu cerca de ${delta.toFixed(1)} kg no período analisado.`;
+    return `Your weight increased by about ${delta.toFixed(1)} kg in the analyzed period.`;
   }
-  return `Seu peso caiu cerca de ${Math.abs(delta).toFixed(1)} kg no período analisado.`;
+  return `Your weight decreased by about ${Math.abs(delta).toFixed(1)} kg in the analyzed period.`;
 }
 
 function summarizeProtocols(protocols, t) {
@@ -64,10 +64,10 @@ function summarizeProtocols(protocols, t) {
   }
   const names = active
     .slice(0, 3)
-    .map((p) => p.name || 'Protocolo')
+    .map((p) => p.name || 'Protocol')
     .join(', ');
-  const extra = active.length > 3 ? ` e mais ${active.length - 3}` : '';
-  return `${active.length} protocolo${active.length > 1 ? 's' : ''} ativo${active.length > 1 ? 's' : ''}: ${names}${extra}.`;
+  const extra = active.length > 3 ? ` and ${active.length - 3} more` : '';
+  return `${active.length} active protocol${active.length > 1 ? 's' : ''}: ${names}${extra}.`;
 }
 
 export default function Insights() {
@@ -77,7 +77,7 @@ export default function Insights() {
       title={t('pages.insights.title')}
       subtitle={t('pages.insights.subtitle')}
       maxWidth="max-w-5xl"
-      fallbackDescription="A página de Insights abriu em modo seguro. O conteúdo principal falhou, mas a rota continua acessível."
+      fallbackDescription="The Insights page opened in safe mode. The main content failed, but the route remains accessible."
     >
       <InsightsContent />
     </SafePageBoundary>
@@ -217,7 +217,7 @@ function InsightsContent() {
   const caloriesPerDay = avg(
     Object.values(
       meals.reduce((accumulator, meal) => {
-        const date = meal?.date || 'sem-data';
+        const date = meal?.date || 'undated';
         accumulator[date] = Number(accumulator[date] || 0) + Number(meal?.total_calories || 0);
         return accumulator;
       }, {}),
@@ -242,17 +242,17 @@ function InsightsContent() {
         ? t('pages.insights.training_not_completed')
         : t('pages.insights.training_no_records')
       : completedWorkouts.length >= Math.max(3, Math.floor(days / 10))
-        ? `Sua consistência de treino no período está boa — ${completedWorkouts.length} sessões concluídas.`
-        : `Seu volume de treino no período está baixo (${completedWorkouts.length} sessões). Vale reforçar a frequência.`;
+        ? `Your training consistency in this period is strong — ${completedWorkouts.length} sessions completed.`
+        : `Your training volume in this period is low (${completedWorkouts.length} sessions). It may be worth increasing frequency.`;
 
   const nutritionText =
     caloriesPerDay > 0
-      ? `Sua média de ingestão registrada ficou em torno de ${formatNumber(caloriesPerDay)} kcal por dia.`
+      ? `Your average logged intake was about ${formatNumber(caloriesPerDay)} kcal per day.`
       : t('pages.insights.nutrition_insufficient');
 
   const recoveryText =
     averageSleep > 0
-      ? `Média de sono: ${averageSleep.toFixed(1)}h. Energia média: ${averageEnergy.toFixed(1)} / 5.`
+      ? `Average sleep: ${averageSleep.toFixed(1)}h. Average energy: ${averageEnergy.toFixed(1)} / 5.`
       : t('pages.insights.recovery_insufficient');
 
   const protocolsText = summarizeProtocols(protocols, t);
@@ -260,7 +260,7 @@ function InsightsContent() {
   return (
     <PageShell
       title="Insights"
-      subtitle="Uma leitura objetiva do seu histórico recente, sem gráficos complexos nem bloqueios artificiais."
+      subtitle="A focused read on your recent history, without noisy charts or artificial blockers."
       actions={
         <>
           {visibleRanges.map(([option]) => (
@@ -288,15 +288,15 @@ function InsightsContent() {
 
       {loading ? (
         <LoadingState
-          title="Carregando insights"
-          description="Estamos carregando as fontes de dados e mantendo a página aberta em modo seguro."
+          title="Loading insights"
+          description="We are loading the data sources while keeping the page available in safe mode."
         />
       ) : null}
 
       {!loading && hasErrors ? (
         <ErrorState
-          title="Insights em modo seguro"
-          description="Parte dos dados não carregou completamente, mas a página continua aberta e legível."
+          title="Insights in safe mode"
+          description="Some data did not load completely, but the page remains available and readable."
         />
       ) : null}
 
@@ -321,62 +321,62 @@ function InsightsContent() {
         <>
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Treinos concluídos"
+              label="Completed workouts"
               value={formatNumber(completedWorkouts.length)}
-              hint={`Período analisado: últimos ${days} dias`}
+              hint={`Period analyzed: last ${days} days`}
               icon={Activity}
             />
             <MetricCard
-              label="Sono médio"
+              label="Average sleep"
               value={averageSleep ? `${averageSleep.toFixed(1)} h` : '--'}
-              hint="Calculado a partir dos check-ins registrados."
+              hint="Calculated from recorded check-ins."
               icon={Moon}
             />
             <MetricCard
-              label="Calorias médias"
+              label="Average calories"
               value={caloriesPerDay ? `${formatNumber(caloriesPerDay)} kcal` : '--'}
-              hint="Média por dia com refeições registradas."
+              hint="Average per day with logged meals."
               icon={Brain}
             />
             <MetricCard
-              label="Protocolos ativos"
+              label="Active protocols"
               value={formatNumber(activeProtocols.length)}
-              hint="Protocolos que seguem ativos hoje."
+              hint="Protocols that are still active today."
               icon={Shield}
             />
           </section>
 
           <SectionCard
-            title="Leituras principais"
-            subtitle="Resumo textual do que o histórico recente está mostrando."
+            title="Key takeaways"
+            subtitle="Plain-language summary of what your recent history is showing."
           >
             <div className="grid gap-3 md:grid-cols-2">
               <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                <p className="font-semibold text-[hsl(var(--fg))]">Peso</p>
+                <p className="font-semibold text-[hsl(var(--fg))]">Weight</p>
                 <p className="mt-2">{summarizeWeight(measurements, t)}</p>
               </div>
               <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                <p className="font-semibold text-[hsl(var(--fg))]">Treino</p>
+                <p className="font-semibold text-[hsl(var(--fg))]">Training</p>
                 <p className="mt-2">{consistencyText}</p>
               </div>
               <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                <p className="font-semibold text-[hsl(var(--fg))]">Nutrição</p>
+                <p className="font-semibold text-[hsl(var(--fg))]">Nutrition</p>
                 <p className="mt-2">{nutritionText}</p>
               </div>
               <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                <p className="font-semibold text-[hsl(var(--fg))]">Recuperação</p>
+                <p className="font-semibold text-[hsl(var(--fg))]">Recovery</p>
                 <p className="mt-2">{recoveryText}</p>
               </div>
               <div className="atlas-card-muted p-4 text-sm leading-6 text-[hsl(var(--fg-2))] md:col-span-2">
-                <p className="font-semibold text-[hsl(var(--fg))]">Protocolos</p>
+                <p className="font-semibold text-[hsl(var(--fg))]">Protocols</p>
                 <p className="mt-2">{protocolsText}</p>
               </div>
             </div>
           </SectionCard>
 
           <SectionCard
-            title="Contagem de registros"
-            subtitle="Visão simples do volume de dados disponíveis no período."
+            title="Record count"
+            subtitle="Simple view of how much data is available in this period."
           >
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
@@ -389,7 +389,7 @@ function InsightsContent() {
               </div>
               <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Refeições
+                  Meals
                 </p>
                 <p className="mt-2 text-2xl font-bold text-[hsl(var(--fg))]">
                   {formatNumber(meals.length)}
@@ -397,7 +397,7 @@ function InsightsContent() {
               </div>
               <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Medições
+                  Measurements
                 </p>
                 <p className="mt-2 text-2xl font-bold text-[hsl(var(--fg))]">
                   {formatNumber(measurements.length)}
@@ -405,7 +405,7 @@ function InsightsContent() {
               </div>
               <div className="atlas-card-muted p-4 text-sm text-[hsl(var(--fg-2))]">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Treinos
+                  Workouts
                 </p>
                 <p className="mt-2 text-2xl font-bold text-[hsl(var(--fg))]">
                   {formatNumber(workouts.length)}
@@ -416,7 +416,7 @@ function InsightsContent() {
 
           {hasErrors ? (
             <StatusBanner tone="warning">
-              Algumas leituras podem estar incompletas porque uma ou mais fontes falharam.
+              Some readings may be incomplete because one or more sources failed.
             </StatusBanner>
           ) : null}
 
@@ -425,12 +425,12 @@ function InsightsContent() {
             <div>
               <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Block Review</p>
               <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">
-                Leitura consolidada de 4–12 semanas com aderência, deltas e próximo passo.
+                Consolidated 4–12 week readout with adherence, deltas, and the next best move.
               </p>
             </div>
             <Button asChild size="sm" variant="outline" className="shrink-0">
               <Link to={ROUTES.blockReview}>
-                Ver bloco <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                Open block <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
           </div>

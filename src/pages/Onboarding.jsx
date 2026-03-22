@@ -28,20 +28,20 @@ import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const GOALS = [
-  { id: 'fat_loss',    emoji: '🔥', label: 'Perda de gordura' },
-  { id: 'muscle_gain', emoji: '💪', label: 'Ganho muscular' },
-  { id: 'recomp',      emoji: '⚡', label: 'Recomposição' },
+  { id: 'fat_loss',    emoji: '🔥', label: 'Fat loss' },
+  { id: 'muscle_gain', emoji: '💪', label: 'Muscle gain' },
+  { id: 'recomp',      emoji: '⚡', label: 'Recomposition' },
   { id: 'performance', emoji: '🏆', label: 'Performance' },
-  { id: 'health',      emoji: '❤️', label: 'Saúde geral' },
-  { id: 'longevity',   emoji: '🌱', label: 'Longevidade' },
+  { id: 'health',      emoji: '❤️', label: 'General health' },
+  { id: 'longevity',   emoji: '🌱', label: 'Longevity' },
 ];
 
 const ACTIVITY_LEVELS = [
-  { id: 'sedentary',   label: 'Sedentário',   desc: 'Sem exercícios regulares' },
-  { id: 'light',       label: 'Leve',          desc: '1–2× por semana' },
-  { id: 'moderate',    label: 'Moderado',      desc: '3–4× por semana' },
-  { id: 'active',      label: 'Ativo',         desc: '5–6× por semana' },
-  { id: 'very_active', label: 'Muito ativo',   desc: '2× ao dia / atleta' },
+  { id: 'sedentary',   label: 'Sedentary',   desc: 'No regular exercise' },
+  { id: 'light',       label: 'Light',       desc: '1–2x per week' },
+  { id: 'moderate',    label: 'Moderate',    desc: '3–4x per week' },
+  { id: 'active',      label: 'Active',      desc: '5–6x per week' },
+  { id: 'very_active', label: 'Very active', desc: '2x per day / athlete' },
 ];
 
 // Remarketing data — collected for retargeting (transcript 2 playbook)
@@ -49,16 +49,16 @@ const HEAR_ABOUT_US = [
   { id: 'instagram',     label: 'Instagram / TikTok' },
   { id: 'youtube',       label: 'YouTube' },
   { id: 'google',        label: 'Google' },
-  { id: 'indication',    label: 'Indicação' },
-  { id: 'coach',         label: 'Meu coach / nutricionista' },
-  { id: 'other',         label: 'Outro' },
+  { id: 'indication',    label: 'Referral' },
+  { id: 'coach',         label: 'My coach / nutritionist' },
+  { id: 'other',         label: 'Other' },
 ];
 
 const SETUP_MESSAGES = [
-  'Calculando suas metas nutricionais...',
-  'Registrando primeiro checkpoint...',
-  'Configurando seu painel...',
-  'Seu Atlas Core está pronto.',
+  'Calculating your nutrition targets...',
+  'Saving your first checkpoint...',
+  'Setting up your dashboard...',
+  'Your Atlas Core is ready.',
 ];
 
 const TOTAL_STEPS = 4; // 0=welcome, 1=profile+goals, 2=first checkpoint, 3=path choice
@@ -99,7 +99,7 @@ function StepDots({ step, total }) {
     <div className="mb-7 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] px-4 py-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-          Etapa {step + 1} de {total}
+          Step {step + 1} of {total}
         </p>
         <span className="font-mono text-[12px] font-semibold text-[hsl(var(--brand))]">
           {Math.round(((step + 1) / total) * 100)}%
@@ -157,7 +157,7 @@ function FieldLabel({ children }) {
 function OptionalBadge() {
   return (
     <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal text-[hsl(var(--fg-3))]">
-      opcional
+      optional
     </span>
   );
 }
@@ -172,19 +172,19 @@ function StepWelcome() {
       </div>
       <div>
         <h2 className="text-[22px] font-bold tracking-tight mb-2">
-          Bem-vindo ao{' '}
+          Welcome to{' '}
           <span className="text-[hsl(var(--accent-primary))]">atlas</span>
           <span className="text-[hsl(var(--fg))]">.core</span>
         </h2>
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
-          3 passos rápidos para configurar seu painel e registrar seu primeiro ponto de dados.
+          Three quick steps to set up your dashboard and save your first data point.
         </p>
       </div>
       <div className="space-y-2 text-left">
         {[
-          { n: '01', title: 'Perfil e objetivos', desc: 'Quem você é e o que quer alcançar' },
-          { n: '02', title: 'Primeiro checkpoint', desc: 'Seu ponto de partida — você vai querer comparar com este momento' },
-          { n: '03', title: 'Escolha seu caminho', desc: 'Como quer começar esta semana' },
+          { n: '01', title: 'Profile and goals', desc: 'Who you are and what you want to achieve' },
+          { n: '02', title: 'First checkpoint', desc: 'Your starting point so you can compare against it later' },
+          { n: '03', title: 'Choose your path', desc: 'How you want to start this week' },
         ].map(({ n, title, desc }) => (
           <div
             key={n}
@@ -208,9 +208,9 @@ function StepProfileAndGoals({ form, set, toggle }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-[18px] font-bold mb-1">Qual é seu objetivo principal?</h2>
+        <h2 className="text-[18px] font-bold mb-1">What is your main goal?</h2>
         <p className="text-[12px] text-[hsl(var(--fg-2))]">
-          Define o foco do painel e das recomendações da IA
+          This shapes your dashboard and Atlas AI recommendations
         </p>
       </div>
 
@@ -228,11 +228,11 @@ function StepProfileAndGoals({ form, set, toggle }) {
 
       <div className="border-t border-[hsl(var(--border-h))] pt-4 space-y-3">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">
-          Dados básicos
+          Basic profile
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <FieldLabel>Altura (cm)</FieldLabel>
+            <FieldLabel>Height (cm)</FieldLabel>
             <Input
               type="number"
               value={form.height}
@@ -242,7 +242,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
             />
           </div>
           <div>
-            <FieldLabel>Peso atual (kg)</FieldLabel>
+            <FieldLabel>Current weight (kg)</FieldLabel>
             <Input
               type="number"
               step="0.1"
@@ -257,20 +257,20 @@ function StepProfileAndGoals({ form, set, toggle }) {
             />
           </div>
           <div>
-            <FieldLabel>Sexo biológico</FieldLabel>
+            <FieldLabel>Biological sex</FieldLabel>
             <Select value={form.sex} onValueChange={(v) => set('sex', v)}>
               <SelectTrigger className="atlas-field h-11 rounded-[12px] border-0 text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Masculino</SelectItem>
-                <SelectItem value="female">Feminino</SelectItem>
-                <SelectItem value="other">Outro</SelectItem>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <FieldLabel>Idade</FieldLabel>
+            <FieldLabel>Age</FieldLabel>
             <Input
               type="number"
               value={form.age}
@@ -284,7 +284,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>
-              Peso alvo (kg)<OptionalBadge />
+              Target weight (kg)<OptionalBadge />
             </FieldLabel>
             <Input
               type="number"
@@ -296,7 +296,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
             />
           </div>
           <div>
-            <FieldLabel>Nível de atividade</FieldLabel>
+            <FieldLabel>Activity level</FieldLabel>
             <Select value={form.activity_level} onValueChange={(v) => set('activity_level', v)}>
               <SelectTrigger className="atlas-field h-11 rounded-[12px] border-0 text-base">
                 <SelectValue />
@@ -316,7 +316,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
       {/* ── Remarketing data collection (transcript 2 playbook) ── */}
       <div className="border-t border-[hsl(var(--border-h))] pt-4 space-y-2.5">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">
-          Como você nos encontrou? <OptionalBadge />
+          How did you hear about us? <OptionalBadge />
         </p>
         <div className="flex flex-wrap gap-2">
           {HEAR_ABOUT_US.map((option) => {
@@ -346,16 +346,15 @@ function StepFirstCheckpoint({ form, set }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-[18px] font-bold mb-1">Primeiro checkpoint</h2>
+        <h2 className="text-[18px] font-bold mb-1">First checkpoint</h2>
         <p className="text-[12px] text-[hsl(var(--fg-2))] leading-relaxed">
-          Vamos registrar seu ponto de partida. Você vai poder comparar com este momento em
-          qualquer bloco futuro do Block Review.
+          Let’s save your starting point so you can compare future Block Reviews against it.
         </p>
       </div>
 
       <div className="space-y-3">
         <div>
-          <FieldLabel>Peso (kg)</FieldLabel>
+          <FieldLabel>Weight (kg)</FieldLabel>
           <Input
             type="number"
             step="0.1"
@@ -369,7 +368,7 @@ function StepFirstCheckpoint({ form, set }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>
-              Gordura corporal (%)<OptionalBadge />
+              Body fat (%)<OptionalBadge />
             </FieldLabel>
             <Input
               type="number"
@@ -382,7 +381,7 @@ function StepFirstCheckpoint({ form, set }) {
           </div>
           <div>
             <FieldLabel>
-              Cintura (cm)<OptionalBadge />
+              Waist (cm)<OptionalBadge />
             </FieldLabel>
             <Input
               type="number"
@@ -398,8 +397,8 @@ function StepFirstCheckpoint({ form, set }) {
 
       <div className="rounded-xl bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.15)] px-4 py-3">
         <p className="text-[12px] text-[hsl(var(--fg-2))] leading-5">
-          Este checkpoint fica salvo em <strong className="text-[hsl(var(--fg))]">Medições</strong> e
-          serve como referência para comparar progresso no{' '}
+          This checkpoint is saved in <strong className="text-[hsl(var(--fg))]">Measurements</strong> and
+          serves as the baseline for progress comparisons in{' '}
           <strong className="text-[hsl(var(--fg))]">Block Review</strong>.
         </p>
       </div>
@@ -454,9 +453,9 @@ function StepPathChoice({ form, set }) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-[18px] font-bold mb-1">Como quer começar?</h2>
+        <h2 className="text-[18px] font-bold mb-1">How do you want to start?</h2>
         <p className="text-[12px] text-[hsl(var(--fg-2))]">
-          Você pode mudar isso a qualquer momento dentro do app
+          You can change this anytime inside the app
         </p>
       </div>
 
@@ -464,13 +463,13 @@ function StepPathChoice({ form, set }) {
         selected={form.chosen_path === 'fresh'}
         onClick={() => set('chosen_path', 'fresh')}
         icon={Compass}
-        title="Começar do zero esta semana"
-        desc="Vou te mostrar exatamente o que registrar nos próximos 7 dias para gerar seus primeiros insights."
+        title="Start fresh this week"
+        desc="We’ll show you exactly what to log over the next 7 days so your first insights are useful."
         items={[
-          'Log de refeições hoje (Nutrição)',
-          'Criar ou iniciar um plano de treino (Treinos)',
-          'Acompanhar peso + medidas 2× por semana',
-          'Configurar protocolos ativos, se houver',
+          'Log meals today in Nutrition',
+          'Create or start a workout plan in Workouts',
+          'Track weight and measurements twice this week',
+          'Set up active protocols, if needed',
         ]}
       />
 
@@ -478,13 +477,13 @@ function StepPathChoice({ form, set }) {
         selected={form.chosen_path === 'own'}
         onClick={() => set('chosen_path', 'own')}
         icon={Dumbbell}
-        title="Vou configurar no meu ritmo"
-        desc="Já tenho uma rotina. Vou explorar os módulos que fazem sentido para mim."
+        title="I’ll set it up at my own pace"
+        desc="I already have a routine. I’ll explore the modules that matter to me."
       />
 
       {!form.chosen_path && (
         <p className="text-[11px] text-center text-[hsl(var(--fg-3))]">
-          Selecione uma das opções para continuar
+          Select one option to continue
         </p>
       )}
     </div>
@@ -509,10 +508,10 @@ function PaywallPrimingScreen({ onContinue }) {
           <ShieldCheck className="w-7 h-7 text-[hsl(var(--brand))]" strokeWidth={1.75} />
         </div>
         <h2 className="text-[20px] font-bold tracking-tight mb-1">
-          Como seu período gratuito funciona
+          How your free trial works
         </h2>
         <p className="text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
-          7 dias com acesso completo. Sem cartão de crédito agora.
+          7 days of full access. No credit card required right now.
         </p>
       </div>
 
@@ -520,23 +519,23 @@ function PaywallPrimingScreen({ onContinue }) {
       <div className="space-y-2">
         {[
           {
-            day: 'Hoje',
-            title: 'Acesso completo desbloqueado',
-            desc: 'Treinos, nutrição, IA e exames — tudo disponível desde o primeiro dia.',
+            day: 'Today',
+            title: 'Full access unlocked',
+            desc: 'Workouts, nutrition, AI, and labs are available from day one.',
             icon: '🚀',
             highlight: true,
           },
           {
             day: 'Dia 5',
-            title: 'Lembrete por email',
-            desc: 'Avisamos antes do seu período gratuito encerrar.',
+            title: 'Email reminder',
+            desc: 'We’ll remind you before your trial ends.',
             icon: '📧',
             highlight: false,
           },
           {
-            day: 'Dia 7',
-            title: 'Período gratuito encerra',
-            desc: 'Escolha um plano para continuar ou perca o acesso.',
+            day: 'Day 7',
+            title: 'Trial ends',
+            desc: 'Choose a plan to continue or lose access.',
             icon: '⏰',
             highlight: false,
           },
@@ -570,10 +569,10 @@ function PaywallPrimingScreen({ onContinue }) {
           <Crown className="w-4 h-4 text-[hsl(var(--brand))] shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
             <p className="text-[12px] font-semibold text-[hsl(var(--fg))] leading-snug">
-              Plano Anual — economize até 40%
+              Annual plan — save up to 40%
             </p>
             <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">
-              Após o período gratuito, o plano anual garante o menor custo por mês. Você pode escolher na hora de ativar.
+              After the trial, the annual plan gives you the lowest monthly cost. You can choose it when you activate.
             </p>
           </div>
         </div>
@@ -586,11 +585,11 @@ function PaywallPrimingScreen({ onContinue }) {
             <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" strokeWidth={1.5} />
           ))}
           <span className="text-[11px] font-semibold ml-1 text-[hsl(var(--fg-2))]">
-            4.9 · 500+ atletas
+            4.9 · 500+ athletes
           </span>
         </div>
         <p className="text-[12px] text-[hsl(var(--fg-2))] italic leading-relaxed">
-          "Finalmente um app que centraliza treino, nutrição e exames no mesmo lugar."
+          "Finally, one app that brings training, nutrition, and labs together in the same place."
         </p>
       </div>
 
@@ -599,11 +598,11 @@ function PaywallPrimingScreen({ onContinue }) {
         onClick={onContinue}
         className="btn btn-primary w-full h-12 rounded-2xl text-[14px] gap-2"
       >
-        Começar meu período gratuito <ArrowRight className="w-4 h-4" strokeWidth={2} />
+        Start my free trial <ArrowRight className="w-4 h-4" strokeWidth={2} />
       </button>
 
       <p className="text-center text-[11px] text-[hsl(var(--fg-3))]">
-        Sem cartão de crédito · Cancele quando quiser
+        No credit card · Cancel anytime
       </p>
     </motion.div>
   );
@@ -665,14 +664,14 @@ function SetupGenerationScreen({ onDone }) {
           </motion.p>
         </AnimatePresence>
         {!done && (
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">Configurando seu Atlas Core...</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">Setting up your Atlas Core...</p>
         )}
       </div>
 
       {done && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <button onClick={onDone} className="btn btn-primary h-12 px-8 rounded-2xl text-[14px] gap-2">
-            <ArrowRight className="w-4 h-4" strokeWidth={2} /> Entrar no app
+            <ArrowRight className="w-4 h-4" strokeWidth={2} /> Enter the app
           </button>
         </motion.div>
       )}
@@ -704,11 +703,11 @@ function SuccessScreen({ chosenPath, onDone }) {
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
         className="space-y-2"
       >
-        <h2 className="text-[24px] font-bold">Tudo pronto! 🎉</h2>
+        <h2 className="text-[24px] font-bold">All set! 🎉</h2>
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
           {isFresh
-            ? 'Seu primeiro checkpoint foi salvo. Vá para Today e comece seu primeiro log de hoje.'
-            : 'Seu Atlas Core está configurado. Explore os módulos no ritmo que preferir.'}
+            ? 'Your first checkpoint is saved. Go to Today and start your first log of the day.'
+            : 'Your Atlas Core is ready. Explore the modules at your own pace.'}
         </p>
       </motion.div>
 
@@ -718,12 +717,12 @@ function SuccessScreen({ chosenPath, onDone }) {
           className="rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] p-4 text-left space-y-2"
         >
           <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-            Esta semana, foque em
+            This week, focus on
           </p>
           {[
-            { icon: UtensilsCrossed, text: 'Registrar refeições em Nutrição' },
-            { icon: Dumbbell, text: 'Criar ou iniciar um plano em Treinos' },
-            { icon: Scale, text: 'Logar medidas 2× esta semana' },
+            { icon: UtensilsCrossed, text: 'Log meals in Nutrition' },
+            { icon: Dumbbell, text: 'Create or start a plan in Workouts' },
+            { icon: Scale, text: 'Log measurements twice this week' },
           ].map(({ icon: Icon, text }, i) => (
             <motion.div
               key={i}
@@ -743,7 +742,7 @@ function SuccessScreen({ chosenPath, onDone }) {
         onClick={onDone}
         className="btn btn-primary w-full h-12 rounded-2xl text-[14px] gap-2 mt-2"
       >
-        <ArrowRight className="w-4 h-4" strokeWidth={2} /> Entrar no app
+        <ArrowRight className="w-4 h-4" strokeWidth={2} /> Enter the app
       </motion.button>
     </div>
   );
@@ -950,7 +949,7 @@ export default function Onboarding() {
                   disabled={!canContinue()}
                   className="btn btn-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1"
                 >
-                  Continuar <ChevronRight className="w-4 h-4" strokeWidth={2} />
+                  Continue <ChevronRight className="w-4 h-4" strokeWidth={2} />
                 </button>
               ) : (
                 <button
@@ -960,7 +959,7 @@ export default function Onboarding() {
                 >
                   {saving
                     ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : <><Zap className="w-4 h-4" strokeWidth={2} /> Configurar meu Atlas Core</>
+                    : <><Zap className="w-4 h-4" strokeWidth={2} /> Set up my Atlas Core</>
                   }
                 </button>
               )}
@@ -968,8 +967,8 @@ export default function Onboarding() {
 
             {step === 0 && (
               <p className="text-center text-[11px] text-[hsl(var(--fg-2))] mt-4">
-                Ao continuar, você aceita os{' '}
-                <span className="underline cursor-pointer">Termos de Uso</span>.
+                By continuing, you accept the{' '}
+                <span className="underline cursor-pointer">Terms of Use</span>.
               </p>
             )}
           </>

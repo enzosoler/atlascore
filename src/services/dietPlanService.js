@@ -1,6 +1,6 @@
 /**
  * Atlas Core — Diet Plan Service (Supabase)
- * Substitui base44.entities.DietPlan nas páginas MyDiet e afins.
+ * Replaces base44.entities.DietPlan in MyDiet and related pages.
  * Tabela: diet_plans
  * Colunas esperadas: id, user_id, name, objective, total_calories, total_protein,
  *   total_carbs, total_fat, meals (jsonb), active, created_by_type, version,
@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 const TABLE = 'diet_plans';
 
-/** Lista os planos ativos do usuário (mais recente primeiro) */
+/** List the user's active plans (most recent first). */
 export async function getActiveDietPlans(userId) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -22,7 +22,7 @@ export async function getActiveDietPlans(userId) {
   return data || [];
 }
 
-/** Cria um novo plano */
+/** Create a new plan. */
 export async function createDietPlan(userId, plan) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -33,7 +33,7 @@ export async function createDietPlan(userId, plan) {
   return data;
 }
 
-/** Atualiza um plano existente */
+/** Update an existing plan. */
 export async function updateDietPlan(id, patch) {
   const { data, error } = await supabase
     .from(TABLE)
@@ -45,7 +45,7 @@ export async function updateDietPlan(id, patch) {
   return data;
 }
 
-/** Desativa todos os planos ativos do usuário (usado antes de criar novo) */
+/** Deactivate all active plans for the user (used before creating a new one). */
 export async function deactivateAllDietPlans(userId) {
   const { error } = await supabase
     .from(TABLE)
