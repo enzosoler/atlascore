@@ -51,8 +51,8 @@ export default function RoleGate({ page, roles, redirect = true, children }) {
         <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--err)/0.08)] flex items-center justify-center">
           <span className="text-2xl">🔒</span>
         </div>
-        <p className="t-subtitle">Acesso Restrito</p>
-        <p className="t-caption max-w-xs">Você não tem permissão para acessar este recurso.</p>
+        <p className="t-subtitle">Restricted Access</p>
+        <p className="t-caption max-w-xs">You don't have permission to access this resource.</p>
       </div>
     );
   }

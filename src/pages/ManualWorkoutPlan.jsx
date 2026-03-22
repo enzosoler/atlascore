@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Plus, 
   Trash2, 
   Save, 
-  Dumbbell, 
   Search, 
   Loader2,
-  ChevronDown,
-  ChevronUp,
-  GripVertical
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -20,14 +16,11 @@ import { toast } from 'sonner';
 import { searchExercises } from '@/lib/exerciseDB';
 import { 
   AppContainer, 
-  Card, 
-  PageHeader, 
-  Section,
-  ActionRow 
+  Card
 } from '@/components/shared/AppContainer';
+import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 
 export default function ManualWorkoutPlan() {
   const { user } = useAuth();
@@ -144,11 +137,14 @@ export default function ManualWorkoutPlan() {
 
   return (
     <AppContainer maxWidth="max-w-4xl">
-      <div className="flex items-center gap-4 mb-6">
+      <div className="mb-6 flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="atlas-display-title text-2xl">Criar Plano Manual</h1>
+        <div>
+          <p className="atlas-overline">Train</p>
+          <h1 className="atlas-display-title text-2xl">Criar Plano Manual</h1>
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -160,6 +156,7 @@ export default function ManualWorkoutPlan() {
                 value={planName} 
                 onChange={(e) => setPlanName(e.target.value)}
                 placeholder="Ex: Hipertrofia ABC"
+                className="atlas-field h-11 rounded-[12px] border-0 px-4"
               />
             </div>
             <div className="space-y-2">
@@ -168,13 +165,14 @@ export default function ManualWorkoutPlan() {
                 value={objective} 
                 onChange={(e) => setObjective(e.target.value)}
                 placeholder="Ex: Ganho de massa muscular"
+                className="atlas-field h-11 rounded-[12px] border-0 px-4"
               />
             </div>
           </div>
         </Card>
 
         <div className="space-y-4">
-          {days.map((day, dayIndex) => (
+          {days.map((day) => (
             <DayEditor 
               key={day.id}
               day={day}
@@ -187,14 +185,14 @@ export default function ManualWorkoutPlan() {
           ))}
         </div>
 
-        <div className="flex justify-between items-center pt-4">
-          <Button variant="outline" onClick={addDay} className="gap-2">
+        <div className="flex items-center justify-between pt-4">
+          <SecondaryButton onClick={addDay} className="gap-2">
             <Plus className="w-4 h-4" /> Adicionar Dia
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+          </SecondaryButton>
+          <PrimaryButton onClick={handleSave} disabled={isSaving} className="gap-2">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Salvar Plano
-          </Button>
+          </PrimaryButton>
         </div>
       </div>
     </AppContainer>
@@ -224,19 +222,19 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
   };
 
   return (
-    <Card className="overflow-hidden">
-      <div className="bg-[hsl(var(--shell))] px-5 py-3 flex items-center justify-between border-b border-[hsl(var(--border-h))]">
+    <Card className="overflow-hidden rounded-[18px]">
+      <div className="flex items-center justify-between border-b border-[hsl(var(--border-h))] bg-[hsl(var(--shell))] px-5 py-3">
         <div className="flex items-center gap-3 flex-1">
           <Input 
             value={day.name} 
             onChange={(e) => onUpdate({ name: e.target.value })}
-            className="max-w-[150px] h-8 font-semibold bg-transparent border-none focus-visible:ring-0 px-0"
+            className="max-w-[150px] h-8 border-none bg-transparent px-0 font-semibold focus-visible:ring-0"
           />
           <Input 
             value={day.focus} 
             onChange={(e) => onUpdate({ focus: e.target.value })}
             placeholder="Foco (ex: Peito e Tríceps)"
-            className="max-w-[250px] h-8 text-sm bg-transparent border-none focus-visible:ring-0 px-0 text-[hsl(var(--fg-2))]"
+            className="max-w-[250px] h-8 border-none bg-transparent px-0 text-sm text-[hsl(var(--fg-2))] focus-visible:ring-0"
           />
         </div>
         <Button variant="ghost" size="icon" onClick={onRemove} className="text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)]">
@@ -246,7 +244,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
 
       <div className="p-4 space-y-3">
         {day.exercises.map((ex, idx) => (
-          <div key={ex.id} className="flex flex-col sm:flex-row gap-3 p-3 rounded-xl bg-[hsl(var(--bg-surface))] border border-[hsl(var(--border-h))]">
+          <div key={ex.id} className="flex flex-col gap-3 rounded-[16px] border border-[hsl(var(--border-h))] bg-[hsl(var(--bg-surface))] p-3 sm:flex-row">
             <div className="flex items-center gap-3 flex-1">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--shell))] text-[10px] font-bold text-[hsl(var(--fg-2))]">
                 {idx + 1}
@@ -264,7 +262,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
                   type="number" 
                   value={ex.sets} 
                   onChange={(e) => onUpdateExercise(ex.id, { sets: e.target.value })}
-                  className="w-14 h-8 text-center text-xs"
+                  className="atlas-field h-9 w-14 rounded-[10px] border-0 px-2 text-center text-xs"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -272,7 +270,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
                 <Input 
                   value={ex.reps} 
                   onChange={(e) => onUpdateExercise(ex.id, { reps: e.target.value })}
-                  className="w-16 h-8 text-center text-xs"
+                  className="atlas-field h-9 w-16 rounded-[10px] border-0 px-2 text-center text-xs"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -281,7 +279,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
                   type="number" 
                   value={ex.rest_seconds} 
                   onChange={(e) => onUpdateExercise(ex.id, { rest_seconds: e.target.value })}
-                  className="w-16 h-8 text-center text-xs"
+                  className="atlas-field h-9 w-16 rounded-[10px] border-0 px-2 text-center text-xs"
                 />
               </div>
               <Button variant="ghost" size="icon" onClick={() => onRemoveExercise(ex.id)} className="mt-4 text-[hsl(var(--fg-3))] hover:text-[hsl(var(--err))]">
@@ -298,13 +296,13 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
               placeholder="Buscar exercício para adicionar..." 
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-9 h-10 text-sm"
+              className="atlas-field h-11 rounded-[12px] border-0 pl-9 text-sm"
             />
             {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-[hsl(var(--fg-3))]" />}
           </div>
 
           {searchResults.length > 0 && (
-            <div className="absolute z-10 left-0 right-0 mt-1 bg-[hsl(var(--card))] border border-[hsl(var(--border-h))] rounded-xl shadow-lg overflow-hidden">
+            <div className="absolute left-0 right-0 z-10 mt-1 overflow-hidden rounded-[16px] border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] shadow-lg">
               {searchResults.map(result => (
                 <button
                   key={result.id}

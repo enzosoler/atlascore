@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
 import { Sparkles, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
+import { EmptyState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
 
 const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'Você' };
 const CREATOR_BADGE = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutral' };
@@ -14,7 +16,7 @@ const CREATOR_BADGE = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutra
 function ExerciseCard({ exercise, index }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="surface">
+    <div className="atlas-card rounded-[18px]">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-3 text-left"
@@ -49,19 +51,19 @@ function ExerciseCard({ exercise, index }) {
         <div className="px-4 pb-3 border-t border-[hsl(var(--border-h))] pt-3 space-y-2">
           <div className="grid grid-cols-3 gap-2 text-[12px]">
             {exercise.sets > 0 && (
-              <div className="rounded-lg bg-[hsl(var(--shell))] p-2 text-center">
+            <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
                 <p className="t-label">Séries</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.sets}</p>
               </div>
             )}
             {exercise.reps && (
-              <div className="rounded-lg bg-[hsl(var(--shell))] p-2 text-center">
+            <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
                 <p className="t-label">Reps</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.reps}</p>
               </div>
             )}
             {exercise.rest_seconds > 0 && (
-              <div className="rounded-lg bg-[hsl(var(--shell))] p-2 text-center">
+            <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
                 <p className="t-label">Descanso</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.rest_seconds}s</p>
               </div>
@@ -85,7 +87,7 @@ function WorkoutDayCard({ day }) {
   const [open, setOpen] = useState(false);
   const exercises = day.exercises || [];
   return (
-    <div className="surface p-0 overflow-hidden">
+    <div className="atlas-card overflow-hidden rounded-[18px] p-0">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-5 py-4 text-left"
@@ -248,86 +250,83 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh] gap-2 t-small text-[hsl(var(--fg-2))]">
+      <div className="flex min-h-[50vh] items-center justify-center gap-2 t-small text-[hsl(var(--fg-2))]">
         <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap pb-5 border-b border-[hsl(var(--border-h))]">
-        <div>
-          <h1 className="t-headline">Meu Treino</h1>
-          <p className="t-small mt-1">Plano de treino ativo prescrito</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate(ROUTES.manualWorkout)}
-            className="btn btn-secondary gap-1.5"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Criar Manual
-          </button>
-          <button
-            onClick={generate}
-            disabled={generating}
-            className="btn btn-secondary gap-1.5"
-          >
-            {generating ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5" />
-            )}
-            {plan ? 'Gerar novo plano' : 'Gerar plano por IA'}
-          </button>
-        </div>
-      </div>
+    <AppContainer maxWidth="max-w-3xl">
+      <PageHeader
+        eyebrow="Train"
+        title="Meu Treino"
+        subtitle="Visualize o plano ativo, compare origem e revise a estrutura de dias e exercícios com leitura rápida."
+        actions={(
+          <div className="flex flex-wrap gap-2">
+            <SecondaryButton
+              onClick={() => navigate(ROUTES.manualWorkout)}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Criar Manual
+            </SecondaryButton>
+            <PrimaryButton
+              onClick={generate}
+              disabled={generating}
+              className="gap-2"
+            >
+              {generating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {plan ? 'Gerar novo plano' : 'Gerar plano por IA'}
+            </PrimaryButton>
+          </div>
+        )}
+      />
 
       {genError && (
-        <div className="rounded-xl border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.06)] px-4 py-3">
-          <p className="text-[13px] text-[hsl(var(--err))]">{genError}</p>
-        </div>
+        <StatusBanner tone="error">{genError}</StatusBanner>
       )}
 
       {!plan ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">
-            <Dumbbell className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} />
-          </div>
-          <p className="t-subtitle mb-1">Nenhum plano de treino ativo</p>
-          <p className="t-caption mb-4">
-            Gere um plano personalizado com IA baseado no seu perfil e objetivos.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => navigate(ROUTES.manualWorkout)}
-              className="btn btn-secondary gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Criar Manualmente
-            </button>
-            <button
-              onClick={generate}
-              disabled={generating}
-              className="btn btn-primary gap-1.5"
-            >
-              {generating ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5" />
-              )}
-              Gerar com IA
-            </button>
-          </div>
-        </div>
+        <Card className="px-5 py-4">
+          <EmptyState
+            icon={Dumbbell}
+            title="Nenhum plano de treino ativo"
+            description="Crie um plano manual ou gere uma estrutura com IA baseada no seu perfil e objetivos."
+            action={(
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <SecondaryButton
+                  onClick={() => navigate(ROUTES.manualWorkout)}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Criar Manualmente
+                </SecondaryButton>
+                <PrimaryButton
+                  onClick={generate}
+                  disabled={generating}
+                  className="gap-2"
+                >
+                  {generating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Gerar com IA
+                </PrimaryButton>
+              </div>
+            )}
+          />
+        </Card>
       ) : (
         <>
-          {/* Plan header */}
-          <div className="surface p-5 space-y-3">
+          <Section eyebrow="Plan" title={plan.name} subtitle={plan.objective || 'Plano ativo pronto para execução.'}>
+            <Card className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="t-title flex-1">{plan.name}</p>
               <span
                 className={`badge ${CREATOR_BADGE[plan.created_by_type] || 'badge-neutral'} gap-1`}
               >
@@ -349,28 +348,29 @@ Crie um plano com 4-5 dias de treino com exercícios reais, séries, repetiçõe
                 {new Date(plan.start_date + 'T12:00').toLocaleDateString('pt-BR')}
               </p>
             )}
-          </div>
+            </Card>
+          </Section>
 
-          {/* Days */}
-          <div>
-            <p className="t-label mb-3">
-              Dias de treino ({(plan.days || []).length})
-            </p>
+          <Section
+            eyebrow="Structure"
+            title={`Dias de treino (${(plan.days || []).length})`}
+            subtitle="Cada card mostra o foco do dia e abre os exercícios detalhados."
+          >
             <div className="space-y-2">
               {(plan.days || []).map((day, i) => (
                 <WorkoutDayCard key={i} day={day} />
               ))}
             </div>
-          </div>
+          </Section>
 
           {plan.notes && (
-            <div className="surface p-4">
+            <Card className="p-4">
               <p className="t-label mb-1">Observações</p>
               <p className="t-body text-[hsl(var(--fg-2))]">{plan.notes}</p>
-            </div>
+            </Card>
           )}
         </>
       )}
-    </div>
+    </AppContainer>
   );
 }

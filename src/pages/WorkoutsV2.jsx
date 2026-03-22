@@ -22,11 +22,12 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
-import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
+import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
+import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import {
   getActiveWorkoutPlans,
   createWorkoutPlan,
@@ -158,7 +159,7 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
   };
 
   return (
-    <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.4)] overflow-hidden">
+    <div className="overflow-hidden rounded-[16px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.4)]">
       {/* Day header */}
       <button
         onClick={() => setExpanded((v) => !v)}
@@ -221,7 +222,7 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
             <div className="px-3 pb-3 pt-2">
               <button
                 onClick={() => setShowSearch(true)}
-                className="flex items-center gap-1.5 w-full px-3 py-2 rounded-lg border border-dashed border-[hsl(var(--border))] text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--brand))] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] transition-colors"
+                className="flex w-full items-center gap-1.5 rounded-[12px] border border-dashed border-[hsl(var(--border))] px-3 py-2.5 text-xs text-[hsl(var(--fg-3))] transition-colors hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] hover:text-[hsl(var(--brand))]"
               >
                 <Search className="w-3.5 h-3.5" />
                 Add exercise from library
@@ -335,7 +336,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full sm:max-w-lg bg-[hsl(var(--card))] rounded-t-3xl sm:rounded-2xl border border-[hsl(var(--border))] flex flex-col max-h-[92vh] sm:max-h-[85vh] overflow-hidden">
+      <div className="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-[28px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-h-[85vh] sm:max-w-lg sm:rounded-[24px]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[hsl(var(--border))] flex-shrink-0">
@@ -379,7 +380,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
-              className="w-full h-10 px-3.5 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm text-[hsl(var(--fg))] placeholder-[hsl(var(--fg-3))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.4)]"
+              className="atlas-field h-11 w-full rounded-[12px] border-0 px-4 text-sm"
             />
           </div>
 
@@ -392,7 +393,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
               placeholder={isEnglish ? 'e.g. Hypertrophy, strength, fat loss…' : 'Ex.: hipertrofia, força, perda de gordura…'}
               value={objective}
               onChange={(e) => setObjective(e.target.value)}
-              className="w-full h-10 px-3.5 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm text-[hsl(var(--fg))] placeholder-[hsl(var(--fg-3))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.4)]"
+              className="atlas-field h-11 w-full rounded-[12px] border-0 px-4 text-sm"
             />
           </div>
 
@@ -405,7 +406,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
                 <button
                   key={f}
                   onClick={() => setFrequency(f)}
-                  className={`flex-1 h-9 rounded-xl text-sm font-semibold transition-colors ${
+                  className={`flex-1 h-10 rounded-[12px] text-sm font-semibold transition-colors ${
                     frequency === f
                       ? 'bg-[hsl(var(--brand))] text-white'
                       : 'bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill-secondary))]'
@@ -443,14 +444,14 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
           <button
             onClick={onClose}
             disabled={saving}
-            className="flex-1 h-11 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm font-semibold text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill-secondary))] transition-colors disabled:opacity-40"
+            className="flex-1 h-11 rounded-[12px] bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-sm font-semibold text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill-secondary))] transition-colors disabled:opacity-40"
           >
             {isEnglish ? 'Cancel' : 'Cancelar'}
           </button>
           <button
             onClick={handleSave}
             disabled={saving || !isPlanValid}
-            className="flex-1 h-11 rounded-xl bg-[hsl(var(--brand))] text-sm font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
+            className="flex flex-1 items-center justify-center gap-2 h-11 rounded-[12px] bg-[hsl(var(--brand))] text-sm font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : isEnglish ? 'Save Plan' : 'Salvar plano'}
           </button>
@@ -468,7 +469,7 @@ function DayCard({ day, dayIndex, onStart }) {
   const exerciseCount = (day.exercises || []).length;
 
   return (
-    <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)] overflow-hidden">
+    <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)]">
       <button
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
@@ -484,7 +485,7 @@ function DayCard({ day, dayIndex, onStart }) {
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onStart(dayIndex); }}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[hsl(var(--brand))] text-white text-xs font-bold hover:opacity-90 transition-colors"
+          className="flex-shrink-0 flex items-center gap-1.5 rounded-[12px] bg-[hsl(var(--brand))] px-3 py-2 text-xs font-bold text-white transition-colors hover:opacity-90"
         >
           <Play className="w-3 h-3 fill-current" />
           Start
@@ -525,7 +526,7 @@ function SessionCard({ session }) {
     : 0;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)]">
+    <div className="flex items-center gap-3 rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)] px-4 py-3.5">
       <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
       </div>
@@ -717,59 +718,82 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
 
   // ── List mode ─────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))]">
-
-      {/* Page Header */}
-      <div className="mx-auto max-w-3xl px-4 pt-6 pb-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">{isEnglish ? 'Training' : 'Treino'}</p>
-            <h1 className="text-2xl font-bold text-[hsl(var(--fg))] mt-0.5">{isEnglish ? 'Workouts' : 'Treinos'}</h1>
-          </div>
-          <div className="flex items-center gap-2">
+    <AppContainer maxWidth="max-w-3xl">
+      <PageHeader
+        eyebrow={isEnglish ? 'Training' : 'Treino'}
+        title={isEnglish ? 'Workouts' : 'Treinos'}
+        subtitle={isEnglish
+          ? 'Manage your active plan, launch focused sessions, and keep recent training history easy to scan.'
+          : 'Gerencie o plano ativo, inicie sessões focadas e acompanhe o histórico recente com leitura rápida.'}
+        actions={(
+          <div className="flex flex-wrap gap-2">
             {can('ai_workout_generation') ? (
-              <button
-                onClick={() => setShowAIGen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[hsl(var(--brand)/0.12)] border border-[hsl(var(--brand)/0.25)] text-[hsl(var(--brand))] text-sm font-semibold hover:bg-[hsl(var(--brand)/0.22)] transition-colors"
-              >
-                <Sparkles className="w-4 h-4" />
-                {isEnglish ? 'AI Plan' : 'IA Plano'}
-              </button>
+              <SecondaryButton className="gap-2" onClick={() => setShowAIGen(true)}>
+                <Sparkles className="h-4 w-4" />
+                {isEnglish ? 'AI Plan' : 'Plano IA'}
+              </SecondaryButton>
             ) : null}
-            <button
-              onClick={() => setShowCreatePlan(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[hsl(var(--brand)/0.12)] border border-[hsl(var(--brand)/0.25)] text-[hsl(var(--brand))] text-sm font-semibold hover:bg-[hsl(var(--brand)/0.22)] transition-colors"
-            >
-              <Plus className="w-4 h-4" />
+            <PrimaryButton className="gap-2" onClick={() => setShowCreatePlan(true)}>
+              <Plus className="h-4 w-4" />
               {isEnglish ? 'New Plan' : 'Novo plano'}
-            </button>
-            <button
-              onClick={handleStartEmpty}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-[hsl(var(--fg-2))] text-sm font-medium hover:bg-[hsl(var(--fill-secondary))] transition-colors"
-            >
-              <Zap className="w-4 h-4" />
+            </PrimaryButton>
+            <SecondaryButton className="gap-2" onClick={handleStartEmpty}>
+              <Zap className="h-4 w-4" />
               {isEnglish ? 'Free Workout' : 'Treino livre'}
-            </button>
+            </SecondaryButton>
           </div>
+        )}
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Card className="px-4 py-4">
+            <p className="atlas-overline">{isEnglish ? 'Status' : 'Status'}</p>
+            <p className="mt-3 text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {activePlan ? activePlan.name : (isEnglish ? 'No active plan' : 'Sem plano ativo')}
+            </p>
+            <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              {activePlan
+                ? `${days.length} ${isEnglish ? 'days ready to execute' : 'dias prontos para executar'}`
+                : (isEnglish ? 'Create a plan or jump into a free workout.' : 'Crie um plano ou comece um treino livre.')}
+            </p>
+          </Card>
+          <Card className="px-4 py-4">
+            <p className="atlas-overline">{isEnglish ? 'Recent sessions' : 'Sessões recentes'}</p>
+            <p className="mt-3 font-mono text-[24px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">
+              {recentSessions.length}
+            </p>
+            <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              {isEnglish ? 'Logged and ready for comparison.' : 'Registradas e prontas para comparação.'}
+            </p>
+          </Card>
+          <Card className="px-4 py-4">
+            <p className="atlas-overline">{isEnglish ? 'Personal records' : 'Records'}</p>
+            <p className="mt-3 font-mono text-[24px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">
+              {Object.keys(personalRecords || {}).length}
+            </p>
+            <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              {isEnglish ? 'Available during execution as live feedback.' : 'Disponíveis durante a execução como feedback ao vivo.'}
+            </p>
+          </Card>
         </div>
-      </div>
+      </PageHeader>
 
-      <div className="mx-auto max-w-3xl px-4 pb-10 space-y-8 sm:px-6 lg:px-8">
-
-        {/* Loading */}
+      <div className="space-y-8 pb-10">
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-6 h-6 text-[hsl(var(--brand))] animate-spin" />
           </div>
         )}
 
-        {/* Active Plan */}
         {!isLoading && activePlan && (
-          <section>
-            <div className="rounded-2xl border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.08)] px-4 py-4 mb-4">
+          <Section
+            eyebrow={isEnglish ? 'Active plan' : 'Plano ativo'}
+            title={activePlan.name}
+            subtitle={activePlan.objective || (isEnglish ? 'Structured plan ready for execution.' : 'Plano estruturado pronto para execução.')}
+          >
+            <Card className="mb-4 border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.12),transparent_34%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-4 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[hsl(var(--brand)/0.2)] flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--brand)/0.2)]">
                     <Zap className="w-4 h-4 text-[hsl(var(--brand))]" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -790,54 +814,50 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
                 </div>
                 <button
                   onClick={() => setShowCreatePlan(true)}
-                  className="flex-shrink-0 text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors px-2 py-1 rounded-lg hover:bg-[hsl(var(--fill))]"
+                  className="flex-shrink-0 rounded-[10px] px-2 py-1 text-xs text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg-2))]"
                 >
                   {isEnglish ? 'Replace' : 'Substituir'}
                 </button>
               </div>
-            </div>
+            </Card>
 
             <div className="space-y-2.5">
               {days.map((day, i) => (
                 <DayCard key={i} day={day} dayIndex={i} onStart={handleStartFromPlan} />
               ))}
             </div>
-          </section>
+          </Section>
         )}
 
-        {/* No plan state */}
         {!isLoading && !activePlan && (
-          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)] px-6 py-10 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--fill))] flex items-center justify-center mx-auto mb-4">
-              <Dumbbell className="w-6 h-6 text-[hsl(var(--fg-3))]" />
-            </div>
-            <p className="text-[hsl(var(--fg))] font-semibold">{isEnglish ? 'No active plan' : 'Nenhum plano ativo'}</p>
-            <p className="text-[hsl(var(--fg-3))] text-sm mt-1 mb-5">
-              {isEnglish ? 'Create a structured plan or jump straight into a free workout' : 'Crie um plano estruturado ou comece direto em um treino livre'}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
-              <button
-                onClick={() => setShowCreatePlan(true)}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-bold hover:opacity-90 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                {isEnglish ? 'Create Plan' : 'Criar plano'}
-              </button>
-              <button
-                onClick={handleStartEmpty}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--border))] text-[hsl(var(--fg))] text-sm font-medium hover:bg-[hsl(var(--fill-secondary))] transition-colors"
-              >
-                <Play className="w-4 h-4 fill-current" />
-                {isEnglish ? 'Free Workout' : 'Treino livre'}
-              </button>
-            </div>
-          </div>
+          <Card className="px-5 py-4">
+            <EmptyState
+              icon={Dumbbell}
+              title={isEnglish ? 'No active plan' : 'Nenhum plano ativo'}
+              description={isEnglish ? 'Create a structured plan or jump straight into a free workout.' : 'Crie um plano estruturado ou comece direto em um treino livre.'}
+              action={(
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <PrimaryButton className="gap-2" onClick={() => setShowCreatePlan(true)}>
+                    <Plus className="h-4 w-4" />
+                    {isEnglish ? 'Create Plan' : 'Criar plano'}
+                  </PrimaryButton>
+                  <SecondaryButton className="gap-2" onClick={handleStartEmpty}>
+                    <Play className="h-4 w-4 fill-current" />
+                    {isEnglish ? 'Free Workout' : 'Treino livre'}
+                  </SecondaryButton>
+                </div>
+              )}
+            />
+          </Card>
         )}
 
-        {/* Recent Sessions */}
         {!isLoading && recentSessions.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-3">
+          <Section
+            eyebrow={isEnglish ? 'History' : 'Histórico'}
+            title={isEnglish ? 'Recent Sessions' : 'Sessões recentes'}
+            subtitle={isEnglish ? 'Latest logs from completed workouts.' : 'Últimos registros de treinos concluídos.'}
+          >
+            <div className="mb-3 flex items-center justify-between">
               <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">{isEnglish ? 'Recent Sessions' : 'Sessões recentes'}</p>
               <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
                 <Flame className="w-3 h-3 text-orange-400" />
@@ -849,7 +869,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
                 <SessionCard key={s.id} session={s} />
               ))}
             </div>
-          </section>
+          </Section>
         )}
 
       </div>
@@ -866,13 +886,13 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
       {/* AI Generation Modal */}
       {showAIGen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-sm rounded-[28px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-lg mx-4">
+          <div className="relative mx-4 w-full max-w-sm rounded-[24px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6 shadow-lg">
             <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">{isEnglish ? 'Atlas AI' : 'Atlas IA'}</p>
             <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">{isEnglish ? 'Generate AI Workout Plan' : 'Gerar Plano de Treino com IA'}</h2>
             <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">{isEnglish ? 'Atlas AI will create a personalized training plan based on your profile. Your current active plan will be replaced.' : 'O Atlas IA criará um plano de treino personalizado baseado no seu perfil. O plano ativo atual será substituído.'}</p>
             <div className="mt-5 flex gap-3">
-              <button onClick={() => setShowAIGen(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-[hsl(var(--border))] text-sm font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors">{isEnglish ? 'Cancel' : 'Cancelar'}</button>
-              <button onClick={generateAIPlan} disabled={aiGenerating} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-bold hover:opacity-90 transition-colors disabled:opacity-60">
+              <button onClick={() => setShowAIGen(false)} className="flex-1 rounded-[12px] border border-[hsl(var(--border))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors">{isEnglish ? 'Cancel' : 'Cancelar'}</button>
+              <button onClick={generateAIPlan} disabled={aiGenerating} className="flex flex-1 items-center justify-center gap-2 rounded-[12px] bg-[hsl(var(--brand))] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-colors disabled:opacity-60">
                 {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 {aiGenerating ? (isEnglish ? 'Generating...' : 'Gerando...') : (isEnglish ? 'Generate' : 'Gerar')}
               </button>
@@ -881,6 +901,6 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
         </div>
       )}
 
-    </div>
+    </AppContainer>
   );
 }

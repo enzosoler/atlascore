@@ -291,7 +291,11 @@ function NewCheckpointModal({ onConfirm, onClose }) {
 // Página principal
 // ─────────────────────────────────────────────────────────────────
 
-export default function ProgressPhotos() {
+export default function ProgressPhotos({ embedded = false }) {
+  if (embedded) {
+    return <ProgressPhotosContent embedded />;
+  }
+
   return (
     <SafePageBoundary
       title="Progress Photos"
@@ -303,7 +307,7 @@ export default function ProgressPhotos() {
   );
 }
 
-function ProgressPhotosContent() {
+function ProgressPhotosContent({ embedded = false }) {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const { subscription } = useSubscription();
   const navigate = useNavigate();
@@ -408,10 +412,10 @@ function ProgressPhotosContent() {
 
   // ── Render ─────────────────────────────────────────────────────
 
-  return (
-    <AppContainer>
-      {/* ── Page Header ─────────────────────────────────────────── */}
-      <PageHeader
+  const pageBody = (
+    <>
+      {!embedded ? (
+        <PageHeader
         eyebrow="Photos"
         title="Progress Photos"
         subtitle="Record photo checkpoints in standard poses to track your body's visual evolution over time."
@@ -459,6 +463,29 @@ function ProgressPhotosContent() {
           </div>
         </div>
       </PageHeader>
+      ) : (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="max-w-2xl">
+            <p className="atlas-overline">Photos</p>
+            <h2 className="mt-3 text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
+              Private checkpoint gallery
+            </h2>
+            <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+              Capture consistent pose photos and keep them grouped by checkpoint date inside the Body hub.
+            </p>
+          </div>
+          {!isAtLimit ? (
+            <PrimaryButton
+              type="button"
+              onClick={() => setShowNewModal(true)}
+              className="inline-flex items-center gap-2 self-start"
+            >
+              <Plus className="h-4 w-4" strokeWidth={1.9} />
+              New checkpoint
+            </PrimaryButton>
+          ) : null}
+        </div>
+      )}
 
       {/* ── Notice banner ────────────────────────────────────────── */}
       {notice?.message && (
@@ -559,6 +586,8 @@ function ProgressPhotosContent() {
           onClose={() => setShowNewModal(false)}
         />
       )}
-    </AppContainer>
+    </>
   );
+
+  return embedded ? <div className="space-y-6">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>;
 }

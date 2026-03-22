@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Mail, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 
 /**
  * InviteModal - Send invite to student/client/patient
@@ -17,9 +17,21 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
   const [sending, setSending] = useState(false);
 
   const roleLabels = {
-    coach: { title: 'Convidar Aluno', placeholder: 'aluno@example.com' },
-    nutritionist: { title: 'Convidar Cliente', placeholder: 'cliente@example.com' },
-    clinician: { title: 'Convidar Paciente', placeholder: 'paciente@example.com' },
+    coach: {
+      title: 'Convidar aluno',
+      subtitle: 'Envie um convite seguro para liberar acompanhamento, prescrição e aderência em um único histórico.',
+      placeholder: 'aluno@example.com',
+    },
+    nutritionist: {
+      title: 'Convidar cliente',
+      subtitle: 'Convide um cliente para compartilhar refeições, medidas, exames e planos prescritos.',
+      placeholder: 'cliente@example.com',
+    },
+    clinician: {
+      title: 'Convidar paciente',
+      subtitle: 'Crie um vínculo clínico com acesso claro a protocolos, exames e composição corporal.',
+      placeholder: 'paciente@example.com',
+    },
   };
 
   const label = roleLabels[role] || roleLabels.coach;
@@ -57,56 +69,74 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-[hsl(var(--card))] border-border rounded-2xl">
+      <DialogContent className="sm:max-w-md rounded-[20px] border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] px-0 py-0 shadow-[var(--shadow-xl)]">
         <DialogHeader>
-          <DialogTitle className="text-[15px]">{label.title}</DialogTitle>
+          <div className="border-b border-[hsl(var(--border)/0.76)] px-6 pb-4 pt-6">
+            <DialogTitle className="text-[18px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {label.title}
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              {label.subtitle}
+            </DialogDescription>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">
-              Nome
+        <div className="space-y-5 px-6 pb-6 pt-2">
+          <div className="atlas-field px-4 py-3">
+            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+              Nome completo
             </label>
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-[hsl(var(--card))]">
-              <User className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
+            <div className="flex items-center gap-3">
+              <User className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
               <input
                 type="text"
                 placeholder="Nome completo"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-[13px]"
+                className="flex-1 bg-transparent text-[14px] text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
               />
             </div>
           </div>
 
-          <div>
-            <label className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">
+          <div className="atlas-field px-4 py-3">
+            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
               Email
             </label>
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-[hsl(var(--card))]">
-              <Mail className="w-4 h-4 text-muted-foreground" strokeWidth={2} />
+            <div className="flex items-center gap-3">
+              <Mail className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
               <input
                 type="email"
                 placeholder={label.placeholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-[13px]"
+                className="flex-1 bg-transparent text-[14px] text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
               />
             </div>
           </div>
 
-          <p className="text-[11px] text-muted-foreground text-center">
-            Convite expira em 30 dias se não for aceito
-          </p>
+          <div className="rounded-[16px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.52)] px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+              Convite
+            </p>
+            <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              O convite expira em 30 dias se não for aceito. O vínculo só fica ativo após confirmação.
+            </p>
+          </div>
 
-          <button
-            onClick={handleSend}
-            disabled={sending}
-            className="w-full h-11 rounded-xl bg-[hsl(var(--brand))] text-white font-semibold text-[13px] hover:bg-[hsl(var(--brand)/0.88)] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-          >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            {sending ? 'Enviando...' : 'Enviar Convite'}
-          </button>
+          <div className="flex gap-3">
+            <SecondaryButton type="button" className="flex-1" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </SecondaryButton>
+            <PrimaryButton
+              type="button"
+              onClick={handleSend}
+              disabled={sending}
+              className="flex-1 justify-center"
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {sending ? 'Enviando...' : 'Enviar convite'}
+            </PrimaryButton>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

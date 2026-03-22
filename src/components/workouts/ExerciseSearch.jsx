@@ -71,7 +71,7 @@ function ExerciseRow({ exercise, onSelect }) {
   return (
     <button
       onClick={() => onSelect(exercise)}
-      className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-[hsl(var(--shell))] transition-colors text-left border-b border-[hsl(var(--border-h))] last:border-0"
+      className="flex w-full items-start gap-3 border-b border-[hsl(var(--border-h))] px-3 py-3 text-left transition-colors last:border-0 hover:bg-[hsl(var(--shell))]"
     >
       {/* Thumbnail */}
       {hasMedia && (
@@ -114,7 +114,7 @@ function ExerciseRow({ exercise, onSelect }) {
 
 function SectionHeader({ icon: Icon, label }) {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[hsl(var(--shell))] border-b border-[hsl(var(--border-h))]">
+    <div className="flex items-center gap-1.5 border-b border-[hsl(var(--border-h))] bg-[hsl(var(--shell))] px-3 py-2">
       <Icon className="w-3 h-3 text-[hsl(var(--fg-2))]" strokeWidth={2} />
       <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">{label}</p>
     </div>
@@ -141,7 +141,7 @@ function ManualEntry({ onAdd, onBack }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Ex: My custom exercise"
-          className="atlas-input"
+          className="atlas-field h-11 w-full rounded-[12px] border-0 px-4"
           autoFocus
         />
       </div>
@@ -159,7 +159,7 @@ function ManualEntry({ onAdd, onBack }) {
           }
         }}
         disabled={!name.trim()}
-        className="btn btn-primary w-full h-10 rounded-xl text-[13px] gap-1.5 disabled:opacity-50"
+        className="btn btn-primary h-11 w-full rounded-[10px] text-[13px] gap-1.5 disabled:opacity-50"
       >
         <PenLine className="w-3.5 h-3.5" /> Add manually
       </button>
@@ -326,7 +326,7 @@ export default function ExerciseSearch({ onSelect }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
 
       {/* Search bar */}
       <div className="flex gap-2">
@@ -337,7 +337,7 @@ export default function ExerciseSearch({ onSelect }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search exercise… (bench press, squat)"
-            className="atlas-input pl-9 pr-9"
+            className="atlas-field h-11 w-full rounded-[12px] border-0 pl-9 pr-9"
             inputMode="text"
           />
           {loading && (
@@ -354,10 +354,10 @@ export default function ExerciseSearch({ onSelect }) {
         </div>
         <button
           onClick={() => setShowFilters((f) => !f)}
-          className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-colors shrink-0 ${
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border transition-colors ${
             showFilters
               ? 'bg-[hsl(var(--brand)/0.1)] border-[hsl(var(--brand)/0.3)] text-[hsl(var(--brand))]'
-              : 'border-[hsl(var(--border-h))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--shell))]'
+              : 'border-[hsl(var(--border-h))] bg-[hsl(var(--fill)/0.58)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--shell))]'
           }`}
         >
           <Filter className="w-4 h-4" strokeWidth={2} />
@@ -366,7 +366,7 @@ export default function ExerciseSearch({ onSelect }) {
 
       {/* Filter chips */}
       {showFilters && (
-        <div className="space-y-2 p-3 rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))]">
+        <div className="atlas-card space-y-2 rounded-[18px] border-[hsl(var(--border)/0.82)] p-3">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">Muscle</p>
             <div className="flex flex-wrap gap-1.5">
@@ -374,10 +374,10 @@ export default function ExerciseSearch({ onSelect }) {
                 <button
                   key={value}
                   onClick={() => { setMuscleFilter((p) => p === value ? '' : value); setEquipFilter(''); }}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
+                  className={`rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors ${
                     muscleFilter === value
-                      ? 'bg-[hsl(var(--brand))] text-white border-[hsl(var(--brand))]'
-                      : 'border-[hsl(var(--border-h))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card))]'
+                      ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]'
+                      : 'border-[hsl(var(--border-h))] bg-[hsl(var(--fill)/0.48)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card))]'
                   }`}
                 >
                   {label}
@@ -392,10 +392,10 @@ export default function ExerciseSearch({ onSelect }) {
                 <button
                   key={value}
                   onClick={() => { setEquipFilter((p) => p === value ? '' : value); setMuscleFilter(''); }}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
+                  className={`rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors ${
                     equipFilter === value
-                      ? 'bg-[hsl(var(--brand))] text-white border-[hsl(var(--brand))]'
-                      : 'border-[hsl(var(--border-h))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card))]'
+                      ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]'
+                      : 'border-[hsl(var(--border-h))] bg-[hsl(var(--fill)/0.48)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card))]'
                   }`}
                 >
                   {label}
@@ -408,7 +408,7 @@ export default function ExerciseSearch({ onSelect }) {
 
       {/* Home: favorites + recents */}
       {showHome && hasContext && (
-        <div className="border border-[hsl(var(--border-h))] rounded-xl overflow-hidden bg-[hsl(var(--card))]">
+        <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--border-h))] bg-[hsl(var(--card))]">
           {favorites.length > 0 && (
             <>
               <SectionHeader icon={Star} label="Favorites" />
@@ -430,7 +430,7 @@ export default function ExerciseSearch({ onSelect }) {
 
       {/* Results list */}
       {(results.length > 0 || (loading && (query || muscleFilter || equipFilter))) && (
-        <div className="border border-[hsl(var(--border-h))] rounded-xl overflow-hidden bg-[hsl(var(--card))]">
+        <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--border-h))] bg-[hsl(var(--card))]">
           {(muscleFilter || equipFilter) && (
             <SectionHeader
               icon={Dumbbell}
@@ -475,7 +475,7 @@ export default function ExerciseSearch({ onSelect }) {
       {showHome && (
         <button
           onClick={() => setShowManual(true)}
-          className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[12px] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors rounded-lg hover:bg-[hsl(var(--shell))]"
+          className="flex w-full items-center justify-center gap-1.5 rounded-[12px] py-2 text-[12px] text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--shell))] hover:text-[hsl(var(--fg))]"
         >
           <PenLine className="w-3.5 h-3.5" strokeWidth={2} /> Add exercise manually
         </button>

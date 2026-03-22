@@ -3,14 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Copy, Trash2, CheckCircle2, Clock, Dumbbell, ChevronRight, Calendar } from 'lucide-react';
+import { Plus, CheckCircle2, Clock, Dumbbell, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import RoutineCard from '@/components/routines/RoutineCard';
 import RoutineForm from '@/components/routines/RoutineForm';
+import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
+import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 
-const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const DAYS_ABBR = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
 
 export default function Routines() {
@@ -64,50 +64,49 @@ export default function Routines() {
   const activeRoutine = routines.find(r => r.active);
 
   return (
-    <div className="mx-auto max-w-6xl p-5 lg:p-8 space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Rotinas de Treino</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Organize seus treinos em rotinas estruturadas</p>
-        </div>
-        <Button onClick={() => setShowCreate(true)} className="h-9 rounded-lg text-[13px] bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)/0.85)] text-white gap-1.5">
-          <Plus className="w-3.5 h-3.5" /> Nova rotina
-        </Button>
-      </div>
+    <AppContainer maxWidth="max-w-6xl">
+      <PageHeader
+        eyebrow="Train"
+        title="Rotinas de Treino"
+        subtitle="Organize blocos recorrentes, distribua sessões na semana e mantenha um ponto de partida consistente para executar no painel de treino."
+        actions={(
+          <PrimaryButton className="gap-2" onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4" />
+            Nova rotina
+          </PrimaryButton>
+        )}
+      />
 
-      {/* Active Routine Highlight */}
       {activeRoutine && (
-        <div className="surface border-[hsl(var(--ok)/0.3)] bg-[hsl(var(--ok)/0.02)] p-6">
+        <Card className="border-[hsl(var(--ok)/0.24)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.12),transparent_34%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[hsl(var(--ok)/0.12)] flex items-center justify-center shrink-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--ok)/0.12)]">
                 <CheckCircle2 className="w-5 h-5 text-[hsl(var(--ok))]" strokeWidth={2} />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase text-[hsl(var(--ok))] tracking-wider">Rotina Ativa</p>
-                <p className="text-[15px] font-bold text-foreground mt-0.5">{activeRoutine.name}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--ok))]">Rotina Ativa</p>
+                <p className="mt-0.5 text-[18px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">{activeRoutine.name}</p>
               </div>
             </div>
             {activeRoutine.last_completed_date && (
               <div className="text-right">
-                <p className="text-[11px] text-muted-foreground">Último completado</p>
-                <p className="text-[13px] font-semibold">{new Date(activeRoutine.last_completed_date).toLocaleDateString('pt-BR')}</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">Último completado</p>
+                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{new Date(activeRoutine.last_completed_date).toLocaleDateString('pt-BR')}</p>
               </div>
             )}
           </div>
 
-          {/* Days of Week Visual */}
-          <div className="grid grid-cols-7 gap-1.5 mb-4">
+          <div className="mb-4 grid grid-cols-7 gap-2">
             {DAYS_ABBR.map((abbr, i) => {
               const dayWorkout = activeRoutine.days_of_week?.find(d => d.day === i);
               return (
-                <div key={i} className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
+                <div key={i} className={`flex flex-col items-center gap-1 rounded-[12px] border p-2 transition-colors ${
                   dayWorkout
-                    ? 'bg-[hsl(var(--ok)/0.15)] border border-[hsl(var(--ok)/0.3)]'
-                    : 'bg-[hsl(var(--secondary))] border border-transparent'
+                    ? 'border-[hsl(var(--ok)/0.3)] bg-[hsl(var(--ok)/0.15)]'
+                    : 'border-[hsl(var(--border)/0.68)] bg-[hsl(var(--fill)/0.74)]'
                 }`}>
-                  <p className="text-[10px] font-semibold text-foreground">{abbr}</p>
+                  <p className="text-[10px] font-semibold text-[hsl(var(--fg))]">{abbr}</p>
                   {dayWorkout && (
                     <Dumbbell className="w-3.5 h-3.5 text-[hsl(var(--ok))]" strokeWidth={2} />
                   )}
@@ -116,40 +115,44 @@ export default function Routines() {
             })}
           </div>
 
-          {/* Quick Stats */}
-          <div className="flex gap-6 text-[12px] text-muted-foreground">
+          <div className="flex flex-wrap gap-6 text-[12px] text-[hsl(var(--fg-2))]">
             {activeRoutine.estimated_duration_minutes && (
               <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-foreground/40" strokeWidth={2} />
+                <Clock className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
                 <span>{activeRoutine.estimated_duration_minutes}min por sessão</span>
               </div>
             )}
             {activeRoutine.total_exercises && (
               <div className="flex items-center gap-1.5">
-                <Dumbbell className="w-3.5 h-3.5 text-foreground/40" strokeWidth={2} />
+                <Dumbbell className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
                 <span>{activeRoutine.total_exercises} exercícios</span>
               </div>
             )}
           </div>
-        </div>
+        </Card>
       )}
 
-      {/* All Routines */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="t-label">Todas as rotinas ({userRoutines.length})</p>
-        </div>
-
+      <Section
+        eyebrow="Library"
+        title={`Todas as rotinas (${userRoutines.length})`}
+        subtitle="Templates pessoais para repetir semanas, duplicar estruturas e ativar a melhor opção para o bloco atual."
+      >
         {userRoutines.length === 0 ? (
-          <div className="text-center py-12 card border-dashed space-y-3">
-            <Calendar className="w-8 h-8 text-muted-foreground/40 mx-auto" strokeWidth={1.5} />
-            <p className="text-[13px] text-muted-foreground">Nenhuma rotina criada</p>
-            <button onClick={() => setShowCreate(true)} className="text-[13px] text-[hsl(var(--brand))] font-medium hover:underline">
-              + Criar primeira rotina
-            </button>
-          </div>
+          <Card className="px-5 py-4">
+            <EmptyState
+              icon={Calendar}
+              title="Nenhuma rotina criada"
+              description="Monte sua primeira rotina para distribuir sessões na semana e começar com uma estrutura recorrente."
+              action={(
+                <PrimaryButton className="gap-2" onClick={() => setShowCreate(true)}>
+                  <Plus className="h-4 w-4" />
+                  Criar primeira rotina
+                </PrimaryButton>
+              )}
+            />
+          </Card>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {userRoutines.map(routine => (
               <RoutineCard
                 key={routine.id}
@@ -163,12 +166,14 @@ export default function Routines() {
             ))}
           </div>
         )}
-      </div>
+      </Section>
 
-      {/* Prescribed Routines */}
       {prescribedRoutines.length > 0 && (
-        <div>
-          <p className="t-label mb-3">Rotinas Prescritas</p>
+        <Section
+          eyebrow="Assigned"
+          title="Rotinas prescritas"
+          subtitle="Estruturas enviadas por coach ou profissional para você iniciar sem reconfigurar a semana."
+        >
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {prescribedRoutines.map(routine => (
               <RoutineCard key={routine.id} routine={routine} isPrescribed onClone={() => {
@@ -177,52 +182,50 @@ export default function Routines() {
               }} />
             ))}
           </div>
-        </div>
+        </Section>
       )}
 
-      {/* Create Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="sm:max-w-xl bg-[hsl(var(--card))] border-border rounded-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[24px] border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle className="text-[15px]">Criar nova rotina</DialogTitle>
+            <DialogTitle className="text-[18px] font-semibold tracking-[-0.03em]">Criar nova rotina</DialogTitle>
           </DialogHeader>
           <RoutineForm onSuccess={() => setShowCreate(false)} />
         </DialogContent>
       </Dialog>
 
-      {/* Clone Dialog */}
       <Dialog open={showClone} onOpenChange={setShowClone}>
-        <DialogContent className="sm:max-w-md bg-[hsl(var(--card))] border-border rounded-2xl">
+        <DialogContent className="rounded-[24px] border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[15px]">Clonar rotina</DialogTitle>
+            <DialogTitle className="text-[18px] font-semibold tracking-[-0.03em]">Clonar rotina</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <p className="text-[13px] font-medium text-foreground mb-1">Nome da cópia</p>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">Nome da cópia</p>
               <Input
                 id="clone-name"
                 defaultValue={`${cloneSource?.name} (Cópia)`}
-                className="h-10 rounded-lg text-[13px]"
+                className="atlas-field h-11 rounded-[10px] border-0 px-4 text-[14px]"
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowClone(false)} className="flex-1 h-10 rounded-lg">
+              <SecondaryButton type="button" onClick={() => setShowClone(false)} className="h-11 flex-1 rounded-[10px]">
                 Cancelar
-              </Button>
-              <Button
+              </SecondaryButton>
+              <PrimaryButton
                 onClick={() => {
                   const newName = document.getElementById('clone-name')?.value;
                   cloneRoutine.mutate({ ...cloneSource, name: newName || `${cloneSource?.name} (Cópia)` });
                 }}
                 disabled={cloneRoutine.isPending}
-                className="flex-1 h-10 rounded-lg bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)/0.85)] text-white"
+                className="h-11 flex-1 rounded-[10px]"
               >
                 {cloneRoutine.isPending ? 'Clonando…' : 'Clonar'}
-              </Button>
+              </PrimaryButton>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </AppContainer>
   );
 }

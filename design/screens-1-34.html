@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:,">
+<title>atlas.core — Screen Gallery 1-34</title>
+<style>
+  :root {
+    --bg: #080E0E;
+    --card: #111A1A;
+    --card-2: #0D1515;
+    --border: #1E2C2C;
+    --teal: #4A9B9B;
+    --teal-dim: rgba(74,155,155,0.12);
+    --teal-glow: rgba(74,155,155,0.22);
+    --white: #FFFFFF;
+    --secondary: #8A9A9A;
+    --muted: #556060;
+    --red: #E05C5C;
+    --red-dim: rgba(224,92,92,0.12);
+    --green: #4CAF7D;
+    --green-dim: rgba(76,175,125,0.12);
+    --sheet: 20px;
+    --card-r: 14px;
+    --btn-r: 10px;
+    --space: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+    color: var(--white);
+    background:
+      radial-gradient(circle at 20% 0%, rgba(74,155,155,0.18), transparent 28%),
+      radial-gradient(circle at 80% 10%, rgba(74,155,155,0.09), transparent 24%),
+      linear-gradient(180deg, #050909 0%, #040808 100%);
+    overflow-x: hidden;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: auto;
+    pointer-events: none;
+    border-radius: 999px;
+    filter: blur(40px);
+    opacity: 0.6;
+  }
+  body::before {
+    width: 320px; height: 320px;
+    left: -110px; top: 140px;
+    background: rgba(74,155,155,0.08);
+  }
+  body::after {
+    width: 420px; height: 420px;
+    right: -180px; top: 520px;
+    background: rgba(74,155,155,0.06);
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    padding: 48px 28px 80px;
+  }
+
+  .hero {
+    max-width: 1200px;
+    margin: 0 auto 36px;
+    text-align: center;
+  }
+  .brand-mark {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 18px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(74,155,155,0.12), transparent 56%),
+      linear-gradient(180deg, #101717, #0B1111);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+  }
+  .brand-mark svg { width: 50px; height: 50px; }
+  .hero h1 {
+    font-size: 34px;
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+    margin-bottom: 10px;
+  }
+  .hero p {
+    color: var(--secondary);
+    font-size: 15px;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .legend {
+    max-width: 1200px;
+    margin: 0 auto 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(17,26,26,0.78);
+    color: var(--secondary);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .pill strong { color: var(--white); font-weight: 700; }
+
+  .gallery {
+    max-width: 1560px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+    gap: 44px 28px;
+    align-items: start;
+  }
+
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .screen-meta {
+    text-align: center;
+    min-height: 38px;
+  }
+  .screen-num {
+    color: var(--teal);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .screen-label {
+    color: var(--secondary);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 54px;
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 18px 0 rgba(255,255,255,0.01) inset,
+      0 40px 80px rgba(0,0,0,0.72),
+      0 0 80px rgba(0,0,0,0.22);
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+  }
+  .dynamic-island {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 126px;
+    height: 37px;
+    margin-left: -63px;
+    border-radius: 19px;
+    background: #000;
+    z-index: 40;
+  }
+  .status-bar {
+    height: 58px;
+    padding: 14px 28px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 20;
+  }
+  .status-time {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+  .status-icons { display: flex; align-items: center; gap: 6px; }
+  .status-icons svg { color: var(--white); }
+
+  .nav {
+    padding: 10px 20px 8px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .nav-left { min-width: 0; }
+  .nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--teal);
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .nav-back svg { width: 18px; height: 18px; }
+  .nav-title {
+    font-size: 28px;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .nav-subtitle {
+    margin-top: 4px;
+    color: var(--secondary);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .nav-action {
+    color: var(--teal);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    padding-top: 6px;
+  }
+
+  .content {
+    flex: 1;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 16px 24px;
+  }
+  .content::-webkit-scrollbar { display: none; }
+  .content.flow {
+    padding: 0 20px 24px;
+  }
+
+  .home-indicator {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    width: 134px;
+    height: 5px;
+    margin-left: -67px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.28);
+    z-index: 50;
+  }
+
+  .tab-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 83px;
+    padding-top: 10px;
+    background: rgba(8,14,14,0.92);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: flex-start;
+    z-index: 30;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: var(--secondary);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .tab-item svg { width: 22px; height: 22px; color: currentColor; }
+  .tab-item.active { color: var(--teal); }
+
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .section + .section { margin-top: 16px; }
+  .eyebrow {
+    color: var(--secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .title-xl {
+    font-size: 32px;
+    line-height: 1.08;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .title-lg {
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+  }
+  .body {
+    color: var(--secondary);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .card {
+    border-radius: var(--card-r);
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 14px;
+  }
+  .card.soft { background: linear-gradient(180deg, #121B1B, #0F1717); }
+  .card.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .card.three { display: grid; gap: 8px; }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+  .card-subtitle {
+    font-size: 12px;
+    color: var(--secondary);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .badge.teal { background: var(--teal-dim); color: var(--teal); }
+  .badge.green { background: var(--green-dim); color: var(--green); }
+  .badge.red { background: var(--red-dim); color: var(--red); }
+  .badge.gray { background: rgba(138,154,154,0.12); color: var(--secondary); }
+
+  .btn {
+    width: 100%;
+    height: 56px;
+    border: 0;
+    border-radius: var(--btn-r);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    cursor: default;
+  }
+  .btn.primary { background: var(--teal); color: #fff; }
+  .btn.secondary {
+    background: transparent;
+    color: var(--teal);
+    border: 1.5px solid var(--teal);
+  }
+  .btn.destructive { background: var(--red); color: #fff; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--secondary);
+  }
+
+  .input {
+    position: relative;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card-2);
+    padding: 20px 14px 10px;
+  }
+  .input.focused { border-color: var(--teal); box-shadow: 0 0 0 1px rgba(74,155,155,0.18); }
+  .input .label {
+    position: absolute;
+    top: 8px;
+    left: 14px;
+    color: var(--teal);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .input .value,
+  .input input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: var(--white);
+    font-size: 16px;
+    font-family: inherit;
+  }
+  .input .placeholder { color: var(--secondary); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .row + .row {
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .meta {
+    color: var(--secondary);
+    font-size: 12px;
+  }
+  .value {
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .muted {
+    color: var(--secondary);
+  }
+  .mono {
+    font-family: "SF Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+  }
+
+  .metric {
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #101919, #0D1515);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .metric .kicker {
+    color: var(--secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .metric .big {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--white);
+    font-variant-numeric: tabular-nums;
+  }
+  .metric .change {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .metric .change.down { color: var(--red); }
+  .sparkline {
+    width: 100%;
+    height: 36px;
+    margin-top: 2px;
+  }
+
+  .sheet {
+    border-radius: var(--sheet) var(--sheet) 0 0;
+    background: linear-gradient(180deg, #111A1A, #0D1515);
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    box-shadow: 0 -16px 40px rgba(0,0,0,0.45);
+  }
+  .sheet-handle {
+    width: 40px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    margin: 10px auto 12px;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5,9,9,0.72);
+    backdrop-filter: blur(14px);
+    z-index: 25;
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #111A1A, #0D1515);
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 1.8s infinite;
+  }
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  .center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .stack-lg { gap: 12px; }
+
+  .logo-core {
+    width: 112px;
+    height: 112px;
+    border-radius: 28px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(74,155,155,0.18), transparent 48%),
+      linear-gradient(180deg, #121B1B, #091010);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  }
+  .logo-core svg { width: 64px; height: 64px; }
+
+  .large-num {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    font-weight: 800;
+  }
+
+  .progress {
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .progress > span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--teal);
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #0F1717;
+    color: var(--secondary);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .chip.active {
+    color: var(--teal);
+    border-color: rgba(74,155,155,0.35);
+    background: var(--teal-dim);
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .list-item {
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    padding: 12px;
+  }
+  .list-item .top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .list-item .name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .list-item .desc {
+    color: var(--secondary);
+    font-size: 12px;
+    line-height: 1.4;
+    margin-top: 3px;
+  }
+
+  .empty {
+    padding: 20px 14px;
+    border-radius: 18px;
+    border: 1px dashed rgba(74,155,155,0.2);
+    background: rgba(17,26,26,0.55);
+    text-align: center;
+  }
+  .empty .icon {
+    width: 66px;
+    height: 66px;
+    margin: 0 auto 14px;
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    color: rgba(74,155,155,0.4);
+    background: rgba(74,155,155,0.08);
+  }
+  .empty h3 {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .empty p {
+    font-size: 13px;
+    color: var(--secondary);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  .split-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .split-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .completion-ring {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: conic-gradient(var(--teal) 0 72%, #213232 72% 100%);
+    display: grid;
+    place-items: center;
+    margin: 0 auto;
+    box-shadow: 0 0 0 12px rgba(74,155,155,0.06);
+  }
+  .completion-ring span {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: grid;
+    place-items: center;
+    color: var(--white);
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .overlay-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 0 24px;
+    z-index: 35;
+  }
+
+  .hero-block {
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at top right, rgba(74,155,155,0.12), transparent 45%),
+      linear-gradient(180deg, #111A1A, #0D1515);
+    padding: 18px;
+  }
+
+  .subtle-note {
+    font-size: 12px;
+    color: var(--secondary);
+    line-height: 1.45;
+  }
+
+  @media (max-width: 520px) {
+    .page { padding: 28px 14px 64px; }
+    .gallery { grid-template-columns: 1fr; gap: 32px; }
+    .phone { transform: scale(0.93); transform-origin: top center; }
+    .wrap { margin-bottom: -26px; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M20 50L32 14L44 50" stroke="#FFFFFF" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M25 34H39" stroke="#4A9B9B" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="32" r="12" stroke="#4A9B9B" stroke-width="1.6" opacity="0.8"/>
+          <circle cx="32" cy="32" r="4.2" fill="#4A9B9B"/>
+        </svg>
+      </div>
+      <h1>atlas.core screen gallery 1-34</h1>
+      <p>Standalone high-fidelity iOS-style mockups for public flow, dashboard, nutrition, workout planning, and workout execution. The page uses the atlas.core dark system with SF Pro spacing, muted teal accents, and native-style chrome.</p>
+    </header>
+
+    <section class="legend" aria-label="design tokens">
+      <span class="pill"><strong>Bg</strong> #080E0E</span>
+      <span class="pill"><strong>Card</strong> #111A1A</span>
+      <span class="pill"><strong>Border</strong> #1E2C2C</span>
+      <span class="pill"><strong>Accent</strong> #4A9B9B</span>
+      <span class="pill"><strong>Buttons</strong> 10px radius</span>
+      <span class="pill"><strong>Cards</strong> 14px radius</span>
+      <span class="pill"><strong>Sheets</strong> 20px radius</span>
+    </section>
+
+    <section id="gallery" class="gallery" aria-label="screen gallery"></section>
+  </main>
+
+  <script>
+    const gallery = document.getElementById("gallery");
+
+    const join = (...parts) => parts.filter(Boolean).join("");
+
+    const icon = (path, viewBox = "0 0 24 24") => `<svg viewBox="${viewBox}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+    const icons = {
+      today: icon('<circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"></path>'),
+      train: icon('<rect x="3" y="10" width="18" height="4" rx="2"></rect><circle cx="6.5" cy="12" r="3"></circle><circle cx="17.5" cy="12" r="3"></circle>'),
+      nutrition: icon('<path d="M12 3c-4 0-7 3-7 7 0 5 4 8 7 11 3-3 7-6 7-11 0-4-3-7-7-7Z"></path><path d="M12 7v10"></path>'),
+      body: icon('<circle cx="12" cy="5" r="2.5"></circle><path d="M8 10h8l-1 5H9l-1-5Z"></path><path d="M9 15l-2 5M15 15l2 5"></path>'),
+      more: icon('<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"></circle><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"></circle><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"></circle>'),
+      back: icon('<path d="M14 5L7 12l7 7"></path>', "0 0 24 24"),
+      plus: icon('<path d="M12 5v14M5 12h14"></path>'),
+      check: icon('<path d="M20 6L9 17l-5-5"></path>'),
+      lock: icon('<rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path>'),
+      mail: icon('<rect x="4" y="6" width="16" height="12" rx="3"></rect><path d="M5 8l7 5 7-5"></path>'),
+      search: icon('<circle cx="11" cy="11" r="6"></circle><path d="M20 20l-3.5-3.5"></path>'),
+      camera: icon('<rect x="4" y="7" width="16" height="12" rx="3"></rect><circle cx="12" cy="13" r="3.2"></circle><path d="M8.5 7l1.2-2h4.6l1.2 2"></path>'),
+      shield: icon('<path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z"></path>'),
+      spark: icon('<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3Z"></path><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"></path>'),
+      calendar: icon('<rect x="4" y="5" width="16" height="15" rx="3"></rect><path d="M8 3v4M16 3v4M4 10h16"></path>'),
+      clock: icon('<circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path>'),
+      chart: icon('<path d="M4 16l5-5 4 3 7-8"></path><path d="M20 7v4h-4"></path>'),
+      leaf: icon('<path d="M18 5C10 5 5 10 5 18c8 0 13-5 13-13Z"></path><path d="M9 15c2-2 5-4 9-6"></path>'),
+      dumbbell: icon('<path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"></path>'),
+      user: icon('<circle cx="12" cy="8" r="3"></circle><path d="M5 20c1.7-3.5 4.6-5 7-5s5.3 1.5 7 5"></path>'),
+      logout: icon('<path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"></path><path d="M14 9l4 3-4 3"></path><path d="M18 12H10"></path>'),
+      upload: icon('<path d="M12 16V4"></path><path d="M8 8l4-4 4 4"></path><path d="M4 16v3h16v-3"></path>'),
+      info: icon('<circle cx="12" cy="12" r="9"></circle><path d="M12 10v6"></path><path d="M12 7.2h.01"></path>'),
+      play: icon('<path d="M9 7l8 5-8 5V7Z"></path>'),
+      heart: icon('<path d="M12 21s-7-4.7-9.1-8.9C1 8.8 3.1 6 6.2 6c1.9 0 3.2 1 3.8 2 0 0 1.3-2 3.8-2 3.1 0 5.2 2.8 3.3 6.1C19 16.3 12 21 12 21Z"></path>'),
+      star: icon('<path d="M12 4l2.3 4.8 5.3.8-3.8 3.8.9 5.4L12 16.2 7.3 18.8l.9-5.4-3.8-3.8 5.3-.8L12 4Z"></path>'),
+      meal: icon('<path d="M7 3v8M11 3v8M7 11c0 2-1 3-2 3h8c-1 0-2-1-2-3"></path><path d="M15 3v16"></path>'),
+      muscle: icon('<path d="M8 7h8l2 6-3 5H9L6 13l2-6Z"></path>'),
+      capsule: icon('<rect x="4" y="7" width="16" height="10" rx="5"></rect><path d="M12 7v10"></path>'),
+    };
+
+    const statusBar = () => `
+      <div class="status-bar">
+        <div class="status-time">9:41</div>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="3" width="3" height="9" rx="1" fill="#fff" opacity="0.4"></rect><rect x="4.5" y="2" width="3" height="10" rx="1" fill="#fff" opacity="0.65"></rect><rect x="9" y="0" width="3" height="12" rx="1" fill="#fff"></rect><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#fff"></rect></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12"><path d="M1.5 3.5A9 9 0 0 1 14.5 3.5" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"></path><path d="M4 6a5 5 0 0 1 8 0" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"></path><circle cx="8" cy="10" r="1.5" fill="#fff"></circle></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="#fff" stroke-opacity="0.35"></rect><rect x="2" y="2" width="16.5" height="8" rx="2" fill="#fff"></rect><path d="M23 4.5V7.5c.8-.3 1.5-1 1.5-1.5 0-.5-.7-1.2-1.5-1.5Z" fill="#fff" opacity="0.4"></path></svg>
+        </div>
+      </div>`;
+
+    const tabBar = (active) => {
+      const tabs = [
+        ["today", "Today", icons.today],
+        ["train", "Train", icons.train],
+        ["nutrition", "Nutrition", icons.nutrition],
+        ["body", "Body", icons.body],
+        ["more", "More", icons.more],
+      ];
+      return `
+        <div class="tab-bar">
+          ${tabs.map(([id, label, svg]) => `<div class="tab-item ${id === active ? "active" : ""}">${svg}${label}</div>`).join("")}
+        </div>
+      `;
+    };
+
+    const nav = ({ title, subtitle, back = null, action = "" }) => `
+      <div class="nav">
+        <div class="nav-left">
+          ${back ? `<div class="nav-back">${icons.back}${back}</div>` : ""}
+          <div class="nav-title">${title}</div>
+          ${subtitle ? `<div class="nav-subtitle">${subtitle}</div>` : ""}
+        </div>
+        ${action ? `<div class="nav-action">${action}</div>` : ""}
+      </div>`;
+
+    const phone = ({ body, activeTab = null, navHtml = "", flow = false, overlay = false }) => `
+      <div class="phone">
+        <div class="dynamic-island"></div>
+        <div class="screen">
+          ${statusBar()}
+          ${navHtml}
+          <div class="content ${flow ? "flow" : ""}">
+            ${body}
+          </div>
+          ${activeTab ? tabBar(activeTab) : ""}
+          ${overlay ? `<div class="overlay"></div>` : ""}
+          <div class="home-indicator"></div>
+        </div>
+      </div>`;
+
+    const wrap = (num, label, phoneHtml) => `
+      <article class="wrap">
+        <div class="screen-meta">
+          <div class="screen-num">${String(num).padStart(2, "0")}</div>
+          <div class="screen-label">${label}</div>
+        </div>
+        ${phoneHtml}
+      </article>`;
+
+    const button = (label, tone = "primary") => `<button class="btn ${tone}">${label}</button>`;
+    const badge = (label, tone = "teal") => `<span class="badge ${tone}">${label}</span>`;
+    const chip = (label, active = false) => `<span class="chip ${active ? "active" : ""}">${label}</span>`;
+
+    const field = (label, value = "", placeholder = "") => `
+      <div class="input ${value ? "focused" : ""}">
+        <div class="label">${label}</div>
+        <div class="value ${!value ? "placeholder" : ""}">${value || placeholder}</div>
+      </div>`;
+
+    const row = (left, right, meta = "") => `
+      <div class="row">
+        <div>
+          <div class="value">${left}</div>
+          ${meta ? `<div class="meta">${meta}</div>` : ""}
+        </div>
+        <div class="value">${right}</div>
+      </div>`;
+
+    const metric = (label, value, change, down = false, spark = "70%") => `
+      <div class="metric">
+        <div class="kicker">${label}</div>
+        <div class="big">${value}</div>
+        <div class="change ${down ? "down" : ""}">${down ? "▼" : "▲"} ${change}</div>
+        <svg class="sparkline" viewBox="0 0 100 36" fill="none" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 24C12 23 18 15 28 16C39 17 45 28 56 26C67 24 74 12 84 14C90 15 94 21 100 18" stroke="rgba(74,155,155,0.95)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M0 32H100" stroke="#1E2C2C" stroke-width="1"/>
+        </svg>
+      </div>`;
+
+    const listItem = (title, desc, badgeHtml = "") => `
+      <div class="list-item">
+        <div class="top">
+          <div>
+            <div class="name">${title}</div>
+            <div class="desc">${desc}</div>
+          </div>
+          ${badgeHtml}
+        </div>
+      </div>`;
+
+    const progress = (value, label = "") => `
+      <div class="stack">
+        ${label ? `<div class="row"><div class="meta">${label}</div><div class="value mono">${value}%</div></div>` : ""}
+        <div class="progress"><span style="width:${value}%"></span></div>
+      </div>`;
+
+    const shell = (body) => `<div class="stack">${body}</div>`;
+
+    const flowShell = ({ overline = "", title, subtitle = "", body = "", primary = "", secondary = "", footer = "" }) => `
+      <div class="stack stack-lg">
+        <div class="stack">
+          ${overline ? `<div class="eyebrow">${overline}</div>` : ""}
+          <div class="title-xl">${title}</div>
+          ${subtitle ? `<div class="body">${subtitle}</div>` : ""}
+        </div>
+        ${body}
+        ${primary ? button(primary, "primary") : ""}
+        ${secondary ? button(secondary, "secondary") : ""}
+        ${footer ? `<div class="subtle-note">${footer}</div>` : ""}
+      </div>`;
+
+    const authShell = ({ title, subtitle, body, primary, secondary, footer, overline = "" }) => flowShell({ overline, title, subtitle, body, primary, secondary, footer });
+
+    const appShell = ({ title, subtitle = "", action = "", body = "" }) => `
+      ${nav({ title, subtitle, action })}
+      <div class="stack">
+        ${body}
+      </div>
+    `;
+
+    const sectionCard = (title, subtitle, inner, className = "") => `
+      <div class="card ${className}">
+        <div class="card-header">
+          <div>
+            <div class="card-title">${title}</div>
+            ${subtitle ? `<div class="card-subtitle">${subtitle}</div>` : ""}
+          </div>
+          ${className === "soft" ? badge("Live", "teal") : ""}
+        </div>
+        ${inner}
+      </div>`;
+
+    const iconCard = (iconHtml, title, subtitle) => `
+      <div class="card center" style="padding:18px">
+        <div class="stack stack-lg" style="align-items:center">
+          <div class="logo-core" style="width:74px;height:74px;border-radius:22px">${iconHtml}</div>
+          <div class="stack" style="gap:4px">
+            <div class="title-lg">${title}</div>
+            <div class="body">${subtitle}</div>
+          </div>
+        </div>
+      </div>`;
+
+    const goalCards = `
+      <div class="list">
+        ${listItem("Strength & Hypertrophy", "Build muscle with structured progression.", badge("Selected", "teal"))}
+        ${listItem("Fat Loss", "Keep macros tight and track weekly changes.", badge("Popular", "gray"))}
+        ${listItem("Performance", "Optimize output, recovery, and readiness.", badge("Athlete", "green"))}
+      </div>`;
+
+    const pathCards = `
+      <div class="list">
+        ${listItem("Athlete", "Daily tracking, training, meals, and recovery.", badge("Primary", "teal"))}
+        ${listItem("Coach", "Plan teams, prescribe workouts, monitor adherence.", badge("Role", "gray"))}
+        ${listItem("Clinician", "Lab exams, protocols, patient status, exports.", badge("Clinical", "green"))}
+      </div>`;
+
+    const mealRows = (items) => `<div class="list">${items.map(([name, macro, c]) => `
+      <div class="card" style="padding:12px">
+        <div class="row">
+          <div>
+            <div class="value">${name}</div>
+            <div class="meta">${macro}</div>
+          </div>
+          ${c ? badge(c, "gray") : ""}
+        </div>
+      </div>`).join("")}</div>`;
+
+    const exerciseCard = (name, muscle, equipment, favorite = false) => `
+      <div class="card" style="padding:12px">
+        <div class="row">
+          <div>
+            <div class="value">${name}</div>
+            <div class="meta">${muscle} · ${equipment}</div>
+          </div>
+          <div>${favorite ? icons.heart : badge("Save", "gray")}</div>
+        </div>
+      </div>`;
+
+    const planCard = (name, frequency, adherence, last, cta = "Open plan", accent = false) => `
+      <div class="card ${accent ? "soft" : ""}">
+        <div class="row" style="align-items:flex-start">
+          <div>
+            <div class="value" style="font-size:17px">${name}</div>
+            <div class="meta">${frequency}</div>
+          </div>
+          ${badge(adherence, accent ? "teal" : "gray")}
+        </div>
+        <div style="margin:12px 0">${progress(adherence.replace("%",""))}</div>
+        <div class="row">
+          <div class="meta">Last used ${last}</div>
+          <div class="meta">${cta}</div>
+        </div>
+      </div>`;
+
+    const protocolCard = (name, dose, status, active = false) => `
+      <div class="card">
+        <div class="row">
+          <div>
+            <div class="value">${name}</div>
+            <div class="meta">${dose}</div>
+          </div>
+          ${badge(status, active ? "teal" : "gray")}
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="meta">${icons.play} Resume</div>
+          <div class="meta">${icons.lock} Pause</div>
+        </div>
+      </div>`;
+
+    const conversationBubble = (who, text, side = "left") => `
+      <div style="display:flex; justify-content:${side === "right" ? "flex-end" : "flex-start"}">
+        <div class="card ${who === "user" ? "" : "soft"}" style="max-width:78%; background:${who === "user" ? "rgba(74,155,155,0.2)" : "var(--card)"}; border-color:${who === "user" ? "rgba(74,155,155,0.35)" : "var(--border)"}">
+          <div class="meta" style="margin-bottom:6px">${who === "user" ? "You" : "atlas.core AI"}</div>
+          <div class="body" style="color:var(--white)">${text}</div>
+        </div>
+      </div>`;
+
+    const kpiTile = (iconHtml, value, label, delta) => `
+      <div class="metric">
+        <div class="row" style="align-items:flex-start">
+          <div>${iconHtml}</div>
+          <div class="meta">${delta}</div>
+        </div>
+        <div class="big">${value}</div>
+        <div class="meta">${label}</div>
+      </div>`;
+
+    const alertCard = (msg, action = "Review now") => `
+      <div class="card" style="border-left:3px solid var(--red)">
+        <div class="row">
+          <div class="value" style="font-size:14px">${msg}</div>
+          <div class="meta" style="color:var(--red)">${action}</div>
+        </div>
+      </div>`;
+
+    const inviteCard = (name, email, role) => `
+      <div class="card">
+        <div class="row">
+          <div>
+            <div class="value">${name}</div>
+            <div class="meta">${email}</div>
+          </div>
+          ${badge(role, "gray")}
+        </div>
+        <div class="split-2" style="margin-top:12px">
+          ${button("Accept", "primary")}
+          ${button("Decline", "ghost")}
+        </div>
+      </div>`;
+
+    const upgradeGate = (title, price, cta = "Upgrade now") => `
+      <div class="hero-block center">
+        <div class="stack stack-lg" style="align-items:center">
+          <div class="logo-core" style="width:84px;height:84px">${icons.spark}</div>
+          <div class="stack" style="gap:6px">
+            <div class="title-lg">${title}</div>
+            <div class="body">${price}</div>
+          </div>
+          ${button(cta, "primary")}
+          <div class="meta">Dismiss anytime</div>
+        </div>
+      </div>`;
+
+    const searchField = (placeholder = "Search") => `
+      <div class="input focused" style="padding-top:18px">
+        <div class="label">${placeholder}</div>
+        <div class="value placeholder">Type to search...</div>
+      </div>`;
+
+    const searchLoading = () => `
+      <div class="list">
+        <div class="card shimmer" style="height:74px"></div>
+        <div class="card shimmer" style="height:74px"></div>
+        <div class="card shimmer" style="height:74px"></div>
+      </div>`;
+
+    const screenConfigs = [
+      {
+        num: 1,
+        label: "Splash Screen",
+        body: `
+          <div class="center" style="height:100%; padding:24px 0">
+            <div class="stack stack-lg" style="align-items:center; width:100%">
+              <div class="logo-core">${icons.spark}</div>
+              <div class="stack" style="gap:4px">
+                <div class="title-xl" style="font-size:30px">atlas.core</div>
+                <div class="body" style="max-width:240px">Health, training, and nutrition tracking for athletes and professionals.</div>
+              </div>
+              <div class="card" style="width:100%; max-width:280px; padding:12px">
+                <div class="row" style="margin-bottom:10px"><div class="meta">Loading experience</div><div class="meta">v1</div></div>
+                <div class="progress"><span style="width:68%"></span></div>
+              </div>
+            </div>
+          </div>
+        `,
+        flow: true
+      },
+      {
+        num: 2,
+        label: "Onboarding Welcome",
+        body: flowShell({
+          overline: "Welcome",
+          title: "Everything you track, in one native iPhone experience.",
+          subtitle: "Built for athletes, coaches, nutritionists, and clinicians who want a calm system instead of scattered tools.",
+          body: `
+            ${iconCard(icons.today, "Daily command center", "Workouts, meals, and check-ins in one place.")}
+            <div class="split-3">
+              ${kpiTile(icons.train, "Train", "Plans and execution", "Fast")}
+              ${kpiTile(icons.nutrition, "Nutrition", "Meals and macros", "Exact")}
+              ${kpiTile(icons.body, "Body", "Progress and photos", "Visual")}
+            </div>
+          `,
+          primary: "Get started",
+          secondary: "Log in",
+          footer: "Native iOS patterns, dark surfaces, and quiet premium motion."
+        }),
+        flow: true
+      },
+      {
+        num: 3,
+        label: "Onboarding - Goal Selection",
+        body: flowShell({
+          overline: "Step 1 of 4",
+          title: "Choose your primary goal.",
+          subtitle: "This shapes the default dashboard, insights, and plan recommendations.",
+          body: goalCards,
+          primary: "Continue",
+          footer: "You can refine everything later."
+        }),
+        flow: true
+      },
+      {
+        num: 4,
+        label: "Onboarding - Profile Baseline",
+        body: flowShell({
+          overline: "Step 2 of 4",
+          title: "Set your baseline.",
+          subtitle: "A simple starting profile keeps progress, loading targets, and reminders accurate.",
+          body: `
+            <div class="stack">
+              ${field("Age", "29")}
+              ${field("Height", "183 cm")}
+              ${field("Weight", "82 kg")}
+              ${field("Training age", "6 years")}
+              ${field("Weekly sessions", "5")}
+            </div>
+          `,
+          primary: "Continue"
+        }),
+        flow: true
+      },
+      {
+        num: 5,
+        label: "Onboarding - First Checkpoint",
+        body: flowShell({
+          overline: "Step 3 of 4",
+          title: "Capture your first checkpoint.",
+          subtitle: "Keep this lightweight: a quick set of ratings and one note is enough.",
+          body: `
+            <div class="split-2">
+              ${kpiTile(icons.clock, "7.5 h", "Sleep", "Good")}
+              ${kpiTile(icons.body, "4 / 5", "Readiness", "Solid")}
+            </div>
+            ${sectionCard("Quick check-in", "", `
+              <div class="list">
+                ${row("Energy", "4 / 5")}
+                ${row("Mood", "4 / 5")}
+                ${row("Soreness", "2 / 5")}
+                ${row("Notes", "Training block started")}
+              </div>
+            `)}
+          `,
+          primary: "Save checkpoint"
+        }),
+        flow: true
+      },
+      {
+        num: 6,
+        label: "Onboarding - Path Choice",
+        body: flowShell({
+          overline: "Step 4 of 4",
+          title: "Choose your path.",
+          subtitle: "The same product, tuned for the job you actually need to do.",
+          body: pathCards,
+          primary: "Continue as athlete"
+        }),
+        flow: true
+      },
+      {
+        num: 7,
+        label: "Paywall Priming Screen",
+        body: flowShell({
+          overline: "Why upgrade",
+          title: "Unlock the full atlas.core system.",
+          subtitle: "Track more deeply, generate plans, collaborate with professionals, and keep history across every pillar.",
+          body: `
+            <div class="hero-block">
+              <div class="row" style="margin-bottom:10px">
+                <div>
+                  <div class="value" style="font-size:18px">Pro Annual</div>
+                  <div class="meta">$12.99 / month billed yearly</div>
+                </div>
+                ${badge("Best value", "teal")}
+              </div>
+              ${progress(86, "Included features")}
+              <div class="stack" style="margin-top:12px">
+                <div class="meta">AI coaching and analysis</div>
+                <div class="meta">Unlimited logs, exports, and insights</div>
+                <div class="meta">Role collaboration with coach / nutritionist / clinician</div>
+              </div>
+            </div>
+          `,
+          primary: "Start trial",
+          secondary: "Not now"
+        }),
+        flow: true
+      },
+      {
+        num: 8,
+        label: "Setup Generation Screen",
+        body: `
+          <div class="center" style="height:100%; padding:24px 0">
+            <div class="stack stack-lg" style="align-items:center; width:100%">
+              <div class="logo-core" style="width:96px;height:96px">${icons.spark}</div>
+              <div class="stack" style="gap:4px; align-items:center">
+                <div class="title-lg">Generating your setup...</div>
+                <div class="body" style="max-width:260px; text-align:center">Training split, meal structure, and reminder defaults are being built from your answers.</div>
+              </div>
+              <div class="card soft" style="width:100%; max-width:300px">
+                <div class="list">
+                  ${row("Preparing profile", "Done")}
+                  ${row("Building default plan", "Running")}
+                  ${row("Tuning reminder cadence", "Queued")}
+                </div>
+              </div>
+              <div class="card shimmer" style="width:100%; max-width:300px; height:92px"></div>
+            </div>
+          </div>
+        `,
+        flow: true
+      },
+      {
+        num: 9,
+        label: "Onboarding Success",
+        body: flowShell({
+          overline: "Ready",
+          title: "Your workspace is ready.",
+          subtitle: "You can start logging immediately or adjust the details later.",
+          body: `
+            <div class="center">
+              <div class="stack stack-lg" style="align-items:center">
+                <div class="completion-ring"><span>${icons.check}</span></div>
+                <div class="stack" style="gap:4px; align-items:center">
+                  <div class="title-lg">Setup complete</div>
+                  <div class="body" style="text-align:center; max-width:250px">Dashboard, nutrition, body, and training flows are now personalized.</div>
+                </div>
+                <div class="split-2" style="width:100%">
+                  ${sectionCard("Today", "Command center", `<div class="meta">Daily actions and progress.</div>`)}
+                  ${sectionCard("AI", "Coach assistance", `<div class="meta">Insights and quick prompts.</div>`)}
+                </div>
+              </div>
+            </div>
+          `,
+          primary: "Go to dashboard"
+        }),
+        flow: true
+      },
+      {
+        num: 10,
+        label: "Login Screen",
+        body: flowShell({
+          overline: "Sign in",
+          title: "Welcome back.",
+          subtitle: "Use the same account across your athlete or professional workspace.",
+          body: `
+            <div class="stack">
+              ${field("Email", "athlete@atlas.core")}
+              ${field("Password", "••••••••")}
+            </div>
+            <div class="row"><div class="meta">Remember me</div>${badge("On", "teal")}</div>
+          `,
+          primary: "Sign in",
+          secondary: "Continue with Apple",
+          footer: "Forgot your password? Reset in a few taps."
+        }),
+        flow: true
+      },
+      {
+        num: 11,
+        label: "Sign Up Screen",
+        body: flowShell({
+          overline: "Create account",
+          title: "Start your workspace.",
+          subtitle: "Create a clean profile, then choose your role and goals.",
+          body: `
+            <div class="stack">
+              ${field("Full name", "Enzo Soler")}
+              ${field("Email", "enzo@atlas.core")}
+              ${field("Password", "••••••••••")}
+              <div class="row"><div class="meta">I agree to the terms</div>${badge("Accepted", "green")}</div>
+            </div>
+          `,
+          primary: "Create account",
+          secondary: "Use Apple ID"
+        }),
+        flow: true
+      },
+      {
+        num: 12,
+        label: "Forgot Password Screen",
+        body: flowShell({
+          overline: "Recovery",
+          title: "Reset your password.",
+          subtitle: "We’ll send a secure link to the email on your account.",
+          body: field("Email", "athlete@atlas.core"),
+          primary: "Send reset link",
+          secondary: "Back to sign in"
+        }),
+        flow: true
+      },
+      {
+        num: 13,
+        label: "Password Reset Sent State",
+        body: flowShell({
+          overline: "Sent",
+          title: "Check your inbox.",
+          subtitle: "We sent a password reset link to athlete@atlas.core. It expires in 15 minutes.",
+          body: `
+            <div class="card center" style="padding:18px">
+              <div class="stack stack-lg" style="align-items:center">
+                <div class="logo-core" style="width:74px;height:74px">${icons.mail}</div>
+                <div class="stack" style="align-items:center">
+                  <div class="title-lg" style="font-size:22px">Reset email sent</div>
+                  <div class="body" style="max-width:250px; text-align:center">If you don’t see it, check spam or request another link.</div>
+                </div>
+              </div>
+            </div>
+          `,
+          primary: "Resend email",
+          secondary: "Back to sign in"
+        }),
+        flow: true
+      },
+      {
+        num: 14,
+        label: "Email Confirmation Screen",
+        body: flowShell({
+          overline: "Verify email",
+          title: "Confirm your address.",
+          subtitle: "Tap the link in the email to finish account activation.",
+          body: `
+            <div class="card soft">
+              <div class="row">
+                <div>
+                  <div class="value">athlete@atlas.core</div>
+                  <div class="meta">Awaiting verification</div>
+                </div>
+                ${badge("Pending", "gray")}
+              </div>
+              <div class="divider" style="margin:12px 0"></div>
+              <div class="subtle-note">Once confirmed, you can continue directly into onboarding or the dashboard.</div>
+            </div>
+          `,
+          primary: "I’ve verified my email",
+          secondary: "Resend email"
+        }),
+        flow: true
+      },
+      {
+        num: 15,
+        label: "Today - Dashboard (full data state)",
+        body: `
+          <div class="stack">
+            <div class="card soft">
+              <div class="row" style="align-items:flex-start">
+                <div>
+                  <div class="eyebrow">Today</div>
+                  <div class="title-lg">Monday, March 22</div>
+                  <div class="body">Your daily command center.</div>
+                </div>
+                ${badge("72%", "teal")}
+              </div>
+              <div class="split-2" style="margin-top:14px">
+                <div class="metric">
+                  <div class="kicker">Adherence</div>
+                  <div class="big">72%</div>
+                  <div class="change">▲ 4% vs last week</div>
+                </div>
+                <div class="metric">
+                  <div class="kicker">Body weight</div>
+                  <div class="big">80.5 kg</div>
+                  <div class="change down">▼ 0.6 kg</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="split-2">
+              <div class="card">
+                <div class="row"><div class="value">Workout</div>${badge("Continue", "teal")}</div>
+                <div class="meta" style="margin-top:6px">Upper body - set 2 of 5</div>
+                <div class="progress" style="margin-top:12px"><span style="width:42%"></span></div>
+              </div>
+              <div class="card">
+                <div class="row"><div class="value">Nutrition</div>${badge("4 meals", "green")}</div>
+                <div class="meta" style="margin-top:6px">1,860 / 2,250 kcal</div>
+                <div class="progress" style="margin-top:12px"><span style="width:83%"></span></div>
+              </div>
+            </div>
+
+            ${sectionCard("AI insight", "Based on your last 7 days", `
+              <div class="row">
+                <div class="value" style="font-size:15px">Your lower body volume is lagging two sessions behind the plan.</div>
+                ${badge("Actionable", "teal")}
+              </div>
+              <div class="subtle-note" style="margin-top:8px">Adjust tomorrow’s session or move one accessory block into today’s workout.</div>
+            `)}
+
+            ${sectionCard("Quick actions", "", `
+              <div class="split-2">
+                ${button("Log meal", "secondary")}
+                ${button("Check in", "secondary")}
+                ${button("Start workout", "primary")}
+                ${button("Review week", "ghost")}
+              </div>
+            `)}
+          </div>
+        `,
+        activeTab: "today"
+      },
+      {
+        num: 16,
+        label: "Today - Empty State",
+        body: `
+          <div class="empty" style="margin-top:22px">
+            <div class="icon">${icons.today}</div>
+            <h3>Start your first day.</h3>
+            <p>Add a workout, a meal, and one quick check-in so the dashboard can begin to learn your routine.</p>
+            <div class="stack">
+              ${button("Set up today", "primary")}
+              ${button("Import plan", "secondary")}
+            </div>
+          </div>
+          <div class="stack" style="margin-top:14px">
+            ${sectionCard("Setup checklist", "", `
+              <div class="list">
+                ${row("Workout plan", "Not set")}
+                ${row("Nutrition target", "Not set")}
+                ${row("Body baseline", "Not set")}
+                ${row("Weekly check-in", "Not set")}
+              </div>
+            `)}
+          </div>
+        `,
+        activeTab: "today"
+      },
+      {
+        num: 17,
+        label: "Today - Weekly Check-in Modal",
+        body: `
+          <div class="overlay"></div>
+          <div class="overlay-sheet">
+            <div class="card sheet" style="margin:0 12px">
+              <div class="sheet-handle"></div>
+              <div class="stack stack-lg">
+                <div>
+                  <div class="eyebrow">Weekly check-in</div>
+                  <div class="title-lg" style="font-size:24px">How was the week?</div>
+                  <div class="body">Quick ratings only. This should feel light and reflective.</div>
+                </div>
+                <div class="split-2">
+                  ${kpiTile(icons.clock, "7.2 h", "Sleep avg", "+0.3")}
+                  ${kpiTile(icons.body, "4/5", "Recovery", "Steady")}
+                </div>
+                <div class="list">
+                  ${row("Energy", "4 / 5")}
+                  ${row("Mood", "4 / 5")}
+                  ${row("Soreness", "2 / 5")}
+                  ${row("Notes", "Training felt productive")}
+                </div>
+                <div class="split-2">
+                  ${button("Save check-in", "primary")}
+                  ${button("Skip", "ghost")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        overlay: false
+      },
+      {
+        num: 18,
+        label: "Today - Trial Banner State",
+        body: `
+          <div class="stack">
+            <div class="card" style="background:linear-gradient(180deg, rgba(74,155,155,0.17), rgba(17,26,26,0.9)); border-color: rgba(74,155,155,0.3)">
+              <div class="row">
+                <div>
+                  <div class="value" style="font-size:17px">5 days left in your trial</div>
+                  <div class="meta" style="color:#D3E9E9">Everything else stays visible. Upgrade when you’re ready.</div>
+                </div>
+                ${badge("Trial", "teal")}
+              </div>
+            </div>
+            ${sectionCard("Today", "Full data state", `
+              <div class="split-2">
+                ${metric("Adherence", "72%", "4%")}
+                ${metric("Weight", "80.5 kg", "0.6 kg", true)}
+              </div>
+            `)}
+            ${sectionCard("Locked analysis", "", `
+              <div class="row"><div class="value" style="font-size:15px">Review 4 weeks</div>${badge("Pro", "gray")}</div>
+              <div class="subtle-note" style="margin-top:6px">Deeper trend comparisons are available in Pro.</div>
+            `)}
+          </div>
+        `,
+        activeTab: "today"
+      },
+      {
+        num: 19,
+        label: "Nutrition - Daily View",
+        body: appShell({
+          title: "Nutrition",
+          subtitle: "Daily logging and macro tracking",
+          action: `${icons.plus}`,
+          activeTab: "nutrition",
+          body: `
+            <div class="stack">
+              <div class="hero-block">
+                <div class="row">
+                  <div>
+                    <div class="eyebrow">Daily target</div>
+                    <div class="large-num">2,250</div>
+                    <div class="meta">kcal remaining 390</div>
+                  </div>
+                  <div class="completion-ring" style="width:82px;height:82px"><span style="font-size:18px">61%</span></div>
+                </div>
+                <div class="split-3" style="margin-top:14px">
+                  ${metric("Protein", "161g", "15g")}
+                  ${metric("Carbs", "238g", "21g")}
+                  ${metric("Fat", "63g", "7g")}
+                </div>
+              </div>
+              <div class="list">
+                <div class="card" style="padding:12px"><div class="row"><div><div class="value">Breakfast</div><div class="meta">Greek yogurt, oats, berries</div></div>${badge("480 kcal", "gray")}</div></div>
+                <div class="card" style="padding:12px"><div class="row"><div><div class="value">Lunch</div><div class="meta">Chicken rice bowl</div></div>${badge("690 kcal", "green")}</div></div>
+                <div class="card" style="padding:12px"><div class="row"><div><div class="value">Dinner</div><div class="meta">Salmon, potatoes, greens</div></div>${badge("620 kcal", "gray")}</div></div>
+              </div>
+              ${button("Log meal", "primary")}
+            </div>
+          `
+        })
+      },
+      {
+        num: 20,
+        label: "Nutrition - Empty Day State",
+        body: appShell({
+          title: "Nutrition",
+          subtitle: "Nothing logged yet today",
+          action: `${icons.plus}`,
+          activeTab: "nutrition",
+          body: `
+            <div class="empty" style="margin-top:12px">
+              <div class="icon">${icons.meal}</div>
+              <h3>No meals yet.</h3>
+              <p>Search a food, add a meal, or start from your diet plan to keep the day fast and frictionless.</p>
+              <div class="stack">
+                ${button("Add first meal", "primary")}
+                ${button("Search food", "secondary")}
+              </div>
+            </div>
+          `
+        }),
+        activeTab: "nutrition"
+      },
+      {
+        num: 21,
+        label: "Nutrition - Meal Form Modal",
+        body: `
+          <div class="overlay"></div>
+          <div class="overlay-sheet">
+            <div class="card sheet" style="margin:0 12px">
+              <div class="sheet-handle"></div>
+              <div class="stack stack-lg">
+                <div>
+                  <div class="eyebrow">Meal</div>
+                  <div class="title-lg" style="font-size:24px">Add breakfast</div>
+                </div>
+                <div class="stack">
+                  ${field("Meal name", "Breakfast")}
+                  ${field("Time", "07:40")}
+                  ${field("Items", "Greek yogurt, oats, berries")}
+                </div>
+                <div class="split-2">
+                  ${button("Save meal", "primary")}
+                  ${button("Cancel", "ghost")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        num: 22,
+        label: "Nutrition - Food Search Active State",
+        body: appShell({
+          title: "Search food",
+          subtitle: "Search results and recent foods",
+          activeTab: "nutrition",
+          body: `
+            ${searchField("Food search")}
+            <div class="chip-row" style="margin-top:10px">
+              ${chip("Recent", true)}
+              ${chip("High protein")}
+              ${chip("Low fat")}
+              ${chip("Brand")}
+            </div>
+            <div class="list" style="margin-top:12px">
+              ${listItem("Chicken breast, cooked", "31g protein · 0g carbs · 3g fat", badge("100g", "gray"))}
+              ${listItem("Greek yogurt, plain", "17g protein · 6g carbs · 0g fat", badge("150g", "gray"))}
+              ${listItem("Oats", "11g protein · 54g carbs · 7g fat", badge("80g", "gray"))}
+            </div>
+          `
+        }),
+        activeTab: "nutrition"
+      },
+      {
+        num: 23,
+        label: "Nutrition - Food Search Loading State",
+        body: appShell({
+          title: "Search food",
+          subtitle: "Loading results",
+          activeTab: "nutrition",
+          body: `
+            ${searchField("Food search")}
+            <div class="chip-row" style="margin-top:10px">
+              ${chip("Recent", true)}
+              ${chip("Verified")}
+            </div>
+            <div class="list" style="margin-top:12px">
+              <div class="card shimmer" style="height:74px"></div>
+              <div class="card shimmer" style="height:74px"></div>
+              <div class="card shimmer" style="height:74px"></div>
+            </div>
+          `
+        }),
+        activeTab: "nutrition"
+      },
+      {
+        num: 24,
+        label: "Nutrition - Food Search No Results",
+        body: appShell({
+          title: "Search food",
+          subtitle: "No matching food found",
+          activeTab: "nutrition",
+          body: `
+            ${searchField("Food search")}
+            <div class="empty" style="margin-top:12px">
+              <div class="icon">${icons.search}</div>
+              <h3>No results.</h3>
+              <p>Try a broader term, a brand name, or add the item manually.</p>
+              <div class="stack">
+                ${button("Add manually", "primary")}
+                ${button("Search again", "secondary")}
+              </div>
+            </div>
+          `
+        }),
+        activeTab: "nutrition"
+      },
+      {
+        num: 25,
+        label: "My Diet - AI Generated Plan View",
+        body: appShell({
+          title: "My Diet",
+          subtitle: "AI generated plan",
+          activeTab: "nutrition",
+          body: `
+            <div class="hero-block">
+              <div class="row">
+                <div>
+                  <div class="eyebrow">Generated plan</div>
+                  <div class="value" style="font-size:18px">Performance cut</div>
+                  <div class="meta">2,250 kcal · 161P / 238C / 63F</div>
+                </div>
+                ${badge("AI", "teal")}
+              </div>
+              <div class="progress" style="margin-top:12px"><span style="width:78%"></span></div>
+              <div class="chip-row" style="margin-top:12px">
+                ${chip("High protein", true)}
+                ${chip("3 meals + 1 snack")}
+                ${chip("Flexible swaps")}
+              </div>
+            </div>
+            <div class="list">
+              ${listItem("Meal 1", "Eggs, yogurt, berries", badge("480 kcal", "gray"))}
+              ${listItem("Meal 2", "Chicken rice bowl", badge("690 kcal", "gray"))}
+              ${listItem("Meal 3", "Salmon and potatoes", badge("620 kcal", "gray"))}
+              ${listItem("Snack", "Whey + fruit", badge("230 kcal", "gray"))}
+            </div>
+            ${button("Regenerate plan", "secondary")}
+          `
+        }),
+        activeTab: "nutrition"
+      },
+      {
+        num: 26,
+        label: "My Diet - Prescribed by Nutritionist",
+        body: appShell({
+          title: "My Diet",
+          subtitle: "Prescribed by nutritionist",
+          activeTab: "nutrition",
+          body: `
+            <div class="hero-block">
+              <div class="row">
+                <div>
+                  <div class="eyebrow">Provider plan</div>
+                  <div class="value" style="font-size:18px">Cut phase protocol</div>
+                  <div class="meta">Assigned by Dr. Silva · Updated Mar 20</div>
+                </div>
+                ${badge("Clinical", "green")}
+              </div>
+            </div>
+            ${sectionCard("Structure", "", `
+              <div class="list">
+                ${row("Meals per day", "4")}
+                ${row("Protein target", "160 g")}
+                ${row("Food rules", "No alcohol · 1 free meal")}
+                ${row("Compliance", "89%")}
+              </div>
+            `)}
+            ${button("Message nutritionist", "primary")}
+          `
+        }),
+        activeTab: "nutrition"
+      },
+      {
+        num: 27,
+        label: "My Diet - Empty State",
+        body: appShell({
+          title: "My Diet",
+          subtitle: "No plan assigned yet",
+          activeTab: "nutrition",
+          body: `
+            <div class="empty" style="margin-top:12px">
+              <div class="icon">${icons.leaf}</div>
+              <h3>No diet loaded.</h3>
+              <p>Generate an AI plan or wait for your nutritionist to assign one.</p>
+              <div class="stack">
+                ${button("Generate diet", "primary")}
+                ${button("Request prescription", "secondary")}
+              </div>
+            </div>
+          `
+        }),
+        activeTab: "nutrition"
+      },
+      {
+        num: 28,
+        label: "Workouts - Plan List View",
+        body: appShell({
+          title: "Workouts",
+          subtitle: "Plans and templates",
+          action: `${icons.plus}`,
+          activeTab: "train",
+          body: `
+            <div class="chip-row">
+              ${chip("Active", true)}
+              ${chip("Templates")}
+              ${chip("Assigned")}
+              ${chip("Archived")}
+            </div>
+            <div class="list">
+              ${planCard("Upper / Lower split", "4 days per week", "86%", "2 days ago", "Continue", true)}
+              ${planCard("Hypertrophy block", "5 days per week", "72%", "Yesterday")}
+              ${planCard("Recovery week", "3 days per week", "58%", "Last week")}
+            </div>
+          `
+        }),
+        activeTab: "train"
+      },
+      {
+        num: 29,
+        label: "Workouts - Empty State",
+        body: appShell({
+          title: "Workouts",
+          subtitle: "No plans yet",
+          action: `${icons.plus}`,
+          activeTab: "train",
+          body: `
+            <div class="empty" style="margin-top:12px">
+              <div class="icon">${icons.dumbbell}</div>
+              <h3>Create your first plan.</h3>
+              <p>Start from a template, build manually, or wait for a coach to prescribe one.</p>
+              <div class="stack">
+                ${button("Create plan", "primary")}
+                ${button("Browse templates", "secondary")}
+              </div>
+            </div>
+          `
+        }),
+        activeTab: "train"
+      },
+      {
+        num: 30,
+        label: "Workouts - Create Plan Modal",
+        body: `
+          <div class="overlay"></div>
+          <div class="overlay-sheet">
+            <div class="card sheet" style="margin:0 12px">
+              <div class="sheet-handle"></div>
+              <div class="stack stack-lg">
+                <div>
+                  <div class="eyebrow">New plan</div>
+                  <div class="title-lg" style="font-size:24px">Create a workout plan</div>
+                </div>
+                <div class="stack">
+                  ${field("Plan name", "Upper / Lower")}
+                  ${field("Frequency", "4 days / week")}
+                  ${field("Primary goal", "Hypertrophy")}
+                </div>
+                <div class="split-2">
+                  ${button("Create plan", "primary")}
+                  ${button("Cancel", "ghost")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        num: 31,
+        label: "Workouts - Exercise Search Modal",
+        body: `
+          <div class="overlay"></div>
+          <div class="overlay-sheet">
+            <div class="card sheet" style="margin:0 12px">
+              <div class="sheet-handle"></div>
+              <div class="stack stack-lg">
+                <div>
+                  <div class="eyebrow">Search exercise</div>
+                  <div class="title-lg" style="font-size:24px">Add movements</div>
+                </div>
+                ${searchField("Exercise")}
+                <div class="chip-row">
+                  ${chip("Chest", true)}
+                  ${chip("Back")}
+                  ${chip("Legs")}
+                  ${chip("Barbell")}
+                </div>
+                <div class="list">
+                  ${exerciseCard("Barbell bench press", "Chest", "Barbell", true)}
+                  ${exerciseCard("Seated row", "Back", "Cable")}
+                  ${exerciseCard("Bulgarian split squat", "Legs", "Dumbbells")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        num: 32,
+        label: "Workouts - Execution Screen",
+        body: `
+          <div class="stack">
+            <div class="nav" style="padding:6px 0 4px">
+              <div class="nav-left">
+                <div class="nav-back">${icons.back}End workout</div>
+                <div class="nav-title" style="font-size:22px">Upper body A</div>
+                <div class="nav-subtitle">Set 2 of 5 · 5 exercises</div>
+              </div>
+              <div class="badge red">45 min</div>
+            </div>
+            <div class="card soft">
+              <div class="row">
+                <div>
+                  <div class="eyebrow">Current exercise</div>
+                  <div class="title-lg" style="font-size:24px">Incline dumbbell press</div>
+                  <div class="meta">Chest · dumbbells</div>
+                </div>
+                ${badge("Active", "teal")}
+              </div>
+              <div style="margin:14px 0">${progress(45, "Workout progress")}</div>
+              <div class="split-3">
+                ${metric("Set", "2", "of 4")}
+                ${metric("Weight", "32kg", "Target")}
+                ${metric("Reps", "10", "Target")}
+              </div>
+            </div>
+            ${sectionCard("Set tracker", "", `
+              <div class="split-3">
+                ${badge("1 ✓", "green")}
+                ${badge("2", "teal")}
+                ${badge("3", "gray")}
+              </div>
+            `)}
+            ${button("Mark set complete", "primary")}
+            ${sectionCard("Upcoming", "", `
+              <div class="list">
+                ${row("Cable fly", "3 sets · 20kg")}
+                ${row("Lateral raise", "3 sets · 12kg")}
+              </div>
+            `)}
+          </div>
+        `
+      },
+      {
+        num: 33,
+        label: "Workouts - Rest Timer Overlay",
+        body: `
+          <div class="overlay"></div>
+          <div class="center" style="height:100%; padding:18px 20px 100px; position:relative; z-index:35">
+            <div class="card sheet" style="width:100%">
+              <div class="sheet-handle"></div>
+              <div class="stack stack-lg" style="align-items:center">
+                <div class="eyebrow">Rest timer</div>
+                <div class="completion-ring" style="width:160px;height:160px">
+                  <span class="large-num" style="font-size:32px">01:18</span>
+                </div>
+                <div class="stack" style="align-items:center">
+                  <div class="title-lg" style="font-size:24px">Next set in progress</div>
+                  <div class="body" style="text-align:center; max-width:240px">Stay focused, breathe, and get ready for the next attempt.</div>
+                </div>
+                <div class="split-2" style="width:100%">
+                  ${button("Skip rest", "secondary")}
+                  ${button("+15 sec", "primary")}
+                </div>
+                ${sectionCard("Next up", "", `<div class="row"><div><div class="value">Incline dumbbell press</div><div class="meta">32kg · 10 reps</div></div>${badge("Ready", "green")}</div>`)}
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        num: 34,
+        label: "Workouts - Workout Complete Screen",
+        body: `
+          <div class="center" style="height:100%; padding:18px 20px 24px">
+            <div class="stack stack-lg" style="width:100%; align-items:center">
+              <div class="completion-ring"><span>${icons.check}</span></div>
+              <div class="stack" style="align-items:center">
+                <div class="title-lg">Workout complete</div>
+                <div class="body" style="text-align:center; max-width:250px">Strong session. Review the summary, celebrate the work, and move on.</div>
+              </div>
+              <div class="split-3" style="width:100%">
+                ${metric("Volume", "12.4t", "+8%")}
+                ${metric("Duration", "54m", "5m")}
+                ${metric("PRs", "2", "New")}
+              </div>
+              <div class="split-2" style="width:100%">
+                ${button("Share summary", "secondary")}
+                ${button("Done", "primary")}
+              </div>
+              ${sectionCard("Highlights", "", `
+                <div class="list">
+                  ${row("Incline press", "New PR")}
+                  ${row("Top set", "32kg x 10")}
+                  ${row("Consistency", "4 workouts this week")}
+                </div>
+              `)}
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    gallery.innerHTML = screenConfigs.map((screen) => wrap(screen.num, screen.label, phone({
+      body: screen.body,
+      activeTab: screen.activeTab || null,
+      navHtml: screen.navHtml || "",
+      flow: !!screen.flow,
+      overlay: !!screen.overlay
+    }))).join("");
+  </script>
+</body>
+</html>

@@ -5,8 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -23,7 +22,7 @@ export default function RoutineForm({ onSuccess }) {
   });
   const [selectedDays, setSelectedDays] = useState(new Set());
 
-  const { data: workouts = [] } = useQuery({
+  useQuery({
     queryKey: ['prescribed-workouts', user?.email],
     queryFn: () => base44.entities.PrescribedWorkout?.filter?.({ athlete_email: user?.email }) ?? [],
     enabled: !!user?.email,
@@ -85,37 +84,34 @@ export default function RoutineForm({ onSuccess }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Name */}
-      <div>
-        <label className="text-[11px] font-semibold uppercase text-muted-foreground block mb-1.5">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+        <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
           Nome da Rotina
         </label>
         <Input
           value={form.name}
           onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
           placeholder="Ex: Upper/Lower Split, Full Body 4x"
-          className="h-10 rounded-lg text-[13px]"
+          className="atlas-field h-11 rounded-[10px] border-0 px-4 text-[14px]"
         />
       </div>
 
-      {/* Description */}
-      <div>
-        <label className="text-[11px] font-semibold uppercase text-muted-foreground block mb-1.5">
+      <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+        <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
           Descrição
         </label>
         <Textarea
           value={form.description}
           onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))}
           placeholder="Descreva a rotina (opcional)"
-          className="h-20 rounded-lg text-[13px] resize-none"
+          className="atlas-field min-h-[96px] resize-none rounded-[10px] border-0 px-4 py-3 text-[14px]"
         />
       </div>
 
-      {/* Duration & Exercises */}
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-[11px] font-semibold uppercase text-muted-foreground block mb-1.5">
+        <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+          <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
             Duração (minutos)
           </label>
           <Input
@@ -124,11 +120,11 @@ export default function RoutineForm({ onSuccess }) {
             onChange={(e) => setForm(f => ({ ...f, estimated_duration_minutes: Number(e.target.value) }))}
             min={5}
             max={300}
-            className="h-10 rounded-lg text-[13px]"
+            className="atlas-field h-11 rounded-[10px] border-0 px-4 text-[14px]"
           />
         </div>
-        <div>
-          <label className="text-[11px] font-semibold uppercase text-muted-foreground block mb-1.5">
+        <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+          <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
             Total de Exercícios
           </label>
           <Input
@@ -137,39 +133,44 @@ export default function RoutineForm({ onSuccess }) {
             onChange={(e) => setForm(f => ({ ...f, total_exercises: Number(e.target.value) }))}
             min={0}
             max={50}
-            className="h-10 rounded-lg text-[13px]"
+            className="atlas-field h-11 rounded-[10px] border-0 px-4 text-[14px]"
           />
         </div>
       </div>
 
-      {/* Days of Week */}
-      <div>
-        <label className="text-[11px] font-semibold uppercase text-muted-foreground block mb-2">
+      <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+        <label className="mb-3 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
           Dias da Semana
         </label>
-        <div className="grid grid-cols-7 gap-1.5">
+        <div className="grid grid-cols-7 gap-2">
           {DAYS_PT.map((day, idx) => (
-            <div key={idx} className="flex flex-col items-center gap-1">
-              <input
-                type="checkbox"
-                id={`day-${idx}`}
-                checked={selectedDays.has(idx)}
-                onChange={() => toggleDay(idx)}
-                className="w-4 h-4 rounded border-border cursor-pointer"
+            <button
+              key={idx}
+              type="button"
+              onClick={() => toggleDay(idx)}
+              className={`flex flex-col items-center gap-2 rounded-[12px] border px-1 py-3 transition-colors ${
+                selectedDays.has(idx)
+                  ? 'border-[hsl(var(--brand)/0.26)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]'
+                  : 'border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.5)] text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--fill)/0.9)]'
+              }`}
+            >
+              <span
+                className={`h-2.5 w-2.5 rounded-full ${
+                  selectedDays.has(idx) ? 'bg-[hsl(var(--brand))]' : 'bg-[hsl(var(--border))]'
+                }`}
               />
-              <label htmlFor={`day-${idx}`} className="text-[10px] font-medium text-muted-foreground cursor-pointer">
+              <span className="text-[10px] font-semibold">
                 {day.slice(0, 3)}
-              </label>
-            </div>
+              </span>
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Submit */}
       <Button
         type="submit"
         disabled={createRoutine.isPending || selectedDays.size === 0}
-        className="w-full h-11 rounded-lg bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)/0.85)] text-white font-semibold text-[13px]"
+        className="h-11 w-full rounded-[10px] bg-[hsl(var(--primary))] text-[13px] font-semibold text-white hover:bg-[hsl(var(--primary)/0.85)]"
       >
         {createRoutine.isPending ? (
           <>

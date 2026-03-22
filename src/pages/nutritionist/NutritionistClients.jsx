@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Trash2, Users } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { Link } from 'react-router-dom';
-import { Plus, Trash2, Loader2, Users } from 'lucide-react';
-import { toast } from 'sonner';
-import RoleGate from '@/components/rbac/RoleGate';
 import InviteModal from '@/components/shared/InviteModal';
+import RoleGate from '@/components/rbac/RoleGate';
+import { PageShell, SectionCard } from '@/components/shared/StablePage';
+import {
+  WorkspaceHeader,
+  WorkspaceInviteAction,
+  WorkspacePersonRow,
+  WorkspaceRosterSection,
+} from '@/components/shared/ProfessionalUI';
 
 export default function NutritionistClients() {
   const { user } = useAuth();
@@ -15,7 +20,12 @@ export default function NutritionistClients() {
 
   const { data: links = [], isLoading } = useQuery({
     queryKey: ['nutritionist-clients'],
-    queryFn: () => base44.entities.NutritionistClientLink.filter({ nutritionist_email: user?.email }, '-created_date', 100),
+    queryFn: () =>
+      base44.entities.NutritionistClientLink.filter(
+        { nutritionist_email: user?.email },
+        '-created_date',
+        100
+      ),
   });
 
   const deleteM = useMutation({
@@ -25,67 +35,71 @@ export default function NutritionistClients() {
 
   return (
     <RoleGate page="NutritionistClients">
-      <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
-        <div className="flex items-start justify-between gap-4 pb-5 border-b border-[hsl(var(--border-h))]">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Meus Clientes</h1>
-            <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1">Gerenciar vínculos com atletas</p>
-          </div>
-          <button onClick={() => setShowInvite(true)} className="btn btn-primary gap-1.5 h-9">
-            <Plus className="w-4 h-4" /> Adicionar
-          </button>
-        </div>
+      <PageShell
+        title="Clients"
+        subtitle="Manage client relationships and move directly into detailed nutrition reviews."
+        maxWidth="max-w-4xl"
+      >
+        <WorkspaceHeader
+          eyebrow="Nutritionist role"
+          title="Clients"
+          subtitle="Pending invites stay visible, while accepted clients open into richer profile review."
+          icon={Users}
+          tone="brand"
+          badge={`${links.length} linked`}
+          actions={<WorkspaceInviteAction label="Invite client" onClick={() => setShowInvite(true)} />}
+        />
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12 gap-2 text-[hsl(var(--fg-2))]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
-          </div>
-        ) : links.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <Users className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} />
-            </div>
-            <p className="t-subtitle mb-1">Sem clientes</p>
-            <p className="t-caption mb-4">Você ainda não vinculou nenhum cliente</p>
-            <button onClick={() => setShowInvite(true)} className="btn btn-primary">
-              <Plus className="w-4 h-4" /> Adicionar cliente
-            </button>
-          </div>
+          <SectionCard title="Loading clients" subtitle="Fetching client relationships.">
+            <div className="py-12 text-center text-[13px] text-[hsl(var(--fg-2))]">Loading clients...</div>
+          </SectionCard>
         ) : (
-          <div className="space-y-2">
+          <WorkspaceRosterSection
+            eyebrow="Roster"
+            title="All linked clients"
+            subtitle="Use accepted client records for meals, measurements, diet plans, and exam review."
+            emptyIcon={Users}
+            emptyTitle="No clients linked"
+            emptyDescription="Invite a client to start prescribing diets and reviewing adherence."
+            emptyAction={<WorkspaceInviteAction label="Invite client" onClick={() => setShowInvite(true)} />}
+          >
             {links.map((link) => (
-              <Link
+              <WorkspacePersonRow
                 key={link.id}
                 to={`/nutritionist/client/${link.id}`}
-                className="surface p-4 flex items-center justify-between hover:border-[hsl(var(--brand)/0.3)] transition-colors group"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[13px]">{link.client_name}</p>
-                  <p className="text-[12px] text-[hsl(var(--fg-2))]">{link.client_email}</p>
-                  <p className="text-[11px] text-[hsl(var(--fg-2))] mt-1">
-                    {link.permissions?.can_view_meals ? '📊 Refeições' : ''}
-                    {link.permissions?.can_create_diet_plan ? ' · 📋 Planos' : ''}
-                    {link.permissions?.can_view_lab_exams ? ' · 🧬 Exames' : ''}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`badge ${link.status === 'accepted' ? 'badge-ok' : link.status === 'pending' ? 'badge-warn' : 'badge-neutral'}`}>
-                    {link.status === 'accepted' ? 'Ativo' : link.status === 'pending' ? 'Pendente' : link.status}
-                  </span>
+                initial={(link.client_name || link.client_email)?.[0]?.toUpperCase() || 'C'}
+                title={link.client_name || link.client_email}
+                subtitle={link.client_email}
+                meta={[
+                  link.permissions?.can_view_meals ? 'Meals' : null,
+                  link.permissions?.can_create_diet_plan ? 'Diet plans' : null,
+                  link.permissions?.can_view_lab_exams ? 'Labs' : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+                badge={link.status === 'accepted' ? 'Active' : 'Pending'}
+                badgeTone={link.status === 'accepted' ? 'success' : 'warning'}
+                accentTone="brand"
+                actions={
                   <button
-                    onClick={(e) => { e.preventDefault(); deleteM.mutate(link.id); }}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-[hsl(var(--fg-2)/0.5)] hover:text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.07)] transition-colors"
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      deleteM.mutate(link.id);
+                    }}
+                    className="flex h-9 w-9 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg-3))] transition-colors hover:border-[hsl(var(--err)/0.2)] hover:bg-[hsl(var(--err)/0.08)] hover:text-[hsl(var(--err))]"
                   >
-                    <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
+                    <Trash2 className="h-4 w-4" strokeWidth={1.9} />
                   </button>
-                </div>
-              </Link>
+                }
+              />
             ))}
-          </div>
+          </WorkspaceRosterSection>
         )}
 
         <InviteModal open={showInvite} onOpenChange={setShowInvite} role="nutritionist" />
-      </div>
+      </PageShell>
     </RoleGate>
   );
 }

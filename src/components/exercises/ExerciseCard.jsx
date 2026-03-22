@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Zap } from 'lucide-react';
+import { Heart, Sparkles, Zap } from 'lucide-react';
 import ExerciseMedia from './ExerciseMedia.jsx';
 import {
   muscleToPT,
@@ -32,7 +32,7 @@ const DIFFICULTY_LABEL = {
 
 function MusclePill({ muscle }) {
   return (
-    <span className="badge badge-blue text-[10px] truncate max-w-[96px]">
+    <span className="inline-flex max-w-[110px] items-center rounded-full border border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.1)] px-2.5 py-1 text-[10px] font-semibold tracking-[-0.01em] text-[hsl(var(--brand))] truncate">
       {muscleToPT(muscle)}
     </span>
   );
@@ -54,27 +54,31 @@ export default function ExerciseCard({
   const difficulty = exercise.difficulty_level;
   const pattern = exercise.movement_pattern;
   const isCompound = exercise.is_compound;
+  const equipment = exercise.equipment ? equipmentToPT(exercise.equipment) : null;
+  const sourceLabel = exercise.source === 'exercisedb' ? 'ExerciseDB' : null;
 
   const inner = compact ? (
     /* ── Compact list row ── */
-    <div className="flex items-center gap-3 px-3 py-2.5">
+    <div className="flex items-center gap-3 px-3.5 py-3">
       {hasGif && (
         <div className="shrink-0">
           <ExerciseMedia exercise={exercise} size="sm" showFallback={false} />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[hsl(var(--fg))] truncate group-hover:text-[hsl(var(--brand))] transition-colors">
+        <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))] truncate group-hover:text-[hsl(var(--brand))] transition-colors">
           {namePT}
         </p>
         {nameEN && (
           <p className="text-[11px] text-[hsl(var(--fg-2))] truncate">{nameEN}</p>
         )}
-        <div className="flex flex-wrap gap-1 mt-1">
+        <div className="mt-1.5 flex flex-wrap gap-1">
           {primaryMuscles.slice(0, 2).map((m) => <MusclePill key={m} muscle={m} />)}
-          {isCompound && (
-            <span className="badge badge-primary text-[9px]">Comp.</span>
-          )}
+          {equipment ? (
+            <span className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.84)] px-2.5 py-1 text-[10px] font-semibold text-[hsl(var(--fg-2))]">
+              {equipment}
+            </span>
+          ) : null}
         </div>
       </div>
       <div className="flex flex-col items-end gap-1 shrink-0">
@@ -88,62 +92,70 @@ export default function ExerciseCard({
     </div>
   ) : (
     /* ── Full card ── */
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Media */}
-      <div className="relative">
+      <div className="relative overflow-hidden rounded-t-[14px]">
         <ExerciseMedia exercise={exercise} size="md" />
         {isFavorite && (
-          <div className="absolute top-2 left-2">
-            <Heart className="w-4 h-4 text-[hsl(var(--err))] fill-current drop-shadow" />
+          <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--bg)/0.72)] text-[hsl(var(--err))] backdrop-blur">
+            <Heart className="h-4 w-4 fill-current" />
           </div>
         )}
-        {exercise.source === 'exercisedb' && (
-          <div className="absolute bottom-2 left-2">
-            <span className="rounded-md bg-black/50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
-              EDB
-            </span>
+        {(sourceLabel || difficulty) && (
+          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+            {sourceLabel ? (
+              <span className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--bg)/0.72)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/88 backdrop-blur">
+                {sourceLabel}
+              </span>
+            ) : null}
+            {difficulty ? (
+              <span className={`badge ${DIFFICULTY_BADGE[difficulty]}`} style={{ fontSize: 9 }}>
+                {DIFFICULTY_LABEL[difficulty]}
+              </span>
+            ) : null}
           </div>
         )}
       </div>
 
       {/* Body */}
-      <div className="p-3.5 flex flex-col flex-1 gap-2">
+      <div className="flex flex-1 flex-col gap-3 px-4 py-4">
         {/* Names */}
         <div>
-          <h3 className="text-[13px] font-bold text-[hsl(var(--fg))] group-hover:text-[hsl(var(--brand))] transition-colors leading-tight line-clamp-2">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-tight tracking-[-0.03em] text-[hsl(var(--fg))] transition-colors group-hover:text-[hsl(var(--brand))]">
             {namePT}
           </h3>
           {nameEN && (
-            <p className="text-[10px] text-[hsl(var(--fg-2))] truncate mt-0.5">{nameEN}</p>
+            <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))] truncate">{nameEN}</p>
           )}
         </div>
 
         {/* Muscles */}
         {primaryMuscles.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {primaryMuscles.slice(0, 3).map((m) => <MusclePill key={m} muscle={m} />)}
           </div>
         )}
 
         {/* Footer chips */}
-        <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
-          {difficulty && (
-            <span className={`badge ${DIFFICULTY_BADGE[difficulty]}`} style={{ fontSize: 9 }}>
-              {DIFFICULTY_LABEL[difficulty]}
+        <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
+          {equipment ? (
+            <span className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.78)] px-2.5 py-1 text-[10px] font-semibold text-[hsl(var(--fg-2))]">
+              {equipment}
             </span>
-          )}
+          ) : null}
           {pattern && MOVEMENT_PATTERN_LABELS[pattern] && (
             <span className="badge badge-neutral" style={{ fontSize: 9 }}>
               {MOVEMENT_PATTERN_LABELS[pattern]}
             </span>
           )}
           {isCompound && (
-            <span className="badge badge-primary" style={{ fontSize: 9 }}>
-              <Zap className="w-2.5 h-2.5 inline -mt-px" /> Composto
+            <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.1)] px-2.5 py-1 text-[10px] font-semibold text-[hsl(var(--brand))]">
+              <Zap className="h-2.5 w-2.5" /> Composto
             </span>
           )}
           {useCount > 0 && (
-            <span className="badge badge-neutral" style={{ fontSize: 9 }}>
+            <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.1)] px-2.5 py-1 text-[10px] font-semibold text-[hsl(var(--ok))]">
+              <Sparkles className="h-2.5 w-2.5" />
               {useCount}× usado
             </span>
           )}
@@ -152,7 +164,7 @@ export default function ExerciseCard({
     </div>
   );
 
-  const sharedClasses = `group surface rounded-xl overflow-hidden border border-[hsl(var(--border-h))] hover:border-[hsl(var(--brand)/0.3)] hover:shadow-md transition-all cursor-pointer ${compact ? 'flex items-stretch' : 'flex flex-col h-full'}`;
+  const sharedClasses = `group atlas-card overflow-hidden border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--fill)/0.48)_100%)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--brand)/0.28)] hover:shadow-[var(--shadow-md)] cursor-pointer ${compact ? 'flex items-stretch rounded-[14px]' : 'flex flex-col h-full rounded-[14px]'}`;
 
   if (onClick) {
     return (

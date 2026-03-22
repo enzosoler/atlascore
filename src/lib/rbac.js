@@ -96,13 +96,13 @@ export const PAGE_ACCESS = {
 export const NAV_BY_ROLE = {
   athlete: [
     { path: ROUTES.today,      label: 'Today',     icon: 'Home' },
+    { path: ROUTES.workouts,   label: 'Train',     icon: 'Dumbbell' },
     { path: ROUTES.nutrition,  label: 'Nutrition', icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,   label: 'Workouts',  icon: 'Dumbbell' },
     { path: ROUTES.body,       label: 'Body',      icon: 'TrendingUp' },
     { path: ROUTES.protocols,  label: 'Protocols', icon: 'FlaskConical' },
     { path: ROUTES.labExams,   label: 'Lab Exams', icon: 'ClipboardList' },
     { path: ROUTES.atlasAI,    label: 'Atlas AI',  icon: 'Brain' },
-    { path: ROUTES.profile,    label: 'Profile',   icon: 'User' },
+    { path: ROUTES.profile,    label: 'More',      icon: 'User' },
   ],
   coach: [
     { path: ROUTES.today,              label: 'Home',           icon: 'Home' },
@@ -130,13 +130,8 @@ export const NAV_BY_ROLE = {
   ],
   admin: [
     { path: ROUTES.today,      label: 'Today',        icon: 'Home' },
-    { path: ROUTES.nutrition,  label: 'Nutrition',    icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,   label: 'Workouts',     icon: 'Dumbbell' },
-    { path: ROUTES.body,       label: 'Body',         icon: 'TrendingUp' },
-    { path: ROUTES.protocols,  label: 'Protocols',    icon: 'FlaskConical' },
-    { path: ROUTES.labExams,   label: 'Lab Exams',    icon: 'ClipboardList' },
-    { path: ROUTES.atlasAI,    label: 'Atlas AI',     icon: 'Brain' },
     { path: ROUTES.admin,      label: 'Admin',        icon: 'ShieldCheck' },
+    { path: ROUTES.social,     label: 'Social',       icon: 'MessageSquare' },
     { path: ROUTES.profile,    label: 'Profile',      icon: 'User' },
   ],
 };
@@ -145,7 +140,7 @@ export const NAV_BY_ROLE = {
  * Bottom nav (mobile) — max 4 items per role, most used pages
  */
 export const BOTTOM_NAV_BY_ROLE = {
-  athlete:      ['today', 'nutrition', 'workouts', 'atlas-ai'],
+  athlete:      ['today', 'workouts', 'nutrition', 'body', 'profile'],
   coach:        ['today', 'coach-dashboard', 'coach/students', 'profile'],
   nutritionist: ['today', 'nutritionist-dashboard', 'nutritionist/clients', 'profile'],
   clinician:    ['today', 'clinician-dashboard', 'clinician/patients', 'profile'],

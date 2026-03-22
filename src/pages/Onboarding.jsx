@@ -96,19 +96,29 @@ function Logo() {
 
 function StepDots({ step, total }) {
   return (
-    <div className="flex items-center justify-center gap-2 mb-8">
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          className={`rounded-full transition-all duration-300 ${
-            i === step
-              ? 'w-6 h-2 bg-[hsl(var(--brand))]'
-              : i < step
-                ? 'w-2 h-2 bg-[hsl(var(--brand)/0.4)]'
-                : 'w-2 h-2 bg-[hsl(var(--border-h))]'
-          }`}
-        />
-      ))}
+    <div className="mb-7 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] px-4 py-3">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+          Etapa {step + 1} de {total}
+        </p>
+        <span className="font-mono text-[12px] font-semibold text-[hsl(var(--brand))]">
+          {Math.round(((step + 1) / total) * 100)}%
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={`rounded-full transition-all duration-300 ${
+              i === step
+                ? 'h-2 flex-1 bg-[hsl(var(--brand))]'
+                : i < step
+                  ? 'h-2 flex-1 bg-[hsl(var(--brand)/0.38)]'
+                  : 'h-2 flex-1 bg-[hsl(var(--border-h))]'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -138,7 +148,7 @@ function GoalChip({ selected, onClick, emoji, label }) {
 
 function FieldLabel({ children }) {
   return (
-    <label className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
+    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
       {children}
     </label>
   );
@@ -228,7 +238,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
               value={form.height}
               onChange={(e) => set('height', e.target.value)}
               placeholder="175"
-              className="h-10 rounded-lg text-base"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
             />
           </div>
           <div>
@@ -243,13 +253,13 @@ function StepProfileAndGoals({ form, set, toggle }) {
                 set('checkpoint_weight', e.target.value);
               }}
               placeholder="80"
-              className="h-10 rounded-lg text-base"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
             />
           </div>
           <div>
             <FieldLabel>Sexo biológico</FieldLabel>
             <Select value={form.sex} onValueChange={(v) => set('sex', v)}>
-              <SelectTrigger className="h-10 rounded-lg text-base">
+              <SelectTrigger className="atlas-field h-11 rounded-[12px] border-0 text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -266,7 +276,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
               value={form.age}
               onChange={(e) => set('age', e.target.value)}
               placeholder="30"
-              className="h-10 rounded-lg text-base"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
             />
           </div>
         </div>
@@ -282,13 +292,13 @@ function StepProfileAndGoals({ form, set, toggle }) {
               value={form.target_weight}
               onChange={(e) => set('target_weight', e.target.value)}
               placeholder="75"
-              className="h-10 rounded-lg text-base"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
             />
           </div>
           <div>
             <FieldLabel>Nível de atividade</FieldLabel>
             <Select value={form.activity_level} onValueChange={(v) => set('activity_level', v)}>
-              <SelectTrigger className="h-10 rounded-lg text-base">
+              <SelectTrigger className="atlas-field h-11 rounded-[12px] border-0 text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -352,7 +362,7 @@ function StepFirstCheckpoint({ form, set }) {
             value={form.checkpoint_weight}
             onChange={(e) => set('checkpoint_weight', e.target.value)}
             placeholder="80"
-            className="h-10 rounded-lg text-base"
+            className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
           />
         </div>
 
@@ -367,7 +377,7 @@ function StepFirstCheckpoint({ form, set }) {
               value={form.checkpoint_body_fat}
               onChange={(e) => set('checkpoint_body_fat', e.target.value)}
               placeholder="18"
-              className="h-10 rounded-lg text-base"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
             />
           </div>
           <div>
@@ -380,7 +390,7 @@ function StepFirstCheckpoint({ form, set }) {
               value={form.checkpoint_waist}
               onChange={(e) => set('checkpoint_waist', e.target.value)}
               placeholder="80"
-              className="h-10 rounded-lg text-base"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
             />
           </div>
         </div>
@@ -865,14 +875,14 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))] flex items-center justify-center p-5">
+    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--bg))] p-5">
       <div className="w-full max-w-md">
 
         {/* ── Paywall priming screen ── */}
         {showPaywallPriming && (
           <>
             <Logo />
-            <div className="surface rounded-2xl p-6">
+            <div className="surface rounded-[22px] p-6">
               <PaywallPrimingScreen onContinue={handlePrimingContinue} />
             </div>
           </>
@@ -882,7 +892,7 @@ export default function Onboarding() {
         {!showPaywallPriming && showGeneration && (
           <>
             <Logo />
-            <div className="surface rounded-2xl p-8">
+            <div className="surface rounded-[22px] p-8">
               <SetupGenerationScreen onDone={handleGenerationDone} />
             </div>
           </>
@@ -892,7 +902,7 @@ export default function Onboarding() {
         {!showPaywallPriming && !showGeneration && showSuccess && (
           <>
             <Logo />
-            <div className="surface rounded-2xl p-8">
+            <div className="surface rounded-[22px] p-8">
               <SuccessScreen chosenPath={form.chosen_path} onDone={handleSuccessDone} />
             </div>
           </>
@@ -918,7 +928,7 @@ export default function Onboarding() {
                 key={step}
                 initial={{ x: 24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -24, opacity: 0 }}
                 transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="surface rounded-2xl p-6 mb-4"
+                className="surface mb-4 rounded-[22px] p-6"
               >
                 {stepContent()}
               </motion.div>
@@ -928,7 +938,7 @@ export default function Onboarding() {
               {step > 0 && (
                 <button
                   onClick={() => setStep((s) => s - 1)}
-                  className="btn btn-secondary h-11 rounded-xl px-4"
+                  className="btn btn-secondary h-11 rounded-[12px] px-4"
                 >
                   <ChevronLeft className="w-4 h-4" strokeWidth={2} />
                 </button>
@@ -938,7 +948,7 @@ export default function Onboarding() {
                 <button
                   onClick={() => setStep((s) => s + 1)}
                   disabled={!canContinue()}
-                  className="btn btn-primary flex-1 h-11 rounded-xl text-[14px] gap-1"
+                  className="btn btn-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1"
                 >
                   Continuar <ChevronRight className="w-4 h-4" strokeWidth={2} />
                 </button>
@@ -946,7 +956,7 @@ export default function Onboarding() {
                 <button
                   onClick={handleFinish}
                   disabled={saving || !canContinue()}
-                  className="btn btn-primary flex-1 h-11 rounded-xl text-[14px] gap-1.5"
+                  className="btn btn-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1.5"
                 >
                   {saving
                     ? <Loader2 className="w-4 h-4 animate-spin" />

@@ -139,35 +139,61 @@ export function TabBar({ items, className = '' }) {
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.88)] bg-[hsl(var(--bg)/0.88)] backdrop-blur-2xl lg:hidden',
+        'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.92)] bg-[hsl(var(--bg)/0.92)] backdrop-blur-2xl lg:hidden',
         className
       )}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="mx-auto flex w-full max-w-[30rem] items-center gap-2 px-3 py-3">
+      <div className="mx-auto flex w-full max-w-[30rem] items-start gap-1 px-2.5 py-2.5">
         {items.map((item) => {
           const Icon = item.icon;
           const key = item.key || item.to || item.label;
           const classes = cn(
-            'flex flex-1 min-w-0 flex-col items-center gap-1 rounded-[20px] px-2 py-2 text-center text-[10px] font-semibold tracking-[-0.01em] leading-none transition-all duration-200',
+            'flex flex-1 min-w-0 flex-col items-center gap-1 rounded-[14px] px-1.5 py-1.5 text-center text-[10px] font-semibold tracking-[-0.01em] leading-none transition-all duration-200',
             item.active
-              ? 'border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
-              : 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.92)] hover:text-[hsl(var(--fg))]'
+              ? 'text-[hsl(var(--brand))]'
+              : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
           );
 
           if (item.to) {
             return (
               <Link key={key} to={item.to} onClick={item.onClick} className={classes}>
-                {Icon ? <Icon className="h-5 w-5 shrink-0" strokeWidth={item.active ? 2.25 : 1.9} /> : null}
+                {Icon ? (
+                  <div className={cn(
+                    'flex h-7 w-7 items-center justify-center rounded-[10px] transition-all duration-200',
+                    item.active ? 'bg-[hsl(var(--brand)/0.14)] shadow-[0_0_0_1px_hsl(var(--brand)/0.12)]' : 'bg-transparent'
+                  )}>
+                    <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={item.active ? 2.25 : 1.95} />
+                  </div>
+                ) : null}
                 <span className="max-w-[56px] truncate">{item.label}</span>
+                <span
+                  className={cn(
+                    'mt-0.5 h-1 w-1 rounded-full transition-all duration-200',
+                    item.active ? 'bg-[hsl(var(--brand))]' : 'bg-transparent'
+                  )}
+                />
               </Link>
             );
           }
 
           return (
             <button key={key} type="button" onClick={item.onClick} className={classes}>
-              {Icon ? <Icon className="h-5 w-5 shrink-0" strokeWidth={item.active ? 2.25 : 1.9} /> : null}
+              {Icon ? (
+                <div className={cn(
+                  'flex h-7 w-7 items-center justify-center rounded-[10px] transition-all duration-200',
+                  item.active ? 'bg-[hsl(var(--brand)/0.14)] shadow-[0_0_0_1px_hsl(var(--brand)/0.12)]' : 'bg-transparent'
+                )}>
+                  <Icon className="h-[19px] w-[19px] shrink-0" strokeWidth={item.active ? 2.25 : 1.95} />
+                </div>
+              ) : null}
               <span className="max-w-[56px] truncate">{item.label}</span>
+              <span
+                className={cn(
+                  'mt-0.5 h-1 w-1 rounded-full transition-all duration-200',
+                  item.active ? 'bg-[hsl(var(--brand))]' : 'bg-transparent'
+                )}
+              />
             </button>
           );
         })}

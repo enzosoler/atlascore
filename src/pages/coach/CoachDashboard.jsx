@@ -1,26 +1,18 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { ClipboardList, Loader2, TrendingUp, Users } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { Link } from 'react-router-dom';
 import RoleGate from '@/components/rbac/RoleGate';
-import { Users, TrendingUp, ClipboardList, ChevronRight, Loader2 } from 'lucide-react';
-
-function KpiCard({ icon: Icon, label, value, color, href }) {
-  const inner = (
-    <div className="surface p-5 flex items-center gap-4 hover:border-[hsl(var(--brand)/0.3)] transition-colors">
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}18` }}>
-        <Icon className="w-5 h-5" style={{ color }} strokeWidth={2} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="kpi-sm">{value ?? '—'}</p>
-        <p className="t-caption">{label}</p>
-      </div>
-      {href && <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-2)/0.4)] shrink-0" strokeWidth={2} />}
-    </div>
-  );
-  return href ? <Link to={href}>{inner}</Link> : inner;
-}
+import { PageShell, SectionCard } from '@/components/shared/StablePage';
+import {
+  WorkspaceHeader,
+  WorkspaceMetricGrid,
+  WorkspaceMetricTile,
+  WorkspaceRosterSection,
+  WorkspacePersonRow,
+} from '@/components/shared/ProfessionalUI';
 
 export default function CoachDashboard() {
   const { user } = useAuth();
@@ -31,78 +23,106 @@ export default function CoachDashboard() {
     enabled: !!user?.email,
   });
 
-  const studentEmails = students.map(s => s.student_email);
+  const studentEmails = students.map((student) => student.student_email);
 
   const { data: checkins = [] } = useQuery({
-    queryKey: ['coach-checkins-recent'],
+    queryKey: ['coach-checkins-recent', studentEmails],
     queryFn: () => base44.entities.DailyCheckin.list('-date', 50),
     enabled: studentEmails.length > 0,
   });
 
-  const recentCheckins = checkins.filter(c => studentEmails.includes(c.created_by));
-  const avgAdherence = recentCheckins.length > 0
-    ? Math.round(recentCheckins.reduce((s, c) => s + (c.adherence_score || 0), 0) / recentCheckins.length)
-    : null;
-
   const { data: workouts = [] } = useQuery({
-    queryKey: ['coach-workouts-pending'],
+    queryKey: ['coach-workouts-pending', studentEmails],
     queryFn: () => base44.entities.Workout.list('-date', 100),
     enabled: studentEmails.length > 0,
   });
 
-  const pendingWorkouts = workouts.filter(w => !w.completed && studentEmails.includes(w.created_by)).length;
+  const recentCheckins = checkins.filter((checkin) => studentEmails.includes(checkin.created_by));
+  const avgAdherence = recentCheckins.length
+    ? Math.round(
+        recentCheckins.reduce((sum, checkin) => sum + (checkin.adherence_score || 0), 0) /
+          recentCheckins.length
+      )
+    : null;
+  const pendingWorkouts = workouts.filter(
+    (workout) => !workout.completed && studentEmails.includes(workout.created_by)
+  ).length;
 
   return (
     <RoleGate roles={['coach', 'admin']}>
-      <div className="mx-auto max-w-4xl p-5 lg:p-8 space-y-6">
-        <div className="pb-5 border-b border-[hsl(var(--border-h))]">
-          <h1 className="t-headline">Dashboard Coach</h1>
-          <p className="t-small mt-1">Visão geral dos seus alunos</p>
-        </div>
+      <PageShell title="Coach" subtitle="Operational view of adherence, active athletes, and follow-up priorities." maxWidth="max-w-6xl">
+        <WorkspaceHeader
+          eyebrow="Coach role"
+          title="Coach dashboard"
+          subtitle="Start with the athletes who need attention, then move into adherence and pending execution."
+          icon={Users}
+          tone="brand"
+          badge={`${students.length} active athletes`}
+        />
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12 gap-2 t-small text-[hsl(var(--fg-2))]">
-            <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
-          </div>
+          <SectionCard title="Loading" subtitle="Pulling active athlete context.">
+            <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading coach workspace...
+            </div>
+          </SectionCard>
         ) : (
           <>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <KpiCard icon={Users} label="Alunos ativos" value={students.length} color="hsl(var(--brand))" href="/coach/students" />
-              <KpiCard icon={TrendingUp} label="Aderência média" value={avgAdherence !== null ? `${avgAdherence}%` : 'N/A'} color="hsl(var(--ok))" />
-              <KpiCard icon={ClipboardList} label="Treinos pendentes" value={pendingWorkouts} color="hsl(var(--warn))" />
-            </div>
+            <WorkspaceMetricGrid className="xl:grid-cols-3">
+              <WorkspaceMetricTile
+                label="Active athletes"
+                value={students.length}
+                hint="Linked and accepted student accounts"
+                icon={Users}
+              />
+              <WorkspaceMetricTile
+                label="Average adherence"
+                value={avgAdherence !== null ? `${avgAdherence}%` : '--'}
+                hint="Recent daily check-in adherence"
+                icon={TrendingUp}
+                tone="success"
+              />
+              <WorkspaceMetricTile
+                label="Pending workouts"
+                value={pendingWorkouts}
+                hint="Incomplete logged sessions across your athletes"
+                icon={ClipboardList}
+                tone="warning"
+              />
+            </WorkspaceMetricGrid>
 
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="t-label">Alunos recentes</p>
-                <Link to="/coach/students" className="t-caption text-[hsl(var(--brand))] hover:underline">Ver todos →</Link>
-              </div>
-              {students.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-state-icon"><Users className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={1.5} /></div>
-                  <p className="t-subtitle mb-1">Nenhum aluno vinculado</p>
-                  <p className="t-caption">Adicione alunos para acompanhá-los aqui.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {students.slice(0, 5).map(s => (
-                    <Link key={s.id} to={`/coach/student/${s.student_email}`} className="surface flex items-center gap-3 px-4 py-3 hover:border-[hsl(var(--brand)/0.2)] transition-colors">
-                      <div className="w-9 h-9 rounded-xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center font-bold text-[hsl(var(--brand))] text-[14px] shrink-0">
-                        {(s.student_name || s.student_email)?.[0]?.toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold truncate">{s.student_name || s.student_email}</p>
-                        <p className="t-caption truncate">{s.student_email}</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-2)/0.4)] shrink-0" strokeWidth={2} />
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            <WorkspaceRosterSection
+              eyebrow="Athletes"
+              title="Recent student activity"
+              subtitle="Quick access to the athletes you are currently coaching."
+              action={
+                <Link
+                  to="/coach/students"
+                  className="text-[13px] font-semibold text-[hsl(var(--brand))]"
+                >
+                  View all
+                </Link>
+              }
+              emptyIcon={Users}
+              emptyTitle="No students linked yet"
+              emptyDescription="Invite your first athlete to unlock adherence, programming, and follow-up."
+            >
+              {students.slice(0, 5).map((student) => (
+                <WorkspacePersonRow
+                  key={student.id}
+                  to={`/coach/student/${student.student_email}`}
+                  initial={(student.student_name || student.student_email)?.[0]?.toUpperCase() || 'A'}
+                  title={student.student_name || student.student_email}
+                  subtitle={student.student_email}
+                  meta={student.status === 'active' ? 'Active coaching link' : student.status}
+                  accentTone="brand"
+                />
+              ))}
+            </WorkspaceRosterSection>
           </>
         )}
-      </div>
+      </PageShell>
     </RoleGate>
   );
 }

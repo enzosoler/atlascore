@@ -17,8 +17,8 @@ export default function TrialExpiredUpgrade({ feature = 'Atlas AI', plan = 'Pro'
     Pro: 'Pro',
     Performance: 'Performance',
     Coach: 'Coach',
-    Nutrition: 'Nutricionista',
-    Clinical: 'Clínico',
+    Nutrition: 'Nutrition',
+    Clinical: 'Clinical',
   };
 
   return (
@@ -29,16 +29,16 @@ export default function TrialExpiredUpgrade({ feature = 'Atlas AI', plan = 'Pro'
       
       <div>
         <p className="text-[14px] font-semibold text-[hsl(var(--fg))] mb-1">
-          Trial encerrado
+          Trial ended
         </p>
         <p className="text-[13px] text-[hsl(var(--fg-2))]">
-          {feature} continua disponível no plano {planNames[plan]}.
+          {feature} remains available on the {planNames[plan]} plan.
         </p>
       </div>
 
       <Link to={ROUTES.pricing}
         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[hsl(var(--err))] text-white text-[13px] font-semibold hover:bg-[hsl(var(--err)/0.88)] transition-colors">
-        Continuar assinatura <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+        Continue subscription <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
       </Link>
     </div>
   );

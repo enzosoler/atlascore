@@ -98,8 +98,11 @@ export function WeeklyCheckinModal({ open, onClose }) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
-      <DialogContent className="max-w-sm rounded-2xl p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-0">
+      <DialogContent className="max-w-sm overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-0 shadow-[var(--shadow-lg)]">
+        <div className="flex justify-center pt-3">
+          <div className="h-1.5 w-11 rounded-full bg-[hsl(var(--border))]" />
+        </div>
+        <DialogHeader className="px-6 pb-0 pt-4">
           <DialogTitle className="text-[18px] font-bold tracking-[-0.03em]">
             {done ? 'Check-in registrado ✓' : 'Check-in semanal'}
           </DialogTitle>
@@ -118,7 +121,7 @@ export function WeeklyCheckinModal({ open, onClose }) {
                 <Check className="w-7 h-7 text-[hsl(var(--ok))]" strokeWidth={2.5} />
               </div>
 
-              <div className="space-y-2 rounded-xl bg-[hsl(var(--shell))] p-4 text-[13px] text-[hsl(var(--fg-2))]">
+              <div className="space-y-2 rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.56)] p-4 text-[13px] text-[hsl(var(--fg-2))]">
                 {energyLabel && (
                   <div className="flex items-center justify-between">
                     <span>Energia</span>
@@ -138,7 +141,7 @@ export function WeeklyCheckinModal({ open, onClose }) {
                   </div>
                 )}
                 {notes && (
-                  <div className="pt-1 border-t border-[hsl(var(--border-h))]">
+                  <div className="border-t border-[hsl(var(--border-h))] pt-1">
                     <span className="text-[hsl(var(--fg-2))]">"{notes}"</span>
                   </div>
                 )}
@@ -157,63 +160,71 @@ export function WeeklyCheckinModal({ open, onClose }) {
           ) : (
             // ── Form state ──
             <div className="space-y-5">
-              <RatingRow
-                label="Energia"
-                hint="1 = esgotado · 5 = excelente"
-                value={energy}
-                onChange={setEnergy}
-              />
-
-              <RatingRow
-                label="Humor"
-                hint="1 = péssimo · 5 = excelente"
-                value={mood}
-                onChange={setMood}
-              />
-
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Sono (horas)</p>
-                  <p className="text-[11px] text-[hsl(var(--fg-3))]">opcional</p>
-                </div>
-                <input
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  max="24"
-                  value={sleepHours}
-                  onChange={(e) => setSleepHours(e.target.value)}
-                  placeholder="7.5"
-                  className="w-full h-10 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 text-[14px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.4)]"
+              <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+                <RatingRow
+                  label="Energia"
+                  hint="1 = esgotado · 5 = excelente"
+                  value={energy}
+                  onChange={setEnergy}
                 />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Nota rápida</p>
-                  <p className="text-[11px] text-[hsl(var(--fg-3))]">opcional</p>
-                </div>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Como foi o dia, algo diferente..."
-                  rows={2}
-                  className="w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2.5 text-[14px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.4)] resize-none"
+              <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+                <RatingRow
+                  label="Humor"
+                  hint="1 = péssimo · 5 = excelente"
+                  value={mood}
+                  onChange={setMood}
                 />
+              </div>
+
+              <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Sono (horas)</p>
+                    <p className="text-[11px] text-[hsl(var(--fg-3))]">opcional</p>
+                  </div>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="24"
+                    value={sleepHours}
+                    onChange={(e) => setSleepHours(e.target.value)}
+                    placeholder="7.5"
+                    className="atlas-field h-11 w-full px-3 text-[14px]"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Nota rápida</p>
+                    <p className="text-[11px] text-[hsl(var(--fg-3))]">opcional</p>
+                  </div>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Como foi o dia, algo diferente..."
+                    rows={2}
+                    className="atlas-field min-h-[88px] w-full resize-none px-3 py-2.5 text-[14px]"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-2 pt-1">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="h-11 flex-1 rounded-[10px]"
                   onClick={handleClose}
                 >
                   Cancelar
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1"
+                  className="h-11 flex-1 rounded-[10px]"
                   disabled={!canSave || saving}
                   onClick={handleSave}
                 >

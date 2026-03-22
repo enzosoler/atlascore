@@ -4,7 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const surfaceClassName =
-  'atlas-card rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)]';
+  'atlas-card rounded-[18px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)]';
 
 const toneStyles = {
   blue: {
@@ -38,7 +38,7 @@ function getAdherenceTone(score) {
 export function TodayScreen({ children }) {
   return (
     <div className="min-h-full bg-transparent text-[hsl(var(--fg))]">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-8 pt-5 sm:px-6 lg:gap-8 lg:px-8 lg:py-10">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 pb-8 pt-4 sm:px-6 lg:gap-7 lg:px-8 lg:py-8">
         {children}
       </div>
     </div>
@@ -53,10 +53,10 @@ export function TodaySection({ eyebrow, title, description, children, className 
   return (
     <section className={cn('space-y-3', className)}>
       {(eyebrow || title || description) ? (
-        <div className="space-y-2 px-1">
+        <div className="space-y-2 px-0.5">
           {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
           {title ? (
-            <h2 className="text-[20px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+            <h2 className="text-[20px] font-semibold tracking-[-0.045em] text-[hsl(var(--fg))]">
               {title}
             </h2>
           ) : null}
@@ -135,7 +135,7 @@ export function TodayStatCard({
       to={to}
       className={cn(
         surfaceClassName,
-        'flex flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+        'flex min-h-[178px] flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
         done
           ? 'border-[hsl(var(--ok)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.08),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]'
           : styles.glow
@@ -144,7 +144,7 @@ export function TodayStatCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="atlas-overline">{label}</p>
-          <p className="mt-3 text-[28px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{value}</p>
+          <p className="mt-3 font-mono text-[28px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">{value}</p>
         </div>
         <div className={cn(
           'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border',
@@ -166,7 +166,7 @@ export function TodayStatCard({
         ) : <span />}
         {ctaLabel ? (
           <span className={cn(
-            'inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-colors',
+            'inline-flex items-center gap-1 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold transition-colors',
             done
               ? 'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
               : 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-fg,var(--bg)))]'
@@ -211,7 +211,7 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[20px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{score}</span>
+            <span className="font-mono text-[20px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{score}</span>
           </div>
         </div>
 

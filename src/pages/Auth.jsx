@@ -18,8 +18,6 @@ import PublicSiteShell, { PublicLanguageSwitcher } from '@/components/public/Pub
 import { Button } from '@/components/ui/button';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
-const SUPPORT_EMAIL = 'suporte@atlascore.app';
-
 function resolveRequestedDestination(nextParam) {
   if (!nextParam) return ROUTES.today;
 
@@ -93,6 +91,7 @@ function getDestinationLabel(destination, language) {
         [ROUTES.atlasAI]: 'Atlas AI',
         [ROUTES.insights]: 'Insights',
         [ROUTES.progress]: 'Progresso',
+        [ROUTES.body]: 'Body',
         [ROUTES.profile]: 'Perfil',
         [ROUTES.pricing]: 'Planos',
         [ROUTES.coachDashboard]: 'o dashboard do coach',
@@ -112,6 +111,7 @@ function getDestinationLabel(destination, language) {
         [ROUTES.atlasAI]: 'Atlas AI',
         [ROUTES.insights]: 'Insights',
         [ROUTES.progress]: 'Progress',
+        [ROUTES.body]: 'Body',
         [ROUTES.profile]: 'Profile',
         [ROUTES.pricing]: 'Pricing',
         [ROUTES.coachDashboard]: 'the coach dashboard',
@@ -131,6 +131,44 @@ function FeatureCard({ icon: Icon, text }) {
       </div>
       <p className="mt-4 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{text}</p>
     </div>
+  );
+}
+
+function AuthField({
+  id,
+  label,
+  type = 'text',
+  autoComplete,
+  value,
+  onChange,
+  placeholder,
+}) {
+  const hasValue = String(value || '').length > 0;
+
+  return (
+    <label
+      htmlFor={id}
+      className="relative block rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.56)_0%,hsl(var(--card))_100%)] px-4 pb-3 pt-5 transition-colors focus-within:border-[hsl(var(--brand)/0.42)] focus-within:ring-2 focus-within:ring-[hsl(var(--brand)/0.12)]"
+    >
+      <span
+        className={`pointer-events-none absolute left-4 transition-all duration-150 ${
+          hasValue
+            ? 'top-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]'
+            : 'top-[18px] text-[14px] text-[hsl(var(--fg-3))]'
+        }`}
+      >
+        {label}
+      </span>
+      <input
+        id={id}
+        type={type}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={onChange}
+        placeholder={hasValue ? placeholder : ''}
+        className="w-full border-0 bg-transparent px-0 pt-3 text-[15px] font-medium text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none"
+      />
+    </label>
   );
 }
 
@@ -240,15 +278,6 @@ export default function Auth() {
     () => buildAuthHref({ mode: 'signup', next: nextParam }),
     [nextParam]
   );
-
-  const supportHref = React.useMemo(() => {
-    const subject = language === 'pt-BR' ? 'Recuperar acesso ao Atlas Core' : 'Atlas Core account access';
-    const body = language === 'pt-BR'
-      ? `Olá,\n\nPreciso de ajuda para recuperar o acesso à minha conta Atlas Core.\nEmail da conta: ${email.trim() || ''}\n\nObrigado.`
-      : `Hi,\n\nI need help recovering access to my Atlas Core account.\nAccount email: ${email.trim() || ''}\n\nThank you.`;
-
-    return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }, [email, language]);
 
   const destinationNote = React.useMemo(() => {
     if (!nextParam) return '';
@@ -406,7 +435,7 @@ export default function Auth() {
                   {ui.authHint}
                 </p>
                 {destinationNote ? (
-                  <p className="mt-3 flex items-center gap-2 text-[12px] font-medium text-[hsl(var(--brand))]">
+                  <p className="mt-3 flex items-center gap-2 rounded-full border border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.08)] px-3 py-2 text-[12px] font-medium text-[hsl(var(--brand))]">
                     <ArrowRight className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
                     <span>{destinationNote}</span>
                   </p>
@@ -426,20 +455,15 @@ export default function Auth() {
                         : 'Enter your email and we will send you a link to reset your password.'}
                     </p>
                   </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="resetEmail" className="text-[12px] font-semibold text-[hsl(var(--fg))]">
-                      {t('profile.email')}
-                    </label>
-                    <input
+                  <AuthField
                       id="resetEmail"
+                      label={t('profile.email')}
                       type="email"
                       autoComplete="email"
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       placeholder={ui.emailPlaceholder}
-                      className="atlas-field h-12 px-4 text-base"
-                    />
-                  </div>
+                  />
                   {errorMessage ? (
                     <div className="atlas-banner px-4 py-3.5 text-[12px]" data-tone="error">
                       {errorMessage}
@@ -483,51 +507,36 @@ export default function Auth() {
               {!(isLogin && forgotPassword) && (
               <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
                 {!isLogin ? (
-                  <div className="space-y-1.5">
-                    <label htmlFor="fullName" className="text-[12px] font-semibold text-[hsl(var(--fg))]">
-                      {ui.fullNameLabel}
-                    </label>
-                    <input
+                  <AuthField
                       id="fullName"
+                      label={ui.fullNameLabel}
                       type="text"
                       autoComplete="name"
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
                       placeholder={ui.fullNamePlaceholder}
-                      className="atlas-field h-12 px-4 text-base"
-                    />
-                  </div>
+                  />
                 ) : null}
 
-                <div className="space-y-1.5">
-                  <label htmlFor="email" className="text-[12px] font-semibold text-[hsl(var(--fg))]">
-                    {t('profile.email')}
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder={ui.emailPlaceholder}
-                    className="atlas-field h-12 px-4 text-base"
-                  />
-                </div>
+                <AuthField
+                  id="email"
+                  label={t('profile.email')}
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder={ui.emailPlaceholder}
+                />
 
-                <div className="space-y-1.5">
-                  <label htmlFor="password" className="text-[12px] font-semibold text-[hsl(var(--fg))]">
-                    {t('profile.password')}
-                  </label>
-                  <input
+                <AuthField
                     id="password"
+                    label={t('profile.password')}
                     type="password"
                     autoComplete={isLogin ? 'current-password' : 'new-password'}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder={ui.passwordPlaceholder}
-                    className="atlas-field h-12 px-4 text-base"
-                  />
-                </div>
+                />
 
                 {errorMessage ? (
                   <div className="atlas-banner px-4 py-3.5 text-[12px]" data-tone="error">
@@ -541,7 +550,7 @@ export default function Auth() {
                   </div>
                 ) : null}
 
-                <Button type="submit" size="lg" className="h-11 w-full" disabled={isSubmitting}>
+                <Button type="submit" size="lg" className="h-12 w-full rounded-[12px]" disabled={isSubmitting}>
                   {isSubmitting
                     ? isLogin
                       ? ui.signInBusy
@@ -563,7 +572,7 @@ export default function Auth() {
 
                 <GoogleSignInButton
                   redirectUrl={`${window.location.origin}/auth/callback`}
-                  className="w-full h-11"
+                  className="h-12 w-full rounded-[12px]"
                 />
               </form>
               )}

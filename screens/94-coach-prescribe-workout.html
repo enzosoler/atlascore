@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>94 · Coach — Prescribe Workout · atlas.core</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  :root {
+    --bg: #080E0E; --card: #111A1A; --card-hi: #162020; --border: #1E2C2C;
+    --teal: #4A9B9B; --teal-dim: rgba(74,155,155,0.12); --teal-mid: rgba(74,155,155,0.22);
+    --white: #FFFFFF; --sub: #8A9A9A;
+    --ok: #4CAF7D; --ok-dim: rgba(76,175,125,0.12);
+    --warn: #E8A838; --warn-dim: rgba(232,168,56,0.12);
+    --err: #E05C5C; --err-dim: rgba(224,92,92,0.12);
+  }
+  body {
+    background: #1a1a1a; display: flex; justify-content: center;
+    align-items: flex-start; min-height: 100vh; padding: 40px 20px;
+    font-family: -apple-system, "SF Pro Display", BlinkMacSystemFont, sans-serif;
+  }
+  .phone {
+    width: 375px; min-height: 812px; background: var(--bg);
+    border-radius: 44px; overflow: hidden; position: relative;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 28px 0; height: 44px;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: var(--white); letter-spacing: -0.3px; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+
+  /* Nav */
+  .nav {
+    padding: 10px 20px 14px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 4px;
+    color: var(--teal); font-size: 15px; font-weight: 500;
+    cursor: pointer; background: none; border: none; padding: 0;
+    font-family: inherit;
+  }
+  .nav-title { flex: 1; text-align: center; font-size: 16px; font-weight: 600; color: var(--white); letter-spacing: -0.3px; }
+  .nav-save {
+    font-size: 15px; font-weight: 600; color: var(--teal);
+    background: none; border: none; cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Student chip */
+  .student-chip-bar { padding: 12px 20px 0; }
+  .student-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--teal-dim); border: 1px solid rgba(74,155,155,0.25);
+    border-radius: 20px; padding: 7px 14px 7px 8px;
+  }
+  .chip-avatar {
+    width: 24px; height: 24px; border-radius: 7px;
+    background: var(--teal); display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--white); flex-shrink: 0;
+  }
+  .chip-name { font-size: 13px; font-weight: 600; color: var(--teal); }
+  .chip-change { font-size: 12px; color: rgba(74,155,155,0.6); margin-left: 2px; }
+
+  /* Scroll */
+  .scroll { padding: 16px 20px 130px; overflow-y: auto; max-height: 640px; display: flex; flex-direction: column; gap: 14px; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* Field groups */
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field-label { font-size: 12px; font-weight: 600; color: var(--sub); letter-spacing: 0.04em; text-transform: uppercase; }
+  .field-input {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 13px 16px;
+    font-size: 15px; color: var(--white); font-family: inherit;
+    outline: none; width: 100%;
+  }
+  .field-input.active { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(74,155,155,0.1); }
+  .field-input::placeholder { color: var(--sub); }
+  textarea.field-input { resize: none; height: 76px; line-height: 1.5; }
+
+  /* Type selector */
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .type-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 12px 14px;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .type-card.selected {
+    background: var(--teal-dim); border-color: rgba(74,155,155,0.4);
+  }
+  .type-icon { font-size: 18px; flex-shrink: 0; }
+  .type-info { }
+  .type-name { font-size: 14px; font-weight: 600; color: var(--white); }
+  .type-sub { font-size: 11px; color: var(--sub); margin-top: 1px; }
+  .type-card.selected .type-name { color: var(--teal); }
+
+  /* Days per week stepper */
+  .stepper {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 0;
+  }
+  .stepper-label { flex: 1; font-size: 15px; color: var(--white); }
+  .stepper-controls { display: flex; align-items: center; gap: 14px; }
+  .step-btn {
+    width: 30px; height: 30px; border-radius: 10px;
+    background: var(--card-hi); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--white); font-size: 18px; font-weight: 400;
+  }
+  .step-val { font-size: 17px; font-weight: 700; color: var(--white); width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); }
+
+  /* Exercise list */
+  .exercise-list { display: flex; flex-direction: column; gap: 8px; }
+  .exercise-row {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .ex-drag { color: var(--border); cursor: grab; flex-shrink: 0; }
+  .ex-order {
+    width: 22px; height: 22px; border-radius: 7px;
+    background: var(--teal-dim); color: var(--teal);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name { font-size: 14px; font-weight: 600; color: var(--white); }
+  .ex-params { font-size: 12px; color: var(--sub); margin-top: 3px; }
+  .ex-params span { color: var(--teal); font-weight: 600; }
+  .ex-remove {
+    width: 28px; height: 28px; border-radius: 8px; border: none;
+    background: transparent; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; color: var(--sub);
+  }
+  .ex-remove:hover { background: var(--err-dim); color: var(--err); }
+
+  /* Add exercise button */
+  .add-ex-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; border: 1.5px dashed var(--border);
+    border-radius: 12px; padding: 13px;
+    font-size: 14px; font-weight: 500; color: var(--sub);
+    cursor: pointer; font-family: inherit;
+    transition: all 0.15s;
+  }
+  .add-ex-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* Start date */
+  .date-row {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 13px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .date-label { font-size: 15px; color: var(--white); }
+  .date-value { font-size: 14px; font-weight: 600; color: var(--teal); }
+
+  /* Duration */
+  .duration-options { display: flex; gap: 8px; }
+  .duration-pill {
+    flex: 1; text-align: center; padding: 9px 8px;
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--sub);
+    cursor: pointer;
+  }
+  .duration-pill.selected {
+    background: var(--teal-dim); border-color: rgba(74,155,155,0.4);
+    color: var(--teal); font-weight: 600;
+  }
+
+  /* Prescribe CTA */
+  .cta-area {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(8,14,14,0.95); backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border);
+    padding: 14px 20px 34px;
+  }
+  .btn-prescribe {
+    width: 100%; background: var(--teal); color: var(--white);
+    border: none; border-radius: 14px; padding: 15px 20px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    font-family: inherit; letter-spacing: -0.2px;
+    box-shadow: 0 6px 24px rgba(74,155,155,0.4);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-note { font-size: 12px; color: var(--sub); text-align: center; margin-top: 8px; }
+
+  /* Section label */
+  .section-label {
+    font-size: 12px; font-weight: 600; color: var(--sub);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: -6px;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+        <rect x="0" y="3" width="3" height="9" rx="1" fill="white"/>
+        <rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/>
+        <rect x="9" y="0" width="3" height="12" rx="1" fill="white"/>
+      </svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+        <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/>
+        <rect x="2" y="2" width="17" height="8" rx="2" fill="white"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <button class="back-btn">
+      <svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 1 1 8.5 9 16"/></svg>
+      Profile
+    </button>
+    <div class="nav-title">Prescribe Workout</div>
+    <button class="nav-save">Save</button>
+  </div>
+
+  <!-- Student Chip -->
+  <div class="student-chip-bar">
+    <div class="student-chip">
+      <div class="chip-avatar">J</div>
+      <div class="chip-name">Julia Mendes</div>
+      <div class="chip-change">↗</div>
+    </div>
+  </div>
+
+  <!-- Scrollable Form -->
+  <div class="scroll">
+
+    <!-- Plan Name -->
+    <div class="field">
+      <div class="field-label">Plan Name</div>
+      <input class="field-input active" type="text" value="Hypertrophy Block B" placeholder="e.g. Strength Phase 1">
+    </div>
+
+    <!-- Workout Type -->
+    <div class="field">
+      <div class="field-label">Type</div>
+      <div class="type-grid">
+        <div class="type-card selected">
+          <div class="type-icon">🏋️</div>
+          <div class="type-info">
+            <div class="type-name">Strength</div>
+            <div class="type-sub">Compound lifts</div>
+          </div>
+        </div>
+        <div class="type-card">
+          <div class="type-icon">⚡</div>
+          <div class="type-info">
+            <div class="type-name">HIIT</div>
+            <div class="type-sub">High intensity</div>
+          </div>
+        </div>
+        <div class="type-card">
+          <div class="type-icon">🏃</div>
+          <div class="type-info">
+            <div class="type-name">Endurance</div>
+            <div class="type-sub">Cardio focus</div>
+          </div>
+        </div>
+        <div class="type-card">
+          <div class="type-icon">🧘</div>
+          <div class="type-info">
+            <div class="type-name">Mobility</div>
+            <div class="type-sub">Flexibility</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Days / Week -->
+    <div class="field">
+      <div class="field-label">Days per week</div>
+      <div class="stepper">
+        <div class="stepper-label">Training days</div>
+        <div class="stepper-controls">
+          <div class="step-btn">−</div>
+          <div class="step-val">4</div>
+          <div class="step-btn" style="color:var(--teal);">+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div class="field">
+      <div class="field-label">Block Duration</div>
+      <div class="duration-options">
+        <div class="duration-pill">4 wks</div>
+        <div class="duration-pill">6 wks</div>
+        <div class="duration-pill selected">8 wks</div>
+        <div class="duration-pill">12 wks</div>
+      </div>
+    </div>
+
+    <!-- Exercises -->
+    <div class="section-label">Exercises</div>
+    <div class="exercise-list">
+
+      <div class="exercise-row">
+        <div class="ex-drag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+        </div>
+        <div class="ex-order">1</div>
+        <div class="ex-info">
+          <div class="ex-name">Bench Press</div>
+          <div class="ex-params"><span>4×8</span> · 70–80% 1RM · 90s rest</div>
+        </div>
+        <button class="ex-remove">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="exercise-row">
+        <div class="ex-drag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+        </div>
+        <div class="ex-order">2</div>
+        <div class="ex-info">
+          <div class="ex-name">Incline DB Press</div>
+          <div class="ex-params"><span>3×10</span> · RPE 7–8 · 75s rest</div>
+        </div>
+        <button class="ex-remove">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="exercise-row">
+        <div class="ex-drag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+        </div>
+        <div class="ex-order">3</div>
+        <div class="ex-info">
+          <div class="ex-name">Bent-Over Row</div>
+          <div class="ex-params"><span>4×8</span> · 75–80% 1RM · 90s rest</div>
+        </div>
+        <button class="ex-remove">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="exercise-row">
+        <div class="ex-drag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+        </div>
+        <div class="ex-order">4</div>
+        <div class="ex-info">
+          <div class="ex-name">Overhead Press</div>
+          <div class="ex-params"><span>3×8</span> · RPE 8 · 90s rest</div>
+        </div>
+        <button class="ex-remove">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <button class="add-ex-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add exercise
+      </button>
+    </div>
+
+    <!-- Start Date -->
+    <div class="field">
+      <div class="field-label">Start date</div>
+      <div class="date-row">
+        <div class="date-label">Begins</div>
+        <div class="date-value">Mon, Mar 24, 2026</div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="field">
+      <div class="field-label">Coach Notes <span style="color:#1E2C2C;font-weight:400;text-transform:none;letter-spacing:0;">· Optional</span></div>
+      <textarea class="field-input" placeholder="Focus on progressive overload each week. Increase weight when all reps are clean…"></textarea>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- CTA -->
+  <div class="cta-area">
+    <button class="btn-prescribe">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Prescribe to Julia
+    </button>
+    <div class="btn-note">Student will be notified and can start Mon, Mar 24</div>
+  </div>
+
+</div><!-- /phone -->
+</body>
+</html>

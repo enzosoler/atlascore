@@ -3,7 +3,7 @@
  * Shows in /Progress page
  */
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeLLM } from '@/lib/llm';
 import { Brain, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 
@@ -25,19 +25,16 @@ export default function AIProgressAnalysis({ measurements, profile }) {
       const bfChange = latest.body_fat - oldest.body_fat;
       const days = (new Date(latest.date) - new Date(oldest.date)) / (1000 * 60 * 60 * 24);
       
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise os TRENDS de ${Math.round(days)} dias:
-        
+      const text = await invokeLLM(`Analise os TRENDS de ${Math.round(days)} dias:
+
 - Peso: ${oldest.weight}kg → ${latest.weight}kg (${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}kg)
 - Gordura: ${oldest.body_fat}% → ${latest.body_fat}% (${bfChange > 0 ? '+' : ''}${bfChange.toFixed(1)}%)
 - Meta: ${profile?.target_weight}kg, ${profile?.body_fat_goal}% gordura
 - Objetivo: ${profile?.training_goal}
 
-Responda com 2-3 linhas: ritmo, se está no caminho certo, dica acionável.`,
-        model: 'gemini_3_flash',
-      });
+Responda com 2-3 linhas: ritmo, se está no caminho certo, dica acionável.`);
 
-      setAnalysis(res.data);
+      setAnalysis(text);
     } finally {
       setLoading(false);
     }

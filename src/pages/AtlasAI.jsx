@@ -860,10 +860,10 @@ export default function AtlasAI() {
                     <div className="min-w-0">
                       <p className="atlas-overline">Atlas AI</p>
                       <h2 className="mt-3 text-[1.125rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                        Assistant contextual
+                        Contextual assistant
                       </h2>
                       <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                        Conversas premium com contexto do profile local.
+                        Premium conversations grounded in your local profile signals.
                       </p>
                     </div>
                   </div>
@@ -1019,6 +1019,17 @@ export default function AtlasAI() {
                     ? 'Local profile is connected and already informs goal, weight and targets in this conversation.'
                     : 'Connect goals and weight in Profile to make Atlas AI more contextual.'}
                 </StatusBanner>
+
+                {!hasPaidAccess ? (
+                  <StatusBanner tone={freePromptsRemaining === 0 ? 'warning' : 'neutral'}>
+                    <p className="font-semibold text-[hsl(var(--fg))]">Free plan usage</p>
+                    <p className="mt-1">
+                      {freePromptsRemaining > 0
+                        ? `${freePromptsRemaining} prompt${freePromptsRemaining === 1 ? '' : 's'} remaining and ${jobsRemainingThisWeek} guided job${jobsRemainingThisWeek === 1 ? '' : 's'} left this week.`
+                        : 'Your free prompts are exhausted. Upgrade to Pro to keep Atlas AI fully unlocked.'}
+                    </p>
+                  </StatusBanner>
+                ) : null}
 
                 {hasProfileContext ? (
                   <div className="flex flex-wrap gap-2">

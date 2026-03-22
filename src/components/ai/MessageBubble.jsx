@@ -150,8 +150,8 @@ export default function MessageBubble({ message }) {
         className={cn(
           'mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border shadow-[var(--shadow-xs)]',
           isUser
-            ? 'border-[hsl(var(--fg)/0.08)] bg-[hsl(var(--fg))] text-[hsl(var(--button-primary-foreground))]'
-            : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand-ai))]'
+            ? 'border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand))] text-white'
+            : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand))]'
         )}
       >
         {isUser ? <User className="h-4 w-4" strokeWidth={1.9} /> : <Brain className="h-4 w-4" strokeWidth={1.9} />}
@@ -162,7 +162,7 @@ export default function MessageBubble({ message }) {
           className={cn(
             'rounded-[28px] border px-5 py-4 shadow-[var(--shadow-sm)]',
             isUser
-              ? 'border-[hsl(var(--fg)/0.06)] bg-[hsl(var(--fg))] text-[hsl(var(--button-primary-foreground))]'
+              ? 'border-[hsl(var(--brand)/0.22)] bg-[linear-gradient(180deg,hsl(var(--brand))_0%,hsl(var(--brand)/0.84)_100%)] text-white'
               : 'border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--fill)/0.5)_100%)] text-[hsl(var(--fg))]'
           )}
         >
@@ -170,7 +170,7 @@ export default function MessageBubble({ message }) {
             className={cn(
               'mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em]',
               isUser
-                ? 'justify-end text-[hsl(var(--button-primary-foreground)/0.68)]'
+                ? 'justify-end text-white/70'
                 : 'text-[hsl(var(--fg-3))]'
             )}
           >
@@ -191,7 +191,7 @@ export default function MessageBubble({ message }) {
 
           {message.content ? (
             isUser ? (
-              <p className="text-[14px] leading-7 text-[hsl(var(--button-primary-foreground))]">
+              <p className="text-[14px] leading-7 text-white">
                 {message.content}
               </p>
             ) : (

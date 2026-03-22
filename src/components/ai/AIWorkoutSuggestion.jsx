@@ -3,7 +3,7 @@
  * Shows in /Workouts page
  */
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeLLM } from '@/lib/llm';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 
@@ -14,22 +14,19 @@ export default function AIWorkoutSuggestion({ loggedExercises, profile }) {
 
   const generateSuggestion = async () => {
     if (!can('atlas_ai')) return;
-    
+
     try {
       setLoading(true);
       const doneExercises = loggedExercises?.map(ex => ex.name).join(', ') || 'nenhum';
-      
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Sugira UM exercício PRÁTICO para continuar o treino, baseado em:
-        
+
+      const text = await invokeLLM(`Sugira UM exercício PRÁTICO para continuar o treino, baseado em:
+
 - Exercícios já feitos: ${doneExercises}
 - Meta de treino: ${profile?.training_goal || 'ganho de força'}
 
-Responda com APENAS o nome do exercício + 1 linha (ex: "Supino dumbbell — 3x8, foco no controle").`,
-        model: 'gemini_3_flash',
-      });
+Responda com APENAS o nome do exercício + 1 linha (ex: "Supino dumbbell — 3x8, foco no controle").`);
 
-      setSuggestion(res.data);
+      setSuggestion(text);
     } finally {
       setLoading(false);
     }

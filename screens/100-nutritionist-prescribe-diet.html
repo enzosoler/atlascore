@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100 — Nutritionist Prescribe Diet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #080E0E; --card: #111A1A; --card-hi: #162020; --border: #1E2C2C;
+    --teal: #4A9B9B; --teal-dim: rgba(74,155,155,0.12); --teal-border: rgba(74,155,155,0.25);
+    --fg: #FFFFFF; --fg2: #8A9A9A; --fg3: #5A6E6E;
+    --ok: #4CAF7D; --ok-dim: rgba(76,175,125,0.12);
+    --warn: #E8A838;
+    --err: #E05C5C;
+  }
+  body { background: #0F1414; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 20px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  .phone { width: 390px; min-height: 844px; background: var(--bg); border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 40px 80px rgba(0,0,0,0.7), 0 0 120px rgba(74,155,155,0.04); }
+  .status-bar { height: 54px; padding: 16px 28px 0; display: flex; align-items: center; justify-content: space-between; }
+  .status-time { font-size: 15px; font-weight: 600; color: var(--fg); }
+  .screen { height: calc(844px - 54px - 83px); overflow-y: auto; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* Nav */
+  .nav-row {
+    padding: 8px 20px 0;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .back-btn {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .nav-title { font-size: 17px; font-weight: 700; color: var(--fg); flex: 1; }
+  .nav-sub { font-size: 12px; color: var(--fg2); }
+
+  /* Client Pill */
+  .client-pill {
+    margin: 0 20px 16px;
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .client-pill-avatar {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(135deg, #1A3030, #1E3838);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .client-pill-name { font-size: 13px; font-weight: 700; color: var(--fg); }
+  .client-pill-sub { font-size: 11px; color: var(--teal); margin-top: 1px; }
+
+  /* Section */
+  .section { padding: 0 20px; margin-bottom: 16px; }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+
+  /* Card */
+  .form-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+  }
+
+  /* Fields */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label { font-size: 11px; font-weight: 600; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; display: block; }
+  .field-input {
+    width: 100%;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 13px;
+    font-size: 14px; color: var(--fg); font-family: inherit;
+    outline: none;
+  }
+  .field-input.focused {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(74,155,155,0.1);
+  }
+  .field-input::placeholder { color: var(--fg3); }
+
+  .field-textarea {
+    width: 100%; height: 72px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 13px;
+    font-size: 13px; color: var(--fg); font-family: inherit;
+    outline: none; resize: none;
+  }
+  .field-textarea::placeholder { color: var(--fg3); }
+
+  /* Macro Grid */
+  .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .macro-field { }
+  .macro-input-wrap {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 13px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .macro-input-wrap.cal { border-color: var(--teal-border); background: var(--teal-dim); }
+  .macro-input-val { font-size: 20px; font-weight: 700; color: var(--fg); font-family: 'SF Mono', 'Fira Code', monospace; }
+  .macro-input-unit { font-size: 11px; color: var(--fg3); }
+  .macro-name { font-size: 11px; font-weight: 600; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .macro-input-val.cal-val { color: var(--teal); font-size: 22px; }
+
+  /* Macro Distribution Bar */
+  .macro-dist-wrap { margin-top: 14px; }
+  .macro-dist-label { font-size: 11px; color: var(--fg3); margin-bottom: 6px; }
+  .macro-dist-bar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; gap: 2px; }
+  .macro-dist-p { flex: 160; background: var(--teal); border-radius: 3px; }
+  .macro-dist-c { flex: 250; background: #7B68EE; border-radius: 3px; }
+  .macro-dist-f { flex: 70; background: var(--warn); border-radius: 3px; }
+  .macro-dist-legend { display: flex; gap: 14px; margin-top: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--fg3); }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Meals Builder */
+  .meal-item {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .meal-item:last-child { margin-bottom: 0; }
+  .meal-header { display: flex; align-items: center; gap: 10px; }
+  .meal-type-select {
+    flex: 1; background: transparent; border: none;
+    font-size: 13px; font-weight: 700; color: var(--fg); font-family: inherit; outline: none;
+    cursor: pointer;
+  }
+  .meal-time { font-size: 11px; color: var(--teal); font-weight: 600; }
+  .meal-kcal-badge {
+    font-size: 11px; font-weight: 700; color: var(--fg2);
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px; padding: 2px 7px;
+  }
+  .meal-foods { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .food-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .food-name { font-size: 12px; color: var(--fg2); flex: 1; }
+  .food-amount { font-size: 12px; font-weight: 600; color: var(--fg); font-family: 'SF Mono', 'Fira Code', monospace; }
+  .food-kcal { font-size: 11px; color: var(--fg3); width: 50px; text-align: right; }
+  .add-food-btn {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--teal); font-weight: 600;
+    margin-top: 6px; cursor: pointer;
+  }
+
+  /* Add Meal CTA */
+  .add-meal-btn {
+    width: 100%; border-radius: 10px; height: 40px;
+    background: transparent; border: 1px dashed var(--border);
+    color: var(--fg3); font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    cursor: pointer; font-family: inherit; margin-top: 8px;
+  }
+
+  /* Options Row */
+  .options-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .select-field { }
+  .select-input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 13px;
+    font-size: 14px; color: var(--fg); font-family: inherit; outline: none;
+    appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%235A6E6E' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  /* Restrictions Tags */
+  .tags-input-wrap {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 13px;
+    display: flex; flex-wrap: wrap; gap: 6px; min-height: 44px;
+    align-items: center;
+  }
+  .tag {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(74,155,155,0.12); border: 1px solid rgba(74,155,155,0.25);
+    border-radius: 6px; padding: 3px 8px;
+    font-size: 11px; font-weight: 600; color: var(--teal);
+  }
+  .tag-x { font-size: 13px; cursor: pointer; opacity: 0.7; }
+  .tag-placeholder { font-size: 13px; color: var(--fg3); }
+
+  /* Submit Button */
+  .submit-section { padding: 0 20px; margin-bottom: 16px; }
+  .submit-btn {
+    width: 100%; height: 52px; border-radius: 14px;
+    background: var(--teal); color: white;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer; border: none;
+    box-shadow: 0 4px 20px rgba(74,155,155,0.3);
+  }
+  .submit-btn-sub { font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 400; margin-top: 2px; }
+  .submit-btn-inner { text-align: center; }
+
+  /* Tab Bar */
+  .tab-bar { height: 83px; background: rgba(17,26,26,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: flex-start; padding: 10px 0 0; position: absolute; bottom: 0; left: 0; right: 0; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0; }
+  .tab-label { font-size: 10px; font-weight: 500; color: var(--fg2); }
+  .tab-item.active .tab-label { color: var(--teal); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="9" y="0" width="3" height="12" rx="1" fill="white"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="white"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="white"/></svg>
+    </div>
+  </div>
+
+  <div class="screen">
+
+    <!-- Nav -->
+    <div class="nav-row">
+      <div class="back-btn">
+        <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="#8A9A9A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="nav-title">Prescribe Diet</div>
+        <div class="nav-sub">Create nutrition plan</div>
+      </div>
+    </div>
+
+    <!-- Client Pill -->
+    <div class="client-pill">
+      <div class="client-pill-avatar">LM</div>
+      <div>
+        <div class="client-pill-name">Lucas Mendes</div>
+        <div class="client-pill-sub">Prescribing diet plan → lucas@email.com</div>
+      </div>
+    </div>
+
+    <!-- Plan Basics -->
+    <div class="section">
+      <div class="section-label">Plan Details</div>
+      <div class="form-card">
+        <div class="field">
+          <label class="field-label">Plan Name</label>
+          <input class="field-input focused" type="text" value="Lean Bulk Protocol 2025" />
+        </div>
+        <div class="field">
+          <label class="field-label">Description</label>
+          <textarea class="field-textarea" placeholder="Describe the protocol goals and guidelines…">High protein, moderate carb cycle for lean muscle gain. Adjust carbs on training days.</textarea>
+        </div>
+        <div class="options-row">
+          <div class="select-field">
+            <label class="field-label">Frequency</label>
+            <select class="select-input">
+              <option selected>Daily</option>
+              <option>Weekdays</option>
+              <option>Weekends</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Start Date</label>
+            <input class="field-input" type="text" value="Mar 22, 2026" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Macro Targets -->
+    <div class="section">
+      <div class="section-label">Daily Macro Targets</div>
+      <div class="form-card">
+        <div class="macro-grid">
+          <div class="macro-field" style="grid-column:1/-1">
+            <div class="macro-name">Calories</div>
+            <div class="macro-input-wrap cal">
+              <div class="macro-input-val cal-val">2,200</div>
+              <div class="macro-input-unit">kcal/day</div>
+            </div>
+          </div>
+          <div class="macro-field">
+            <div class="macro-name">Protein</div>
+            <div class="macro-input-wrap">
+              <div class="macro-input-val">160</div>
+              <div class="macro-input-unit">g</div>
+            </div>
+          </div>
+          <div class="macro-field">
+            <div class="macro-name">Carbs</div>
+            <div class="macro-input-wrap">
+              <div class="macro-input-val">250</div>
+              <div class="macro-input-unit">g</div>
+            </div>
+          </div>
+          <div class="macro-field">
+            <div class="macro-name">Fat</div>
+            <div class="macro-input-wrap">
+              <div class="macro-input-val">70</div>
+              <div class="macro-input-unit">g</div>
+            </div>
+          </div>
+          <div class="macro-field">
+            <div class="macro-name">Water</div>
+            <div class="macro-input-wrap">
+              <div class="macro-input-val">3.5</div>
+              <div class="macro-input-unit">L</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="macro-dist-wrap">
+          <div class="macro-dist-label">Macro distribution (% of kcal)</div>
+          <div class="macro-dist-bar">
+            <div class="macro-dist-p"></div>
+            <div class="macro-dist-c"></div>
+            <div class="macro-dist-f"></div>
+          </div>
+          <div class="macro-dist-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>P 29%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#7B68EE"></div>C 45%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div>F 28%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal Plan Builder -->
+    <div class="section">
+      <div class="section-label">Meal Schedule</div>
+      <div class="form-card">
+
+        <!-- Meal 1 -->
+        <div class="meal-item">
+          <div class="meal-header">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#4A9B9B" stroke-width="1.3"/><path d="M7 4.5V7L8.5 8.5" stroke="#4A9B9B" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <select class="meal-type-select"><option>Breakfast</option></select>
+            <span class="meal-time">07:30</span>
+            <span class="meal-kcal-badge">520 kcal</span>
+          </div>
+          <div class="meal-foods">
+            <div class="food-row">
+              <div class="food-name">Oats + whey protein</div>
+              <div class="food-amount">80g</div>
+              <div class="food-kcal">310 kcal</div>
+            </div>
+            <div class="food-row">
+              <div class="food-name">Banana</div>
+              <div class="food-amount">1 unit</div>
+              <div class="food-kcal">105 kcal</div>
+            </div>
+            <div class="food-row">
+              <div class="food-name">Peanut butter</div>
+              <div class="food-amount">15g</div>
+              <div class="food-kcal">88 kcal</div>
+            </div>
+            <div class="add-food-btn">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2V10M2 6H10" stroke="#4A9B9B" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Add food
+            </div>
+          </div>
+        </div>
+
+        <!-- Meal 2 -->
+        <div class="meal-item">
+          <div class="meal-header">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#4A9B9B" stroke-width="1.3"/><path d="M7 4.5V7L8.5 8.5" stroke="#4A9B9B" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <select class="meal-type-select"><option>Lunch</option></select>
+            <span class="meal-time">12:30</span>
+            <span class="meal-kcal-badge">680 kcal</span>
+          </div>
+          <div class="meal-foods">
+            <div class="food-row">
+              <div class="food-name">Chicken breast</div>
+              <div class="food-amount">180g</div>
+              <div class="food-kcal">297 kcal</div>
+            </div>
+            <div class="food-row">
+              <div class="food-name">Brown rice cooked</div>
+              <div class="food-amount">200g</div>
+              <div class="food-kcal">218 kcal</div>
+            </div>
+            <div class="food-row">
+              <div class="food-name">Broccoli + olive oil</div>
+              <div class="food-amount">150g + 8g</div>
+              <div class="food-kcal">138 kcal</div>
+            </div>
+            <div class="add-food-btn">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2V10M2 6H10" stroke="#4A9B9B" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Add food
+            </div>
+          </div>
+        </div>
+
+        <!-- Meal 3 — Post Workout (collapsed) -->
+        <div class="meal-item" style="opacity:0.75">
+          <div class="meal-header">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#4A9B9B" stroke-width="1.3"/></svg>
+            <select class="meal-type-select"><option>Post-Workout</option></select>
+            <span class="meal-time">18:00</span>
+            <span class="meal-kcal-badge">350 kcal</span>
+          </div>
+        </div>
+
+        <button class="add-meal-btn">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 2V11M2 6.5H11" stroke="#5A6E6E" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Add Meal
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Restrictions -->
+    <div class="section">
+      <div class="section-label">Dietary Restrictions</div>
+      <div class="form-card">
+        <div class="tags-input-wrap">
+          <span class="tag">lactose-free <span class="tag-x">×</span></span>
+          <span class="tag">no alcohol <span class="tag-x">×</span></span>
+          <span class="tag-placeholder">+ Add restriction…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="section">
+      <div class="section-label">Clinical Notes</div>
+      <div class="form-card">
+        <textarea class="field-textarea" style="height:80px" placeholder="Notes for client or internal record…">Prioritize protein on training days (Mon/Wed/Fri). Reduce carbs by 30% on rest days. Re-evaluate in 4 weeks.</textarea>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-section">
+      <button class="submit-btn">
+        <div class="submit-btn-inner">
+          <div style="display:flex;align-items:center;gap:8px;justify-content:center">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="white" stroke-width="1.4"/><path d="M5 8L7 10L11 6" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Prescribe Diet Plan
+          </div>
+          <div class="submit-btn-sub">Plan will be sent to Lucas Mendes</div>
+        </div>
+      </button>
+    </div>
+
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="12" y="3" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="3" y="12" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/><rect x="12" y="12" width="7" height="7" rx="2" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">Today</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 18V8L11 3L18 8V18H14V13H8V18H4Z" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">Train</span>
+    </div>
+    <div class="tab-item active">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11C3 7 5.5 5 8.5 5C10.5 5 11.5 6 11.5 6C11.5 6 12.5 5 14.5 5C17.5 5 19 7 19 11C19 15 14 18.5 11.5 19.5C9 18.5 3 15 3 11Z" stroke="#4A9B9B" stroke-width="1.5" fill="#4A9B9B" fill-opacity="0.15"/></svg>
+      </div>
+      <span class="tab-label" style="color:var(--teal)">Nutrition</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="9" r="4" stroke="#8A9A9A" stroke-width="1.5"/><path d="M4 19C4 15.7 7.1 13 11 13C14.9 13 18 15.7 18 19" stroke="#8A9A9A" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <span class="tab-label">Body</span>
+    </div>
+    <div class="tab-item">
+      <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="3" stroke="#8A9A9A" stroke-width="1.5"/><circle cx="11" cy="11" r="8" stroke="#8A9A9A" stroke-width="1.5"/></svg>
+      </div>
+      <span class="tab-label">More</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

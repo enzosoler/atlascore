@@ -6,7 +6,7 @@ const DEFAULT_THEME = 'dark';
 
 const ThemeContext = createContext({ theme: DEFAULT_THEME, setTheme: () => {} });
 const LIGHT_THEME_COLOR = '#F4F7FB';
-const DARK_THEME_COLOR = '#0B0D12';
+const DARK_THEME_COLOR = '#080E0E';
 
 function getInitialTheme() {
   if (typeof window === 'undefined') return DEFAULT_THEME;

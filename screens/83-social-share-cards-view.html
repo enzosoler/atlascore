@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=390, initial-scale=1.0" />
+<title>Screen 83 — Social: Share Cards View</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  :root {
+    --bg:        #080E0E;
+    --surface:   #111A1A;
+    --border:    #1E2C2C;
+    --teal:      #4A9B9B;
+    --teal-dim:  rgba(74,155,155,0.12);
+    --teal-glow: rgba(74,155,155,0.22);
+    --white:     #FFFFFF;
+    --secondary: #8A9A9A;
+    --success:   #4CAF7D;
+    --warn:      #E0A85C;
+    --purple:    #9B7FD4;
+    --mono:      'SF Mono', 'Fira Mono', monospace;
+  }
+
+  html, body {
+    width: 390px;
+    min-height: 844px;
+    background: var(--bg);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ─── STATUS BAR ─── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .status-right { display: flex; gap: 6px; align-items: center; }
+  .status-right svg { width: 14px; height: 14px; fill: var(--white); }
+
+  /* ─── NAV HEADER ─── */
+  .nav-header {
+    padding: 20px 20px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .nav-title-block {}
+  .nav-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 4px;
+  }
+  .nav-large-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--white);
+    line-height: 1.1;
+  }
+  .nav-subtitle {
+    font-size: 13px;
+    color: var(--secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+    max-width: 220px;
+  }
+  .nav-icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-icon-btn svg { width: 18px; height: 18px; }
+
+  /* ─── SECTION LABEL ─── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin: 24px 20px 12px;
+  }
+
+  /* ─── SHARE CARD GRID ─── */
+  .cards-grid {
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .share-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .share-card.selected {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 1px var(--teal), 0 8px 32px rgba(74,155,155,0.16);
+  }
+  .share-card .card-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .share-card.selected .card-glow { opacity: 1; }
+
+  .card-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .card-icon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-icon svg { width: 17px; height: 17px; }
+
+  .share-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--secondary);
+    text-transform: uppercase;
+  }
+  .share-chip svg { width: 11px; height: 11px; }
+
+  .card-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin-bottom: 4px;
+  }
+  .card-big-value {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--white);
+    line-height: 1;
+  }
+  .card-big-value .unit {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--secondary);
+    margin-left: 2px;
+  }
+  .card-subtitle {
+    font-size: 11px;
+    color: var(--secondary);
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+  .card-detail {
+    margin-top: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 5px 9px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  /* ─── CARD COLORS ─── */
+  /* Nutrition — teal */
+  .card-nutrition .card-icon { background: rgba(74,155,155,0.15); color: var(--teal); }
+  .card-nutrition .card-glow { background: radial-gradient(ellipse at top left, rgba(74,155,155,0.1) 0%, transparent 70%); }
+  .card-nutrition .card-detail { background: rgba(74,155,155,0.12); color: var(--teal); }
+
+  /* Workout — orange */
+  .card-workout .card-icon { background: rgba(224,168,92,0.15); color: var(--warn); }
+  .card-workout .card-glow { background: radial-gradient(ellipse at top left, rgba(224,168,92,0.1) 0%, transparent 70%); }
+  .card-workout .card-detail { background: rgba(224,168,92,0.12); color: var(--warn); }
+
+  /* Checkin — green */
+  .card-checkin .card-icon { background: rgba(76,175,125,0.15); color: var(--success); }
+  .card-checkin .card-glow { background: radial-gradient(ellipse at top left, rgba(76,175,125,0.1) 0%, transparent 70%); }
+  .card-checkin .card-detail { background: rgba(76,175,125,0.12); color: var(--success); }
+
+  /* Progress — purple */
+  .card-progress .card-icon { background: rgba(155,127,212,0.15); color: var(--purple); }
+  .card-progress .card-glow { background: radial-gradient(ellipse at top left, rgba(155,127,212,0.1) 0%, transparent 70%); }
+  .card-progress .card-detail { background: rgba(155,127,212,0.12); color: var(--purple); }
+
+  /* ─── PREVIEW SECTION ─── */
+  .preview-section {
+    padding: 0 20px;
+    margin-top: 24px;
+  }
+  .preview-empty {
+    border: 1.5px dashed var(--border);
+    border-radius: 20px;
+    padding: 40px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .preview-empty-icon {
+    width: 48px; height: 48px;
+    border-radius: 16px;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .preview-empty-icon svg { width: 22px; height: 22px; color: var(--teal); opacity: 0.4; }
+  .preview-empty-title { font-size: 14px; font-weight: 700; color: var(--white); }
+  .preview-empty-sub { font-size: 12px; color: var(--secondary); line-height: 1.5; }
+
+  /* ─── TAB BAR ─── */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    width: 390px;
+    background: rgba(8,14,14,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 4px 24px;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+  .tab-item svg { width: 22px; height: 22px; }
+  .tab-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .tab-item.active .tab-label { color: var(--teal); }
+  .tab-item.active svg { color: var(--teal); }
+  .tab-item:not(.active) .tab-label { color: var(--secondary); }
+  .tab-item:not(.active) svg { color: var(--secondary); }
+  .tab-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-top: -1px;
+  }
+
+  .scroll-area {
+    padding-bottom: 120px;
+  }
+</style>
+</head>
+<body>
+<div class="scroll-area">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-right">
+      <!-- Signal -->
+      <svg viewBox="0 0 16 12"><rect x="0" y="6" width="2.5" height="6" rx="0.5"/><rect x="4" y="4" width="2.5" height="8" rx="0.5"/><rect x="8" y="2" width="2.5" height="10" rx="0.5"/><rect x="12" y="0" width="2.5" height="12" rx="0.5"/></svg>
+      <!-- WiFi -->
+      <svg viewBox="0 0 16 12"><path d="M8 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm-4.9-2.5a7 7 0 019.8 0l-1.4 1.4a5 5 0 00-7 0L2.1 7.5zm-3.5-3.5a11.5 11.5 0 0116.8 0l-1.4 1.4a9.5 9.5 0 00-14 0L-.4 4z" fill-rule="evenodd"/></svg>
+      <!-- Battery -->
+      <svg viewBox="0 0 22 12"><rect x="0" y="1" width="18" height="10" rx="2" stroke="white" stroke-width="1.2" fill="none"/><rect x="1" y="2" width="14" height="8" rx="1.2" fill="white"/><path d="M19 4v4a2 2 0 000-4z"/></svg>
+    </div>
+  </div>
+
+  <!-- NAV HEADER -->
+  <div class="nav-header">
+    <div class="nav-title-block">
+      <div class="nav-eyebrow">Share</div>
+      <div class="nav-large-title">Social</div>
+      <div class="nav-subtitle">Select a card to generate<br>your share image</div>
+    </div>
+    <div class="nav-icon-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#8A9A9A">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- SECTION LABEL -->
+  <div class="section-label">Choose a card</div>
+
+  <!-- CARDS GRID -->
+  <div class="cards-grid">
+
+    <!-- NUTRITION CARD (selected) -->
+    <div class="share-card card-nutrition selected">
+      <div class="card-glow"></div>
+      <div class="card-top-row">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+          </svg>
+        </div>
+        <div class="share-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share
+        </div>
+      </div>
+      <div class="card-eyebrow">Today's Nutrition</div>
+      <div class="card-big-value">2,140<span class="unit">kcal</span></div>
+      <div class="card-subtitle">4 meals logged</div>
+      <div class="card-detail">Protein · 172g</div>
+    </div>
+
+    <!-- WORKOUT CARD -->
+    <div class="share-card card-workout">
+      <div class="card-glow"></div>
+      <div class="card-top-row">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6.5 6.5h11m-11 5h11m-11 5h11M2 12h2m16 0h2M2 6.5h1m18 0h1M2 17.5h1m18 0h1"/>
+          </svg>
+        </div>
+        <div class="share-chip" style="color:#8A9A9A">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share
+        </div>
+      </div>
+      <div class="card-eyebrow">Weekly Workouts</div>
+      <div class="card-big-value">5<span class="unit">sessions</span></div>
+      <div class="card-subtitle">This week</div>
+      <div class="card-detail">This week</div>
+    </div>
+
+    <!-- CHECK-IN CARD -->
+    <div class="share-card card-checkin">
+      <div class="card-glow"></div>
+      <div class="card-top-row">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+            <line x1="9" y1="9" x2="9.01" y2="9"/>
+            <line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+        </div>
+        <div class="share-chip" style="color:#8A9A9A">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share
+        </div>
+      </div>
+      <div class="card-eyebrow">Today's Check-in</div>
+      <div class="card-big-value">4<span class="unit">/5</span></div>
+      <div class="card-subtitle">Mood &amp; energy logged</div>
+      <div class="card-detail">Energy · 4/5 · Sleep 7h</div>
+    </div>
+
+    <!-- PROGRESS / WEIGHT CARD -->
+    <div class="share-card card-progress">
+      <div class="card-glow"></div>
+      <div class="card-top-row">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+        <div class="share-chip" style="color:#8A9A9A">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share
+        </div>
+      </div>
+      <div class="card-eyebrow">Current Weight</div>
+      <div class="card-big-value">83.4<span class="unit">kg</span></div>
+      <div class="card-subtitle">Latest measurement</div>
+      <div class="card-detail">Body fat · 12.8%</div>
+    </div>
+
+  </div>
+
+  <!-- PREVIEW SECTION -->
+  <div class="section-label" style="margin-top:28px">Preview</div>
+  <div class="preview-section">
+    <div class="preview-empty">
+      <div class="preview-empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4A9B9B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <div class="preview-empty-title">No card selected</div>
+      <div class="preview-empty-sub">Tap a card above to preview<br>and generate your share image.</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM SPACER -->
+  <div style="height: 24px;"></div>
+
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <!-- Today -->
+  <div class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+      <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+    </svg>
+    <span class="tab-label">Today</span>
+  </div>
+  <!-- Train -->
+  <div class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6.5 6.5h11m-11 5h11m-11 5h11M2 12h2m16 0h2"/>
+    </svg>
+    <span class="tab-label">Train</span>
+  </div>
+  <!-- Nutrition -->
+  <div class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+    </svg>
+    <span class="tab-label">Nutrition</span>
+  </div>
+  <!-- Body -->
+  <div class="tab-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+    </svg>
+    <span class="tab-label">Body</span>
+  </div>
+  <!-- More (active — social lives here) -->
+  <div class="tab-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+    </svg>
+    <span class="tab-label">More</span>
+    <div class="tab-dot"></div>
+  </div>
+</div>
+
+</body>
+</html>

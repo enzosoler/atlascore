@@ -109,7 +109,7 @@ export default function Diary() {
   return (
     <SafePageBoundary
       title="Diary"
-      subtitle="Diary safe mode."
+      subtitle="A reflective daily log that pulls signals from the rest of the product into one calm timeline."
       fallbackDescription="The diary loaded in safe mode. Navigate to another route and come back to try again."
     >
       <DiaryContent />
@@ -243,8 +243,8 @@ function DiaryContent() {
       {/* ── Page Header ─────────────────────────────────────────── */}
       <PageHeader
         eyebrow="Diary"
-        title="Your day in one place."
-        subtitle="Consolidated view of nutrition, workouts, check-in and measurements for the selected date."
+        title="Your day, pulled into one readable timeline."
+        subtitle="Nutrition, workouts, wellness, supplements, and body checkpoints are grouped into a lightweight daily review."
         accentClassName="from-[hsl(var(--brand)/0.07)] via-[hsl(var(--brand)/0.02)]"
         actions={
           <div className="flex flex-wrap items-center gap-3">

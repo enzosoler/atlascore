@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
+  BellRing,
   Moon,
   Sun,
-  Monitor,
   User,
   Bell,
   Shield,
   ChevronRight,
   LogOut,
-  Trash2,
+  FileOutput,
+  HelpCircle,
   ArrowRight,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
@@ -21,6 +22,7 @@ import {
   SafePageBoundary,
   SectionCard,
   StatusBanner,
+  SecondaryButton,
 } from '@/components/shared/StablePage';
 
 // ── Theme option button ───────────────────────────────────────────────────────
@@ -117,6 +119,10 @@ function SettingsContent() {
       subtitle={t('settings.subtitle')}
       maxWidth="max-w-2xl"
     >
+      <StatusBanner>
+        Configure appearance, access, and recovery actions without leaving the native atlas.core shell.
+      </StatusBanner>
+
       {/* Account info */}
       <SectionCard
         title={t('settings.account.title')}
@@ -163,6 +169,22 @@ function SettingsContent() {
             onSelect={setTheme}
           />
         </div>
+
+        <div className="mt-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--brand))]">
+              <BellRing className="h-4 w-4" strokeWidth={1.9} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                Dark-first mobile UI
+              </p>
+              <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+                The app is tuned for the atlas.core dark interface. Light mode stays available, but dark preserves the intended contrast and hierarchy.
+              </p>
+            </div>
+          </div>
+        </div>
       </SectionCard>
 
 
@@ -185,11 +207,43 @@ function SettingsContent() {
             href={ROUTES.export}
           />
           <SettingsRow
-            icon={Bell}
+            icon={FileOutput}
+            label="Exports"
+            description="Generate CSV, JSON, and PDF exports with a controlled date range."
+            href={ROUTES.export}
+          />
+          <SettingsRow
+            icon={HelpCircle}
             label={t('settings.more.help')}
             description={t('settings.more.helpDesc')}
             href={ROUTES.help}
           />
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Notifications and support"
+        subtitle="Quiet defaults with clear recovery paths."
+      >
+        <div className="space-y-3">
+          <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">
+                <Bell className="h-4 w-4" strokeWidth={1.9} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                  System prompts stay minimal
+                </p>
+                <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+                  Trial notices, password changes, and session expirations follow the same calm iOS-style confirmation pattern used across the app.
+                </p>
+              </div>
+            </div>
+          </div>
+          <Link to={ROUTES.help} className="inline-block">
+            <SecondaryButton type="button">Open Help Center</SecondaryButton>
+          </Link>
         </div>
       </SectionCard>
 

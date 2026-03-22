@@ -27,29 +27,28 @@ function SocialCard({ title, subtitle, value, unit, detail, icon: Icon, gradient
   return (
     <button
       onClick={onClick}
-      className="group relative overflow-hidden rounded-[28px] border border-zinc-200/80 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.06)] text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(15,23,42,0.10)]"
+      className="group relative overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.92)] p-5 text-left shadow-[var(--shadow-xs)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[hsl(var(--brand)/0.2)] hover:shadow-[var(--shadow-md)]"
     >
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ background: gradient }}
+        style={{ background: gradient, mixBlendMode: 'screen' }}
       />
       <div className="relative">
         <div className="flex items-start justify-between gap-3">
           <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-zinc-200 text-zinc-600"
-            style={{ background: 'hsl(0,0%,97%)' }}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))]"
           >
             <Icon className="h-5 w-5" strokeWidth={2} />
           </div>
-          <Share2 className="h-4 w-4 text-zinc-400 mt-1 group-hover:text-zinc-700 transition-colors" strokeWidth={2} />
+          <Share2 className="mt-1 h-4 w-4 text-[hsl(var(--fg-3))] transition-colors group-hover:text-[hsl(var(--fg))]" strokeWidth={2} />
         </div>
-        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">{title}</p>
-        <p className="mt-2 text-[30px] font-bold tracking-[-0.06em] text-zinc-950">
-          {value}<span className="text-[16px] font-semibold text-zinc-500 ml-1">{unit}</span>
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--fg-3))]">{title}</p>
+        <p className="mt-2 text-[30px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
+          {value}<span className="ml-1 text-[16px] font-semibold text-[hsl(var(--fg-3))]">{unit}</span>
         </p>
-        <p className="mt-1 text-[13px] leading-6 text-zinc-600">{subtitle}</p>
+        <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{subtitle}</p>
         {detail && (
-          <p className="mt-3 text-[12px] font-medium text-zinc-400">{detail}</p>
+          <p className="mt-3 text-[12px] font-medium text-[hsl(var(--fg-3))]">{detail}</p>
         )}
       </div>
     </button>
@@ -59,13 +58,13 @@ function SocialCard({ title, subtitle, value, unit, detail, icon: Icon, gradient
 function ShareCardPreview({ title, stats, color }) {
   return (
     <div
-      className="rounded-[24px] p-6 text-white overflow-hidden relative"
+      className="relative overflow-hidden rounded-[24px] border border-white/10 p-6 text-white shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
       style={{ background: color }}
     >
       <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
       <div className="absolute -left-4 bottom-0 h-24 w-24 rounded-full bg-white/8" />
       <div className="relative">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">Atlas Core</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">atlas.core</p>
         <p className="mt-2 text-[22px] font-bold tracking-[-0.04em]">{title}</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           {stats.map((s) => (
@@ -75,7 +74,7 @@ function ShareCardPreview({ title, stats, color }) {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-[11px] text-white/50">useatlascore.com</p>
+        <p className="mt-4 text-[11px] text-white/50">Tracked in atlas.core</p>
       </div>
     </div>
   );
@@ -282,7 +281,7 @@ function SocialContent() {
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Left: stat cards */}
           <div className="space-y-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-zinc-500 px-1">
+            <p className="px-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
               Selecione um card para compartilhar
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -298,7 +297,7 @@ function SocialContent() {
 
           {/* Right: preview */}
           <div className="space-y-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-zinc-500 px-1">
+            <p className="px-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
               Pré-visualização do card
             </p>
 
@@ -311,7 +310,7 @@ function SocialContent() {
                 />
                 <div className="flex gap-3">
                   <button
-                    className="flex flex-1 items-center justify-center gap-2 rounded-[16px] border border-zinc-200 bg-white px-4 py-3 text-[14px] font-semibold text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50"
+                    className="atlas-button atlas-button-secondary flex-1 justify-center"
                     onClick={() => {
                       if (navigator.share) {
                         navigator.share({
@@ -326,7 +325,7 @@ function SocialContent() {
                     Compartilhar
                   </button>
                   <button
-                    className="flex items-center justify-center gap-2 rounded-[16px] border border-zinc-200 bg-white px-4 py-3 text-[14px] font-semibold text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50"
+                    className="atlas-button atlas-button-primary"
                     onClick={() => {
                       /* future: html2canvas download */
                     }}
@@ -337,12 +336,12 @@ function SocialContent() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-[28px] border border-dashed border-zinc-300 bg-zinc-50 py-16 px-6 text-center">
-                <ImageIcon className="h-10 w-10 text-zinc-300" strokeWidth={1.5} />
-                <p className="mt-4 text-[15px] font-semibold text-zinc-700">
+              <div className="flex flex-col items-center justify-center rounded-[28px] border border-dashed border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.42)] px-6 py-16 text-center">
+                <ImageIcon className="h-10 w-10 text-[hsl(var(--brand)/0.4)]" strokeWidth={1.5} />
+                <p className="mt-4 text-[15px] font-semibold text-[hsl(var(--fg))]">
                   Nenhum card selecionado
                 </p>
-                <p className="mt-2 text-[13px] text-zinc-500">
+                <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))]">
                   Clique em um card à esquerda para visualizar e compartilhar.
                 </p>
               </div>

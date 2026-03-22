@@ -41,7 +41,7 @@ import CoachDashboard from '@/pages/coach/CoachDashboard';
 import CoachStudents from '@/pages/coach/CoachStudents';
 import CoachStudentProfile from '@/pages/coach/CoachStudentProfile';
 import CoachPrescribeWorkout from '@/pages/coach/CoachPrescribeWorkout';
-import ClinicianDashboard from '@/pages/clinician/ClinicianDashboardProfessional';
+import ClinicianDashboard from '@/pages/clinician/ClinicianDashboard';
 import ClinicianPatients from '@/pages/clinician/ClinicianPatients';
 import ClinicianPatientProfile from '@/pages/clinician/ClinicianPatientProfile';
 import NutritionistDashboard from '@/pages/nutritionist/NutritionistDashboard.jsx';

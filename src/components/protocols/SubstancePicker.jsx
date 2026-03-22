@@ -54,7 +54,7 @@ export default function SubstancePicker({
   return (
     <div className={cn('space-y-3', className)}>
       <label htmlFor="protocol-substance-picker" className="text-[12px] font-semibold text-[hsl(var(--fg))]">
-        Substância principal
+        Main substance
       </label>
 
       <div className="relative">
@@ -64,7 +64,7 @@ export default function SubstancePicker({
           type="text"
           value={query}
           onChange={(event) => handleInputChange(event.target.value)}
-          placeholder="Ex: Cipionato de Testosterona, Creatina, Vitamina D3"
+          placeholder="E.g.: Testosterone Cypionate, Creatine, Vitamin D3"
           className="atlas-field h-12 pl-11 pr-4 text-base"
         />
       </div>
@@ -73,7 +73,7 @@ export default function SubstancePicker({
         <div className="flex items-center gap-2 pb-2">
           <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={1.9} />
           <p className="text-[12px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-            Sugestões clínicas
+            Clinical suggestions
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function SubstancePicker({
             >
               <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{item.canonical_name}</p>
               <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-                {item.category} · {item.common_frequency_reference || 'Sem referência'}
+                {item.category} · {item.common_frequency_reference || 'No reference'}
               </p>
             </button>
           ))}

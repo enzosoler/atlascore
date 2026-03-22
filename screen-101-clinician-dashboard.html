@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>101 — Clinician Dashboard · atlas.core</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #080E0E;
+    --surface:   #111A1A;
+    --surface2:  #152020;
+    --border:    #1E2C2C;
+    --border2:   #243636;
+    --teal:      #4A9B9B;
+    --teal-dim:  rgba(74,155,155,0.12);
+    --teal-dim2: rgba(74,155,155,0.07);
+    --text:      #FFFFFF;
+    --text2:     #8A9A9A;
+    --text3:     #5A7070;
+    --green:     #4CAF7D;
+    --green-dim: rgba(76,175,125,0.12);
+    --red:       #E05C5C;
+    --red-dim:   rgba(224,92,92,0.12);
+    --amber:     #D4A049;
+    --amber-dim: rgba(212,160,73,0.12);
+    --blue:      #5B9BD5;
+    --blue-dim:  rgba(91,155,213,0.12);
+  }
+
+  body {
+    background: #0A0F0F;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+    padding: 40px 20px;
+  }
+
+  .phone-frame {
+    width: 393px;
+    min-height: 852px;
+    background: var(--bg);
+    border-radius: 52px;
+    border: 1px solid #2A3A3A;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 8px #0D1818,
+      0 40px 80px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(74,155,155,0.08);
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px 0;
+  }
+  .status-time { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+  .status-icons { display: flex; align-items: center; gap: 6px; }
+  .status-icons svg { width: 16px; height: 16px; fill: var(--text); }
+
+  /* Nav bar */
+  .nav-bar {
+    padding: 8px 24px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .nav-back {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 13px; color: var(--teal); font-weight: 500;
+    opacity: 0;
+  }
+  .nav-role-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--teal-dim); border: 1px solid rgba(74,155,155,0.2);
+    border-radius: 20px; padding: 4px 10px 4px 6px;
+  }
+  .role-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
+  .role-label { font-size: 11px; font-weight: 600; color: var(--teal); letter-spacing: 0.4px; text-transform: uppercase; }
+
+  /* Large title */
+  .page-header {
+    padding: 16px 24px 0;
+  }
+  .page-title {
+    font-size: 30px; font-weight: 700; color: var(--text);
+    letter-spacing: -0.8px; line-height: 1.1;
+  }
+  .page-sub {
+    font-size: 13px; color: var(--text2); margin-top: 4px; font-weight: 400;
+  }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* Scroll content */
+  .scroll-content { padding: 0 16px 100px; }
+
+  /* Section label */
+  .section-label {
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    letter-spacing: 0.8px; text-transform: uppercase;
+    margin-bottom: 10px; padding: 0 4px;
+  }
+
+  /* KPI grid */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 20px;
+  }
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 12px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent-color);
+    opacity: 0.6;
+  }
+  .kpi-value {
+    font-size: 26px; font-weight: 700; letter-spacing: -0.8px;
+    line-height: 1; color: var(--text);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+  }
+  .kpi-label { font-size: 10px; color: var(--text2); font-weight: 500; line-height: 1.3; }
+  .kpi-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px;
+  }
+
+  /* Alert banner */
+  .alert-banner {
+    background: rgba(212,160,73,0.08);
+    border: 1px solid rgba(212,160,73,0.25);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .alert-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(212,160,73,0.15); display: flex;
+    align-items: center; justify-content: center; shrink: 0; flex-shrink: 0;
+  }
+  .alert-title { font-size: 13px; font-weight: 600; color: #D4A049; margin-bottom: 2px; }
+  .alert-desc { font-size: 12px; color: rgba(212,160,73,0.7); line-height: 1.4; }
+  .alert-patients { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .alert-chip {
+    background: rgba(212,160,73,0.12); border: 1px solid rgba(212,160,73,0.2);
+    border-radius: 20px; padding: 3px 8px;
+    font-size: 11px; font-weight: 500; color: #D4A049;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .alert-chip .dot { width: 5px; height: 5px; border-radius: 50%; background: #E05C5C; }
+
+  /* Patient list */
+  .patient-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .patient-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .patient-row:hover { border-color: rgba(74,155,155,0.25); }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; flex-shrink: 0;
+  }
+  .patient-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .patient-meta { font-size: 11px; color: var(--text2); margin-top: 1px; }
+  .patient-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    border-radius: 20px; padding: 3px 8px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.2px;
+  }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(76,175,125,0.2); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(212,160,73,0.2); }
+  .badge-red   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(224,92,92,0.2); }
+  .badge-gray  { background: rgba(138,154,154,0.1); color: var(--text2); border: 1px solid rgba(138,154,154,0.15); }
+  .badge-teal  { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(74,155,155,0.2); }
+
+  .chevron { color: var(--text3); flex-shrink: 0; }
+
+  /* Compliance row */
+  .compliance-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
+  }
+  .compliance-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .compliance-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .compliance-avg { font-size: 22px; font-weight: 700; color: var(--green); letter-spacing: -0.5px; }
+  .compliance-bars { display: flex; flex-direction: column; gap: 8px; }
+  .comp-item { display: flex; align-items: center; gap: 10px; }
+  .comp-name { font-size: 11px; color: var(--text2); width: 80px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .comp-bar-wrap { flex: 1; height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+  .comp-bar { height: 100%; border-radius: 2px; }
+  .comp-pct { font-size: 11px; font-weight: 600; width: 32px; text-align: right; flex-shrink: 0; }
+
+  /* Upcoming section */
+  .upcoming-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .upcoming-date-block {
+    width: 38px; text-align: center; flex-shrink: 0;
+  }
+  .upcoming-day { font-size: 20px; font-weight: 700; color: var(--teal); letter-spacing: -0.5px; line-height: 1; }
+  .upcoming-month { font-size: 9px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+  .upcoming-divider { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
+  .upcoming-type { font-size: 10px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .upcoming-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .upcoming-sub { font-size: 11px; color: var(--text2); }
+
+  /* Bottom tab bar */
+  .tab-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 82px;
+    background: rgba(8,14,14,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-around;
+    padding: 12px 0 0;
+  }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .tab-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+  .tab-label { font-size: 10px; font-weight: 500; }
+  .tab-item.active .tab-label { color: var(--teal); }
+  .tab-item.inactive .tab-label { color: var(--text3); }
+  .tab-item.active .tab-icon svg { stroke: var(--teal); }
+  .tab-item.inactive .tab-icon svg { stroke: var(--text3); }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24"><path d="M1 6l5.5 5.5L12 6l5.5 5.5L23 6" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" style="width:25px;height:13px"><rect x="1" y="3" width="18" height="11" rx="2" stroke="white" stroke-width="1.5" fill="none"/><rect x="2.5" y="4.5" width="14" height="8" rx="1" fill="white"/><path d="M21 8.5v3a1.5 1.5 0 0 0 0-3z" fill="white"/></svg>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav-bar">
+    <div class="nav-back"></div>
+    <div class="nav-role-badge">
+      <div class="role-dot"></div>
+      <span class="role-label">Clinician</span>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub">Sunday, March 22 · Dr. Elena Matos</div>
+  </div>
+
+  <div style="padding: 0 24px;"><div class="divider"></div></div>
+
+  <!-- Scroll content -->
+  <div class="scroll-content">
+
+    <!-- KPI Grid -->
+    <div class="section-label">Overview</div>
+    <div class="kpi-grid">
+      <div class="kpi-card" style="--accent-color: var(--green);">
+        <div class="kpi-icon" style="background: var(--green-dim);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4CAF7D" stroke-width="2.2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="kpi-value" style="color:#4CAF7D;">24</div>
+        <div class="kpi-label">Active<br>Patients</div>
+      </div>
+      <div class="kpi-card" style="--accent-color: var(--teal);">
+        <div class="kpi-icon" style="background: var(--teal-dim);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A9B9B" stroke-width="2.2" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        </div>
+        <div class="kpi-value" style="color:#4A9B9B;">31</div>
+        <div class="kpi-label">Lab<br>Exams</div>
+      </div>
+      <div class="kpi-card" style="--accent-color: var(--blue);">
+        <div class="kpi-icon" style="background: var(--blue-dim);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B9BD5" stroke-width="2.2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="kpi-value" style="color:#5B9BD5;">18</div>
+        <div class="kpi-label">Active<br>Protocols</div>
+      </div>
+    </div>
+
+    <!-- Abnormal Alert Banner -->
+    <div class="alert-banner">
+      <div class="alert-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4A049" stroke-width="2.2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div>
+        <div class="alert-title">3 Patients with Abnormal Markers</div>
+        <div class="alert-desc">Lab results require clinical review before next protocol cycle.</div>
+        <div class="alert-patients">
+          <span class="alert-chip"><span class="dot"></span> M. Silva · TSH↑</span>
+          <span class="alert-chip"><span class="dot"></span> R. Costa · GGT↑</span>
+          <span class="alert-chip"><span class="dot"></span> C. Ramos · HCT↓</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Patients -->
+    <div class="section-label">Recent Patients</div>
+    <div class="patient-list">
+
+      <div class="patient-row">
+        <div class="avatar" style="background: rgba(76,175,125,0.12); color:#4CAF7D;">M</div>
+        <div>
+          <div class="patient-name">Marco Silva</div>
+          <div class="patient-meta">Protocol · Day 42 of 90</div>
+        </div>
+        <div class="patient-right">
+          <span class="badge badge-amber">Abnormal</span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="patient-row">
+        <div class="avatar" style="background: rgba(74,155,155,0.12); color:#4A9B9B;">R</div>
+        <div>
+          <div class="patient-name">Renata Costa</div>
+          <div class="patient-meta">Protocol · Day 18 of 60</div>
+        </div>
+        <div class="patient-right">
+          <span class="badge badge-amber">Review</span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="patient-row">
+        <div class="avatar" style="background: rgba(76,175,125,0.12); color:#4CAF7D;">F</div>
+        <div>
+          <div class="patient-name">Felipe Andrade</div>
+          <div class="patient-meta">Check-in · 7d streak</div>
+        </div>
+        <div class="patient-right">
+          <span class="badge badge-green">Normal</span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="patient-row">
+        <div class="avatar" style="background: rgba(91,155,213,0.12); color:#5B9BD5;">C</div>
+        <div>
+          <div class="patient-name">Carla Ramos</div>
+          <div class="patient-meta">Protocol · Day 5 of 90</div>
+        </div>
+        <div class="patient-right">
+          <span class="badge badge-red">Critical</span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="patient-row">
+        <div class="avatar" style="background: rgba(138,154,154,0.1); color:#8A9A9A;">T</div>
+        <div>
+          <div class="patient-name">Thiago Mendes</div>
+          <div class="patient-meta">Monitoring · No protocol</div>
+        </div>
+        <div class="patient-right">
+          <span class="badge badge-gray">Stable</span>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Protocol Compliance -->
+    <div class="section-label">Protocol Compliance</div>
+    <div class="compliance-row">
+      <div class="compliance-header">
+        <div class="compliance-title">Average adherence this week</div>
+        <div class="compliance-avg">82%</div>
+      </div>
+      <div class="compliance-bars">
+        <div class="comp-item">
+          <span class="comp-name">M. Silva</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:94%; background:#4CAF7D;"></div></div>
+          <span class="comp-pct" style="color:#4CAF7D;">94%</span>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">F. Andrade</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:88%; background:#4CAF7D;"></div></div>
+          <span class="comp-pct" style="color:#4CAF7D;">88%</span>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">R. Costa</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:72%; background:#D4A049;"></div></div>
+          <span class="comp-pct" style="color:#D4A049;">72%</span>
+        </div>
+        <div class="comp-item">
+          <span class="comp-name">C. Ramos</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:55%; background:#E05C5C;"></div></div>
+          <span class="comp-pct" style="color:#E05C5C;">55%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming -->
+    <div class="section-label">Upcoming</div>
+    <div class="upcoming-row">
+      <div class="upcoming-date-block">
+        <div class="upcoming-day">24</div>
+        <div class="upcoming-month">Mar</div>
+      </div>
+      <div class="upcoming-divider"></div>
+      <div>
+        <div class="upcoming-type">Lab Results</div>
+        <div class="upcoming-label">Marco Silva · Full Panel</div>
+        <div class="upcoming-sub">Scheduled · Bloodwork due</div>
+      </div>
+      <div style="margin-left:auto;">
+        <span class="badge badge-teal">Due in 2d</span>
+      </div>
+    </div>
+    <div class="upcoming-row">
+      <div class="upcoming-date-block">
+        <div class="upcoming-day">28</div>
+        <div class="upcoming-month">Mar</div>
+      </div>
+      <div class="upcoming-divider"></div>
+      <div>
+        <div class="upcoming-type">Protocol Review</div>
+        <div class="upcoming-label">Renata Costa · Cycle 1 End</div>
+        <div class="upcoming-sub">Scheduled · Adjust dosing</div>
+      </div>
+      <div style="margin-left:auto;">
+        <span class="badge badge-gray">6 days</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <div class="tab-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <span class="tab-label">Dashboard</span>
+    </div>
+    <div class="tab-item inactive">
+      <div class="tab-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <span class="tab-label">Patients</span>
+    </div>
+    <div class="tab-item inactive">
+      <div class="tab-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      </div>
+      <span class="tab-label">Exams</span>
+    </div>
+    <div class="tab-item inactive">
+      <div class="tab-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <span class="tab-label">Protocols</span>
+    </div>
+    <div class="tab-item inactive">
+      <div class="tab-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+      </div>
+      <span class="tab-label">Profile</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

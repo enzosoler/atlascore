@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>34 · Workout Complete — atlas.core</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  :root {
+    --bg: #080E0E;
+    --card: #111A1A;
+    --border: #1E2C2C;
+    --teal: #4A9B9B;
+    --teal-dim: rgba(74,155,155,0.10);
+    --teal-glow: rgba(74,155,155,0.14);
+    --white: #FFFFFF;
+    --secondary: #8A9A9A;
+    --red: #E05C5C;
+    --green: #4CAF7D;
+    --green-dim: rgba(76,175,125,0.10);
+    --r-card: 14px;
+    --r-btn: 10px;
+  }
+
+  body {
+    width: 375px;
+    height: 812px;
+    background: var(--bg);
+    font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    color: var(--white);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── AMBIENT GLOW ─── */
+  .ambient-glow {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(ellipse at center, rgba(74,155,155,0.14) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ambient-glow-2 {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(ellipse at center, rgba(76,175,125,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── STATUS BAR ─── */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px 0;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .status-time { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: var(--white); }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+
+  /* ─── HERO ─── */
+  .hero-section {
+    padding: 28px 20px 0;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .check-ring {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+  .check-ring-svg {
+    width: 72px;
+    height: 72px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg);
+  }
+  .check-ring-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 2.5;
+  }
+  .check-ring-fill {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 201;
+    stroke-dashoffset: 0;
+    filter: drop-shadow(0 0 6px rgba(76,175,125,0.5));
+  }
+  .check-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--green-dim);
+    border-radius: 50%;
+  }
+  .complete-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+  .complete-title {
+    font-family: -apple-system, 'SF Pro Display', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -1.4px;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .complete-subtitle {
+    font-size: 15px;
+    color: var(--secondary);
+    font-weight: 400;
+  }
+  .complete-subtitle strong { color: var(--white); font-weight: 600; }
+
+  /* ─── DURATION HERO STAT ─── */
+  .duration-stat {
+    margin: 18px 20px 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .duration-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--secondary);
+  }
+  .duration-value {
+    font-family: -apple-system, 'SF Mono', monospace;
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    color: var(--white);
+    font-variant-numeric: tabular-nums;
+  }
+  .duration-sep {
+    width: 1px;
+    height: 36px;
+    background: var(--border);
+  }
+  .duration-sub {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .pb-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(76,175,125,0.12);
+    border: 1px solid rgba(76,175,125,0.2);
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+  .pb-badge-text { font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: 0.3px; }
+
+  /* ─── STATS GRID ─── */
+  .stats-grid {
+    margin: 10px 20px 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .stat-cell {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-cell-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--teal-dim);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .stat-cell-value {
+    font-family: -apple-system, 'SF Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    color: var(--white);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .stat-cell-unit {
+    font-size: 11px;
+    color: var(--secondary);
+    font-weight: 500;
+  }
+  .stat-cell-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--secondary);
+    margin-top: 2px;
+  }
+
+  /* ─── PRS ─── */
+  .prs-section {
+    margin: 10px 20px 0;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--secondary);
+    margin-bottom: 8px;
+  }
+  .pr-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pr-card {
+    background: var(--green-dim);
+    border: 1px solid rgba(76,175,125,0.15);
+    border-radius: var(--r-card);
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pr-icon-wrap {
+    width: 30px;
+    height: 30px;
+    background: rgba(76,175,125,0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pr-info { flex: 1; }
+  .pr-exercise {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: -0.2px;
+  }
+  .pr-type { font-size: 11px; color: var(--green); font-weight: 500; }
+  .pr-value {
+    font-family: -apple-system, 'SF Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── RATING ─── */
+  .rating-section {
+    margin: 10px 20px 0;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .rating-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    padding: 14px 16px;
+  }
+  .rating-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+  .rating-stars {
+    display: flex;
+    gap: 8px;
+  }
+  .star {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .star svg { transition: transform 0.15s; }
+  .star:active svg { transform: scale(1.2); }
+
+  /* ─── BOTTOM ACTIONS ─── */
+  .bottom-actions {
+    padding: 12px 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .actions-row {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-share {
+    flex: 1;
+    height: 52px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-btn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .btn-share:active { border-color: var(--teal); }
+  .btn-share-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--secondary);
+    letter-spacing: -0.2px;
+  }
+  .btn-done {
+    flex: 1.6;
+    height: 52px;
+    background: var(--teal);
+    border: none;
+    border-radius: var(--r-btn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-done:active { opacity: 0.85; }
+  .btn-done-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+
+  /* ─── HOME INDICATOR ─── */
+  .home-indicator {
+    height: 34px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
+  }
+  .home-bar {
+    width: 134px;
+    height: 5px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<!-- AMBIENT GLOW -->
+<div class="ambient-glow"></div>
+<div class="ambient-glow-2"></div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span class="status-time">10:09</span>
+  <div class="status-icons">
+    <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+      <rect x="0" y="3" width="3" height="9" rx="1" fill="white"/>
+      <rect x="4.5" y="2" width="3" height="10" rx="1" fill="white"/>
+      <rect x="9" y="0" width="3" height="12" rx="1" fill="white"/>
+      <rect x="13.5" y="0" width="3" height="12" rx="1" fill="white" opacity="0.3"/>
+    </svg>
+    <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+      <path d="M8 2.5C10.3 2.5 12.4 3.5 13.8 5.1L15.2 3.7C13.4 1.8 10.8 0.5 8 0.5C5.2 0.5 2.6 1.8 0.8 3.7L2.2 5.1C3.6 3.5 5.7 2.5 8 2.5Z" fill="white"/>
+      <path d="M8 5.5C9.5 5.5 10.9 6.1 11.9 7.1L13.3 5.7C12 4.4 10.1 3.5 8 3.5C5.9 3.5 4 4.4 2.7 5.7L4.1 7.1C5.1 6.1 6.5 5.5 8 5.5Z" fill="white"/>
+      <circle cx="8" cy="10" r="2" fill="white"/>
+    </svg>
+    <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+      <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/>
+      <rect x="2" y="2" width="19" height="8" rx="2" fill="white"/>
+      <path d="M23 4.5V7.5C23.8 7.2 24.5 6.5 24.5 6C24.5 5.5 23.8 4.8 23 4.5Z" fill="white" opacity="0.4"/>
+    </svg>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero-section">
+  <div class="check-ring">
+    <svg class="check-ring-svg" viewBox="0 0 72 72">
+      <circle class="check-ring-track" cx="36" cy="36" r="32"/>
+      <circle class="check-ring-fill" cx="36" cy="36" r="32"/>
+    </svg>
+    <div class="check-icon">
+      <svg width="26" height="20" viewBox="0 0 26 20" fill="none">
+        <path d="M2 10L10 18L24 2" stroke="#4CAF7D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+  <p class="complete-eyebrow">Workout Complete</p>
+  <h1 class="complete-title">Push Day A</h1>
+  <p class="complete-subtitle"><strong>Monday, March 22</strong> · Morning session</p>
+</div>
+
+<!-- DURATION HERO STAT -->
+<div class="duration-stat">
+  <div class="duration-sub">
+    <div class="duration-label">Duration</div>
+    <div style="height:4px;"></div>
+    <div class="pb-badge">
+      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+        <path d="M4 1L5 3H7L5.5 4.5L6 6.5L4 5.5L2 6.5L2.5 4.5L1 3H3L4 1Z" fill="#4CAF7D"/>
+      </svg>
+      <span class="pb-badge-text">Personal Best</span>
+    </div>
+  </div>
+  <div class="duration-sep"></div>
+  <div class="duration-value">48:14</div>
+</div>
+
+<!-- STATS GRID -->
+<div class="stats-grid">
+  <div class="stat-cell">
+    <div class="stat-cell-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M1 7h2.5l2-4 2 8 2-4H13" stroke="#4A9B9B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="stat-cell-value">11</span>
+    <span class="stat-cell-unit">sets</span>
+    <span class="stat-cell-label">Volume</span>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-cell-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="5.5" stroke="#4A9B9B" stroke-width="1.4"/>
+        <path d="M7 4v3l2 1.5" stroke="#4A9B9B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="stat-cell-value">96</span>
+    <span class="stat-cell-unit">reps total</span>
+    <span class="stat-cell-label">Reps</span>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-cell-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 12L7 3L12 12" stroke="#4A9B9B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 9h6" stroke="#4A9B9B" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="stat-cell-value">4.2</span>
+    <span class="stat-cell-unit">tonnes</span>
+    <span class="stat-cell-label">Volume</span>
+  </div>
+</div>
+
+<!-- PRs -->
+<div class="prs-section">
+  <div class="section-label">Personal Records</div>
+  <div class="pr-list">
+    <div class="pr-card">
+      <div class="pr-icon-wrap">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1L8.5 5H13L9.5 7.5L10.5 11.5L7 9L3.5 11.5L4.5 7.5L1 5H5.5L7 1Z" fill="#4CAF7D"/>
+        </svg>
+      </div>
+      <div class="pr-info">
+        <div class="pr-exercise">Bench Press</div>
+        <div class="pr-type">New 1RM — up from 82.5kg</div>
+      </div>
+      <span class="pr-value">85kg</span>
+    </div>
+    <div class="pr-card">
+      <div class="pr-icon-wrap">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1L8.5 5H13L9.5 7.5L10.5 11.5L7 9L3.5 11.5L4.5 7.5L1 5H5.5L7 1Z" fill="#4CAF7D"/>
+        </svg>
+      </div>
+      <div class="pr-info">
+        <div class="pr-exercise">Incline DB Press</div>
+        <div class="pr-type">Volume PR — most reps at weight</div>
+      </div>
+      <span class="pr-value">+4 reps</span>
+    </div>
+  </div>
+</div>
+
+<!-- RATING -->
+<div class="rating-section">
+  <div class="rating-card">
+    <div class="rating-title">How did that feel?</div>
+    <div class="rating-stars">
+      <!-- 4 filled stars, 1 outline -->
+      <div class="star">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="#4A9B9B"/>
+        </svg>
+      </div>
+      <div class="star">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="#4A9B9B"/>
+        </svg>
+      </div>
+      <div class="star">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="#4A9B9B"/>
+        </svg>
+      </div>
+      <div class="star">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="#4A9B9B"/>
+        </svg>
+      </div>
+      <div class="star">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L14.5 9H22L16 13.5L18.5 20.5L12 16L5.5 20.5L8 13.5L2 9H9.5L12 2Z" fill="none" stroke="#1E2C2C" stroke-width="1.5"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM ACTIONS -->
+<div class="bottom-actions">
+  <div class="actions-row">
+    <button class="btn-share">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2V11M4 6L8 2L12 6" stroke="#8A9A9A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 10v3a1 1 0 001 1h10a1 1 0 001-1v-3" stroke="#8A9A9A" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span class="btn-share-text">Share</span>
+    </button>
+    <button class="btn-done">
+      <span class="btn-done-text">Save & Finish</span>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- HOME INDICATOR -->
+<div class="home-indicator">
+  <div class="home-bar"></div>
+</div>
+
+</body>
+</html>

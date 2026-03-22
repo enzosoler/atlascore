@@ -81,7 +81,7 @@ export default function SetupGeneratingScreen({
             {messages[msgIdx]}
           </motion.p>
         </AnimatePresence>
-        {!done && <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">Atlas Core está configurando...</p>}
+        {!done && <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">Atlas Core is setting up...</p>}
       </div>
 
       {/* Button (optional) */}

@@ -6,17 +6,17 @@ import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
 
 const OPTIONS = [
-  { id: 'bug',     icon: Bug,        label: 'Reportar um bug',         color: 'text-[hsl(var(--err))]',  bg: 'bg-[hsl(var(--err)/0.07)]' },
-  { id: 'feature', icon: Lightbulb,  label: 'Sugerir funcionalidade',  color: 'text-[hsl(var(--warn))]', bg: 'bg-[hsl(var(--warn)/0.07)]' },
-  { id: 'help',    icon: HelpCircle, label: 'Algo confuso?',           color: 'text-[hsl(var(--brand))]', bg: 'bg-[hsl(var(--brand)/0.07)]' },
-  { id: 'contact', icon: Mail,       label: 'Falar com o time',        color: 'text-[hsl(var(--fg-2))]', bg: 'bg-[hsl(var(--shell))]' },
+  { id: 'bug',     icon: Bug,        label: 'Report a bug',            color: 'text-[hsl(var(--err))]',  bg: 'bg-[hsl(var(--err)/0.07)]' },
+  { id: 'feature', icon: Lightbulb,  label: 'Suggest a feature',       color: 'text-[hsl(var(--warn))]', bg: 'bg-[hsl(var(--warn)/0.07)]' },
+  { id: 'help',    icon: HelpCircle, label: 'Something confusing?',    color: 'text-[hsl(var(--brand))]', bg: 'bg-[hsl(var(--brand)/0.07)]' },
+  { id: 'contact', icon: Mail,       label: 'Talk to the team',        color: 'text-[hsl(var(--fg-2))]', bg: 'bg-[hsl(var(--shell))]' },
 ];
 
 const PLACEHOLDERS = {
-  bug:     'Descreva o que aconteceu e em qual parte do app...',
-  feature: 'Qual funcionalidade tornaria o app mais útil para você?',
-  help:    'O que está confuso ou difícil de entender?',
-  contact: 'Como podemos ajudar?',
+  bug:     'Describe what happened and in which part of the app...',
+  feature: 'What feature would make the app more useful for you?',
+  help:    'What is confusing or hard to understand?',
+  contact: 'How can we help?',
 };
 
 export default function SupportWidget() {
@@ -35,13 +35,13 @@ export default function SupportWidget() {
       await base44.integrations.Core.SendEmail({
         to: 'suporte@atlascore.app',
         subject: `[Atlas Core] ${OPTIONS.find(o => o.id === selected)?.label} — ${user?.email || 'anon'}`,
-        body: `Tipo: ${selected}\nUsuário: ${user?.email || 'não identificado'}\nNome: ${user?.full_name || '—'}\n\nMensagem:\n${text}`,
+        body: `Type: ${selected}\nUser: ${user?.email || 'not identified'}\nName: ${user?.full_name || '—'}\n\nMessage:\n${text}`,
       });
-      toast.success('Mensagem enviada! Obrigado pelo feedback.');
+      toast.success('Message sent! Thanks for the feedback.');
       setOpen(false);
       reset();
     } catch {
-      toast.error('Erro ao enviar. Tente novamente.');
+      toast.error('Error sending. Please try again.');
     } finally {
       setSending(false);
     }
@@ -76,8 +76,8 @@ export default function SupportWidget() {
             {!selected ? (
               <>
                 <div className="mb-3">
-                  <p className="text-[13px] font-semibold">Precisa de ajuda?</p>
-                  <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">Estamos aqui durante o early access.</p>
+                  <p className="text-[13px] font-semibold">Need help?</p>
+                  <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">We're here during early access.</p>
                 </div>
                 <div className="space-y-1.5">
                   {OPTIONS.map(opt => {
@@ -95,7 +95,7 @@ export default function SupportWidget() {
             ) : (
               <>
                 <button onClick={reset} className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--fg-2))] mb-3 hover:text-[hsl(var(--fg))] transition-colors">
-                  ← Voltar
+                  ← Back
                 </button>
                 <p className="text-[13px] font-semibold mb-2">{OPTIONS.find(o => o.id === selected)?.label}</p>
                 <textarea
@@ -109,7 +109,7 @@ export default function SupportWidget() {
                   disabled={!text.trim() || sending}
                   className="btn btn-primary w-full h-9 rounded-xl text-[12px] mt-2 gap-1.5 disabled:opacity-50"
                 >
-                  {sending ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Enviando...</> : 'Enviar mensagem'}
+                  {sending ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending...</> : 'Send message'}
                 </button>
               </>
             )}

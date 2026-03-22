@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:,">
+<title>atlas.core - Screens 69-103</title>
+<style>
+  :root {
+    --bg: #080E0E;
+    --surface: #111A1A;
+    --surface-2: #162020;
+    --border: #1E2C2C;
+    --border-2: #263636;
+    --teal: #4A9B9B;
+    --teal-dim: rgba(74,155,155,0.12);
+    --teal-dim-2: rgba(74,155,155,0.18);
+    --white: #FFFFFF;
+    --sub: #8A9A9A;
+    --sub-2: #5D7070;
+    --red: #E05C5C;
+    --red-dim: rgba(224,92,92,0.12);
+    --green: #4CAF7D;
+    --green-dim: rgba(76,175,125,0.12);
+    --amber: #E0A85C;
+    --amber-dim: rgba(224,168,92,0.12);
+    --radius-card: 14px;
+    --radius-btn: 10px;
+    --radius-sheet: 20px;
+    --shadow: 0 40px 90px rgba(0,0,0,0.72);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+  html, body {
+    min-height: 100%;
+    background:
+      radial-gradient(circle at top left, rgba(74,155,155,0.12), transparent 26%),
+      radial-gradient(circle at 80% 10%, rgba(224,92,92,0.06), transparent 20%),
+      linear-gradient(180deg, #050909 0%, #040707 100%);
+    color: var(--white);
+    font-family: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    padding: 40px 24px 72px;
+  }
+
+  .page {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 30px;
+  }
+
+  .brand-mark {
+    width: 76px;
+    height: 76px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #0F1515 0%, #0A1010 100%);
+    border: 1px solid var(--border);
+    position: relative;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
+    flex: 0 0 auto;
+  }
+  .brand-mark::before,
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .brand-mark::before {
+    inset: 13px;
+  }
+  .brand-mark::after {
+    inset: 22px;
+    border-color: rgba(74,155,155,0.2);
+  }
+  .brand-a {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.08em;
+    color: var(--white);
+  }
+  .brand-core {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--teal);
+    top: 23px;
+    right: 24px;
+    box-shadow: 0 0 0 6px rgba(74,155,155,0.08);
+  }
+
+  .hero-copy h1 {
+    font-size: 34px;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 6px;
+  }
+  .hero-copy p {
+    color: var(--sub);
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 820px;
+  }
+
+  .section {
+    margin-top: 36px;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .section-head h2 {
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+  .section-head p {
+    color: var(--sub);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .gallery {
+    display: grid;
+    gap: 28px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(410px, 1fr));
+    gap: 24px 18px;
+    align-items: start;
+  }
+
+  .mockup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .mockup-label {
+    font-size: 11px;
+    color: var(--sub);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .mockup-label span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--teal-dim);
+    color: var(--teal);
+    margin-right: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    border-radius: 54px;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: var(--shadow), 0 0 0 5px #0D1414;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 34px;
+    background: #000;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    z-index: 30;
+  }
+
+  .status {
+    height: 44px;
+    padding: 14px 28px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 20;
+  }
+  .time {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .signal {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+  }
+  .signal span {
+    width: 3px;
+    border-radius: 1px;
+    background: var(--white);
+  }
+  .signal span:nth-child(1) { height: 4px; opacity: 0.4; }
+  .signal span:nth-child(2) { height: 7px; opacity: 0.6; }
+  .signal span:nth-child(3) { height: 10px; opacity: 0.8; }
+  .signal span:nth-child(4) { height: 12px; }
+  .wifi {
+    width: 15px;
+    height: 12px;
+    border-top: 2px solid var(--white);
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
+    border-radius: 50%;
+    opacity: 0.95;
+    transform: translateY(1px);
+  }
+  .battery {
+    width: 24px;
+    height: 12px;
+    border: 1.5px solid var(--white);
+    border-radius: 3px;
+    padding: 1px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  .battery::after {
+    content: "";
+    position: absolute;
+    right: -3px;
+    width: 2px;
+    height: 5px;
+    border-radius: 1px;
+    background: var(--white);
+  }
+  .battery span {
+    display: block;
+    width: 78%;
+    height: 100%;
+    border-radius: 1px;
+    background: var(--white);
+  }
+
+  .nav {
+    padding: 8px 20px 0;
+    flex: 0 0 auto;
+  }
+  .nav.large {
+    padding-top: 6px;
+  }
+  .back-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--teal);
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .back-chevron {
+    font-size: 18px;
+    line-height: 1;
+    transform: translateY(-1px);
+  }
+  .nav-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .nav-title {
+    font-size: 31px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    color: var(--white);
+  }
+  .nav-subtitle {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 1.45;
+    max-width: 255px;
+  }
+  .nav-mini {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .nav-action {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: grid;
+    place-items: center;
+    color: var(--teal);
+    flex: 0 0 auto;
+  }
+  .nav-action span {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .content {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 0 16px 92px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: none;
+  }
+  .content::-webkit-scrollbar { display: none; }
+  .content.tight { padding-bottom: 24px; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin: 4px 4px 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset;
+  }
+  .card.soft {
+    background: linear-gradient(180deg, #121B1B 0%, #101616 100%);
+  }
+  .card.deep {
+    background: linear-gradient(180deg, #0E1616 0%, #0B1111 100%);
+  }
+  .card.warn {
+    border-color: rgba(224,92,92,0.22);
+    background: rgba(224,92,92,0.06);
+  }
+  .card.green {
+    border-color: rgba(76,175,125,0.22);
+    background: rgba(76,175,125,0.06);
+  }
+  .card.teal {
+    border-color: rgba(74,155,155,0.28);
+    background: rgba(74,155,155,0.06);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .badge.teal { background: var(--teal-dim); color: var(--teal); }
+  .badge.gray { background: rgba(138,154,154,0.12); color: var(--sub); }
+  .badge.red { background: var(--red-dim); color: var(--red); }
+  .badge.green { background: var(--green-dim); color: var(--green); }
+  .badge.amber { background: var(--amber-dim); color: var(--amber); }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 7px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.01);
+    color: var(--sub);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .chip.active {
+    border-color: rgba(74,155,155,0.28);
+    color: var(--teal);
+    background: var(--teal-dim);
+  }
+  .chip.warn {
+    border-color: rgba(224,92,92,0.2);
+    color: var(--red);
+    background: var(--red-dim);
+  }
+  .chip.green {
+    border-color: rgba(76,175,125,0.2);
+    color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .stats-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .stats-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px;
+    min-width: 0;
+  }
+  .metric .eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin-bottom: 8px;
+  }
+  .metric .value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--white);
+  }
+  .metric .value.teal { color: var(--teal); }
+  .metric .value.green { color: var(--green); }
+  .metric .value.red { color: var(--red); }
+  .metric .meta {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--sub);
+    line-height: 1.4;
+  }
+  .metric .delta {
+    margin-top: 7px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .metric .delta.up { color: var(--green); }
+  .metric .delta.down { color: var(--red); }
+  .metric .delta.neutral { color: var(--sub); }
+
+  .progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--teal) 0%, #66C4C4 100%);
+  }
+  .progress.green span {
+    background: linear-gradient(90deg, var(--green) 0%, #69D39A 100%);
+  }
+  .progress.red span {
+    background: linear-gradient(90deg, var(--red) 0%, #EF8686 100%);
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 0;
+  }
+  .row + .row {
+    border-top: 1px solid var(--border);
+  }
+  .list-card .row {
+    padding: 12px 14px;
+  }
+  .list-card .row + .row {
+    border-top: 1px solid var(--border);
+  }
+  .row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+  }
+  .row-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+  .row-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+  .row-subtitle {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--sub);
+    line-height: 1.35;
+  }
+  .row-meta {
+    font-size: 12px;
+    color: var(--sub);
+    text-align: right;
+  }
+  .chevron {
+    color: var(--sub-2);
+    font-size: 18px;
+    line-height: 1;
+  }
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    flex: 0 0 auto;
+  }
+  .avatar.teal { background: var(--teal-dim); color: var(--teal); }
+  .avatar.green { background: var(--green-dim); color: var(--green); }
+  .avatar.red { background: var(--red-dim); color: var(--red); }
+  .avatar.amber { background: var(--amber-dim); color: var(--amber); }
+  .avatar.gray { background: rgba(138,154,154,0.12); color: var(--sub); }
+
+  .input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-height: 56px;
+    padding: 20px 14px 10px;
+    position: relative;
+  }
+  .input.focused {
+    border-color: rgba(74,155,155,0.42);
+    box-shadow: 0 0 0 1px rgba(74,155,155,0.18);
+  }
+  .input label {
+    position: absolute;
+    top: 9px;
+    left: 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teal);
+  }
+  .input .value {
+    font-size: 16px;
+    color: var(--white);
+    line-height: 1.4;
+  }
+  .input .placeholder {
+    color: var(--sub);
+  }
+
+  .button-row {
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    height: 54px;
+    border-radius: var(--radius-btn);
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    cursor: default;
+    white-space: nowrap;
+  }
+  .btn.primary {
+    background: var(--teal);
+    color: var(--white);
+    box-shadow: 0 12px 28px rgba(74,155,155,0.18);
+  }
+  .btn.secondary {
+    background: transparent;
+    color: var(--teal);
+    border-color: rgba(74,155,155,0.34);
+  }
+  .btn.destructive {
+    background: var(--red);
+    color: var(--white);
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--sub);
+    border-color: var(--border);
+  }
+
+  .tabbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 83px;
+    background: rgba(8,14,14,0.94);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding-top: 10px;
+    z-index: 25;
+  }
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 20%;
+    color: var(--sub);
+  }
+  .tab.active {
+    color: var(--teal);
+  }
+  .tab-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    color: currentColor;
+  }
+  .tab-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .home-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.26);
+    z-index: 26;
+  }
+
+  .search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--sub);
+    font-size: 14px;
+  }
+  .search strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .exercise-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px;
+    position: relative;
+    min-height: 124px;
+  }
+  .exercise-heart {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.02);
+    color: var(--red);
+    font-size: 12px;
+  }
+  .exercise-title {
+    margin-top: 36px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .exercise-sub {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--sub);
+    line-height: 1.35;
+  }
+  .mini-chart {
+    margin-top: 10px;
+    height: 46px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  .mini-chart span {
+    flex: 1;
+    border-radius: 6px 6px 3px 3px;
+    background: linear-gradient(180deg, rgba(74,155,155,0.95), rgba(74,155,155,0.35));
+  }
+  .mini-chart.green span {
+    background: linear-gradient(180deg, rgba(76,175,125,0.95), rgba(76,175,125,0.35));
+  }
+
+  .share-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .share-template {
+    min-height: 146px;
+    border-radius: 18px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .share-template.selected {
+    border-color: rgba(74,155,155,0.35);
+    box-shadow: 0 0 0 1px rgba(74,155,155,0.16);
+  }
+  .share-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    color: var(--sub);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .share-kpi {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+  }
+  .share-kpi small {
+    font-size: 12px;
+    color: var(--sub);
+    font-weight: 600;
+  }
+  .share-note {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--sub);
+    line-height: 1.35;
+  }
+  .share-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(74,155,155,0.12), transparent 64%);
+    pointer-events: none;
+  }
+
+  .sheet {
+    margin-top: auto;
+    background: linear-gradient(180deg, rgba(17,26,26,0.98), rgba(10,15,15,0.98));
+    border-top: 1px solid var(--border);
+    border-top-left-radius: var(--radius-sheet);
+    border-top-right-radius: var(--radius-sheet);
+    padding: 12px 16px 24px;
+    position: relative;
+    box-shadow: 0 -30px 60px rgba(0,0,0,0.35);
+  }
+  .sheet .handle {
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    margin: 0 auto 12px;
+  }
+  .sheet-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .sheet-sub {
+    color: var(--sub);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 34px 20px 16px;
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+  }
+  .empty-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    background: rgba(74,155,155,0.08);
+    border: 1px solid rgba(74,155,155,0.18);
+    display: grid;
+    place-items: center;
+    color: rgba(74,155,155,0.42);
+    font-size: 30px;
+    font-weight: 700;
+  }
+  .empty-state h3 {
+    font-size: 22px;
+    letter-spacing: -0.03em;
+  }
+  .empty-state p {
+    color: var(--sub);
+    font-size: 13px;
+    line-height: 1.55;
+    max-width: 250px;
+  }
+
+  .dialog {
+    margin: auto 16px;
+    background: linear-gradient(180deg, #121C1C 0%, #0D1313 100%);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 28px 70px rgba(0,0,0,0.48);
+  }
+  .dialog-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .dialog-icon.red { background: var(--red-dim); color: var(--red); }
+  .dialog-icon.teal { background: var(--teal-dim); color: var(--teal); }
+  .dialog h3 {
+    font-size: 24px;
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+  }
+  .dialog p {
+    color: var(--sub);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .ring {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: conic-gradient(var(--teal) 0 68%, rgba(74,155,155,0.12) 68% 100%);
+    padding: 8px;
+    margin: 0 auto;
+  }
+  .ring .inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--bg);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+  }
+
+  .bar-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 44px;
+  }
+  .bar-group span {
+    flex: 1;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(180deg, rgba(74,155,155,0.95), rgba(74,155,155,0.26));
+  }
+  .bar-group.green span {
+    background: linear-gradient(180deg, rgba(76,175,125,0.95), rgba(76,175,125,0.26));
+  }
+  .bar-group.red span {
+    background: linear-gradient(180deg, rgba(224,92,92,0.95), rgba(224,92,92,0.26));
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+
+  .muted {
+    color: var(--sub);
+  }
+
+  @media (max-width: 460px) {
+    body { padding: 24px 12px 64px; }
+    .grid { grid-template-columns: 1fr; }
+    .phone { width: 100%; max-width: 390px; }
+    .hero { align-items: flex-start; }
+    .hero-copy h1 { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <div class="hero">
+      <div class="brand-mark" aria-hidden="true">
+        <div class="brand-a">A</div>
+        <div class="brand-core"></div>
+      </div>
+      <div class="hero-copy">
+        <h1>atlas.core screens 69-103</h1>
+        <p>Standalone iOS-style mobile mockups for profile, settings, exercise library, workout planning, social sharing, role dashboards, exports, and clinical tracking. Dark-mode-first, SF Pro feel, and the atlas.core token set are preserved throughout.</p>
+      </div>
+    </div>
+
+    <div id="gallery" class="gallery"></div>
+  </main>
+
+<script>
+  const tabIcons = {
+    today: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.7 4.7l2.1 2.1M17.2 17.2l2.1 2.1M4.7 19.3l2.1-2.1M17.2 6.8l2.1-2.1"></path></svg>',
+    train: '<svg viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M7 9h2M7 15h2M15 9h2M15 15h2"></path><path d="M6 9.5c0-1.9 1.3-3.5 3-3.5h6c1.7 0 3 1.6 3 3.5v5c0 1.9-1.3 3.5-3 3.5H9c-1.7 0-3-1.6-3-3.5z"></path></svg>',
+    nutrition: '<svg viewBox="0 0 24 24"><path d="M12 3c-3.9 0-7 2.9-7 6.6 0 4.9 4.2 8.7 7 11.4 2.8-2.7 7-6.5 7-11.4C19 5.9 15.9 3 12 3z"></path><path d="M12 7c1.8 1.1 3 2.6 3 4.3 0 1.6-1 3.1-3 4.7-2-1.6-3-3.1-3-4.7C9 9.6 10.2 8.1 12 7z"></path></svg>',
+    body: '<svg viewBox="0 0 24 24"><path d="M12 4a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"></path><path d="M7 21l2.2-7.2h5.6L17 21"></path><path d="M9 14l-2-4M15 14l2-4"></path></svg>',
+    more: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>',
+  };
+
+  function statusBar() {
+    return `
+      <div class="status">
+        <div class="time">9:41</div>
+        <div class="status-icons">
+          <div class="signal"><span></span><span></span><span></span><span></span></div>
+          <div class="wifi"></div>
+          <div class="battery"><span></span></div>
+        </div>
+      </div>`;
+  }
+
+  function tabs(active = 'more') {
+    const items = [
+      ['today', 'Today'],
+      ['train', 'Train'],
+      ['nutrition', 'Nutrition'],
+      ['body', 'Body'],
+      ['more', 'More'],
+    ];
+    return `
+      <div class="tabbar">
+        ${items.map(([key, label]) => `
+          <div class="tab ${key === active ? 'active' : ''}">
+            <div class="tab-icon">${tabIcons[key]}</div>
+            <div class="tab-label">${label}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="home-indicator"></div>`;
+  }
+
+  function shell({ number, label, group, nav, body, active = 'more', tabsOn = true, labelText = '' }) {
+    return `
+      <figure class="mockup">
+        <div class="mockup-label"><span>${number}</span>${label}</div>
+        <div class="phone ${labelText}">
+          <div class="notch"></div>
+          ${statusBar()}
+          ${nav}
+          <div class="content">
+            ${body}
+          </div>
+          ${tabsOn ? tabs(active) : '<div class="home-indicator"></div>'}
+        </div>
+      </figure>`;
+  }
+
+  const groups = [
+    {
+      title: 'Profile, Settings, and Export',
+      range: '69-75, 85-86',
+      blurb: 'View mode, edit flows, destructive dialogs, settings surfaces, and export states.',
+      screens: [
+        shell({
+          number: '69',
+          label: 'Profile - View Mode',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Profile</div>
+                  <div class="nav-subtitle">Enzo Soler - athlete, premium account, account and app controls.</div>
+                </div>
+                <div class="nav-action"><span>...</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card soft">
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div class="avatar teal" style="width:72px; height:72px; border-radius:22px; font-size:28px;">E</div>
+                <div style="min-width:0; flex:1;">
+                  <div style="font-size:24px; font-weight:800; letter-spacing:-0.04em; line-height:1.05;">Enzo Soler</div>
+                  <div class="muted" style="margin-top:4px; font-size:13px;">enzo@atlascore.app</div>
+                  <div style="margin-top:10px;"><span class="badge teal">Pro</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="stats-grid cols-3">
+              <div class="metric"><div class="eyebrow">Workouts</div><div class="value">142</div><div class="meta">All time sessions</div></div>
+              <div class="metric"><div class="eyebrow">Active Days</div><div class="value teal">61</div><div class="meta">Current streak</div></div>
+              <div class="metric"><div class="eyebrow">Score</div><div class="value green">8.4</div><div class="meta">Weekly average</div></div>
+            </div>
+            <div class="card list-card">
+              <div class="section-label">Personal Info</div>
+              <div class="row">
+                <div><div class="row-title">Date of birth</div><div class="row-subtitle">June 12, 1993</div></div>
+                <div class="row-meta">Edit</div>
+              </div>
+              <div class="row">
+                <div><div class="row-title">Height</div><div class="row-subtitle">183 cm</div></div>
+                <div class="row-meta">Athlete baseline</div>
+              </div>
+              <div class="row">
+                <div><div class="row-title">Goal</div><div class="row-subtitle">Strength and hypertrophy</div></div>
+                <span class="badge teal">Active</span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row">
+                <div class="row-left"><div class="avatar gray">P</div><div><div class="row-title">Edit profile</div><div class="row-subtitle">Name, bio, and baseline details</div></div></div>
+                <div class="chevron">&rsaquo;</div>
+              </div>
+              <div class="row">
+                <div class="row-left"><div class="avatar teal">S</div><div><div class="row-title">Subscription</div><div class="row-subtitle">Plan, billing, and trial status</div></div></div>
+                <div class="chevron">&rsaquo;</div>
+              </div>
+              <div class="row">
+                <div class="row-left"><div class="avatar green">E</div><div><div class="row-title">Export data</div><div class="row-subtitle">Body, nutrition, workouts, labs</div></div></div>
+                <div class="chevron">&rsaquo;</div>
+              </div>
+            </div>
+            <div class="card warn">
+              <div class="row" style="padding:0;">
+                <div class="row-left"><div class="avatar red">!</div><div><div class="row-title">Log out</div><div class="row-subtitle">End this session on this device</div></div></div>
+                <div class="badge red">Secure</div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '70',
+          label: 'Profile - Edit Section',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Profile</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Edit profile</div>
+                  <div class="nav-subtitle">Update baseline data used across the app and connected role views.</div>
+                </div>
+                <div class="nav-action"><span>...</span></div>
+              </div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div class="card">
+              <div class="input focused">
+                <label>Full name</label>
+                <div class="value">Enzo Soler</div>
+              </div>
+              <div style="height:10px"></div>
+              <div class="input">
+                <label>Primary sport</label>
+                <div class="value">Strength training</div>
+              </div>
+              <div style="height:10px"></div>
+              <div class="input">
+                <label>Goal</label>
+                <div class="value">Gain lean mass</div>
+              </div>
+              <div style="height:10px"></div>
+              <div class="input">
+                <label>Units</label>
+                <div class="value">Metric (kg, cm)</div>
+              </div>
+            </div>
+            <div class="stats-grid cols-2">
+              <div class="metric"><div class="eyebrow">DOB</div><div class="value">1993</div><div class="meta">Used for age-based metrics</div></div>
+              <div class="metric"><div class="eyebrow">Weight</div><div class="value">82.0 kg</div><div class="meta">Baseline for projections</div></div>
+            </div>
+            <div class="button-row" style="margin-top:auto;">
+              <div class="btn ghost" style="flex:1;">Cancel</div>
+              <div class="btn primary" style="flex:1;">Save changes</div>
+            </div>
+          `
+        }),
+        shell({
+          number: '71',
+          label: 'Profile - Reset Progress Dialog',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Profile</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+              <div class="dialog" style="width:100%;">
+                <div class="dialog-icon red">!</div>
+                <h3>Reset progress?</h3>
+                <p>This clears body measurements, workout history, nutrition logs, insights, and check-ins. The action cannot be undone.</p>
+                <div class="stats-grid cols-2" style="margin-top:16px;">
+                  <div class="metric"><div class="eyebrow">Affected data</div><div class="value">All</div><div class="meta">Workouts, meals, body, labs</div></div>
+                  <div class="metric"><div class="eyebrow">Backup</div><div class="value">None</div><div class="meta">Permanent deletion</div></div>
+                </div>
+                <div class="button-row" style="margin-top:16px;">
+                  <div class="btn ghost" style="flex:1;">Cancel</div>
+                  <div class="btn destructive" style="flex:1;">Reset now</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '72',
+          label: 'Profile - Logout Confirmation',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Profile</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+              <div class="dialog" style="width:100%;">
+                <div class="dialog-icon teal">E</div>
+                <h3>Log out of atlas.core?</h3>
+                <p>You will need to sign in again to access workout plans, nutrition logs, and role dashboards on this device.</p>
+                <div class="card" style="margin-top:14px;">
+                  <div class="row" style="padding:0;">
+                    <div><div class="row-title">Signed in as Enzo Soler</div><div class="row-subtitle">enzo@atlascore.app</div></div>
+                    <span class="badge gray">Pro</span>
+                  </div>
+                </div>
+                <div class="button-row" style="margin-top:16px;">
+                  <div class="btn ghost" style="flex:1;">Cancel</div>
+                  <div class="btn primary" style="flex:1;">Log out</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '73',
+          label: 'Settings - Main',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Settings</div>
+                  <div class="nav-subtitle">Notifications, display, language, privacy, and connected services.</div>
+                </div>
+                <div class="nav-action"><span>...</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Notifications</div><div class="row-subtitle">Training, nutrition, and AI alerts</div></div><span class="badge teal">On</span></div>
+              <div class="row"><div><div class="row-title">Sound and haptics</div><div class="row-subtitle">Session feedback and reminders</div></div><span class="badge green">Enabled</span></div>
+              <div class="row"><div><div class="row-title">Language</div><div class="row-subtitle">English (United States)</div></div><div class="chevron">&rsaquo;</div></div>
+              <div class="row"><div><div class="row-title">Theme</div><div class="row-subtitle">Dark mode active</div></div><span class="badge gray">System</span></div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Privacy</div><div class="row-subtitle">Profile visibility and data sharing</div></div><div class="chevron">&rsaquo;</div></div>
+              <div class="row"><div><div class="row-title">Connected accounts</div><div class="row-subtitle">Apple, email, and invite links</div></div><div class="chevron">&rsaquo;</div></div>
+              <div class="row"><div><div class="row-title">Experimental features</div><div class="row-subtitle">AI insights and new views</div></div><span class="badge amber">Beta</span></div>
+            </div>
+            <div class="card teal">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Active trial</div><div class="row-subtitle">5 days left with premium access</div></div>
+                <span class="badge teal">Upgrade ready</span>
+              </div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '74',
+          label: 'Settings - Theme in Dark Mode',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Settings</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Theme</div>
+                  <div class="nav-subtitle">The app is tuned for a dark, clinical, low-glare atlas.core experience.</div>
+                </div>
+                <div class="nav-action"><span>◐</span></div>
+              </div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div class="card deep">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Dark mode</div><div class="row-subtitle">Current selection across the app</div></div>
+                <span class="badge teal">Active</span>
+              </div>
+              <div style="height:14px"></div>
+              <div class="stats-grid cols-2">
+                <div class="metric"><div class="eyebrow">Background</div><div class="value">#080E0E</div><div class="meta">Deep neutral canvas</div></div>
+                <div class="metric"><div class="eyebrow">Surface</div><div class="value">#111A1A</div><div class="meta">Raised cards and sheets</div></div>
+              </div>
+              <div style="height:12px"></div>
+              <div class="card" style="padding:12px; background:#0E1515;">
+                <div style="display:flex; gap:8px;">
+                  <div class="chip active">Teal accent</div>
+                  <div class="chip">White text</div>
+                  <div class="chip">Muted separators</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="section-label">Theme previews</div>
+              <div class="row">
+                <div class="row-left"><div class="avatar teal">D</div><div><div class="row-title">Dark mode</div><div class="row-subtitle">Best for gym and low light use</div></div></div>
+                <span class="badge teal">Selected</span>
+              </div>
+              <div class="row">
+                <div class="row-left"><div class="avatar gray">S</div><div><div class="row-title">System</div><div class="row-subtitle">Follow device appearance</div></div></div>
+                <div class="chevron">&rsaquo;</div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '75',
+          label: 'Settings - Delete Account Confirmation',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Settings</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:center;">
+              <div class="dialog" style="width:100%;">
+                <div class="dialog-icon red">X</div>
+                <h3>Delete account permanently?</h3>
+                <p>This removes your profile, progress, messages, exports, and all linked professional records from this account.</p>
+                <div class="card warn" style="margin-top:14px;">
+                  <div class="list">
+                    <div class="row" style="padding:0;"><div><div class="row-title">Workout history</div><div class="row-subtitle">Plans, execution data, PRs</div></div><span class="badge red">Deleted</span></div>
+                    <div class="row" style="padding:0;"><div><div class="row-title">Nutrition logs</div><div class="row-subtitle">Meals, diet plans, adherence</div></div><span class="badge red">Deleted</span></div>
+                    <div class="row" style="padding:0;"><div><div class="row-title">Clinical data</div><div class="row-subtitle">Labs, protocols, measurements</div></div><span class="badge red">Deleted</span></div>
+                  </div>
+                </div>
+                <div class="button-row" style="margin-top:16px;">
+                  <div class="btn ghost" style="flex:1;">Cancel</div>
+                  <div class="btn destructive" style="flex:1;">Delete account</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '85',
+          label: 'Export - Main',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Export</div>
+                  <div class="nav-subtitle">Own your data in CSV, PDF, and image formats with a clean export flow.</div>
+                </div>
+                <div class="nav-action"><span>...</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card teal">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Data snapshot</div><div class="row-subtitle">42 workouts, 216 meals, 18 measurements</div></div>
+                <span class="badge teal">Ready</span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="section-label">Export range</div>
+              <div class="row"><div><div class="row-title">Last 7 days</div><div class="row-subtitle">Fast review and sharing</div></div><span class="badge gray">Preset</span></div>
+              <div class="row"><div><div class="row-title">Last 30 days</div><div class="row-subtitle">Recommended for coaches and clients</div></div><span class="badge teal">Selected</span></div>
+              <div class="row"><div><div class="row-title">All time</div><div class="row-subtitle">Complete account archive</div></div><div class="chevron">&rsaquo;</div></div>
+            </div>
+            <div class="card">
+              <div class="section-label">Include</div>
+              <div class="chip-row">
+                <div class="chip active">Workouts</div>
+                <div class="chip active">Nutrition</div>
+                <div class="chip active">Body</div>
+                <div class="chip active">Labs</div>
+                <div class="chip">AI chats</div>
+                <div class="chip">Photos</div>
+              </div>
+            </div>
+            <div class="button-row" style="margin-top:auto;">
+              <div class="btn secondary" style="flex:1;">Preview</div>
+              <div class="btn primary" style="flex:1;">Generate export</div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '86',
+          label: 'Export - Generating State',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Export</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+              <div style="width:100%; text-align:center;">
+                <div class="ring">
+                  <div class="inner">
+                    <div>
+                      <div style="font-size:26px;">64%</div>
+                      <div class="muted" style="font-size:11px;">Generating</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:18px; font-size:24px; font-weight:800; letter-spacing:-0.04em;">Preparing PDF</div>
+                <div class="muted" style="margin-top:6px; font-size:13px; line-height:1.45;">Combining workouts, meals, body progress, and clinical notes into a shareable export.</div>
+                <div class="card" style="margin-top:18px;">
+                  <div class="row" style="padding:0;"><div><div class="row-title">Collecting data</div><div class="row-subtitle">Workouts, meals, body, labs</div></div><span class="badge green">Done</span></div>
+                  <div class="row"><div><div class="row-title">Formatting pages</div><div class="row-subtitle">Charts and summaries</div></div><span class="badge teal">Now</span></div>
+                  <div class="row" style="padding-bottom:0;"><div><div class="row-title">Finalizing file</div><div class="row-subtitle">Compress and hand off</div></div><span class="badge gray">Queued</span></div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+      ]
+    },
+    {
+      title: 'Exercise Library and Workout Planning',
+      range: '76-82, 87-89',
+      blurb: 'Browse, search, filter, and assemble training plans before execution.',
+      screens: [
+        shell({
+          number: '76',
+          label: 'Exercises - Library Default View',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Exercises</div>
+                  <div class="nav-subtitle">Browse the full atlas.core movement library by muscle, equipment, or intent.</div>
+                </div>
+                <div class="nav-action"><span>+</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="search">Search exercises, muscles, equipment</div>
+            <div class="chip-row">
+              <div class="chip active">Popular</div>
+              <div class="chip">Favorites</div>
+              <div class="chip">Upper body</div>
+              <div class="chip">Lower body</div>
+              <div class="chip">Machines</div>
+            </div>
+            <div class="section-label">Popular picks</div>
+            <div class="exercise-grid">
+              <div class="exercise-card"><div class="exercise-heart">+</div><div class="badge teal">Chest</div><div class="exercise-title">Incline Dumbbell Press</div><div class="exercise-sub">Dumbbells - compound - upper chest</div><div class="mini-chart"><span style="height:34%"></span><span style="height:56%"></span><span style="height:42%"></span><span style="height:68%"></span><span style="height:54%"></span></div></div>
+              <div class="exercise-card"><div class="exercise-heart">+</div><div class="badge green">Back</div><div class="exercise-title">Chest-Supported Row</div><div class="exercise-sub">Machine - controlled - mid back</div><div class="mini-chart green"><span style="height:40%"></span><span style="height:49%"></span><span style="height:64%"></span><span style="height:60%"></span><span style="height:44%"></span></div></div>
+              <div class="exercise-card"><div class="exercise-heart">+</div><div class="badge teal">Legs</div><div class="exercise-title">Hack Squat</div><div class="exercise-sub">Machine - heavy - quad focus</div><div class="mini-chart"><span style="height:48%"></span><span style="height:30%"></span><span style="height:58%"></span><span style="height:70%"></span><span style="height:62%"></span></div></div>
+              <div class="exercise-card"><div class="exercise-heart">+</div><div class="badge gray">Core</div><div class="exercise-title">Cable Crunch</div><div class="exercise-sub">Cable - isolation - trunk flexion</div><div class="mini-chart green"><span style="height:24%"></span><span style="height:36%"></span><span style="height:40%"></span><span style="height:52%"></span><span style="height:46%"></span></div></div>
+            </div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '77',
+          label: 'Exercises - Search Results',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Exercises</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Search results</div>
+                  <div class="nav-subtitle">Search: "row". Matching terms are prioritized with muscle and equipment tags.</div>
+                </div>
+                <div class="nav-action"><span>&times;</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="search"><strong>row</strong> - 18 matches</div>
+            <div class="chip-row">
+              <div class="chip active">All</div>
+              <div class="chip">Compound</div>
+              <div class="chip">Back</div>
+              <div class="chip">Cable</div>
+              <div class="chip">Machine</div>
+            </div>
+            <div class="card list-card">
+              <div class="row">
+                <div class="row-left"><div class="avatar teal">1</div><div><div class="row-title">Chest-supported row</div><div class="row-subtitle">Back - machine - mid back</div></div></div>
+                <span class="badge teal">Best match</span>
+              </div>
+              <div class="row">
+                <div class="row-left"><div class="avatar green">2</div><div><div class="row-title">Seated cable row</div><div class="row-subtitle">Back - cable - neutral grip</div></div></div>
+                <div class="chevron">&rsaquo;</div>
+              </div>
+              <div class="row">
+                <div class="row-left"><div class="avatar gray">3</div><div><div class="row-title">One-arm dumbbell row</div><div class="row-subtitle">Back - dumbbell - unilateral</div></div></div>
+                <div class="chevron">&rsaquo;</div>
+              </div>
+            </div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '78',
+          label: 'Exercises - Filter Sheet',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Exercises</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:flex-end;">
+              <div class="sheet" style="width:100%;">
+                <div class="handle"></div>
+                <div class="sheet-title">Filters</div>
+                <div class="sheet-sub">Narrow the exercise library by muscle group, equipment, difficulty, and pattern.</div>
+                <div class="card" style="margin-top:14px;">
+                  <div class="section-label">Muscle group</div>
+                  <div class="chip-row">
+                    <div class="chip active">Back</div><div class="chip">Chest</div><div class="chip">Legs</div><div class="chip">Shoulders</div><div class="chip">Arms</div>
+                  </div>
+                  <div style="height:12px"></div>
+                  <div class="section-label">Equipment</div>
+                  <div class="chip-row">
+                    <div class="chip active">Machine</div><div class="chip">Cable</div><div class="chip">Dumbbell</div><div class="chip">Barbell</div>
+                  </div>
+                </div>
+                <div class="stats-grid cols-2" style="margin-top:12px;">
+                  <div class="metric"><div class="eyebrow">Difficulty</div><div class="value">Intermediate</div><div class="meta">Readable under fatigue</div></div>
+                  <div class="metric"><div class="eyebrow">Range</div><div class="value">24-90s</div><div class="meta">Session duration friendly</div></div>
+                </div>
+                <div class="button-row" style="margin-top:14px;">
+                  <div class="btn ghost" style="flex:1;">Clear all</div>
+                  <div class="btn primary" style="flex:1;">Apply filters</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '79',
+          label: 'Exercises - Favorites View',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Favorites</div>
+                  <div class="nav-subtitle">Your saved movements and the ones most often used in plans.</div>
+                </div>
+                <div class="nav-action"><span>&hearts;</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="chip-row">
+              <div class="chip">All</div>
+              <div class="chip active">Favorites</div>
+              <div class="chip">Recently used</div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar red">H</div><div><div class="row-title">Hack squat</div><div class="row-subtitle">4 plans saved it this week</div></div></div><div class="badge red">&hearts;</div></div>
+              <div class="row"><div class="row-left"><div class="avatar teal">R</div><div><div class="row-title">Romanian deadlift</div><div class="row-subtitle">1RM history and cues attached</div></div></div><div class="badge red">&hearts;</div></div>
+              <div class="row"><div class="row-left"><div class="avatar green">P</div><div><div class="row-title">Pull-up</div><div class="row-subtitle">Bodyweight progress tracked</div></div></div><div class="badge red">&hearts;</div></div>
+            </div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '80',
+          label: 'Exercises - Recents View',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Recents</div>
+                  <div class="nav-subtitle">The last exercises you used while building or executing sessions.</div>
+                </div>
+                <div class="nav-action"><span>&#8635;</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar teal">1</div><div><div class="row-title">Leg press</div><div class="row-subtitle">Used 2 hours ago - 4 sets</div></div></div><span class="badge gray">Recent</span></div>
+              <div class="row"><div class="row-left"><div class="avatar green">2</div><div><div class="row-title">Lat pulldown</div><div class="row-subtitle">Used yesterday - prescribed plan</div></div></div><span class="badge gray">Recent</span></div>
+              <div class="row"><div class="row-left"><div class="avatar gray">3</div><div><div class="row-title">Cable fly</div><div class="row-subtitle">Used 3 days ago - warmup block</div></div></div><span class="badge gray">Recent</span></div>
+            </div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '81',
+          label: 'Exercises - Active Filters State',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Exercises</div>
+                  <div class="nav-subtitle">Active filters are visible and easy to clear without leaving the page.</div>
+                </div>
+                <div class="nav-action"><span>+</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card teal">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Filters active</div><div class="row-subtitle">Back, machine, intermediate, 24 results</div></div>
+                <span class="badge teal">Clear all</span>
+              </div>
+            </div>
+            <div class="chip-row">
+              <div class="chip active">Back</div>
+              <div class="chip active">Machine</div>
+              <div class="chip active">Intermediate</div>
+              <div class="chip active">Compound</div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar teal">C</div><div><div class="row-title">Chest-supported row</div><div class="row-subtitle">24 matches after filtering</div></div></div><div class="badge green">Ready</div></div>
+              <div class="row"><div class="row-left"><div class="avatar green">S</div><div><div class="row-title">Seated row</div><div class="row-subtitle">Cable and machine variations</div></div></div><div class="badge green">Ready</div></div>
+            </div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '82',
+          label: 'Exercises - Detail Page',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Exercises</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Exercise detail</div>
+                  <div class="nav-subtitle">Instruction, cues, related history, and how this movement performed in your plans.</div>
+                </div>
+                <div class="nav-action"><span>&hearts;</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card soft">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                <div>
+                  <div class="badge teal">Back</div>
+                  <div style="margin-top:10px; font-size:24px; font-weight:800; letter-spacing:-0.04em;">Chest-supported row</div>
+                  <div class="muted" style="margin-top:4px; font-size:13px; line-height:1.45;">Machine - mid back - controlled concentric drive.</div>
+                </div>
+                <div class="avatar teal">B</div>
+              </div>
+            </div>
+            <div class="stats-grid cols-2">
+              <div class="metric"><div class="eyebrow">Best set</div><div class="value">90 kg</div><div class="meta">8 reps at RPE 8</div></div>
+              <div class="metric"><div class="eyebrow">Sessions</div><div class="value teal">12</div><div class="meta">Logged in atlas.core</div></div>
+            </div>
+            <div class="card">
+              <div class="section-label">Execution cues</div>
+              <div class="list">
+                <div class="row" style="padding:0;"><div><div class="row-title">Brace torso</div><div class="row-subtitle">Keep chest anchored and ribs down</div></div><span class="badge gray">Cue 1</span></div>
+                <div class="row" style="padding:0;"><div><div class="row-title">Drive elbows</div><div class="row-subtitle">Pull toward hip line, not the hands</div></div><span class="badge gray">Cue 2</span></div>
+                <div class="row" style="padding:0;"><div><div class="row-title">Control return</div><div class="row-subtitle">Slow eccentric with full stretch</div></div><span class="badge gray">Cue 3</span></div>
+              </div>
+            </div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '87',
+          label: 'Manual Workout Plan - Builder',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Manual plan</div>
+                  <div class="nav-subtitle">Build a workout from scratch with structured blocks, drag handles, and quick add controls.</div>
+                </div>
+                <div class="nav-action"><span>+</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card">
+              <div class="input focused">
+                <label>Plan name</label>
+                <div class="value">Upper / Pull Hypertrophy</div>
+              </div>
+              <div style="height:10px"></div>
+              <div class="chip-row">
+                <div class="chip active">Strength</div>
+                <div class="chip">Hypertrophy</div>
+                <div class="chip">Deload</div>
+                <div class="chip">Push</div>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar gray">::</div><div><div class="row-title">Warmup block</div><div class="row-subtitle">5 min bike + mobility</div></div></div><div class="chevron">&equiv;</div></div>
+              <div class="row"><div class="row-left"><div class="avatar teal">1</div><div><div class="row-title">Incline dumbbell press</div><div class="row-subtitle">4 sets - 8 reps - 90 sec</div></div></div><div class="chevron">&equiv;</div></div>
+              <div class="row"><div class="row-left"><div class="avatar green">2</div><div><div class="row-title">Chest-supported row</div><div class="row-subtitle">4 sets - 10 reps - 75 sec</div></div></div><div class="chevron">&equiv;</div></div>
+              <div class="row"><div class="row-left"><div class="avatar red">+</div><div><div class="row-title">Add exercise</div><div class="row-subtitle">Search the library or add a section</div></div></div><div class="chevron">&rsaquo;</div></div>
+            </div>
+            <div class="button-row" style="margin-top:auto;">
+              <div class="btn ghost" style="flex:1;">Save draft</div>
+              <div class="btn primary" style="flex:1;">Publish plan</div>
+            </div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '88',
+          label: 'My Workout - AI Generated',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">My Workout</div>
+                  <div class="nav-subtitle">AI generated from your goal, recent performance, and available equipment.</div>
+                </div>
+                <div class="nav-action"><span>AI</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card teal">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">AI summary</div><div class="row-subtitle">Emphasis on upper back volume and moderate fatigue</div></div>
+                <span class="badge teal">Generated</span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Warmup</div><div class="row-subtitle">8 min + movement prep</div></div><span class="badge gray">Phase 1</span></div>
+              <div class="row"><div><div class="row-title">Main lift</div><div class="row-subtitle">Hack squat - 4 sets - 6 reps</div></div><span class="badge teal">High effort</span></div>
+              <div class="row"><div><div class="row-title">Accessory block</div><div class="row-subtitle">Row, press, and core supersets</div></div><span class="badge gray">Balanced</span></div>
+            </div>
+            <div class="stats-grid cols-2">
+              <div class="metric"><div class="eyebrow">Match score</div><div class="value teal">92%</div><div class="meta">Based on your history</div></div>
+              <div class="metric"><div class="eyebrow">Duration</div><div class="value">58m</div><div class="meta">Fatigue-aware session</div></div>
+            </div>
+            <div class="btn primary" style="margin-top:auto;">Start workout</div>
+          `,
+          active: 'train'
+        }),
+        shell({
+          number: '89',
+          label: 'My Workout - Prescribed by Coach',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">My Workout</div>
+                  <div class="nav-subtitle">Coach-prescribed session with notes, expectations, and execution order locked in.</div>
+                </div>
+                <div class="nav-action"><span>✓</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card deep">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Prescribed by Coach Marco</div><div class="row-subtitle">Updated 2 days ago - week 3 of the block</div></div>
+                <span class="badge green">Locked</span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Main focus</div><div class="row-subtitle">Lower-body tension with controlled eccentrics</div></div><span class="badge teal">Priority</span></div>
+              <div class="row"><div><div class="row-title">Coach note</div><div class="row-subtitle">Stop 1 rep shy on the last set if technique drifts.</div></div><span class="badge gray">Note</span></div>
+              <div class="row"><div><div class="row-title">Compliance</div><div class="row-subtitle">3 of 4 sessions completed this week</div></div><span class="badge green">75%</span></div>
+            </div>
+            <div class="stats-grid cols-2">
+              <div class="metric"><div class="eyebrow">Target volume</div><div class="value">16 sets</div><div class="meta">Lower body and back</div></div>
+              <div class="metric"><div class="eyebrow">Status</div><div class="value green">Approved</div><div class="meta">Ready for execution</div></div>
+            </div>
+          `,
+          active: 'train'
+        }),
+      ]
+    },
+    {
+      title: 'Social, Coach, Nutritionist, and Clinician',
+      range: '83-84, 90-103',
+      blurb: 'Sharing surfaces, role dashboards, client/patient profiles, and clinical operations.',
+      screens: [
+        shell({
+          number: '83',
+          label: 'Social - Share Cards View',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Social</div>
+                  <div class="nav-subtitle">Choose a branded card to share workouts, body progress, and milestones.</div>
+                </div>
+                <div class="nav-action"><span>+</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="share-grid">
+              <div class="share-template selected">
+                <div class="share-glow"></div>
+                <div class="share-top"><span>Workout</span><span class="badge teal">Selected</span></div>
+                <div class="share-kpi">142<small> sessions</small></div>
+                <div class="share-note">Weekly training consistency and streak status.</div>
+              </div>
+              <div class="share-template">
+                <div class="share-glow"></div>
+                <div class="share-top"><span>Body</span><span class="badge gray">Preview</span></div>
+                <div class="share-kpi">-2.1<small> kg</small></div>
+                <div class="share-note">Body change card with trend summary.</div>
+              </div>
+              <div class="share-template">
+                <div class="share-glow"></div>
+                <div class="share-top"><span>Nutrition</span><span class="badge green">Ready</span></div>
+                <div class="share-kpi">94%<small> macro</small></div>
+                <div class="share-note">Adherence and completion stats.</div>
+              </div>
+              <div class="share-template">
+                <div class="share-glow"></div>
+                <div class="share-top"><span>PR</span><span class="badge amber">New</span></div>
+                <div class="share-kpi">90<small> kg</small></div>
+                <div class="share-note">Shareable strength milestone card.</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Publish preview</div><div class="row-subtitle">Looks native to atlas.core while remaining social friendly</div></div>
+                <span class="badge teal">Export</span>
+              </div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '84',
+          label: 'Social - Generated Share Card',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Social</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Generated card</div>
+                  <div class="nav-subtitle">A polished external-ready share card with the atlas.core mark and calm dark branding.</div>
+                </div>
+              </div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div class="card deep" style="padding:18px; min-height:470px; display:flex; flex-direction:column; justify-content:space-between;">
+              <div>
+                <div class="badge teal">atlas.core</div>
+                <div style="margin-top:16px; font-size:26px; font-weight:800; letter-spacing:-0.05em; line-height:1.05;">Weekly strength update</div>
+                <div class="muted" style="margin-top:6px; font-size:13px; line-height:1.45; max-width:220px;">A clean share card that balances performance, recovery, and momentum.</div>
+              </div>
+              <div>
+                <div class="stats-grid cols-2">
+                  <div class="metric"><div class="eyebrow">Workouts</div><div class="value teal">4</div><div class="meta">Completed this week</div></div>
+                  <div class="metric"><div class="eyebrow">Body</div><div class="value green">-0.4</div><div class="meta">kg vs last week</div></div>
+                </div>
+                <div style="height:12px"></div>
+                <div class="bar-group">
+                  <span style="height:38%"></span><span style="height:54%"></span><span style="height:46%"></span><span style="height:70%"></span><span style="height:60%"></span><span style="height:82%"></span><span style="height:74%"></span>
+                </div>
+              </div>
+              <div class="card" style="padding:12px; background:rgba(255,255,255,0.02);">
+                <div class="row" style="padding:0;">
+                  <div><div class="row-title">atlas.core</div><div class="row-subtitle">Training, nutrition, and clinical tracking</div></div>
+                  <span class="badge gray">Share</span>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '90',
+          label: 'Coach - Dashboard',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Coach</div>
+                  <div class="nav-subtitle">Operational view of student adherence, missed sessions, and next interventions.</div>
+                </div>
+                <div class="nav-action"><span>+</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="stats-grid cols-3">
+              <div class="metric"><div class="eyebrow">Students</div><div class="value">18</div><div class="delta up">+2 this block</div></div>
+              <div class="metric"><div class="eyebrow">Risk</div><div class="value red">3</div><div class="delta down">Need attention</div></div>
+              <div class="metric"><div class="eyebrow">Adherence</div><div class="value green">87%</div><div class="delta up">+4 pts</div></div>
+            </div>
+            <div class="card warn">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">At-risk students</div><div class="row-subtitle">Missed sessions and low check-in compliance in the last 7 days.</div></div>
+                <span class="badge red">Action</span>
+              </div>
+              <div style="height:10px"></div>
+              <div class="list">
+                <div class="row" style="padding:0;"><div class="row-left"><div class="avatar red">JP</div><div><div class="row-title">Jordan P.</div><div class="row-subtitle">2 missed workouts, 54% adherence</div></div></div><div class="badge red">Low</div></div>
+                <div class="row" style="padding:0;"><div class="row-left"><div class="avatar amber">MS</div><div><div class="row-title">Maya S.</div><div class="row-subtitle">No body check-in in 8 days</div></div></div><div class="badge amber">Watch</div></div>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Squad overview</div><div class="row-subtitle">Blue team, red team, and remote clients</div></div><span class="badge teal">All groups</span></div>
+              <div class="row"><div style="flex:1;"><div class="row-title">Blue team</div><div class="progress" style="margin-top:6px;"><span style="width:78%"></span></div></div><div class="row-meta">78%</div></div>
+              <div class="row"><div style="flex:1;"><div class="row-title">Red team</div><div class="progress green" style="margin-top:6px;"><span style="width:91%"></span></div></div><div class="row-meta">91%</div></div>
+            </div>
+            <div class="card">
+              <div class="section-label">Quick actions</div>
+              <div class="chip-row">
+                <div class="chip active">Invite student</div>
+                <div class="chip">Prescribe workout</div>
+                <div class="chip">Open insights</div>
+              </div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '91',
+          label: 'Coach - Students List',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Students</div>
+                  <div class="nav-subtitle">Fast scanning list with adherence, status, and recent context.</div>
+                </div>
+                <div class="nav-action"><span>&#128269;</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="search">Search students or teams</div>
+            <div class="chip-row">
+              <div class="chip active">All</div>
+              <div class="chip">At risk</div>
+              <div class="chip">High adherence</div>
+              <div class="chip">Needs plan</div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar green">AM</div><div><div class="row-title">Alicia M.</div><div class="row-subtitle">87% adherence - upper block</div></div></div><span class="badge green">On track</span></div>
+              <div class="row"><div class="row-left"><div class="avatar amber">JR</div><div><div class="row-title">Javier R.</div><div class="row-subtitle">63% adherence - missed check-in</div></div></div><span class="badge amber">Watch</span></div>
+              <div class="row"><div class="row-left"><div class="avatar red">TP</div><div><div class="row-title">Talia P.</div><div class="row-subtitle">48% adherence - needs intervention</div></div></div><span class="badge red">Low</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '92',
+          label: 'Coach - Invite Modal',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Coach</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:flex-end;">
+              <div class="sheet" style="width:100%;">
+                <div class="handle"></div>
+                <div class="sheet-title">Invite student</div>
+                <div class="sheet-sub">Send an onboarding invite by email and choose the role and access level.</div>
+                <div style="height:14px"></div>
+                <div class="input focused">
+                  <label>Email</label>
+                  <div class="value">student@domain.com</div>
+                </div>
+                <div style="height:10px"></div>
+                <div class="input">
+                  <label>Role</label>
+                  <div class="value">Student</div>
+                </div>
+                <div style="height:10px"></div>
+                <div class="input">
+                  <label>Access</label>
+                  <div class="value">Workout, nutrition, and body tracking</div>
+                </div>
+                <div class="button-row" style="margin-top:14px;">
+                  <div class="btn ghost" style="flex:1;">Cancel</div>
+                  <div class="btn primary" style="flex:1;">Send invite</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '93',
+          label: 'Coach - Student Profile',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Students</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Student profile</div>
+                  <div class="nav-subtitle">Performance, adherence, and intervention history in one calm scanned view.</div>
+                </div>
+                <div class="nav-action"><span>...</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card soft">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="avatar teal" style="width:60px; height:60px; border-radius:18px; font-size:24px;">AM</div>
+                <div style="flex:1;">
+                  <div style="font-size:22px; font-weight:800; letter-spacing:-0.04em;">Alicia M.</div>
+                  <div class="muted" style="margin-top:4px; font-size:13px;">Strength block - 87% adherence</div>
+                </div>
+                <span class="badge green">On track</span>
+              </div>
+            </div>
+            <div class="stats-grid cols-2">
+              <div class="metric"><div class="eyebrow">Completed</div><div class="value green">31</div><div class="meta">Workouts this block</div></div>
+              <div class="metric"><div class="eyebrow">Missed</div><div class="value red">4</div><div class="meta">Sessions or check-ins</div></div>
+            </div>
+            <div class="card">
+              <div class="section-label">Trend</div>
+              <div class="bar-group green">
+                <span style="height:30%"></span><span style="height:42%"></span><span style="height:38%"></span><span style="height:54%"></span><span style="height:48%"></span><span style="height:64%"></span><span style="height:58%"></span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Recent alerts</div><div class="row-subtitle">2 late check-ins and 1 missed lift</div></div><span class="badge amber">Review</span></div>
+              <div class="row"><div><div class="row-title">Last intervention</div><div class="row-subtitle">Adjusted volume on lower body day</div></div><span class="badge gray">2d ago</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '94',
+          label: 'Coach - Prescribe Workout',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Student</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:flex-end;">
+              <div class="sheet" style="width:100%;">
+                <div class="handle"></div>
+                <div class="sheet-title">Prescribe workout</div>
+                <div class="sheet-sub">Select a template, adjust frequency, and lock the plan for the student.</div>
+                <div class="card" style="margin-top:14px;">
+                  <div class="row" style="padding:0;"><div><div class="row-title">Template</div><div class="row-subtitle">Upper / Lower 4-day split</div></div><span class="badge teal">Selected</span></div>
+                  <div style="height:10px"></div>
+                  <div class="chip-row"><div class="chip active">4 days</div><div class="chip">5 days</div><div class="chip">6 days</div><div class="chip">Deload</div></div>
+                </div>
+                <div class="card list-card" style="margin-top:12px;">
+                  <div class="row"><div><div class="row-title">Day 1</div><div class="row-subtitle">Chest, shoulders, triceps</div></div><div class="chevron">&rsaquo;</div></div>
+                  <div class="row"><div><div class="row-title">Day 2</div><div class="row-subtitle">Back, biceps, posterior chain</div></div><div class="chevron">&rsaquo;</div></div>
+                </div>
+                <div class="button-row" style="margin-top:14px;">
+                  <div class="btn ghost" style="flex:1;">Save draft</div>
+                  <div class="btn primary" style="flex:1;">Assign plan</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '95',
+          label: 'Nutritionist - Dashboard',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Nutritionist</div>
+                  <div class="nav-subtitle">Macro adherence, body change, food logs, and client management at a glance.</div>
+                </div>
+                <div class="nav-action"><span>+</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="stats-grid cols-3">
+              <div class="metric"><div class="eyebrow">Clients</div><div class="value">24</div><div class="delta up">+3 active</div></div>
+              <div class="metric"><div class="eyebrow">Adherence</div><div class="value green">94%</div><div class="delta up">+2 pts</div></div>
+              <div class="metric"><div class="eyebrow">Exports</div><div class="value teal">9</div><div class="delta neutral">This week</div></div>
+            </div>
+            <div class="card warn">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Nutrition alerts</div><div class="row-subtitle">Clients with repeated missed meals or low macro adherence.</div></div>
+                <span class="badge red">3 open</span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Macro adherence</div><div class="row-subtitle">7 day average across active clients</div></div><span class="badge green">Excellent</span></div>
+              <div class="row"><div style="flex:1;"><div class="progress green"><span style="width:94%"></span></div></div><div class="row-meta">94%</div></div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar green">AB</div><div><div class="row-title">Ava B.</div><div class="row-subtitle">-1.8 kg, 96% meal completion</div></div></div><span class="badge green">On track</span></div>
+              <div class="row"><div class="row-left"><div class="avatar amber">KM</div><div><div class="row-title">Kai M.</div><div class="row-subtitle">Macro drift on rest days</div></div></div><span class="badge amber">Watch</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '96',
+          label: 'Nutritionist - Clients List',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Clients</div>
+                  <div class="nav-subtitle">Quick-scan adherence, weight trend, and assignment status.</div>
+                </div>
+                <div class="nav-action"><span>&#128269;</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="search">Search clients or plans</div>
+            <div class="chip-row">
+              <div class="chip active">All</div>
+              <div class="chip">Prescribed</div>
+              <div class="chip">AI plans</div>
+              <div class="chip">Low adherence</div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar green">LA</div><div><div class="row-title">Lena A.</div><div class="row-subtitle">95% adherence - diet on track</div></div></div><span class="badge green">Good</span></div>
+              <div class="row"><div class="row-left"><div class="avatar amber">JR</div><div><div class="row-title">Jon R.</div><div class="row-subtitle">82% adherence - late logs</div></div></div><span class="badge amber">Watch</span></div>
+              <div class="row"><div class="row-left"><div class="avatar red">SB</div><div><div class="row-title">Sara B.</div><div class="row-subtitle">Low food logging this week</div></div></div><span class="badge red">Needs review</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '97',
+          label: 'Nutritionist - Invite Modal',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Nutritionist</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:flex-end;">
+              <div class="sheet" style="width:100%;">
+                <div class="handle"></div>
+                <div class="sheet-title">Invite client</div>
+                <div class="sheet-sub">Invite a client into your nutrition workflow with plan and communication permissions.</div>
+                <div style="height:14px"></div>
+                <div class="input focused">
+                  <label>Email</label>
+                  <div class="value">client@domain.com</div>
+                </div>
+                <div style="height:10px"></div>
+                <div class="input">
+                  <label>Access</label>
+                  <div class="value">Food logs, diet plan, progress tracking</div>
+                </div>
+                <div style="height:10px"></div>
+                <div class="input">
+                  <label>Invite note</label>
+                  <div class="value">Welcome - please complete your food baseline first.</div>
+                </div>
+                <div class="button-row" style="margin-top:14px;">
+                  <div class="btn ghost" style="flex:1;">Cancel</div>
+                  <div class="btn primary" style="flex:1;">Send invite</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '98',
+          label: 'Nutritionist - Client Profile',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Clients</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Client profile</div>
+                  <div class="nav-subtitle">Macro adherence, body change, meal logs, and diet plan state in one rich view.</div>
+                </div>
+                <div class="nav-action"><span>...</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card soft">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="avatar teal" style="width:60px; height:60px; border-radius:18px; font-size:24px;">KA</div>
+                <div style="flex:1;">
+                  <div style="font-size:22px; font-weight:800; letter-spacing:-0.04em;">Kai Adams</div>
+                  <div class="muted" style="margin-top:4px; font-size:13px;">Nutrition client - prescribed diet active</div>
+                </div>
+                <span class="badge green">94%</span>
+              </div>
+            </div>
+            <div class="stats-grid cols-3">
+              <div class="metric"><div class="eyebrow">Body</div><div class="value green">-2.1</div><div class="meta">kg over 30 days</div></div>
+              <div class="metric"><div class="eyebrow">Macro</div><div class="value teal">96%</div><div class="meta">7 day adherence</div></div>
+              <div class="metric"><div class="eyebrow">Meals</div><div class="value">18</div><div class="meta">Logged this week</div></div>
+            </div>
+            <div class="card">
+              <div class="section-label">Weight trend</div>
+              <div class="bar-group green">
+                <span style="height:52%"></span><span style="height:50%"></span><span style="height:48%"></span><span style="height:44%"></span><span style="height:42%"></span><span style="height:36%"></span><span style="height:30%"></span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Meal completion</div><div class="row-subtitle">Breakfast, lunch, and dinner consistency</div></div><span class="badge green">Strong</span></div>
+              <div class="row"><div><div class="row-title">Recent note</div><div class="row-subtitle">Lower appetite on heavy training days</div></div><span class="badge gray">Read</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '99',
+          label: 'Nutritionist - PDF Export State',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Client</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+              <div style="width:100%; text-align:center;">
+                <div class="ring">
+                  <div class="inner">
+                    <div>
+                      <div style="font-size:26px;">81%</div>
+                      <div class="muted" style="font-size:11px;">PDF build</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:18px; font-size:24px; font-weight:800; letter-spacing:-0.04em;">Preparing PDF report</div>
+                <div class="muted" style="margin-top:6px; font-size:13px; line-height:1.45;">Combining macro adherence, body change, meal history, and attached notes into a shareable client report.</div>
+                <div class="card" style="margin-top:18px;">
+                  <div class="row" style="padding:0;"><div><div class="row-title">Metrics</div><div class="row-subtitle">Weight, macro, meals, and photos</div></div><span class="badge green">Done</span></div>
+                  <div class="row"><div><div class="row-title">Charts</div><div class="row-subtitle">7 day trends and highlights</div></div><span class="badge teal">Now</span></div>
+                  <div class="row" style="padding-bottom:0;"><div><div class="row-title">Final formatting</div><div class="row-subtitle">Brand and export layout</div></div><span class="badge gray">Queued</span></div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '100',
+          label: 'Nutritionist - Prescribe Diet',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Client</div>
+            </div>`,
+          tabsOn: false,
+          body: `
+            <div style="flex:1; display:flex; align-items:flex-end;">
+              <div class="sheet" style="width:100%;">
+                <div class="handle"></div>
+                <div class="sheet-title">Prescribe diet</div>
+                <div class="sheet-sub">Create a diet plan with macro targets, meal structure, and swap logic.</div>
+                <div class="card" style="margin-top:14px;">
+                  <div class="row" style="padding:0;"><div><div class="row-title">Target macros</div><div class="row-subtitle">2400 kcal - 190P - 260C - 70F</div></div><span class="badge teal">Set</span></div>
+                </div>
+                <div class="card list-card" style="margin-top:12px;">
+                  <div class="row"><div><div class="row-title">Meal 1</div><div class="row-subtitle">Greek yogurt, oats, fruit</div></div><span class="badge green">32P</span></div>
+                  <div class="row"><div><div class="row-title">Meal 2</div><div class="row-subtitle">Chicken, rice, vegetables</div></div><span class="badge green">48P</span></div>
+                  <div class="row"><div><div class="row-title">Meal 3</div><div class="row-subtitle">Salmon, potato, salad</div></div><span class="badge green">40P</span></div>
+                </div>
+                <div class="button-row" style="margin-top:14px;">
+                  <div class="btn ghost" style="flex:1;">Save draft</div>
+                  <div class="btn primary" style="flex:1;">Assign diet</div>
+                </div>
+              </div>
+            </div>
+          `
+        }),
+        shell({
+          number: '101',
+          label: 'Clinician - Dashboard',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Clinician</div>
+                  <div class="nav-subtitle">Medical-first tracking of status, abnormal markers, and protocol compliance.</div>
+                </div>
+                <div class="nav-action"><span>+</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="stats-grid cols-3">
+              <div class="metric"><div class="eyebrow">Patients</div><div class="value">12</div><div class="delta neutral">Active now</div></div>
+              <div class="metric"><div class="eyebrow">Abnormal</div><div class="value red">4</div><div class="delta down">Labs flagged</div></div>
+              <div class="metric"><div class="eyebrow">Protocols</div><div class="value green">91%</div><div class="delta up">Compliance</div></div>
+            </div>
+            <div class="card warn">
+              <div class="row" style="padding:0;">
+                <div><div class="row-title">Critical marker alerts</div><div class="row-subtitle">Low ferritin and elevated CRP require review.</div></div>
+                <span class="badge red">Urgent</span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar red">HB</div><div><div class="row-title">Hannah B.</div><div class="row-subtitle">CRP elevated - protocol overdue</div></div></div><span class="badge red">Critical</span></div>
+              <div class="row"><div class="row-left"><div class="avatar amber">JL</div><div><div class="row-title">Joel L.</div><div class="row-subtitle">Ferritin below range</div></div></div><span class="badge amber">Review</span></div>
+              <div class="row"><div class="row-left"><div class="avatar green">NP</div><div><div class="row-title">Nina P.</div><div class="row-subtitle">All markers within range</div></div></div><span class="badge green">Normal</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '102',
+          label: 'Clinician - Patients List',
+          nav: `
+            <div class="nav large">
+              <div class="nav-head">
+                <div>
+                  <div class="nav-title">Patients</div>
+                  <div class="nav-subtitle">Structured rows for status, risk, and latest labs.</div>
+                </div>
+                <div class="nav-action"><span>&#128269;</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="search">Search patients or markers</div>
+            <div class="chip-row">
+              <div class="chip active">All</div>
+              <div class="chip">Critical</div>
+              <div class="chip">Protocol overdue</div>
+              <div class="chip">Normal</div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div class="row-left"><div class="avatar red">AB</div><div><div class="row-title">Ana B.</div><div class="row-subtitle">CRP elevated - 2 days late</div></div></div><span class="badge red">Critical</span></div>
+              <div class="row"><div class="row-left"><div class="avatar amber">DM</div><div><div class="row-title">Diego M.</div><div class="row-subtitle">Labs pending - protocol next week</div></div></div><span class="badge amber">Pending</span></div>
+              <div class="row"><div class="row-left"><div class="avatar green">KS</div><div><div class="row-title">Kate S.</div><div class="row-subtitle">Markers normal - compliant</div></div></div><span class="badge green">Normal</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+        shell({
+          number: '103',
+          label: 'Clinician - Patient Profile',
+          nav: `
+            <div class="nav">
+              <div class="back-row"><span class="back-chevron">&lsaquo;</span> Patients</div>
+              <div class="nav-head">
+                <div>
+                  <div class="nav-mini">Patient profile</div>
+                  <div class="nav-subtitle">Clinical status, abnormal markers, body composition, and protocol compliance.</div>
+                </div>
+                <div class="nav-action"><span>...</span></div>
+              </div>
+            </div>`,
+          body: `
+            <div class="card soft">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="avatar red" style="width:60px; height:60px; border-radius:18px; font-size:24px;">HB</div>
+                <div style="flex:1;">
+                  <div style="font-size:22px; font-weight:800; letter-spacing:-0.04em;">Hannah B.</div>
+                  <div class="muted" style="margin-top:4px; font-size:13px;">Protocol compliance review and lab follow-up</div>
+                </div>
+                <span class="badge red">Priority</span>
+              </div>
+            </div>
+            <div class="stats-grid cols-3">
+              <div class="metric"><div class="eyebrow">CRP</div><div class="value red">9.2</div><div class="meta">Above range</div></div>
+              <div class="metric"><div class="eyebrow">Ferritin</div><div class="value amber">14</div><div class="meta">Low normal threshold</div></div>
+              <div class="metric"><div class="eyebrow">Compliance</div><div class="value green">91%</div><div class="meta">Protocol adherence</div></div>
+            </div>
+            <div class="card">
+              <div class="section-label">Marker trend</div>
+              <div class="bar-group red">
+                <span style="height:58%"></span><span style="height:56%"></span><span style="height:62%"></span><span style="height:69%"></span><span style="height:74%"></span><span style="height:78%"></span><span style="height:84%"></span>
+              </div>
+            </div>
+            <div class="card list-card">
+              <div class="row"><div><div class="row-title">Body composition</div><div class="row-subtitle">Lean mass stable, body fat trending down</div></div><span class="badge green">Stable</span></div>
+              <div class="row"><div><div class="row-title">Protocol</div><div class="row-subtitle">Supplement routine and blood work schedule</div></div><span class="badge amber">Due soon</span></div>
+            </div>
+          `,
+          active: 'more'
+        }),
+      ]
+    }
+  ];
+
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = groups.map(group => `
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>${group.title}</h2>
+          <p>${group.range} - ${group.blurb}</p>
+        </div>
+      </div>
+      <div class="grid">
+        ${group.screens.join('')}
+      </div>
+    </section>
+  `).join('');
+</script>
+</body>
+</html>
