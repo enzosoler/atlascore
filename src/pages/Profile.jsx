@@ -1061,7 +1061,7 @@ function ProfileContent() {
               subtitle={t('profile.sections_labels.profileSettingsSubtitle')}
             >
               {!profileData ? (
-                <div className="mb-6 rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--brand)/0.05)] px-5 py-5 shadow-[var(--shadow-xs)]">
+                <div className="mb-5 rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--brand)/0.05)] px-5 py-5 shadow-[var(--shadow-xs)]">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand))]">
                       <Sparkles className="h-4 w-4" strokeWidth={1.9} />
@@ -1078,7 +1078,7 @@ function ProfileContent() {
                 </div>
               ) : null}
 
-              <div className="mb-6 rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.52)] px-5 py-5 shadow-[var(--shadow-xs)]">
+              <div className="mb-5 rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.52)] px-5 py-5 shadow-[var(--shadow-xs)]">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="atlas-metric-label">{t('profile.hero.readiness')}</p>
@@ -1104,11 +1104,11 @@ function ProfileContent() {
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {profileFormSections.map((section) => (
                   <section
                     key={section.title}
-                    className="rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-5 py-5 shadow-[var(--shadow-xs)]"
+                    className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-5 py-5 shadow-[var(--shadow-xs)]"
                   >
                     <div className="mb-5">
                       <p className="atlas-overline">{section.eyebrow}</p>
@@ -1133,7 +1133,7 @@ function ProfileContent() {
                   </section>
                 ))}
 
-                <section className="rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-5 py-5 shadow-[var(--shadow-xs)]">
+                <section className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.76)] px-5 py-5 shadow-[var(--shadow-xs)]">
                   <div className="mb-5">
                     <p className="atlas-overline">Direction</p>
                     <h3 className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
@@ -1158,7 +1158,7 @@ function ProfileContent() {
                 </section>
               </div>
 
-              <div className="mt-8 rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.52)] px-5 py-5 shadow-[var(--shadow-xs)]">
+              <div className="mt-7 rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.52)] px-5 py-5 shadow-[var(--shadow-xs)]">
                 <div className="flex flex-col gap-5">
                   <div className="max-w-2xl">
                     <p className="atlas-metric-label">{t('profile.sections_labels.persistenceLabel')}</p>
@@ -1194,7 +1194,7 @@ function ProfileContent() {
               <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[hsl(var(--brand)/0.07)] to-transparent" />
 
               <div className="relative space-y-5">
-                <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
+                <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))]">
                       <Target className="h-4 w-4" strokeWidth={1.9} />

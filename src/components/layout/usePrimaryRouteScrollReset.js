@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { useLocation, useNavigationType } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const SCROLLABLE_OVERFLOWS = new Set(['auto', 'scroll', 'overlay']);
 
@@ -77,21 +77,22 @@ export function resetPrimaryScroll(candidate) {
 }
 
 export function usePrimaryRouteScrollReset(containerRef) {
-  const { pathname, hash } = useLocation();
-  const navigationType = useNavigationType();
+  const { pathname, search, hash, state } = useLocation();
   const isReadyRef = useRef(false);
-  const previousPathnameRef = useRef(pathname);
+  const previousRouteRef = useRef(`${pathname}${search}`);
+  const shouldPreserveScroll = Boolean(state?.preserveScroll);
 
   useLayoutEffect(() => {
-    const previousPathname = previousPathnameRef.current;
-    previousPathnameRef.current = pathname;
+    const currentRoute = `${pathname}${search}`;
+    const previousRoute = previousRouteRef.current;
+    previousRouteRef.current = currentRoute;
 
     if (!isReadyRef.current) {
       isReadyRef.current = true;
       return;
     }
 
-    if (previousPathname === pathname || navigationType === 'POP' || hash) {
+    if (previousRoute === currentRoute || hash || shouldPreserveScroll) {
       return;
     }
 
@@ -102,5 +103,5 @@ export function usePrimaryRouteScrollReset(containerRef) {
     });
 
     return () => window.cancelAnimationFrame(frameId);
-  }, [containerRef, hash, navigationType, pathname]);
+  }, [containerRef, hash, pathname, search, shouldPreserveScroll]);
 }

@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "atlas-button inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold tracking-[-0.016em] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "atlas-button inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold tracking-[-0.014em] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -21,10 +21,10 @@ const buttonVariants = cva(
         link: "min-h-0 rounded-none border-0 bg-transparent p-0 text-[hsl(var(--brand))] shadow-none hover:translate-y-0 hover:bg-transparent hover:text-[hsl(var(--brand)/0.88)] hover:underline",
       },
       size: {
-        default: "h-10 px-4",
-        sm: "h-9 px-3 text-xs",
-        lg: "h-11 px-6 text-sm",
-        icon: "h-10 w-10 px-0",
+        default: "h-11 px-5",
+        sm: "h-10 px-4 text-[13px]",
+        lg: "h-12 px-6 text-sm",
+        icon: "h-11 w-11 px-0",
       },
     },
     defaultVariants: {
