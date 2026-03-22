@@ -64,6 +64,7 @@ export const PAGE_ACCESS = {
   MyPrescribedWorkout: ['athlete', 'admin'],
   AtlasAI:         ['athlete', 'admin'],
   Insights:        ['athlete', 'admin'],
+  BlockReview:     ['athlete', 'admin'],
   Social:          ['athlete', 'coach', 'clinician', 'admin'],
   Export:          ['athlete', 'coach', 'clinician', 'admin'],
   Profile:         ['athlete', 'coach', 'clinician', 'admin'],

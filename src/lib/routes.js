@@ -13,6 +13,7 @@ export const ROUTES = {
   labExams: '/LabExams',
   atlasAI: '/AtlasAI',
   insights: '/Insights',
+  blockReview: '/block-review',
   exercises: '/Exercises',
   progress: '/Progress',
   profile: '/Profile',
