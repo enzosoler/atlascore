@@ -1,10 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const surfaceClassName =
   'atlas-card rounded-[18px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)]';
+const summaryMetaClassName =
+  'inline-flex min-h-[34px] max-w-full items-center self-start overflow-hidden truncate whitespace-nowrap rounded-[12px] px-3.5 text-[11px] font-semibold tracking-[-0.012em] leading-none shadow-[var(--shadow-xs)]';
+const summaryCtaClassName =
+  'h-10 w-full justify-center gap-1.5 rounded-[14px] px-3.5 text-[12px] font-semibold tracking-[-0.018em] shadow-[var(--shadow-xs)] [&_svg]:h-[14px] [&_svg]:w-[14px]';
+const summaryCtaBaseClassName = buttonVariants({ variant: 'default', size: 'sm' });
 
 const toneStyles = {
   blue: {
@@ -135,7 +141,7 @@ export function TodayStatCard({
       to={to}
       className={cn(
         surfaceClassName,
-        'flex min-h-[178px] flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
+        'flex min-h-[198px] flex-col p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]',
         done
           ? 'border-[hsl(var(--ok)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.08),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]'
           : styles.glow
@@ -158,21 +164,31 @@ export function TodayStatCard({
 
       <p className="mt-3 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
 
-      <div className="mt-auto pt-4 flex items-center justify-between gap-2">
+      <div className="mt-auto flex flex-col gap-2.5 pt-5">
         {meta ? (
-          <span className={cn('inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold', done ? 'border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]' : styles.pill)}>
+          <span
+            className={cn(
+              summaryMetaClassName,
+              done
+                ? 'border border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]'
+                : styles.pill
+            )}
+          >
             {meta}
           </span>
-        ) : <span />}
+        ) : null}
         {ctaLabel ? (
-          <span className={cn(
-            'inline-flex items-center gap-1 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold transition-colors',
-            done
-              ? 'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
-              : 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-fg,var(--bg)))]'
-          )}>
-            {ctaLabel}
-            <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          <span
+            className={cn(
+              summaryCtaBaseClassName,
+              summaryCtaClassName,
+              done
+                ? 'border-[hsl(var(--ok)/0.16)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))] hover:bg-[hsl(var(--ok)/0.16)]'
+                : 'border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--primary))] text-[hsl(var(--primary-fg,var(--bg)))] hover:bg-[hsl(var(--primary)/0.94)]'
+            )}
+          >
+            <span className="truncate text-center">{ctaLabel}</span>
+            <ChevronRight className="shrink-0" strokeWidth={2.6} />
           </span>
         ) : null}
       </div>
