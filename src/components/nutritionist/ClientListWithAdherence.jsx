@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 /**
  * ClientListWithAdherence — detailed client list with adherence %, last meal, current weight
@@ -40,7 +40,7 @@ export default function ClientListWithAdherence({ links = [], meals = [], measur
     <div className="space-y-2">
       {clientData.length === 0 ? (
         <div className="text-center py-8 text-[13px] text-[hsl(var(--fg-2))]">
-          Nenhum cliente ativo
+          No active clients
         </div>
       ) : (
         clientData.map(({ link, lastMeal, adherence, latestMeasurement }) => (
@@ -60,7 +60,7 @@ export default function ClientListWithAdherence({ links = [], meals = [], measur
                     <TrendingUp className="w-3.5 h-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
                     <span className="text-[12px] font-bold text-[hsl(var(--fg))]">{Math.round(adherence)}%</span>
                   </div>
-                  <p className="text-[10px] text-[hsl(var(--fg-2))]">aderência</p>
+                  <p className="text-[10px] text-[hsl(var(--fg-2))]">adherence</p>
                 </div>
               </div>
 
@@ -69,16 +69,16 @@ export default function ClientListWithAdherence({ links = [], meals = [], measur
                 {lastMeal && (
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
-                    Última refeição: {formatDistanceToNow(new Date(lastMeal.date), { locale: ptBR, addSuffix: true })}
+                    Last meal: {formatDistanceToNow(new Date(lastMeal.date), { locale: enUS, addSuffix: true })}
                   </div>
                 )}
                 {latestMeasurement?.weight && (
                   <div className="flex items-center gap-1">
-                    ⚖️ {latestMeasurement.weight}kg em {new Date(latestMeasurement.date).toLocaleDateString('pt-BR')}
+                    Weight: {latestMeasurement.weight}kg on {new Date(latestMeasurement.date).toLocaleDateString('en-US')}
                   </div>
                 )}
                 {!lastMeal && (
-                  <span className="italic text-[hsl(var(--err))]">Sem registros</span>
+                  <span className="italic text-[hsl(var(--err))]">No logs yet</span>
                 )}
               </div>
             </div>

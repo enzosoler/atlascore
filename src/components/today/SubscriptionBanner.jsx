@@ -30,9 +30,9 @@ export default function SubscriptionBanner({ planName, onDismiss, subscription }
           <Check className="w-5 h-5 text-[hsl(var(--ok))]" strokeWidth={2.5} />
         </div>
         <div className="min-w-0">
-          <p className="text-[13px] font-bold text-[hsl(var(--ok))]">Bem-vindo ao {resolvedName}! 🎉</p>
+          <p className="text-[13px] font-bold text-[hsl(var(--ok))]">Welcome to {resolvedName}! 🎉</p>
           <p className="text-[12px] text-[hsl(var(--ok)/0.8)] mt-0.5">
-            7 dias grátis. Seu plano começa a ser cobrado após o período de teste.
+            7 days free. Your plan starts billing after the trial period.
           </p>
         </div>
       </div>

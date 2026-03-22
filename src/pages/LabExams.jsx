@@ -103,7 +103,7 @@ function MarkerTrendCard({ markerName, data }) {
               key={`${markerName}-${index}`}
               className={`flex-1 rounded-t-[10px] opacity-80 transition-opacity hover:opacity-100 ${barToneClassName}`}
               style={{ height: `${Math.max(height, 12)}%` }}
-              title={`${entry.value} em ${entry.date}`}
+              title={`${entry.value} on ${entry.date}`}
             />
           );
         })}
@@ -136,16 +136,16 @@ function ExamCard({
           </h3>
           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 text-xs text-[hsl(var(--fg-2))]">
             <span>{formatDate(exam.exam_date)}</span>
-            <span>{markers.length} marcadores</span>
+            <span>{markers.length} markers</span>
             {abnormal > 0 ? (
               <span className="flex items-center gap-1 text-[hsl(var(--warn))]">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                {abnormal} alterados
+                {abnormal} out of range
               </span>
             ) : markers.length > 0 ? (
               <span className="flex items-center gap-1 text-[hsl(var(--ok))]">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Todos normais
+                All in range
               </span>
             ) : null}
           </div>
@@ -316,7 +316,7 @@ function LabExamsContent() {
             }))
           : previous.markers,
       }));
-      toast.success(`Importados ${result.output.markers?.length || 0} marcadores.`);
+      toast.success(`Imported ${result.output.markers?.length || 0} markers.`);
     } finally {
       setImporting(false);
       event.target.value = '';
@@ -386,47 +386,47 @@ function LabExamsContent() {
   return (
     <PageShell
       title="Lab Exams"
-      subtitle="Centralize PDF, imagem e leitura estruturada dos seus exames em uma camada mais confiável e legível."
+      subtitle="Keep PDFs, images, and structured lab reads in one dependable layer."
       actions={(
         <PrimaryButton type="button" onClick={() => setShowAdd(true)} className="inline-flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Novo exame
+          New exam
         </PrimaryButton>
       )}
       maxWidth="max-w-6xl"
     >
       {importing ? (
         <StatusBanner tone="success">
-          O arquivo foi enviado. Estamos extraindo os marcadores para pré-preencher o formulário.
+          The file was uploaded. We are extracting markers to prefill the form.
         </StatusBanner>
       ) : null}
 
       {isLoading ? (
         <LoadingState
-          title="Carregando exames"
-          description="Estamos recuperando seus painéis laboratoriais e mantendo a rota disponível."
+          title="Loading exams"
+          description="We are retrieving your lab panels while keeping the route available."
         />
       ) : null}
 
       <section className="grid gap-3 md:grid-cols-3">
         <SummaryTile
-          label="Painéis"
+          label="Panels"
           value={exams.length}
-          hint="Quantidade total de exames registrados."
+          hint="Total number of recorded lab panels."
           icon={Heart}
           accentClassName="border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]"
         />
         <SummaryTile
-          label="Marcadores alterados"
+          label="Out-of-range markers"
           value={abnormalMarkers}
-          hint="Sinais fora do intervalo normal em todo o histórico."
+          hint="Signals outside the reference range across your history."
           icon={AlertTriangle}
           accentClassName="border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.14)] text-[hsl(var(--warn))]"
         />
         <SummaryTile
-          label="Marcadores rastreados"
+          label="Tracked markers"
           value={trackedMarkers}
-          hint="Base total para leitura longitudinal."
+          hint="Total data base for longitudinal review."
           icon={CheckCircle2}
           accentClassName="border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]"
         />
@@ -434,8 +434,8 @@ function LabExamsContent() {
 
       {Object.keys(markerTrends).some((key) => markerTrends[key].length > 1) ? (
         <SectionCard
-          title="Evolução de marcadores"
-          subtitle="Leitura rápida de tendência para o que já possui histórico suficiente."
+          title="Marker trends"
+          subtitle="Quick trend read for markers with enough history."
         >
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {Object.entries(markerTrends)
@@ -448,17 +448,17 @@ function LabExamsContent() {
       ) : null}
 
       <SectionCard
-        title="Histórico de exames"
-        subtitle="Abra cada painel para revisar marcadores, intervalos de referência e anotações."
+        title="Exam history"
+        subtitle="Open each panel to review markers, reference ranges, and notes."
       >
         {!isLoading && exams.length === 0 ? (
           <EmptyState
-            title="Nenhum exame registrado"
-            description="Adicione manualmente ou importe um PDF ou imagem para iniciar o histórico laboratorial."
+            title="No lab exams yet"
+            description="Add one manually or import a PDF or image to start your lab history."
             icon={Heart}
             action={(
               <PrimaryButton type="button" onClick={() => setShowAdd(true)}>
-                Registrar primeiro exame
+                Add first exam
               </PrimaryButton>
             )}
           />
@@ -491,16 +491,16 @@ function LabExamsContent() {
         }}
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-4xl">
-          <DialogPanelHeader
-            eyebrow="Lab import"
-            title="Registrar exame"
-            description="Use upload para pré-preencher o painel e depois refine valores, unidades e observações antes de salvar."
+            <DialogPanelHeader
+              eyebrow="Lab import"
+            title="Add exam"
+            description="Use upload to prefill the panel, then refine values, units, and notes before saving."
             accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
           />
 
           <DialogHeader className="sr-only">
-            <DialogTitle>Novo exame</DialogTitle>
-            <DialogDescription>Registrar exame laboratorial.</DialogDescription>
+            <DialogTitle>New exam</DialogTitle>
+            <DialogDescription>Add a lab exam.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 p-6 lg:p-7">
@@ -508,10 +508,10 @@ function LabExamsContent() {
               {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               <div>
                 <p className="text-sm font-semibold text-[hsl(var(--fg))]">
-                  {importing ? 'Importando arquivo…' : 'Importar PDF ou imagem do exame'}
+                  {importing ? 'Importing file...' : 'Import exam PDF or image'}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-[hsl(var(--fg-2))]">
-                  Extraímos painel, data e marcadores para você revisar antes de salvar.
+                  We extract panel name, date, and markers for review before you save.
                 </p>
               </div>
               <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={handleImportFile} />
@@ -520,10 +520,10 @@ function LabExamsContent() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">
-                  Painel / exame
+                  Panel / exam
                 </label>
                 <Input
-                  placeholder="Ex: Hemograma, Hormônios, Perfil lipídico"
+                  placeholder="e.g. CBC, hormones, lipid panel"
                   value={form.panel_name}
                   onChange={(event) => {
                     setForm((previous) => ({ ...previous, panel_name: event.target.value }));
@@ -537,7 +537,7 @@ function LabExamsContent() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">Data</label>
+                <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">Date</label>
                 <Input
                   type="date"
                   value={form.exam_date}
@@ -556,8 +556,8 @@ function LabExamsContent() {
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">Marcadores</p>
-                  <p className="text-[12px] text-[hsl(var(--fg-3))]">Revise valor, unidade e status clínico.</p>
+                  <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">Markers</p>
+                  <p className="text-[12px] text-[hsl(var(--fg-3))]">Review value, unit, and clinical status.</p>
                 </div>
                 <Button type="button" variant="outline" className="h-10" onClick={addMarker}>
                   <Plus className="h-4 w-4" />
@@ -572,20 +572,20 @@ function LabExamsContent() {
                     className="atlas-card-muted grid gap-3 p-4 md:grid-cols-[1.5fr_0.8fr_0.8fr_auto]"
                   >
                     <Input
-                      placeholder="Nome do marcador"
+                      placeholder="Marker name"
                       value={marker.name}
                       onChange={(event) => updateMarker(index, 'name', event.target.value)}
                       className="h-11"
                     />
                     <Input
                       type="number"
-                      placeholder="Valor"
+                      placeholder="Value"
                       value={marker.value}
                       onChange={(event) => updateMarker(index, 'value', event.target.value)}
                       className="h-11"
                     />
                     <Input
-                      placeholder="Unidade"
+                      placeholder="Unit"
                       value={marker.unit}
                       onChange={(event) => updateMarker(index, 'unit', event.target.value)}
                       className="h-11"
@@ -603,9 +603,9 @@ function LabExamsContent() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">Notas</label>
+              <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">Notes</label>
               <Textarea
-                placeholder="Observações relevantes do painel, contexto clínico ou próximos passos…"
+                placeholder="Relevant panel notes, clinical context, or next steps..."
                 value={form.notes}
                 onChange={(event) => setForm((previous) => ({ ...previous, notes: event.target.value }))}
                 className="min-h-[120px] resize-y"
@@ -613,7 +613,7 @@ function LabExamsContent() {
             </div>
 
             <Button onClick={handleSave} disabled={createMutation.isPending} className="w-full">
-              {createMutation.isPending ? 'Salvando exame…' : 'Salvar exame'}
+              {createMutation.isPending ? 'Saving exam...' : 'Save exam'}
             </Button>
           </div>
         </DialogContent>

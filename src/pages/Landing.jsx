@@ -16,9 +16,7 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
 import { useTranslation } from '@/hooks/useTranslation';
-import PublicSiteShell, {
-  PublicLanguageSwitcher,
-} from '@/components/public/PublicSiteShell';
+import PublicSiteShell from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
 import RegionSelector from '@/components/pricing/RegionSelector';
@@ -90,180 +88,9 @@ function calcYearlySavings(planId, pricing) {
 }
 
 /* ─────────────────────────────────────────
-   COPY (bilingual, inline)
+   COPY
 ───────────────────────────────────────── */
 const COPY = {
-  'pt-BR': {
-    nav: { howItWorks: 'Como funciona', features: 'Funcionalidades', blog: 'Blog', pricing: 'Planos', login: 'Entrar', signup: 'Criar conta' },
-    hero: {
-      badge: 'Acesso Antecipado',
-      h1a: 'Seu corpo está evoluindo.',
-      h1b: 'Você sabe exatamente como?',
-      sub: 'Um único lugar para treinos, nutrição, suplementos e progresso. Pare de gerenciar abas. Comece a entender sua evolução.',
-      cta1: 'Começar grátis',
-      cta2: 'Ver como funciona',
-      s1t: '1 sistema', s1d: 'em vez de 6 apps',
-      s2t: 'Clareza total', s2d: 'sobre seu progresso real',
-      s3t: 'Feito para', s3d: 'a vida real, não planos perfeitos',
-    },
-    problem: {
-      label: 'O Problema',
-      h2: 'Seus dados de saúde\nestão espalhados por toda parte.',
-      sub: 'Você leva a sério seu corpo — mas suas informações vivem em 5 lugares diferentes. Nenhum deles fala com o outro.',
-      items: [
-        { e: '🏋️', t: 'App de treino', d: 'Séries, repetições, PRs — mas nada mais' },
-        { e: '🥗', t: 'Contador de calorias', d: 'Calorias registradas, ignoradas pela manhã' },
-        { e: '📊', t: 'Planilha', d: 'Medidas que você atualiza duas vezes por ano' },
-        { e: '📱', t: 'Notas', d: 'Stack de suplementos anotado em 2022' },
-        { e: '📸', t: 'Galeria de fotos', d: 'Fotos de progresso soterradas no rolo da câmera' },
-        { e: '💬', t: 'WhatsApp', d: 'Feedback do coach que você nunca mais vai achar' },
-      ],
-      quote: '"O problema não é falta de esforço. É que você não tem uma visão real do que todo esse esforço está fazendo."',
-      quoteDesc: 'Sem uma visão unificada, você não sabe se está progredindo, estagnado ou regredindo. Você está trabalhando no escuro.',
-    },
-    solution: {
-      label: 'A Solução',
-      h2a: 'Tudo em um lugar.',
-      h2b: 'Finalmente.',
-      sub: 'O Atlas Core é seu sistema de performance pessoal. Não é mais um app de treino, não é um rastreador de dieta — é o único lugar onde todos os seus dados de saúde vivem, se conectam e fazem sentido.',
-      p1t: 'Centralizado', p1d: 'Treinos, nutrição, suplementos, medidas e fotos — tudo em um sistema. Sem mais troca de apps.',
-      p2t: 'Focado em progresso', p2d: 'O produto inteiro é construído em torno de uma pergunta: você está realmente melhorando?',
-      p3t: 'Pronto para a vida real', p3d: 'Planos não são perfeitos. O Atlas Core reflete como você realmente vive — não como pretendia viver.',
-    },
-    features: {
-      workouts: {
-        label: 'Treinos',
-        h2: 'Treine mais inteligente.\nRegistre tudo.',
-        desc: 'Registre qualquer treino, qualquer estilo. Acompanhe séries, reps, carga e descanso. Saiba exatamente o que fez na última sessão — e supere.',
-        pts: [
-          { t: 'Biblioteca completa de exercícios', d: '— ou adicione os seus. Musculação, funcional, cardio.' },
-          { t: 'Histórico de treinos em destaque', d: '— veja todas as sessões que já fez.' },
-          { t: 'Rastreamento de PR automático', d: '— recordes pessoais se atualizam sozinhos.' },
-          { t: 'Sem templates forçados', d: '— registre o que realmente fez, não o que foi planejado.' },
-        ],
-      },
-      nutrition: {
-        label: 'Nutrição',
-        h2: 'Registre a comida.\nEntenda os padrões.',
-        desc: 'Acompanhe o que come sem obsessão. O objetivo não é perfeição — é consciência. Veja o que realmente move seus resultados.',
-        pts: [
-          { t: 'Registro diário rápido', d: '— refeições, macros e calorias sem atrito.' },
-          { t: 'Padrões semanais', d: '— veja onde está atingindo metas e onde não está.' },
-          { t: 'Conectado aos resultados', d: '— nutrição fica ao lado dos dados de peso e performance.' },
-          { t: 'Não é uma prisão calórica', d: '— desenhado para consciência, não ansiedade.' },
-        ],
-      },
-      progress: {
-        label: 'Rastreamento de Progresso',
-        h2: 'Números não mentem.\nAgora você pode vê-los.',
-        desc: 'Peso, gordura corporal, circunferências — registrados em segundos, visíveis ao longo do tempo.',
-        pts: [
-          { t: 'Tendências de peso corporal', d: '— médias semanais cortam o ruído diário.' },
-          { t: 'Medidas completas', d: '— cintura, peito, braços, pernas, quadril, % gordura.' },
-          { t: 'Comparações antes/depois', d: '— escolha duas datas e veja a diferença.' },
-          { t: 'Detecção de tendência', d: '— saiba imediatamente se sua trajetória está correta.' },
-        ],
-      },
-      photos: {
-        label: 'Fotos de Progresso',
-        h2: 'Veja o que a balança\nnão consegue mostrar.',
-        desc: 'Seu corpo muda de formas que as medidas não capturam. Fotos de progresso são o registro mais honesto que você tem.',
-        pts: [
-          { t: 'Organizadas por data', d: '— sem mais cavar no rolo da câmera.' },
-          { t: 'Comparação lado a lado', d: '— escolha dois check-ins e veja a diferença.' },
-          { t: 'Privado e seguro', d: '— suas fotos são suas. Sem compartilhamento público.' },
-          { t: 'Sincronizado com métricas', d: '— veja seu peso e medidas ao lado da foto daquele dia.' },
-        ],
-      },
-      supplements: {
-        label: 'Suplementos & Protocolos',
-        h2: 'Seu stack registrado.\nFinalmente consistente.',
-        desc: 'Creatina, vitaminas, pré-treino — seja lá qual for o seu protocolo, o Atlas Core o mantém organizado e rastreável.',
-        pts: [
-          { t: 'Checklist diário', d: '— registre o que tomou e quando.' },
-          { t: 'Protocolos personalizados', d: '— stack matinal, noturno, dosagem por ciclo.' },
-          { t: 'Rastreamento de consistência', d: '— veja sua aderência nos últimos 30 dias.' },
-          { t: 'Sem julgamentos', d: '— registre o que quiser. São seus dados de saúde.' },
-        ],
-      },
-      timeline: {
-        label: 'Linha do Tempo Unificada',
-        h2: 'Tudo que aconteceu,\nem uma visão.',
-        desc: 'Treinos, check-ins, fotos, mudanças de protocolo — tudo visível em uma única linha do tempo cronológica.',
-        pts: [
-          { t: 'Log automático', d: '— cada ação vira parte do seu histórico.' },
-          { t: 'Cruze qualquer dado', d: '— veja como estava sua nutrição na semana que bateu o PR.' },
-          { t: 'Resumos mensais', d: '— entenda o que cada mês realmente entregou.' },
-          { t: 'Memória de longo prazo', d: '— volte 6, 12 meses, 2 anos. Seus dados não expiram.' },
-        ],
-      },
-    },
-    diff: {
-      label: 'Por que Atlas Core',
-      h2: 'Não é mais um app de fitness.',
-      sub: 'Cada outra ferramenta é construída em torno de uma única categoria. O Atlas Core é construído em torno de você.',
-      cols: ['Capacidade', 'Apps de treino', 'Rastreadores de comida', 'Apps genéricos', 'Atlas Core'],
-      rows: [
-        ['Rastreamento de treino', '✓', '—', 'Parcial', '✓ Completo'],
-        ['Nutrição & macros', '—', '✓', 'Parcial', '✓ Completo'],
-        ['Medidas corporais', '—', '—', 'Básico', '✓ Completo'],
-        ['Fotos de progresso', '—', '—', '—', '✓ Organizado'],
-        ['Suplementos', '—', '—', '—', '✓ Completo'],
-        ['Linha do tempo unificada', '—', '—', '—', '✓ Tudo'],
-        ['Análise entre métricas', '—', '—', '—', '✓ Integrado'],
-      ],
-      cards: [
-        { e: '🚫', t: 'Não força planos', d: 'O Atlas Core não diz o que fazer. Rastreia o que você realmente faz — e mostra se está funcionando.' },
-        { e: '🚫', t: 'Sem gamificação', d: 'Sem streaks, sem medalhas, sem motivação falsa. Seu progresso é real. Essa é a recompensa.' },
-        { e: '🚫', t: 'Não é clínico', d: 'Construído para pessoas sérias — não pacientes. Sem jargão, sem formulários, sem complexidade.' },
-      ],
-    },
-    pricing: {
-      label: 'Planos',
-      h2: 'Simples. Honesto.',
-      sub: 'Comece grátis. Faça upgrade quando quiser a visão completa.',
-      toggle: { intl: 'USD / Internacional', br: 'BRL / Brasil' },
-      free: {
-        name: 'Free', priceIntl: '$0', priceBR: 'Grátis', period: '/mês', annualNote: 'Sempre grátis. Sem cartão.',
-        features: ['Today básico', 'Diário de treino e nutrição', 'Registro de medidas', 'Protocolos básicos', 'Perfil e configurações', 'Histórico limitado (30 dias)', 'Atlas AI limitada'],
-        absent: ['Geração de dieta/treino por IA', 'Exames laboratoriais completos', 'Fotos de progresso', 'Analytics avançados', 'Export PDF/CSV'],
-        cta: 'Criar conta grátis', id: 'free',
-      },
-      pro: {
-        name: 'Pro', priceIntl: '$9.99', priceBR: 'R$ 29', period: '/mês',
-        annualIntl: 'Ou $79/ano — economize $40 (33%)', annualBR: 'Ou R$249/ano — economize R$110 (31%)',
-        popular: 'Mais escolhido',
-        features: [
-          'Tudo do Free', 'Geração de dieta por IA', 'Geração de treino por IA', 'Plano Alimentar / Plano de Treino completos',
-          'Exames laboratoriais completos', 'Fotos de progresso ilimitadas', 'Histórico expandido (1 ano)',
-          'Analytics completos', 'Atlas AI contextual completa', 'Export PDF e CSV', 'Alertas de estoque', 'Social cards premium',
-        ],
-        cta: '7 dias grátis — sem cartão', id: 'pro_monthly',
-      },
-      founder: {
-        h3: '🔒 Preço Fundador — Bloqueado Para Sempre',
-        desc: 'Entrando no Acesso Antecipado? Seu preço nunca muda — mesmo quando aumentarmos. Você entra pelo preço de base.',
-        cta: 'Garantir preço fundador',
-      },
-    },
-    pros: {
-      label: 'Para Profissionais',
-      h2: 'Feito para o indivíduo.\nFunciona com seu time.',
-      sub: 'O Atlas Core não exige coach ou nutricionista. Mas se você trabalha com um, ele pode ver seus dados e colaborar direto no app.',
-      cards: [
-        { e: '🏃', t: 'Personal Trainers', d: 'Acompanhe treinos, fotos de progresso e medidas dos seus alunos em tempo real. Sem mais prints no WhatsApp.' },
-        { e: '🥦', t: 'Nutricionistas', d: 'Revise registros alimentares reais ao lado das métricas corporais. Veja se o plano está gerando resultados reais.' },
-      ],
-      note: 'A colaboração profissional é opcional. O Atlas Core funciona perfeitamente sem nenhum outro envolvido.',
-    },
-    closing: {
-      h2a: 'Você tem colocado esforço.',
-      h2b: 'Está na hora de ver.',
-      sub: 'O Atlas Core te dá o que nenhum app de fitness conseguiu — a visão completa da sua evolução física, em um lugar, sempre honesto.',
-      cta1: 'Começar grátis hoje', cta2: 'Ver todos os planos',
-      fine: 'Sem cartão de crédito. Plano grátis disponível. Cancele quando quiser.',
-    },
-  },
   'en-US': {
     nav: { howItWorks: 'How it works', features: 'Features', blog: 'Blog', pricing: 'Pricing', login: 'Log In', signup: 'Get Started' },
     hero: {
@@ -438,76 +265,6 @@ const COPY = {
 };
 
 const HOME_MOCK_COPY = {
-  'pt-BR': {
-    workout: {
-      overline: 'Treino de hoje',
-      exerciseName: 'supino reto',
-      weight: '102,5 kg',
-      progress: '⬆ +2,5 kg desde a última sessão · PR',
-      bars: [
-        { label: 'Volume', pct: 82, val: '+18%' },
-        { label: 'Frequência', pct: 65, val: '3x/sem' },
-        { label: 'Consistência', pct: 91, val: '91%' },
-      ],
-      tags: ['Peito A', 'Superior', 'Semana 6'],
-    },
-    nutrition: {
-      overline: 'Nutrição do dia',
-      metricLabel: 'Calorias',
-      metricValue: '2.340',
-      metricMeta: 'Meta: 2.500 · 94% do objetivo',
-      bars: [
-        { label: 'Proteína', pct: 88, val: '176g' },
-        { label: 'Carbo', pct: 72, val: '248g' },
-        { label: 'Gordura', pct: 54, val: '62g' },
-      ],
-      summaryLabel: 'Média de 7 dias',
-      summaryText: 'Proteína média: 168g · 3 dias abaixo da meta',
-    },
-    progress: {
-      overline: 'Evolução corporal',
-      cards: [
-        { label: 'Peso', value: '84,2 kg', trend: '▼ −3,8 kg / 8 sem' },
-        { label: 'Gordura', value: '17,4%', trend: '▼ −2,1% / 8 sem' },
-      ],
-      bars: [
-        { label: 'Cintura', pct: 60, val: '−3 cm', accent: true },
-        { label: 'Braço', pct: 75, val: '+1,5 cm' },
-        { label: 'Peito', pct: 68, val: '+2 cm' },
-      ],
-    },
-    photos: {
-      overline: 'Progresso visual',
-      items: [
-        ['01 jan', '#1a1a2e'],
-        ['15 fev', '#1e2a1e'],
-        ['19 mar', '#2a1e1e'],
-      ],
-      summaryTitle: '📸 12 semanas de progresso',
-      summaryText: 'Compare quaisquer duas datas. A diferença que você não percebe no dia a dia.',
-    },
-    supplements: {
-      overline: 'Protocolo do dia',
-      items: [
-        { icon: '💊', name: 'Creatina', dose: '5g · Manhã', done: true },
-        { icon: '🌿', name: 'Vitamina D3', dose: '5000 IU · Manhã', done: true },
-        { icon: '🔥', name: 'Pré-treino', dose: '1 dose · Pré-treino', done: true },
-        { icon: '🌙', name: 'Magnésio', dose: '400mg · Noite', done: false },
-      ],
-      summaryLabel: 'Aderência em 30 dias',
-      summaryValue: '87%',
-      summarySuffix: 'de consistência',
-    },
-    timeline: {
-      overline: 'Sua linha do tempo',
-      items: [
-        { date: 'Hoje · 19 mar', label: 'Novo PR — agachamento 140 kg', detail: 'Treino registrado · 4 exercícios', active: true },
-        { date: '17 mar', label: 'Check-in — 84,2 kg', detail: '% de gordura: 17,4% · Foto de progresso', active: false },
-        { date: '15 mar', label: 'Protocolo atualizado', detail: 'Ômega-3 adicionado · 3g por dia', active: false },
-        { date: '12 mar', label: 'Nutrição — melhor semana', detail: 'Proteína média: 182g · 7/7 dias', active: false },
-      ],
-    },
-  },
   'en-US': {
     workout: {
       overline: "Today's workout",
@@ -857,11 +614,9 @@ function PricingCard({ plan, popularLabel }) {
    MAIN COMPONENT
 ───────────────────────────────────────── */
 export default function Landing() {
-  const { language, t, locale } = useTranslation();
-  const c = COPY[language] || COPY['en-US'];
-  const homeMocks = HOME_MOCK_COPY[language] || HOME_MOCK_COPY['en-US'];
-  const showBR = language === 'pt-BR';
-  const isPt = locale === 'pt-BR';
+  const { t, locale } = useTranslation();
+  const c = COPY['en-US'];
+  const homeMocks = HOME_MOCK_COPY['en-US'];
 
   const [billing, setBilling] = useState('monthly');
   const [region, setRegion] = useState('US');
@@ -880,12 +635,12 @@ export default function Landing() {
         missing: translated.missing || [],
         cta: translated.cta,
         trial: billing === 'monthly' ? translated.trial : null,
-        period: billing === 'yearly' ? (isPt ? '/ano' : '/year') : translated.period,
+        period: billing === 'yearly' ? '/year' : translated.period,
         savings,
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, isPt, t]);
+  }, [locale, pricing, billing, t]);
 
   const professionalPlans = useMemo(() => {
     const translations = t('pricing_page.plans');
@@ -900,12 +655,12 @@ export default function Landing() {
         features: translated.features,
         cta: translated.cta,
         trial: billing === 'monthly' ? translated.trial : null,
-        period: billing === 'yearly' ? (isPt ? '/ano' : '/year') : translated.period,
+        period: billing === 'yearly' ? '/year' : translated.period,
         savings,
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, isPt, t]);
+  }, [locale, pricing, billing, t]);
 
   return (
     <PublicSiteShell
@@ -917,7 +672,6 @@ export default function Landing() {
       ]}
       actions={(
         <>
-          <span className="hidden sm:contents"><PublicLanguageSwitcher /></span>
           <Button size="sm" onClick={handleLogin}>{c.nav.login}</Button>
         </>
       )}
@@ -1181,7 +935,7 @@ export default function Landing() {
                         : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
                     }`}
                   >
-                    {isPt ? 'Mensal' : 'Monthly'}
+                    Monthly
                   </button>
                   <button
                     type="button"
@@ -1192,10 +946,10 @@ export default function Landing() {
                         : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
                     }`}
                   >
-                    {isPt ? 'Anual' : 'Yearly'}
+                    Yearly
                     {billing !== 'yearly' && (
                       <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
-                        {isPt ? 'até 31%' : 'up to 31%'}
+                        up to 31%
                       </span>
                     )}
                   </button>
@@ -1207,11 +961,11 @@ export default function Landing() {
 
         {/* Athlete plans */}
         <motion.div {...fadeIn(0.08)} className="atlas-public-panel mb-6 px-6 py-6 lg:px-8 lg:py-8">
-          <p className="atlas-overline mb-6">{isPt ? 'Atleta' : 'Athlete'}</p>
+          <p className="atlas-overline mb-6">Athlete</p>
           <div className="grid gap-4 lg:grid-cols-3">
             {athletePlans.map((plan, index) => (
               <motion.div key={plan.id} {...fadeIn(index * 0.06)}>
-                <PricingCard plan={plan} popularLabel={isPt ? 'Mais escolhido' : 'Most chosen'} />
+                <PricingCard plan={plan} popularLabel="Most chosen" />
               </motion.div>
             ))}
           </div>
@@ -1221,17 +975,15 @@ export default function Landing() {
         <motion.div {...fadeIn(0.12)} className="mb-6">
           <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
             <div className="pt-2">
-              <p className="atlas-overline">{isPt ? 'Profissional' : 'Professional'}</p>
+              <p className="atlas-overline">Professional</p>
               <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                {isPt
-                  ? 'Planos para coaches, nutricionistas e clínicos.'
-                  : 'Plans for coaches, nutritionists, and clinicians.'}
+                Plans for coaches, nutritionists, and clinicians.
               </p>
             </div>
             <div className="grid gap-4 lg:grid-cols-3">
               {professionalPlans.map((plan, index) => (
                 <motion.div key={plan.id} {...fadeIn(index * 0.06)}>
-                  <PricingCard plan={plan} popularLabel={isPt ? 'Mais escolhido' : 'Most chosen'} />
+                  <PricingCard plan={plan} popularLabel="Most chosen" />
                 </motion.div>
               ))}
             </div>

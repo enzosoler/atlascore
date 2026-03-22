@@ -55,7 +55,7 @@ export default function RestTimer({ duration = 90, onComplete }) {
 
   return (
     <div className="surface p-6 text-center space-y-6">
-      <p className="t-small text-muted-foreground">Descanse</p>
+      <p className="t-small text-muted-foreground">Rest</p>
       
       {/* Timer Display */}
       <div className="relative w-48 h-48 mx-auto">
@@ -96,14 +96,14 @@ export default function RestTimer({ duration = 90, onComplete }) {
           variant="outline"
           className="flex-1 h-10 rounded-lg"
         >
-          {isActive ? 'Pausar' : 'Retomar'}
+          {isActive ? 'Pause' : 'Resume'}
         </Button>
         <Button
           onClick={() => onComplete?.()}
           className="flex-1 h-10 rounded-lg bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand)/0.85)] text-white gap-2"
         >
           <SkipForward className="w-4 h-4" />
-          Próximo
+          Next
         </Button>
       </div>
     </div>

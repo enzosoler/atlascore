@@ -46,7 +46,7 @@ export default function WorkoutExecution({ workout, onComplete, onBack }) {
     );
 
     if (!currentSetObj?.weight || !currentSetObj?.reps) {
-      toast.error('Preecha weight e reps');
+      toast.error('Enter weight and reps');
       return;
     }
 
@@ -110,7 +110,7 @@ export default function WorkoutExecution({ workout, onComplete, onBack }) {
           <ChevronLeft className="w-5 h-5" strokeWidth={2} />
         </button>
         <span className="text-[12px] font-semibold text-muted-foreground">
-          {currentExerciseIdx + 1} de {exercises.length} exercícios
+          {currentExerciseIdx + 1} of {exercises.length} exercises
         </span>
         <div className="w-8" />
       </div>
@@ -124,7 +124,7 @@ export default function WorkoutExecution({ workout, onComplete, onBack }) {
           {/* Current Set Info */}
           <div className="surface p-5 space-y-4">
             <div className="flex items-baseline justify-between">
-              <h3 className="t-subtitle">Set {currentSetIdx + 1} de {currentExercise.sets?.length || 0}</h3>
+              <h3 className="t-subtitle">Set {currentSetIdx + 1} of {currentExercise.sets?.length || 0}</h3>
               <span className="text-[12px] text-muted-foreground">
                 {currentSet?.reps}x{currentSet?.weight ? `${currentSet.weight}kg` : '—'} (RIR {currentSet?.rir})
               </span>
@@ -174,7 +174,7 @@ export default function WorkoutExecution({ workout, onComplete, onBack }) {
               className="w-full h-12 rounded-lg bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand)/0.85)] text-white font-semibold text-[14px] gap-2"
             >
               <Check className="w-5 h-5" />
-              Set Completo
+              Complete set
             </Button>
           </div>
 

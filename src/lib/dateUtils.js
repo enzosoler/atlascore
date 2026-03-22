@@ -1,85 +1,84 @@
 /**
- * Atlas Core — Utilitário Centralizado de Datas
- * Padrão: "19 de março" / "Quinta-feira, 19 de março"
- * Todos os componentes devem importar daqui em vez de criar formatação inline.
+ * Atlas Core — centralized date helpers
+ * Standard output: "March 19" / "Thursday, March 19"
+ * Components should import from here instead of formatting inline.
  */
 
-const PT_BR = 'pt-BR';
+const EN_US = 'en-US';
 
 /**
- * Formata data como "19 de março de 2026" (completo com ano)
+ * Formats a date like "March 19, 2026"
  * @param {Date|string} date
  */
 export function formatDateLong(date) {
   const d = toDate(date);
-  return d.toLocaleDateString(PT_BR, { day: 'numeric', month: 'long', year: 'numeric' });
+  return d.toLocaleDateString(EN_US, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 /**
- * Formata data como "19 de março" (sem ano)
+ * Formats a date like "March 19"
  * @param {Date|string} date
  */
 export function formatDateShort(date) {
   const d = toDate(date);
-  return d.toLocaleDateString(PT_BR, { day: 'numeric', month: 'long' });
+  return d.toLocaleDateString(EN_US, { day: 'numeric', month: 'long' });
 }
 
 /**
- * Formata data como "Quinta-feira, 19 de março"
- * (primeira letra do dia da semana em maiúsculo, restante em minúsculo)
+ * Formats a date like "Thursday, March 19"
  * @param {Date|string} date
  */
 export function formatDateWithWeekday(date) {
   const d = toDate(date);
-  const weekday = d.toLocaleDateString(PT_BR, { weekday: 'long' });
+  const weekday = d.toLocaleDateString(EN_US, { weekday: 'long' });
   const weekdayCapitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1).toLowerCase();
   const day = d.getDate();
-  const month = d.toLocaleDateString(PT_BR, { month: 'long' });
-  return `${weekdayCapitalized}, ${day} de ${month}`;
+  const month = d.toLocaleDateString(EN_US, { month: 'long' });
+  return `${weekdayCapitalized}, ${month} ${day}`;
 }
 
 /**
- * Formata data como "Qui, 19 mar" (abreviado)
+ * Formats a date like "Thu Mar 19"
  * @param {Date|string} date
  */
 export function formatDateAbbr(date) {
   const d = toDate(date);
-  return d.toLocaleDateString(PT_BR, { weekday: 'short', day: 'numeric', month: 'short' })
+  return d.toLocaleDateString(EN_US, { weekday: 'short', day: 'numeric', month: 'short' })
     .replace(/\./g, '')
     .replace(/,/, '');
 }
 
 /**
- * Formata como "19/03/2026" (formato BR padrão)
+ * Formats a date like "3/19/2026"
  * @param {Date|string} date
  */
 export function formatDateBR(date) {
   const d = toDate(date);
-  return d.toLocaleDateString(PT_BR);
+  return d.toLocaleDateString(EN_US);
 }
 
 /**
- * Formata como "19/03" (dia e mês sem ano)
+ * Formats as "03/19" (month/day without year)
  * @param {Date|string} date
  */
 export function formatDateDayMonth(date) {
   const d = toDate(date);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  return `${dd}/${mm}`;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${month}/${day}`;
 }
 
 /**
- * Formata hora como "14:30"
+ * Formats time like "2:30 PM"
  * @param {Date|string} date
  */
 export function formatTime(date) {
   const d = toDate(date);
-  return d.toLocaleTimeString(PT_BR, { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString(EN_US, { hour: 'numeric', minute: '2-digit' });
 }
 
 /**
- * Retorna "Hoje", "Ontem" ou a data formatada
+ * Returns "Today", "Yesterday", or the formatted date
  * @param {Date|string} date
  */
 export function formatRelativeDate(date) {
@@ -88,8 +87,8 @@ export function formatRelativeDate(date) {
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (isSameDay(d, today)) return 'Hoje';
-  if (isSameDay(d, yesterday)) return 'Ontem';
+  if (isSameDay(d, today)) return 'Today';
+  if (isSameDay(d, yesterday)) return 'Yesterday';
   return formatDateShort(d);
 }
 
@@ -103,12 +102,12 @@ export function getTodayKey() {
 // ── helpers internos ──────────────────────────────────────
 
 /**
- * Converte string YYYY-MM-DD ou Date para objeto Date, evitando timezone shift
+ * Converts YYYY-MM-DD strings or Date values to Date while avoiding timezone shift
  */
 function toDate(date) {
   if (date instanceof Date) return date;
   if (typeof date === 'string') {
-    // YYYY-MM-DD: adiciona T12:00 para evitar conversão de timezone
+    // YYYY-MM-DD: add T12:00 to avoid timezone conversion drift
     if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return new Date(`${date}T12:00:00`);
     return new Date(date);
   }

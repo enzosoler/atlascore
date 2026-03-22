@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap } from 'lucide-react';
 
 const DEFAULT_MESSAGES = [
-  'Analisando seus objetivos...',
-  'Construindo seu painel personalizado...',
-  'Configurando suas categorias de tracking...',
-  'Calculando metas nutricionais...',
-  'Preparando sua linha do tempo...',
-  'Tudo pronto.',
+  'Analyzing your goals...',
+  'Building your personalized dashboard...',
+  'Configuring your tracking categories...',
+  'Calculating your nutrition targets...',
+  'Preparing your timeline...',
+  'Everything is ready.',
 ];
 
 /**
@@ -19,7 +19,7 @@ const DEFAULT_MESSAGES = [
  *   messages?: string[]  — custom rotating messages
  *   onDone?: () => void  — called when animation completes (auto, no button)
  *   autoFinishMs?: number — ms per step (default 650)
- *   showButton?: boolean  — show "Entrar" button at end instead of auto-advancing
+ *   showButton?: boolean  — show "Enter" button at end instead of auto-advancing
  *   buttonLabel?: string
  */
 export default function SetupGeneratingScreen({
@@ -27,7 +27,7 @@ export default function SetupGeneratingScreen({
   onDone,
   autoFinishMs = 650,
   showButton = false,
-  buttonLabel = 'Continuar',
+  buttonLabel = 'Continue',
 }) {
   const [msgIdx, setMsgIdx] = useState(0);
   const [done, setDone] = useState(false);

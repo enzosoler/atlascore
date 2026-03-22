@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     // Validate inputs
     if (!recipient_email || !recipient_name || !inviter_email || !role) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Dados incompletos' }),
+        JSON.stringify({ success: false, error: 'Incomplete request data' }),
         { status: 400 }
       );
     }
@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     const inviter = await base44.auth.me();
     if (!inviter || inviter.email !== inviter_email) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Não autorizado' }),
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
         { status: 403 }
       );
     }
@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     const mapping = roleMap[role];
     if (!mapping) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Role inválido' }),
+        JSON.stringify({ success: false, error: 'Invalid role' }),
         { status: 400 }
       );
     }
@@ -63,17 +63,17 @@ Deno.serve(async (req) => {
     const inviteUrl = `${appUrl}/auth?mode=signup&invite=${encodeURIComponent(recipient_email)}&role=${role}&inviter=${encodeURIComponent(inviter_email)}`;
 
     const emailBody = `
-Olá ${recipient_name},
+Hi ${recipient_name},
 
-${inviter_name} te convidou para fazer parte da sua equipe no Atlas Core!
+${inviter_name} invited you to join their team on Atlas Core.
 
-Se você é um(a) ${role === 'student' ? 'aluno(a)' : role === 'client' ? 'cliente' : 'paciente'}, clique no link abaixo para criar sua conta:
+If you are joining as a ${role === 'student' ? 'student' : role === 'client' ? 'client' : 'patient'}, use the link below to create your account:
 
 ${inviteUrl}
 
-Este link expira em 30 dias.
+This link expires in 30 days.
 
-Não foi você? Ignore este email.
+Not you? You can ignore this email.
 
 ---
 Atlas Core
@@ -81,7 +81,7 @@ Atlas Core
 
     await base44.integrations.Core.SendEmail({
       to: recipient_email,
-      subject: `${inviter_name} te convidou para Atlas Core`,
+      subject: `${inviter_name} invited you to Atlas Core`,
       body: emailBody,
       from_name: 'Atlas Core',
     });
@@ -89,7 +89,7 @@ Atlas Core
     console.log(`Invite sent to ${recipient_email} from ${inviter_email}`);
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Convite enviado com sucesso' }),
+      JSON.stringify({ success: true, message: 'Invite sent successfully' }),
       { status: 200 }
     );
   } catch (error) {

@@ -58,15 +58,15 @@ export default function NutritionistAlertsPanel({ links, meals = [] }) {
         <div className="w-10 h-10 rounded-lg bg-[hsl(var(--ok)/0.1)] flex items-center justify-center mx-auto mb-2">
           <Activity className="w-5 h-5 text-[hsl(var(--ok))]" strokeWidth={2} />
         </div>
-        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Tudo em dia</p>
-        <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">Seus clientes estão mantendo ótima aderência</p>
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Everything looks on track</p>
+        <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">Your clients are maintaining strong adherence</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <p className="t-label">⚠️ Atenção necessária</p>
+      <p className="t-label">Attention needed</p>
       {alerts.slice(0, 5).map(alert => {
         const Icon = alert.icon;
         return (
@@ -79,8 +79,8 @@ export default function NutritionistAlertsPanel({ links, meals = [] }) {
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">{alert.client}</p>
               <p className="text-[11px] text-[hsl(var(--fg-2))]">
-                {alert.type === 'low-adherence' && `Aderência baixa: ${alert.value}% este mês`}
-                {alert.type === 'no-logging' && `Sem registros há ${alert.days} dias`}
+                {alert.type === 'low-adherence' && `Low adherence: ${alert.value}% this month`}
+                {alert.type === 'no-logging' && `No logs for ${alert.days} days`}
               </p>
             </div>
           </Link>

@@ -90,10 +90,10 @@ export function WeeklyCheckinModal({ open, onClose }) {
 
   // Friendly summary labels
   const energyLabel = energy
-    ? ['', 'Energia muito baixa', 'Energia baixa', 'Energia ok', 'Energia boa', 'Energia alta'][energy]
+    ? ['', 'Very low energy', 'Low energy', 'Energy is okay', 'Good energy', 'High energy'][energy]
     : null;
   const moodLabel = mood
-    ? ['', 'Humor péssimo', 'Humor baixo', 'Humor ok', 'Humor bom', 'Humor excelente'][mood]
+    ? ['', 'Very poor mood', 'Low mood', 'Mood is okay', 'Good mood', 'Excellent mood'][mood]
     : null;
 
   return (
@@ -104,11 +104,11 @@ export function WeeklyCheckinModal({ open, onClose }) {
         </div>
         <DialogHeader className="px-6 pb-0 pt-4">
           <DialogTitle className="text-[18px] font-bold tracking-[-0.03em]">
-            {done ? 'Check-in registrado ✓' : 'Check-in semanal'}
+            {done ? 'Check-in saved ✓' : 'Weekly check-in'}
           </DialogTitle>
           {!done && (
             <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1 leading-5">
-              Como você está hoje? Leva menos de 30 segundos.
+              How are you feeling today? It takes less than 30 seconds.
             </p>
           )}
         </DialogHeader>
@@ -124,19 +124,19 @@ export function WeeklyCheckinModal({ open, onClose }) {
               <div className="space-y-2 rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.56)] p-4 text-[13px] text-[hsl(var(--fg-2))]">
                 {energyLabel && (
                   <div className="flex items-center justify-between">
-                    <span>Energia</span>
+                    <span>Energy</span>
                     <span className="font-semibold text-[hsl(var(--fg))]">{energy}/5 — {energyLabel}</span>
                   </div>
                 )}
                 {moodLabel && (
                   <div className="flex items-center justify-between">
-                    <span>Humor</span>
+                    <span>Mood</span>
                     <span className="font-semibold text-[hsl(var(--fg))]">{mood}/5 — {moodLabel}</span>
                   </div>
                 )}
                 {sleepHours && (
                   <div className="flex items-center justify-between">
-                    <span>Sono</span>
+                    <span>Sleep</span>
                     <span className="font-semibold text-[hsl(var(--fg))]">{sleepHours}h</span>
                   </div>
                 )}
@@ -149,12 +149,12 @@ export function WeeklyCheckinModal({ open, onClose }) {
 
               {(energy <= 2 || mood <= 2) && (
                 <p className="text-[12px] text-[hsl(var(--warn))] leading-5">
-                  Energia ou humor baixos registrados. Considere ajustar o volume de treino hoje.
+                  Low energy or mood logged. Consider reducing today's training volume.
                 </p>
               )}
 
               <Button onClick={handleClose} className="w-full" size="sm">
-                Fechar
+                Close
               </Button>
             </div>
           ) : (
@@ -162,8 +162,8 @@ export function WeeklyCheckinModal({ open, onClose }) {
             <div className="space-y-5">
               <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
                 <RatingRow
-                  label="Energia"
-                  hint="1 = esgotado · 5 = excelente"
+                  label="Energy"
+                  hint="1 = drained · 5 = excellent"
                   value={energy}
                   onChange={setEnergy}
                 />
@@ -171,8 +171,8 @@ export function WeeklyCheckinModal({ open, onClose }) {
 
               <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
                 <RatingRow
-                  label="Humor"
-                  hint="1 = péssimo · 5 = excelente"
+                  label="Mood"
+                  hint="1 = terrible · 5 = excellent"
                   value={mood}
                   onChange={setMood}
                 />
@@ -181,8 +181,8 @@ export function WeeklyCheckinModal({ open, onClose }) {
               <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-between">
-                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Sono (horas)</p>
-                    <p className="text-[11px] text-[hsl(var(--fg-3))]">opcional</p>
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Sleep (hours)</p>
+                    <p className="text-[11px] text-[hsl(var(--fg-3))]">optional</p>
                   </div>
                   <input
                     type="number"
@@ -200,13 +200,13 @@ export function WeeklyCheckinModal({ open, onClose }) {
               <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
                 <div className="space-y-2">
                   <div className="flex items-baseline justify-between">
-                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Nota rápida</p>
-                    <p className="text-[11px] text-[hsl(var(--fg-3))]">opcional</p>
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Quick note</p>
+                    <p className="text-[11px] text-[hsl(var(--fg-3))]">optional</p>
                   </div>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Como foi o dia, algo diferente..."
+                    placeholder="How did the day go? Anything unusual?"
                     rows={2}
                     className="atlas-field min-h-[88px] w-full resize-none px-3 py-2.5 text-[14px]"
                   />
@@ -220,7 +220,7 @@ export function WeeklyCheckinModal({ open, onClose }) {
                   className="h-11 flex-1 rounded-[10px]"
                   onClick={handleClose}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button
                   size="sm"
@@ -230,7 +230,7 @@ export function WeeklyCheckinModal({ open, onClose }) {
                 >
                   {saving
                     ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : 'Registrar check-in'
+                    : 'Save check-in'
                   }
                 </Button>
               </div>

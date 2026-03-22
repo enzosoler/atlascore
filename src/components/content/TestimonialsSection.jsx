@@ -2,36 +2,36 @@ import React from 'react';
 import { Star } from 'lucide-react';
 
 /**
- * TestimonialsSection — seção de reviews/depoimentos para landing
+ * TestimonialsSection — reviews/testimonials section for the landing page
  */
 export default function TestimonialsSection() {
   const testimonials = [
     {
       name: 'Marcus Silva',
-      role: 'Atleta Competitivo',
+      role: 'Competitive Athlete',
       rating: 5,
-      text: 'Atlas Core transformou meu treino. Pela primeira vez vejo realmente meu progresso — comparar treinos de 6 meses atrás vs hoje é incrível. Ganho consistente de força.',
+      text: 'Atlas Core transformed how I train. For the first time I can actually see progress over time, and comparing workouts from six months ago with today is incredibly motivating.',
       avatar: '👨‍💼',
     },
     {
       name: 'Ana Martins',
       role: 'Personal Trainer',
       rating: 5,
-      text: 'Como coach, Atlas é um game-changer. Vejo dados dos meus alunos em tempo real, sei quem está aderindo, quem precisa de ajuste. Relatórios em PDF impressionam meus clientes.',
+      text: 'As a coach, Atlas is a game changer. I can see athlete data in real time, spot who is adhering, and know exactly who needs an adjustment. The PDF reports are client-ready.',
       avatar: '👩‍🏫',
     },
     {
       name: 'Dr. Carlos Rocha',
-      role: 'Nutricionista',
+      role: 'Nutritionist',
       rating: 5,
-      text: 'Atlas me permite prescrever com precisão e acompanhar. Os gráficos de Plan vs Execution revelam comportamentos que conversas não mostram. Clientes adoram a clareza.',
+      text: 'Atlas lets me prescribe with precision and follow through with context. Plan-versus-execution views reveal patterns that conversations alone never surface, and clients love the clarity.',
       avatar: '👨‍⚕️',
     },
     {
       name: 'Juliana Costa',
       role: 'Fitness Enthusiast',
       rating: 5,
-      text: 'Simples, mas poderoso. Não preciso de 10 apps — Atlas integra tudo. Check-ins, treino, nutrição, análise. O Atlas AI me dá insights que nunca teria visto sozinha.',
+      text: 'Simple, but powerful. I do not need ten different apps anymore. Atlas brings together check-ins, training, nutrition, and analysis, and Atlas AI surfaces insights I would have missed on my own.',
       avatar: '👩‍💻',
     },
   ];
@@ -41,13 +41,13 @@ export default function TestimonialsSection() {
       <div className="max-w-5xl mx-auto px-5 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-[hsl(var(--brand))] mb-2">
-            Confiam em Atlas Core
+            Trusted by Atlas Core users
           </p>
           <h2 className="text-3xl font-bold tracking-tight mb-3 text-[hsl(var(--fg))]">
-            O que nossos usuários dizem
+            What our users say
           </h2>
           <p className="text-[16px] text-[hsl(var(--fg-2))] max-w-2xl mx-auto">
-            Atletas, coaches, nutricionistas e clínicos compartilham como Atlas Core transformou seus treinos e resultados.
+            Athletes, coaches, nutritionists, and clinicians share how Atlas Core changed their workflow and results.
           </p>
         </div>
 
@@ -92,13 +92,13 @@ export default function TestimonialsSection() {
         {/* Trust Badges */}
         <div className="mt-16 pt-16 border-t border-[hsl(var(--border-h))]">
           <p className="text-center text-[12px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-8">
-            Usado por atletas e profissionais em todo Brasil
+            Used by athletes and professionals everywhere
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             {[
-              { icon: '🏋️', label: '5,000+\nAtletas' },
+              { icon: '🏋️', label: '5,000+\nAthletes' },
               { icon: '👨‍🏫', label: '800+\nCoaches' },
-              { icon: '🥗', label: '500+\nNutricionistas' },
+              { icon: '🥗', label: '500+\nNutritionists' },
               { icon: '⭐', label: '4.9/5\nRating' },
             ].map((stat, i) => (
               <div key={i} className="space-y-2">

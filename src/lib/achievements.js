@@ -4,29 +4,29 @@
  */
 
 export const ACHIEVEMENTS = [
-  // ── Água ──
-  { key: 'water_3d',   emoji: '💧', label: 'Hidratado',        desc: '3 dias consecutivos batendo a meta de água',   category: 'agua',    target: 3  },
-  { key: 'water_7d',   emoji: '🌊', label: 'Fonte Constante',  desc: '7 dias consecutivos batendo a meta de água',   category: 'agua',    target: 7  },
-  { key: 'water_30d',  emoji: '🏔️', label: 'Oceano',           desc: '30 dias consecutivos batendo a meta de água',  category: 'agua',    target: 30 },
+  // ── Hydration ──
+  { key: 'water_3d',   emoji: '💧', label: 'Hydrated',         desc: 'Hit your water goal for 3 straight days',      category: 'agua',    target: 3  },
+  { key: 'water_7d',   emoji: '🌊', label: 'Steady Flow',      desc: 'Hit your water goal for 7 straight days',      category: 'agua',    target: 7  },
+  { key: 'water_30d',  emoji: '🏔️', label: 'Ocean Mode',      desc: 'Hit your water goal for 30 straight days',     category: 'agua',    target: 30 },
 
   // ── Check-ins ──
-  { key: 'checkin_7d',  emoji: '📋', label: 'Check-in Warrior', desc: '7 dias consecutivos de check-in',             category: 'checkin', target: 7  },
-  { key: 'checkin_14d', emoji: '🗓️', label: 'Consistente',      desc: '14 dias consecutivos de check-in',            category: 'checkin', target: 14 },
-  { key: 'checkin_30d', emoji: '🔥', label: 'Imparável',        desc: '30 dias consecutivos de check-in',            category: 'checkin', target: 30 },
+  { key: 'checkin_7d',  emoji: '📋', label: 'Check-in Warrior', desc: 'Complete check-ins for 7 straight days',      category: 'checkin', target: 7  },
+  { key: 'checkin_14d', emoji: '🗓️', label: 'Consistent',       desc: 'Complete check-ins for 14 straight days',     category: 'checkin', target: 14 },
+  { key: 'checkin_30d', emoji: '🔥', label: 'Unstoppable',      desc: 'Complete check-ins for 30 straight days',     category: 'checkin', target: 30 },
 
-  // ── Treinos ──
-  { key: 'workout_5',   emoji: '💪', label: 'Começando',        desc: '5 treinos registrados',                       category: 'treino',  target: 5  },
-  { key: 'workout_20',  emoji: '🏋️', label: 'Dedicado',         desc: '20 treinos registrados',                      category: 'treino',  target: 20 },
-  { key: 'workout_50',  emoji: '🥇', label: 'Veterano',         desc: '50 treinos registrados',                      category: 'treino',  target: 50 },
-  { key: 'workout_3streak', emoji: '⚡', label: 'Sequência',    desc: '3 semanas consecutivas com treino',           category: 'treino',  target: 3  },
+  // ── Workouts ──
+  { key: 'workout_5',   emoji: '💪', label: 'Getting Started',  desc: 'Log 5 workouts',                              category: 'treino',  target: 5  },
+  { key: 'workout_20',  emoji: '🏋️', label: 'Committed',       desc: 'Log 20 workouts',                             category: 'treino',  target: 20 },
+  { key: 'workout_50',  emoji: '🥇', label: 'Veteran',         desc: 'Log 50 workouts',                              category: 'treino',  target: 50 },
+  { key: 'workout_3streak', emoji: '⚡', label: 'Streak',       desc: 'Train for 3 straight weeks',                  category: 'treino',  target: 3  },
 
-  // ── Peso / Medidas ──
-  { key: 'measurement_5',  emoji: '📏', label: 'Monitorando',  desc: '5 medições registradas',                      category: 'corpo',   target: 5  },
-  { key: 'measurement_10', emoji: '🔬', label: 'Analítico',    desc: '10 medições registradas',                     category: 'corpo',   target: 10 },
+  // ── Body metrics ──
+  { key: 'measurement_5',  emoji: '📏', label: 'Tracking',     desc: 'Log 5 measurements',                          category: 'corpo',   target: 5  },
+  { key: 'measurement_10', emoji: '🔬', label: 'Analytical',   desc: 'Log 10 measurements',                         category: 'corpo',   target: 10 },
 
-  // ── Especiais ──
-  { key: 'first_checkin',  emoji: '🌟', label: 'Primeiro Passo', desc: 'Primeiro check-in realizado',               category: 'especial', target: 1 },
-  { key: 'perfect_week',   emoji: '👑', label: 'Semana Perfeita', desc: 'Check-in, água e treino em 7 dias seguidos', category: 'especial', target: 7 },
+  // ── Specials ──
+  { key: 'first_checkin',  emoji: '🌟', label: 'First Step',    desc: 'Complete your first check-in',                category: 'especial', target: 1 },
+  { key: 'perfect_week',   emoji: '👑', label: 'Perfect Week',  desc: 'Check-in, hydration, and training for 7 straight days', category: 'especial', target: 7 },
 ];
 
 /**

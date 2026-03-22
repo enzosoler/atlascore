@@ -42,7 +42,7 @@ export default function SubscriptionManager() {
 
   const createSubM = useMutation({
     mutationFn: (d) => base44.entities.Subscription.create({ ...d, started_at: new Date().toISOString().split('T')[0] }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-subscriptions'] }); setShowSub(false); toast.success('Assinatura criada'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-subscriptions'] }); setShowSub(false); toast.success('Subscription created'); },
   });
 
   const deleteSubM = useMutation({
@@ -52,7 +52,7 @@ export default function SubscriptionManager() {
 
   const createOvM = useMutation({
     mutationFn: (d) => base44.entities.EntitlementOverride.create(d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-overrides'] }); setShowOverride(false); toast.success('Override criado'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-overrides'] }); setShowOverride(false); toast.success('Override created'); },
   });
 
   const deleteOvM = useMutation({
@@ -67,11 +67,11 @@ export default function SubscriptionManager() {
       <div className="surface p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="t-subtitle">Assinaturas</p>
-            <p className="t-caption mt-0.5">Gerencie planos de usuários manualmente</p>
+            <p className="t-subtitle">Subscriptions</p>
+            <p className="t-caption mt-0.5">Manage user plans manually</p>
           </div>
           <button onClick={() => setShowSub(true)} className="btn btn-primary gap-1.5 h-9">
-            <Plus className="w-3.5 h-3.5" /> Novo plano
+            <Plus className="w-3.5 h-3.5" /> New plan
           </button>
         </div>
 
@@ -80,7 +80,7 @@ export default function SubscriptionManager() {
             <Loader2 className="w-4 h-4 animate-spin" /> Loading…
           </div>
         ) : subs.length === 0 ? (
-          <p className="t-caption text-center py-6">Nenhuma assinatura cadastrada</p>
+          <p className="t-caption text-center py-6">No subscriptions found</p>
         ) : (
           <div className="space-y-2">
             {subs.map(s => (
@@ -93,7 +93,7 @@ export default function SubscriptionManager() {
                     <span className="badge badge-neutral">{SOURCE_LABELS[s.source] || s.source}</span>
                   </div>
                   {s.notes && <p className="t-caption mt-0.5">{s.notes}</p>}
-                  {s.ends_at && <p className="t-caption mt-0.5">Expira: {s.ends_at}</p>}
+                  {s.ends_at && <p className="t-caption mt-0.5">Expires: {s.ends_at}</p>}
                 </div>
                 <button onClick={() => deleteSubM.mutate(s.id)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[hsl(var(--fg-2)/0.4)] hover:text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.07)] transition-colors shrink-0">
                   <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
@@ -108,16 +108,16 @@ export default function SubscriptionManager() {
       <div className="surface p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="t-subtitle flex items-center gap-2"><Gift className="w-4 h-4 text-[hsl(var(--brand-ai))]" /> Overrides manuais</p>
-            <p className="t-caption mt-0.5">Libere ou bloqueie features individualmente</p>
+            <p className="t-subtitle flex items-center gap-2"><Gift className="w-4 h-4 text-[hsl(var(--brand-ai))]" /> Manual overrides</p>
+            <p className="t-caption mt-0.5">Grant or block features individually</p>
           </div>
           <button onClick={() => setShowOverride(true)} className="btn btn-secondary gap-1.5 h-9">
-            <Plus className="w-3.5 h-3.5" /> Novo override
+            <Plus className="w-3.5 h-3.5" /> New override
           </button>
         </div>
 
         {overrides.length === 0 ? (
-          <p className="t-caption text-center py-6">Nenhum override cadastrado</p>
+          <p className="t-caption text-center py-6">No overrides found</p>
         ) : (
           <div className="space-y-2">
             {overrides.map(o => (
@@ -127,10 +127,10 @@ export default function SubscriptionManager() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[13px] font-medium">{o.user_email}</span>
                     <span className="badge badge-blue">{FEATURE_LABELS[o.feature_key] || o.feature_key}</span>
-                    <span className={`badge ${o.enabled ? 'badge-ok' : 'badge-err'}`}>{o.enabled ? 'liberado' : 'bloqueado'}</span>
+                    <span className={`badge ${o.enabled ? 'badge-ok' : 'badge-err'}`}>{o.enabled ? 'enabled' : 'blocked'}</span>
                   </div>
                   {o.reason && <p className="t-caption mt-0.5">{o.reason}</p>}
-                  {o.expires_at && <p className="t-caption mt-0.5">Expira: {o.expires_at}</p>}
+                  {o.expires_at && <p className="t-caption mt-0.5">Expires: {o.expires_at}</p>}
                 </div>
                 <button onClick={() => deleteOvM.mutate(o.id)} className="w-7 h-7 rounded-lg flex items-center justify-center text-[hsl(var(--fg-2)/0.4)] hover:text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.07)] transition-colors shrink-0">
                   <Trash2 className="w-3.5 h-3.5" strokeWidth={2} />
@@ -144,15 +144,15 @@ export default function SubscriptionManager() {
       {/* Create Subscription Dialog */}
       <Dialog open={showSub} onOpenChange={setShowSub}>
         <DialogContent className="sm:max-w-md bg-[hsl(var(--card))] border-[hsl(var(--border-h))] rounded-2xl">
-          <DialogHeader><DialogTitle>Criar assinatura manual</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Create manual subscription</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="t-label block mb-1.5">Email do usuário</label>
+              <label className="t-label block mb-1.5">User email</label>
               <Input value={subForm.user_email} onChange={e => setSubForm(f => ({ ...f, user_email: e.target.value }))} placeholder="user@example.com" className="h-10 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="t-label block mb-1.5">Plano</label>
+                <label className="t-label block mb-1.5">Plan</label>
                 <Select value={subForm.plan_code} onValueChange={v => setSubForm(f => ({ ...f, plan_code: v }))}>
                   <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -171,15 +171,15 @@ export default function SubscriptionManager() {
               </div>
             </div>
             <div>
-              <label className="t-label block mb-1.5">Expira em (opcional)</label>
+              <label className="t-label block mb-1.5">Expires on (optional)</label>
               <Input type="date" value={subForm.ends_at} onChange={e => setSubForm(f => ({ ...f, ends_at: e.target.value }))} className="h-10 rounded-lg text-base" />
             </div>
             <div>
-              <label className="t-label block mb-1.5">Observações</label>
-              <Input value={subForm.notes} onChange={e => setSubForm(f => ({ ...f, notes: e.target.value }))} placeholder="Ex: gift para parceiro, trial manual…" className="h-10 rounded-lg text-base" />
+              <label className="t-label block mb-1.5">Notes</label>
+              <Input value={subForm.notes} onChange={e => setSubForm(f => ({ ...f, notes: e.target.value }))} placeholder="Example: partner gift or manual trial" className="h-10 rounded-lg text-base" />
             </div>
             <button onClick={() => createSubM.mutate(subForm)} disabled={!subForm.user_email || createSubM.isPending} className="btn btn-primary w-full h-11 rounded-xl text-[14px]">
-              {createSubM.isPending ? 'Criando…' : 'Criar assinatura'}
+              {createSubM.isPending ? 'Creating...' : 'Create subscription'}
             </button>
           </div>
         </DialogContent>
@@ -188,10 +188,10 @@ export default function SubscriptionManager() {
       {/* Create Override Dialog */}
       <Dialog open={showOverride} onOpenChange={setShowOverride}>
         <DialogContent className="sm:max-w-md bg-[hsl(var(--card))] border-[hsl(var(--border-h))] rounded-2xl">
-          <DialogHeader><DialogTitle>Criar override manual</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Create manual override</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="t-label block mb-1.5">Email do usuário</label>
+              <label className="t-label block mb-1.5">User email</label>
               <Input value={ovForm.user_email} onChange={e => setOvForm(f => ({ ...f, user_email: e.target.value }))} placeholder="user@example.com" className="h-10 rounded-lg text-base" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -205,26 +205,26 @@ export default function SubscriptionManager() {
                 </Select>
               </div>
               <div>
-                <label className="t-label block mb-1.5">Ação</label>
+                <label className="t-label block mb-1.5">Action</label>
                 <Select value={String(ovForm.enabled)} onValueChange={v => setOvForm(f => ({ ...f, enabled: v === 'true' }))}>
                   <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Liberar</SelectItem>
-                    <SelectItem value="false">Bloquear</SelectItem>
+                    <SelectItem value="true">Enable</SelectItem>
+                    <SelectItem value="false">Block</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div>
-              <label className="t-label block mb-1.5">Expira em (opcional)</label>
+              <label className="t-label block mb-1.5">Expires on (optional)</label>
               <Input type="date" value={ovForm.expires_at} onChange={e => setOvForm(f => ({ ...f, expires_at: e.target.value }))} className="h-10 rounded-lg text-base" />
             </div>
             <div>
-              <label className="t-label block mb-1.5">Motivo</label>
-              <Input value={ovForm.reason} onChange={e => setOvForm(f => ({ ...f, reason: e.target.value }))} placeholder="Ex: gift, trial, compensação…" className="h-10 rounded-lg text-base" />
+              <label className="t-label block mb-1.5">Reason</label>
+              <Input value={ovForm.reason} onChange={e => setOvForm(f => ({ ...f, reason: e.target.value }))} placeholder="Example: gift, trial, or compensation" className="h-10 rounded-lg text-base" />
             </div>
             <button onClick={() => createOvM.mutate(ovForm)} disabled={!ovForm.user_email || createOvM.isPending} className="btn btn-primary w-full h-11 rounded-xl text-[14px]">
-              {createOvM.isPending ? 'Criando…' : 'Criar override'}
+              {createOvM.isPending ? 'Creating...' : 'Create override'}
             </button>
           </div>
         </DialogContent>

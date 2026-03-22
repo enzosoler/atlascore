@@ -49,7 +49,7 @@ export default function NutritionistPrescribeDiet() {
   const saveMut = useMutation({
     mutationFn: (data) => base44.entities.PrescribedDiet.create(data),
     onSuccess: () => {
-      toast.success('Dieta prescrita com sucesso!');
+      toast.success('Diet plan prescribed successfully');
       qc.invalidateQueries(['nutritionist-client']);
       navigate(-1);
     },
@@ -57,7 +57,7 @@ export default function NutritionistPrescribeDiet() {
 
   const handleSave = () => {
     if (!form.client_email || !form.name) {
-      toast.error('Nome e email do cliente são obrigatórios');
+      toast.error('Client name and email are required');
       return;
     }
     const payload = {};
@@ -89,71 +89,71 @@ export default function NutritionistPrescribeDiet() {
         <SectionCard title="Plan details" subtitle="Define the name, targets, schedule, and notes.">
           <div className="space-y-4">
           <div>
-            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Nome do plano</label>
+            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Plan name</label>
             <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Cutting Phase, Bulk Protocol" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
           </div>
 
           <div>
-            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Descrição</label>
-            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Detalhes do plano…" className="atlas-field min-h-[112px] w-full rounded-[14px] border-0 bg-transparent px-4 py-3 text-base outline-none placeholder:text-[hsl(var(--fg-3))]" />
+            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Description</label>
+            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Plan details..." className="atlas-field min-h-[112px] w-full rounded-[14px] border-0 bg-transparent px-4 py-3 text-base outline-none placeholder:text-[hsl(var(--fg-3))]" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Calorias diárias</label>
+              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Daily calories</label>
               <Input type="number" value={form.target_calories} onChange={e => setForm(f => ({ ...f, target_calories: e.target.value }))} placeholder="2200" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
             </div>
             <div>
-              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Proteína (g)</label>
+              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Protein (g)</label>
               <Input type="number" value={form.target_protein} onChange={e => setForm(f => ({ ...f, target_protein: e.target.value }))} placeholder="160" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
             </div>
             <div>
-              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Carboidratos (g)</label>
+              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Carbs (g)</label>
               <Input type="number" value={form.target_carbs} onChange={e => setForm(f => ({ ...f, target_carbs: e.target.value }))} placeholder="250" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
             </div>
             <div>
-              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Gordura (g)</label>
+              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Fat (g)</label>
               <Input type="number" value={form.target_fat} onChange={e => setForm(f => ({ ...f, target_fat: e.target.value }))} placeholder="70" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Água (L/dia)</label>
+              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Water (L/day)</label>
               <Input type="number" step="0.5" value={form.target_water} onChange={e => setForm(f => ({ ...f, target_water: e.target.value }))} placeholder="3" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
             </div>
             <div>
-              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Frequência</label>
+              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Frequency</label>
               <Select value={form.frequency} onValueChange={v => setForm(f => ({ ...f, frequency: v }))}>
                 <SelectTrigger className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">Diário</SelectItem>
-                  <SelectItem value="weekdays">Dias úteis</SelectItem>
-                  <SelectItem value="weekends">Finais de semana</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekdays">Weekdays</SelectItem>
+                  <SelectItem value="weekends">Weekends</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Data inicial</label>
+              <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Start date</label>
               <Input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Restrições</label>
-            <Input value={form.restrictions.join(', ')} onChange={e => setForm(f => ({ ...f, restrictions: e.target.value.split(',').map(r => r.trim()).filter(r => r) }))} placeholder="Ex: sem lácteos, vegano, gluten-free" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
+            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Restrictions</label>
+            <Input value={form.restrictions.join(', ')} onChange={e => setForm(f => ({ ...f, restrictions: e.target.value.split(',').map(r => r.trim()).filter(r => r) }))} placeholder="Example: dairy-free, vegan, gluten-free" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
           </div>
 
           <div>
-            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Observações</label>
-            <Input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notas adicionais…" className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
+            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Notes</label>
+            <Input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Additional notes..." className="atlas-field h-12 rounded-[14px] border-0 bg-transparent px-4 text-base" />
           </div>
           </div>
         </SectionCard>
 
         <div className="flex justify-end">
           <PrimaryButton onClick={handleSave} disabled={saveMut.isPending}>
-            {saveMut.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Salvando...</> : <><Save className="h-4 w-4" /> Prescrever dieta</>}
+            {saveMut.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</> : <><Save className="h-4 w-4" /> Prescribe diet</>}
           </PrimaryButton>
         </div>
       </PageShell>

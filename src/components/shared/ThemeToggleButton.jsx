@@ -2,31 +2,27 @@ import React from 'react';
 import { Moon, SunMedium } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/lib/ThemeContext';
-import { useTranslation } from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
 
-function getThemeToggleCopy(language, nextTheme) {
-  const isPt = language === 'pt-BR';
-
+function getThemeToggleCopy(nextTheme) {
   if (nextTheme === 'light') {
     return {
-      label: isPt ? 'Claro' : 'Light',
-      ariaLabel: isPt ? 'Ativar modo claro' : 'Switch to light mode',
+      label: 'Light',
+      ariaLabel: 'Switch to light mode',
     };
   }
 
   return {
-    label: isPt ? 'Escuro' : 'Dark',
-    ariaLabel: isPt ? 'Ativar modo escuro' : 'Switch to dark mode',
+    label: 'Dark',
+    ariaLabel: 'Switch to dark mode',
   };
 }
 
 export default function ThemeToggleButton({ compact = false, className = '' }) {
   const { theme, setTheme } = useTheme();
-  const { language } = useTranslation();
 
   const nextTheme = theme === 'dark' ? 'light' : 'dark';
-  const copy = getThemeToggleCopy(language, nextTheme);
+  const copy = getThemeToggleCopy(nextTheme);
   const Icon = theme === 'dark' ? SunMedium : Moon;
 
   return (

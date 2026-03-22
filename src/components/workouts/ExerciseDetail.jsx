@@ -30,7 +30,7 @@ export default function ExerciseDetail({ exercise }) {
         <div className="w-full rounded-xl overflow-hidden bg-[hsl(var(--shell))] aspect-video flex items-center justify-center">
           <img
             src={exercise.media_gif_url}
-            alt={`Demonstração: ${exercise.name}`}
+            alt={`Demonstration: ${exercise.name}`}
             className="w-full h-full object-cover"
             loading="lazy"
           />
@@ -54,7 +54,7 @@ export default function ExerciseDetail({ exercise }) {
       {/* Form Cues */}
       {exercise.form_cues_pt && exercise.form_cues_pt.length > 0 && (
         <div>
-          <p className="t-label mb-2">Dicas de Forma</p>
+          <p className="t-label mb-2">Form cues</p>
           <ul className="space-y-1">
             {exercise.form_cues_pt.slice(0, 3).map((cue, i) => (
               <li

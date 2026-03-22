@@ -51,7 +51,7 @@ export default function NutritionistClientProfile() {
   if (loadingLink) {
     return (
       <div className="flex items-center justify-center min-h-screen gap-2 text-[hsl(var(--fg-2))]">
-        <Loader2 className="w-4 h-4 animate-spin" /> Carregando…
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading...
       </div>
     );
   }
@@ -60,9 +60,9 @@ export default function NutritionistClientProfile() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="t-subtitle mb-2">Cliente não encontrado</p>
+          <p className="t-subtitle mb-2">Client not found</p>
           <button onClick={() => navigate('/nutritionist/clients')} className="btn btn-secondary">
-            Voltar
+            Back
           </button>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function NutritionistClientProfile() {
 
   const sorted = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date));
   const chartData = sorted.map(m => ({
-    date: new Date(m.date + 'T12:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    date: new Date(m.date + 'T12:00').toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }),
     weight: m.weight,
     bf: m.body_fat,
   }));
@@ -99,7 +99,7 @@ export default function NutritionistClientProfile() {
             diets={diets}
           />
           <span className={`badge ${link.status === 'accepted' ? 'badge-ok' : 'badge-neutral'}`}>
-            {link.status === 'accepted' ? 'Ativo' : link.status === 'pending' ? 'Pendente' : link.status}
+            {link.status === 'accepted' ? 'Active' : link.status === 'pending' ? 'Pending' : link.status}
           </span>
         </div>
 
@@ -107,31 +107,31 @@ export default function NutritionistClientProfile() {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="bg-[hsl(var(--card-hi))] border border-[hsl(var(--border))] h-10 rounded-xl w-full p-1 gap-1">
             <TabsTrigger value="overview" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-              Resumo
+              Overview
             </TabsTrigger>
             {link.permissions?.can_view_meals && (
               <TabsTrigger value="meals" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                Refeições
+                Meals
               </TabsTrigger>
             )}
             {link.permissions?.can_view_measurements && (
               <TabsTrigger value="measurements" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                Medidas
+                Measurements
               </TabsTrigger>
             )}
             {link.permissions?.can_view_progress_photos && (
               <TabsTrigger value="photos" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                Fotos
+                Photos
               </TabsTrigger>
             )}
             {link.permissions?.can_view_lab_exams && (
                <TabsTrigger value="exams" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                 Exames
+                 Labs
                </TabsTrigger>
              )}
              {link.permissions?.can_view_meals && (
                <TabsTrigger value="adherence" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                 Aderência
+                 Adherence
                </TabsTrigger>
              )}
             </TabsList>
@@ -141,15 +141,15 @@ export default function NutritionistClientProfile() {
             <div className="surface rounded-xl p-5 space-y-4">
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
-                  <p className="text-[11px] text-[hsl(var(--fg-2))] uppercase tracking-wider font-medium mb-1">Refeições</p>
+                  <p className="text-[11px] text-[hsl(var(--fg-2))] uppercase tracking-wider font-medium mb-1">Meals</p>
                   <p className="text-[24px] font-bold text-[hsl(var(--fg))]">{meals.length}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] text-[hsl(var(--fg-2))] uppercase tracking-wider font-medium mb-1">Medidas</p>
+                  <p className="text-[11px] text-[hsl(var(--fg-2))] uppercase tracking-wider font-medium mb-1">Measurements</p>
                   <p className="text-[24px] font-bold text-[hsl(var(--fg))]">{measurements.length}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] text-[hsl(var(--fg-2))] uppercase tracking-wider font-medium mb-1">Planos</p>
+                  <p className="text-[11px] text-[hsl(var(--fg-2))] uppercase tracking-wider font-medium mb-1">Plans</p>
                   <p className="text-[24px] font-bold text-[hsl(var(--fg))]">{diets.length}</p>
                 </div>
               </div>
@@ -157,23 +157,23 @@ export default function NutritionistClientProfile() {
 
             {/* Permissions summary */}
             <div className="surface rounded-xl p-5 space-y-2">
-              <p className="text-[13px] font-semibold mb-3">Permissões</p>
+              <p className="text-[13px] font-semibold mb-3">Permissions</p>
               <div className="grid grid-cols-2 gap-2 text-[12px]">
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${link.permissions?.can_view_meals ? 'bg-[hsl(var(--ok))]' : 'bg-[hsl(var(--fg-2)/0.3)]'}`} />
-                  Ver refeições
+                  View meals
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${link.permissions?.can_view_measurements ? 'bg-[hsl(var(--ok))]' : 'bg-[hsl(var(--fg-2)/0.3)]'}`} />
-                  Ver medidas
+                  View measurements
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${link.permissions?.can_create_diet_plan ? 'bg-[hsl(var(--ok))]' : 'bg-[hsl(var(--fg-2)/0.3)]'}`} />
-                  Criar planos
+                  Create plans
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${link.permissions?.can_view_lab_exams ? 'bg-[hsl(var(--ok))]' : 'bg-[hsl(var(--fg-2)/0.3)]'}`} />
-                  Ver exames
+                  View labs
                 </div>
               </div>
             </div>
@@ -184,7 +184,7 @@ export default function NutritionistClientProfile() {
             <TabsContent value="meals" className="mt-4 space-y-2">
               {meals.length === 0 ? (
                 <div className="text-center py-8 text-[13px] text-[hsl(var(--fg-2))]">
-                  Nenhuma refeição registrada
+                  No meals logged
                 </div>
               ) : (
                 meals.slice(0, 10).map((m) => (
@@ -207,12 +207,12 @@ export default function NutritionistClientProfile() {
                     <XAxis dataKey="date" tick={{ fill: 'hsl(var(--fg-2))', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: 'hsl(var(--fg-2))', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                    <Line type="monotone" dataKey="weight" stroke="hsl(var(--brand))" strokeWidth={2} dot={{ r: 3 }} name="Peso" />
+                    <Line type="monotone" dataKey="weight" stroke="hsl(var(--brand))" strokeWidth={2} dot={{ r: 3 }} name="Weight" />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="text-center py-8 text-[13px] text-[hsl(var(--fg-2))]">
-                  Registre pelo menos 2 medidas para ver o gráfico
+                  Log at least 2 measurements to see the chart
                 </div>
               )}
               <div className="space-y-2">
@@ -220,7 +220,7 @@ export default function NutritionistClientProfile() {
                   <div key={m.id} className="surface p-3 text-[12px]">
                     <p className="font-semibold">{m.date}</p>
                     <p className="text-[hsl(var(--fg-2))] mt-1">
-                      {m.weight && `${m.weight}kg`} {m.body_fat && `• ${m.body_fat}% gordura`}
+                      {m.weight && `${m.weight}kg`} {m.body_fat && `• ${m.body_fat}% body fat`}
                     </p>
                   </div>
                 ))}
@@ -233,7 +233,7 @@ export default function NutritionistClientProfile() {
             <TabsContent value="photos" className="mt-4 grid grid-cols-2 gap-3">
               {photos.length === 0 ? (
                 <div className="col-span-2 text-center py-8 text-[13px] text-[hsl(var(--fg-2))]">
-                  Nenhuma foto de progresso
+                  No progress photos yet
                 </div>
               ) : (
                 photos.slice(0, 6).map((p) => (
@@ -254,7 +254,7 @@ export default function NutritionistClientProfile() {
             <TabsContent value="exams" className="mt-4 space-y-2">
               {exams.length === 0 ? (
                 <div className="text-center py-8 text-[13px] text-[hsl(var(--fg-2))]">
-                  Nenhum exame laboratorial
+                  No lab exams yet
                 </div>
               ) : (
                 exams.slice(0, 5).map((e) => (

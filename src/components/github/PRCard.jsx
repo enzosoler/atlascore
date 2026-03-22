@@ -1,11 +1,11 @@
 import { GitPullRequest, GitMerge, GitBranch, Clock, User, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 const STATE_CONFIG = {
-  open: { label: 'Aberto', color: 'badge-blue', icon: GitPullRequest },
+  open: { label: 'Open', color: 'badge-blue', icon: GitPullRequest },
   closed_merged: { label: 'Merged', color: 'badge-ok', icon: GitMerge },
-  closed: { label: 'Fechado', color: 'badge-neutral', icon: GitPullRequest },
+  closed: { label: 'Closed', color: 'badge-neutral', icon: GitPullRequest },
   draft: { label: 'Draft', color: 'badge-neutral', icon: GitPullRequest },
 };
 
@@ -16,7 +16,7 @@ export default function PRCard({ pr }) {
 
   const timeAgo = (date) => {
     try {
-      return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR });
+      return formatDistanceToNow(new Date(date), { addSuffix: true, locale: enUS });
     } catch {
       return date;
     }

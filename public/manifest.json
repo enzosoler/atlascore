@@ -1,7 +1,7 @@
 {
   "name": "atlas.core",
   "short_name": "atlas.core",
-  "description": "Treino, nutricao, exames e progresso em um sistema conectado.",
+  "description": "Training, nutrition, labs, and progress in one connected system.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#05070A",

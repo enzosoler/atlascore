@@ -25,9 +25,9 @@ const DIFFICULTY_BADGE = {
   advanced:     'badge-err',
 };
 const DIFFICULTY_LABEL = {
-  beginner:     'Iniciante',
-  intermediate: 'Intermediário',
-  advanced:     'Avançado',
+  beginner:     'Beginner',
+  intermediate: 'Intermediate',
+  advanced:     'Advanced',
 };
 
 function MusclePill({ muscle }) {
@@ -47,7 +47,7 @@ export default function ExerciseCard({
 }) {
   if (!exercise) return null;
 
-  const namePT = exercise.canonical_name_pt || exercise.name || '—';
+  const namePT = exercise.canonical_name_en || exercise.name || '—';
   const nameEN = exercise.canonical_name_en || '';
   const primaryMuscles = exercise.primary_muscles || [];
   const hasGif = !!(exercise.media?.gif_url || exercise.media_gif_url);
@@ -150,13 +150,13 @@ export default function ExerciseCard({
           )}
           {isCompound && (
             <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.1)] px-2.5 py-1 text-[10px] font-semibold text-[hsl(var(--brand))]">
-              <Zap className="h-2.5 w-2.5" /> Composto
+              <Zap className="h-2.5 w-2.5" /> Compound
             </span>
           )}
           {useCount > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.1)] px-2.5 py-1 text-[10px] font-semibold text-[hsl(var(--ok))]">
               <Sparkles className="h-2.5 w-2.5" />
-              {useCount}× usado
+              Used {useCount}x
             </span>
           )}
         </div>

@@ -3,14 +3,14 @@ import { Plus, ChevronLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const FIELDS = [
-  { key: 'name',    label: 'Nome do alimento', type: 'text',   placeholder: 'Ex: Frango assado caseiro', required: true },
-  { key: 'amount',  label: 'Quantidade',       type: 'number', placeholder: '100', required: true },
-  { key: 'unit',    label: 'Unidade',          type: 'text',   placeholder: 'g, ml, unidade...', required: true },
-  { key: 'kcal',    label: 'Calorias (kcal)',  type: 'number', placeholder: '0', required: true },
-  { key: 'protein', label: 'Proteína (g)',     type: 'number', placeholder: '0' },
-  { key: 'carbs',   label: 'Carboidratos (g)', type: 'number', placeholder: '0' },
-  { key: 'fat',     label: 'Gordura (g)',      type: 'number', placeholder: '0' },
-  { key: 'fiber',   label: 'Fibra (g)',        type: 'number', placeholder: '0' },
+  { key: 'name',    label: 'Food name',      type: 'text',   placeholder: 'Example: Homemade roast chicken', required: true },
+  { key: 'amount',  label: 'Amount',         type: 'number', placeholder: '100', required: true },
+  { key: 'unit',    label: 'Unit',           type: 'text',   placeholder: 'g, ml, serving...', required: true },
+  { key: 'kcal',    label: 'Calories (kcal)',type: 'number', placeholder: '0', required: true },
+  { key: 'protein', label: 'Protein (g)',    type: 'number', placeholder: '0' },
+  { key: 'carbs',   label: 'Carbs (g)',      type: 'number', placeholder: '0' },
+  { key: 'fat',     label: 'Fat (g)',        type: 'number', placeholder: '0' },
+  { key: 'fiber',   label: 'Fiber (g)',      type: 'number', placeholder: '0' },
 ];
 
 export default function ManualFoodEntry({ onAdd, onBack }) {
@@ -66,7 +66,7 @@ export default function ManualFoodEntry({ onAdd, onBack }) {
         disabled={!isValid}
         className="btn btn-primary w-full h-10 rounded-xl text-[13px] gap-1.5 disabled:opacity-50"
       >
-        <Plus className="w-3.5 h-3.5" /> Adicionar alimento
+        <Plus className="w-3.5 h-3.5" /> Add food
       </button>
     </div>
   );
