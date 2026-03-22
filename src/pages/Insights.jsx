@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, Brain, Moon, Shield, BarChart3 } from 'lucide-react';
+import { Activity, Brain, Moon, Shield, BarChart3, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/routes';
@@ -416,6 +416,21 @@ function InsightsContent() {
               Algumas leituras podem estar incompletas porque uma ou mais fontes falharam.
             </StatusBanner>
           ) : null}
+
+          {/* Block Review entry point */}
+          <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--shell))] px-5 py-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Block Review</p>
+              <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">
+                Leitura consolidada de 4–12 semanas com aderência, deltas e próximo passo.
+              </p>
+            </div>
+            <Button asChild size="sm" variant="outline" className="shrink-0">
+              <Link to={ROUTES.blockReview}>
+                Ver bloco <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
         </>
       ) : null}
     </PageShell>

@@ -50,6 +50,7 @@ import NutritionistClientProfile from '@/pages/nutritionist/NutritionistClientPr
 import NutritionistPrescribeDiet from '@/pages/nutritionist/NutritionistPrescribeDiet';
 import Auth from '@/pages/Auth.jsx';
 import Insights from '@/pages/Insights';
+import BlockReview from '@/pages/BlockReview';
 import Exercises from '@/pages/Exercises';
 import ExerciseDetail from '@/pages/ExerciseDetail';
 import Progress from '@/pages/Progress';
@@ -154,6 +155,7 @@ const AppRoutes = () => (
         <Route path={ROUTES.labExams} element={<LabExams />} />
         <Route path={ROUTES.atlasAI} element={<AtlasAI />} />
         <Route path={ROUTES.insights} element={<Insights />} />
+        <Route path={ROUTES.blockReview} element={<BlockReview />} />
         <Route path={ROUTES.exercises} element={<Exercises />} />
         <Route path="/exercise/:id" element={<ExerciseDetail />} />
         <Route path={ROUTES.progress} element={<Progress />} />
