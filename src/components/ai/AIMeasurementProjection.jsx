@@ -1,5 +1,5 @@
 /**
- * AIMeasurementProjection — project goal achievement timeline
+ * Measurement projection — project goal achievement timeline
  * Shows in /Measurements page
  */
 import React, { useState } from 'react';
@@ -56,7 +56,7 @@ Answer with: "In ~X weeks" or "already achieved!" + motivating tip.`);
           className="mt-2 px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
         >
           {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />}
-          {loading ? 'Calculating...' : 'Generate projection'}
+              {loading ? 'Calculating...' : 'Show projection'}
         </button>
       )}
     </div>

@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Bot,
   CheckCircle2,
   ClipboardList,
   Dumbbell,
@@ -64,8 +63,8 @@ const PLAN_SOURCES = {
       'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]',
   },
   ai: {
-    label: 'AI generated',
-    Icon: Bot,
+    label: 'Generated',
+    Icon: ClipboardList,
     className:
       'border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]',
   },
@@ -376,7 +375,7 @@ function PlanCard({ plan, onLogSession }) {
           No training plan for today
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          Build one yourself, generate with AI, or wait for your coach to assign it.
+          Build one yourself, use the structured plan builder, or wait for your coach to assign it.
         </p>
       </div>
     );
@@ -964,12 +963,12 @@ function WorkoutsContent() {
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 
       {/* ── SECTION 1: TRAINING PLAN ── */}
-      <SectionCard
+          <SectionCard
         title="Training Plan"
         subtitle={
           plannedWorkout
             ? 'Your assigned workout for today. Log a session when you start executing.'
-            : 'No plan assigned for this day. Create, generate, or request one.'
+            : 'No plan assigned for this day. Create, build, or request one.'
         }
       >
         <Card className="px-5 py-5">

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Brain,
+  BarChart3,
   CheckCircle2,
   Clock,
   Cloud,
@@ -10,6 +10,7 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
+  Camera,
   Dumbbell,
   Loader2,
   Scale,
@@ -18,7 +19,6 @@ import {
   SunMedium,
   UtensilsCrossed,
   CalendarCheck,
-  BarChart3,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -28,6 +28,7 @@ import { useI18n } from '@/lib/i18nContext';
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { getGreeting } from '@/lib/atlas-theme';
+import { generateMvpInsights } from '@/lib/insightsEngine';
 import { SafePageBoundary } from '@/components/shared/StablePage';
 import {
   TodayActionCard,
@@ -57,7 +58,7 @@ function getPreferredName(displayName, fallbackName = null) {
   return `${candidate.charAt(0).toLocaleUpperCase()}${candidate.slice(1)}`;
 }
 
-function getDateLabel(locale) {
+function getDateLabel() {
   return new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
@@ -187,15 +188,13 @@ function getWeatherPresentation(code, locale) {
   };
 }
 
-function getNextSteps(t, locale, ROUTES, {
+function getNextSteps(t, ROUTES, {
   activeWorkoutPlan,
   todaySession,
   todayMealsCount,
   recentMeasurementsCount,
   progressPhotosCount,
 }) {
-  const isEnglish = locale === 'en-US';
-
   return [
     {
       to: ROUTES.nutrition,
@@ -233,118 +232,15 @@ function getNextSteps(t, locale, ROUTES, {
       phase: 'Body',
     },
     {
-      to: progressPhotosCount > 0 ? ROUTES.atlasAI : ROUTES.progressPhotos,
-      title: progressPhotosCount > 0 ? t('today_page.nextSteps.aiTitle') : 'Add progress photo',
+      to: ROUTES.progressPhotos,
+      title: progressPhotosCount > 0 ? 'Review progress photos' : 'Add progress photo',
       description: progressPhotosCount > 0
-        ? t('today_page.nextSteps.aiDesc')
+        ? 'See how your latest checkpoints are changing over time.'
         : 'Capture a dated visual checkpoint so your photo timeline evolves with the rest of your data.',
-      icon: progressPhotosCount > 0 ? Brain : Sparkles,
-      phase: progressPhotosCount > 0 ? t('today_page.nextSteps.aiPhase') : 'Photos',
+      icon: Camera,
+      phase: 'Photos',
     },
   ];
-}
-
-// ── Simple rules-based insight generator ──────────────────────────────────────
-// Priority order: missing data warnings → positive streaks → protocol info → default
-function buildInsight(
-  t,
-  locale,
-  {
-    recentSessions,
-    todayMeals,
-    recentMeasurements,
-    activeProtocolsList,
-    activeDietPlan,
-    activeWorkoutPlan,
-    todayStr,
-  },
-) {
-  const last7 = recentSessions.filter((s) => {
-    if (!s.date) return false;
-    const diff = (new Date(todayStr) - new Date(s.date)) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff < 7;
-  });
-  const completedLast7 = last7.filter((s) => s.status === 'completed').length;
-
-  // 1. No workouts this week despite having an active plan
-  if (activeWorkoutPlan && completedLast7 === 0) {
-    return {
-      title: t('today_page.insight.noWorkoutsTitle'),
-      description: t('today_page.insight.noWorkoutsDesc'),
-    };
-  }
-
-  // 2. No meals logged today despite having an active diet plan
-  if (activeDietPlan && todayMeals.length === 0) {
-    return {
-      title: t('today_page.insight.noMealsTitle'),
-      description: t('today_page.insight.noMealsDesc'),
-    };
-  }
-
-  // 3. No measurements ever (new user prompt)
-  if (recentMeasurements.length === 0) {
-    return {
-      title: t('today_page.insight.noMeasurementsTitle'),
-      description: t('today_page.insight.noMeasurementsDesc'),
-    };
-  }
-
-  // 4. No measurements in the last 30 days (lapsed tracking)
-  const thirtyAgoStr = (() => {
-    const d = new Date(todayStr);
-    d.setDate(d.getDate() - 30);
-    return d.toISOString().split('T')[0];
-  })();
-  const hasRecentMeasure = recentMeasurements.some((m) => m.date && m.date >= thirtyAgoStr);
-  if (!hasRecentMeasure) {
-    return {
-      title: t('today_page.insight.oldMeasurementsTitle'),
-      description: t('today_page.insight.oldMeasurementsDesc'),
-    };
-  }
-
-  // 5. Great workout consistency this week
-  if (completedLast7 >= 4) {
-    return {
-      title: `${completedLast7} workouts completed in the last 7 days.`,
-      description: t('today_page.insight.workoutConsistencyDesc'),
-    };
-  }
-  if (completedLast7 >= 2) {
-    return {
-      title: `${completedLast7} workouts completed this week.`,
-      description: t('today_page.insight.workoutGoodDesc'),
-    };
-  }
-
-  // 6. Active protocol info
-  if (activeProtocolsList.length > 0) {
-    const p = activeProtocolsList[0];
-    const since = p.start_date
-      ? new Date(`${p.start_date}T12:00:00`).toLocaleDateString(
-          'en-US',
-          {
-            day: 'numeric',
-            month: 'short',
-          },
-        )
-      : null;
-    const count = activeProtocolsList.length;
-    const protocolWord = `${count} active protocol${count > 1 ? 's' : ''}.`;
-    return {
-      title: protocolWord,
-      description: since
-        ? `${p.name || 'Protocol'} ${t('today_page.insight.protocolDescWith').replace('{date}', since)}`
-        : t('today_page.insight.protocolDescDefault'),
-    };
-  }
-
-  // Default
-  return {
-    title: t('today_page.insight.defaultTitle'),
-    description: t('today_page.insight.defaultDesc'),
-  };
 }
 
 export default function Today() {
@@ -442,6 +338,22 @@ function TodayContent() {
 
   // ── Data queries ───────────────────────────────────────────────────────────
 
+  const { data: profileRow = null, isLoading: loadingProfile } = useQuery({
+    queryKey: ['today-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data || null;
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000,
+  });
+
   const { data: activeDietPlans = [], isLoading: loadingDiet } = useQuery({
     queryKey: ['today-diet-plan', user?.id],
     queryFn: async () => {
@@ -469,7 +381,12 @@ function TodayContent() {
     queryKey: ['today-sessions', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(20);
+      const { data } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('completed_at', { ascending: false })
+        .limit(60);
       // Normalise: add a `date` field (YYYY-MM-DD) from completed_at so existing logic works
       return (data || []).map((s) => ({ ...s, date: s.completed_at ? s.completed_at.split('T')[0] : null }));
     },
@@ -494,11 +411,38 @@ function TodayContent() {
     queryKey: ['today-measurements-recent', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(10);
+      const { data } = await supabase
+        .from('measurements')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(200);
       return data || [];
     },
     enabled: !!user?.id,
     staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: recentCheckins = [], isLoading: loadingCheckins } = useQuery({
+    queryKey: ['today-checkins-recent', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const start = new Date();
+      start.setDate(start.getDate() - 30);
+      const startKey = start.toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('daily_checkins')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date', startKey)
+        .order('date', { ascending: false })
+        .limit(60);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: recentProgressPhotos = [], isLoading: loadingProgressPhotos } = useQuery({
@@ -530,15 +474,25 @@ function TodayContent() {
   });
 
   const isLoading =
+    loadingProfile ||
     loadingDiet ||
     loadingWorkout ||
     loadingSessions ||
     loadingMeals ||
     loadingMeasurements ||
+    loadingCheckins ||
     loadingProgressPhotos ||
     loadingProtocols;
 
   // ── Derived state ─────────────────────────────────────────────────────────
+
+  const profile = useMemo(() => {
+    const pd = profileRow?.profile_data;
+    const fromPd = pd && typeof pd === 'object' ? pd : {};
+    const merged = { ...fromPd, ...(profileRow || {}) };
+    delete merged.profile_data;
+    return merged;
+  }, [profileRow]);
 
   const activeDietPlan = activeDietPlans[0] || null;
   const activeWorkoutPlan = activeWorkoutPlans[0] || null;
@@ -546,6 +500,31 @@ function TodayContent() {
   const activeProtocolsList = allProtocols.filter((p) => p.active && !p.end_date);
   const latestMeasurement = recentMeasurements[0] || null;
   const todaySession = recentSessions.find((s) => s.date === todayStr);
+
+  const mvp = useMemo(() => {
+    if (!user?.id) return null;
+    return generateMvpInsights({
+      today: todayStr,
+      rangeDays: 30,
+      profile,
+      workoutPlan: activeWorkoutPlan,
+      dietPlan: activeDietPlan,
+      measurements: recentMeasurements,
+      workouts: recentSessions,
+      meals: recentMeals,
+      checkins: recentCheckins,
+    });
+  }, [
+    user?.id,
+    todayStr,
+    profile,
+    activeWorkoutPlan,
+    activeDietPlan,
+    recentMeasurements,
+    recentSessions,
+    recentMeals,
+    recentCheckins,
+  ]);
 
   // ── "Done" flags for each pillar ──────────────────────────────────────────
 
@@ -644,7 +623,7 @@ function TodayContent() {
       ? `${activeProtocolsList.length} active`
       : t('today_page.noActive');
 
-  const NEXT_STEPS = getNextSteps(t, locale, ROUTES, {
+  const NEXT_STEPS = getNextSteps(t, ROUTES, {
     activeWorkoutPlan,
     todaySession,
     todayMealsCount: todayMeals.length,
@@ -738,22 +717,22 @@ function TodayContent() {
     adherenceSignals.reduce((t, i) => t + i.value, 0) / adherenceSignals.length,
   );
 
-  // ── Dynamic data-driven insight ────────────────────────────────────────────
+  const engineScore = mvp?.summary?.consistencyScore ?? null;
+  const engineSignals = (mvp?.summary?.consistencyComponents || [])
+    .filter((item) => item?.value != null)
+    .map((item) => ({ label: item.label, value: item.value }));
 
-  const insight = isLoading
-    ? {
-        title: t('today_page.insight.loadingTitle'),
-        description: t('today_page.insight.loadingDesc'),
-      }
-    : buildInsight(t, locale, {
-        recentSessions,
-        todayMeals,
-        recentMeasurements,
-        activeProtocolsList,
-        activeDietPlan,
-        activeWorkoutPlan,
-        todayStr,
-      });
+  const adherenceScore = engineScore ?? adherenceAverage;
+  const adherenceItems = engineSignals.length ? engineSignals : adherenceSignals;
+
+  const nextActionInsight =
+    (mvp?.insights || []).find((item) => item?.category === 'next_action') || null;
+  const previewTitle = isLoading
+    ? t('today_page.insight.loadingTitle')
+    : nextActionInsight?.title || t('today_page.insight.defaultTitle');
+  const previewDescription = isLoading
+    ? t('today_page.insight.loadingDesc')
+    : nextActionInsight?.body || t('today_page.insight.defaultDesc');
 
   // ── Recent activity (last 5 workout sessions) ─────────────────────────────
 
@@ -766,7 +745,7 @@ function TodayContent() {
         <div className="min-w-0">
           <p className="atlas-overline">Today</p>
           <p className="mt-2 text-[15px] font-medium tracking-[-0.02em] text-[hsl(var(--fg-2))]">
-            {getDateLabel(locale)}
+            {getDateLabel()}
           </p>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.86)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
@@ -877,17 +856,17 @@ function TodayContent() {
           title={t('today_page.adherence.title')}
         >
           <TodayAdherenceCard
-            score={isLoading ? 0 : adherenceAverage}
+            score={isLoading ? 0 : adherenceScore || 0}
             summary={
               isLoading
                 ? t('today_page.calculating')
-                : adherenceAverage >= 70
+                : adherenceScore >= 70
                   ? t('today_page.adherence.good')
-                  : adherenceAverage > 0
+                  : adherenceScore > 0
                     ? t('today_page.adherence.improve')
                     : t('today_page.adherence.configure')
             }
-            items={isLoading ? [] : adherenceSignals}
+            items={isLoading ? [] : adherenceItems}
           />
         </TodaySection>
 
@@ -898,9 +877,9 @@ function TodayContent() {
           <TodayInsightCard
             to={ROUTES.insights}
             eyebrow={t('today_page.insight.eyebrow')}
-            icon={Brain}
-            title={insight.title}
-            description={insight.description}
+            icon={BarChart3}
+            title={previewTitle}
+            description={previewDescription}
             cta={t('today_page.insight.cta')}
           />
         </TodaySection>

@@ -40,7 +40,7 @@ const USE_CASES = {
     ],
     benefits: [
       'Photos, measurements, and history in one place',
-      'Atlas AI grounded in your real usage',
+      'Progress insights grounded in your real usage',
       'Plan versus execution, visible every day',
       'Exports you can save or share',
     ],
@@ -100,7 +100,7 @@ const USE_CASES = {
       'Clients and prescriptions in one workspace',
       'Body metrics and progress tracking',
       'Nutrition reports with richer context',
-      'AI-assisted meal-plan generation when needed',
+      'Meal-plan tools when needed',
     ],
     cta: 'Start as a nutritionist',
   },

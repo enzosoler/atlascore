@@ -40,7 +40,7 @@ const TRACKING_GUIDES = [
 const FAQ_ITEMS = [
   {
     q: 'How much does Atlas Core cost?',
-    a: 'There is a free plan to get started, plus paid tiers for AI, exports, reports, and professional workflows. The full comparison lives on the pricing page.',
+    a: 'There is a free plan to get started, plus paid tiers for richer insights, exports, reports, and professional workflows. The full comparison lives on the pricing page.',
   },
   {
     q: 'Does the product work on mobile?',

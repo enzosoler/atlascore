@@ -21,12 +21,12 @@
       "line2": "Your progress.",
       "line3": "All in one place."
     },
-    "subtitle": "Workouts, nutrition, labs, measurements, and protocols — centralized, connected, and powered by contextual AI.",
+    "subtitle": "Workouts, nutrition, labs, measurements, and protocols — centralized, connected, and built for clear progress insights.",
     "features": {
       "training": "Workout and nutrition in one place",
       "labs": "Lab results and protocols",
       "analytics": "Analytics and real progress",
-      "ai": "Contextual AI based on your data"
+      "ai": "Progress insights based on your data"
     },
     "login": {
       "title": "Welcome back",
@@ -92,7 +92,7 @@
       "pending": "Pending",
       "adherenceTitle": "Strong adherence",
       "adherenceSubtitle": "Workout, nutrition, and sleep on track",
-      "aiLabel": "Atlas AI",
+      "aiLabel": "Insights",
       "aiInsight": "Consistent pattern: light Sunday sessions improve recovery by 15%. Keep it up!"
     },
     "problem": {
@@ -136,8 +136,8 @@
           "desc": "Weight, body fat, measurements, strength — all in charts showing trends. You see changes you wouldn't notice day-to-day."
         },
         "ai": {
-          "title": "AI that understands your context",
-          "desc": "Atlas AI reads your actual workouts, meals, labs, history. No generic assumptions — insights based on YOUR real data."
+          "title": "Progress insights from your real data",
+          "desc": "Atlas reads your actual workouts, meals, labs, and history. No generic assumptions — clear trends from YOUR real data."
         },
         "team": {
           "title": "Your coach/doctor in the loop",
@@ -156,7 +156,7 @@
           "Complete workout + nutrition logging",
           "Progress tracking with photos & measurements",
           "Supplement stock alerts",
-          "AI insights with real context"
+          "Progress insights with real context"
         ]
       },
       "coach": {
@@ -171,7 +171,7 @@
       },
       "nutritionist": {
         "title": "Nutritionist",
-        "desc": "You coach clients through nutrition. View meals, measurements, photos, and create meal plans with AI or manually.",
+        "desc": "You coach clients through nutrition. View meals, measurements, photos, and create meal plans manually or from structured templates.",
         "features": [
           "Client dashboard",
           "Meal history & trends",
@@ -206,8 +206,8 @@
           "after": "Labs + history + trends"
         },
         {
-          "before": "Generic AI",
-          "after": "AI powered by your real data"
+          "before": "Generic guesswork",
+          "after": "Data-driven feedback"
         },
         {
           "before": "Tracking alone",
@@ -237,10 +237,10 @@
             "Basic Today dashboard",
             "Workout and nutrition logging",
             "Measurement tracking",
-            "Limited Atlas AI"
+            "Weekly insights"
           ],
           "missing": [
-            "AI generation",
+            "Structured plan tools",
             "Lab tracking",
             "Progress photos",
             "Advanced analytics"
@@ -256,8 +256,8 @@
           "isFree": false,
           "features": [
             "Everything in Free",
-            "AI meal generation",
-            "AI workout generation",
+            "Meal plan tools",
+            "Workout plan tools",
             "Lab tracking",
             "Progress photos",
             "Full analytics",
@@ -278,7 +278,7 @@
             "Complete smart protocol tracking",
             "Premium reports",
             "Unlimited history",
-            "Advanced Atlas AI"
+            "Advanced progress summaries"
           ],
           "missing": [],
           "cta": "Subscribe to Performance"
@@ -303,7 +303,7 @@
         },
         {
           "q": "What's different in Pro ($14.99/month)?",
-          "a": "AI-powered meal + workout generation, full Atlas AI access, complete lab tracking, unlimited progress photos, 1 year history, advanced analytics, and PDF/CSV exports."
+          "a": "Structured meal and workout plan tools, complete lab tracking, unlimited progress photos, 1 year history, advanced analytics, and PDF/CSV exports."
         },
         {
           "q": "What's different in Performance ($29.99/month)?",
@@ -322,16 +322,16 @@
           "a": "Yes. No commitment, no cancellation fees. Cancel in one click. But most people stay once they see their real data trending."
         },
         {
-          "q": "Does the AI create workouts and meals automatically?",
-          "a": "Yes, on Pro and up. Give it your data (goals, weight, activity, preferences) and Atlas AI generates a starter plan. You refine it, your coach refines it — AI learns from real context."
+          "q": "Does the app build workouts and meals automatically?",
+          "a": "Yes, on Pro and up. Give it your data (goals, weight, activity, preferences) and Atlas builds a structured starting point. You refine it, your coach refines it — everything stays grounded in real context."
         },
         {
           "q": "What if I already have a plan from my coach?",
           "a": "Perfect. Log it into Atlas Core, mark it as prescribed, and track your adherence vs. the plan. Your coach sees everything and adjusts when needed."
         },
         {
-          "q": "How does Atlas AI know me?",
-          "a": "It reads your real data: logged workouts, meals, measurements, labs, active protocols. No guessing. That's why the insights are actually useful and contextual."
+          "q": "How does Atlas build insights for me?",
+          "a": "It reads your real data: logged workouts, meals, measurements, labs, and active protocols. No guessing. That's why the insights stay useful and contextual."
         }
       ]
     },
@@ -348,7 +348,7 @@
     "backToApp": "← Back to app",
     "title": "Plans & pricing",
     "heading": "Choose your plan",
-    "subtitle": "Start free. Upgrade when you need more AI, data context, and real control.",
+    "subtitle": "Start free. Upgrade when you need richer insights, more data context, and real control.",
     "athlete": "For athletes & enthusiasts",
     "professional": "For professionals",
     "professionalDesc": "Separate subscriptions for coaches and clinicians. Professional access focused on client monitoring.",
@@ -368,10 +368,10 @@
           "Basic protocols",
           "Profile & settings",
           "30-day history",
-          "Limited AI"
+          "Weekly insights"
         ],
         "missing": [
-          "AI workout/meal generation",
+          "Structured workout/meal tools",
           "Complete lab tracking",
           "Progress photos",
           "Advanced analytics",
@@ -388,14 +388,14 @@
         "cta": "Subscribe to Pro",
         "features": [
           "Everything in Free",
-          "AI meal generation",
-          "AI workout generation",
+          "Meal plan tools",
+          "Workout plan tools",
           "Meal plans & training plans",
           "Complete lab tracking",
           "Unlimited progress photos",
           "1-year history",
           "Advanced analytics",
-          "Full Atlas AI",
+          "Progress insights",
           "PDF & CSV exports",
           "Stock alerts",
           "Premium social cards"
@@ -416,7 +416,7 @@
           "Advanced stock management",
           "Premium reports",
           "Deep dashboards",
-          "Full AI with summaries",
+          "Summary insights",
           "Complete exports",
           "Unlimited history"
         ],
@@ -455,7 +455,7 @@
           "Meal plan prescription",
           "Meal history tracking",
           "Measurement & photo access",
-          "AI meal generation",
+          "Meal plan tools",
           "Nutrition reports",
           "Report exports"
         ]
@@ -498,7 +498,7 @@
         },
         {
           "emoji": "🤖",
-          "title": "Contextual AI",
+          "title": "Progress insights",
           "desc": "Insights from your data, not generic questions"
         }
       ],
@@ -506,7 +506,7 @@
     },
     "goalsAndBasics": {
       "title": "What's your main goal?",
-      "subtitle": "This sets your dashboard focus and AI recommendations",
+      "subtitle": "This sets your dashboard focus and weekly insights",
       "basics": "Basic info",
       "goals": [
         {
@@ -602,7 +602,7 @@
     "tracking": {
       "title": "What do you want to track?",
       "subtitle": "This builds your initial dashboard. You can enable/disable anytime.",
-      "hint": "Select as many as you want — more is always better for AI",
+      "hint": "Select as many as you want — more context means better insights",
       "options": [
         {
           "id": "protocol",
@@ -755,7 +755,7 @@
     "carbs": "Carbohydrates (g)",
     "fat": "Fat (g)",
     "waterTarget": "Water (L / day)",
-    "aiTone": "Atlas AI tone",
+    "aiTone": "Insight tone",
     "theme": "Theme",
     "light": "Light (default)",
     "dark": "Dark",
@@ -804,7 +804,7 @@
       "targetsTitle": "Daily performance targets",
       "targetsDesc": "Targets that make nutrition, training and recovery more coherent.",
       "trainingTitle": "Training context",
-      "trainingDesc": "Training configuration for plan generation and AI personalization."
+      "trainingDesc": "Training configuration for plan generation and personalized insights."
     },
     "fields": {
       "phone": "Phone / WhatsApp",
@@ -838,7 +838,7 @@
       "waterDesc": "Daily hydration pace.",
       "trainingGoal": "Training goal",
       "trainingGoalPlaceholder": "E.g., Lose 8kg in 6 months focusing on fat, maintain lean mass and improve cardiovascular...",
-      "trainingGoalDesc": "Direct the AI focus and plan personalization."
+      "trainingGoalDesc": "Guide the summary focus and plan personalization."
     },
     "readiness": {
       "high": "Your profile is mature enough to make goals and product readings more accurate.",
@@ -1027,9 +1027,9 @@
       "workoutTitle": "Review workout",
       "workoutDesc": "Get the main session ready before your workout window opens.",
       "workoutPhase": "Next step",
-      "aiTitle": "Ask Atlas AI",
-      "aiDesc": "Use a short prompt when you want a clear decision without extra noise.",
-      "aiPhase": "Quick insight",
+      "aiTitle": "Review progress",
+      "aiDesc": "Open a short summary when you want a clear next step without extra noise.",
+      "aiPhase": "Summary",
       "profileTitle": "Refine profile",
       "profileDesc": "Keep base preferences aligned so the app stays accurate.",
       "profilePhase": "Keep aligned"

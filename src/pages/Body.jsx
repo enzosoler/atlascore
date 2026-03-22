@@ -11,7 +11,7 @@ const TABS = [
   {
     id: 'overview',
     label: 'Progress',
-    description: 'Weight, composition, and body trend reading.',
+    description: 'Weight, composition, and body trend insights.',
     icon: TrendingUp,
   },
   {

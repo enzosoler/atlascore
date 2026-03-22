@@ -5,7 +5,6 @@ import {
   ArrowRight,
   ArrowLeft,
   BarChart3,
-  Brain,
   Dumbbell,
   FlaskConical,
   ShieldCheck,
@@ -82,7 +81,7 @@ function getDestinationLabel(destination) {
     [ROUTES.protocols]: 'Protocols',
     [ROUTES.measurements]: 'Measurements',
     [ROUTES.labExams]: 'Labs',
-    [ROUTES.atlasAI]: 'Atlas AI',
+    [ROUTES.progressReview]: 'Progress review',
     [ROUTES.insights]: 'Insights',
     [ROUTES.progress]: 'Progress',
     [ROUTES.body]: 'Body',
@@ -179,7 +178,7 @@ export default function Auth() {
       secureLabel: 'Secure access',
       heroTitle: 'Sign in and keep your progress connected in one place.',
       heroCopy:
-        'Workouts, nutrition, labs, measurements and Atlas AI stay tied to the same context so you can pick up without friction.',
+        'Workouts, nutrition, labs, measurements and progress insights stay tied to the same context so you can pick up without friction.',
       authHint: isLogin
         ? 'Sign back in to pick up your history, adherence and context without losing momentum.'
         : 'Create your account to start with training, nutrition and progress organized from day one.',
@@ -209,7 +208,7 @@ export default function Auth() {
     { icon: Dumbbell, text: t('auth.features.training') },
     { icon: FlaskConical, text: t('auth.features.labs') },
     { icon: BarChart3, text: t('auth.features.analytics') },
-    { icon: Brain, text: t('auth.features.ai') },
+    { icon: Activity, text: t('auth.features.ai') },
   ];
 
   const loginHref = React.useMemo(

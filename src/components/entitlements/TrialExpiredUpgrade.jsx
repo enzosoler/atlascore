@@ -8,7 +8,7 @@ import { ROUTES } from '@/lib/routes';
  * TrialExpiredUpgrade — shows when trial is expired for a feature
  * Only renders if user's trial status is 'trialing' but days remaining = 0
  */
-export default function TrialExpiredUpgrade({ feature = 'Atlas AI', plan = 'Pro' }) {
+export default function TrialExpiredUpgrade({ feature = 'Insights', plan = 'Pro' }) {
   const { isTrialExpired } = useSubscription();
 
   if (!isTrialExpired) return null;

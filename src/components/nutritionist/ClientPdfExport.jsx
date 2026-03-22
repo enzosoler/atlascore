@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 export default function ClientPdfExport({ link, measurements, meals, photos, exams, diets }) {
   const [loading, setLoading] = useState(false);
+  const getBodyFatValue = (measurement) => measurement?.body_fat_percent ?? measurement?.body_fat ?? null;
 
   const generate = async () => {
     setLoading(true);
@@ -66,8 +67,8 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
       const latestM = [...measurements].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
       const activeDiet = diets.find(d => d.active) || diets[0];
       const stats = [
-        ['Current weight', latestM?.weight ? `${latestM.weight} kg` : '—'],
-        ['Body fat', latestM?.body_fat ? `${latestM.body_fat}%` : '—'],
+        ['Current weight', latestM?.weight != null ? `${latestM.weight} kg` : '—'],
+        ['Body fat', getBodyFatValue(latestM) != null ? `${getBodyFatValue(latestM)}%` : '—'],
         ['Meals logged', meals.length],
         ['Measurements logged', measurements.length],
         ['Active diet plan', activeDiet ? activeDiet.name : 'None'],
@@ -156,10 +157,11 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
           doc.setFontSize(9);
           doc.setTextColor(...textColor);
           const parts = [m.date];
-          if (m.weight) parts.push(`${m.weight}kg`);
-          if (m.body_fat) parts.push(`${m.body_fat}% BF`);
-          if (m.waist) parts.push(`waist ${m.waist}cm`);
-          if (m.arms) parts.push(`arms ${m.arms}cm`);
+          if (m.weight != null) parts.push(`${m.weight}kg`);
+          const bodyFat = getBodyFatValue(m);
+          if (bodyFat != null) parts.push(`${bodyFat}% BF`);
+          if (m.waist != null) parts.push(`waist ${m.waist}cm`);
+          if (m.arms != null) parts.push(`arms ${m.arms}cm`);
           doc.text(parts.join(' · '), margin, y);
           y += 6;
         });

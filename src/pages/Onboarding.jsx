@@ -210,7 +210,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
       <div>
         <h2 className="text-[18px] font-bold mb-1">What is your main goal?</h2>
         <p className="text-[12px] text-[hsl(var(--fg-2))]">
-          This shapes your dashboard and Atlas AI recommendations
+          This shapes your dashboard and weekly insights
         </p>
       </div>
 
@@ -521,7 +521,7 @@ function PaywallPrimingScreen({ onContinue }) {
           {
             day: 'Today',
             title: 'Full access unlocked',
-            desc: 'Workouts, nutrition, AI, and labs are available from day one.',
+            desc: 'Workouts, nutrition, insights, and labs are available from day one.',
             icon: '🚀',
             highlight: true,
           },

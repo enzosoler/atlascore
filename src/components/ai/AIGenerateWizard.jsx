@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Sparkles, ChevronRight, Check } from 'lucide-react';
 
 /**
- * Smart AI wizard — shows a summary of what the system already knows,
+ * Structured plan wizard — shows what the system already knows,
  * then asks only for missing or confirmation-needed info.
  *
  * Props:
@@ -17,7 +17,6 @@ import { Loader2, Sparkles, ChevronRight, Check } from 'lucide-react';
 export default function AIGenerateWizard({ open, onClose, type, profile, onGenerate }) {
   const [step, setStep] = useState('review'); // 'review' | 'fill' | 'generating'
   const [answers, setAnswers] = useState({});
-  const [loading, setLoading] = useState(false);
 
   const set = (k, v) => setAnswers(a => ({ ...a, [k]: v }));
 
@@ -58,12 +57,10 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
 
   const handleGenerate = async () => {
     setStep('generating');
-    setLoading(true);
     try {
       await onGenerate(answers);
       onClose();
     } finally {
-      setLoading(false);
       setStep('review');
       setAnswers({});
     }
@@ -80,7 +77,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[15px]">
             <Sparkles className="w-4 h-4 text-[hsl(var(--brand-ai))]" />
-            {isDiet ? 'Generate AI Meal Plan' : 'Generate AI Workout'}
+            {isDiet ? 'Build meal plan' : 'Build workout plan'}
           </DialogTitle>
         </DialogHeader>
 
@@ -88,7 +85,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
           <div className="space-y-4">
             <div>
               <p className="text-[12px] text-[hsl(var(--fg-2))] mb-3">
-                I'll use your current profile data to generate a personalized plan.
+                I'll use your current profile data to build a personalized plan.
               </p>
               <div className="bg-[hsl(var(--shell))] rounded-xl p-3 space-y-1.5">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">What I already know about you</p>
@@ -114,7 +111,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                 Cancel
               </button>
               <button onClick={handleReview} className="btn btn-primary flex-1 h-10 rounded-xl text-[13px] gap-1.5">
-                {hasMissing ? <>Review <ChevronRight className="w-3.5 h-3.5" /></> : <><Sparkles className="w-3.5 h-3.5" /> Generate now</>}
+                {hasMissing ? <>Review <ChevronRight className="w-3.5 h-3.5" /></> : <><Sparkles className="w-3.5 h-3.5" /> Build now</>}
               </button>
             </div>
           </div>
@@ -218,7 +215,7 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
                 Back
               </button>
               <button onClick={handleGenerate} className="btn btn-primary flex-1 h-10 rounded-xl text-[13px] gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Generate now
+                <Sparkles className="w-3.5 h-3.5" /> Build now
               </button>
             </div>
           </div>
@@ -231,10 +228,10 @@ export default function AIGenerateWizard({ open, onClose, type, profile, onGener
             </div>
             <div className="text-center">
               <p className="text-[14px] font-semibold mb-1">
-                {isDiet ? 'Generating meal plan...' : 'Generating workout...'}
+                {isDiet ? 'Building meal plan...' : 'Building workout...'}
               </p>
               <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                Atlas AI is using your profile to personalize the plan
+                Your profile is being used to tailor the plan
               </p>
             </div>
           </div>

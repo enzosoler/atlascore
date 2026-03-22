@@ -56,7 +56,7 @@ export default function GettingStartedGuide() {
         <li>Liters of water you drank</li>
       </ul>
       <p>
-        This data feeds Atlas AI analysis — the more consistently you log, the better the insights become.
+        This data feeds progress insights — the more consistently you log, the better the patterns become.
       </p>
 
       <h3>Nutritional Snapshot</h3>
@@ -99,7 +99,7 @@ export default function GettingStartedGuide() {
       <ul>
         <li>Read the other <strong>Guides</strong> to learn advanced workflows</li>
         <li>Invite a <strong>Coach or Nutritionist</strong> for custom prescriptions</li>
-        <li>Explore <strong>Atlas AI</strong> for analysis and recommendations</li>
+        <li>Explore <strong>Insights</strong> for analysis and recommendations</li>
         <li>Export your data as <strong>PDF/CSV</strong> whenever needed</li>
       </ul>
 

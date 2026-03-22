@@ -146,7 +146,7 @@ export default function WorkoutLoggingGuide() {
         <li>Nutrition (did you eat enough?)</li>
       </ul>
       <p>
-        With 30+ days of data, Atlas AI can surface patterns like "you train better when you sleep 8+ hours."
+        With 30+ days of data, progress insights can surface patterns like "you train better when you sleep 8+ hours."
       </p>
 
       <blockquote>

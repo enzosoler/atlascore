@@ -201,7 +201,7 @@ Most apps fail at least two of these. Here's the list.
 
 Atlas Core was built specifically to solve the fragmentation problem. Instead of using one app for workouts, another for macros, a spreadsheet for measurements, and your camera roll for progress photos, everything lives in one system with shared context.
 
-**Where it excels:** workout logging + nutrition + supplement management + body measurements + progress photos + lab tracking + AI insights that connect all of it. It's the only app on this list where your food choices, training load, supplement protocol, and body composition history inform each other.
+**Where it excels:** workout logging + nutrition + supplement management + body measurements + progress photos + lab tracking + data-driven insights that connect all of it. It's the only app on this list where your food choices, training load, supplement protocol, and body composition history inform each other.
 
 **Where it's still growing:** it's a newer platform, which means the community features and integrations library are smaller than established players — but it's growing fast.
 

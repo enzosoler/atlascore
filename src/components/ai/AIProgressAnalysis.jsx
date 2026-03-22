@@ -1,36 +1,53 @@
 /**
- * AIProgressAnalysis — analyze weight/body fat trends
+ * Progress analysis — analyze weight/body fat trends
  * Shows in /Progress page
  */
 import React, { useState } from 'react';
 import { invokeLLM } from '@/lib/llm';
-import { Brain, Loader2 } from 'lucide-react';
+import { BarChart3, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
+import { getMeasurementFieldValue } from '@/lib/measurementModel';
 
 export default function AIProgressAnalysis({ measurements, profile }) {
   const { can } = useSubscription();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const formatValue = (value, digits = 1) => {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) {
+      return '--';
+    }
+
+    return Number(value).toFixed(digits);
+  };
+
   const generateAnalysis = async () => {
     if (!can('atlas_ai') || measurements.length < 2) return;
-    
+
     try {
       setLoading(true);
       const sorted = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date));
       const latest = sorted[sorted.length - 1];
       const oldest = sorted[0];
-      
-      const weightChange = latest.weight - oldest.weight;
-      const bfChange = latest.body_fat - oldest.body_fat;
-      const days = (new Date(latest.date) - new Date(oldest.date)) / (1000 * 60 * 60 * 24);
-      
-      const text = await invokeLLM(`Analyze these ${Math.round(days)}-day trends:
 
-- Weight: ${oldest.weight}kg -> ${latest.weight}kg (${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}kg)
-- Body fat: ${oldest.body_fat}% -> ${latest.body_fat}% (${bfChange > 0 ? '+' : ''}${bfChange.toFixed(1)}%)
-- Goal: ${profile?.target_weight}kg, ${profile?.body_fat_goal}% body fat
-- Objective: ${profile?.training_goal}
+      const latestWeight = getMeasurementFieldValue(latest, 'weight');
+      const oldestWeight = getMeasurementFieldValue(oldest, 'weight');
+      const latestBodyFat = getMeasurementFieldValue(latest, 'body_fat_percent');
+      const oldestBodyFat = getMeasurementFieldValue(oldest, 'body_fat_percent');
+      const weightChange = latestWeight !== null && oldestWeight !== null ? latestWeight - oldestWeight : 0;
+      const bfChange = latestBodyFat !== null && oldestBodyFat !== null ? latestBodyFat - oldestBodyFat : 0;
+      const days = Math.max(0, Math.round((new Date(latest.date) - new Date(oldest.date)) / (1000 * 60 * 60 * 24)));
+
+      const targetWeightText = profile?.target_weight != null ? `${formatValue(profile.target_weight)}kg` : '--';
+      const bodyFatGoalText = profile?.body_fat_goal != null ? `${formatValue(profile.body_fat_goal)}%` : '--';
+      const objectiveText = profile?.training_goal || '--';
+
+      const text = await invokeLLM(`Analyze these ${days}-day trends:
+
+- Weight: ${formatValue(oldestWeight)}kg -> ${formatValue(latestWeight)}kg (${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}kg)
+- Body fat: ${formatValue(oldestBodyFat)}% -> ${formatValue(latestBodyFat)}% (${bfChange > 0 ? '+' : ''}${bfChange.toFixed(1)}%)
+- Goal: ${targetWeightText}, ${bodyFatGoalText} body fat
+- Objective: ${objectiveText}
 
 Reply in 2-3 lines: pace of change, whether it is on track, and one actionable recommendation.`);
 
@@ -49,12 +66,12 @@ Reply in 2-3 lines: pace of change, whether it is on track, and one actionable r
           {loading ? (
             <Loader2 className="w-4 h-4 text-[hsl(var(--brand-ai))] animate-spin" strokeWidth={2} />
           ) : (
-            <Brain className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
+            <BarChart3 className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
           )}
         </div>
         <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-2">
-            <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Atlas AI - Trend analysis</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Trend analysis</span>
           </div>
           {analysis ? (
             <p className="text-[12px] text-foreground leading-relaxed">{analysis}</p>
@@ -64,8 +81,8 @@ Reply in 2-3 lines: pace of change, whether it is on track, and one actionable r
               disabled={loading}
               className="px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
             >
-              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
-              {loading ? 'Analyzing...' : 'Analyze trends'}
+              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <BarChart3 className="w-3 h-3" />}
+              {loading ? 'Reading...' : 'Review trends'}
             </button>
           )}
         </div>

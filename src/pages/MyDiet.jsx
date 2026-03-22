@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
-import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, Bot, User, Users } from 'lucide-react';
+import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, ClipboardList, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
@@ -12,9 +12,9 @@ import { AppContainer, Card, PageHeader, Section } from '@/components/shared/App
 import { EmptyState, PrimaryButton, StatusBanner } from '@/components/shared/StablePage';
 // Supabase diet plan services removed — base44 is now the single source of truth
 
-const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'You' };
-const CREATOR_BADGE  = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutral' };
-const CREATOR_ICONS  = { ai: Bot, coach: Users, user: User };
+const CREATOR_LABELS = { ai: 'Generated', coach: 'Coach', user: 'You' };
+const CREATOR_BADGE  = { ai: 'badge-neutral', coach: 'badge-blue', user: 'badge-neutral' };
+const CREATOR_ICONS  = { ai: ClipboardList, coach: Users, user: User };
 
 function MacroChip({ label, value, unit, color }) {
   return (
@@ -168,7 +168,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
       clearTimeout(timeoutId);
 
       if (res?.name) {
-        // Deactivate previous AI plans in base44
+        // Deactivate previous generated plans in base44
         for (const p of plans) {
           try { await base44.entities.DietPlan.update(p.id, { active: false }); } catch { /* noop */ }
         }
@@ -185,7 +185,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
         qc.invalidateQueries({ queryKey: ['diet-plans-active'] });
         toast.success('Diet plan generated!');
       } else {
-        setGenError('The AI response did not contain a valid plan. Please try again.');
+        setGenError('The plan response did not contain a valid structure. Please try again.');
         toast.error('Error generating. Please try again.');
       }
     } catch (err) {
@@ -194,7 +194,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
         setGenError('Generation took too long (>15s). Check your connection and try again.');
         toast.error('Timed out. Please try again.');
       } else {
-        setGenError('Error connecting to AI. Please try again in a moment.');
+        setGenError('Error connecting to the plan service. Please try again in a moment.');
         toast.error('Error generating plan.');
       }
     } finally {
@@ -208,7 +208,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
     </div>
   );
 
-  const CreatorIcon = plan ? (CREATOR_ICONS[plan.created_by_type] || Bot) : null;
+  const CreatorIcon = plan ? (CREATOR_ICONS[plan.created_by_type] || ClipboardList) : null;
 
   return (
     <AppContainer maxWidth="max-w-3xl">
@@ -219,7 +219,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
         actions={can('ai_diet_generation') ? (
           <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {plan ? 'Generate new plan' : 'Generate AI plan'}
+            {plan ? 'Build new plan' : 'Build plan'}
           </PrimaryButton>
         ) : (
           <UpgradeGate feature="ai_diet_generation" plan="Pro" />
@@ -235,11 +235,11 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
           <EmptyState
             icon={UtensilsCrossed}
             title="No active diet plan"
-            description="Generate a personalized plan with AI based on your profile, targets, and food style."
+            description="Build a personalized plan from your profile, targets, and food style."
             action={can('ai_diet_generation') ? (
               <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
                 {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                Generate with AI
+                Build plan
               </PrimaryButton>
             ) : (
               <UpgradeGate feature="ai_diet_generation" plan="Pro" />
@@ -253,7 +253,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
             <div className="flex flex-wrap items-center gap-2">
               <span className={`badge ${CREATOR_BADGE[plan.created_by_type] || 'badge-neutral'} gap-1`}>
                 {CreatorIcon && <CreatorIcon className="w-3 h-3" />}
-                {CREATOR_LABELS[plan.created_by_type] || 'AI'}
+                {CREATOR_LABELS[plan.created_by_type] || 'Generated'}
               </span>
               <span className="badge badge-neutral">v{plan.version || 1}</span>
             </div>

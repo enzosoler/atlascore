@@ -265,10 +265,10 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
 
 export function TodayInsightCard({
   to,
-  eyebrow = 'Atlas AI',
+  eyebrow = 'Insights',
   title,
   description,
-  cta = 'Abrir Atlas AI',
+  cta = 'View insights',
   icon: Icon,
 }) {
   return (

@@ -31,7 +31,7 @@ export default function TestimonialsSection() {
       name: 'Juliana Costa',
       role: 'Fitness Enthusiast',
       rating: 5,
-      text: 'Simple, but powerful. I do not need ten different apps anymore. Atlas brings together check-ins, training, nutrition, and analysis, and Atlas AI surfaces insights I would have missed on my own.',
+      text: 'Simple, but powerful. I do not need ten different apps anymore. Atlas brings together check-ins, training, nutrition, and analysis, and the insights surface patterns I would have missed on my own.',
       avatar: '👩‍💻',
     },
   ];

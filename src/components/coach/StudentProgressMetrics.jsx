@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus, Scale, Zap, Moon } from 'lucide-react';
+import { getMeasurementFieldValue } from '@/lib/measurementModel';
 
 /**
  * StudentProgressMetrics — consolidated progress view for coach
@@ -15,14 +16,26 @@ import { TrendingUp, TrendingDown, Minus, Scale, Zap, Moon } from 'lucide-react'
 export default function StudentProgressMetrics({ measurements = [], checkins = [], workouts = [] }) {
   const metrics = useMemo(() => {
     // Weight progress
-    const weights = measurements.filter(m => m.weight).sort((a, b) => new Date(a.date) - new Date(b.date));
-    const weightDelta = weights.length >= 2 ? weights[weights.length - 1].weight - weights[0].weight : null;
-    const latestWeight = weights.length > 0 ? weights[weights.length - 1].weight : null;
+    const weights = measurements
+      .map((measurement) => ({
+        ...measurement,
+        value: getMeasurementFieldValue(measurement, 'weight'),
+      }))
+      .filter((measurement) => measurement.value !== null)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    const weightDelta = weights.length >= 2 ? weights[weights.length - 1].value - weights[0].value : null;
+    const latestWeight = weights.length > 0 ? weights[weights.length - 1].value : null;
 
     // Body composition
-    const bodyFats = measurements.filter(m => m.body_fat).sort((a, b) => new Date(a.date) - new Date(b.date));
-    const bodyFatDelta = bodyFats.length >= 2 ? bodyFats[bodyFats.length - 1].body_fat - bodyFats[0].body_fat : null;
-    const latestBodyFat = bodyFats.length > 0 ? bodyFats[bodyFats.length - 1].body_fat : null;
+    const bodyFats = measurements
+      .map((measurement) => ({
+        ...measurement,
+        value: getMeasurementFieldValue(measurement, 'body_fat_percent'),
+      }))
+      .filter((measurement) => measurement.value !== null)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    const bodyFatDelta = bodyFats.length >= 2 ? bodyFats[bodyFats.length - 1].value - bodyFats[0].value : null;
+    const latestBodyFat = bodyFats.length > 0 ? bodyFats[bodyFats.length - 1].value : null;
 
     // Check-in metrics
     const recentCheckins = checkins.slice(0, 7);
@@ -155,40 +168,40 @@ export default function StudentProgressMetrics({ measurements = [], checkins = [
         <div className="surface p-5 rounded-xl">
           <p className="t-label mb-3">Latest measurements</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-            {metrics.latest.weight && (
+            {getMeasurementFieldValue(metrics.latest, 'weight') != null && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
                 <p className="text-muted-foreground mb-1">Weight</p>
-                <p className="font-bold">{metrics.latest.weight} kg</p>
+                <p className="font-bold">{getMeasurementFieldValue(metrics.latest, 'weight')} kg</p>
               </div>
             )}
-            {metrics.latest.body_fat && (
+            {getMeasurementFieldValue(metrics.latest, 'body_fat_percent') != null && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
                 <p className="text-muted-foreground mb-1">Body fat</p>
-                <p className="font-bold">{metrics.latest.body_fat}%</p>
+                <p className="font-bold">{getMeasurementFieldValue(metrics.latest, 'body_fat_percent')}%</p>
               </div>
             )}
-            {metrics.latest.waist && (
+            {getMeasurementFieldValue(metrics.latest, 'waist') != null && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
                 <p className="text-muted-foreground mb-1">Waist</p>
-                <p className="font-bold">{metrics.latest.waist} cm</p>
+                <p className="font-bold">{getMeasurementFieldValue(metrics.latest, 'waist')} cm</p>
               </div>
             )}
-            {metrics.latest.chest && (
+            {getMeasurementFieldValue(metrics.latest, 'thorax') != null && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
                 <p className="text-muted-foreground mb-1">Chest</p>
-                <p className="font-bold">{metrics.latest.chest} cm</p>
+                <p className="font-bold">{getMeasurementFieldValue(metrics.latest, 'thorax')} cm</p>
               </div>
             )}
-            {metrics.latest.arms && (
+            {getMeasurementFieldValue(metrics.latest, 'arms') != null && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
                 <p className="text-muted-foreground mb-1">Arms</p>
-                <p className="font-bold">{metrics.latest.arms} cm</p>
+                <p className="font-bold">{getMeasurementFieldValue(metrics.latest, 'arms')} cm</p>
               </div>
             )}
-            {metrics.latest.thighs && (
+            {getMeasurementFieldValue(metrics.latest, 'thighs') != null && (
               <div className="text-center p-2 rounded bg-[hsl(var(--card-hi))]">
                 <p className="text-muted-foreground mb-1">Thighs</p>
-                <p className="font-bold">{metrics.latest.thighs} cm</p>
+                <p className="font-bold">{getMeasurementFieldValue(metrics.latest, 'thighs')} cm</p>
               </div>
             )}
           </div>

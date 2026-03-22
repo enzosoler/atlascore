@@ -14,7 +14,7 @@ export const MACRO_COLORS = {
 
 // Authorship badge — maps to classes that exist in index.css
 export const AUTHOR = {
-  ai:           { label: 'Atlas AI',  cls: 'badge badge-ai' },
+  ai:           { label: 'Insights',  cls: 'badge badge-ai' },
   coach:        { label: 'Coach',     cls: 'badge badge-blue' },
   user:         { label: 'You',       cls: 'badge badge-neutral' },
   prescription: { label: 'Prescribed', cls: 'badge badge-ok' },

@@ -13,7 +13,7 @@ const DEFAULT_MESSAGES = [
 
 /**
  * Reusable "system is building something" loading screen.
- * Use for: onboarding, AI summary generation, report generation.
+ * Use for: onboarding, summary generation, report generation.
  *
  * Props:
  *   messages?: string[]  — custom rotating messages

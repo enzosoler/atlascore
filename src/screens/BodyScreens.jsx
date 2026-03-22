@@ -525,14 +525,14 @@ function Screen40_ProgressTab() {
           </ResponsiveContainer>
         </div>
 
-        {/* AI insight pill */}
+        {/* Progress insight pill */}
         <div style={{ background: `linear-gradient(135deg, ${DS.accentDim}, rgba(74,155,155,0.06))`, borderRadius: 14, border: `1px solid ${DS.accentMid}`, padding: "14px 16px" }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: 8, background: DS.accentMid, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
               <Star size={13} color={DS.accent} strokeWidth={2} />
             </div>
             <div>
-              <p style={{ fontSize: 12, fontWeight: 700, color: DS.accent, marginBottom: 4, letterSpacing: 0.1 }}>Atlas AI Insight</p>
+              <p style={{ fontSize: 12, fontWeight: 700, color: DS.accent, marginBottom: 4, letterSpacing: 0.1 }}>Insights</p>
               <p style={{ fontSize: 13, color: DS.fg2, lineHeight: 1.5 }}>
                 Consistent 0.31 kg/week loss over 12 weeks. Body fat trending down while waist reduced 2.8 cm — strong recomp signal.
               </p>

@@ -5,13 +5,14 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
-import { Sparkles, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { ClipboardList, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
 
-const CREATOR_LABELS = { ai: 'Atlas AI', coach: 'Coach', user: 'You' };
-const CREATOR_BADGE = { ai: 'badge-ai', coach: 'badge-blue', user: 'badge-neutral' };
+const CREATOR_LABELS = { ai: 'Generated', coach: 'Coach', user: 'You' };
+const CREATOR_BADGE = { ai: 'badge-neutral', coach: 'badge-blue', user: 'badge-neutral' };
+const CREATOR_ICONS = { ai: ClipboardList, coach: Users, user: User };
 
 function ExerciseCard({ exercise, index }) {
   const [open, setOpen] = useState(false);
@@ -161,6 +162,7 @@ export default function MyWorkout() {
   });
 
   const plan = plans[0] || null;
+  const CreatorIcon = plan ? (CREATOR_ICONS[plan.created_by_type] || ClipboardList) : null;
 
   const generate = async () => {
     setGenerating(true);
@@ -231,7 +233,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
         qc.invalidateQueries({ queryKey: ['workout-plans-active'] });
         toast.success('Workout plan generated successfully.');
       } else {
-        setGenError('The AI response did not include a valid plan. Please try again.');
+        setGenError('The plan response did not include a valid structure. Please try again.');
         toast.error('Could not generate the plan. Please try again.');
       }
     } catch (err) {
@@ -240,7 +242,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
         setGenError('Generation took too long (>15s). Check your connection and try again.');
         toast.error('Request timed out. Please try again.');
       } else {
-        setGenError('Could not connect to Atlas AI. Please try again in a moment.');
+        setGenError('Could not connect to the plan service. Please try again in a moment.');
         toast.error('Error generating plan.');
       }
     } finally {
@@ -279,9 +281,9 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Sparkles className="h-4 w-4" />
+                <ClipboardList className="h-4 w-4" />
               )}
-              {plan ? 'Generate new plan' : 'Generate plan with AI'}
+              {plan ? 'Generate new plan' : 'Generate plan'}
             </PrimaryButton>
           </div>
         )}
@@ -296,7 +298,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
           <EmptyState
             icon={Dumbbell}
             title="No active workout plan"
-            description="Create one manually or generate a structure with AI based on your profile and goals."
+            description="Create one manually or generate a structured plan based on your profile and goals."
             action={(
               <div className="flex flex-col gap-3 sm:flex-row">
                 <SecondaryButton
@@ -314,9 +316,9 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
                   {generating ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Sparkles className="h-4 w-4" />
+                    <ClipboardList className="h-4 w-4" />
                   )}
-                  Generate with AI
+                  Generate plan
                 </PrimaryButton>
               </div>
             )}
@@ -330,7 +332,8 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
               <span
                 className={`badge ${CREATOR_BADGE[plan.created_by_type] || 'badge-neutral'} gap-1`}
               >
-                {CREATOR_LABELS[plan.created_by_type] || 'IA'}
+                {CreatorIcon && <CreatorIcon className="w-3 h-3" />}
+                {CREATOR_LABELS[plan.created_by_type] || 'Generated'}
               </span>
               <span className="badge badge-neutral">v{plan.version || 1}</span>
             </div>

@@ -188,7 +188,7 @@ export default function Pricing() {
       signup: 'Create account',
       compareTitle: 'Plans designed for the same premium product',
       compareCopy:
-        'Start free, then expand into AI, context and professional collaboration when you need it.',
+        'Start free, then expand into richer insights and professional collaboration when you need it.',
       trustA: '7-day free trial',
       trustB: 'Change plans anytime',
       trustC: 'Secure Stripe checkout',

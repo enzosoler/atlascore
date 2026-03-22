@@ -1,5 +1,5 @@
 /**
- * AIWorkoutSuggestion — suggest next exercise based on current workout
+ * Workout suggestion — suggest next exercise based on current workout
  * Shows in /Workouts page
  */
 import React, { useState } from 'react';
@@ -51,7 +51,7 @@ Reply with ONLY the exercise name plus one line of guidance (example: "Dumbbell 
           className="mt-2 px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
         >
           {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-          {loading ? 'Generating...' : 'Suggest exercise'}
+          {loading ? 'Reading...' : 'Suggest exercise'}
         </button>
       )}
     </div>

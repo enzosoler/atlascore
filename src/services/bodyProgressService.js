@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabaseClient';
 import { base44 } from '@/api/base44Client';
+import {
+  MEASUREMENT_FIELD_DEFINITIONS,
+  normalizeMeasurementEntry,
+  prepareMeasurementWritePayload,
+} from '@/lib/measurementModel';
 
 const MEASUREMENTS_TABLE = 'measurements';
 const PROGRESS_PHOTOS_TABLE = 'progress_photos';
@@ -10,6 +15,43 @@ function requireUserId(userId) {
   if (!userId) {
     throw new Error('User session is required to access body progress data.');
   }
+}
+
+function hasOwnField(payload, key) {
+  return !!payload && Object.prototype.hasOwnProperty.call(payload, key);
+}
+
+function isEmptyMeasurementValue(value) {
+  return value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
+}
+
+function getClearedMeasurementColumns(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return {};
+  }
+
+  const cleared = {};
+
+  for (const field of MEASUREMENT_FIELD_DEFINITIONS) {
+    const candidateKeys = [field.key, field.storageKey, ...field.aliases];
+    const explicitKey = candidateKeys.find((key) => hasOwnField(payload, key));
+
+    if (!explicitKey) {
+      continue;
+    }
+
+    if (isEmptyMeasurementValue(payload[explicitKey])) {
+      cleared[field.storageKey] = null;
+    }
+  }
+
+  for (const legacyKey of ['arms', 'thighs']) {
+    if (hasOwnField(payload, legacyKey) && isEmptyMeasurementValue(payload[legacyKey])) {
+      cleared[legacyKey] = null;
+    }
+  }
+
+  return cleared;
 }
 
 function toDateKey(value) {
@@ -117,18 +159,19 @@ export async function listMeasurements(userId, limit = 200) {
     throw error;
   }
 
-  return data || [];
+  return (data || []).map((measurement) => normalizeMeasurementEntry(measurement));
 }
 
 export async function createMeasurement(userId, payload) {
   requireUserId(userId);
 
+  const writePayload = prepareMeasurementWritePayload(payload);
+
   const { data, error } = await supabase
     .from(MEASUREMENTS_TABLE)
     .insert({
-      ...payload,
+      ...writePayload,
       user_id: userId,
-      date: toDateKey(payload?.date),
     })
     .select()
     .single();
@@ -137,17 +180,57 @@ export async function createMeasurement(userId, payload) {
     throw error;
   }
 
-  return data;
+  return normalizeMeasurementEntry(data);
 }
 
 export async function updateMeasurement(userId, id, payload) {
   requireUserId(userId);
 
+  const { data: existing, error: existingError } = await supabase
+    .from(MEASUREMENTS_TABLE)
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  const mergedFieldSources = {
+    ...(existing?.field_sources || {}),
+    ...(payload?.field_sources || {}),
+  };
+
+  for (const field of MEASUREMENT_FIELD_DEFINITIONS) {
+    const rawValue =
+      payload?.[field.key] ??
+      payload?.[field.storageKey] ??
+      payload?.[field.aliases[0]] ??
+      null;
+
+    if (rawValue === null || rawValue === undefined || rawValue === '') {
+      delete mergedFieldSources[field.key];
+      delete mergedFieldSources[field.storageKey];
+      for (const alias of field.aliases) {
+        delete mergedFieldSources[alias];
+      }
+    }
+  }
+
+  const writePayload = prepareMeasurementWritePayload({
+    ...existing,
+    ...payload,
+    field_sources: mergedFieldSources,
+  });
+
+  const clearedColumns = getClearedMeasurementColumns(payload);
+
   const { data, error } = await supabase
     .from(MEASUREMENTS_TABLE)
     .update({
-      ...payload,
-      date: toDateKey(payload?.date),
+      ...writePayload,
+      ...clearedColumns,
     })
     .eq('id', id)
     .eq('user_id', userId)
@@ -158,7 +241,7 @@ export async function updateMeasurement(userId, id, payload) {
     throw error;
   }
 
-  return data;
+  return normalizeMeasurementEntry(data);
 }
 
 export async function deleteMeasurement(userId, id) {

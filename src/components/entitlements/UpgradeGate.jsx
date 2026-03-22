@@ -29,11 +29,11 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
   };
 
   const featureNames = {
-    atlas_ai: 'Atlas AI',
+    atlas_ai: 'Insights',
     lab_exams: 'Lab Exams',
     progress_photos: 'Progress Photos',
-    ai_diet_generation: 'AI Diet Generation',
-    ai_workout_generation: 'AI Workout Generation',
+    ai_diet_generation: 'Meal plan builder',
+    ai_workout_generation: 'Workout plan builder',
     advanced_protocol_tracking: 'Advanced Protocol Tracking',
     premium_exports: 'Premium Export',
     standard_exports: 'Report Export',

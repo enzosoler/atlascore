@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertCircle, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getMeasurementFieldValue } from '@/lib/measurementModel';
 
 const ICON_TONE_CLASS = {
   positive: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]',
@@ -14,10 +15,16 @@ export default function MeasurementInsights({ measurements, latest }) {
   const sorted = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date));
   const oldest = sorted[0];
 
-  const weightChange = latest.weight - oldest.weight;
-  const bfChange =
-    latest.body_fat && oldest.body_fat ? latest.body_fat - oldest.body_fat : null;
-  const waistChange = latest.waist && oldest.waist ? latest.waist - oldest.waist : null;
+  const latestWeight = getMeasurementFieldValue(latest, 'weight');
+  const oldestWeight = getMeasurementFieldValue(oldest, 'weight');
+  const latestBodyFat = getMeasurementFieldValue(latest, 'body_fat_percent');
+  const oldestBodyFat = getMeasurementFieldValue(oldest, 'body_fat_percent');
+  const latestWaist = getMeasurementFieldValue(latest, 'waist');
+  const oldestWaist = getMeasurementFieldValue(oldest, 'waist');
+
+  const weightChange = latestWeight !== null && oldestWeight !== null ? latestWeight - oldestWeight : 0;
+  const bfChange = latestBodyFat !== null && oldestBodyFat !== null ? latestBodyFat - oldestBodyFat : null;
+  const waistChange = latestWaist !== null && oldestWaist !== null ? latestWaist - oldestWaist : null;
 
   const daysElapsed = Math.floor(
     (new Date(`${latest.date}T12:00:00`) - new Date(`${oldest.date}T12:00:00`)) /
@@ -25,8 +32,8 @@ export default function MeasurementInsights({ measurements, latest }) {
   );
   const weeksElapsed = daysElapsed / 7;
 
-  const weightRate = weeksElapsed > 0 ? weightChange / weeksElapsed : 0;
-  const projectedWeight8w = latest.weight + weightRate * 8;
+  const weightRate = weeksElapsed > 0 && latestWeight !== null && oldestWeight !== null ? weightChange / weeksElapsed : 0;
+  const projectedWeight8w = latestWeight !== null ? latestWeight + weightRate * 8 : null;
 
   const insights = [];
 
@@ -64,7 +71,7 @@ export default function MeasurementInsights({ measurements, latest }) {
       label: 'Current rate',
       icon: AlertCircle,
       tone: 'neutral',
-      text: `Average rate of ${Math.abs(weightRate).toFixed(2)}kg per week. At the same pace, the 8-week projection points to ${projectedWeight8w.toFixed(1)}kg.`,
+      text: `Average rate of ${Math.abs(weightRate).toFixed(2)}kg per week. At the same pace, the 8-week projection points to ${projectedWeight8w?.toFixed(1) ?? '--'}kg.`,
     });
   }
 
@@ -80,12 +87,12 @@ export default function MeasurementInsights({ measurements, latest }) {
   return (
     <div className="rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
       <div>
-        <p className="atlas-overline">Automated reading</p>
+        <p className="atlas-overline">Trend reading</p>
         <p className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-          Signals detected in period
+          Clear signals in the current period
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          An automatic summary of your current body curve, without competing with the main visualization.
+          A rules-based summary of your current body curve, without competing with the main visualization.
         </p>
       </div>
 

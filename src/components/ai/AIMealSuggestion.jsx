@@ -1,5 +1,5 @@
 /**
- * AIMealSuggestion — suggest next meal based on current intake
+ * Meal suggestion — suggest next meal based on current intake
  * Shows in /Nutrition page
  */
 import React, { useState } from 'react';
@@ -53,7 +53,7 @@ Reply with: "Next meal: [name] - [simple ingredients, ~cal kcal]".`);
           className="mt-2 px-3 py-1.5 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))] text-[11px] font-medium hover:bg-[hsl(var(--brand-ai)/0.2)] transition-colors flex items-center gap-1"
         >
           {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-          {loading ? 'Generating...' : 'Suggest meal'}
+          {loading ? 'Reading...' : 'Suggest meal'}
         </button>
       )}
     </div>

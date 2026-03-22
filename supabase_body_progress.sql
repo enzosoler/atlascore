@@ -15,19 +15,75 @@ CREATE TABLE IF NOT EXISTS measurements (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     uuid NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
   date        date NOT NULL,
+  age         numeric(4, 0),          -- years
+  height      numeric(6, 2),          -- cm
   weight      numeric(6, 2),          -- kg
   body_fat    numeric(5, 2),          -- %
   waist       numeric(6, 2),          -- cm
+  neck        numeric(6, 2),          -- cm
+  abdomen     numeric(6, 2),          -- cm
+  shoulders   numeric(6, 2),          -- cm
   chest       numeric(6, 2),          -- cm
   arms        numeric(6, 2),          -- cm
+  left_bicep  numeric(6, 2),          -- cm
+  right_bicep numeric(6, 2),          -- cm
+  left_forearm numeric(6, 2),         -- cm
+  right_forearm numeric(6, 2),        -- cm
+  scapular    numeric(6, 2),          -- cm
   thighs      numeric(6, 2),          -- cm
+  left_thigh  numeric(6, 2),          -- cm
+  right_thigh numeric(6, 2),          -- cm
+  left_calf   numeric(6, 2),          -- cm
+  right_calf  numeric(6, 2),          -- cm
   hips        numeric(6, 2),          -- cm
-  neck        numeric(6, 2),          -- cm
+  fat_mass    numeric(6, 2),          -- kg
+  total_body_water numeric(6, 2),     -- L
+  hydration_index numeric(6, 2),      -- index
+  water_in_lean_mass numeric(6, 2),   -- L/kg
+  lean_mass   numeric(6, 2),          -- kg
+  lean_mass_percent numeric(5, 2),    -- %
+  muscle_fat_ratio numeric(6, 2),     -- ratio
+  muscle_mass numeric(6, 2),          -- kg
+  muscle_mass_percent numeric(5, 2),  -- %
+  intracellular_water numeric(6, 2),  -- L
+  intracellular_water_percent numeric(5, 2), -- %
+  extracellular_water numeric(6, 2),  -- L
+  bmi         numeric(6, 2),          -- kg/m²
+  bmr         numeric(6, 2),          -- kcal/day
+  phase_angle numeric(5, 2),          -- °
+  cellular_age numeric(6, 2),         -- years
+  source      text NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'device_import', 'clinician_import', 'computed')),
+  field_sources jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at  timestamptz NOT NULL DEFAULT now(),
   notes       text,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS measurements_user_date_idx ON measurements (user_id, date DESC);
+
+CREATE OR REPLACE FUNCTION public.set_measurements_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'measurements_set_updated_at'
+  ) THEN
+    CREATE TRIGGER measurements_set_updated_at
+    BEFORE UPDATE ON measurements
+    FOR EACH ROW
+    EXECUTE FUNCTION public.set_measurements_updated_at();
+  END IF;
+END $$;
 
 -- Enable RLS
 ALTER TABLE measurements ENABLE ROW LEVEL SECURITY;

@@ -1,189 +1,92 @@
-# Atlas AI — Distributed Integration
+# Deterministic Insights - MVP Integration
 
 ## Overview
 
-Atlas AI is no longer a standalone feature page. Instead, contextual AI insights are distributed throughout the app:
+The old Atlas AI MVP has been replaced by a deterministic insights layer. The app now uses existing user data to generate trustworthy progress readings without any LLM or external AI calls.
 
-- **Today** — Daily recommendation (motivation + actionable insight)
-- **Workouts** — Next exercise suggestion (what to do next)
-- **Nutrition** — Next meal suggestion (what to eat to hit macros)
-- **Progress** — Trend analysis (pace, trajectory, goal projection)
-- **Measurements** — Goal projection (when will you hit your target)
-- **AtlasAI** (page) — Full chat interface (converse with your data)
+The main surfaces are:
 
----
+- `Today` - a short daily preview of the strongest deterministic next action
+- `Insights` - the full summary page with progress, training, nutrition, recovery, and next action
+- Legacy routes like `/AtlasAI` and `/atlas-ai` now redirect to the new insights experience
 
-## Components Created
+## Core Files
 
-### 1. AITodayInsight
-**Location**: `components/ai/AITodayInsight.jsx`
-**Shows on**: `/Today` page (default section)
-**Features**:
-- Analyzes: meals logged, workout completion, check-in mood/energy, profile goals
-- Generates: 1-2 line contextual recommendation for TODAY
-- Auto-triggers on page load (if subscribed to atlas_ai)
-- Cached (doesn't regenerate on re-render)
+- `src/lib/insightsEngine.js` - pure rule-based insights engine
+- `src/pages/Insights.jsx` - insights dashboard UI
+- `src/pages/Today.jsx` - daily preview that pulls the next action from the engine
+- `src/lib/routes.js` - route aliases and legacy redirects
 
-### 2. AIWorkoutSuggestion
-**Location**: `components/ai/AIWorkoutSuggestion.jsx`
-**Shows on**: `/Workouts` page — "Registrado" tab
-**Features**:
-- Analyzes: exercises already done, training goal
-- Generates: "Next exercise" with 1 line instruction (sets, reps, focus)
-- Button-triggered (not auto)
-- Useful during active workout
+## What The Engine Produces
 
-### 3. AIMealSuggestion
-**Location**: `components/ai/AIMealSuggestion.jsx`
-**Shows on**: `/Nutrition` page — "Registrado" tab
-**Features**:
-- Analyzes: meals logged, remaining macros, goals
-- Generates: "Next meal" with simple ingredients + cal estimate
-- Button-triggered (not auto)
-- Useful for meal planning throughout day
+### Categories
 
-### 4. AIProgressAnalysis
-**Location**: `components/ai/AIProgressAnalysis.jsx`
-**Shows on**: `/Progress` page (above metrics)
-**Features**:
-- Analyzes: weight/body fat trends over 4-12 weeks
-- Generates: pace assessment + trajectory + actionable tip
-- Button-triggered (requires 2+ measurements)
-- Shows "moving right direction", "pacing good", etc.
+- Progress
+- Training
+- Nutrition
+- Recovery
+- Next action
 
-### 5. AIMeasurementProjection
-**Location**: `components/ai/AIMeasurementProjection.jsx`
-**Shows on**: `/Measurements` page (before chart)
-**Features**:
-- Analyzes: current weight, target, weekly rate of change
-- Generates: "In ~X weeks" or "already achieved!" + motivation
-- Button-triggered (requires 3+ measurements + set target)
-- Goal-focused projection
+### Summary Cards
 
----
+- This week
+- Since start
+- Trends
+- Next best action
 
-## Integration Details
+### Product Rules
 
-### API Calls
-All components use `base44.integrations.Core.InvokeLLM` with:
-- `model: 'gemini_3_flash'` (fast, cheap, good quality)
-- Short prompts (under 200 tokens)
-- Structured responses (1-3 lines max)
+- Never invent unsupported insights
+- Prefer weekly averages over noisy daily values
+- Avoid shaming language
+- Show context alongside every reading
+- Return a safe baseline when there is not enough data
 
-### Entitlement Check
-All components check `can('atlas_ai')` before rendering:
-- Free users: components don't show
-- Pro+ users: components show + work
+## Data Inputs
 
-### Performance
-- **Auto-triggered**: Only AITodayInsight (on page load)
-- **Button-triggered**: All others (user clicks "Sugerir...", "Analisar...", etc.)
-- **No caching yet** — each generation is fresh (can add localStorage later if needed)
+The engine reads only the current user's own data:
 
----
+- body measurements
+- workouts
+- food logs
+- daily check-ins
+- active workout and diet plans
+- profile targets
 
-## Data Passed to AI
+## UI Behaviour
 
-### Today Insight
-```
-- meals logged count
-- workout completed (true/false)
-- checkin: mood (1-5), energy (1-5)
-- profile: calories_target, training_goal
-```
+### Today
 
-### Workout Suggestion
-```
-- exercises already done (names)
-- profile.training_goal
-```
+The Today page now previews the next deterministic action, chosen from the weakest meaningful signal in the dashboard.
 
-### Meal Suggestion
-```
-- meals already logged (types: breakfast, lunch, etc.)
-- remaining macros: calories, protein, carbs, fat
-- profile.training_goal
-```
+### Insights
 
-### Progress Analysis
-```
-- weight change: old → new (kg)
-- body fat change: old → new (%)
-- days tracked
-- profile: target_weight, body_fat_goal, training_goal
-```
+The Insights page presents:
 
-### Measurement Projection
-```
-- current weight (kg)
-- target weight (kg)
-- weekly rate of change (estimated from history)
-- measurements count
-```
+- a consistency score
+- weekly summary cards
+- lifetime / since-start deltas
+- trend readings
+- a deterministic next action card
 
----
+## No AI Dependency
 
-## `/AtlasAI` Page (Unchanged)
+This implementation does not call:
 
-The full Atlas AI chat page remains at `/AtlasAI`:
-- Real-time conversation with your data
-- No character limits
-- Create/load/persist conversations
-- Access from top menu or Today page link
+- LLM APIs
+- prompt services
+- third-party inference providers
 
----
+All outputs are derived from deterministic calculations in the app.
 
-## User Experience Flow
+## Validation
 
-### Athlete Flow
-1. Opens `/Today` → sees AI insight for the day ("Complete your 3 meals today to hit protein goal")
-2. Opens `/Workouts` → logs exercises → clicks "Suggest Exercise" → gets the next move
-3. Opens `/Nutrition` → logs meals → clicks "Suggest Meal" → gets a meal idea
-4. Opens `/Progress` → clicks "Analyze Trends" → gets an assessment
-5. Opens `/Measurements` → clicks "Generate Projection" → sees the goal timeline
-6. Opens `/AtlasAI` → deep chat with data
+Recommended checks:
 
-### Coach/Nutritionist Flow
-- These pages work for professionals too (shows insights on client's data if coaching)
-- Can be used for client progress review
-- Insights help with recommendations
+1. Run the engine tests
+2. Build the app
+3. Confirm the Today page and Insights page render without loading errors
 
----
+## Legacy Notes
 
-## Files Modified
-
-- `pages/Today.js` — Added AITodayInsight + improved AI link
-- `pages/Workouts.js` — Added AIWorkoutSuggestion in "Registrado" tab
-- `pages/Nutrition.js` — Added AIMealSuggestion in "Registrado" tab
-- `pages/Progress.js` — Added AIProgressAnalysis before metrics
-- `pages/Measurements.js` — Added AIMeasurementProjection before chart
-
----
-
-## Future Enhancements
-
-- Cache results in localStorage (24h TTL)
-- Detect when user opens a new page without logging (skip AI to save credits)
-- Add "view analysis" button to see full AI response in modal
-- Aggregate insights for weekly/monthly reports
-- AI integration with coach/nutritionist dashboards
-
----
-
-## Testing
-
-### Quick Test
-1. Create trial user with Pro plan
-2. Log data: meal, workout, measurement, checkin
-3. Visit `/Today` → should show insight auto
-4. Visit `/Workouts` → click "Suggest Exercise" → should generate
-5. Visit `/Nutrition` → click "Suggest Meal" → should generate
-6. Visit `/Progress` → click "Analyze Trends" → should generate
-7. Visit `/Measurements` → click "Generate Projection" → should generate
-8. Visit `/AtlasAI` → should load chat interface
-
-### Debug
-- Check browser console for errors
-- Check Network tab for `InvokeLLM` API calls
-- Verify `can('atlas_ai')` returns true
-- Check that components don't render if not subscribed
+The old Atlas AI chat page was removed from the MVP path. Routes now point to the deterministic Insights experience instead.

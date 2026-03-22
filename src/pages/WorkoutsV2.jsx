@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
-import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
@@ -236,8 +235,6 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
 }
 
 function CreatePlanModal({ onClose, onCreated, userId }) {
-  const { locale } = useI18n();
-  const isEnglish = locale === 'en-US';
   const [name, setName] = useState('');
   const [objective, setObjective] = useState('');
   const [frequency, setFrequency] = useState(3);
@@ -554,8 +551,6 @@ function SessionCard({ session }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function WorkoutsV2() {
-  const { locale } = useI18n();
-  const isEnglish = locale === 'en-US';
   const qc = useQueryClient();
   const { user } = useAuth();
   const { can } = useSubscription();
@@ -687,7 +682,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
         });
         qc.invalidateQueries({ queryKey: ['active-workout-plan', user?.id] });
         qc.invalidateQueries({ queryKey: ['today-workout-plan', user?.id] });
-        toast.success('AI plan generated!');
+        toast.success('Plan generated!');
         setShowAIGen(false);
       } else {
         toast.error('Could not generate plan. Try again.');
@@ -728,7 +723,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
             {can('ai_workout_generation') ? (
               <SecondaryButton className="gap-2" onClick={() => setShowAIGen(true)}>
                 <Sparkles className="h-4 w-4" />
-                AI Plan
+                Plan builder
               </SecondaryButton>
             ) : null}
             <PrimaryButton className="gap-2" onClick={() => setShowCreatePlan(true)}>
@@ -744,7 +739,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
       >
         <div className="grid gap-3 sm:grid-cols-3">
           <Card className="px-4 py-4">
-            <p className="atlas-overline">{isEnglish ? 'Status' : 'Status'}</p>
+            <p className="atlas-overline">Status</p>
             <p className="mt-3 text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
               {activePlan ? activePlan.name : 'No active plan'}
             </p>
@@ -882,20 +877,20 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
         />
       )}
 
-      {/* AI Generation Modal */}
+      {/* Plan generation modal */}
       {showAIGen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="relative mx-4 w-full max-w-sm rounded-[24px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6 shadow-lg">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Atlas AI</p>
-            <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">Generate AI workout plan</h2>
-            <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">Atlas AI will create a personalized training plan based on your profile. Your current active plan will be replaced.</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Plan builder</p>
+            <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">Build workout plan</h2>
+            <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">Your profile will be used to build a personalized training plan. Your current active plan will be replaced.</p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <SecondaryButton type="button" onClick={() => setShowAIGen(false)} className="flex-1">
                 Cancel
               </SecondaryButton>
               <PrimaryButton type="button" onClick={generateAIPlan} disabled={aiGenerating} className="flex-1 gap-2">
                 {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {aiGenerating ? 'Generating...' : 'Generate'}
+                {aiGenerating ? 'Building...' : 'Build'}
               </PrimaryButton>
             </div>
           </div>

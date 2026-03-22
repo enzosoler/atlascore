@@ -4,23 +4,23 @@
  */
 
 export const FEATURE_LOCKS = {
-  // Atlas AI
+  // Insights
   atlas_ai: {
-    label: 'Atlas AI',
+    label: 'Insights',
     minPlan: 'pro',
-    description: 'Contextual insights powered by your data',
+    description: 'Weekly summaries, trend reading, and next-step guidance from your data',
   },
 
-  // AI Generation
+  // Plan builder
   ai_workout_generation: {
-    label: 'AI workout generation',
+    label: 'Workout plan builder',
     minPlan: 'pro',
-    description: 'Create personalized workouts automatically',
+    description: 'Create structured workouts from your profile',
   },
   ai_diet_generation: {
-    label: 'AI diet generation',
+    label: 'Meal plan builder',
     minPlan: 'pro',
-    description: 'Create personalized diet plans automatically',
+    description: 'Create structured meal plans from your profile',
   },
 
   // Labs

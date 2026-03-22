@@ -45,18 +45,26 @@ import { useI18n } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 import {
+  MEASUREMENT_COMPOSITION_SECTION,
+  MEASUREMENT_FIELD_MAP,
+  MEASUREMENT_MANUAL_FIELD_SECTIONS,
+  MEASUREMENT_SOURCE_OPTIONS,
+  MEASUREMENT_TREND_FIELD_KEYS,
+  computeDerivedMeasurementFields,
+  countFilledMeasurementFields,
+  getMeasurementFieldErrors,
+  getMeasurementFieldSourceLabel,
+  getMeasurementFieldValue,
+  getMeasurementFormState,
+  getMeasurementValidationSummary,
+  measurementFormSchema,
+} from '@/lib/measurementModel';
+import {
   createMeasurement,
   deleteMeasurement,
   listMeasurements,
   updateMeasurement,
 } from '@/services/bodyProgressService';
-import {
-  BODY_FIELD_KEYS,
-  getMeasurementFieldErrors,
-  getMeasurementFormState,
-  getMeasurementValidationSummary,
-  measurementFormSchema,
-} from '@/lib/measurementCheckpoint';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -65,95 +73,51 @@ const TEXTAREA_CLASS_NAME = 'atlas-field min-h-[120px] resize-y px-4 py-3 text-b
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
-// Mock data removed — all measurements now persisted via base44.entities.Measurement
+const METRIC_STYLES = {
+  teal: { color: '#0f766e', tint: 'rgba(15, 118, 110, 0.10)', border: 'rgba(15, 118, 110, 0.24)' },
+  blue: { color: '#2563eb', tint: 'rgba(37, 99, 235, 0.10)', border: 'rgba(37, 99, 235, 0.22)' },
+  cyan: { color: '#0891b2', tint: 'rgba(8, 145, 178, 0.10)', border: 'rgba(8, 145, 178, 0.22)' },
+  indigo: { color: '#1d4ed8', tint: 'rgba(29, 78, 216, 0.10)', border: 'rgba(29, 78, 216, 0.22)' },
+  emerald: { color: '#047857', tint: 'rgba(4, 120, 87, 0.10)', border: 'rgba(4, 120, 87, 0.22)' },
+  lime: { color: '#16a34a', tint: 'rgba(22, 163, 74, 0.10)', border: 'rgba(22, 163, 74, 0.22)' },
+  amber: { color: '#a16207', tint: 'rgba(161, 98, 7, 0.10)', border: 'rgba(161, 98, 7, 0.22)' },
+  orange: { color: '#c2410c', tint: 'rgba(194, 65, 12, 0.10)', border: 'rgba(194, 65, 12, 0.22)' },
+  violet: { color: '#7c3aed', tint: 'rgba(124, 58, 237, 0.10)', border: 'rgba(124, 58, 237, 0.22)' },
+  slate: { color: '#475569', tint: 'rgba(71, 85, 105, 0.10)', border: 'rgba(71, 85, 105, 0.22)' },
+};
 
-const METRIC_OPTIONS = [
-  {
-    key: 'weight',
-    label: 'Weight',
-    unit: 'kg',
-    digits: 1,
-    color: '#0f766e',
-    tint: 'rgba(15, 118, 110, 0.10)',
-    border: 'rgba(15, 118, 110, 0.24)',
-    description: 'Total body mass to track your body without noise.',
-  },
-  {
-    key: 'body_fat',
-    label: 'Body fat',
-    unit: '%',
-    digits: 1,
-    color: '#2563eb',
-    tint: 'rgba(37, 99, 235, 0.10)',
-    border: 'rgba(37, 99, 235, 0.22)',
-    description: 'Body composition for a clean snapshot of the period.',
-  },
-  {
-    key: 'waist',
-    label: 'Waist',
-    unit: 'cm',
-    digits: 1,
-    color: '#0891b2',
-    tint: 'rgba(8, 145, 178, 0.10)',
-    border: 'rgba(8, 145, 178, 0.22)',
-    description: 'One of the most useful references to see real body change.',
-  },
-  {
-    key: 'chest',
-    label: 'Chest',
-    unit: 'cm',
-    digits: 1,
-    color: '#1d4ed8',
-    tint: 'rgba(29, 78, 216, 0.10)',
-    border: 'rgba(29, 78, 216, 0.22)',
-    description: 'Upper torso volume within your checkpoint history.',
-  },
-  {
-    key: 'arms',
-    label: 'Arms',
-    unit: 'cm',
-    digits: 1,
-    color: '#0ea5e9',
-    tint: 'rgba(14, 165, 233, 0.10)',
-    border: 'rgba(14, 165, 233, 0.22)',
-    description: 'Dedicated tracking for arm measurements without other data noise.',
-  },
-  {
-    key: 'thighs',
-    label: 'Thighs',
-    unit: 'cm',
-    digits: 1,
-    color: '#047857',
-    tint: 'rgba(4, 120, 87, 0.10)',
-    border: 'rgba(4, 120, 87, 0.22)',
-    description: 'Lower body dimension to observe body density changes.',
-  },
-  {
-    key: 'hips',
-    label: 'Hips',
-    unit: 'cm',
-    digits: 1,
-    color: '#a16207',
-    tint: 'rgba(161, 98, 7, 0.10)',
-    border: 'rgba(161, 98, 7, 0.22)',
-    description: 'Proportion and distribution measured checkpoint to checkpoint.',
-  },
-  {
-    key: 'neck',
-    label: 'Neck',
-    unit: 'cm',
-    digits: 1,
-    color: '#475569',
-    tint: 'rgba(71, 85, 105, 0.10)',
-    border: 'rgba(71, 85, 105, 0.22)',
-    description: 'Complementary metric for a more complete body portrait.',
-  },
-];
+const METRIC_OPTIONS = MEASUREMENT_TREND_FIELD_KEYS.map((key) => {
+  const field = MEASUREMENT_FIELD_MAP[key];
+
+  return {
+    ...field,
+    digits: field?.precision ?? 1,
+    ...(METRIC_STYLES[key] || METRIC_STYLES.slate),
+  };
+});
 
 const METRIC_LOOKUP = METRIC_OPTIONS.reduce((accumulator, metric) => {
   accumulator[metric.key] = metric;
   return accumulator;
 }, {});
+
+const BODY_SITE_FIELDS = MEASUREMENT_MANUAL_FIELD_SECTIONS.flatMap((section) => section.fields).filter(
+  (field) => !['weight', 'age', 'height', 'waist', 'body_fat_percent'].includes(field.key)
+);
+const BODY_SITE_FIELDS_NO_WAIST = BODY_SITE_FIELDS.filter((field) => field.key !== 'waist');
+
+const FORM_IMPORTED_SECTION = {
+  ...MEASUREMENT_COMPOSITION_SECTION,
+  className: 'rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5',
+};
+
+const FORM_SECTIONS = MEASUREMENT_MANUAL_FIELD_SECTIONS.map((section, index) => ({
+  ...section,
+  className:
+    index === 0
+      ? 'rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5'
+      : 'rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5',
+})).concat(FORM_IMPORTED_SECTION);
 
 function getMutationErrorMessage(error, fallbackMessage) {
   if (typeof error === 'string' && error.trim()) {
@@ -195,7 +159,7 @@ function getDayDifference(fromDate, toDate) {
 }
 
 function countFilledMetrics(measurement) {
-  return BODY_FIELD_KEYS.filter((field) => Number(measurement?.[field]) > 0).length;
+  return countFilledMeasurementFields(measurement);
 }
 
 function getDeltaIcon(delta) {
@@ -369,21 +333,45 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
   const daysSincePrevious = previousMeasurement
     ? getDayDifference(previousMeasurement.date, measurement.date)
     : null;
+  const historyBodyFields = BODY_SITE_FIELDS_NO_WAIST
+    .filter((field) => getMeasurementFieldValue(measurement, field.key) !== null)
+    .slice(0, 6);
+  const sourceLabel = getMeasurementFieldSourceLabel(measurement?.source);
+  const bodyFatValue = getMeasurementFieldValue(measurement, 'body_fat_percent');
+  const bmiValue = getMeasurementFieldValue(measurement, 'bmi');
 
   const keyDeltas = [
     {
       label: 'Weight',
-      delta: previousMeasurement ? measurement.weight - previousMeasurement.weight : null,
+      delta:
+        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'weight') !== null
+          ? getMeasurementFieldValue(measurement, 'weight') - getMeasurementFieldValue(previousMeasurement, 'weight')
+          : null,
       metric: METRIC_LOOKUP.weight,
     },
     {
-      label: 'Body Fat',
-      delta: previousMeasurement ? measurement.body_fat - previousMeasurement.body_fat : null,
-      metric: METRIC_LOOKUP.body_fat,
+      label: 'Body Fat %',
+      delta:
+        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'body_fat_percent') !== null
+          ? getMeasurementFieldValue(measurement, 'body_fat_percent') -
+            getMeasurementFieldValue(previousMeasurement, 'body_fat_percent')
+          : null,
+      metric: METRIC_LOOKUP.body_fat_percent,
+    },
+    {
+      label: 'BMI',
+      delta:
+        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'bmi') !== null
+          ? getMeasurementFieldValue(measurement, 'bmi') - getMeasurementFieldValue(previousMeasurement, 'bmi')
+          : null,
+      metric: METRIC_LOOKUP.bmi,
     },
     {
       label: 'Waist',
-      delta: previousMeasurement ? measurement.waist - previousMeasurement.waist : null,
+      delta:
+        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'waist') !== null
+          ? getMeasurementFieldValue(measurement, 'waist') - getMeasurementFieldValue(previousMeasurement, 'waist')
+          : null,
       metric: METRIC_LOOKUP.waist,
     },
   ];
@@ -399,6 +387,9 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               Body checkpoint
             </span>
             <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
+              {sourceLabel}
+            </span>
+            <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
               {previousMeasurement ? `${daysSincePrevious} days after previous` : 'First entry'}
             </span>
           </div>
@@ -412,18 +403,24 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
               })}
             </h3>
             <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              Weight {toDisplayNumber(measurement.weight)} kg · BF {toDisplayNumber(measurement.body_fat)}%
+              Weight {toDisplayNumber(getMeasurementFieldValue(measurement, 'weight'))} kg · BF{' '}
+              {toDisplayNumber(bodyFatValue)}%
               {' · '}
-              Waist {toDisplayNumber(measurement.waist)} cm
+              BMI {toDisplayNumber(bmiValue)}
+              {' · '}
+              Waist {toDisplayNumber(getMeasurementFieldValue(measurement, 'waist'))} cm
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <HistoryMetricChip label="Chest" value={measurement.chest} unit="cm" />
-            <HistoryMetricChip label="Arms" value={measurement.arms} unit="cm" />
-            <HistoryMetricChip label="Thighs" value={measurement.thighs} unit="cm" />
-            <HistoryMetricChip label="Hips" value={measurement.hips} unit="cm" />
-            <HistoryMetricChip label="Neck" value={measurement.neck} unit="cm" />
+            {historyBodyFields.map((field) => (
+              <HistoryMetricChip
+                key={field.key}
+                label={field.label}
+                value={getMeasurementFieldValue(measurement, field.key)}
+                unit={field.unit}
+              />
+            ))}
             <HistoryMetricChip label="Fields" value={countFilledMetrics(measurement)} unit="filled" />
           </div>
 
@@ -440,7 +437,7 @@ function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
         <aside className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.55)] px-5 py-5 shadow-[var(--shadow-xs)]">
           <p className="atlas-overline">Summary</p>
           <p className="mt-3 text-[2rem] font-semibold tracking-[-0.065em] text-[hsl(var(--fg))]">
-            {toDisplayNumber(measurement.weight)}
+            {toDisplayNumber(getMeasurementFieldValue(measurement, 'weight'))}
             <span className="ml-1 text-[13px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
               kg
             </span>
@@ -484,6 +481,8 @@ function MeasurementField({
   unit,
   hint,
   error,
+  as = 'input',
+  options = [],
   className = '',
   inputClassName = '',
   ...props
@@ -500,16 +499,34 @@ function MeasurementField({
       </div>
 
       <div className="relative mt-2">
-        <input
-          {...props}
-          aria-invalid={!!error}
-          className={cn(
-            INPUT_CLASS_NAME,
-            unit ? 'pr-14' : '',
-            error && 'border-[hsl(var(--err)/0.52)] ring-1 ring-[hsl(var(--err)/0.18)]',
-            inputClassName
-          )}
-        />
+        {as === 'select' ? (
+          <select
+            {...props}
+            aria-invalid={!!error}
+            className={cn(
+              INPUT_CLASS_NAME,
+              error && 'border-[hsl(var(--err)/0.52)] ring-1 ring-[hsl(var(--err)/0.18)]',
+              inputClassName
+            )}
+          >
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            {...props}
+            aria-invalid={!!error}
+            className={cn(
+              INPUT_CLASS_NAME,
+              unit ? 'pr-14' : '',
+              error && 'border-[hsl(var(--err)/0.52)] ring-1 ring-[hsl(var(--err)/0.18)]',
+              inputClassName
+            )}
+          />
+        )}
         {unit ? (
           <span className="pointer-events-none absolute inset-y-0 right-4 inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">
             {unit}
@@ -522,6 +539,36 @@ function MeasurementField({
   );
 }
 
+function MeasurementFieldGroup({ section, form, fieldErrors, onFieldChange }) {
+  if (!section?.fields?.length) {
+    return null;
+  }
+
+  return (
+    <div className={section.className}>
+      <p className="atlas-overline">{section.label}</p>
+      {section.description ? (
+        <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">{section.description}</p>
+      ) : null}
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {section.fields.map((field) => (
+          <MeasurementField
+            key={field.key}
+            label={field.label}
+            unit={field.unit}
+            type="text"
+            inputMode="decimal"
+            value={form[field.key]}
+            onChange={(event) => onFieldChange(field.key, event.target.value)}
+            error={fieldErrors[field.key]}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, submitError = null, onClearError }) {
   const [form, setForm] = useState(() => getMeasurementFormState(measurement));
   const validation = useMemo(() => measurementFormSchema.safeParse(form), [form]);
@@ -530,6 +577,8 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
     () => getMeasurementValidationSummary(validation, form),
     [validation, form]
   );
+  const derivedPreview = useMemo(() => computeDerivedMeasurementFields(form), [form]);
+  const sourceOptions = useMemo(() => MEASUREMENT_SOURCE_OPTIONS, []);
   const canSubmit = validation.success && !isSaving;
 
   const updateField = (field, value) => {
@@ -561,10 +610,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
           <div className="max-w-2xl">
             <p className="atlas-overline">Checkpoint</p>
             <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              Record all measurements from the same moment.
+              Record the manual and imported measurements for this checkpoint.
             </p>
             <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              This preserves comparability and keeps the trend reading much cleaner in history.
+              Derived fields are calculated automatically from the source inputs. Imported body-composition values can be added here or later without changing the checkpoint date.
             </p>
           </div>
 
@@ -582,96 +631,50 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
             error={fieldErrors.date}
           />
 
+          <MeasurementField
+            label="Source"
+            as="select"
+            value={form.source}
+            onChange={(event) => updateField('source', event.target.value)}
+            error={fieldErrors.source}
+            options={sourceOptions}
+            hint="Record provenance"
+          />
+
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
             <p className="atlas-metric-label">Quick guide</p>
             <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              You can save with any combination of measurements. Weight is optional, but at least one body metric is required.
+              You can save with any combination of manual or imported measurements. Weight is optional, but at least one source measurement is required.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
-        <p className="atlas-overline">Core metrics</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <MeasurementField
-            label="Weight"
-            unit="kg"
-            type="text"
-            inputMode="decimal"
-            value={form.weight}
-            onChange={(event) => updateField('weight', event.target.value)}
-            error={fieldErrors.weight}
-          />
-          <MeasurementField
-            label="Body Fat"
-            unit="%"
-            type="text"
-            inputMode="decimal"
-            value={form.body_fat}
-            onChange={(event) => updateField('body_fat', event.target.value)}
-            error={fieldErrors.body_fat}
-          />
-          <MeasurementField
-            label="Waist"
-            unit="cm"
-            type="text"
-            inputMode="decimal"
-            value={form.waist}
-            onChange={(event) => updateField('waist', event.target.value)}
-            error={fieldErrors.waist}
-          />
-        </div>
-      </div>
+      {FORM_SECTIONS.map((section) => (
+        <MeasurementFieldGroup
+          key={section.key}
+          section={section}
+          form={form}
+          fieldErrors={fieldErrors}
+          onFieldChange={updateField}
+        />
+      ))}
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <p className="atlas-overline">Circumferences</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <MeasurementField
-            label="Chest"
-            unit="cm"
-            type="text"
-            inputMode="decimal"
-            value={form.chest}
-            onChange={(event) => updateField('chest', event.target.value)}
-            error={fieldErrors.chest}
-          />
-          <MeasurementField
-            label="Arms"
-            unit="cm"
-            type="text"
-            inputMode="decimal"
-            value={form.arms}
-            onChange={(event) => updateField('arms', event.target.value)}
-            error={fieldErrors.arms}
-          />
-          <MeasurementField
-            label="Thighs"
-            unit="cm"
-            type="text"
-            inputMode="decimal"
-            value={form.thighs}
-            onChange={(event) => updateField('thighs', event.target.value)}
-            error={fieldErrors.thighs}
-          />
-          <MeasurementField
-            label="Hips"
-            unit="cm"
-            type="text"
-            inputMode="decimal"
-            value={form.hips}
-            onChange={(event) => updateField('hips', event.target.value)}
-            error={fieldErrors.hips}
-          />
-          <MeasurementField
-            label="Neck"
-            unit="cm"
-            type="text"
-            inputMode="decimal"
-            value={form.neck}
-            onChange={(event) => updateField('neck', event.target.value)}
-            error={fieldErrors.neck}
-          />
+        <p className="atlas-overline">Derived preview</p>
+        <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
+          These values are computed locally from the source inputs. Imported values will keep their own provenance if a device or clinician workflow supplies them later.
+        </p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <SnapshotRow label="BMI" value={toDisplayNumber(derivedPreview.bmi, 2)} unit="kg/m²" />
+          <SnapshotRow label="Fat mass" value={toDisplayNumber(derivedPreview.fat_mass, 2)} unit="kg" />
+          <SnapshotRow label="Lean mass" value={toDisplayNumber(derivedPreview.lean_mass, 2)} unit="kg" />
+          <SnapshotRow label="Lean mass %" value={toDisplayNumber(derivedPreview.lean_mass_percent, 1)} unit="%" />
+          <SnapshotRow label="Muscle/fat ratio" value={toDisplayNumber(derivedPreview.muscle_fat_ratio, 2)} unit="ratio" />
+          <SnapshotRow label="Intracellular water %" value={toDisplayNumber(derivedPreview.intracellular_water_percent, 1)} unit="%" />
+          <SnapshotRow label="Water in lean mass" value={toDisplayNumber(derivedPreview.water_in_lean_mass, 2)} unit="L/kg" />
+          <SnapshotRow label="Muscle mass %" value={toDisplayNumber(derivedPreview.muscle_mass_percent, 1)} unit="%" />
         </div>
       </div>
 
@@ -800,6 +803,28 @@ function MeasurementsContent({ embedded = false }) {
 
   const latestMeasurement = sortedMeasurements[sortedMeasurements.length - 1] || null;
   const firstMeasurement = sortedMeasurements[0] || null;
+  const latestBodyFields = useMemo(
+    () =>
+      BODY_SITE_FIELDS_NO_WAIST.filter((field) => getMeasurementFieldValue(latestMeasurement, field.key) !== null).slice(0, 8),
+    [latestMeasurement]
+  );
+  const latestCompositionFields = useMemo(
+    () =>
+      [
+        'lean_mass_percent',
+        'muscle_mass',
+        'muscle_mass_percent',
+        'muscle_fat_ratio',
+        'total_body_water',
+        'intracellular_water_percent',
+        'water_in_lean_mass',
+      ]
+        .map((key) => MEASUREMENT_FIELD_MAP[key])
+        .filter((field) => field && getMeasurementFieldValue(latestMeasurement, field.key) !== null)
+        .slice(0, 6),
+    [latestMeasurement]
+  );
+  const latestConsistencyIssues = latestMeasurement?.consistency_issues || [];
 
   const captureSpanDays =
     latestMeasurement && firstMeasurement
@@ -813,7 +838,7 @@ function MeasurementsContent({ embedded = false }) {
 
   const metricSnapshots = useMemo(() => {
     return METRIC_OPTIONS.reduce((accumulator, metric) => {
-      const entries = sortedMeasurements.filter((measurement) => Number(measurement?.[metric.key]) > 0);
+      const entries = sortedMeasurements.filter((measurement) => getMeasurementFieldValue(measurement, metric.key) !== null);
       const latestEntry = entries[entries.length - 1] || null;
       const previousEntry = entries[entries.length - 2] || null;
 
@@ -821,14 +846,16 @@ function MeasurementsContent({ embedded = false }) {
         entries,
         latestEntry,
         previousEntry,
-        value: latestEntry ? latestEntry[metric.key] : null,
+        value: latestEntry ? getMeasurementFieldValue(latestEntry, metric.key) : null,
         delta:
           latestEntry && previousEntry
-            ? Number(latestEntry[metric.key]) - Number(previousEntry[metric.key])
+            ? getMeasurementFieldValue(latestEntry, metric.key) -
+              getMeasurementFieldValue(previousEntry, metric.key)
             : null,
         rangeDelta:
           entries.length > 1
-            ? Number(latestEntry[metric.key]) - Number(entries[0][metric.key])
+            ? getMeasurementFieldValue(latestEntry, metric.key) -
+              getMeasurementFieldValue(entries[0], metric.key)
             : null,
       };
 
@@ -848,7 +875,7 @@ function MeasurementsContent({ embedded = false }) {
 
   const chartData = selectedSnapshot.entries.map((measurement) => ({
     date: formatMeasurementDate(measurement.date),
-    value: measurement[metricKey],
+    value: getMeasurementFieldValue(measurement, metricKey),
   }));
 
   const isSavingMeasurement = createMutation.isPending || updateMutation.isPending;
@@ -949,31 +976,31 @@ function MeasurementsContent({ embedded = false }) {
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <HeroStat
               label="Current Weight"
-              value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.weight)} kg` : '--'}
+              value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))} kg` : '--'}
               detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight)}
               icon={Scale}
               metric={METRIC_LOOKUP.weight}
             />
             <HeroStat
-              label="Body Fat"
-              value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.body_fat)} %` : '--'}
-              detail={getDeltaLabel(metricSnapshots.body_fat?.delta, METRIC_LOOKUP.body_fat)}
+              label="Body Fat %"
+              value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} %` : '--'}
+              detail={getDeltaLabel(metricSnapshots.body_fat_percent?.delta, METRIC_LOOKUP.body_fat_percent)}
               icon={Activity}
-              metric={METRIC_LOOKUP.body_fat}
+              metric={METRIC_LOOKUP.body_fat_percent}
             />
             <HeroStat
-              label="Waist"
-              value={latestMeasurement ? `${toDisplayNumber(latestMeasurement.waist)} cm` : '--'}
-              detail={getDeltaLabel(metricSnapshots.waist?.delta, METRIC_LOOKUP.waist)}
+              label="BMI"
+              value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)} kg/m²` : '--'}
+              detail={getDeltaLabel(metricSnapshots.bmi?.delta, METRIC_LOOKUP.bmi)}
               icon={Ruler}
-              metric={METRIC_LOOKUP.waist}
+              metric={METRIC_LOOKUP.bmi}
             />
             <HeroStat
               label="Cadence"
               value={averageCadenceDays ? `${averageCadenceDays} days` : '--'}
               detail={`${sortedMeasurements.length || 0} checkpoints in history.`}
               icon={CalendarClock}
-              metric={METRIC_LOOKUP.chest}
+              metric={METRIC_LOOKUP.weight}
             />
           </div>
         </PageHeader>
@@ -1000,6 +1027,11 @@ function MeasurementsContent({ embedded = false }) {
       </StatusBanner>
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
+      {latestConsistencyIssues.length ? (
+        <StatusBanner tone={latestConsistencyIssues.some((issue) => issue.severity === 'error') ? 'error' : 'warning'}>
+          {latestConsistencyIssues[0].message}
+        </StatusBanner>
+      ) : null}
 
       <Section
           title="Latest checkpoint"
@@ -1021,6 +1053,10 @@ function MeasurementsContent({ embedded = false }) {
                     <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
                       Immediate summary of the most recent checkpoint, without noise from other modules.
                     </p>
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
+                      Source
+                      <span className="text-[hsl(var(--fg))]">{getMeasurementFieldSourceLabel(latestMeasurement?.source)}</span>
+                    </div>
                   </div>
 
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[rgba(14,165,233,0.18)] bg-[rgba(14,165,233,0.12)] text-[#0891b2]">
@@ -1029,12 +1065,28 @@ function MeasurementsContent({ embedded = false }) {
                 </div>
 
                 <div className="mt-5 space-y-3">
-                  <SnapshotRow label="Weight" value={toDisplayNumber(latestMeasurement.weight)} unit="kg" />
-                  <SnapshotRow label="Body Fat" value={toDisplayNumber(latestMeasurement.body_fat)} unit="%" />
-                  <SnapshotRow label="Waist" value={toDisplayNumber(latestMeasurement.waist)} unit="cm" />
-                  <SnapshotRow label="Chest" value={toDisplayNumber(latestMeasurement.chest)} unit="cm" />
-                  <SnapshotRow label="Arms" value={toDisplayNumber(latestMeasurement.arms)} unit="cm" />
-                  <SnapshotRow label="Thighs" value={toDisplayNumber(latestMeasurement.thighs)} unit="cm" />
+                  <SnapshotRow label="Weight" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))} unit="kg" />
+                  <SnapshotRow label="Body Fat %" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} unit="%" />
+                  <SnapshotRow label="Waist" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'waist'))} unit="cm" />
+                  <SnapshotRow label="BMI" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)} unit="kg/m²" />
+                  <SnapshotRow label="Fat mass" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'fat_mass'), 2)} unit="kg" />
+                  <SnapshotRow label="Lean mass" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'lean_mass'), 2)} unit="kg" />
+                  {latestBodyFields.map((field) => (
+                    <SnapshotRow
+                      key={field.key}
+                      label={field.label}
+                      value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, field.key))}
+                      unit={field.unit}
+                    />
+                  ))}
+                  {latestCompositionFields.map((field) => (
+                    <SnapshotRow
+                      key={field.key}
+                      label={field.label}
+                      value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, field.key), field.precision ?? 2)}
+                      unit={field.unit}
+                    />
+                  ))}
                 </div>
 
                 <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
@@ -1065,7 +1117,7 @@ function MeasurementsContent({ embedded = false }) {
           {sortedMeasurements.length ? (
             <div className="grid gap-6">
               <div className="space-y-5">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {METRIC_OPTIONS.map((metric) => (
                     <MetricSelectorCard
                       key={metric.key}

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
   AlertCircle,
-  Brain,
   CheckCircle2,
   ChevronRight,
+  BarChart3,
   Clock,
   Loader2,
   User,
@@ -153,8 +153,8 @@ export default function MessageBubble({ message }) {
             ? 'border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand))] text-white'
             : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] text-[hsl(var(--brand))]'
         )}
-      >
-        {isUser ? <User className="h-4 w-4" strokeWidth={1.9} /> : <Brain className="h-4 w-4" strokeWidth={1.9} />}
+        >
+        {isUser ? <User className="h-4 w-4" strokeWidth={1.9} /> : <BarChart3 className="h-4 w-4" strokeWidth={1.9} />}
       </div>
 
       <div className={cn('max-w-3xl space-y-2', isUser && 'items-end text-right')}>
@@ -178,13 +178,13 @@ export default function MessageBubble({ message }) {
               <>
                 <span>You</span>
                 <span className="h-1 w-1 rounded-full bg-current" />
-                <span>Prompt</span>
+                <span>Question</span>
               </>
             ) : (
               <>
-                <span>Atlas AI</span>
+                <span>Insights</span>
                 <span className="h-1 w-1 rounded-full bg-current" />
-                <span>Local reply</span>
+                <span>Local summary</span>
               </>
             )}
           </div>

@@ -24,7 +24,6 @@ import Routines from '@/pages/Routines';
 import Protocols from '@/pages/Protocols';
 import Measurements from '@/pages/Measurements';
 import LabExams from '@/pages/LabExams';
-import AtlasAI from '@/pages/AtlasAI';
 import Profile from '@/pages/Profile';
 import Export from '@/pages/Export';
 import AdminPanel from '@/pages/AdminPanel';
@@ -153,7 +152,7 @@ const AppRoutes = () => (
         <Route path={ROUTES.protocols} element={<Protocols />} />
         <Route path={ROUTES.measurements} element={<Measurements />} />
         <Route path={ROUTES.labExams} element={<LabExams />} />
-        <Route path={ROUTES.atlasAI} element={<AtlasAI />} />
+        <Route path={ROUTES.progressReview} element={<Insights />} />
         <Route path={ROUTES.insights} element={<Insights />} />
         <Route path={ROUTES.blockReview} element={<BlockReview />} />
         <Route path={ROUTES.exercises} element={<Exercises />} />

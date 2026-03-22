@@ -62,7 +62,7 @@ export const PAGE_ACCESS = {
   MyWorkout:       ['athlete', 'admin'],
   MyPrescribedDiet:    ['athlete', 'admin'],
   MyPrescribedWorkout: ['athlete', 'admin'],
-  AtlasAI:         ['athlete', 'admin'],
+  ProgressReview:  ['athlete', 'admin'],
   Insights:        ['athlete', 'admin'],
   BlockReview:     ['athlete', 'admin'],
   Social:          ['athlete', 'coach', 'clinician', 'admin'],
@@ -101,7 +101,7 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.body,       label: 'Body',      icon: 'TrendingUp' },
     { path: ROUTES.protocols,  label: 'Protocols', icon: 'FlaskConical' },
     { path: ROUTES.labExams,   label: 'Lab Exams', icon: 'ClipboardList' },
-    { path: ROUTES.atlasAI,    label: 'Atlas AI',  icon: 'Brain' },
+    { path: ROUTES.insights,   label: 'Insights',  icon: 'BarChart3' },
     { path: ROUTES.profile,    label: 'More',      icon: 'User' },
   ],
   coach: [
