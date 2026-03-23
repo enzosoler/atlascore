@@ -17,6 +17,17 @@ function requireUserId(userId) {
   }
 }
 
+function isMissingTableError(error) {
+  const message = error?.message || '';
+  return (
+    error?.code === 'PGRST205' ||
+    error?.code === '42P01' ||
+    /schema cache/i.test(message) ||
+    /could not find the table/i.test(message) ||
+    /relation .* does not exist/i.test(message)
+  );
+}
+
 function hasOwnField(payload, key) {
   return !!payload && Object.prototype.hasOwnProperty.call(payload, key);
 }
@@ -91,6 +102,62 @@ function isSupabaseStorageRef(value) {
 
 function getStoragePathFromRef(value) {
   return isSupabaseStorageRef(value) ? value.slice(SUPABASE_URL_PREFIX.length) : null;
+}
+
+async function fetchProfileData(userId) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('profile_data')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    if (error?.code === 'PGRST116' || /results contain 0 rows/i.test(error?.message || '')) {
+      return {};
+    }
+    throw error;
+  }
+
+  return data?.profile_data && typeof data.profile_data === 'object' ? data.profile_data : {};
+}
+
+async function updateProfileData(userId, updater) {
+  const existing = await fetchProfileData(userId);
+  const next = updater(existing || {});
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ profile_data: next })
+    .eq('id', userId)
+    .select('profile_data')
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.profile_data || next;
+}
+
+function coerceArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeProgressPhotoEntry(entry) {
+  if (!entry || typeof entry !== 'object') {
+    return null;
+  }
+
+  const dateValue = entry.date ? toDateKey(entry.date) : null;
+  const category = entry.category ?? null;
+  const photoUrl = entry.photo_url ?? null;
+  const id = entry.id || (dateValue && category ? `${dateValue}-${category}` : undefined);
+
+  return {
+    id,
+    date: dateValue,
+    category,
+    photo_url: photoUrl,
+  };
 }
 
 async function resolvePhotoUrl(photo) {
@@ -274,7 +341,18 @@ export async function listProgressPhotos(userId, limit = 200) {
     .limit(limit);
 
   if (error) {
-    throw error;
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    const profileData = await fetchProfileData(userId);
+    const fallback = coerceArray(profileData?.progress_photos)
+      .map(normalizeProgressPhotoEntry)
+      .filter(Boolean)
+      .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+      .slice(0, limit);
+
+    return Promise.all(fallback.map(resolvePhotoUrl));
   }
 
   return Promise.all((data || []).map(resolvePhotoUrl));
@@ -310,7 +388,31 @@ export async function createProgressPhoto(userId, payload) {
     .single();
 
   if (error) {
-    throw error;
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    const normalized = normalizeProgressPhotoEntry({
+      ...payload,
+      date: toDateKey(payload?.date),
+    });
+
+    const updated = await updateProfileData(userId, (current) => {
+      const existing = coerceArray(current?.progress_photos);
+      const filtered = existing.filter(
+        (item) => !(item?.date === normalized?.date && item?.category === normalized?.category)
+      );
+      return {
+        ...current,
+        progress_photos: [normalized, ...filtered],
+      };
+    });
+
+    const stored = coerceArray(updated?.progress_photos).find(
+      (item) => item?.date === normalized?.date && item?.category === normalized?.category
+    );
+
+    return resolvePhotoUrl(normalizeProgressPhotoEntry(stored || normalized));
   }
 
   return resolvePhotoUrl(data);
@@ -337,6 +439,22 @@ export async function deleteProgressPhoto(userId, id, photoUrl) {
     .eq('user_id', userId);
 
   if (error) {
-    throw error;
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    await updateProfileData(userId, (current) => {
+      const existing = coerceArray(current?.progress_photos);
+      const filtered = existing.filter((item) => {
+        if (id && item?.id === id) return false;
+        if (photoUrl && item?.photo_url === photoUrl) return false;
+        return true;
+      });
+
+      return {
+        ...current,
+        progress_photos: filtered,
+      };
+    });
   }
 }

@@ -27,6 +27,7 @@ import {
   shiftDate,
 } from '@/components/shared/StablePage';
 import { cn } from '@/lib/utils';
+import { getDailyCheckin } from '@/services/checkinService';
 
 // ─────────────────────────────────────────────────────────────────
 // Sub-components reusing the same patterns as the other pages
@@ -133,13 +134,7 @@ function DiaryContent() {
     queryKey: ['diary-checkin', date],
     queryFn: async () => {
       if (!user?.id) return null;
-      const { data } = await supabase
-        .from('daily_checkins')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('date', date)
-        .maybeSingle();
-      return data || null;
+      return getDailyCheckin(user.id, date);
     },
     enabled: !!user?.id,
   });

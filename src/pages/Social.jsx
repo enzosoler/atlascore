@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
+import { getDailyCheckin } from '@/services/checkinService';
 import {
   SafePageBoundary,
   PageShell,
@@ -110,13 +111,7 @@ function SocialContent() {
     queryKey: ['social-checkin', today],
     queryFn: async () => {
       if (!user?.id) return null;
-      const { data } = await supabase
-        .from('daily_checkins')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .maybeSingle();
-      return data || null;
+      return getDailyCheckin(user.id, today);
     },
     enabled: !!user?.id,
   });

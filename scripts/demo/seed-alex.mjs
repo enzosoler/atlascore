@@ -1191,14 +1191,118 @@ function buildAuthMetadata() {
   }
 }
 
-function buildProfileRow(userId) {
+function buildProfileRow(userId, profileData = PROFILE_DATA) {
   return {
     id: userId,
     role: 'user',
     full_name: TARGET_FULL_NAME,
     language: 'en',
-    profile_data: PROFILE_DATA,
+    profile_data: profileData,
   }
+}
+
+function normalizeProfileObject(value) {
+  return value && typeof value === 'object' ? value : {}
+}
+
+function normalizeProfileArray(value) {
+  return Array.isArray(value) ? value : []
+}
+
+function mergeDailyCheckins(existing, incoming) {
+  const map = new Map()
+
+  for (const entry of normalizeProfileArray(existing)) {
+    if (!entry?.date) continue
+    map.set(entry.date, entry)
+  }
+
+  for (const entry of normalizeProfileArray(incoming)) {
+    if (!entry?.date || map.has(entry.date)) continue
+    map.set(entry.date, entry)
+  }
+
+  return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date))
+}
+
+function mergeProgressPhotos(existing, incoming) {
+  const map = new Map()
+
+  const add = (entry) => {
+    if (!entry?.date || !entry?.category) return
+    const key = `${entry.date}-${entry.category}`
+    if (map.has(key)) return
+    map.set(key, {
+      id: entry.id || key,
+      date: entry.date,
+      category: entry.category,
+      photo_url: entry.photo_url,
+    })
+  }
+
+  for (const entry of normalizeProfileArray(existing)) add(entry)
+  for (const entry of normalizeProfileArray(incoming)) add(entry)
+
+  return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date))
+}
+
+function buildProfileFallbackBlocks(checkins, photos, aiConversation) {
+  const daily_checkins = checkins.map(({ user_id, ...rest }) => ({ ...rest }))
+  const progress_photos = photos.map(({ user_id, ...rest }) => ({
+    id: rest.id || `${rest.date}-${rest.category}`,
+    date: rest.date,
+    category: rest.category,
+    photo_url: rest.photo_url,
+  }))
+
+  const ai_conversation = aiConversation
+    ? {
+        name: aiConversation.name,
+        messages: aiConversation.messages,
+      }
+    : null
+
+  return {
+    daily_checkins,
+    progress_photos,
+    ai_conversation,
+  }
+}
+
+function mergeProfileData(existingProfileData, fallbackBlocks) {
+  const existing = normalizeProfileObject(existingProfileData)
+  const fallback = normalizeProfileObject(fallbackBlocks)
+
+  const merged = {
+    ...PROFILE_DATA,
+    ...existing,
+  }
+
+  merged.ui_state = {
+    ...PROFILE_UI_STATE,
+    ...normalizeProfileObject(existing.ui_state),
+  }
+
+  merged.seed_meta = {
+    ...PROFILE_DATA.seed_meta,
+    ...normalizeProfileObject(existing.seed_meta),
+  }
+
+  merged.atlas_ai = {
+    ...PROFILE_DATA.atlas_ai,
+    ...normalizeProfileObject(existing.atlas_ai),
+  }
+
+  merged.daily_checkins = mergeDailyCheckins(existing.daily_checkins, fallback.daily_checkins)
+  merged.progress_photos = mergeProgressPhotos(existing.progress_photos, fallback.progress_photos)
+
+  if (existing.ai_conversation) {
+    merged.ai_conversation = existing.ai_conversation
+  } else if (fallback.ai_conversation) {
+    merged.ai_conversation = fallback.ai_conversation
+  }
+
+  return merged
 }
 
 function buildMeasurementRows(userId) {
@@ -1514,6 +1618,21 @@ function buildAiConversation(userId) {
   }
 }
 
+async function fetchExistingProfileData(supabase, userId) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('profile_data')
+    .eq('id', userId)
+    .single()
+
+  if (error) {
+    if (isNoRowsError(error) || isMissingTableError(error)) return {}
+    throw error
+  }
+
+  return data?.profile_data || {}
+}
+
 async function ensureAuthUser(supabase) {
   const metadata = buildAuthMetadata()
 
@@ -1601,7 +1720,6 @@ async function main() {
 
   console.log(`Resolved user id: ${userId}`)
 
-  const profileRow = buildProfileRow(userId)
   const subscriptionRow = {
     user_id: userId,
     plan_code: 'pro',
@@ -1620,6 +1738,10 @@ async function main() {
   const aiConversation = buildAiConversation(userId)
   const protocols = buildProtocols(userId)
   const foodLogs = buildFoodLogRows(userId)
+  const existingProfileData = await fetchExistingProfileData(supabase, userId)
+  const fallbackBlocks = buildProfileFallbackBlocks(checkins, photos, aiConversation)
+  const mergedProfileData = mergeProfileData(existingProfileData, fallbackBlocks)
+  const profileRow = buildProfileRow(userId, mergedProfileData)
 
   const workoutPlanInsert = await upsertByNaturalKey(
     supabase,

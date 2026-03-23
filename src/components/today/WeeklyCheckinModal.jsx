@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { upsertDailyCheckin } from '@/services/checkinService';
 
 // ─── Rating row ───────────────────────────────────────────────────────────────
 
@@ -68,7 +68,6 @@ export function WeeklyCheckinModal({ open, onClose }) {
     try {
       const today = new Date().toISOString().split('T')[0];
       const payload = {
-        user_id: user.id,
         date: today,
         energy,
         mood,
@@ -76,9 +75,7 @@ export function WeeklyCheckinModal({ open, onClose }) {
       if (sleepHours !== '') payload.sleep_hours = Number(sleepHours);
       if (notes.trim()) payload.notes = notes.trim();
 
-      await supabase
-        .from('daily_checkins')
-        .upsert(payload, { onConflict: 'user_id,date' });
+      await upsertDailyCheckin(user.id, payload);
 
       setDone(true);
     } catch (err) {

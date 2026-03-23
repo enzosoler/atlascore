@@ -30,6 +30,7 @@ import {
   toArray,
 } from '@/components/shared/StablePage';
 import { listMeasurements } from '@/services/bodyProgressService';
+import { listDailyCheckins } from '@/services/checkinService';
 import { TodayAdherenceCard, TodaySection } from '@/components/today/TodayMobileUI';
 import { cn } from '@/lib/utils';
 
@@ -376,15 +377,7 @@ function InsightsContent() {
     queryKey: ['insights-checkins', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const { data, error } = await supabase
-        .from('daily_checkins')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false })
-        .limit(365);
-
-      if (error) throw error;
-      return data || [];
+      return listDailyCheckins(user.id, { limit: 365 });
     },
     initialData: [],
     enabled: !!user?.id,
