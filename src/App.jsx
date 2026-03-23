@@ -10,7 +10,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
-import { DailyStoreProvider } from '@/store/dailyStore.jsx';
+import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
 import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 
@@ -62,7 +62,8 @@ import WorkoutLoggingGuide from '@/pages/guides/WorkoutLoggingGuide';
 import PlanVsExecutionGuide from '@/pages/guides/PlanVsExecutionGuide';
 import BlogIndex from '@/pages/blog/BlogIndex.jsx';
 import Settings from '@/pages/Settings.jsx';
-import BlogPost from '@/pages/blog/BlogPost.jsx';
+import AuthCallback from '@/pages/AuthCallback';
+import UpdatePassword from '@/pages/UpdatePassword';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout.jsx';
@@ -127,7 +128,8 @@ const AppRoutes = () => (
     <Route path={ROUTES.signup} element={<Auth />} />
     <Route path={ROUTES.login} element={<Auth />} />
     <Route path={ROUTES.pricing} element={<Pricing />} />
-    <Route path={ROUTES.help} element={<HelpCenter />} />
+    <Route path="/auth/callback" element={<AuthCallback />} />
+    <Route path="/auth/update-password" element={<UpdatePassword />} />
     <Route path="/use-case/:role" element={<UseCase />} />
     <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
     <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
@@ -206,16 +208,18 @@ function App() {
       <I18nProvider>
         <ThemeProvider>
           <AuthProvider>
-            <QueryClientProvider client={queryClientInstance}>
-              <SubscriptionProvider>
-                <DailyStoreProvider>
-                  <Router>
-                    <AuthenticatedApp />
-                  </Router>
-                  <Toaster />
-                </DailyStoreProvider>
-              </SubscriptionProvider>
-            </QueryClientProvider>
+            <GoogleReCaptchaProvider>
+              <QueryClientProvider client={queryClientInstance}>
+                <SubscriptionProvider>
+                  <DailyStoreProvider>
+                    <Router>
+                      <AuthenticatedApp />
+                    </Router>
+                    <Toaster />
+                  </DailyStoreProvider>
+                </SubscriptionProvider>
+              </QueryClientProvider>
+            </GoogleReCaptchaProvider>
           </AuthProvider>
         </ThemeProvider>
       </I18nProvider>

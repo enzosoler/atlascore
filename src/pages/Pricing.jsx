@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useI18n } from '@/lib/i18nContext';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import RegionSelector from '@/components/pricing/RegionSelector';
 import PublicSiteShell, {
   PublicSectionHeader,
@@ -278,20 +278,29 @@ export default function Pricing() {
 
     setLoading(planId);
     try {
-      // Use Stripe Checkout via Base44 Edge Function
-      const res = await base44.functions.invoke('createCheckout', {
-        plan: planId,
-        success_url: `${window.location.origin}/Today?subscribed=1`,
-        cancel_url: `${window.location.origin}/Pricing`,
-        email: user?.email,
-        region,
-        billing,
+      // Use Stripe Checkout via Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          plan: planId,
+          user_id: user?.id,
+          email: user?.email,
+          region,
+          billing,
+          success_url: `${window.location.origin}/Today?subscribed=1`,
+          cancel_url: `${window.location.origin}/Pricing`,
+        },
       });
 
-      if (res.data?.url) {
-        window.location.href = res.data.url;
+      if (error) {
+        console.error('Checkout error:', error);
+        toast.error(error.message || 'Error starting checkout. Please try again.');
+        return;
+      }
+
+      if (data?.url) {
+        window.location.href = data.url;
       } else {
-        toast.error(res.data?.error || 'Error starting checkout. Please try again.');
+        toast.error(data?.error || 'Error starting checkout. Please try again.');
       }
     } catch (error) {
       toast.error('Could not connect to the payment server.');

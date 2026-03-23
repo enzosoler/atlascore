@@ -132,7 +132,8 @@ function BlockReviewContent() {
   const { user } = useAuth();
   const { subscription } = useSubscription();
   const planCode = subscription?.plan_code || 'free';
-  const planLevel = PLAN_LEVELS[planCode] || 0;
+  const isAdmin = user?.role === 'admin' || user?.atlas_role === 'admin';
+  const planLevel = isAdmin ? 999 : (PLAN_LEVELS[planCode] || 0);
 
   const [blockKey, setBlockKey] = useState('4w');
   const [blockOffset, setBlockOffset] = useState(0); // 0 = current block, 1 = previous, etc.
@@ -506,8 +507,8 @@ function BlockReviewContent() {
         </button>
       </div>
 
-      {/* Free plan notice */}
-      {planCode === 'free' && (
+      {/* Free plan notice - hide for admins */}
+      {planCode === 'free' && !isAdmin && (
         <div className="atlas-banner px-4 py-3 text-sm leading-6">
           <p className="font-semibold text-[hsl(var(--fg))]">Free plan block limit</p>
           <p className="mt-1">

@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
       console.error(`createCheckout: price ID not configured for plan="${plan}" region="${region}" billing="${billing || 'monthly'}"`);
       return Response.json({ error: 'Price not configured for this option.' }, { status: 500 });
     }
-    const origin = req.headers.get('origin') || 'https://app.atlascore.com';
+    const origin = req.headers.get('origin') || 'https://useatlascore.com';
 
     const sessionParams = {
       mode: 'subscription',

@@ -12,10 +12,13 @@ import {
   FileOutput,
   HelpCircle,
   ArrowRight,
+  CreditCard,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { useI18n } from '@/lib/i18nContext';
+import { useCustomerPortal } from '@/hooks/useCustomerPortal';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import { ROUTES } from '@/lib/routes';
 import {
   PageShell,
@@ -107,6 +110,8 @@ function SettingsContent() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const { t } = useI18n();
+  const { openCustomerPortal, loading: portalLoading } = useCustomerPortal();
+  const { subscription } = useSubscription();
 
   const handleLogout = async () => {
     if (window.confirm(t('settings.signout.confirm'))) {
@@ -147,6 +152,44 @@ function SettingsContent() {
           </Button>
         </div>
       </SectionCard>
+
+      {/* Subscription management */}
+      {subscription && ['active', 'trialing', 'past_due'].includes(subscription.status) && (
+        <SectionCard
+          title="Subscription"
+          subtitle="Manage your plan, billing, and payment methods"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+                <CreditCard className="h-5 w-5" strokeWidth={1.9} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                  {subscription.plan_code?.charAt(0).toUpperCase() + subscription.plan_code?.slice(1) || 'Pro'} Plan
+                </p>
+                <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
+                  Status: {subscription.status === 'active' ? 'Active' : subscription.status === 'trialing' ? 'Trial' : 'Past due'}
+                  {subscription.current_period_ends_at && ` • Renews ${new Date(subscription.current_period_ends_at).toLocaleDateString()}`}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openCustomerPortal(user?.id, user?.email)}
+                disabled={portalLoading}
+                className="gap-1.5"
+              >
+                {portalLoading ? 'Loading...' : 'Manage'}
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+              </Button>
+            </div>
+            <p className="text-[12px] text-[hsl(var(--fg-3))]">
+              Access the Stripe Customer Portal to update payment methods, view invoices, change plans, or cancel your subscription.
+            </p>
+          </div>
+        </SectionCard>
+      )}
 
       {/* Appearance */}
       <SectionCard

@@ -15,6 +15,7 @@ import { ROLE_HOME, ROUTES } from '@/lib/routes';
 import { supabase } from '@/lib/supabaseClient';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
+import { useReCaptcha, IS_CAPTCHA_ENABLED } from '@/lib/ReCaptchaContext';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 function resolveRequestedDestination(nextParam) {
@@ -151,6 +152,7 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const { signIn, signUp, isAuthenticated, user } = useAuth();
+  const { executeRecaptcha, isCaptchaEnabled } = useReCaptcha();
 
   const modeParam = searchParams.get('mode');
   const legacyRecoveryRequested = searchParams.get('reset') === '1';
@@ -264,6 +266,12 @@ export default function Auth() {
     try {
       setIsSubmitting(true);
 
+      // Execute CAPTCHA if enabled
+      let captchaToken = null;
+      if (isCaptchaEnabled && executeRecaptcha) {
+        captchaToken = await executeRecaptcha(isLogin ? 'login' : 'signup');
+      }
+
       if (isLogin) {
         await signIn({
           email: normalizedEmail,
@@ -304,8 +312,15 @@ export default function Auth() {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
+      // Execute CAPTCHA if enabled
+      let captchaToken = null;
+      if (isCaptchaEnabled && executeRecaptcha) {
+        captchaToken = await executeRecaptcha('password_reset');
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: `${window.location.origin}/auth?mode=login`,
+        redirectTo: `${window.location.origin}/auth/update-password`,
+        captchaToken: captchaToken,
       });
       if (error) throw error;
       setResetSent(true);
