@@ -24,6 +24,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import { useI18n } from '@/lib/i18nContext';
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
@@ -266,6 +267,7 @@ export default function Today() {
 
 function TodayContent() {
   const { user } = useAuth();
+  const { subscription, trialDaysRemaining, isTrialExpired } = useSubscription();
   const { t, locale } = useI18n();
   const isEN = locale === 'en-US';
   const [checkinOpen, setCheckinOpen] = useState(false);
@@ -762,7 +764,7 @@ function TodayContent() {
 
   const last7 = recentSessions.filter((s) => {
     if (!s.date) return false;
-    const diff = (new Date(todayStr) - new Date(s.date)) / (1000 * 60 * 60 * 24);
+    const diff = (new Date(todayStr).getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24);
     return diff >= 0 && diff < 7;
   });
   const completedLast7 = last7.filter((s) => s.status === 'completed').length;
@@ -801,9 +803,118 @@ function TodayContent() {
     ? t('today_page.insight.loadingDesc')
     : nextActionInsight?.body || t('today_page.insight.defaultDesc');
 
-  // ── Recent activity (last 5 workout sessions) ─────────────────────────────
+  // Calculate real 7-day nutrition average stats
+  const nutritionAverageStats = useMemo(() => {
+    const last7Days = recentMeals.filter((m) => {
+      if (!m.date) return false;
+      const diffDays = (new Date(todayStr).getTime() - new Date(m.date).getTime()) / (1000 * 60 * 60 * 24);
+      return diffDays >= 0 && diffDays < 7;
+    });
+    
+    if (last7Days.length === 0) return null;
+    
+    const daysWithData = new Set(last7Days.map(m => m.date)).size;
+    const avgProtein = last7Days.reduce((sum, m) => sum + (m.protein || 0), 0) / daysWithData;
+    const proteinTarget = Number(profile?.protein_target) || 180;
+    const daysBelow = last7Days.filter(m => (m.protein || 0) < proteinTarget * 0.9).length;
+    
+    return {
+      protein: Math.round(avgProtein),
+      daysBelowTarget: daysBelow,
+      daysTracked: daysWithData,
+    };
+  }, [recentMeals, todayStr, profile?.protein_target]);
 
-  const recentActivity = recentSessions.slice(0, 5);
+  // Calculate real workout stats (last 7 days)
+  const workoutStats = useMemo(() => {
+    const last7 = recentSessions.filter((s) => {
+      if (!s.date) return false;
+      const diffDays = (new Date(todayStr).getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24);
+      return diffDays >= 0 && diffDays < 7;
+    });
+    
+    const completed = last7.filter(s => s.status === 'completed').length;
+    const totalVolume = last7.reduce((sum, s) => sum + (s.total_volume || 0), 0);
+    const prev7 = recentSessions.filter((s) => {
+      if (!s.date) return false;
+      const diffDays = (new Date(todayStr).getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24);
+      return diffDays >= 7 && diffDays < 14;
+    });
+    const prevVolume = prev7.reduce((sum, s) => sum + (s.total_volume || 0), 0);
+    const volumeChange = prevVolume > 0 ? Math.round(((totalVolume - prevVolume) / prevVolume) * 100) : 0;
+    
+    const freqTarget = activeWorkoutPlan?.frequency || activeWorkoutPlan?.days?.length || 4;
+    const consistency = Math.min(100, Math.round((completed / Math.max(1, freqTarget)) * 100));
+    
+    return [
+      { label: 'Volume', value: volumeChange > 0 ? `+${volumeChange}%` : `${volumeChange}%`, percentage: Math.min(100, Math.max(0, 50 + volumeChange)) },
+      { label: 'Frequency', value: `${completed}x/wk`, percentage: Math.min(100, Math.round((completed / 5) * 100)) },
+      { label: 'Consistency', value: `${consistency}%`, percentage: consistency },
+    ];
+  }, [recentSessions, todayStr, activeWorkoutPlan]);
+
+  // Build real timeline events from actual data
+  const timelineEvents = useMemo(() => {
+    const events = [];
+    
+    // Add PR events from sessions
+    const prSessions = recentSessions.filter(s => s.has_pr || s.exercises?.some(e => e.is_pr));
+    prSessions.slice(0, 2).forEach(s => {
+      const prExercise = s.exercises?.find(e => e.is_pr);
+      events.push({
+        type: 'pr',
+        dateLabel: s.date === todayStr 
+          ? `Today · ${new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+          : new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        title: prExercise ? `New PR — ${prExercise.name} ${formatWeight(prExercise.weight, profile)}` : 'Workout completed',
+        subtitle: `${s.exercises?.length || 0} exercises`,
+        highlight: s.date === todayStr,
+      });
+    });
+    
+    // Add measurement events
+    recentMeasurements.slice(0, 2).forEach(m => {
+      events.push({
+        type: 'checkin',
+        dateLabel: new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        title: `Check-in — ${formatWeight(m.weight, profile)}`,
+        subtitle: m.body_fat ? `Body fat: ${m.body_fat}%` : 'Body measurement',
+      });
+    });
+    
+    // Add protocol events
+    if (activeProtocolsList.length > 0) {
+      events.push({
+        type: 'protocol',
+        dateLabel: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        title: 'Protocol active',
+        subtitle: `${activeProtocolsList.length} substances tracked`,
+      });
+    }
+    
+    // Add nutrition milestone if enough data
+    if (nutritionAverageStats && nutritionAverageStats.daysTracked >= 3) {
+      events.push({
+        type: 'nutrition',
+        dateLabel: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        title: 'Nutrition tracking',
+        subtitle: `Average protein: ${nutritionAverageStats.protein}g`,
+      });
+    }
+    
+    // If no events, return empty state
+    if (events.length === 0) {
+      return [{
+        type: 'empty',
+        dateLabel: 'Get started',
+        title: 'Welcome to Atlas Core',
+        subtitle: 'Log your first workout, meal, or measurement to see your timeline.',
+        highlight: true,
+      }];
+    }
+    
+    return events.slice(0, 4);
+  }, [recentSessions, recentMeasurements, activeProtocolsList, nutritionAverageStats, profile, todayStr]);
 
   return (
     <TodayScreen>
@@ -820,6 +931,31 @@ function TodayContent() {
           {isLoading ? 'Loading' : `${allDoneCount}/3 complete`}
         </div>
       </header>
+
+      {/* ── Upgrade Banner (for free users or expired trials) ── */}
+      {(subscription?.tier === 'free' || !subscription || isTrialExpired) && (
+        <Link
+          to={ROUTES.pricing}
+          className="atlas-card flex items-center gap-4 rounded-[20px] border-[hsl(var(--brand)/0.22)] bg-[linear-gradient(135deg,hsl(var(--brand)/0.12)_0%,hsl(var(--card))_100%)] p-4 shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.16)] text-[hsl(var(--brand))]">
+            <Sparkles className="h-5 w-5" strokeWidth={2} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+              {isTrialExpired ? 'Trial expired — Unlock full access' : 'Upgrade to Atlas Core Pro'}
+            </p>
+            <p className="text-[12px] text-[hsl(var(--fg-2))]">
+              {isTrialExpired 
+                ? 'Your trial has ended. Upgrade to keep your data and continue progressing.' 
+                : 'Get unlimited AI insights, advanced analytics, and priority support.'}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-[hsl(var(--brand))] px-3 py-1.5 text-[11px] font-semibold text-white">
+            Upgrade
+          </span>
+        </Link>
+      )}
 
       {/* ── Greeting card ── */}
       <TodayCard
@@ -906,11 +1042,7 @@ function TodayContent() {
           weightDiff={todaySession?.exercises?.[0]?.weight_diff || 0}
           isPR={todaySession?.exercises?.[0]?.is_pr || false}
           tags={activeWorkoutPlan ? [activeWorkoutPlan.name, `Week ${activeWorkoutPlan.current_week || 1}`] : []}
-          stats={[
-            { label: 'Volume', value: '+18%', percentage: 65 },
-            { label: 'Frequency', value: '3x/wk', percentage: 75 },
-            { label: 'Consistency', value: '91%', percentage: 91 },
-          ]}
+          stats={workoutStats}
           tone="teal"
           loading={isLoading}
         />
@@ -930,11 +1062,7 @@ function TodayContent() {
             carbs: Number(profile?.carbs_target) || 250,
             fat: Number(profile?.fat_target) || 70,
           }}
-          averageStats={{
-            protein: 168,
-            daysBelowTarget: 3,
-            daysTracked: 7,
-          }}
+          averageStats={nutritionAverageStats}
           tone="teal"
           loading={isLoading}
         />
@@ -951,33 +1079,7 @@ function TodayContent() {
         {/* Timeline Card */}
         <TimelineCard
           to={ROUTES.insights}
-          events={[
-            {
-              type: 'pr',
-              dateLabel: `Today · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
-              title: `New PR — squat ${formatWeight(140, profile)}`,
-              subtitle: 'Workout logged · 4 exercises',
-              highlight: true,
-            },
-            {
-              type: 'checkin',
-              dateLabel: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              title: `Check-in — ${formatWeight(84.2, profile)}`,
-              subtitle: 'Body fat: 17.4% · Progress photo',
-            },
-            {
-              type: 'protocol',
-              dateLabel: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              title: 'Protocol updated',
-              subtitle: 'Added omega-3 · 3g daily',
-            },
-            {
-              type: 'nutrition',
-              dateLabel: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              title: 'Nutrition — best week',
-              subtitle: 'Average protein: 182g · 7/7 days',
-            },
-          ]}
+          events={timelineEvents}
           loading={isLoading}
         />
       </div>
@@ -1041,14 +1143,14 @@ function TodayContent() {
       </div>
 
       {/* ── Recent activity — last 5 workout sessions ── */}
-      {!isLoading && recentActivity.length > 0 && (
+      {!isLoading && recentSessions.length > 0 && (
         <TodaySection
           eyebrow={t('today_page.activity.eyebrow')}
           title={t('today_page.activity.title')}
         >
           <TodayCard>
             <div className="space-y-0 divide-y divide-[hsl(var(--border)/0.72)]">
-              {recentActivity.map((session) => {
+              {recentSessions.slice(0, 5).map((session) => {
                 const isCompleted = session.status === 'completed';
                 const sessionDate = session.date
                   ? new Date(`${session.date}T12:00:00`).toLocaleDateString(
