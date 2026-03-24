@@ -62,6 +62,18 @@ interface CheckoutRequest {
 }
 
 serve(async (req) => {
+  // DEBUG: Log all headers and request info
+  console.log('[create-checkout] === REQUEST DEBUG ===');
+  console.log('[create-checkout] Method:', req.method);
+  console.log('[create-checkout] Headers:');
+  req.headers.forEach((value, key) => {
+    if (key.toLowerCase() === 'authorization') {
+      console.log(`  ${key}: Bearer ${value.substring(0, 20)}... (${value.length} chars)`);
+    } else {
+      console.log(`  ${key}: ${value.substring(0, 50)}`);
+    }
+  });
+  console.log('[create-checkout] =====================');
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS });
   }

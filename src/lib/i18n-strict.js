@@ -13,6 +13,11 @@ import ptOnboarding from './translations/pt-BR-onboarding.json';
 // Vite replaces import.meta.env.VITE_LOCALE at build time
 const BUILD_LOCALE = import.meta.env.VITE_LOCALE || 'en-US';
 
+// DEBUG: Log the build locale in production
+console.log('[i18n] Build locale:', BUILD_LOCALE);
+console.log('[i18n] VITE_LOCALE env:', import.meta.env.VITE_LOCALE);
+console.log('[i18n] BUILD_LOCALE env:', import.meta.env.BUILD_LOCALE);
+
 // STRICT LOCALE MAP - NO FALLBACKS
 const TRANSLATIONS_BY_LOCALE = {
   'en-US': { ...enTranslations, ...enOnboarding },

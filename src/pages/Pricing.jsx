@@ -285,7 +285,9 @@ export default function Pricing() {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       
-      console.log('[Pricing] Got session token:', token ? 'YES' : 'NO');
+      // DEBUG: Log session details
+      console.log('[Pricing] session?', session);
+      console.log('[Pricing] token?', token ? `${token.substring(0, 20)}... (${token.length} chars)` : 'NO TOKEN');
 
       // Use Stripe Checkout via Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('create-checkout', {

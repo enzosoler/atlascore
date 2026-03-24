@@ -208,7 +208,7 @@ serve(async (req) => {
     });
   }
 
-  const { provider = 'fatsecret', query, language = 'en' } = body;
+  const { provider, query, language = 'en' } = body;
 
   if (!query || typeof query !== 'string' || query.trim().length === 0) {
     return new Response(JSON.stringify({ error: 'query is required' }), {
