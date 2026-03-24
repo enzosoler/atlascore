@@ -100,6 +100,16 @@ async function handleRequest(req: Request): Promise<Response> {
     });
   }
 
+  // Validate webhook authorization - Supabase Auth sends the secret as Bearer token
+  const authHeader = req.headers.get('Authorization') || '';
+  const webhookSecret = Deno.env.get('WEBHOOK_SECRET') || SERVICE_ROLE_KEY;
+  
+  if (!authHeader.startsWith('Bearer ') || authHeader.replace('Bearer ', '') !== webhookSecret) {
+    return new Response(JSON.stringify({ error: 'Hook requires authorization token' }), {
+      status: 401, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await req.json();

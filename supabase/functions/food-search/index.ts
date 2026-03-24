@@ -222,15 +222,18 @@ serve(async (req) => {
 
     if (provider === 'usda') {
       results = await searchUSDA(query.trim());
-    } else if (provider === 'openfoodfacts') {
-      results = await searchOpenFoodFacts(query.trim());
+    } else if (provider === 'fatsecret') {
+      // Try FatSecret if explicitly requested
+      results = await searchFatSecret(query.trim(), language);
     } else {
-      // Default: try FatSecret first, fallback to Open Food Facts
+      // Default: Open Food Facts (free, no API key, no IP restrictions)
+      // FatSecret requires IP whitelist that free accounts don't support
       try {
-        results = await searchFatSecret(query.trim(), language);
-      } catch (fatSecretErr: any) {
-        console.log('FatSecret failed, trying Open Food Facts:', fatSecretErr?.message || String(fatSecretErr));
         results = await searchOpenFoodFacts(query.trim());
+      } catch (offErr: any) {
+        console.log('Open Food Facts failed, trying FatSecret:', offErr?.message);
+        // Fallback to FatSecret only if OFF fails completely
+        results = await searchFatSecret(query.trim(), language);
       }
     }
 
