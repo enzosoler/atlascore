@@ -135,8 +135,13 @@ export default function Diary() {
 function DiaryContent() {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [date, setDate] = useState(getToday());
   const isToday = date === getToday();
+
+  // ── Editing State ─────────────────────────────────────────────
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated) navigate(ROUTES.home, { replace: true });
@@ -183,7 +188,7 @@ function DiaryContent() {
       if (!user?.id) return [];
       const { data } = await supabase
         .from('workouts')
-        .select('id, status, completed_at, exercises, duration_minutes, notes')
+        .select('id, name, status, completed_at, exercises, exercises_completed, duration_minutes, volume_load, perceived_effort, notes, plan_id')
         .eq('user_id', user.id)
         .gte('completed_at', `${date}T00:00:00`)
         .lte('completed_at', `${date}T23:59:59`)
@@ -191,7 +196,7 @@ function DiaryContent() {
       return (data || []).map(w => ({
         ...w,
         date,
-        name: w.status || 'Workout',
+        name: w.name || w.status || 'Workout',
       }));
     },
     enabled: !!user?.id,
@@ -236,6 +241,46 @@ function DiaryContent() {
     enabled: !!user?.id,
   });
 
+  // ── Handlers ───────────────────────────────────────────────────
+
+  const handleEditWorkout = (workout) => {
+    setEditingWorkout(workout);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveWorkout = async (updates) => {
+    if (!editingWorkout?.id) return;
+
+    try {
+      await updateWorkout(editingWorkout.id, updates);
+      toast.success('Workout updated successfully!');
+      setIsEditModalOpen(false);
+      setEditingWorkout(null);
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['diary-workouts', date] });
+      queryClient.invalidateQueries({ queryKey: ['workout-history', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['recent-workouts', user?.id] });
+    } catch (error) {
+      console.error('Error updating workout:', error);
+      toast.error('Failed to update workout. Please try again.');
+    }
+  };
+
+  const handleDeleteWorkout = async (workoutId) => {
+    if (!window.confirm('Are you sure you want to delete this workout? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteWorkout(workoutId);
+      toast.success('Workout deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['diary-workouts', date] });
+    } catch (error) {
+      console.error('Error deleting workout:', error);
+      toast.error('Failed to delete workout. Please try again.');
+    }
+  };
+
   // ── Valores derivados ──────────────────────────────────────────
 
   const totalCal      = meals.reduce((s, m) => s + (m.total_calories || 0), 0);
@@ -243,7 +288,7 @@ function DiaryContent() {
   const totalCarbs    = meals.reduce((s, m) => s + (m.total_carbs || 0), 0);
   const totalFat      = meals.reduce((s, m) => s + (m.total_fat || 0), 0);
   const measurement   = measurements[0] || null;
-  const doneWorkouts  = workouts.filter((w) => w.completed || w.status === 'completed').length;
+  const doneWorkouts  = workouts.filter((w) => w.status === 'completed').length;
 
   // ── Render ─────────────────────────────────────────────────────
 
@@ -309,6 +354,7 @@ function DiaryContent() {
         eyebrow="Diary"
         title={meals.length > 0 ? `Nutrition · ${Math.round(totalCal)} kcal` : 'Nutrition'}
         subtitle="Foods logged via Nutrition page for the selected date."
+        actions={null}
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
@@ -356,6 +402,7 @@ function DiaryContent() {
         eyebrow="Diary"
         title="Check-in"
         subtitle="Wellness, sleep, and hydration data logged for the day."
+        actions={null}
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
@@ -438,6 +485,7 @@ function DiaryContent() {
         eyebrow="Diary"
         title={workouts.length > 0 ? `Workouts · ${workouts.length} session(s)` : 'Workouts'}
         subtitle="Sessions recorded in the Workouts section for the selected date."
+        actions={null}
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
@@ -451,36 +499,54 @@ function DiaryContent() {
           ) : (
             <div className="divide-y divide-[hsl(var(--border)/0.5)]">
               {workouts.map((w) => {
-                const done = w.completed || w.status === 'completed';
+                const done = w.status === 'completed';
                 return (
                   <div key={w.id} className="px-5 py-4">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-[14px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
-                        {w.name}
-                      </p>
-                      <span
-                        className={cn(
-                          'shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-                          done
-                            ? 'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]'
-                            : 'bg-[hsl(var(--warn)/0.12)] text-[hsl(34_68%_32%)]'
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[14px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
+                          {w.name}
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap gap-3 text-[12px] text-[hsl(var(--fg-2))]">
+                          {w.duration_minutes > 0 && <span>{w.duration_minutes} min</span>}
+                          {w.volume_load > 0 && (
+                            <span>{w.volume_load.toLocaleString('en-US')} kg vol.</span>
+                          )}
+                          {w.perceived_effort > 0 && <span>RPE {w.perceived_effort}</span>}
+                        </div>
+                        {(w.exercises?.length > 0 || w.exercises_completed?.length > 0) && (
+                          <p className="mt-1.5 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+                            {(w.exercises_completed || w.exercises || []).map((e) => e.name).join(' · ')}
+                          </p>
                         )}
-                      >
-                        {done ? 'Done' : 'Pending'}
-                      </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                            done
+                              ? 'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]'
+                              : 'bg-[hsl(var(--warn)/0.12)] text-[hsl(34_68%_32%)]'
+                          )}
+                        >
+                          {done ? 'Done' : 'Pending'}
+                        </span>
+                        <button
+                          onClick={() => handleEditWorkout(w)}
+                          className="p-1.5 rounded-full hover:bg-[hsl(var(--fill))] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
+                          title="Edit workout"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteWorkout(w.id)}
+                          className="p-1.5 rounded-full hover:bg-[hsl(var(--err)/0.1)] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--err))] transition-colors"
+                          title="Delete workout"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="mt-1.5 flex flex-wrap gap-3 text-[12px] text-[hsl(var(--fg-2))]">
-                      {w.duration_minutes > 0 && <span>{w.duration_minutes} min</span>}
-                      {w.volume_load > 0 && (
-                        <span>{w.volume_load.toLocaleString('en-US')} kg vol.</span>
-                      )}
-                      {w.perceived_effort > 0 && <span>RPE {w.perceived_effort}</span>}
-                    </div>
-                    {(w.exercises || []).length > 0 && (
-                      <p className="mt-1.5 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-                        {w.exercises.map((e) => e.name).join(' · ')}
-                      </p>
-                    )}
                   </div>
                 );
               })}
@@ -494,6 +560,7 @@ function DiaryContent() {
         eyebrow="Diary"
         title="Measurements"
         subtitle="Body checkpoint recorded for the selected date."
+        actions={null}
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
@@ -542,6 +609,7 @@ function DiaryContent() {
             : 'Supplements'
         }
         subtitle="Active compounds registered in Protocols."
+        actions={null}
       >
         <Card className="overflow-hidden px-0 py-0">
           <SectionIconHeader
@@ -561,17 +629,150 @@ function DiaryContent() {
                 >
                   {s.name}
                   {s.dose ? ` · ${s.dose}` : ''}
-                  {s.protocol_id && (
-                    <span className="rounded-full bg-[hsl(var(--brand)/0.12)] px-1.5 py-0.5 text-[10px] text-[hsl(var(--brand))]">
-                      protocol
-                    </span>
-                  )}
                 </span>
               ))}
             </div>
           )}
         </Card>
       </Section>
+      {/* ── Edit Workout Modal ─────────────────────────────────── */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[32rem]">
+          <DialogHeader>
+            <DialogTitle>Edit Workout</DialogTitle>
+          </DialogHeader>
+          {editingWorkout && (
+            <WorkoutEditForm
+              workout={editingWorkout}
+              onSave={handleSaveWorkout}
+              onCancel={() => {
+                setIsEditModalOpen(false);
+                setEditingWorkout(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </AppContainer>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Workout Edit Form Component
+// ─────────────────────────────────────────────────────────────────
+
+function WorkoutEditForm({ workout, onSave, onCancel }) {
+  const [formData, setFormData] = useState({
+    name: workout.name || '',
+    completed_at: workout.completed_at ? new Date(workout.completed_at).toISOString().slice(0, 16) : '',
+    duration_minutes: workout.duration_minutes || 0,
+    volume_load: workout.volume_load || 0,
+    perceived_effort: workout.perceived_effort || 0,
+    status: workout.status || 'completed',
+    notes: workout.notes || '',
+  });
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({
+      ...formData,
+      duration_minutes: Number(formData.duration_minutes),
+      volume_load: Number(formData.volume_load),
+      perceived_effort: Number(formData.perceived_effort),
+      completed_at: new Date(formData.completed_at).toISOString(),
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Workout Name</label>
+        <Input
+          value={formData.name}
+          onChange={(e) => handleChange('name', e.target.value)}
+          placeholder="e.g., Upper Body A"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Date & Time</label>
+        <Input
+          type="datetime-local"
+          value={formData.completed_at}
+          onChange={(e) => handleChange('completed_at', e.target.value)}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Duration (min)</label>
+          <Input
+            type="number"
+            value={formData.duration_minutes}
+            onChange={(e) => handleChange('duration_minutes', e.target.value)}
+            min="0"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Volume Load (kg)</label>
+          <Input
+            type="number"
+            value={formData.volume_load}
+            onChange={(e) => handleChange('volume_load', e.target.value)}
+            min="0"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Perceived Effort (RPE 1-10)</label>
+        <Input
+          type="number"
+          value={formData.perceived_effort}
+          onChange={(e) => handleChange('perceived_effort', e.target.value)}
+          min="1"
+          max="10"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Status</label>
+        <select
+          value={formData.status}
+          onChange={(e) => handleChange('status', e.target.value)}
+          className="w-full rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2 text-sm"
+        >
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Notes</label>
+        <textarea
+          value={formData.notes}
+          onChange={(e) => handleChange('notes', e.target.value)}
+          placeholder="Any notes about this workout..."
+          rows={3}
+          className="w-full rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-2 text-sm resize-none"
+        />
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          <X className="h-4 w-4 mr-2" />
+          Cancel
+        </Button>
+        <Button type="submit">
+          <Save className="h-4 w-4 mr-2" />
+          Save Changes
+        </Button>
+      </div>
+    </form>
   );
 }
