@@ -20,7 +20,13 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const APP_URL = Deno.env.get('APP_URL') || 'https://atlascore.app';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const SEND_EMAIL_URL = `${SUPABASE_URL}/functions/v1/send-email`;
+
+// Check if service role key is configured
+if (!SERVICE_ROLE_KEY) {
+  console.error('on-auth-user-created: SUPABASE_SERVICE_ROLE_KEY not set');
+}
+
+const SEND_EMAIL_URL = SERVICE_ROLE_KEY ? `${SUPABASE_URL}/functions/v1/send-email` : '';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -41,6 +47,11 @@ function firstNameFrom(fullName: string | undefined, email: string): string {
 }
 
 async function invokeEmailFunction(payload: Record<string, unknown>): Promise<void> {
+  if (!SEND_EMAIL_URL) {
+    console.warn('on-auth-user-created: send-email URL not configured, skipping email');
+    return;
+  }
+  
   try {
     const res = await fetch(SEND_EMAIL_URL, {
       method: 'POST',
@@ -63,6 +74,22 @@ async function invokeEmailFunction(payload: Record<string, unknown>): Promise<vo
 }
 
 Deno.serve(async (req) => {
+  try {
+    return await handleRequest(req);
+  } catch (error) {
+    console.error('on-auth-user-created: unhandled error:', error);
+    // Always return 200 to prevent Supabase Auth from blocking signups
+    return new Response(JSON.stringify({ 
+      success: true, 
+      warning: 'Internal error occurred but signup was not blocked',
+      error: error instanceof Error ? error.message : String(error)
+    }), {
+      status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+});
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS });
   }
@@ -174,4 +201,4 @@ Deno.serve(async (req) => {
   }), {
     status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
   });
-});
+}

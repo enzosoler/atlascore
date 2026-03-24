@@ -112,7 +112,31 @@ function extractNutrient(description: string, name: string): number {
   return match ? parseFloat(match[1]) : 0;
 }
 
-// ── USDA food search ──────────────────────────────────────────────────────────
+// ── Open Food Facts search (free, no API key required) ─────────────────────────
+async function searchOpenFoodFacts(query: string) {
+  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=1&page_size=20`;
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'AtlasCore/1.0 (contact@atlascore.app)',
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Open Food Facts error: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return (data.products || []).map((product: any) => ({
+    id: String(product.code || product.id || Math.random().toString(36)),
+    name: product.product_name || product.product_name_en || 'Unknown product',
+    brand: product.brands || null,
+    calories: product.nutriments?.energy_kcal || product.nutriments?.energy_kcal_100g || 0,
+    protein: product.nutriments?.proteins || product.nutriments?.proteins_100g || 0,
+    carbs: product.nutriments?.carbohydrates || product.nutriments?.carbohydrates_100g || 0,
+    fat: product.nutriments?.fat || product.nutriments?.fat_100g || 0,
+    source_api: 'OpenFoodFacts',
+  }));
+}
 async function searchUSDA(query: string) {
   const apiKey = Deno.env.get('USDA_API_KEY');
   if (!apiKey) throw new Error('USDA_API_KEY not configured.');
@@ -198,8 +222,16 @@ serve(async (req) => {
 
     if (provider === 'usda') {
       results = await searchUSDA(query.trim());
+    } else if (provider === 'openfoodfacts') {
+      results = await searchOpenFoodFacts(query.trim());
     } else {
-      results = await searchFatSecret(query.trim(), language);
+      // Default: try FatSecret first, fallback to Open Food Facts
+      try {
+        results = await searchFatSecret(query.trim(), language);
+      } catch (fatSecretErr: any) {
+        console.log('FatSecret failed, trying Open Food Facts:', fatSecretErr?.message || String(fatSecretErr));
+        results = await searchOpenFoodFacts(query.trim());
+      }
     }
 
     return new Response(JSON.stringify({ results }), {

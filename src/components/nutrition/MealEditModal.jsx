@@ -5,10 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { X, Plus, Edit2, Loader2 } from 'lucide-react';
+import { X, Plus, Edit2, Loader2, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { MEAL_TYPES } from '@/lib/atlas-theme';
 import FoodSearch from './FoodSearch';
+import FoodCameraScanner from './FoodCameraScanner';
 
 const MACRO_COLORS = { protein: '#4F8CFF', carbs: '#8B7CFF', fat: '#F5A83A' };
 
@@ -18,6 +19,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
   const [foods, setFoods] = useState(meal?.foods || []);
   const [editingIdx, setEditingIdx] = useState(null);
   const [editAmount, setEditAmount] = useState('');
+  const [showCamera, setShowCamera] = useState(false);
 
   const totals = useMemo(() => {
     return foods.reduce(
@@ -84,6 +86,21 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
     setFoods(foods.filter((_, i) => i !== idx));
   };
 
+  const handleFoodsDetected = (detectedFoods) => {
+    const formatted = detectedFoods.map(f => ({
+      name: f.name,
+      amount: 100,
+      unit: 'g',
+      kcal: f.calories || 0,
+      protein: f.protein || 0,
+      carbs: f.carbs || 0,
+      fat: f.fat || 0,
+      fiber: f.fiber || 0,
+    }));
+    setFoods(prev => [...prev, ...formatted]);
+    toast.success(`${detectedFoods.length} food(s) added from photo`);
+  };
+
   const duplicateMeal = () => {
     const newFoods = JSON.parse(JSON.stringify(foods));
     const tomorrow = new Date(date);
@@ -129,10 +146,21 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="section-label">Foods</p>
-              <FoodSearch
-                onSelectFood={(f) => setFoods([...foods, f])}
-                compact
-              />
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCamera(true)}
+                  className="h-8 gap-1.5 text-[12px]"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Scan
+                </Button>
+                <FoodSearch
+                  onSelectFood={(f) => setFoods([...foods, f])}
+                  compact
+                />
+              </div>
             </div>
 
             {foods.length > 0 ? (
@@ -249,6 +277,12 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
           </div>
         </div>
       </DialogContent>
+
+      <FoodCameraScanner
+        open={showCamera}
+        onOpenChange={setShowCamera}
+        onFoodsDetected={handleFoodsDetected}
+      />
     </Dialog>
   );
 }

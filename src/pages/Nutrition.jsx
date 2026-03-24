@@ -403,7 +403,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
 
-  // Search flow: instant TACO results → FatSecret fallback
+  // Search flow: instant TACO results + FatSecret combined
   useEffect(() => {
     const q = searchQuery.trim();
     if (q.length < 2) {
@@ -415,27 +415,39 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
     // 1. TACO (offline, instant)
     const tacoHits = searchTaco(q, 8);
-    if (tacoHits.length > 0) {
-      setSearchResults(tacoHits);
-      setIsSearching(false);
-      setSearchError('');
-      return;
-    }
 
-    // 2. FatSecret (packaged foods not covered by TACO)
+    // Show TACO immediately while fetching FatSecret
+    setSearchResults(tacoHits);
+
+    // 2. FatSecret (packaged/international foods)
     setIsSearching(true);
     setSearchError('');
+
     const timer = setTimeout(async () => {
       try {
-        const results = await searchFatSecretFoods(q, 'en');
-        setSearchResults(results.slice(0, 8));
+        const fatSecretFoods = await searchFatSecretFoods(q, 'pt');
+
+        // Combine results, removing duplicates
+        const seenIds = new Set(tacoHits.map(f => String(f.id)));
+        const uniqueFatSecretFoods = fatSecretFoods.filter(f => {
+          const key = String(f.id);
+          if (seenIds.has(key)) return false;
+          seenIds.add(key);
+          return true;
+        });
+
+        // Combine: TACO first, then FatSecret
+        const combinedResults = [...tacoHits, ...uniqueFatSecretFoods].slice(0, 10);
+        setSearchResults(combinedResults);
       } catch {
-        setSearchError('Search failed. Try a different food name.');
-        setSearchResults([]);
+        // Keep TACO results if FatSecret fails
+        setSearchResults(tacoHits);
+        setSearchError('External search failed. Showing local results only.');
       } finally {
         setIsSearching(false);
       }
     }, 400);
+
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -785,6 +797,7 @@ export default function NutritionPage() {
   const handleSaveTargets = async () => {
     if (!user?.id || !targetDraft) return;
     setIsSavingTargets(true);
+
     try {
       // Read current profile_data first so we don't overwrite unrelated fields
       const { data: existing } = await supabase
@@ -824,6 +837,13 @@ export default function NutritionPage() {
     }
   };
 
+  // Detect language based on query characters (PT vs EN)
+  const detectLanguage = (query) => {
+    // Portuguese-specific characters
+    const ptChars = /[çãõâêîôûáéíóúàèìòùäëïöü]/i;
+    return ptChars.test(query) ? 'pt' : 'en';
+  };
+
   useEffect(() => {
     const q = foodQuery.trim();
     if (q.length < 2) {
@@ -835,31 +855,52 @@ export default function NutritionPage() {
 
     // Step 1: instant TACO search (offline, no cost)
     const tacoResults = searchTaco(q, 10);
-    if (tacoResults.length > 0) {
-      setFoodResults(tacoResults);
-      setIsSearchingFoods(false);
-      setFoodSearchError('');
-      return;
-    }
+    console.log('[Nutrition] TACO results:', tacoResults.length, tacoResults.map(f => f.name));
 
-    // Step 2: FatSecret fallback for packaged foods not covered by TACO
+    // Show TACO results immediately while fetching FatSecret
+    setFoodResults(tacoResults);
+
+    // Step 2: always fetch FatSecret for international/packaged foods
     setIsSearchingFoods(true);
     setFoodSearchError('');
+
+    // Detect language from query
+    const lang = detectLanguage(q);
+    console.log('[Nutrition] Detected language:', lang);
+
     let active = true;
     const timer = window.setTimeout(async () => {
       try {
-        let foods = await searchFatSecretFoods(q, 'en');
-        if (active) setFoodResults(foods.slice(0, 8));
+        console.log('[Nutrition] Fetching FatSecret for:', q, 'lang:', lang);
+        let fatSecretFoods = await searchFatSecretFoods(q, lang);
+        console.log('[Nutrition] FatSecret results:', fatSecretFoods.length, fatSecretFoods.map(f => f.name));
+        if (!active) return;
+
+        // Combine TACO + FatSecret results, removing duplicates
+        const seenIds = new Set(tacoResults.map(f => String(f.id)));
+        const uniqueFatSecretFoods = fatSecretFoods.filter(f => {
+          const key = String(f.id);
+          if (seenIds.has(key)) return false;
+          seenIds.add(key);
+          return true;
+        });
+
+        // Combine: TACO first (local), then FatSecret results
+        const combinedResults = [...tacoResults, ...uniqueFatSecretFoods].slice(0, 12);
+        console.log('[Nutrition] Combined results:', combinedResults.length);
+        setFoodResults(combinedResults);
       } catch (error) {
-        console.error('FatSecret search failed:', error);
+        console.error('[Nutrition] FatSecret search failed:', error);
         if (active) {
-          setFoodResults([]);
-          setFoodSearchError(t('pages.nutrition.not_found'));
+          // Keep TACO results if FatSecret fails
+          setFoodResults(tacoResults);
+          setFoodSearchError(`External search error: ${error.message}`);
         }
       } finally {
         if (active) setIsSearchingFoods(false);
       }
     }, FATSECRET_SEARCH_DEBOUNCE_MS);
+
     return () => { active = false; window.clearTimeout(timer); };
   }, [foodQuery]);
 
