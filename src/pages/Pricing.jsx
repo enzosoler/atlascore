@@ -265,6 +265,8 @@ export default function Pricing() {
   }, [locale, pricing, billing, t]);
 
   const handleSubscribe = async (planId) => {
+    console.log('[Pricing] handleSubscribe called with planId:', planId);
+    
     if (planId === 'free') {
       window.location.href = '/auth?mode=signup';
       return;
@@ -276,6 +278,7 @@ export default function Pricing() {
       return;
     }
 
+    console.log('[Pricing] Calling create-checkout with:', { plan: planId, user_id: user?.id, email: user?.email, region, billing });
     setLoading(planId);
     try {
       // Use Stripe Checkout via Supabase Edge Function
@@ -291,6 +294,8 @@ export default function Pricing() {
         },
       });
 
+      console.log('[Pricing] create-checkout response:', { data, error });
+
       if (error) {
         console.error('Checkout error:', error);
         toast.error(error.message || 'Error starting checkout. Please try again.');
@@ -300,6 +305,7 @@ export default function Pricing() {
       if (data?.url) {
         window.location.href = data.url;
       } else {
+        console.error('[Pricing] No URL in response:', data);
         toast.error(data?.error || 'Error starting checkout. Please try again.');
       }
     } catch (error) {
