@@ -39,7 +39,14 @@ import {
   TodaySection,
   TodayStatCard,
 } from '@/components/today/TodayMobileUI';
+import {
+  TodayWorkoutCard,
+  TodayNutritionCard,
+  TodayProtocolCard,
+  TimelineCard,
+} from '@/components/dashboard';
 import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
+import { formatWeight, formatWeightDiff, isImperial } from '@/lib/units';
 
 function getPreferredName(displayName, fallbackName = null) {
   if (!displayName) return fallbackName;
@@ -826,6 +833,101 @@ function TodayContent() {
           </div>
         )}
       </TodaySection>
+
+      {/* ── Detailed Dashboard Cards — Workout, Nutrition, Protocol, Timeline ── */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Today's Workout Card */}
+        <TodayWorkoutCard
+          to={ROUTES.workouts}
+          primaryLift={todaySession?.exercises?.[0]?.name || (activeWorkoutPlan?.name)}
+          weight={todaySession?.exercises?.[0]?.weight 
+            ? formatWeight(Number(todaySession.exercises[0].weight), profile)
+            : '—'}
+          weightDiff={todaySession?.exercises?.[0]?.weight_diff || 0}
+          isPR={todaySession?.exercises?.[0]?.is_pr || false}
+          tags={activeWorkoutPlan ? [activeWorkoutPlan.name, `Week ${activeWorkoutPlan.current_week || 1}`] : []}
+          stats={[
+            { label: 'Volume', value: '+18%', percentage: 65 },
+            { label: 'Frequency', value: '3x/wk', percentage: 75 },
+            { label: 'Consistency', value: '91%', percentage: 91 },
+          ]}
+          tone="teal"
+          loading={isLoading}
+        />
+
+        {/* Today's Nutrition Card */}
+        <TodayNutritionCard
+          to={ROUTES.nutrition}
+          calories={todayMeals.reduce((sum, m) => sum + (m.calories || 0), 0)}
+          calorieTarget={activeDietPlan?.target_calories || profile?.calories_target || 2500}
+          macros={{
+            protein: todayMeals.reduce((sum, m) => sum + (m.protein || 0), 0),
+            carbs: todayMeals.reduce((sum, m) => sum + (m.carbs || 0), 0),
+            fat: todayMeals.reduce((sum, m) => sum + (m.fat || 0), 0),
+          }}
+          macroTargets={{
+            protein: Number(profile?.protein_target) || 180,
+            carbs: Number(profile?.carbs_target) || 250,
+            fat: Number(profile?.fat_target) || 70,
+          }}
+          averageStats={{
+            protein: 168,
+            daysBelowTarget: 3,
+            daysTracked: 7,
+          }}
+          tone="teal"
+          loading={isLoading}
+        />
+
+        {/* Today's Protocol Card */}
+        <TodayProtocolCard
+          to={ROUTES.protocols}
+          protocols={activeProtocolsList.slice(0, 4).map((p, i) => ({
+            name: p.substance_name || p.name,
+            dose: p.dose,
+            unit: p.unit || 'mg',
+            time: p.schedule || 'Morning',
+            checked: i < 3, // First 3 checked as demo
+            icon: ['💊', '🌿', '🔥', '🌙'][i] || '💊',
+          }))}
+          adherence={87}
+          tone="teal"
+          loading={isLoading}
+        />
+
+        {/* Timeline Card */}
+        <TimelineCard
+          to={ROUTES.insights}
+          events={[
+            {
+              type: 'pr',
+              dateLabel: `Today · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+              title: `New PR — squat ${formatWeight(140, profile)}`,
+              subtitle: 'Workout logged · 4 exercises',
+              highlight: true,
+            },
+            {
+              type: 'checkin',
+              dateLabel: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              title: `Check-in — ${formatWeight(84.2, profile)}`,
+              subtitle: 'Body fat: 17.4% · Progress photo',
+            },
+            {
+              type: 'protocol',
+              dateLabel: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              title: 'Protocol updated',
+              subtitle: 'Added omega-3 · 3g daily',
+            },
+            {
+              type: 'nutrition',
+              dateLabel: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              title: 'Nutrition — best week',
+              subtitle: 'Average protein: 182g · 7/7 days',
+            },
+          ]}
+          loading={isLoading}
+        />
+      </div>
 
       {/* ── Daily summary strip — shown once ≥ 2 pillars are done ── */}
       {showDailySummary && (

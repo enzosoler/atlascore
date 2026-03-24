@@ -19,7 +19,14 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
-import { setLanguage } from '@/lib/i18n';
+import {
+  isImperial,
+  formatWeight,
+  formatWeightDiff,
+  formatHeight,
+  getWeightUnit,
+  getHeightUnit,
+} from '@/lib/units';
 import { ROUTES } from '@/lib/routes';
 import {
   ActionRow,
