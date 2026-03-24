@@ -5,6 +5,10 @@
   "framework": null,
   "buildCommand": null,
   "installCommand": null,
+  "rewrites": [
+    { "source": "/br/:path*", "destination": "/br/index.html" },
+    { "source": "/:path*", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
