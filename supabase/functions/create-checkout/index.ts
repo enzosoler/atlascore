@@ -22,29 +22,29 @@ const CORS = {
 // Price IDs configuration
 const PRICE_MAP: Record<string, Record<string, string>> = {
   br_monthly: {
-    athlete_pro: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_PRO') || '',
-    athlete_performance: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_PERFORMANCE') || '',
+    athlete_pro: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PRO') || '',
+    athlete_performance: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PERFORMANCE') || '',
     coach: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_COACH') || '',
     nutritionist: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_NUTRITIONIST') || '',
     clinician: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_CLINICIAN') || '',
   },
   br_yearly: {
-    athlete_pro: Deno.env.get('STRIPE_PRICE_BR_YEARLY_PRO') || '',
-    athlete_performance: Deno.env.get('STRIPE_PRICE_BR_YEARLY_PERFORMANCE') || '',
+    athlete_pro: Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PRO') || '',
+    athlete_performance: Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PERFORMANCE') || '',
     coach: Deno.env.get('STRIPE_PRICE_BR_YEARLY_COACH') || '',
     nutritionist: Deno.env.get('STRIPE_PRICE_BR_YEARLY_NUTRITIONIST') || '',
     clinician: Deno.env.get('STRIPE_PRICE_BR_YEARLY_CLINICIAN') || '',
   },
   us_monthly: {
-    athlete_pro: Deno.env.get('STRIPE_PRICE_US_MONTHLY_PRO') || '',
-    athlete_performance: Deno.env.get('STRIPE_PRICE_US_MONTHLY_PERFORMANCE') || '',
+    athlete_pro: Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PRO') || '',
+    athlete_performance: Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PERFORMANCE') || '',
     coach: Deno.env.get('STRIPE_PRICE_US_MONTHLY_COACH') || '',
     nutritionist: Deno.env.get('STRIPE_PRICE_US_MONTHLY_NUTRITIONIST') || '',
     clinician: Deno.env.get('STRIPE_PRICE_US_MONTHLY_CLINICIAN') || '',
   },
   us_yearly: {
-    athlete_pro: Deno.env.get('STRIPE_PRICE_US_YEARLY_PRO') || '',
-    athlete_performance: Deno.env.get('STRIPE_PRICE_US_YEARLY_PERFORMANCE') || '',
+    athlete_pro: Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PRO') || '',
+    athlete_performance: Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE') || '',
     coach: Deno.env.get('STRIPE_PRICE_US_YEARLY_COACH') || '',
     nutritionist: Deno.env.get('STRIPE_PRICE_US_YEARLY_NUTRITIONIST') || '',
     clinician: Deno.env.get('STRIPE_PRICE_US_YEARLY_CLINICIAN') || '',
