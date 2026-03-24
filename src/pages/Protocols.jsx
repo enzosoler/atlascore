@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -7,6 +7,7 @@ import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
+import LogDoseForm from '@/components/protocols/LogDoseForm';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import {
   DialogPanelHeader,
@@ -33,40 +34,6 @@ import {
 
 const PROTOCOLS_QUERY_KEY = ['protocols'];
 const FILTERS = ['all', 'active', 'paused', 'finished'];
-
-// Half-life lookup table (in days) for common substances
-const SUBSTANCE_HALF_LIFE_MAP = {
-  'Cipionato de Testosterona': 8.0,
-  'Test C': 8.0,
-  'Enantato de Testosterona': 4.5,
-  'Test E': 4.5,
-  'Propionato de Testosterona': 0.8,
-  'Test P': 0.8,
-  'Undecanoato de Testosterona': 20.9,
-  'Nebido': 20.9,
-  'Decanoato de Nandrolona': 12.0,
-  'Deca': 12.0,
-  'Fenilpropionato de Nandrolona': 2.5,
-  'NPP': 2.5,
-  'Acetato de Trembolona': 1.0,
-  'Tren A': 1.0,
-  'Enantato de Trembolona': 5.0,
-  'Tren E': 5.0,
-  'Drostanolona Propionato': 1.0,
-  'Masteron': 1.0,
-  'Drostanolona Enantato': 4.5,
-  'Mast E': 4.5,
-  'Metenolona Enantato': 10.5,
-  'Primobolan': 10.5,
-  'Oxandrolona': 0.4,
-  'Anavar': 0.4,
-  'Oximetolona': 0.35,
-  'Hemogenin': 0.35,
-  'Metandienona': 0.2,
-  'Dianabol': 0.2,
-  'Estanozolol': 0.4,
-  'Winstrol': 0.4,
-};
 
 const CURVE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
@@ -106,6 +73,40 @@ async function fetchProtocols() {
   return data ?? [];
 }
 
+async function fetchProtocolLogs(protocolId) {
+  const { data, error } = await supabase
+    .from('protocol_logs')
+    .select('*')
+    .eq('protocol_id', protocolId)
+    .order('taken_at', { ascending: false })
+    .limit(100);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function fetchAllProtocolLogs() {
+  const { data, error } = await supabase
+    .from('protocol_logs')
+    .select('*')
+    .order('taken_at', { ascending: false })
+    .limit(500);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function logDose(payload) {
+  const { data, error } = await supabase
+    .from('protocol_logs')
+    .insert(payload)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 async function createProtocol(payload) {
   const { data, error } = await supabase
     .from('protocols')
@@ -138,156 +139,235 @@ async function deleteProtocol(protocolId) {
   if (error) throw error;
 }
 
-// ── Half-Life Curve Chart ────────────────────────────────────────────────────
+// ── Concentration Chart based on Actual Dose Logs ────────────────────────────
 
-function getSubstanceHalfLife(protocol) {
-  // First check if protocol has estimated_half_life_days
-  if (typeof protocol?.estimated_half_life_days === 'number' && protocol.estimated_half_life_days > 0) {
-    return protocol.estimated_half_life_days;
-  }
+import {
+  generateConcentrationSeries,
+  getSubstanceHalfLife,
+  fetchProtocolLogs,
+} from '@/lib/concentrationCalculator';
 
-  // Fall back to lookup by substance name
-  const name = protocol?.substance_name;
-  if (name && SUBSTANCE_HALF_LIFE_MAP[name]) {
-    return SUBSTANCE_HALF_LIFE_MAP[name];
-  }
+function ConcentrationChart({ protocols }) {
+  const qc = useQueryClient();
+  const { user } = useAuth();
 
-  // Default to 1 day
-  return 1;
-}
+  // Fetch logs for all active protocols
+  const logsQueries = useQueries({
+    queries: protocols.map((protocol) => ({
+      queryKey: ['protocol-logs', protocol.id],
+      queryFn: () => fetchProtocolLogs(protocol.id),
+      enabled: !!protocol?.id && !!user?.id,
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
 
-function HalfLifeCurveChart({ protocols }) {
-  if (!protocols || protocols.length === 0) {
+  const isLoading = logsQueries.some((q) => q.isLoading);
+
+  // Combine protocols with their logs and calculate series
+  const protocolsWithData = useMemo(() => {
+    return protocols.map((protocol, index) => {
+      const logs = logsQueries[index]?.data || [];
+      const halfLife = getSubstanceHalfLife(protocol);
+      const series =
+        logs.length > 0
+          ? generateConcentrationSeries(logs, halfLife, 30, 14, 4)
+          : [];
+
+      return {
+        protocol,
+        logs,
+        halfLife,
+        series,
+        hasLogs: logs.length > 0,
+      };
+    });
+  }, [protocols, logsQueries]);
+
+  const hasAnyLogs = protocolsWithData.some((p) => p.hasLogs);
+
+  if (protocols.length === 0) {
     return (
       <div className="flex items-center justify-center rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.4)] px-6 py-12 text-center">
-        <p className="text-[14px] text-[hsl(var(--fg-2))]">No active protocol available to preview.</p>
+        <p className="text-[14px] text-[hsl(var(--fg-2))]">
+          No active protocols available.
+        </p>
       </div>
     );
   }
 
-  const VIEWBOX_WIDTH = 400;
-  const VIEWBOX_HEIGHT = 200;
-  const PADDING = { top: 20, bottom: 30, left: 40, right: 60 };
-  const PLOT_WIDTH = VIEWBOX_WIDTH - PADDING.left - PADDING.right;
-  const PLOT_HEIGHT = VIEWBOX_HEIGHT - PADDING.top - PADDING.bottom;
-
-  const xAxisEnd = PADDING.left + PLOT_WIDTH;
-  const yAxisEnd = PADDING.top;
-
-  // Generate points for a decay curve: C(t) = 100 × e^(-0.693 × t / half_life)
-  const generateCurvePoints = (halfLife, colorIndex) => {
-    const points = [];
-    const daysToShow = 30;
-    const pointsPerDay = 2;
-
-    for (let i = 0; i <= daysToShow * pointsPerDay; i++) {
-      const t = i / pointsPerDay; // days
-      const c = 100 * Math.exp((-0.693 * t) / halfLife); // concentration
-      const x = PADDING.left + (t / daysToShow) * PLOT_WIDTH;
-      const y = PADDING.top + PLOT_HEIGHT - (c / 100) * PLOT_HEIGHT;
-      points.push({ x, y, c, t });
-    }
-
-    return points;
-  };
-
-  const curvesData = protocols.slice(0, 4).map((protocol, index) => {
-    const halfLife = getSubstanceHalfLife(protocol);
-    const points = generateCurvePoints(halfLife, index);
-    return {
-      protocol,
-      halfLife,
-      points,
-      color: CURVE_COLORS[index],
-      label: protocol?.substance_name || `Protocol ${index + 1}`,
-    };
-  });
-
-  const pathData = curvesData.map(curve => {
-    const d = curve.points.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ');
-    return { color: curve.color, d };
-  });
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.4)] px-6 py-12">
+        <p className="text-[14px] text-[hsl(var(--fg-2))]">Loading dose history...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <svg viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`} className="w-full border border-[hsl(var(--border)/0.88)] rounded-[16px] bg-[hsl(var(--fill)/0.3)]">
-        {/* Grid lines */}
-        <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={PADDING.top + PLOT_HEIGHT} stroke="hsl(var(--border))" strokeWidth="1" opacity="0.5" />
-        <line x1={PADDING.left} y1={PADDING.top + PLOT_HEIGHT} x2={xAxisEnd} y2={PADDING.top + PLOT_HEIGHT} stroke="hsl(var(--border))" strokeWidth="1" opacity="0.5" />
+      {!hasAnyLogs ? (
+        <div className="rounded-[16px] border border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.08)] px-4 py-3">
+          <p className="text-[13px] text-[hsl(var(--warn))]">
+            No doses logged yet. Click "Log dose" on a protocol to see concentration curves.
+          </p>
+        </div>
+      ) : null}
 
-        {/* Y-axis labels */}
-        <text x={PADDING.left - 8} y={PADDING.top + 4} fontSize="10" textAnchor="end" fill="hsl(var(--fg-2))">100%</text>
-        <text x={PADDING.left - 8} y={PADDING.top + PLOT_HEIGHT / 2 + 4} fontSize="10" textAnchor="end" fill="hsl(var(--fg-2))">50%</text>
-        <text x={PADDING.left - 8} y={PADDING.top + PLOT_HEIGHT + 4} fontSize="10" textAnchor="end" fill="hsl(var(--fg-2))">0%</text>
+      {protocolsWithData.map((data, index) => (
+        <ProtocolConcentrationCard
+          key={data.protocol.id}
+          data={data}
+          color={CURVE_COLORS[index % CURVE_COLORS.length]}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ProtocolConcentrationCard({ data, color }) {
+  const { protocol, halfLife, series, hasLogs } = data;
+
+  const VIEWBOX_WIDTH = 400;
+  const VIEWBOX_HEIGHT = 120;
+  const PADDING = { top: 10, bottom: 25, left: 40, right: 20 };
+  const PLOT_WIDTH = VIEWBOX_WIDTH - PADDING.left - PADDING.right;
+  const PLOT_HEIGHT = VIEWBOX_HEIGHT - PADDING.top - PADDING.bottom;
+
+  if (!hasLogs || series.length === 0) {
+    return (
+      <div className="rounded-[20px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.3)] px-4 py-4">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+          <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+            {protocol.substance_name || protocol.name}
+          </p>
+        </div>
+        <p className="mt-2 text-[12px] text-[hsl(var(--fg-2))]">
+          No doses logged yet. Log doses to see concentration curve.
+        </p>
+      </div>
+    );
+  }
+
+  // Find min/max for scaling
+  const concentrations = series.map((p) => p.concentration);
+  const maxConcentration = Math.max(...concentrations, 1);
+  const minConcentration = Math.min(...concentrations.filter((c) => c > 0), maxConcentration * 0.01);
+
+  // Generate path points
+  const now = new Date();
+  const startTime = series[0].time.getTime();
+  const endTime = series[series.length - 1].time.getTime();
+  const timeRange = endTime - startTime;
+
+  const points = series.map((point) => {
+    const x =
+      PADDING.left +
+      ((point.time.getTime() - startTime) / timeRange) * PLOT_WIDTH;
+    const y =
+      PADDING.top +
+      PLOT_HEIGHT -
+      ((point.concentration - minConcentration) / (maxConcentration - minConcentration)) *
+        PLOT_HEIGHT;
+    return { x, y, ...point };
+  });
+
+  // Find current time position
+  const nowX =
+    PADDING.left + ((now.getTime() - startTime) / timeRange) * PLOT_WIDTH;
+
+  // Create path
+  const pathData = points.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ');
+
+  // Find current concentration
+  const currentPoint = points.reduce((closest, pt) => {
+    return Math.abs(pt.time.getTime() - now.getTime()) <
+      Math.abs(closest.time.getTime() - now.getTime())
+      ? pt
+      : closest;
+  });
+
+  // Format dates for labels
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  return (
+    <div className="rounded-[20px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.3)] p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+          <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+            {protocol.substance_name || protocol.name}
+          </p>
+        </div>
+        <div className="flex gap-3 text-[11px] text-[hsl(var(--fg-2))]">
+          <span>T½: {halfLife.toFixed(1)}d</span>
+          <span>Current: {currentPoint.concentration.toFixed(1)}</span>
+        </div>
+      </div>
+
+      <svg viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`} className="w-full">
+        {/* Grid */}
+        <line
+          x1={PADDING.left}
+          y1={PADDING.top}
+          x2={PADDING.left}
+          y2={PADDING.top + PLOT_HEIGHT}
+          stroke="hsl(var(--border))"
+          strokeWidth="1"
+          opacity="0.5"
+        />
+        <line
+          x1={PADDING.left}
+          y1={PADDING.top + PLOT_HEIGHT}
+          x2={PADDING.left + PLOT_WIDTH}
+          y2={PADDING.top + PLOT_HEIGHT}
+          stroke="hsl(var(--border))"
+          strokeWidth="1"
+          opacity="0.5"
+        />
+
+        {/* Now line */}
+        <line
+          x1={nowX}
+          y1={PADDING.top}
+          x2={nowX}
+          y2={PADDING.top + PLOT_HEIGHT}
+          stroke="hsl(var(--fg-2))"
+          strokeWidth="1"
+          strokeDasharray="3,3"
+          opacity="0.7"
+        />
+
+        {/* Concentration curve */}
+        <path d={pathData} stroke={color} strokeWidth="2" fill="none" strokeLinecap="round" />
+
+        {/* Current concentration point */}
+        <circle
+          cx={currentPoint.x.toFixed(1)}
+          cy={currentPoint.y.toFixed(1)}
+          r="3"
+          fill={color}
+          stroke="white"
+          strokeWidth="1"
+        />
 
         {/* X-axis labels */}
-        <text x={PADDING.left} y={PADDING.top + PLOT_HEIGHT + 20} fontSize="10" textAnchor="middle" fill="hsl(var(--fg-2))">0d</text>
-        <text x={PADDING.left + PLOT_WIDTH / 2} y={PADDING.top + PLOT_HEIGHT + 20} fontSize="10" textAnchor="middle" fill="hsl(var(--fg-2))">15d</text>
-        <text x={xAxisEnd} y={PADDING.top + PLOT_HEIGHT + 20} fontSize="10" textAnchor="middle" fill="hsl(var(--fg-2))">30d</text>
-
-        {/* Axis labels */}
-        <text x={PADDING.left - 25} y={PADDING.top - 5} fontSize="11" fontWeight="600" fill="hsl(var(--fg-2))">Conc.</text>
-        <text x={xAxisEnd + 15} y={PADDING.top + PLOT_HEIGHT + 22} fontSize="11" fontWeight="600" fill="hsl(var(--fg-2))">Dias</text>
-
-        {/* Curves */}
-        {pathData.map((path, idx) => (
-          <path
-            key={idx}
-            d={path.d}
-            stroke={path.color}
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        ))}
-
-        {/* Half-life markers (50% point) */}
-        {curvesData.map((curve, idx) => {
-          const halfLifePoint = curve.points.find(pt => pt.c <= 50);
-          if (!halfLifePoint) return null;
-          return (
-            <circle
-              key={`marker-${idx}`}
-              cx={halfLifePoint.x}
-              cy={halfLifePoint.y}
-              r="2.5"
-              fill={curve.color}
-              stroke="white"
-              strokeWidth="1"
-            />
-          );
-        })}
-
-        {/* Protocol labels at right edge */}
-        {curvesData.map((curve, idx) => {
-          const lastPoint = curve.points[curve.points.length - 1];
-          return (
-            <g key={`label-${idx}`}>
-              <text
-                x={xAxisEnd + 8}
-                y={lastPoint.y + 4}
-                fontSize="11"
-                fontWeight="600"
-                fill={curve.color}
-              >
-                {curve.label.slice(0, 12)}
-              </text>
-            </g>
-          );
-        })}
+        <text x={PADDING.left} y={PADDING.top + PLOT_HEIGHT + 15} fontSize="9" fill="hsl(var(--fg-2))">
+          {formatDate(series[0].time)}
+        </text>
+        <text x={PADDING.left + PLOT_WIDTH / 2} y={PADDING.top + PLOT_HEIGHT + 15} fontSize="9" textAnchor="middle" fill="hsl(var(--fg-2))">
+          {formatDate(new Date((startTime + endTime) / 2))}
+        </text>
+        <text x={PADDING.left + PLOT_WIDTH} y={PADDING.top + PLOT_HEIGHT + 15} fontSize="9" textAnchor="end" fill="hsl(var(--fg-2))">
+          {formatDate(series[series.length - 1].time)}
+        </text>
       </svg>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {curvesData.map((curve, idx) => (
-          <div key={idx} className="rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.5)] px-3 py-2">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: curve.color }} />
-              <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">{curve.label.slice(0, 14)}</p>
-            </div>
-            <p className="mt-1 text-[11px] text-[hsl(var(--fg-2))]">T½: {curve.halfLife.toFixed(1)}d</p>
-          </div>
-        ))}
+      <div className="mt-2 flex items-center justify-between text-[11px] text-[hsl(var(--fg-2))]">
+        <span>Past 30 days</span>
+        <span>Next 14 days (projected)</span>
       </div>
     </div>
   );
@@ -345,6 +425,10 @@ function ProtocolsContent() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProtocol, setEditingProtocol] = useState(null);
   const [pendingActionKey, setPendingActionKey] = useState('');
+
+  // Dose logging state
+  const [isLogDoseOpen, setIsLogDoseOpen] = useState(false);
+  const [loggingProtocol, setLoggingProtocol] = useState(null);
 
   // ── Query ──────────────────────────────────────────────────────────────────
 
@@ -417,7 +501,33 @@ function ProtocolsContent() {
     onSettled: () => setPendingActionKey(''),
   });
 
-  // ── Derived state ──────────────────────────────────────────────────────────
+  // ── Dose logging ───────────────────────────────────────────────────────────
+
+  const logDoseMutation = useMutation({
+    mutationFn: ({ protocolId, dose_amount, unit, notes, taken_at }) =>
+      logDose({
+        protocol_id: protocolId,
+        user_id: user.id,
+        dose_amount,
+        unit,
+        notes,
+        taken_at: taken_at || new Date().toISOString(),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
+      qc.invalidateQueries({ queryKey: ['protocol-logs'] });
+      setIsLogDoseOpen(false);
+      setLoggingProtocol(null);
+      setNotice({ tone: 'success', message: 'Dose logged successfully.' });
+    },
+    onError: (error) => {
+      console.error('[Protocols] log dose error:', error);
+      setNotice({
+        tone: 'warning',
+        message: 'Failed to log dose. Please try again.',
+      });
+    },
+  });
 
   const protocols = toArray(protocolsQuery.data);
   const isLoading = protocolsQuery.isPending;
@@ -490,6 +600,26 @@ function ProtocolsContent() {
     });
   };
 
+  const handleLogDose = (protocol) => {
+    setNotice(null);
+    setLoggingProtocol(protocol);
+    setIsLogDoseOpen(true);
+  };
+
+  const handleLogDoseSubmit = (payload) => {
+    if (!loggingProtocol?.id) return;
+    logDoseMutation.mutate({
+      protocolId: loggingProtocol.id,
+      ...payload,
+    });
+  };
+
+  const handleLogDoseClose = () => {
+    if (logDoseMutation.isPending) return;
+    setIsLogDoseOpen(false);
+    setLoggingProtocol(null);
+  };
+
   const handleFormClose = () => {
     if (saveProtocolMutation.isPending) return;
     setIsFormOpen(false);
@@ -557,7 +687,7 @@ function ProtocolsContent() {
       {/* Half-Life Curve Visualization (Performance Plan) */}
       <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
         <SectionCard title="Half-Life Curves" subtitle="Visualize active concentration over time for current protocols.">
-          <HalfLifeCurveChart protocols={groupedProtocols.active} />
+          <ConcentrationChart protocols={groupedProtocols.active} />
         </SectionCard>
       </UpgradeGate>
 
@@ -648,6 +778,8 @@ function ProtocolsContent() {
                   status={status}
                   busyActionKey={pendingActionKey}
                   onEdit={() => handleEdit(protocol)}
+                  onLogDose={status === 'active' ? () => handleLogDose(protocol) : null}
+                  isLogDosePending={logDoseMutation.isPending && loggingProtocol?.id === protocol.id}
                   onPause={
                     status === 'active'
                       ? () => handleStatusChange(protocol, 'paused')
@@ -702,6 +834,36 @@ function ProtocolsContent() {
             isSubmitting={saveProtocolMutation.isPending}
             onCancel={handleFormClose}
             onSubmit={handleFormSubmit}
+          />
+        </DialogContent>
+      </Dialog>
+      {/* Log Dose dialog */}
+      <Dialog
+        open={isLogDoseOpen}
+        onOpenChange={(open) => {
+          if (logDoseMutation.isPending) return;
+          setIsLogDoseOpen(open);
+          if (!open) setLoggingProtocol(null);
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-lg">
+          <DialogPanelHeader
+            eyebrow="Log Dose"
+            title={loggingProtocol?.substance_name || 'Log Dose'}
+            description={`Record when you took this dose. Defaults to protocol settings.`}
+            accentClassName="from-[hsl(var(--ok)/0.18)] via-[hsl(var(--brand)/0.08)]"
+          />
+          <DialogHeader className="sr-only">
+            <DialogTitle>Log Dose</DialogTitle>
+            <DialogDescription>
+              Record a dose administration for this protocol.
+            </DialogDescription>
+          </DialogHeader>
+          <LogDoseForm
+            protocol={loggingProtocol}
+            isSubmitting={logDoseMutation.isPending}
+            onCancel={handleLogDoseClose}
+            onSubmit={handleLogDoseSubmit}
           />
         </DialogContent>
       </Dialog>

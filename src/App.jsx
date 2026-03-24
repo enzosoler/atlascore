@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation }
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { DailyStoreProvider } from '@/store/dailyStore';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
@@ -61,9 +62,83 @@ import GitHubPRTracker from '@/pages/GitHubPRTracker';
 import WorkoutLoggingGuide from '@/pages/guides/WorkoutLoggingGuide';
 import PlanVsExecutionGuide from '@/pages/guides/PlanVsExecutionGuide';
 import BlogIndex from '@/pages/blog/BlogIndex.jsx';
+import BlogPost from '@/pages/blog/BlogPost.jsx';
 import Settings from '@/pages/Settings.jsx';
 import AuthCallback from '@/pages/AuthCallback';
 import UpdatePassword from '@/pages/UpdatePassword';
+
+// Entry & Onboarding Screens
+import SplashScreen from '@/pages/SplashScreen';
+import WelcomeScreen from '@/pages/WelcomeScreen';
+import EmailAuth from '@/pages/EmailAuth';
+import SocialAuth from '@/pages/SocialAuth';
+import AppleAuth from '@/pages/AppleAuth';
+import PermissionsScreen from '@/pages/PermissionsScreen';
+
+// Pre-Paywall Screens
+import GoalSelection from '@/pages/GoalSelection';
+import PreferencesScreen from '@/pages/PreferencesScreen';
+import SetupInput from '@/pages/SetupInput';
+import ValueCreation from '@/pages/ValueCreation';
+import PreviewResult from '@/pages/PreviewResult';
+import PrePaywallReveal from '@/pages/PrePaywallReveal';
+
+// Monetization Screens
+import UpgradePrompts from '@/pages/UpgradePrompts';
+import BillingManagement from '@/pages/BillingManagement';
+import RestorePurchases from '@/pages/RestorePurchases';
+import TrialStart from '@/pages/TrialStart';
+import TrialExplanation from '@/pages/TrialExplanation';
+import DiscountScreen from '@/pages/DiscountScreen';
+
+// Core App Shell Screens
+import NotificationsScreen from '@/pages/NotificationsScreen';
+import ActivityScreen from '@/pages/ActivityScreen';
+import ExploreScreen from '@/pages/ExploreScreen';
+import CreateAction from '@/pages/CreateAction';
+
+// Core Functional Screens
+import FeedList from '@/pages/FeedList';
+import DetailView from '@/pages/DetailView';
+import CreationFlow from '@/pages/CreationFlow';
+import SearchResults from '@/pages/SearchResults';
+
+// Engagement Screens
+import SavedFavorites from '@/pages/SavedFavorites';
+import MessagesChat from '@/pages/MessagesChat';
+import StreaksMilestones from '@/pages/StreaksMilestones';
+
+// Profile Extension Screens
+import UserContent from '@/pages/UserContent';
+import AccountStatus from '@/pages/AccountStatus';
+import SubscriptionTier from '@/pages/SubscriptionTier';
+import ConnectedServices from '@/pages/ConnectedServices';
+
+// Settings Extension Screens
+import PrivacyScreen from '@/pages/PrivacyScreen';
+import ThemeScreen from '@/pages/ThemeScreen';
+import LanguageScreen from '@/pages/LanguageScreen';
+import DataExport from '@/pages/DataExport';
+import DeleteAccount from '@/pages/DeleteAccount';
+
+// Support Screens
+import ContactSupport from '@/pages/ContactSupport';
+import TermsPrivacy from '@/pages/TermsPrivacy';
+import ReportProblem from '@/pages/ReportProblem';
+import ManageConsent from '@/pages/ManageConsent';
+
+// Nice-to-have Screens
+import Referral from '@/pages/Referral';
+import Achievements from '@/pages/Achievements';
+import Tutorial from '@/pages/Tutorial';
+import Changelog from '@/pages/Changelog';
+import RateApp from '@/pages/RateApp';
+import Calendar from '@/pages/Calendar';
+import Leaderboard from '@/pages/Leaderboard';
+import Integrations from '@/pages/Integrations';
+import Checkout from '@/pages/Checkout';
+import Waitlist from '@/pages/Waitlist';
+import Reactivation from '@/pages/Reactivation';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout.jsx';
@@ -130,6 +205,67 @@ const AppRoutes = () => (
     <Route path={ROUTES.pricing} element={<Pricing />} />
     <Route path="/auth/callback" element={<AuthCallback />} />
     <Route path="/auth/update-password" element={<UpdatePassword />} />
+
+    {/* Entry & Onboarding */}
+    <Route path="/splash" element={<SplashScreen />} />
+    <Route path="/welcome" element={<WelcomeScreen />} />
+    <Route path="/auth/email" element={<EmailAuth />} />
+    <Route path="/auth/social" element={<SocialAuth />} />
+    <Route path="/auth/apple" element={<AppleAuth />} />
+    <Route path="/permissions" element={<PermissionsScreen />} />
+
+    {/* Pre-Paywall */}
+    <Route path="/onboarding/goal-selection" element={<GoalSelection />} />
+    <Route path="/onboarding/preferences" element={<PreferencesScreen />} />
+    <Route path="/onboarding/setup-input" element={<SetupInput />} />
+    <Route path="/onboarding/value-creation" element={<ValueCreation />} />
+    <Route path="/onboarding/preview-result" element={<PreviewResult />} />
+    <Route path="/onboarding/pre-paywall" element={<PrePaywallReveal />} />
+
+    {/* Monetization */}
+    <Route path="/upgrade" element={<UpgradePrompts />} />
+    <Route path="/billing" element={<BillingManagement />} />
+    <Route path="/restore-purchases" element={<RestorePurchases />} />
+    <Route path="/trial" element={<TrialStart />} />
+    <Route path="/trial-info" element={<TrialExplanation />} />
+    <Route path="/discounts" element={<DiscountScreen />} />
+    <Route path="/checkout" element={<Checkout />} />
+
+    {/* Core App Shell */}
+    <Route path="/notifications" element={<NotificationsScreen />} />
+    <Route path="/activity" element={<ActivityScreen />} />
+    <Route path="/explore" element={<ExploreScreen />} />
+    <Route path="/create" element={<CreateAction />} />
+
+    {/* Core Functional */}
+    <Route path="/feed" element={<FeedList />} />
+    <Route path="/detail/:id" element={<DetailView />} />
+    <Route path="/create-new" element={<CreationFlow />} />
+    <Route path="/search" element={<SearchResults />} />
+
+    {/* Engagement */}
+    <Route path="/saved" element={<SavedFavorites />} />
+    <Route path="/messages" element={<MessagesChat />} />
+    <Route path="/streaks" element={<StreaksMilestones />} />
+
+    {/* Support */}
+    <Route path="/support/contact" element={<ContactSupport />} />
+    <Route path="/legal" element={<TermsPrivacy />} />
+    <Route path="/report" element={<ReportProblem />} />
+    <Route path="/consent" element={<ManageConsent />} />
+
+    {/* Nice-to-have */}
+    <Route path="/referral" element={<Referral />} />
+    <Route path="/achievements" element={<Achievements />} />
+    <Route path="/tutorial" element={<Tutorial />} />
+    <Route path="/changelog" element={<Changelog />} />
+    <Route path="/rate" element={<RateApp />} />
+    <Route path="/calendar" element={<Calendar />} />
+    <Route path="/leaderboard" element={<Leaderboard />} />
+    <Route path="/integrations" element={<Integrations />} />
+    <Route path="/waitlist" element={<Waitlist />} />
+    <Route path="/welcome-back" element={<Reactivation />} />
+
     <Route path="/use-case/:role" element={<UseCase />} />
     <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
     <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
@@ -185,6 +321,19 @@ const AppRoutes = () => (
         <Route path="/clinician/patient/:id" element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard>} />
         <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminPanel /></RouteGuard>} />
         <Route path={ROUTES.githubPRs} element={<GitHubPRTracker />} />
+
+        {/* Profile Extension */}
+        <Route path="/profile/content" element={<UserContent />} />
+        <Route path="/account-status" element={<AccountStatus />} />
+        <Route path="/subscription" element={<SubscriptionTier />} />
+        <Route path="/connected-services" element={<ConnectedServices />} />
+
+        {/* Settings Extension */}
+        <Route path="/settings/privacy" element={<PrivacyScreen />} />
+        <Route path="/settings/theme" element={<ThemeScreen />} />
+        <Route path="/settings/language" element={<LanguageScreen />} />
+        <Route path="/settings/export" element={<DataExport />} />
+        <Route path="/settings/delete-account" element={<DeleteAccount />} />
       </Route>
     </Route>
 

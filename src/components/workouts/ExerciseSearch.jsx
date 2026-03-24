@@ -61,8 +61,8 @@ const DIFFICULTY_LABEL = {
 function ExerciseRow({ exercise, onSelect }) {
   // Support both unified model and legacy shape
   const displayName = exercise.canonical_name_en || exercise.name || exercise.canonical_name_pt || '—';
-  const secondaryName = exercise.canonical_name_en && exercise.canonical_name_en !== displayName
-    ? exercise.canonical_name_en
+  const secondaryName = exercise.canonical_name_pt && exercise.canonical_name_pt !== displayName
+    ? exercise.canonical_name_pt
     : '';
   const muscles    = (exercise.primary_muscles || []).slice(0, 2).join(', ');
   const equip      = typeof exercise.equipment === 'string'
@@ -73,35 +73,45 @@ function ExerciseRow({ exercise, onSelect }) {
   return (
     <button
       onClick={() => onSelect(exercise)}
-      className="flex w-full items-start gap-3 border-b border-[hsl(var(--border-h))] px-3 py-3 text-left transition-colors last:border-0 hover:bg-[hsl(var(--shell))]"
+      className="flex w-full items-stretch gap-3 border-b border-[hsl(var(--border-h))] px-3 py-3 text-left transition-colors last:border-0 hover:bg-[hsl(var(--shell))]"
     >
-      {/* Thumbnail */}
-      {hasMedia && (
-        <div className="shrink-0 mt-0.5">
-          <ExerciseMedia exercise={exercise} size="sm" showFallback={false} />
-        </div>
-      )}
+      {/* Exercise Media Thumbnail - larger size */}
+      <div className="shrink-0">
+        {hasMedia ? (
+          <div className="w-24 h-20 rounded-xl overflow-hidden bg-[hsl(var(--shell))]">
+            <ExerciseMedia exercise={exercise} size="sm" showFallback={true} />
+          </div>
+        ) : (
+          <div className="w-24 h-20 rounded-xl bg-[hsl(var(--shell))] flex items-center justify-center">
+            <Dumbbell className="w-8 h-8 text-[hsl(var(--fg-2))]" strokeWidth={1.5} />
+          </div>
+        )}
+      </div>
 
-      {/* Text */}
-      <div className="flex-1 min-w-0 pr-2">
+      {/* Text Content */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center pr-2">
         <div className="flex items-center gap-1.5">
-          <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{displayName}</p>
+          <p className="text-[14px] font-medium text-[hsl(var(--fg))] truncate">{displayName}</p>
           {exercise.is_compound && (
             <span className="badge badge-blue shrink-0" style={{ fontSize: 9, padding: '1px 5px' }}>
               Comp.
             </span>
           )}
         </div>
-        {(secondaryName || muscles || equip) && (
+        {secondaryName && (
           <p className="text-[11px] text-[hsl(var(--fg-2))] truncate mt-0.5">
-            {[secondaryName, muscles, exercise.default_rep_range ? `${exercise.default_rep_range} reps` : null]
-              .filter(Boolean).join(' · ')}
+            {secondaryName}
+          </p>
+        )}
+        {(muscles || equip) && (
+          <p className="text-[11px] text-[hsl(var(--fg-2))] truncate mt-0.5">
+            {[muscles, equip].filter(Boolean).join(' · ')}
           </p>
         )}
       </div>
 
       {/* Badges */}
-      <div className="flex flex-col items-end gap-1 shrink-0">
+      <div className="flex flex-col items-end justify-center gap-1 shrink-0">
         {exercise.difficulty_level && (
           <span className={`badge ${DIFFICULTY_BADGE[exercise.difficulty_level]}`} style={{ fontSize: 9 }}>
             {DIFFICULTY_LABEL[exercise.difficulty_level]}

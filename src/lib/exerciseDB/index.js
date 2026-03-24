@@ -23,7 +23,6 @@ import {
   normalizeStr,
   translateSearchQueryToEN,
 } from './translations.js';
-import { base44 } from '@/api/base44Client.js';
 
 // ─── Query key factory ────────────────────────────────────────────────────────
 
@@ -37,20 +36,29 @@ export const exerciseKeys = {
   lists: () => ['exercises', 'lists'],
 };
 
+// ExerciseDB GIF URL pattern - images are served from v2.exercisedb.io
+const EXERCISEDB_IMAGE_BASE = 'https://v2.exercisedb.io/image';
+
 const STATIC_EXERCISE_CATALOG = Object.entries(EXERCISE_TRANSLATIONS)
-  .map(([canonicalNameEN, entry]) =>
-    normalizeBase44Exercise({
-      id: `static_${normalizeStr(canonicalNameEN).replace(/\s+/g, '_')}`,
+  .map(([canonicalNameEN, entry]) => {
+    const id = `static_${normalizeStr(canonicalNameEN).replace(/\s+/g, '_')}`;
+    const gifUrl = entry?.exercise_db_id 
+      ? `${EXERCISEDB_IMAGE_BASE}/${entry.exercise_db_id}` 
+      : null;
+    
+    return normalizeBase44Exercise({
+      id,
       canonical_name_en: canonicalNameEN,
       canonical_name_pt: entry?.pt || getExercisePT(canonicalNameEN),
       aliases_en: entry?.aliases_en || [],
       aliases_pt: entry?.aliases_pt || [],
-      primary_muscles: [],
+      primary_muscles: entry?.primary_muscles || [],
       secondary_muscles: [],
-      equipment: '',
-      category: '',
-    })
-  )
+      equipment: entry?.equipment || '',
+      category: entry?.category || '',
+      media_gif_url: gifUrl,
+    });
+  })
   .filter(Boolean);
 
 // ─── Local search utility ─────────────────────────────────────────────────────
@@ -150,12 +158,7 @@ export async function searchExercises(query, limit = 30) {
     }
   }
 
-  // Fallback to base44
-  const base44Results = await searchBase44Exercises(trimmed, limit);
-  if (base44Results.length > 0) {
-    return base44Results;
-  }
-
+  // Fallback to static catalog (primary offline source)
   const staticMatches = localSearch(STATIC_EXERCISE_CATALOG, trimmed);
   if (staticMatches.length > 0) {
     return staticMatches.slice(0, limit);
@@ -184,7 +187,8 @@ export async function searchByMuscle(muscle, limit = 50) {
       console.warn('[ExerciseService] fetchByMuscle failed:', err.message);
     }
   }
-  return searchBase44Exercises(muscle, limit);
+  // Fallback to static catalog
+  return localSearch(STATIC_EXERCISE_CATALOG, muscle).slice(0, limit);
 }
 
 /**
@@ -202,7 +206,8 @@ export async function searchByBodyPart(bodyPart, limit = 50) {
       console.warn('[ExerciseService] fetchByBodyPart failed:', err.message);
     }
   }
-  return searchBase44Exercises(bodyPart, limit);
+  // Fallback to static catalog
+  return localSearch(STATIC_EXERCISE_CATALOG, bodyPart).slice(0, limit);
 }
 
 /**
@@ -220,7 +225,8 @@ export async function searchByEquipment(equipment, limit = 50) {
       console.warn('[ExerciseService] fetchByEquipment failed:', err.message);
     }
   }
-  return searchBase44Exercises(equipment, limit);
+  // Fallback to static catalog
+  return localSearch(STATIC_EXERCISE_CATALOG, equipment).slice(0, limit);
 }
 
 // ─── Fetch single exercise ────────────────────────────────────────────────────
@@ -245,13 +251,9 @@ export async function fetchExercise(id) {
     }
   }
 
-  // base44 source (fallback or direct)
-  try {
-    const results = await base44.entities.ExerciseMaster.filter({ id });
-    if (results?.[0]) return normalizeBase44Exercise(results[0]);
-  } catch {
-    /* noop */
-  }
+  // Static catalog fallback
+  const staticMatch = STATIC_EXERCISE_CATALOG.find((ex) => ex.id === id);
+  if (staticMatch) return staticMatch;
 
   return null;
 }
@@ -336,83 +338,25 @@ export async function fetchExerciseLibrary({ bodyPart, muscle, equipment, limit 
     }
   }
 
-  // Fallback: base44 ExerciseMaster
-  try {
-    const results = await base44.entities.ExerciseMaster.list('-search_rank', limit);
-    return (results || []).map(normalizeBase44Exercise).filter(Boolean);
-  } catch {
-    return [];
-  }
-}
-
-// ─── base44 fallback search ───────────────────────────────────────────────────
-
-async function searchBase44Exercises(query, limit = 30) {
-  try {
-    // First try the base44 API
-    const raw = await base44.functions.invoke('exerciseSearch', {
-      action: 'search',
-      query,
-    });
-    const results = raw?.data?.results || [];
-    const normalized = results.slice(0, limit).map((ex) => normalizeBase44Exercise(ex)).filter(Boolean);
-    
-    // If we got results, return them
-    if (normalized.length > 0) return normalized;
-    
-    // Otherwise, try local search with PT translation
-    const enQuery = translateSearchQueryToEN(query);
-    try {
-      const allExercises = await base44.entities.ExerciseMaster.all();
-      const localResults = localSearch(allExercises.map(normalizeBase44Exercise).filter(Boolean), query);
-      
-      if (localResults.length > 0) return localResults.slice(0, limit);
-      
-      // Try with translated EN query
-      const enResults = localSearch(allExercises.map(normalizeBase44Exercise).filter(Boolean), enQuery);
-      return enResults.slice(0, limit);
-    } catch (localErr) {
-      console.warn('[ExerciseService] Local search failed:', localErr.message);
-    }
-    
-    return [];
-  } catch (err) {
-    console.warn('[ExerciseService] searchBase44Exercises failed:', err.message);
-    return [];
-  }
+  // Fallback: static catalog
+  return STATIC_EXERCISE_CATALOG.slice(offset, offset + limit);
 }
 
 // ─── Exercise log helpers (user history) ─────────────────────────────────────
 
 export async function logExerciseUse(exerciseId, exerciseName) {
-  if (!exerciseId) return;
-  try {
-    await base44.functions.invoke('exerciseLogs', {
-      action: 'log_use',
-      exercise_master_id: exerciseId,
-      exercise_name: exerciseName,
-    });
-  } catch {
-    /* non-critical */
-  }
+  // No-op since base44 is not used
+  return;
 }
 
 export async function fetchRecentExercises() {
-  try {
-    const res = await base44.functions.invoke('exerciseLogs', { action: 'recent' });
-    return (res?.data?.results || []).map(normalizeBase44Exercise).filter(Boolean);
-  } catch {
-    return [];
-  }
+  // Return empty since base44 is not used
+  return [];
 }
 
 export async function fetchFavoriteExercises() {
-  try {
-    const res = await base44.functions.invoke('exerciseLogs', { action: 'favorites' });
-    return (res?.data?.results || []).map(normalizeBase44Exercise).filter(Boolean);
-  } catch {
-    return [];
-  }
+  // Return empty since base44 is not used
+  return [];
 }
 
 // Re-export translation/enrichment helpers for UI consumption

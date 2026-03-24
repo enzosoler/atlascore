@@ -480,6 +480,42 @@ function TodayContent() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Today's protocol logs for checked state
+  const { data: todayProtocolLogs = [], isLoading: loadingProtocolLogs } = useQuery({
+    queryKey: ['today-protocol-logs', user?.id, todayStr],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from('protocol_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('taken_at', `${todayStr}T00:00:00`)
+        .lte('taken_at', `${todayStr}T23:59:59`);
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 1 * 60 * 1000,
+  });
+
+  // Recent protocol logs for adherence calculation (last 7 days)
+  const { data: recentProtocolLogs = [], isLoading: loadingRecentProtocolLogs } = useQuery({
+    queryKey: ['recent-protocol-logs', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const { data } = await supabase
+        .from('protocol_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('taken_at', sevenDaysAgo.toISOString())
+        .order('taken_at', { ascending: false });
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const isLoading =
     loadingProfile ||
     loadingDiet ||
@@ -489,7 +525,9 @@ function TodayContent() {
     loadingMeasurements ||
     loadingCheckins ||
     loadingProgressPhotos ||
-    loadingProtocols;
+    loadingProtocols ||
+    loadingProtocolLogs ||
+    loadingRecentProtocolLogs;
 
   // ── Derived state ─────────────────────────────────────────────────────────
 
@@ -505,6 +543,28 @@ function TodayContent() {
   const activeWorkoutPlan = activeWorkoutPlans[0] || null;
   const todayMeals = recentMeals.filter((m) => m.date === todayStr);
   const activeProtocolsList = allProtocols.filter((p) => p.active && !p.end_date);
+
+  // Calculate real protocol adherence (last 7 days)
+  const protocolAdherence = useMemo(() => {
+    if (activeProtocolsList.length === 0) return 0;
+    
+    const expectedDoses = activeProtocolsList.length * 7; // Once per day for 7 days
+    const actualDoses = recentProtocolLogs.length;
+    return Math.min(100, Math.round((actualDoses / Math.max(1, expectedDoses)) * 100));
+  }, [activeProtocolsList.length, recentProtocolLogs.length]);
+
+  // Build protocol list with real checked state
+  const protocolsWithCheckedState = useMemo(() => {
+    const loggedProtocolIds = new Set(todayProtocolLogs.map(log => log.protocol_id));
+    return activeProtocolsList.slice(0, 4).map((p, i) => ({
+      name: p.substance_name || p.name,
+      dose: p.dose,
+      unit: p.unit || 'mg',
+      time: p.schedule || 'Morning',
+      checked: loggedProtocolIds.has(p.id),
+      icon: ['💊', '🌿', '🔥', '🌙'][i] || '💊',
+    }));
+  }, [activeProtocolsList, todayProtocolLogs]);
   const latestMeasurement = recentMeasurements[0] || null;
   const todaySession = recentSessions.find((s) => s.date === todayStr);
 
@@ -882,15 +942,8 @@ function TodayContent() {
         {/* Today's Protocol Card */}
         <TodayProtocolCard
           to={ROUTES.protocols}
-          protocols={activeProtocolsList.slice(0, 4).map((p, i) => ({
-            name: p.substance_name || p.name,
-            dose: p.dose,
-            unit: p.unit || 'mg',
-            time: p.schedule || 'Morning',
-            checked: i < 3, // First 3 checked as demo
-            icon: ['💊', '🌿', '🔥', '🌙'][i] || '💊',
-          }))}
-          adherence={87}
+          protocols={protocolsWithCheckedState}
+          adherence={protocolAdherence}
           tone="teal"
           loading={isLoading}
         />
