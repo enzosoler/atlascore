@@ -1,4 +1,10 @@
 {
+  "version": 2,
+  "public": true,
+  "outputDirectory": "dist",
+  "framework": null,
+  "buildCommand": null,
+  "installCommand": null,
   "headers": [
     {
       "source": "/(.*)",
@@ -12,12 +18,6 @@
           "value": "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.base44.app wss://*.supabase.co; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none';"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
