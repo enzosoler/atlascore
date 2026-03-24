@@ -144,7 +144,6 @@ async function deleteProtocol(protocolId) {
 import {
   generateConcentrationSeries,
   getSubstanceHalfLife,
-  fetchProtocolLogs,
 } from '@/lib/concentrationCalculator';
 
 function ConcentrationChart({ protocols }) {
