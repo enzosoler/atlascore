@@ -8,11 +8,16 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   
   // Determine build locale from mode or env
-  const buildLocale = env.VITE_LOCALE || (mode === 'pt' ? 'pt-BR' : mode === 'en' ? 'en-US' : 'en-US');
+  const isPT = mode === 'pt' || env.VITE_LOCALE === 'pt-BR';
+  const buildLocale = isPT ? 'pt-BR' : 'en-US';
+  
+  // Path strategy: EN = root (/), PT = /br/
+  const basePath = isPT ? '/br/' : '/';
+  const outDir = isPT ? 'dist/br' : 'dist';
   
   return {
     plugins: [react()],
-    base: './',
+    base: basePath,
     define: {
       'import.meta.env.VITE_LOCALE': JSON.stringify(buildLocale),
       'import.meta.env.BUILD_LOCALE': JSON.stringify(buildLocale),
@@ -32,7 +37,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: `dist-${mode === 'pt' ? 'pt' : 'en'}`,
+      outDir: outDir,
       assetsDir: 'assets',
       emptyOutDir: true,
       rollupOptions: {
