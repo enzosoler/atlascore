@@ -136,6 +136,8 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.body,       label: 'Body',         icon: 'TrendingUp' },
     { path: ROUTES.protocols,  label: 'Plans',        icon: 'FlaskConical' },
     { path: ROUTES.insights,   label: 'Progress',     icon: 'BarChart3' },
+    { path: ROUTES.progressPhotos, label: 'Photos',    icon: 'Camera' },
+    { path: ROUTES.labExams,  label: 'Health',       icon: 'ClipboardList' },
     { path: ROUTES.admin,      label: 'Admin',        icon: 'ShieldCheck' },
     { path: ROUTES.social,     label: 'Social',       icon: 'MessageSquare' },
     { path: ROUTES.profile,    label: 'Profile',      icon: 'User' },
