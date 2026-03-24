@@ -100,20 +100,29 @@ async function handleRequest(req: Request): Promise<Response> {
     });
   }
 
+  // Log ALL headers to debug
+  console.log('=== ALL HEADERS ===');
+  req.headers.forEach((value, key) => {
+    console.log(`${key}: ${value.substring(0, 50)}${value.length > 50 ? '...' : ''}`);
+  });
+  console.log('===================');
+
   // Validate webhook authorization
-  // Supabase Auth can send the secret in various headers
   const authHeader = req.headers.get('Authorization') || '';
   const webhookSecret = Deno.env.get('WEBHOOK_SECRET') || SERVICE_ROLE_KEY;
   
   // Extract Bearer token if present
   const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.replace('Bearer ', '') : '';
   
+  console.log('Auth header:', authHeader.substring(0, 30) || '(empty)');
+  console.log('Webhook secret configured:', !!webhookSecret);
+  console.log('Token match:', bearerToken === webhookSecret);
+  
   // Check if any form of the token matches
   const isAuthorized = bearerToken === webhookSecret;
   
   if (!isAuthorized) {
-    console.log('Auth failed - bearerToken:', bearerToken.substring(0, 10) + '...');
-    console.log('Auth failed - webhookSecret:', webhookSecret.substring(0, 10) + '...');
+    console.log('Auth failed - returning 401');
     return new Response(JSON.stringify({ error: 'Hook requires authorization token' }), {
       status: 401, headers: { ...CORS, 'Content-Type': 'application/json' },
     });

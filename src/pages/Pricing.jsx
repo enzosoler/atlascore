@@ -281,6 +281,12 @@ export default function Pricing() {
     console.log('[Pricing] Calling create-checkout with:', { plan: planId, user_id: user?.id, email: user?.email, region, billing });
     setLoading(planId);
     try {
+      // Get current session for JWT token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      console.log('[Pricing] Got session token:', token ? 'YES' : 'NO');
+
       // Use Stripe Checkout via Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
@@ -292,6 +298,9 @@ export default function Pricing() {
           success_url: `${window.location.origin}/Today?subscribed=1`,
           cancel_url: `${window.location.origin}/Pricing`,
         },
+        headers: token ? {
+          'Authorization': `Bearer ${token}`,
+        } : {},
       });
 
       console.log('[Pricing] create-checkout response:', { data, error });
