@@ -107,7 +107,10 @@ serve(async (req) => {
   const priceKey = `${regionKey}_${billingKey}`;
   const priceId = PRICE_MAP[priceKey]?.[plan];
 
+  console.log(`[create-checkout] plan=${plan} region=${region} billing=${billing} priceKey=${priceKey} priceId=${priceId || 'NOT FOUND'}`);
+
   if (!priceId) {
+    console.error(`[create-checkout] Price not configured for priceKey=${priceKey} plan=${plan}`);
     return new Response(JSON.stringify({ error: `Price not configured for plan: ${plan}, region: ${region}, billing: ${billing}` }), {
       status: 500,
       headers: { ...CORS, 'Content-Type': 'application/json' },
