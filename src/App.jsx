@@ -203,6 +203,7 @@ const AppRoutes = () => (
     <Route path={ROUTES.signup} element={<Auth />} />
     <Route path={ROUTES.login} element={<Auth />} />
     <Route path={ROUTES.pricing} element={<Pricing />} />
+    <Route path={ROUTES.help} element={<HelpCenter />} />
     <Route path="/auth/callback" element={<AuthCallback />} />
     <Route path="/auth/update-password" element={<UpdatePassword />} />
 
