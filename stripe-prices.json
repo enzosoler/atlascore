@@ -1,0 +1,182 @@
+[
+  {
+    "plan": "athlete_pro",
+    "region": "BR",
+    "billing": "monthly",
+    "price_id": "price_1TEMmERieY0K8YEgKSb7bAoi",
+    "env_var": "STRIPE_PRICE_BR_MONTHLY_ATHLETE_PRO",
+    "amount": 29,
+    "currency": "BRL"
+  },
+  {
+    "plan": "athlete_pro",
+    "region": "BR",
+    "billing": "yearly",
+    "price_id": "price_1TEMmERieY0K8YEgpyi6mvgU",
+    "env_var": "STRIPE_PRICE_BR_YEARLY_ATHLETE_PRO",
+    "amount": 249,
+    "currency": "BRL"
+  },
+  {
+    "plan": "athlete_pro",
+    "region": "US",
+    "billing": "monthly",
+    "price_id": "price_1TEMmFRieY0K8YEgYVrVPb2s",
+    "env_var": "STRIPE_PRICE_US_MONTHLY_ATHLETE_PRO",
+    "amount": 9,
+    "currency": "USD"
+  },
+  {
+    "plan": "athlete_pro",
+    "region": "US",
+    "billing": "yearly",
+    "price_id": "price_1TEMmFRieY0K8YEg3SR9IM9k",
+    "env_var": "STRIPE_PRICE_US_YEARLY_ATHLETE_PRO",
+    "amount": 79,
+    "currency": "USD"
+  },
+  {
+    "plan": "athlete_performance",
+    "region": "BR",
+    "billing": "monthly",
+    "price_id": "price_1TEMmGRieY0K8YEg8Pg3NqOY",
+    "env_var": "STRIPE_PRICE_BR_MONTHLY_ATHLETE_PERFORMANCE",
+    "amount": 59,
+    "currency": "BRL"
+  },
+  {
+    "plan": "athlete_performance",
+    "region": "BR",
+    "billing": "yearly",
+    "price_id": "price_1TEMmGRieY0K8YEgxdZ0yTut",
+    "env_var": "STRIPE_PRICE_BR_YEARLY_ATHLETE_PERFORMANCE",
+    "amount": 499,
+    "currency": "BRL"
+  },
+  {
+    "plan": "athlete_performance",
+    "region": "US",
+    "billing": "monthly",
+    "price_id": "price_1TEMmHRieY0K8YEg9PSVkmXt",
+    "env_var": "STRIPE_PRICE_US_MONTHLY_ATHLETE_PERFORMANCE",
+    "amount": 19,
+    "currency": "USD"
+  },
+  {
+    "plan": "athlete_performance",
+    "region": "US",
+    "billing": "yearly",
+    "price_id": "price_1TEMmHRieY0K8YEgnOGNWZQc",
+    "env_var": "STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE",
+    "amount": 159,
+    "currency": "USD"
+  },
+  {
+    "plan": "coach",
+    "region": "BR",
+    "billing": "monthly",
+    "price_id": "price_1TEMmIRieY0K8YEg2WjVn4PR",
+    "env_var": "STRIPE_PRICE_BR_MONTHLY_COACH",
+    "amount": 99,
+    "currency": "BRL"
+  },
+  {
+    "plan": "coach",
+    "region": "BR",
+    "billing": "yearly",
+    "price_id": "price_1TEMmIRieY0K8YEgx6H5m2IE",
+    "env_var": "STRIPE_PRICE_BR_YEARLY_COACH",
+    "amount": 849,
+    "currency": "BRL"
+  },
+  {
+    "plan": "coach",
+    "region": "US",
+    "billing": "monthly",
+    "price_id": "price_1TEMmIRieY0K8YEgOWz60BYr",
+    "env_var": "STRIPE_PRICE_US_MONTHLY_COACH",
+    "amount": 29,
+    "currency": "USD"
+  },
+  {
+    "plan": "coach",
+    "region": "US",
+    "billing": "yearly",
+    "price_id": "price_1TEMmJRieY0K8YEgxEkmjXic",
+    "env_var": "STRIPE_PRICE_US_YEARLY_COACH",
+    "amount": 249,
+    "currency": "USD"
+  },
+  {
+    "plan": "nutritionist",
+    "region": "BR",
+    "billing": "monthly",
+    "price_id": "price_1TEMmJRieY0K8YEggJKE9kFt",
+    "env_var": "STRIPE_PRICE_BR_MONTHLY_NUTRITIONIST",
+    "amount": 79,
+    "currency": "BRL"
+  },
+  {
+    "plan": "nutritionist",
+    "region": "BR",
+    "billing": "yearly",
+    "price_id": "price_1TEMmKRieY0K8YEg8dEQidTM",
+    "env_var": "STRIPE_PRICE_BR_YEARLY_NUTRITIONIST",
+    "amount": 679,
+    "currency": "BRL"
+  },
+  {
+    "plan": "nutritionist",
+    "region": "US",
+    "billing": "monthly",
+    "price_id": "price_1TEMmKRieY0K8YEgceRTHz1A",
+    "env_var": "STRIPE_PRICE_US_MONTHLY_NUTRITIONIST",
+    "amount": 24,
+    "currency": "USD"
+  },
+  {
+    "plan": "nutritionist",
+    "region": "US",
+    "billing": "yearly",
+    "price_id": "price_1TEMmKRieY0K8YEgY1FmnInH",
+    "env_var": "STRIPE_PRICE_US_YEARLY_NUTRITIONIST",
+    "amount": 199,
+    "currency": "USD"
+  },
+  {
+    "plan": "clinician",
+    "region": "BR",
+    "billing": "monthly",
+    "price_id": "price_1TEMmLRieY0K8YEgG3wigwi8",
+    "env_var": "STRIPE_PRICE_BR_MONTHLY_CLINICIAN",
+    "amount": 129,
+    "currency": "BRL"
+  },
+  {
+    "plan": "clinician",
+    "region": "BR",
+    "billing": "yearly",
+    "price_id": "price_1TEMmLRieY0K8YEgkptDOoPK",
+    "env_var": "STRIPE_PRICE_BR_YEARLY_CLINICIAN",
+    "amount": 1099,
+    "currency": "BRL"
+  },
+  {
+    "plan": "clinician",
+    "region": "US",
+    "billing": "monthly",
+    "price_id": "price_1TEMmMRieY0K8YEg2UGz2GyC",
+    "env_var": "STRIPE_PRICE_US_MONTHLY_CLINICIAN",
+    "amount": 39,
+    "currency": "USD"
+  },
+  {
+    "plan": "clinician",
+    "region": "US",
+    "billing": "yearly",
+    "price_id": "price_1TEMmMRieY0K8YEgjsGOAeqy",
+    "env_var": "STRIPE_PRICE_US_YEARLY_CLINICIAN",
+    "amount": 319,
+    "currency": "USD"
+  }
+]
