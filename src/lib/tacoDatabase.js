@@ -20,6 +20,7 @@ export const TACO = [
   { id: 't010', name: 'Cassava flour, raw',   category: 'Grains', kcal: 361, protein: 1.6,  carbs: 88.2, fat: 0.3,  aliases: ['cassava flour raw', 'cassava flour'] },
   { id: 't011', name: 'Traditional granola',        category: 'Grains', kcal: 394, protein: 9.8,  carbs: 66.8, fat: 10.8, aliases: ['traditional granola'] },
   { id: 't012', name: 'Water cracker',      category: 'Grains', kcal: 440, protein: 8.7,  carbs: 71.0, fat: 14.2, aliases: ['water cracker'] },
+  { id: 't013', name: 'Cheese bread (pão de queijo)', category: 'Grains', kcal: 363, protein: 5.2, carbs: 42.1, fat: 18.5, aliases: ['pao de queijo', 'pão de queijo', 'cheese bread', 'pao de queijo frozen'] },
 
   // ─── Legumes ─────────────────────────────────────────────────────────────
   { id: 't020', name: 'Carioca beans, cooked',      category: 'Legumes', kcal: 76,  protein: 4.8,  carbs: 13.6, fat: 0.5, aliases: ['carioca beans cooked', 'carioca beans'] },

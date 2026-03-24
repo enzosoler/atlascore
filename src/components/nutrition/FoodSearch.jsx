@@ -1,17 +1,22 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { searchTaco } from '@/services/tacoService';
 import { Input } from '@/components/ui/input';
-import { Search, Loader2, Heart, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, Loader2, Clock, Plus, Minus, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
-const DEBOUNCE_MS = 400;
+const DEBOUNCE_MS = 300;
+const MIN_SEARCH_CHARS = 2;
 
 export default function FoodSearch({ onSelectFood, compact = false }) {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [open, setOpen] = useState(false);
-  const [favorites, setFavorites] = useState(new Set());
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [quantity, setQuantity] = useState(100);
+  const [unit, setUnit] = useState('g');
 
   // Debounce search
   useEffect(() => {
@@ -34,7 +39,7 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
     staleTime: 10 * 60 * 1000,
   });
 
-  // Filter and rank results
+  // Filter and rank results from FoodMaster + TACO
   const results = useMemo(() => {
     if (!debouncedSearch) return [];
 
@@ -43,16 +48,47 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
     }
 
     const q = debouncedSearch.toLowerCase();
-    const filtered = allFoods
+
+    // Search FoodMaster
+    const foodMasterResults = allFoods
       .filter(
         (f) =>
           f.canonical_name?.toLowerCase().includes(q) ||
           f.aliases?.some((a) => a.toLowerCase().includes(q))
       )
-      .slice(0, 15);
+      .map((f) => ({ ...f, _source: 'foodmaster' }));
 
-    setSearchCache((prev) => ({ ...prev, [debouncedSearch]: filtered }));
-    return filtered;
+    // Search TACO (if 2+ chars)
+    let tacoResults = [];
+    if (debouncedSearch.length >= MIN_SEARCH_CHARS) {
+      tacoResults = searchTaco(debouncedSearch, 10).map((f) => ({
+        id: f.id,
+        canonical_name: f.name,
+        serving_base_amount: 100,
+        serving_base_unit: 'g',
+        calories_per_base: f.calories,
+        protein_per_base: f.protein,
+        carbs_per_base: f.carbs,
+        fat_per_base: f.fat,
+        fiber_per_base: 0,
+        brand: f.brand,
+        category: f.category,
+        _source: 'taco',
+      }));
+    }
+
+    // Combine and remove duplicates (prefer FoodMaster)
+    const seen = new Set();
+    const combined = [...foodMasterResults, ...tacoResults].filter((f) => {
+      const key = f.canonical_name?.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const limited = combined.slice(0, 15);
+    setSearchCache((prev) => ({ ...prev, [debouncedSearch]: limited }));
+    return limited;
   }, [debouncedSearch, allFoods, searchCache]);
 
   const recent = useMemo(() => {
@@ -65,48 +101,69 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
       .slice(0, 5);
   }, [debouncedSearch, recentLogs, allFoods]);
 
-  const handleSelectFood = useCallback(
-    (food) => {
-      const item = {
-        name: food.canonical_name,
-        food_master_id: food.id,
-        amount: food.serving_base_amount,
-        unit: food.serving_base_unit,
-        kcal: food.calories_per_base,
-        protein: food.protein_per_base,
-        carbs: food.carbs_per_base,
-        fat: food.fat_per_base,
-        fiber: food.fiber_per_base || 0,
-      };
-      onSelectFood(item);
-      setSearch('');
-      setOpen(false);
+  const handleSelectFood = useCallback((food) => {
+    setSelectedFood(food);
+    setQuantity(food.serving_base_amount || 100);
+    setUnit(food.serving_base_unit || 'g');
+  }, []);
 
-      // Update favorite
-      base44.entities.FoodLog.filter({ food_master_id: food.id }).then((logs) => {
+  const handleConfirmAdd = useCallback(() => {
+    if (!selectedFood) return;
+
+    const ratio = quantity / (selectedFood.serving_base_amount || 100);
+    const item = {
+      name: selectedFood.canonical_name,
+      food_master_id: selectedFood.id,
+      amount: quantity,
+      unit: unit,
+      kcal: Math.round((selectedFood.calories_per_base || 0) * ratio),
+      protein: Math.round((selectedFood.protein_per_base || 0) * ratio * 10) / 10,
+      carbs: Math.round((selectedFood.carbs_per_base || 0) * ratio * 10) / 10,
+      fat: Math.round((selectedFood.fat_per_base || 0) * ratio * 10) / 10,
+      fiber: Math.round((selectedFood.fiber_per_base || 0) * ratio * 10) / 10,
+    };
+
+    onSelectFood(item);
+
+    // Update recent logs for FoodMaster items
+    if (selectedFood._source === 'foodmaster') {
+      base44.entities.FoodLog.filter({ food_master_id: selectedFood.id }).then((logs) => {
         if (logs.length > 0) {
           base44.entities.FoodLog.update(logs[0].id, { last_used_at: new Date().toISOString() });
         } else {
           base44.entities.FoodLog.create({
-            food_master_id: food.id,
-            food_name: food.canonical_name,
+            food_master_id: selectedFood.id,
+            food_name: selectedFood.canonical_name,
             last_used_at: new Date().toISOString(),
           });
         }
       });
+    }
 
-      toast.success(`${food.canonical_name} added`);
-    },
-    [onSelectFood]
-  );
+    toast.success(`${selectedFood.canonical_name} added`);
+    setSelectedFood(null);
+    setQuantity(100);
+    setUnit('g');
+    setSearch('');
+    setOpen(false);
+  }, [selectedFood, quantity, unit, onSelectFood]);
+
+  const adjustQty = (delta) => {
+    setQuantity((prev) => {
+      const newVal = prev + delta;
+      return newVal > 0 ? Math.round(newVal * 10) / 10 : 0.1;
+    });
+  };
+
+  const handleCancel = () => {
+    setSelectedFood(null);
+    setQuantity(100);
+    setUnit('g');
+  };
 
   return (
     <div className="relative">
-      <div
-        className={`relative ${
-          compact ? 'w-auto' : 'w-full'
-        }`}
-      >
+      <div className={`relative ${compact ? 'w-auto' : 'w-full'}`}>
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
         <Input
           type="text"
@@ -114,15 +171,14 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onFocus={() => setOpen(true)}
-          className={`pl-10 rounded-lg text-[13px] ${
-            compact ? 'h-8 w-32' : 'h-10'
-          }`}
+          className={`pl-10 rounded-lg text-[13px] ${compact ? 'h-8 w-32' : 'h-10'}`}
         />
       </div>
 
       {/* Dropdown */}
       {open && (
         <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[hsl(var(--card))] border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          {/* Recent items */}
           {search === '' && recent.length > 0 && (
             <>
               <div className="sticky top-0 px-3 py-2 text-[11px] font-semibold uppercase text-muted-foreground bg-[hsl(var(--secondary))]">
@@ -143,9 +199,10 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
             </>
           )}
 
+          {/* Search results */}
           {debouncedSearch && results.length === 0 && (
             <div className="px-3 py-6 text-center text-[12px] text-muted-foreground">
-              No results for "{debouncedSearch}"
+              No results for &quot;{debouncedSearch}&quot;
             </div>
           )}
 
@@ -160,9 +217,15 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
                   onClick={() => handleSelectFood(f)}
                   className="w-full text-left px-3 py-2.5 hover:bg-[hsl(var(--secondary))] transition-colors text-[12px]"
                 >
-                  <p className="font-medium">{f.canonical_name}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{f.canonical_name}</p>
+                    {f._source === 'taco' && (
+                      <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">TACO</span>
+                    )}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">
                     {f.serving_base_amount} {f.serving_base_unit} · {f.calories_per_base} kcal
+                    {f.category && ` · ${f.category}`}
                   </p>
                 </button>
               ))}
@@ -171,12 +234,71 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
         </div>
       )}
 
+      {/* Quantity Selector Modal */}
+      {selectedFood && (
+        <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[hsl(var(--card))] border border-border rounded-lg shadow-lg p-3">
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-medium text-[13px]">{selectedFood.canonical_name}</p>
+            <button onClick={handleCancel} className="text-muted-foreground hover:text-foreground">
+              <span className="text-[11px]">Cancel</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 mb-3">
+            <button
+              onClick={() => adjustQty(-10)}
+              className="w-8 h-8 rounded-md bg-[hsl(var(--secondary))] hover:bg-[hsl(var(--secondary)/0.8)] flex items-center justify-center"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <Input
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
+              className="h-9 w-20 text-center text-[13px]"
+            />
+            <button
+              onClick={() => adjustQty(10)}
+              className="w-8 h-8 rounded-md bg-[hsl(var(--secondary))] hover:bg-[hsl(var(--secondary)/0.8)] flex items-center justify-center"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+            <select
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              className="h-9 px-2 rounded-md border border-border bg-background text-[13px]"
+            >
+              <option value="g">g</option>
+              <option value="ml">ml</option>
+              <option value="serving">serving</option>
+              <option value="cup">cup</option>
+              <option value="tbsp">tbsp</option>
+              <option value="tsp">tsp</option>
+            </select>
+          </div>
+
+          <p className="text-[11px] text-muted-foreground mb-3">
+            {Math.round((selectedFood.calories_per_base || 0) * (quantity / (selectedFood.serving_base_amount || 100)))} kcal
+            {' · '}
+            P {(selectedFood.protein_per_base * (quantity / (selectedFood.serving_base_amount || 100))).toFixed(1)}g
+            {' · '}
+            C {(selectedFood.carbs_per_base * (quantity / (selectedFood.serving_base_amount || 100))).toFixed(1)}g
+            {' · '}
+            F {(selectedFood.fat_per_base * (quantity / (selectedFood.serving_base_amount || 100))).toFixed(1)}g
+          </p>
+
+          <Button
+            onClick={handleConfirmAdd}
+            className="w-full h-9 rounded-lg text-[13px]"
+          >
+            <Check className="w-3.5 h-3.5 mr-1.5" /> Add
+          </Button>
+        </div>
+      )}
+
       {/* Click outside to close */}
-      {open && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setOpen(false)}
-        />
+      {open && !selectedFood && (
+        <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
       )}
     </div>
   );

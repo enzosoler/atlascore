@@ -607,8 +607,8 @@
         {
           "id": "protocol",
           "emoji": "💉",
-          "label": "Protocols",
-          "desc": "Substances, doses, cycles"
+          "label": "Plans",
+          "desc": "Supplements, doses, and health plans"
         },
         {
           "id": "body",

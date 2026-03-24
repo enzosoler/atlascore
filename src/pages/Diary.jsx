@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +13,10 @@ import {
   BarChart3,
   Pill,
   Minus,
+  Pencil,
+  Trash2,
+  X,
+  Save,
 } from 'lucide-react';
 import { getToday } from '@/lib/atlas-theme';
 import {
@@ -28,6 +32,16 @@ import {
 } from '@/components/shared/StablePage';
 import { cn } from '@/lib/utils';
 import { getDailyCheckin } from '@/services/checkinService';
+import { updateWorkout, deleteWorkout } from '@/services/workoutService';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 // ─────────────────────────────────────────────────────────────────
 // Sub-components reusing the same patterns as the other pages
