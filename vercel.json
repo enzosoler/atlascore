@@ -3,24 +3,12 @@
   "public": true,
   "outputDirectory": "dist",
   "framework": null,
-  "buildCommand": null,
-  "installCommand": null,
   "rewrites": [
+    { "source": "/br/assets/(.*)", "destination": "/br/assets/$1" },
+    { "source": "/br/(.*\\.(js|css|svg|png|ico|json))", "destination": "/br/$1" },
+    { "source": "/br/(.*)", "destination": "/br/index.html" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/(.*\\.(js|css|svg|png|ico|json))", "destination": "/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.base44.app wss://*.supabase.co; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none';"
-        }
-      ]
-    }
   ]
 }
