@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, ChevronLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 const FIELDS = [
   { key: 'name',    label: 'Food name',      type: 'text',   placeholder: 'Example: Homemade roast chicken', required: true },
@@ -19,7 +20,15 @@ export default function ManualFoodEntry({ onAdd, onBack }) {
   const isValid = form.name.trim() && form.amount && form.kcal;
 
   const handleAdd = () => {
-    if (!isValid) return;
+    if (!isValid) {
+      const missingFields = [];
+      if (!form.name.trim()) missingFields.push('Food name');
+      if (!form.amount) missingFields.push('Amount');
+      if (!form.kcal) missingFields.push('Calories');
+      
+      toast?.error?.(`Please fill in: ${missingFields.join(', ')}`) || alert(`Please fill in: ${missingFields.join(', ')}`);
+      return;
+    }
     onAdd({
       name: form.name.trim(),
       amount: parseFloat(form.amount) || 100,
@@ -63,8 +72,7 @@ export default function ManualFoodEntry({ onAdd, onBack }) {
 
       <button
         onClick={handleAdd}
-        disabled={!isValid}
-        className="btn btn-primary w-full h-10 rounded-xl text-[13px] gap-1.5 disabled:opacity-50"
+        className="btn btn-primary w-full h-10 rounded-xl text-[13px] gap-1.5"
       >
         <Plus className="w-3.5 h-3.5" /> Add food
       </button>

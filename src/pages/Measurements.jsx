@@ -694,7 +694,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
         <SecondaryButton type="button" onClick={onCancel}>
           Cancel
         </SecondaryButton>
-        <PrimaryButton type="submit" disabled={!canSubmit}>
+        <PrimaryButton type="submit" disabled={isSaving}>
           {isSaving ? 'Saving...' : measurement ? 'Save checkpoint' : 'Log checkpoint'}
         </PrimaryButton>
       </div>

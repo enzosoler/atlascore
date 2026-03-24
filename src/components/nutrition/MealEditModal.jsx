@@ -219,9 +219,14 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
 
           {/* Actions */}
           <div className="flex gap-2 pt-2">
+            {foods.length === 0 && (
+              <p className="text-[12px] text-[hsl(var(--err))] flex-1 py-2">
+                Add at least one food to save the meal.
+              </p>
+            )}
             <Button
               onClick={saveMeal}
-              disabled={!foods.length || updateMutation.isPending}
+              disabled={updateMutation.isPending}
               className="btn btn-primary flex-1 h-11 rounded-xl"
             >
               {updateMutation.isPending ? (
