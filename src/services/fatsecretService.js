@@ -10,11 +10,11 @@ import { supabase } from '@/lib/supabaseClient';
 
 export async function searchFatSecretFoods(query, language = 'en') {
   const { data, error } = await supabase.functions.invoke('food-search', {
-    body: { provider: 'fatsecret', query, language },
+    body: { query, language }, // Uses default provider (Open Food Facts)
   });
 
   if (error) {
-    throw new Error(`FatSecret search error: ${error.message}`);
+    throw new Error(`External search error: ${error.message}`);
   }
 
   return data?.results ?? [];

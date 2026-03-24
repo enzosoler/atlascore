@@ -17,7 +17,8 @@ export default function RegionSelector({ onRegionChange }) {
 
   useEffect(() => {
     async function init() {
-      const detected = await detectRegion();
+      // Default to US, don't auto-detect Brazil via IP
+      const detected = 'US';
       setDetectedRegion(detected);
       setSelected(detected);
       setRegionPricing(detected);
