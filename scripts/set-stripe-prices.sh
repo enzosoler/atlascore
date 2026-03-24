@@ -1,0 +1,32 @@
+#!/bin/bash
+# Script para configurar Stripe Price IDs no Supabase
+
+set -e
+
+echo "Configurando Stripe Price IDs no Supabase..."
+
+supabase secrets set STRIPE_PRICE_BR_MONTHLY_ATHLETE_PRO=price_1TEMmERieY0K8YEgKSb7bAoi
+supabase secrets set STRIPE_PRICE_BR_YEARLY_ATHLETE_PRO=price_1TEMmERieY0K8YEgpyi6mvgU
+supabase secrets set STRIPE_PRICE_US_MONTHLY_ATHLETE_PRO=price_1TEMmFRieY0K8YEgYVrVPb2s
+supabase secrets set STRIPE_PRICE_US_YEARLY_ATHLETE_PRO=price_1TEMmFRieY0K8YEg3SR9IM9k
+supabase secrets set STRIPE_PRICE_BR_MONTHLY_ATHLETE_PERFORMANCE=price_1TEMmGRieY0K8YEg8Pg3NqOY
+supabase secrets set STRIPE_PRICE_BR_YEARLY_ATHLETE_PERFORMANCE=price_1TEMmGRieY0K8YEgxdZ0yTut
+supabase secrets set STRIPE_PRICE_US_MONTHLY_ATHLETE_PERFORMANCE=price_1TEMmHRieY0K8YEg9PSVkmXt
+supabase secrets set STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE=price_1TEMmHRieY0K8YEgnOGNWZQc
+supabase secrets set STRIPE_PRICE_BR_MONTHLY_COACH=price_1TEMmIRieY0K8YEg2WjVn4PR
+supabase secrets set STRIPE_PRICE_BR_YEARLY_COACH=price_1TEMmIRieY0K8YEgx6H5m2IE
+supabase secrets set STRIPE_PRICE_US_MONTHLY_COACH=price_1TEMmIRieY0K8YEgOWz60BYr
+supabase secrets set STRIPE_PRICE_US_YEARLY_COACH=price_1TEMmJRieY0K8YEgxEkmjXic
+supabase secrets set STRIPE_PRICE_BR_MONTHLY_NUTRITIONIST=price_1TEMmJRieY0K8YEggJKE9kFt
+supabase secrets set STRIPE_PRICE_BR_YEARLY_NUTRITIONIST=price_1TEMmKRieY0K8YEg8dEQidTM
+supabase secrets set STRIPE_PRICE_US_MONTHLY_NUTRITIONIST=price_1TEMmKRieY0K8YEgceRTHz1A
+supabase secrets set STRIPE_PRICE_US_YEARLY_NUTRITIONIST=price_1TEMmKRieY0K8YEgY1FmnInH
+supabase secrets set STRIPE_PRICE_BR_MONTHLY_CLINICIAN=price_1TEMmLRieY0K8YEgG3wigwi8
+supabase secrets set STRIPE_PRICE_BR_YEARLY_CLINICIAN=price_1TEMmLRieY0K8YEgkptDOoPK
+supabase secrets set STRIPE_PRICE_US_MONTHLY_CLINICIAN=price_1TEMmMRieY0K8YEg2UGz2GyC
+supabase secrets set STRIPE_PRICE_US_YEARLY_CLINICIAN=price_1TEMmMRieY0K8YEgjsGOAeqy
+
+echo "Price IDs configurados com sucesso!"
+echo ""
+echo "Agora deploy a função com:"
+echo "supabase functions deploy create-checkout"
