@@ -166,11 +166,12 @@ async function handleRequest(req: Request): Promise<Response> {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-  // 1. Upsert profile with language
+  // 1. Upsert profile with language and email
   const { error: profileError } = await admin.from('profiles').upsert({
     id: userId,
     role: 'user',
     full_name: fullName || null,
+    email: email || null,
     language,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'id' });

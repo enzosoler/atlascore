@@ -81,11 +81,11 @@ export function useRoleAndSubscription(userId) {
  * Calculate trial days remaining
  */
 export function getTrialDaysRemaining(subscription) {
-  if (!subscription || subscription.status !== 'trialing' || !subscription.trial_ends_at) {
+  if (!subscription || subscription.status !== 'trialing' || !subscription.expires_at) {
     return 0;
   }
 
-  const end = new Date(subscription.trial_ends_at);
+  const end = new Date(subscription.expires_at);
   const now = new Date();
   const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   return Math.max(0, diff);

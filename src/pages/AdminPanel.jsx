@@ -132,13 +132,13 @@ function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = f
 
 function UserDetailsModal({ user, onClose, onUpdated }) {
   const latestSubscription = user?.subscriptions?.[0] || null;
-  const [tier, setTier] = useState(latestSubscription?.tier || 'free');
+  const [tier, setTier] = useState(latestSubscription?.plan_code || 'free');
   const [status, setStatus] = useState(latestSubscription?.status || 'inactive');
   const [saving, setSaving] = useState(false);
   const hasSubscription = Boolean(latestSubscription?.user_id);
   const hasChanges =
     hasSubscription &&
-    (tier !== (latestSubscription?.tier || 'free') ||
+    (tier !== (latestSubscription?.plan_code || 'free') ||
       status !== (latestSubscription?.status || 'inactive'));
 
   const handleSave = async () => {
@@ -146,7 +146,7 @@ function UserDetailsModal({ user, onClose, onUpdated }) {
 
     setSaving(true);
     try {
-      if (tier !== latestSubscription?.tier) {
+      if (tier !== latestSubscription?.plan_code) {
         await updateSubscriptionTier(user.id, tier);
       }
       if (status !== latestSubscription?.status) {
@@ -238,9 +238,9 @@ function UserDetailsModal({ user, onClose, onUpdated }) {
           </div>
 
           <div className="grid gap-2 text-[12px] text-[hsl(var(--fg-2))] sm:grid-cols-2">
-            <p>Trial ends: {fmt(latestSubscription?.trial_ends_at)}</p>
-            <p>Current period ends: {fmt(latestSubscription?.current_period_ends_at)}</p>
-            <p>Provider: {latestSubscription?.provider || 'manual'}</p>
+            <p>Trial/Expires: {fmt(latestSubscription?.expires_at)}</p>
+            <p>Started: {fmt(latestSubscription?.started_at)}</p>
+            <p>Stripe: {latestSubscription?.stripe_subscription_id || 'none'}</p>
             <p>Created: {fmt(latestSubscription?.created_at)}</p>
           </div>
         </div>
@@ -572,7 +572,7 @@ function UsersTab() {
               <Th>Role</Th>
               <Th>Plan</Th>
               <Th>Status</Th>
-              <Th>Trial End</Th>
+              <Th>Expires</Th>
               <Th>Joined</Th>
               <Th className="w-12" />
             </tr>
@@ -597,7 +597,7 @@ function UsersTab() {
                     {isSuspended && <Badge label="suspended" className="ml-1 bg-[hsl(var(--warn)/0.1)] text-[hsl(var(--warn))]" />}
                   </Td>
                   <Td>
-                    <span className="text-[hsl(var(--fg-2))]">{sub?.tier || '—'}</span>
+                    <span className="text-[hsl(var(--fg-2))]">{sub?.plan_code || '—'}</span>
                   </Td>
                   <Td>
                     {sub ? (
@@ -606,7 +606,7 @@ function UsersTab() {
                       <span className="text-[hsl(var(--fg-2))]">—</span>
                     )}
                   </Td>
-                  <Td className="text-[hsl(var(--fg-2))]">{fmt(sub?.trial_ends_at)}</Td>
+                  <Td className="text-[hsl(var(--fg-2))]">{fmt(sub?.expires_at)}</Td>
                   <Td className="text-[hsl(var(--fg-2))]">{fmt(u.created_at)}</Td>
                   <Td>
                     <ActionMenu items={[
@@ -829,9 +829,9 @@ function SubscriptionsTab() {
               <Th>User ID</Th>
               <Th>Plan</Th>
               <Th>Status</Th>
-              <Th>Provider</Th>
-              <Th>Trial End</Th>
-              <Th>Period End</Th>
+              <Th>Stripe</Th>
+              <Th>Expires</Th>
+              <Th>Started</Th>
               <Th>Created</Th>
               <Th className="w-12" />
             </tr>
@@ -843,14 +843,14 @@ function SubscriptionsTab() {
                   <p className="font-mono text-[12px] text-[hsl(var(--fg-2))]">{shortId(s.user_id)}</p>
                 </Td>
                 <Td>
-                  <span className="text-[hsl(var(--fg))]">{s.tier || '—'}</span>
+                  <span className="text-[hsl(var(--fg))]">{s.plan_code || '—'}</span>
                 </Td>
                 <Td>
                   <Badge label={s.status || '—'} className={statusBadge(s.status)} />
                 </Td>
-                <Td className="text-[hsl(var(--fg-2))]">{s.provider || 'manual'}</Td>
-                <Td className="text-[hsl(var(--fg-2))]">{fmt(s.trial_ends_at)}</Td>
-                <Td className="text-[hsl(var(--fg-2))]">{fmt(s.current_period_ends_at)}</Td>
+                <Td className="text-[hsl(var(--fg-2))]">{s.stripe_subscription_id || 'manual'}</Td>
+                <Td className="text-[hsl(var(--fg-2))]">{fmt(s.expires_at)}</Td>
+                <Td className="text-[hsl(var(--fg-2))]">{fmt(s.started_at)}</Td>
                 <Td className="text-[hsl(var(--fg-2))]">{fmt(s.created_at)}</Td>
                 <Td>
                   <ActionMenu items={[

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>atlas.core</string>
+	<string>Atlas Core</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -35,8 +35,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -47,5 +45,36 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+
+	<!-- Deep Linking: Custom URL Scheme (atlascore://) -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.atlascore.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>atlascore</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Deep Linking: Universal Links (useatlascore.com) -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:useatlascore.com</string>
+	</array>
+
+	<!-- Camera Permission (for food vision / barcode scanning) -->
+	<key>NSCameraUsageDescription</key>
+	<string>Atlas Core uses your camera to scan food items and barcodes for nutrition tracking.</string>
+
+	<!-- Photo Library Permission (for social sharing cards) -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Atlas Core needs access to your photos to save and share your progress cards.</string>
+
+	<!-- Status bar style -->
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
 </dict>
 </plist>

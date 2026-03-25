@@ -936,7 +936,7 @@ function TodayContent() {
       </header>
 
       {/* ── Upgrade Banner (for free users or expired trials) ── */}
-      {(subscription?.tier === 'free' || !subscription || isTrialExpired) && user?.atlas_role !== 'admin' && (
+      {(subscription?.plan_code === 'free' || !subscription || isTrialExpired) && user?.atlas_role !== 'admin' && (
         <Link
           to={ROUTES.pricing}
           className="atlas-card flex items-center gap-4 rounded-[20px] border-[hsl(var(--brand)/0.22)] bg-[linear-gradient(135deg,hsl(var(--brand)/0.12)_0%,hsl(var(--card))_100%)] p-4 shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"

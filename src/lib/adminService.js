@@ -3,17 +3,21 @@ import { supabase } from '@/lib/supabaseClient';
 /**
  * Atlas Admin Service
  *
- * KEY ARCHITECTURE NOTE:
- *   `profiles.id`        === auth.users.id  (same UUID)
+ * KEY ARCHITECTURE NOTES:
+ *
+ *   `profiles.id`           === auth.users.id  (same UUID)
+ *   `profiles.email`        — synced from auth.users via trigger/webhook
  *   `subscriptions.user_id` === auth.users.id
  *
- * PostgREST can only auto-join tables that share an explicit FK in the schema
- * cache.  `subscriptions.user_id` references `auth.users.id`, NOT `profiles.id`,
- * so the nested-join syntax `subscriptions:subscriptions(...)` on profiles will
- * always throw "Could not find a relationship between 'profiles' and
- * 'subscriptions' in the schema cache".
+ * RLS policies use `public.is_admin()` (SECURITY DEFINER) to check admin
+ * status without circular dependency. This allows admins to SELECT all
+ * rows from profiles and subscriptions.
  *
- * FIX: Use two separate queries and merge client-side on the shared user UUID.
+ * The `email` column on profiles is populated by:
+ *   1. The `handle_new_user()` trigger on auth.users INSERT
+ *   2. The `sync_auth_email_to_profile()` trigger on auth.users UPDATE
+ *   3. The `on-auth-user-created` and `auth-webhook` edge functions
+ *   4. A one-time backfill in the migration SQL
  */
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
@@ -64,6 +68,13 @@ export async function fetchAuditLogs(limit = 100) {
 /**
  * Fetch all users with their subscriptions merged.
  * Uses TWO separate queries to avoid the missing-FK join error.
+ *
+ * After running migration 20260325140000_fix_admin_rls_definitive.sql,
+ * the RLS policies use `public.is_admin()` (SECURITY DEFINER) so admins
+ * can see ALL profiles, not just their own.
+ *
+ * The `email` column is now on the profiles table, so no need for
+ * service_role access to auth.users.
  */
 export async function fetchAllUsers(page = 1, pageSize = 50) {
   // 1. Fetch profiles (paginated)
@@ -76,8 +87,14 @@ export async function fetchAllUsers(page = 1, pageSize = 50) {
     .order('created_at', { ascending: false })
     .range(from, to);
 
-  if (profilesError) throw profilesError;
-  if (!profiles || profiles.length === 0) return { users: [], total: count || 0, page, pageSize };
+  if (profilesError) {
+    console.error('[AdminService] fetchAllUsers profiles error:', profilesError);
+    throw profilesError;
+  }
+
+  if (!profiles || profiles.length === 0) {
+    return { users: [], total: count || 0, page, pageSize };
+  }
 
   // 2. Fetch subscriptions for those specific user IDs
   const ids = profiles.map((p) => p.id);
@@ -107,13 +124,14 @@ export async function fetchAllUsers(page = 1, pageSize = 50) {
 }
 
 /**
- * Search users by partial ID match (email search requires Edge Function / service key).
- * For now we search locally within the last 500 profiles.
+ * Search users by partial match on ID, email, or name.
+ * Email is now stored on the profiles table, so search works client-side.
  */
 export async function searchUsers(query) {
   const q = query.trim().toLowerCase();
   if (!q) return fetchAllUsers(1, 50);
 
+  // Fetch up to 500 profiles for client-side filtering
   const { data: profiles, error } = await supabase
     .from('profiles')
     .select('*')
@@ -122,7 +140,7 @@ export async function searchUsers(query) {
 
   if (error) throw error;
 
-  // Filter by partial ID or display_name / email if those columns exist
+  // Filter by partial ID, email, or display_name
   const filtered = (profiles || []).filter((p) => {
     const id = (p.id || '').toLowerCase();
     const email = (p.email || '').toLowerCase();
@@ -130,6 +148,7 @@ export async function searchUsers(query) {
     return id.includes(q) || email.includes(q) || name.includes(q);
   });
 
+  // Fetch subscriptions for matched users
   const ids = filtered.map((p) => p.id);
   let subscriptions = [];
   if (ids.length > 0) {
@@ -218,7 +237,6 @@ export async function suspendUser(userId) {
     .eq('id', userId)
     .maybeSingle();
 
-  // Try is_suspended column first; fall back to setting role = 'suspended'
   const { data, error } = await supabase
     .from('profiles')
     .update({ is_suspended: true })
@@ -227,8 +245,7 @@ export async function suspendUser(userId) {
     .single();
 
   if (error && error.code === '42703') {
-    // Column doesn't exist — surface clear message
-    throw new Error('Suspension requires the is_suspended column in profiles. See SQL migration file.');
+    throw new Error('Suspension requires the is_suspended column in profiles. Run migration 20260325140000.');
   }
   if (error) throw error;
 
@@ -245,7 +262,7 @@ export async function unsuspendUser(userId) {
     .single();
 
   if (error && error.code === '42703') {
-    throw new Error('Suspension requires the is_suspended column in profiles. See SQL migration file.');
+    throw new Error('Suspension requires the is_suspended column in profiles. Run migration 20260325140000.');
   }
   if (error) throw error;
 
@@ -256,9 +273,6 @@ export async function unsuspendUser(userId) {
 // ─── ONBOARDING RESET ────────────────────────────────────────────────────────
 
 export async function resetOnboarding(userId) {
-  // Update user_metadata in auth.users is only possible with service role.
-  // From the client we can only update the profiles row.
-  // If there's an onboarding_completed column on profiles, update it.
   const { data, error } = await supabase
     .from('profiles')
     .update({ onboarding_completed: false })
@@ -267,7 +281,7 @@ export async function resetOnboarding(userId) {
     .single();
 
   if (error && error.code === '42703') {
-    throw new Error('Reset onboarding requires onboarding_completed column in profiles. See SQL migration file.');
+    throw new Error('Reset onboarding requires onboarding_completed column in profiles. Run migration 20260325140000.');
   }
   if (error) throw error;
 
@@ -299,7 +313,7 @@ export async function updateSubscriptionTier(userId, newTier) {
 
   const { data: before } = await supabase
     .from('subscriptions')
-    .select('tier, status')
+    .select('plan_code, status')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -307,14 +321,14 @@ export async function updateSubscriptionTier(userId, newTier) {
 
   const { data, error } = await supabase
     .from('subscriptions')
-    .update({ tier: newTier })
+    .update({ plan_code: newTier })
     .eq('user_id', userId)
     .select()
     .single();
 
   if (error) throw error;
 
-  await logAdminAction('subscription.tier.update', userId, { newTier }, { tier: before?.tier }, { tier: newTier });
+  await logAdminAction('subscription.tier.update', userId, { newTier }, { plan_code: before?.plan_code }, { plan_code: newTier });
   return data;
 }
 
@@ -345,7 +359,7 @@ export async function updateSubscriptionStatus(userId, newStatus) {
 export async function extendTrial(userId, additionalDays = 7) {
   const { data: subscription, error: fetchError } = await supabase
     .from('subscriptions')
-    .select('trial_ends_at, status')
+    .select('expires_at, status')
     .eq('user_id', userId)
     .eq('status', 'trialing')
     .order('created_at', { ascending: false })
@@ -355,12 +369,12 @@ export async function extendTrial(userId, additionalDays = 7) {
   if (fetchError) throw fetchError;
   if (!subscription) throw new Error('No active trial found for this user.');
 
-  const currentEnd = new Date(subscription.trial_ends_at || Date.now());
+  const currentEnd = new Date(subscription.expires_at || Date.now());
   const newEnd = new Date(currentEnd.getTime() + additionalDays * 24 * 60 * 60 * 1000);
 
   const { data, error } = await supabase
     .from('subscriptions')
-    .update({ trial_ends_at: newEnd.toISOString() })
+    .update({ expires_at: newEnd.toISOString() })
     .eq('user_id', userId)
     .eq('status', 'trialing')
     .select()
@@ -368,7 +382,7 @@ export async function extendTrial(userId, additionalDays = 7) {
 
   if (error) throw error;
 
-  await logAdminAction('subscription.trial.extend', userId, { additionalDays }, { trial_ends_at: subscription.trial_ends_at }, { trial_ends_at: newEnd.toISOString() });
+  await logAdminAction('subscription.trial.extend', userId, { additionalDays }, { expires_at: subscription.expires_at }, { expires_at: newEnd.toISOString() });
   return data;
 }
 
@@ -389,14 +403,14 @@ export async function grantAccess(userId, tier = 'pro', reason = '') {
   if (existing?.id) {
     ({ data, error } = await supabase
       .from('subscriptions')
-      .update({ status: 'granted', tier, granted_by_admin: actorId, grant_reason: reason })
+      .update({ status: 'granted', plan_code: tier, granted_by_admin: actorId, grant_reason: reason })
       .eq('id', existing.id)
       .select()
       .single());
   } else {
     ({ data, error } = await supabase
       .from('subscriptions')
-      .insert({ user_id: userId, status: 'granted', tier, granted_by_admin: actorId, grant_reason: reason })
+      .insert({ user_id: userId, status: 'granted', plan_code: tier, granted_by_admin: actorId, grant_reason: reason })
       .select()
       .single());
   }
@@ -423,9 +437,6 @@ export async function revokeAccess(userId) {
 }
 
 export async function resyncBillingStatus(userId) {
-  // Client-side cannot call Stripe directly — this is a placeholder that marks
-  // the subscription for resync and would normally trigger an Edge Function.
   await logAdminAction('subscription.resync_requested', userId, { note: 'Manual resync requested from admin console' });
-  // In production: call a Supabase Edge Function here
   throw new Error('Billing resync requires a Supabase Edge Function. This action has been logged.');
 }

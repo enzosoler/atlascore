@@ -27,7 +27,7 @@ export default function TrialBanner() {
   if (!subscription || subscription.status !== 'trialing') return null;
   if (user?.atlas_role === 'admin') return null;
 
-  const days = daysLeft(subscription.trial_ends_at);
+  const days = daysLeft(subscription.expires_at || subscription.trial_ends_at);
   const isUrgent = days <= 2;
 
   return (

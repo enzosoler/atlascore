@@ -30,16 +30,15 @@ function normalizeSupabaseSubscription(row) {
   return {
     id: row.id,
     user_email: row.user_email || null,
-    plan_code: row.tier || 'free',
-    tier: row.tier || 'free',
+    plan_code: row.plan_code || 'free',
+    tier: row.plan_code || 'free',          // alias kept for backward compat
     status: row.status || 'inactive',
-    started_at:
-      toDateOnly(row.current_period_starts_at) ||
-      toDateOnly(row.trial_starts_at) ||
-      toDateOnly(row.created_at),
-    trial_ends_at: toDateOnly(row.trial_ends_at),
-    current_period_starts_at: toDateOnly(row.current_period_starts_at),
-    current_period_ends_at: toDateOnly(row.current_period_ends_at),
+    started_at: toDateOnly(row.started_at) || toDateOnly(row.created_at),
+    expires_at: toDateOnly(row.expires_at),
+    trial_ends_at: toDateOnly(row.expires_at), // alias kept for backward compat
+    stripe_subscription_id: row.stripe_subscription_id || null,
+    granted_by_admin: row.granted_by_admin || null,
+    grant_reason: row.grant_reason || null,
     created_at: row.created_at,
     source: 'supabase',
   };
@@ -121,8 +120,9 @@ export function SubscriptionProvider({ children }) {
 
   // Calculate trial days remaining
   const trialDaysRemaining = useMemo(() => {
-    if (!subscription || subscription.status !== 'trialing' || !subscription.trial_ends_at) return 0;
-    const end = new Date(subscription.trial_ends_at + 'T23:59:59');
+    const expiresField = subscription?.expires_at || subscription?.trial_ends_at;
+    if (!subscription || subscription.status !== 'trialing' || !expiresField) return 0;
+    const end = new Date(expiresField + 'T23:59:59');
     const now = new Date();
     const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
     return Math.max(0, diff);

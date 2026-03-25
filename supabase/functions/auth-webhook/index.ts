@@ -135,11 +135,12 @@ serve(async (req) => {
   };
 
   try {
-    // 1. Create or update profile
+    // 1. Create or update profile (includes email for admin panel visibility)
     const { error: profileError } = await admin.from('profiles').upsert({
       id: userId,
       role: 'user',
       full_name: (metadata?.full_name || null) as string | null,
+      email: email || null,
       language: 'en',
       updated_at: new Date().toISOString(),
     }, { onConflict: 'id' });

@@ -4,6 +4,14 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+/** Capitalize each word: "frango frito" → "Frango Frito" */
+function titleCase(str) {
+  if (!str) return str;
+  return str.replace(/\b\p{L}+/gu, (word) =>
+    word.charAt(0).toUpperCase() + word.slice(1)
+  );
+}
+
 /**
  * AIFoodInput — Natural language food logging powered by AI.
  *
@@ -95,7 +103,7 @@ export default function AIFoodInput({ onFoodsDetected }) {
     // For now, we always add the whole meal as a single food entry,
     // since that's what the user described as one thing.
     const foods = [{
-      name: result.food_name,
+      name: titleCase(result.food_name),
       serving_description: result.serving_description,
       estimatedAmount: result.serving_description,
       calories: result.calories || 0,
@@ -114,7 +122,7 @@ export default function AIFoodInput({ onFoodsDetected }) {
     if (!result?.items?.length) return;
 
     const foods = result.items.map((item) => ({
-      name: item.name,
+      name: titleCase(item.name),
       serving_description: `${item.estimated_grams}g`,
       estimatedAmount: `${item.estimated_grams}g`,
       calories: item.calories || 0,
@@ -211,7 +219,7 @@ export default function AIFoodInput({ onFoodsDetected }) {
       <div className="p-3 rounded-xl border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.05)]">
         <div className="flex items-start justify-between mb-2">
           <div>
-            <p className="font-semibold text-[14px] text-[hsl(var(--fg))]">{result.food_name}</p>
+            <p className="font-semibold text-[14px] text-[hsl(var(--fg))]">{titleCase(result.food_name)}</p>
             {result.serving_description && (
               <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">{result.serving_description}</p>
             )}
@@ -260,7 +268,7 @@ export default function AIFoodInput({ onFoodsDetected }) {
                     key={idx}
                     className="flex items-center justify-between text-[11px] px-2 py-1.5 rounded-lg bg-[hsl(var(--fill)/0.46)]"
                   >
-                    <span className="text-[hsl(var(--fg))]">{item.name}</span>
+                    <span className="text-[hsl(var(--fg))]">{titleCase(item.name)}</span>
                     <span className="text-[hsl(var(--fg-2))] shrink-0 ml-2">
                       {item.estimated_grams}g · {Math.round(item.calories)} kcal
                     </span>

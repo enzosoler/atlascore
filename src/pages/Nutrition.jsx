@@ -438,19 +438,42 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
   const [showAI, setShowAI] = useState(false);
 
   const handleAIFoodsDetected = (detectedFoods) => {
-    const formatted = detectedFoods.map(f => ({
-      name: f.name,
-      kcal: Math.round(f.calories || 0),
-      protein: Math.round((f.protein || 0) * 10) / 10,
-      carbs: Math.round((f.carbs || 0) * 10) / 10,
-      fat: Math.round((f.fat || 0) * 10) / 10,
-      amount: parseFloat(f.serving_description) || 100,
-      unit: 'g',
-      external_id: null,
-      source_api: 'AI',
-    }));
+    const formatted = detectedFoods.map(f => {
+      const grams = parseFloat(f.serving_description) || 100;
+      return {
+        name: f.name,
+        kcal: Math.round(f.calories || 0),
+        protein: Math.round((f.protein || 0) * 10) / 10,
+        carbs: Math.round((f.carbs || 0) * 10) / 10,
+        fat: Math.round((f.fat || 0) * 10) / 10,
+        amount: grams,
+        _baseAmount: grams,
+        _baseKcal: Math.round(f.calories || 0),
+        _baseProtein: Math.round((f.protein || 0) * 10) / 10,
+        _baseCarbs: Math.round((f.carbs || 0) * 10) / 10,
+        _baseFat: Math.round((f.fat || 0) * 10) / 10,
+        unit: 'g',
+        external_id: null,
+        source_api: 'AI',
+      };
+    });
     setFoods((prev) => [...prev, ...formatted]);
     setShowAI(false);
+  };
+
+  const updateFoodAmount = (idx, newAmount) => {
+    setFoods((prev) => prev.map((f, i) => {
+      if (i !== idx || !f._baseAmount) return f;
+      const ratio = (newAmount || 0) / f._baseAmount;
+      return {
+        ...f,
+        amount: newAmount,
+        kcal: Math.round(f._baseKcal * ratio),
+        protein: Math.round(f._baseProtein * ratio * 10) / 10,
+        carbs: Math.round(f._baseCarbs * ratio * 10) / 10,
+        fat: Math.round(f._baseFat * ratio * 10) / 10,
+      };
+    }));
   };
 
   // Search flow: instant TACO results + FatSecret combined
@@ -660,21 +683,37 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
             {foods.map((food, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-2.5"
+                className="rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-2.5"
               >
-                <div className="min-w-0">
-                  <p className="truncate text-[13px] font-semibold text-[hsl(var(--fg))]">{food.name}</p>
-                  <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                    {food.kcal} kcal · P {food.protein}g · C {food.carbs}g · G {food.fat}g
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-[hsl(var(--fg))]">{food.name}</p>
+                    <p className="text-[12px] text-[hsl(var(--fg-2))]">
+                      {food.kcal} kcal · P {food.protein}g · C {food.carbs}g · G {food.fat}g
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFood(idx)}
+                    className="ml-3 shrink-0 rounded-lg p-1.5 text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeFood(idx)}
-                  className="ml-3 shrink-0 rounded-lg p-1.5 text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
-                >
-                  <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
-                </button>
+                {food._baseAmount && (
+                  <div className="mt-2 flex items-center gap-2 pt-2 border-t border-[hsl(var(--border)/0.4)]">
+                    <label className="text-[11px] text-[hsl(var(--fg-3))] shrink-0">Portion</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="5000"
+                      value={food.amount}
+                      onChange={(e) => updateFoodAmount(idx, parseFloat(e.target.value) || 0)}
+                      className="w-20 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-2 py-1 text-[12px] text-[hsl(var(--fg))] text-center focus:outline-none focus:ring-1 focus:ring-[hsl(var(--brand)/0.3)]"
+                    />
+                    <span className="text-[11px] text-[hsl(var(--fg-3))]">g</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

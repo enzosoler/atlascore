@@ -142,20 +142,18 @@ serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 
-  // User-scoped client (for auth verification)
-  const supabaseUser = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error: authError } = await supabaseUser.auth.getUser(
-    authHeader.replace('Bearer ', '')
-  );
+  // Service-role client — used for all DB operations (bypasses RLS).
+  // Also used to verify the user's JWT token via auth.getUser().
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
   if (authError || !user) {
-    return json({ error: 'Unauthorized' }, 401);
+    console.error('[log-food-text] Auth failed:', authError?.message);
+    return json({ error: 'Unauthorized', detail: authError?.message }, 401);
   }
-
-  // Service-role client (for writing to cache, quotas, logs)
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // ── 2. Parse request ─────────────────────────────────────────────────────
 

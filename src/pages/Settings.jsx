@@ -170,7 +170,7 @@ function SettingsContent() {
                 </p>
                 <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
                   Status: {subscription.status === 'active' ? 'Active' : subscription.status === 'trialing' ? 'Trial' : 'Past due'}
-                  {subscription.current_period_ends_at && ` • Renews ${new Date(subscription.current_period_ends_at).toLocaleDateString()}`}
+                  {subscription.expires_at && ` • Renews ${new Date(subscription.expires_at).toLocaleDateString()}`}
                 </p>
               </div>
               <Button
