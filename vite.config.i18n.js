@@ -24,13 +24,32 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
-        // NO i18n alias - using direct imports
+      },
+    },
+    optimizeDeps: {
+      esbuildOptions: {
+        loader: {
+          '.js': 'jsx',
+        },
       },
     },
     build: {
       outDir: outDir,
       assetsDir: 'assets',
       emptyOutDir: !isPT,  // false for PT build to preserve EN build in dist/
+      rollupOptions: {
+        external: [
+          '@capacitor-community/firebase-analytics',
+          '@capacitor/core',
+          '@capacitor/app',
+          '@capacitor/haptics',
+          '@capacitor/keyboard',
+          '@capacitor/status-bar',
+        ],
+        output: {
+          manualChunks: undefined,
+        },
+      },
     },
   };
 });
