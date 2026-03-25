@@ -288,6 +288,22 @@ export default function Auth() {
         fullName,
       });
 
+      // Send welcome email via edge function
+      if (!result.needsEmailConfirmation) {
+        try {
+          await supabase.functions.invoke('send-welcome-email', {
+            body: {
+              email: normalizedEmail,
+              firstName: fullName,
+              appUrl: window.location.origin,
+            },
+          });
+        } catch (emailError) {
+          // Log but don't block signup if email fails
+          console.error('Failed to send welcome email:', emailError);
+        }
+      }
+
       if (result.needsEmailConfirmation) {
         setSuccessMessage(ui.emailConfirmation);
         setPassword('');

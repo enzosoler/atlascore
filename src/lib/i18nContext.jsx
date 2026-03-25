@@ -10,15 +10,15 @@ function getLocaleFromPath(pathname) {
   const parts = pathname.split('/').filter(Boolean);
   const firstSegment = parts[0];
   if (firstSegment === 'en') return 'en';
-  if (firstSegment === 'pt') return 'pt-BR';
+  if (firstSegment === 'pt' || firstSegment === 'br') return 'pt-BR';
   return defaultLocale;
 }
 
 function buildPathWithLocale(pathname, targetLocale) {
   const parts = pathname.split('/').filter(Boolean);
   const currentFirst = parts[0];
-  const hasLocalePrefix = currentFirst === 'en' || currentFirst === 'pt';
-  const newPrefix = localeToPublicPath(targetLocale);
+  const hasLocalePrefix = currentFirst === 'en' || currentFirst === 'pt' || currentFirst === 'br';
+  const newPrefix = targetLocale === 'pt-BR' ? 'br' : localeToPublicPath(targetLocale);
   if (hasLocalePrefix) {
     parts[0] = newPrefix;
   } else {
@@ -70,7 +70,15 @@ export function I18nProvider({ children }) {
     return buildPathWithLocale(location.pathname, targetLocale);
   }, [location.pathname]);
 
-  const value = { locale, t, dictionary: dictionary || {}, isLoading, setLocale, switchLocale };
+  const value = { locale, t, dictionary: dictionary || {}, isLoading, setLocale, switchLocale, getTranslation: (key) => {
+    const keys = key.split('.');
+    let value = dictionary || {};
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) return null;
+    }
+    return value;
+  } };
 
   return (
     <I18nContext.Provider value={value}>

@@ -134,9 +134,13 @@ async function handleRequest(req: Request): Promise<Response> {
   // Check if any form of the token matches
   const isAuthorized = bearerToken === webhookSecret || xWebhookSecret === webhookSecret;
   
-  // DEBUG MODE: Temporarily allow through to test webhook payload
-  // TODO: Remove this after confirming webhook works
-  console.log('Auth check result:', isAuthorized ? 'PASS' : 'FAIL - but allowing for debug');
+  // Validate webhook authorization
+  if (!isAuthorized) {
+    console.error('on-auth-user-created: Unauthorized webhook call');
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
 
   // Validate webhook by payload structure (server-to-server callback)
   const eventType = body.type as string | undefined;

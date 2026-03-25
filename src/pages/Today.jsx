@@ -558,14 +558,17 @@ function TodayContent() {
   // Build protocol list with real checked state
   const protocolsWithCheckedState = useMemo(() => {
     const loggedProtocolIds = new Set(todayProtocolLogs.map(log => log.protocol_id));
-    return activeProtocolsList.slice(0, 4).map((p, i) => ({
-      name: p.substance_name || p.name,
-      dose: p.dose,
-      unit: p.unit || 'mg',
-      time: p.schedule || 'Morning',
-      checked: loggedProtocolIds.has(p.id),
-      icon: ['💊', '🌿', '🔥', '🌙'][i] || '💊',
-    }));
+    return activeProtocolsList
+      .filter(Boolean)
+      .slice(0, 4)
+      .map((p, i) => ({
+        name: p?.substance_name || p?.name || 'Unnamed',
+        dose: p?.dose,
+        unit: p?.unit || 'mg',
+        time: p?.schedule || 'Morning',
+        checked: loggedProtocolIds.has(p?.id),
+        icon: ['💊', '🌿', '🔥', '🌙'][i] || '💊',
+      }));
   }, [activeProtocolsList, todayProtocolLogs]);
   const latestMeasurement = recentMeasurements[0] || null;
   const todaySession = recentSessions.find((s) => s.date === todayStr);

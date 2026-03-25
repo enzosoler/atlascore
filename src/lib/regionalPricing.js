@@ -92,10 +92,19 @@ export const REGIONAL_PRICING = {
  * Returns: 'BR' | 'US'
  */
 export async function detectRegion() {
-  // Session-scoped cache only — resets on new tab/session
+  // 1. Check URL path first (highest priority)
+  if (typeof window !== 'undefined') {
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/br/') || pathname === '/br') {
+      return 'BR';
+    }
+  }
+
+  // 2. Session-scoped cache only — resets on new tab/session
   const cached = sessionStorage.getItem('atlas_detected_region');
   if (cached && REGIONAL_PRICING[cached]) return cached;
 
+  // 3. Detect via IP
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();

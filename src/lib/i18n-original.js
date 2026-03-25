@@ -1,32 +1,38 @@
 import enUS from './translations/en-US.json';
 import enUSOnboarding from './translations/en-US-onboarding.json';
+import ptBR from './translations/pt-BR.json';
+import ptBROnboarding from './translations/pt-BR-onboarding.json';
+
+const BUILD_LOCALE = import.meta.env.VITE_LOCALE || 'en-US';
+const IS_PT = BUILD_LOCALE === 'pt-BR';
 
 export const translations = {
   'en-US': { ...enUS, ...enUSOnboarding },
+  'pt-BR': { ...ptBR, ...ptBROnboarding },
 };
 
-export const DEFAULT_LANGUAGE = 'en-US';
-export const supportedLanguages = ['en-US'];
+export const DEFAULT_LANGUAGE = BUILD_LOCALE;
+export const supportedLanguages = [BUILD_LOCALE];
 export const LANGUAGE_STORAGE_KEY = 'atlas_locale';
 export const LEGACY_LANGUAGE_STORAGE_KEY = 'language';
 
 export const normalizeLanguage = (lang) => {
-  return 'en-US';
+  return BUILD_LOCALE;
 };
 
 export const detectPreferredLanguage = () => {
-  return 'en-US';
+  return BUILD_LOCALE;
 };
 
-// No-op: language is always en-US
+// No-op: language is fixed at build time
 export const resetLanguageToSystem = () => {
-  if (typeof window === 'undefined') return 'en-US';
-  window.dispatchEvent(new CustomEvent('languageChanged', { detail: 'en-US' }));
-  return 'en-US';
+  if (typeof window === 'undefined') return BUILD_LOCALE;
+  window.dispatchEvent(new CustomEvent('languageChanged', { detail: BUILD_LOCALE }));
+  return BUILD_LOCALE;
 };
 
 export const getLanguage = () => {
-  return 'en-US';
+  return BUILD_LOCALE;
 };
 
 export const setLanguage = (lang) => {
@@ -35,7 +41,7 @@ export const setLanguage = (lang) => {
 
 const getTranslationValue = (key) => {
   const keys = key.split('.');
-  let value = translations['en-US'];
+  let value = translations[BUILD_LOCALE];
 
   for (const k of keys) {
     value = value?.[k];

@@ -360,7 +360,7 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
             </p>
           </div>
           <p className="mt-2.5 text-sm text-[hsl(var(--fg-2))]">
-            {meal.foods.map((food) => food.name).join(', ')}
+            {(meal?.foods || []).map((food) => food.name).join(', ')}
           </p>
         </div>
         <div className="grid shrink-0 grid-cols-2 gap-x-3 gap-y-2 text-right">

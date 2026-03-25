@@ -1,13 +1,14 @@
 /**
- * Auth Webhook - Server-to-server endpoint for Supabase Auth events
+ * Auth Webhook - Send Email Hook for Supabase Auth
  * 
- * Flow: Supabase Auth (user.created) -> this function -> sends emails
+ * Uses standardwebhooks to verify signature from Supabase Auth
+ * verify_jwt = false (set in config.toml) - Supabase uses webhook secret, not JWT
  * 
- * Authentication: X-Webhook-Secret header (NOT Authorization Bearer)
- * Reason: Supabase Auth webhook does not send Authorization Bearer
+ * Flow: Supabase Auth -> this function -> sends welcome/trial emails
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sendWelcome, sendTrialStarted } from '../_shared/email-service.ts';
 import { logWebhook } from '../_shared/logger.ts';
@@ -15,98 +16,40 @@ import { logWebhook } from '../_shared/logger.ts';
 // CORS headers
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-secret',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, webhook-id, webhook-timestamp, webhook-signature',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 // Environment
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const WEBHOOK_SECRET = Deno.env.get('WEBHOOK_SECRET') ?? '';
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://atlascore.app';
 
-// Types
-interface WebhookPayload {
-  type: string;
-  record?: {
-    id?: string;
-    email?: string;
+// Get hook secret and remove v1,whsec_ prefix if present
+const rawHookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') ?? '';
+const HOOK_SECRET = rawHookSecret.replace(/^v1,whsec_/, '');
+
+// Types for Supabase Auth webhook payload
+interface AuthWebhookPayload {
+  user: {
+    id: string;
+    email: string;
     user_metadata?: Record<string, unknown>;
     confirmation_sent_at?: string;
   };
-}
-
-// Validate webhook secret - supports both X-Webhook-Secret and Supabase Auth format
-function validateWebhookSecret(req: Request): boolean {
-  // Try X-Webhook-Secret first (our custom header)
-  const secretHeader = req.headers.get('X-Webhook-Secret') || '';
-  
-  // Try Authorization Bearer (what Supabase Auth sends when hook secret is configured)
-  const authHeader = req.headers.get('Authorization') || '';
-  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.replace('Bearer ', '') : '';
-  
-  // Also check query param as fallback
-  const url = new URL(req.url);
-  const secretFromQuery = url.searchParams.get('secret') || '';
-  
-  const receivedSecret = secretHeader || bearerToken || secretFromQuery;
-  
-  logWebhook('validate_secret', {
-    hasHeader: !!secretHeader,
-    hasBearer: !!bearerToken,
-    hasQuery: !!secretFromQuery,
-    hasEnvSecret: !!WEBHOOK_SECRET,
-    receivedLength: receivedSecret.length,
-    secretLength: WEBHOOK_SECRET.length,
-  });
-  
-  if (!WEBHOOK_SECRET) {
-    console.error('WEBHOOK_SECRET not configured');
-    return false;
-  }
-  
-  if (!receivedSecret) {
-    console.error('No secret received in request');
-    return false;
-  }
-  
-  // Constant-time comparison to prevent timing attacks
-  if (receivedSecret.length !== WEBHOOK_SECRET.length) {
-    console.error('Secret length mismatch');
-    return false;
-  }
-  
-  let result = 0;
-  for (let i = 0; i < receivedSecret.length; i++) {
-    result |= receivedSecret.charCodeAt(i) ^ WEBHOOK_SECRET.charCodeAt(i);
-  }
-  
-  return result === 0;
-}
-
-// Validate payload shape
-function validatePayload(body: unknown): { valid: boolean; error?: string; data?: WebhookPayload } {
-  if (!body || typeof body !== 'object') {
-    return { valid: false, error: 'Invalid payload: not an object' };
-  }
-  
-  const payload = body as WebhookPayload;
-  
-  if (!payload.type) {
-    return { valid: false, error: 'Invalid payload: missing type' };
-  }
-  
-  // We only handle user.created (signup) for now
-  const validTypes = ['user.created', 'signup'];
-  if (!validTypes.includes(payload.type)) {
-    return { valid: false, error: `Unsupported event type: ${payload.type}` };
-  }
-  
-  if (!payload.record?.id || !payload.record?.email) {
-    return { valid: false, error: 'Invalid payload: missing user id or email' };
-  }
-  
-  return { valid: true, data: payload };
+  email_data?: {
+    token: string;
+    token_hash: string;
+    redirect_to: string;
+    email_action_type: string;
+    site_url: string;
+    token_new?: string;
+    token_hash_new?: string;
+    old_email?: string;
+    old_phone?: string;
+    provider?: string;
+    factor_type?: string;
+  };
 }
 
 // Extract first name from metadata
@@ -115,7 +58,6 @@ function getFirstName(metadata: Record<string, unknown> | undefined, email: stri
   if (fullName) {
     return fullName.split(' ')[0];
   }
-  // Fallback: use part before @ in email
   return email.split('@')[0];
 }
 
@@ -123,12 +65,12 @@ function getFirstName(metadata: Record<string, unknown> | undefined, email: stri
 serve(async (req) => {
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
-  
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS });
   }
-  
+
   // Only accept POST
   if (req.method !== 'POST') {
     return new Response(
@@ -136,50 +78,54 @@ serve(async (req) => {
       { status: 405, headers: { ...CORS, 'Content-Type': 'application/json' } }
     );
   }
-  
+
   logWebhook('request_start', { requestId, url: req.url });
-  
-  // Validate webhook secret
-  if (!validateWebhookSecret(req)) {
-    logWebhook('auth_failed', { requestId });
+
+  // Verify webhook signature using standardwebhooks
+  if (!HOOK_SECRET) {
+    console.error('SEND_EMAIL_HOOK_SECRET not configured');
     return new Response(
-      JSON.stringify({ error: 'Invalid webhook secret' }),
+      JSON.stringify({ error: 'Webhook secret not configured' }),
+      { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Get raw payload for verification
+  const payload = await req.text();
+  const headers = Object.fromEntries(req.headers.entries());
+  const wh = new Webhook(HOOK_SECRET);
+
+  let data: AuthWebhookPayload;
+  try {
+    data = wh.verify(payload, headers) as AuthWebhookPayload;
+    logWebhook('signature_verified', { requestId, userId: data.user?.id });
+  } catch (err: any) {
+    console.error('Webhook signature verification failed:', err);
+    logWebhook('signature_failed', { requestId, error: err?.message || String(err) });
+    return new Response(
+      JSON.stringify({ error: 'Invalid webhook signature' }),
       { status: 401, headers: { ...CORS, 'Content-Type': 'application/json' } }
     );
   }
-  
-  // Parse body
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
+
+  // Validate required fields
+  if (!data.user?.id || !data.user?.email) {
     return new Response(
-      JSON.stringify({ error: 'Invalid JSON body' }),
+      JSON.stringify({ error: 'Missing user id or email' }),
       { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
     );
   }
-  
-  // Validate payload
-  const validation = validatePayload(body);
-  if (!validation.valid || !validation.data) {
-    logWebhook('validation_failed', { requestId, error: validation.error });
-    return new Response(
-      JSON.stringify({ error: validation.error }),
-      { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
-  }
-  
-  const payload = validation.data;
-  const userId = payload.record!.id!;
-  const email = payload.record!.email!;
-  const metadata = payload.record!.user_metadata;
+
+  const userId = data.user.id;
+  const email = data.user.email;
+  const metadata = data.user.user_metadata;
   const firstName = getFirstName(metadata, email);
-  
-  logWebhook('payload_valid', { requestId, userId, email: email.substring(0, 3) + '...', type: payload.type });
-  
+
+  logWebhook('payload_valid', { requestId, userId, email: email.substring(0, 3) + '...' });
+
   // Initialize Supabase admin client
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-  
+
   const results = {
     profileCreated: false,
     subscriptionCreated: false,
@@ -187,17 +133,17 @@ serve(async (req) => {
     trialSent: false,
     errors: [] as string[],
   };
-  
+
   try {
     // 1. Create or update profile
     const { error: profileError } = await admin.from('profiles').upsert({
       id: userId,
       role: 'user',
       full_name: (metadata?.full_name || null) as string | null,
-      language: 'en', // Default, can be updated later
+      language: 'en',
       updated_at: new Date().toISOString(),
     }, { onConflict: 'id' });
-    
+
     if (profileError) {
       console.error('Profile creation failed:', profileError);
       results.errors.push(`Profile: ${profileError.message}`);
@@ -205,11 +151,11 @@ serve(async (req) => {
       results.profileCreated = true;
       logWebhook('profile_created', { requestId, userId });
     }
-    
+
     // 2. Create trial subscription
     const trialStartsAt = new Date();
     const trialEndsAt = new Date(trialStartsAt.getTime() + 7 * 24 * 60 * 60 * 1000);
-    
+
     const { error: subError } = await admin.from('subscriptions').insert({
       user_id: userId,
       tier: 'free',
@@ -217,16 +163,16 @@ serve(async (req) => {
       trial_starts_at: trialStartsAt.toISOString(),
       trial_ends_at: trialEndsAt.toISOString(),
     });
-    
-    if (subError && subError.code !== '23505') { // Ignore duplicate
+
+    if (subError && subError.code !== '23505') {
       console.error('Subscription creation failed:', subError);
       results.errors.push(`Subscription: ${subError.message}`);
     } else {
       results.subscriptionCreated = true;
       logWebhook('subscription_created', { requestId, userId, trialEndsAt });
     }
-    
-    // 3. Send welcome email (fire-and-forget, don't block on failure)
+
+    // 3. Send welcome email
     const welcomeResult = await sendWelcome(email, firstName, userId, 'en');
     if (welcomeResult.success) {
       results.welcomeSent = true;
@@ -235,7 +181,7 @@ serve(async (req) => {
       results.errors.push(`Welcome email: ${welcomeResult.error}`);
       logWebhook('welcome_failed', { requestId, userId, error: welcomeResult.error });
     }
-    
+
     // 4. Send trial started email
     const trialResult = await sendTrialStarted(email, firstName, 7, userId, 'en');
     if (trialResult.success) {
@@ -245,23 +191,22 @@ serve(async (req) => {
       results.errors.push(`Trial email: ${trialResult.error}`);
       logWebhook('trial_failed', { requestId, userId, error: trialResult.error });
     }
-    
+
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     results.errors.push(`Unexpected: ${errorMsg}`);
     console.error('Webhook processing error:', error);
   }
-  
+
   const duration = Date.now() - startTime;
-  
+
   logWebhook('request_complete', {
     requestId,
     duration,
     ...results,
   });
-  
-  // Always return 200 to Supabase Auth, even if emails fail
-  // We don't want to block user signup because of email issues
+
+  // Always return 200 to Supabase Auth
   return new Response(
     JSON.stringify({
       success: true,
@@ -272,3 +217,4 @@ serve(async (req) => {
     { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } }
   );
 });
+

@@ -178,7 +178,7 @@ export default function Pricing() {
   const [billing, setBilling] = useState('monthly');
   const { user, isAuthenticated } = useAuth();
   const { subscription } = useSubscription();
-  const { t, locale } = useI18n();
+  const { t, locale, getTranslation } = useI18n();
 
   const pricing = getRegionPricing(region);
 
@@ -225,9 +225,25 @@ export default function Pricing() {
   })();
 
   const athletePlans = useMemo(() => {
-    const translations = t('pricing_page.plans');
+    const translations = getTranslation('pricing_page.plans');
+    if (!translations) return [];
     return ATHLETE_PLAN_META.map((meta) => {
       const translated = translations[meta.key];
+      if (!translated) {
+        console.warn(`[Pricing] Missing translation for plan: ${meta.key}`);
+        return {
+          ...meta,
+          name: meta.key,
+          pitch: '',
+          features: [],
+          missing: [],
+          cta: 'Subscribe',
+          trial: null,
+          period: '/month',
+          savings: null,
+          price: '$0',
+        };
+      }
       const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
       return {
         ...meta,
@@ -242,12 +258,28 @@ export default function Pricing() {
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, t]);
+  }, [locale, pricing, billing, getTranslation]);
 
   const professionalPlans = useMemo(() => {
-    const translations = t('pricing_page.plans');
+    const translations = getTranslation('pricing_page.plans');
+    if (!translations) return [];
     return PROFESSIONAL_PLAN_META.map((meta) => {
       const translated = translations[meta.key];
+      if (!translated) {
+        console.warn(`[Pricing] Missing translation for plan: ${meta.key}`);
+        return {
+          ...meta,
+          name: meta.key,
+          pitch: '',
+          note: '',
+          features: [],
+          cta: 'Subscribe',
+          trial: null,
+          period: '/month',
+          savings: null,
+          price: '$0',
+        };
+      }
       const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
       return {
         ...meta,
@@ -262,7 +294,7 @@ export default function Pricing() {
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, t]);
+  }, [locale, pricing, billing, getTranslation]);
 
   const handleSubscribe = async (planId) => {
     console.log('[Checkout] ========================================');

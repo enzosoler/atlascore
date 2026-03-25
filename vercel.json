@@ -6,6 +6,7 @@
   "buildCommand": null,
   "installCommand": null,
   "rewrites": [
+    { "source": "/br/:path*", "destination": "/br/index.html" },
     { "source": "/pt/:path*", "destination": "/index.html" },
     { "source": "/en/:path*", "destination": "/index.html" },
     { "source": "/:path*", "destination": "/index.html" }

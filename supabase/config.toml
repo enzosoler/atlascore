@@ -1,0 +1,8 @@
+# Supabase Configuration File
+# https://supabase.com/docs/guides/cli/config
+
+[functions.auth-webhook]
+verify_jwt = false
+
+[functions.send-email-v2]
+verify_jwt = true
