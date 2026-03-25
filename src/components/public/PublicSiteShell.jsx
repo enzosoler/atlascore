@@ -4,14 +4,34 @@ import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import ThemeToggleButton from '@/components/shared/ThemeToggleButton';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
+import { useI18n } from '@/lib/i18nContext';
 
-const DEFAULT_FOOTER_LINKS = [
-  { href: ROUTES.home, label: 'Home' },
-  { href: ROUTES.blog, label: 'Blog' },
-  { href: ROUTES.pricing, label: 'Pricing' },
-  { href: ROUTES.help, label: 'Help' },
-  { href: `${ROUTES.auth}?mode=login`, label: 'Login' },
-];
+const FOOTER_LINKS = {
+  en: [
+    { href: ROUTES.home, label: 'Home' },
+    { href: ROUTES.blog, label: 'Blog' },
+    { href: ROUTES.pricing, label: 'Pricing' },
+    { href: ROUTES.help, label: 'Help' },
+    { href: `${ROUTES.auth}?mode=login`, label: 'Login' },
+  ],
+  'pt-BR': [
+    { href: ROUTES.home, label: 'Início' },
+    { href: ROUTES.blog, label: 'Blog' },
+    { href: ROUTES.pricing, label: 'Planos' },
+    { href: ROUTES.help, label: 'Ajuda' },
+    { href: `${ROUTES.auth}?mode=login`, label: 'Entrar' },
+  ],
+};
+
+const FOOTER_TAGLINE = {
+  en: 'Calm, connected tracking for real-world performance.',
+  'pt-BR': 'Acompanhamento calmo e conectado para performance real.',
+};
+
+const SUBTITLE = {
+  en: 'Performance OS',
+  'pt-BR': 'Sistema de Performance',
+};
 
 export function PublicLanguageSwitcher({ className = '', align = 'end' }) {
   return null;
@@ -42,6 +62,14 @@ export function PublicSectionHeader({
 }
 
 export function PublicNav({ links = [], actions, compact = false }) {
+  let locale = 'en';
+  try {
+    const i18n = useI18n();
+    locale = i18n.locale || 'en';
+  } catch (e) {
+    // fallback if not in I18nProvider
+  }
+
   return (
     <header className="atlas-public-nav">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 lg:px-8">
@@ -54,7 +82,7 @@ export function PublicNav({ links = [], actions, compact = false }) {
             <p className="truncate text-[16px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] sm:text-[20px]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </p>
-            <p className="hidden truncate text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] sm:block">Performance OS</p>
+            <p className="hidden truncate text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] sm:block">{SUBTITLE[locale] || SUBTITLE.en}</p>
           </div>
         </Link>
 
@@ -98,9 +126,20 @@ export default function PublicSiteShell({
   actions,
   compactNav = false,
   showFooter = true,
-  footerLinks = DEFAULT_FOOTER_LINKS,
+  footerLinks,
   mainClassName = '',
 }) {
+  let locale = 'en';
+  try {
+    const i18n = useI18n();
+    locale = i18n.locale || 'en';
+  } catch (e) {
+    // fallback if not in I18nProvider
+  }
+
+  const resolvedFooterLinks = footerLinks || FOOTER_LINKS[locale] || FOOTER_LINKS.en;
+  const tagline = FOOTER_TAGLINE[locale] || FOOTER_TAGLINE.en;
+
   return (
     <div className="atlas-public-shell">
       {/* Primary brand halo — top center */}
@@ -123,12 +162,12 @@ export default function PublicSiteShell({
                   <span className="text-[hsl(var(--accent-primary))]">atlas</span>.core
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                  Calm, connected tracking for real-world performance.
+                  {tagline}
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-[hsl(var(--fg-2))]">
-                {footerLinks.map((link) => (
+                {resolvedFooterLinks.map((link) => (
                   <Link
                     key={`${link.href}-${link.label}`}
                     to={link.href}

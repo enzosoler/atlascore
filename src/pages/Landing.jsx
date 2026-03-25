@@ -262,6 +262,160 @@ const COPY = {
       fine: 'No credit card needed. Free plan available. Cancel anytime.',
     },
   },
+  'pt-BR': {
+    nav: { howItWorks: 'Como funciona', features: 'Funcionalidades', blog: 'Blog', pricing: 'Planos', login: 'Entrar', signup: 'Começar' },
+    hero: {
+      badge: 'Acesso Antecipado',
+      h1a: 'Registre tudo.',
+      h1b: 'Entenda o que realmente funciona.',
+      sub: 'Seus treinos, nutrição e métricas corporais — finalmente em um só lugar. Veja os padrões que realmente mudam seu corpo.',
+      cta1: 'Começar grátis',
+      cta2: 'Veja como funciona',
+      s1t: 'Tudo conectado', s1d: 'sem ficar espalhado em apps',
+      s2t: 'Veja padrões', s2d: 'não só números soltos',
+      s3t: 'Saiba o que funciona', s3d: 'para o seu corpo',
+    },
+    problem: {
+      label: 'O Problema',
+      h2: 'Você está fazendo tudo certo.\nMas não sabe o que está funcionando.',
+      sub: 'Treinos em um app. Nutrição em outro. Fotos de progresso perdidas no rolo da câmera. Quando seus dados estão espalhados, você está no escuro.',
+      items: [
+        { e: '🏋️', t: 'App de Treino', d: 'Registra sessões, mas sem contexto dos resultados' },
+        { e: '🥗', t: 'App de Dieta', d: 'Registra refeições, nunca vê o impacto' },
+        { e: '📊', t: 'Planilha', d: 'Medidas que você esquece de atualizar' },
+        { e: '📱', t: 'Notas', d: 'Planos espalhados em anotações aleatórias' },
+        { e: '📸', t: 'Galeria', d: 'Fotos de progresso enterradas e esquecidas' },
+        { e: '💬', t: 'Mensagens', d: 'Feedback do coach perdido em conversas' },
+      ],
+      quote: 'Dados sem conexão são só ruído.',
+      quoteDesc: 'Sem tudo em um só lugar, você está adivinhando. E adivinhação não traz resultados.',
+    },
+    solution: {
+      label: 'A Solução',
+      h2a: 'Tudo conectado.',
+      h2b: 'Uma visão.',
+      sub: 'Atlas é uma plataforma única para quem quer entender seu progresso, não só registrar. Treino, nutrição e métricas corporais — organizados, conectados, legíveis.',
+      p1t: 'Centralizado', p1d: 'Treino, nutrição, métricas corporais — tudo em um sistema. Quando os dados vivem juntos, padrões ficam visíveis.',
+      p2t: 'Conectado', p2d: 'Todo o produto é construído em torno de uma pergunta: o que realmente está impulsionando seus resultados?',
+      p3t: 'Honesto', p3d: 'Sem gamificação. Sem truques de motivação. Apenas seus dados, apresentados com clareza.',
+    },
+    features: {
+      workouts: {
+        label: 'Treinos',
+        h2: 'Veja seu treino\nevoluir.',
+        desc: 'Acompanhe volume, intensidade e consistência ao longo do tempo. Saiba quando está progredindo e quando estagnou.',
+        pts: [
+          { t: 'Biblioteca completa de exercícios', d: ' — ou adicione os seus. Musculação, funcional, cardio.' },
+          { t: 'Histórico de treinos', d: ' — veja cada sessão que você já fez.' },
+          { t: 'Rastreamento de PRs', d: ' — recordes pessoais atualizam automaticamente.' },
+          { t: 'Sem templates forçados', d: ' — registre o que você realmente fez, não o que foi planejado.' },
+        ],
+      },
+      nutrition: {
+        label: 'Nutrição',
+        h2: 'Entenda o que\nsua nutrição faz.',
+        desc: 'Não é só contagem de calorias. Uma visão clara dos seus padrões alimentares e como se conectam à performance e composição corporal.',
+        pts: [
+          { t: 'Registro diário rápido', d: ' — refeições, macros e calorias sem atrito.' },
+          { t: 'Padrões semanais', d: ' — veja onde está batendo metas e onde não.' },
+          { t: 'Conectado aos resultados', d: ' — nutrição ao lado do peso e dados de performance.' },
+          { t: 'Não é uma prisão calórica', d: ' — feito para consciência, não ansiedade.' },
+        ],
+      },
+      progress: {
+        label: 'Acompanhamento',
+        h2: 'Veja o quadro completo,\nnão só o número.',
+        desc: 'O peso flutua. Atlas rastreia múltiplos marcadores — medidas corporais, progresso visual, tendências de peso — para você ver o quadro completo.',
+        pts: [
+          { t: 'Tendências de peso', d: ' — médias semanais cortam o ruído diário.' },
+          { t: 'Medidas completas', d: ' — cintura, peito, braços, pernas, quadril, % de gordura.' },
+          { t: 'Comparações antes/depois', d: ' — escolha duas datas e veja a diferença.' },
+          { t: 'Detecção de tendências', d: ' — saiba imediatamente se sua trajetória está correta.' },
+        ],
+      },
+      photos: {
+        label: 'Fotos de Progresso',
+        h2: 'Veja o que a balança\nnão mostra.',
+        desc: 'Seu corpo muda de formas que medidas não captam. Fotos de progresso são o registro mais honesto que você tem.',
+        pts: [
+          { t: 'Organizadas por data', d: ' — sem mais procurar no rolo da câmera.' },
+          { t: 'Comparação lado a lado', d: ' — escolha dois check-ins e veja a diferença.' },
+          { t: 'Privado e seguro', d: ' — suas fotos são suas. Sem compartilhamento público.' },
+          { t: 'Sincronizado com métricas', d: ' — veja peso e medidas junto com a foto daquele dia.' },
+        ],
+      },
+      supplements: {
+        label: 'Suplementos e Protocolos',
+        h2: 'Seu protocolo, organizado.\nSua adesão, visível.',
+        desc: 'Creatina, vitaminas, pré-treino — qualquer que seja seu protocolo, Atlas mantém organizado e rastreável.',
+        pts: [
+          { t: 'Checklist diário', d: ' — registre o que tomou, quando tomou.' },
+          { t: 'Protocolos personalizados', d: ' — stack matinal, noturno, dosagem cíclica.' },
+          { t: 'Rastreamento de consistência', d: ' — veja sua adesão nos últimos 30 dias.' },
+          { t: 'Sem julgamento', d: ' — registre o que quiser. São seus dados de saúde.' },
+        ],
+      },
+      timeline: {
+        label: 'Timeline Unificada',
+        h2: 'Todo seu histórico.\nUm scroll.',
+        desc: 'Treinos, check-ins, fotos, mudanças de protocolo — tudo visível em uma única timeline cronológica.',
+        pts: [
+          { t: 'Log automático', d: ' — cada ação vira parte do seu histórico.' },
+          { t: 'Referência cruzada', d: ' — veja como era sua nutrição na semana do seu PR.' },
+          { t: 'Resumos mensais', d: ' — entenda o que cada mês realmente entregou.' },
+          { t: 'Memória de longo prazo', d: ' — volte 6 meses, 12 meses, 2 anos. Seus dados não expiram.' },
+        ],
+      },
+    },
+    diff: {
+      label: 'Por que Atlas',
+      h2: 'Construído em torno da conexão,\nnão da categoria.',
+      sub: 'Toda outra ferramenta rastreia uma coisa bem. Atlas rastreia como tudo se relaciona.',
+      cols: ['Capacidade', 'Apps de Treino', 'Apps de Dieta', 'Apps de Saúde', 'Atlas'],
+      rows: [
+        ['Rastreamento de treino', '✓', '—', 'Parcial', '✓ Completo'],
+        ['Nutrição e macros', '—', '✓', 'Parcial', '✓ Completo'],
+        ['Medidas corporais', '—', '—', 'Básico', '✓ Completo'],
+        ['Fotos de progresso', '—', '—', '—', '✓ Organizado'],
+        ['Rastreamento de suplementos', '—', '—', '—', '✓ Completo'],
+        ['Timeline unificada', '—', '—', '—', '✓ Tudo'],
+        ['Análise cruzada', '—', '—', '—', '✓ Nativo'],
+      ],
+      cards: [
+        { e: '🚫', t: 'Sem imposição de planos', d: 'Atlas não diz o que fazer. Rastreia o que você realmente faz — e mostra se está funcionando.' },
+        { e: '🚫', t: 'Sem gamificação', d: 'Sem streaks, sem badges. Seu progresso é real. Essa é a recompensa.' },
+        { e: '🚫', t: 'Não é clínico', d: 'Feito para pessoas sérias. Sem jargão, sem formulários, sem complexidade.' },
+      ],
+    },
+    pricing: {
+      label: 'Planos',
+      h2: 'Simples. Honesto.',
+      sub: 'Comece grátis. Evolua quando quiser o quadro completo.',
+      toggle: { monthly: 'Mensal', yearly: 'Anual' },
+      founder: {
+        h3: '🔒 Preço de Fundador — Travado Para Sempre',
+        desc: 'Entrando durante o Acesso Antecipado? Seu preço nunca muda — mesmo quando aumentarmos.',
+        cta: 'Garantir Preço de Fundador',
+      },
+    },
+    pros: {
+      label: 'Para Profissionais',
+      h2: 'Feito para indivíduos.\nFunciona com seu time.',
+      sub: 'Atlas não exige um coach ou nutricionista. Mas se você trabalha com um, eles podem ver seus dados e colaborar diretamente no app.',
+      cards: [
+        { e: '🏃', t: 'Personal Trainers', d: 'Veja os logs de treino, fotos de progresso e medidas dos seus clientes em tempo real. Sem mais screenshots no WhatsApp.' },
+        { e: '🥦', t: 'Nutricionistas', d: 'Revise logs reais de alimentação junto com métricas corporais. Veja se o plano está se traduzindo em resultados reais.' },
+      ],
+      note: 'Colaboração profissional é opcional. Atlas funciona perfeitamente sem mais ninguém envolvido.',
+    },
+    closing: {
+      h2a: 'Pare de adivinhar.',
+      h2b: 'Comece a ver.',
+      sub: 'Atlas te dá o quadro completo — o que você fez, como está funcionando e onde continuar avançando.',
+      cta1: 'Começar grátis', cta2: 'Ver planos',
+      fine: 'Sem cartão de crédito. Plano grátis disponível. Cancele quando quiser.',
+    },
+  },
 };
 
 const HOME_MOCK_COPY = {
@@ -614,8 +768,8 @@ function PricingCard({ plan, popularLabel }) {
    MAIN COMPONENT
 ───────────────────────────────────────── */
 export default function Landing() {
-  const { t, locale, getTranslation } = useTranslation();
-  const c = COPY['en-US'];
+  const { t, language: locale, getTranslation } = useTranslation();
+  const c = COPY[locale === 'pt-BR' ? 'pt-BR' : 'en-US'];
   const homeMocks = HOME_MOCK_COPY['en-US'];
 
   const [billing, setBilling] = useState('monthly');
@@ -965,7 +1119,7 @@ export default function Landing() {
                         : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
                     }`}
                   >
-                    Monthly
+                    {locale === 'pt-BR' ? 'Mensal' : 'Monthly'}
                   </button>
                   <button
                     type="button"
@@ -976,10 +1130,10 @@ export default function Landing() {
                         : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
                     }`}
                   >
-                    Yearly
+                    {locale === 'pt-BR' ? 'Anual' : 'Yearly'}
                     {billing !== 'yearly' && (
                       <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
-                        up to 31%
+                        {locale === 'pt-BR' ? 'até 31%' : 'up to 31%'}
                       </span>
                     )}
                   </button>
@@ -991,11 +1145,11 @@ export default function Landing() {
 
         {/* Athlete plans */}
         <motion.div {...fadeIn(0.08)} className="atlas-public-panel mb-6 px-6 py-6 lg:px-8 lg:py-8">
-          <p className="atlas-overline mb-6">Athlete</p>
+          <p className="atlas-overline mb-6">{locale === 'pt-BR' ? 'Atleta' : 'Athlete'}</p>
           <div className="grid gap-4 lg:grid-cols-3">
             {athletePlans.map((plan, index) => (
               <motion.div key={plan.id} {...fadeIn(index * 0.06)}>
-                <PricingCard plan={plan} popularLabel="Most chosen" />
+                <PricingCard plan={plan} popularLabel={locale === 'pt-BR' ? 'Mais escolhido' : 'Most chosen'} />
               </motion.div>
             ))}
           </div>
@@ -1005,15 +1159,15 @@ export default function Landing() {
         <motion.div {...fadeIn(0.12)} className="mb-6">
           <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
             <div className="pt-2">
-              <p className="atlas-overline">Professional</p>
+              <p className="atlas-overline">{locale === 'pt-BR' ? 'Profissional' : 'Professional'}</p>
               <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                Plans for coaches, nutritionists, and clinicians.
+                {locale === 'pt-BR' ? 'Planos para treinadores, nutricionistas e clínicos.' : 'Plans for coaches, nutritionists, and clinicians.'}
               </p>
             </div>
             <div className="grid gap-4 lg:grid-cols-3">
               {professionalPlans.map((plan, index) => (
                 <motion.div key={plan.id} {...fadeIn(index * 0.06)}>
-                  <PricingCard plan={plan} popularLabel="Most chosen" />
+                  <PricingCard plan={plan} popularLabel={locale === 'pt-BR' ? 'Mais escolhido' : 'Most chosen'} />
                 </motion.div>
               ))}
             </div>
