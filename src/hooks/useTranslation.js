@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 import { useI18n } from '@/lib/i18nContext';
 
 export const useTranslation = () => {
-  const { locale, t } = useI18n();
+  const { locale, t, getTranslation } = useI18n();
 
   return useMemo(() => ({
     t,
+    getTranslation,
     language: locale,
-    setLanguage: () => {}, // No-op: language is always en-US
-    supportedLanguages: ['en-US'],
-  }), [locale, t]);
+    setLanguage: () => {},
+    supportedLanguages: ['en-US', 'pt-BR'],
+  }), [locale, t, getTranslation]);
 };

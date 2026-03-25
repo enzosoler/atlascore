@@ -614,7 +614,7 @@ function PricingCard({ plan, popularLabel }) {
    MAIN COMPONENT
 ───────────────────────────────────────── */
 export default function Landing() {
-  const { t, locale } = useTranslation();
+  const { t, locale, getTranslation } = useTranslation();
   const c = COPY['en-US'];
   const homeMocks = HOME_MOCK_COPY['en-US'];
 
@@ -623,9 +623,24 @@ export default function Landing() {
   const pricing = getRegionPricing(region);
 
   const athletePlans = useMemo(() => {
-    const translations = t('pricing_page.plans');
+    const translations = getTranslation('pricing_page.plans');
+    if (!translations) return [];
     return ATHLETE_PLAN_META.map((meta) => {
       const translated = translations[meta.key];
+      if (!translated) {
+        return {
+          ...meta,
+          name: meta.key,
+          pitch: '',
+          features: [],
+          missing: [],
+          cta: 'Subscribe',
+          trial: null,
+          period: '/month',
+          savings: null,
+          price: '$0',
+        };
+      }
       const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
       return {
         ...meta,
@@ -640,12 +655,27 @@ export default function Landing() {
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, t]);
+  }, [locale, pricing, billing, getTranslation]);
 
   const professionalPlans = useMemo(() => {
-    const translations = t('pricing_page.plans');
+    const translations = getTranslation('pricing_page.plans');
+    if (!translations) return [];
     return PROFESSIONAL_PLAN_META.map((meta) => {
       const translated = translations[meta.key];
+      if (!translated) {
+        return {
+          ...meta,
+          name: meta.key,
+          pitch: '',
+          note: '',
+          features: [],
+          cta: 'Subscribe',
+          trial: null,
+          period: '/month',
+          savings: null,
+          price: '$0',
+        };
+      }
       const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
       return {
         ...meta,
@@ -660,7 +690,7 @@ export default function Landing() {
         price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
       };
     });
-  }, [locale, pricing, billing, t]);
+  }, [locale, pricing, billing, getTranslation]);
 
   return (
     <PublicSiteShell
