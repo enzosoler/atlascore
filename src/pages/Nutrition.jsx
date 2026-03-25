@@ -1385,74 +1385,7 @@ export default function NutritionPage() {
           ) : null}
         </Section>
 
-        <Section
-          title="Search food"
-          subtitle="Instant results from TACO. Also searches global database for branded and packaged foods."
-        >
-          <Card className="px-5 py-5">
-            <label className={FIELD_LABEL_CLASS}>
-              Search food
-              <div className="relative mt-2">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
-                <input
-                  type="text"
-                  value={foodQuery}
-                  onChange={(event) => setFoodQuery(event.target.value)}
-                  placeholder="e.g. grilled chicken, rice, banana, whey..."
-                  className={cn(INPUT_CLASS_NAME, 'pl-11')}
-                />
-              </div>
-            </label>
 
-            {isSearchingFoods ? (
-              <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]">
-                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-                Searching database…
-              </div>
-            ) : null}
-
-            {!isSearchingFoods && foodSearchError ? (
-              <div className="mt-5 rounded-[22px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.06)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--err))]">
-                {foodSearchError}
-              </div>
-            ) : null}
-
-            {!isSearchingFoods && !foodSearchError && foodResults.length > 0 ? (
-              <div className="mt-5 space-y-3">
-                {foodResults.map((food) => (
-                  <FoodSearchResult
-                    key={food.id}
-                    food={food}
-                    onSelect={handleSelectFood}
-                    isSaving={savingFoodId === food.id}
-                  />
-                ))}
-              </div>
-            ) : null}
-
-            {!isSearchingFoods && !foodSearchError && foodQuery.trim().length >= 2 && foodResults.length === 0 ? (
-              <div className="mt-5 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                No results. Try a different or more generic name.
-              </div>
-            ) : null}
-          </Card>
-
-          {!isSearchingFoods && !foodQuery && recentFoods.length > 0 ? (
-            <Card className="px-5 py-5 mt-5">
-              <p className={FIELD_LABEL_CLASS}>Recent foods</p>
-              <div className="mt-5 space-y-3">
-                {recentFoods.map((food) => (
-                  <FoodSearchResult
-                    key={food.id}
-                    food={food}
-                    onSelect={handleSelectFood}
-                    isSaving={savingFoodId === food.id}
-                  />
-                ))}
-              </div>
-            </Card>
-          ) : null}
-        </Section>
       </AppContainer>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
