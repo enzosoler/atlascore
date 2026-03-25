@@ -33,6 +33,7 @@ import {
   listProgressPhotos,
   uploadProgressPhoto,
 } from '@/services/bodyProgressService';
+import { useI18n } from '@/lib/i18nContext';
 
 // ─────────────────────────────────────────────────────────────────
 // Standard poses for physique tracking
@@ -52,7 +53,7 @@ const POSES = [
 function formatCheckpointDate(dateStr) {
   const dt = new Date(dateStr + 'T12:00:00');
   const today = getToday();
-  const label = dt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const label = dt.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return { label, isToday: dateStr === today };
 }
 
@@ -293,13 +294,15 @@ function NewCheckpointModal({ onConfirm, onClose }) {
 // ─────────────────────────────────────────────────────────────────
 
 export default function ProgressPhotos({ embedded = false }) {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   if (embedded) {
     return <ProgressPhotosContent embedded />;
   }
 
   return (
     <SafePageBoundary
-      title="Progress Photos"
+      title={isPt ? "Fotos de Progresso" : "Progress Photos"}
       subtitle="Photos page safe mode."
       fallbackDescription="The photos page loaded in safe mode."
     >
@@ -418,8 +421,8 @@ function ProgressPhotosContent({ embedded = false }) {
       {!embedded ? (
         <PageHeader
         eyebrow="Photos"
-        title="Progress Photos"
-        subtitle="Record photo checkpoints in standard poses to track your body's visual evolution over time."
+        title={isPt ? "Fotos de Progresso" : "Progress Photos"}
+        subtitle={isPt ? "Registre checkpoints fotográficos em poses padrão para acompanhar a evolução visual do seu corpo." : "Record photo checkpoints in standard poses to track your body's visual evolution over time."}
         accentClassName="from-[hsl(var(--brand)/0.06)] via-[hsl(var(--brand)/0.02)]"
         actions={
           isAtLimit ? (
@@ -452,7 +455,7 @@ function ProgressPhotosContent({ embedded = false }) {
             </p>
             <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
               {allDates.length > 0
-                ? 'Click "New checkpoint" to add more.'
+                ? 'Click isPt ? "Novo checkpoint" : "New checkpoint" to add more.'
                 : 'Add your first photo checkpoint.'}
             </p>
           </Card>
@@ -506,8 +509,8 @@ function ProgressPhotosContent({ embedded = false }) {
       {/* ── Pose instructions ────────────────────────────────────── */}
       <Section
         eyebrow="Guide"
-        title="How to record"
-        subtitle="Follow the standard poses to ensure consistent comparisons between checkpoints."
+        title={isPt ? "Como registrar" : "How to record"}
+        subtitle={isPt ? "Siga as poses padrão para garantir comparações consistentes entre checkpoints." : "Follow the standard poses to ensure consistent comparisons between checkpoints."}
       >
         <Card className="px-5 py-5">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -533,7 +536,7 @@ function ProgressPhotosContent({ embedded = false }) {
       <Section
         eyebrow="Photos"
         title={allDates.length > 0 ? `Checkpoints · ${allDates.length}` : 'Checkpoints'}
-        subtitle="Each checkpoint groups the 4 standard poses for the selected date."
+        subtitle={isPt ? "Cada checkpoint agrupa as 4 poses padrão para a data selecionada." : "Each checkpoint groups the 4 standard poses for the selected date."}
         actions={
           <PrimaryButton
             type="button"

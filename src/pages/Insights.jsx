@@ -81,7 +81,7 @@ const TONE_STYLES = {
 
 function formatShortDate(dateKey) {
   if (!dateKey) return '--';
-  return new Date(`${dateKey}T12:00:00`).toLocaleDateString('en-US', {
+  return new Date(`${dateKey}T12:00:00`).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
   });
@@ -286,7 +286,8 @@ function CategoryInsightCard({ insight }) {
 }
 
 export default function Insights() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   return (
     <SafePageBoundary
       title={t('pages.insights.title')}
@@ -500,8 +501,8 @@ function InsightsContent() {
 
   return (
     <PageShell
-      title="Insights"
-      subtitle="A focused read on your recent history, without noisy charts or artificial blockers."
+      title={isPt ? "Insights" : "Insights"}
+      subtitle={isPt ? "Uma leitura focada do seu histórico recente, sem gráficos ruidosos ou bloqueios artificiais." : "A focused read on your recent history, without noisy charts or artificial blockers."}
       actions={
         <>
           {visibleRanges.map(([option]) => (
@@ -546,13 +547,13 @@ function InsightsContent() {
 
       {!loading && !hasAnyData ? (
         <SectionCard
-          title="Waiting for your first trend"
-          subtitle="Insights become useful once the app has enough signal to compare recent behavior."
+          title={isPt ? "Aguardando sua primeira tendência" : "Waiting for your first trend"}
+          subtitle={isPt ? "Insights se tornam úteis quando o app tem sinal suficiente para comparar comportamento recente." : "Insights become useful once the app has enough signal to compare recent behavior."}
         >
           <EmptyState
             icon={BarChart3}
-            title="No data to show yet"
-            description="Log a few workouts, nutrition entries, check-ins, or measurements to unlock your first meaningful insight."
+            title={isPt ? "Sem dados para mostrar ainda" : "No data to show yet"}
+            description={isPt ? "Registre alguns treinos, refeições, check-ins ou medidas para desbloquear seu primeiro insight significativo." : "Log a few workouts, nutrition entries, check-ins, or measurements to unlock your first meaningful insight."}
             action={
               <Button asChild size="default">
                 <Link to={ROUTES.body}>Add your first measurement</Link>

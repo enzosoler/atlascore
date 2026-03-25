@@ -948,7 +948,7 @@ function MeasurementsContent({ embedded = false }) {
     <>
       {!embedded ? (
         <PageHeader
-          eyebrow="Measurements"
+          eyebrow={isPt ? "Medidas" : "Measurements"}
           title="Measurements with care, hierarchy and clean reading."
           subtitle="A dedicated space for body checkpoints: weight, composition and measurements in a premium, clean and rhythmic view."
           accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"

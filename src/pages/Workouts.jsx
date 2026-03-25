@@ -247,7 +247,7 @@ function buildExerciseSets(count, reps, weight) {
 }
 
 function formatVolume(value) {
-  return Number(value || 0).toLocaleString('en-US');
+  return Number(value || 0).toLocaleString(locale);
 }
 
 function getExerciseSummary(exercise) {
@@ -920,7 +920,7 @@ function WorkoutsContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow="Workouts"
+        eyebrow={isPt ? "Treinos" : "Workouts"}
         title="Planned and free execution, side by side."
         subtitle="Your assigned plan on top, free workouts below. Two distinct spaces with no mixing."
         accentClassName="from-[hsl(var(--brand)/0.09)] via-[hsl(var(--brand)/0.03)]"
@@ -1085,7 +1085,7 @@ function WorkoutsContent() {
 
       {/* ── SECTION 2: FREE WORKOUT ── */}
       <SectionCard
-        title="Free Workout"
+        title={isPt ? "Treino Livre" : "Free Workout"}
         subtitle="Workouts done outside your training plan — extra sessions, cardio, mobility, anything goes."
         actions={
           <div className="flex flex-wrap items-center gap-2">

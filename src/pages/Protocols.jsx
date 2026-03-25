@@ -288,7 +288,7 @@ function ProtocolConcentrationCard({ data, color }) {
 
   // Format dates for labels
   const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
   };
 
   return (
@@ -398,7 +398,8 @@ function SummaryTile({ label, value, hint, icon: Icon }) {
 // ── Page entry point ──────────────────────────────────────────────────────────
 
 export default function Protocols() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   return (
     <SafePageBoundary
       title={t('pages.protocols.title')}
@@ -415,7 +416,8 @@ export default function Protocols() {
 
 function ProtocolsContent() {
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   const filterLabels = getFilterLabels(t);
   const qc = useQueryClient();
 
@@ -629,8 +631,8 @@ function ProtocolsContent() {
 
   return (
     <PageShell
-      title="Protocols"
-      subtitle="Track compounds, doses and cycles of your current protocol in one place."
+      title={isPt ? "Protocolos" : "Protocols"}
+      subtitle={isPt ? "Acompanhe compostos, doses e ciclos do seu protocolo atual em um só lugar." : "Track compounds, doses and cycles of your current protocol in one place."}
       actions={
         <PrimaryButton
           type="button"
@@ -666,34 +668,34 @@ function ProtocolsContent() {
         <SummaryTile
           label="Active"
           value={groupedProtocols.active.length}
-          hint="Compounds currently in use or being monitored."
+          hint={isPt ? "Compostos em uso ou sendo monitorados." : "Compounds currently in use or being monitored."}
           icon={FlaskConical}
         />
         <SummaryTile
           label="Paused"
           value={groupedProtocols.paused.length}
-          hint="Items temporarily suspended but still tracked."
+          hint={isPt ? "Itens temporariamente suspensos mas ainda rastreados." : "Items temporarily suspended but still tracked."}
           icon={PauseCircle}
         />
         <SummaryTile
           label="Finished"
           value={groupedProtocols.finished.length}
-          hint="Completed cycles and protocols kept in history."
+          hint={isPt ? "Ciclos e protocolos completos mantidos no histórico." : "Completed cycles and protocols kept in history."}
           icon={Clock3}
         />
       </section>
 
       {/* Half-Life Curve Visualization (Performance Plan) */}
       <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
-        <SectionCard title="Half-Life Curves" subtitle="Visualize active concentration over time for current protocols.">
+        <SectionCard title={isPt ? "Curvas de Meia-Vida" : "Half-Life Curves"} subtitle={isPt ? "Visualize a concentração ativa ao longo do tempo para protocolos atuais." : "Visualize active concentration over time for current protocols."}>
           <ConcentrationChart protocols={groupedProtocols.active} />
         </SectionCard>
       </UpgradeGate>
 
       {/* Protocol list */}
       <SectionCard
-        title="Current protocol items"
-        subtitle="Status tracking of substances you currently use or monitor."
+        title={isPt ? "Itens do protocolo atual" : "Current protocol items"}
+        subtitle={isPt ? "Rastreamento de status de substâncias que você usa ou monitora." : "Status tracking of substances you currently use or monitor."}
         actions={
           <div className="flex flex-wrap gap-2">
             {FILTERS.map((option) => {
@@ -737,7 +739,7 @@ function ProtocolsContent() {
         {/* No protocols at all */}
         {!isLoading && !hasAnyProtocols ? (
           <EmptyState
-            title="No protocol items"
+            title={isPt ? "Nenhum item de protocolo" : "No protocol items"}
             description={
               hasLoadError
                 ? 'The list could not be loaded. You can still add your first protocol.'
@@ -813,7 +815,7 @@ function ProtocolsContent() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-3xl">
           <DialogPanelHeader
-            eyebrow="Protocols"
+            eyebrow={isPt ? "Protocolos" : "Protocols"}
             title={editingProtocol ? 'Edit protocol' : 'Add Protocol'}
             description="Enter the main protocol data: substance, category, dose, unit, frequency, timing and current status."
             accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"

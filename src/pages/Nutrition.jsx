@@ -268,10 +268,10 @@ function mapFoodLogToMeal(log) {
   };
 }
 
-function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail, locale = 'en-US' }) {
+function MacroTrack({ label, consumed, target, unit, tone = 'calories', detail, locale = 'en' }) {
   const pct = getProgressPercent(consumed, target);
   const remaining = getRemainingValue(target, consumed);
-  const isEnglish = locale === 'en-US';
+  const isEnglish = locale !== 'pt-BR';
 
   return (
     <div className="space-y-2.5">
@@ -1283,14 +1283,14 @@ export default function NutritionPage() {
 
   return (
     <SafePageBoundary
-      title="Nutrition"
+      title={isPt ? "Nutrição" : "Nutrition"}
       subtitle={`Calorie and macro summary for ${selectedDate}`}
       fallbackDescription="Nutrition loaded in safe mode because the main render failed."
     >
       <AppContainer>
         <PageHeader
-          eyebrow="Nutrition"
-          title="Nutrition"
+          eyebrow={isPt ? "Nutrição" : "Nutrition"}
+          title={isPt ? "Nutrição" : "Nutrition"}
           subtitle={`Calories, macros, and meal logging for ${selectedDate} in one calmer daily view.`}
         />
 
@@ -1301,8 +1301,8 @@ export default function NutritionPage() {
         ) : null}
 
         <Section
-          title="Daily Goals"
-          subtitle="Calories and macronutrients for quick reference."
+          title={isPt ? "Metas Diárias" : "Daily Goals"}
+          subtitle={isPt ? "Calorias e macronutrientes para referência rápida." : "Calories and macronutrients for quick reference."}
           actions={loggingStreak >= 2 ? (
             <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--warn)/0.12)] border border-[hsl(var(--warn)/0.25)] px-3 py-1">
               <span className="text-[13px]">🔥</span>
@@ -1391,28 +1391,28 @@ export default function NutritionPage() {
           )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MacroTrack
-              label="Calories"
+              label={isPt ? "Calorias" : "Calories"}
               consumed={dailyTotals.calories}
               target={profile.calories_target}
               unit="kcal"
               tone="calories"
             />
             <MacroTrack
-              label="Protein"
+              label={isPt ? "Proteína" : "Protein"}
               consumed={dailyTotals.protein}
               target={profile.protein_target}
               unit="g"
               tone="protein"
             />
             <MacroTrack
-              label="Carbohydrates"
+              label={isPt ? "Carboidratos" : "Carbohydrates"}
               consumed={dailyTotals.carbs}
               target={profile.carbs_target}
               unit="g"
               tone="carbs"
             />
             <MacroTrack
-              label="Fats"
+              label={isPt ? "Gorduras" : "Fats"}
               consumed={dailyTotals.fat}
               target={profile.fat_target}
               unit="g"
@@ -1422,8 +1422,8 @@ export default function NutritionPage() {
         </Section>
 
         <Section
-          title="Daily Log"
-          subtitle="Meals and foods logged for the selected date."
+          title={isPt ? "Registro Diário" : "Daily Log"}
+          subtitle={isPt ? "Refeições e alimentos registrados na data selecionada." : "Meals and foods logged for the selected date."}
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <DateStepper date={selectedDate} onChange={handleDateChange} />
@@ -1444,8 +1444,8 @@ export default function NutritionPage() {
             <div className="mt-6">
               <EmptyState
                 icon={UtensilsCrossed}
-                title="No meals logged"
-                description="Add a meal to start tracking your nutrition."
+                title={isPt ? "Nenhuma refeição registrada" : "No meals logged"}
+                description={isPt ? "Adicione uma refeição para começar a monitorar sua nutrição." : "Add a meal to start tracking your nutrition."}
               />
             </div>
           ) : null}

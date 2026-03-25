@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BarChart3,
   CheckCircle2,
@@ -20,8 +20,8 @@ import {
   UtensilsCrossed,
   CalendarCheck,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { Link, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
@@ -47,7 +47,9 @@ import {
   TimelineCard,
 } from '@/components/dashboard';
 import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
+import FoodCameraScanner from '@/components/nutrition/FoodCameraScanner';
 import { formatWeight, formatWeightDiff, isImperial } from '@/lib/units';
+import { toast } from 'sonner';
 
 function getPreferredName(displayName, fallbackName = null) {
   if (!displayName) return fallbackName;
@@ -66,8 +68,8 @@ function getPreferredName(displayName, fallbackName = null) {
   return `${candidate.charAt(0).toLocaleUpperCase()}${candidate.slice(1)}`;
 }
 
-function getDateLabel() {
-  return new Intl.DateTimeFormat('en-US', {
+function getDateLabel(locale = 'en') {
+  return new Intl.DateTimeFormat(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -270,7 +272,11 @@ function TodayContent() {
   const { subscription, trialDaysRemaining, isTrialExpired } = useSubscription();
   const { t, locale } = useI18n();
   const isEN = locale === 'en-US';
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [isSavingMeal, setIsSavingMeal] = useState(false);
   const [weather, setWeather] = useState(null);
   const fallbackName = t('today_page.fallbackName');
   const displayName = user?.full_name || user?.email || fallbackName;
@@ -622,8 +628,8 @@ function TodayContent() {
         : 'Your core tracking is current. Review what is working and protect the next best decision.'
       : allDoneCount === 0
         ? isEN
-          ? 'Start with food, training, or body data so Today becomes something measurable.'
-          : 'Start with food, training, or body data so Today becomes something measurable.'
+          ? 'isPt ? "Comece com alimentação, treino ou dados corporais para que o Hoje se torne mensurável." : "Start with food, training, or body data so Today becomes something measurable."'
+          : 'isPt ? "Comece com alimentação, treino ou dados corporais para que o Hoje se torne mensurável." : "Start with food, training, or body data so Today becomes something measurable."'
         : isEN
           ? 'You already have momentum today. Close the biggest gap and keep the day structurally complete.'
           : 'You already have momentum today. Close the biggest gap and keep the day structurally complete.';
@@ -715,7 +721,7 @@ function TodayContent() {
       icon: UtensilsCrossed,
       tone: 'blue',
       done: nutritionDone,
-      ctaLabel: nutritionDone ? 'Review today' : 'Log meals',
+      ctaLabel: nutritionDone ? (isPt ? 'Revisar hoje' : 'Review today') : (isPt ? 'Registrar refeições' : 'Log meals'),
     },
     {
       to: ROUTES.workouts,
@@ -731,7 +737,7 @@ function TodayContent() {
       ctaLabel: workoutDone
         ? 'Review session'
         : !activeWorkoutPlan
-          ? 'Create plan'
+          ? (isPt ? 'Criar plano' : 'Create plan')
           : 'Start session',
     },
     {
@@ -745,7 +751,7 @@ function TodayContent() {
       icon: Scale,
       tone: 'green',
       done: measurementsDone,
-      ctaLabel: measurementsDone ? 'View body' : 'Log weight',
+      ctaLabel: measurementsDone ? (isPt ? 'Ver corpo' : 'View body') : (isPt ? 'Registrar peso' : 'Log weight'),
     },
     {
       to: ROUTES.protocols,
@@ -759,7 +765,7 @@ function TodayContent() {
       icon: Shield,
       tone: 'teal',
       done: protocolsDone,
-      ctaLabel: 'View protocols',
+      ctaLabel: isPt ? 'Ver protocolos' : 'View protocols',
     },
   ];
 
@@ -867,8 +873,8 @@ function TodayContent() {
       events.push({
         type: 'pr',
         dateLabel: s.date === todayStr 
-          ? `Today · ${new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-          : new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          ? `${isPt ? 'Hoje' : 'Today'} · ${new Date(s.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`
+          : new Date(s.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         title: prExercise ? `New PR — ${prExercise.name} ${formatWeight(prExercise.weight, profile)}` : 'Workout completed',
         subtitle: `${s.exercises?.length || 0} exercises`,
         highlight: s.date === todayStr,
@@ -879,7 +885,7 @@ function TodayContent() {
     recentMeasurements.slice(0, 2).forEach(m => {
       events.push({
         type: 'checkin',
-        dateLabel: new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dateLabel: new Date(m.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         title: `Check-in — ${formatWeight(m.weight, profile)}`,
         subtitle: m.body_fat ? `Body fat: ${m.body_fat}%` : 'Body measurement',
       });
@@ -889,7 +895,7 @@ function TodayContent() {
     if (activeProtocolsList.length > 0) {
       events.push({
         type: 'protocol',
-        dateLabel: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dateLabel: new Date().toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         title: 'Protocol active',
         subtitle: `${activeProtocolsList.length} substances tracked`,
       });
@@ -899,7 +905,7 @@ function TodayContent() {
     if (nutritionAverageStats && nutritionAverageStats.daysTracked >= 3) {
       events.push({
         type: 'nutrition',
-        dateLabel: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dateLabel: new Date().toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
         title: 'Nutrition tracking',
         subtitle: `Average protein: ${nutritionAverageStats.protein}g`,
       });
@@ -919,6 +925,68 @@ function TodayContent() {
     return events.slice(0, 4);
   }, [recentSessions, recentMeasurements, activeProtocolsList, nutritionAverageStats, profile, todayStr]);
 
+  // ── Quick-action: auto-detect meal type from current hour ──────────────────
+  const guessMealType = useCallback(() => {
+    const h = new Date().getHours();
+    if (h < 10) return 'breakfast';
+    if (h < 12) return 'morning_snack';
+    if (h < 15) return 'lunch';
+    if (h < 18) return 'afternoon_snack';
+    if (h < 20) return 'dinner';
+    return 'evening_snack';
+  }, []);
+
+  const MEAL_TYPE_HOURS = {
+    breakfast: 8, morning_snack: 10, lunch: 12,
+    afternoon_snack: 15, pre_workout: 17, post_workout: 18,
+    dinner: 20, evening_snack: 22,
+  };
+
+  // ── Quick-action: save camera-detected foods directly to Supabase ──────────
+  const handleQuickMealSave = useCallback(async (detectedFoods) => {
+    if (!user?.id || !detectedFoods?.length) return;
+    setIsSavingMeal(true);
+    const mealType = guessMealType();
+    const hour = MEAL_TYPE_HOURS[mealType] ?? 12;
+    const now = new Date();
+    now.setHours(hour, 0, 0, 0);
+    const timestamp = now.toISOString();
+
+    try {
+      for (const food of detectedFoods) {
+        const { error } = await supabase.from('food_logs').insert({
+          user_id: user.id,
+          date: timestamp,
+          food_name: food.name,
+          calories: Math.round(food.calories || 0),
+          protein: Math.round((food.protein || 0) * 10) / 10,
+          carbs: Math.round((food.carbs || 0) * 10) / 10,
+          fat: Math.round((food.fat || 0) * 10) / 10,
+          quantity: 1,
+          serving_unit: 'g',
+          serving_size: parseFloat(food.estimatedAmount) || 100,
+          source_api: 'AI-Vision',
+        });
+        if (error) throw error;
+      }
+      toast.success(
+        `${detectedFoods.length} food${detectedFoods.length > 1 ? 's' : ''} logged as ${mealType.replace('_', ' ')}`
+      );
+      queryClient.invalidateQueries({ queryKey: ['today-meals'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-meals'] });
+    } catch (err) {
+      console.error('Quick meal save error:', err);
+      toast.error('Could not save meal. Try again.');
+    } finally {
+      setIsSavingMeal(false);
+    }
+  }, [user?.id, guessMealType, queryClient]);
+
+  // ── Quick-action: start workout ────────────────────────────────────────────
+  const handleQuickStartWorkout = useCallback(() => {
+    navigate(`${ROUTES.workouts}?action=start`);
+  }, [navigate]);
+
   return (
     <TodayScreen>
       {/* ── Header ── */}
@@ -926,7 +994,7 @@ function TodayContent() {
         <div className="min-w-0">
           <p className="atlas-overline">Today</p>
           <p className="mt-2 text-[15px] font-medium tracking-[-0.02em] text-[hsl(var(--fg-2))]">
-            {getDateLabel()}
+            {getDateLabel(locale)}
           </p>
         </div>
         <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.86)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">

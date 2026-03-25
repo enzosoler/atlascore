@@ -21,6 +21,7 @@ import {
   listMeasurements,
   listProgressPhotos,
 } from '@/services/bodyProgressService';
+import { useI18n } from '@/lib/i18nContext';
 
 function MetricCard({ label, metricKey, value, unit, change, goal, data, digits = 1 }) {
   const isPositive = change > 0;
@@ -421,5 +422,7 @@ function ProgressContent({ embedded = false }) {
 }
 
 export default function Progress({ embedded = false }) {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   return <ProgressContent embedded={embedded} />;
 }
