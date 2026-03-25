@@ -4,5 +4,8 @@
 [functions.auth-webhook]
 verify_jwt = false
 
+[functions.create-checkout]
+verify_jwt = false
+
 [functions.send-email-v2]
 verify_jwt = true
