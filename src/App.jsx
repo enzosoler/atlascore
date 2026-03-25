@@ -355,24 +355,24 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <ErrorBoundary>
-      <I18nProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <GoogleReCaptchaProvider>
-              <QueryClientProvider client={queryClientInstance}>
-                <SubscriptionProvider>
-                  <DailyStoreProvider>
-                    <Router>
+      <ThemeProvider>
+        <AuthProvider>
+          <GoogleReCaptchaProvider>
+            <QueryClientProvider client={queryClientInstance}>
+              <SubscriptionProvider>
+                <DailyStoreProvider>
+                  <Router>
+                    <I18nProvider>
                       <AuthenticatedApp />
-                    </Router>
-                    <Toaster />
-                  </DailyStoreProvider>
-                </SubscriptionProvider>
-              </QueryClientProvider>
-            </GoogleReCaptchaProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </I18nProvider>
+                    </I18nProvider>
+                  </Router>
+                  <Toaster />
+                </DailyStoreProvider>
+              </SubscriptionProvider>
+            </QueryClientProvider>
+          </GoogleReCaptchaProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
