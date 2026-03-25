@@ -450,25 +450,25 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
     // Show TACO immediately while fetching FatSecret
     setSearchResults(tacoHits);
 
-    // 2. FatSecret (packaged/international foods)
+    // 2. External database (packaged/international foods)
     setIsSearching(true);
     setSearchError('');
 
     const timer = setTimeout(async () => {
       try {
-        const fatSecretResult = await searchFoods(q, 'pt', 'BR');
+        const externalResult = await searchFoods(q, 'pt', 'BR');
 
-        if (!fatSecretResult.success) {
-          throw new Error(fatSecretResult.error || 'FatSecret search failed');
+        if (!externalResult.success) {
+          throw new Error(externalResult.error || 'External search failed');
         }
 
         // Combine results, removing duplicates
-        const combined = mergeFoodResults(tacoHits, fatSecretResult.results || [], 10);
+        const combined = mergeFoodResults(tacoHits, externalResult.results || [], 10);
         setSearchResults(combined);
       } catch {
-        // Keep TACO results if FatSecret fails
+        // Keep TACO results if external search fails
         setSearchResults(tacoHits);
-        setSearchError('FatSecret search failed. Showing local results only.');
+        setSearchError(tacoHits.length > 0 ? 'Food search error: Search failed (003)' : 'No results found. Try another search.');
       } finally {
         setIsSearching(false);
       }
@@ -1344,7 +1344,7 @@ export default function NutritionPage() {
 
         <Section
           title="Search food"
-          subtitle="Instant results from TACO. Also searches FatSecret for branded and packaged foods."
+          subtitle="Instant results from TACO. Also searches Open Food Facts for branded and packaged foods."
         >
           <Card className="px-5 py-5">
             <label className={FIELD_LABEL_CLASS}>
@@ -1364,7 +1364,7 @@ export default function NutritionPage() {
             {isSearchingFoods ? (
               <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]">
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-                Searching FatSecret…
+                Searching database…
               </div>
             ) : null}
 
