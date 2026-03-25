@@ -353,10 +353,6 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  // Determine basename based on build locale for /br/ subfolder support
-  const buildLocale = import.meta.env.BUILD_LOCALE || import.meta.env.VITE_LOCALE || 'en-US';
-  const basename = buildLocale === 'pt-BR' ? '/br' : '/';
-  
   return (
     <ErrorBoundary>
       <I18nProvider>
@@ -366,7 +362,7 @@ function App() {
               <QueryClientProvider client={queryClientInstance}>
                 <SubscriptionProvider>
                   <DailyStoreProvider>
-                    <Router basename={basename}>
+                    <Router>
                       <AuthenticatedApp />
                     </Router>
                     <Toaster />

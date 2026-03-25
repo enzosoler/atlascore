@@ -1,33 +1,91 @@
-import React, { createContext, useCallback } from 'react';
-import { t as translate, getLanguage } from '@/lib/i18n';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { defaultLocale, localeToPublicPath, isValidLocale } from '@/i18n/config';
+import { loadDictionaryWithFallback } from '@/i18n/dictionaries';
+import { createTranslator } from '@/i18n/translator';
 
-export const I18nContext = createContext();
+const I18nContext = createContext(null);
 
-/**
- * I18nProvider — Build-time locale provider
- * Locale is determined at build time by VITE_LOCALE, not runtime
- */
+function getLocaleFromPath(pathname) {
+  const parts = pathname.split('/').filter(Boolean);
+  const firstSegment = parts[0];
+  if (firstSegment === 'en') return 'en';
+  if (firstSegment === 'pt') return 'pt-BR';
+  return defaultLocale;
+}
+
+function buildPathWithLocale(pathname, targetLocale) {
+  const parts = pathname.split('/').filter(Boolean);
+  const currentFirst = parts[0];
+  const hasLocalePrefix = currentFirst === 'en' || currentFirst === 'pt';
+  const newPrefix = localeToPublicPath(targetLocale);
+  if (hasLocalePrefix) {
+    parts[0] = newPrefix;
+  } else {
+    parts.unshift(newPrefix);
+  }
+  return '/' + parts.join('/');
+}
+
 export function I18nProvider({ children }) {
-  // Get locale from build-time i18n configuration
-  const locale = getLanguage();
+  const location = useLocation();
+  const [locale, setLocaleState] = useState(() => getLocaleFromPath(location.pathname));
+  const [dictionary, setDictionary] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const setLocale = useCallback(() => {
-    // No-op: language is fixed at build time
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setIsLoading(true);
+      try {
+        const dict = await loadDictionaryWithFallback(locale);
+        if (!cancelled) setDictionary(dict);
+      } catch (err) {
+        console.error('[i18n] Failed to load dictionary:', err);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [locale]);
+
+  useEffect(() => {
+    const newLocale = getLocaleFromPath(location.pathname);
+    if (newLocale !== locale && isValidLocale(newLocale)) {
+      setLocaleState(newLocale);
+    }
+  }, [location.pathname, locale]);
+
+  const t = useMemo(() => {
+    if (!dictionary) return (key) => key;
+    return createTranslator(dictionary);
+  }, [dictionary]);
+
+  const setLocale = useCallback((newLocale) => {
+    if (isValidLocale(newLocale)) setLocaleState(newLocale);
   }, []);
 
-  const t = useCallback((key, params) => translate(key, locale, params), [locale]);
+  const switchLocale = useCallback((targetLocale) => {
+    return buildPathWithLocale(location.pathname, targetLocale);
+  }, [location.pathname]);
+
+  const value = { locale, t, dictionary: dictionary || {}, isLoading, setLocale, switchLocale };
 
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={value}>
       {children}
     </I18nContext.Provider>
   );
 }
 
 export function useI18n() {
-  const context = React.useContext(I18nContext);
-  if (!context) {
-    throw new Error('useI18n must be used within I18nProvider');
-  }
+  const context = useContext(I18nContext);
+  if (!context) throw new Error('useI18n must be used within I18nProvider');
   return context;
+}
+
+export function useT() {
+  const { t } = useI18n();
+  return t;
 }

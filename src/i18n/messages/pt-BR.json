@@ -1,0 +1,1107 @@
+{
+  "common": {
+    "appName": "Atlas Core",
+    "back": "← Voltar ao app",
+    "continue": "Continuar",
+    "cancel": "Cancelar",
+    "skip": "Pular por agora →",
+    "save": "Salvar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "close": "Fechar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "termsOfUse": "termos de serviço"
+  },
+  "auth": {
+    "kicker": "Sistema de evolução pessoal",
+    "title": {
+      "line1": "Seus dados.",
+      "line2": "Seu progresso.",
+      "line3": "Tudo em um só lugar."
+    },
+    "subtitle": "Treinos, nutrição, exames, medidas e protocolos — centralizados, conectados e construídos para insights claros de progresso.",
+    "features": {
+      "training": "Treino e nutrição em um só lugar",
+      "labs": "Resultados de exames e protocolos",
+      "analytics": "Análises e progresso real",
+      "ai": "Insights de progresso baseados nos seus dados"
+    },
+    "login": {
+      "title": "Bem-vindo de volta",
+      "subtitle": "Entrando no Atlas Core...",
+      "noAccount": "Ainda não tem uma conta?",
+      "createAccount": "Criar conta gratuita",
+      "forgotPassword": "Esqueci minha senha"
+    },
+    "signup": {
+      "title": "Comece seu progresso",
+      "subtitle": "Criando seu acesso ao Atlas Core...",
+      "hasAccount": "Já tem uma conta?",
+      "signIn": "Entrar"
+    },
+    "forgot": {
+      "title": "Redefinir senha",
+      "subtitle": "Vamos ajudá-lo a recuperar o acesso...",
+      "remembered": "Lembrou sua senha?",
+      "backToLogin": "Voltar ao login"
+    },
+    "redirecting": "Redirecionando...",
+    "didNotOpen": "O login não abriu automaticamente",
+    "openNow": "Abrir login agora",
+    "help": "Se nada acontecer, verifique bloqueadores de popup ou extensões de autenticação.",
+    "trust": {
+      "free": "Grátis para começar",
+      "noCard": "Não precisa de cartão",
+      "cancel": "Cancele quando quiser"
+    },
+    "backHome": "← Voltar ao início",
+    "footer": "© 2026 Atlas Core. Todos os direitos reservados."
+  },
+  "landing": {
+    "nav": {
+      "howItWorks": "Como funciona",
+      "pricing": "Planos",
+      "faq": "FAQ",
+      "login": "Entrar",
+      "signup": "Cadastrar"
+    },
+    "hero": {
+      "badge": "Bem-vindo",
+      "title": "Pare com o caos.\nTome o controle.",
+      "subtitle": "Treinos, nutrição, exames, medidas, protocolos — tudo em um só lugar. Sem screenshots. Sem confusão. Um dashboard para seu progresso real.",
+      "benefit1": "Veja progresso real",
+      "benefit2": "Dados não mentem",
+      "benefit3": "Compartilhe com confiança",
+      "cta": "Começar grátis",
+      "learnMore": "Saiba mais"
+    },
+    "mock": {
+      "date": "Domingo, 16 de março",
+      "greeting": "Bom dia, Ana 👋",
+      "actionNeeded": "Ação necessária",
+      "workoutTitle": "Treino Inferior A — hoje",
+      "workoutMeta": "5 exercícios · 45 min",
+      "stockTitle": "Creatina — 5 dias",
+      "stockMeta": "Repor em breve",
+      "nutrition": "Nutrição",
+      "training": "Treino",
+      "trainingTitle": "Inferior A",
+      "trainingSubtitle": "Pernas e glúteos",
+      "pending": "Pendente",
+      "adherenceTitle": "Adesão forte",
+      "adherenceSubtitle": "Treino, nutrição e sono em dia",
+      "aiLabel": "Insights",
+      "aiInsight": "Padrão consistente: treinos leves de domingo melhoram recuperação em 15%. Continue assim!"
+    },
+    "problem": {
+      "label": "O Problema",
+      "title": "Tudo espalhado\nem apps diferentes.",
+      "subtitle": "Treinos num app, nutrição noutro, exames em PDFs no email, medidas em fotos. Seu histórico? Não existe. Você nunca sabe se está realmente progredindo.",
+      "items": {
+        "workout": "Treinos",
+        "workoutWhere": "no app da academia",
+        "diet": "Nutrição",
+        "dietWhere": "no MyFitnessPal",
+        "labs": "Resultados de exames",
+        "labsWhere": "em PDFs no email",
+        "measurements": "Medidas",
+        "measurementsWhere": "nas fotos do celular",
+        "protocols": "Protocolos",
+        "protocolsWhere": "em anotações soltas",
+        "history": "Histórico",
+        "historyWhere": "não existe"
+      }
+    },
+    "solution": {
+      "label": "A Solução Real",
+      "title": "Centralizar tudo\nmuda como você vê o progresso.",
+      "subtitle": "Atlas Core não é mais um app. É o sistema operacional que reúne treino, nutrição, exames, medidas e protocolos em uma só visão. Histórico real. Contexto real. Dados que realmente importam.",
+      "gains": {
+        "dashboard": {
+          "title": "Seu dashboard completo",
+          "desc": "Um só lugar para ver as prioridades de hoje: próximo treino, próxima refeição, protocolos ativos, alertas importantes. Sem ficar alternando entre 5 apps."
+        },
+        "data": {
+          "title": "Dados de progresso reais",
+          "desc": "Veja exatamente o quanto você está seguindo seu plano — dieta, treino, medidas, exames. Sem chutes. Sem suposições. Dados frios que dizem a verdade."
+        },
+        "score": {
+          "title": "Score de adesão real",
+          "desc": "Avaliação diária baseada em treinos completados, refeições registradas, sono, hidratação. Você vê onde está falhando e corrige. Não é gamificação — é feedback real."
+        },
+        "trends": {
+          "title": "Progresso visível em gráficos",
+          "desc": "Peso, gordura corporal, medidas, força — tudo em gráficos mostrando tendências. Você vê mudanças que não notaria no dia a dia."
+        },
+        "ai": {
+          "title": "Insights de progresso dos seus dados reais",
+          "desc": "Atlas lê seus treinos reais, refeições, exames e histórico. Sem suposições genéricas — tendências claras dos SEUS dados reais."
+        },
+        "team": {
+          "title": "Seu treinador/médico no circuito",
+          "desc": "Compartilhe seus dados com quem quiser. Treinador vê adesão real. Médico vê histórico de exames. Sem WhatsApp. Sem screenshots. Sem confusão."
+        }
+      }
+    },
+    "forWho": {
+      "label": "Para Quem",
+      "title": "Construído para quem quer\nprogresso baseado em dados.",
+      "subtitle": "Se você mede por dados, não por sensação. Se quer saber exatamente o que funciona.",
+      "athlete": {
+        "title": "Atleta e entusiasta",
+        "desc": "Você treina consistentemente, acerta a dieta, verifica os exames. Mas está tudo espalhado. Atlas Core reúne tudo.",
+        "features": [
+          "Registro completo de treino + nutrição",
+          "Acompanhamento de progresso com fotos e medidas",
+          "Alertas de estoque de suplementos",
+          "Insights de progresso com contexto real"
+        ]
+      },
+      "coach": {
+        "title": "Treinador e coach",
+        "desc": "Você gerencia múltiplos atletas. Precisa acompanhar adesão, prescrever treinos e ver progresso sem depender de screenshots.",
+        "features": [
+          "Dashboard de atletas com adesão",
+          "Prescrição de treino + nutrição",
+          "Acompanhamento de check-ins",
+          "Relatórios exportáveis"
+        ]
+      },
+      "nutritionist": {
+        "title": "Nutricionista",
+        "desc": "Você acompanha clientes na nutrição. Visualiza refeições, medidas, fotos e cria planos alimentares manualmente ou a partir de templates estruturados.",
+        "features": [
+          "Dashboard de cliente",
+          "Histórico e tendências de refeições",
+          "Prescrição de plano alimentar",
+          "Exportações de relatórios nutricionais"
+        ]
+      },
+      "clinician": {
+        "title": "Médico e clínico",
+        "desc": "Você prescreve protocolos e precisa de dados para tomar decisões. Exames, medidas e histórico de uso tudo em um só lugar.",
+        "features": [
+          "Histórico completo de exames",
+          "Monitoramento de protocolos",
+          "Acompanhamento de composição corporal",
+          "Exportações de relatórios clínicos"
+        ]
+      }
+    },
+    "system": {
+      "title": "Não é só treino.\nUm sistema completo.",
+      "items": [
+        {
+          "before": "Só treinos",
+          "after": "Treinos + recuperação + adesão"
+        },
+        {
+          "before": "Só nutrição",
+          "after": "Nutrição + protocolos + contexto"
+        },
+        {
+          "before": "Só exames",
+          "after": "Exames + histórico + tendências"
+        },
+        {
+          "before": "Suposições genéricas",
+          "after": "Feedback baseado em dados"
+        },
+        {
+          "before": "Acompanhamento sozinho",
+          "after": "Histórico compartilhado com profissionais"
+        },
+        {
+          "before": "App bonito",
+          "after": "Sistema que resolve o caos"
+        }
+      ]
+    },
+    "pricing": {
+      "label": "Planos",
+      "title": "Comece grátis,\nevolua quando estiver pronto.",
+      "subtitle": "Sem cartão de crédito. Sem compromisso. 7 dias grátis nos planos pagos. Cancele quando quiser.",
+      "popular": "Popular",
+      "period": "/mês",
+      "plans": [
+        {
+          "id": "free",
+          "name": "Grátis",
+          "pitch": "Comece a registrar.",
+          "price": "Grátis",
+          "popular": false,
+          "isFree": true,
+          "features": [
+            "Dashboard básico de Hoje",
+            "Registro de treino e nutrição",
+            "Acompanhamento de medidas",
+            "Insights semanais"
+          ],
+          "missing": [
+            "Ferramentas de plano estruturado",
+            "Acompanhamento de exames",
+            "Fotos de progresso",
+            "Análises avançadas"
+          ],
+          "cta": "Criar conta grátis"
+        },
+        {
+          "id": "athlete_pro",
+          "name": "Pro",
+          "pitch": "Use de verdade todo dia.",
+          "price": "R$ 29,90",
+          "popular": true,
+          "isFree": false,
+          "features": [
+            "Tudo do Grátis",
+            "Ferramentas de plano alimentar",
+            "Ferramentas de plano de treino",
+            "Acompanhamento de exames",
+            "Fotos de progresso ilimitadas",
+            "Análises completas",
+            "Exportação PDF e CSV"
+          ],
+          "missing": [],
+          "cta": "Assinar Pro"
+        },
+        {
+          "id": "athlete_performance",
+          "name": "Performance",
+          "pitch": "O hub central da sua rotina.",
+          "price": "R$ 59,90",
+          "popular": false,
+          "isFree": false,
+          "features": [
+            "Tudo do Pro",
+            "Acompanhamento inteligente de protocolos",
+            "Relatórios premium",
+            "Histórico ilimitado",
+            "Resumos avançados de progresso"
+          ],
+          "missing": [],
+          "cta": "Assinar Performance"
+        }
+      ]
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Perguntas frequentes",
+      "items": [
+        {
+          "q": "O Atlas Core substitui meu treinador ou nutricionista?",
+          "a": "Não. Atlas Core organiza seus dados e facilita trabalhar com profissionais — não os substitui. Na verdade, funciona melhor com um treinador ou médico no seu time. Vocês dois veem os mesmos dados. Sem screenshots necessários."
+        },
+        {
+          "q": "Posso usar com meu treinador, nutricionista e médico ao mesmo tempo?",
+          "a": "Absolutamente. Atlas Core foi construído para isso. Cada profissional vê apenas o que você permite. Todos veem seu histórico real juntos."
+        },
+        {
+          "q": "O que está incluído no plano Grátis?",
+          "a": "Registro completo de treino + nutrição, acompanhamento de medidas, check-ins diários, 30 dias de histórico, perfil e configurações. O Grátis não expira — é seu para começar."
+        },
+        {
+          "q": "Qual a diferença do Pro (R$ 29,90/mês)?",
+          "a": "Ferramentas estruturadas de plano alimentar e de treino, acompanhamento completo de exames, fotos de progresso ilimitadas, 1 ano de histórico, análises avançadas e exportações PDF/CSV."
+        },
+        {
+          "q": "Qual a diferença do Performance (R$ 59,90/mês)?",
+          "a": "Tudo do Pro, mais acompanhamento inteligente de protocolos com curvas de meia-vida, alertas de estoque, relatórios premium, dashboards profundos e histórico ilimitado. Para controle completo."
+        },
+        {
+          "q": "Funciona no celular?",
+          "a": "100%. Atlas Core é totalmente responsivo e otimizado para iOS e Android. Mesma experiência de registro e acompanhamento no celular que no desktop."
+        },
+        {
+          "q": "Posso exportar meus dados?",
+          "a": "Sim. Exporte relatórios PDF (com resumo, métricas, medidas, exames) ou planilhas CSV no Pro e superior. Seus dados são seus."
+        },
+        {
+          "q": "Posso cancelar quando quiser?",
+          "a": "Sim. Sem compromisso, sem taxas de cancelamento. Cancele com um clique. Mas a maioria fica depois de ver seus dados reais em tendência."
+        },
+        {
+          "q": "O app cria treinos e refeições automaticamente?",
+          "a": "Sim, no Pro e superior. Dê seus dados (metas, peso, atividade, preferências) e Atlas constrói um ponto de partida estruturado. Você refina, seu treinador refina — tudo permanece embasado em contexto real."
+        },
+        {
+          "q": "E se eu já tiver um plano do meu treinador?",
+          "a": "Perfeito. Registre no Atlas Core, marque como prescrito e acompanhe sua adesão vs. o plano. Seu treinador vê tudo e ajusta quando necessário."
+        },
+        {
+          "q": "Como o Atlas cria insights para mim?",
+          "a": "Ele lê seus dados reais: treinos registrados, refeições, medidas, exames e protocolos ativos. Sem chutes. É por isso que os insights permanecem úteis e contextuais."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Você pode realmente\nver seu progresso.",
+      "subtitle": "Crie sua conta grátis. Em 2 minutos, seu primeiro dashboard está pronto.",
+      "noCard": "Sem cartão de crédito · Sem compromisso · Histórico grátis para sempre"
+    },
+    "footer": {
+      "copyright": "© 2026 Atlas Core. Todos os direitos reservados."
+    }
+  },
+  "pricing_page": {
+    "backToApp": "← Voltar ao app",
+    "title": "Planos e preços",
+    "heading": "Escolha seu plano",
+    "subtitle": "Comece grátis. Evolua quando precisar de insights mais ricos, mais contexto de dados e controle real.",
+    "athlete": "Para atletas e entusiastas",
+    "professional": "Para profissionais",
+    "professionalDesc": "Assinaturas separadas para treinadores e clínicos. Acesso profissional focado em monitoramento de clientes.",
+    "footer": "Todos os planos pagos incluem 7 dias de teste grátis · Cancele quando quiser · Sem taxas de cancelamento",
+    "footerPayment": "Pagamentos processados com segurança via Stripe",
+    "plans": {
+      "free": {
+        "name": "Grátis",
+        "price": "Grátis",
+        "pitch": "Comece a registrar.",
+        "cta": "Plano grátis",
+        "ctaSignup": "Criar conta",
+        "features": [
+          "Dashboard diário",
+          "Registro de treino + nutrição",
+          "Acompanhamento de medidas",
+          "Protocolos básicos",
+          "Perfil e configurações",
+          "30 dias de histórico",
+          "Insights semanais"
+        ],
+        "missing": [
+          "Ferramentas de plano estruturado",
+          "Acompanhamento completo de exames",
+          "Fotos de progresso",
+          "Análises avançadas",
+          "Exportações PDF/CSV"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "R$ 29,90",
+        "period": "/mês",
+        "pitch": "Tudo que você precisa no dia a dia.",
+        "trial": "7 dias de teste grátis",
+        "popular": "Mais popular",
+        "cta": "Assinar Pro",
+        "features": [
+          "Tudo do Grátis",
+          "Ferramentas de plano alimentar",
+          "Ferramentas de plano de treino",
+          "Planos alimentares e de treino",
+          "Acompanhamento completo de exames",
+          "Fotos de progresso ilimitadas",
+          "1 ano de histórico",
+          "Análises avançadas",
+          "Insights de progresso",
+          "Exportações PDF e CSV",
+          "Alertas de estoque",
+          "Cards sociais premium"
+        ],
+        "missing": []
+      },
+      "performance": {
+        "name": "Performance",
+        "price": "R$ 59,90",
+        "period": "/mês",
+        "pitch": "Hub de controle completo.",
+        "trial": "7 dias de teste grátis",
+        "cta": "Assinar Performance",
+        "features": [
+          "Tudo do Pro",
+          "Acompanhamento inteligente de protocolos",
+          "Curvas de meia-vida e próxima dose",
+          "Gerenciamento avançado de estoque",
+          "Relatórios premium",
+          "Dashboards profundos",
+          "Insights resumidos",
+          "Exportações completas",
+          "Histórico ilimitado"
+        ],
+        "missing": []
+      },
+      "coach": {
+        "name": "Treinador",
+        "price": "R$ 99,90",
+        "period": "/mês",
+        "pitch": "Gerencie atletas com eficiência.",
+        "trial": "7 dias de teste grátis",
+        "note": "Por treinador · até 20 atletas",
+        "cta": "Assinar como Treinador",
+        "features": [
+          "Dashboard completo de treinador",
+          "Gerenciamento de atletas",
+          "Prescrição de treinos",
+          "Prescrição de nutrição",
+          "Acompanhamento de adesão",
+          "Progresso e tendências",
+          "Medidas e fotos",
+          "Exportações de relatórios"
+        ]
+      },
+      "nutritionist": {
+        "name": "Nutricionista",
+        "price": "R$ 79,90",
+        "period": "/mês",
+        "pitch": "Monitore nutrição de clientes.",
+        "trial": "7 dias de teste grátis",
+        "note": "Por nutricionista · até 25 clientes",
+        "cta": "Assinar como Nutricionista",
+        "features": [
+          "Dashboard nutricional completo",
+          "Gerenciamento de clientes",
+          "Prescrição de plano alimentar",
+          "Acompanhamento de histórico de refeições",
+          "Acesso a medidas e fotos",
+          "Ferramentas de plano alimentar",
+          "Relatórios nutricionais",
+          "Exportações de relatórios"
+        ]
+      },
+      "clinician": {
+        "name": "Clínico",
+        "price": "R$ 129,90",
+        "period": "/mês",
+        "pitch": "Visão clínica consolidada.",
+        "trial": "7 dias de teste grátis",
+        "note": "Por clínico · até 30 pacientes",
+        "cta": "Assinar como Clínico",
+        "features": [
+          "Dashboard clínico completo",
+          "Gerenciamento de pacientes",
+          "Histórico completo de exames",
+          "Acompanhamento de composição corporal",
+          "Monitoramento de protocolos",
+          "Fotos de progresso",
+          "Exportações clínicas",
+          "Relatórios clínicos premium"
+        ]
+      }
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bem-vindo ao Atlas Core",
+      "subtitle": "Vamos configurar seu app. Leva menos de 2 minutos.",
+      "benefits": [
+        {
+          "emoji": "📍",
+          "title": "Setup personalizado",
+          "desc": "O app se adapta aos seus objetivos e contexto"
+        },
+        {
+          "emoji": "📈",
+          "title": "Timeline única",
+          "desc": "Protocolos, exames, progresso — tudo conectado"
+        },
+        {
+          "emoji": "🤖",
+          "title": "Insights de progresso",
+          "desc": "Insights dos seus dados, não perguntas genéricas"
+        }
+      ],
+      "terms": "Ao continuar, você concorda com nossos {termsOfUse}."
+    },
+    "goalsAndBasics": {
+      "title": "Qual seu objetivo principal?",
+      "subtitle": "Isso define o foco do seu dashboard e insights semanais",
+      "basics": "Info básica",
+      "goals": [
+        {"id": "fat_loss", "emoji": "🔥", "label": "Perda de gordura"},
+        {"id": "muscle_gain", "emoji": "💪", "label": "Ganho de massa"},
+        {"id": "recomp", "emoji": "⚡", "label": "Recomp corporal"},
+        {"id": "performance", "emoji": "🏆", "label": "Performance"},
+        {"id": "health", "emoji": "❤️", "label": "Saúde geral"},
+        {"id": "longevity", "emoji": "🌱", "label": "Longevidade"}
+      ],
+      "fields": {
+        "height": "Altura (cm)",
+        "weight": "Peso atual (kg)",
+        "sex": "Sexo biológico",
+        "age": "Idade",
+        "male": "Masculino",
+        "female": "Feminino",
+        "other": "Outro"
+      }
+    },
+    "routine": {
+      "title": "Sua rotina de treino",
+      "subtitle": "Calibra metas e personaliza planos",
+      "activityLevel": "Nível de atividade",
+      "activities": [
+        {"id": "sedentary", "label": "Sedentário", "desc": "Sem exercício regular"},
+        {"id": "light", "label": "Leve", "desc": "1–2× por semana"},
+        {"id": "moderate", "label": "Moderado", "desc": "3–4× por semana"},
+        {"id": "active", "label": "Ativo", "desc": "5–6× por semana"},
+        {"id": "very_active", "label": "Muito ativo", "desc": "2× por dia / atleta"}
+      ],
+      "fields": {
+        "workoutsPerWeek": "Treinos por semana",
+        "experience": "Experiência",
+        "beginner": "Iniciante (<1 ano)",
+        "intermediate": "Intermediário (1–3 anos)",
+        "advanced": "Avançado (3–6 anos)",
+        "expert": "Expert (6+ anos)"
+      },
+      "additionalContext": "Contexto adicional",
+      "additional": {
+        "equipment": "Equipamento disponível",
+        "equipmentPlaceholder": "Ex: Academia completa, halteres, barra...",
+        "injuries": "Lesões ou limitações",
+        "injuriesPlaceholder": "Ex: Joelho, lombar, ombro...",
+        "diet": "Estilo alimentar",
+        "dietPlaceholder": "Ex: Low-carb, carnívoro, mediterrâneo..."
+      }
+    },
+    "tracking": {
+      "title": "O que você quer acompanhar?",
+      "subtitle": "Isso constrói seu dashboard inicial. Você pode ativar/desativar a qualquer hora.",
+      "hint": "Selecione quantos quiser — mais contexto significa insights melhores",
+      "options": [
+        {"id": "protocol", "emoji": "�", "label": "Planos", "desc": "Suplementos, doses e planos de saúde"},
+        {"id": "body", "emoji": "📏", "label": "Composição corporal", "desc": "Peso, medidas, fotos"},
+        {"id": "exams", "emoji": "🧬", "label": "Exames", "desc": "Hormônios, sangue, saúde"},
+        {"id": "nutrition", "emoji": "🥗", "label": "Nutrição", "desc": "Refeições e macros"},
+        {"id": "workouts", "emoji": "🏋️", "label": "Treinos", "desc": "Sessões e progresso"},
+        {"id": "symptoms", "emoji": "📊", "label": "Sintomas e humor", "desc": "Check-ins diários"}
+      ]
+    },
+    "setup": {
+      "analyzing": "Analisando seus objetivos...",
+      "building": "Construindo seu dashboard personalizado...",
+      "configuring": "Configurar meu Atlas Core",
+      "calculating": "Calculando suas metas nutricionais...",
+      "preparing": "Preparando sua timeline...",
+      "ready": "Seu Atlas Core está pronto.",
+      "enter": "Entrar no app"
+    }
+  },
+  "today": {
+    "greeting": "Bom dia",
+    "checkin": {
+      "title": "Check-in de hoje",
+      "subtitle": "Como você está se sentindo?",
+      "mood": "Humor",
+      "energy": "Energia",
+      "sleep": "Sono",
+      "water": "Água",
+      "done": "Check-in completo",
+      "register": "Registrar"
+    },
+    "nutrition": {
+      "label": "Nutrição",
+      "calories": "kcal",
+      "protein": "P",
+      "carbs": "C",
+      "fat": "G",
+      "noMeals": "Nenhuma refeição registrada hoje"
+    },
+    "workout": {
+      "label": "Treino",
+      "exercises": "exercícios",
+      "pending": "Pendente",
+      "done": "Concluído",
+      "none": "Sem treino hoje",
+      "viewPlan": "Ver plano de treino →"
+    },
+    "adherence": "Adesão",
+    "excellent": "Excelente",
+    "good": "Bom",
+    "focus": "Foco",
+    "continue": "Continue assim.",
+    "completePending": "Complete as tarefas pendentes.",
+    "professionals": "Profissionais vinculados"
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Personalize sua experiência no Atlas Core.",
+    "account": {
+      "title": "Conta",
+      "subtitle": "Suas informações de conta atuais.",
+      "editProfile": "Editar perfil"
+    },
+    "appearance": {
+      "title": "Aparência",
+      "subtitle": "Escolha o tema da interface.",
+      "light": "Claro",
+      "dark": "Escuro"
+    },
+    "language": {
+      "title": "Idioma",
+      "subtitle": "Selecione o idioma da interface.",
+      "noteEn": "Nota: todas as superfícies do produto são mantidas em inglês.",
+      "notePt": "Nota: posts do blog e algumas seções legadas permanecem no idioma original."
+    },
+    "more": {
+      "title": "Mais opções",
+      "subtitle": "Acesse outras áreas da conta.",
+      "profile": "Meu Perfil",
+      "profileDesc": "Dados pessoais, metas e informações biométricas.",
+      "privacy": "Privacidade e dados",
+      "privacyDesc": "Controle como seus dados são usados.",
+      "help": "Ajuda e suporte",
+      "helpDesc": "Central de ajuda, tutoriais e contato."
+    },
+    "signout": {
+      "title": "Sair",
+      "subtitle": "Encerrar sessão desta conta.",
+      "label": "Sair",
+      "description": "Você será redirecionado para a tela de login.",
+      "confirm": "Tem certeza que deseja sair?"
+    }
+  },
+  "profile": {
+    "account": "Conta",
+    "email": "Email",
+    "phone": "Telefone / WhatsApp",
+    "password": "Senha",
+    "edit": "Alterar",
+    "biometrics": "Biometria",
+    "targets": "Metas",
+    "preferences": "Preferências",
+    "age": "Idade",
+    "height": "Altura (cm)",
+    "currentWeight": "Peso atual (kg)",
+    "sex": "Sexo",
+    "male": "Masculino",
+    "female": "Feminino",
+    "other": "Outro",
+    "activityLevel": "Nível de atividade",
+    "dietaryStyle": "Estilo alimentar",
+    "trainingGoal": "Objetivo de treino",
+    "targetWeight": "Peso alvo (kg)",
+    "bodyFatGoal": "Meta de gordura corporal (%)",
+    "macros": {"pending": "Macros pendentes"},
+    "calories": "Calorias (kcal)",
+    "protein": "Proteína (g)",
+    "carbs": "Carboidratos (g)",
+    "fat": "Gordura (g)",
+    "waterTarget": "Água (L / dia)",
+    "aiTone": "Tom dos insights",
+    "theme": "Tema",
+    "light": "Claro (padrão)",
+    "dark": "Escuro",
+    "friendly": "Amigável e encorajador",
+    "direct": "Direto e objetivo",
+    "motivational": "Motivacional e intenso",
+    "analytical": "Analítico e técnico",
+    "saveProfile": "Salvar perfil",
+    "achievements": "Conquistas",
+    "subscription": "Planos e assinatura",
+    "viewPlans": "Ver planos →",
+    "dangerZone": "Zona de perigo",
+    "deleteAllData": "Excluir todos os dados",
+    "deleteConfirm": "Confirmar exclusão",
+    "deleteConfirmMsg": "Esta ação é irreversível. Todos seus dados serão permanentemente excluídos.",
+    "yes": "Sim, excluir tudo",
+    "changeEmail": "Alterar email",
+    "newEmail": "Novo email",
+    "changePassword": "Alterar senha",
+    "redirecting": "Redirecionando...",
+    "passwordReset": "Você será levado à tela de login para redefinir sua senha.",
+    "pageTitle": "Mantenha sua base afiada.",
+    "pageSubtitle": "Conta, metas e identidade do atleta agora lidas como uma única superfície: sofisticada, pessoal e pronta para sustentar nutrição, treino e performance.",
+    "openMyDiet": "Abrir Minha Dieta",
+    "openMyWorkout": "Abrir Meu Treino",
+    "sessionLabel": "Sessão",
+    "sessionValue": "Supabase ativo",
+    "sessionDetail": "Sessão autenticada pronta para uso.",
+    "profileLabel": "Perfil",
+    "profileAligned": "% alinhado",
+    "fieldsFilledDetail": "{filled} de {total} campos principais preenchidos.",
+    "dailyFuel": "Combustível diário",
+    "statusBanner": "Autenticação real com Supabase permanece intacta. Esta tela preserva o fluxo de dados do perfil atual enquanto ganha a nova camada visual premium.",
+    "loadingProfile": "Carregando seu perfil",
+    "loadingProfileDesc": "Estamos trazendo seus dados existentes para esta nova leitura visual sem interromper a página.",
+    "safeMode": "Perfil em modo seguro",
+    "safeModeDesc": "Alguns dados não carregaram, mas você ainda pode revisar sua conta e salvar informações principais.",
+    "sections": {
+      "account": "Conta",
+      "accountSubtitle": "Identidade premium, acesso estável e um resumo curto da conta antes dos dados e metas.",
+      "accountDesc": "Identidade premium, acesso estável.",
+      "baselineTitle": "Linha de base pessoal",
+      "baselineDesc": "Dados pessoais essenciais para dar contexto ao resto da experiência.",
+      "bodyTitle": "Métricas corporais atuais",
+      "bodyDesc": "Ajuste direção e referência corporal objetivamente.",
+      "targetsTitle": "Metas de performance diárias",
+      "targetsDesc": "Metas que tornam nutrição, treino e recuperação mais coerentes.",
+      "trainingTitle": "Contexto de treino",
+      "trainingDesc": "Configuração de treino para geração de planos e insights personalizados."
+    },
+    "fields": {
+      "phone": "Telefone / WhatsApp",
+      "phoneDesc": "Contato rápido para referência e suporte.",
+      "age": "Idade",
+      "ageUnit": "anos",
+      "ageDesc": "Ajuda a contextualizar rotina e objetivos.",
+      "height": "Altura",
+      "heightUnit": "cm",
+      "heightDesc": "Base para leituras de composição corporal e progresso.",
+      "currentWeight": "Peso atual",
+      "currentWeightUnit": "kg",
+      "currentWeightDesc": "Ponto de partida da fase atual.",
+      "targetWeight": "Peso alvo",
+      "targetWeightUnit": "kg",
+      "targetWeightDesc": "Meta corporal que guia a direção do bloco.",
+      "calories": "Calorias alvo",
+      "caloriesUnit": "kcal",
+      "caloriesDesc": "Base energética diária.",
+      "protein": "Proteína alvo",
+      "proteinUnit": "g",
+      "proteinDesc": "Prioridade para recuperar e sustentar massa magra.",
+      "carbs": "Carboidratos alvo",
+      "carbsUnit": "g",
+      "carbsDesc": "Combustível útil para treino e dia.",
+      "fat": "Gordura alvo",
+      "fatUnit": "g",
+      "fatDesc": "Base hormonal e saciedade ao longo do dia.",
+      "water": "Água alvo",
+      "waterUnit": "L",
+      "waterDesc": "Ritmo diário de hidratação.",
+      "trainingGoal": "Objetivo de treino",
+      "trainingGoalPlaceholder": "Ex: Perder 8kg em 6 meses focando em gordura, manter massa magra e melhorar cardiovascular...",
+      "trainingGoalDesc": "Guia o foco do resumo e personalização do plano."
+    },
+    "readiness": {
+      "high": "Seu perfil é maduro o suficiente para tornar metas e leituras do produto mais precisas.",
+      "medium": "A base principal está configurada. Complete os campos restantes para dar mais contexto ao seu dia.",
+      "low": "Defina linha de base, metas e direção para que o produto se torne mais pessoal desde a primeira leitura."
+    },
+    "weightDirection": {
+      "aligned": "Peso atual e meta estão alinhados na mesma faixa.",
+      "gain": "Ganho planejado de {delta} kg.",
+      "loss": "Redução planejada de {delta} kg.",
+      "noTarget": "Peso atual informado. Peso corporal alvo não definido.",
+      "noCurrent": "Meta corporal definida. Peso atual não registrado.",
+      "noData": "Sem direção",
+      "noDataDetail": "Preencha peso atual e peso alvo para ver a estratégia corporal."
+    },
+    "hero": {
+      "readiness": "Prontidão do perfil",
+      "goal": "Meta",
+      "noGoal": "Defina uma meta clara para treino e o resto do produto responderá com mais contexto.",
+      "weightLabel": "Direção corporal"
+    },
+    "reset": {
+      "title": "Resetar progresso",
+      "desc": "Esta ação é ",
+      "descStrong": "permanente e irreversível",
+      "descEnd": ". Todos os dados listados abaixo serão excluídos e não podem ser recuperados.",
+      "whatGetsDeleted": "O que será excluído",
+      "entities": {
+        "Workout": "Histórico de treinos",
+        "ExerciseLog": "Logs de exercícios",
+        "Measurement": "Métricas de progresso (peso, gordura, medidas)",
+        "ProgressPhoto": "Fotos de progresso",
+        "FoodLog": "Registros nutricionais",
+        "Meal": "Refeições registradas",
+        "Supplement": "Suplementos registrados",
+        "DailyCheckin": "Check-ins e entradas de diário"
+      },
+      "typeToConfirm": "Digite RESET para confirmar",
+      "placeholder": "Digite RESET aqui",
+      "cancel": "Cancelar",
+      "confirmBtn": "Excluir tudo permanentemente",
+      "confirming": "Excluindo...",
+      "preserved": "Preservado:",
+      "preservedItems": "conta, perfil, planos prescritos e dados de autenticação."
+    },
+    "sections_labels": {
+      "account": "Conta",
+      "hero": "Resumo do perfil",
+      "editProfile": "Editar perfil",
+      "saveProfile": "Salvar perfil",
+      "saving": "Salvando...",
+      "successBanner": "Perfil salvo.",
+      "errorBanner": "Erro ao salvar perfil.",
+      "readinessLabel": "Prontidão do perfil",
+      "dangerZone": "Zona de perigo",
+      "dangerZoneSubtitle": "Ações irreversíveis para sua conta.",
+      "resetProgress": "Resetar progresso",
+      "resetProgressDesc": "Excluir permanentemente histórico de treinos, refeições, medidas e check-ins.",
+      "deleteAccount": "Excluir conta",
+      "deleteAccountDesc": "Remover permanentemente sua conta e todos os dados associados.",
+      "subscription": "Planos e assinatura",
+      "subscriptionDesc": "Gerencie seu plano atual.",
+      "email": "Email",
+      "adminBadge": "Admin",
+      "profileSettings": "Configurações de perfil",
+      "profileSettingsSubtitle": "Organize linha de base, composição corporal e metas em blocos claros, com a mesma linguagem sofisticada do resto do produto.",
+      "firstSetup": "Primeira configuração em andamento",
+      "firstSetupDesc": "Preencha os dados abaixo para transformar a rota de perfil em uma base pessoal mais completa coerente com o resto do app.",
+      "profileReadiness": "Prontidão do perfil",
+      "persistenceLabel": "Persistência",
+      "persistenceDesc": "Salve o perfil sem alterar a lógica de dados atual.",
+      "persistenceDetail": "Esta ação atualiza o perfil com o fluxo existente e mantém a página pronta para o resto da experiência premium.",
+      "clearFields": "Limpar campos",
+      "profileSummary": "Resumo do perfil",
+      "profileSummarySubtitle": "Uma leitura curta e pessoal de como o resto do app deve ver você hoje.",
+      "currentFocus": "Foco atual",
+      "goalDefined": "Meta definida",
+      "directionPending": "Direção pendente",
+      "dailyConsumption": "Consumo diário",
+      "bodyDirection": "Direção corporal",
+      "hydrationPace": "Ritmo de hidratação",
+      "structure": "Estrutura",
+      "whyMatters": "Por que importa",
+      "whyMattersDesc": "Um perfil claro torna metas, planos e contextos mais consistentes sem adicionar fricção ao backend. A página se sente pessoal porque o sistema lê você com mais clareza.",
+      "refinedForSpeed": "Refinado para leitura rápida",
+      "refinedForSpeedDesc": "A hierarquia agora separa identidade, métricas rápidas e formulário em blocos muito mais claros.",
+      "dangerZoneTitle": "Zona de perigo",
+      "dangerZoneSubtitleText": "Ações destrutivas e permanentes. Não podem ser desfeitas.",
+      "resetProgressTitle": "Resetar progresso",
+      "resetProgressDetail": "Exclui permanentemente todos seus treinos, nutrição, progresso, fotos e check-ins. Sua conta, perfil e planos prescritos são preservados.",
+      "logOut": "Sair"
+    },
+    "metrics": {
+      "weightDirection": "Direção do peso",
+      "calories": "Calorias",
+      "protein": "Proteína",
+      "hydration": "Hidratação",
+      "calorieTargetSet": "Meta calórica definida para fornecer base para o dia.",
+      "calorieTargetNotSet": "Defina uma meta calórica para ancorar leitura nutricional.",
+      "proteinTargetSet": "Meta de proteína pronta para sustentar recuperação e composição.",
+      "proteinTargetNotSet": "Defina meta de proteína para fechar linha de base nutricional.",
+      "hydrationTargetSet": "Meta diária pronta para manter consistência de hidratação.",
+      "hydrationTargetNotSet": "Defina meta de água para completar o setup diário."
+    },
+    "trainingGoalSection": {
+      "title": "Objetivo de treino",
+      "subtitle": "Descreva o foco principal do momento para que a experiência se sinta mais sua e menos genérica.",
+      "label": "Objetivo de treino",
+      "placeholder": "Ex: perder gordura com energia alta, ganhar massa com controle, melhorar consistência e rotina."
+    }
+  },
+  "today_page": {
+    "title": "Hoje",
+    "subtitle": "Visão geral diária.",
+    "heading": "Hoje",
+    "tagline": "Sua nutrição, treino e próxima decisão do dia.",
+    "adminBadge": "Modo admin ativo",
+    "fallbackName": "Atleta",
+    "loading": "Carregando dados...",
+    "calculating": "Calculando...",
+    "noPlan": "Sem plano",
+    "activePlan": "Plano ativo",
+    "setupNutrition": "Configurar em Nutrição",
+    "setupWorkouts": "Configurar em Treinos",
+    "addMeasurement": "Adicionar medida",
+    "completed": "Concluído",
+    "inProgress": "Em andamento",
+    "pending": "Pendente",
+    "noActive": "Nenhum ativo",
+    "snapshot": {
+      "eyebrow": "Resumo",
+      "title": "Hoje em um relance",
+      "nutrition": "Nutrição",
+      "nutritionActive": "Meta calórica ativa.",
+      "nutritionNone": "Nenhum plano alimentar ativo.",
+      "workout": "Treino",
+      "workoutActive": "Plano de treino ativo.",
+      "workoutNone": "Nenhum plano de treino ativo.",
+      "progress": "Progresso",
+      "progressLatest": "Medição mais recente.",
+      "progressNone": "Nenhuma medida registrada.",
+      "protocols": "Protocolos",
+      "protocolsActive": "Protocolos ativos agora.",
+      "protocolsNone": "Nenhum protocolo ativo."
+    },
+    "adherence": {
+      "eyebrow": "Adesão",
+      "title": "Consistência recente",
+      "good": "Boa consistência nas últimas semanas.",
+      "improve": "Há espaço para melhorar a consistência.",
+      "configure": "Configure seus planos para calcular adesão."
+    },
+    "insight": {
+      "eyebrow": "Insight do dia",
+      "title": "Leitura rápida",
+      "cta": "Ver todos os insights",
+      "loadingTitle": "Carregando...",
+      "loadingDesc": "Aguarde enquanto os dados carregam.",
+      "noWorkoutsTitle": "Nenhum treino registrado esta semana.",
+      "noWorkoutsDesc": "Você tem um plano ativo. Abra Treinos para registrar sua próxima sessão.",
+      "noMealsTitle": "Nenhuma refeição registrada hoje.",
+      "noMealsDesc": "Abra Nutrição para registrar suas refeições e acompanhar macros de hoje.",
+      "noMeasurementsTitle": "Nenhuma medida registrada ainda.",
+      "noMeasurementsDesc": "Registre seu peso e medidas em Progresso para acompanhar sua evolução ao longo do tempo.",
+      "oldMeasurementsTitle": "Nenhuma medida nos últimos 30 dias.",
+      "oldMeasurementsDesc": "Registrar seu peso regularmente ajuda a identificar tendências e ajustar o plano.",
+      "workoutConsistencyDesc": "Excelente consistência. Mantenha este ritmo para maximizar resultados.",
+      "workoutGoodDesc": "Boa consistência. Cada sessão completa conta para o resultado final.",
+      "protocolDescWith": "ativo desde {date}. Acompanhe estoque em Protocolos.",
+      "protocolDescDefault": "Acompanhe seus suplementos e protocolos na aba Protocolos.",
+      "defaultTitle": "Comece com nutrição, depois abra seu treino.",
+      "defaultDesc": "Manter a primeira decisão alimentar visível costuma tornar o resto do dia mais leve e fácil de executar."
+    },
+    "activity": {
+      "eyebrow": "Atividade",
+      "title": "Sessões recentes",
+      "fallbackName": "Treino"
+    },
+    "nextSteps": {
+      "eyebrow": "Próximos passos",
+      "title": "Ações prioritárias",
+      "description": "Avance pelo dia na ordem certa, com uma ação clara por card.",
+      "nutritionTitle": "Abrir nutrição",
+      "nutritionDesc": "Confirme refeições, macros e primeira escolha alimentar antes do dia ficar agitado.",
+      "nutritionPhase": "Prioridade máxima",
+      "workoutTitle": "Revisar treino",
+      "workoutDesc": "Prepare a sessão principal antes da janela de treino abrir.",
+      "workoutPhase": "Próximo passo",
+      "aiTitle": "Revisar progresso",
+      "aiDesc": "Abra um resumo curto quando quiser um próximo passo claro sem ruído extra.",
+      "aiPhase": "Resumo",
+      "profileTitle": "Refinar perfil",
+      "profileDesc": "Mantenha preferências de base alinhadas para que o app permaneça preciso.",
+      "profilePhase": "Mantenha alinhado"
+    }
+  },
+  "pages": {
+    "workouts": {
+      "title": "Treinos",
+      "subtitle": "Planeje, execute e acompanhe suas sessões de treino",
+      "status": {
+        "pending": "Pendente",
+        "completed": "Concluído",
+        "in_progress": "Em andamento"
+      },
+      "actions": {
+        "mark_complete": "Concluir",
+        "mark_pending": "Reabrir",
+        "add_exercise": "Adicionar exercício",
+        "save_workout": "Salvar treino",
+        "edit_workout": "Editar treino"
+      },
+      "messages": {
+        "workout_marked_complete": "Treino marcado como concluído.",
+        "no_execution_logged": "Adicione uma execução para acompanhar o dia.",
+        "use_local_register": "Use o registro local para estruturar a execução do dia mesmo sem um plano.",
+        "empty_state": "Nenhuma execução registrada",
+        "no_plan": "Nenhuma sessão planejada",
+        "empty_subtitle": "Adicione um nome e pelo menos um exercício para salvar o treino.",
+        "session_covered": "Sessão coberta",
+        "still_in_progress": "Ainda em andamento",
+        "open_modal": "Abra o modal de treino local para adicionar execução do dia.",
+        "no_plan_defined": "Nenhum plano definido para a data selecionada.",
+        "no_workouts_to_compare": "Nenhum treino registrado para comparar ainda."
+      }
+    },
+    "nutrition": {
+      "title": "Nutrição",
+      "subtitle": "Acompanhe suas refeições e macronutrientes",
+      "add_meal": "Adicionar refeição",
+      "edit_meal": "Editar refeição",
+      "save_changes": "Salvar alterações",
+      "meal_subtitle": "Ajuste os detalhes da refeição.",
+      "register_new_meal": "Registre uma nova refeição.",
+      "meal_type": "Tipo de refeição",
+      "meal": "Refeição",
+      "meal_of_day": "Refeição principal do dia.",
+      "search_label": "Buscar alimentos",
+      "search_placeholder": "Busque por nome ou descrição",
+      "not_found": "Não encontrado. Tente outro nome ou verifique a conexão.",
+      "load_error": "Não foi possível carregar seu histórico de refeições.",
+      "need_login_food": "Você precisa estar logado para salvar um alimento.",
+      "need_login_meal": "Você precisa estar logado para salvar uma refeição.",
+      "proteins": "Proteínas",
+      "calories_and_macros": "Calorias e macronutrientes para referência rápida.",
+      "meals_logged": "Refeições e alimentos registrados na data selecionada.",
+      "empty_state": "Adicione uma refeição para começar a monitorar sua nutrição."
+    },
+    "measurements": {
+      "title": "Medidas",
+      "subtitle": "Snapshots de composição corporal",
+      "weight": "Peso",
+      "body_fat": "Gordura corporal",
+      "chest": "Peito",
+      "arm": "Braço",
+      "thigh": "Coxa",
+      "waist": "Cintura",
+      "hip": "Quadril",
+      "neck": "Pescoço",
+      "circumferences": "Circunferências",
+      "trend": "Tendência",
+      "weight_desc": "Leitura base de massa total para acompanhar seu corpo sem ruído.",
+      "body_fat_desc": "Composição corporal em snapshot limpo do período.",
+      "chest_desc": "Volume do torso superior dentro do histórico de checkpoints.",
+      "arm_desc": "Leitura dedicada para acompanhar braço sem se perder em outros dados.",
+      "thigh_desc": "Dimensão inferior com curva própria para observar densidade corporal.",
+      "waist_desc": "Contexto de proporção e distribuição medido checkpoint a checkpoint.",
+      "hip_desc": "Métrica complementar para retrato corporal mais completo.",
+      "neck_desc": "Uma das referências mais úteis para ver mudança corporal real.",
+      "notes": "Notas de contexto",
+      "no_notes": "Sem notas adicionais neste checkpoint.",
+      "no_notes_recent": "Sem notas no checkpoint mais recente.",
+      "empty_state": "Abra o modal nesta página para criar o primeiro checkpoint corporal.",
+      "register_first": "Registre a primeira entrada para ativar o gráfico, leitura de tendência e resumo lateral."
+    },
+    "lab_exams": {
+      "title": "Exames Laboratoriais",
+      "subtitle": "Registro clínico de seus marcadores laboratoriais",
+      "status": {
+        "low": "Baixo",
+        "high": "Alto",
+        "critical": "Crítico",
+        "normal": "Normal"
+      },
+      "add_panel": "Adicionar painel",
+      "upload_pdf": "Enviar PDF ou imagem",
+      "panel_name": "Nome do painel",
+      "exam_date": "Data do exame",
+      "panel_name_required": "Nome do painel é obrigatório.",
+      "date_required": "Data é obrigatória.",
+      "import_error": "Não foi possível importar o arquivo.",
+      "panels": "Painéis",
+      "evolution": "Evolução de marcadores",
+      "history": "Histórico de exames",
+      "empty_state": "Adicione manualmente ou importe um PDF ou imagem para começar o histórico laboratorial.",
+      "recent_trends": "Leitura rápida de tendências para o que já tem histórico suficiente."
+    },
+    "insights": {
+      "title": "Insights",
+      "subtitle": "Uma leitura rápida do seu histórico recente",
+      "weight_trend": "Tendência de peso",
+      "no_weight_data": "Registros insuficientes para identificar tendência de peso.",
+      "weight_stable": "Seu peso está relativamente estável dentro do período selecionado.",
+      "weight_insufficient": "Registros atuais ainda não permitem leitura de tendência de peso.",
+      "training_summary": "Resumo de treino",
+      "training_no_records": "Nenhum treino registrado no período. Registre sessões em Treinos para acompanhar consistência.",
+      "training_not_completed": "Há treinos no período, mas nenhum marcado como concluído. Verifique se as sessões estão sendo finalizadas.",
+      "nutrition_summary": "Resumo nutricional",
+      "nutrition_insufficient": "Refeições insuficientes registradas para gerar leitura nutricional.",
+      "recovery_summary": "Resumo de recuperação",
+      "recovery_insufficient": "Check-ins insuficientes para resumir recuperação.",
+      "protocols_summary": "Resumo de protocolos",
+      "no_active_protocols": "Nenhum protocolo ativo no momento. Acesse Protocolos para configurar suplementação.",
+      "avg_calories": "Calorias médias",
+      "calories_per_day": "Média por dia com refeições registradas.",
+      "completed_workouts": "Treinos concluídos",
+      "avg_sleep": "Sono médio",
+      "measurements": "Medidas",
+      "meals": "Refeições",
+      "nutrition": "Nutrição",
+      "recovery": "Recuperação"
+    },
+    "protocols": {
+      "title": "Protocolos",
+      "subtitle": "Gerencie medicamentos, suplementos e compostos",
+      "tab_all": "Todos",
+      "tab_active": "Ativos",
+      "tab_paused": "Pausados",
+      "tab_finished": "Finalizados",
+      "add_protocol": "Adicionar protocolo",
+      "start_with": "Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto acompanhado.",
+      "empty_state_list": "A lista não pôde ser carregada. Você ainda pode adicionar seu primeiro protocolo.",
+      "empty_state_empty": "Comece com um medicamento, hormônio, peptídeo, suplemento ou outro composto acompanhado.",
+      "save_error": "Não foi possível salvar o protocolo. Tente novamente.",
+      "status_error": "Não foi possível atualizar o status. Tente novamente.",
+      "delete_error": "Não foi possível excluir o protocolo. Tente novamente.",
+      "delete_success": "Protocolo excluído.",
+      "loading": "Aguarde enquanto seus protocolos são carregados.",
+      "loading_partial": "Dados não carregaram completamente, mas você ainda pode adicionar novos itens."
+    }
+  }
+}

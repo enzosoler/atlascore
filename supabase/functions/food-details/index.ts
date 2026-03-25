@@ -1,11 +1,8 @@
 /**
- * food-search
+ * food-details
  *
- * Canonical external food search using FatSecret.
- * - Server-side OAuth2 token handling
- * - Uses foods.search.v4
- * - Returns normalized results
- * - Explicit provider + status
+ * Fetch full FatSecret nutrition details for one food.
+ * Uses food.get.v5
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -32,46 +29,26 @@ serve(async (req) => {
   }
 
   try {
-    if (!FATSECRET_CLIENT_ID || !FATSECRET_CLIENT_SECRET) {
-      return json({
-        success: false,
-        provider: 'fatsecret',
-        error: 'FatSecret credentials are not configured',
-        results: [],
-        count: 0,
-      }, 500);
-    }
-
     const body = await req.json().catch(() => ({}));
-    const query = String(body.query || '').trim();
-    const language = String(body.language || 'pt').trim();
-    const region = String(body.region || 'BR').trim().toUpperCase();
-    const page = Number(body.page || 0);
-    const maxResults = Math.min(Number(body.maxResults || 12), 20);
+    const foodId = String(body.foodId || '').trim();
 
-    if (query.length < 2) {
+    if (!foodId) {
       return json({
         success: false,
         provider: 'fatsecret',
-        error: 'Query too short',
-        results: [],
-        count: 0,
+        error: 'foodId is required',
       }, 400);
     }
 
     const accessToken = await getFatSecretAccessToken();
 
     const searchParams = new URLSearchParams({
-      search_expression: query,
-      page_number: String(page),
-      max_results: String(maxResults),
+      food_id: foodId,
       format: 'json',
-      region,
-      language: mapLanguage(language),
     });
 
     const res = await fetch(
-      `https://platform.fatsecret.com/rest/foods/search/v4?${searchParams.toString()}`,
+      `https://platform.fatsecret.com/rest/food/v5?${searchParams.toString()}`,
       {
         method: 'GET',
         headers: {
@@ -90,7 +67,7 @@ serve(async (req) => {
     }
 
     if (!res.ok) {
-      console.error('[FatSecret search] upstream error', {
+      console.error('[FatSecret details] upstream error', {
         status: res.status,
         body: rawText,
       });
@@ -98,34 +75,52 @@ serve(async (req) => {
       return json({
         success: false,
         provider: 'fatsecret',
-        error: `FatSecret search failed (${res.status})`,
-        results: [],
-        count: 0,
+        error: `FatSecret detail request failed (${res.status})`,
       }, 502);
     }
 
-    const foods = normalizeFoodArray(data?.foods_search?.results?.food ?? data?.foods?.food ?? []);
-    const results = foods
-      .map(mapFatSecretSearchFood)
-      .filter(Boolean);
+    const food = data?.food;
+    if (!food) {
+      return json({
+        success: false,
+        provider: 'fatsecret',
+        error: 'Food not found',
+      }, 404);
+    }
+
+    const servings = normalizeFoodArray(food?.servings?.serving).map((s: any, index: number) => ({
+      id: String(s?.serving_id || index),
+      label:
+        s?.serving_description ||
+        `${s?.metric_serving_amount || 1} ${s?.metric_serving_unit || 'serving'}`,
+      amount: Number(s?.number_of_units || 1),
+      unit: s?.measurement_description || s?.metric_serving_unit || 'serving',
+      grams: Number(s?.metric_serving_amount || 0) || null,
+      calories: Number(s?.calories || 0),
+      protein: Number(s?.protein || 0),
+      carbs: Number(s?.carbohydrate || 0),
+      fat: Number(s?.fat || 0),
+    }));
 
     return json({
       success: true,
       provider: 'fatsecret',
-      fallbackUsed: false,
-      query,
-      count: results.length,
-      results,
+      food: {
+        id: String(food.food_id),
+        name: food.food_name,
+        brand: food.brand_name || null,
+        type: food.food_type || null,
+        servings,
+        source: 'FatSecret',
+      },
     });
   } catch (error) {
-    console.error('[food-search] fatal error', error);
+    console.error('[food-details] fatal error', error);
 
     return json({
       success: false,
       provider: 'fatsecret',
-      error: error instanceof Error ? error.message : 'Search failed',
-      results: [],
-      count: 0,
+      error: error instanceof Error ? error.message : 'Food details failed',
     }, 502);
   }
 });
@@ -175,54 +170,9 @@ async function getFatSecretAccessToken(): Promise<string> {
   return cachedToken!;
 }
 
-function mapFatSecretSearchFood(food: any) {
-  const foodId = String(food?.food_id || '');
-  const foodName = String(food?.food_name || '').trim();
-
-  if (!foodId || !foodName) return null;
-
-  const macros = parseDescriptionMacros(String(food?.food_description || ''));
-
-  return {
-    id: foodId,
-    name: foodName,
-    brand: food?.brand_name || null,
-    calories: macros.calories,
-    protein: macros.protein,
-    carbs: macros.carbs,
-    fat: macros.fat,
-    source: 'FatSecret',
-    sourceId: foodId,
-    foodType: food?.food_type || null,
-    description: food?.food_description || null,
-  };
-}
-
-function parseDescriptionMacros(description: string) {
-  return {
-    calories: matchNumber(description, /Calories:\s*([\d.]+)/i),
-    protein: matchNumber(description, /Protein:\s*([\d.]+)/i),
-    carbs: matchNumber(description, /Carbs?:\s*([\d.]+)/i),
-    fat: matchNumber(description, /Fat:\s*([\d.]+)/i),
-  };
-}
-
-function matchNumber(text: string, regex: RegExp) {
-  const match = text.match(regex);
-  const n = match ? Number(match[1]) : 0;
-  return Number.isFinite(n) ? n : 0;
-}
-
 function normalizeFoodArray(value: any): any[] {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
-}
-
-function mapLanguage(language: string) {
-  const normalized = language.toLowerCase();
-  if (normalized === 'pt') return 'Portuguese';
-  if (normalized === 'en') return 'English';
-  return 'Portuguese';
 }
 
 function json(payload: unknown, status = 200) {

@@ -32,7 +32,7 @@ import { useI18n } from '@/lib/i18nContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
-import { searchFoods } from '@/services/foodSearchService';
+import { searchFoods, getFoodDetails } from '@/services/foodSearchService';
 import { searchTaco } from '@/services/tacoService';
 
 const FIELD_LABEL_CLASS =
@@ -156,6 +156,37 @@ function addRecentFood(food) {
   } catch (error) {
     console.error("Error saving recent food to local storage:", error);
   }
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeFoodKey(food) {
+  const name = normalizeText(food.name);
+  const brand = normalizeText(food.brand || '');
+  return `${name}|${brand}`;
+}
+
+function mergeFoodResults(localFoods, externalFoods, limit = 12) {
+  const seen = new Set();
+  const merged = [];
+
+  for (const food of [...localFoods, ...externalFoods]) {
+    const key = normalizeFoodKey(food);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(food);
+    if (merged.length >= limit) break;
+  }
+
+  return merged;
 }
 
 function formatDateKey(value) {
@@ -425,24 +456,19 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
     const timer = setTimeout(async () => {
       try {
-        const fatSecretFoods = await searchFatSecretFoods(q, 'pt');
+        const fatSecretResult = await searchFoods(q, 'pt', 'BR');
+
+        if (!fatSecretResult.success) {
+          throw new Error(fatSecretResult.error || 'FatSecret search failed');
+        }
 
         // Combine results, removing duplicates
-        const seenIds = new Set(tacoHits.map(f => String(f.id)));
-        const uniqueFatSecretFoods = fatSecretFoods.filter(f => {
-          const key = String(f.id);
-          if (seenIds.has(key)) return false;
-          seenIds.add(key);
-          return true;
-        });
-
-        // Combine: TACO first, then FatSecret
-        const combinedResults = [...tacoHits, ...uniqueFatSecretFoods].slice(0, 10);
-        setSearchResults(combinedResults);
+        const combined = mergeFoodResults(tacoHits, fatSecretResult.results || [], 10);
+        setSearchResults(combined);
       } catch {
         // Keep TACO results if FatSecret fails
         setSearchResults(tacoHits);
-        setSearchError('External search failed. Showing local results only.');
+        setSearchError('FatSecret search failed. Showing local results only.');
       } finally {
         setIsSearching(false);
       }
@@ -547,7 +573,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
         {isSearching ? (
           <div className="mt-3 flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
-            <Loader2 className="h-4 w-4 animate-spin" /> Not found locally, searching FatSecret...
+            <Loader2 className="h-4 w-4 animate-spin" /> Searching FatSecret…
           </div>
         ) : null}
 
@@ -871,36 +897,27 @@ export default function NutritionPage() {
     let active = true;
     const timer = window.setTimeout(async () => {
       try {
-        console.log('[Nutrition] Fetching external foods for:', q, 'lang:', lang);
-        const searchResult = await searchFoods(q, lang);
+        console.log('[Nutrition] Fetching FatSecret foods for:', q, 'lang:', lang);
+        const searchResult = await searchFoods(q, lang, 'BR');
         
         if (!searchResult.success) {
           throw new Error(searchResult.error || 'Search failed');
         }
         
         const externalFoods = searchResult.results || [];
-        console.log('[Nutrition] External search results:', externalFoods.length, externalFoods.map(f => f.name));
+        console.log('[Nutrition] FatSecret results:', externalFoods.length, externalFoods.map(f => f.name));
         if (!active) return;
 
-        // Combine TACO + external results, removing duplicates
-        const seenIds = new Set(tacoResults.map(f => String(f.id)));
-        const uniqueExternalFoods = externalFoods.filter(f => {
-          const key = String(f.id);
-          if (seenIds.has(key)) return false;
-          seenIds.add(key);
-          return true;
-        });
-
-        // Combine: TACO first (local), then external results
-        const combinedResults = [...tacoResults, ...uniqueExternalFoods].slice(0, 12);
+        // Combine TACO + FatSecret results, removing duplicates
+        const combinedResults = mergeFoodResults(tacoResults, externalFoods, 12);
         console.log('[Nutrition] Combined results:', combinedResults.length);
         setFoodResults(combinedResults);
       } catch (error) {
-        console.error('[Nutrition] External search failed:', error);
+        console.error('[Nutrition] FatSecret search failed:', error);
         if (active) {
           // Keep TACO results if FatSecret fails
           setFoodResults(tacoResults);
-          setFoodSearchError(`External search error: ${error.message}`);
+          setFoodSearchError(`FatSecret search error: ${error.message}`);
         }
       } finally {
         if (active) setIsSearchingFoods(false);
@@ -910,13 +927,45 @@ export default function NutritionPage() {
     return () => { active = false; window.clearTimeout(timer); };
   }, [foodQuery]);
 
-  const handleSelectFood = (food) => {
+  const handleSelectFood = async (food) => {
     if (!user?.id) {
       setNotice({ tone: 'error', message: t('pages.nutrition.need_login_food') });
       return;
     }
-    setPendingFood(food);
-    setPendingFoodAmount('100');
+
+    // TACO can open directly
+    if (food.source === 'TACO' || food.brand === 'TACO') {
+      setPendingFood(food);
+      setPendingFoodAmount('100');
+      return;
+    }
+
+    // FatSecret: fetch richer serving data first
+    setSavingFoodId(food.id);
+
+    try {
+      const detail = await getFoodDetails(food.sourceId || food.id);
+
+      if (!detail.success) {
+        throw new Error(detail.error || 'Could not load food details');
+      }
+
+      const fullFood = detail.food;
+
+      setPendingFood({
+        ...food,
+        servings: fullFood.servings || [],
+        source: 'FatSecret',
+      });
+      setPendingFoodAmount('100');
+    } catch (error) {
+      setNotice({
+        tone: 'error',
+        message: error instanceof Error ? error.message : 'Could not load food details',
+      });
+    } finally {
+      setSavingFoodId(null);
+    }
   };
 
   const handleConfirmPortionAndSave = async () => {
@@ -939,8 +988,8 @@ export default function NutritionPage() {
         quantity: 1,
         serving_unit: 'g',
         serving_size: amount,
-        external_id: pendingFood.id,
-        source_api: pendingFood.brand === 'TACO' ? 'TACO' : 'FatSecret',
+        external_id: pendingFood.sourceId || pendingFood.id,
+        source_api: pendingFood.source || 'FatSecret',
       };
 
       const { data, error } = await supabase.from('food_logs').insert(snapshot).select().single();
@@ -1295,7 +1344,7 @@ export default function NutritionPage() {
 
         <Section
           title="Search food"
-          subtitle="Instant results from the TACO database. For packaged foods, automatically searches FatSecret."
+          subtitle="Instant results from TACO. Also searches FatSecret for branded and packaged foods."
         >
           <Card className="px-5 py-5">
             <label className={FIELD_LABEL_CLASS}>
@@ -1315,7 +1364,7 @@ export default function NutritionPage() {
             {isSearchingFoods ? (
               <div className="mt-5 flex items-center gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.44)] px-4 py-4 text-[13px] text-[hsl(var(--fg-2))]">
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.9} />
-                Not found in TACO, searching FatSecret...
+                Searching FatSecret…
               </div>
             ) : null}
 
