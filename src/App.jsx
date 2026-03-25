@@ -1,4 +1,5 @@
 import React from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -14,6 +15,7 @@ import { I18nProvider } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
 import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralTracking';
 
 // Pages
 import Landing from '@/pages/Landing.jsx';
@@ -139,6 +141,8 @@ import Integrations from '@/pages/Integrations';
 import Checkout from '@/pages/Checkout';
 import Waitlist from '@/pages/Waitlist';
 import Reactivation from '@/pages/Reactivation';
+import StoryLanding from '@/pages/StoryLanding';
+import ShareTarget from '@/pages/ShareTarget';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout.jsx';
@@ -154,19 +158,15 @@ const MissingConfigScreen = () => (
   <div className="min-h-screen bg-[hsl(var(--bg))] flex items-center justify-center p-6">
     <div className="max-w-xl w-full rounded-2xl border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] p-6 space-y-4">
       <div>
-        <p className="text-[20px] font-semibold text-[hsl(var(--fg))]">Base44 configuration missing</p>
+        <p className="text-[20px] font-semibold text-[hsl(var(--fg))]">Configuration missing</p>
         <p className="mt-2 text-[14px] text-[hsl(var(--fg-2))]">
-          The authenticated app depends on the <code>VITE_BASE44_APP_ID</code> and <code>VITE_BASE44_APP_BASE_URL</code> variables.
+          The authenticated app depends on environment variables to connect to the backend.
           Without them, authentication, queries, and internal routes cannot load.
         </p>
       </div>
 
       <div className="rounded-xl bg-[hsl(var(--shell))] p-4 text-[13px] text-[hsl(var(--fg))]">
-        <p className="font-medium mb-2">Create a <code>.env.local</code> file at the project root with:</p>
-        <pre className="whitespace-pre-wrap break-all text-[12px] leading-6">
-{`VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-backend.base44.app`}
-        </pre>
+        <p className="font-medium mb-2">Create a <code>.env.local</code> file at the project root with the required variables.</p>
       </div>
 
       <p className="text-[13px] text-[hsl(var(--fg-2))]">
@@ -267,6 +267,10 @@ const AppRoutes = () => (
     <Route path="/waitlist" element={<Waitlist />} />
     <Route path="/welcome-back" element={<Reactivation />} />
 
+    {/* Viral loop: Instagram Story referral landing + OS Share Menu target */}
+    <Route path="/start" element={<StoryLanding />} />
+    <Route path="/share-target" element={<ShareTarget />} />
+
     <Route path="/use-case/:role" element={<UseCase />} />
     <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
     <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
@@ -343,7 +347,16 @@ const AppRoutes = () => (
 );
 
 const AuthenticatedApp = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+
+  // Capture referral params from URL on first render (before auth redirect clears them)
+  React.useEffect(() => {
+    captureReferralParams();
+  }, []);
+
+  // Persist referral attribution to user metadata after authentication
+  useReferralTracking(user);
+
   return (
     <>
       <AppRoutes />
@@ -367,6 +380,7 @@ function App() {
                     </I18nProvider>
                   </Router>
                   <Toaster />
+                  <Analytics />
                 </DailyStoreProvider>
               </SubscriptionProvider>
             </QueryClientProvider>

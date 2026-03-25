@@ -39,6 +39,8 @@ export const ROUTES = {
   help: '/help',
   blog: '/blog',
   settings: '/Settings',
+  storyLanding: '/start',
+  shareTarget: '/share-target',
 };
 
 export const ROLE_HOME = {
