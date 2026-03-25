@@ -5,6 +5,7 @@ import {
   Pencil,
   Plus,
   Search,
+  Sparkles,
   Target,
   Trash2,
   UtensilsCrossed,
@@ -34,6 +35,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 import { searchFoods, getFoodDetails } from '@/services/foodSearchService';
 import { searchTaco } from '@/services/tacoService';
+import AIFoodInput from '@/components/nutrition/AIFoodInput';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -433,6 +435,23 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const [showAI, setShowAI] = useState(false);
+
+  const handleAIFoodsDetected = (detectedFoods) => {
+    const formatted = detectedFoods.map(f => ({
+      name: f.name,
+      kcal: Math.round(f.calories || 0),
+      protein: Math.round((f.protein || 0) * 10) / 10,
+      carbs: Math.round((f.carbs || 0) * 10) / 10,
+      fat: Math.round((f.fat || 0) * 10) / 10,
+      amount: parseFloat(f.serving_description) || 100,
+      unit: 'g',
+      external_id: null,
+      source_api: 'AI',
+    }));
+    setFoods((prev) => [...prev, ...formatted]);
+    setShowAI(false);
+  };
 
   // Search flow: instant TACO results + FatSecret combined
   useEffect(() => {
@@ -557,9 +576,31 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
         </label>
       </div>
 
-      {/* FatSecret food search */}
+      {/* AI Describe or Search toggle */}
       <div className="mt-5">
-        <p className={FIELD_LABEL_CLASS}>Search food</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className={FIELD_LABEL_CLASS}>{showAI ? 'Describe what you ate' : 'Search food'}</p>
+          <button
+            type="button"
+            onClick={() => setShowAI(!showAI)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all',
+              showAI
+                ? 'bg-[hsl(var(--brand))] text-white'
+                : 'bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)]'
+            )}
+          >
+            {showAI ? <Search className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {showAI ? 'Search instead' : 'Describe with AI'}
+          </button>
+        </div>
+
+        {showAI ? (
+          <div className="rounded-[16px] border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.05)] p-3">
+            <AIFoodInput onFoodsDetected={handleAIFoodsDetected} />
+          </div>
+        ) : (
+        <>
         <div className="relative mt-2">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
           <input
@@ -605,6 +646,8 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
             No results for &quot;{searchQuery}&quot;. Try another name.
           </p>
         ) : null}
+        </>
+        )}
       </div>
 
       {/* Added foods list */}
