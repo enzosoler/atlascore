@@ -32,7 +32,7 @@ import { useI18n } from '@/lib/i18nContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
-import { searchFatSecretFoods } from '@/services/fatsecretService';
+import { searchFoods } from '@/services/foodSearchService';
 import { searchTaco } from '@/services/tacoService';
 
 const FIELD_LABEL_CLASS =
@@ -871,26 +871,32 @@ export default function NutritionPage() {
     let active = true;
     const timer = window.setTimeout(async () => {
       try {
-        console.log('[Nutrition] Fetching FatSecret for:', q, 'lang:', lang);
-        let fatSecretFoods = await searchFatSecretFoods(q, lang);
-        console.log('[Nutrition] FatSecret results:', fatSecretFoods.length, fatSecretFoods.map(f => f.name));
+        console.log('[Nutrition] Fetching external foods for:', q, 'lang:', lang);
+        const searchResult = await searchFoods(q, lang);
+        
+        if (!searchResult.success) {
+          throw new Error(searchResult.error || 'Search failed');
+        }
+        
+        const externalFoods = searchResult.results || [];
+        console.log('[Nutrition] External search results:', externalFoods.length, externalFoods.map(f => f.name));
         if (!active) return;
 
-        // Combine TACO + FatSecret results, removing duplicates
+        // Combine TACO + external results, removing duplicates
         const seenIds = new Set(tacoResults.map(f => String(f.id)));
-        const uniqueFatSecretFoods = fatSecretFoods.filter(f => {
+        const uniqueExternalFoods = externalFoods.filter(f => {
           const key = String(f.id);
           if (seenIds.has(key)) return false;
           seenIds.add(key);
           return true;
         });
 
-        // Combine: TACO first (local), then FatSecret results
-        const combinedResults = [...tacoResults, ...uniqueFatSecretFoods].slice(0, 12);
+        // Combine: TACO first (local), then external results
+        const combinedResults = [...tacoResults, ...uniqueExternalFoods].slice(0, 12);
         console.log('[Nutrition] Combined results:', combinedResults.length);
         setFoodResults(combinedResults);
       } catch (error) {
-        console.error('[Nutrition] FatSecret search failed:', error);
+        console.error('[Nutrition] External search failed:', error);
         if (active) {
           // Keep TACO results if FatSecret fails
           setFoodResults(tacoResults);
