@@ -265,65 +265,114 @@ export default function Pricing() {
   }, [locale, pricing, billing, t]);
 
   const handleSubscribe = async (planId) => {
-    console.log('[Pricing] handleSubscribe called with planId:', planId);
+    console.log('[Checkout] ========================================');
+    console.log('[Checkout] Starting checkout flow for plan:', planId);
     
+    // ── 1. Validações iniciais ─────────────────────────────────────
     if (planId === 'free') {
       window.location.href = '/auth?mode=signup';
       return;
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user?.id) {
       sessionStorage.setItem('pending_plan', planId);
       window.location.href = `/auth?mode=signup&next=/Pricing`;
       return;
     }
 
-    console.log('[Pricing] Calling create-checkout with:', { plan: planId, user_id: user?.id, email: user?.email, region, billing });
     setLoading(planId);
+    
     try {
-      // Get current session for JWT token
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      // ── 2. Obter sessão e token ──────────────────────────────────
+      console.log('[Checkout] Getting Supabase session...');
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
-      // DEBUG: Log session details
-      console.log('[Pricing] session?', session);
-      console.log('[Pricing] token?', token ? `${token.substring(0, 20)}... (${token.length} chars)` : 'NO TOKEN');
-
-      // Use Stripe Checkout via Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: {
-          plan: planId,
-          user_id: user?.id,
-          email: user?.email,
-          region,
-          billing,
-          success_url: `${window.location.origin}/Today?subscribed=1`,
-          cancel_url: `${window.location.origin}/Pricing`,
-        },
-        headers: token ? {
-          'Authorization': `Bearer ${token}`,
-        } : {},
+      if (sessionError) {
+        console.error('[Checkout] Session error:', sessionError);
+        toast.error('Erro de autenticação. Faça login novamente.');
+        return;
+      }
+      
+      const session = sessionData?.session;
+      const accessToken = session?.access_token;
+      
+      console.log('[Checkout] Session obtained:', {
+        hasSession: !!session,
+        hasToken: !!accessToken,
+        userId: session?.user?.id,
+        expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
       });
 
-      console.log('[Pricing] create-checkout response:', { data, error });
-
-      if (error) {
-        console.error('Checkout error:', error);
-        toast.error(error.message || 'Error starting checkout. Please try again.');
+      if (!accessToken) {
+        console.error('[Checkout] No access token available');
+        toast.error('Sessão expirada. Faça login novamente.');
         return;
       }
 
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        console.error('[Pricing] No URL in response:', data);
-        toast.error(data?.error || 'Error starting checkout. Please try again.');
+      // ── 3. Preparar payload ──────────────────────────────────────
+      const payload = {
+        plan: planId,
+        user_id: user.id,
+        email: user.email,
+        region: region || 'US',
+        billing: billing || 'monthly',
+        success_url: `${window.location.origin}/Today?subscribed=1`,
+        cancel_url: `${window.location.origin}/Pricing`,
+      };
+      
+      console.log('[Checkout] Payload:', payload);
+
+      // ── 4. Chamar Edge Function com fetch explícito ────────────────
+      console.log('[Checkout] Calling Edge Function...');
+      
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`;
+      
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('[Checkout] Response status:', response.status);
+
+      // ── 5. Tratar resposta ───────────────────────────────────────
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Checkout] HTTP error:', response.status, errorText);
+        
+        if (response.status === 401) {
+          toast.error('Sessão inválida. Faça login novamente.');
+        } else if (response.status === 403) {
+          toast.error('Acesso negado. Verifique suas permissões.');
+        } else {
+          toast.error(`Erro ${response.status}: ${errorText || 'Falha no checkout'}`);
+        }
+        return;
       }
+
+      const data = await response.json();
+      console.log('[Checkout] Response data:', data);
+
+      if (data?.success && data?.url) {
+        console.log('[Checkout] Redirecting to Stripe...');
+        window.location.href = data.url;
+      } else if (data?.error) {
+        console.error('[Checkout] Function returned error:', data.error);
+        toast.error(data.error);
+      } else {
+        console.error('[Checkout] Unexpected response:', data);
+        toast.error('Resposta inesperada do servidor');
+      }
+      
     } catch (error) {
-      toast.error('Could not connect to the payment server.');
-      console.error('Checkout error:', error);
+      console.error('[Checkout] Exception:', error);
+      toast.error('Falha na conexão. Tente novamente.');
     } finally {
       setLoading(null);
+      console.log('[Checkout] ========================================');
     }
   };
 

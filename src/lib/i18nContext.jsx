@@ -1,20 +1,21 @@
-import React, { createContext } from 'react';
-import { t as translate } from '@/lib/i18n';
+import React, { createContext, useCallback } from 'react';
+import { t as translate, getLanguage } from '@/lib/i18n';
 
 export const I18nContext = createContext();
 
 /**
- * I18nContext — English-only provider
- * Always uses en-US locale
+ * I18nProvider — Build-time locale provider
+ * Locale is determined at build time by VITE_LOCALE, not runtime
  */
 export function I18nProvider({ children }) {
-  const locale = 'en-US';
+  // Get locale from build-time i18n configuration
+  const locale = getLanguage();
 
-  const setLocale = React.useCallback(() => {
-    // No-op: language is always en-US
+  const setLocale = useCallback(() => {
+    // No-op: language is fixed at build time
   }, []);
 
-  const t = React.useCallback((key) => translate(key, locale), []);
+  const t = useCallback((key, params) => translate(key, locale, params), [locale]);
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>

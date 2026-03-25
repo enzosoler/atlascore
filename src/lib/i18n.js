@@ -1,71 +1,60 @@
-import enUS from './translations/en-US.json';
-import enUSOnboarding from './translations/en-US-onboarding.json';
+import en from './translations/en-US.json';
+import enOnb from './translations/en-US-onboarding.json';
+import pt from './translations/pt-BR.json';
+import ptOnb from './translations/pt-BR-onboarding.json';
 
-export const translations = {
-  'en-US': { ...enUS, ...enUSOnboarding },
-};
+// BUILD-TIME LOCALE DETECTION
+const BUILD_LOCALE = import.meta.env.VITE_LOCALE || 'en-US';
+const IS_PT = BUILD_LOCALE === 'pt-BR';
 
-export const DEFAULT_LANGUAGE = 'en-US';
-export const supportedLanguages = ['en-US'];
-export const LANGUAGE_STORAGE_KEY = 'atlas_locale';
-export const LEGACY_LANGUAGE_STORAGE_KEY = 'language';
+// DEBUG LOGS - visible in browser console
+console.log('[i18n] === BUILD INFO ===');
+console.log('[i18n] VITE_LOCALE:', import.meta.env.VITE_LOCALE);
+console.log('[i18n] BUILD_LOCALE:', BUILD_LOCALE);
+console.log('[i18n] IS_PT:', IS_PT);
 
-export const normalizeLanguage = (lang) => {
-  return 'en-US';
-};
+// Load translations based on build locale
+const translations = IS_PT 
+  ? { ...pt, ...ptOnb }
+  : { ...en, ...enOnb };
 
-export const detectPreferredLanguage = () => {
-  return 'en-US';
-};
+console.log('[i18n] Loaded translations for:', IS_PT ? 'pt-BR' : 'en-US');
+console.log('[i18n] Sample key (common.appName):', translations.common?.appName || 'NOT FOUND');
 
-// No-op: language is always en-US
-export const resetLanguageToSystem = () => {
-  if (typeof window === 'undefined') return 'en-US';
-  window.dispatchEvent(new CustomEvent('languageChanged', { detail: 'en-US' }));
-  return 'en-US';
-};
+// Export locale functions
+export const getLanguage = () => BUILD_LOCALE;
+export const DEFAULT_LANGUAGE = BUILD_LOCALE;
+export const supportedLanguages = [BUILD_LOCALE];
+export const setLanguage = () => { console.log('[i18n] setLanguage called - ignored (build-time locale)'); };
+export const normalizeLanguage = () => BUILD_LOCALE;
+export const detectPreferredLanguage = () => BUILD_LOCALE;
+export const resetLanguageToSystem = () => BUILD_LOCALE;
 
-export const getLanguage = () => {
-  return 'en-US';
-};
-
-export const setLanguage = (lang) => {
-  // No-op: language is always en-US
-};
-
-const getTranslationValue = (key) => {
+// Translation lookup
+const getVal = (key) => {
   const keys = key.split('.');
-  let value = translations['en-US'];
-
+  let val = translations;
   for (const k of keys) {
-    value = value?.[k];
-    if (value === undefined) break;
-  }
-
-  return value;
-};
-
-const interpolate = (template, params = {}) => {
-  if (typeof template !== 'string' || !params || typeof params !== 'object') {
-    return template;
-  }
-
-  return template.replace(/\{(\w+)\}/g, (_, token) => {
-    if (params[token] === undefined || params[token] === null) {
-      return `{${token}}`;
+    val = val?.[k];
+    if (val === undefined) {
+      if (import.meta.env.DEV) {
+        console.warn(`[i18n] Missing key: "${key}"`);
+      }
+      return '';
     }
-
-    return String(params[token]);
-  });
+  }
+  return val;
 };
 
-export const t = (key, _lang, params) => {
-  const value = getTranslationValue(key);
-
-  if (value === undefined) {
-    console.warn(`Translation key not found: ${key}`);
-    return key;
+// Translation function
+export const t = (key, _ignoredLocale, params) => {
+  const val = getVal(key);
+  if (!val) {
+    if (import.meta.env.DEV) {
+      console.error(`[i18n] CRITICAL: Missing "${key}"`);
+    }
+    return '';
   }
-
-  return interpolate(value, params);
+  if (!params) return val;
+  return val.replace(/\{(\w+)\}/g, (_, t) => params[t] ?? `{${t}}`);
 };

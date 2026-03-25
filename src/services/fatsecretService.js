@@ -6,26 +6,23 @@
  * and are never bundled into the client.
  */
 
-import { supabase } from '@/lib/supabaseClient';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 export async function searchFatSecretFoods(query, language = 'en') {
-  // Get current session to pass auth token
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session?.access_token) {
-    throw new Error('Not authenticated. Please sign in again.');
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/food-search`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, language }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Search failed: ${response.status}`);
   }
 
-  const { data, error } = await supabase.functions.invoke('food-search', {
-    body: { query, language },
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-    },
-  });
-
-  if (error) {
-    throw new Error(`External search error: ${error.message}`);
-  }
-
+  const data = await response.json();
   return data?.results ?? [];
 }

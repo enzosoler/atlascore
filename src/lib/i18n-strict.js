@@ -11,12 +11,20 @@ import ptOnboarding from './translations/pt-BR-onboarding.json';
 
 // BUILD-TIME LOCALE DETECTION
 // Vite replaces import.meta.env.VITE_LOCALE at build time
-const BUILD_LOCALE = import.meta.env.VITE_LOCALE || 'en-US';
+const rawLocale = import.meta.env.VITE_LOCALE;
+const buildLocale = import.meta.env.BUILD_LOCALE;
 
-// DEBUG: Log the build locale in production
-console.log('[i18n] Build locale:', BUILD_LOCALE);
-console.log('[i18n] VITE_LOCALE env:', import.meta.env.VITE_LOCALE);
-console.log('[i18n] BUILD_LOCALE env:', import.meta.env.BUILD_LOCALE);
+// DEBUG: Log everything about locale detection
+console.log('[i18n] === LOCALE DETECTION ===');
+console.log('[i18n] import.meta.env.VITE_LOCALE:', rawLocale);
+console.log('[i18n] import.meta.env.BUILD_LOCALE:', buildLocale);
+console.log('[i18n] import.meta.env (all keys):', Object.keys(import.meta.env || {}));
+console.log('[i18n] typeof import.meta.env:', typeof import.meta.env);
+
+// Defensive fallback - if Vite didn't replace the value, use explicit check
+const BUILD_LOCALE = rawLocale || buildLocale || 'en-US';
+
+console.log('[i18n] Final BUILD_LOCALE:', BUILD_LOCALE);
 
 // STRICT LOCALE MAP - NO FALLBACKS
 const TRANSLATIONS_BY_LOCALE = {
