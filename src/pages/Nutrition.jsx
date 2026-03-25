@@ -468,7 +468,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
       } catch {
         // Keep TACO results if external search fails
         setSearchResults(tacoHits);
-        setSearchError(tacoHits.length > 0 ? 'Food search error: Search failed (003)' : 'No results found. Try another search.');
+        setSearchError(tacoHits.length > 0 ? 'External search failed. Showing local results.' : 'No results found. Try another search.');
       } finally {
         setIsSearching(false);
       }
@@ -1344,7 +1344,7 @@ export default function NutritionPage() {
 
         <Section
           title="Search food"
-          subtitle="Instant results from TACO. Also searches Open Food Facts for branded and packaged foods."
+          subtitle="Instant results from TACO. Also searches global database for branded and packaged foods."
         >
           <Card className="px-5 py-5">
             <label className={FIELD_LABEL_CLASS}>
