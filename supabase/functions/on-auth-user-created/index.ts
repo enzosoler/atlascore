@@ -26,7 +26,7 @@ if (!SERVICE_ROLE_KEY) {
   console.error('on-auth-user-created: SUPABASE_SERVICE_ROLE_KEY not set');
 }
 
-const SEND_EMAIL_URL = SERVICE_ROLE_KEY ? `${SUPABASE_URL}/functions/v1/send-email` : '';
+const SEND_EMAIL_URL = `${SUPABASE_URL}/functions/v1/send-email`;
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -57,7 +57,8 @@ async function invokeEmailFunction(payload: Record<string, unknown>): Promise<vo
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+        'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+        'apikey': SERVICE_ROLE_KEY,
       },
       body: JSON.stringify(payload),
     });

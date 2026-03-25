@@ -160,10 +160,16 @@ a{text-decoration:none}
   ${inner}
   <div class="ft">
     <p class="ft-brand">Atlas Core</p>
+    <p class="ft-copy" style="font-style: italic; margin-bottom: 12px;">
+      "One visual system from first click to daily use."
+    </p>
     <p class="ft-copy">
       © ${new Date().getFullYear()} Atlas Core. All rights reserved.<br/>
       Questions? <a href="mailto:support@atlascore.app">support@atlascore.app</a>
       &nbsp;·&nbsp; <a href="${appUrl}">atlascore.app</a>
+    </p>
+    <p class="ft-copy" style="margin-top: 16px; font-size: 10px; color: ${C.fg3};">
+      Tired of being elite? <a href="${appUrl}/settings/notifications" style="color: ${C.fg3}; text-decoration: underline;">Unsubscribe here</a> and return to mediocrity. We won't judge (much).
     </p>
   </div>
 </div>
@@ -198,8 +204,8 @@ function buildWelcome(p: EmailPayload, _lang: RenderLang, appUrl: string): Email
     subject: 'Welcome to Atlas Core',
     eyebrow: `Hi ${n},`,
     headline: 'Your training intelligence<br/>starts here.',
-    copy1: 'You are not here to log data for the sake of it. You are here to understand what works, double down on it, and move with more clarity.',
-    copy2: 'Atlas Core brings your workouts, nutrition, lab exams, body measurements, and AI context into one sharp view of your progress.',
+    copy1: 'You are not here to log data for the sake of it. You are here to understand what works, double down on it, and move with more clarity. This is your new visual system for performance.',
+    copy2: 'Atlas Core brings your workouts, nutrition, lab exams, body measurements, and AI context into one sharp view of your progress. No detached layers, just pure performance data.',
     features: [
       'Workout adherence and training volume tracked over time',
       'Nutrition logging tied directly to your goals',

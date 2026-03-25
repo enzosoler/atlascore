@@ -594,32 +594,30 @@ export default function Pricing() {
             ))}
           </div>
         </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 pb-6 lg:px-8">
-        <div className="atlas-public-panel-muted px-6 py-6 lg:px-8">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-            <div>
-              <p className="atlas-metric-label">{ui.footerTitle}</p>
-              <p className="mt-3 max-w-3xl text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                {ui.footerCopy}
-              </p>
-              <p className="mt-4 text-[12px] text-[hsl(var(--fg-3))]">{t('pricing_page.footer')}</p>
-              <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">{t('pricing_page.footerPayment')}</p>
+      </section>      <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
+        <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
+          <div className="flex flex-col items-center text-center">
+            <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              {t('pricing_page.footer')}
+            </p>
+            <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
+              {t('pricing_page.footerPayment')}
+            </p>
+            
+            <div className="mt-8">
+              {!isAuthenticated ? (
+                <Button asChild size="lg">
+                  <Link to={`${ROUTES.auth}?mode=signup`}>
+                    {ui.signup}
+                    <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2} />
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild size="lg" variant="outline">
+                  <Link to={ROUTES.today}>{t('pricing_page.backToApp')}</Link>
+                </Button>
+              )}
             </div>
-
-            {!isAuthenticated ? (
-              <Button asChild size="lg">
-                <Link to={`${ROUTES.auth}?mode=signup`}>
-                  {ui.signup}
-                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild size="lg" variant="outline">
-                <Link to={ROUTES.today}>{t('pricing_page.backToApp')}</Link>
-              </Button>
-            )}
           </div>
         </div>
       </section>
