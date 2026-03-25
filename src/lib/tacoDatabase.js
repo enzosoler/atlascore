@@ -12,7 +12,7 @@ export const TACO = [
   { id: 't002', name: 'Brown rice, cooked',      category: 'Grains', kcal: 124, protein: 2.6,  carbs: 25.8, fat: 1.0,  aliases: ['brown rice cooked', 'brown rice'] },
   { id: 't003', name: 'Rotini pasta, cooked',   category: 'Grains', kcal: 136, protein: 4.4,  carbs: 27.7, fat: 0.9,  aliases: ['rotini pasta cooked', 'rotini pasta'] },
   { id: 't004', name: 'Sliced bread',                category: 'Grains', kcal: 265, protein: 8.5,  carbs: 49.4, fat: 3.5,  aliases: ['sliced bread'] },
-  { id: 't005', name: 'French roll',                 category: 'Grains', kcal: 300, protein: 8.0,  carbs: 58.6, fat: 3.1,  aliases: ['french roll'] },
+  { id: 't005', name: 'French roll',                 category: 'Grains', kcal: 300, protein: 8.0,  carbs: 58.6, fat: 3.1,  aliases: ['french roll', 'pao frances', 'pão francês', 'french bread'] },
   { id: 't006', name: 'Rolled oats',               category: 'Grains', kcal: 394, protein: 13.9, carbs: 66.6, fat: 8.5,  aliases: ['rolled oats'] },
   { id: 't007', name: 'Wheat flour',            category: 'Grains', kcal: 360, protein: 9.8,  carbs: 75.1, fat: 1.4,  aliases: ['wheat flour'] },
   { id: 't008', name: 'Tapioca (cassava starch)',  category: 'Grains', kcal: 358, protein: 0.2,  carbs: 88.7, fat: 0.0,  aliases: ['tapioca cassava starch', 'tapioca'] },
