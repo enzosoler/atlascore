@@ -4,6 +4,20 @@
  */
 
 export const FEATURE_LOCKS = {
+  // AI Food Logging
+  ai_food_text: {
+    label: 'AI food logging',
+    minPlan: 'free',
+    limits: { free: '5/day', pro: '30/day', performance: '50/day' },
+    description: 'Describe what you ate and AI fills in the macros',
+  },
+  ai_food_photo: {
+    label: 'Photo food scanner',
+    minPlan: 'pro',
+    limits: { pro: '5/day', performance: '15/day' },
+    description: 'Take a photo of your meal and AI detects foods and macros',
+  },
+
   // Insights
   atlas_ai: {
     label: 'Insights',

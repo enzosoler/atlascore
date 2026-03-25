@@ -5,11 +5,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { X, Plus, Edit2, Loader2, Camera } from 'lucide-react';
+import { X, Plus, Edit2, Loader2, Camera, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { MEAL_TYPES } from '@/lib/atlas-theme';
 import FoodSearch from './FoodSearch';
 import FoodCameraScanner from './FoodCameraScanner';
+import AIFoodInput from './AIFoodInput';
 
 const MACRO_COLORS = { protein: '#4F8CFF', carbs: '#8B7CFF', fat: '#F5A83A' };
 
@@ -20,6 +21,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
   const [editingIdx, setEditingIdx] = useState(null);
   const [editAmount, setEditAmount] = useState('');
   const [showCamera, setShowCamera] = useState(false);
+  const [showAIInput, setShowAIInput] = useState(false);
 
   const totals = useMemo(() => {
     return foods.reduce(
@@ -89,7 +91,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
   const handleFoodsDetected = (detectedFoods) => {
     const formatted = detectedFoods.map(f => ({
       name: f.name,
-      amount: 100,
+      amount: parseFloat(f.serving_description) || 100,
       unit: 'g',
       kcal: f.calories || 0,
       protein: f.protein || 0,
@@ -99,6 +101,23 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
     }));
     setFoods(prev => [...prev, ...formatted]);
     toast.success(`${detectedFoods.length} food(s) added from photo`);
+  };
+
+  const handleAIFoodsDetected = (detectedFoods) => {
+    const formatted = detectedFoods.map(f => ({
+      name: f.name,
+      amount: parseFloat(f.serving_description) || 100,
+      unit: 'g',
+      kcal: f.calories || 0,
+      protein: f.protein || 0,
+      carbs: f.carbs || 0,
+      fat: f.fat || 0,
+      fiber: f.fiber || 0,
+      _ai: true,
+    }));
+    setFoods(prev => [...prev, ...formatted]);
+    setShowAIInput(false);
+    toast.success(`${detectedFoods.length} food(s) added via AI`);
   };
 
   const duplicateMeal = () => {
@@ -142,11 +161,28 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
             </SelectContent>
           </Select>
 
+          {/* AI Food Input — describe what you ate */}
+          {showAIInput ? (
+            <div className="p-3 rounded-xl border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.05)]">
+              <AIFoodInput onFoodsDetected={handleAIFoodsDetected} />
+            </div>
+          ) : null}
+
           {/* Foods list with edit capability */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="section-label">Foods</p>
               <div className="flex gap-2">
+                {/* AI describe button */}
+                <Button
+                  variant={showAIInput ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowAIInput(!showAIInput)}
+                  className={`h-8 gap-1.5 text-[12px] ${showAIInput ? 'bg-[hsl(var(--brand))] text-white' : ''}`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Describe
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -193,7 +229,14 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
                     ) : (
                       <>
                         <div>
-                          <p className="font-medium">{f.name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-medium">{f.name}</p>
+                            {f._ai && (
+                              <span className="text-[9px] px-1 py-0.5 rounded bg-[hsl(var(--brand)/0.15)] text-[hsl(var(--brand))] font-medium">
+                                AI
+                              </span>
+                            )}
+                          </div>
                           <p className="text-muted-foreground">
                             {f.amount}
                             {f.unit} · {Math.round(f.kcal)} kcal

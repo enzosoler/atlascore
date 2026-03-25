@@ -374,7 +374,7 @@ function App() {
             <QueryClientProvider client={queryClientInstance}>
               <SubscriptionProvider>
                 <DailyStoreProvider>
-                  <Router>
+                  <Router basename={import.meta.env.BASE_URL}>
                     <I18nProvider>
                       <AuthenticatedApp />
                     </I18nProvider>

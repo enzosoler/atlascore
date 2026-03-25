@@ -6,7 +6,25 @@ import { createTranslator } from '@/i18n/translator';
 
 const I18nContext = createContext(null);
 
+/**
+ * Detect locale from the build-time env variable (set by vite.config.i18n.js)
+ * or fall back to parsing the browser URL.
+ * When BrowserRouter has basename="/br/", useLocation().pathname strips the prefix,
+ * so we rely on the build locale instead.
+ */
+function getBuildLocale() {
+  const buildLocale = import.meta.env.VITE_LOCALE;
+  if (buildLocale === 'pt-BR') return 'pt-BR';
+  if (buildLocale === 'en-US') return 'en';
+  return null;
+}
+
 function getLocaleFromPath(pathname) {
+  // First check build-time locale (reliable for /br/ builds with basename)
+  const buildLocale = getBuildLocale();
+  if (buildLocale) return buildLocale;
+
+  // Fallback: parse from path (for dev mode or non-i18n builds)
   const parts = pathname.split('/').filter(Boolean);
   const firstSegment = parts[0];
   if (firstSegment === 'en') return 'en';
@@ -15,16 +33,23 @@ function getLocaleFromPath(pathname) {
 }
 
 function buildPathWithLocale(pathname, targetLocale) {
-  const parts = pathname.split('/').filter(Boolean);
-  const currentFirst = parts[0];
-  const hasLocalePrefix = currentFirst === 'en' || currentFirst === 'pt' || currentFirst === 'br';
-  const newPrefix = targetLocale === 'pt-BR' ? 'br' : localeToPublicPath(targetLocale);
-  if (hasLocalePrefix) {
-    parts[0] = newPrefix;
+  // When switching locales, we need to navigate to a full URL
+  // because the other locale lives on a different base path
+  if (targetLocale === 'pt-BR') {
+    // Strip any existing locale prefix and build /br/ path
+    const parts = pathname.split('/').filter(Boolean);
+    const currentFirst = parts[0];
+    const hasLocalePrefix = currentFirst === 'en' || currentFirst === 'pt' || currentFirst === 'br';
+    const cleanParts = hasLocalePrefix ? parts.slice(1) : parts;
+    return '/br/' + cleanParts.join('/');
   } else {
-    parts.unshift(newPrefix);
+    // English: strip locale prefix and go to root
+    const parts = pathname.split('/').filter(Boolean);
+    const currentFirst = parts[0];
+    const hasLocalePrefix = currentFirst === 'en' || currentFirst === 'pt' || currentFirst === 'br';
+    const cleanParts = hasLocalePrefix ? parts.slice(1) : parts;
+    return '/' + cleanParts.join('/');
   }
-  return '/' + parts.join('/');
 }
 
 export function I18nProvider({ children }) {
@@ -67,7 +92,11 @@ export function I18nProvider({ children }) {
   }, []);
 
   const switchLocale = useCallback((targetLocale) => {
-    return buildPathWithLocale(location.pathname, targetLocale);
+    // For locale switching between /br/ and /, we need a full page navigation
+    // because each locale is a separate build with its own basename
+    const newPath = buildPathWithLocale(location.pathname, targetLocale);
+    window.location.href = newPath;
+    return newPath;
   }, [location.pathname]);
 
   const value = { locale, t, dictionary: dictionary || {}, isLoading, setLocale, switchLocale, getTranslation: (key) => {
