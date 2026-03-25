@@ -1,8 +1,8 @@
 /**
- * Food Search Service v3 - FatSecret Canonical
+ * Food Search Service v4 - Open Food Facts
  *
- * - searchFoods: uses FatSecret foods.search.v4
- * - getFoodDetails: uses FatSecret food.get.v5
+ * - searchFoods: uses Open Food Facts API (free, no authentication)
+ * - getFoodDetails: uses Open Food Facts API
  * - Returns normalized results with explicit provider
  */
 
@@ -46,7 +46,7 @@ export async function searchFoods(query, language = 'pt', region = 'BR') {
         success: false,
         results: [],
         error: data?.error || `Search failed (${response.status})`,
-        provider: data?.provider || 'fatsecret',
+        provider: data?.provider || 'open-food-facts',
       };
     }
 
@@ -54,7 +54,7 @@ export async function searchFoods(query, language = 'pt', region = 'BR') {
 
     return {
       success: true,
-      provider: data?.provider || 'fatsecret',
+      provider: data?.provider || 'open-food-facts',
       fallbackUsed: !!data?.fallbackUsed,
       count: results.length,
       results: results.map((item) => ({
@@ -65,7 +65,7 @@ export async function searchFoods(query, language = 'pt', region = 'BR') {
         protein: Number(item.protein || 0),
         carbs: Number(item.carbs || 0),
         fat: Number(item.fat || 0),
-        source: 'FatSecret',
+        source: 'Open Food Facts',
         sourceId: String(item.sourceId || item.id),
         description: item.description || null,
       })),
