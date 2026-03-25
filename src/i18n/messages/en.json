@@ -368,7 +368,8 @@
           "Basic protocols",
           "Profile & settings",
           "30-day history",
-          "Weekly insights"
+          "Weekly insights",
+          "Social sharing cards"
         ],
         "missing": [
           "Structured workout/meal tools",
@@ -397,8 +398,7 @@
           "Advanced analytics",
           "Progress insights",
           "PDF & CSV exports",
-          "Stock alerts",
-          "Premium social cards"
+          "Stock alerts"
         ],
         "missing": []
       },

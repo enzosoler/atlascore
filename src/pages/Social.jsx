@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { useSubscription } from '@/lib/SubscriptionContext';
-import UpgradeGate from '@/components/entitlements/UpgradeGate';
+
 import { getDailyCheckin } from '@/services/checkinService';
 import {
   SafePageBoundary,
@@ -96,16 +95,10 @@ export default function Social() {
 
 function SocialContent() {
   const { user } = useAuth();
-  const { can } = useSubscription();
   const [selectedCard, setSelectedCard] = useState(null);
 
   const today = getToday();
   const weekStart = getWeekStart();
-
-  // Check if user can access social cards
-  if (!can('social_cards')) {
-    return <UpgradeGate feature="social_cards" plan="Pro" />;
-  }
 
   const { data: checkin, isLoading: loadingCheckin } = useQuery({
     queryKey: ['social-checkin', today],

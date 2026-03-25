@@ -237,7 +237,8 @@
             "Dashboard básico de Hoje",
             "Registro de treino e nutrição",
             "Acompanhamento de medidas",
-            "Insights semanais"
+            "Insights semanais",
+            "Cards de compartilhamento social"
           ],
           "missing": [
             "Ferramentas de plano estruturado",
@@ -368,7 +369,8 @@
           "Protocolos básicos",
           "Perfil e configurações",
           "30 dias de histórico",
-          "Insights semanais"
+          "Insights semanais",
+          "Cards de compartilhamento social"
         ],
         "missing": [
           "Ferramentas de plano estruturado",
@@ -397,8 +399,7 @@
           "Análises avançadas",
           "Insights de progresso",
           "Exportações PDF e CSV",
-          "Alertas de estoque",
-          "Cards sociais premium"
+          "Alertas de estoque"
         ],
         "missing": []
       },

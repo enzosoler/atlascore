@@ -100,8 +100,8 @@ export const FEATURE_LOCKS = {
 
   // Social
   social_cards: {
-    label: 'Premium social cards',
-    minPlan: 'pro',
+    label: 'Social cards',
+    minPlan: 'free',
   },
 
   // Macro view

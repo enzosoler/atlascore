@@ -223,7 +223,7 @@ const COPY = {
       toggle: { intl: 'USD / International', br: 'BRL / Brasil' },
       free: {
         name: 'Free', priceIntl: '$0', priceBR: 'R$ 0', period: '/month', annualNote: 'Always free. No card required.',
-        features: ['Basic Today', 'Workout and nutrition diary', 'Measurement tracking', 'Basic protocols', 'Profile and settings', 'Limited history (30 days)', 'Weekly insights'],
+        features: ['Basic Today', 'Workout and nutrition diary', 'Measurement tracking', 'Basic protocols', 'Profile and settings', 'Limited history (30 days)', 'Weekly insights', 'Social sharing cards'],
         absent: ['Structured plan tools', 'Full lab work', 'Progress photos', 'Advanced analytics', 'PDF/CSV export'],
         cta: 'Get Started Free', id: 'free',
       },
@@ -234,7 +234,7 @@ const COPY = {
         features: [
           'Everything in Free', 'Meal plan tools', 'Workout plan tools', 'Complete meal/workout plans',
           'Full lab work', 'Unlimited progress photos', 'Expanded history (1 year)',
-          'Complete analytics', 'Progress insights', 'PDF and CSV export', 'Stock alerts', 'Premium social cards',
+          'Complete analytics', 'Progress insights', 'PDF and CSV export', 'Stock alerts',
         ],
         cta: 'Start Pro Free for 7 Days', id: 'pro_monthly',
       },
