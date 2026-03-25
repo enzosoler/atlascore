@@ -573,7 +573,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 
         {isSearching ? (
           <div className="mt-3 flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
-            <Loader2 className="h-4 w-4 animate-spin" /> Searching FatSecret…
+            <Loader2 className="h-4 w-4 animate-spin" /> Searching database…
           </div>
         ) : null}
 
@@ -665,7 +665,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
             Search and add foods above
           </p>
           <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
-            Instant results from TACO — packaged foods via FatSecret
+            Instant results from TACO — global database via Open Food Facts
           </p>
         </div>
       ) : null}
@@ -886,7 +886,7 @@ export default function NutritionPage() {
     // Show TACO results immediately while fetching FatSecret
     setFoodResults(tacoResults);
 
-    // Step 2: always fetch FatSecret for international/packaged foods
+    // Step 2: always fetch external database for international/packaged foods
     setIsSearchingFoods(true);
     setFoodSearchError('');
 
@@ -897,7 +897,7 @@ export default function NutritionPage() {
     let active = true;
     const timer = window.setTimeout(async () => {
       try {
-        console.log('[Nutrition] Fetching FatSecret foods for:', q, 'lang:', lang);
+        console.log('[Nutrition] Fetching external foods for:', q, 'lang:', lang);
         const searchResult = await searchFoods(q, lang, 'BR');
         
         if (!searchResult.success) {
@@ -905,19 +905,19 @@ export default function NutritionPage() {
         }
         
         const externalFoods = searchResult.results || [];
-        console.log('[Nutrition] FatSecret results:', externalFoods.length, externalFoods.map(f => f.name));
+        console.log('[Nutrition] External search results:', externalFoods.length, externalFoods.map(f => f.name));
         if (!active) return;
 
-        // Combine TACO + FatSecret results, removing duplicates
+        // Combine TACO + external results, removing duplicates
         const combinedResults = mergeFoodResults(tacoResults, externalFoods, 12);
         console.log('[Nutrition] Combined results:', combinedResults.length);
         setFoodResults(combinedResults);
       } catch (error) {
-        console.error('[Nutrition] FatSecret search failed:', error);
+        console.error('[Nutrition] Food search failed:', error);
         if (active) {
-          // Keep TACO results if FatSecret fails
+          // Keep TACO results if external search fails
           setFoodResults(tacoResults);
-          setFoodSearchError(`FatSecret search error: ${error.message}`);
+          setFoodSearchError(`Food search error: ${error.message}`);
         }
       } finally {
         if (active) setIsSearchingFoods(false);
@@ -940,7 +940,7 @@ export default function NutritionPage() {
       return;
     }
 
-    // FatSecret: fetch richer serving data first
+    // External database: fetch richer serving data first
     setSavingFoodId(food.id);
 
     try {
@@ -1060,7 +1060,7 @@ export default function NutritionPage() {
           serving_unit: food.unit || 'g',
           serving_size: food.amount || 100,
           external_id: food.external_id || null,
-          source_api: food.source_api || 'FatSecret',
+          source_api: food.source_api || 'Open Food Facts',
         };
 
         const { data, error } = await supabase
