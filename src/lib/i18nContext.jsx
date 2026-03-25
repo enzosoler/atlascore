@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { defaultLocale, localeToPublicPath, isValidLocale } from '@/i18n/config';
+import { defaultLocale, isValidLocale } from '@/i18n/config';
 import { loadDictionaryWithFallback } from '@/i18n/dictionaries';
 import { createTranslator } from '@/i18n/translator';
 
 const I18nContext = createContext(null);
+
+const LOCALE_STORAGE_KEY = 'atlas_locale';
 
 /**
  * Detect locale from the build-time env variable (set by vite.config.i18n.js)
@@ -19,6 +21,82 @@ function getBuildLocale() {
   return null;
 }
 
+/**
+ * Detect locale from browser language (navigator.language).
+ * If the browser is set to Portuguese (pt, pt-BR, pt-PT, etc.), return 'pt-BR'.
+ * Otherwise return 'en'.
+ */
+function getBrowserLocale() {
+  if (typeof navigator === 'undefined') return defaultLocale;
+  const lang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  if (lang.startsWith('pt')) return 'pt-BR';
+  return 'en';
+}
+
+/**
+ * Read persisted locale from localStorage.
+ */
+function getStoredLocale() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (stored && isValidLocale(stored)) return stored;
+  } catch {
+    // localStorage may be unavailable
+  }
+  return null;
+}
+
+/**
+ * Persist locale to localStorage.
+ */
+function storeLocale(locale) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  } catch {
+    // localStorage may be unavailable
+  }
+}
+
+/**
+ * Resolve the initial locale with this priority:
+ * 1. Build-time locale (for /br/ builds)
+ * 2. localStorage (user's previous explicit choice)
+ * 3. URL path segment (/br/ or /pt/)
+ * 4. Browser language (navigator.language)
+ * 5. Default locale ('en')
+ */
+function resolveInitialLocale(pathname) {
+  // 1. Build-time locale
+  const buildLocale = getBuildLocale();
+  if (buildLocale) {
+    storeLocale(buildLocale);
+    return buildLocale;
+  }
+
+  // 2. localStorage
+  const stored = getStoredLocale();
+  if (stored) return stored;
+
+  // 3. URL path
+  const parts = pathname.split('/').filter(Boolean);
+  const firstSegment = parts[0];
+  if (firstSegment === 'pt' || firstSegment === 'br') {
+    storeLocale('pt-BR');
+    return 'pt-BR';
+  }
+  if (firstSegment === 'en') {
+    storeLocale('en');
+    return 'en';
+  }
+
+  // 4. Browser language
+  const browserLocale = getBrowserLocale();
+  storeLocale(browserLocale);
+  return browserLocale;
+}
+
 function getLocaleFromPath(pathname) {
   // First check build-time locale (reliable for /br/ builds with basename)
   const buildLocale = getBuildLocale();
@@ -29,6 +107,11 @@ function getLocaleFromPath(pathname) {
   const firstSegment = parts[0];
   if (firstSegment === 'en') return 'en';
   if (firstSegment === 'pt' || firstSegment === 'br') return 'pt-BR';
+
+  // Don't override stored locale on path changes within the app
+  const stored = getStoredLocale();
+  if (stored) return stored;
+
   return defaultLocale;
 }
 
@@ -54,7 +137,7 @@ function buildPathWithLocale(pathname, targetLocale) {
 
 export function I18nProvider({ children }) {
   const location = useLocation();
-  const [locale, setLocaleState] = useState(() => getLocaleFromPath(location.pathname));
+  const [locale, setLocaleState] = useState(() => resolveInitialLocale(location.pathname));
   const [dictionary, setDictionary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -79,8 +162,14 @@ export function I18nProvider({ children }) {
     const newLocale = getLocaleFromPath(location.pathname);
     if (newLocale !== locale && isValidLocale(newLocale)) {
       setLocaleState(newLocale);
+      storeLocale(newLocale);
     }
   }, [location.pathname, locale]);
+
+  // Persist locale changes to localStorage
+  useEffect(() => {
+    storeLocale(locale);
+  }, [locale]);
 
   const t = useMemo(() => {
     if (!dictionary) return (key) => key;
@@ -88,15 +177,29 @@ export function I18nProvider({ children }) {
   }, [dictionary]);
 
   const setLocale = useCallback((newLocale) => {
-    if (isValidLocale(newLocale)) setLocaleState(newLocale);
+    if (isValidLocale(newLocale)) {
+      setLocaleState(newLocale);
+      storeLocale(newLocale);
+    }
   }, []);
 
   const switchLocale = useCallback((targetLocale) => {
-    // For locale switching between /br/ and /, we need a full page navigation
-    // because each locale is a separate build with its own basename
-    const newPath = buildPathWithLocale(location.pathname, targetLocale);
-    window.location.href = newPath;
-    return newPath;
+    // Persist the choice before navigating
+    storeLocale(targetLocale);
+
+    // Check if we're in a build with basename (e.g., /br/ build)
+    const buildLocale = getBuildLocale();
+    if (buildLocale) {
+      // We're in a locale-specific build — need full page navigation
+      const newPath = buildPathWithLocale(location.pathname, targetLocale);
+      window.location.href = newPath;
+      return newPath;
+    }
+
+    // In the main (EN) build, just update the locale in-place
+    // No need for full page navigation — the dictionary will reload
+    setLocaleState(targetLocale);
+    return null;
   }, [location.pathname]);
 
   const value = { locale, t, dictionary: dictionary || {}, isLoading, setLocale, switchLocale, getTranslation: (key) => {

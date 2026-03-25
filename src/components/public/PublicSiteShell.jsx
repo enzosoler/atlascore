@@ -33,8 +33,40 @@ const SUBTITLE = {
   'pt-BR': 'Sistema de Performance',
 };
 
+/**
+ * Language toggle button — compact pill that switches between EN and PT-BR.
+ */
+export function LanguageToggle({ className = '' }) {
+  let locale = 'en';
+  let switchLocale = () => {};
+  try {
+    const i18n = useI18n();
+    locale = i18n.locale || 'en';
+    switchLocale = i18n.switchLocale;
+  } catch (e) {
+    // fallback if not in I18nProvider
+  }
+
+  const isPt = locale === 'pt-BR';
+  const nextLocale = isPt ? 'en' : 'pt-BR';
+  const label = isPt ? 'EN' : 'PT';
+
+  return (
+    <button
+      onClick={() => switchLocale(nextLocale)}
+      className={cn(
+        'inline-flex items-center justify-center rounded-full border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.56)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[hsl(var(--fg-2))] transition-all hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]',
+        className
+      )}
+      title={isPt ? 'Switch to English' : 'Mudar para Português'}
+    >
+      {label}
+    </button>
+  );
+}
+
 export function PublicLanguageSwitcher({ className = '', align = 'end' }) {
-  return null;
+  return <LanguageToggle className={className} />;
 }
 
 export function PublicSectionHeader({
@@ -111,6 +143,7 @@ export function PublicNav({ links = [], actions, compact = false }) {
         ) : null}
 
         <div className="flex items-center gap-2.5">
+          <LanguageToggle />
           <ThemeToggleButton compact className="sm:hidden" />
           <ThemeToggleButton className="hidden sm:inline-flex" />
           {actions}

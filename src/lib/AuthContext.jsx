@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }) => {
 
     if (typeof window === 'undefined') return;
 
-    window.localStorage.removeItem('atlas_locale');
+    // atlas_locale is preserved across sessions for language continuity
     window.localStorage.removeItem('atlas_region');
     window.localStorage.removeItem('pending_plan');
     window.sessionStorage.clear();

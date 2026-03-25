@@ -175,8 +175,37 @@ export default function Auth() {
   const [forgotPassword, setForgotPassword] = React.useState(false);
   const [resetSent, setResetSent] = React.useState(false);
 
+  const { language: currentLocale } = useTranslation();
+  const isPt = currentLocale === 'pt-BR';
+
   const ui = React.useMemo(
-    () => ({
+    () => isPt ? ({
+      secureLabel: 'Acesso seguro',
+      heroTitle: 'Entre e mantenha seu progresso conectado em um só lugar.',
+      heroCopy:
+        'Treinos, nutrição, exames, medidas e insights de progresso ficam no mesmo contexto para você continuar sem atrito.',
+      authHint: isLogin
+        ? 'Entre novamente para retomar seu histórico, adesão e contexto sem perder o ritmo.'
+        : 'Crie sua conta para começar com treino, nutrição e progresso organizados desde o primeiro dia.',
+      fullNameLabel: 'Nome completo',
+      fullNamePlaceholder: 'Seu nome',
+      emailPlaceholder: 'voce@exemplo.com',
+      passwordPlaceholder: 'Sua senha',
+      recoveryTitle: 'Precisa de ajuda para acessar sua conta?',
+      recoveryCopy:
+        'Envie um email do endereço vinculado à sua conta e ajudaremos você a entrar.',
+      recoveryCta: 'Contatar suporte',
+      supportLink: 'Esqueceu sua senha? Contate o suporte.',
+      missingCredentials: 'Digite seu email e senha para continuar.',
+      missingName: 'Digite seu nome completo para criar sua conta.',
+      emailConfirmation:
+        'Conta criada. Verifique seu email para confirmar o acesso antes de entrar.',
+      signInCta: 'Entrar',
+      signInBusy: 'Entrando...',
+      signUpCta: 'Criar conta',
+      signUpBusy: 'Criando conta...',
+      backHome: 'Voltar ao início',
+    }) : ({
       secureLabel: 'Secure access',
       heroTitle: 'Sign in and keep your progress connected in one place.',
       heroCopy:
@@ -203,7 +232,7 @@ export default function Auth() {
       signUpBusy: 'Creating account...',
       backHome: 'Back to home',
     }),
-    [isLogin]
+    [isLogin, isPt]
   );
 
   const features = [
@@ -227,6 +256,9 @@ export default function Auth() {
 
     const destinationLabel = getDestinationLabel(requestedDestination);
 
+    if (isPt) {
+      return `${isLogin ? 'Após entrar' : 'Após criar sua conta'}, você continuará para ${destinationLabel}.`;
+    }
     return `${isLogin ? 'After sign-in' : 'After you create your account'}, you will continue to ${destinationLabel}.`;
   }, [isLogin, nextParam, requestedDestination]);
 

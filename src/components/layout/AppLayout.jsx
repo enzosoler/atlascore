@@ -37,6 +37,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
+import { LanguageToggle } from '@/components/public/PublicSiteShell';
+import { useI18n } from '@/lib/i18nContext';
 import { getPrimaryScrollTop, resetPrimaryScroll, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
 
 const ICON_MAP = {
@@ -170,6 +172,36 @@ function BrandLockup({ logoWidth, logoHeight, textClassName = '', className = ''
         <span className="font-medium text-[hsl(var(--fg)/0.84)]">.core</span>
       </span>
     </div>
+  );
+}
+
+function LanguageToggleNav({ collapsed }) {
+  let locale = 'en';
+  let switchLocale = () => {};
+  try {
+    const i18n = useI18n();
+    locale = i18n.locale || 'en';
+    switchLocale = i18n.switchLocale;
+  } catch (e) {
+    // fallback
+  }
+
+  const isPt = locale === 'pt-BR';
+  const nextLocale = isPt ? 'en' : 'pt-BR';
+  const currentLabel = isPt ? 'PT' : 'EN';
+  const nextLabel = isPt ? 'EN' : 'PT';
+
+  return (
+    <button
+      onClick={() => switchLocale(nextLocale)}
+      title={isPt ? 'Switch to English' : 'Mudar para Português'}
+      className={getDesktopNavItemClass(false, collapsed)}
+    >
+      <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[10px] font-bold uppercase tracking-[0.04em]">
+        {currentLabel}
+      </span>
+      {!collapsed ? <span>{isPt ? 'English' : 'Português'}</span> : null}
+    </button>
   );
 }
 
@@ -414,6 +446,7 @@ export default function AppLayout() {
               <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
               {!collapsed ? <span>Settings</span> : null}
             </Link>
+            <LanguageToggleNav collapsed={collapsed} />
             <ThemeToggleButton
               compact={collapsed}
               className={collapsed ? '' : 'w-full justify-start'}
@@ -553,6 +586,7 @@ export default function AppLayout() {
                     {ROLE_LABELS[role] || role}
                   </span>
                 </div>
+                <LanguageToggleNav collapsed={false} />
                 <Link to={ROUTES.settings} className={getMobileNavItemClass(isActive(ROUTES.settings))}>
                   <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
                   <span>Settings</span>
