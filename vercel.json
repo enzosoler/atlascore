@@ -3,7 +3,7 @@
   "public": true,
   "outputDirectory": "dist",
   "framework": null,
-  "buildCommand": null,
+  "buildCommand": "npm run build:dual",
   "installCommand": null,
   "rewrites": [
     { "source": "/br/:path*", "destination": "/br/index.html" },

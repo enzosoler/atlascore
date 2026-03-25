@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: outDir,
       assetsDir: 'assets',
-      emptyOutDir: true,
+      emptyOutDir: !isPT,  // false for PT build to preserve EN build in dist/
     },
   };
 });
