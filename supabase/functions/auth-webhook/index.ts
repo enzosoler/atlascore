@@ -36,16 +36,27 @@ interface WebhookPayload {
   };
 }
 
-// Validate webhook secret from custom header
+// Validate webhook secret - supports both X-Webhook-Secret and Supabase Auth format
 function validateWebhookSecret(req: Request): boolean {
-  // Supabase Auth doesn't send Authorization Bearer
-  // Instead, we use a custom header X-Webhook-Secret
+  // Try X-Webhook-Secret first (our custom header)
   const secretHeader = req.headers.get('X-Webhook-Secret') || '';
+  
+  // Try Authorization Bearer (what Supabase Auth sends when hook secret is configured)
+  const authHeader = req.headers.get('Authorization') || '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.replace('Bearer ', '') : '';
+  
+  // Also check query param as fallback
+  const url = new URL(req.url);
+  const secretFromQuery = url.searchParams.get('secret') || '';
+  
+  const receivedSecret = secretHeader || bearerToken || secretFromQuery;
   
   logWebhook('validate_secret', {
     hasHeader: !!secretHeader,
+    hasBearer: !!bearerToken,
+    hasQuery: !!secretFromQuery,
     hasEnvSecret: !!WEBHOOK_SECRET,
-    headerLength: secretHeader.length,
+    receivedLength: receivedSecret.length,
     secretLength: WEBHOOK_SECRET.length,
   });
   
@@ -54,14 +65,20 @@ function validateWebhookSecret(req: Request): boolean {
     return false;
   }
   
+  if (!receivedSecret) {
+    console.error('No secret received in request');
+    return false;
+  }
+  
   // Constant-time comparison to prevent timing attacks
-  if (secretHeader.length !== WEBHOOK_SECRET.length) {
+  if (receivedSecret.length !== WEBHOOK_SECRET.length) {
+    console.error('Secret length mismatch');
     return false;
   }
   
   let result = 0;
-  for (let i = 0; i < secretHeader.length; i++) {
-    result |= secretHeader.charCodeAt(i) ^ WEBHOOK_SECRET.charCodeAt(i);
+  for (let i = 0; i < receivedSecret.length; i++) {
+    result |= receivedSecret.charCodeAt(i) ^ WEBHOOK_SECRET.charCodeAt(i);
   }
   
   return result === 0;
