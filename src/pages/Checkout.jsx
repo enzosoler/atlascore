@@ -3,12 +3,25 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Check, Lock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Link } from 'react-router-dom';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const [step, setStep] = React.useState(1);
+  const [billingTermsAccepted, setBillingTermsAccepted] = React.useState(false);
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
+    // Record billing terms acceptance
+    try {
+      const { supabase } = await import('@/lib/supabaseClient');
+      await supabase.functions.invoke('terms-acceptance/accept-billing', {
+        body: {},
+      });
+    } catch (error) {
+      console.error('Failed to record billing terms acceptance:', error);
+    }
+
     setStep(3);
     setTimeout(() => navigate('/today'), 2000);
   };
@@ -72,7 +85,37 @@ export default function Checkout() {
                 <Lock className="w-4 h-4" />
                 <span>Payments are secure and encrypted</span>
               </div>
-              <Button onClick={handlePayment} className="w-full">Pay $9.99</Button>
+
+              {/* Billing Terms Checkbox */}
+              <div className="flex items-start gap-3 rounded-lg border border-[hsl(var(--border))] p-3">
+                <Checkbox
+                  id="billing-terms"
+                  checked={billingTermsAccepted}
+                  onCheckedChange={setBillingTermsAccepted}
+                  className="mt-0.5"
+                />
+                <label htmlFor="billing-terms" className="text-sm text-[hsl(var(--fg-2))] cursor-pointer">
+                  I agree to the{' '}
+                  <Link
+                    to="/terms"
+                    target="_blank"
+                    className="underline hover:text-[hsl(var(--fg))]"
+                  >
+                    Subscription Terms
+                  </Link>{' '}
+                  and authorize Atlas Core to charge my payment method $9.99 monthly. 
+                  I understand that subscriptions automatically renew and can be cancelled 
+                  anytime in my account settings.
+                </label>
+              </div>
+
+              <Button 
+                onClick={handlePayment} 
+                className="w-full"
+                disabled={!billingTermsAccepted}
+              >
+                Pay $9.99
+              </Button>
             </div>
           )}
 

@@ -320,6 +320,18 @@ export default function Auth() {
 
       const result = await signUp(normalizedEmail, password, { fullName });
 
+      // Record terms acceptance
+      try {
+        await supabase.functions.invoke('terms-acceptance', {
+          body: {
+            user_id: result.user?.id,
+          },
+        });
+      } catch (termsError) {
+        // Log but don't block signup if terms recording fails
+        console.error('Failed to record terms acceptance:', termsError);
+      }
+
       // Send welcome email via edge function
       if (!result.needsEmailConfirmation) {
         try {
@@ -533,6 +545,29 @@ export default function Auth() {
                   <div className="text-[12px] text-green-600 bg-green-600/10 px-3 py-2 rounded-lg">
                     {successMessage}
                   </div>
+                )}
+
+                {/* Legal Acceptance - Signup Only */}
+                {!isLogin && (
+                  <p className="text-center text-[12px] text-[hsl(var(--fg-3))]">
+                    By creating an account, you agree to our{' '}
+                    <Link
+                      to="/terms"
+                      target="_blank"
+                      className="underline hover:text-[hsl(var(--fg-2))]"
+                    >
+                      Terms of Service
+                    </Link>{' '}
+                    and{' '}
+                    <Link
+                      to="/privacy"
+                      target="_blank"
+                      className="underline hover:text-[hsl(var(--fg-2))]"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
+                  </p>
                 )}
 
                 {/* Primary CTA */}
