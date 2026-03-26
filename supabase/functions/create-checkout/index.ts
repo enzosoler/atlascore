@@ -1,6 +1,13 @@
 /**
  * create-checkout - Stripe Checkout Session for Subscriptions
  *
+ * Architecture:
+ * - BR has dedicated Stripe Price IDs (BRL prices created separately in Stripe)
+ * - All other regions use the US Price IDs, which have Manual Currency Prices
+ *   configured in Stripe. Stripe auto-detects the customer's location and
+ *   presents the correct local currency at checkout.
+ * - Adaptive Pricing is enabled as a fallback for countries without manual prices.
+ *
  * Deploy:
  *   supabase functions deploy create-checkout
  *
@@ -19,8 +26,13 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// Price IDs configuration
+// ── Price ID configuration ─────────────────────────────────────────────────────
+// BR has its own dedicated Price IDs (legacy).
+// All other regions use the US Price IDs — Stripe resolves local currency
+// via Manual Currency Prices or Adaptive Pricing.
+
 const PRICE_MAP: Record<string, Record<string, string>> = {
+  // Brazil — dedicated BRL prices
   br_monthly: {
     athlete_pro: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PRO') || '',
     athlete_performance: Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PERFORMANCE') || '',
@@ -35,14 +47,16 @@ const PRICE_MAP: Record<string, Record<string, string>> = {
     nutritionist: Deno.env.get('STRIPE_PRICE_BR_YEARLY_NUTRITIONIST') || '',
     clinician: Deno.env.get('STRIPE_PRICE_BR_YEARLY_CLINICIAN') || '',
   },
-  us_monthly: {
+  // Default (US) — used for ALL non-BR regions.
+  // Stripe's Manual Currency Prices + Adaptive Pricing handle localization.
+  default_monthly: {
     athlete_pro: Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PRO') || '',
     athlete_performance: Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PERFORMANCE') || '',
     coach: Deno.env.get('STRIPE_PRICE_US_MONTHLY_COACH') || '',
     nutritionist: Deno.env.get('STRIPE_PRICE_US_MONTHLY_NUTRITIONIST') || '',
     clinician: Deno.env.get('STRIPE_PRICE_US_MONTHLY_CLINICIAN') || '',
   },
-  us_yearly: {
+  default_yearly: {
     athlete_pro: Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PRO') || '',
     athlete_performance: Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE') || '',
     coach: Deno.env.get('STRIPE_PRICE_US_YEARLY_COACH') || '',
@@ -55,7 +69,7 @@ interface CheckoutRequest {
   plan: string;
   user_id: string;
   email: string;
-  region?: 'BR' | 'US';
+  region?: string;
   billing?: 'monthly' | 'yearly';
   success_url?: string;
   cancel_url?: string;
@@ -93,7 +107,7 @@ serve(async (req) => {
     });
   }
 
-  const { plan, user_id, email, region = 'BR', billing = 'monthly', success_url, cancel_url } = body;
+  const { plan, user_id, email, region = 'US', billing = 'monthly', success_url, cancel_url } = body;
 
   if (!plan || !user_id || !email) {
     return new Response(JSON.stringify({ error: 'Missing required fields: plan, user_id, email' }), {
@@ -102,7 +116,8 @@ serve(async (req) => {
     });
   }
 
-  const regionKey = region.toLowerCase() === 'us' ? 'us' : 'br';
+  // Resolve price key: BR gets its own prices, everyone else uses default (US)
+  const regionKey = region.toUpperCase() === 'BR' ? 'br' : 'default';
   const billingKey = billing === 'yearly' ? 'yearly' : 'monthly';
   const priceKey = `${regionKey}_${billingKey}`;
   const priceId = PRICE_MAP[priceKey]?.[plan];
@@ -148,7 +163,7 @@ serve(async (req) => {
         // Create new customer
         const customer = await stripe.customers.create({
           email,
-          metadata: { user_id, app: 'atlas-core' },
+          metadata: { user_id, app: 'atlas-core', region },
         });
         customerId = customer.id;
       }
@@ -165,6 +180,7 @@ serve(async (req) => {
         user_id,
         plan,
         email,
+        region,
       },
       subscription_data: {
         trial_period_days: 7,
@@ -172,14 +188,15 @@ serve(async (req) => {
           user_id,
           plan,
           email,
+          region,
         },
       },
       allow_promotion_codes: true,
     });
 
-    console.log(`create-checkout: session=${session.id} user=${user_id} plan=${plan}`);
+    console.log(`create-checkout: session=${session.id} user=${user_id} plan=${plan} region=${region}`);
 
-    return new Response(JSON.stringify({ url: session.url, session_id: session.id }), {
+    return new Response(JSON.stringify({ success: true, url: session.url, session_id: session.id }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
