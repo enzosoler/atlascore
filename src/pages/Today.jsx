@@ -1069,46 +1069,34 @@ function TodayContent() {
               );
             })}
           </div>
+
+          {/* ── Quick actions — inline inside the hero card ── */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setCameraOpen(true)}
+              disabled={isSavingMeal}
+              className="group inline-flex items-center gap-2 rounded-full border border-[hsl(var(--brand)/0.32)] bg-[hsl(var(--brand)/0.14)] px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] backdrop-blur-[14px] transition-all hover:bg-[hsl(var(--brand)/0.22)] hover:shadow-[var(--shadow-sm)] active:scale-[0.97]"
+            >
+              <Camera className="h-4 w-4 shrink-0" strokeWidth={2} />
+              {isSavingMeal
+                ? (isEN ? 'Saving...' : 'Salvando...')
+                : (isEN ? 'Snap a meal' : 'Foto da refeição')}
+            </button>
+
+            <button
+              onClick={handleQuickStartWorkout}
+              className="group inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent-secondary)/0.32)] bg-[hsl(var(--accent-secondary)/0.14)] px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] text-[hsl(var(--accent-secondary))] shadow-[var(--shadow-xs)] backdrop-blur-[14px] transition-all hover:bg-[hsl(var(--accent-secondary)/0.22)] hover:shadow-[var(--shadow-sm)] active:scale-[0.97]"
+            >
+              <Dumbbell className="h-4 w-4 shrink-0" strokeWidth={2} />
+              {workoutDone
+                ? (isEN ? 'Workout done' : 'Treino feito')
+                : activeWorkoutPlan
+                  ? (isEN ? 'Start workout' : 'Iniciar treino')
+                  : (isEN ? 'Log workout' : 'Registrar treino')}
+            </button>
+          </div>
         </div>
       </TodayCard>
-
-      {/* ── Quick actions: Snap a meal + Start workout ── */}
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => setCameraOpen(true)}
-          disabled={isSavingMeal}
-          className="atlas-card group relative flex flex-col items-center gap-3 overflow-hidden rounded-[24px] border-[hsl(var(--brand)/0.28)] bg-[linear-gradient(135deg,hsl(var(--brand)/0.14)_0%,hsl(var(--card))_100%)] p-5 text-center shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] active:scale-[0.97]"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-[hsl(var(--brand)/0.24)] bg-[hsl(var(--brand)/0.16)] text-[hsl(var(--brand))] transition-transform group-hover:scale-105">
-            <Camera className="h-6 w-6" strokeWidth={1.8} />
-          </div>
-          <div>
-            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {isSavingMeal ? 'Saving...' : 'Snap a meal'}
-            </p>
-            <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
-              Photo → AI → logged
-            </p>
-          </div>
-        </button>
-
-        <button
-          onClick={handleQuickStartWorkout}
-          className="atlas-card group relative flex flex-col items-center gap-3 overflow-hidden rounded-[24px] border-[hsl(var(--accent-secondary)/0.28)] bg-[linear-gradient(135deg,hsl(var(--accent-secondary)/0.14)_0%,hsl(var(--card))_100%)] p-5 text-center shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] active:scale-[0.97]"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-[hsl(var(--accent-secondary)/0.24)] bg-[hsl(var(--accent-secondary)/0.16)] text-[hsl(var(--accent-secondary))] transition-transform group-hover:scale-105">
-            <Dumbbell className="h-6 w-6" strokeWidth={1.8} />
-          </div>
-          <div>
-            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {workoutDone ? 'Workout done' : activeWorkoutPlan ? 'Start workout' : 'Log workout'}
-            </p>
-            <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
-              {activeWorkoutPlan ? activeWorkoutPlan.name : 'Free session'}
-            </p>
-          </div>
-        </button>
-      </div>
 
       {/* Camera scanner modal for quick meal logging */}
       <FoodCameraScanner
