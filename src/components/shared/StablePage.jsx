@@ -71,6 +71,8 @@ export class SafePageBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error(`[SafePageBoundary:${this.props.title || 'Page'}]`, error, errorInfo);
+    // Log para debug - mostra no console do navegador
+    window.__lastPageError = { error: error?.toString?.(), stack: error?.stack, componentStack: errorInfo?.componentStack };
   }
 
   render() {
