@@ -27,6 +27,7 @@ import { supabase } from '@/lib/supabaseClient';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
 import AIWorkoutInput from '@/components/workouts/AIWorkoutInput';
+import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import {
@@ -599,8 +600,23 @@ export default function WorkoutsV2() {
   const [activeSession, setActiveSession] = useState(null);
   const [autoStartHandled, setAutoStartHandled] = useState(false);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
-  const [showAIGen, setShowAIGen] = useState(false);
-  const [aiGenerating, setAiGenerating] = useState(false);
+  const [showPlanBuilder, setShowPlanBuilder] = useState(false);
+  const [profileData, setProfileData] = useState({});
+
+  // Fetch user profile data for AI plan generation
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (error) throw error;
+      return data || {};
+    },
+    enabled: !!user?.id,
+  });
 
   const { data: activePlan, isLoading: isLoadingPlan } = useQuery({
     queryKey: ['active-workout-plan', user?.id],
@@ -688,75 +704,6 @@ export default function WorkoutsV2() {
     toast.success('Plan created! Start a session from any day.');
   };
 
-  const generateAIPlan = async () => {
-    setAiGenerating(true);
-    try {
-      const profileData = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      const profile = profileData?.data || {};
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Create a detailed weekly workout plan in English for an athlete with the following profile:
-- Goal: ${profile.training_goal || 'general fitness'}
-- Experience: ${profile.training_experience || 'intermediate'}
-- Location: ${profile.training_location || 'gym'}
-- Session duration: ${profile.training_session_minutes || 60} minutes
-- Frequency: ${profile.training_frequency || 4} days/week
-
-Create a structured plan with 3-5 training days, each with specific exercises, sets, reps and rest time.`,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            objective: { type: 'string' },
-            frequency: { type: 'number' },
-            days: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  label: { type: 'string' },
-                  focus: { type: 'string' },
-                  exercises: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        name: { type: 'string' },
-                        sets: { type: 'number' },
-                        reps: { type: 'string' },
-                        rest: { type: 'number' },
-                        notes: { type: 'string' },
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
-      if (res?.days?.length) {
-        await deactivateAllWorkoutPlans(user.id);
-        await createWorkoutPlan(user.id, {
-          ...res,
-          active: true,
-          created_by_type: 'ai',
-          version: 1,
-          start_date: new Date().toISOString().split('T')[0],
-        });
-        qc.invalidateQueries({ queryKey: ['active-workout-plan', user?.id] });
-        qc.invalidateQueries({ queryKey: ['today-workout-plan', user?.id] });
-        toast.success('Plan generated!');
-        setShowAIGen(false);
-      } else {
-        toast.error('Could not generate plan. Try again.');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Error generating plan.');
-    } finally {
-      setAiGenerating(false);
-    }
-  };
 
   // ── Execution mode ────────────────────────────────────────────────────────
   if (mode === 'execution') {
@@ -784,7 +731,7 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
         actions={(
           <ActionRow>
             {can('ai_workout_generation') ? (
-              <SecondaryButton className="gap-2" onClick={() => setShowAIGen(true)}>
+              <SecondaryButton className="gap-2" onClick={() => setShowPlanBuilder(true)}>
                 <Sparkles className="h-4 w-4" />
                 Plan builder
               </SecondaryButton>
@@ -940,24 +887,14 @@ Create a structured plan with 3-5 training days, each with specific exercises, s
         />
       )}
 
-      {/* Plan generation modal */}
-      {showAIGen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="relative mx-4 w-full max-w-sm rounded-[24px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6 shadow-lg">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--fg-3))]">Plan builder</p>
-            <h2 className="mt-2 text-lg font-bold text-[hsl(var(--fg))] tracking-tight">Build workout plan</h2>
-            <p className="mt-2 text-sm text-[hsl(var(--fg-2))] leading-6">Your profile will be used to build a personalized training plan. Your current active plan will be replaced.</p>
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              <SecondaryButton type="button" onClick={() => setShowAIGen(false)} className="flex-1">
-                Cancel
-              </SecondaryButton>
-              <PrimaryButton type="button" onClick={generateAIPlan} disabled={aiGenerating} className="flex-1 gap-2">
-                {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {aiGenerating ? 'Building...' : 'Build'}
-              </PrimaryButton>
-            </div>
-          </div>
-        </div>
+      {/* Plan Builder Wizard */}
+      {showPlanBuilder && (
+        <PlanBuilderWizard
+          open={showPlanBuilder}
+          onClose={() => setShowPlanBuilder(false)}
+          userId={user?.id}
+          profileData={userProfile || {}}
+        />
       )}
 
     </AppContainer>

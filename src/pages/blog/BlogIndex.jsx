@@ -25,6 +25,54 @@ function CategoryPill({ category }) {
   );
 }
 
+function FeaturedPostCard({ post, locale }) {
+  const localized = getLocalizedPost(post, locale);
+
+  return (
+    <Link
+      to={`${ROUTES.blog}/${post.slug}`}
+      className="group relative overflow-hidden rounded-2xl border border-[hsl(var(--border)/0.7)] bg-gradient-to-br from-[hsl(var(--card))] to-[hsl(var(--fill)/0.3)] p-6 transition-all duration-300 hover:shadow-[var(--shadow-lg)] lg:p-8"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[hsl(var(--tint)/0.08)] to-transparent" />
+      
+      <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-8">
+        <div className="flex-1 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--tint))] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+              Featured
+            </span>
+            <CategoryPill category={localized.category} />
+            <div className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))]">
+              <Clock3 className="h-3 w-3" strokeWidth={1.9} />
+              <span>{post.readingTime} min read</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-[22px] font-semibold leading-tight tracking-[-0.025em] text-[hsl(var(--fg))] transition-colors group-hover:text-[hsl(var(--tint))] lg:text-[26px]">
+              {localized.title}
+            </h2>
+            <p className="max-w-2xl text-[15px] leading-7 text-[hsl(var(--fg-2))]">
+              {localized.excerpt}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <span className="flex items-center gap-1.5 text-[13px] font-semibold text-[hsl(var(--tint))]">
+              Read article
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2} />
+            </span>
+            <span className="text-[12px] text-[hsl(var(--fg-3))]">
+              <CalendarDays className="mr-1 inline h-3 w-3" strokeWidth={1.9} />
+              {formatDate(post.publishedAt, locale)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function PostCard({ post, locale }) {
   const localized = getLocalizedPost(post, locale);
 
@@ -79,6 +127,9 @@ export default function BlogIndex() {
           return loc.category === activeCategory;
         });
 
+  const featuredPost = BLOG_POSTS.find(p => p.featured);
+  const regularPosts = filtered.filter(p => p.slug !== featuredPost?.slug);
+
   const ui = {
     title: 'Insights for athletes\nwho track seriously.',
     description: 'Practical guides on training, nutrition, and building systems that actually produce results — not motivation, not hype.',
@@ -130,6 +181,13 @@ export default function BlogIndex() {
         </div>
       </section>
 
+      {/* Featured Post */}
+      {featuredPost && activeCategory === 'All' && (
+        <section className="mx-auto max-w-6xl px-5 pb-8 lg:px-8">
+          <FeaturedPostCard post={featuredPost} locale={locale} />
+        </section>
+      )}
+
       {/* Category filter */}
       <section className="mx-auto max-w-6xl px-5 pb-8 lg:px-8">
         <div className="flex flex-wrap gap-2">
@@ -153,7 +211,7 @@ export default function BlogIndex() {
       {/* Post grid */}
       <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((post) => (
+          {(activeCategory === 'All' ? regularPosts : filtered).map((post) => (
             <PostCard key={post.slug} post={post} locale={locale} />
           ))}
         </div>

@@ -6,6 +6,7 @@ import PublicSiteShell, {
 } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
 import BlogPostLayout from '@/components/content/BlogPostLayout';
+import BlogPostCTA from '@/components/content/BlogPostCTA';
 import { Button } from '@/components/ui/button';
 import { BLOG_POSTS, getPostBySlug, getLocalizedPost, getLocalizedContent } from '@/lib/blogPosts';
 import { ROUTES } from '@/lib/routes';
@@ -138,6 +139,7 @@ export default function BlogPost() {
           eyebrow={post.category}
         >
           <ReactMarkdown>{markdown}</ReactMarkdown>
+          <BlogPostCTA type={rawPost?.ctaType || 'tracking'} />
         </BlogPostLayout>
       </section>
 

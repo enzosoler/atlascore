@@ -20,6 +20,8 @@ export const BLOG_POSTS = [
       'en-US': 'Tools'
     },
     author: 'Atlas Core',
+    ctaType: 'tracking',
+    featured: false,
   },
   {
     slug: 'track-body-transformation',
@@ -35,6 +37,8 @@ export const BLOG_POSTS = [
       'en-US': 'Tracking'
     },
     author: 'Atlas Core',
+    ctaType: 'measurements',
+    featured: true,
   },
   {
     slug: 'why-no-fitness-progress',
@@ -50,6 +54,8 @@ export const BLOG_POSTS = [
       'en-US': 'Mindset'
     },
     author: 'Atlas Core',
+    ctaType: 'planning',
+    featured: false,
   },
   {
     slug: 'not-the-program',
@@ -65,6 +71,8 @@ export const BLOG_POSTS = [
       'en-US': 'Training'
     },
     author: 'Atlas Core',
+    ctaType: 'workout',
+    featured: false,
   },
   {
     slug: 'spreadsheets-vs-apps-vs-allinone',
@@ -80,6 +88,8 @@ export const BLOG_POSTS = [
       'en-US': 'Tools'
     },
     author: 'Atlas Core',
+    ctaType: 'tracking',
+    featured: false,
   },
   {
     slug: 'discipline-is-overrated',
@@ -95,6 +105,8 @@ export const BLOG_POSTS = [
       'en-US': 'Mindset'
     },
     author: 'Atlas Core',
+    ctaType: 'planning',
+    featured: false,
   },
   {
     slug: 'what-serious-athletes-track',
@@ -110,6 +122,8 @@ export const BLOG_POSTS = [
       'en-US': 'Tracking'
     },
     author: 'Atlas Core',
+    ctaType: 'tracking',
+    featured: false,
   },
   {
     slug: 'how-to-follow-a-meal-plan',
@@ -125,6 +139,8 @@ export const BLOG_POSTS = [
       'en-US': 'Nutrition'
     },
     author: 'Atlas Core',
+    ctaType: 'nutrition',
+    featured: false,
   },
   {
     slug: 'tracking-vs-guessing',
@@ -140,6 +156,8 @@ export const BLOG_POSTS = [
       'en-US': 'Tracking'
     },
     author: 'Atlas Core',
+    ctaType: 'tracking',
+    featured: false,
   },
   {
     slug: 'hidden-reason-diet-not-working',
@@ -155,6 +173,25 @@ export const BLOG_POSTS = [
       'en-US': 'Nutrition'
     },
     author: 'Atlas Core',
+    ctaType: 'nutrition',
+    featured: false,
+  },
+  {
+    slug: 'ai-vs-traditional-training',
+    title: {
+      'en-US': 'AI vs. Traditional Training Plans: Why Your Workout Should Adapt Weekly'
+    },
+    excerpt: {
+      'en-US': 'Static training plans assume you recover the same every week. AI-generated workouts adapt to your actual performance, sleep, and stress in real-time.'
+    },
+    publishedAt: '2025-03-26',
+    readingTime: 6,
+    category: {
+      'en-US': 'AI Training'
+    },
+    author: 'Atlas Core',
+    ctaType: 'workout',
+    featured: true,
   },
 ];
 
@@ -391,6 +428,65 @@ The gap between what you think you're doing and what you're actually doing is no
 ## The Hidden Reason Your Diet Isn't Working Has Nothing to Do With Your Diet
 
 You've tried every diet. The reason it's not working is almost certainly not the diet itself — and the fix is simpler than any new approach.
+`,
+
+'ai-vs-traditional-training': `
+## The Problem With Static Training Plans
+
+Traditional training plans are built on assumptions. They assume you'll recover at the same rate every week. They assume your sleep will be consistent. They assume your stress levels won't spike before a heavy squat day.
+
+But your body doesn't work that way.
+
+Some weeks you're dialed in — 8 hours of sleep, minimal stress, nutrition on point. Other weeks life happens. A work deadline, a bad night's sleep, travel. Yet that static plan on your spreadsheet keeps demanding the same weights, the same volume, regardless of your actual readiness.
+
+This mismatch between programmed load and actual recovery is where injuries happen and progress stalls.
+
+---
+
+## How AI Changes the Equation
+
+AI-generated workouts don't just change exercises. They adapt the entire training stimulus based on real inputs:
+
+### 1. Recovery Tracking Integration
+Your HRV, sleep quality, and subjective readiness scores inform the day's training load. Low recovery? The AI backs off volume. Fully recovered? It pushes progressive overload.
+
+### 2. Performance Pattern Recognition
+The AI learns how you respond to different rep ranges, exercises, and training frequencies. It identifies what actually drives your progress — not what should work on paper.
+
+### 3. Dynamic Progression
+Instead of rigid percentages, AI uses auto-regulation. The weight on the bar adjusts based on your last session's performance, not some arbitrary 8-week cycle written months ago.
+
+---
+
+## What This Looks Like in Practice
+
+**Week 1:** You sleep 9 hours, hit PRs. AI increases volume 10%.
+
+**Week 2:** Work stress peaks, sleep drops to 6 hours. AI reduces intensity 15%, substitutes a technical skill session.
+
+**Week 3:** Recovery normalizes. AI progresses weights based on your actual strength adaptation, not the original program's guesses.
+
+The result? Consistent progress without the boom-bust cycle of overreaching and deloading.
+
+---
+
+## The Data Advantage
+
+Static plans can't learn. They don't know that you actually grow faster with higher frequency and lower volume per session. They don't adjust when your bench stalls on the 5th week every cycle.
+
+AI accumulates data on *your* response patterns. Over months, it builds a model of what works specifically for your physiology, your schedule, your recovery capacity.
+
+This isn't guesswork anymore. It's evidence-based training at the individual level.
+
+---
+
+## The Real Difference
+
+Traditional plan: "Do 5x5 at 80% because the spreadsheet says so."
+
+AI plan: "Based on your sleep, HRV, and last session's RPE, today calls for 4x6 at 78% with 2 minutes rest. This matches your optimal volume threshold for hypertrophy based on 12 weeks of your data."
+
+One treats you like a template. The other treats you like an individual.
 `,
 
 };

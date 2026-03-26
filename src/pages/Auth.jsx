@@ -1,13 +1,9 @@
 import React from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Activity,
   ArrowRight,
   ArrowLeft,
-  BarChart3,
-  Dumbbell,
-  FlaskConical,
-  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/lib/AuthContext';
@@ -17,6 +13,7 @@ import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
 import { useReCaptcha, IS_CAPTCHA_ENABLED } from '@/lib/ReCaptchaContext';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 
 function resolveRequestedDestination(nextParam) {
   if (!nextParam) return ROUTES.today;
@@ -97,17 +94,6 @@ function getDestinationLabel(destination) {
   return labels[pathname] || 'your next step';
 }
 
-function FeatureCard({ icon: Icon, text }) {
-  return (
-    <div className="atlas-public-panel-muted p-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
-        <Icon className="h-4 w-4" strokeWidth={1.9} />
-      </div>
-      <p className="mt-4 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{text}</p>
-    </div>
-  );
-}
-
 function AuthField({
   id,
   label,
@@ -117,32 +103,21 @@ function AuthField({
   onChange,
   placeholder,
 }) {
-  const hasValue = String(value || '').length > 0;
-
   return (
-    <label
-      htmlFor={id}
-      className="relative block rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.56)_0%,hsl(var(--card))_100%)] px-4 pb-3 pt-5 transition-colors focus-within:border-[hsl(var(--brand)/0.42)] focus-within:ring-2 focus-within:ring-[hsl(var(--brand)/0.12)]"
-    >
-      <span
-        className={`pointer-events-none absolute left-4 transition-all duration-150 ${
-          hasValue
-            ? 'top-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]'
-            : 'top-[18px] text-[14px] text-[hsl(var(--fg-3))]'
-        }`}
-      >
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="text-[13px] font-medium text-[hsl(var(--fg))]">
         {label}
-      </span>
+      </label>
       <input
         id={id}
         type={type}
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
-        placeholder={hasValue ? placeholder : ''}
-        className="w-full border-0 bg-transparent px-0 pt-3 text-[15px] font-medium text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none"
+        placeholder={placeholder}
+        className="w-full h-11 px-4 rounded-xl border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] transition-all focus:outline-none focus:border-[hsl(var(--brand)/0.5)] focus:ring-2 focus:ring-[hsl(var(--brand)/0.08)]"
       />
-    </label>
+    </div>
   );
 }
 
@@ -180,67 +155,98 @@ export default function Auth() {
 
   const ui = React.useMemo(
     () => isPt ? ({
-      secureLabel: 'Acesso seguro',
-      heroTitle: 'Entre e mantenha seu progresso conectado em um só lugar.',
-      heroCopy:
-        'Treinos, nutrição, exames, medidas e insights de progresso ficam no mesmo contexto para você continuar sem atrito.',
-      authHint: isLogin
-        ? 'Entre novamente para retomar seu histórico, adesão e contexto sem perder o ritmo.'
-        : 'Crie sua conta para começar com treino, nutrição e progresso organizados desde o primeiro dia.',
+      // Headlines - personal and action-oriented
+      loginTitle: 'Bem-vindo de volta',
+      loginSubtitle: 'Continue seu treino e nutrição onde parou.',
+      signupTitle: 'Comece sua jornada',
+      signupSubtitle: 'Seu plano de treino e nutrição personalizado espera por você.',
+
+      // AI hint
+      aiHint: 'Com IA adaptativa',
+
+      // Form labels
       fullNameLabel: 'Nome completo',
       fullNamePlaceholder: 'Seu nome',
+      emailLabel: 'Email',
       emailPlaceholder: 'voce@exemplo.com',
+      passwordLabel: 'Senha',
       passwordPlaceholder: 'Sua senha',
-      recoveryTitle: 'Precisa de ajuda para acessar sua conta?',
-      recoveryCopy:
-        'Envie um email do endereço vinculado à sua conta e ajudaremos você a entrar.',
-      recoveryCta: 'Contatar suporte',
-      supportLink: 'Esqueceu sua senha? Contate o suporte.',
-      missingCredentials: 'Digite seu email e senha para continuar.',
-      missingName: 'Digite seu nome completo para criar sua conta.',
-      emailConfirmation:
-        'Conta criada. Verifique seu email para confirmar o acesso antes de entrar.',
+
+      // CTAs
       signInCta: 'Entrar',
       signInBusy: 'Entrando...',
       signUpCta: 'Criar conta',
-      signUpBusy: 'Criando conta...',
+      signUpBusy: 'Criando...',
+      googleSignIn: 'Continuar com Google',
+      orDivider: 'ou',
+
+      // Links
+      noAccount: 'Não tem conta?',
+      hasAccount: 'Já tem conta?',
+      createAccount: 'Criar conta',
+      signInLink: 'Entrar',
+      forgotPassword: 'Esqueceu a senha?',
+      backToSignIn: 'Voltar para entrar',
       backHome: 'Voltar ao início',
+
+      // Recovery
+      recoveryTitle: 'Redefinir senha',
+      recoverySubtitle: 'Enviamos um link para seu email.',
+      recoveryButton: 'Enviar link',
+      recoverySent: 'Link enviado! Verifique seu email.',
+
+      // Errors
+      missingCredentials: 'Digite seu email e senha.',
+      missingName: 'Digite seu nome completo.',
+      emailConfirmation: 'Conta criada! Confirme seu email para entrar.',
     }) : ({
-      secureLabel: 'Secure access',
-      heroTitle: 'Sign in and keep your progress connected in one place.',
-      heroCopy:
-        'Workouts, nutrition, labs, measurements and progress insights stay tied to the same context so you can pick up without friction.',
-      authHint: isLogin
-        ? 'Sign back in to pick up your history, adherence and context without losing momentum.'
-        : 'Create your account to start with training, nutrition and progress organized from day one.',
+      // Headlines - personal and action-oriented
+      loginTitle: 'Welcome back',
+      loginSubtitle: 'Pick up your training and nutrition right where you left off.',
+      signupTitle: 'Start your journey',
+      signupSubtitle: 'Your personalized training and nutrition plan is waiting.',
+
+      // AI hint
+      aiHint: 'AI-powered',
+
+      // Form labels
       fullNameLabel: 'Full name',
       fullNamePlaceholder: 'Your name',
+      emailLabel: 'Email',
       emailPlaceholder: 'you@example.com',
+      passwordLabel: 'Password',
       passwordPlaceholder: 'Your password',
-      recoveryTitle: 'Need help accessing your account?',
-      recoveryCopy:
-        'Email us from the address tied to your account and we will help you get back in.',
-      recoveryCta: 'Contact support',
-      supportLink: 'Forgot your password? Contact support.',
-      missingCredentials: 'Enter your email and password to continue.',
-      missingName: 'Enter your full name to create your account.',
-      emailConfirmation:
-        'Account created. Check your email to confirm access before signing in.',
+
+      // CTAs
       signInCta: 'Sign in',
       signInBusy: 'Signing in...',
       signUpCta: 'Create account',
-      signUpBusy: 'Creating account...',
+      signUpBusy: 'Creating...',
+      googleSignIn: 'Continue with Google',
+      orDivider: 'or',
+
+      // Links
+      noAccount: "Don't have an account?",
+      hasAccount: 'Already have an account?',
+      createAccount: 'Create account',
+      signInLink: 'Sign in',
+      forgotPassword: 'Forgot password?',
+      backToSignIn: 'Back to sign in',
       backHome: 'Back to home',
+
+      // Recovery
+      recoveryTitle: 'Reset password',
+      recoverySubtitle: "We'll send a link to your email.",
+      recoveryButton: 'Send reset link',
+      recoverySent: 'Reset link sent! Check your email.',
+
+      // Errors
+      missingCredentials: 'Enter your email and password.',
+      missingName: 'Enter your full name.',
+      emailConfirmation: 'Account created! Check your email to confirm.',
     }),
     [isLogin, isPt]
   );
-
-  const features = [
-    { icon: Dumbbell, text: t('auth.features.training') },
-    { icon: FlaskConical, text: t('auth.features.labs') },
-    { icon: BarChart3, text: t('auth.features.analytics') },
-    { icon: Activity, text: t('auth.features.ai') },
-  ];
 
   const loginHref = React.useMemo(
     () => buildAuthHref({ mode: 'login', next: nextParam }),
@@ -373,239 +379,243 @@ export default function Auth() {
   };
 
   return (
-    <PublicSiteShell
-      compactNav
-      showFooter={false}
-      actions={(
-        <>
-          <Button asChild variant="ghost" className="hidden sm:inline-flex">
-            <Link to={ROUTES.home}>{ui.backHome}</Link>
-          </Button>
-        </>
-      )}
-    >
-      <section className="mx-auto max-w-6xl px-5 py-10 lg:px-8 lg:py-16">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
-          <div className="atlas-page-header relative overflow-hidden px-6 py-6 lg:px-8 lg:py-8">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[hsl(var(--brand)/0.08)] to-transparent" />
-
-            <div className="relative space-y-7">
-              <div className="space-y-4">
-                <span className="atlas-public-pill">
-                  <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={1.9} />
-                  {ui.secureLabel}
-                </span>
-                <div className="space-y-4">
-                  <h1 className="atlas-display-title max-w-3xl text-[clamp(2.5rem,2rem+1.8vw,4.25rem)]">
-                    {ui.heroTitle}
-                  </h1>
-                  <p className="atlas-public-copy max-w-2xl">{ui.heroCopy}</p>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {features.map((feature) => (
-                  <FeatureCard key={feature.text} icon={feature.icon} text={feature.text} />
-                ))}
-              </div>
-            </div>
+    <PublicSiteShell compactNav showFooter={false}>
+      <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[380px]">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <Link to={ROUTES.home} className="flex items-center gap-2">
+              <AtlasCoreLogoSVG className="h-7 w-auto" variant="mono" />
+            </Link>
           </div>
 
-          <div className="atlas-public-panel px-6 py-6 lg:px-7 lg:py-7">
-            <div className="mx-auto max-w-sm">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[20px] border border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
-                <Activity className="h-5 w-5" strokeWidth={2} />
-              </div>
-
-              <div className="mt-6">
-                <h2 className="text-[1.7rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-                  {isLogin ? t('auth.login.title') : t('auth.signup.title')}
-                </h2>
-                <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                  {ui.authHint}
-                </p>
-                {destinationNote ? (
-                  <p className="mt-3 flex items-center gap-2 rounded-full border border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.08)] px-3 py-2 text-[12px] font-medium text-[hsl(var(--brand))]">
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                    <span>{destinationNote}</span>
-                  </p>
-                ) : null}
-              </div>
-
-              {/* ── Forgot password panel ── */}
-              {isLogin && forgotPassword && !resetSent && (
-                <form className="mt-7 space-y-4" onSubmit={handlePasswordReset}>
-                  <div>
-                    <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                      {ui.recoveryTitle}
-                    </p>
-                    <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      Enter your email and we will send you a link to reset your password.
-                    </p>
-                  </div>
-                  <AuthField
-                      id="resetEmail"
-                      label={t('profile.email')}
-                      type="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder={ui.emailPlaceholder}
-                  />
-                  {errorMessage ? (
-                    <div className="atlas-banner px-4 py-3.5 text-[12px]" data-tone="error">
-                      {errorMessage}
-                    </div>
-                  ) : null}
-                  <Button type="submit" size="lg" className="h-11 w-full" disabled={isSubmitting}>
-                    {isSubmitting ? 'Sending...' : 'Send reset link'}
-                    {!isSubmitting ? <ArrowRight className="h-4 w-4" strokeWidth={2} /> : null}
-                  </Button>
-                  <button
-                    type="button"
-                    onClick={() => { setForgotPassword(false); setErrorMessage(''); }}
-                    className="flex w-full items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-                    Back to sign in
-                  </button>
-                </form>
-              )}
-
-              {isLogin && forgotPassword && resetSent && (
-                <div className="mt-7 space-y-5">
-                  <div className="atlas-banner px-4 py-4 text-[13px]" data-tone="success">
-                    Reset link sent! Check your email to reset your password.
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => { setForgotPassword(false); setResetSent(false); setErrorMessage(''); }}
-                    className="flex w-full items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
-                    Back to sign in
-                  </button>
+          {/* Card */}
+          <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.86)] rounded-2xl p-6 sm:p-8 shadow-sm">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <h1 className="text-xl font-semibold tracking-tight text-[hsl(var(--fg))]">
+                {forgotPassword
+                  ? ui.recoveryTitle
+                  : isLogin
+                    ? ui.loginTitle
+                    : ui.signupTitle}
+              </h1>
+              <p className="mt-1.5 text-[13px] text-[hsl(var(--fg-2))]">
+                {forgotPassword
+                  ? ui.recoverySubtitle
+                  : isLogin
+                    ? ui.loginSubtitle
+                    : ui.signupSubtitle}
+              </p>
+              {!forgotPassword && (
+                <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-medium text-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.08)] px-2.5 py-1 rounded-full">
+                  <Sparkles className="h-3 w-3" />
+                  {ui.aiHint}
                 </div>
               )}
+            </div>
 
-              {!(isLogin && forgotPassword) && (
-              <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
-                {!isLogin ? (
-                  <AuthField
-                      id="fullName"
-                      label={ui.fullNameLabel}
-                      type="text"
-                      autoComplete="name"
-                      value={fullName}
-                      onChange={(event) => setFullName(event.target.value)}
-                      placeholder={ui.fullNamePlaceholder}
-                  />
-                ) : null}
-
+            {/* Forgot Password Form */}
+            {forgotPassword && !resetSent && (
+              <form onSubmit={handlePasswordReset} className="space-y-4">
                 <AuthField
                   id="email"
-                  label={t('profile.email')}
+                  label={ui.emailLabel}
                   type="email"
                   autoComplete="email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={ui.emailPlaceholder}
+                />
+
+                {errorMessage && (
+                  <div className="text-[12px] text-red-500 bg-red-500/10 px-3 py-2 rounded-lg">
+                    {errorMessage}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full h-10 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Sending...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      {ui.recoveryButton}
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  )}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotPassword(false);
+                    setErrorMessage('');
+                  }}
+                  className="w-full flex items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  {ui.backToSignIn}
+                </button>
+              </form>
+            )}
+
+            {/* Reset Sent State */}
+            {forgotPassword && resetSent && (
+              <div className="text-center space-y-4">
+                <div className="text-[13px] text-green-600 bg-green-600/10 px-4 py-3 rounded-lg">
+                  {ui.recoverySent}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotPassword(false);
+                    setResetSent(false);
+                    setErrorMessage('');
+                  }}
+                  className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+                >
+                  {ui.backToSignIn}
+                </button>
+              </div>
+            )}
+
+            {/* Main Auth Form */}
+            {!forgotPassword && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Full name for signup */}
+                {!isLogin && (
+                  <AuthField
+                    id="fullName"
+                    label={ui.fullNameLabel}
+                    type="text"
+                    autoComplete="name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder={ui.fullNamePlaceholder}
+                  />
+                )}
+
+                <AuthField
+                  id="email"
+                  label={ui.emailLabel}
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder={ui.emailPlaceholder}
                 />
 
                 <AuthField
-                    id="password"
-                    label={t('profile.password')}
-                    type="password"
-                    autoComplete={isLogin ? 'current-password' : 'new-password'}
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder={ui.passwordPlaceholder}
+                  id="password"
+                  label={ui.passwordLabel}
+                  type="password"
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={ui.passwordPlaceholder}
                 />
 
-                {errorMessage ? (
-                  <div className="atlas-banner px-4 py-3.5 text-[12px]" data-tone="error">
+                {/* Error/Success Messages */}
+                {errorMessage && (
+                  <div className="text-[12px] text-red-500 bg-red-500/10 px-3 py-2 rounded-lg">
                     {errorMessage}
                   </div>
-                ) : null}
-
-                {successMessage ? (
-                  <div className="atlas-banner px-4 py-3.5 text-[12px]" data-tone="success">
+                )}
+                {successMessage && (
+                  <div className="text-[12px] text-green-600 bg-green-600/10 px-3 py-2 rounded-lg">
                     {successMessage}
                   </div>
-                ) : null}
+                )}
 
-                <Button type="submit" size="lg" className="h-12 w-full rounded-[12px]" disabled={isSubmitting}>
-                  {isSubmitting
-                    ? isLogin
-                      ? ui.signInBusy
-                      : ui.signUpBusy
-                    : isLogin
-                      ? ui.signInCta
-                      : ui.signUpCta}
-                  {!isSubmitting ? <ArrowRight className="h-4 w-4" strokeWidth={2} /> : null}
+                {/* Primary CTA */}
+                <Button
+                  type="submit"
+                  className="w-full h-10 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      {isLogin ? ui.signInBusy : ui.signUpBusy}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      {isLogin ? ui.signInCta : ui.signUpCta}
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  )}
                 </Button>
 
-                <div className="relative">
+                {/* Divider */}
+                <div className="relative py-1">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[hsl(var(--border))]" />
+                    <div className="w-full border-t border-[hsl(var(--border)/0.5)]" />
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">Or</span>
+                  <div className="relative flex justify-center">
+                    <span className="px-2 bg-[hsl(var(--card))] text-[11px] text-[hsl(var(--fg-3))]">
+                      {ui.orDivider}
+                    </span>
                   </div>
                 </div>
 
+                {/* Google Sign In */}
                 <GoogleSignInButton
                   redirectUrl={`${window.location.origin}/auth/callback`}
-                  className="h-12 w-full rounded-[12px]"
+                  className="w-full h-10 rounded-lg"
                 />
               </form>
-              )}
+            )}
 
-              {!isLogin ? (
-                <div className="mt-6 flex items-center justify-center gap-4 border-t border-[hsl(var(--border)/0.76)] pt-5">
-                  {[t('auth.trust.free'), t('auth.trust.noCard'), t('auth.trust.cancel')].map((item) => (
-                    <span key={item} className="text-center text-[10px] font-medium text-[hsl(var(--fg-3))]">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
+            {/* Footer Links */}
+            {!forgotPassword && (
+              <div className="mt-6 pt-5 border-t border-[hsl(var(--border)/0.5)] space-y-3">
+                {/* Switch login/signup */}
+                <p className="text-center text-[13px] text-[hsl(var(--fg-2))]">
+                  {isLogin ? ui.noAccount : ui.hasAccount}{' '}
+                  <Link
+                    to={isLogin ? signupHref : loginHref}
+                    className="font-medium text-[hsl(var(--brand))] hover:underline underline-offset-2"
+                  >
+                    {isLogin ? ui.createAccount : ui.signInLink}
+                  </Link>
+                </p>
 
-              {!(isLogin && forgotPassword) && (
-                <>
-                  <div className="mt-5 text-center text-[13px] text-[hsl(var(--fg-2))]">
-                    {isLogin ? t('auth.login.noAccount') : t('auth.signup.hasAccount')}{' '}
-                    <Link
-                      to={isLogin ? signupHref : loginHref}
-                      className="font-semibold text-[hsl(var(--fg))] hover:underline"
-                    >
-                      {isLogin ? t('auth.login.createAccount') : t('auth.signup.signIn')}
-                    </Link>
-                  </div>
+                {/* Forgot password */}
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotPassword(true);
+                      setErrorMessage('');
+                      setSuccessMessage('');
+                    }}
+                    className="w-full text-center text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+                  >
+                    {ui.forgotPassword}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
-                  {isLogin ? (
-                    <div className="mt-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => { setForgotPassword(true); setErrorMessage(''); setSuccessMessage(''); }}
-                        className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] hover:underline underline-offset-2"
-                      >
-                        Forgot your password?
-                      </button>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-3 text-center">
-                    <Link to={ROUTES.home} className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]">
-                      {t('auth.backHome')}
-                    </Link>
-                  </div>
-                </>
-              )}
-            </div>
+          {/* Back to home - outside card */}
+          <div className="mt-6 text-center">
+            <Link
+              to={ROUTES.home}
+              className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+            >
+              {ui.backHome}
+            </Link>
           </div>
         </div>
-      </section>
+      </div>
     </PublicSiteShell>
   );
 }

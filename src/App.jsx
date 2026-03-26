@@ -63,6 +63,16 @@ import GettingStartedGuide from '@/pages/guides/GettingStartedGuide';
 import GitHubPRTracker from '@/pages/GitHubPRTracker';
 import WorkoutLoggingGuide from '@/pages/guides/WorkoutLoggingGuide';
 import PlanVsExecutionGuide from '@/pages/guides/PlanVsExecutionGuide';
+import AIWorkoutGenerationGuide from '@/pages/guides/AIWorkoutGenerationGuide';
+import AIPlanBuildingGuide from '@/pages/guides/AIPlanBuildingGuide';
+import AdjustingPlansGuide from '@/pages/guides/AdjustingPlansGuide';
+import AIVsManualGuide from '@/pages/guides/AIVsManualGuide';
+import ProgressPhotosGuide from '@/pages/guides/ProgressPhotosGuide';
+import ExportReportsGuide from '@/pages/guides/ExportReportsGuide';
+import NutritionTrackingGuide from '@/pages/guides/NutritionTrackingGuide';
+import MobileWorkoutsGuide from '@/pages/guides/MobileWorkoutsGuide';
+import AccountSettingsGuide from '@/pages/guides/AccountSettingsGuide';
+import CoachManagementGuide from '@/pages/guides/CoachManagementGuide';
 import BlogIndex from '@/pages/blog/BlogIndex.jsx';
 import BlogPost from '@/pages/blog/BlogPost.jsx';
 import Settings from '@/pages/Settings.jsx';
@@ -275,6 +285,16 @@ const AppRoutes = () => (
     <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
     <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
     <Route path="/guides/plan-vs-execution" element={<PlanVsExecutionGuide />} />
+    <Route path="/guides/ai-workout-generation" element={<AIWorkoutGenerationGuide />} />
+    <Route path="/guides/ai-plan-building" element={<AIPlanBuildingGuide />} />
+    <Route path="/guides/adjusting-plans" element={<AdjustingPlansGuide />} />
+    <Route path="/guides/ai-vs-manual" element={<AIVsManualGuide />} />
+    <Route path="/guides/progress-photos" element={<ProgressPhotosGuide />} />
+    <Route path="/guides/export-reports" element={<ExportReportsGuide />} />
+    <Route path="/guides/nutrition-tracking" element={<NutritionTrackingGuide />} />
+    <Route path="/guides/mobile-workouts" element={<MobileWorkoutsGuide />} />
+    <Route path="/guides/account-settings" element={<AccountSettingsGuide />} />
+    <Route path="/guides/coach-management" element={<CoachManagementGuide />} />
     {LEGACY_ROUTE_REDIRECTS.map(([from, to]) => (
       <Route
         key={from}
