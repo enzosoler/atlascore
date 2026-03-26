@@ -96,7 +96,7 @@ function shortId(id) {
 
 // ─── CONFIRMATION MODAL ──────────────────────────────────────────────────────
 
-function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = false, onConfirm, onCancel, loading }) {
+function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = false, onConfirm, onCancel, loading, children }) {
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
       <div className="w-full max-w-sm rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-xl)] space-y-4">
@@ -104,6 +104,7 @@ function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = f
           <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">{title}</h3>
           {description && <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">{description}</p>}
         </div>
+        {children && <div className="space-y-3">{children}</div>}
         <div className="flex gap-2 pt-1">
           <button
             onClick={onCancel}
@@ -491,10 +492,11 @@ function UsersTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detailsUser, setDetailsUser] = useState(null);
-  const [confirm, setConfirm] = useState(null); // { type, user }
+  const [confirm, setConfirm] = useState(null); // { type, user, tier? }
   const [actionLoading, setActionLoading] = useState(false);
   const [roleEdit, setRoleEdit] = useState(null); // { userId, currentRole }
   const [selectedRole, setSelectedRole] = useState('');
+  const [grantTier, setGrantTier] = useState('pro'); // Novo estado para tier de grant
 
   const searchTimeout = useRef(null);
 
@@ -734,7 +736,7 @@ function UsersTab() {
           description={
             confirm.type === 'suspend'         ? `Suspend ${confirm.user.full_name || shortId(confirm.user.id)}? They will lose access.`
             : confirm.type === 'unsuspend'     ? `Restore access for ${confirm.user.full_name || shortId(confirm.user.id)}.`
-            : confirm.type === 'grant'         ? `Grant pro access to ${confirm.user.full_name || shortId(confirm.user.id)}.`
+            : confirm.type === 'grant'         ? `Grant ${grantTier} access to ${confirm.user.full_name || shortId(confirm.user.id)}.`
             : confirm.type === 'revoke'        ? `Revoke access for ${confirm.user.full_name || shortId(confirm.user.id)}. This sets subscription to inactive.`
             : confirm.type === 'extendTrial'   ? `Extend trial by 7 days for ${confirm.user.full_name || shortId(confirm.user.id)}.`
             : confirm.type === 'resetOnboarding' ? `Reset onboarding flags for ${confirm.user.full_name || shortId(confirm.user.id)}. They will see the onboarding flow again.`
@@ -743,7 +745,7 @@ function UsersTab() {
           confirmLabel={
             confirm.type === 'suspend'         ? 'Suspend'
             : confirm.type === 'unsuspend'     ? 'Unsuspend'
-            : confirm.type === 'grant'         ? 'Grant'
+            : confirm.type === 'grant'         ? `Grant ${grantTier}`
             : confirm.type === 'revoke'        ? 'Revoke'
             : confirm.type === 'extendTrial'   ? 'Extend'
             : confirm.type === 'resetOnboarding' ? 'Reset'
@@ -751,20 +753,37 @@ function UsersTab() {
           }
           danger={['suspend', 'revoke', 'resetOnboarding'].includes(confirm.type)}
           loading={actionLoading}
-          onCancel={() => setConfirm(null)}
+          onCancel={() => { setConfirm(null); setGrantTier('pro'); }}
           onConfirm={() => {
             const { type, user } = confirm;
             const actions = {
               suspend:         () => runAction(() => suspendUser(user.id),         'User suspended'),
               unsuspend:       () => runAction(() => unsuspendUser(user.id),       'User unsuspended'),
-              grant:           () => runAction(() => grantAccess(user.id, 'pro', 'Admin console grant'), 'Access granted'),
+              grant:           () => runAction(() => grantAccess(user.id, grantTier, 'Admin console grant'), `Access granted: ${grantTier}`),
               revoke:          () => runAction(() => revokeAccess(user.id),        'Access revoked'),
               extendTrial:     () => runAction(() => extendTrial(user.id, 7),      'Trial extended by 7 days'),
               resetOnboarding: () => runAction(() => resetOnboarding(user.id),     'Onboarding reset'),
             };
             actions[type]?.();
           }}
-        />
+        >
+          {confirm.type === 'grant' && (
+            <div className="mt-4">
+              <label className="block mb-2 text-[12px] font-medium text-[hsl(var(--fg))]">Select plan tier</label>
+              <select
+                value={grantTier}
+                onChange={(e) => setGrantTier(e.target.value)}
+                className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
+              >
+                <option value="pro">Pro - AI insights, meal/workout builders, lab exams</option>
+                <option value="performance">Performance - Everything in Pro + advanced protocol tracking</option>
+                <option value="coach">Coach - Coach dashboard and client management</option>
+                <option value="nutritionist">Nutritionist - Nutritionist dashboard and meal planning</option>
+                <option value="clinician">Clinician - Clinical dashboard and health tracking</option>
+              </select>
+            </div>
+          )}
+        </ConfirmModal>
       )}
     </div>
   );

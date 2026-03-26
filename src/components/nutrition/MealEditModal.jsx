@@ -14,6 +14,41 @@ import AIFoodInput from './AIFoodInput';
 
 const MACRO_COLORS = { protein: '#4F8CFF', carbs: '#8B7CFF', fat: '#F5A83A' };
 
+// Tabela de conversão de unidades comuns para gramas (aproximações padrão)
+const UNIT_TO_GRAMS = {
+  g: 1,
+  ml: 1, // para líquidos, 1ml ≈ 1g (água/similar)
+  unit: 60,      // unidade média (ex: 1 pão ≈ 60g, 1 banana ≈ 120g - usamos média)
+  serving: 150,  // porção padrão ≈ 150g
+  cup: 240,      // xícara ≈ 240g/ml
+  tbsp: 15,      // colher de sopa ≈ 15g
+  tsp: 5,        // colher de chá ≈ 5g
+  slice: 25,     // fatia ≈ 25g
+  piece: 50,     // peça ≈ 50g
+};
+
+// Converte quantidade de uma unidade para gramas
+// Usa unit_weight_g específico do alimento se disponível, senão usa tabela padrão
+const convertToGrams = (amount, unit, food = null) => {
+  // Se o alimento tem unit_weight_g específico e a unidade é 'unit', 'slice', 'piece', etc.
+  // usar o peso específico da IA
+  const aiUnitWeight = food?.unit_weight_g;
+  
+  // Se tem dados da IA e a unidade é a mesma que a IA identificou
+  if (aiUnitWeight && food?.unit_type === unit) {
+    return amount * aiUnitWeight;
+  }
+  
+  // Se tem dados da IA mas a unidade é genérica 'unit', usar o peso da IA
+  if (aiUnitWeight && unit === 'unit') {
+    return amount * aiUnitWeight;
+  }
+  
+  // Fallback para tabela padrão
+  const factor = UNIT_TO_GRAMS[unit] || 1;
+  return amount * factor;
+};
+
 export default function MealEditModal({ open, onOpenChange, meal, date, onSuccess }) {
   const qc = useQueryClient();
   const [mealType, setMealType] = useState(meal?.meal_type || 'lunch');
@@ -75,27 +110,25 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
     const newAmount = parseFloat(editAmount);
     if (isNaN(newAmount) || newAmount <= 0) return;
     const f = foods[idx];
-    // Se a unidade mudou, recalcula com base na proporção de unidades comuns para gramas
-    // Caso contrário, usa o cálculo normal baseado na quantidade
-    const unitChanged = editUnit !== (f.unit || 'g');
-    let ratio;
-    if (unitChanged) {
-      // Se mudou de unidade, mantém os macros baseados na proporção original
-      // pois não temos conversão exata de unidades arbitrárias
-      ratio = 1;
-    } else {
-      ratio = newAmount / f.amount;
-    }
+    
+    // Converte tanto a quantidade antiga quanto a nova para gramas
+    // Passando o objeto food para usar unit_weight_g quando disponível
+    const oldGrams = convertToGrams(f.amount, f.unit || 'g', f);
+    const newGrams = convertToGrams(newAmount, editUnit, f);
+    
+    // Calcula o ratio baseado na diferença de gramas
+    const ratio = newGrams / oldGrams;
+    
     const updated = [...foods];
     updated[idx] = {
       ...f,
       amount: newAmount,
       unit: editUnit,
-      kcal: f.kcal * ratio,
-      protein: f.protein * ratio,
-      carbs: f.carbs * ratio,
-      fat: f.fat * ratio,
-      fiber: (f.fiber || 0) * ratio,
+      kcal: Math.round(f.kcal * ratio),
+      protein: Math.round(f.protein * ratio * 10) / 10,
+      carbs: Math.round(f.carbs * ratio * 10) / 10,
+      fat: Math.round(f.fat * ratio * 10) / 10,
+      fiber: Math.round((f.fiber || 0) * ratio * 10) / 10,
     };
     setFoods(updated);
     setEditingIdx(null);
@@ -123,14 +156,17 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
   const handleAIFoodsDetected = (detectedFoods) => {
     const formatted = detectedFoods.map(f => ({
       name: f.name,
-      amount: parseFloat(f.serving_description) || 100,
-      unit: 'g',
+      amount: f.amount || parseFloat(f.serving_description) || 100,
+      unit: f.unit || 'g',
       kcal: f.calories || 0,
       protein: f.protein || 0,
       carbs: f.carbs || 0,
       fat: f.fat || 0,
       fiber: f.fiber || 0,
       _ai: true,
+      // Dados de conversão da IA
+      unit_weight_g: f.unit_weight_g || null,
+      unit_type: f.unit_type || 'unit',
     }));
     setFoods(prev => [...prev, ...formatted]);
     setShowAIInput(false);

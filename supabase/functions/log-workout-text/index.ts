@@ -1,7 +1,7 @@
 /**
- * log-food-text — Supabase Edge Function
+ * log-workout-text — Supabase Edge Function
  *
- * AI-powered natural language food logging with:
+ * AI-powered natural language workout logging with:
  *  - Semantic cache lookup (shared across all users)
  *  - Tier-based rate limiting (free / pro / premium)
  *  - Global daily + monthly spending caps
@@ -11,7 +11,7 @@
  * Model: gpt-4.1-nano (cheapest capable model)
  *
  * Deploy:
- *   supabase functions deploy log-food-text
+ *   supabase functions deploy log-workout-text
  *
  * Required secrets:
  *   supabase secrets set OPENAI_API_KEY=xxx
@@ -36,41 +36,37 @@ const PRICING = {
   output_per_million: 0.40,
 };
 
-const SYSTEM_PROMPT = `You are a nutrition estimation assistant. The user will describe a meal or food item in any language. Your job is to:
+const SYSTEM_PROMPT = `You are a workout parsing assistant. The user will describe exercises, sets, reps, and weights in natural language (any language). Your job is to:
 
-1. Identify all food items in the description.
-2. Estimate realistic portion sizes based on context clues.
-3. Return the TOTAL macronutrient breakdown for the entire described meal.
+1. Identify all exercises mentioned in the description.
+2. Extract sets, reps, and weight for each exercise.
+3. Determine the primary muscle group for each exercise.
+4. If no weight is specified, assume bodyweight or leave null.
+5. If no reps are specified, assume a reasonable range like "8-12".
+6. If no sets are specified, assume 3 sets.
 
 Rules:
-- If the user mentions a preparation method (e.g., "com manteiga no preparo"), factor that into the macros.
-- If no portion is specified, assume a typical single adult serving.
-- Be conservative with estimates — it's better to slightly underestimate than wildly overestimate.
-- Always respond in the SAME LANGUAGE as the user's input.
-- For unit_weight_g: estimate the weight in grams of ONE standard unit of this food (e.g., 1 pão francês ≈ 60g, 1 banana ≈ 120g, 1 fatia de queijo ≈ 30g, 1 colher de sopa de azeite ≈ 15g)
+- Always respond in the SAME LANGUAGE as the user's input for exercise names.
+- For muscle groups, use English: chest, back, shoulders, biceps, triceps, legs, core, calves, forearms.
+- Be conservative with estimates — it's better to slightly underestimate weights than overestimate.
+- Handle variations: "3x10" means 3 sets of 10 reps, "10x3" could mean 10 sets of 3 or 3 sets of 10 depending on context (usually the smaller number is sets).
 
 Respond ONLY with valid JSON in this exact format:
 {
-  "food_name": "short name for the meal in the user's language",
-  "serving_description": "estimated portion description in the user's language",
-  "calories": 0,
-  "protein": 0.0,
-  "carbs": 0.0,
-  "fat": 0.0,
-  "fiber": 0.0,
-  "confidence": 0.0,
-  "items": [
+  "exercises": [
     {
-      "name": "individual item name",
-      "estimated_grams": 0,
-      "unit_weight_g": 0,
-      "unit_type": "unit|slice|piece|cup|tbsp|tsp|serving|portion",
-      "calories": 0,
-      "protein": 0.0,
-      "carbs": 0.0,
-      "fat": 0.0
+      "name": "exercise name in user's language",
+      "sets": 3,
+      "reps": "10",
+      "weight": 20,
+      "weight_unit": "kg",
+      "muscle_group": "chest",
+      "rest_seconds": 60,
+      "confidence": 0.95
     }
-  ]
+  ],
+  "estimated_duration_minutes": 45,
+  "notes": "any additional notes about the workout"
 }`;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -83,7 +79,7 @@ function json(payload: unknown, status = 200) {
 }
 
 /**
- * Normalize a food query for cache lookup.
+ * Normalize a workout query for cache lookup.
  * - Lowercase
  * - Collapse whitespace
  * - Remove common filler words (Portuguese + English)
@@ -95,10 +91,10 @@ function normalizeQuery(raw: string): string {
     'um', 'uma', 'uns', 'umas', 'de', 'do', 'da', 'dos', 'das',
     'no', 'na', 'nos', 'nas', 'com', 'sem', 'para', 'por',
     'pouco', 'um pouco', 'bastante', 'muito', 'muita',
-    'preparo', 'preparação',
+    'kg', 'quilos', 'quilo',
     // English fillers
     'a', 'an', 'the', 'of', 'with', 'some', 'little', 'bit',
-    'in', 'on', 'for', 'and',
+    'in', 'on', 'for', 'and', 'kg', 'kgs', 'pounds', 'lbs',
   ];
 
   let normalized = raw
@@ -154,7 +150,7 @@ serve(async (req) => {
   const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
   if (authError || !user) {
-    console.error('[log-food-text] Auth failed:', authError?.message);
+    console.error('[log-workout-text] Auth failed:', authError?.message);
     return json({ error: 'Unauthorized', detail: authError?.message }, 401);
   }
 
@@ -180,19 +176,19 @@ serve(async (req) => {
   // ── 3. Cache lookup ──────────────────────────────────────────────────────
 
   const { data: cacheHit } = await supabase
-    .from('food_nutrition_cache')
+    .from('workout_nutrition_cache')
     .select('*')
     .eq('normalized_query', normalizedQuery)
     .single();
 
   if (cacheHit) {
     // Increment hit count asynchronously (fire-and-forget)
-    supabase.rpc('increment_cache_hit', { p_cache_id: cacheHit.id }).then(() => {});
+    supabase.rpc('increment_workout_cache_hit', { p_cache_id: cacheHit.id }).then(() => {});
 
     // Log as cache hit (no cost)
     supabase.from('ai_usage_log').insert({
       user_id: user.id,
-      feature: 'food_text',
+      feature: 'workout_text',
       model: MODEL,
       input_tokens: 0,
       output_tokens: 0,
@@ -205,14 +201,9 @@ serve(async (req) => {
     return json({
       success: true,
       source: 'cache',
-      food_name: cacheHit.original_query,
-      serving_description: cacheHit.serving_description,
-      calories: cacheHit.calories,
-      protein: cacheHit.protein,
-      carbs: cacheHit.carbs,
-      fat: cacheHit.fat,
-      fiber: cacheHit.fiber,
-      confidence: cacheHit.confidence,
+      exercises: cacheHit.exercises,
+      estimated_duration_minutes: cacheHit.estimated_duration_minutes,
+      notes: cacheHit.notes,
     });
   }
 
@@ -225,14 +216,14 @@ serve(async (req) => {
     .single();
 
   if (!config) {
-    console.error('[log-food-text] ai_spending_config not found');
+    console.error('[log-workout-text] ai_spending_config not found');
     return json({ error: 'Service configuration error' }, 503);
   }
 
   // Kill switch
   if (config.kill_switch) {
     return json({
-      error: 'AI nutrition analysis is temporarily unavailable. Please try again later.',
+      error: 'AI workout analysis is temporarily unavailable. Please try again later.',
       code: 'KILL_SWITCH',
     }, 503);
   }
@@ -240,9 +231,9 @@ serve(async (req) => {
   // Monthly cap
   const { data: monthlySpend } = await supabase.rpc('get_ai_spend_current_month');
   if (typeof monthlySpend === 'number' && monthlySpend >= config.monthly_cap_usd) {
-    console.error(`[log-food-text] Monthly cap reached: $${monthlySpend} >= $${config.monthly_cap_usd}`);
+    console.error(`[log-workout-text] Monthly cap reached: $${monthlySpend} >= $${config.monthly_cap_usd}`);
     return json({
-      error: 'AI nutrition analysis has reached its monthly limit. Please try again next month or use the food search feature.',
+      error: 'AI workout analysis has reached its monthly limit. Please try again next month or add exercises manually.',
       code: 'MONTHLY_CAP',
     }, 429);
   }
@@ -250,9 +241,9 @@ serve(async (req) => {
   // Daily cap
   const { data: dailySpend } = await supabase.rpc('get_ai_spend_today');
   if (typeof dailySpend === 'number' && dailySpend >= config.daily_cap_usd) {
-    console.error(`[log-food-text] Daily cap reached: $${dailySpend} >= $${config.daily_cap_usd}`);
+    console.error(`[log-workout-text] Daily cap reached: $${dailySpend} >= $${config.daily_cap_usd}`);
     return json({
-      error: 'AI nutrition analysis has reached its daily limit. Please try again tomorrow or use the food search feature.',
+      error: 'AI workout analysis has reached its daily limit. Please try again tomorrow or add exercises manually.',
       code: 'DAILY_CAP',
     }, 429);
   }
@@ -272,6 +263,7 @@ serve(async (req) => {
   const tier = subscription?.tier || 'free';
 
   // Determine the user's daily text call limit based on tier
+  // Note: using the same config fields as food for simplicity
   let maxTextCallsPerDay: number;
   switch (tier) {
     case 'premium':
@@ -321,7 +313,7 @@ serve(async (req) => {
       ? ' Upgrade to Pro or Premium for more daily analyses.'
       : '';
     return json({
-      error: `You've reached your daily limit of ${maxTextCallsPerDay} AI food analyses.${upgradeHint}`,
+      error: `You've reached your daily limit of ${maxTextCallsPerDay} AI workout analyses.${upgradeHint}`,
       code: 'USER_DAILY_LIMIT',
       limit: maxTextCallsPerDay,
       used: quota.text_calls_today,
@@ -360,12 +352,12 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error(`[log-food-text] OpenAI error: ${response.status}`, errText);
+      console.error(`[log-workout-text] OpenAI error: ${response.status}`, errText);
 
       // Log the failed attempt
       await supabase.from('ai_usage_log').insert({
         user_id: user.id,
-        feature: 'food_text',
+        feature: 'workout_text',
         model: MODEL,
         input_tokens: 0,
         output_tokens: 0,
@@ -387,11 +379,11 @@ serve(async (req) => {
     try {
       aiResult = JSON.parse(content);
     } catch {
-      console.error('[log-food-text] Failed to parse AI response:', content);
+      console.error('[log-workout-text] Failed to parse AI response:', content);
       return json({ error: 'AI returned invalid data. Please try again.' }, 502);
     }
   } catch (err) {
-    console.error('[log-food-text] Fetch error:', err);
+    console.error('[log-workout-text] Fetch error:', err);
     return json({ error: 'AI service unavailable. Please try again.' }, 503);
   }
 
@@ -402,7 +394,7 @@ serve(async (req) => {
   // Log the AI call
   await supabase.from('ai_usage_log').insert({
     user_id: user.id,
-    feature: 'food_text',
+    feature: 'workout_text',
     model: MODEL,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
@@ -426,19 +418,15 @@ serve(async (req) => {
   const cacheEntry = {
     normalized_query: normalizedQuery,
     original_query: rawQuery,
-    calories: Math.round(aiResult.calories ?? 0),
-    protein: Math.round((aiResult.protein ?? 0) * 10) / 10,
-    carbs: Math.round((aiResult.carbs ?? 0) * 10) / 10,
-    fat: Math.round((aiResult.fat ?? 0) * 10) / 10,
-    fiber: Math.round((aiResult.fiber ?? 0) * 10) / 10,
-    serving_description: aiResult.serving_description || null,
+    exercises: aiResult.exercises || [],
+    estimated_duration_minutes: aiResult.estimated_duration_minutes || null,
+    notes: aiResult.notes || null,
     model_used: MODEL,
-    confidence: Math.max(0, Math.min(1, aiResult.confidence ?? 0.8)),
   };
 
-  // Upsert to handle race conditions (two users querying the same food simultaneously)
+  // Upsert to handle race conditions (two users querying the same workout simultaneously)
   await supabase
-    .from('food_nutrition_cache')
+    .from('workout_nutrition_cache')
     .upsert(cacheEntry, { onConflict: 'normalized_query' });
 
   // ── 9. Return result ─────────────────────────────────────────────────────
@@ -446,15 +434,9 @@ serve(async (req) => {
   return json({
     success: true,
     source: 'ai',
-    food_name: aiResult.food_name || rawQuery,
-    serving_description: aiResult.serving_description,
-    calories: cacheEntry.calories,
-    protein: cacheEntry.protein,
-    carbs: cacheEntry.carbs,
-    fat: cacheEntry.fat,
-    fiber: cacheEntry.fiber,
-    confidence: cacheEntry.confidence,
-    items: aiResult.items || [],
+    exercises: aiResult.exercises || [],
+    estimated_duration_minutes: aiResult.estimated_duration_minutes || null,
+    notes: aiResult.notes || null,
     usage: {
       calls_today: (quota?.text_calls_today ?? 0) + 1,
       daily_limit: maxTextCallsPerDay,

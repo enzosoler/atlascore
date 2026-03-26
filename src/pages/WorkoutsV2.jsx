@@ -26,6 +26,7 @@ import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
+import AIWorkoutInput from '@/components/workouts/AIWorkoutInput';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import {
@@ -146,6 +147,7 @@ function ExerciseRow({ ex, onChange, onRemove }) {
 function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemoveExercise, onUpdateExercise }) {
   const [expanded, setExpanded] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
+  const [showAI, setShowAI] = useState(false);
 
   const handleSelect = (searchResult) => {
     // searchResult comes from ExerciseSearch.onSelect — unified shape
@@ -156,6 +158,21 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
     const rest = searchResult.default_rest_seconds || 60;
     onAddExerciseFromLibrary(dayIndex, { name, muscle_group: muscle, sets, reps: String(reps), rest });
     setShowSearch(false);
+  };
+
+  const handleAIExercisesDetected = (exercises) => {
+    // exercises comes from AIWorkoutInput.onExercisesDetected
+    exercises.forEach((ex) => {
+      onAddExerciseFromLibrary(dayIndex, {
+        name: ex.name,
+        muscle_group: ex.muscle_group || '',
+        sets: ex.sets || 3,
+        reps: String(ex.reps || '8-12'),
+        rest: ex.rest_seconds || 60,
+      });
+    });
+    setShowAI(false);
+    toast.success(`${exercises.length} exercise${exercises.length !== 1 ? 's' : ''} added via AI`);
   };
 
   return (
@@ -204,8 +221,21 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
             </div>
           )}
 
-          {/* Library search panel */}
-          {showSearch ? (
+          {/* AI Workout Input panel */}
+          {showAI ? (
+            <div className="px-3 pb-3 pt-2 border-t border-[hsl(var(--border)/0.5)]">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-[hsl(var(--fg-2))]">Describe exercises with AI</p>
+                <button
+                  onClick={() => setShowAI(false)}
+                  className="text-xs text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              <AIWorkoutInput onExercisesDetected={handleAIExercisesDetected} />
+            </div>
+          ) : showSearch ? (
             <div className="px-3 pb-3 pt-2 border-t border-[hsl(var(--border)/0.5)]">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-[hsl(var(--fg-2))]">Search library</p>
@@ -220,13 +250,22 @@ function DayEditor({ day, dayIndex, onChange, onAddExerciseFromLibrary, onRemove
             </div>
           ) : (
             <div className="px-3 pb-3 pt-2">
-              <button
-                onClick={() => setShowSearch(true)}
-                className="flex w-full items-center gap-1.5 rounded-[12px] border border-dashed border-[hsl(var(--border))] px-3 py-2.5 text-xs text-[hsl(var(--fg-3))] transition-colors hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] hover:text-[hsl(var(--brand))]"
-              >
-                <Search className="w-3.5 h-3.5" />
-                Add exercise from library
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowSearch(true)}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-[12px] border border-dashed border-[hsl(var(--border))] px-3 py-2.5 text-xs text-[hsl(var(--fg-3))] transition-colors hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] hover:text-[hsl(var(--brand))]"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  Search library
+                </button>
+                <button
+                  onClick={() => setShowAI(true)}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-[12px] border border-dashed border-[hsl(var(--brand)/0.3)] px-3 py-2.5 text-xs text-[hsl(var(--brand))] transition-colors hover:border-[hsl(var(--brand)/0.6)] hover:bg-[hsl(var(--brand)/0.08)]"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Describe with AI
+                </button>
+              </div>
             </div>
           )}
         </div>

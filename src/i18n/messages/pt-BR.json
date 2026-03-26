@@ -712,7 +712,6 @@
     "profileAligned": "% alinhado",
     "fieldsFilledDetail": "{filled} de {total} campos principais preenchidos.",
     "dailyFuel": "Combustível diário",
-    "statusBanner": "Autenticação real com Supabase permanece intacta. Esta tela preserva o fluxo de dados do perfil atual enquanto ganha a nova camada visual premium.",
     "loadingProfile": "Carregando seu perfil",
     "loadingProfileDesc": "Estamos trazendo seus dados existentes para esta nova leitura visual sem interromper a página.",
     "safeMode": "Perfil em modo seguro",

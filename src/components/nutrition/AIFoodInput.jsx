@@ -102,6 +102,10 @@ export default function AIFoodInput({ onFoodsDetected }) {
     // - Individual sub-items (if they expand and want granularity)
     // For now, we always add the whole meal as a single food entry,
     // since that's what the user described as one thing.
+    
+    // Se tem items, tenta extrair unit_weight_g do primeiro item como referência
+    const firstItem = result.items?.[0];
+    
     const foods = [{
       name: titleCase(result.food_name),
       serving_description: result.serving_description,
@@ -112,6 +116,12 @@ export default function AIFoodInput({ onFoodsDetected }) {
       fat: result.fat || 0,
       fiber: result.fiber || 0,
       confidence: result.confidence,
+      // Dados de conversão de unidades da IA (do primeiro item se disponível)
+      unit_weight_g: firstItem?.unit_weight_g || null,
+      unit_type: firstItem?.unit_type || 'unit',
+      // Quantidade e unidade
+      amount: firstItem?.estimated_grams || 100,
+      unit: 'g',
     }];
 
     onFoodsDetected(foods);
@@ -131,6 +141,12 @@ export default function AIFoodInput({ onFoodsDetected }) {
       fat: item.fat || 0,
       fiber: 0,
       confidence: result.confidence,
+      // Dados de conversão de unidades da IA
+      unit_weight_g: item.unit_weight_g || null,
+      unit_type: item.unit_type || 'unit',
+      // Quantidade em gramas para cálculos
+      amount: item.estimated_grams || 100,
+      unit: 'g',
     }));
 
     onFoodsDetected(foods);
