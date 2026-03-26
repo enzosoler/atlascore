@@ -716,9 +716,8 @@ export default function Profile() {
   return (
     <SafePageBoundary
       title={t('profile.sections_labels.account')}
-      subtitle={t('profile.statusBanner')}
       maxWidth="max-w-6xl"
-      fallbackDescription={t('profile.statusBanner')}
+      fallbackDescription={t('profile.pageSubtitle')}
     >
       <ProfileContent />
     </SafePageBoundary>
@@ -943,10 +942,6 @@ function ProfileContent() {
           <HeroStat label={t('profile.dailyFuel')} value={calorieTargetValue} detail={macroSignature} />
         </div>
       </PageHeader>
-
-      <StatusBanner>
-        {t('profile.statusBanner')}
-      </StatusBanner>
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
 

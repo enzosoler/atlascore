@@ -20,6 +20,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
   const [foods, setFoods] = useState(meal?.foods || []);
   const [editingIdx, setEditingIdx] = useState(null);
   const [editAmount, setEditAmount] = useState('');
+  const [editUnit, setEditUnit] = useState('g');
   const [showCamera, setShowCamera] = useState(false);
   const [showAIInput, setShowAIInput] = useState(false);
 
@@ -63,17 +64,29 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
   const handleEditFood = (idx) => {
     setEditingIdx(idx);
     setEditAmount(foods[idx].amount.toString());
+    setEditUnit(foods[idx].unit || 'g');
   };
 
   const handleSaveEdit = (idx) => {
     const newAmount = parseFloat(editAmount);
     if (isNaN(newAmount) || newAmount <= 0) return;
     const f = foods[idx];
-    const ratio = newAmount / f.amount;
+    // Se a unidade mudou, recalcula com base na proporção de unidades comuns para gramas
+    // Caso contrário, usa o cálculo normal baseado na quantidade
+    const unitChanged = editUnit !== (f.unit || 'g');
+    let ratio;
+    if (unitChanged) {
+      // Se mudou de unidade, mantém os macros baseados na proporção original
+      // pois não temos conversão exata de unidades arbitrárias
+      ratio = 1;
+    } else {
+      ratio = newAmount / f.amount;
+    }
     const updated = [...foods];
     updated[idx] = {
       ...f,
       amount: newAmount,
+      unit: editUnit,
       kcal: f.kcal * ratio,
       protein: f.protein * ratio,
       carbs: f.carbs * ratio,
@@ -216,7 +229,21 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
                           step="0.1"
                           className="h-7 w-16 text-[11px] rounded-md"
                         />
-                        <span className="text-muted-foreground">{f.unit}</span>
+                        <select
+                          value={editUnit}
+                          onChange={(e) => setEditUnit(e.target.value)}
+                          className="h-7 px-2 rounded-md border border-border bg-background text-[11px]"
+                        >
+                          <option value="g">g</option>
+                          <option value="ml">ml</option>
+                          <option value="unit">unidade</option>
+                          <option value="serving">porção</option>
+                          <option value="cup">xícara</option>
+                          <option value="tbsp">colher sopa</option>
+                          <option value="tsp">colher chá</option>
+                          <option value="slice">fatia</option>
+                          <option value="piece">peça</option>
+                        </select>
                         <Button
                           size="sm"
                           variant="ghost"
