@@ -305,20 +305,13 @@ export default function Auth() {
       }
 
       if (isLogin) {
-        await signIn({
-          email: normalizedEmail,
-          password,
-        });
+        await signIn(normalizedEmail, password);
 
         navigate(requestedDestination || ROUTES.today, { replace: true });
         return;
       }
 
-      const result = await signUp({
-        email: normalizedEmail,
-        password,
-        fullName,
-      });
+      const result = await signUp(normalizedEmail, password, { fullName });
 
       // Send welcome email via edge function
       if (!result.needsEmailConfirmation) {

@@ -290,15 +290,40 @@ function NewCheckpointModal({ onConfirm, onClose }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────
 // Main page
 // ─────────────────────────────────────────────────────────────────
 
-export default function ProgressPhotos({ embedded = false }) {
+export default function ProgressPhotos({ embedded = false, publicOnly = false }) {
   const { t, locale } = useI18n();
   const isPt = locale === 'pt-BR';
   if (embedded) {
-    return <ProgressPhotosContent embedded />;
+    return <ProgressPhotosContent embedded publicOnly />;
+  }
+
+  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
+
+  if (!isLoadingAuth && !isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center p-10">
+        <h2 className="text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
+          {isPt ? "Fotos de Progresso" : "Progress Photos"}
+        </h2>
+        <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
+          {isPt
+            ? "Capture consistent pose photos and keep them grouped by checkpoint date inside the Body hub."
+            : "Capture consistent pose photos and keep them grouped by checkpoint date inside the Body hub."}
+        </p>
+        <PrimaryButton
+          type="button"
+          onClick={() => navigate(ROUTES.auth)}
+          className="mt-5 inline-flex items-center gap-2"
+        >
+          <Lock className="h-4 w-4" strokeWidth={1.9} />
+          {isPt ? "Entrar para continuar" : "Sign in to continue"}
+        </PrimaryButton>
+      </div>
+    );
   }
 
   return (
@@ -326,8 +351,8 @@ function ProgressPhotosContent({ embedded = false }) {
   const [notice, setNotice] = useState(null);
 
   React.useEffect(() => {
-    if (!isLoadingAuth && !isAuthenticated) navigate(ROUTES.home, { replace: true });
-  }, [isAuthenticated, isLoadingAuth, navigate]);
+    if (!isLoadingAuth && !isAuthenticated && embedded) navigate(ROUTES.home, { replace: true });
+  }, [isAuthenticated, isLoadingAuth, navigate, embedded]);
 
   // ── Query de fotos ──────────────────────────────────────────────
 
@@ -336,13 +361,13 @@ function ProgressPhotosContent({ embedded = false }) {
   const { data: allPhotos = [] } = useQuery({
     queryKey: ['progress-photos-page', user?.id],
     queryFn: () => listProgressPhotos(user.id, 200),
-    enabled: !!user?.id,
+    enabled: !!user?.id && isAuthenticated,
   });
 
   // ── Mutations ───────────────────────────────────────────────────
 
   const deleteMutation = useMutation({
-    mutationFn: ({ id, photoUrl }) => deleteProgressPhoto(user.id, id, photoUrl),
+    mutationFn: ({ id, photoUrl }) => isAuthenticated ? deleteProgressPhoto(user.id, id, photoUrl) : Promise.reject(new Error('Not authenticated')),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
       qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
@@ -363,6 +388,11 @@ function ProgressPhotosContent({ embedded = false }) {
 
   const handleUpload = useCallback(
     async (date, poseKey, file) => {
+      if (!isAuthenticated || !user?.id) {
+        setNotice({ tone: 'error', message: 'Please sign in to upload photos.' });
+        navigate(ROUTES.auth);
+        return;
+      }
       const key = `${date}-${poseKey}`;
       setUploadingPose(key);
       try {
@@ -384,7 +414,7 @@ function ProgressPhotosContent({ embedded = false }) {
         setUploadingPose(null);
       }
     },
-    [qc, user?.id]
+    [qc, user?.id, isAuthenticated, navigate]
   );
 
   const handleDelete = useCallback(

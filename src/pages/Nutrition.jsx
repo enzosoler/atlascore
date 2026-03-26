@@ -547,18 +547,29 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
   }, [searchQuery]);
 
   const addFood = (food) => {
+    const baseAmount = 100;
+    const baseKcal = Math.round(food.calories || 0);
+    const baseProtein = Math.round((food.protein || 0) * 10) / 10;
+    const baseCarbs = Math.round((food.carbs || 0) * 10) / 10;
+    const baseFat = Math.round((food.fat || 0) * 10) / 10;
+    
     setFoods((prev) => [
       ...prev,
       {
         name: food.name,
-        kcal: Math.round(food.calories || 0),
-        protein: Math.round((food.protein || 0) * 10) / 10,
-        carbs: Math.round((food.carbs || 0) * 10) / 10,
-        fat: Math.round((food.fat || 0) * 10) / 10,
-        amount: 100,
+        kcal: baseKcal,
+        protein: baseProtein,
+        carbs: baseCarbs,
+        fat: baseFat,
+        amount: baseAmount,
         unit: 'g',
         external_id: food.id || null,
         source_api: 'FatSecret',
+        _baseAmount: baseAmount,
+        _baseKcal: baseKcal,
+        _baseProtein: baseProtein,
+        _baseCarbs: baseCarbs,
+        _baseFat: baseFat,
       },
     ]);
     setSearchQuery('');

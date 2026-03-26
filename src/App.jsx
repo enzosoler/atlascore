@@ -272,6 +272,7 @@ const AppRoutes = () => (
     <Route path="/share-target" element={<ShareTarget />} />
 
     <Route path="/use-case/:role" element={<UseCase />} />
+    <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
     <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
     <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
     <Route path="/guides/plan-vs-execution" element={<PlanVsExecutionGuide />} />
@@ -309,7 +310,6 @@ const AppRoutes = () => (
         <Route path={ROUTES.myWorkout} element={<MyWorkout />} />
         <Route path={ROUTES.manualWorkout} element={<ManualWorkoutPlan />} />
         <Route path={ROUTES.diary} element={<Diary />} />
-        <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
         <Route path={ROUTES.social} element={<Social />} />
         <Route path={ROUTES.prescribedDiet} element={<MyPrescribedDiet />} />
         <Route path={ROUTES.prescribedWorkout} element={<MyPrescribedWorkout />} />
