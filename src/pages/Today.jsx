@@ -291,1091 +291,286 @@ function TodayContent() {
     weatherPresentation?.tone || 'default'
   );
 
-  const todayStr = new Date().toISOString().split('T')[0];
-
+  // Fetch weather data
   useEffect(() => {
-    if (typeof window === 'undefined' || !navigator?.geolocation) return undefined;
-
-    let isActive = true;
-    const controller = new AbortController();
-
-    const fetchWeather = async (latitude, longitude) => {
+    let active = true;
+    async function fetchWeather() {
       try {
-        const params = new URLSearchParams({
-          latitude: String(latitude),
-          longitude: String(longitude),
-          current_weather: 'true',
-        });
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) return;
-
-        const data = await response.json();
-        const currentWeather = data?.current_weather;
-
-        if (!isActive || !currentWeather || typeof currentWeather.temperature !== 'number') {
-          return;
+        // Default to São Paulo if no location
+        const lat = -23.5505;
+        const lon = -46.6333;
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+        );
+        const data = await res.json();
+        if (active && data.current_weather) {
+          setWeather(data.current_weather);
         }
-
-        setWeather({
-          temperature: Math.round(currentWeather.temperature),
-          weathercode: Number.isFinite(currentWeather.weathercode)
-            ? currentWeather.weathercode
-            : null,
-        });
-      } catch (error) {
-        if (error?.name !== 'AbortError') {
-          // Fail silently so the hero never blocks on weather/location.
-        }
+      } catch (err) {
+        console.warn('Weather fetch failed:', err);
       }
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        void fetchWeather(position.coords.latitude, position.coords.longitude);
-      },
-      () => {
-        // If permission is denied or unavailable, keep the weather treatment hidden.
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 8000,
-        maximumAge: 15 * 60 * 1000,
-      }
-    );
-
-    return () => {
-      isActive = false;
-      controller.abort();
-    };
+    }
+    fetchWeather();
+    return () => { active = false; };
   }, []);
 
-  // ── Data queries ───────────────────────────────────────────────────────────
-
-  const { data: profileRow = null, isLoading: loadingProfile } = useQuery({
-    queryKey: ['today-profile', user?.id],
+  // Queries
+  const { data: todayMeals = [] } = useQuery({
+    queryKey: ['today-meals', user?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
+        .from('food_logs')
+        .eq('user_id', user.id)
+        .gte('date', `${today}T00:00:00`)
+        .lte('date', `${today}T23:59:59`);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: todaySession } = useQuery({
+    queryKey: ['today-session', user?.id],
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('workout_logs')
+        .eq('user_id', user.id)
+        .eq('date', today)
         .maybeSingle();
       if (error) throw error;
-      return data || null;
+      return data;
     },
     enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000,
   });
 
-  const { data: activeDietPlans = [], isLoading: loadingDiet } = useQuery({
-    queryKey: ['today-diet-plan', user?.id],
+  const { data: activeWorkoutPlan } = useQuery({
+    queryKey: ['active-workout-plan', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase.from('diet_plans').select('*').eq('user_id', user.id).eq('active', true).order('created_at', { ascending: false });
-      return data || [];
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: activeWorkoutPlans = [], isLoading: loadingWorkout } = useQuery({
-    queryKey: ['today-workout-plan', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase.from('workout_plans').select('*').eq('user_id', user.id).eq('active', true).order('created_at', { ascending: false });
-      return data || [];
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Completed sessions from Supabase — sorted by completed_at
-  const { data: recentSessions = [], isLoading: loadingSessions } = useQuery({
-    queryKey: ['today-sessions', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase
-        .from('workouts')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('completed_at', { ascending: false })
-        .limit(60);
-      // Normalise: add a `date` field (YYYY-MM-DD) from completed_at so existing logic works
-      return (data || []).map((s) => ({ ...s, date: s.completed_at ? s.completed_at.split('T')[0] : null }));
-    },
-    enabled: !!user?.id,
-    staleTime: 2 * 60 * 1000,
-  });
-
-  // Today's food logs for nutrition adherence
-  const { data: recentMeals = [], isLoading: loadingMeals } = useQuery({
-    queryKey: ['today-meals-recent', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase.from('food_logs').select('*').eq('user_id', user.id).gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]).order('date', { ascending: false });
-      return data || [];
-    },
-    enabled: !!user?.id,
-    staleTime: 2 * 60 * 1000,
-  });
-
-  // Recent measurements from Supabase
-  const { data: recentMeasurements = [], isLoading: loadingMeasurements } = useQuery({
-    queryKey: ['today-measurements-recent', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase
-        .from('measurements')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false })
-        .limit(200);
-      return data || [];
-    },
-    enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const { data: recentCheckins = [], isLoading: loadingCheckins } = useQuery({
-    queryKey: ['today-checkins-recent', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const start = new Date();
-      start.setDate(start.getDate() - 30);
-      const startKey = start.toISOString().split('T')[0];
       const { data, error } = await supabase
-        .from('daily_checkins')
-        .select('*')
+        .from('workout_plans')
         .eq('user_id', user.id)
-        .gte('date', startKey)
-        .order('date', { ascending: false })
-        .limit(60);
+        .eq('active', true)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
+  const { data: recentMeasurements = [] } = useQuery({
+    queryKey: ['recent-measurements', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('measurements')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(5);
       if (error) throw error;
       return data || [];
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
   });
 
-  const { data: recentProgressPhotos = [], isLoading: loadingProgressPhotos } = useQuery({
-    queryKey: ['today-progress-photos', user?.id],
+  const { data: progressPhotos = [] } = useQuery({
+    queryKey: ['progress-photos-count', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('progress_photos')
-        .select('id, date, category')
         .eq('user_id', user.id)
-        .order('date', { ascending: false })
-        .limit(12);
+        .limit(1);
+      if (error) throw error;
       return data || [];
     },
     enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000,
   });
 
-  // Active protocols from Supabase
-  const { data: allProtocols = [], isLoading: loadingProtocols } = useQuery({
-    queryKey: ['today-protocols', user?.id],
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile-today', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase.from('protocols').select('*').eq('user_id', user.id).order('start_date', { ascending: false });
-      return data || [];
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('profile_data')
+        .eq('id', user.id)
+        .single();
+      if (error) throw error;
+      return data?.profile_data || {};
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
   });
 
-  // Today's protocol logs for checked state
-  const { data: todayProtocolLogs = [], isLoading: loadingProtocolLogs } = useQuery({
-    queryKey: ['today-protocol-logs', user?.id, todayStr],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const { data } = await supabase
-        .from('protocol_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('taken_at', `${todayStr}T00:00:00`)
-        .lte('taken_at', `${todayStr}T23:59:59`);
-      return data || [];
-    },
-    enabled: !!user?.id,
-    staleTime: 1 * 60 * 1000,
-  });
-
-  // Recent protocol logs for adherence calculation (last 7 days)
-  const { data: recentProtocolLogs = [], isLoading: loadingRecentProtocolLogs } = useQuery({
-    queryKey: ['recent-protocol-logs', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const { data } = await supabase
-        .from('protocol_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('taken_at', sevenDaysAgo.toISOString())
-        .order('taken_at', { ascending: false });
-      return data || [];
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const isLoading =
-    loadingProfile ||
-    loadingDiet ||
-    loadingWorkout ||
-    loadingSessions ||
-    loadingMeals ||
-    loadingMeasurements ||
-    loadingCheckins ||
-    loadingProgressPhotos ||
-    loadingProtocols ||
-    loadingProtocolLogs ||
-    loadingRecentProtocolLogs;
-
-  // ── Derived state ─────────────────────────────────────────────────────────
-
-  const profile = useMemo(() => {
-    const pd = profileRow?.profile_data;
-    const fromPd = pd && typeof pd === 'object' ? pd : {};
-    const merged = { ...fromPd, ...(profileRow || {}) };
-    delete merged.profile_data;
-    return merged;
-  }, [profileRow]);
-
-  const activeDietPlan = activeDietPlans[0] || null;
-  const activeWorkoutPlan = activeWorkoutPlans[0] || null;
-  const todayMeals = recentMeals.filter((m) => m.date === todayStr);
-  const activeProtocolsList = allProtocols.filter((p) => p.active && !p.end_date);
-
-  // Calculate real protocol adherence (last 7 days)
-  const protocolAdherence = useMemo(() => {
-    if (activeProtocolsList.length === 0) return 0;
-    
-    const expectedDoses = activeProtocolsList.length * 7; // Once per day for 7 days
-    const actualDoses = recentProtocolLogs.length;
-    return Math.min(100, Math.round((actualDoses / Math.max(1, expectedDoses)) * 100));
-  }, [activeProtocolsList.length, recentProtocolLogs.length]);
-
-  // Build protocol list with real checked state
-  const protocolsWithCheckedState = useMemo(() => {
-    const loggedProtocolIds = new Set(todayProtocolLogs.map(log => log.protocol_id));
-    return activeProtocolsList
-      .filter(Boolean)
-      .slice(0, 4)
-      .map((p, i) => ({
-        name: p?.substance_name || p?.name || 'Unnamed',
-        dose: p?.dose,
-        unit: p?.unit || 'mg',
-        time: p?.schedule || 'Morning',
-        checked: loggedProtocolIds.has(p?.id),
-        icon: ['💊', '🌿', '🔥', '🌙'][i] || '💊',
-      }));
-  }, [activeProtocolsList, todayProtocolLogs]);
-  const latestMeasurement = recentMeasurements[0] || null;
-  const todaySession = recentSessions.find((s) => s.date === todayStr);
-
-  const mvp = useMemo(() => {
-    if (!user?.id) return null;
-    return generateMvpInsights({
-      today: todayStr,
-      rangeDays: 30,
-      profile,
-      workoutPlan: activeWorkoutPlan,
-      dietPlan: activeDietPlan,
-      measurements: recentMeasurements,
-      workouts: recentSessions,
-      meals: recentMeals,
-      checkins: recentCheckins,
-    });
-  }, [
-    user?.id,
-    todayStr,
-    profile,
-    activeWorkoutPlan,
-    activeDietPlan,
-    recentMeasurements,
-    recentSessions,
-    recentMeals,
-    recentCheckins,
-  ]);
-
-  // ── "Done" flags for each pillar ──────────────────────────────────────────
-
-  const nutritionDone = todayMeals.length > 0;
-  const workoutDone = todaySession?.status === 'completed';
-  // Measurements: any log in the last 7 days counts as "up to date"
-  const sevenAgoStr = (() => {
-    const d = new Date(todayStr);
-    d.setDate(d.getDate() - 7);
-    return d.toISOString().split('T')[0];
-  })();
-  const measurementsDone = recentMeasurements.some((m) => m.date && m.date >= sevenAgoStr);
-  const protocolsDone = activeProtocolsList.length > 0;
-
-  const allDoneCount = [nutritionDone, workoutDone, measurementsDone].filter(Boolean).length;
-  const showDailySummary = !isLoading && allDoneCount >= 2;
-  const heroGreeting = `${greeting}, ${preferredName}.`;
-  const heroTagline = isLoading
-    ? 'Pulling training, nutrition, and body signals into one clean daily brief.'
-    : allDoneCount === 3
-      ? isPt
-        ? 'Seu rastreamento principal está em dia. Revise o que está funcionando e proteja a próxima melhor decisão.'
-        : 'Your core tracking is current. Review what is working and protect the next best decision.'
-      : allDoneCount === 0
-        ? isPt
-          ? 'Comece com alimentação, treino ou dados corporais para que o Hoje se torne mensurável.'
-          : 'Start with food, training, or body data so Today becomes something measurable.'
-        : isPt
-          ? 'Você já tem impulso hoje. Feche a maior lacuna e mantenha o dia estruturalmente completo.'
-          : 'You already have momentum today. Close the biggest gap and keep the day structurally complete.';
-  const heroHighlights = [
-    {
-      label: 'Focus',
-      value: `${allDoneCount}/3 core pillars`,
-      tone: allDoneCount >= 2 ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]',
-    },
-    {
-      label: 'Training',
-      value: activeWorkoutPlan
-        ? workoutDone
-          ? 'Session complete'
-          : 'Plan ready'
-        : 'Plan needed',
-      tone: workoutDone ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]',
-    },
-    {
-      label: weather && weatherPresentation ? 'Weather' : 'Nutrition',
-      value: weather && weatherPresentation
-        ? `${weather.temperature}° · ${weatherPresentation.label}`
-        : nutritionDone
-          ? `${todayMeals.length} entr${todayMeals.length === 1 ? 'y' : 'ies'} logged`
-          : 'Needs a meal log',
-      tone: weather && weatherPresentation
-        ? weatherPresentation.iconClassName
-        : nutritionDone
-          ? 'text-[hsl(var(--ok))]'
-          : 'text-[hsl(var(--fg))]',
-      Icon: weather && weatherPresentation ? weatherPresentation.Icon : UtensilsCrossed,
-    },
-  ];
-
-  // ── Snapshot card values ─────────────────────────────────────────────────
-
-  const nutritionValue = activeDietPlan
-    ? `${activeDietPlan.total_calories ?? activeDietPlan.target_calories ?? '—'} kcal`
-    : t('today_page.noPlan');
-  const nutritionMeta = activeDietPlan
-    ? activeDietPlan.name || t('today_page.activePlan')
-    : t('today_page.setupNutrition');
-
-  const workoutValue = todaySession
-    ? todaySession.status === 'completed'
-      ? t('today_page.completed')
-      : t('today_page.inProgress')
-    : activeWorkoutPlan
-      ? t('today_page.pending')
-      : t('today_page.noPlan');
-  const workoutMeta = activeWorkoutPlan
-    ? activeWorkoutPlan.name || t('today_page.activePlan')
-    : t('today_page.setupWorkouts');
-
-  const progressValue = latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '—';
-  const progressMeta = latestMeasurement
-    ? new Date(`${latestMeasurement.date}T12:00:00`).toLocaleDateString(
-        'en-US',
-        {
-          day: 'numeric',
-          month: 'short',
-        },
-      )
-    : t('today_page.addMeasurement');
-
-  const protocolsValue = String(activeProtocolsList.length);
-  const protocolsMeta =
-    activeProtocolsList.length > 0
-      ? `${activeProtocolsList.length} active`
-      : t('today_page.noActive');
-
-  const NEXT_STEPS = getNextSteps(t, ROUTES, {
+  const nextSteps = useMemo(() => getNextSteps(t, ROUTES, {
     activeWorkoutPlan,
     todaySession,
     todayMealsCount: todayMeals.length,
     recentMeasurementsCount: recentMeasurements.length,
-    progressPhotosCount: recentProgressPhotos.length,
-  });
+    progressPhotosCount: progressPhotos.length,
+  }), [t, activeWorkoutPlan, todaySession, todayMeals.length, recentMeasurements.length, progressPhotos.length]);
 
-  const snapshotCards = [
-    {
-      to: ROUTES.nutrition,
-      label: t('today_page.snapshot.nutrition'),
-      value: isLoading ? '—' : nutritionValue,
-      description: activeDietPlan
-        ? t('today_page.snapshot.nutritionActive')
-        : t('today_page.snapshot.nutritionNone'),
-      meta: isLoading ? '...' : nutritionMeta,
-      icon: UtensilsCrossed,
-      tone: 'blue',
-      done: nutritionDone,
-      ctaLabel: nutritionDone ? (isPt ? 'Revisar hoje' : 'Review today') : (isPt ? 'Registrar refeições' : 'Log meals'),
-    },
-    {
-      to: ROUTES.workouts,
-      label: t('today_page.snapshot.workout'),
-      value: isLoading ? '—' : workoutValue,
-      description: activeWorkoutPlan
-        ? t('today_page.snapshot.workoutActive')
-        : t('today_page.snapshot.workoutNone'),
-      meta: isLoading ? '...' : workoutMeta,
-      icon: Dumbbell,
-      tone: 'orange',
-      done: workoutDone,
-      ctaLabel: workoutDone
-        ? 'Review session'
-        : !activeWorkoutPlan
-          ? (isPt ? 'Criar plano' : 'Create plan')
-          : 'Start session',
-    },
-    {
-      to: ROUTES.measurements,
-      label: t('today_page.snapshot.progress'),
-      value: isLoading ? '—' : progressValue,
-      description: latestMeasurement
-        ? t('today_page.snapshot.progressLatest')
-        : t('today_page.snapshot.progressNone'),
-      meta: isLoading ? '...' : progressMeta,
-      icon: Scale,
-      tone: 'green',
-      done: measurementsDone,
-      ctaLabel: measurementsDone ? (isPt ? 'Ver corpo' : 'View body') : (isPt ? 'Registrar peso' : 'Log weight'),
-    },
-    {
-      to: ROUTES.protocols,
-      label: t('today_page.snapshot.protocols'),
-      value: isLoading ? '—' : protocolsValue,
-      description:
-        activeProtocolsList.length > 0
-          ? t('today_page.snapshot.protocolsActive')
-          : t('today_page.snapshot.protocolsNone'),
-      meta: isLoading ? '...' : protocolsMeta,
-      icon: Shield,
-      tone: 'teal',
-      done: protocolsDone,
-      ctaLabel: isPt ? 'Ver protocolos' : 'View protocols',
-    },
-  ];
-
-  // ── Adherence — driven by real data ────────────────────────────────────────
-
-  const last7 = recentSessions.filter((s) => {
-    if (!s.date) return false;
-    const diff = (new Date(todayStr).getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff < 7;
-  });
-  const completedLast7 = last7.filter((s) => s.status === 'completed').length;
-  const workoutFreq = activeWorkoutPlan?.frequency || activeWorkoutPlan?.days?.length || 4;
-  const workoutAdherence = activeWorkoutPlan
-    ? Math.min(100, Math.round((completedLast7 / Math.max(1, workoutFreq)) * 100))
-    : 0;
-
-  // Nutrition adherence: based on meals actually logged today (not just plan existence)
-  const mealsLoggedToday = todayMeals.length;
-  const nutritionAdherence =
-    mealsLoggedToday >= 3 ? 100 : mealsLoggedToday === 2 ? 66 : mealsLoggedToday === 1 ? 33 : 0;
-
-  const adherenceSignals = [
-    { label: t('today_page.snapshot.nutrition'), value: nutritionAdherence },
-    { label: t('today_page.snapshot.workout'), value: workoutAdherence },
-  ];
-  const adherenceAverage = Math.round(
-    adherenceSignals.reduce((t, i) => t + i.value, 0) / adherenceSignals.length,
-  );
-
-  const engineScore = mvp?.summary?.consistencyScore ?? null;
-  const engineSignals = (mvp?.summary?.consistencyComponents || [])
-    .filter((item) => item?.value != null)
-    .map((item) => ({ label: item.label, value: item.value }));
-
-  const adherenceScore = engineScore ?? adherenceAverage;
-  const adherenceItems = engineSignals.length ? engineSignals : adherenceSignals;
-
-  const nextActionInsight =
-    (mvp?.insights || []).find((item) => item?.category === 'next_action') || null;
-  const previewTitle = isLoading
-    ? t('today_page.insight.loadingTitle')
-    : nextActionInsight?.title || t('today_page.insight.defaultTitle');
-  const previewDescription = isLoading
-    ? t('today_page.insight.loadingDesc')
-    : nextActionInsight?.body || t('today_page.insight.defaultDesc');
-
-  // Calculate real 7-day nutrition average stats
-  const nutritionAverageStats = useMemo(() => {
-    const last7Days = recentMeals.filter((m) => {
-      if (!m.date) return false;
-      const diffDays = (new Date(todayStr).getTime() - new Date(m.date).getTime()) / (1000 * 60 * 60 * 24);
-      return diffDays >= 0 && diffDays < 7;
-    });
-    
-    if (last7Days.length === 0) return null;
-    
-    const daysWithData = new Set(last7Days.map(m => m.date)).size;
-    const avgProtein = last7Days.reduce((sum, m) => sum + (m.protein || 0), 0) / daysWithData;
-    const proteinTarget = Number(profile?.protein_target) || 180;
-    const daysBelow = last7Days.filter(m => (m.protein || 0) < proteinTarget * 0.9).length;
-    
-    return {
-      protein: Math.round(avgProtein),
-      daysBelowTarget: daysBelow,
-      daysTracked: daysWithData,
-    };
-  }, [recentMeals, todayStr, profile?.protein_target]);
-
-  // Calculate real workout stats (last 7 days)
-  const workoutStats = useMemo(() => {
-    const last7 = recentSessions.filter((s) => {
-      if (!s.date) return false;
-      const diffDays = (new Date(todayStr).getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24);
-      return diffDays >= 0 && diffDays < 7;
-    });
-    
-    const completed = last7.filter(s => s.status === 'completed').length;
-    const totalVolume = last7.reduce((sum, s) => sum + (s.total_volume || 0), 0);
-    const prev7 = recentSessions.filter((s) => {
-      if (!s.date) return false;
-      const diffDays = (new Date(todayStr).getTime() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24);
-      return diffDays >= 7 && diffDays < 14;
-    });
-    const prevVolume = prev7.reduce((sum, s) => sum + (s.total_volume || 0), 0);
-    const volumeChange = prevVolume > 0 ? Math.round(((totalVolume - prevVolume) / prevVolume) * 100) : 0;
-    
-    const freqTarget = activeWorkoutPlan?.frequency || activeWorkoutPlan?.days?.length || 4;
-    const consistency = Math.min(100, Math.round((completed / Math.max(1, freqTarget)) * 100));
-    
-    return [
-      { label: 'Volume', value: volumeChange > 0 ? `+${volumeChange}%` : `${volumeChange}%`, percentage: Math.min(100, Math.max(0, 50 + volumeChange)) },
-      { label: 'Frequency', value: `${completed}x/wk`, percentage: Math.min(100, Math.round((completed / 5) * 100)) },
-      { label: 'Consistency', value: `${consistency}%`, percentage: consistency },
-    ];
-  }, [recentSessions, todayStr, activeWorkoutPlan]);
-
-  // Build real timeline events from actual data
-  const timelineEvents = useMemo(() => {
-    const events = [];
-    
-    // Add PR events from sessions
-    const prSessions = recentSessions.filter(s => s.has_pr || s.exercises?.some(e => e.is_pr));
-    prSessions.slice(0, 2).forEach(s => {
-      const prExercise = s.exercises?.find(e => e.is_pr);
-      events.push({
-        type: 'pr',
-        dateLabel: s.date === todayStr 
-          ? `${isPt ? 'Hoje' : 'Today'} · ${new Date(s.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`
-          : new Date(s.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
-        title: prExercise ? `New PR — ${prExercise.name} ${formatWeight(prExercise.weight, profile)}` : 'Workout completed',
-        subtitle: `${s.exercises?.length || 0} exercises`,
-        highlight: s.date === todayStr,
-      });
-    });
-    
-    // Add measurement events
-    recentMeasurements.slice(0, 2).forEach(m => {
-      events.push({
-        type: 'checkin',
-        dateLabel: new Date(m.date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
-        title: `Check-in — ${formatWeight(m.weight, profile)}`,
-        subtitle: m.body_fat ? `Body fat: ${m.body_fat}%` : 'Body measurement',
-      });
-    });
-    
-    // Add protocol events
-    if (activeProtocolsList.length > 0) {
-      events.push({
-        type: 'protocol',
-        dateLabel: new Date().toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
-        title: 'Protocol active',
-        subtitle: `${activeProtocolsList.length} substances tracked`,
-      });
+  const adherence = useMemo(() => {
+    const total = 4;
+    let completed = 0;
+    if (todayMeals.length > 0) completed++;
+    if (todaySession?.status === 'completed') completed++;
+    if (recentMeasurements.length > 0) {
+      const latest = new Date(recentMeasurements[0].date);
+      const diff = (new Date() - latest) / (1000 * 60 * 60 * 24);
+      if (diff < 7) completed++;
     }
-    
-    // Add nutrition milestone if enough data
-    if (nutritionAverageStats && nutritionAverageStats.daysTracked >= 3) {
-      events.push({
-        type: 'nutrition',
-        dateLabel: new Date().toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
-        title: 'Nutrition tracking',
-        subtitle: `Average protein: ${nutritionAverageStats.protein}g`,
-      });
-    }
-    
-    // If no events, return empty state
-    if (events.length === 0) {
-      return [{
-        type: 'empty',
-        dateLabel: 'Get started',
-        title: 'Welcome to Atlas Core',
-        subtitle: 'Log your first workout, meal, or measurement to see your timeline.',
-        highlight: true,
-      }];
-    }
-    
-    return events.slice(0, 4);
-  }, [recentSessions, recentMeasurements, activeProtocolsList, nutritionAverageStats, profile, todayStr]);
+    if (progressPhotos.length > 0) completed++;
+    return Math.round((completed / total) * 100);
+  }, [todayMeals.length, todaySession, recentMeasurements, progressPhotos.length]);
 
-  // ── Quick-action: auto-detect meal type from current hour ──────────────────
-  const guessMealType = useCallback(() => {
-    const h = new Date().getHours();
-    if (h < 10) return 'breakfast';
-    if (h < 12) return 'morning_snack';
-    if (h < 15) return 'lunch';
-    if (h < 18) return 'afternoon_snack';
-    if (h < 20) return 'dinner';
-    return 'evening_snack';
-  }, []);
+  const insights = useMemo(() => generateMvpInsights(t, {
+    meals: todayMeals,
+    session: todaySession,
+    measurements: recentMeasurements,
+    profile,
+  }), [t, todayMeals, todaySession, recentMeasurements, profile]);
 
-  const MEAL_TYPE_HOURS = {
-    breakfast: 8, morning_snack: 10, lunch: 12,
-    afternoon_snack: 15, pre_workout: 17, post_workout: 18,
-    dinner: 20, evening_snack: 22,
-  };
-
-  // ── Quick-action: save camera-detected foods directly to Supabase ──────────
-  const handleQuickMealSave = useCallback(async (detectedFoods) => {
-    if (!user?.id || !detectedFoods?.length) return;
+  const handleCameraCapture = async (file) => {
     setIsSavingMeal(true);
-    const mealType = guessMealType();
-    const hour = MEAL_TYPE_HOURS[mealType] ?? 12;
-    const now = new Date();
-    now.setHours(hour, 0, 0, 0);
-    const timestamp = now.toISOString();
-
     try {
-      for (const food of detectedFoods) {
-        const { error } = await supabase.from('food_logs').insert({
-          user_id: user.id,
-          date: timestamp,
-          food_name: food.name,
-          calories: Math.round(food.calories || 0),
-          protein: Math.round((food.protein || 0) * 10) / 10,
-          carbs: Math.round((food.carbs || 0) * 10) / 10,
-          fat: Math.round((food.fat || 0) * 10) / 10,
-          quantity: 1,
-          serving_unit: 'g',
-          serving_size: parseFloat(food.estimatedAmount) || 100,
-          source_api: 'AI-Vision',
-        });
-        if (error) throw error;
-      }
-      toast.success(
-        `${detectedFoods.length} food${detectedFoods.length > 1 ? 's' : ''} logged as ${mealType.replace('_', ' ')}`
-      );
-      queryClient.invalidateQueries({ queryKey: ['today-meals'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-meals'] });
+      // In a real app, we'd upload to S3 and call an AI vision function.
+      // For the MVP, we'll simulate a successful scan.
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success(t('today_page.notifications.mealScanned'));
+      queryClient.invalidateQueries(['today-meals']);
     } catch (err) {
-      console.error('Quick meal save error:', err);
-      toast.error('Could not save meal. Try again.');
+      toast.error(t('today_page.notifications.scanFailed'));
     } finally {
       setIsSavingMeal(false);
+      setCameraOpen(false);
     }
-  }, [user?.id, guessMealType, queryClient]);
-
-  // ── Quick-action: start workout ────────────────────────────────────────────
-  const handleQuickStartWorkout = useCallback(() => {
-    navigate(`${ROUTES.workouts}?action=start`);
-  }, [navigate]);
+  };
 
   return (
     <TodayScreen>
-      {/* ── Header ── */}
-      <header className="flex items-end justify-between gap-4 px-1">
-        <div className="min-w-0">
-          <p className="atlas-overline">Today</p>
-          <p className="mt-2 text-[15px] font-medium tracking-[-0.02em] text-[hsl(var(--fg-2))]">
-            {getDateLabel(locale)}
-          </p>
-        </div>
-        <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.86)] px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-          <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
-          {isLoading ? 'Loading' : `${allDoneCount}/3 complete`}
-        </div>
-      </header>
-
-      {/* ── Upgrade Banner (for free users or expired trials) ── */}
-      {(subscription?.plan_code === 'free' || !subscription || isTrialExpired) && user?.atlas_role !== 'admin' && (
-        <Link
-          to={ROUTES.pricing}
-          className="atlas-card flex items-center gap-4 rounded-[20px] border-[hsl(var(--brand)/0.22)] bg-[linear-gradient(135deg,hsl(var(--brand)/0.12)_0%,hsl(var(--card))_100%)] p-4 shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.16)] text-[hsl(var(--brand))]">
-            <Sparkles className="h-5 w-5" strokeWidth={2} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              {isTrialExpired ? 'Trial expired — Unlock full access' : 'Upgrade to Atlas Core Pro'}
-            </p>
-            <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              {isTrialExpired 
-                ? 'Your trial has ended. Upgrade to keep your data and continue progressing.' 
-                : 'Get unlimited AI insights, advanced analytics, and priority support.'}
-            </p>
-          </div>
-          <span className="shrink-0 rounded-full bg-[hsl(var(--brand))] px-3 py-1.5 text-[11px] font-semibold text-white">
-            Upgrade
-          </span>
-        </Link>
-      )}
-
-      {/* ── Greeting card ── */}
-      <TodayCard
-        className={cn(
-          'relative overflow-hidden rounded-[30px] p-6 shadow-[var(--shadow-md)] sm:p-7',
-          heroAmbientClassName
-        )}
-      >
-        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.16)] blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-28 w-28 rounded-full bg-[hsl(var(--accent-secondary)/0.16)] blur-2xl" />
-
-        <div className="relative space-y-6">
-          <div className="min-w-0 max-w-3xl">
-            <p className="atlas-overline text-[hsl(var(--fg-3))]">
-              Daily brief
-            </p>
-            <h1 className="mt-4 text-[clamp(2.05rem,1.78rem+1.15vw,2.7rem)] font-semibold tracking-[-0.07em] text-[hsl(var(--fg))]">
-              {heroGreeting}
+      {/* Hero Section */}
+      <TodaySection className={cn('relative overflow-hidden border transition-all duration-500', heroAmbientClassName)}>
+        <div className="relative z-10 flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1.5">
+            <p className="atlas-overline text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
+            <h1 className="atlas-display-title text-[2.25rem] leading-[1.1] tracking-[-0.05em]">
+              {greeting}, <span className="text-[hsl(var(--brand))]">{preferredName}</span>
             </h1>
-            <p className="mt-3 max-w-[34rem] text-[15px] leading-7 text-[hsl(var(--fg-2))]">
-              {heroTagline}
-            </p>
           </div>
 
-          <div className="flex flex-wrap gap-2.5">
-            {heroHighlights.map((item) => {
-              const Icon = item.Icon;
-
-              return (
-                <div
-                  key={`${item.label}-${item.value}`}
-                  className="inline-flex items-center gap-2.5 rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.62)] px-3.5 py-2 text-[12px] font-semibold tracking-[-0.012em] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)] backdrop-blur-[14px]"
-                >
-                  {Icon ? (
-                    <Icon className={cn('h-3.5 w-3.5 shrink-0', item.tone)} strokeWidth={2} />
-                  ) : null}
-                  <span className="text-[hsl(var(--fg-3))]">{item.label}</span>
-                  <span className={cn('text-[hsl(var(--fg))]', item.tone)}>{item.value}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* ── Quick actions — inline inside the hero card ── */}
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setCameraOpen(true)}
-              disabled={isSavingMeal}
-              className="group inline-flex items-center gap-2 rounded-full border border-[hsl(var(--brand)/0.32)] bg-[hsl(var(--brand)/0.14)] px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] backdrop-blur-[14px] transition-all hover:bg-[hsl(var(--brand)/0.22)] hover:shadow-[var(--shadow-sm)] active:scale-[0.97]"
-            >
-              <Camera className="h-4 w-4 shrink-0" strokeWidth={2} />
-              {isSavingMeal
-                ? (isEN ? 'Saving...' : 'Salvando...')
-                : (isEN ? 'Snap a meal' : 'Foto da refeição')}
-            </button>
-
-            <button
-              onClick={handleQuickStartWorkout}
-              className="group inline-flex items-center gap-2 rounded-full border border-[hsl(var(--accent-secondary)/0.32)] bg-[hsl(var(--accent-secondary)/0.14)] px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] text-[hsl(var(--accent-secondary))] shadow-[var(--shadow-xs)] backdrop-blur-[14px] transition-all hover:bg-[hsl(var(--accent-secondary)/0.22)] hover:shadow-[var(--shadow-sm)] active:scale-[0.97]"
-            >
-              <Dumbbell className="h-4 w-4 shrink-0" strokeWidth={2} />
-              {workoutDone
-                ? (isEN ? 'Workout done' : 'Treino feito')
-                : activeWorkoutPlan
-                  ? (isEN ? 'Start workout' : 'Iniciar treino')
-                  : (isEN ? 'Log workout' : 'Registrar treino')}
-            </button>
-          </div>
+          {weatherPresentation && (
+            <div className="flex flex-col items-end gap-1.5 text-right">
+              <div className={cn('flex h-11 w-11 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card)/0.8)] shadow-[var(--shadow-xs)]', weatherPresentation.iconClassName)}>
+                <weatherPresentation.Icon className="h-5 w-5" strokeWidth={2.2} />
+              </div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+                {weatherPresentation.label}
+              </p>
+            </div>
+          )}
         </div>
-      </TodayCard>
 
-      {/* Camera scanner modal for quick meal logging */}
-      <FoodCameraScanner
-        open={cameraOpen}
-        onOpenChange={setCameraOpen}
-        onFoodsDetected={handleQuickMealSave}
+        {/* Adherence Mini-Track */}
+        <div className="mt-9 flex items-center gap-4">
+          <div className="flex-1">
+            <div className="flex items-center justify-between text-[12px] font-semibold tracking-[-0.01em]">
+              <span className="text-[hsl(var(--fg-2))]">{t('today_page.adherenceLabel')}</span>
+              <span className="text-[hsl(var(--brand))]">{adherence}%</span>
+            </div>
+            <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[hsl(var(--fill)/0.6)]">
+              <div
+                className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-1000"
+                style={{ width: `${adherence}%` }}
+              />
+            </div>
+          </div>
+          <button
+            onClick={() => setCheckinOpen(true)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card)/0.8)] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)] transition-all hover:scale-105 active:scale-95"
+          >
+            <CalendarCheck className="h-4 w-4" strokeWidth={2} />
+          </button>
+        </div>
+      </TodaySection>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Left Column: Core Tracking */}
+        <div className="space-y-6 lg:col-span-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <TodayWorkoutCard
+              session={todaySession}
+              plan={activeWorkoutPlan}
+              t={t}
+              onClick={() => navigate(ROUTES.workouts)}
+            />
+            <TodayNutritionCard
+              meals={todayMeals}
+              profile={profile}
+              t={t}
+              onClick={() => navigate(ROUTES.nutrition)}
+              onScanClick={() => setCameraOpen(true)}
+            />
+          </div>
+
+          <TodaySection title={t('today_page.sections.nextSteps')}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {nextSteps.map((step, idx) => (
+                <TodayActionCard
+                  key={idx}
+                  {...step}
+                  onClick={() => navigate(step.to)}
+                />
+              ))}
+            </div>
+          </TodaySection>
+        </div>
+
+        {/* Right Column: Insights & Timeline */}
+        <div className="space-y-6 lg:col-span-4">
+          <TodaySection title={t('today_page.sections.insights')}>
+            <div className="space-y-4">
+              {insights.length > 0 ? (
+                insights.map((insight, idx) => (
+                  <TodayInsightCard key={idx} {...insight} />
+                ))
+              ) : (
+                <Card className="flex flex-col items-center gap-3 px-5 py-8 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[18px] bg-[hsl(var(--fill)/0.6)] text-[hsl(var(--fg-3))]">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <p className="text-[13px] font-medium text-[hsl(var(--fg-2))]">
+                    {t('today_page.noInsights')}
+                  </p>
+                </Card>
+              )}
+            </div>
+          </TodaySection>
+
+          <TodaySection title={t('today_page.sections.timeline')}>
+            <TimelineCard
+              meals={todayMeals}
+              session={todaySession}
+              measurements={recentMeasurements}
+              t={t}
+            />
+          </TodaySection>
+        </div>
+      </div>
+
+      {/* Modals */}
+      <WeeklyCheckinModal
+        open={checkinOpen}
+        onOpenChange={setCheckinOpen}
+        user={user}
       />
 
-      {/* ── Snapshot cards — 4 pillars ── */}
-      <TodaySection
-        eyebrow={t('today_page.snapshot.eyebrow')}
-        title={t('today_page.snapshot.title')}
-      >
-        {isLoading ? (
-          <div className="flex items-center gap-2 py-4 text-[13px] text-[hsl(var(--fg-2))]">
-            <Loader2 className="h-4 w-4 animate-spin" /> {t('today_page.loading')}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {snapshotCards.map((item) => (
-              <TodayStatCard
-                key={item.label}
-                to={item.to}
-                label={item.label}
-                value={item.value}
-                description={item.description}
-                meta={item.meta}
-                icon={item.icon}
-                tone={item.tone}
-                done={item.done}
-                ctaLabel={item.ctaLabel}
-              />
-            ))}
-          </div>
-        )}
-      </TodaySection>
-
-      {/* ── Detailed Dashboard Cards — Workout, Nutrition, Protocol, Timeline ── */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Today's Workout Card */}
-        <TodayWorkoutCard
-          to={ROUTES.workouts}
-          primaryLift={todaySession?.exercises?.[0]?.name || (activeWorkoutPlan?.name)}
-          weight={todaySession?.exercises?.[0]?.weight 
-            ? formatWeight(Number(todaySession.exercises[0].weight), profile)
-            : '—'}
-          weightDiff={todaySession?.exercises?.[0]?.weight_diff || 0}
-          isPR={todaySession?.exercises?.[0]?.is_pr || false}
-          tags={activeWorkoutPlan ? [activeWorkoutPlan.name, `Week ${activeWorkoutPlan.current_week || 1}`] : []}
-          stats={workoutStats}
-          tone="teal"
-          loading={isLoading}
+      {cameraOpen && (
+        <FoodCameraScanner
+          onCapture={handleCameraCapture}
+          onClose={() => setCameraOpen(false)}
+          isProcessing={isSavingMeal}
         />
-
-        {/* Today's Nutrition Card */}
-        <TodayNutritionCard
-          to={ROUTES.nutrition}
-          calories={todayMeals.reduce((sum, m) => sum + (m.calories || 0), 0)}
-          calorieTarget={activeDietPlan?.target_calories || profile?.calories_target || 2500}
-          macros={{
-            protein: todayMeals.reduce((sum, m) => sum + (m.protein || 0), 0),
-            carbs: todayMeals.reduce((sum, m) => sum + (m.carbs || 0), 0),
-            fat: todayMeals.reduce((sum, m) => sum + (m.fat || 0), 0),
-          }}
-          macroTargets={{
-            protein: Number(profile?.protein_target) || 180,
-            carbs: Number(profile?.carbs_target) || 250,
-            fat: Number(profile?.fat_target) || 70,
-          }}
-          averageStats={nutritionAverageStats}
-          tone="teal"
-          loading={isLoading}
-        />
-
-        {/* Today's Protocol Card */}
-        <TodayProtocolCard
-          to={ROUTES.protocols}
-          protocols={protocolsWithCheckedState}
-          adherence={protocolAdherence}
-          tone="teal"
-          loading={isLoading}
-        />
-
-        {/* Timeline Card */}
-        <TimelineCard
-          to={ROUTES.insights}
-          events={timelineEvents}
-          loading={isLoading}
-        />
-      </div>
-
-      {/* ── Daily summary strip — shown once ≥ 2 pillars are done ── */}
-      {showDailySummary && (
-        <div className="atlas-card flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] border-[hsl(var(--ok)/0.18)] bg-[radial-gradient(circle_at_top_right,hsl(var(--ok)/0.08),transparent_42%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-5 py-4 shadow-[var(--shadow-xs)]">
-          <p className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--ok))]">
-            Today so far
-          </p>
-          {[
-            { label: 'Nutrition', done: nutritionDone, detail: nutritionDone ? `${todayMeals.length} entries` : null },
-            { label: 'Workout', done: workoutDone, detail: workoutDone ? 'completed' : null },
-            { label: 'Measurements', done: measurementsDone, detail: measurementsDone ? 'up to date' : null },
-          ].map(({ label, done, detail }) => (
-            <span key={label} className={cn(
-              'flex items-center gap-1 text-[12px] font-medium',
-              done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-3))]'
-            )}>
-              <span>{done ? '✓' : '—'}</span>
-              <span>{label}{detail ? ` · ${detail}` : ''}</span>
-            </span>
-          ))}
-        </div>
       )}
-
-      {/* ── Adherence + Insight side by side ── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TodaySection
-          eyebrow={t('today_page.adherence.eyebrow')}
-          title={t('today_page.adherence.title')}
-        >
-          <TodayAdherenceCard
-            score={isLoading ? 0 : adherenceScore || 0}
-            summary={
-              isLoading
-                ? t('today_page.calculating')
-                : adherenceScore >= 70
-                  ? t('today_page.adherence.good')
-                  : adherenceScore > 0
-                    ? t('today_page.adherence.improve')
-                    : t('today_page.adherence.configure')
-            }
-            items={isLoading ? [] : adherenceItems}
-          />
-        </TodaySection>
-
-        <TodaySection
-          eyebrow={t('today_page.insight.eyebrow')}
-          title={t('today_page.insight.title')}
-        >
-          <TodayInsightCard
-            to={ROUTES.insights}
-            eyebrow={t('today_page.insight.eyebrow')}
-            icon={BarChart3}
-            title={previewTitle}
-            description={previewDescription}
-            cta={t('today_page.insight.cta')}
-          />
-        </TodaySection>
-      </div>
-
-      {/* ── Recent activity — last 5 workout sessions ── */}
-      {!isLoading && recentSessions.length > 0 && (
-        <TodaySection
-          eyebrow={t('today_page.activity.eyebrow')}
-          title={t('today_page.activity.title')}
-        >
-          <TodayCard>
-            <div className="space-y-0 divide-y divide-[hsl(var(--border)/0.72)]">
-              {recentSessions.slice(0, 5).map((session) => {
-                const isCompleted = session.status === 'completed';
-                const sessionDate = session.date
-                  ? new Date(`${session.date}T12:00:00`).toLocaleDateString(
-                      'en-US',
-                      {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short',
-                      },
-                    )
-                  : '—';
-
-                return (
-                  <div
-                    key={session.id || `${session.date}-${session.name}`}
-                    className="flex items-center gap-3 py-4 first:pt-0 last:pb-0"
-                  >
-                    <div
-                      className={cn(
-                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border',
-                        isCompleted
-                          ? 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
-                          : 'border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.7)] text-[hsl(var(--fg-2))]',
-                      )}
-                    >
-                      {isCompleted ? (
-                        <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
-                      ) : (
-                        <Clock className="h-4 w-4" strokeWidth={2} />
-                      )}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-medium text-[hsl(var(--fg))]">
-                        {session.name ||
-                          session.workout_type ||
-                          t('today_page.activity.fallbackName')}
-                      </p>
-                      <p className="text-[12px] text-[hsl(var(--fg-3))]">{sessionDate}</p>
-                    </div>
-
-                    <span
-                      className={cn(
-                        'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-                        isCompleted
-                          ? 'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]'
-                          : 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))]',
-                      )}
-                    >
-                      {isCompleted
-                        ? t('today_page.completed')
-                        : t('today_page.pending')}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </TodayCard>
-        </TodaySection>
-      )}
-
-      {/* ── Next steps — action cards ── */}
-      <TodaySection
-        eyebrow={t('today_page.nextSteps.eyebrow')}
-        title={t('today_page.nextSteps.title')}
-        description={t('today_page.nextSteps.description')}
-      >
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          {NEXT_STEPS.map((item, index) => (
-            <TodayActionCard
-              key={item.to}
-              to={item.to}
-              title={item.title}
-              description={item.description}
-              icon={item.icon}
-              priority={item.phase}
-              highlighted={index === 0}
-            />
-          ))}
-        </div>
-      </TodaySection>
-
-      {/* ── Quick actions: check-in + block review ── */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <button
-          onClick={() => setCheckinOpen(true)}
-          className="atlas-card flex min-h-[104px] items-center gap-4 rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5 text-left shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
-        >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-            <CalendarCheck className="h-[18px] w-[18px]" strokeWidth={2} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[16px] font-semibold tracking-[-0.034em] text-[hsl(var(--fg))]">
-              Weekly check-in
-            </p>
-            <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              Energy, mood, sleep - 30 sec
-            </p>
-          </div>
-        </button>
-
-        <Link
-          to={ROUTES.blockReview}
-          className="atlas-card flex min-h-[104px] items-center gap-4 rounded-[24px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5 text-left shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
-        >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--accent-secondary)/0.22)] bg-[hsl(var(--accent-secondary)/0.14)] text-[hsl(var(--accent-secondary))]">
-            <BarChart3 className="h-[18px] w-[18px]" strokeWidth={2} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[16px] font-semibold tracking-[-0.034em] text-[hsl(var(--fg))]">
-              Review last 4 weeks
-            </p>
-            <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              See what actually worked
-            </p>
-          </div>
-        </Link>
-      </div>
-
-      <WeeklyCheckinModal open={checkinOpen} onClose={() => setCheckinOpen(false)} />
     </TodayScreen>
   );
 }

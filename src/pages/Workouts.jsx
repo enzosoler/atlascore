@@ -11,6 +11,12 @@ import {
   UserCheck,
 } from 'lucide-react';
 import {
+  ActionRow,
+  AppContainer,
+  PageHeader,
+  Section,
+} from '@/components/shared/AppContainer';
+import {
   DateStepper,
   DialogPanelHeader,
   EmptyState,
@@ -22,11 +28,6 @@ import {
   StatusBanner,
   shiftDate,
 } from '@/components/shared/StablePage';
-import {
-  ActionRow,
-  AppContainer,
-  PageHeader,
-} from '@/components/shared/AppContainer';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { WORKOUT_TYPES, getToday } from '@/lib/atlas-theme';
 import { cn } from '@/lib/utils';

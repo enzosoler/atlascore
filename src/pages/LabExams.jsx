@@ -24,13 +24,15 @@ import { toast } from 'sonner';
 import {
   AppContainer,
   Card,
+  Section,
+} from '@/components/shared/AppContainer';
+import {
   EmptyState,
   PageShell,
   PrimaryButton,
   SecondaryButton,
-  Section,
-  Skeleton,
 } from '@/components/shared/StablePage';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
