@@ -4,6 +4,99 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
+/**
+ * Normalizes pt-BR food descriptions for better AI parsing
+ * Handles common Brazilian food terms, portions, and variations
+ */
+function normalizeFoodInput(input) {
+  if (!input || typeof input !== 'string') return input;
+
+  let normalized = input.toLowerCase().trim();
+
+  // Brazilian portion descriptors → standard quantities
+  const portionMappings = {
+    'um pao': '1 pao',
+    'uma fatia': '1 fatia',
+    'um pedaco': '1 pedaco',
+    'um pouco de': '20g de',
+    'colher de': '1 colher de',
+    'colheres de': '2 colheres de',
+    'xicara de': '1 xicara de 200ml de',
+    'copo de': '1 copo de 250ml de',
+    'prato de': '1 prato de 300g de',
+    'concha de': '1 concha de',
+  };
+
+  Object.entries(portionMappings).forEach(([pattern, replacement]) => {
+    normalized = normalized.replace(new RegExp(`\\b${pattern}\\b`, 'gi'), replacement);
+  });
+
+  // Common Brazilian food normalizations
+  const foodMappings = {
+    'pao frances': 'pao frances (baguette)',
+    'pao de forma': 'pao de forma (sliced white bread)',
+    'arroz branco': 'arroz branco cozido',
+    'feijao': 'feijao carioca cozido',
+    'frango': 'peito de frango',
+    'carne': 'carne bovina',
+    'manteiga': 'manteiga comum',
+    'queijo': 'queijo minas frescal',
+    'leite': 'leite integral',
+    'cafe': 'cafe preto sem acucar',
+    'suco': 'suco natural de laranja',
+    'ovos': 'ovos inteiros',
+  };
+
+  Object.entries(foodMappings).forEach(([pattern, replacement]) => {
+    // Only replace if it's a standalone word to avoid partial matches
+    normalized = normalized.replace(
+      new RegExp(`\\b${pattern}\\b(?!\\w)`, 'gi'),
+      replacement
+    );
+  });
+
+  return normalized;
+}
+
+/**
+ * Validates AI food analysis result
+ * Returns { isValid: boolean, confidence: number, issues: string[] }
+ */
+function validateFoodResult(result) {
+  const issues = [];
+
+  if (!result || typeof result !== 'object') {
+    return { isValid: false, confidence: 0, issues: ['Invalid result structure'] };
+  }
+
+  if (!result.food_name || typeof result.food_name !== 'string') {
+    issues.push('Missing food name');
+  }
+
+  // Check for zero calories (likely unparseable)
+  if (result.calories === 0 || result.calories === undefined || result.calories === null) {
+    issues.push('Calories not determined');
+  }
+
+  // Check confidence threshold
+  const confidence = result.confidence || 0;
+  if (confidence < 0.5) {
+    issues.push(`Low confidence (${Math.round(confidence * 100)}%)`);
+  }
+
+  // Validate macros are reasonable (not all zeros unless it's water)
+  const hasAnyMacros = (result.protein || 0) > 0 || (result.carbs || 0) > 0 || (result.fat || 0) > 0;
+  if (!hasAnyMacros && (result.calories || 0) > 10) {
+    issues.push('Missing macronutrient breakdown');
+  }
+
+  return {
+    isValid: issues.length === 0 && confidence >= 0.5,
+    confidence,
+    issues,
+  };
+}
+
 /** Capitalize each word: "frango frito" → "Frango Frito" */
 function titleCase(str) {
   if (!str) return str;
@@ -12,50 +105,33 @@ function titleCase(str) {
   );
 }
 
-/**
- * AIFoodInput — Natural language food logging powered by AI.
- *
- * Users type what they ate in plain language (any language), e.g.:
- *   "arroz com feijão com um pouco de manteiga"
- *   "2 eggs scrambled with cheese and toast"
- *
- * The component calls the `log-food-text` edge function which returns:
- *   {
- *     success: true,
- *     source: 'ai' | 'cache',
- *     food_name: string,
- *     serving_description: string,
- *     calories, protein, carbs, fat, fiber,
- *     confidence: number,
- *     items: [{ name, estimated_grams, calories, protein, carbs, fat }]  // sub-items
- *   }
- *
- * Props:
- *   onFoodsDetected(foods[]) — called with an array of food items in the standard shape:
- *     { name, estimatedAmount, calories, protein, carbs, fat, fiber, confidence, serving_description }
- */
 export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState(null); // The full AI response
-  const [showItems, setShowItems] = useState(false); // Toggle sub-items breakdown
+  const [result, setResult] = useState(null);
+  const [showItems, setShowItems] = useState(false);
   const [error, setError] = useState(null);
-  const [suggestedSearch, setSuggestedSearch] = useState(null); // Extracted search term on failure
+  const [suggestedSearch, setSuggestedSearch] = useState(null);
+  const [validation, setValidation] = useState(null);
 
   const handleAnalyze = useCallback(async () => {
-    const trimmed = text.trim();
-    if (!trimmed) {
+    const rawText = text.trim();
+    if (!rawText) {
       toast.error('Describe what you ate');
       return;
     }
 
+    // Normalize pt-BR inputs for better parsing
+    const normalizedText = normalizeFoodInput(rawText);
+
     setIsAnalyzing(true);
     setResult(null);
     setError(null);
+    setValidation(null);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke('log-food-text', {
-        body: { query: trimmed },
+        body: { query: normalizedText, originalQuery: rawText },
       });
 
       if (fnError) {
@@ -73,11 +149,25 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
         } else {
           setError(data.error);
         }
+        setSuggestedSearch(rawText);
         return;
       }
 
       if (!data?.success) {
-        toast.info('Could not identify foods. Try being more specific (e.g., "1 plate of rice with beans").');
+        setError('Could not identify foods. Try being more specific (e.g., "1 pao frances com 10g de manteiga").');
+        setSuggestedSearch(rawText);
+        return;
+      }
+
+      // Validate the result quality
+      const validationResult = validateFoodResult(data);
+      setValidation(validationResult);
+
+      if (!validationResult.isValid) {
+        // Still show result but with warning - user can choose to proceed or search
+        setResult(data);
+        setError(`Low confidence result: ${validationResult.issues.join(', ')}. Please verify or try search.`);
+        setSuggestedSearch(rawText);
         return;
       }
 
@@ -85,10 +175,10 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
     } catch (err) {
       console.error('AI food text error:', err);
       const msg = err?.message || '';
-      
+
       // Store the original text for potential fallback search
-      setSuggestedSearch(text.trim());
-      
+      setSuggestedSearch(rawText);
+
       if (msg.includes('429') || msg.includes('rate')) {
         setError('Too many requests. AI is busy — try search below or wait a moment.');
       } else if (msg.includes('limit') || msg.includes('cap')) {
@@ -167,6 +257,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
     setIsAnalyzing(false);
     setError(null);
     setSuggestedSearch(null);
+    setValidation(null);
   }, []);
 
   // ── Input mode: before analysis ──────────────────────────────────────────
@@ -339,10 +430,11 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
 
         <Button
           onClick={handleConfirm}
-          className="flex-1 h-9 rounded-xl text-[12px] btn btn-primary gap-1.5"
+          disabled={validation && !validation.isValid}
+          className="flex-1 h-9 rounded-xl text-[12px] btn btn-primary gap-1.5 disabled:opacity-50"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          Add meal
+          {validation && !validation.isValid ? 'Add anyway (low confidence)' : 'Add meal'}
         </Button>
       </div>
 

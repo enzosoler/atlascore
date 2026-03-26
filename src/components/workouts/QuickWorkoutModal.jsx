@@ -11,6 +11,7 @@ import {
   Target,
   Timer,
   Play,
+  AlertCircle,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
@@ -45,6 +46,42 @@ export default function QuickWorkoutModal({ open, onClose, onStart }) {
   const [location, setLocation] = useState('');
   const [generating, setGenerating] = useState(false);
   const [generatedWorkout, setGeneratedWorkout] = useState(null);
+  const [generationError, setGenerationError] = useState(null);
+  const [isValidWorkout, setIsValidWorkout] = useState(false);
+
+  /**
+   * Validates AI-generated workout structure
+   * Returns { isValid: boolean, error: string | null }
+   */
+  const validateWorkout = (workout) => {
+    if (!workout || typeof workout !== 'object') {
+      return { isValid: false, error: 'Invalid workout data received' };
+    }
+
+    if (!workout.exercises || !Array.isArray(workout.exercises)) {
+      return { isValid: false, error: 'No exercises found in generated workout' };
+    }
+
+    if (workout.exercises.length === 0) {
+      return { isValid: false, error: 'Workout contains no exercises' };
+    }
+
+    // Validate each exercise has required fields
+    const requiredFields = ['name', 'sets', 'reps'];
+    const invalidExercises = workout.exercises.filter((ex) => {
+      if (!ex || typeof ex !== 'object') return true;
+      return requiredFields.some((field) => !ex[field]);
+    });
+
+    if (invalidExercises.length > 0) {
+      return {
+        isValid: false,
+        error: `${invalidExercises.length} exercise(s) missing required fields (name, sets, or reps)`,
+      };
+    }
+
+    return { isValid: true, error: null };
+  };
 
   const handleClose = () => {
     setStep(1);
@@ -292,7 +329,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`,
             )}
 
             {/* Step 3: Location */}
-            {step === 3 && (
+            {step === 3 && !generating && (
               <motion.div
                 key="step3"
                 initial={{ opacity: 0, x: 20 }}
@@ -341,6 +378,28 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`,
                     );
                   })}
                 </div>
+
+                {/* Generation Error Display */}
+                {generationError && (
+                  <div className="p-3 rounded-xl bg-[hsl(var(--err)/0.1)] border border-[hsl(var(--err)/0.3)]">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-[hsl(var(--err))] mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[12px] font-medium text-[hsl(var(--err))]">Generation failed</p>
+                        <p className="text-[11px] text-[hsl(var(--err))] mt-0.5">{generationError}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setGenerationError(null);
+                        handleGenerate();
+                      }}
+                      className="mt-2 w-full py-2 rounded-lg bg-[hsl(var(--brand))] text-white text-[12px] font-medium hover:opacity-90 transition-opacity"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -460,7 +519,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`,
           {step === 4 && (
             <button
               onClick={handleStart}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              disabled={!isValidWorkout || !generatedWorkout}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Play className="w-4 h-4 fill-current" />
               Start Workout
