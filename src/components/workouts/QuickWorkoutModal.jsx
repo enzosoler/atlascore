@@ -13,7 +13,7 @@ import {
   Play,
   AlertCircle,
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { invokeLLMJson } from '@/lib/llm';
 import { toast } from 'sonner';
 
 const MUSCLE_OPTIONS = [
@@ -101,8 +101,7 @@ export default function QuickWorkoutModal({ open, onClose, onStart }) {
     setIsValidWorkout(false);
 
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        systemPrompt: `You are an expert fitness coach. Create a focused, effective workout based on the user's constraints.
+      const prompt = `You are an expert fitness coach. Create a focused, effective workout based on the user's constraints.
 
 Rules:
 1. Select exercises appropriate for the location (gym equipment vs home vs bodyweight)
@@ -111,42 +110,45 @@ Rules:
 4. Include warmup recommendations
 5. Structure: 3-6 exercises with appropriate sets/reps
 
-CRITICAL: You MUST return a valid workout with at least 3 exercises. Each exercise MUST have: name, muscle_group, sets (number), reps (string), rest_seconds (number).`,
-        prompt: `Create a ${duration}-minute workout for ${muscle === 'full_body' ? 'full body' : muscle} training at ${location}.
+CRITICAL: You MUST return a valid workout with at least 3 exercises. Each exercise MUST have: name, muscle_group, sets (number), reps (string), rest_seconds (number).
+
+Create a ${duration}-minute workout for ${muscle === 'full_body' ? 'full body' : muscle} training at ${location}.
 
 Constraints:
 - Duration: ${duration} minutes (include rest periods)
 - Target: ${muscle}
 - Location: ${location} (${location === 'gym' ? 'full equipment available' : location === 'home' ? 'dumbbells, bands, bodyweight' : 'bodyweight only'})
 
-Generate a ready-to-train workout with exercises, sets, reps, and rest times.`,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-            duration_minutes: { type: 'number' },
-            focus: { type: 'string' },
-            warmup: { type: 'array', items: { type: 'string' } },
-            exercises: {
-              type: 'array',
-              minItems: 1,
-              items: {
-                type: 'object',
-                properties: {
-                  name: { type: 'string' },
-                  muscle_group: { type: 'string' },
-                  sets: { type: 'number', minimum: 1 },
-                  reps: { type: 'string' },
-                  rest_seconds: { type: 'number', minimum: 0 },
-                  notes: { type: 'string' },
-                },
-                required: ['name', 'sets', 'reps'],
+Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
+
+      const schema = {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          duration_minutes: { type: 'number' },
+          focus: { type: 'string' },
+          warmup: { type: 'array', items: { type: 'string' } },
+          exercises: {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                muscle_group: { type: 'string' },
+                sets: { type: 'number', minimum: 1 },
+                reps: { type: 'string' },
+                rest_seconds: { type: 'number', minimum: 0 },
+                notes: { type: 'string' },
               },
+              required: ['name', 'sets', 'reps'],
             },
           },
-          required: ['name', 'exercises'],
         },
-      });
+        required: ['name', 'exercises'],
+      };
+
+      const res = await invokeLLMJson(prompt, schema);
 
       // Strict validation before accepting the workout
       const validation = validateWorkout(res);

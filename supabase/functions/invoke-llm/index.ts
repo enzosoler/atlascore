@@ -1,9 +1,12 @@
 /**
  * Atlas Core — invoke-llm Edge Function
- * Proxies LLM requests to Anthropic Claude API.
+ * Proxies LLM requests to OpenAI API.
  *
  * Expected body: { prompt: string, max_tokens?: number, response_json_schema?: object }
- * Returns: { text: string } on success, { error: string } on failure
+ * Returns: { text: string, data: object|string } on success, { error: string } on failure
+ *
+ * Required secrets:
+ *   supabase secrets set OPENAI_API_KEY=xxx
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
@@ -12,13 +15,15 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MODEL = 'gpt-4.1-nano';
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS });
   }
 
   try {
-    const { prompt, max_tokens = 512, response_json_schema } = await req.json();
+    const { prompt, max_tokens = 1024, response_json_schema } = await req.json();
 
     if (!prompt) {
       return new Response(JSON.stringify({ error: 'prompt is required' }), {
@@ -27,9 +32,9 @@ serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
+    const apiKey = Deno.env.get('OPENAI_API_KEY');
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured' }), {
+      return new Response(JSON.stringify({ error: 'OPENAI_API_KEY not configured' }), {
         status: 503,
         headers: { ...CORS, 'Content-Type': 'application/json' },
       });
@@ -43,24 +48,27 @@ serve(async (req) => {
       ? `${prompt}\n\nRespond ONLY with valid JSON matching this schema:\n${JSON.stringify(response_json_schema, null, 2)}`
       : prompt;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: MODEL,
         max_tokens,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
+        temperature: 0.3,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        ...(response_json_schema ? { response_format: { type: 'json_object' } } : {}),
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error('[invoke-llm] Anthropic error:', err);
+      console.error('[invoke-llm] OpenAI error:', response.status, err);
       return new Response(JSON.stringify({ error: 'LLM request failed' }), {
         status: 502,
         headers: { ...CORS, 'Content-Type': 'application/json' },
@@ -68,7 +76,7 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    const text = result.content?.[0]?.text ?? '';
+    const text = result.choices?.[0]?.message?.content ?? '';
 
     // If JSON schema requested, parse and return parsed object
     if (response_json_schema) {
@@ -79,6 +87,7 @@ serve(async (req) => {
           headers: { ...CORS, 'Content-Type': 'application/json' },
         });
       } catch {
+        console.error('[invoke-llm] Failed to parse JSON from response:', text.substring(0, 500));
         // Return raw text if JSON parse fails
       }
     }

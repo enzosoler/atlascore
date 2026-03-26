@@ -135,7 +135,41 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
       });
 
       if (fnError) {
-        throw new Error(fnError.message);
+        // Try to extract the actual error message from the edge function response
+        let errorMsg = fnError.message || 'AI analysis failed';
+        try {
+          // FunctionsHttpError contains the response context
+          if (fnError.context && typeof fnError.context.json === 'function') {
+            const errorBody = await fnError.context.json();
+            if (errorBody?.error) errorMsg = errorBody.error;
+            if (errorBody?.code) {
+              // Handle specific error codes from the edge function
+              if (errorBody.code === 'KILL_SWITCH') {
+                setError('AI food analysis is temporarily unavailable. Please add foods manually.');
+                setSuggestedSearch(rawText);
+                return;
+              }
+              if (errorBody.code === 'MONTHLY_CAP' || errorBody.code === 'DAILY_CAP') {
+                setError('AI food analysis has reached its limit. Please add foods manually.');
+                setSuggestedSearch(rawText);
+                return;
+              }
+              if (errorBody.code === 'USER_DAILY_LIMIT') {
+                setError(`Daily AI limit reached (${errorBody.used}/${errorBody.limit}). Try again tomorrow or add foods manually.`);
+                setSuggestedSearch(rawText);
+                return;
+              }
+              if (errorBody.code === 'PARSE_ERROR') {
+                setError('AI couldn\'t parse that food. Try rephrasing with more detail (e.g., "1 prato de macarrão com molho").');
+                setSuggestedSearch(rawText);
+                return;
+              }
+            }
+          }
+        } catch {
+          // If we can't parse the error context, fall through with the original message
+        }
+        throw new Error(errorMsg);
       }
 
       // Handle rate limit / spending cap errors from the edge function
