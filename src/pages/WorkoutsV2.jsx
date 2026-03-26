@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
@@ -554,8 +555,10 @@ export default function WorkoutsV2() {
   const qc = useQueryClient();
   const { user } = useAuth();
   const { can } = useSubscription();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState('list'); // 'list' | 'execution'
   const [activeSession, setActiveSession] = useState(null);
+  const [autoStartHandled, setAutoStartHandled] = useState(false);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showAIGen, setShowAIGen] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
@@ -611,6 +614,27 @@ export default function WorkoutsV2() {
     setActiveSession({ name: 'Free Workout', exercises: [] });
     setMode('execution');
   };
+
+  // ── Auto-start from Today quick action (?action=start) ──────────────────────
+  useEffect(() => {
+    if (autoStartHandled) return;
+    if (searchParams.get('action') !== 'start') return;
+    if (isLoadingPlan) return; // wait for plan data
+    setAutoStartHandled(true);
+    // Clean up the URL param
+    setSearchParams((prev) => { prev.delete('action'); return prev; }, { replace: true });
+    if (activePlan && activePlan.days?.length > 0) {
+      // Find today's day index based on plan schedule, or default to first day
+      const todayIdx = activePlan.current_day_index ?? 0;
+      const safeIdx = Math.min(todayIdx, (activePlan.days?.length || 1) - 1);
+      setActiveSession(buildSessionFromPlan(activePlan, safeIdx));
+      setMode('execution');
+    } else {
+      // No plan — start a free workout
+      setActiveSession({ name: 'Free Workout', exercises: [] });
+      setMode('execution');
+    }
+  }, [searchParams, isLoadingPlan, activePlan, autoStartHandled, setSearchParams]);
 
   const handleCompleteWorkout = (completedData) => {
     if (!user?.id || !activeSession) return;

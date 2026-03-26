@@ -1072,6 +1072,51 @@ function TodayContent() {
         </div>
       </TodayCard>
 
+      {/* ── Quick actions: Snap a meal + Start workout ── */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={() => setCameraOpen(true)}
+          disabled={isSavingMeal}
+          className="atlas-card group relative flex flex-col items-center gap-3 overflow-hidden rounded-[24px] border-[hsl(var(--brand)/0.28)] bg-[linear-gradient(135deg,hsl(var(--brand)/0.14)_0%,hsl(var(--card))_100%)] p-5 text-center shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] active:scale-[0.97]"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-[hsl(var(--brand)/0.24)] bg-[hsl(var(--brand)/0.16)] text-[hsl(var(--brand))] transition-transform group-hover:scale-105">
+            <Camera className="h-6 w-6" strokeWidth={1.8} />
+          </div>
+          <div>
+            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {isSavingMeal ? 'Saving...' : 'Snap a meal'}
+            </p>
+            <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
+              Photo → AI → logged
+            </p>
+          </div>
+        </button>
+
+        <button
+          onClick={handleQuickStartWorkout}
+          className="atlas-card group relative flex flex-col items-center gap-3 overflow-hidden rounded-[24px] border-[hsl(var(--accent-secondary)/0.28)] bg-[linear-gradient(135deg,hsl(var(--accent-secondary)/0.14)_0%,hsl(var(--card))_100%)] p-5 text-center shadow-[var(--shadow-sm)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] active:scale-[0.97]"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-[hsl(var(--accent-secondary)/0.24)] bg-[hsl(var(--accent-secondary)/0.16)] text-[hsl(var(--accent-secondary))] transition-transform group-hover:scale-105">
+            <Dumbbell className="h-6 w-6" strokeWidth={1.8} />
+          </div>
+          <div>
+            <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {workoutDone ? 'Workout done' : activeWorkoutPlan ? 'Start workout' : 'Log workout'}
+            </p>
+            <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
+              {activeWorkoutPlan ? activeWorkoutPlan.name : 'Free session'}
+            </p>
+          </div>
+        </button>
+      </div>
+
+      {/* Camera scanner modal for quick meal logging */}
+      <FoodCameraScanner
+        open={cameraOpen}
+        onOpenChange={setCameraOpen}
+        onFoodsDetected={handleQuickMealSave}
+      />
+
       {/* ── Snapshot cards — 4 pillars ── */}
       <TodaySection
         eyebrow={t('today_page.snapshot.eyebrow')}
