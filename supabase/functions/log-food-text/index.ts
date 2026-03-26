@@ -384,11 +384,32 @@ serve(async (req) => {
     inputTokens = data.usage?.prompt_tokens ?? 0;
     outputTokens = data.usage?.completion_tokens ?? 0;
 
+    // DEBUG: Log raw AI response for troubleshooting
+    console.log('[log-food-text] Raw AI response:', JSON.stringify({
+      model: MODEL,
+      query: rawQuery,
+      content_preview: content.substring(0, 500),
+      content_length: content.length,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      finish_reason: data.choices?.[0]?.finish_reason,
+    }));
+
     try {
       aiResult = JSON.parse(content);
-    } catch {
-      console.error('[log-food-text] Failed to parse AI response:', content);
-      return json({ error: 'AI returned invalid data. Please try again.' }, 502);
+    } catch (parseErr: any) {
+      console.error('[log-food-text] Failed to parse AI response:', {
+        error: parseErr?.message,
+        content: content,
+        content_preview: content.substring(0, 1000),
+        query: rawQuery,
+        model: MODEL,
+      });
+      return json({ 
+        error: 'AI returned invalid data format. Please try again.', 
+        code: 'PARSE_ERROR',
+        detail: 'The AI response could not be parsed as JSON'
+      }, 502);
     }
   } catch (err) {
     console.error('[log-food-text] Fetch error:', err);

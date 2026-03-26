@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Sparkles, Loader2, Check, AlertCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, Check, AlertCircle, X, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
@@ -34,12 +34,13 @@ function titleCase(str) {
  *   onFoodsDetected(foods[]) — called with an array of food items in the standard shape:
  *     { name, estimatedAmount, calories, protein, carbs, fat, fiber, confidence, serving_description }
  */
-export default function AIFoodInput({ onFoodsDetected }) {
+export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null); // The full AI response
   const [showItems, setShowItems] = useState(false); // Toggle sub-items breakdown
   const [error, setError] = useState(null);
+  const [suggestedSearch, setSuggestedSearch] = useState(null); // Extracted search term on failure
 
   const handleAnalyze = useCallback(async () => {
     const trimmed = text.trim();
@@ -84,10 +85,16 @@ export default function AIFoodInput({ onFoodsDetected }) {
     } catch (err) {
       console.error('AI food text error:', err);
       const msg = err?.message || '';
+      
+      // Store the original text for potential fallback search
+      setSuggestedSearch(text.trim());
+      
       if (msg.includes('429') || msg.includes('rate')) {
-        setError('Too many requests. Please wait a moment and try again.');
+        setError('Too many requests. AI is busy — try search below or wait a moment.');
+      } else if (msg.includes('limit') || msg.includes('cap')) {
+        setError('Daily AI limit reached. Use the search feature to find your food.');
       } else {
-        setError('Failed to analyze. Please try again or add foods manually.');
+        setError('Couldn\'t analyze automatically. Try search below or rephrase your description.');
       }
     } finally {
       setIsAnalyzing(false);
@@ -159,6 +166,7 @@ export default function AIFoodInput({ onFoodsDetected }) {
     setShowItems(false);
     setIsAnalyzing(false);
     setError(null);
+    setSuggestedSearch(null);
   }, []);
 
   // ── Input mode: before analysis ──────────────────────────────────────────
@@ -200,9 +208,20 @@ export default function AIFoodInput({ onFoodsDetected }) {
         )}
 
         {error && (
-          <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[hsl(var(--err)/0.1)] text-[hsl(var(--err))]">
-            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-            <p className="text-[12px]">{error}</p>
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[hsl(var(--err)/0.1)] text-[hsl(var(--err))]">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <p className="text-[12px]">{error}</p>
+            </div>
+            {onFallbackToSearch && suggestedSearch && (
+              <button
+                onClick={() => onFallbackToSearch(suggestedSearch)}
+                className="w-full py-2 px-3 rounded-lg bg-[hsl(var(--fill)/0.46)] hover:bg-[hsl(var(--fill))] text-[12px] text-[hsl(var(--fg))] transition-colors flex items-center justify-center gap-2"
+              >
+                <Search className="w-3.5 h-3.5" />
+                Try searching for &quot;{suggestedSearch.length > 25 ? suggestedSearch.substring(0, 25) + '...' : suggestedSearch}&quot;
+              </button>
+            )}
           </div>
         )}
       </div>

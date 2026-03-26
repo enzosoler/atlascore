@@ -47,7 +47,7 @@ import FoodCameraScanner from '@/components/nutrition/FoodCameraScanner';
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
 const INPUT_CLASS_NAME = 'atlas-field mt-2 h-11 px-4 py-2 text-base';
-const SELECT_CLASS_NAME = \`\${INPUT_CLASS_NAME} appearance-none\`;
+const SELECT_CLASS_NAME = `${INPUT_CLASS_NAME} appearance-none`;
 
 const DEFAULT_PROFILE = {
   calories_target: 0,
@@ -106,7 +106,7 @@ const TRACK_FILL_CLASS = {
 };
 
 function createLocalId(prefix) {
-  return \`\${prefix}-\${Date.now()}-\${Math.random().toString(36).slice(2, 8)}\`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function getMealTypeLabel(mealType) {
@@ -123,7 +123,7 @@ function toNumber(value) {
 }
 
 function formatUnit(value, unit) {
-  return \`\${Math.round(Number(value || 0))}\${unit}\`;
+  return `${Math.round(Number(value || 0))}${unit}`;
 }
 
 function getProgressPercent(current, target) {
@@ -167,7 +167,7 @@ function normalizeText(value) {
 function normalizeFoodKey(food) {
   const name = normalizeText(food.name);
   const brand = normalizeText(food.brand || '');
-  return \`\${name}|\${brand}\`;
+  return `${name}|${brand}`;
 }
 
 function mergeFoodResults(localFoods, externalFoods, limit = 12) {
@@ -191,7 +191,7 @@ function formatDateKey(value) {
   const year = parsed.getFullYear();
   const month = String(parsed.getMonth() + 1).padStart(2, '0');
   const day = String(parsed.getDate()).padStart(2, '0');
-  return \`\${year}-\${month}-\${day}\`;
+  return `${year}-${month}-${day}`;
 }
 
 function buildSnapshotDate(selectedDate) {
@@ -219,7 +219,7 @@ function mapFoodLogToMeal(log) {
   const quantity = Number(log?.quantity || 1);
   const foodName = log?.food_name || 'Food logged';
   return {
-    id: log?.id ? \`food-log-\${log.id}\` : createLocalId('food-log'),
+    id: log?.id ? `food-log-${log.id}` : createLocalId('food-log'),
     source: 'supabase',
     source_row_id: log?.id || null,
     date: formatDateKey(log?.date),
@@ -282,7 +282,7 @@ function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
     },
     partial: {
       icon: Zap,
-      title: isPt ? \`Você está em \${Math.round(caloriesPct)}% da meta\` : \`You're at \${Math.round(caloriesPct)}% of your target\`,
+      title: isPt ? `Você está em ${Math.round(caloriesPct)}% da meta` : `You're at ${Math.round(caloriesPct)}% of your target`,
       subtitle: isPt
         ? 'Foque em proteína e calorias para manter o progresso'
         : 'Focus on protein and calories to stay on track',
@@ -375,13 +375,13 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
 
     if (proteinRemaining > 30 && dailyTotals.protein / profile.protein_target < 0.5) {
       action = {
-        label: isPt ? \`Priorize proteína (\${proteinRemaining}g restantes)\` : \`Prioritize protein (\${proteinRemaining}g remaining)\`,
+        label: isPt ? `Priorize proteína (${proteinRemaining}g restantes)` : `Prioritize protein (${proteinRemaining}g remaining)`,
         sublabel: isPt ? 'Adicione frango, ovos ou whey' : 'Add chicken, eggs, or protein shake',
         priority: 'medium',
       };
     } else if (caloriesRemaining > 500) {
       action = {
-        label: isPt ? \`\${caloriesRemaining} kcal restantes\` : \`\${caloriesRemaining} kcal remaining\`,
+        label: isPt ? `${caloriesRemaining} kcal restantes` : `${caloriesRemaining} kcal remaining`,
         sublabel: isPt ? 'Planeje sua próxima refeição' : 'Plan your next meal',
         priority: 'medium',
       };
@@ -507,9 +507,9 @@ function InterpretedMacroTrack({ label, consumed, target, unit, tone = 'calories
           )}
           <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
             {remaining > 0
-              ? \`\${remaining}\${unit} remaining\`
+              ? `${remaining}${unit} remaining`
               : consumed > target
-                ? \`\${Math.round(consumed - target)}\${unit} over\`
+                ? `${Math.round(consumed - target)}${unit} over`
                 : 'Goal reached'}
           </p>
         </div>
@@ -526,7 +526,7 @@ function InterpretedMacroTrack({ label, consumed, target, unit, tone = 'calories
       <div className="h-2.5 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
         <div
           className={cn('h-full rounded-full transition-all duration-500', TRACK_FILL_CLASS[tone])}
-          style={{ width: \`\${pct}%\` }}
+          style={{ width: `${pct}%` }}
         />
       </div>
     </div>
@@ -1006,7 +1006,13 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                 <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" />
                 Just describe your meal
               </p>
-              <AIFoodInput onFoodsDetected={handleAIFoodsDetected} />
+              <AIFoodInput 
+                onFoodsDetected={handleAIFoodsDetected} 
+                onFallbackToSearch={(searchTerm) => {
+                  setInputMode('search');
+                  setSearchQuery(searchTerm);
+                }}
+              />
             </div>
 
             <div>
@@ -1138,9 +1144,9 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
           <div className="mt-3 grid grid-cols-4 gap-3 rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
             {[
               { label: 'kcal', value: Math.round(totals.kcal), tone: 'calories' },
-              { label: 'Prot', value: \`\${Math.round(totals.protein)}g\`, tone: 'protein' },
-              { label: 'Carb', value: \`\${Math.round(totals.carbs)}g\`, tone: 'carbs' },
-              { label: 'Fat', value: \`\${Math.round(totals.fat)}g\`, tone: 'fat' },
+              { label: 'Prot', value: `${Math.round(totals.protein)}g`, tone: 'protein' },
+              { label: 'Carb', value: `${Math.round(totals.carbs)}g`, tone: 'carbs' },
+              { label: 'Fat', value: `${Math.round(totals.fat)}g`, tone: 'fat' },
             ].map(({ label, value, tone }) => (
               <div key={label} className="text-center">
                 <div className="flex items-center justify-center gap-1">
@@ -1382,7 +1388,7 @@ export default function NutritionPage() {
       } catch (error) {
         if (active) {
           setFoodResults(tacoResults);
-          setFoodSearchError(\`Food search error: \${error.message}\`);
+          setFoodSearchError(`Food search error: ${error.message}`);
         }
       } finally {
         if (active) setIsSearchingFoods(false);
@@ -1458,11 +1464,11 @@ export default function NutritionPage() {
       setFoodQuery('');
       setFoodResults([]);
       setFoodSearchError('');
-      setNotice({ tone: 'success', message: \`\${pendingFood.name} added successfully.\` });
+      setNotice({ tone: 'success', message: `${pendingFood.name} added successfully.` });
       addRecentFood(pendingFood);
       setPendingFood(null);
     } catch (error) {
-      setNotice({ tone: 'error', message: \`Could not save \${pendingFood.name}. Try again.\` });
+      setNotice({ tone: 'error', message: `Could not save ${pendingFood.name}. Try again.` });
     } finally {
       setSavingFoodId(null);
     }
@@ -1543,8 +1549,8 @@ export default function NutritionPage() {
     setNotice({
       tone: 'success',
       message: editingMeal?.id
-        ? \`\${foods.length} food item(s) updated in \${mealLabel}.\`
-        : \`\${foods.length} food item(s) added to \${mealLabel}.\`,
+        ? `${foods.length} food item(s) updated in ${mealLabel}.`
+        : `${foods.length} food item(s) added to ${mealLabel}.`,
     });
   };
 
@@ -1558,12 +1564,12 @@ export default function NutritionPage() {
           .eq('user_id', user.id);
         if (error) throw error;
       } catch (error) {
-        setNotice({ tone: 'error', message: \`Could not remove \${meal.title}.\` });
+        setNotice({ tone: 'error', message: `Could not remove ${meal.title}.` });
         return;
       }
     }
     setMeals((current) => current.filter((m) => m.id !== meal.id));
-    setNotice({ tone: 'success', message: \`\${meal.title} was removed.\` });
+    setNotice({ tone: 'success', message: `${meal.title} was removed.` });
   };
 
   const handleDateChange = (delta) => {
@@ -1686,19 +1692,19 @@ export default function NutritionPage() {
             <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--warn)/0.12)] border border-[hsl(var(--warn)/0.25)] px-3 py-1">
               <span className="text-[13px]">🔥</span>
               <span className="text-[12px] font-semibold text-[hsl(var(--warn))]">
-                {\`\${loggingStreak}-day streak\`}
+                {`${loggingStreak}-day streak`}
               </span>
             </div>
           ) : null}
         >
           {!showTargetsEditor && (
-            <div className={\`mb-4 flex items-center justify-between gap-3 rounded-[18px] border px-4 py-3 \${profile.calories_target === 0 ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)]' : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)]'\`}>
+            <div className={`mb-4 flex items-center justify-between gap-3 rounded-[18px] border px-4 py-3 ${profile.calories_target === 0 ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)]' : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)]'`}>
               <div className="flex items-center gap-2.5 text-[13px] text-[hsl(var(--fg-2))]">
-                <Target className={\`h-4 w-4 shrink-0 \${profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]'}\`} strokeWidth={1.9} />
+                <Target className={`h-4 w-4 shrink-0 ${profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={1.9} />
                 <span>
                   {profile.calories_target === 0
                     ? 'Set your daily calorie and macro targets to get started.'
-                    : \`\${profile.calories_target} kcal · \${profile.protein_target}g protein · \${profile.carbs_target}g carbs · \${profile.fat_target}g fat\`}
+                    : `${profile.calories_target} kcal · ${profile.protein_target}g protein · ${profile.carbs_target}g carbs · ${profile.fat_target}g fat`}
                 </span>
               </div>
               <SecondaryButton
@@ -1937,9 +1943,9 @@ export default function NutritionPage() {
                     <div className="grid grid-cols-4 gap-3 rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
                       {[
                         { label: 'kcal', value: scaled.calories, tone: 'calories' },
-                        { label: 'Prot', value: \`\${scaled.protein}g\`, tone: 'protein' },
-                        { label: 'Carb', value: \`\${scaled.carbs}g\`, tone: 'carbs' },
-                        { label: 'Fat', value: \`\${scaled.fat}g\`, tone: 'fat' },
+                        { label: 'Prot', value: `${scaled.protein}g`, tone: 'protein' },
+                        { label: 'Carb', value: `${scaled.carbs}g`, tone: 'carbs' },
+                        { label: 'Fat', value: `${scaled.fat}g`, tone: 'fat' },
                       ].map(({ label, value, tone }) => (
                         <div key={label} className="text-center">
                           <div className="flex items-center justify-center gap-1">
