@@ -247,7 +247,7 @@ function buildExerciseSets(count, reps, weight) {
   }));
 }
 
-function formatVolume(value) {
+function formatVolume(value, locale = 'en') {
   return Number(value || 0).toLocaleString(locale);
 }
 
@@ -428,7 +428,7 @@ function PlanCard({ plan, onLogSession }) {
   );
 }
 
-function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta }) {
+function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta, locale = 'en' }) {
   const status = getWorkoutStatusMeta(workout.status, statusMeta);
 
   return (
@@ -461,7 +461,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta }) 
 
           <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.55)]">
             <div className="grid gap-px bg-[hsl(var(--border)/0.7)] sm:grid-cols-3">
-              <WorkoutMetric label="Volume" value={formatVolume(workout.volume_load || 0)} suffix="kg" />
+              <WorkoutMetric label="Volume" value={formatVolume(workout.volume_load || 0, locale)} suffix="kg" />
               <WorkoutMetric label="Date" value={workout.date} />
               <WorkoutMetric label="Status" value={status.label} />
             </div>
@@ -799,7 +799,8 @@ export default function Workouts() {
 }
 
 function WorkoutsContent() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   const statusMeta = getStatusMeta(t);
 
   const [selectedDate, setSelectedDate] = useState(TODAY);
@@ -955,7 +956,7 @@ function WorkoutsContent() {
           />
           <HeroStat
             label="Total volume"
-            value={`${formatVolume(totalVolume)} kg`}
+            value={`${formatVolume(totalVolume, locale)} kg`}
             detail="Combined load from the plan and all free workouts for the day."
           />
         </div>
@@ -1145,6 +1146,7 @@ function WorkoutsContent() {
                     onToggleStatus={() => handleToggleStatus(workout)}
                     onDelete={() => handleDelete(workout)}
                     statusMeta={statusMeta}
+                    locale={locale}
                   />
                 </div>
               ))}
