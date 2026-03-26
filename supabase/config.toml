@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.send-email-v2]
 verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false

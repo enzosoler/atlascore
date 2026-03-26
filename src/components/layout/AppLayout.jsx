@@ -419,7 +419,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-transparent overflow-x-clip">
+    <div className="flex min-h-screen bg-transparent">
       {/* ── Sidebar desktop ─────────────────────────────────────── */}
       <aside
         className={cn(
@@ -662,7 +662,7 @@ export default function AppLayout() {
       <main
         ref={mainRef}
         className={cn(
-          'flex-1 min-h-screen overflow-x-clip transition-all duration-300',
+          'flex-1 min-h-screen overflow-x-hidden transition-all duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'lg:pt-0',
           'pb-[calc(94px+env(safe-area-inset-bottom))] lg:pb-0'

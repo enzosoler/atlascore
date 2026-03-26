@@ -126,13 +126,12 @@ export function OnboardingTour() {
     <AnimatePresence>
       {isVisible && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — pointer-events-none so page content remains interactive */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/40"
-            onClick={handleSkip}
+            className="fixed inset-0 z-40 bg-black/40 pointer-events-none"
           />
 
           {/* Spotlight (highlight target element) */}
