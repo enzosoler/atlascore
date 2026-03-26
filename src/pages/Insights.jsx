@@ -33,6 +33,7 @@ import { listMeasurements } from '@/services/bodyProgressService';
 import { listDailyCheckins } from '@/services/checkinService';
 import { TodayAdherenceCard, TodaySection } from '@/components/today/TodayMobileUI';
 import { cn } from '@/lib/utils';
+import AIHolisticInsights from '@/components/ai/AIHolisticInsights';
 
 const ALL_RANGE_DAYS = {
   '14d': 14,
@@ -423,6 +424,62 @@ function InsightsContent() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // AI Insights — Lab exams (Performance tier)
+  const labExamsQuery = useQuery({
+    queryKey: ['insights-lab-exams', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('lab_exams')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('exam_date', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data || [];
+    },
+    initialData: [],
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  // AI Insights — Protocols (Performance tier)
+  const protocolsQuery = useQuery({
+    queryKey: ['insights-protocols', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('protocols')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    initialData: [],
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  // AI Insights — Protocol logs (Performance tier)
+  const protocolLogsQuery = useQuery({
+    queryKey: ['insights-protocol-logs', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('protocol_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('taken_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data || [];
+    },
+    initialData: [],
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000,
+  });
+
   const loading =
     profileQuery.isLoading ||
     measurementsQuery.isLoading ||
@@ -456,6 +513,9 @@ function InsightsContent() {
   const checkins = toArray(checkinsQuery.data);
   const activeDietPlan = toArray(dietPlansQuery.data)[0] || null;
   const activeWorkoutPlan = toArray(workoutPlansQuery.data)[0] || null;
+  const labExams = toArray(labExamsQuery.data);
+  const protocols = toArray(protocolsQuery.data);
+  const protocolLogs = toArray(protocolLogsQuery.data);
 
   const hasAnyData = Boolean(measurements.length || workouts.length || meals.length || checkins.length);
 
@@ -604,6 +664,20 @@ function InsightsContent() {
 
             <NextActionPanel insight={nextActionInsight} />
           </section>
+
+          {/* ── AI Holistic Insights ── */}
+          <AIHolisticInsights
+            profile={profile}
+            measurements={measurements}
+            workouts={workouts}
+            workoutPlan={activeWorkoutPlan}
+            meals={meals}
+            dietPlan={activeDietPlan}
+            checkins={checkins}
+            labExams={labExams}
+            protocols={protocols}
+            protocolLogs={protocolLogs}
+          />
 
           <SectionCard
             title="Deterministic readings"

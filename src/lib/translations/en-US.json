@@ -238,12 +238,14 @@
             "Workout and nutrition logging",
             "Measurement tracking",
             "Weekly insights",
+            "1 AI insight per week",
             "Social sharing cards"
           ],
           "missing": [
             "Structured plan tools",
             "Lab tracking",
             "Progress photos",
+            "Full AI insights",
             "Advanced analytics"
           ],
           "cta": "Create free account"
@@ -261,6 +263,7 @@
             "Workout plan tools",
             "Lab tracking",
             "Progress photos",
+            "Daily AI insights",
             "Full analytics",
             "PDF and CSV export"
           ],
@@ -277,6 +280,7 @@
           "features": [
             "Everything in Pro",
             "Complete smart protocol tracking",
+            "Clinical AI insights (labs + protocols)",
             "Premium reports",
             "Unlimited history",
             "Advanced progress summaries"
@@ -370,12 +374,14 @@
           "Profile & settings",
           "30-day history",
           "Weekly insights",
+          "1 AI insight per week",
           "Social sharing cards"
         ],
         "missing": [
           "Structured workout/meal tools",
           "Complete lab tracking",
           "Progress photos",
+          "Full AI insights",
           "Advanced analytics",
           "PDF/CSV exports"
         ]
@@ -397,7 +403,7 @@
           "Unlimited progress photos",
           "1-year history",
           "Advanced analytics",
-          "Progress insights",
+          "Daily AI insights (training + nutrition + recovery)",
           "PDF & CSV exports",
           "Stock alerts"
         ],
@@ -414,6 +420,7 @@
           "Everything in Pro",
           "Intelligent protocol tracking",
           "Half-life curves & next dose",
+          "Clinical AI insights (labs + protocols + hormones)",
           "Advanced stock management",
           "Premium reports",
           "Deep dashboards",
@@ -1179,6 +1186,41 @@
       "delete_success": "Protocol deleted.",
       "loading": "Wait while your protocols are loaded.",
       "loading_partial": "Data didn't load completely, but you can still add new items."
+    }
+  },
+  "ai_insights": {
+    "section_title": "AI Insights",
+    "badge_label": "AI-Powered",
+    "subtitle_free": "A free AI-powered snapshot of your recent patterns.",
+    "subtitle_pro": "AI-powered correlations across your training, nutrition, and recovery.",
+    "subtitle_performance": "Clinical-grade analysis across training, nutrition, recovery, labs, and protocols.",
+    "loading": "Analyzing your data and generating personalized insights...",
+    "analyzing": "Analyzing...",
+    "refresh": "Refresh",
+    "cached": "Cached result",
+    "generate_button": "Generate AI Insights",
+    "cta_free": "Get a free AI-powered snapshot of your recent patterns. One insight per week on the free plan.",
+    "cta_paid": "Generate personalized insights by correlating all your data.",
+    "locked_label": "Full analysis locked",
+    "unlock_cta": "Unlock with {tier}",
+    "upgrade_title": "Want deeper insights for your performance?",
+    "upgrade_body": "Upgrade to Pro to unlock {count}+ AI-powered correlations across your training, nutrition, and recovery data \u2014 updated daily.",
+    "see_plans": "See plans",
+    "clinical_title": "Lab & Protocol insights",
+    "clinical_body": "Correlate your lab exams and protocols with training and nutrition on the Performance plan.",
+    "error_generic": "Could not generate insights right now. Try again later.",
+    "rate_limited": "AI insights refresh available in {hours}h. Check back later.",
+    "blur_placeholder": "This insight contains a detailed analysis correlating your training volume, sleep patterns, and nutritional adherence over the past week with actionable recommendations.",
+    "blur_action_placeholder": "Specific action recommendation based on your data analysis.",
+    "categories": {
+      "headline": "Headline",
+      "training": "Training",
+      "nutrition": "Nutrition",
+      "recovery": "Recovery",
+      "lab_exams": "Lab Exams",
+      "protocols": "Protocols",
+      "risk_alert": "Alert",
+      "next_action": "Next Action"
     }
   }
 }

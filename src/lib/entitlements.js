@@ -18,11 +18,22 @@ export const FEATURE_LOCKS = {
     description: 'Take a photo of your meal and AI detects foods and macros',
   },
 
-  // Insights
+  // AI Insights (Freemium — free users get teaser insights)
   atlas_ai: {
-    label: 'Insights',
+    label: 'AI Insights',
+    minPlan: 'free',
+    limits: { free: '1/week', pro: 'unlimited', performance: 'unlimited' },
+    description: 'AI-powered insights from your training, nutrition, and recovery data',
+  },
+  atlas_ai_full: {
+    label: 'Full AI Insights',
     minPlan: 'pro',
-    description: 'Weekly summaries, trend reading, and next-step guidance from your data',
+    description: 'Complete AI analysis with correlations across all your data',
+  },
+  atlas_ai_clinical: {
+    label: 'Clinical AI Insights',
+    minPlan: 'performance',
+    description: 'Lab exam analysis, protocol assessment, and clinical correlations',
   },
 
   // Plan builder
