@@ -49,7 +49,7 @@ export const ROLE_BADGE = {
  */
 export const PAGE_ACCESS = {
   // ── Athlete workspace ──────────────────────────────────
-  Today:           ['athlete', 'coach', 'clinician', 'admin'],
+  Today:           ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
   Diary:           ['athlete', 'admin'],
   Nutrition:       ['athlete', 'admin'],
   Workouts:        ['athlete', 'admin'],
@@ -65,9 +65,9 @@ export const PAGE_ACCESS = {
   ProgressReview:  ['athlete', 'admin'],
   Insights:        ['athlete', 'admin'],
   BlockReview:     ['athlete', 'admin'],
-  Social:          ['athlete', 'coach', 'clinician', 'admin'],
-  Export:          ['athlete', 'coach', 'clinician', 'admin'],
-  Profile:         ['athlete', 'coach', 'clinician', 'admin'],
+  Social:          ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
+  Export:          ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
+  Profile:         ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
 
   // ── Coach area ─────────────────────────────────────────
   // Coach sees /today as a landing point (own profile/tools)

@@ -83,7 +83,7 @@ serve(async (req) => {
       .not('stripe_customer_id', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     let customerId = existingSub?.stripe_customer_id;
 

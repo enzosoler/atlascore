@@ -151,26 +151,7 @@ serve(async (req: Request) => {
     
     if (authError) {
       log('AUTH', 'JWT validation error from getUser', { error: authError?.message, code: authError?.status });
-      
-      // Fallback: try to decode JWT manually
-      try {
-        const parts = jwt.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(atob(parts[1]));
-          if (payload.sub) {
-            userId = payload.sub;
-            userEmail = payload.email || '';
-            log('AUTH', 'JWT decoded manually (fallback)', { userId, email: userEmail });
-          } else {
-            return errorResponse('Invalid JWT: no user ID found', 401);
-          }
-        } else {
-          return errorResponse('Invalid JWT format', 401);
-        }
-      } catch (decodeError) {
-        log('AUTH', 'JWT manual decode failed', { error: decodeError });
-        return errorResponse('Invalid or expired session. Please log in again.', 401);
-      }
+      return errorResponse('Invalid or expired session. Please log in again.', 401);
     } else if (!user) {
       log('AUTH', 'JWT validation returned no user');
       return errorResponse('Invalid or expired session. Please log in again.', 401);

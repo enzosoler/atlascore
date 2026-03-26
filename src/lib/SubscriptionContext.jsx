@@ -33,9 +33,10 @@ function normalizeSupabaseSubscription(row) {
     plan_code: row.tier || 'free',
     tier: row.tier || 'free',
     status: row.status || 'inactive',
-    started_at: toDateOnly(row.started_at) || toDateOnly(row.created_at),
-    expires_at: toDateOnly(row.trial_ends_at),
+    started_at: toDateOnly(row.started_at) || toDateOnly(row.trial_starts_at) || toDateOnly(row.created_at),
+    // trial_ends_at is the actual DB column; expires_at is kept as an alias for legacy callers
     trial_ends_at: toDateOnly(row.trial_ends_at),
+    expires_at: toDateOnly(row.current_period_ends_at) || toDateOnly(row.trial_ends_at),
     stripe_subscription_id: row.stripe_subscription_id || null,
     granted_by_admin: row.granted_by_admin || null,
     grant_reason: row.grant_reason || null,

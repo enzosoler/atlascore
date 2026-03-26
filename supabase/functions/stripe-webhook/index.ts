@@ -19,29 +19,41 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// Map Stripe price IDs to plan codes
+// Map Stripe price IDs to plan codes.
+// Env var names must match create-checkout/index.ts (ATHLETE_PRO, ATHLETE_PERFORMANCE).
 const PRICE_TO_PLAN: Record<string, string> = {
-  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_PERFORMANCE') || '']: 'performance',
+  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PRO') || '']: 'pro',
+  [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_ATHLETE_PERFORMANCE') || '']: 'performance',
   [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_COACH') || '']: 'coach',
   [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_NUTRITIONIST') || '']: 'nutritionist',
   [Deno.env.get('STRIPE_PRICE_BR_MONTHLY_CLINICIAN') || '']: 'clinician',
-  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_PERFORMANCE') || '']: 'performance',
+  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PRO') || '']: 'pro',
+  [Deno.env.get('STRIPE_PRICE_BR_YEARLY_ATHLETE_PERFORMANCE') || '']: 'performance',
   [Deno.env.get('STRIPE_PRICE_BR_YEARLY_COACH') || '']: 'coach',
   [Deno.env.get('STRIPE_PRICE_BR_YEARLY_NUTRITIONIST') || '']: 'nutritionist',
   [Deno.env.get('STRIPE_PRICE_BR_YEARLY_CLINICIAN') || '']: 'clinician',
-  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_PERFORMANCE') || '']: 'performance',
+  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PRO') || '']: 'pro',
+  [Deno.env.get('STRIPE_PRICE_US_MONTHLY_ATHLETE_PERFORMANCE') || '']: 'performance',
   [Deno.env.get('STRIPE_PRICE_US_MONTHLY_COACH') || '']: 'coach',
   [Deno.env.get('STRIPE_PRICE_US_MONTHLY_NUTRITIONIST') || '']: 'nutritionist',
   [Deno.env.get('STRIPE_PRICE_US_MONTHLY_CLINICIAN') || '']: 'clinician',
-  [Deno.env.get('STRIPE_PRICE_US_YEARLY_PRO') || '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_US_YEARLY_PERFORMANCE') || '']: 'performance',
+  [Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PRO') || '']: 'pro',
+  [Deno.env.get('STRIPE_PRICE_US_YEARLY_ATHLETE_PERFORMANCE') || '']: 'performance',
   [Deno.env.get('STRIPE_PRICE_US_YEARLY_COACH') || '']: 'coach',
   [Deno.env.get('STRIPE_PRICE_US_YEARLY_NUTRITIONIST') || '']: 'nutritionist',
   [Deno.env.get('STRIPE_PRICE_US_YEARLY_CLINICIAN') || '']: 'clinician',
 };
+
+// Normalize plan names from checkout metadata to internal tier codes.
+// create-checkout uses 'athlete_pro'/'athlete_performance'; the DB uses 'pro'/'performance'.
+function normalizePlanCode(plan: string | null | undefined): string | null {
+  if (!plan) return null;
+  const map: Record<string, string> = {
+    athlete_pro: 'pro',
+    athlete_performance: 'performance',
+  };
+  return map[plan] ?? plan;
+}
 
 // Map Stripe status to our status
 const STATUS_MAP: Record<string, string> = {
@@ -131,7 +143,8 @@ serve(async (req) => {
         const customerId = subscription.customer as string;
         const subscriptionId = subscription.id;
         const priceId = subscription.items.data[0]?.price.id;
-        const planCode = priceId ? getPlanFromPriceId(priceId) : plan;
+        // Use price-to-plan mapping first; fall back to normalized metadata plan name.
+        const planCode = getPlanFromPriceId(priceId) || normalizePlanCode(plan);
 
         const subscriptionData = {
           user_id: userId,
@@ -196,7 +209,7 @@ serve(async (req) => {
         const { error } = await supabaseAdmin
           .from('subscriptions')
           .update(updateData)
-          .eq('user_id', existingSub.user_id);
+          .eq('stripe_subscription_id', subscriptionId);
 
         if (error) {
           console.error('stripe-webhook: Failed to update subscription:', error);
