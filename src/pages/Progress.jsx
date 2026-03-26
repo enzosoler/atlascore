@@ -146,20 +146,11 @@ function ProgressContent({ embedded = false }) {
     enabled: !!user?.id,
   });
 
-  const demoPhotos = useMemo(
-    () => [
-      { id: 'demo-1', date: '2026-01-01', photo_url: '/demo-progress-photos/progress_casual_1.jpg' },
-      { id: 'demo-2', date: '2026-02-15', photo_url: '/demo-progress-photos/progress_casual_2.jpg' },
-      { id: 'demo-3', date: '2026-03-19', photo_url: '/demo-progress-photos/progress_photo_3_after.jpg' },
-    ],
-    []
-  );
-
-  const { data: photos = demoPhotos, isLoading: photosLoading } = useQuery({
+  const { data: photos = [], isLoading: photosLoading } = useQuery({
     queryKey: ['progress-photos', user?.id],
     queryFn: async () => {
       const items = await listProgressPhotos(user.id, 50);
-      return items.length > 0 ? items : demoPhotos;
+      return items.length > 0 ? items : [];
     },
     enabled: !!user?.id,
   });

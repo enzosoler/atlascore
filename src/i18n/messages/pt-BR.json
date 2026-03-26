@@ -957,7 +957,15 @@
       "profileTitle": "Refinar perfil",
       "profileDesc": "Mantenha preferências de base alinhadas para que o app permaneça preciso.",
       "profilePhase": "Mantenha alinhado"
-    }
+    },
+    "adherenceLabel": "Adesão do bloco",
+    "sections": {
+      "nextSteps": "Próximos passos",
+      "insights": "Insights",
+      "timeline": "Linha do tempo"
+    },
+    "noInsights": "Registre seus primeiros dados para obter insights personalizados.",
+    "emptyTimeline": "Nenhuma atividade recente. Comece a registrar para construir sua linha do tempo."
   },
   "pages": {
     "workouts": {

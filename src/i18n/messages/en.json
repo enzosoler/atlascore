@@ -681,12 +681,20 @@
       "viewPlan": "View workout plan →"
     },
     "adherence": "Adherence",
+    "adherenceLabel": "Block adherence",
     "excellent": "Excellent",
     "good": "Good",
     "focus": "Focus",
     "continue": "Keep it up.",
     "completePending": "Complete pending tasks.",
-    "professionals": "Linked professionals"
+    "professionals": "Linked professionals",
+    "sections": {
+      "nextSteps": "Next steps",
+      "insights": "Insights",
+      "timeline": "Timeline"
+    },
+    "noInsights": "Log your first data to get personalized insights.",
+    "emptyTimeline": "No recent activity. Start logging to build your timeline."
   },
   "settings": {
     "title": "Settings",

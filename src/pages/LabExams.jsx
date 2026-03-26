@@ -52,10 +52,10 @@ import * as labService from '@/services/labExamService';
 
 const StatusBadge = ({ status, t }) => {
   const configs = {
-    normal: { color: 'bg-green-500/10 text-green-500 border-green-500/20', label: t('pages.lab_exams.status.normal') },
-    low: { color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', label: t('pages.lab_exams.status.low') },
-    high: { color: 'bg-orange-500/10 text-orange-500 border-orange-500/20', label: t('pages.lab_exams.status.high') },
-    critical: { color: 'bg-red-500/10 text-red-500 border-red-500/20', label: t('pages.lab_exams.status.critical') },
+    normal: { color: 'bg-green-500/10 text-green-600 border-green-500/20', label: t('pages.lab_exams.status.normal') },
+    low: { color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', label: t('pages.lab_exams.status.low') },
+    high: { color: 'bg-orange-500/10 text-orange-600 border-orange-500/20', label: t('pages.lab_exams.status.high') },
+    critical: { color: 'bg-red-500/10 text-red-600 border-red-500/20', label: t('pages.lab_exams.status.critical') },
   };
 
   const config = configs[status] || configs.normal;
@@ -73,7 +73,7 @@ const ExamRow = ({ exam, onClick, onDelete, t }) => {
   return (
     <div
       onClick={() => onClick(exam)}
-      className="group flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0"
+      className="group flex items-center justify-between p-4 hover:bg-[hsl(var(--fill))] transition-colors cursor-pointer border-b border-[hsl(var(--separator))] last:border-0"
     >
       <div className="flex items-center gap-4">
         <div className={cn(
@@ -81,16 +81,16 @@ const ExamRow = ({ exam, onClick, onDelete, t }) => {
           abnormalCount > 0 ? "bg-orange-500" : "bg-green-500"
         )} />
         <div>
-          <h4 className="font-medium text-white">{exam.panel_name}</h4>
-          <p className="text-sm text-white/40">{new Date(exam.exam_date).toLocaleDateString()}</p>
+          <h4 className="font-medium text-[hsl(var(--fg))]">{exam.panel_name}</h4>
+          <p className="text-sm text-[hsl(var(--fg-2))]">{new Date(exam.exam_date).toLocaleDateString()}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-6">
         <div className="text-right hidden sm:block">
-          <p className="text-sm font-medium text-white">{exam.markers?.length || 0} markers</p>
+          <p className="text-sm font-medium text-[hsl(var(--fg))]">{exam.markers?.length || 0} markers</p>
           {abnormalCount > 0 && (
-            <p className="text-xs text-orange-500">{abnormalCount} abnormal</p>
+            <p className="text-xs text-orange-600">{abnormalCount} abnormal</p>
           )}
         </div>
         <button
@@ -98,11 +98,11 @@ const ExamRow = ({ exam, onClick, onDelete, t }) => {
             e.stopPropagation();
             onDelete(exam.id);
           }}
-          className="p-2 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+          className="p-2 text-[hsl(var(--fg-3))] hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
         >
           <Trash2 size={16} />
         </button>
-        <ChevronRight size={16} className="text-white/20" />
+        <ChevronRight size={16} className="text-[hsl(var(--fg-3))]" />
       </div>
     </div>
   );
@@ -110,9 +110,9 @@ const ExamRow = ({ exam, onClick, onDelete, t }) => {
 
 const MarkerTable = ({ markers, t }) => {
   return (
-    <div className="overflow-hidden rounded-xl border border-white/5 bg-white/[0.02]">
+    <div className="overflow-hidden rounded-xl border border-[hsl(var(--separator))] bg-[hsl(var(--card))]">
       <table className="w-full text-left text-sm">
-        <thead className="bg-white/5 text-white/40 font-medium">
+        <thead className="bg-[hsl(var(--separator))] text-[hsl(var(--fg-2))] font-medium">
           <tr>
             <th className="px-4 py-3">Marker</th>
             <th className="px-4 py-3">Value</th>
@@ -120,14 +120,14 @@ const MarkerTable = ({ markers, t }) => {
             <th className="px-4 py-3 text-right">Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody className="divide-y divide-[hsl(var(--separator))]">
           {markers.map((marker, idx) => (
-            <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
-              <td className="px-4 py-3 font-medium text-white">{marker.name}</td>
-              <td className="px-4 py-3 text-white/80">
-                {marker.value} <span className="text-white/40 text-xs">{marker.unit}</span>
+            <tr key={idx} className="hover:bg-[hsl(var(--fill))] transition-colors">
+              <td className="px-4 py-3 font-medium text-[hsl(var(--fg))]">{marker.name}</td>
+              <td className="px-4 py-3 text-[hsl(var(--fg-2))]">
+                {marker.value} <span className="text-[hsl(var(--fg-3))] text-xs">{marker.unit}</span>
               </td>
-              <td className="px-4 py-3 text-white/40 font-mono text-xs">{marker.ref_range || '-'}</td>
+              <td className="px-4 py-3 text-[hsl(var(--fg-3))] font-mono text-xs">{marker.ref_range || '-'}</td>
               <td className="px-4 py-3 text-right">
                 <StatusBadge status={marker.status} t={t} />
               </td>
@@ -214,16 +214,16 @@ export default function LabExams() {
             {/* Stats Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Card className="p-4 flex flex-col justify-center items-center text-center">
-                <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Total Exams</p>
-                <p className="text-2xl font-bold text-white">{stats.total}</p>
+                <p className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider mb-1">Total Exams</p>
+                <p className="text-2xl font-bold text-[hsl(var(--fg))]">{stats.total}</p>
               </Card>
               <Card className="p-4 flex flex-col justify-center items-center text-center">
-                <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Abnormal</p>
-                <p className="text-2xl font-bold text-orange-500">{stats.abnormal}</p>
+                <p className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider mb-1">Abnormal</p>
+                <p className="text-2xl font-bold text-orange-600">{stats.abnormal}</p>
               </Card>
               <Card className="p-4 flex flex-col justify-center items-center text-center">
-                <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Latest</p>
-                <p className="text-sm font-bold text-white">
+                <p className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider mb-1">Latest</p>
+                <p className="text-sm font-bold text-[hsl(var(--fg))]">
                   {exams[0] ? new Date(exams[0].exam_date).toLocaleDateString() : '-'}
                 </p>
               </Card>
@@ -240,7 +240,7 @@ export default function LabExams() {
 
             {/* Exam List */}
             <Section title={t('pages.lab_exams.history')}>
-              <Card className="overflow-hidden divide-y divide-white/5">
+              <Card className="overflow-hidden divide-y divide-[hsl(var(--separator))]">
                 {isLoading ? (
                   <div className="p-8 space-y-4">
                     <Skeleton className="h-12 w-full" />
@@ -280,16 +280,16 @@ export default function LabExams() {
                   className="space-y-6"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-white">{selectedExam.panel_name}</h3>
+                    <h3 className="text-xl font-bold text-[hsl(var(--fg))]">{selectedExam.panel_name}</h3>
                     <button
                       onClick={() => setSelectedExam(null)}
-                      className="p-2 text-white/40 hover:text-white transition-colors"
+                      className="p-2 text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
                     >
                       <X size={20} />
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-white/40">
+                  <div className="flex items-center gap-2 text-sm text-[hsl(var(--fg-2))]">
                     <Calendar size={14} />
                     {new Date(selectedExam.exam_date).toLocaleDateString()}
                   </div>
@@ -297,18 +297,18 @@ export default function LabExams() {
                   <Section title="Markers">
                     <div className="space-y-3">
                       {selectedExam.markers?.map((marker, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-[hsl(var(--fill))] border border-[hsl(var(--separator))]">
                           <div>
-                            <p className="text-sm font-medium text-white">{marker.name}</p>
-                            <p className="text-xs text-white/40">{marker.ref_range || 'No ref range'}</p>
+                            <p className="text-sm font-medium text-[hsl(var(--fg))]">{marker.name}</p>
+                            <p className="text-xs text-[hsl(var(--fg-2))]">{marker.ref_range || 'No ref range'}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-bold text-white">
-                              {marker.value} <span className="text-[10px] font-normal text-white/40">{marker.unit}</span>
+                            <p className="text-sm font-bold text-[hsl(var(--fg))]">
+                              {marker.value} <span className="text-[10px] font-normal text-[hsl(var(--fg-2))]">{marker.unit}</span>
                             </p>
                             <p className={cn(
                               "text-[10px] font-bold uppercase tracking-tighter",
-                              marker.status === 'normal' ? "text-green-500" : "text-orange-500"
+                              marker.status === 'normal' ? "text-green-600" : "text-orange-600"
                             )}>
                               {marker.status}
                             </p>
@@ -320,18 +320,18 @@ export default function LabExams() {
 
                   {selectedExam.notes && (
                     <Section title="Notes">
-                      <p className="text-sm text-white/60 bg-white/5 p-4 rounded-xl border border-white/5 italic">
+                      <p className="text-sm text-[hsl(var(--fg-2))] bg-[hsl(var(--fill))] p-4 rounded-xl border border-[hsl(var(--separator))] italic">
                         "{selectedExam.notes}"
                       </p>
                     </Section>
                   )}
                 </motion.div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-white/5 rounded-3xl">
-                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                    <Info size={24} className="text-white/20" />
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-[hsl(var(--separator))] rounded-3xl">
+                  <div className="w-12 h-12 rounded-full bg-[hsl(var(--fill))] flex items-center justify-center mb-4">
+                    <Info size={24} className="text-[hsl(var(--fg-3))]" />
                   </div>
-                  <p className="text-sm text-white/40">Select an exam to view details and markers</p>
+                  <p className="text-sm text-[hsl(var(--fg-2))]">Select an exam to view details and markers</p>
                 </div>
               )}
             </AnimatePresence>
@@ -341,10 +341,10 @@ export default function LabExams() {
 
       {/* Add Exam Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-[#0A0A0A] border-white/10">
+        <DialogContent className="sm:max-w-md bg-[hsl(var(--bg))] border-[hsl(var(--separator))]">
           <DialogHeader>
-            <DialogTitle className="text-white">{t('pages.lab_exams.add_panel')}</DialogTitle>
-            <DialogDescription className="text-white/40">
+            <DialogTitle className="text-[hsl(var(--fg))]">{t('pages.lab_exams.add_panel')}</DialogTitle>
+            <DialogDescription className="text-[hsl(var(--fg-2))]">
               Upload a PDF or enter details manually.
             </DialogDescription>
           </DialogHeader>
@@ -361,21 +361,21 @@ export default function LabExams() {
               />
               <div className={cn(
                 "border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all",
-                isExtracting ? "border-white/10 bg-white/5" : "border-white/10 group-hover:border-white/20 group-hover:bg-white/[0.02]"
+                isExtracting ? "border-[hsl(var(--separator))] bg-[hsl(var(--fill))]" : "border-[hsl(var(--separator))] group-hover:border-[hsl(var(--separator-strong))] group-hover:bg-[hsl(var(--fill))]"
               )}>
                 {isExtracting ? (
                   <>
-                    <Loader2 className="w-8 h-8 text-white/40 animate-spin mb-4" />
-                    <p className="text-sm font-medium text-white">Extracting data...</p>
-                    <p className="text-xs text-white/40 mt-1">This takes a few seconds</p>
+                    <Loader2 className="w-8 h-8 text-[hsl(var(--fg-2))] animate-spin mb-4" />
+                    <p className="text-sm font-medium text-[hsl(var(--fg))]">Extracting data...</p>
+                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">This takes a few seconds</p>
                   </>
                 ) : (
                   <>
-                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Upload size={24} className="text-white/40" />
+                    <div className="w-12 h-12 rounded-full bg-[hsl(var(--fill))] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Upload size={24} className="text-[hsl(var(--fg-2))]" />
                     </div>
-                    <p className="text-sm font-medium text-white">Import PDF or Image</p>
-                    <p className="text-xs text-white/40 mt-1">We'll extract markers automatically</p>
+                    <p className="text-sm font-medium text-[hsl(var(--fg))]">Import PDF or Image</p>
+                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">We'll extract markers automatically</p>
                   </>
                 )}
               </div>
@@ -383,21 +383,21 @@ export default function LabExams() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-white/5" />
+                <span className="w-full border-t border-[hsl(var(--separator))]" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[#0A0A0A] px-2 text-white/20">Or manual entry</span>
+                <span className="bg-[hsl(var(--bg))] px-2 text-[hsl(var(--fg-3))]">Or manual entry</span>
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/40 uppercase tracking-wider">Panel Name</label>
-                <Input placeholder="e.g. CBC, Lipid Panel" className="bg-white/5 border-white/10 text-white" />
+                <label className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider">Panel Name</label>
+                <Input placeholder="e.g. CBC, Lipid Panel" className="bg-[hsl(var(--fill))] border-[hsl(var(--separator))] text-[hsl(var(--fg))]" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/40 uppercase tracking-wider">Date</label>
-                <Input type="date" className="bg-white/5 border-white/10 text-white" />
+                <label className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider">Date</label>
+                <Input type="date" className="bg-[hsl(var(--fill))] border-[hsl(var(--separator))] text-[hsl(var(--fg))]" />
               </div>
             </div>
 
