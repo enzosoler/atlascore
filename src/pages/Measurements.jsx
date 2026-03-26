@@ -721,7 +721,7 @@ export default function Measurements({ embedded = false }) {
   );
 }
 
-function MeasurementsContent({ embedded = false }) {
+function MeasurementsContent({ embedded = false, measurements: propMeasurements }) {
   const { t, locale } = useI18n();
   const isPt = locale === 'pt-BR';
   const { user } = useAuth();
@@ -733,11 +733,13 @@ function MeasurementsContent({ embedded = false }) {
   const queryClient = useQueryClient();
 
   // ── Data fetching ────────────────────────────────────────────────
-  const { data: measurements = [], isLoading, isError } = useQuery({
+  const { data: fetchedMeasurements = [], isLoading, isError } = useQuery({
     queryKey: ['measurements', user?.id],
     queryFn: () => listMeasurements(user.id, 200),
-    enabled: !!user?.id,
+    enabled: !!user?.id && !propMeasurements,
   });
+
+  const measurements = propMeasurements || fetchedMeasurements;
 
   // ── Mutations ────────────────────────────────────────────────────
   const invalidateMeasurements = () => {

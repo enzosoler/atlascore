@@ -10,7 +10,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter } from 'lucide-react';
+import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter, Sparkles, Lightbulb, ChevronRight } from 'lucide-react';
 import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
 import {
   searchExercises,
@@ -24,16 +24,25 @@ import {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MUSCLE_FILTER_OPTIONS = [
-  { label: 'Chest',       value: 'chest' },
-  { label: 'Back',      value: 'back' },
-  { label: 'Shoulders',      value: 'delts' },
-  { label: 'Biceps',      value: 'biceps' },
-  { label: 'Triceps',     value: 'triceps' },
-  { label: 'Quadriceps',  value: 'quads' },
-  { label: 'Hamstrings',   value: 'hamstrings' },
-  { label: 'Glutes',      value: 'glutes' },
-  { label: 'Calves', value: 'calves' },
-  { label: 'Core',        value: 'abs' },
+  { label: 'Chest',       value: 'chest', icon: '💪' },
+  { label: 'Back',      value: 'back', icon: '🔙' },
+  { label: 'Shoulders',      value: 'delts', icon: '🎯' },
+  { label: 'Biceps',      value: 'biceps', icon: '💪' },
+  { label: 'Triceps',     value: 'triceps', icon: '💪' },
+  { label: 'Legs',        value: 'legs', icon: '🦵' },
+  { label: 'Core',        value: 'abs', icon: '🎯' },
+];
+
+// Popular exercises for quick selection
+const POPULAR_EXERCISES = [
+  { name: 'Bench Press', muscle: 'chest', equipment: 'barbell' },
+  { name: 'Squat', muscle: 'legs', equipment: 'barbell' },
+  { name: 'Deadlift', muscle: 'back', equipment: 'barbell' },
+  { name: 'Overhead Press', muscle: 'delts', equipment: 'barbell' },
+  { name: 'Pull-ups', muscle: 'back', equipment: 'body weight' },
+  { name: 'Dumbbell Row', muscle: 'back', equipment: 'dumbbell' },
+  { name: 'Lunges', muscle: 'legs', equipment: 'body weight' },
+  { name: 'Push-ups', muscle: 'chest', equipment: 'body weight' },
 ];
 
 const EQUIPMENT_FILTER_OPTIONS = [
@@ -418,24 +427,90 @@ export default function ExerciseSearch({ onSelect }) {
         </div>
       )}
 
-      {/* Home: favorites + recents */}
-      {showHome && hasContext && (
-        <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--border-h))] bg-[hsl(var(--card))]">
-          {favorites.length > 0 && (
-            <>
-              <SectionHeader icon={Star} label="Favorites" />
-              {favorites.slice(0, 3).map((ex, i) => (
-                <ExerciseRow key={`fav-${i}`} exercise={ex} onSelect={handleSelect} />
+      {/* Home: Categories + Popular + Recent */}
+      {showHome && (
+        <div className="space-y-4">
+          {/* Categories */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2 px-1">Categories</p>
+            <div className="grid grid-cols-4 gap-2">
+              {MUSCLE_FILTER_OPTIONS.slice(0, 4).map(({ label, value, icon }) => (
+                <button
+                  key={value}
+                  onClick={() => setMuscleFilter(value)}
+                  className="flex flex-col items-center gap-1 p-3 rounded-xl border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] transition-colors"
+                >
+                  <span className="text-xl">{icon}</span>
+                  <span className="text-[11px] font-medium text-[hsl(var(--fg))]">{label}</span>
+                </button>
               ))}
-            </>
-          )}
-          {recents.length > 0 && (
-            <>
-              <SectionHeader icon={Clock} label="Recent" />
-              {recents.slice(0, 5).map((ex, i) => (
-                <ExerciseRow key={`rec-${i}`} exercise={ex} onSelect={handleSelect} />
+            </div>
+          </div>
+
+          {/* Popular Exercises */}
+          <div>
+            <div className="flex items-center justify-between mb-2 px-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">Popular</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {POPULAR_EXERCISES.map((ex) => (
+                <button
+                  key={ex.name}
+                  onClick={() => {
+                    setQuery(ex.name);
+                    // Trigger search after a brief delay to let state update
+                    setTimeout(() => {
+                      searchExercises(ex.name, 5).then(data => {
+                        if (data && data.length > 0) {
+                          handleSelect(data[0]);
+                        }
+                      });
+                    }, 100);
+                  }}
+                  className="px-3 py-2 rounded-xl border border-[hsl(var(--border-h))] bg-[hsl(var(--fill)/0.5)] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.06)] transition-colors text-sm text-[hsl(var(--fg))]"
+                >
+                  {ex.name}
+                </button>
               ))}
-            </>
+            </div>
+          </div>
+
+          {/* AI Suggestion */}
+          <button
+            className="w-full flex items-center justify-between p-4 rounded-xl border border-dashed border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.06)] hover:bg-[hsl(var(--brand)/0.1)] transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-[hsl(var(--brand))]" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-[hsl(var(--fg))]">Suggest exercises</p>
+                <p className="text-xs text-[hsl(var(--fg-2))]">AI picks based on your plan</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-3))]" />
+          </button>
+
+          {/* Recents & Favorites */}
+          {hasContext && (
+            <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--border-h))] bg-[hsl(var(--card))]">
+              {recents.length > 0 && (
+                <>
+                  <SectionHeader icon={Clock} label="Recent" />
+                  {recents.slice(0, 4).map((ex, i) => (
+                    <ExerciseRow key={`rec-${i}`} exercise={ex} onSelect={handleSelect} />
+                  ))}
+                </>
+              )}
+              {favorites.length > 0 && (
+                <>
+                  <SectionHeader icon={Star} label="Favorites" />
+                  {favorites.slice(0, 3).map((ex, i) => (
+                    <ExerciseRow key={`fav-${i}`} exercise={ex} onSelect={handleSelect} />
+                  ))}
+                </>
+              )}
+            </div>
           )}
         </div>
       )}

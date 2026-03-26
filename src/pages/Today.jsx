@@ -430,7 +430,7 @@ function DominantWorkoutCard({
 }
 
 // Action-Based Nutrition Card
-function ActionNutritionCard({ todayMeals, calorieTarget, macros, onLogMeal }) {
+function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
   const navigate = useNavigate();
   const hasLoggedMeals = todayMeals.length > 0;
   const totalCalories = todayMeals.reduce((sum, m) => sum + (m.calories || 0), 0);
@@ -741,7 +741,7 @@ function TodayTimeline({ todaySession, todayMeals, recentMeasurements }) {
     }
 
     // Sort by time
-    return items.sort((a, b) => new Date(b.time) - new Date(a.time));
+    return items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
   }, [todaySession, todayMeals, recentMeasurements]);
 
   if (events.length === 0) {
@@ -1003,7 +1003,7 @@ function TodayContent() {
                   if (todaySession?.status === 'completed') completed++;
                   if (todayMeals.length > 0) completed++;
                   const hasRecentMeasurement = recentMeasurements.length > 0 &&
-                    (new Date() - new Date(recentMeasurements[0].date)) / (1000 * 60 * 60 * 24) < 7;
+                    (new Date().getTime() - new Date(recentMeasurements[0].date).getTime()) / (1000 * 60 * 60 * 24) < 7;
                   if (hasRecentMeasurement) completed++;
                   return `${completed}/${total}`;
                 })()}
@@ -1031,7 +1031,7 @@ function TodayContent() {
                 </span>
               )}
               {recentMeasurements.length > 0 &&
-                (new Date() - new Date(recentMeasurements[0].date)) / (1000 * 60 * 60 * 24) < 7 && (
+                (new Date().getTime() - new Date(recentMeasurements[0].date).getTime()) / (1000 * 60 * 60 * 24) < 7 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--ok))]">
                   <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
                   Weight

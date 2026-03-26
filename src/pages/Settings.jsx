@@ -1,18 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  BellRing,
   Moon,
   Sun,
   User,
-  Bell,
-  Shield,
-  ChevronRight,
   LogOut,
   FileOutput,
   HelpCircle,
   ArrowRight,
   CreditCard,
+  Shield,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
@@ -24,37 +22,38 @@ import {
   PageShell,
   SafePageBoundary,
   SectionCard,
-  StatusBanner,
-  SecondaryButton,
 } from '@/components/shared/StablePage';
 import { Button } from '@/components/ui/button';
 
 // ── Theme option button ───────────────────────────────────────────────────────
 
-function ThemeOption({ icon: Icon, label, value, currentTheme, onSelect }) {
+function ThemeOption({ icon: Icon, label, description, value, currentTheme, onSelect }) {
   const active = currentTheme === value;
   return (
     <button
       type="button"
       onClick={() => onSelect(value)}
       className={[
-        'flex min-h-[104px] flex-1 flex-col items-center justify-center gap-2 rounded-[22px] border px-4 py-5 text-[13px] font-medium transition-all duration-200',
+        'flex min-h-[104px] flex-1 flex-col items-start justify-center gap-1.5 rounded-[22px] border px-5 py-5 text-left transition-all duration-200',
         active
           ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]'
           : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)] hover:text-[hsl(var(--fg))]',
       ].join(' ')}
     >
       <Icon className="h-5 w-5" strokeWidth={1.9} />
-      {label}
+      <span className="text-[14px] font-semibold tracking-[-0.016em]">{label}</span>
+      {description && (
+        <span className="text-[12px] leading-4 opacity-80">{description}</span>
+      )}
     </button>
   );
 }
 
 // ── Row link ──────────────────────────────────────────────────────────────────
 
-function SettingsRow({ icon: Icon, label, description, href, onClick, destructive = false }) {
+function ControlRow({ icon: Icon, label, description, href, onClick, meta, destructive = false }) {
   const cls = [
-    'flex min-h-[84px] w-full items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-5 py-4 text-left transition-all duration-200',
+    'flex min-h-[72px] w-full items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-5 py-3.5 text-left transition-all duration-200',
     destructive
       ? 'hover:border-[hsl(var(--err)/0.3)] hover:bg-[hsl(var(--err)/0.06)]'
       : 'hover:bg-[hsl(var(--fill)/0.72)]',
@@ -64,7 +63,7 @@ function SettingsRow({ icon: Icon, label, description, href, onClick, destructiv
     <>
       <div
         className={[
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border',
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border',
           destructive
             ? 'border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]'
             : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
@@ -82,10 +81,12 @@ function SettingsRow({ icon: Icon, label, description, href, onClick, destructiv
           {label}
         </p>
         {description ? (
-          <p className="mt-0.5 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{description}</p>
+          <p className="mt-0.5 text-[12px] leading-4 text-[hsl(var(--fg-2))]">{description}</p>
         ) : null}
       </div>
-      <ChevronRight className="h-4 w-4 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
+      {meta && (
+        <span className="text-[12px] text-[hsl(var(--fg-3))]">{meta}</span>
+      )}
     </>
   );
 
@@ -119,60 +120,66 @@ function SettingsContent() {
     }
   };
 
+  const planName = subscription?.plan_code
+    ? subscription.plan_code.charAt(0).toUpperCase() + subscription.plan_code.slice(1)
+    : 'Free';
+
+  const planStatus = subscription?.status === 'active'
+    ? 'Active'
+    : subscription?.status === 'trialing'
+    ? 'Trial'
+    : subscription?.status === 'past_due'
+    ? 'Past due'
+    : 'Free';
+
+  const lastUpdated = new Date().toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+
   return (
-    <PageShell
-      title={t('settings.title')}
-      subtitle={t('settings.subtitle')}
-      maxWidth="max-w-2xl"
-    >
-      <StatusBanner>
-        Configure appearance, access, and recovery actions without leaving the native atlas.core shell.
-      </StatusBanner>
-
-      {/* Account info */}
+    <PageShell maxWidth="max-w-2xl">
+      {/* Account — Primary section */}
       <SectionCard
-        title={t('settings.account.title')}
-        subtitle={t('settings.account.subtitle')}
+        title="Account"
+        subtitle="Your profile and plan"
       >
-        <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-            <User className="h-5 w-5" strokeWidth={1.9} />
+        <div className="space-y-3">
+          <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+              <User className="h-5 w-5" strokeWidth={1.9} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                {user?.name || user?.email?.split('@')[0] || 'User'}
+              </p>
+              <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">{user?.email || '—'}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[12px] text-[hsl(var(--fg-3))]">Updated {lastUpdated}</span>
+              <Button asChild variant="outline" size="sm" className="gap-1.5">
+                <Link to={ROUTES.profile}>
+                  Edit your profile
+                  <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+                </Link>
+              </Button>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-              {user?.name || user?.email?.split('@')[0] || 'User'}
-            </p>
-            <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">{user?.email || '—'}</p>
-          </div>
-          <Button asChild variant="outline" size="sm" className="ml-auto gap-1.5">
-            <Link to={ROUTES.profile}>
-              {t('settings.account.editProfile')}
-              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-            </Link>
-          </Button>
-        </div>
-      </SectionCard>
 
-      {/* Subscription management */}
-      {subscription && ['active', 'trialing', 'past_due'].includes(subscription.status) && (
-        <SectionCard
-          title="Subscription"
-          subtitle="Manage your plan, billing, and payment methods"
-        >
-          <div className="space-y-3">
-            <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-                <CreditCard className="h-5 w-5" strokeWidth={1.9} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                  {subscription.plan_code?.charAt(0).toUpperCase() + subscription.plan_code?.slice(1) || 'Pro'} Plan
-                </p>
-                <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
-                  Status: {subscription.status === 'active' ? 'Active' : subscription.status === 'trialing' ? 'Trial' : 'Past due'}
-                  {subscription.expires_at && ` • Renews ${new Date(subscription.expires_at).toLocaleDateString()}`}
-                </p>
-              </div>
+          <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+              <CreditCard className="h-5 w-5" strokeWidth={1.9} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                {planName} Plan
+              </p>
+              <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
+                {planStatus}
+                {subscription?.expires_at && ` • Renews ${new Date(subscription.expires_at).toLocaleDateString()}`}
+              </p>
+            </div>
+            {subscription && ['active', 'trialing', 'past_due'].includes(subscription.status) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -180,126 +187,104 @@ function SettingsContent() {
                 disabled={portalLoading}
                 className="gap-1.5"
               >
-                {portalLoading ? 'Loading...' : 'Manage'}
+                {portalLoading ? 'Loading...' : 'Manage plan'}
                 <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
               </Button>
-            </div>
-            <p className="text-[12px] text-[hsl(var(--fg-3))]">
-              Access the Stripe Customer Portal to update payment methods, view invoices, change plans, or cancel your subscription.
-            </p>
+            )}
           </div>
-        </SectionCard>
-      )}
+        </div>
+      </SectionCard>
 
-      {/* Appearance */}
+      {/* Experience */}
       <SectionCard
-        title={t('settings.appearance.title')}
-        subtitle={t('settings.appearance.subtitle')}
+        title="Interface"
+        subtitle="How atlas.core looks and feels"
       >
         <div className="flex gap-3">
           <ThemeOption
-            icon={Sun}
-            label={t('settings.appearance.light')}
-            value="light"
-            currentTheme={theme}
-            onSelect={setTheme}
-          />
-          <ThemeOption
             icon={Moon}
-            label={t('settings.appearance.dark')}
+            label="Dark"
+            description="Recommended"
             value="dark"
             currentTheme={theme}
             onSelect={setTheme}
           />
+          <ThemeOption
+            icon={Sun}
+            label="Light"
+            description="Alternative"
+            value="light"
+            currentTheme={theme}
+            onSelect={setTheme}
+          />
         </div>
+        <p className="mt-3 text-[12px] text-[hsl(var(--fg-3))]">
+          Dark mode preserves the intended contrast and visual hierarchy designed for atlas.core.
+        </p>
+      </SectionCard>
 
-        <div className="mt-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--brand))]">
-              <BellRing className="h-4 w-4" strokeWidth={1.9} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                Dark-first mobile UI
-              </p>
-              <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-                The app is tuned for the atlas.core dark interface. Light mode stays available, but dark preserves the intended contrast and hierarchy.
-              </p>
-            </div>
-          </div>
+      {/* Data & Control */}
+      <SectionCard
+        title="Data"
+        subtitle="Exports and privacy controls"
+      >
+        <div className="space-y-3">
+          <ControlRow
+            icon={FileOutput}
+            label="Export your data"
+            description="Download CSV, JSON, or PDF with date range selection"
+            href={ROUTES.export}
+          />
+          <ControlRow
+            icon={Shield}
+            label="Privacy settings"
+            description="Manage data visibility and account controls"
+            href={ROUTES.export}
+          />
         </div>
       </SectionCard>
 
-
-      {/* Other links */}
+      {/* Support */}
       <SectionCard
-        title={t('settings.more.title')}
-        subtitle={t('settings.more.subtitle')}
+        title="Support"
+        subtitle="Help and system information"
       >
         <div className="space-y-3">
-          <SettingsRow
-            icon={User}
-            label={t('settings.more.profile')}
-            description={t('settings.more.profileDesc')}
-            href={ROUTES.profile}
-          />
-          <SettingsRow
-            icon={Shield}
-            label={t('settings.more.privacy')}
-            description={t('settings.more.privacyDesc')}
-            href={ROUTES.export}
-          />
-          <SettingsRow
-            icon={FileOutput}
-            label="Exports"
-            description="Generate CSV, JSON, and PDF exports with a controlled date range."
-            href={ROUTES.export}
-          />
-          <SettingsRow
+          <ControlRow
             icon={HelpCircle}
-            label={t('settings.more.help')}
-            description={t('settings.more.helpDesc')}
+            label="Help Center"
+            description="Guides, FAQs, and troubleshooting"
             href={ROUTES.help}
           />
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        title="Notifications and support"
-        subtitle="Quiet defaults with clear recovery paths."
-      >
-        <div className="space-y-3">
-          <div className="rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+          <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">
-                <Bell className="h-4 w-4" strokeWidth={1.9} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">
+                <Clock className="h-4 w-4" strokeWidth={1.9} />
               </div>
               <div className="min-w-0">
                 <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                  System prompts stay minimal
+                  System prompts
                 </p>
-                <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-                  Trial notices, password changes, and session expirations follow the same calm iOS-style confirmation pattern used across the app.
+                <p className="mt-1 text-[12px] leading-4 text-[hsl(var(--fg-2))]">
+                  Trial notices, password changes, and session events use calm iOS-style confirmations.
                 </p>
               </div>
             </div>
           </div>
-          <Link to={ROUTES.help} className="inline-block">
-            <SecondaryButton type="button">Open Help Center</SecondaryButton>
-          </Link>
         </div>
       </SectionCard>
 
-      {/* Danger zone */}
+      {/* Session — Danger zone */}
       <SectionCard
-        title={t('settings.signout.title')}
-        subtitle={t('settings.signout.subtitle')}
+        title="Session"
+        subtitle="Active session control"
       >
-        <SettingsRow
+        <ControlRow
           icon={LogOut}
-          label={t('settings.signout.label')}
-          description={t('settings.signout.description')}
+          label="Sign out"
+          description="End your current session across all devices"
           onClick={handleLogout}
+          meta="Active now"
           destructive
         />
       </SectionCard>

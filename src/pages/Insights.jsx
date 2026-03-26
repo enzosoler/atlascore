@@ -8,10 +8,21 @@ import {
   Moon,
   Scale,
   Sparkles,
+  TrendingUp,
+  Target,
+  Zap,
   UtensilsCrossed,
+  Activity,
+  ChevronRight,
+  Lightbulb,
+  Clock,
+  Flame,
+  Droplets,
+  Brain,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { ROUTES } from '@/lib/routes';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
@@ -63,6 +74,70 @@ const CATEGORY_META = {
     icon: ArrowRight,
   },
 };
+
+// Sample insights to show as previews when user has no data
+const SAMPLE_INSIGHTS = [
+  {
+    id: 'sample-1',
+    category: 'progress',
+    title: 'Your weight is trending down over the last 4 weeks',
+    body: 'Based on your weekly check-ins, you have maintained a steady -0.5kg/week average. This pace is sustainable and aligned with your goals.',
+    direction: 'positive',
+    metric_key: 'body_progress',
+  },
+  {
+    id: 'sample-2',
+    category: 'nutrition',
+    title: 'Your protein intake is below target on most days',
+    body: 'You hit your 140g protein goal on 3 of the last 7 days. Consider adding a protein source to your breakfast to improve consistency.',
+    direction: 'attention',
+    metric_key: 'protein_adherence',
+  },
+  {
+    id: 'sample-3',
+    category: 'training',
+    title: 'You are most consistent on weekdays',
+    body: 'You completed 8 of 10 planned weekday workouts vs 1 of 4 weekend sessions. Consider shifting one weekend session to Friday.',
+    direction: 'neutral',
+    metric_key: 'workout_adherence',
+  },
+  {
+    id: 'sample-4',
+    category: 'recovery',
+    title: 'Higher sleep correlates with better workout performance',
+    body: 'On days after 7+ hours of sleep, your average training volume was 15% higher. Sleep could be your performance multiplier.',
+    direction: 'positive',
+    metric_key: 'recovery_trend',
+  },
+];
+
+// Quick action items for empty state
+const QUICK_ACTIONS = [
+  {
+    id: 'workout',
+    label: 'Log workout',
+    description: 'Record your training session',
+    icon: Dumbbell,
+    route: ROUTES.workouts,
+    color: 'brand',
+  },
+  {
+    id: 'meal',
+    label: 'Add meal',
+    description: 'Log your nutrition',
+    icon: UtensilsCrossed,
+    route: ROUTES.nutrition,
+    color: 'warn',
+  },
+  {
+    id: 'measurement',
+    label: 'Add weight',
+    description: 'Track body metrics',
+    icon: Scale,
+    route: ROUTES.body,
+    color: 'ok',
+  },
+];
 
 const TONE_STYLES = {
   positive: {
@@ -145,6 +220,40 @@ function routeLabel(metricKey) {
   };
 
   return labels[metricKey] || 'Open Today';
+}
+
+// Calculate unlock progress based on user data
+function calculateUnlockProgress(workouts, meals, measurements) {
+  const workoutCount = workouts?.length || 0;
+  const mealCount = meals?.length || 0;
+  const measurementCount = measurements?.length || 0;
+
+  const steps = [
+    { id: 'workout', label: 'Log 1 workout', completed: workoutCount >= 1 },
+    { id: 'meals', label: 'Log 2 meals', completed: mealCount >= 2 },
+    { id: 'measurement', label: 'Add 1 measurement', completed: measurementCount >= 1 },
+  ];
+
+  const completedCount = steps.filter((s) => s.completed).length;
+  const progressPercent = (completedCount / steps.length) * 100;
+
+  return { steps, completedCount, totalCount: steps.length, progressPercent };
+}
+
+// Calculate insight level based on data volume
+function calculateInsightLevel(workouts, meals, measurements, checkins) {
+  const workoutCount = workouts?.length || 0;
+  const mealCount = meals?.length || 0;
+  const measurementCount = measurements?.length || 0;
+  const checkinCount = checkins?.length || 0;
+
+  const totalDataPoints = workoutCount + mealCount + measurementCount + checkinCount;
+
+  if (totalDataPoints === 0) return { level: 0, label: 'Insight level: 0%', stage: 'empty' };
+  if (totalDataPoints <= 3) return { level: 25, label: 'Insight level: 25%', stage: 'starting' };
+  if (totalDataPoints <= 7) return { level: 50, label: 'Insight level: 50%', stage: 'building' };
+  if (totalDataPoints <= 15) return { level: 75, label: 'Insight level: 75%', stage: 'growing' };
+  return { level: 100, label: 'Insight level: 100%', stage: 'full' };
 }
 
 function SummaryItem({ item }) {
@@ -282,6 +391,457 @@ function CategoryInsightCard({ insight }) {
         </span>
       </div>
     </article>
+  );
+}
+
+// Sample/Preview insight card - shown when no real data exists
+function PreviewInsightCard({ insight, isSample = false }) {
+  const meta = CATEGORY_META[insight.category] || CATEGORY_META.progress;
+  const Icon = meta.icon;
+  const tone = TONE_STYLES[insight.direction || 'neutral'] || TONE_STYLES.neutral;
+
+  return (
+    <article className={cn(
+      'rounded-[24px] border px-5 py-5 shadow-[var(--shadow-sm)] transition-all duration-300',
+      tone.panel,
+      isSample && 'opacity-80 hover:opacity-100'
+    )}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.92)] text-[hsl(var(--fg))]">
+            <Icon className="h-4.5 w-4.5" strokeWidth={2} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="atlas-overline">{meta.label}</p>
+              {isSample && (
+                <span className="rounded-full border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
+                  Example
+                </span>
+              )}
+            </div>
+            <p className="mt-2 text-[1.05rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+              {insight.title}
+            </p>
+          </div>
+        </div>
+        <span className={cn('shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', tone.badge)}>
+          {directionLabel(insight.direction)}
+        </span>
+      </div>
+
+      <p className="mt-3 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{insight.body}</p>
+    </article>
+  );
+}
+
+// Unlock progress component - shows checklist of steps to unlock insights
+function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
+
+  return (
+    <div className="rounded-[24px] border border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
+            <Lightbulb className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+              {isPt ? 'Desbloqueie seu primeiro insight' : 'Unlock your first insight'}
+            </p>
+            <p className="mt-1 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
+              {isPt
+                ? 'Complete estes 3 passos para gerar insights personalizados baseados nos seus dados.'
+                : 'Complete these 3 steps to generate personalized insights based on your data.'}
+            </p>
+          </div>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className="text-[24px] font-bold tracking-[-0.04em] text-[hsl(var(--brand))]">
+            {completedCount}/{totalCount}
+          </p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+            {isPt ? 'completo' : 'complete'}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <Progress value={progressPercent} className="h-2 bg-[hsl(var(--fill))]" />
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        {steps.map((step, index) => {
+          const Icon = step.icon || (step.id === 'workout' ? Dumbbell : step.id === 'meals' ? UtensilsCrossed : Scale);
+          return (
+            <div
+              key={step.id}
+              className={cn(
+                'flex items-center gap-3 rounded-[16px] border px-4 py-3 transition-all duration-200',
+                step.completed
+                  ? 'border-[hsl(var(--ok)/0.3)] bg-[hsl(var(--ok)/0.08)]'
+                  : 'border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card)/0.5)]'
+              )}
+            >
+              <div
+                className={cn(
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                  step.completed
+                    ? 'bg-[hsl(var(--ok)/0.2)] text-[hsl(var(--ok))]'
+                    : 'bg-[hsl(var(--fill)/0.7)] text-[hsl(var(--fg-3))]'
+                )}
+              >
+                {step.completed ? (
+                  <Sparkles className="h-4 w-4" />
+                ) : (
+                  <Icon className="h-4 w-4" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className={cn(
+                  'text-[13px] font-medium',
+                  step.completed ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]'
+                )}>
+                  {step.label}
+                </p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">
+                  {isPt ? `Passo ${index + 1}` : `Step ${index + 1}`}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {completedCount === totalCount && (
+        <div className="mt-4 rounded-[16px] border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.08)] px-4 py-3">
+          <p className="text-[13px] font-medium text-[hsl(var(--ok))]">
+            {isPt
+              ? 'Parabéns! Seu primeiro insight será gerado em breve.'
+              : 'Great! Your first insight will be generated shortly.'}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Quick action buttons for empty state
+function QuickActionButtons() {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {QUICK_ACTIONS.map((action) => {
+        const Icon = action.icon;
+        const colorVar = action.color === 'brand' ? 'var(--brand)' : action.color === 'ok' ? 'var(--ok)' : 'var(--warn)';
+
+        return (
+          <Link
+            key={action.id}
+            to={action.route}
+            className="group flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] p-4 transition-all duration-200 hover:border-[hsl(var(--brand)/0.3)] hover:shadow-[var(--shadow-sm)]"
+          >
+            <div
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px]"
+              style={{ backgroundColor: `hsl(${colorVar}/0.1)`, color: `hsl(${colorVar})` }}
+            >
+              <Icon className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] font-semibold text-[hsl(var(--fg))] group-hover:text-[hsl(var(--brand))] transition-colors">
+                {action.label}
+              </p>
+              <p className="text-[12px] text-[hsl(var(--fg-3))]">{action.description}</p>
+            </div>
+            <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--fg-3))] group-hover:text-[hsl(var(--brand))] transition-colors" />
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+// AI Coaching message component
+function AICoachingMessage({ hasSomeData }) {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
+
+  return (
+    <div className="rounded-[20px] border border-[hsl(var(--accent-secondary)/0.2)] bg-[radial-gradient(circle_at_top_left,hsl(var(--accent-secondary)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-5 py-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--accent-secondary)/0.1)] text-[hsl(var(--accent-secondary))]">
+          <Brain className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+            {isPt ? 'Análise por IA' : 'AI Analysis'}
+          </p>
+          <p className="mt-1 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
+            {hasSomeData
+              ? isPt
+                ? 'Continue registrando consistentemente para desbloquear insights mais significativos sobre tendências e padrões.'
+                : 'Keep logging consistently to unlock more meaningful insights about trends and patterns.'
+              : isPt
+                ? 'Comece a registrar seus dados consistentemente. Após 3-5 dias de atividade, insights significativos começarão a aparecer aqui.'
+                : 'Start logging your data consistently. After 3-5 days of activity, meaningful insights will begin appearing here.'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Insight Level indicator
+function InsightLevelIndicator({ level, label, stage }) {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
+
+  const stageLabels = {
+    empty: isPt ? 'Aguardando dados' : 'Waiting for data',
+    starting: isPt ? 'Começando' : 'Starting',
+    building: isPt ? 'Construindo' : 'Building',
+    growing: isPt ? 'Crescendo' : 'Growing',
+    full: isPt ? 'Completo' : 'Complete',
+  };
+
+  const stageColors = {
+    empty: 'var(--fg-3)',
+    starting: 'var(--warn)',
+    building: 'var(--brand)',
+    growing: 'var(--ok)',
+    full: 'var(--ok)',
+  };
+
+  return (
+    <div className="flex items-center justify-between rounded-[16px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-4 py-3">
+      <div className="flex items-center gap-3">
+        <div
+          className="flex h-9 w-9 items-center justify-center rounded-[12px]"
+          style={{ backgroundColor: `hsl(${stageColors[stage]}/0.1)`, color: `hsl(${stageColors[stage]})` }}
+        >
+          <Activity className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-[13px] font-medium text-[hsl(var(--fg))]">{label}</p>
+          <p className="text-[11px] text-[hsl(var(--fg-3))]">{stageLabels[stage]}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="h-2 w-24 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${level}%`,
+              backgroundColor: `hsl(${stageColors[stage]})`,
+            }}
+          />
+        </div>
+        <span className="text-[12px] font-semibold text-[hsl(var(--fg-2))]">{level}%</span>
+      </div>
+    </div>
+  );
+}
+
+// Category preview cards - show what insights each category will provide
+function CategoryPreviews() {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
+
+  const categories = [
+    {
+      key: 'training',
+      icon: Dumbbell,
+      title: isPt ? 'Treinamento' : 'Training',
+      examples: isPt
+        ? ['Volume está aumentando consistentemente', 'Você está mais forte no supino']
+        : ['Volume is trending up consistently', 'You are getting stronger on bench press'],
+    },
+    {
+      key: 'nutrition',
+      icon: UtensilsCrossed,
+      title: isPt ? 'Nutrição' : 'Nutrition',
+      examples: isPt
+        ? ['Proteína atingida em 5 dos últimos 7 dias', 'Média de calorias dentro do alvo']
+        : ['Protein hit on 5 of last 7 days', 'Calorie average within target'],
+    },
+    {
+      key: 'progress',
+      icon: TrendingUp,
+      title: isPt ? 'Corpo' : 'Body',
+      examples: isPt
+        ? ['Peso reduziu 2kg em 4 semanas', 'Circunferência da cintura diminuindo']
+        : ['Weight down 2kg over 4 weeks', 'Waist circumference decreasing'],
+    },
+    {
+      key: 'recovery',
+      icon: Moon,
+      title: isPt ? 'Consistência' : 'Consistency',
+      examples: isPt
+        ? ['Dias consecutivos de check-in: 12', 'Você treina melhor com 7+ horas de sono']
+        : ['Consecutive check-in days: 12', 'You train better with 7+ hours sleep'],
+    },
+  ];
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {categories.map((cat) => {
+        const Icon = cat.icon;
+        return (
+          <div
+            key={cat.key}
+            className="rounded-[20px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.6)] p-4 transition-all duration-200 hover:border-[hsl(var(--border)/0.9)] hover:bg-[hsl(var(--card))]"
+          >
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[hsl(var(--fill)/0.6)] text-[hsl(var(--fg-2))]">
+                <Icon className="h-4 w-4" />
+              </div>
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{cat.title}</p>
+            </div>
+            <ul className="mt-3 space-y-1.5">
+              {cat.examples.map((example, i) => (
+                <li key={i} className="flex items-start gap-2 text-[12px] text-[hsl(var(--fg-3))]">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[hsl(var(--fg-3))]" />
+                  <span>{example}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Empty state redesigned - now shows value immediately
+function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
+
+  const unlockProgress = calculateUnlockProgress(workouts, meals, measurements);
+  const insightLevel = calculateInsightLevel(workouts, meals, measurements, checkins);
+  const hasSomeData = unlockProgress.completedCount > 0;
+
+  // Check for today's activity
+  const today = new Date().toISOString().split('T')[0];
+  const hasLoggedToday =
+    workouts?.some((w) => w.date === today || w.completed_at?.startsWith(today)) ||
+    meals?.some((m) => m.date === today) ||
+    measurements?.some((m) => m.date === today) ||
+    checkins?.some((c) => c.date === today);
+
+  return (
+    <div className="space-y-6">
+      {/* Header with immediate value */}
+      <div className="rounded-[24px] border border-[hsl(var(--brand)/0.15)] bg-[radial-gradient(ellipse_at_top,hsl(var(--brand)/0.08),transparent_60%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+            <Sparkles className="h-7 w-7" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+              {isPt ? 'Suas análises de progresso' : 'Your progress insights'}
+            </h2>
+            <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+              {hasLoggedToday
+                ? isPt
+                  ? 'Você fez um check-in hoje. Continue assim para desbloquear insights mais profundos sobre seus padrões e tendências.'
+                  : 'You logged something today. Keep it up to unlock deeper insights about your patterns and trends.'
+                : isPt
+                  ? 'Você ainda não registrou nada hoje. Comece com sua primeira ação para começar a construir insights significativos.'
+                  : "You haven't logged anything yet today. Start with your first action to begin building meaningful insights."}
+            </p>
+          </div>
+        </div>
+
+        {/* Insight Level Indicator */}
+        <div className="mt-5">
+          <InsightLevelIndicator
+            level={insightLevel.level}
+            label={insightLevel.label}
+            stage={insightLevel.stage}
+          />
+        </div>
+      </div>
+
+      {/* Unlock System */}
+      <UnlockProgress {...unlockProgress} />
+
+      {/* Quick Actions */}
+      <SectionCard
+        title={isPt ? 'Comece a registrar seus dados' : 'Start logging your data'}
+        subtitle={
+          isPt
+            ? 'Ações rápidas para gerar insights significativos'
+            : 'Quick actions to generate meaningful insights'
+        }
+        actions={null}
+      >
+        <QuickActionButtons />
+      </SectionCard>
+
+      {/* AI Coaching Layer */}
+      <AICoachingMessage hasSomeData={hasSomeData} />
+
+      {/* Preview Insights - Always Visible */}
+      <SectionCard
+        title={isPt ? 'Aqui está o que você começará a ver' : "Here's what you'll start seeing"}
+        subtitle={
+          isPt
+            ? 'Exemplos de insights baseados em dados típicos'
+            : 'Example insights based on typical data patterns'
+        }
+        actions={null}
+      >
+        <div className="mb-4 flex items-center gap-2 rounded-[12px] border border-[hsl(var(--warn)/0.15)] bg-[hsl(var(--warn)/0.06)] px-3 py-2">
+          <Lightbulb className="h-4 w-4 shrink-0 text-[hsl(var(--warn))]" />
+          <p className="text-[12px] text-[hsl(var(--warn))]">
+            {isPt
+              ? 'Estes são exemplos. Insights reais aparecerão quando você tiver dados suficientes.'
+              : 'These are examples. Real insights will appear once you have sufficient data.'}
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          {SAMPLE_INSIGHTS.map((insight) => (
+            <PreviewInsightCard key={insight.id} insight={insight} isSample={true} />
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* Category Previews */}
+      <SectionCard
+        title={isPt ? 'Categorias de insights' : 'Insight categories'}
+        subtitle={
+          isPt
+            ? 'Uma prévia do que cada seção analisará para você'
+            : 'A preview of what each section will analyze for you'
+        }
+        actions={null}
+      >
+        <CategoryPreviews />
+      </SectionCard>
+
+      {/* Time-based expectations */}
+      <div className="rounded-[16px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.5)] px-4 py-4">
+        <div className="flex items-start gap-3">
+          <Clock className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--fg-3))]" />
+          <div>
+            <p className="text-[13px] font-medium text-[hsl(var(--fg))]">
+              {isPt ? 'Quando os insights aparecerão?' : 'When will insights appear?'}
+            </p>
+            <p className="mt-1 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
+              {isPt
+                ? 'Insights básicos aparecem após 1-2 dias de registro. Insights significativos e tendências são desbloqueados após 3-5 dias de dados consistentes.'
+                : 'Basic insights appear after 1-2 days of logging. Meaningful insights and trends unlock after 3-5 days of consistent data.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -547,22 +1107,14 @@ function InsightsContent() {
         />
       ) : null}
 
+      {/* NEW: Redesigned empty state that delivers value immediately */}
       {!loading && !hasAnyData ? (
-        <SectionCard
-          title={isPt ? "Aguardando sua primeira tendência" : "Waiting for your first trend"}
-          subtitle={isPt ? "Insights se tornam úteis quando o app tem sinal suficiente para comparar comportamento recente." : "Insights become useful once the app has enough signal to compare recent behavior."}
-        >
-          <EmptyState
-            icon={BarChart3}
-            title={isPt ? "Sem dados para mostrar ainda" : "No data to show yet"}
-            description={isPt ? "Registre alguns treinos, refeições, check-ins ou medidas para desbloquear seu primeiro insight significativo." : "Log a few workouts, nutrition entries, check-ins, or measurements to unlock your first meaningful insight."}
-            action={
-              <Button asChild size="default">
-                <Link to={ROUTES.body}>Add your first measurement</Link>
-              </Button>
-            }
-          />
-        </SectionCard>
+        <InsightsEmptyState
+          workouts={workouts}
+          meals={meals}
+          measurements={measurements}
+          checkins={checkins}
+        />
       ) : null}
 
       {!loading && hasAnyData ? (

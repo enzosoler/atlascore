@@ -86,23 +86,37 @@ function PricingCard({
   const Icon = plan.icon;
   const isFree = plan.id === 'free';
   const isCurrentPlan = currentPlanId === plan.id || (isFree && !currentPlanId);
+  const isPro = plan.id === 'athlete_pro';
+  const isPerformance = plan.id === 'athlete_performance';
 
   return (
     <article
-      className={`relative flex h-full flex-col rounded-[30px] border px-5 py-5 lg:px-6 lg:py-6 ${
-        plan.popular
-          ? 'border-[hsl(var(--brand)/0.32)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]'
-          : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.86)] shadow-[var(--shadow-xs)]'
+      className={`relative flex h-full flex-col rounded-[30px] border px-5 py-5 lg:px-6 lg:py-6 transition-all ${
+        isPro
+          ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--card))] shadow-[0_8px_30px_rgb(0,0,0,0.12)] scale-[1.02] z-10'
+          : isPerformance
+            ? 'border-[hsl(var(--brand)/0.24)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]'
+            : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.86)] shadow-[var(--shadow-xs)]'
       }`}
     >
-      {plan.popular ? (
-        <span className="atlas-public-pill absolute right-5 top-5 border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]">
+      {isPro ? (
+        <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand))] px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+          <Sparkles className="h-3 w-3" strokeWidth={2} />
           {labels.popular}
+        </span>
+      ) : plan.aiBadge ? (
+        <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] px-3 py-1 text-[11px] font-medium text-[hsl(var(--brand))]">
+          <Sparkles className="h-3 w-3" strokeWidth={2} />
+          {labels.aiBadge}
         </span>
       ) : null}
 
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border shadow-[var(--shadow-xs)] ${
+          isPro 
+            ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]' 
+            : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))]'
+        }`}>
           <Icon className="h-5 w-5" strokeWidth={1.9} />
         </div>
 
@@ -111,8 +125,8 @@ function PricingCard({
           <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
             {plan.pitch}
           </p>
-          {plan.note ? (
-            <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{plan.note}</p>
+          {plan.tagline ? (
+            <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{plan.tagline}</p>
           ) : null}
         </div>
       </div>
@@ -137,8 +151,8 @@ function PricingCard({
 
       <div className="mt-6 flex-1 space-y-2.5">
         {plan.features.map((feature) => (
-          <div key={feature} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.4} />
+          <div key={feature} className="flex items-start gap-2 text-[13px] leading-5 text-[hsl(var(--fg))]">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.4} />
             <span>{feature}</span>
           </div>
         ))}
@@ -153,10 +167,10 @@ function PricingCard({
       <Button
         onClick={() => onSubscribe(plan.id)}
         disabled={loading === plan.id || (isFree && isCurrentPlan)}
-        variant={plan.popular && !isCurrentPlan ? 'default' : 'outline'}
+        variant={isPro && !isCurrentPlan ? 'default' : 'outline'}
         className={`mt-6 h-11 w-full ${
           isCurrentPlan ? 'border-[hsl(var(--ok)/0.34)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]' : ''
-        }`}
+        } ${isPro && !isCurrentPlan ? 'bg-[hsl(var(--brand))] text-white hover:bg-[hsl(var(--brand)/0.9)]' : ''}`}
       >
         {loading === plan.id ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -186,13 +200,14 @@ export default function Pricing() {
     () => ({
       login: 'Login',
       signup: 'Create account',
-      compareTitle: 'Plans designed for the same premium product',
+      compareTitle: 'What changes when you upgrade',
       compareCopy:
-        'Start free, then expand into richer insights and professional collaboration when you need it.',
+        'See exactly what you get at each level. Upgrade anytime — downgrade anytime.',
       trustA: '7-day free trial',
-      trustB: 'Change plans anytime',
-      trustC: 'Secure Stripe checkout',
-      popular: 'Most chosen',
+      trustB: 'Cancel anytime',
+      trustC: 'No credit card required',
+      popular: 'Most popular',
+      aiBadge: 'AI-powered',
       current: 'Current plan',
       freeCurrent: 'Free plan',
       freeSignup: 'Create free account',
@@ -201,9 +216,9 @@ export default function Pricing() {
       savePrefix: 'Save ',
       athleteLabel: t('pricing_page.athlete'),
       professionalLabel: t('pricing_page.professional'),
-      footerTitle: 'One visual system from first click to daily use',
+      footerTitle: 'Ready to see real progress?',
       footerCopy:
-        'Pricing should feel like part of atlas.core itself, not a detached marketing layer.',
+        'Join thousands who upgraded from basic tracking to data-driven performance.',
     }),
     [t]
   );
@@ -235,6 +250,8 @@ export default function Pricing() {
           ...meta,
           name: meta.key,
           pitch: '',
+          tagline: '',
+          aiBadge: false,
           features: [],
           missing: [],
           cta: 'Subscribe',
@@ -249,6 +266,8 @@ export default function Pricing() {
         ...meta,
         name: translated.name,
         pitch: translated.pitch,
+        tagline: translated.tagline || '',
+        aiBadge: translated.aiBadge || false,
         features: translated.features,
         missing: translated.missing || [],
         cta: translated.cta,

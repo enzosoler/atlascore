@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
@@ -8,15 +8,17 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
 import LogDoseForm from '@/components/protocols/LogDoseForm';
+import TodayDoseSection from '@/components/protocols/TodayDoseSection';
+import AdherenceWidget from '@/components/protocols/AdherenceWidget';
+import AIInsightsBanner from '@/components/protocols/AIInsightsBanner';
+import QuickAddTemplates from '@/components/protocols/QuickAddTemplates';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import {
   DialogPanelHeader,
   EmptyState,
   ErrorState,
-  FilterChip,
   LoadingState,
   PageShell,
-  PrimaryButton,
   SafePageBoundary,
   SectionCard,
   StatusBanner,
@@ -33,18 +35,9 @@ import {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const PROTOCOLS_QUERY_KEY = ['protocols'];
-const FILTERS = ['all', 'active', 'paused', 'finished'];
+const LOGS_QUERY_KEY = ['protocol-logs'];
 
 const CURVE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
-
-function getFilterLabels(t) {
-  return {
-    all: t('pages.protocols.tab_all'),
-    active: t('pages.protocols.tab_active'),
-    paused: t('pages.protocols.tab_paused'),
-    finished: t('pages.protocols.tab_finished'),
-  };
-}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -416,14 +409,13 @@ export default function Protocols() {
 
 function ProtocolsContent() {
   const { user } = useAuth();
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
   const isPt = locale === 'pt-BR';
-  const filterLabels = getFilterLabels(t);
   const qc = useQueryClient();
 
-  const [filter, setFilter] = useState('active');
   const [notice, setNotice] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isTemplateMode, setIsTemplateMode] = useState(true);
   const [editingProtocol, setEditingProtocol] = useState(null);
   const [pendingActionKey, setPendingActionKey] = useState('');
 
@@ -431,42 +423,61 @@ function ProtocolsContent() {
   const [isLogDoseOpen, setIsLogDoseOpen] = useState(false);
   const [loggingProtocol, setLoggingProtocol] = useState(null);
 
-  // ── Query ──────────────────────────────────────────────────────────────────
+  // ── Queries ─────────────────────────────────────────────────────────────────
 
   const protocolsQuery = useQuery({
     queryKey: PROTOCOLS_QUERY_KEY,
     queryFn: fetchProtocols,
-    // Only fetch once the user session is confirmed
     enabled: Boolean(user?.id),
     retry: 1,
   });
 
-  // ── Save (create / update) ─────────────────────────────────────────────────
+  const logsQuery = useQuery({
+    queryKey: LOGS_QUERY_KEY,
+    queryFn: fetchAllProtocolLogs,
+    enabled: Boolean(user?.id),
+    retry: 1,
+  });
+
+  // ── Mutations ──────────────────────────────────────────────────────────────
 
   const saveProtocolMutation = useMutation({
     mutationFn: ({ protocolId, payload }) =>
       protocolId
         ? updateProtocol(protocolId, payload)
         : createProtocol({ ...payload, user_id: user.id }),
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
       setIsFormOpen(false);
+      setIsTemplateMode(true);
       setEditingProtocol(null);
-      setNotice({
-        tone: 'success',
-        message: variables.protocolId ? 'Protocol updated.' : 'Protocol added.',
-      });
+      setNotice({ tone: 'success', message: 'Saved successfully.' });
     },
-    onError: (error) => {
-      console.error('[Protocols] save error:', error);
-      setNotice({
-        tone: 'warning',
-        message: t('pages.protocols.save_error'),
-      });
+    onError: () => {
+      setNotice({ tone: 'warning', message: 'Failed to save. Please try again.' });
     },
   });
 
-  // ── Status change (pause / resume / finish / reactivate) ──────────────────
+  const saveMultipleProtocolsMutation = useMutation({
+    mutationFn: async (items) => {
+      const results = [];
+      for (const item of items) {
+        const result = await createProtocol({ ...item, user_id: user.id });
+        results.push(result);
+      }
+      return results;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
+      setIsFormOpen(false);
+      setIsTemplateMode(true);
+      setEditingProtocol(null);
+      setNotice({ tone: 'success', message: 'Items added successfully.' });
+    },
+    onError: () => {
+      setNotice({ tone: 'warning', message: 'Failed to add items. Please try again.' });
+    },
+  });
 
   const statusMutation = useMutation({
     mutationFn: ({ id, payload }) => updateProtocol(id, payload),
@@ -476,33 +487,23 @@ function ProtocolsContent() {
       setNotice({ tone: 'success', message: variables.successMessage });
     },
     onError: () => {
-      setNotice({
-        tone: 'warning',
-        message: t('pages.protocols.status_error'),
-      });
+      setNotice({ tone: 'warning', message: 'Failed to update status.' });
     },
     onSettled: () => setPendingActionKey(''),
   });
-
-  // ── Delete ─────────────────────────────────────────────────────────────────
 
   const deleteMutation = useMutation({
     mutationFn: ({ id }) => deleteProtocol(id),
     onMutate: ({ actionKey }) => setPendingActionKey(actionKey),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setNotice({ tone: 'success', message: t('pages.protocols.delete_success') });
+      setNotice({ tone: 'success', message: 'Item deleted.' });
     },
     onError: () => {
-      setNotice({
-        tone: 'warning',
-        message: t('pages.protocols.delete_error'),
-      });
+      setNotice({ tone: 'warning', message: 'Failed to delete.' });
     },
     onSettled: () => setPendingActionKey(''),
   });
-
-  // ── Dose logging ───────────────────────────────────────────────────────────
 
   const logDoseMutation = useMutation({
     mutationFn: ({ protocolId, dose_amount, unit, notes, taken_at }) =>
@@ -516,62 +517,81 @@ function ProtocolsContent() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      qc.invalidateQueries({ queryKey: ['protocol-logs'] });
+      qc.invalidateQueries({ queryKey: LOGS_QUERY_KEY });
       setIsLogDoseOpen(false);
       setLoggingProtocol(null);
-      setNotice({ tone: 'success', message: 'Dose logged successfully.' });
+      setNotice({ tone: 'success', message: 'Dose logged.' });
     },
-    onError: (error) => {
-      console.error('[Protocols] log dose error:', error);
-      setNotice({
-        tone: 'warning',
-        message: 'Failed to log dose. Please try again.',
-      });
+    onError: () => {
+      setNotice({ tone: 'warning', message: 'Failed to log dose.' });
     },
   });
 
+  // ── Data processing ────────────────────────────────────────────────────────
+
   const protocols = toArray(protocolsQuery.data);
-  const isLoading = protocolsQuery.isPending;
-  const hasLoadError = protocolsQuery.isError;
+  const logs = toArray(logsQuery.data);
+  const isLoading = protocolsQuery.isPending || logsQuery.isPending;
+  const hasLoadError = protocolsQuery.isError || logsQuery.isError;
 
-  const groupedProtocols = useMemo(() => {
-    const active   = protocols.filter((p) =>  p?.active && !p?.end_date);
-    const paused   = protocols.filter((p) => !p?.active && !p?.end_date);
-    const finished = protocols.filter((p) =>  Boolean(p?.end_date));
-    return { all: protocols, active, paused, finished };
-  }, [protocols]);
+  const activeProtocols = useMemo(() => 
+    protocols.filter((p) => p?.active !== false && !p?.end_date),
+    [protocols]
+  );
 
-  const filteredProtocols = groupedProtocols[filter] ?? [];
   const hasAnyProtocols = protocols.length > 0;
 
-  // ── Event handlers ─────────────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────────────────────────
 
   const handleCreate = () => {
     setNotice(null);
     setEditingProtocol(null);
+    setIsTemplateMode(true);
     setIsFormOpen(true);
   };
 
   const handleEdit = (protocol) => {
     setNotice(null);
     setEditingProtocol(protocol);
+    setIsTemplateMode(false);
     setIsFormOpen(true);
+  };
+
+  const handleTemplateSelect = (template) => {
+    if (template.type === 'ai') {
+      // TODO: Call AI service to parse the prompt
+      setIsTemplateMode(false);
+    } else if (template.items) {
+      // Add template items with today's date
+      const itemsWithDates = template.items.map(item => ({
+        ...item,
+        start_date: getToday(),
+        active: true,
+      }));
+      saveMultipleProtocolsMutation.mutate(itemsWithDates);
+    }
+  };
+
+  const handleFormSubmit = (payload) => {
+    saveProtocolMutation.mutate({
+      protocolId: editingProtocol?.id ?? null,
+      payload,
+    });
   };
 
   const handleStatusChange = (protocol, nextStatus) => {
     if (!protocol?.id) return;
 
-    // Send null (not empty string) for date columns — Postgres rejects ''
     const payloads = {
-      active:   { active: true,  end_date: null },
-      paused:   { active: false, end_date: null },
+      active: { active: true, end_date: null },
+      paused: { active: false, end_date: null },
       finished: { active: false, end_date: protocol?.end_date || getToday() },
     };
 
     const messages = {
-      active:   'Protocol reactivated.',
-      paused:   'Protocol paused.',
-      finished: 'Protocol marked as finished.',
+      active: 'Reactivated.',
+      paused: 'Paused.',
+      finished: 'Marked as finished.',
     };
 
     statusMutation.mutate({
@@ -584,21 +604,9 @@ function ProtocolsContent() {
 
   const handleDelete = (protocol) => {
     if (!protocol?.id) return;
-
     const label = protocol?.substance_name || protocol?.name || 'this item';
     if (!window.confirm(`Delete ${label}?`)) return;
-
-    deleteMutation.mutate({
-      id: protocol.id,
-      actionKey: `${protocol.id}-delete`,
-    });
-  };
-
-  const handleFormSubmit = (payload) => {
-    saveProtocolMutation.mutate({
-      protocolId: editingProtocol?.id ?? null,
-      payload,
-    });
+    deleteMutation.mutate({ id: protocol.id, actionKey: `${protocol.id}-delete` });
   };
 
   const handleLogDose = (protocol) => {
@@ -609,10 +617,14 @@ function ProtocolsContent() {
 
   const handleLogDoseSubmit = (payload) => {
     if (!loggingProtocol?.id) return;
-    logDoseMutation.mutate({
-      protocolId: loggingProtocol.id,
-      ...payload,
-    });
+    logDoseMutation.mutate({ protocolId: loggingProtocol.id, ...payload });
+  };
+
+  const handleFormClose = () => {
+    if (saveProtocolMutation.isPending || saveMultipleProtocolsMutation.isPending) return;
+    setIsFormOpen(false);
+    setIsTemplateMode(true);
+    setEditingProtocol(null);
   };
 
   const handleLogDoseClose = () => {
@@ -621,224 +633,203 @@ function ProtocolsContent() {
     setLoggingProtocol(null);
   };
 
-  const handleFormClose = () => {
-    if (saveProtocolMutation.isPending) return;
-    setIsFormOpen(false);
-    setEditingProtocol(null);
-  };
-
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <PageShell
-      title={isPt ? "Protocolos" : "Protocols"}
-      subtitle={isPt ? "Acompanhe compostos, doses e ciclos do seu protocolo atual em um só lugar." : "Track compounds, doses and cycles of your current protocol in one place."}
+      eyebrow={isPt ? "Suplementos & Medicação" : "Supplements & Meds"}
+      title={isPt ? "O que você está tomando" : "What you're taking"}
+      subtitle={isPt 
+        ? "Acompanhe suas doses diárias e mantenha consistência." 
+        : "Log doses, stay consistent, and track your protocol over time."}
       actions={
-        <PrimaryButton
+        <button
           type="button"
           onClick={handleCreate}
-          className="inline-flex items-center gap-2"
+          className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand))] px-4 py-2.5 text-[14px] font-semibold text-white transition-all hover:bg-[hsl(var(--brand)/0.9)]"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
-          Add Protocol
-        </PrimaryButton>
+          Add new
+        </button>
       }
-      maxWidth="max-w-6xl"
+      maxWidth="max-w-4xl"
     >
-      {notice?.message ? (
+      {notice?.message && (
         <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>
-      ) : null}
+      )}
 
-      {isLoading ? (
+      {isLoading && (
         <LoadingState
-          title="Loading protocols"
-          description="Please wait while your protocols are loading."
+          title="Loading your items"
+          description="Please wait while we load your supplements and medications."
         />
-      ) : null}
+      )}
 
-      {!isLoading && hasLoadError ? (
+      {!isLoading && hasLoadError && (
         <ErrorState
-          title="Protocols in safe mode"
-          description="Data did not load completely, but you can still add new items."
+          title="Unable to load data"
+          description="Some information may be unavailable, but you can still add new items."
         />
-      ) : null}
+      )}
 
-      {/* Summary tiles */}
-      <section className="grid gap-3 md:grid-cols-3">
-        <SummaryTile
-          label="Active"
-          value={groupedProtocols.active.length}
-          hint={isPt ? "Compostos em uso ou sendo monitorados." : "Compounds currently in use or being monitored."}
-          icon={FlaskConical}
-        />
-        <SummaryTile
-          label="Paused"
-          value={groupedProtocols.paused.length}
-          hint={isPt ? "Itens temporariamente suspensos mas ainda rastreados." : "Items temporarily suspended but still tracked."}
-          icon={PauseCircle}
-        />
-        <SummaryTile
-          label="Finished"
-          value={groupedProtocols.finished.length}
-          hint={isPt ? "Ciclos e protocolos completos mantidos no histórico." : "Completed cycles and protocols kept in history."}
-          icon={Clock3}
-        />
-      </section>
-
-      {/* Half-Life Curve Visualization (Performance Plan) */}
-      <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
-        <SectionCard title={isPt ? "Curvas de Meia-Vida" : "Half-Life Curves"} subtitle={isPt ? "Visualize a concentração ativa ao longo do tempo para protocolos atuais." : "Visualize active concentration over time for current protocols."}>
-          <ConcentrationChart protocols={groupedProtocols.active} />
+      {/* ── TODAY: Critical daily focus section ─────────────────────────────── */}
+      {!isLoading && (
+        <SectionCard
+          title={isPt ? "Hoje" : "Today"}
+          subtitle={isPt ? "O que você precisa tomar agora" : "What you need to take now"}
+        >
+          <TodayDoseSection
+            protocols={activeProtocols}
+            logs={logs}
+            onLogDose={handleLogDose}
+            isPending={logDoseMutation.isPending}
+            loggingProtocolId={loggingProtocol?.id}
+          />
         </SectionCard>
-      </UpgradeGate>
+      )}
 
-      {/* Protocol list */}
-      <SectionCard
-        title={isPt ? "Itens do protocolo atual" : "Current protocol items"}
-        subtitle={isPt ? "Rastreamento de status de substâncias que você usa ou monitora." : "Status tracking of substances you currently use or monitor."}
-        actions={
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map((option) => {
-              const count =
-                option === 'all'
-                  ? groupedProtocols.all.length
-                  : groupedProtocols[option]?.length ?? 0;
+      {/* ── AI Insights Banner ──────────────────────────────────────────────── */}
+      {!isLoading && hasAnyProtocols && (
+        <AIInsightsBanner protocols={activeProtocols} logs={logs} />
+      )}
 
-              return (
-                <FilterChip
-                  key={option}
-                  onClick={() => setFilter(option)}
-                  active={filter === option}
+      {/* ── Active Items: Simplified cards ──────────────────────────────────── */}
+      {!isLoading && (
+        <SectionCard
+          title={isPt ? "Itens ativos" : "Active items"}
+          subtitle={isPt 
+            ? "Seus suplementos e medicações em uso" 
+            : "Your supplements and medications in use"}
+        >
+          {!hasAnyProtocols ? (
+            <EmptyState
+              title={isPt ? "Nenhum item ainda" : "No items yet"}
+              description={isPt
+                ? "Adicione seus suplementos, medicações ou compostos para começar a acompanhar."
+                : "Add your supplements, medications, or compounds to start tracking."}
+              action={
+                <button
+                  type="button"
+                  onClick={handleCreate}
+                  className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand))] px-4 py-2.5 text-[14px] font-semibold text-white transition-all hover:bg-[hsl(var(--brand)/0.9)]"
                 >
-                  {filterLabels[option] || option} ({count})
-                </FilterChip>
-              );
-            })}
+                  <Plus className="h-4 w-4" strokeWidth={2} />
+                  Add your first item
+                </button>
+              }
+            />
+          ) : (
+            <div className="space-y-3">
+              {protocols.map((protocol) => {
+                const status = getProtocolStatus(protocol);
+                return (
+                  <ProtocolCard
+                    key={protocol?.id ?? `${protocol?.name}-${protocol?.start_date}`}
+                    protocol={protocol}
+                    status={status}
+                    logs={logs}
+                    busyActionKey={pendingActionKey}
+                    onEdit={() => handleEdit(protocol)}
+                    onLogDose={status === 'active' ? () => handleLogDose(protocol) : null}
+                    isLogDosePending={logDoseMutation.isPending && loggingProtocol?.id === protocol.id}
+                    onPause={status === 'active' ? () => handleStatusChange(protocol, 'paused') : null}
+                    onResume={status === 'paused' ? () => handleStatusChange(protocol, 'active') : null}
+                    onFinish={status !== 'finished' ? () => handleStatusChange(protocol, 'finished') : null}
+                    onDelete={() => handleDelete(protocol)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </SectionCard>
+      )}
+
+      {/* ── Adherence & Stats ───────────────────────────────────────────────── */}
+      {!isLoading && hasAnyProtocols && (
+        <AdherenceWidget protocols={activeProtocols} logs={logs} />
+      )}
+
+      {/* ── Advanced features (Paywall at bottom) ───────────────────────────────── */}
+      {!isLoading && hasAnyProtocols && (
+        <div className="rounded-[20px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)] p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+                {isPt ? "Análise avançada" : "Advanced analysis"}
+              </p>
+              <p className="text-[13px] text-[hsl(var(--fg-2))]">
+                {isPt 
+                  ? "Concentração, meia-vida e projeções" 
+                  : "Concentration curves, half-life tracking, and projections"}
+              </p>
+            </div>
+            <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
+              <button className="rounded-full bg-[hsl(var(--brand))] px-4 py-2 text-[13px] font-medium text-white">
+                {isPt ? "Atualizar" : "Upgrade"}
+              </button>
+            </UpgradeGate>
           </div>
-        }
-      >
-        {/* Skeleton while loading */}
-        {isLoading ? (
-          <div className="space-y-4">
-            {[0, 1].map((index) => (
-              <div
-                key={index}
-                className="animate-pulse rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.72)] p-5"
-              >
-                <div className="h-5 w-40 rounded-full bg-[hsl(var(--border))]" />
-                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  {[0, 1, 2, 3].map((block) => (
-                    <div key={block} className="h-20 rounded-2xl bg-[hsl(var(--card))]" />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
+        </div>
+      )}
 
-        {/* No protocols at all */}
-        {!isLoading && !hasAnyProtocols ? (
-          <EmptyState
-            title={isPt ? "Nenhum item de protocolo" : "No protocol items"}
-            description={
-              hasLoadError
-                ? 'The list could not be loaded. You can still add your first protocol.'
-                : 'Start with a medication, hormone, peptide, supplement or other tracked compound.'
-            }
-            action={
-              <PrimaryButton type="button" onClick={handleCreate}>
-                Add Protocol
-              </PrimaryButton>
-            }
-          />
-        ) : null}
-
-        {/* Filter has no matches */}
-        {!isLoading && hasAnyProtocols && filteredProtocols.length === 0 ? (
-          <EmptyState
-            title={`No ${filterLabels[filter]?.toLowerCase() || filter} protocols`}
-            description="Try another filter or add a new protocol."
-            action={
-              <PrimaryButton type="button" onClick={handleCreate}>
-                Add Protocol
-              </PrimaryButton>
-            }
-          />
-        ) : null}
-
-        {/* Protocol cards */}
-        {!isLoading && filteredProtocols.length > 0 ? (
-          <div className="space-y-4">
-            {filteredProtocols.map((protocol) => {
-              const status = getProtocolStatus(protocol);
-
-              return (
-                <ProtocolCard
-                  key={protocol?.id ?? `${protocol?.name}-${protocol?.start_date}`}
-                  protocol={protocol}
-                  status={status}
-                  busyActionKey={pendingActionKey}
-                  onEdit={() => handleEdit(protocol)}
-                  onLogDose={status === 'active' ? () => handleLogDose(protocol) : null}
-                  isLogDosePending={logDoseMutation.isPending && loggingProtocol?.id === protocol.id}
-                  onPause={
-                    status === 'active'
-                      ? () => handleStatusChange(protocol, 'paused')
-                      : null
-                  }
-                  onResume={
-                    status === 'paused'
-                      ? () => handleStatusChange(protocol, 'active')
-                      : null
-                  }
-                  onFinish={
-                    status !== 'finished'
-                      ? () => handleStatusChange(protocol, 'finished')
-                      : null
-                  }
-                  onDelete={() => handleDelete(protocol)}
-                />
-              );
-            })}
-          </div>
-        ) : null}
-      </SectionCard>
-
-      {/* Create / Edit dialog */}
+      {/* ── Add/Edit Dialog ─────────────────────────────────────────────────── */}
       <Dialog
         open={isFormOpen}
         onOpenChange={(open) => {
-          if (saveProtocolMutation.isPending) return;
+          if (saveProtocolMutation.isPending || saveMultipleProtocolsMutation.isPending) return;
           setIsFormOpen(open);
-          if (!open) setEditingProtocol(null);
+          if (!open) {
+            setEditingProtocol(null);
+            setIsTemplateMode(true);
+          }
         }}
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-3xl">
-          <DialogPanelHeader
-            eyebrow={isPt ? "Protocolos" : "Protocols"}
-            title={editingProtocol ? 'Edit protocol' : 'Add Protocol'}
-            description="Enter the main protocol data: substance, category, dose, unit, frequency, timing and current status."
-            accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
-          />
-          {/* Visually hidden for accessibility */}
-          <DialogHeader className="sr-only">
-            <DialogTitle>
-              {editingProtocol ? 'Edit protocol' : 'Add Protocol'}
-            </DialogTitle>
-            <DialogDescription>
-              Enter the main protocol data: substance, category, dose, unit, frequency, timing and current status.
-            </DialogDescription>
-          </DialogHeader>
-
-          <ProtocolForm
-            protocol={editingProtocol}
-            isSubmitting={saveProtocolMutation.isPending}
-            onCancel={handleFormClose}
-            onSubmit={handleFormSubmit}
-          />
+        <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-lg">
+          {isTemplateMode && !editingProtocol ? (
+            <>
+              <DialogPanelHeader
+                eyebrow={isPt ? "Adicionar" : "Add new"}
+                title={isPt ? "O que você está tomando?" : "What are you taking?"}
+                description={isPt
+                  ? "Escolha um modelo ou descreva para que a IA estruture automaticamente."
+                  : "Choose a template or describe what you take for AI-powered setup."}
+                accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
+              />
+              <div className="p-6">
+                <QuickAddTemplates 
+                  onSelect={handleTemplateSelect}
+                  onClose={() => setIsTemplateMode(false)}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <DialogPanelHeader
+                eyebrow={isPt ? "Itens" : "Items"}
+                title={editingProtocol ? (isPt ? "Editar" : "Edit") : (isPt ? "Adicionar" : "Add")}
+                description={isPt
+                  ? "Insira os dados do item: substância, dose, frequência e horário."
+                  : "Enter item details: substance, dose, frequency, and timing."}
+                accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
+              />
+              <DialogHeader className="sr-only">
+                <DialogTitle>{editingProtocol ? 'Edit item' : 'Add item'}</DialogTitle>
+                <DialogDescription>
+                  Enter the details for this supplement or medication.
+                </DialogDescription>
+              </DialogHeader>
+              <ProtocolForm
+                protocol={editingProtocol}
+                isSubmitting={saveProtocolMutation.isPending}
+                onCancel={handleFormClose}
+                onSubmit={handleFormSubmit}
+              />
+            </>
+          )}
         </DialogContent>
       </Dialog>
-      {/* Log Dose dialog */}
+
+      {/* ── Log Dose Dialog ───────────────────────────────────────────────────── */}
       <Dialog
         open={isLogDoseOpen}
         onOpenChange={(open) => {
@@ -849,15 +840,17 @@ function ProtocolsContent() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-lg">
           <DialogPanelHeader
-            eyebrow="Log Dose"
-            title={loggingProtocol?.substance_name || 'Log Dose'}
-            description={`Record when you took this dose. Defaults to protocol settings.`}
+            eyebrow={isPt ? "Registrar dose" : "Log dose"}
+            title={loggingProtocol?.substance_name || (isPt ? "Registrar dose" : "Log dose")}
+            description={isPt
+              ? "Registre quando você tomou esta dose."
+              : "Record when you took this dose."}
             accentClassName="from-[hsl(var(--ok)/0.18)] via-[hsl(var(--brand)/0.08)]"
           />
           <DialogHeader className="sr-only">
             <DialogTitle>Log Dose</DialogTitle>
             <DialogDescription>
-              Record a dose administration for this protocol.
+              Record a dose for this item.
             </DialogDescription>
           </DialogHeader>
           <LogDoseForm
