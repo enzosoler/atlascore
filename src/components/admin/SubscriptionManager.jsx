@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, Gift, Loader2, ShieldCheck } from 'lucide-react';
+import { Plus, Trash2, Gift, Loader2, ShieldCheck, Crown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { PLAN_LABELS, FEATURE_LABELS } from '@/lib/entitlements';
+import { supabase } from '@/lib/supabaseClient';
 
 const STATUS_COLORS = {
   active: 'badge-ok',
+  granted: 'badge-ok',
   trialing: 'badge-blue',
   past_due: 'badge-warn',
   canceled: 'badge-err',
   expired: 'badge-neutral',
+  inactive: 'badge-neutral',
 };
 
 const SOURCE_LABELS = {
@@ -23,41 +25,125 @@ const SOURCE_LABELS = {
   admin: 'Admin',
 };
 
+// Plan tiers for grant options
+const GRANT_PLANS = [
+  { code: 'pro', label: 'Pro', description: 'AI insights, meal/workout builders, lab exams, progress photos' },
+  { code: 'performance', label: 'Performance', description: 'Everything in Pro + advanced protocol tracking, half-life curves' },
+  { code: 'coach', label: 'Coach', description: 'Coach dashboard and client management' },
+  { code: 'nutritionist', label: 'Nutritionist', description: 'Nutritionist dashboard and meal planning tools' },
+  { code: 'clinician', label: 'Clinician', description: 'Clinical dashboard and advanced health tracking' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'granted', label: 'Granted (Admin)' },
+  { value: 'trialing', label: 'Trialing' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
 export default function SubscriptionManager() {
   const qc = useQueryClient();
-  const [showSub, setShowSub] = useState(false);
+  const [showGrant, setShowGrant] = useState(false);
   const [showOverride, setShowOverride] = useState(false);
-  const [subForm, setSubForm] = useState({ user_email: '', plan_code: 'pro', status: 'active', source: 'admin', notes: '', ends_at: '' });
+  const [grantForm, setGrantForm] = useState({ 
+    user_email: '', 
+    plan_code: 'pro', 
+    status: 'granted', 
+    source: 'admin', 
+    grant_reason: '', 
+    expires_at: '',
+    granted_by_admin: true 
+  });
   const [ovForm, setOvForm] = useState({ user_email: '', feature_key: 'atlas_ai', enabled: true, reason: '', expires_at: '' });
 
+  // Fetch subscriptions from Supabase
   const { data: subs = [], isLoading } = useQuery({
-    queryKey: ['all-subscriptions'],
-    queryFn: () => base44.entities.Subscription.list('-created_date', 100),
+    queryKey: ['admin-subscriptions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data || [];
+    },
   });
 
+  // Fetch entitlement overrides from Base44 (legacy system)
   const { data: overrides = [] } = useQuery({
-    queryKey: ['all-overrides'],
-    queryFn: () => base44.entities.EntitlementOverride.list('-created_date', 100),
+    queryKey: ['admin-overrides'],
+    queryFn: async () => {
+      // Import dynamically to avoid issues if base44 is not configured
+      const { base44 } = await import('@/api/base44Client');
+      return base44.entities.EntitlementOverride.list('-created_date', 100);
+    },
   });
 
-  const createSubM = useMutation({
-    mutationFn: (d) => base44.entities.Subscription.create({ ...d, started_at: new Date().toISOString().split('T')[0] }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-subscriptions'] }); setShowSub(false); toast.success('Subscription created'); },
+  // Grant subscription mutation using Supabase
+  const grantSubM = useMutation({
+    mutationFn: async (d) => {
+      const payload = {
+        user_email: d.user_email.toLowerCase().trim(),
+        plan_code: d.plan_code,
+        status: d.status,
+        source: d.source,
+        granted_by_admin: true,
+        grant_reason: d.grant_reason || 'Admin grant',
+        started_at: new Date().toISOString().split('T')[0],
+        expires_at: d.expires_at || null,
+      };
+      const { data, error } = await supabase.from('subscriptions').insert(payload).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => { 
+      qc.invalidateQueries({ queryKey: ['admin-subscriptions'] }); 
+      setShowGrant(false); 
+      toast.success('Plan granted successfully'); 
+    },
+    onError: (err) => {
+      toast.error('Failed to grant plan: ' + err.message);
+    },
   });
 
   const deleteSubM = useMutation({
-    mutationFn: (id) => base44.entities.Subscription.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['all-subscriptions'] }),
+    mutationFn: async (id) => {
+      const { error } = await supabase.from('subscriptions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-subscriptions'] }),
   });
 
+  // Override mutations using Base44 (legacy system)
   const createOvM = useMutation({
-    mutationFn: (d) => base44.entities.EntitlementOverride.create(d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-overrides'] }); setShowOverride(false); toast.success('Override created'); },
+    mutationFn: async (d) => {
+      const { base44 } = await import('@/api/base44Client');
+      const payload = {
+        user_email: d.user_email.toLowerCase().trim(),
+        feature_key: d.feature_key,
+        enabled: d.enabled,
+        reason: d.reason || 'Admin override',
+        expires_at: d.expires_at || null,
+      };
+      return base44.entities.EntitlementOverride.create(payload);
+    },
+    onSuccess: () => { 
+      qc.invalidateQueries({ queryKey: ['admin-overrides'] }); 
+      setShowOverride(false); 
+      toast.success('Override created'); 
+    },
+    onError: (err) => {
+      toast.error('Failed to create override: ' + err.message);
+    },
   });
 
   const deleteOvM = useMutation({
-    mutationFn: (id) => base44.entities.EntitlementOverride.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['all-overrides'] }),
+    mutationFn: async (id) => {
+      const { base44 } = await import('@/api/base44Client');
+      return base44.entities.EntitlementOverride.delete(id);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-overrides'] }),
   });
 
   return (
@@ -68,10 +154,10 @@ export default function SubscriptionManager() {
         <div className="flex items-center justify-between">
           <div>
             <p className="t-subtitle">Subscriptions</p>
-            <p className="t-caption mt-0.5">Manage user plans manually</p>
+            <p className="t-caption mt-0.5">Grant or manage user plans manually</p>
           </div>
-          <button onClick={() => setShowSub(true)} className="btn btn-primary gap-1.5 h-9">
-            <Plus className="w-3.5 h-3.5" /> New plan
+          <button onClick={() => setShowGrant(true)} className="btn btn-primary gap-1.5 h-9">
+            <Crown className="w-3.5 h-3.5" /> Grant plan
           </button>
         </div>
 
@@ -141,45 +227,99 @@ export default function SubscriptionManager() {
         )}
       </div>
 
-      {/* Create Subscription Dialog */}
-      <Dialog open={showSub} onOpenChange={setShowSub}>
-        <DialogContent className="sm:max-w-md bg-[hsl(var(--card))] border-[hsl(var(--border-h))] rounded-2xl">
-          <DialogHeader><DialogTitle>Create manual subscription</DialogTitle></DialogHeader>
-          <div className="space-y-3">
+      {/* Grant Plan Dialog */}
+      <Dialog open={showGrant} onOpenChange={setShowGrant}>
+        <DialogContent className="sm:max-w-lg bg-[hsl(var(--card))] border-[hsl(var(--border-h))] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-[hsl(var(--brand))]" />
+              Grant plan to user
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
             <div>
               <label className="t-label block mb-1.5">User email</label>
-              <Input value={subForm.user_email} onChange={e => setSubForm(f => ({ ...f, user_email: e.target.value }))} placeholder="user@example.com" className="h-10 rounded-lg text-base" />
+              <Input 
+                value={grantForm.user_email} 
+                onChange={e => setGrantForm(f => ({ ...f, user_email: e.target.value }))} 
+                placeholder="user@example.com" 
+                className="h-10 rounded-lg text-base" 
+              />
             </div>
+            
+            <div>
+              <label className="t-label block mb-2">Select plan</label>
+              <div className="grid gap-2">
+                {GRANT_PLANS.map((plan) => (
+                  <button
+                    key={plan.code}
+                    onClick={() => setGrantForm(f => ({ ...f, plan_code: plan.code }))}
+                    className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+                      grantForm.plan_code === plan.code 
+                        ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.08)]' 
+                        : 'border-[hsl(var(--border-h))] hover:border-[hsl(var(--brand)/0.5)]'
+                    }`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border-2 mt-0.5 flex items-center justify-center ${
+                      grantForm.plan_code === plan.code 
+                        ? 'border-[hsl(var(--brand))]' 
+                        : 'border-[hsl(var(--border-h))]'
+                    }`}>
+                      {grantForm.plan_code === plan.code && (
+                        <div className="w-2 h-2 rounded-full bg-[hsl(var(--brand))]" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-[14px]">{plan.label}</span>
+                        {plan.code === 'performance' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[hsl(var(--brand)/0.15)] text-[hsl(var(--brand))]">Advanced</span>
+                        )}
+                      </div>
+                      <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{plan.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="t-label block mb-1.5">Plan</label>
-                <Select value={subForm.plan_code} onValueChange={v => setSubForm(f => ({ ...f, plan_code: v }))}>
+                <label className="t-label block mb-1.5">Status</label>
+                <Select value={grantForm.status} onValueChange={v => setGrantForm(f => ({ ...f, status: v }))}>
                   <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Object.entries(PLAN_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+                    {STATUS_OPTIONS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="t-label block mb-1.5">Status</label>
-                <Select value={subForm.status} onValueChange={v => setSubForm(f => ({ ...f, status: v }))}>
-                  <SelectTrigger className="h-10 rounded-lg text-base"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {['active','trialing','past_due','canceled','expired'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <label className="t-label block mb-1.5">Expires on (optional)</label>
+                <Input 
+                  type="date" 
+                  value={grantForm.expires_at} 
+                  onChange={e => setGrantForm(f => ({ ...f, expires_at: e.target.value }))} 
+                  className="h-10 rounded-lg text-base" 
+                />
               </div>
             </div>
+            
             <div>
-              <label className="t-label block mb-1.5">Expires on (optional)</label>
-              <Input type="date" value={subForm.ends_at} onChange={e => setSubForm(f => ({ ...f, ends_at: e.target.value }))} className="h-10 rounded-lg text-base" />
+              <label className="t-label block mb-1.5">Grant reason</label>
+              <Input 
+                value={grantForm.grant_reason} 
+                onChange={e => setGrantForm(f => ({ ...f, grant_reason: e.target.value }))} 
+                placeholder="Example: partner gift, promotional, or manual upgrade" 
+                className="h-10 rounded-lg text-base" 
+              />
             </div>
-            <div>
-              <label className="t-label block mb-1.5">Notes</label>
-              <Input value={subForm.notes} onChange={e => setSubForm(f => ({ ...f, notes: e.target.value }))} placeholder="Example: partner gift or manual trial" className="h-10 rounded-lg text-base" />
-            </div>
-            <button onClick={() => createSubM.mutate(subForm)} disabled={!subForm.user_email || createSubM.isPending} className="btn btn-primary w-full h-11 rounded-xl text-[14px]">
-              {createSubM.isPending ? 'Creating...' : 'Create subscription'}
+            
+            <button 
+              onClick={() => grantSubM.mutate(grantForm)} 
+              disabled={!grantForm.user_email || grantSubM.isPending} 
+              className="btn btn-primary w-full h-11 rounded-xl text-[14px]"
+            >
+              {grantSubM.isPending ? 'Granting...' : `Grant ${GRANT_PLANS.find(p => p.code === grantForm.plan_code)?.label || 'plan'}`}
             </button>
           </div>
         </DialogContent>
