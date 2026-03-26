@@ -1698,9 +1698,9 @@ export default function NutritionPage() {
           ) : null}
         >
           {!showTargetsEditor && (
-            <div className={`mb-4 flex items-center justify-between gap-3 rounded-[18px] border px-4 py-3 ${profile.calories_target === 0 ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)]' : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)]'`}>
+            <div className={'mb-4 flex items-center justify-between gap-3 rounded-[18px] border px-4 py-3 ' + (profile.calories_target === 0 ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)]' : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)]')}>
               <div className="flex items-center gap-2.5 text-[13px] text-[hsl(var(--fg-2))]">
-                <Target className={`h-4 w-4 shrink-0 ${profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={1.9} />
+                <Target className={'h-4 w-4 shrink-0 ' + (profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]')} strokeWidth={1.9} />
                 <span>
                   {profile.calories_target === 0
                     ? 'Set your daily calorie and macro targets to get started.'
