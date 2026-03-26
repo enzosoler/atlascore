@@ -276,6 +276,10 @@ serve(async (req) => {
   switch (tier) {
     case 'performance':
     case 'premium':
+    case 'coach':
+    case 'nutritionist':
+    case 'clinician':
+    case 'internal':
       maxTextCallsPerDay = config.premium_text_calls_per_day;
       break;
     case 'pro':

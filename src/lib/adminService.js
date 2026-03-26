@@ -291,7 +291,7 @@ export async function resetOnboarding(userId) {
 
 // ─── SUBSCRIPTION MANAGEMENT ────────────────────────────────────────────────
 
-const VALID_TIERS   = ['free', 'pro', 'premium', 'performance', 'internal', 'custom'];
+const VALID_TIERS   = ['free', 'pro', 'premium', 'performance', 'coach', 'nutritionist', 'clinician', 'internal', 'custom'];
 const VALID_STATUSES = ['trialing', 'active', 'granted', 'past_due', 'canceled', 'expired', 'inactive'];
 
 export async function fetchAllSubscriptions(page = 1, pageSize = 50) {
@@ -359,7 +359,7 @@ export async function updateSubscriptionStatus(userId, newStatus) {
 export async function extendTrial(userId, additionalDays = 7) {
   const { data: subscription, error: fetchError } = await supabase
     .from('subscriptions')
-    .select('expires_at, status')
+    .select('trial_ends_at, status')
     .eq('user_id', userId)
     .eq('status', 'trialing')
     .order('created_at', { ascending: false })
@@ -369,12 +369,12 @@ export async function extendTrial(userId, additionalDays = 7) {
   if (fetchError) throw fetchError;
   if (!subscription) throw new Error('No active trial found for this user.');
 
-  const currentEnd = new Date(subscription.expires_at || Date.now());
+  const currentEnd = new Date(subscription.trial_ends_at || Date.now());
   const newEnd = new Date(currentEnd.getTime() + additionalDays * 24 * 60 * 60 * 1000);
 
   const { data, error } = await supabase
     .from('subscriptions')
-    .update({ expires_at: newEnd.toISOString() })
+    .update({ trial_ends_at: newEnd.toISOString() })
     .eq('user_id', userId)
     .eq('status', 'trialing')
     .select()
@@ -382,7 +382,7 @@ export async function extendTrial(userId, additionalDays = 7) {
 
   if (error) throw error;
 
-  await logAdminAction('subscription.trial.extend', userId, { additionalDays }, { expires_at: subscription.expires_at }, { expires_at: newEnd.toISOString() });
+  await logAdminAction('subscription.trial.extend', userId, { additionalDays }, { trial_ends_at: subscription.trial_ends_at }, { trial_ends_at: newEnd.toISOString() });
   return data;
 }
 

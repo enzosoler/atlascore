@@ -205,10 +205,11 @@ serve(async (req) => {
 
   const tier = subscription?.tier || 'free';
 
-  if (tier === 'free') {
+  const PHOTO_ALLOWED_TIERS = ['pro', 'premium', 'performance', 'coach', 'nutritionist', 'clinician', 'internal', 'custom'];
+  if (!PHOTO_ALLOWED_TIERS.includes(tier)) {
     return json({
-      error: 'Food photo analysis is a premium feature. Upgrade your plan to unlock it.',
-      code: 'PREMIUM_REQUIRED',
+      error: 'Food photo analysis is a paid feature. Upgrade your plan to unlock it.',
+      code: 'UPGRADE_REQUIRED',
     }, 403);
   }
 
@@ -273,13 +274,17 @@ serve(async (req) => {
   switch (tier) {
     case 'performance':
     case 'premium':
+    case 'coach':
+    case 'nutritionist':
+    case 'clinician':
+    case 'internal':
       maxPhotoCallsPerDay = config.premium_photo_calls_per_day;
       break;
     case 'pro':
       maxPhotoCallsPerDay = config.pro_photo_calls_per_day;
       break;
     default:
-      maxPhotoCallsPerDay = config.free_photo_calls_per_day; // 0 for free (already blocked above)
+      maxPhotoCallsPerDay = config.free_photo_calls_per_day;
   }
 
   const today = new Date().toISOString().split('T')[0];

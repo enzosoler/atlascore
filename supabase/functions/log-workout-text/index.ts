@@ -263,11 +263,14 @@ serve(async (req) => {
   const tier = subscription?.tier || 'free';
 
   // Determine the user's daily text call limit based on tier
-  // Note: using the same config fields as food for simplicity
   let maxTextCallsPerDay: number;
   switch (tier) {
     case 'performance':
     case 'premium':
+    case 'coach':
+    case 'nutritionist':
+    case 'clinician':
+    case 'internal':
       maxTextCallsPerDay = config.premium_text_calls_per_day;
       break;
     case 'pro':

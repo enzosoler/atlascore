@@ -34,8 +34,8 @@ function normalizeSupabaseSubscription(row) {
     tier: row.tier || 'free',
     status: row.status || 'inactive',
     started_at: toDateOnly(row.started_at) || toDateOnly(row.created_at),
-    expires_at: toDateOnly(row.expires_at),
-    trial_ends_at: toDateOnly(row.expires_at), // alias kept for backward compat
+    expires_at: toDateOnly(row.trial_ends_at),
+    trial_ends_at: toDateOnly(row.trial_ends_at),
     stripe_subscription_id: row.stripe_subscription_id || null,
     granted_by_admin: row.granted_by_admin || null,
     grant_reason: row.grant_reason || null,

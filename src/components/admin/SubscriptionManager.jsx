@@ -171,7 +171,7 @@ export default function SubscriptionManager() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[13px] font-medium">{s.user_email}</span>
-                    <span className="badge badge-blue">{PLAN_LABELS[s.plan_code] || s.plan_code}</span>
+                    <span className="badge badge-blue">{PLAN_LABELS[s.tier] || s.tier}</span>
                     <span className={`badge ${STATUS_COLORS[s.status] || 'badge-neutral'}`}>{s.status}</span>
                     <span className="badge badge-neutral">{SOURCE_LABELS[s.source] || s.source}</span>
                   </div>
