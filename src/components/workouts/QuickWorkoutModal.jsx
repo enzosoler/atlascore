@@ -223,7 +223,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-[28px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-h-[85vh] sm:max-w-lg sm:rounded-[24px]"
+        className="flex w-full flex-col overflow-hidden rounded-t-[28px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-w-lg sm:rounded-[24px]"
+        style={{ maxHeight: 'min(92svh, 92vh)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[hsl(var(--border))] flex-shrink-0">
@@ -475,7 +476,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-4 border-t border-[hsl(var(--border))] flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-t border-[hsl(var(--border))] flex-shrink-0" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
           {step > 1 && step < 4 && !generating && (
             <button
               onClick={() => setStep(step - 1)}

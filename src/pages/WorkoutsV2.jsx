@@ -886,6 +886,7 @@ export default function WorkoutsV2() {
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
   const [profileData, setProfileData] = useState({});
+  const [showQuickWorkout, setShowQuickWorkout] = useState(false);
 
   // Fetch user profile data for AI plan generation
   const { data: userProfile } = useQuery({
@@ -1005,7 +1006,6 @@ export default function WorkoutsV2() {
   const isLoading = isLoadingPlan || isLoadingRecent;
   const days = activePlan?.days || [];
   const todayDayIndex = activePlan ? getTodayDayIndex(activePlan) : 0;
-  const [showQuickWorkout, setShowQuickWorkout] = useState(false);
 
   // ── List mode ─────────────────────────────────────────────────────────────
   return (
