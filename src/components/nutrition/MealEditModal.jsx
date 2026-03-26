@@ -50,6 +50,10 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
 
   const saveMeal = () => {
     if (!foods.length) return;
+    if (!meal?.id) {
+      toast.error('No meal ID found');
+      return;
+    }
     updateMutation.mutate({
       meal_type: mealType,
       foods,
