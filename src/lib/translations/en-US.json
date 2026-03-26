@@ -789,7 +789,6 @@
     "profileAligned": "% aligned",
     "fieldsFilledDetail": "{filled} of {total} main fields filled.",
     "dailyFuel": "Daily fuel",
-    "statusBanner": "Real authentication with Supabase remains intact. This screen preserves the current profile data flow while gaining the new premium visual layer.",
     "loadingProfile": "Loading your profile",
     "loadingProfileDesc": "We're bringing your existing data to this new visual reading without interrupting the page.",
     "safeMode": "Profile in safe mode",
@@ -969,6 +968,17 @@
     "inProgress": "In progress",
     "pending": "Pending",
     "noActive": "None active",
+    "adherenceLabel": "Adherence",
+    "sections": {
+      "nextSteps": "Next steps",
+      "insights": "Insights",
+      "timeline": "Your timeline"
+    },
+    "noInsights": "No insights yet. Start logging your activities to get personalized insights.",
+    "notifications": {
+      "mealScanned": "Meal scanned and logged successfully!",
+      "scanFailed": "Failed to scan meal. Please try again."
+    },
     "snapshot": {
       "eyebrow": "Summary",
       "title": "Today at a glance",
