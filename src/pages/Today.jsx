@@ -40,12 +40,8 @@ import {
   TodaySection,
   TodayStatCard,
 } from '@/components/today/TodayMobileUI';
-import {
-  TodayWorkoutCard,
-  TodayNutritionCard,
-  TodayProtocolCard,
-  TimelineCard,
-} from '@/components/dashboard';
+import { TodayWorkoutCard, TodayNutritionCard, TimelineCard } from '@/components/dashboard';
+import { Card } from '@/components/ui/card';
 import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
 import FoodCameraScanner from '@/components/nutrition/FoodCameraScanner';
 import { formatWeight, formatWeightDiff, isImperial } from '@/lib/units';
