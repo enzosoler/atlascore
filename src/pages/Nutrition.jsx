@@ -1206,6 +1206,7 @@ export default function NutritionPage() {
   const [meals, setMeals] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState(null);
+  const [isSavingMeal, setIsSavingMeal] = useState(false);
   const [foodQuery, setFoodQuery] = useState('');
   const [foodResults, setFoodResults] = useState([]);
   const [isSearchingFoods, setIsSearchingFoods] = useState(false);
@@ -1486,6 +1487,8 @@ export default function NutritionPage() {
       return;
     }
 
+    setIsSavingMeal(true);
+
     const buildMealTimestamp = (dateStr, mealTypeKey) => {
       const hour = MEAL_TYPE_HOURS[mealTypeKey] ?? 12;
       const [year, month, day] = (dateStr || TODAY).split('-').map(Number);
@@ -1534,6 +1537,8 @@ export default function NutritionPage() {
         if (data) savedMeals.push(mapFoodLogToMeal(data));
       }
     } catch (error) {
+      console.error('Save meal error:', error);
+      setIsSavingMeal(false);
       setNotice({ tone: 'error', message: 'Error saving meal. Check your connection.' });
       return;
     }
@@ -1544,6 +1549,7 @@ export default function NutritionPage() {
         : current;
       return [...withoutEditedMeal, ...savedMeals];
     });
+    setIsSavingMeal(false);
     setIsFormOpen(false);
     setEditingMeal(null);
     setNotice({
@@ -1893,6 +1899,7 @@ export default function NutritionPage() {
               meal={editingMeal}
               selectedDate={selectedDate}
               onSave={handleSaveMeal}
+              isSaving={isSavingMeal}
               onCancel={() => {
                 setIsFormOpen(false);
                 setEditingMeal(null);
