@@ -131,13 +131,6 @@ export const NAV_BY_ROLE = {
   ],
   admin: [
     { path: ROUTES.today,      label: 'Today',        icon: 'Home' },
-    { path: ROUTES.nutrition,  label: 'Nutrition',    icon: 'UtensilsCrossed' },
-    { path: ROUTES.workouts,   label: 'Train',        icon: 'Dumbbell' },
-    { path: ROUTES.body,       label: 'Body',         icon: 'TrendingUp' },
-    { path: ROUTES.protocols,  label: 'Plans',        icon: 'FlaskConical' },
-    { path: ROUTES.insights,   label: 'Progress',     icon: 'BarChart3' },
-    { path: ROUTES.progressPhotos, label: 'Photos',    icon: 'Camera' },
-    { path: ROUTES.labExams,  label: 'Health',       icon: 'ClipboardList' },
     { path: ROUTES.admin,      label: 'Admin',        icon: 'ShieldCheck' },
     { path: ROUTES.social,     label: 'Social',       icon: 'MessageSquare' },
     { path: ROUTES.profile,    label: 'Profile',      icon: 'User' },
@@ -152,12 +145,11 @@ export const BOTTOM_PATHS_BY_ROLE = {
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.profile],
-  admin: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.profile],
+  admin: [ROUTES.today, ROUTES.admin, ROUTES.social, ROUTES.profile],
 };
 
 /** Returns true if the given role can access a page */
 export const canAccess = (role, page) => {
-  if (role === 'admin') return true;
   const allowed = PAGE_ACCESS[page];
   if (!allowed) return false;
   return allowed.includes(role);

@@ -33,6 +33,11 @@ import BodyProfile from '@/pages/BodyProfile';
 import Account from '@/pages/Account';
 import Export from '@/pages/Export';
 import AdminPanel from '@/pages/AdminPanel';
+import AdminLayout from '@/components/admin/AdminLayout';
+import AdminUsers from '@/pages/admin/AdminUsers';
+import ModerationConsole from '@/pages/admin/ModerationConsole';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import TermsOfService from '@/pages/TermsOfService';
 import MyDiet from '@/pages/MyDiet';
 import MyWorkout from '@/pages/MyWorkout';
 import ManualWorkoutPlan from '@/pages/ManualWorkoutPlan';
@@ -284,6 +289,9 @@ const AppRoutes = () => (
     <Route path="/start" element={<StoryLanding />} />
     <Route path="/share-target" element={<ShareTarget />} />
 
+    <Route path="/privacy" element={<PrivacyPolicy />} />
+    <Route path="/terms" element={<TermsOfService />} />
+
     <Route path="/use-case/:role" element={<UseCase />} />
     <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
     <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
@@ -350,7 +358,7 @@ const AppRoutes = () => (
         <Route path={ROUTES.clinicianDashboard} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianDashboard /></RouteGuard>} />
         <Route path={ROUTES.clinicianPatients} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatients /></RouteGuard>} />
         <Route path="/clinician/patient/:id" element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard>} />
-        <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminPanel /></RouteGuard>} />
+        
         <Route path={ROUTES.githubPRs} element={<GitHubPRTracker />} />
 
         {/* Profile Extension */}
@@ -366,6 +374,15 @@ const AppRoutes = () => (
         <Route path="/settings/export" element={<DataExport />} />
         <Route path="/settings/delete-account" element={<DeleteAccount />} />
       </Route>
+    </Route>
+
+    {/* Admin routes - completely separate from AppLayout */}
+    <Route element={<RequireAuthenticatedApp />}>
+      <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminLayout /></RouteGuard>}>
+        <Route index element={<div className="p-8">Admin Overview (coming soon)</div>} />
+        <Route path="users" element={<AdminUsers />} />
+      </Route>
+      <Route path="/moderation" element={<RouteGuard roles={['admin', 'moderator']}><ModerationConsole /></RouteGuard>} />
     </Route>
 
     <Route path="*" element={<PageNotFound />} />

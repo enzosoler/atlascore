@@ -53,11 +53,16 @@ export default function QuickWorkoutModal({ open, onClose, onStart }) {
     setLocation('');
     setGenerating(false);
     setGeneratedWorkout(null);
+    setGenerationError(null);
+    setIsValidWorkout(false);
     onClose();
   };
 
   const handleGenerate = async () => {
     setGenerating(true);
+    setGenerationError(null);
+    setIsValidWorkout(false);
+
     try {
       const res = await base44.integrations.Core.InvokeLLM({
         systemPrompt: `You are an expert fitness coach. Create a focused, effective workout based on the user's constraints.
@@ -69,7 +74,7 @@ Rules:
 4. Include warmup recommendations
 5. Structure: 3-6 exercises with appropriate sets/reps
 
-Return a structured workout plan.`,
+CRITICAL: You MUST return a valid workout with at least 3 exercises. Each exercise MUST have: name, muscle_group, sets (number), reps (string), rest_seconds (number).`,
         prompt: `Create a ${duration}-minute workout for ${muscle === 'full_body' ? 'full body' : muscle} training at ${location}.
 
 Constraints:
@@ -87,39 +92,71 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`,
             warmup: { type: 'array', items: { type: 'string' } },
             exercises: {
               type: 'array',
+              minItems: 1,
               items: {
                 type: 'object',
                 properties: {
                   name: { type: 'string' },
                   muscle_group: { type: 'string' },
-                  sets: { type: 'number' },
+                  sets: { type: 'number', minimum: 1 },
                   reps: { type: 'string' },
-                  rest_seconds: { type: 'number' },
+                  rest_seconds: { type: 'number', minimum: 0 },
                   notes: { type: 'string' },
                 },
+                required: ['name', 'sets', 'reps'],
               },
             },
           },
+          required: ['name', 'exercises'],
         },
       });
 
+      // Strict validation before accepting the workout
+      const validation = validateWorkout(res);
+
+      if (!validation.isValid) {
+        setGenerationError(validation.error);
+        setGeneratedWorkout(null);
+        setIsValidWorkout(false);
+        // Stay on step 3, don't advance
+        setGenerating(false);
+        toast.error(`Workout generation failed: ${validation.error}. Please try again.`);
+        return;
+      }
+
       setGeneratedWorkout(res);
+      setIsValidWorkout(true);
+      setGenerationError(null);
       setStep(4);
     } catch (err) {
-      toast.error('Failed to generate workout. Try again.');
+      console.error('Workout generation error:', err);
+      setGenerationError(err?.message || 'Failed to generate workout');
+      setGeneratedWorkout(null);
+      setIsValidWorkout(false);
+      toast.error('Failed to generate workout. Please try again.');
     } finally {
       setGenerating(false);
     }
   };
 
   const handleStart = () => {
-    if (!generatedWorkout) return;
-    
+    // Strict validation: only proceed if we have a valid workout with exercises
+    if (!generatedWorkout || !isValidWorkout) {
+      toast.error('Cannot start: no valid workout generated');
+      return;
+    }
+
+    const exercises = generatedWorkout.exercises || [];
+    if (exercises.length === 0) {
+      toast.error('Cannot start: workout has no exercises');
+      return;
+    }
+
     const session = {
       name: generatedWorkout.name || 'Quick Workout',
       date: new Date().toISOString().split('T')[0],
       status: 'in_progress',
-      exercises: (generatedWorkout.exercises || []).map((ex) => ({
+      exercises: exercises.map((ex) => ({
         name: ex.name,
         primary_muscles: ex.muscle_group ? [ex.muscle_group] : [],
         rest_seconds: ex.rest_seconds || 60,
@@ -133,7 +170,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`,
         })),
       })),
     };
-    
+
     onStart(session);
     handleClose();
   };
