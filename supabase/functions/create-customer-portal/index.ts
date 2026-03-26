@@ -37,6 +37,29 @@ serve(async (req) => {
     });
   }
 
+  // Validate JWT and extract authenticated user
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+      status: 401,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const jwt = authHeader.slice(7);
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL') || '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  );
+
+  const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(jwt);
+  if (authError || !authUser) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+
   const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
   if (!stripeSecretKey) {
     return new Response(JSON.stringify({ error: 'Stripe not configured' }), {
@@ -57,10 +80,13 @@ serve(async (req) => {
     });
   }
 
-  const { user_id, email, return_url } = body;
+  const { return_url } = body;
+  // Always use the authenticated user's identity — ignore any user_id/email in body
+  const user_id = authUser.id;
+  const email = authUser.email || '';
 
-  if (!user_id || !email) {
-    return new Response(JSON.stringify({ error: 'Missing required fields: user_id, email' }), {
+  if (!email) {
+    return new Response(JSON.stringify({ error: 'Authenticated user has no email' }), {
       status: 400,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
@@ -70,10 +96,7 @@ serve(async (req) => {
   const origin = req.headers.get('origin') || appUrl;
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
+    // supabaseAdmin was already created above for JWT validation — reuse it
 
     // Find existing Stripe customer
     const { data: existingSub } = await supabaseAdmin

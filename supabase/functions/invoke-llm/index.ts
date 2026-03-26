@@ -9,6 +9,7 @@
  *   supabase secrets set OPENAI_API_KEY=xxx
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +21,37 @@ const MODEL = 'gpt-4.1-nano';
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS });
+  }
+
+  // Require authenticated user — prevents unauthenticated cost abuse
+  const authHeader = req.headers.get('Authorization') ?? '';
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+
+  // Accept either a real user JWT or the service-role key (for internal server calls)
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+
+  if (!token) {
+    return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+      status: 401,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Allow service-role calls (internal server-to-server)
+  const isServiceRole = token === serviceRoleKey;
+
+  if (!isServiceRole) {
+    // Validate user JWT
+    const supabase = createClient(supabaseUrl, anonKey);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
   }
 
   try {
