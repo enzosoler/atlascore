@@ -722,7 +722,8 @@ export default function Measurements({ embedded = false }) {
 }
 
 function MeasurementsContent({ embedded = false }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   const { user } = useAuth();
   const [metricKey, setMetricKey] = useState('weight');
   const [notice, setNotice] = useState(null);
