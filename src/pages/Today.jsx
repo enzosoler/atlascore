@@ -808,6 +808,7 @@ function TodayContent() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [aiWizardOpen, setAiWizardOpen] = useState(false);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
   const hasAIAccess = can('atlas_ai');
@@ -946,7 +947,6 @@ function TodayContent() {
 
   const handleAIGenerate = async (answers) => {
     console.log('[Today] AI generate started with answers:', answers);
-    setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('invoke-llm', {
         body: {
@@ -1009,8 +1009,6 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
     } catch (err) {
       console.error('[Today] AI generation failed:', err);
       toast.error('Failed to generate workout plan. Please try again.');
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -1141,6 +1139,15 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
       <WeeklyCheckinModal
         open={checkinOpen}
         onClose={() => setCheckinOpen(false)}
+      />
+
+      {/* AI Generate Wizard */}
+      <AIGenerateWizard
+        open={aiWizardOpen}
+        onClose={() => setAiWizardOpen(false)}
+        type="workout"
+        profile={profile}
+        onGenerate={handleAIGenerate}
       />
     </TodayScreen>
   );

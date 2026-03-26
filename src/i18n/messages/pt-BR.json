@@ -852,7 +852,48 @@
       "dangerZoneSubtitleText": "Ações destrutivas e permanentes. Não podem ser desfeitas.",
       "resetProgressTitle": "Resetar progresso",
       "resetProgressDetail": "Exclui permanentemente todos seus treinos, nutrição, progresso, fotos e check-ins. Sua conta, perfil e planos prescritos são preservados.",
-      "logOut": "Sair"
+      "logOut": "Sair",
+      "profile": "Perfil",
+      "yourSetup": "Sua Configuração"
+    },
+    "overview": {
+      "title": "Seu Perfil",
+      "subtitle": "Visão geral das suas metas, objetivos e métricas corporais.",
+      "goal": "Meta",
+      "calories": "Calorias",
+      "weightTarget": "Meta de Peso",
+      "hydration": "Hidratação",
+      "manageSections": "Gerenciar Seções",
+      "editPrompt": "Quer atualizar suas metas?",
+      "editPromptSubtitle": "Ajuste seus objetivos, macros e métricas corporais.",
+      "editGoals": "Editar Metas"
+    },
+    "goal": {
+      "loseFat": "Perder Gordura",
+      "gainMuscle": "Ganhar Músculo",
+      "maintain": "Manter",
+      "notSet": "Não definido"
+    },
+    "sections": {
+      "account": "Conta",
+      "accountSubtitle": "Email, senha e preferências.",
+      "baselineTitle": "Linha de base pessoal",
+      "baselineDesc": "Dados pessoais essenciais para dar contexto ao resto da experiência.",
+      "body": "Corpo",
+      "bodySubtitle": "Peso, composição e medidas.",
+      "bodyTitle": "Métricas corporais atuais",
+      "bodyDesc": "Ajuste objetivamente a direção e referência corporal.",
+      "goals": "Metas",
+      "goalsSubtitle": "Ajuste seus objetivos e macros.",
+      "settings": "Configurações",
+      "settingsSubtitle": "Preferências do app e notificações.",
+      "targetsTitle": "Metas diárias de performance",
+      "targetsDesc": "Metas que tornam nutrição, treino e recuperação mais coerentes.",
+      "trainingTitle": "Contexto de treino",
+      "trainingDesc": "Configuração de treino para geração de planos e insights personalizados."
+    },
+    "targets": {
+      "notSet": "Não definido"
     },
     "metrics": {
       "weightDirection": "Direção do peso",

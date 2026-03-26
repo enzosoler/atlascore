@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { defaultLocale, isValidLocale } from '@/i18n/config';
 import { loadDictionaryWithFallback } from '@/i18n/dictionaries';
 import { createTranslator } from '@/i18n/translator';
+import { readableFallback } from '@/i18n/translator';
 
 const I18nContext = createContext(null);
 
@@ -172,7 +173,7 @@ export function I18nProvider({ children }) {
   }, [locale]);
 
   const t = useMemo(() => {
-    if (!dictionary) return (key) => key;
+    if (!dictionary) return (key) => readableFallback(key);
     return createTranslator(dictionary);
   }, [dictionary]);
 

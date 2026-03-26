@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18n';
+import { useTranslation } from 'react-i18nextext';
 
 export default function PrivacyPolicy() {
   const { t } = useTranslation();
