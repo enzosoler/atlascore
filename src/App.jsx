@@ -1,6 +1,7 @@
 import React from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as Sonner } from 'sonner'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation } from 'react-router-dom';
@@ -423,6 +424,7 @@ function App() {
                     </I18nProvider>
                   </Router>
                   <Toaster />
+                  <Sonner richColors position="top-right" />
                   <Analytics />
                 </DailyStoreProvider>
               </SubscriptionProvider>

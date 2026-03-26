@@ -6,6 +6,10 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   base: '/',
+  server: {
+    port: process.env.PORT ? parseInt(process.env.PORT) : 5173,
+    strictPort: false,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

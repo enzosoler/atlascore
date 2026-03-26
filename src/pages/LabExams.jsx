@@ -566,7 +566,7 @@ const AnalysisPanel = ({ exam, onClose, onAskAI }) => {
   );
 };
 
-const UploadDialog = ({ isOpen, onClose, onUpload, isExtracting }) => (
+const UploadDialog = ({ isOpen, onClose, onUpload, isExtracting, error }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
     <DialogContent className="sm:max-w-lg bg-[hsl(var(--bg))] border-[hsl(var(--separator))]">
       <DialogHeader>
@@ -622,6 +622,13 @@ const UploadDialog = ({ isOpen, onClose, onUpload, isExtracting }) => (
           </div>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {/* Manual Entry Option */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
@@ -650,6 +657,7 @@ export default function LabExams() {
   const [selectedExam, setSelectedExam] = useState(null);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   // Queries
   const { data: exams = [], isLoading } = useQuery({
@@ -685,6 +693,7 @@ export default function LabExams() {
     if (!file) return;
 
     setIsExtracting(true);
+    setUploadError(null);
     try {
       const data = await labService.extractExamFromFile(file);
       await createMutation.mutateAsync({
@@ -693,7 +702,9 @@ export default function LabExams() {
         markers: data.markers || [],
       });
     } catch (err) {
-      toast.error('Failed to extract data from file');
+      const msg = err?.message || 'Failed to extract data from file';
+      setUploadError(msg);
+      toast.error(msg);
     } finally {
       setIsExtracting(false);
     }
@@ -808,6 +819,7 @@ export default function LabExams() {
         onClose={() => !isExtracting && setIsUploadDialogOpen(false)}
         onUpload={handleFileUpload}
         isExtracting={isExtracting}
+        error={uploadError}
       />
     </PageShell>
   );
