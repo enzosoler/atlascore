@@ -422,12 +422,12 @@ function TodayContent() {
     return Math.round((completed / total) * 100);
   }, [todayMeals.length, todaySession, recentMeasurements, progressPhotos.length]);
 
-  const insights = useMemo(() => generateMvpInsights(t, {
+  const insights = useMemo(() => generateMvpInsights({
     meals: todayMeals,
     session: todaySession,
     measurements: recentMeasurements,
     profile,
-  }), [t, todayMeals, todaySession, recentMeasurements, profile]);
+  }), [todayMeals, todaySession, recentMeasurements, profile]);
 
   const handleCameraCapture = async (file) => {
     setIsSavingMeal(true);
