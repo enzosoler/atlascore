@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useReCaptcha, IS_CAPTCHA_ENABLED } from '@/lib/ReCaptchaContext';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
+// Auth page redesign: centered layout, personal copy, lighter UX
 
 function resolveRequestedDestination(nextParam) {
   if (!nextParam) return ROUTES.today;
