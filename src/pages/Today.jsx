@@ -850,6 +850,7 @@ function TodayContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('workout_plans')
+        .select('*')
         .eq('user_id', user.id)
         .eq('active', true)
         .maybeSingle();
