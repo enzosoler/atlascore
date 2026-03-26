@@ -1226,6 +1226,8 @@ export default function NutritionPage() {
     if (!isFormOpen && !pendingFood) {
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
+      document.body.style.pointerEvents = '';
+      document.body.removeAttribute('data-scroll-locked');
     }
   }, [isFormOpen, pendingFood]);
 
@@ -1895,7 +1897,7 @@ export default function NutritionPage() {
       </AppContainer>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto p-0">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogPanelHeader
             eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
             title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
