@@ -559,8 +559,8 @@ function ProtocolsContent() {
 
   const handleTemplateSelect = (template) => {
     if (template.type === 'ai') {
-      // TODO: Call AI service to parse the prompt
       setIsTemplateMode(false);
+      setIsFormOpen(true); // Open blank form so user can fill in manually
     } else if (template.items) {
       // Add template items with today's date
       const itemsWithDates = template.items.map(item => ({

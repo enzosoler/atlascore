@@ -1,11 +1,29 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Receipt, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
+import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 
 export default function BillingManagement() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { subscription } = useSubscription();
+  const { openCustomerPortal, loading } = useCustomerPortal();
+
+  const handleOpenPortal = () => {
+    openCustomerPortal(
+      user?.id,
+      user?.email,
+      `${window.location.origin}/Settings`
+    );
+  };
+
+  const hasPaidSubscription =
+    subscription?.stripe_subscription_id ||
+    (subscription?.status === 'active') ||
+    (subscription?.status === 'past_due');
 
   return (
     <div className="min-h-screen bg-[hsl(var(--bg))]">
@@ -16,50 +34,30 @@ export default function BillingManagement() {
         <h1 className="text-lg font-semibold">Billing</h1>
       </div>
 
-      <div className="p-4 max-w-2xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          <div className="p-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-            <h2 className="font-semibold mb-4 flex items-center gap-2">
-              <CreditCard className="w-4 h-4" /> Payment Method
-            </h2>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-[hsl(var(--fill))]">
-              <div className="w-10 h-6 bg-gradient-to-r from-orange-500 to-red-500 rounded" />
-              <div>
-                <p className="font-medium text-sm">•••• 4242</p>
-                <p className="text-xs text-[hsl(var(--fg-2))]">Expires 12/25</p>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full mt-3 text-sm">
-              Update Payment Method
+      <div className="p-4 max-w-2xl mx-auto space-y-6">
+        {hasPaidSubscription ? (
+          <div className="p-6 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-center space-y-4">
+            <p className="text-[hsl(var(--fg-2))] text-sm">
+              Manage your subscription, update payment methods, and view invoices
+              in the Stripe billing portal.
+            </p>
+            <Button onClick={handleOpenPortal} disabled={loading} className="gap-2">
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <ExternalLink className="w-4 h-4" />
+              )}
+              {loading ? 'Opening portal…' : 'Open Billing Portal'}
             </Button>
           </div>
-
-          <div className="p-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-            <h2 className="font-semibold mb-4 flex items-center gap-2">
-              <Receipt className="w-4 h-4" /> Billing History
-            </h2>
-            <div className="space-y-3">
-              {[
-                { date: 'Jan 1, 2024', amount: '$9.99', status: 'Paid' },
-                { date: 'Dec 1, 2023', amount: '$9.99', status: 'Paid' },
-                { date: 'Nov 1, 2023', amount: '$9.99', status: 'Paid' },
-              ].map((invoice, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[hsl(var(--fill))]">
-                  <div>
-                    <p className="text-sm font-medium">{invoice.date}</p>
-                    <p className="text-xs text-[hsl(var(--fg-2))]">{invoice.status}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-medium">{invoice.amount}</span>
-                    <button className="p-1 hover:bg-[hsl(var(--fill))] rounded">
-                      <ExternalLink className="w-4 h-4 text-[hsl(var(--fg-3))]" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+        ) : (
+          <div className="p-6 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-center space-y-4">
+            <p className="text-[hsl(var(--fg-2))] text-sm">
+              You are on the free plan. Upgrade to access full billing management.
+            </p>
+            <Button onClick={() => navigate('/Pricing')}>View Plans</Button>
           </div>
-        </motion.div>
+        )}
       </div>
     </div>
   );

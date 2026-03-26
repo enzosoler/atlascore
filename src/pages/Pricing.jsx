@@ -316,10 +316,6 @@ export default function Pricing() {
   }, [locale, pricing, billing, getTranslation]);
 
   const handleSubscribe = async (planId) => {
-    console.log('[Checkout] ========================================');
-    console.log('[Checkout] Starting checkout flow for plan:', planId);
-    
-    // ── 1. Validações iniciais ─────────────────────────────────────
     if (planId === 'free') {
       window.location.href = '/auth?mode=signup';
       return;
@@ -332,35 +328,23 @@ export default function Pricing() {
     }
 
     setLoading(planId);
-    
+
     try {
-      // ── 2. Obter sessão e token ──────────────────────────────────
-      console.log('[Checkout] Getting Supabase session...');
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError) {
-        console.error('[Checkout] Session error:', sessionError);
         toast.error('Erro de autenticação. Faça login novamente.');
         return;
       }
-      
+
       const session = sessionData?.session;
       const accessToken = session?.access_token;
-      
-      console.log('[Checkout] Session obtained:', {
-        hasSession: !!session,
-        hasToken: !!accessToken,
-        userId: session?.user?.id,
-        expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-      });
 
       if (!accessToken) {
-        console.error('[Checkout] No access token available');
         toast.error('Sessão expirada. Faça login novamente.');
         return;
       }
 
-      // ── 3. Preparar payload ──────────────────────────────────────
       const payload = {
         plan: planId,
         user_id: user.id,
@@ -370,14 +354,9 @@ export default function Pricing() {
         success_url: `${window.location.origin}/Today?subscribed=1`,
         cancel_url: `${window.location.origin}/Pricing`,
       };
-      
-      console.log('[Checkout] Payload:', payload);
 
-      // ── 4. Chamar Edge Function com fetch explícito ────────────────
-      console.log('[Checkout] Calling Edge Function...');
-      
       const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`;
-      
+
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
@@ -387,13 +366,8 @@ export default function Pricing() {
         body: JSON.stringify(payload),
       });
 
-      console.log('[Checkout] Response status:', response.status);
-
-      // ── 5. Tratar resposta ───────────────────────────────────────
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[Checkout] HTTP error:', response.status, errorText);
-        
         if (response.status === 401) {
           toast.error('Sessão inválida. Faça login novamente.');
         } else if (response.status === 403) {
@@ -405,25 +379,19 @@ export default function Pricing() {
       }
 
       const data = await response.json();
-      console.log('[Checkout] Response data:', data);
 
       if (data?.success && data?.url) {
-        console.log('[Checkout] Redirecting to Stripe...');
         window.location.href = data.url;
       } else if (data?.error) {
-        console.error('[Checkout] Function returned error:', data.error);
         toast.error(data.error);
       } else {
-        console.error('[Checkout] Unexpected response:', data);
         toast.error('Resposta inesperada do servidor');
       }
-      
+
     } catch (error) {
-      console.error('[Checkout] Exception:', error);
       toast.error('Falha na conexão. Tente novamente.');
     } finally {
       setLoading(null);
-      console.log('[Checkout] ========================================');
     }
   };
 
@@ -636,7 +604,7 @@ export default function Pricing() {
               {t('pricing_page.professionalDesc')}
             </p>
             <Button asChild variant="ghost" className="mt-3 h-9 text-[13px]">
-              <Link to={ROUTES.professionals || '/contact'}>
+              <Link to={ROUTES.help}>
                 Contact us for professional access
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
