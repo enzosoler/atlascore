@@ -30,8 +30,8 @@ function normalizeSupabaseSubscription(row) {
   return {
     id: row.id,
     user_email: row.user_email || null,
-    plan_code: row.plan_code || 'free',
-    tier: row.plan_code || 'free',          // alias kept for backward compat
+    plan_code: row.tier || 'free',
+    tier: row.tier || 'free',
     status: row.status || 'inactive',
     started_at: toDateOnly(row.started_at) || toDateOnly(row.created_at),
     expires_at: toDateOnly(row.expires_at),

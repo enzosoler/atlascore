@@ -145,7 +145,10 @@ export const FEATURE_LABELS = Object.fromEntries(
 export const PLAN_LEVELS = {
   free: 0,
   pro: 1,
+  premium: 2,
   performance: 2,
+  internal: 2,
+  custom: 1,
   coach: 3,
   nutritionist: 3,
   clinician: 3,
@@ -175,7 +178,7 @@ export function hasFeatureAccess(user, subscription, overrides, feature) {
   }
 
   // Plan-based features
-  const userPlanCode = subscription?.plan_code || 'free';
+  const userPlanCode = subscription?.tier || subscription?.plan_code || 'free';
   const userLevel = PLAN_LEVELS[userPlanCode] || 0;
   const minLevel = PLAN_LEVELS[lock.minPlan] || 0;
 

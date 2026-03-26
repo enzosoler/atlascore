@@ -133,13 +133,13 @@ function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = f
 
 function UserDetailsModal({ user, onClose, onUpdated }) {
   const latestSubscription = user?.subscriptions?.[0] || null;
-  const [tier, setTier] = useState(latestSubscription?.plan_code || 'free');
+  const [tier, setTier] = useState(latestSubscription?.tier || 'free');
   const [status, setStatus] = useState(latestSubscription?.status || 'inactive');
   const [saving, setSaving] = useState(false);
   const hasSubscription = Boolean(latestSubscription?.user_id);
   const hasChanges =
     hasSubscription &&
-    (tier !== (latestSubscription?.plan_code || 'free') ||
+    (tier !== (latestSubscription?.tier || 'free') ||
       status !== (latestSubscription?.status || 'inactive'));
 
   const handleSave = async () => {
@@ -147,7 +147,7 @@ function UserDetailsModal({ user, onClose, onUpdated }) {
 
     setSaving(true);
     try {
-      if (tier !== latestSubscription?.plan_code) {
+      if (tier !== latestSubscription?.tier) {
         await updateSubscriptionTier(user.id, tier);
       }
       if (status !== latestSubscription?.status) {
@@ -599,7 +599,7 @@ function UsersTab() {
                     {isSuspended && <Badge label="suspended" className="ml-1 bg-[hsl(var(--warn)/0.1)] text-[hsl(var(--warn))]" />}
                   </Td>
                   <Td>
-                    <span className="text-[hsl(var(--fg-2))]">{sub?.plan_code || '—'}</span>
+                    <span className="text-[hsl(var(--fg-2))]">{sub?.tier || '—'}</span>
                   </Td>
                   <Td>
                     {sub ? (
@@ -862,7 +862,7 @@ function SubscriptionsTab() {
                   <p className="font-mono text-[12px] text-[hsl(var(--fg-2))]">{shortId(s.user_id)}</p>
                 </Td>
                 <Td>
-                  <span className="text-[hsl(var(--fg))]">{s.plan_code || '—'}</span>
+                  <span className="text-[hsl(var(--fg))]">{s.tier || '—'}</span>
                 </Td>
                 <Td>
                   <Badge label={s.status || '—'} className={statusBadge(s.status)} />

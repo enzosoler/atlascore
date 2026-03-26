@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from 'sonner';
 import { PLAN_LABELS, FEATURE_LABELS } from '@/lib/entitlements';
 import { supabase } from '@/lib/supabaseClient';
+import { grantAccess } from '@/lib/adminService';
 
 const STATUS_COLORS = {
   active: 'badge-ok',
@@ -83,19 +84,15 @@ export default function SubscriptionManager() {
   // Grant subscription mutation using Supabase
   const grantSubM = useMutation({
     mutationFn: async (d) => {
-      const payload = {
-        user_email: d.user_email.toLowerCase().trim(),
-        plan_code: d.plan_code,
-        status: d.status,
-        source: d.source,
-        granted_by_admin: true,
-        grant_reason: d.grant_reason || 'Admin grant',
-        started_at: new Date().toISOString().split('T')[0],
-        expires_at: d.expires_at || null,
-      };
-      const { data, error } = await supabase.from('subscriptions').insert(payload).select().single();
-      if (error) throw error;
-      return data;
+      const email = d.user_email.toLowerCase().trim();
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      if (!profile) throw new Error(`No user found with email: ${email}`);
+      return grantAccess(profile.id, d.plan_code, d.grant_reason || 'Admin grant');
     },
     onSuccess: () => { 
       qc.invalidateQueries({ queryKey: ['admin-subscriptions'] }); 

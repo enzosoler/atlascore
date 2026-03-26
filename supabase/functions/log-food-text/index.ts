@@ -274,6 +274,7 @@ serve(async (req) => {
   // Determine the user's daily text call limit based on tier
   let maxTextCallsPerDay: number;
   switch (tier) {
+    case 'performance':
     case 'premium':
       maxTextCallsPerDay = config.premium_text_calls_per_day;
       break;

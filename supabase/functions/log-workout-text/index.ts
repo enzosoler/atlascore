@@ -266,6 +266,7 @@ serve(async (req) => {
   // Note: using the same config fields as food for simplicity
   let maxTextCallsPerDay: number;
   switch (tier) {
+    case 'performance':
     case 'premium':
       maxTextCallsPerDay = config.premium_text_calls_per_day;
       break;
