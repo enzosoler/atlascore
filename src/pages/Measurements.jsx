@@ -329,150 +329,84 @@ function ChangePill({ label, delta, metric }) {
   );
 }
 
-function HistoryCard({ measurement, previousMeasurement, onEdit, onDelete }) {
+// Compact history row
+function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
   const daysSincePrevious = previousMeasurement
     ? getDayDifference(previousMeasurement.date, measurement.date)
     : null;
-  const historyBodyFields = BODY_SITE_FIELDS_NO_WAIST
-    .filter((field) => getMeasurementFieldValue(measurement, field.key) !== null)
-    .slice(0, 6);
-  const sourceLabel = getMeasurementFieldSourceLabel(measurement?.source);
-  const bodyFatValue = getMeasurementFieldValue(measurement, 'body_fat_percent');
-  const bmiValue = getMeasurementFieldValue(measurement, 'bmi');
 
-  const keyDeltas = [
-    {
-      label: 'Weight',
-      delta:
-        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'weight') !== null
-          ? getMeasurementFieldValue(measurement, 'weight') - getMeasurementFieldValue(previousMeasurement, 'weight')
-          : null,
-      metric: METRIC_LOOKUP.weight,
-    },
-    {
-      label: 'Body Fat %',
-      delta:
-        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'body_fat_percent') !== null
-          ? getMeasurementFieldValue(measurement, 'body_fat_percent') -
-            getMeasurementFieldValue(previousMeasurement, 'body_fat_percent')
-          : null,
-      metric: METRIC_LOOKUP.body_fat_percent,
-    },
-    {
-      label: 'BMI',
-      delta:
-        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'bmi') !== null
-          ? getMeasurementFieldValue(measurement, 'bmi') - getMeasurementFieldValue(previousMeasurement, 'bmi')
-          : null,
-      metric: METRIC_LOOKUP.bmi,
-    },
-    {
-      label: 'Waist',
-      delta:
-        previousMeasurement && getMeasurementFieldValue(previousMeasurement, 'waist') !== null
-          ? getMeasurementFieldValue(measurement, 'waist') - getMeasurementFieldValue(previousMeasurement, 'waist')
-          : null,
-      metric: METRIC_LOOKUP.waist,
-    },
-  ];
+  const weight = getMeasurementFieldValue(measurement, 'weight');
+  const prevWeight = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, 'weight') : null;
+  const weightDelta = weight !== null && prevWeight !== null ? weight - prevWeight : null;
+
+  const bodyFat = getMeasurementFieldValue(measurement, 'body_fat_percent');
+  const prevBodyFat = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, 'body_fat_percent') : null;
+  const bodyFatDelta = bodyFat !== null && prevBodyFat !== null ? bodyFat - prevBodyFat : null;
+
+  const waist = getMeasurementFieldValue(measurement, 'waist');
+  const prevWaist = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, 'waist') : null;
+  const waistDelta = waist !== null && prevWaist !== null ? waist - prevWaist : null;
+
+  const formatDelta = (delta, unit, lowerIsBetter = false) => {
+    if (delta === null) return null;
+    const isPositive = delta > 0;
+    const isGood = lowerIsBetter ? delta < 0 : delta > 0;
+    return (
+      <span className={`text-[11px] font-semibold ${isGood ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--warn))]'}`}>
+        {isPositive ? '+' : ''}{delta.toFixed(1)}{unit}
+      </span>
+    );
+  };
 
   return (
-    <article className="atlas-card relative overflow-hidden px-5 py-5 lg:px-6 lg:py-6">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[4px] bg-[linear-gradient(180deg,rgba(15,118,110,0.28),rgba(37,99,235,0.18))]" />
-
-      <div className="flex flex-col gap-6">
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-              Body checkpoint
-            </span>
-            <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-              {sourceLabel}
-            </span>
-            <span className="rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--fg-2))]">
-              {previousMeasurement ? `${daysSincePrevious} days after previous` : 'First entry'}
-            </span>
-          </div>
-
-          <div>
-            <h3 className="text-[1.25rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-              {formatMeasurementDate(measurement.date, {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </h3>
-            <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              Weight {toDisplayNumber(getMeasurementFieldValue(measurement, 'weight'))} kg · BF{' '}
-              {toDisplayNumber(bodyFatValue)}%
-              {' · '}
-              BMI {toDisplayNumber(bmiValue)}
-              {' · '}
-              Waist {toDisplayNumber(getMeasurementFieldValue(measurement, 'waist'))} cm
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {historyBodyFields.map((field) => (
-              <HistoryMetricChip
-                key={field.key}
-                label={field.label}
-                value={getMeasurementFieldValue(measurement, field.key)}
-                unit={field.unit}
-              />
-            ))}
-            <HistoryMetricChip label="Fields" value={countFilledMetrics(measurement)} unit="filled" />
-          </div>
-
-          {measurement.notes ? (
-            <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                Context
-              </p>
-              <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">{measurement.notes}</p>
-            </div>
-          ) : null}
-        </div>
-
-        <aside className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.55)] px-5 py-5 shadow-[var(--shadow-xs)]">
-          <p className="atlas-overline">Summary</p>
-          <p className="mt-3 text-[2rem] font-semibold tracking-[-0.065em] text-[hsl(var(--fg))]">
-            {toDisplayNumber(getMeasurementFieldValue(measurement, 'weight'))}
-            <span className="ml-1 text-[13px] font-medium tracking-[-0.01em] text-[hsl(var(--fg-2))]">
-              kg
-            </span>
-          </p>
-          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-            {countFilledMetrics(measurement)} fields filled in this checkpoint.
-          </p>
-
-          <div className="mt-5 space-y-2.5">
-            {keyDeltas.map((item) => (
-              <ChangePill key={item.label} label={item.label} delta={item.delta} metric={item.metric} />
-            ))}
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-2 xl:flex-col">
-            <button
-              type="button"
-              onClick={onEdit}
-              className="atlas-button atlas-button-secondary h-10 flex-1 xl:w-full"
-            >
-              <Pencil className="h-4 w-4" strokeWidth={1.9} />
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)] xl:w-full"
-            >
-              <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-              Delete
-            </button>
-          </div>
-        </aside>
+    <div className="flex items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.82)] px-4 py-3 hover:bg-[hsl(var(--card))]">
+      <div className="min-w-[100px]">
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+          {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' })}
+        </p>
+        <p className="text-[11px] text-[hsl(var(--fg-3))]">
+          {daysSincePrevious ? `${daysSincePrevious}d after` : 'First'}
+        </p>
       </div>
-    </article>
+
+      <div className="flex flex-1 items-center gap-6">
+        {weight !== null && (
+          <div className="text-center">
+            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{weight.toFixed(1)}kg</p>
+            {weightDelta !== null && <p className="text-[11px]">{formatDelta(weightDelta, 'kg', true)}</p>}
+          </div>
+        )}
+        {bodyFat !== null && (
+          <div className="text-center">
+            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{bodyFat.toFixed(1)}%</p>
+            {bodyFatDelta !== null && <p className="text-[11px]">{formatDelta(bodyFatDelta, '%', true)}</p>}
+          </div>
+        )}
+        {waist !== null && (
+          <div className="text-center">
+            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{waist.toFixed(1)}cm</p>
+            {waistDelta !== null && <p className="text-[11px]">{formatDelta(waistDelta, 'cm', true)}</p>}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onEdit}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.8)] hover:text-[hsl(var(--fg))]"
+        >
+          <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
+        >
+          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.9} />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -1333,9 +1267,9 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
               }
             />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {measurementHistory.map(({ measurement, previousMeasurement }) => (
-                <HistoryCard
+                <HistoryRow
                   key={measurement.id}
                   measurement={measurement}
                   previousMeasurement={previousMeasurement}

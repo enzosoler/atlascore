@@ -28,6 +28,9 @@ import Protocols from '@/pages/Protocols';
 import Measurements from '@/pages/Measurements';
 import LabExams from '@/pages/LabExams';
 import Profile from '@/pages/Profile';
+import Goals from '@/pages/Goals';
+import BodyProfile from '@/pages/BodyProfile';
+import Account from '@/pages/Account';
 import Export from '@/pages/Export';
 import AdminPanel from '@/pages/AdminPanel';
 import MyDiet from '@/pages/MyDiet';
@@ -324,6 +327,9 @@ const AppRoutes = () => (
         <Route path={ROUTES.body} element={<Body />} />
         <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
         <Route path={ROUTES.profile} element={<Profile />} />
+        <Route path={ROUTES.goals} element={<Goals />} />
+        <Route path={ROUTES.bodyProfile} element={<BodyProfile />} />
+        <Route path={ROUTES.account} element={<Account />} />
         <Route path={ROUTES.settings} element={<Settings />} />
         <Route path={ROUTES.export} element={<Export />} />
         <Route path={ROUTES.myDiet} element={<MyDiet />} />

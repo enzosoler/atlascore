@@ -2,22 +2,31 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+  Activity,
   AlertTriangle,
-  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  ArrowDownRight,
+  Brain,
   Calendar,
   CheckCircle2,
   ChevronRight,
   FileText,
   Filter,
-  History,
+  HeartPulse,
+  HelpCircle,
   Info,
   Loader2,
+  Minus,
   Plus,
   Search,
-  Trash2,
+  Sparkles,
+  Target,
+  TrendingDown,
   TrendingUp,
   Upload,
   X,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,7 +36,6 @@ import {
   Section,
 } from '@/components/shared/AppContainer';
 import {
-  EmptyState,
   PageShell,
   PrimaryButton,
   SecondaryButton,
@@ -48,96 +56,590 @@ import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18nContext';
 import * as labService from '@/services/labExamService';
 
+// --- Example Data for Preview ---
+const EXAMPLE_MARKERS = [
+  { name: 'Testosterone', value: '650', unit: 'ng/dL', ref_range: '300-900', status: 'normal', trend: 'stable' },
+  { name: 'LDL Cholesterol', value: '142', unit: 'mg/dL', ref_range: '<100', status: 'high', trend: 'up' },
+  { name: 'Vitamin D', value: '18', unit: 'ng/mL', ref_range: '30-80', status: 'low', trend: 'down' },
+  { name: 'HDL Cholesterol', value: '55', unit: 'mg/dL', ref_range: '>40', status: 'normal', trend: 'stable' },
+  { name: 'Glucose', value: '94', unit: 'mg/dL', ref_range: '70-100', status: 'normal', trend: 'stable' },
+];
+
+const EXAMPLE_INSIGHTS = [
+  { marker: 'LDL Cholesterol', level: 'high', message: 'Above optimal range. Consider reducing saturated fat intake and increasing fiber.', priority: 'high' },
+  { marker: 'Vitamin D', level: 'low', message: 'Deficiency detected. Supplementation and increased sun exposure recommended.', priority: 'medium' },
+];
+
+const EXAMPLE_RECOMMENDATIONS = [
+  { icon: HeartPulse, title: 'Increase fiber intake', description: 'Aim for 30g daily to help lower LDL cholesterol', impact: 'high' },
+  { icon: Target, title: 'Reduce saturated fats', description: 'Limit red meat and full-fat dairy products', impact: 'medium' },
+  { icon: Zap, title: 'Vitamin D3 supplement', description: '2000-4000 IU daily with fatty meal', impact: 'high' },
+  { icon: Activity, title: 'Recheck in 8 weeks', description: 'Schedule follow-up to monitor improvements', impact: 'low' },
+];
+
 // --- Components ---
 
-const StatusBadge = ({ status, t }) => {
+const StatusBadge = ({ status, size = 'md' }) => {
   const configs = {
-    normal: { color: 'bg-green-500/10 text-green-600 border-green-500/20', label: t('pages.lab_exams.status.normal') },
-    low: { color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', label: t('pages.lab_exams.status.low') },
-    high: { color: 'bg-orange-500/10 text-orange-600 border-orange-500/20', label: t('pages.lab_exams.status.high') },
-    critical: { color: 'bg-red-500/10 text-red-600 border-red-500/20', label: t('pages.lab_exams.status.critical') },
+    normal: { 
+      color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', 
+      icon: CheckCircle2,
+      label: 'Normal' 
+    },
+    low: { 
+      color: 'bg-amber-500/10 text-amber-600 border-amber-500/20', 
+      icon: ArrowDownRight,
+      label: 'Low' 
+    },
+    high: { 
+      color: 'bg-rose-500/10 text-rose-600 border-rose-500/20', 
+      icon: ArrowUpRight,
+      label: 'High' 
+    },
+    critical: { 
+      color: 'bg-red-500/15 text-red-600 border-red-500/30', 
+      icon: AlertTriangle,
+      label: 'Critical' 
+    },
   };
 
   const config = configs[status] || configs.normal;
+  const Icon = config.icon;
+  const sizeClasses = size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-2.5 py-1';
 
   return (
-    <Badge variant="outline" className={cn('font-medium capitalize', config.color)}>
+    <Badge variant="outline" className={cn('font-medium capitalize flex items-center gap-1', config.color, sizeClasses)}>
+      <Icon size={size === 'sm' ? 10 : 12} />
       {config.label}
     </Badge>
   );
 };
 
-const ExamRow = ({ exam, onClick, onDelete, t }) => {
+const MarkerTrend = ({ trend }) => {
+  const configs = {
+    up: { icon: TrendingUp, color: 'text-rose-500', label: 'Rising' },
+    down: { icon: TrendingDown, color: 'text-amber-500', label: 'Falling' },
+    stable: { icon: Minus, color: 'text-emerald-500', label: 'Stable' },
+  };
+  
+  const config = configs[trend] || configs.stable;
+  const Icon = config.icon;
+  
+  return (
+    <div className={cn('flex items-center gap-1 text-xs', config.color)}>
+      <Icon size={12} />
+      <span className="capitalize">{config.label}</span>
+    </div>
+  );
+};
+
+const PriorityIndicator = ({ priority }) => {
+  const colors = {
+    high: 'bg-rose-500',
+    medium: 'bg-amber-500',
+    low: 'bg-emerald-500',
+  };
+  
+  return (
+    <div className="flex items-center gap-1">
+      <div className={cn('w-2 h-2 rounded-full', colors[priority])} />
+      <span className="text-xs text-[hsl(var(--fg-3))] capitalize">{priority} priority</span>
+    </div>
+  );
+};
+
+const HeroSection = ({ onUploadClick, hasExams }) => (
+  <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(var(--card))] via-[hsl(var(--card))] to-[hsl(var(--fill))] border border-[hsl(var(--separator))] p-8 md:p-10">
+    {/* Background decoration */}
+    <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+    <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-emerald-500/5 to-transparent rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+    
+    <div className="relative">
+      {/* Badge */}
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
+        <Sparkles size={12} />
+        <span>AI-Powered Health Intelligence</span>
+      </div>
+      
+      {/* Title */}
+      <h1 className="text-3xl md:text-4xl font-bold text-[hsl(var(--fg))] mb-3">
+        Understand your health markers
+      </h1>
+      
+      {/* Subtitle */}
+      <p className="text-lg text-[hsl(var(--fg-2))] max-w-2xl mb-8">
+        Upload your lab results and get clear insights on what matters. 
+        We analyze your markers and show you exactly what to improve.
+      </p>
+      
+      {/* What you'll get */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {[
+          { icon: Activity, label: 'Abnormal markers', desc: 'Instantly highlighted' },
+          { icon: TrendingUp, label: 'Trends over time', desc: 'Track progress' },
+          { icon: Target, label: 'What to improve', desc: 'Actionable guidance' },
+        ].map((item, idx) => (
+          <div key={idx} className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[hsl(var(--fill))] flex items-center justify-center flex-shrink-0">
+              <item.icon size={16} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[hsl(var(--fg))]">{item.label}</p>
+              <p className="text-xs text-[hsl(var(--fg-2))]">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {/* CTA */}
+      <div className="flex flex-wrap items-center gap-4">
+        <PrimaryButton onClick={onUploadClick} className="h-12 px-6 text-base">
+          <Upload size={18} className="mr-2" />
+          Upload your lab results
+        </PrimaryButton>
+        <p className="text-sm text-[hsl(var(--fg-2))]">
+          PDF or image · Auto-extracted · Analyzed in seconds
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const UploadCTA = ({ onUploadClick }) => (
+  <div className="relative group">
+    <button
+      onClick={onUploadClick}
+      className="w-full relative overflow-hidden rounded-2xl border-2 border-dashed border-[hsl(var(--separator))] hover:border-primary/30 hover:bg-primary/5 transition-all p-8 text-center"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <div className="relative">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+          <Brain size={28} className="text-primary" />
+        </div>
+        
+        <h3 className="text-lg font-semibold text-[hsl(var(--fg))] mb-2">
+          Upload your lab results
+        </h3>
+        <p className="text-sm text-[hsl(var(--fg-2))] mb-4">
+          PDF or image · We automatically extract and analyze your markers
+        </p>
+        
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[hsl(var(--fill))] text-sm font-medium text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+          <Upload size={16} />
+          Select file
+          <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+        </div>
+      </div>
+    </button>
+  </div>
+);
+
+const ExampleAnalysisPanel = ({ onUploadClick }) => (
+  <div className="space-y-6">
+    {/* Header */}
+    <div className="flex items-center justify-between">
+      <div>
+        <h3 className="text-lg font-semibold text-[hsl(var(--fg))]">Example Analysis</h3>
+        <p className="text-sm text-[hsl(var(--fg-2))]">See what you get when you upload</p>
+      </div>
+      <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
+        Preview
+      </Badge>
+    </div>
+    
+    {/* Markers Preview */}
+    <Card className="overflow-hidden">
+      <div className="bg-gradient-to-r from-[hsl(var(--fill))] to-transparent px-4 py-3 border-b border-[hsl(var(--separator))]">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-[hsl(var(--fg))]">Blood Panel · Jan 15, 2025</span>
+          <span className="text-xs text-[hsl(var(--fg-2))]">5 markers analyzed</span>
+        </div>
+      </div>
+      
+      <div className="divide-y divide-[hsl(var(--separator))]">
+        {EXAMPLE_MARKERS.map((marker, idx) => (
+          <div key={idx} className="p-4 flex items-center justify-between hover:bg-[hsl(var(--fill))] transition-colors">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                'w-2 h-2 rounded-full',
+                marker.status === 'normal' ? 'bg-emerald-500' : 
+                marker.status === 'high' ? 'bg-rose-500' : 'bg-amber-500'
+              )} />
+              <div>
+                <p className="text-sm font-medium text-[hsl(var(--fg))]">{marker.name}</p>
+                <p className="text-xs text-[hsl(var(--fg-2))]">Ref: {marker.ref_range}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-[hsl(var(--fg))]">
+                {marker.value} <span className="text-xs font-normal text-[hsl(var(--fg-2))]">{marker.unit}</span>
+              </p>
+              <StatusBadge status={marker.status} size="sm" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+    
+    {/* Insights Preview */}
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium text-[hsl(var(--fg))] flex items-center gap-2">
+        <Sparkles size={14} className="text-primary" />
+        AI Insights
+      </h4>
+      
+      {EXAMPLE_INSIGHTS.map((insight, idx) => (
+        <div key={idx} className="p-4 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--separator))]">
+          <div className="flex items-start gap-3">
+            <div className={cn(
+              'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+              insight.level === 'high' ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600'
+            )}>
+              <AlertTriangle size={16} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium text-[hsl(var(--fg))]">{insight.marker}</span>
+                <PriorityIndicator priority={insight.priority} />
+              </div>
+              <p className="text-sm text-[hsl(var(--fg-2))]">{insight.message}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    {/* Recommendations Preview */}
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium text-[hsl(var(--fg))] flex items-center gap-2">
+        <Target size={14} className="text-primary" />
+        Recommendations
+      </h4>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {EXAMPLE_RECOMMENDATIONS.map((rec, idx) => (
+          <div key={idx} className="p-3 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--separator))] hover:border-primary/20 transition-colors">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <rec.icon size={16} className="text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[hsl(var(--fg))]">{rec.title}</p>
+                <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">{rec.description}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+    
+    {/* Upload CTA at bottom */}
+    <div className="pt-4 border-t border-[hsl(var(--separator))]">
+      <button
+        onClick={onUploadClick}
+        className="w-full py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+      >
+        <Upload size={18} />
+        Upload your results to see yours
+      </button>
+    </div>
+  </div>
+);
+
+const ExamRow = ({ exam, onClick, onDelete, isSelected }) => {
   const abnormalCount = exam.markers?.filter(m => m.status !== 'normal').length || 0;
+  const hasAbnormal = abnormalCount > 0;
 
   return (
     <div
       onClick={() => onClick(exam)}
-      className="group flex items-center justify-between p-4 hover:bg-[hsl(var(--fill))] transition-colors cursor-pointer border-b border-[hsl(var(--separator))] last:border-0"
+      className={cn(
+        'group flex items-center justify-between p-4 cursor-pointer border-b border-[hsl(var(--separator))] last:border-0 transition-all',
+        isSelected 
+          ? 'bg-primary/5 border-l-4 border-l-primary' 
+          : 'hover:bg-[hsl(var(--fill))] border-l-4 border-l-transparent'
+      )}
     >
       <div className="flex items-center gap-4">
         <div className={cn(
-          "w-2 h-2 rounded-full",
-          abnormalCount > 0 ? "bg-orange-500" : "bg-green-500"
-        )} />
+          'w-10 h-10 rounded-xl flex items-center justify-center',
+          hasAbnormal ? 'bg-rose-500/10 text-rose-600' : 'bg-emerald-500/10 text-emerald-600'
+        )}>
+          <FileText size={18} />
+        </div>
         <div>
           <h4 className="font-medium text-[hsl(var(--fg))]">{exam.panel_name}</h4>
-          <p className="text-sm text-[hsl(var(--fg-2))]">{new Date(exam.exam_date).toLocaleDateString()}</p>
+          <div className="flex items-center gap-2">
+            <Calendar size={12} className="text-[hsl(var(--fg-3))]" />
+            <p className="text-xs text-[hsl(var(--fg-2))]">
+              {new Date(exam.exam_date).toLocaleDateString(undefined, { 
+                year: 'numeric', month: 'short', day: 'numeric' 
+              })}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <div className="text-right hidden sm:block">
           <p className="text-sm font-medium text-[hsl(var(--fg))]">{exam.markers?.length || 0} markers</p>
-          {abnormalCount > 0 && (
-            <p className="text-xs text-orange-600">{abnormalCount} abnormal</p>
+          {hasAbnormal ? (
+            <p className="text-xs text-rose-600 font-medium">{abnormalCount} need attention</p>
+          ) : (
+            <p className="text-xs text-emerald-600">All normal</p>
           )}
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(exam.id);
-          }}
-          className="p-2 text-[hsl(var(--fg-3))] hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 size={16} />
-        </button>
-        <ChevronRight size={16} className="text-[hsl(var(--fg-3))]" />
+        <ChevronRight size={16} className={cn(
+          'transition-colors',
+          isSelected ? 'text-primary' : 'text-[hsl(var(--fg-3))]'
+        )} />
       </div>
     </div>
   );
 };
 
-const MarkerTable = ({ markers, t }) => {
+const AnalysisPanel = ({ exam, onClose, onAskAI }) => {
+  const abnormalMarkers = exam.markers?.filter(m => m.status !== 'normal') || [];
+  const normalMarkers = exam.markers?.filter(m => m.status === 'normal') || [];
+
   return (
-    <div className="overflow-hidden rounded-xl border border-[hsl(var(--separator))] bg-[hsl(var(--card))]">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-[hsl(var(--separator))] text-[hsl(var(--fg-2))] font-medium">
-          <tr>
-            <th className="px-4 py-3">Marker</th>
-            <th className="px-4 py-3">Value</th>
-            <th className="px-4 py-3">Ref. Range</th>
-            <th className="px-4 py-3 text-right">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[hsl(var(--separator))]">
-          {markers.map((marker, idx) => (
-            <tr key={idx} className="hover:bg-[hsl(var(--fill))] transition-colors">
-              <td className="px-4 py-3 font-medium text-[hsl(var(--fg))]">{marker.name}</td>
-              <td className="px-4 py-3 text-[hsl(var(--fg-2))]">
-                {marker.value} <span className="text-[hsl(var(--fg-3))] text-xs">{marker.unit}</span>
-              </td>
-              <td className="px-4 py-3 text-[hsl(var(--fg-3))] font-mono text-xs">{marker.ref_range || '-'}</td>
-              <td className="px-4 py-3 text-right">
-                <StatusBadge status={marker.status} t={t} />
-              </td>
-            </tr>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-[hsl(var(--fg))]">{exam.panel_name}</h2>
+          <div className="flex items-center gap-2 mt-1">
+            <Calendar size={14} className="text-[hsl(var(--fg-2))]" />
+            <span className="text-sm text-[hsl(var(--fg-2))]">
+              {new Date(exam.exam_date).toLocaleDateString(undefined, { 
+                year: 'numeric', month: 'long', day: 'numeric' 
+              })}
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg transition-colors"
+        >
+          <X size={18} className="text-[hsl(var(--fg-2))]" />
+        </button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="p-3 text-center">
+          <p className="text-2xl font-bold text-[hsl(var(--fg))]">{exam.markers?.length || 0}</p>
+          <p className="text-xs text-[hsl(var(--fg-2))]">Total Markers</p>
+        </Card>
+        <Card className={cn(
+          'p-3 text-center',
+          abnormalMarkers.length > 0 && 'bg-rose-500/5 border-rose-500/20'
+        )}>
+          <p className={cn(
+            'text-2xl font-bold',
+            abnormalMarkers.length > 0 ? 'text-rose-600' : 'text-emerald-600'
+          )}>
+            {abnormalMarkers.length}
+          </p>
+          <p className="text-xs text-[hsl(var(--fg-2))]">Need Attention</p>
+        </Card>
+        <Card className="p-3 text-center">
+          <p className="text-2xl font-bold text-emerald-600">{normalMarkers.length}</p>
+          <p className="text-xs text-[hsl(var(--fg-2))]">Normal</p>
+        </Card>
+      </div>
+
+      {/* Abnormal Markers */}
+      {abnormalMarkers.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-[hsl(var(--fg))] flex items-center gap-2">
+            <AlertTriangle size={14} className="text-rose-500" />
+            Markers Needing Attention
+          </h3>
+          
+          <div className="space-y-2">
+            {abnormalMarkers.map((marker, idx) => (
+              <div key={idx} className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/20">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="font-medium text-[hsl(var(--fg))]">{marker.name}</p>
+                    <p className="text-xs text-[hsl(var(--fg-2))]">Ref range: {marker.ref_range || 'N/A'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className={cn(
+                      'text-lg font-bold',
+                      marker.status === 'high' ? 'text-rose-600' : 'text-amber-600'
+                    )}>
+                      {marker.value}
+                    </p>
+                    <StatusBadge status={marker.status} />
+                  </div>
+                </div>
+                
+                {/* AI Interpretation */}
+                <div className="pt-3 border-t border-rose-500/10">
+                  <p className="text-sm text-[hsl(var(--fg-2))]">
+                    {marker.status === 'high' 
+                      ? `Your ${marker.name} is above the optimal range. This may indicate need for lifestyle adjustments.`
+                      : `Your ${marker.name} is below the optimal range. Consider supplementation or dietary changes.`
+                    }
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* All Markers */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-[hsl(var(--fg))]">All Markers</h3>
+        
+        <div className="space-y-2">
+          {exam.markers?.map((marker, idx) => (
+            <div 
+              key={idx} 
+              className={cn(
+                'p-3 rounded-xl border flex items-center justify-between',
+                marker.status === 'normal' 
+                  ? 'bg-[hsl(var(--fill))] border-[hsl(var(--separator))]' 
+                  : 'bg-rose-500/5 border-rose-500/20'
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  'w-2 h-2 rounded-full',
+                  marker.status === 'normal' ? 'bg-emerald-500' : 
+                  marker.status === 'high' ? 'bg-rose-500' : 'bg-amber-500'
+                )} />
+                <div>
+                  <p className="text-sm font-medium text-[hsl(var(--fg))]">{marker.name}</p>
+                  <p className="text-xs text-[hsl(var(--fg-2))]">{marker.ref_range || 'No ref range'}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-[hsl(var(--fg))]">
+                  {marker.value} <span className="text-xs font-normal text-[hsl(var(--fg-2))]">{marker.unit}</span>
+                </p>
+                <StatusBadge status={marker.status} size="sm" />
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </div>
+      </div>
+
+      {/* Ask AI CTA */}
+      <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+            <HelpCircle size={20} className="text-primary" />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-medium text-[hsl(var(--fg))]">Ask about this result</h4>
+            <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5 mb-3">
+              Get personalized insights and recommendations from AI
+            </p>
+            <button
+              onClick={() => onAskAI?.(exam)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Brain size={16} />
+              Ask AI
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Notes */}
+      {exam.notes && (
+        <div className="p-4 rounded-xl bg-[hsl(var(--fill))] border border-[hsl(var(--separator))]">
+          <h4 className="text-sm font-medium text-[hsl(var(--fg))] mb-2">Notes</h4>
+          <p className="text-sm text-[hsl(var(--fg-2))] italic">"{exam.notes}"</p>
+        </div>
+      )}
+    </motion.div>
   );
 };
+
+const UploadDialog = ({ isOpen, onClose, onUpload, isExtracting }) => (
+  <Dialog open={isOpen} onOpenChange={onClose}>
+    <DialogContent className="sm:max-w-lg bg-[hsl(var(--bg))] border-[hsl(var(--separator))]">
+      <DialogHeader>
+        <DialogTitle className="text-xl text-[hsl(var(--fg))] flex items-center gap-2">
+          <Sparkles size={20} className="text-primary" />
+          AI Lab Analysis
+        </DialogTitle>
+        <DialogDescription className="text-[hsl(var(--fg-2))]">
+          Upload your lab results and get instant AI-powered insights
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-6 py-4">
+        {/* Upload Area */}
+        <div className="relative">
+          <input
+            type="file"
+            onChange={onUpload}
+            accept="application/pdf,image/*"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            disabled={isExtracting}
+          />
+          <div className={cn(
+            'border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-all',
+            isExtracting 
+              ? 'border-primary/30 bg-primary/5' 
+              : 'border-[hsl(var(--separator))] hover:border-primary/30 hover:bg-primary/5'
+          )}>
+            {isExtracting ? (
+              <>
+                <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                </div>
+                <p className="text-base font-medium text-[hsl(var(--fg))]">Analyzing your lab results...</p>
+                <p className="text-sm text-[hsl(var(--fg-2))] mt-1">Extracting markers with AI</p>
+                <div className="mt-4 w-48 h-1 bg-[hsl(var(--separator))] rounded-full overflow-hidden">
+                  <div className="h-full bg-primary animate-pulse rounded-full" style={{ width: '60%' }} />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Upload size={28} className="text-primary" />
+                </div>
+                <p className="text-base font-medium text-[hsl(var(--fg))]">Upload your lab results (PDF or image)</p>
+                <p className="text-sm text-[hsl(var(--fg-2))] mt-1">We automatically extract and analyze your markers</p>
+                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[hsl(var(--fill))] text-xs text-[hsl(var(--fg-2))]">
+                  <FileText size={12} />
+                  PDF, JPG, PNG up to 10MB
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Manual Entry Option */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-[hsl(var(--separator))]" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-[hsl(var(--bg))] px-2 text-[hsl(var(--fg-3))]">Or enter manually</span>
+          </div>
+        </div>
+
+        <SecondaryButton className="w-full" disabled={isExtracting}>
+          <Plus size={16} className="mr-2" />
+          Enter markers manually
+        </SecondaryButton>
+      </div>
+    </DialogContent>
+  </Dialog>
+);
 
 // --- Main Page ---
 
@@ -146,7 +648,7 @@ export default function LabExams() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const [selectedExam, setSelectedExam] = useState(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
 
   // Queries
@@ -156,13 +658,15 @@ export default function LabExams() {
     enabled: !!user?.id,
   });
 
+  const hasExams = exams.length > 0;
+
   // Mutations
   const createMutation = useMutation({
     mutationFn: (payload) => labService.createExam(user?.id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(['lab_exams']);
-      setIsAddDialogOpen(false);
-      toast.success(t('pages.lab_exams.notifications.save_success'));
+      setIsUploadDialogOpen(false);
+      toast.success('Lab results analyzed and saved!');
     },
   });
 
@@ -170,7 +674,8 @@ export default function LabExams() {
     mutationFn: (id) => labService.deleteExam(user?.id, id),
     onSuccess: () => {
       queryClient.invalidateQueries(['lab_exams']);
-      toast.success(t('pages.lab_exams.notifications.delete_success'));
+      setSelectedExam(null);
+      toast.success('Exam deleted');
     },
   });
 
@@ -182,231 +687,129 @@ export default function LabExams() {
     setIsExtracting(true);
     try {
       const data = await labService.extractExamFromFile(file);
-      // Pre-fill form or show preview
-      // For now, let's just create it directly for the demo feel
       await createMutation.mutateAsync({
         panel_name: data.panel_name || file.name.split('.')[0],
         exam_date: data.exam_date || new Date().toISOString().split('T')[0],
         markers: data.markers || [],
       });
     } catch (err) {
-      toast.error("Failed to extract data from PDF");
+      toast.error('Failed to extract data from file');
     } finally {
       setIsExtracting(false);
     }
   };
 
-  const stats = useMemo(() => {
-    const total = exams.length;
-    const abnormal = exams.reduce((acc, exam) => {
-      const hasAbnormal = exam.markers?.some(m => m.status !== 'normal');
-      return acc + (hasAbnormal ? 1 : 0);
-    }, 0);
-    return { total, abnormal };
-  }, [exams]);
+  const handleExamClick = (exam) => {
+    setSelectedExam(exam);
+  };
+
+  const handleAskAI = (exam) => {
+    toast.info('AI Q&A feature coming soon!');
+  };
 
   return (
     <PageShell title={t('pages.lab_exams.title')}>
       <AppContainer>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Stats & List */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Card className="p-4 flex flex-col justify-center items-center text-center">
-                <p className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider mb-1">Total Exams</p>
-                <p className="text-2xl font-bold text-[hsl(var(--fg))]">{stats.total}</p>
-              </Card>
-              <Card className="p-4 flex flex-col justify-center items-center text-center">
-                <p className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider mb-1">Abnormal</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.abnormal}</p>
-              </Card>
-              <Card className="p-4 flex flex-col justify-center items-center text-center">
-                <p className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider mb-1">Latest</p>
-                <p className="text-sm font-bold text-[hsl(var(--fg))]">
-                  {exams[0] ? new Date(exams[0].exam_date).toLocaleDateString() : '-'}
-                </p>
-              </Card>
-              <div className="flex items-center justify-center">
-                <PrimaryButton
-                  onClick={() => setIsAddDialogOpen(true)}
-                  className="w-full h-full py-4"
-                >
-                  <Plus size={20} className="mr-2" />
-                  {t('pages.lab_exams.add_panel')}
-                </PrimaryButton>
-              </div>
-            </div>
+        <div className="space-y-8">
+          {/* Hero Section */}
+          <HeroSection 
+            onUploadClick={() => setIsUploadDialogOpen(true)} 
+            hasExams={hasExams} 
+          />
 
-            {/* Exam List */}
-            <Section title={t('pages.lab_exams.history')}>
-              <Card className="overflow-hidden divide-y divide-[hsl(var(--separator))]">
-                {isLoading ? (
-                  <div className="p-8 space-y-4">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
-                ) : exams.length > 0 ? (
-                  exams.map(exam => (
-                    <ExamRow
-                      key={exam.id}
-                      exam={exam}
-                      onClick={setSelectedExam}
-                      onDelete={deleteMutation.mutate}
-                      t={t}
-                    />
-                  ))
-                ) : (
-                  <EmptyState
-                    title={t('pages.lab_exams.title')}
-                    description={t('pages.lab_exams.empty_state')}
-                    icon={FileText}
-                  />
-                )}
-              </Card>
-            </Section>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Column: Upload + Exam List */}
+            <div className="lg:col-span-5 space-y-6">
+              {/* Upload CTA (when no exams) */}
+              {!hasExams && !isLoading && (
+                <UploadCTA onUploadClick={() => setIsUploadDialogOpen(true)} />
+              )}
 
-          {/* Right Column: Detail View */}
-          <div className="lg:col-span-4">
-            <AnimatePresence mode="wait">
-              {selectedExam ? (
-                <motion.div
-                  key={selectedExam.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="space-y-6"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-[hsl(var(--fg))]">{selectedExam.panel_name}</h3>
-                    <button
-                      onClick={() => setSelectedExam(null)}
-                      className="p-2 text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-[hsl(var(--fg-2))]">
-                    <Calendar size={14} />
-                    {new Date(selectedExam.exam_date).toLocaleDateString()}
-                  </div>
-
-                  <Section title="Markers">
-                    <div className="space-y-3">
-                      {selectedExam.markers?.map((marker, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-[hsl(var(--fill))] border border-[hsl(var(--separator))]">
-                          <div>
-                            <p className="text-sm font-medium text-[hsl(var(--fg))]">{marker.name}</p>
-                            <p className="text-xs text-[hsl(var(--fg-2))]">{marker.ref_range || 'No ref range'}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold text-[hsl(var(--fg))]">
-                              {marker.value} <span className="text-[10px] font-normal text-[hsl(var(--fg-2))]">{marker.unit}</span>
-                            </p>
-                            <p className={cn(
-                              "text-[10px] font-bold uppercase tracking-tighter",
-                              marker.status === 'normal' ? "text-green-600" : "text-orange-600"
-                            )}>
-                              {marker.status}
-                            </p>
-                          </div>
-                        </div>
+              {/* Exam List */}
+              <Section title={hasExams ? 'Your Lab History' : ''}>
+                <Card className="overflow-hidden">
+                  {isLoading ? (
+                    <div className="p-6 space-y-4">
+                      <Skeleton className="h-16 w-full" />
+                      <Skeleton className="h-16 w-full" />
+                      <Skeleton className="h-16 w-full" />
+                    </div>
+                  ) : hasExams ? (
+                    <div className="divide-y divide-[hsl(var(--separator))]">
+                      {exams.map(exam => (
+                        <ExamRow
+                          key={exam.id}
+                          exam={exam}
+                          onClick={handleExamClick}
+                          onDelete={(id) => {
+                            if (confirm('Delete this exam?')) {
+                              deleteMutation.mutate(id);
+                            }
+                          }}
+                          isSelected={selectedExam?.id === exam.id}
+                        />
                       ))}
                     </div>
-                  </Section>
-
-                  {selectedExam.notes && (
-                    <Section title="Notes">
-                      <p className="text-sm text-[hsl(var(--fg-2))] bg-[hsl(var(--fill))] p-4 rounded-xl border border-[hsl(var(--separator))] italic">
-                        "{selectedExam.notes}"
-                      </p>
-                    </Section>
+                  ) : null}
+                  
+                  {/* Add new button at bottom of list */}
+                  {hasExams && (
+                    <div className="p-4 border-t border-[hsl(var(--separator))]">
+                      <button
+                        onClick={() => setIsUploadDialogOpen(true)}
+                        className="w-full py-3 rounded-xl border-2 border-dashed border-[hsl(var(--separator))] hover:border-primary/30 hover:bg-primary/5 transition-all flex items-center justify-center gap-2 text-sm font-medium text-[hsl(var(--fg-2))] hover:text-primary"
+                      >
+                        <Plus size={16} />
+                        Add new lab results
+                      </button>
+                    </div>
                   )}
-                </motion.div>
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-[hsl(var(--separator))] rounded-3xl">
-                  <div className="w-12 h-12 rounded-full bg-[hsl(var(--fill))] flex items-center justify-center mb-4">
-                    <Info size={24} className="text-[hsl(var(--fg-3))]" />
-                  </div>
-                  <p className="text-sm text-[hsl(var(--fg-2))]">Select an exam to view details and markers</p>
-                </div>
-              )}
-            </AnimatePresence>
+                </Card>
+              </Section>
+            </div>
+
+            {/* Right Column: Analysis Panel or Example */}
+            <div className="lg:col-span-7">
+              <AnimatePresence mode="wait">
+                {selectedExam ? (
+                  <motion.div
+                    key="analysis"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                  >
+                    <AnalysisPanel 
+                      exam={selectedExam} 
+                      onClose={() => setSelectedExam(null)}
+                      onAskAI={handleAskAI}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="example"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                  >
+                    <ExampleAnalysisPanel 
+                      onUploadClick={() => setIsUploadDialogOpen(true)} 
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </AppContainer>
 
-      {/* Add Exam Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-[hsl(var(--bg))] border-[hsl(var(--separator))]">
-          <DialogHeader>
-            <DialogTitle className="text-[hsl(var(--fg))]">{t('pages.lab_exams.add_panel')}</DialogTitle>
-            <DialogDescription className="text-[hsl(var(--fg-2))]">
-              Upload a PDF or enter details manually.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4">
-            {/* Upload Area */}
-            <div className="relative group">
-              <input
-                type="file"
-                onChange={handleFileUpload}
-                accept="application/pdf,image/*"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                disabled={isExtracting}
-              />
-              <div className={cn(
-                "border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all",
-                isExtracting ? "border-[hsl(var(--separator))] bg-[hsl(var(--fill))]" : "border-[hsl(var(--separator))] group-hover:border-[hsl(var(--separator-strong))] group-hover:bg-[hsl(var(--fill))]"
-              )}>
-                {isExtracting ? (
-                  <>
-                    <Loader2 className="w-8 h-8 text-[hsl(var(--fg-2))] animate-spin mb-4" />
-                    <p className="text-sm font-medium text-[hsl(var(--fg))]">Extracting data...</p>
-                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">This takes a few seconds</p>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-12 h-12 rounded-full bg-[hsl(var(--fill))] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Upload size={24} className="text-[hsl(var(--fg-2))]" />
-                    </div>
-                    <p className="text-sm font-medium text-[hsl(var(--fg))]">Import PDF or Image</p>
-                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">We'll extract markers automatically</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-[hsl(var(--separator))]" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[hsl(var(--bg))] px-2 text-[hsl(var(--fg-3))]">Or manual entry</span>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider">Panel Name</label>
-                <Input placeholder="e.g. CBC, Lipid Panel" className="bg-[hsl(var(--fill))] border-[hsl(var(--separator))] text-[hsl(var(--fg))]" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[hsl(var(--fg-2))] uppercase tracking-wider">Date</label>
-                <Input type="date" className="bg-[hsl(var(--fill))] border-[hsl(var(--separator))] text-[hsl(var(--fg))]" />
-              </div>
-            </div>
-
-            <PrimaryButton className="w-full" disabled={isExtracting}>
-              Save Manual Entry
-            </PrimaryButton>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Upload Dialog */}
+      <UploadDialog
+        isOpen={isUploadDialogOpen}
+        onClose={() => !isExtracting && setIsUploadDialogOpen(false)}
+        onUpload={handleFileUpload}
+        isExtracting={isExtracting}
+      />
     </PageShell>
   );
 }
+

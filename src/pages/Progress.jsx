@@ -371,142 +371,119 @@ function ProgressContent({ embedded = false, measurements: propMeasurements, pho
             </div>
           ) : null}
 
-          <MeasurementInsights measurements={filteredMeasurements} latest={latest} />
+          {(() => {
+            const insights = generateInsights(latest, oldest, weightChange, bodyFatChange, bmiChange, filteredMeasurements);
 
-          <Section
-            eyebrow="Body trends"
-            title={`Latest checkpoint · ${safeFormatDate(latest?.date, 'MMMM d')}`}
-            subtitle="The key signals are surfaced first, with a mini curve and enough context to understand direction."
-          >
-            <div className="grid gap-4 lg:grid-cols-2">
-              <MetricCard
-                label="Weight"
-                metricKey="weight"
-                value={latestWeight}
-                unit="kg"
-                change={weightChange}
-                goal={profile?.target_weight}
-                data={chartData.map((item) => ({ date: item.date, value: item.weight }))}
-                digits={1}
-              />
-              {latestBodyFat != null ? (
-                <MetricCard
-                  label="Body Fat %"
-                  metricKey="body_fat_percent"
-                  value={latestBodyFat}
-                  unit="%"
-                  change={bodyFatChange}
-                  goal={profile?.body_fat_goal}
-                  data={chartData.map((item) => ({ date: item.date, value: item.body_fat_percent }))}
-                  digits={1}
-                />
-              ) : null}
-              {latestBmi != null ? (
-                <MetricCard
-                  label="BMI"
-                  metricKey="bmi"
-                  value={latestBmi}
-                  unit="kg/m²"
-                  change={bmiChange}
-                  data={chartData.map((item) => ({ date: item.date, value: item.bmi }))}
-                  digits={2}
-                />
-              ) : null}
-            </div>
-          </Section>
+            // Calculate percent changes for trend metrics
+            const weightPercentChange = oldestWeight && oldestWeight !== 0 ? ((latestWeight - oldestWeight) / oldestWeight) * 100 : null;
+            const bodyFatPercentChange = oldestBodyFat && oldestBodyFat !== 0 ? ((latestBodyFat - oldestBodyFat) / oldestBodyFat) * 100 : null;
+            const bmiPercentChange = oldestBmi && oldestBmi !== 0 ? ((latestBmi - oldestBmi) / oldestBmi) * 100 : null;
 
-          {hasBodySiteMeasurements ? (
-            <Section
-              eyebrow="Measurements"
-              title="Manual, imported and derived snapshot"
-              subtitle="Body-site measurements, composition imports, and calculated body metrics follow the same visual rhythm without overpowering the primary story."
-            >
-              <div className="space-y-6">
-                {PROGRESS_FIELD_GROUPS.map((section) => {
-                  const sectionHasData = section.fields.some(({ key }) => getMeasurementFieldValue(latest, key) !== null);
+            // Get waist data if available
+            const latestWaist = getMeasurementFieldValue(latest, 'waist');
+            const oldestWaist = getMeasurementFieldValue(oldest, 'waist');
+            const waistChange = latestWaist !== null && oldestWaist !== null ? latestWaist - oldestWaist : 0;
+            const waistPercentChange = oldestWaist && oldestWaist !== 0 ? ((latestWaist - oldestWaist) / oldestWaist) * 100 : null;
 
-                  if (!sectionHasData) {
-                    return null;
-                  }
+            // Get muscle mass data if available
+            const latestMuscle = getMeasurementFieldValue(latest, 'muscle_mass');
+            const oldestMuscle = getMeasurementFieldValue(oldest, 'muscle_mass');
+            const muscleChange = latestMuscle !== null && oldestMuscle !== null ? latestMuscle - oldestMuscle : 0;
+            const musclePercentChange = oldestMuscle && oldestMuscle !== 0 ? ((latestMuscle - oldestMuscle) / oldestMuscle) * 100 : null;
 
-                  return (
-                    <div key={section.key} className="space-y-3">
-                      <p className="atlas-overline">{section.label}</p>
-                      <div className="grid gap-4 lg:grid-cols-2">
-                        {section.fields.map((field) => {
-                          const latestValue = getMeasurementFieldValue(latest, field.key);
-                          const oldestValue = getMeasurementFieldValue(oldest, field.key);
-                          const change =
-                            latestValue != null && oldestValue != null ? latestValue - oldestValue : 0;
+            // Get chest data if available
+            const latestChest = getMeasurementFieldValue(latest, 'chest');
+            const oldestChest = getMeasurementFieldValue(oldest, 'chest');
+            const chestChange = latestChest !== null && oldestChest !== null ? latestChest - oldestChest : 0;
+            const chestPercentChange = oldestChest && oldestChest !== 0 ? ((latestChest - oldestChest) / oldestChest) * 100 : null;
 
-                          return latestValue != null ? (
-                            <MetricCard
-                              key={field.key}
-                              label={field.label}
-                              value={latestValue}
-                              unit={field.unit}
-                              change={change}
-                              data={chartData.map((item) => ({ date: item.date, value: item[field.key] }))}
-                              digits={field.precision ?? 1}
-                            />
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </Section>
-          ) : null}
+            return (
+              <>
+                <AIInsight title="Your Progress Analysis" insights={insights} />
 
-          <Section
-            eyebrow="Coverage"
-            title="Checkpoint completeness"
-            subtitle="A quick read on the latest record so you know whether the story is mostly manual, imported, or still sparse."
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card className="rounded-[24px] px-5 py-5">
-                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                  Analysis window
-                </p>
-                <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                  {captureSpanDays} days between first and last checkpoint.
-                </p>
-              </Card>
-              <Card className="rounded-[24px] px-5 py-5">
-                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                  Latest entry coverage
-                </p>
-                <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                  {latest ? countFilledMeasurementFields(latest) : 0} non-derived fields filled in the most recent checkpoint.
-                </p>
-              </Card>
-              <Card className="rounded-[24px] px-5 py-5">
-                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                  Starting baseline
-                </p>
-                <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                  {filteredMeasurements.length
-                    ? format(new Date(filteredMeasurements[filteredMeasurements.length - 1].date), 'MMMM d, yyyy')
-                    : '--'}
-                </p>
-              </Card>
-              <Card className="rounded-[24px] px-5 py-5">
-                <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                  Latest recorded context
-                </p>
-                <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                  {latest?.notes || 'No notes recorded yet.'}
-                </p>
-              </Card>
-            </div>
-          </Section>
+                <Section
+                  eyebrow="Key Trends"
+                  title="What changed"
+                  subtitle="Your top metrics with direction and interpretation"
+                  actions={null}
+                >
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <TrendMetric
+                      label="Weight"
+                      value={latestWeight}
+                      unit="kg"
+                      change={weightChange}
+                      percentChange={weightPercentChange}
+                      trend={weightChange < 0 ? 'good' : weightChange > 0.5 ? 'bad' : 'neutral'}
+                      interpretation={weightChange < -1 ? 'Good progress — steady loss' : weightChange > 1 ? 'Trending up — review intake' : 'Stable — maintain course'}
+                    />
+                    {latestBodyFat !== null && (
+                      <TrendMetric
+                        label="Body Fat"
+                        value={latestBodyFat}
+                        unit="%"
+                        change={bodyFatChange}
+                        percentChange={bodyFatPercentChange}
+                        trend={bodyFatChange < 0 ? 'good' : bodyFatChange > 0.5 ? 'bad' : 'neutral'}
+                        interpretation={bodyFatChange < -0.5 ? 'Fat loss in progress' : bodyFatChange > 0.5 ? 'Monitor closely' : 'Holding steady'}
+                      />
+                    )}
+                    {latestMuscle !== null && (
+                      <TrendMetric
+                        label="Muscle Mass"
+                        value={latestMuscle}
+                        unit="kg"
+                        change={muscleChange}
+                        percentChange={musclePercentChange}
+                        trend={muscleChange > 0 ? 'good' : muscleChange < -0.5 ? 'bad' : 'neutral'}
+                        interpretation={muscleChange > 0.2 ? 'Building muscle!' : muscleChange < -0.5 ? 'Potential loss — check protein' : 'Stable'}
+                      />
+                    )}
+                    {latestWaist !== null && (
+                      <TrendMetric
+                        label="Waist"
+                        value={latestWaist}
+                        unit="cm"
+                        change={waistChange}
+                        percentChange={waistPercentChange}
+                        trend={waistChange < 0 ? 'good' : waistChange > 0.5 ? 'bad' : 'neutral'}
+                        interpretation={waistChange < -1 ? 'Great — midsection shrinking' : waistChange > 1 ? 'Review core routine' : 'Consistent'}
+                      />
+                    )}
+                    {latestChest !== null && (
+                      <TrendMetric
+                        label="Chest"
+                        value={latestChest}
+                        unit="cm"
+                        change={chestChange}
+                        percentChange={chestPercentChange}
+                        trend={chestChange > 0 ? 'good' : chestChange < -0.5 ? 'bad' : 'neutral'}
+                        interpretation={chestChange > 0.5 ? 'Upper body growing' : chestChange < -0.5 ? 'Monitor training' : 'Stable'}
+                      />
+                    )}
+                    {latestBmi !== null && (
+                      <TrendMetric
+                        label="BMI"
+                        value={latestBmi}
+                        unit=""
+                        change={bmiChange}
+                        percentChange={bmiPercentChange}
+                        trend={bmiChange < 0 && latestBmi > 18.5 ? 'good' : bmiChange > 0 && latestBmi < 25 ? 'good' : 'neutral'}
+                        interpretation={latestBmi < 18.5 ? 'Underweight — prioritize gain' : latestBmi > 25 ? 'Working toward healthy range' : 'In healthy range'}
+                      />
+                    )}
+                  </div>
+                </Section>
+              </>
+            );
+          })()}
 
           {photos.length > 0 ? (
             <Section
               eyebrow="Photos"
               title="Visual evolution"
-              subtitle="Photo checkpoints stay integrated with the body story instead of feeling like a separate utility."
+              subtitle="Compare your progress visually"
+              actions={null}
             >
               <ProgressPhotoCarousel photos={photos} />
             </Section>

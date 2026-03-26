@@ -540,6 +540,57 @@ export default function Pricing() {
 
       <section id="plans" className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
+          {/* Comparison Snapshot */}
+          <div className="mb-10 overflow-hidden rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)]">
+            <div className="border-b border-[hsl(var(--border)/0.3)] bg-[hsl(var(--card)/0.5)] px-5 py-4 lg:px-6">
+              <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">{ui.compareTitle}</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-[hsl(var(--border)/0.3)]">
+                    <th className="px-5 py-3 text-[12px] font-medium text-[hsl(var(--fg-3))] lg:px-6">Feature</th>
+                    <th className="px-5 py-3 text-center text-[12px] font-medium text-[hsl(var(--fg-3))] lg:px-6">Free</th>
+                    <th className="px-5 py-3 text-center text-[12px] font-semibold text-[hsl(var(--brand))] lg:px-6">Pro</th>
+                    <th className="px-5 py-3 text-center text-[12px] font-medium text-[hsl(var(--fg-3))] lg:px-6">Performance</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px]">
+                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
+                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">Workout & nutrition tracking</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                  </tr>
+                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
+                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">AI insights & feedback</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                  </tr>
+                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
+                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">Training & meal plans</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                  </tr>
+                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
+                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">Advanced analytics & reports</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
+                  </tr>
+                  <tr>
+                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">History</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-2))] lg:px-6">30 days</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">Unlimited</td>
+                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">Unlimited</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <PublicSectionHeader
             eyebrow="Athlete"
             title={ui.athleteLabel}
@@ -547,7 +598,7 @@ export default function Pricing() {
             className="mb-10"
           />
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
             {athletePlans.map((plan, index) => (
               <motion.div
                 key={plan.id}
@@ -565,6 +616,7 @@ export default function Pricing() {
                   onSubscribe={handleSubscribe}
                   labels={{
                     popular: ui.popular,
+                    aiBadge: ui.aiBadge,
                     current: ui.current,
                     freeCurrent: ui.freeCurrent,
                     freeSignup: ui.freeSignup,
@@ -574,43 +626,21 @@ export default function Pricing() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-14 lg:px-8 lg:py-20">
-        <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-10">
-          <PublicSectionHeader
-            eyebrow="Professional"
-            title={ui.professionalLabel}
-            description={t('pricing_page.professionalDesc')}
-          />
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            {professionalPlans.map((plan, index) => (
-              <motion.div
-                key={plan.id}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: '-80px' }}
-                variants={fade}
-                custom={index}
-              >
-                <PricingCard
-                  plan={plan}
-                  loading={loading}
-                  currentPlanId={currentPlanId}
-                  isAuthenticated={isAuthenticated}
-                  onSubscribe={handleSubscribe}
-                  labels={{
-                    popular: ui.popular,
-                    current: ui.current,
-                    freeCurrent: ui.freeCurrent,
-                    freeSignup: ui.freeSignup,
-                    savePrefix: ui.savePrefix,
-                  }}
-                />
-              </motion.div>
-            ))}
+          {/* Professional CTA - Simplified */}
+          <div className="mt-12 rounded-2xl border border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.2)] px-6 py-6 text-center">
+            <p className="text-[14px] font-medium text-[hsl(var(--fg))]">
+              {ui.professionalLabel}?
+            </p>
+            <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))]">
+              {t('pricing_page.professionalDesc')}
+            </p>
+            <Button asChild variant="ghost" className="mt-3 h-9 text-[13px]">
+              <Link to={ROUTES.professionals || '/contact'}>
+                Contact us for professional access
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>      <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
