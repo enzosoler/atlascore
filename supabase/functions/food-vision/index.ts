@@ -271,6 +271,7 @@ serve(async (req) => {
 
   let maxPhotoCallsPerDay: number;
   switch (tier) {
+    case 'performance':
     case 'premium':
       maxPhotoCallsPerDay = config.premium_photo_calls_per_day;
       break;

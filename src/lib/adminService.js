@@ -291,7 +291,7 @@ export async function resetOnboarding(userId) {
 
 // ─── SUBSCRIPTION MANAGEMENT ────────────────────────────────────────────────
 
-const VALID_TIERS   = ['free', 'pro', 'premium', 'internal', 'custom'];
+const VALID_TIERS   = ['free', 'pro', 'premium', 'performance', 'internal', 'custom'];
 const VALID_STATUSES = ['trialing', 'active', 'granted', 'past_due', 'canceled', 'expired', 'inactive'];
 
 export async function fetchAllSubscriptions(page = 1, pageSize = 50) {
@@ -313,7 +313,7 @@ export async function updateSubscriptionTier(userId, newTier) {
 
   const { data: before } = await supabase
     .from('subscriptions')
-    .select('plan_code, status')
+    .select('tier, status')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -321,14 +321,14 @@ export async function updateSubscriptionTier(userId, newTier) {
 
   const { data, error } = await supabase
     .from('subscriptions')
-    .update({ plan_code: newTier })
+    .update({ tier: newTier })
     .eq('user_id', userId)
     .select()
     .single();
 
   if (error) throw error;
 
-  await logAdminAction('subscription.tier.update', userId, { newTier }, { plan_code: before?.plan_code }, { plan_code: newTier });
+  await logAdminAction('subscription.tier.update', userId, { newTier }, { tier: before?.tier }, { tier: newTier });
   return data;
 }
 
@@ -403,14 +403,14 @@ export async function grantAccess(userId, tier = 'pro', reason = '') {
   if (existing?.id) {
     ({ data, error } = await supabase
       .from('subscriptions')
-      .update({ status: 'granted', plan_code: tier, granted_by_admin: actorId, grant_reason: reason })
+      .update({ status: 'granted', tier, granted_by_admin: actorId, grant_reason: reason })
       .eq('id', existing.id)
       .select()
       .single());
   } else {
     ({ data, error } = await supabase
       .from('subscriptions')
-      .insert({ user_id: userId, status: 'granted', plan_code: tier, granted_by_admin: actorId, grant_reason: reason })
+      .insert({ user_id: userId, status: 'granted', tier, granted_by_admin: actorId, grant_reason: reason })
       .select()
       .single());
   }
