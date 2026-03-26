@@ -224,7 +224,6 @@ function ConcentrationChart({ protocols }) {
 }
 
 function ProtocolConcentrationCard({ data, color }) {
-  const { locale } = useI18n();
   const { protocol, halfLife, series, hasLogs } = data;
 
   const VIEWBOX_WIDTH = 400;

@@ -819,7 +819,6 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate }) {
 export default function NutritionPage() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [notice, setNotice] = useState(null);

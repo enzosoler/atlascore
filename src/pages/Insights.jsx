@@ -80,7 +80,7 @@ const TONE_STYLES = {
   },
 };
 
-function formatShortDate(dateKey, locale = 'en') {
+function formatShortDate(dateKey) {
   if (!dateKey) return '--';
   return new Date(`${dateKey}T12:00:00`).toLocaleDateString(locale, {
     month: 'short',
@@ -88,9 +88,9 @@ function formatShortDate(dateKey, locale = 'en') {
   });
 }
 
-function formatWindow(window, locale = 'en') {
+function formatWindow(window) {
   if (!window?.start || !window?.end) return '--';
-  return `${formatShortDate(window.start, locale)} - ${formatShortDate(window.end, locale)}`;
+  return `${formatShortDate(window.start)} - ${formatShortDate(window.end)}`;
 }
 
 function directionLabel(direction) {
@@ -557,7 +557,7 @@ function InsightsContent() {
       value: item.value,
     }));
 
-  const summaryWindowLabel = formatWindow(mvp?.summary?.summaryWindow, locale);
+  const summaryWindowLabel = formatWindow(mvp?.summary?.summaryWindow);
 
   return (
     <PageShell
