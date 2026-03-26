@@ -103,7 +103,6 @@ export const AuthProvider = ({ children }) => {
 
     if (typeof window === 'undefined') return;
 
-    // atlas_locale is preserved across sessions for language continuity
     window.localStorage.removeItem('atlas_region');
     window.localStorage.removeItem('pending_plan');
     window.sessionStorage.clear();
@@ -115,7 +114,13 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
 
-    const profileRole = await fetchProfileRole(authUser?.id, normalizedUser?.atlas_role || 'athlete');
+    let profileRole = normalizedUser?.atlas_role || 'athlete';
+    try {
+      profileRole = await fetchProfileRole(authUser?.id, profileRole);
+    } catch (e) {
+      console.warn('[AuthContext] Profile role fetch failed, using fallback:', e);
+    }
+
     const resolvedUser = {
       ...normalizedUser,
       atlas_role: profileRole,
@@ -173,6 +178,15 @@ export const AuthProvider = ({ children }) => {
     setAuthState(AUTH_STATES.LOADING);
     setAuthError(null);
 
+    const isConfigured = import.meta.env.VITE_SUPABASE_URL && 
+                        (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+    
+    if (!isConfigured) {
+      setAuthState(AUTH_STATES.ERROR);
+      setAuthError(buildAuthError('missing_config', 'Supabase configuration is missing.'));
+      return null;
+    }
+
     try {
       const { data, error } = await withTimeout(supabase.auth.getSession(), 'Auth check');
       if (error) throw error;
@@ -191,6 +205,10 @@ export const AuthProvider = ({ children }) => {
   }, [applyAuthenticatedUser, applyUnauthenticatedState, handleAuthError]);
 
   const revalidateSession = useCallback(async () => {
+    const isConfigured = import.meta.env.VITE_SUPABASE_URL && 
+                        (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+    if (!isConfigured) return null;
+
     try {
       const { data, error } = await withTimeout(supabase.auth.getSession(), 'Session revalidation');
       if (error) throw error;
@@ -213,7 +231,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     mountedRef.current = true;
-
     checkAppState();
 
     const {
@@ -251,56 +268,41 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', revalidateSession);
     };
-  }, [applyAuthenticatedUser, applyUnauthenticatedState, checkAppState, revalidateSession]);
+  }, [checkAppState, revalidateSession, applyAuthenticatedUser, applyUnauthenticatedState]);
 
-  const signIn = useCallback(async ({ email, password }) => {
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: normalizedEmail,
-      password,
-    });
-
-    if (error) throw error;
-
-    return await applyAuthenticatedUser(data.user ?? data.session?.user);
-  }, [applyAuthenticatedUser]);
-
-  const signUp = useCallback(async ({ email, password, fullName }) => {
-    const normalizedEmail = email.trim().toLowerCase();
-    const trimmedName = fullName.trim();
-
-    const { data, error } = await supabase.auth.signUp({
-      email: normalizedEmail,
-      password,
-      options: {
-        data: {
-          full_name: trimmedName || normalizedEmail.split('@')[0],
-          atlas_role: 'athlete',
-          onboarding_completed: false,
-        },
-      },
-    });
-
-    if (error) throw error;
-
-    // Fire-and-forget welcome email.
-    // Runs after successful account creation. Never blocks auth or throws.
-    const firstName = trimmedName.split(' ')[0] || '';
-    sendWelcomeEmailAsync({ email: normalizedEmail, firstName });
-
-    if (data.session?.user) {
-      return {
-        user: await applyAuthenticatedUser(data.session.user),
-        needsEmailConfirmation: false,
-      };
+  const signIn = useCallback(async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (data.user) {
+        return await applyAuthenticatedUser(data.user);
+      }
+      return null;
+    } catch (error) {
+      handleAuthError(error);
+      throw error;
     }
+  }, [applyAuthenticatedUser, handleAuthError]);
 
-    return {
-      user: normalizeSupabaseUser(data.user),
-      needsEmailConfirmation: true,
-    };
-  }, [applyAuthenticatedUser]);
+  const signUp = useCallback(async (email, password, metadata = {}) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: metadata },
+      });
+      if (error) throw error;
+      
+      if (data.user && data.session) {
+        return await applyAuthenticatedUser(data.user);
+      }
+      
+      return { needsEmailConfirmation: true };
+    } catch (error) {
+      handleAuthError(error);
+      throw error;
+    }
+  }, [applyAuthenticatedUser, handleAuthError]);
 
   const logout = useCallback(async () => {
     logoutInProgressRef.current = true;

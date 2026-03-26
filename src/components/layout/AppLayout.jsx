@@ -233,7 +233,50 @@ export default function AppLayout() {
   useEffect(() => { queryClientRef.current = queryClient; }, [queryClient]);
 
   const { user, logout } = useAuth();
-  const { role, nav } = useRBAC(user);
+  const { role, nav: rawNav } = useRBAC(user);
+
+  // ── Translate nav labels ────────────────────────────────────────
+  let locale = 'en';
+  try {
+    const i18n = useI18n();
+    locale = i18n.locale || 'en';
+  } catch (_) {}
+  const isPt = locale === 'pt-BR';
+
+  const ROLE_LABELS_PT = {
+    visitor: 'Visitante',
+    athlete: 'Atleta',
+    coach: 'Treinador',
+    nutritionist: 'Nutricionista',
+    clinician: 'Médico',
+    admin: 'Admin',
+  };
+
+  const NAV_LABELS_PT = {
+    Today: 'Hoje',
+    Nutrition: 'Nutrição',
+    Train: 'Treino',
+    Body: 'Corpo',
+    Plans: 'Planos',
+    Progress: 'Progresso',
+    Photos: 'Fotos',
+    Health: 'Saúde',
+    More: 'Mais',
+    Profile: 'Perfil',
+    Home: 'Início',
+    Dashboard: 'Painel',
+    Athletes: 'Atletas',
+    Clients: 'Clientes',
+    Patients: 'Pacientes',
+    Social: 'Social',
+    Export: 'Exportar',
+    Admin: 'Admin',
+  };
+
+  const nav = rawNav.map((item) => ({
+    ...item,
+    label: isPt ? (NAV_LABELS_PT[item.label] || item.label) : item.label,
+  }));
 
   const bottomPaths = BOTTOM_PATHS_BY_ROLE[role] || BOTTOM_PATHS_BY_ROLE.athlete;
   const bottomNav = useMemo(
@@ -433,7 +476,7 @@ export default function AppLayout() {
                 {user?.full_name || user?.email}
               </p>
               <span className="mt-1 inline-block text-[11px] font-medium text-[hsl(var(--fg-2))]">
-                {ROLE_LABELS[role] || role}
+                {isPt ? (ROLE_LABELS_PT[role] || role) : (ROLE_LABELS[role] || role)}
               </span>
             </div>
           ) : null}
@@ -444,7 +487,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(isActive(ROUTES.settings), collapsed)}
             >
               <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>Settings</span> : null}
+              {!collapsed ? <span>{isPt ? 'Configurações' : 'Settings'}</span> : null}
             </Link>
             <LanguageToggleNav collapsed={collapsed} />
             <ThemeToggleButton
@@ -456,7 +499,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(false, collapsed, true)}
             >
               <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>Sign out</span> : null}
+              {!collapsed ? <span>{isPt ? 'Sair' : 'Sign out'}</span> : null}
             </button>
             <button
               onClick={() => setCollapsed((value) => !value)}
@@ -469,7 +512,7 @@ export default function AppLayout() {
                 )}
                 strokeWidth={1.95}
               />
-              {!collapsed ? <span>Collapse</span> : null}
+              {!collapsed ? <span>{isPt ? 'Recolher' : 'Collapse'}</span> : null}
             </button>
           </div>
         </div>
@@ -583,17 +626,17 @@ export default function AppLayout() {
                     {user?.email}
                   </p>
                   <span className="mt-1 inline-block text-[11px] font-medium text-[hsl(var(--fg-2))]">
-                    {ROLE_LABELS[role] || role}
+                    {isPt ? (ROLE_LABELS_PT[role] || role) : (ROLE_LABELS[role] || role)}
                   </span>
                 </div>
                 <LanguageToggleNav collapsed={false} />
                 <Link to={ROUTES.settings} className={getMobileNavItemClass(isActive(ROUTES.settings))}>
                   <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>Settings</span>
+                  <span>{isPt ? 'Configurações' : 'Settings'}</span>
                 </Link>
                 <button onClick={() => logout()} className={getMobileNavItemClass(false, true)}>
                   <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>Sign out</span>
+                  <span>{isPt ? 'Sair' : 'Sign out'}</span>
                 </button>
               </div>
             </motion.div>
@@ -608,7 +651,7 @@ export default function AppLayout() {
             key: path,
             to: getBottomTabTarget(path),
             onClick: (event) => handleBottomTabPress(event, path),
-            label: MOBILE_TAB_LABEL_OVERRIDES[path] || label,
+            label: isPt ? label : (MOBILE_TAB_LABEL_OVERRIDES[path] || label),
             icon: ICON_MAP[icon] || Home,
             active: currentTabRoot === path,
           })),

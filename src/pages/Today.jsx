@@ -272,6 +272,7 @@ function TodayContent() {
   const { subscription, trialDaysRemaining, isTrialExpired } = useSubscription();
   const { t, locale } = useI18n();
   const isEN = locale === 'en-US';
+  const isPt = locale === 'pt-BR';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [checkinOpen, setCheckinOpen] = useState(false);
@@ -623,15 +624,15 @@ function TodayContent() {
   const heroTagline = isLoading
     ? 'Pulling training, nutrition, and body signals into one clean daily brief.'
     : allDoneCount === 3
-      ? isEN
-        ? 'Your core tracking is current. Review what is working and protect the next best decision.'
+      ? isPt
+        ? 'Seu rastreamento principal está em dia. Revise o que está funcionando e proteja a próxima melhor decisão.'
         : 'Your core tracking is current. Review what is working and protect the next best decision.'
       : allDoneCount === 0
-        ? isEN
-          ? 'isPt ? "Comece com alimentação, treino ou dados corporais para que o Hoje se torne mensurável." : "Start with food, training, or body data so Today becomes something measurable."'
-          : 'isPt ? "Comece com alimentação, treino ou dados corporais para que o Hoje se torne mensurável." : "Start with food, training, or body data so Today becomes something measurable."'
-        : isEN
-          ? 'You already have momentum today. Close the biggest gap and keep the day structurally complete.'
+        ? isPt
+          ? 'Comece com alimentação, treino ou dados corporais para que o Hoje se torne mensurável.'
+          : 'Start with food, training, or body data so Today becomes something measurable.'
+        : isPt
+          ? 'Você já tem impulso hoje. Feche a maior lacuna e mantenha o dia estruturalmente completo.'
           : 'You already have momentum today. Close the biggest gap and keep the day structurally complete.';
   const heroHighlights = [
     {

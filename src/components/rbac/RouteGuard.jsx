@@ -25,10 +25,11 @@ export default function RouteGuard({
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isLoadingAuth && !isAuthenticated) {
-      navigate(ROUTES.home, { replace: true });
+    if (!isLoadingAuth && !isAuthenticated && location.pathname !== ROUTES.home && location.pathname !== ROUTES.auth) {
+      const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
+      navigate(`${ROUTES.auth}?mode=login&next=${encodeURIComponent(nextUrl)}`, { replace: true });
     }
-  }, [isLoadingAuth, isAuthenticated, navigate]);
+  }, [isLoadingAuth, isAuthenticated, navigate, location.pathname]);
 
   // Redirect if not authorized
   useEffect(() => {

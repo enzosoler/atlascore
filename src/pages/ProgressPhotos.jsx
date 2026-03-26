@@ -50,10 +50,10 @@ const POSES = [
 // Formats a readable date label
 // ─────────────────────────────────────────────────────────────────
 
-function formatCheckpointDate(dateStr) {
+function formatCheckpointDate(dateStr, locale = 'en-US') {
   const dt = new Date(dateStr + 'T12:00:00');
   const today = getToday();
-  const label = dt.toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const label = dt.toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return { label, isToday: dateStr === today };
 }
 
@@ -139,8 +139,9 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
 // ─────────────────────────────────────────────────────────────────
 
 function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose }) {
+  const { locale } = useI18n();
   const [expanded, setExpanded] = useState(true);
-  const { label, isToday } = formatCheckpointDate(date);
+  const { label, isToday } = formatCheckpointDate(date, locale);
   const filledCount = photos.filter((p) => p?.photo_url).length;
 
   return (
@@ -314,6 +315,8 @@ export default function ProgressPhotos({ embedded = false }) {
 function ProgressPhotosContent({ embedded = false }) {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const { subscription } = useSubscription();
+  const { t, locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -455,7 +458,7 @@ function ProgressPhotosContent({ embedded = false }) {
             </p>
             <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
               {allDates.length > 0
-                ? 'Click isPt ? "Novo checkpoint" : "New checkpoint" to add more.'
+                ? isPt ? 'Clique em "Novo checkpoint" para adicionar mais.' : 'Click "New checkpoint" to add more.'
                 : 'Add your first photo checkpoint.'}
             </p>
           </Card>

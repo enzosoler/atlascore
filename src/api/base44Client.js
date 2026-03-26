@@ -40,6 +40,14 @@ export const base44 = {
   functions: {
     invoke: () => Promise.resolve(null),
   },
+  integrations: {
+    Core: {
+      InvokeLLM: () => {
+        console.warn('[base44 stub] InvokeLLM called — base44 has been removed. Migrate to a direct OpenAI/Supabase call.');
+        return Promise.resolve(null);
+      },
+    },
+  },
   auth: {
     me: () => Promise.resolve(null),
   },
