@@ -1897,25 +1897,27 @@ export default function NutritionPage() {
       </AppContainer>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
-          <DialogPanelHeader
-            eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
-            title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
-            description={editingMeal ? t('pages.nutrition.meal_subtitle') : 'Describe your meal with AI for instant logging'}
-          />
-          <div className="p-6 pt-0">
-            <MealForm
-              meal={editingMeal}
-              selectedDate={selectedDate}
-              onSave={handleSaveMeal}
-              isSaving={isSavingMeal}
-              onCancel={() => {
-                setIsFormOpen(false);
-                setEditingMeal(null);
-                setQuickAddType(null);
-              }}
-              recentFoods={recentFoods}
+        <DialogContent className="max-w-xl p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <div className="max-h-[90vh] overflow-y-auto">
+            <DialogPanelHeader
+              eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
+              title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
+              description={editingMeal ? t('pages.nutrition.meal_subtitle') : 'Describe your meal with AI for instant logging'}
             />
+            <div className="p-6 pt-0">
+              <MealForm
+                meal={editingMeal}
+                selectedDate={selectedDate}
+                onSave={handleSaveMeal}
+                isSaving={isSavingMeal}
+                onCancel={() => {
+                  setIsFormOpen(false);
+                  setEditingMeal(null);
+                  setQuickAddType(null);
+                }}
+                recentFoods={recentFoods}
+              />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
