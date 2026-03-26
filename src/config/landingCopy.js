@@ -341,6 +341,76 @@ export const COPY = {
    MOCK UI CARDS — data for visual demos
 ───────────────────────────────────────── */
 export const HOME_MOCK_COPY = {
+  'pt-BR': {
+    workout: {
+      overline: 'Treino de hoje',
+      exerciseName: 'supino reto',
+      weight: '102.5 kg',
+      progress: '⬆ +2.5 kg desde a última sessão · PR',
+      bars: [
+        { label: 'Volume', pct: 82, val: '+18%' },
+        { label: 'Frequência', pct: 65, val: '3x/sem' },
+        { label: 'Consistência', pct: 91, val: '91%' },
+      ],
+      tags: ['Push A', 'Superior', 'Semana 6'],
+    },
+    nutrition: {
+      overline: 'Nutrição de hoje',
+      metricLabel: 'Calorias',
+      metricValue: '2.340',
+      metricMeta: 'Meta: 2.500 · 94% do objetivo',
+      bars: [
+        { label: 'Proteína', pct: 88, val: '176g' },
+        { label: 'Carbos', pct: 72, val: '248g' },
+        { label: 'Gordura', pct: 54, val: '62g' },
+      ],
+      summaryLabel: 'Média de 7 dias',
+      summaryText: 'Proteína média: 168g · 3 dias abaixo da meta',
+    },
+    progress: {
+      overline: 'Evolução corporal',
+      cards: [
+        { label: 'Peso', value: '84.2 kg', trend: '▼ −3.8 kg / 8 sem' },
+        { label: 'Gordura corporal', value: '17.4%', trend: '▼ −2.1% / 8 sem' },
+      ],
+      bars: [
+        { label: 'Cintura', pct: 60, val: '−3 cm', accent: true },
+        { label: 'Braço', pct: 75, val: '+1.5 cm' },
+        { label: 'Peitoral', pct: 68, val: '+2 cm' },
+      ],
+    },
+    photos: {
+      overline: 'Evolução visual',
+      items: [
+        ['01 Jan', '#1a1a2e'],
+        ['15 Fev', '#1e2a1e'],
+        ['19 Mar', '#2a1e1e'],
+      ],
+      summaryTitle: '📸 12 semanas de progresso',
+      summaryText: 'Compare duas datas. A diferença que você não percebe no dia a dia.',
+    },
+    supplements: {
+      overline: 'Protocolo de hoje',
+      items: [
+        { icon: '💊', name: 'Creatina', dose: '5g · Manhã', done: true },
+        { icon: '🌿', name: 'Vitamina D3', dose: '5000 UI · Manhã', done: true },
+        { icon: '🔥', name: 'Pré-treino', dose: '1 dose · Pré-treino', done: true },
+        { icon: '🌙', name: 'Magnésio', dose: '400mg · Noite', done: false },
+      ],
+      summaryLabel: 'Adesão 30 dias',
+      summaryValue: '87%',
+      summarySuffix: 'consistência',
+    },
+    timeline: {
+      overline: 'Sua timeline',
+      items: [
+        { date: 'Hoje · 19 Mar', label: 'Novo PR — agachamento 140 kg', detail: 'Treino registrado · 4 exercícios', active: true },
+        { date: '17 Mar', label: 'Check-in — 84.2 kg', detail: 'Gordura corporal: 17.4% · Foto de progresso', active: false },
+        { date: '15 Mar', label: 'Protocolo atualizado', detail: 'Adicionado ômega-3 · 3g diários', active: false },
+        { date: '12 Mar', label: 'Nutrição — melhor semana', detail: 'Proteína média: 182g · 7/7 dias', active: false },
+      ],
+    },
+  },
   'en-US': {
     workout: {
       overline: "Today's workout",

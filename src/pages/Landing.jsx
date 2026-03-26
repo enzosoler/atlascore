@@ -367,7 +367,7 @@ function PricingCard({ plan, popularLabel }) {
 export default function Landing() {
   const { t, language: locale, getTranslation } = useTranslation();
   const c = COPY[locale === 'pt-BR' ? 'pt-BR' : 'en-US'];
-  const homeMocks = HOME_MOCK_COPY['en-US'];
+  const homeMocks = HOME_MOCK_COPY[locale] || HOME_MOCK_COPY['en-US'];
 
   const [billing, setBilling] = useState('monthly');
   const [region, setRegion] = useState('US');
