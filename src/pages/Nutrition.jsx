@@ -1223,6 +1223,13 @@ export default function NutritionPage() {
   const [quickAddType, setQuickAddType] = useState(null);
 
   useEffect(() => {
+    if (!isFormOpen && !pendingFood) {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+  }, [isFormOpen, pendingFood]);
+
+  useEffect(() => {
     if (!user?.id) return;
 
     let isActive = true;
