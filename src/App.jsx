@@ -272,7 +272,6 @@ const AppRoutes = () => (
     <Route path="/share-target" element={<ShareTarget />} />
 
     <Route path="/use-case/:role" element={<UseCase />} />
-    <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
     <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
     <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
     <Route path="/guides/plan-vs-execution" element={<PlanVsExecutionGuide />} />
@@ -303,6 +302,7 @@ const AppRoutes = () => (
         <Route path="/exercise/:id" element={<ExerciseDetail />} />
         <Route path={ROUTES.progress} element={<Progress />} />
         <Route path={ROUTES.body} element={<Body />} />
+        <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
         <Route path={ROUTES.profile} element={<Profile />} />
         <Route path={ROUTES.settings} element={<Settings />} />
         <Route path={ROUTES.export} element={<Export />} />
