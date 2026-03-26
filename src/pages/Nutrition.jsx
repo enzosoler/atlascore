@@ -34,6 +34,7 @@ import {
   shiftDate,
 } from '@/components/shared/StablePage';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/app/ResponsiveModal';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
@@ -1896,31 +1897,34 @@ export default function NutritionPage() {
         </Section>
       </AppContainer>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-xl p-0 max-h-[90vh]" onOpenAutoFocus={(e) => e.preventDefault()}>
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <DialogPanelHeader
-              eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
-              title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
-              description={editingMeal ? t('pages.nutrition.meal_subtitle') : 'Describe your meal with AI for instant logging'}
+      <ResponsiveModal
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        dialogClassName="max-w-xl p-0 max-h-[90vh]"
+        dialogProps={{ onOpenAutoFocus: (e) => e.preventDefault() }}
+      >
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <DialogPanelHeader
+            eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
+            title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
+            description={editingMeal ? t('pages.nutrition.meal_subtitle') : 'Describe your meal with AI for instant logging'}
+          />
+          <div className="p-6 pt-0">
+            <MealForm
+              meal={editingMeal}
+              selectedDate={selectedDate}
+              onSave={handleSaveMeal}
+              isSaving={isSavingMeal}
+              onCancel={() => {
+                setIsFormOpen(false);
+                setEditingMeal(null);
+                setQuickAddType(null);
+              }}
+              recentFoods={recentFoods}
             />
-            <div className="p-6 pt-0">
-              <MealForm
-                meal={editingMeal}
-                selectedDate={selectedDate}
-                onSave={handleSaveMeal}
-                isSaving={isSavingMeal}
-                onCancel={() => {
-                  setIsFormOpen(false);
-                  setEditingMeal(null);
-                  setQuickAddType(null);
-                }}
-                recentFoods={recentFoods}
-              />
-            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </ResponsiveModal>
 
       <Dialog open={!!pendingFood} onOpenChange={(open) => { if (!open) setPendingFood(null); }}>
         <DialogContent>

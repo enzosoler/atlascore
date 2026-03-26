@@ -40,6 +40,7 @@ import { cn } from '@/lib/utils';
 import { LanguageToggle } from '@/components/public/PublicSiteShell';
 import { useI18n } from '@/lib/i18nContext';
 import { getPrimaryScrollTop, resetPrimaryScroll, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
+import { useViewportHeight } from '@/hooks/use-viewport-height';
 
 const ICON_MAP = {
   Home,
@@ -289,6 +290,7 @@ export default function AppLayout() {
   const currentTabRoot = resolveTabRoot(pathname, bottomPaths);
   const transitionState = getTransitionState(pathname, previousPathnameRef.current, bottomPaths);
 
+  useViewportHeight();
   usePrimaryRouteScrollReset(mainRef);
 
   useEffect(() => {

@@ -27,6 +27,7 @@ export const ROUTES = {
   diary: '/diary',
   progressPhotos: '/progress-photos',
   body: '/body',
+  bodyCheckpointNew: '/body/checkpoints/new',
   social: '/social',
   manualWorkout: '/manual-workout',
   prescribedDiet: '/prescribed-diet',

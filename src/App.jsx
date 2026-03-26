@@ -66,6 +66,7 @@ import Exercises from '@/pages/Exercises';
 import ExerciseDetail from '@/pages/ExerciseDetail';
 import Progress from '@/pages/Progress';
 import Body from '@/pages/Body';
+import NewCheckpointPage from '@/pages/body/NewCheckpointPage';
 import HelpCenter from '@/pages/HelpCenter.jsx';
 import UseCase from '@/pages/UseCase';
 import GettingStartedGuide from '@/pages/guides/GettingStartedGuide';
@@ -318,6 +319,7 @@ const AppRoutes = () => (
 
     <Route element={<RequireAuthenticatedApp />}>
       <Route path={ROUTES.onboarding} element={<Onboarding />} />
+      <Route path={ROUTES.bodyCheckpointNew} element={<NewCheckpointPage />} />
 
       <Route element={<AppLayout />}>
         <Route path={ROUTES.today} element={<Today />} />

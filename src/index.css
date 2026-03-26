@@ -1189,3 +1189,59 @@
     animation: fadeIn 0.2s ease both;
   }
 }
+
+/* ── Mobile viewport height ─────────────────────────────────────────
+   --app-height is updated in real time by useViewportHeight().
+   It equals window.innerHeight, which is always the VISIBLE area —
+   unlike 100vh on iOS Safari, which includes the hidden browser chrome.
+   ------------------------------------------------------------------ */
+:root {
+  --app-height: 100vh;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* ── AppShell layout primitive ──────────────────────────────────────
+   grid-template-rows: auto 1fr auto → header / scrollable content / footer
+   ------------------------------------------------------------------ */
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: var(--app-height);
+  overflow: hidden;
+}
+
+.app-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+/* ── Standalone mobile page (MobileFormLayout) ──────────────────── */
+.mobile-page {
+  display: flex;
+  flex-direction: column;
+  height: var(--app-height);
+  overflow: hidden;
+}
+
+/* ── vaul bottom sheet (ResponsiveModal on mobile) ──────────────── */
+.mobile-sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: 92dvh;
+}
+
+.mobile-sheet-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+
+.mobile-sheet-footer {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  flex-shrink: 0;
+}
