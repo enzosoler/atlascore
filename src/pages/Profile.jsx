@@ -289,7 +289,7 @@ function buildProfilePayload(form) {
   }, {});
 }
 
-async function loadLocalProfile(user) {
+async function loadLocalProfile(user, setLocale) {
   // Try Supabase first (works on all devices including mobile)
   if (user?.id) {
     try {
@@ -300,8 +300,8 @@ async function loadLocalProfile(user) {
         .single();
       if (!error && data?.profile_data && Object.keys(data.profile_data).length > 0) {
         // Auto-apply locale preference stored in the profile
-        if (data.profile_data.locale) {
-          setLanguage(data.profile_data.locale);
+        if (data.profile_data.locale && typeof setLocale === 'function') {
+          setLocale(data.profile_data.locale);
         }
         return data.profile_data;
       }
@@ -732,7 +732,7 @@ export default function Profile() {
 function ProfileContent() {
   const qc = useQueryClient();
   const { user, logout } = useAuth();
-  const { t, locale } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const [form, setForm] = useState(EMPTY_FORM);
   const [profileId, setProfileId] = useState(null);
   const [notice, setNotice] = useState(null);
@@ -747,7 +747,7 @@ function ProfileContent() {
 
   const profileQuery = useQuery({
     queryKey: profileQueryKey,
-    queryFn: () => loadLocalProfile(user),
+    queryFn: () => loadLocalProfile(user, setLocale),
   });
 
   const profileData =
