@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -18,6 +18,13 @@ import {
   TrendingUp,
   X,
   Zap,
+  Target,
+  Activity,
+  ArrowRight,
+  RotateCcw,
+  Home,
+  Timer,
+  AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
@@ -28,6 +35,7 @@ import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
 import AIWorkoutInput from '@/components/workouts/AIWorkoutInput';
 import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
+import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import {
@@ -93,11 +101,57 @@ function formatRelativeDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   const now = new Date();
-  const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  const diffMs = now.getTime() - d.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
   if (diffDays < 7) return `${diffDays} days ago`;
   return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+}
+
+// Get today's day index based on plan start date and frequency
+function getTodayDayIndex(plan) {
+  if (!plan?.start_date || !plan?.frequency) return 0;
+  const start = new Date(plan.start_date);
+  const now = new Date();
+  const diffMs = now.getTime() - start.getTime();
+  const daysSinceStart = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  // If negative (plan hasn't started), return 0
+  if (daysSinceStart < 0) return 0;
+  // Calculate which day in the rotation
+  const dayIndex = daysSinceStart % plan.frequency;
+  return dayIndex;
+}
+
+// Get session status based on recent workouts
+function getSessionStatus(dayIndex, recentSessions, plan) {
+  // Check if there's a completed session for this specific day recently
+  const today = new Date().toISOString().split('T')[0];
+  const lastSession = recentSessions[0];
+  
+  if (lastSession) {
+    const lastSessionDate = lastSession.completed_at?.split('T')[0];
+    const lastSessionDayIndex = lastSession.plan_day_index;
+    
+    // If completed today
+    if (lastSessionDate === today && lastSessionDayIndex === dayIndex) {
+      return 'completed';
+    }
+    // If started but not completed (would need more tracking)
+    // For now, simplified logic:
+    if (lastSession.completed_at) {
+      const completedDate = new Date(lastSession.completed_at);
+      const hoursSinceLastSession = (new Date().getTime() - completedDate.getTime()) / (1000 * 60 * 60);
+      
+      // If it's today's scheduled day and not completed
+      const todayIndex = getTodayDayIndex(plan);
+      if (dayIndex === todayIndex && lastSessionDayIndex !== dayIndex) {
+        return 'not_started';
+      }
+    }
+  }
+  
+  return 'not_started';
 }
 
 // ─── CreatePlanModal ──────────────────────────────────────────────────────────
@@ -500,63 +554,293 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
   );
 }
 
-// ─── DayCard (plan day in list view) ──────────────────────────────────────────
+// ─── Today's Workout Card ───────────────────────────────────────────────────
 
-function DayCard({ day, dayIndex, onStart }) {
+function TodayWorkoutCard({ day, dayIndex, plan, status, onStart, isToday }) {
+  const exerciseCount = (day.exercises || []).length;
+  const estimatedDuration = day.exercises?.reduce((sum, ex) => {
+    const sets = ex.sets || 3;
+    const rest = ex.rest || 60;
+    return sum + (sets * 45) + (sets * rest); // ~45s per set + rest
+  }, 300) / 60; // +5min warmup in seconds, convert to minutes
+  
+  const muscleGroups = [...new Set((day.exercises || []).map(ex => ex.muscle_group).filter(Boolean))];
+  
+  const statusConfig = {
+    not_started: { label: 'Ready to start', color: 'text-[hsl(var(--brand))]', bg: 'bg-[hsl(var(--brand)/0.15)]', icon: Play },
+    in_progress: { label: 'In progress', color: 'text-amber-400', bg: 'bg-amber-400/15', icon: Activity },
+    completed: { label: 'Completed today', color: 'text-emerald-400', bg: 'bg-emerald-400/15', icon: CheckCircle2 },
+  };
+  
+  const config = statusConfig[status] || statusConfig.not_started;
+  const StatusIcon = config.icon;
+  
+  return (
+    <div className="overflow-hidden rounded-[20px] border-2 border-[hsl(var(--brand)/0.3)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.15),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-lg shadow-[hsl(var(--brand)/0.1)]">
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-[hsl(var(--brand)/0.2)] flex items-center justify-center">
+              <Dumbbell className="w-7 h-7 text-[hsl(var(--brand))]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2 py-0.5 rounded-full bg-[hsl(var(--brand)/0.2)] text-[hsl(var(--brand))] text-[10px] font-bold uppercase tracking-wider">
+                  TODAY
+                </span>
+                {status !== 'not_started' && (
+                  <span className={`flex items-center gap-1 text-[11px] font-medium ${config.color}`}>
+                    <StatusIcon className="w-3 h-3" />
+                    {config.label}
+                  </span>
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-[hsl(var(--fg))] leading-tight">
+                {day.label || day.name || `Day ${dayIndex + 1}`}
+              </h3>
+              {muscleGroups.length > 0 && (
+                <p className="text-sm text-[hsl(var(--fg-2))] mt-1 capitalize">
+                  {muscleGroups.slice(0, 3).join(' · ')}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex-shrink-0 text-right">
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${config.bg}`}>
+              <StatusIcon className={`w-4 h-4 ${config.color}`} />
+              <span className={`text-sm font-semibold ${config.color}`}>
+                {exerciseCount} exercises
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Stats row */}
+        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[hsl(var(--border)/0.5)]">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[hsl(var(--fg-3))]" />
+            <span className="text-sm text-[hsl(var(--fg-2))]">~{Math.round(estimatedDuration)} min</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-[hsl(var(--fg-3))]" />
+            <span className="text-sm text-[hsl(var(--fg-2))]">
+              {day.exercises?.reduce((sum, ex) => sum + (ex.sets || 3), 0)} sets
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-[hsl(var(--fg-3))]" />
+            <span className="text-sm text-[hsl(var(--fg-2))]">
+              {muscleGroups.length} muscle groups
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Exercise preview */}
+      <div className="px-5 pb-4">
+        <div className="space-y-2">
+          {(day.exercises || []).slice(0, 4).map((ex, i) => (
+            <div key={i} className="flex items-center gap-3 py-2">
+              <span className="w-6 h-6 rounded-md bg-[hsl(var(--fill))] flex items-center justify-center text-xs font-bold text-[hsl(var(--fg-3))]">
+                {i + 1}
+              </span>
+              <span className="flex-1 text-sm text-[hsl(var(--fg))] truncate">{ex.name}</span>
+              <span className="text-xs text-[hsl(var(--fg-3))]">{ex.sets}×{ex.reps}</span>
+            </div>
+          ))}
+          {exerciseCount > 4 && (
+            <p className="text-xs text-[hsl(var(--fg-3))] pl-9">
+              +{exerciseCount - 4} more exercises
+            </p>
+          )}
+        </div>
+      </div>
+      
+      {/* CTA */}
+      <div className="px-5 pb-5">
+        <button
+          onClick={() => onStart(dayIndex)}
+          disabled={status === 'completed'}
+          className={`w-full flex items-center justify-center gap-2 py-4 rounded-[14px] font-bold text-base transition-all ${
+            status === 'completed'
+              ? 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))] cursor-not-allowed'
+              : 'bg-[hsl(var(--brand))] text-white hover:opacity-90 shadow-lg shadow-[hsl(var(--brand)/0.3)]'
+          }`}
+        >
+          {status === 'completed' ? (
+            <>
+              <CheckCircle2 className="w-5 h-5" />
+              Completed Today
+            </>
+          ) : status === 'in_progress' ? (
+            <>
+              <Activity className="w-5 h-5" />
+              Continue Workout
+            </>
+          ) : (
+            <>
+              <Play className="w-5 h-5 fill-current" />
+              Start Today's Workout
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Compact Day Card (for non-today days) ───────────────────────────────────
+
+function CompactDayCard({ day, dayIndex, status, onStart }) {
   const [expanded, setExpanded] = useState(false);
   const exerciseCount = (day.exercises || []).length;
-
+  
+  const statusConfig = {
+    not_started: { icon: CircleIcon, color: 'text-[hsl(var(--fg-3))]' },
+    completed: { icon: CheckCircle2, color: 'text-emerald-400' },
+  };
+  
+  const config = statusConfig[status] || statusConfig.not_started;
+  const StatusIcon = config.icon;
+  
   return (
-    <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)]">
+    <div className="overflow-hidden rounded-[16px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.4)]">
       <button
-        onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-left"
       >
-        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
-          <Dumbbell className="w-4 h-4 text-[hsl(var(--brand))]" />
-        </div>
+        <StatusIcon className={`w-4 h-4 ${config.color} flex-shrink-0`} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[hsl(var(--fg))] leading-tight truncate">
+          <p className="text-sm font-medium text-[hsl(var(--fg))] truncate">
             {day.label || day.name || `Day ${dayIndex + 1}`}
           </p>
-          <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">{exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-[hsl(var(--fg-3))]">
+            {exerciseCount} exercises
+          </p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onStart(dayIndex); }}
-          className="flex-shrink-0 flex items-center gap-1.5 rounded-[12px] bg-[hsl(var(--brand))] px-3 py-2 text-xs font-bold text-white transition-colors hover:opacity-90"
+          className="flex-shrink-0 flex items-center gap-1.5 rounded-[10px] bg-[hsl(var(--fill-secondary))] px-3 py-1.5 text-xs font-semibold text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--brand)/0.1)] hover:text-[hsl(var(--brand))] transition-colors"
         >
           <Play className="w-3 h-3 fill-current" />
           Start
         </button>
-        <span className="flex-shrink-0 text-[hsl(var(--fg-3))] ml-1">
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </span>
+        {expanded ? <ChevronUp className="w-4 h-4 text-[hsl(var(--fg-3))]" /> : <ChevronDown className="w-4 h-4 text-[hsl(var(--fg-3))]" />}
       </button>
-
+      
       {expanded && (
-        <div className="border-t border-[hsl(var(--border)/0.7)] px-4 py-2 space-y-2">
+        <div className="border-t border-[hsl(var(--border)/0.5)] px-4 py-3 space-y-1.5">
           {(day.exercises || []).map((ex, i) => (
-            <div key={i} className="flex items-center gap-2 py-1.5">
-              <span className="w-5 h-5 rounded-md bg-[hsl(var(--fill))] flex items-center justify-center text-[10px] font-bold text-[hsl(var(--fg-3))] flex-shrink-0">
-                {i + 1}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-[hsl(var(--fg))] truncate">{ex.name}</p>
-              </div>
-              <span className="text-xs text-[hsl(var(--fg-3))] flex-shrink-0">{ex.sets}×{ex.reps}</span>
-              {ex.load && <span className="text-xs text-[hsl(var(--brand)/0.7)] flex-shrink-0">{ex.load}kg</span>}
+            <div key={i} className="flex items-center gap-2 text-sm">
+              <span className="text-[hsl(var(--fg-3))]">{i + 1}.</span>
+              <span className="flex-1 text-[hsl(var(--fg))] truncate">{ex.name}</span>
+              <span className="text-xs text-[hsl(var(--fg-3))]">{ex.sets}×{ex.reps}</span>
             </div>
           ))}
-          {exerciseCount === 0 && (
-            <p className="text-xs text-[hsl(var(--fg-3))] py-2">No exercises added yet</p>
-          )}
         </div>
       )}
     </div>
   );
 }
 
-// ─── SessionCard ──────────────────────────────────────────────────────────────
+function CircleIcon({ className }) {
+  return <div className={`w-4 h-4 rounded-full border-2 border-current ${className}`} />;
+}
+
+// ─── AI Insights Card ────────────────────────────────────────────────────────
+
+function AIInsightsCard({ plan, recentSessions }) {
+  const insights = useMemo(() => {
+    const list = [];
+    
+    // Check training consistency
+    if (recentSessions.length > 0) {
+      const lastSession = recentSessions[0];
+      if (lastSession?.completed_at) {
+        const lastDate = new Date(lastSession.completed_at);
+        const now = new Date();
+        const hoursSince = (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSince > 72) {
+          list.push({
+            type: 'warning',
+            icon: AlertCircle,
+            message: `You haven't trained in ${Math.floor(hoursSince / 24)} days`,
+            action: 'Time to get back on track',
+          });
+        } else if (hoursSince < 24) {
+          list.push({
+            type: 'success',
+            icon: CheckCircle2,
+            message: 'You trained today — great consistency!',
+            action: null,
+          });
+        }
+      }
+    } else {
+      list.push({
+        type: 'info',
+        icon: Sparkles,
+        message: 'Start your first workout to build momentum',
+        action: 'Every journey begins with a single rep',
+      });
+    }
+    
+    // Weekly volume check (simplified)
+    const thisWeekSessions = recentSessions.filter(s => {
+      if (!s.completed_at) return false;
+      const daysAgo = (new Date().getTime() - new Date(s.completed_at).getTime()) / (1000 * 60 * 60 * 24);
+      return daysAgo <= 7;
+    });
+    
+    if (thisWeekSessions.length >= 3) {
+      list.push({
+        type: 'success',
+        icon: TrendingUp,
+        message: `On fire! ${thisWeekSessions.length} sessions this week`,
+        action: 'Keep this consistency',
+      });
+    } else if (thisWeekSessions.length === 0 && recentSessions.length > 0) {
+      list.push({
+        type: 'warning',
+        icon: RotateCcw,
+        message: 'No sessions this week yet',
+        action: 'Your plan is waiting',
+      });
+    }
+    
+    return list.slice(0, 2); // Max 2 insights
+  }, [recentSessions]);
+  
+  if (insights.length === 0) return null;
+  
+  return (
+    <div className="space-y-2">
+      {insights.map((insight, i) => {
+        const Icon = insight.icon;
+        const colors = {
+          warning: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+          success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+          info: 'bg-[hsl(var(--brand)/0.1)] border-[hsl(var(--brand)/0.2)] text-[hsl(var(--brand))]',
+        };
+        const colorClass = colors[insight.type] || colors.info;
+        
+        return (
+          <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-[14px] border ${colorClass}`}>
+            <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">{insight.message}</p>
+              {insight.action && (
+                <p className="text-xs opacity-80 mt-0.5">{insight.action}</p>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function SessionCard({ session }) {
   const exerciseCount = Array.isArray(session.exercises_completed)
@@ -720,64 +1004,35 @@ export default function WorkoutsV2() {
 
   const isLoading = isLoadingPlan || isLoadingRecent;
   const days = activePlan?.days || [];
+  const todayDayIndex = activePlan ? getTodayDayIndex(activePlan) : 0;
+  const [showQuickWorkout, setShowQuickWorkout] = useState(false);
 
   // ── List mode ─────────────────────────────────────────────────────────────
   return (
     <AppContainer maxWidth="max-w-3xl">
+      {/* NEW HEADER: Execution-focused */}
       <PageHeader
-        eyebrow="Training"
-        title="Workouts"
-        subtitle="Manage your active plan, launch focused sessions, and keep recent training history easy to scan."
+        eyebrow="Train Today"
+        title={activePlan ? "Your Training Plan" : "Start Training"}
+        subtitle={activePlan 
+          ? `Day ${todayDayIndex + 1} of ${activePlan.frequency} · ${activePlan.name}` 
+          : "Create a plan or generate a quick workout with AI"}
         actions={(
           <ActionRow>
-            {can('ai_workout_generation') ? (
+            {can('ai_workout_generation') && (
               <SecondaryButton className="gap-2" onClick={() => setShowPlanBuilder(true)}>
                 <Sparkles className="h-4 w-4" />
-                Plan builder
+                AI Plan Builder
               </SecondaryButton>
-            ) : null}
-            <PrimaryButton className="gap-2" onClick={() => setShowCreatePlan(true)}>
-              <Plus className="h-4 w-4" />
-              New Plan
-            </PrimaryButton>
-            <SecondaryButton className="gap-2" onClick={handleStartEmpty}>
+            )}
+            <SecondaryButton className="gap-2" onClick={() => setShowQuickWorkout(true)}>
               <Zap className="h-4 w-4" />
-              Free Workout
+              Quick Workout
             </SecondaryButton>
           </ActionRow>
         )}
       >
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Card className="px-4 py-4">
-            <p className="atlas-overline">Status</p>
-            <p className="mt-3 text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {activePlan ? activePlan.name : 'No active plan'}
-            </p>
-            <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              {activePlan
-                ? `${days.length} days ready to execute`
-                : 'Create a plan or jump into a free workout.'}
-            </p>
-          </Card>
-          <Card className="px-4 py-4">
-            <p className="atlas-overline">Recent sessions</p>
-            <p className="mt-3 text-[24px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-              {recentSessions.length}
-            </p>
-            <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              Logged and ready for comparison.
-            </p>
-          </Card>
-          <Card className="px-4 py-4">
-            <p className="atlas-overline">Personal records</p>
-            <p className="mt-3 text-[24px] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-              {Object.keys(personalRecords || {}).length}
-            </p>
-            <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              Available during execution as live feedback.
-            </p>
-          </Card>
-        </div>
+        <div className="h-2" />{/* Spacer for PageHeader children requirement */}
       </PageHeader>
 
       <div className="space-y-7 pb-12">
@@ -788,86 +1043,101 @@ export default function WorkoutsV2() {
         )}
 
         {!isLoading && activePlan && (
-          <Section
-            eyebrow="Active plan"
-            title={activePlan.name}
-            subtitle={activePlan.objective || 'Structured plan ready for execution.'}
-          >
-            <Card className="mb-4 border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.12),transparent_34%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-4 py-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--brand)/0.2)]">
-                    <Zap className="w-4 h-4 text-[hsl(var(--brand))]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold tracking-widest text-[hsl(var(--brand))] uppercase">Active plan</p>
-                    <p className="text-base font-bold text-[hsl(var(--fg))] mt-0.5 truncate">{activePlan.name}</p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
-                        <Calendar className="w-3 h-3" />{activePlan.frequency}× / week
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
-                        <Dumbbell className="w-3 h-3" />{days.length} days
-                      </span>
-                    </div>
-                    {activePlan.objective && (
-                      <p className="text-xs text-[hsl(var(--fg-3))] mt-1 italic truncate">{activePlan.objective}</p>
-                    )}
-                  </div>
+          <>
+            {/* AI INSIGHTS */}
+            <AIInsightsCard plan={activePlan} recentSessions={recentSessions} />
+            
+            {/* TODAY'S WORKOUT - PRIMARY CARD */}
+            {days[todayDayIndex] && (
+              <TodayWorkoutCard
+                day={days[todayDayIndex]}
+                dayIndex={todayDayIndex}
+                plan={activePlan}
+                status={getSessionStatus(todayDayIndex, recentSessions, activePlan)}
+                onStart={handleStartFromPlan}
+                isToday={true}
+              />
+            )}
+            
+            {/* OTHER DAYS - COLLAPSED */}
+            {days.length > 1 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">Upcoming Days</p>
+                  <span className="text-xs text-[hsl(var(--fg-3))]">{days.length - 1} more</span>
                 </div>
-                <SecondaryButton
-                  type="button"
-                  onClick={() => setShowCreatePlan(true)}
-                  className="shrink-0"
-                >
-                  Replace
+                <div className="space-y-2">
+                  {days.map((day, i) => {
+                    if (i === todayDayIndex) return null;
+                    return (
+                      <CompactDayCard
+                        key={i}
+                        day={day}
+                        dayIndex={i}
+                        status={getSessionStatus(i, recentSessions, activePlan)}
+                        onStart={handleStartFromPlan}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {/* PLAN CONTROLS */}
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2 text-sm text-[hsl(var(--fg-3))]">
+                <Calendar className="w-4 h-4" />
+                <span>{activePlan.frequency}× per week · {activePlan.objective || 'General fitness'}</span>
+              </div>
+              <div className="flex gap-2">
+                <SecondaryButton size="sm" onClick={() => setShowPlanBuilder(true)}>
+                  <Sparkles className="w-3.5 h-3.5 mr-1" />
+                  New AI Plan
+                </SecondaryButton>
+                <SecondaryButton size="sm" onClick={() => setShowCreatePlan(true)}>
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  Manual
                 </SecondaryButton>
               </div>
-            </Card>
-
-            <div className="space-y-2.5">
-              {days.map((day, i) => (
-                <DayCard key={i} day={day} dayIndex={i} onStart={handleStartFromPlan} />
-              ))}
             </div>
-          </Section>
+          </>
         )}
 
         {!isLoading && !activePlan && (
-          <Card className="px-5 py-4">
-            <EmptyState
-              icon={Dumbbell}
-              title="No active plan"
-              description="Create a structured plan or jump straight into a free workout."
-              action={(
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <PrimaryButton className="gap-2" onClick={() => setShowCreatePlan(true)}>
-                    <Plus className="h-4 w-4" />
-                    Create Plan
-                  </PrimaryButton>
-                  <SecondaryButton className="gap-2" onClick={handleStartEmpty}>
-                    <Play className="h-4 w-4 fill-current" />
-                    Free Workout
-                  </SecondaryButton>
-                </div>
-              )}
-            />
-          </Card>
+          <div className="space-y-6">
+            {/* NO PLAN STATE - AI-FIRST */}
+            <Card className="px-6 py-6 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-[hsl(var(--brand))]" />
+              </div>
+              <h3 className="text-xl font-bold text-[hsl(var(--fg))] mb-2">Build your training plan with AI</h3>
+              <p className="text-sm text-[hsl(var(--fg-2))] mb-6 max-w-sm mx-auto">
+                Answer 3 quick questions and get a complete, personalized training program in seconds.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row justify-center">
+                <PrimaryButton className="gap-2" onClick={() => setShowPlanBuilder(true)}>
+                  <Sparkles className="h-4 w-4" />
+                  AI Plan Builder
+                </PrimaryButton>
+                <SecondaryButton className="gap-2" onClick={() => setShowQuickWorkout(true)}>
+                  <Zap className="h-4 w-4" />
+                  Quick Workout
+                </SecondaryButton>
+              </div>
+            </Card>
+            
+            {/* AI INSIGHTS FOR NO-PLAN STATE */}
+            <AIInsightsCard plan={null} recentSessions={recentSessions} />
+          </div>
         )}
 
         {!isLoading && recentSessions.length > 0 && (
           <Section
             eyebrow="History"
             title="Recent sessions"
-            subtitle="Latest logs from completed workouts."
+            subtitle="Your completed workouts"
+            actions={<div />}
           >
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">Recent sessions</p>
-              <span className="flex items-center gap-1 text-xs text-[hsl(var(--fg-3))]">
-                <Flame className="w-3 h-3 text-orange-400" />
-                {recentSessions.length} logged
-              </span>
-            </div>
             <div className="space-y-2.5">
               {recentSessions.map((s) => (
                 <SessionCard key={s.id} session={s} />
@@ -877,6 +1147,16 @@ export default function WorkoutsV2() {
         )}
 
       </div>
+
+      {/* Quick Workout Modal */}
+      <QuickWorkoutModal
+        open={showQuickWorkout}
+        onClose={() => setShowQuickWorkout(false)}
+        onStart={(session) => {
+          setActiveSession(session);
+          setMode('execution');
+        }}
+      />
 
       {/* Create Plan Modal */}
       {showCreatePlan && (

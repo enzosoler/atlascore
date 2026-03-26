@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Camera,
   Loader2,
@@ -10,6 +10,14 @@ import {
   Target,
   Trash2,
   UtensilsCrossed,
+  Sunrise,
+  Sun,
+  Moon,
+  Apple,
+  Zap,
+  TrendingUp,
+  Clock,
+  ArrowRight,
 } from 'lucide-react';
 import {
   ActionRow,
@@ -38,16 +46,12 @@ import { searchFoods, getFoodDetails } from '@/services/foodSearchService';
 import { searchTaco } from '@/services/tacoService';
 import AIFoodInput from '@/components/nutrition/AIFoodInput';
 import FoodCameraScanner from '@/components/nutrition/FoodCameraScanner';
-import { useSubscription } from '@/lib/SubscriptionContext';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
 const INPUT_CLASS_NAME = 'atlas-field mt-2 h-11 px-4 py-2 text-base';
 const SELECT_CLASS_NAME = `${INPUT_CLASS_NAME} appearance-none`;
-const TEXTAREA_CLASS_NAME = 'atlas-field mt-2 min-h-[120px] resize-y px-4 py-3 text-base';
 
-// Sensible fallback if the user has never configured targets.
-// These values are intentionally conservative and only used until the profile loads.
 const DEFAULT_PROFILE = {
   calories_target: 0,
   protein_target: 0,
@@ -55,12 +59,9 @@ const DEFAULT_PROFILE = {
   fat_target: 0,
 };
 
-// MOCK_PRESCRIBED_DIET removed — targets now come from profiles.profile_data
-
 const TODAY = getToday();
 const FATSECRET_SEARCH_DEBOUNCE_MS = 400;
 const RECENT_FOODS_STORAGE_KEY = 'atlas_recent_foods';
-
 
 const MEAL_ORDER = [
   'breakfast',
@@ -71,6 +72,26 @@ const MEAL_ORDER = [
   'post_workout',
   'dinner',
   'evening_snack',
+];
+
+const MEAL_BUCKETS = {
+  breakfast: { icon: Sunrise, label: 'Breakfast', time: 'Morning' },
+  morning_snack: { icon: Apple, label: 'Morning Snack', time: 'Late Morning' },
+  lunch: { icon: Sun, label: 'Lunch', time: 'Midday' },
+  afternoon_snack: { icon: Apple, label: 'Afternoon Snack', time: 'Afternoon' },
+  pre_workout: { icon: Zap, label: 'Pre-Workout', time: 'Before Training' },
+  post_workout: { icon: Zap, label: 'Post-Workout', time: 'After Training' },
+  dinner: { icon: Moon, label: 'Dinner', time: 'Evening' },
+  evening_snack: { icon: Apple, label: 'Evening Snack', time: 'Night' },
+};
+
+const QUICK_SUGGESTIONS = [
+  { name: 'Chicken + rice', emoji: '🍗' },
+  { name: 'Eggs + toast', emoji: '🍳' },
+  { name: 'Protein shake', emoji: '🥤' },
+  { name: 'Pasta + sauce', emoji: '🍝' },
+  { name: 'Greek yogurt', emoji: '🥣' },
+  { name: 'Salmon + veggies', emoji: '🐟' },
 ];
 
 const MEAL_MACRO_DOT = {
@@ -86,8 +107,6 @@ const TRACK_FILL_CLASS = {
   carbs: 'bg-[hsl(var(--brand-ai))]',
   fat: 'bg-[hsl(var(--warn))]',
 };
-
-// MOCK_MEALS removed — all meal data comes from Supabase food_logs table
 
 function createLocalId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
