@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabaseClient';
 import {
   LayoutDashboard,
   Users,
