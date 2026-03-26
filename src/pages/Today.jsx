@@ -498,17 +498,27 @@ function TodayContent() {
         <div className="space-y-6 lg:col-span-8">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <TodayWorkoutCard
-              session={todaySession}
-              plan={activeWorkoutPlan}
-              t={t}
-              onClick={() => navigate(ROUTES.workouts)}
+              to={ROUTES.workouts}
+              title={todaySession?.name || activeWorkoutPlan?.name || 'No workout planned'}
+              subtitle={todaySession?.status === 'completed' ? 'Completed' : 'Pending'}
+              primaryLift={activeWorkoutPlan?.exercises?.[0]?.name}
+              weight={activeWorkoutPlan?.exercises?.[0]?.sets?.[0]?.weight}
+              tags={todaySession ? [todaySession.type || 'strength'] : []}
+              stats={[
+                { label: 'Duration', value: `${todaySession?.duration_minutes || 0} min`, percentage: Math.min(100, ((todaySession?.duration_minutes || 0) / 60) * 100) },
+                { label: 'Effort', value: `${todaySession?.perceived_effort || '--'}/10`, percentage: ((todaySession?.perceived_effort || 0) / 10) * 100 },
+              ]}
             />
             <TodayNutritionCard
-              meals={todayMeals}
-              profile={profile}
-              t={t}
-              onClick={() => navigate(ROUTES.nutrition)}
-              onScanClick={() => setCameraOpen(true)}
+              to={ROUTES.nutrition}
+              calories={todayMeals.reduce((sum, m) => sum + (m.calories || 0), 0)}
+              calorieTarget={profile?.targets?.calories}
+              macros={{
+                protein: todayMeals.reduce((sum, m) => sum + (m.protein_g || 0), 0),
+                carbs: todayMeals.reduce((sum, m) => sum + (m.carbs_g || 0), 0),
+                fat: todayMeals.reduce((sum, m) => sum + (m.fat_g || 0), 0),
+              }}
+              macroTargets={profile?.targets}
             />
           </div>
 
@@ -548,10 +558,30 @@ function TodayContent() {
 
           <TodaySection title={t('today_page.sections.timeline')}>
             <TimelineCard
-              meals={todayMeals}
-              session={todaySession}
-              measurements={recentMeasurements}
-              t={t}
+              to={ROUTES.workouts}
+              events={[
+                ...(todaySession ? [{
+                  type: todaySession.status === 'completed' ? 'pr' : 'checkin',
+                  dateLabel: 'Today',
+                  title: todaySession.name || 'Workout',
+                  subtitle: `${todaySession.status} · ${todaySession.duration_minutes || 0} min`,
+                  to: ROUTES.workouts,
+                }] : []),
+                ...(todayMeals.length > 0 ? [{
+                  type: 'nutrition',
+                  dateLabel: 'Today',
+                  title: `${todayMeals.length} meals logged`,
+                  subtitle: `${todayMeals.reduce((sum, m) => sum + (m.calories || 0), 0)} calories`,
+                  to: ROUTES.nutrition,
+                }] : []),
+                ...(recentMeasurements.length > 0 ? [{
+                  type: 'checkin',
+                  dateLabel: recentMeasurements[0].date,
+                  title: 'Measurement recorded',
+                  subtitle: `${recentMeasurements[0].weight || '--'} kg`,
+                  to: ROUTES.measurements,
+                }] : []),
+              ]}
             />
           </TodaySection>
         </div>
