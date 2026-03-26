@@ -15,6 +15,7 @@ const AUTH_STATES = {
 };
 
 const AUTH_CHECK_TIMEOUT = 5000;
+const REVALIDATION_TIMEOUT = 15000;
 
 function withTimeout(promise, label) {
   return Promise.race([
@@ -205,12 +206,17 @@ export const AuthProvider = ({ children }) => {
   }, [applyAuthenticatedUser, applyUnauthenticatedState, handleAuthError]);
 
   const revalidateSession = useCallback(async () => {
-    const isConfigured = import.meta.env.VITE_SUPABASE_URL && 
+    const isConfigured = import.meta.env.VITE_SUPABASE_URL &&
                         (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
     if (!isConfigured) return null;
 
     try {
-      const { data, error } = await withTimeout(supabase.auth.getSession(), 'Session revalidation');
+      const { data, error } = await Promise.race([
+        supabase.auth.getSession(),
+        new Promise((_, reject) =>
+          window.setTimeout(() => reject(new Error('Session revalidation timeout')), REVALIDATION_TIMEOUT)
+        ),
+      ]);
       if (error) throw error;
 
       const sessionUser = data?.session?.user;
@@ -218,16 +224,17 @@ export const AuthProvider = ({ children }) => {
         return await applyAuthenticatedUser(sessionUser);
       }
 
-      applyUnauthenticatedState({
-        markAuthRequired: hadAuthenticatedSessionRef.current,
-        clearClientState: hadAuthenticatedSessionRef.current,
-      });
+      // Only log out if there was no previous session — avoids logging out on network failures
+      if (!hadAuthenticatedSessionRef.current) {
+        applyUnauthenticatedState();
+      }
       return null;
     } catch (error) {
-      handleAuthError(error, { markAuthRequired: hadAuthenticatedSessionRef.current });
+      // On timeout or network error, keep the user logged in — don't log out
+      console.warn('[AuthContext] Session revalidation failed, keeping current state:', error?.message);
       return null;
     }
-  }, [applyAuthenticatedUser, applyUnauthenticatedState, handleAuthError]);
+  }, [applyAuthenticatedUser, applyUnauthenticatedState]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -268,7 +275,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', revalidateSession);
     };
-  }, [checkAppState, revalidateSession, applyAuthenticatedUser, applyUnauthenticatedState]);
+  }, [checkAppState, revalidateSession]);
 
   const signIn = useCallback(async (email, password) => {
     try {
