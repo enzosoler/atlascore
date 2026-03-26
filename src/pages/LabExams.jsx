@@ -233,13 +233,13 @@ export default function LabExams() {
                   className="w-full h-full py-4"
                 >
                   <Plus size={20} className="mr-2" />
-                  {t('pages.lab_exams.actions.add_exam')}
+                  {t('pages.lab_exams.add_panel')}
                 </PrimaryButton>
               </div>
             </div>
 
             {/* Exam List */}
-            <Section title={t('pages.lab_exams.sections.history')}>
+            <Section title={t('pages.lab_exams.history')}>
               <Card className="overflow-hidden divide-y divide-white/5">
                 {isLoading ? (
                   <div className="p-8 space-y-4">
@@ -259,8 +259,8 @@ export default function LabExams() {
                   ))
                 ) : (
                   <EmptyState
-                    title={t('pages.lab_exams.empty.title')}
-                    description={t('pages.lab_exams.empty.description')}
+                    title={t('pages.lab_exams.title')}
+                    description={t('pages.lab_exams.empty_state')}
                     icon={FileText}
                   />
                 )}
@@ -343,7 +343,7 @@ export default function LabExams() {
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-md bg-[#0A0A0A] border-white/10">
           <DialogHeader>
-            <DialogTitle className="text-white">{t('pages.lab_exams.actions.add_exam')}</DialogTitle>
+            <DialogTitle className="text-white">{t('pages.lab_exams.add_panel')}</DialogTitle>
             <DialogDescription className="text-white/40">
               Upload a PDF or enter details manually.
             </DialogDescription>
