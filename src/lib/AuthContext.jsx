@@ -3,7 +3,6 @@ import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { fetchProfileRole, normalizeAtlasRole } from '@/hooks/useRole';
 import { sendWelcomeEmailAsync } from '@/lib/emailService';
-import { analytics } from '@/lib/analytics';
 
 const AuthContext = createContext(null);
 
@@ -89,7 +88,6 @@ export const AuthProvider = ({ children }) => {
   const hadAuthenticatedSessionRef = useRef(false);
   const logoutInProgressRef = useRef(false);
   const mountedRef = useRef(true);
-  const realtimeChannelRef = useRef(null);
 
   const clearAuthState = useCallback(() => {
     setUser(null);
@@ -213,89 +211,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [applyAuthenticatedUser, applyUnauthenticatedState, handleAuthError]);
 
-  // ─── Realtime: listen for profile changes (role, is_suspended, etc.) ────────
-  // When an admin changes a user's role via the admin panel, this subscription
-  // detects the UPDATE on the profiles row and immediately re-resolves the role
-  // without requiring the user to log out and back in.
-  useEffect(() => {
-    // Only subscribe when we have an authenticated user
-    if (!user?.id) {
-      // Clean up any existing channel
-      if (realtimeChannelRef.current) {
-        supabase.removeChannel(realtimeChannelRef.current);
-        realtimeChannelRef.current = null;
-      }
-      return;
-    }
-
-    // Avoid duplicate subscriptions
-    if (realtimeChannelRef.current) {
-      supabase.removeChannel(realtimeChannelRef.current);
-    }
-
-    const channel = supabase
-      .channel(`profile-role-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`,
-        },
-        (payload) => {
-          if (!mountedRef.current) return;
-
-          const newRow = payload.new;
-          const newRole = normalizeAtlasRole(newRow?.role, 'athlete');
-          const isSuspended = newRow?.is_suspended === true;
-
-          console.log(
-            `[AuthContext] Realtime profile update — role: ${newRole}, suspended: ${isSuspended}`
-          );
-
-          setUser((prev) => {
-            if (!prev) return prev;
-
-            // If role or suspension changed, update immediately
-            const roleChanged = prev.atlas_role !== newRole;
-            const suspendedChanged = prev.is_suspended !== isSuspended;
-
-            if (!roleChanged && !suspendedChanged) return prev;
-
-            console.log(
-              `[AuthContext] Applying realtime role change: ${prev.atlas_role} → ${newRole}`
-            );
-
-            return {
-              ...prev,
-              atlas_role: newRole,
-              profile_role: newRole,
-              is_suspended: isSuspended,
-              full_name: newRow?.full_name || prev.full_name,
-            };
-          });
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('[AuthContext] Realtime profile subscription active');
-        }
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('[AuthContext] Realtime profile subscription error — will retry on focus');
-        }
-      });
-
-    realtimeChannelRef.current = channel;
-
-    return () => {
-      supabase.removeChannel(channel);
-      realtimeChannelRef.current = null;
-    };
-    // Re-subscribe only when user ID changes (login/logout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
-
   useEffect(() => {
     mountedRef.current = true;
 
@@ -335,12 +250,6 @@ export const AuthProvider = ({ children }) => {
       subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', revalidateSession);
-
-      // Clean up realtime channel on unmount
-      if (realtimeChannelRef.current) {
-        supabase.removeChannel(realtimeChannelRef.current);
-        realtimeChannelRef.current = null;
-      }
     };
   }, [applyAuthenticatedUser, applyUnauthenticatedState, checkAppState, revalidateSession]);
 
@@ -354,7 +263,6 @@ export const AuthProvider = ({ children }) => {
 
     if (error) throw error;
 
-    analytics.trackLogin('email');
     return await applyAuthenticatedUser(data.user ?? data.session?.user);
   }, [applyAuthenticatedUser]);
 
@@ -375,8 +283,6 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (error) throw error;
-
-    analytics.trackSignUp('email');
 
     // Fire-and-forget welcome email.
     // Runs after successful account creation. Never blocks auth or throws.

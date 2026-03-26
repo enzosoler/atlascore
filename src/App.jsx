@@ -1,6 +1,5 @@
 import React from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import AnalyticsProvider from '@/components/AnalyticsProvider';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -377,9 +376,7 @@ function App() {
                 <DailyStoreProvider>
                   <Router basename={import.meta.env.BASE_URL}>
                     <I18nProvider>
-                      <AnalyticsProvider>
-                        <AuthenticatedApp />
-                      </AnalyticsProvider>
+                      <AuthenticatedApp />
                     </I18nProvider>
                   </Router>
                   <Toaster />

@@ -5,7 +5,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
-  ChevronDown,
+  ChevronRight,
   FileText,
   Heart,
   Loader2,
@@ -18,14 +18,6 @@ import {
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-} from 'recharts';
 
 import { useAuth } from '@/lib/AuthContext';
 import { formatDate, getToday } from '@/lib/atlas-theme';
@@ -72,18 +64,17 @@ import {
   generateExamInsights,
   listExams,
   updateExam,
-  uploadLabFile,
 } from '@/services/labExamService';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Constants & helpers
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const STATUS_META = {
-  normal:   { variant: 'success',     icon: CheckCircle2, tone: 'ok' },
-  low:      { variant: 'warning',     icon: TrendingDown,  tone: 'warn' },
-  high:     { variant: 'warning',     icon: TrendingUp,    tone: 'warn' },
-  critical: { variant: 'destructive', icon: AlertTriangle,  tone: 'err' },
+const STATUS_MAP = {
+  normal:   { variant: 'success',     icon: CheckCircle2 },
+  low:      { variant: 'warning',     icon: TrendingDown },
+  high:     { variant: 'warning',     icon: TrendingUp },
+  critical: { variant: 'destructive', icon: AlertTriangle },
 };
 
 function statusLabel(status, t) {
@@ -103,257 +94,147 @@ const emptyMarker = () => ({
   status: 'normal',
 });
 
-/** Group exams by month-year for timeline display */
-function groupByMonth(exams) {
-  const groups = {};
-  for (const exam of exams) {
-    const d = new Date(exam.exam_date + 'T12:00:00');
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    if (!groups[key]) groups[key] = { key, label: '', exams: [] };
-    groups[key].exams.push(exam);
-  }
-  for (const g of Object.values(groups)) {
-    const [y, m] = g.key.split('-');
-    const d = new Date(Number(y), Number(m) - 1, 1);
-    g.label = d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-  }
-  return Object.values(groups).sort((a, b) => b.key.localeCompare(a.key));
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
-   Sub-components — List view
+   Sub-components
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/** Compact stat pill for the overview strip */
-function StatPill({ label, value, icon: Icon, accentClassName }) {
+/** Summary stat card at the top */
+function StatTile({ label, value, hint, icon: Icon, accentClassName }) {
   return (
-    <div className="flex items-center gap-3 rounded-[20px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.8)] px-4 py-3 shadow-[var(--shadow-xs)]">
-      <div
-        className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border',
-          accentClassName,
-        )}
-      >
-        <Icon className="h-4 w-4" strokeWidth={2} />
+    <article className="atlas-card rounded-[28px] border-[hsl(var(--border)/0.92)] px-5 py-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="atlas-overline">{label}</p>
+          <p className="mt-3 text-[30px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+            {value}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">{hint}</p>
+        </div>
+        <div
+          className={cn(
+            'flex h-11 w-11 items-center justify-center rounded-2xl border shadow-[var(--shadow-xs)]',
+            accentClassName,
+          )}
+        >
+          <Icon className="h-5 w-5" strokeWidth={2} />
+        </div>
       </div>
-      <div className="min-w-0">
-        <p className="text-[20px] font-semibold tabular-nums leading-tight tracking-[-0.03em] text-[hsl(var(--fg))]">
-          {value}
-        </p>
-        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))]">{label}</p>
-      </div>
-    </div>
+    </article>
   );
 }
 
-/** A single exam row in the list */
-function ExamListRow({ exam, onClick, onDelete, t }) {
+/** A single row in the exam list */
+function ExamListRow({ exam, onClick, t }) {
   const markers = exam.markers || [];
   const abnormal = countAbnormal(markers);
   const dateStr = formatDate(exam.exam_date);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   return (
-    <>
-      <motion.button
-        type="button"
-        onClick={onClick}
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
-        className="group flex w-full items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.72)_0%,hsl(var(--card))_100%)] px-4 py-3.5 text-left transition-all hover:border-[hsl(var(--brand)/0.22)] hover:shadow-[var(--shadow-sm)]"
-      >
-        {/* Status dot */}
-        <div
-          className={cn(
-            'h-2.5 w-2.5 shrink-0 rounded-full',
-            abnormal > 0 ? 'bg-[hsl(var(--warn))]' : 'bg-[hsl(var(--ok))]',
-          )}
-        />
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      onClick={onClick}
+      className="group flex w-full items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.84)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.72)_0%,hsl(var(--card))_100%)] px-5 py-4 text-left transition-all hover:border-[hsl(var(--brand)/0.22)] hover:shadow-[var(--shadow-sm)]"
+    >
+      {/* Icon */}
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.74)]">
+        <FileText className="h-4.5 w-4.5 text-[hsl(var(--fg-2))]" />
+      </div>
 
-        {/* Info */}
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[0.9rem] font-semibold text-[hsl(var(--fg))]">
-            {exam.panel_name}
-          </p>
-          <p className="mt-0.5 text-xs text-[hsl(var(--fg-3))]">
-            {dateStr}
-            <span className="mx-1.5 text-[hsl(var(--fg-3)/0.5)]">&middot;</span>
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[0.94rem] font-semibold text-[hsl(var(--fg))]">
+          {exam.panel_name}
+        </p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[hsl(var(--fg-2))]">
+          <span>{dateStr}</span>
+          <span className="text-[hsl(var(--fg-3))]">&middot;</span>
+          <span>
             {markers.length} {t('pages.lab_exams.markers_count')}
-          </p>
+          </span>
+          {abnormal > 0 ? (
+            <Badge variant="warning" className="ml-1 text-[10px]">
+              <AlertTriangle className="mr-1 h-3 w-3" />
+              {abnormal} {t('pages.lab_exams.out_of_range')}
+            </Badge>
+          ) : markers.length > 0 ? (
+            <Badge variant="success" className="ml-1 text-[10px]">
+              <CheckCircle2 className="mr-1 h-3 w-3" />
+              {t('pages.lab_exams.all_in_range')}
+            </Badge>
+          ) : null}
         </div>
+      </div>
 
-        {/* Status badge */}
-        {abnormal > 0 ? (
-          <Badge variant="warning" className="shrink-0 text-[10px]">
-            {abnormal} {t('pages.lab_exams.out_of_range')}
-          </Badge>
-        ) : markers.length > 0 ? (
-          <Badge variant="success" className="shrink-0 text-[10px]">
-            {t('pages.lab_exams.all_in_range')}
-          </Badge>
-        ) : null}
-
-        {/* Delete (on hover) */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowDeleteConfirm(true);
-          }}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[hsl(var(--fg-3))] opacity-0 transition-all hover:text-[hsl(var(--err))] group-hover:opacity-100"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      </motion.button>
-
-      {/* Delete confirmation */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('pages.lab_exams.delete_confirm_title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('pages.lab_exams.delete_confirm_description')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('pages.lab_exams.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => onDelete(exam.id)}
-              className="bg-[hsl(var(--err))] text-white hover:bg-[hsl(var(--err)/0.9)]"
-            >
-              {t('pages.lab_exams.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+      {/* Chevron */}
+      <ChevronRight className="h-4 w-4 shrink-0 text-[hsl(var(--fg-3))] transition-transform group-hover:translate-x-0.5" />
+    </motion.button>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Sub-components — Detail view
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/** Compact marker table row */
-function MarkerTableRow({ marker, t }) {
-  const cfg = STATUS_META[marker.status] || STATUS_META.normal;
+/** Marker row inside exam detail */
+function MarkerRow({ marker, t }) {
+  const cfg = STATUS_MAP[marker.status] || STATUS_MAP.normal;
   const StatusIcon = cfg.icon;
   const hasRef = marker.reference_min != null || marker.reference_max != null;
-  const isAbnormal = marker.status && marker.status !== 'normal';
 
   return (
-    <div
-      className={cn(
-        'flex items-center gap-3 rounded-[14px] px-3.5 py-2.5 transition-colors',
-        isAbnormal
-          ? 'bg-[hsl(var(--warn)/0.06)] hover:bg-[hsl(var(--warn)/0.1)]'
-          : 'hover:bg-[hsl(var(--fill)/0.5)]',
-      )}
-    >
-      {/* Status indicator */}
-      <StatusIcon
-        className={cn(
-          'h-3.5 w-3.5 shrink-0',
-          isAbnormal ? 'text-[hsl(var(--warn))]' : 'text-[hsl(var(--ok)/0.6)]',
-        )}
-      />
-
-      {/* Name + ref range */}
+    <div className="flex flex-col gap-2 rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.72)_0%,hsl(var(--card))_100%)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-medium text-[hsl(var(--fg))]">{marker.name}</p>
+        <p className="text-sm font-semibold text-[hsl(var(--fg))]">{marker.name}</p>
         {hasRef ? (
-          <p className="text-[10px] text-[hsl(var(--fg-3))]">
-            {marker.reference_min ?? '–'} — {marker.reference_max ?? '–'} {marker.unit || ''}
+          <p className="mt-0.5 text-[11px] text-[hsl(var(--fg-3))]">
+            Ref: {marker.reference_min ?? '--'} – {marker.reference_max ?? '--'} {marker.unit || ''}
           </p>
         ) : null}
       </div>
-
-      {/* Value */}
-      <span className="shrink-0 text-[13px] font-semibold tabular-nums text-[hsl(var(--fg))]">
-        {marker.value}
-        {marker.unit ? (
-          <span className="ml-1 text-[11px] font-normal text-[hsl(var(--fg-3))]">
-            {marker.unit}
-          </span>
-        ) : null}
-      </span>
-
-      {/* Status badge — only show if abnormal */}
-      {isAbnormal ? (
-        <Badge variant={cfg.variant} className="shrink-0 gap-0.5 text-[9px]">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold tabular-nums text-[hsl(var(--fg))]">
+          {marker.value} {marker.unit || ''}
+        </span>
+        <Badge variant={cfg.variant} className="gap-1 text-[10px]">
+          <StatusIcon className="h-3 w-3" />
           {statusLabel(marker.status, t)}
         </Badge>
-      ) : null}
+      </div>
     </div>
   );
 }
 
-/** Mini trend sparkline for a single marker */
-function MarkerSparkline({ markerName, data }) {
-  if (!data || data.length < 2) return null;
-
-  const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
-  const latest = sorted[sorted.length - 1];
-  const oldest = sorted[0];
+/** Trend mini-chart for a marker */
+function MarkerTrendCard({ markerName, data }) {
+  const latest = data[data.length - 1];
+  const oldest = data[0];
   const change = Number(latest?.value || 0) - Number(oldest?.value || 0);
   const isUp = change > 0;
-
-  const lineColor =
-    latest?.status === 'normal'
-      ? 'hsl(var(--ok))'
-      : latest?.status === 'critical'
-        ? 'hsl(var(--err))'
-        : 'hsl(var(--warn))';
-
-  const chartData = sorted.map((entry) => ({
-    date: entry.date,
-    value: Number(entry.value || 0),
-    label: new Date(entry.date + 'T12:00:00').toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-    }),
-  }));
+  const toneClassName = isUp ? 'text-[hsl(var(--warn))]' : 'text-[hsl(var(--ok))]';
+  const barToneClassName =
+    latest?.status === 'normal' ? 'bg-[hsl(var(--ok))]' : 'bg-[hsl(var(--warn))]';
+  const maxValue = Math.max(...data.map((e) => Number(e.value || 0)), 1);
 
   return (
-    <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">{markerName}</p>
-        <span
-          className={cn(
-            'text-[11px] font-medium tabular-nums',
-            isUp ? 'text-[hsl(var(--warn))]' : 'text-[hsl(var(--ok))]',
-          )}
-        >
-          {isUp ? '+' : ''}
-          {change.toFixed(1)} {latest?.unit || ''}
+    <div className="atlas-card-muted p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{markerName}</p>
+        <span className={`text-[12px] font-medium ${toneClassName}`}>
+          {isUp ? '↑' : '↓'} {Math.abs(change).toFixed(1)}
         </span>
       </div>
-      <ResponsiveContainer width="100%" height={56}>
-        <LineChart data={chartData} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
-          <XAxis dataKey="label" hide />
-          <YAxis hide domain={['auto', 'auto']} />
-          <RechartsTooltip
-            contentStyle={{
-              background: 'hsl(var(--card))',
-              border: '1px solid hsl(var(--border))',
-              borderRadius: '10px',
-              fontSize: '11px',
-              padding: '4px 8px',
-            }}
-            formatter={(value) => [`${value}`, markerName]}
-            labelFormatter={(label) => label}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={lineColor}
-            strokeWidth={2}
-            dot={{ r: 2.5, fill: lineColor }}
-            activeDot={{ r: 4 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      <div className="flex h-14 items-end justify-between gap-1">
+        {data.map((entry, index) => {
+          const height = (Number(entry.value || 0) / maxValue) * 100;
+          return (
+            <div
+              key={`${markerName}-${index}`}
+              className={`flex-1 rounded-t-[10px] opacity-80 transition-opacity hover:opacity-100 ${barToneClassName}`}
+              style={{ height: `${Math.max(height, 12)}%` }}
+              title={`${entry.value} on ${entry.date}`}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -362,7 +243,7 @@ function MarkerSparkline({ markerName, data }) {
 function InsightsPanel({ insights, loading, onGenerate, t }) {
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-[16px] bg-[hsl(var(--brand)/0.04)] p-4">
+      <div className="atlas-card-muted flex items-center gap-3 rounded-[20px] p-5">
         <Loader2 className="h-5 w-5 animate-spin text-[hsl(var(--brand))]" />
         <p className="text-sm text-[hsl(var(--fg-2))]">{t('pages.lab_exams.generating_insights')}</p>
       </div>
@@ -374,9 +255,11 @@ function InsightsPanel({ insights, loading, onGenerate, t }) {
       <button
         type="button"
         onClick={onGenerate}
-        className="flex w-full items-center gap-3 rounded-[16px] border border-dashed border-[hsl(var(--brand)/0.25)] bg-[hsl(var(--brand)/0.03)] px-4 py-3.5 text-left transition-colors hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.06)]"
+        className="flex w-full items-center gap-3 rounded-[20px] border border-dashed border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.72)_0%,hsl(var(--card))_100%)] px-5 py-4 text-left transition-colors hover:border-[hsl(var(--brand)/0.3)]"
       >
-        <Sparkles className="h-4.5 w-4.5 shrink-0 text-[hsl(var(--brand))]" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.1)]">
+          <Sparkles className="h-4.5 w-4.5 text-[hsl(var(--brand))]" />
+        </div>
         <div>
           <p className="text-sm font-semibold text-[hsl(var(--fg))]">
             {t('pages.lab_exams.generate_insights')}
@@ -390,47 +273,31 @@ function InsightsPanel({ insights, loading, onGenerate, t }) {
   }
 
   return (
-    <div className="space-y-3 rounded-[16px] border border-[hsl(var(--brand)/0.14)] bg-[hsl(var(--brand)/0.03)] p-4">
+    <div className="space-y-3 rounded-[20px] border border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.04)] p-5">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" />
-        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+        <p className="text-sm font-semibold text-[hsl(var(--fg))]">
           {t('pages.lab_exams.ai_insights')}
         </p>
       </div>
 
       {insights.summary ? (
-        <p className="text-sm leading-relaxed text-[hsl(var(--fg))]">{insights.summary}</p>
+        <p className="text-sm font-medium text-[hsl(var(--fg))]">{insights.summary}</p>
       ) : null}
 
       {insights.insights?.length > 0 ? (
-        <ul className="space-y-1.5">
+        <ul className="space-y-2">
           {insights.insights.map((insight, i) => (
-            <li key={i} className="flex gap-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--brand))]" />
+            <li key={i} className="flex gap-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--brand))]" />
               {insight}
             </li>
           ))}
         </ul>
       ) : null}
 
-      {insights.recommendations?.length > 0 ? (
-        <div className="space-y-1.5 border-t border-[hsl(var(--brand)/0.1)] pt-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand)/0.6)]">
-            {t('pages.lab_exams.recommendations')}
-          </p>
-          <ul className="space-y-1.5">
-            {insights.recommendations.map((rec, i) => (
-              <li key={i} className="flex gap-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--ok))]" />
-                {rec}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
       {insights.disclaimer ? (
-        <p className="text-[10px] italic leading-5 text-[hsl(var(--fg-3))]">
+        <p className="mt-2 text-[11px] italic leading-5 text-[hsl(var(--fg-3))]">
           {insights.disclaimer}
         </p>
       ) : null}
@@ -439,80 +306,46 @@ function InsightsPanel({ insights, loading, onGenerate, t }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Exam Detail View
+   Views
    ═══════════════════════════════════════════════════════════════════════════ */
 
-function ExamDetailView({ exam, allExams, onBack, onDelete, onInsightsUpdate, t }) {
+/** Detail view for a single exam */
+function ExamDetailView({ exam, onBack, onDelete, onInsightsUpdate, t }) {
   const { user } = useAuth();
   const markers = exam.markers || [];
   const abnormal = countAbnormal(markers);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insights, setInsights] = useState(() => {
-    if (exam.ai_insights) {
-      try {
-        return typeof exam.ai_insights === 'string'
-          ? JSON.parse(exam.ai_insights)
-          : exam.ai_insights;
-      } catch {
-        return null;
-      }
+    if (exam.insights) {
+      try { return JSON.parse(exam.insights); } catch { return null; }
     }
     return null;
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('all');
-
-  const filteredMarkers = useMemo(() => {
-    if (filterStatus === 'all') return markers;
-    if (filterStatus === 'abnormal') return markers.filter((m) => m.status && m.status !== 'normal');
-    return markers.filter((m) => !m.status || m.status === 'normal');
-  }, [markers, filterStatus]);
-
-  // Build trends for markers in THIS exam from ALL exams
-  const markerTrends = useMemo(() => {
-    const markerNames = new Set(markers.map((m) => m.name));
-    const trends = {};
-    for (const ex of allExams) {
-      for (const m of ex.markers || []) {
-        if (markerNames.has(m.name)) {
-          if (!trends[m.name]) trends[m.name] = [];
-          trends[m.name].push({
-            date: ex.exam_date,
-            value: m.value,
-            unit: m.unit,
-            status: m.status,
-          });
-        }
-      }
-    }
-    return trends;
-  }, [markers, allExams]);
 
   const handleGenerateInsights = async () => {
     setInsightsLoading(true);
     try {
+      // Fetch user profile for context
       let profile = null;
       if (user?.id) {
         const { data } = await supabase
           .from('profiles')
-          .select('*')
+          .select('profile_data')
           .eq('id', user.id)
-          .maybeSingle();
-        if (data) {
-          const pd = data.profile_data && typeof data.profile_data === 'object' ? data.profile_data : {};
-          profile = { ...pd, ...data };
-          delete profile.profile_data;
-        }
+          .single();
+        profile = data?.profile_data || null;
       }
 
       const result = await generateExamInsights(exam, profile);
       if (result) {
         setInsights(result);
+        // Save insights to the exam record
         try {
-          await updateExam(user.id, exam.id, { ai_insights: JSON.stringify(result) });
-          onInsightsUpdate?.(exam.id, result);
+          await updateExam(exam.id, { insights: JSON.stringify(result) });
+          onInsightsUpdate?.(exam.id, JSON.stringify(result));
         } catch {
-          // Non-fatal
+          // Non-fatal — insights are displayed even if save fails
         }
         toast.success(t('pages.lab_exams.insights_generated'));
       } else {
@@ -525,16 +358,14 @@ function ExamDetailView({ exam, allExams, onBack, onDelete, onInsightsUpdate, t 
     }
   };
 
-  const trendEntries = Object.entries(markerTrends).filter(([, data]) => data.length > 1);
-
   return (
     <motion.div
-      initial={{ opacity: 0, x: 16 }}
+      initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -16 }}
+      exit={{ opacity: 0, x: -20 }}
       className="space-y-5"
     >
-      {/* ── Header ──────────────────────────────────────────────────── */}
+      {/* Header */}
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -552,13 +383,13 @@ function ExamDetailView({ exam, allExams, onBack, onDelete, onInsightsUpdate, t 
         <button
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
 
-      {/* ── Quick summary strip ─────────────────────────────────────── */}
+      {/* Summary badges */}
       <div className="flex flex-wrap gap-2">
         <Badge variant="secondary">
           {markers.length} {t('pages.lab_exams.markers_count')}
@@ -576,91 +407,39 @@ function ExamDetailView({ exam, allExams, onBack, onDelete, onInsightsUpdate, t 
         ) : null}
       </div>
 
-      {/* ── Two-column layout: Markers + Sidebar ────────────────────── */}
-      <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-        {/* Left: Markers */}
-        <div className="space-y-4">
-          {markers.length > 0 ? (
-            <div>
-              {/* Filter pills */}
-              {abnormal > 0 ? (
-                <div className="mb-3 flex gap-1.5">
-                  {['all', 'abnormal', 'normal'].map((f) => (
-                    <button
-                      key={f}
-                      type="button"
-                      onClick={() => setFilterStatus(f)}
-                      className={cn(
-                        'rounded-full px-3 py-1 text-[11px] font-semibold transition-colors',
-                        filterStatus === f
-                          ? 'bg-[hsl(var(--brand)/0.14)] text-[hsl(var(--brand))]'
-                          : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]',
-                      )}
-                    >
-                      {f === 'all'
-                        ? t('pages.lab_exams.filter_all')
-                        : f === 'abnormal'
-                          ? t('pages.lab_exams.filter_abnormal')
-                          : t('pages.lab_exams.filter_normal')}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-
-              {/* Marker list */}
-              <div className="space-y-1">
-                <AnimatePresence>
-                  {filteredMarkers.map((marker, index) => (
-                    <motion.div
-                      key={`${marker.name}-${index}`}
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                    >
-                      <MarkerTableRow marker={marker} t={t} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Notes */}
-          {exam.notes ? (
-            <SectionCard title={t('pages.lab_exams.notes_title')}>
-              <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">{exam.notes}</p>
-            </SectionCard>
-          ) : null}
-        </div>
-
-        {/* Right: Trends + AI Insights */}
-        <div className="space-y-4">
-          {/* Trends */}
-          {trendEntries.length > 0 ? (
-            <div className="space-y-2">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                {t('pages.lab_exams.evolution')}
-              </p>
-              {trendEntries.slice(0, 6).map(([name, data]) => (
-                <MarkerSparkline key={name} markerName={name} data={data} />
-              ))}
-            </div>
-          ) : null}
-
-          {/* AI Insights */}
+      {/* Markers list */}
+      {markers.length > 0 ? (
+        <SectionCard
+          title={t('pages.lab_exams.markers_title')}
+          subtitle={t('pages.lab_exams.markers_subtitle')}
+        >
           <div className="space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              {t('pages.lab_exams.ai_insights')}
-            </p>
-            <InsightsPanel
-              insights={insights}
-              loading={insightsLoading}
-              onGenerate={handleGenerateInsights}
-              t={t}
-            />
+            {markers.map((marker, index) => (
+              <MarkerRow key={`${marker.name}-${index}`} marker={marker} t={t} />
+            ))}
           </div>
-        </div>
-      </div>
+        </SectionCard>
+      ) : null}
+
+      {/* Notes */}
+      {exam.notes ? (
+        <SectionCard title={t('pages.lab_exams.notes_title')}>
+          <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">{exam.notes}</p>
+        </SectionCard>
+      ) : null}
+
+      {/* AI Insights */}
+      <SectionCard
+        title={t('pages.lab_exams.ai_insights')}
+        subtitle={t('pages.lab_exams.ai_insights_subtitle')}
+      >
+        <InsightsPanel
+          insights={insights}
+          loading={insightsLoading}
+          onGenerate={handleGenerateInsights}
+          t={t}
+        />
+      </SectionCard>
 
       {/* Delete confirmation */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
@@ -703,15 +482,11 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
   const [importing, setImporting] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [importedCount, setImportedCount] = useState(0);
-  const [importedFile, setImportedFile] = useState(null);
-  const [expandedMarker, setExpandedMarker] = useState(null);
 
   const resetForm = () => {
     setForm({ exam_date: getToday(), panel_name: '', markers: [emptyMarker()], notes: '' });
     setFormErrors({});
     setImportedCount(0);
-    setImportedFile(null);
-    setExpandedMarker(null);
   };
 
   const handleImportFile = async (event) => {
@@ -719,7 +494,6 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
     if (!file) return;
 
     setImporting(true);
-    setImportedFile(file);
     try {
       const result = await extractExamFromFile(file);
 
@@ -790,14 +564,11 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
           reference_min: m.reference_min !== '' ? Number(m.reference_min) : undefined,
           reference_max: m.reference_max !== '' ? Number(m.reference_max) : undefined,
         })),
-      _file: importedFile,
     };
 
     setFormErrors({});
     onSave(payload);
   };
-
-  const filledMarkers = form.markers.filter((m) => m.name?.trim());
 
   return (
     <Dialog
@@ -807,7 +578,7 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
         if (!isOpen) resetForm();
       }}
     >
-      <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-3xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-4xl">
         <DialogPanelHeader
           eyebrow={t('pages.lab_exams.lab_import')}
           title={t('pages.lab_exams.add_exam')}
@@ -820,37 +591,29 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
           <DialogDescription>{t('pages.lab_exams.add_exam_description')}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 p-5 lg:p-6">
-          {/* ── Import area ─────────────────────────────────────────── */}
+        <div className="space-y-6 p-6 lg:p-7">
+          {/* File import */}
           <label
             className={cn(
-              'flex cursor-pointer items-center justify-center gap-3 rounded-[20px] border-2 border-dashed px-5 py-5 text-center transition-all',
-              importing
-                ? 'pointer-events-none border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)] opacity-70'
-                : 'border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.3)] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)]',
+              'flex cursor-pointer items-center justify-center gap-3 rounded-[24px] border border-dashed border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.72)_0%,hsl(var(--card))_100%)] px-5 py-5 text-center transition-colors hover:border-[hsl(var(--brand)/0.24)]',
+              importing && 'pointer-events-none opacity-70',
             )}
           >
             {importing ? (
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-7 w-7 animate-spin text-[hsl(var(--brand))]" />
-                <p className="text-sm font-semibold text-[hsl(var(--brand))]">
-                  {t('pages.lab_exams.importing')}
-                </p>
-                <p className="text-xs text-[hsl(var(--fg-2))]">
-                  {t('pages.lab_exams.import_analyzing')}
-                </p>
-              </div>
+              <Loader2 className="h-5 w-5 animate-spin text-[hsl(var(--brand))]" />
             ) : (
-              <div className="flex flex-col items-center gap-1.5">
-                <Upload className="h-5 w-5 text-[hsl(var(--fg-3))]" />
-                <p className="text-sm font-semibold text-[hsl(var(--fg))]">
-                  {t('pages.lab_exams.import_pdf_title')}
-                </p>
-                <p className="max-w-sm text-xs leading-5 text-[hsl(var(--fg-3))]">
-                  {t('pages.lab_exams.import_pdf_hint')}
-                </p>
-              </div>
+              <Upload className="h-5 w-5 text-[hsl(var(--fg-2))]" />
             )}
+            <div>
+              <p className="text-sm font-semibold text-[hsl(var(--fg))]">
+                {importing
+                  ? t('pages.lab_exams.importing')
+                  : t('pages.lab_exams.import_pdf_title')}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-[hsl(var(--fg-2))]">
+                {t('pages.lab_exams.import_pdf_hint')}
+              </p>
+            </div>
             <input
               type="file"
               className="hidden"
@@ -861,17 +624,12 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
 
           {importedCount > 0 ? (
             <StatusBanner tone="success">
-              <p className="font-semibold">
-                {t('pages.lab_exams.import_banner', { count: importedCount })}
-              </p>
-              <p className="mt-0.5 text-[12px] opacity-80">
-                {t('pages.lab_exams.import_review_hint')}
-              </p>
+              {t('pages.lab_exams.import_banner', { count: importedCount })}
             </StatusBanner>
           ) : null}
 
-          {/* ── Panel name + date ───────────────────────────────────── */}
-          <div className="grid gap-4 sm:grid-cols-2">
+          {/* Panel name + date */}
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">
                 {t('pages.lab_exams.panel_name')}
@@ -885,7 +643,7 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
                     setFormErrors((prev) => ({ ...prev, panel_name: undefined }));
                 }}
                 className={cn(
-                  'h-11',
+                  'h-12',
                   formErrors.panel_name &&
                     'border-[hsl(var(--err))] ring-1 ring-[hsl(var(--err)/0.3)]',
                 )}
@@ -908,7 +666,7 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
                     setFormErrors((prev) => ({ ...prev, exam_date: undefined }));
                 }}
                 className={cn(
-                  'h-11',
+                  'h-12',
                   formErrors.exam_date &&
                     'border-[hsl(var(--err))] ring-1 ring-[hsl(var(--err)/0.3)]',
                 )}
@@ -919,165 +677,61 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
             </div>
           </div>
 
-          {/* ── Markers ─────────────────────────────────────────────── */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
+          {/* Markers */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">
                   {t('pages.lab_exams.markers_title')}
                 </p>
-                {filledMarkers.length > 0 ? (
-                  <p className="text-[11px] text-[hsl(var(--fg-3))]">
-                    {filledMarkers.length} {t('pages.lab_exams.markers_count')}
-                    {importedCount > 0 ? ` — ${t('pages.lab_exams.auto_extracted')}` : ''}
-                  </p>
-                ) : null}
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">
+                  {t('pages.lab_exams.markers_subtitle')}
+                </p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={addMarker}>
-                <Plus className="mr-1 h-3.5 w-3.5" />
+              <Button type="button" variant="outline" className="h-10" onClick={addMarker}>
+                <Plus className="h-4 w-4" />
                 {t('pages.lab_exams.add_marker')}
               </Button>
             </div>
 
-            <div className="space-y-1.5">
-              {form.markers.map((marker, index) => {
-                const isExpanded = expandedMarker === index;
-                const hasName = marker.name?.trim();
-                const statusCfg = STATUS_META[marker.status] || STATUS_META.normal;
-
-                return (
-                  <div
-                    key={`marker-${index}`}
-                    className={cn(
-                      'rounded-[14px] border transition-colors',
-                      hasName
-                        ? 'border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.8)]'
-                        : 'border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)]',
-                    )}
+            <div className="space-y-2">
+              {form.markers.map((marker, index) => (
+                <div
+                  key={`marker-${index}`}
+                  className="atlas-card-muted grid gap-3 p-3 md:grid-cols-[1.5fr_0.8fr_0.8fr_auto]"
+                >
+                  <Input
+                    placeholder={t('pages.lab_exams.marker_name')}
+                    value={marker.name}
+                    onChange={(e) => updateMarker(index, 'name', e.target.value)}
+                    className="h-11"
+                  />
+                  <Input
+                    type="number"
+                    placeholder={t('pages.lab_exams.marker_value')}
+                    value={marker.value}
+                    onChange={(e) => updateMarker(index, 'value', e.target.value)}
+                    className="h-11"
+                  />
+                  <Input
+                    placeholder={t('pages.lab_exams.marker_unit')}
+                    value={marker.unit}
+                    onChange={(e) => updateMarker(index, 'unit', e.target.value)}
+                    className="h-11"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeMarker(index)}
+                    className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
                   >
-                    {/* Compact row */}
-                    <div className="flex items-center gap-2 px-3 py-2">
-                      <div className="min-w-0 flex-1">
-                        {hasName ? (
-                          <div className="flex items-center gap-2">
-                            <span className="truncate text-[13px] font-semibold text-[hsl(var(--fg))]">
-                              {marker.name}
-                            </span>
-                            {marker.value ? (
-                              <span className="shrink-0 text-[13px] tabular-nums text-[hsl(var(--fg-2))]">
-                                {marker.value} {marker.unit}
-                              </span>
-                            ) : null}
-                            {marker.status && marker.status !== 'normal' ? (
-                              <Badge variant={statusCfg.variant} className="text-[9px]">
-                                {statusLabel(marker.status, t)}
-                              </Badge>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <Input
-                            placeholder={t('pages.lab_exams.marker_name')}
-                            value={marker.name}
-                            onChange={(e) => updateMarker(index, 'name', e.target.value)}
-                            className="h-8 border-0 bg-transparent p-0 text-[13px] shadow-none focus-visible:ring-0"
-                          />
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedMarker(isExpanded ? null : index)}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
-                      >
-                        <ChevronDown
-                          className={cn(
-                            'h-3.5 w-3.5 transition-transform',
-                            isExpanded && 'rotate-180',
-                          )}
-                        />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeMarker(index)}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--err))]"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-
-                    {/* Expanded detail */}
-                    {isExpanded ? (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-[hsl(var(--border)/0.5)] px-3 pb-3 pt-2.5"
-                      >
-                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-                              {t('pages.lab_exams.marker_name')}
-                            </label>
-                            <Input
-                              value={marker.name}
-                              onChange={(e) => updateMarker(index, 'name', e.target.value)}
-                              className="h-8 text-[13px]"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-                              {t('pages.lab_exams.marker_value')}
-                            </label>
-                            <Input
-                              type="number"
-                              value={marker.value}
-                              onChange={(e) => updateMarker(index, 'value', e.target.value)}
-                              className="h-8 text-[13px]"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-                              {t('pages.lab_exams.marker_unit')}
-                            </label>
-                            <Input
-                              value={marker.unit}
-                              onChange={(e) => updateMarker(index, 'unit', e.target.value)}
-                              className="h-8 text-[13px]"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-                                {t('pages.lab_exams.ref_min')}
-                              </label>
-                              <Input
-                                type="number"
-                                value={marker.reference_min}
-                                onChange={(e) => updateMarker(index, 'reference_min', e.target.value)}
-                                className="h-8 text-[13px]"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-                                {t('pages.lab_exams.ref_max')}
-                              </label>
-                              <Input
-                                type="number"
-                                value={marker.reference_max}
-                                onChange={(e) => updateMarker(index, 'reference_max', e.target.value)}
-                                className="h-8 text-[13px]"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ) : null}
-                  </div>
-                );
-              })}
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* ── Notes ───────────────────────────────────────────────── */}
+          {/* Notes */}
           <div className="space-y-1.5">
             <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">
               {t('pages.lab_exams.notes_title')}
@@ -1086,20 +740,13 @@ function AddExamDialog({ open, onOpenChange, onSave, saving, t }) {
               placeholder={t('pages.lab_exams.notes_placeholder')}
               value={form.notes}
               onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
-              className="min-h-[72px] resize-y text-[13px]"
+              className="min-h-[100px] resize-y"
             />
           </div>
 
-          {/* ── Save ────────────────────────────────────────────────── */}
+          {/* Save */}
           <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('pages.lab_exams.saving')}
-              </>
-            ) : (
-              t('pages.lab_exams.save_exam')
-            )}
+            {saving ? t('pages.lab_exams.saving') : t('pages.lab_exams.save_exam')}
           </Button>
         </div>
       </DialogContent>
@@ -1143,14 +790,7 @@ function LabExamsContent() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (payload) => {
-      let sourceFile = null;
-      if (payload._file) {
-        sourceFile = await uploadLabFile(user.id, payload._file);
-        delete payload._file;
-      }
-      return createExam(user.id, { ...payload, source_file: sourceFile });
-    },
+    mutationFn: (payload) => createExam(user.id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lab-exams'] });
       setShowAdd(false);
@@ -1163,10 +803,9 @@ function LabExamsContent() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => deleteExam(user.id, id),
+    mutationFn: (id) => deleteExam(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lab-exams'] });
-      setSelectedExamId(null);
       toast.success(t('pages.lab_exams.exam_deleted'));
     },
   });
@@ -1187,16 +826,25 @@ function LabExamsContent() {
     0,
   );
 
-  const monthGroups = useMemo(() => groupByMonth(exams), [exams]);
+  const markerTrends = useMemo(() => {
+    const trends = {};
+    for (const exam of exams) {
+      for (const marker of exam.markers || []) {
+        if (!trends[marker.name]) trends[marker.name] = [];
+        trends[marker.name].push({
+          date: exam.exam_date,
+          value: marker.value,
+          status: marker.status,
+        });
+      }
+    }
+    return trends;
+  }, [exams]);
 
   const handleInsightsUpdate = useCallback(
-    (examId, insightsObj) => {
+    (examId, insightsJson) => {
       qc.setQueryData(['lab-exams', user?.id], (old) =>
-        (old || []).map((e) =>
-          e.id === examId
-            ? { ...e, ai_insights: typeof insightsObj === 'string' ? insightsObj : JSON.stringify(insightsObj) }
-            : e,
-        ),
+        (old || []).map((e) => (e.id === examId ? { ...e, insights: insightsJson } : e)),
       );
     },
     [qc, user?.id],
@@ -1228,7 +876,6 @@ function LabExamsContent() {
           <ExamDetailView
             key={`detail-${selectedExam.id}`}
             exam={selectedExam}
-            allExams={exams}
             onBack={() => setSelectedExamId(null)}
             onDelete={(id) => deleteMutation.mutate(id)}
             onInsightsUpdate={handleInsightsUpdate}
@@ -1245,75 +892,89 @@ function LabExamsContent() {
           >
             {/* Loading skeleton */}
             {isLoading ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-[64px] w-full rounded-[20px]" />
+                  <Skeleton key={i} className="h-[72px] w-full rounded-[20px]" />
                 ))}
               </div>
             ) : null}
 
-            {/* Summary stat strip — compact horizontal */}
+            {/* Summary stats */}
             {!isLoading && exams.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2.5">
-                <StatPill
+              <section className="grid gap-3 md:grid-cols-3">
+                <StatTile
                   label={t('pages.lab_exams.panels')}
                   value={exams.length}
-                  icon={FileText}
-                  accentClassName="border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]"
+                  hint={t('pages.lab_exams.panels_hint')}
+                  icon={Heart}
+                  accentClassName="border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]"
                 />
-                <StatPill
+                <StatTile
                   label={t('pages.lab_exams.out_of_range_markers')}
                   value={abnormalMarkers}
+                  hint={t('pages.lab_exams.out_of_range_hint')}
                   icon={AlertTriangle}
-                  accentClassName="border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]"
+                  accentClassName="border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.14)] text-[hsl(var(--warn))]"
                 />
-                <StatPill
+                <StatTile
                   label={t('pages.lab_exams.tracked_markers')}
                   value={trackedMarkers}
+                  hint={t('pages.lab_exams.tracked_hint')}
                   icon={CheckCircle2}
-                  accentClassName="border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]"
+                  accentClassName="border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]"
                 />
-              </div>
+              </section>
             ) : null}
 
-            {/* Exam list — grouped by month */}
-            {!isLoading && exams.length === 0 ? (
-              <EmptyState
-                title={t('pages.lab_exams.empty_title')}
-                description={t('pages.lab_exams.empty_state')}
-                icon={Heart}
-                action={
-                  <PrimaryButton type="button" onClick={() => setShowAdd(true)}>
-                    {t('pages.lab_exams.add_first')}
-                  </PrimaryButton>
-                }
-              />
+            {/* Trends */}
+            {Object.keys(markerTrends).some((k) => markerTrends[k].length > 1) ? (
+              <SectionCard
+                title={t('pages.lab_exams.evolution')}
+                subtitle={t('pages.lab_exams.recent_trends')}
+              >
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {Object.entries(markerTrends)
+                    .filter(([, data]) => data.length > 1)
+                    .map(([name, data]) => (
+                      <MarkerTrendCard key={name} markerName={name} data={data} />
+                    ))}
+                </div>
+              </SectionCard>
             ) : null}
 
-            {!isLoading && exams.length > 0 ? (
-              <div className="space-y-5">
-                {monthGroups.map((group) => (
-                  <div key={group.key}>
-                    <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                      {group.label}
-                    </p>
-                    <div className="space-y-1.5">
-                      <AnimatePresence>
-                        {group.exams.map((exam) => (
-                          <ExamListRow
-                            key={exam.id}
-                            exam={exam}
-                            onClick={() => setSelectedExamId(exam.id)}
-                            onDelete={(id) => deleteMutation.mutate(id)}
-                            t={t}
-                          />
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null}
+            {/* Exam list */}
+            <SectionCard
+              title={t('pages.lab_exams.history')}
+              subtitle={t('pages.lab_exams.history_subtitle')}
+            >
+              {!isLoading && exams.length === 0 ? (
+                <EmptyState
+                  title={t('pages.lab_exams.empty_title')}
+                  description={t('pages.lab_exams.empty_state')}
+                  icon={Heart}
+                  action={
+                    <PrimaryButton type="button" onClick={() => setShowAdd(true)}>
+                      {t('pages.lab_exams.add_first')}
+                    </PrimaryButton>
+                  }
+                />
+              ) : null}
+
+              {!isLoading && exams.length > 0 ? (
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {exams.map((exam) => (
+                      <ExamListRow
+                        key={exam.id}
+                        exam={exam}
+                        onClick={() => setSelectedExamId(exam.id)}
+                        t={t}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              ) : null}
+            </SectionCard>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useRoleAndSubscription } from '@/hooks/useRoleAndSubscription';
 import {
@@ -23,11 +23,8 @@ import {
   AlertCircle,
   AlertTriangle,
   CheckCircle2,
-  ChevronDown,
   Clock,
-  CreditCard,
   FileText,
-  Filter,
   Loader2,
   MoreHorizontal,
   RefreshCw,
@@ -41,19 +38,13 @@ import {
   UserPlus,
   Users,
   X,
-  Zap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
-const TABS = [
-  { key: 'overview',      label: 'Overview',       icon: TrendingUp },
-  { key: 'users',         label: 'Users',          icon: Users },
-  { key: 'subscriptions', label: 'Subscriptions',  icon: CreditCard },
-  { key: 'audit',         label: 'Audit Log',      icon: FileText },
-];
+const TABS = ['Overview', 'Users', 'Subscriptions', 'Roles', 'Audit Log'];
 
 const ROLES = ['athlete', 'user', 'admin', 'coach', 'nutritionist', 'clinician'];
 
@@ -88,17 +79,6 @@ function roleBadge(role) {
   return map[role] || 'bg-[hsl(var(--border))] text-[hsl(var(--fg-2))]';
 }
 
-function planBadge(plan) {
-  const map = {
-    pro:      'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))] ring-1 ring-[hsl(var(--ok)/0.2)]',
-    premium:  'bg-[hsl(var(--warn)/0.1)] text-[hsl(var(--warn))] ring-1 ring-[hsl(var(--warn)/0.2)]',
-    internal: 'bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))] ring-1 ring-[hsl(var(--primary)/0.2)]',
-    custom:   'bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))] ring-1 ring-[hsl(var(--primary)/0.2)]',
-    free:     'bg-[hsl(var(--border))] text-[hsl(var(--fg-2))]',
-  };
-  return map[plan] || 'bg-[hsl(var(--border))] text-[hsl(var(--fg-2))]';
-}
-
 function fmt(dateStr) {
   if (!dateStr) return '—';
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -111,18 +91,10 @@ function fmtFull(dateStr) {
 
 function shortId(id) {
   if (!id) return '—';
-  return id.slice(0, 7) + '…';
+  return id.slice(0, 8) + '…';
 }
 
-// ─── SHARED UI PRIMITIVES ───────────────────────────────────────────────────
-
-function Badge({ label, className }) {
-  return (
-    <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium whitespace-nowrap', className)}>
-      {label}
-    </span>
-  );
-}
+// ─── CONFIRMATION MODAL ──────────────────────────────────────────────────────
 
 function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = false, onConfirm, onCancel, loading }) {
   return (
@@ -158,6 +130,143 @@ function ConfirmModal({ title, description, confirmLabel = 'Confirm', danger = f
   );
 }
 
+function UserDetailsModal({ user, onClose, onUpdated }) {
+  const latestSubscription = user?.subscriptions?.[0] || null;
+  const [tier, setTier] = useState(latestSubscription?.plan_code || 'free');
+  const [status, setStatus] = useState(latestSubscription?.status || 'inactive');
+  const [saving, setSaving] = useState(false);
+  const hasSubscription = Boolean(latestSubscription?.user_id);
+  const hasChanges =
+    hasSubscription &&
+    (tier !== (latestSubscription?.plan_code || 'free') ||
+      status !== (latestSubscription?.status || 'inactive'));
+
+  const handleSave = async () => {
+    if (!hasSubscription) return;
+
+    setSaving(true);
+    try {
+      if (tier !== latestSubscription?.plan_code) {
+        await updateSubscriptionTier(user.id, tier);
+      }
+      if (status !== latestSubscription?.status) {
+        await updateSubscriptionStatus(user.id, status);
+      }
+      toast.success('User details updated');
+      onUpdated?.();
+      onClose?.();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update subscription details');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
+      <div className="w-full max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-xl)] space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-[18px] font-semibold text-[hsl(var(--fg))]">User details</h3>
+            <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+              Review account, role and latest subscription state.
+            </p>
+          </div>
+          <button onClick={onClose} className="text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--shell)/0.5)] p-4 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Account</p>
+            <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
+              {user?.full_name || user?.display_name || user?.email || '—'}
+            </p>
+            <p className="text-[12px] text-[hsl(var(--fg-2))] break-all">{user?.email || 'No email available'}</p>
+            <p className="text-[12px] font-mono text-[hsl(var(--fg-2))] break-all">{user?.id || '—'}</p>
+          </div>
+
+          <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--shell)/0.5)] p-4 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Status</p>
+            <div className="flex flex-wrap gap-2">
+              <Badge label={user?.role || '—'} className={roleBadge(user?.role)} />
+              {user?.is_suspended ? (
+                <Badge label="suspended" className="bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]" />
+              ) : null}
+            </div>
+            <p className="text-[12px] text-[hsl(var(--fg-2))]">Joined {fmt(user?.created_at)}</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--shell)/0.5)] p-4 space-y-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Subscription</p>
+            <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+              {hasSubscription ? 'Latest subscription can be edited below.' : 'No subscription record found for this user yet.'}
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block mb-2 text-[12px] font-medium text-[hsl(var(--fg))]">Tier</label>
+              <select
+                value={tier}
+                onChange={(event) => setTier(event.target.value)}
+                disabled={!hasSubscription || saving}
+                className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50"
+              >
+                {TIERS.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-2 text-[12px] font-medium text-[hsl(var(--fg))]">Status</label>
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                disabled={!hasSubscription || saving}
+                className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50"
+              >
+                {SUBSCRIPTION_STATUSES.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-2 text-[12px] text-[hsl(var(--fg-2))] sm:grid-cols-2">
+            <p>Trial/Expires: {fmt(latestSubscription?.expires_at)}</p>
+            <p>Started: {fmt(latestSubscription?.started_at)}</p>
+            <p>Stripe: {latestSubscription?.stripe_subscription_id || 'none'}</p>
+            <p>Created: {fmt(latestSubscription?.created_at)}</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={onClose}
+            className="flex-1 h-10 rounded-xl border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))] transition-colors"
+          >
+            Close
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!hasChanges || saving}
+            className="flex-1 h-10 rounded-xl bg-[hsl(var(--primary))] text-[13px] font-medium text-white hover:bg-[hsl(var(--primary)/0.88)] transition-colors disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Save subscription'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ACTION DROPDOWN ─────────────────────────────────────────────────────────
+
 function ActionMenu({ items }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -180,29 +289,22 @@ function ActionMenu({ items }) {
         <MoreHorizontal className="h-4 w-4" />
       </button>
       {open && (
-        <div className="absolute right-0 top-9 z-50 w-52 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-md)] py-1 overflow-hidden">
+        <div className="absolute right-0 top-9 z-50 w-48 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-md)] py-1 overflow-hidden">
           {enabledItems.map((item, idx) => (
-            <React.Fragment key={idx}>
-              {item.separator && idx > 0 && (
-                <div className="my-1 border-t border-[hsl(var(--border)/0.5)]" />
+            <button
+              key={idx}
+              onClick={() => { item.onClick(); setOpen(false); }}
+              disabled={item.disabled}
+              className={cn(
+                'flex w-full items-center gap-2.5 px-3 py-2 text-[13px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
+                item.danger
+                  ? 'text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.07)]'
+                  : 'text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))]'
               )}
-              <button
-                onClick={() => { item.onClick(); setOpen(false); }}
-                disabled={item.disabled}
-                className={cn(
-                  'flex w-full items-center gap-2.5 px-3 py-2 text-[13px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
-                  item.danger
-                    ? 'text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.07)]'
-                    : 'text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))]'
-                )}
-              >
-                {item.icon && <item.icon className="h-3.5 w-3.5 shrink-0" />}
-                <span className="flex-1 text-left">{item.label}</span>
-                {item.shortcut && (
-                  <span className="text-[10px] text-[hsl(var(--fg-2))]">{item.shortcut}</span>
-                )}
-              </button>
-            </React.Fragment>
+            >
+              {item.icon && <item.icon className="h-3.5 w-3.5 shrink-0" />}
+              {item.label}
+            </button>
           ))}
         </div>
       )}
@@ -210,28 +312,30 @@ function ActionMenu({ items }) {
   );
 }
 
-function MetricCard({ label, value, icon: Icon, sub, accent }) {
+// ─── METRIC CARD ─────────────────────────────────────────────────────────────
+
+function MetricCard({ label, value, icon: Icon, trend, sub }) {
   return (
     <div className="atlas-card px-5 py-5 space-y-3">
       <div className="flex items-start justify-between">
-        <p className="atlas-metric-label">{label}</p>
+        <div>
+          <p className="atlas-metric-label">{label}</p>
+          <p className="mt-3 text-[28px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{value ?? '—'}</p>
+        </div>
         {Icon && (
-          <div className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-[14px] shadow-[var(--shadow-xs)]',
-            accent === 'ok'      ? 'border border-[hsl(var(--ok)/0.16)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]'
-            : accent === 'err'   ? 'border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]'
-            : accent === 'warn'  ? 'border border-[hsl(var(--warn)/0.16)] bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]'
-            : 'border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))]'
-          )}>
-            <Icon className="h-4 w-4" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.62)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]">
+            <Icon className="h-4.5 w-4.5" />
           </div>
         )}
       </div>
-      <p className="text-[28px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">{value ?? '—'}</p>
-      {sub && <p className="text-[12px] text-[hsl(var(--fg-2))]">{sub}</p>}
+      {(trend || sub) && (
+        <p className="text-[12px] text-[hsl(var(--fg-2))]">{trend || sub}</p>
+      )}
     </div>
   );
 }
+
+// ─── ERROR STATE ─────────────────────────────────────────────────────────────
 
 function ErrorState({ message, onRetry }) {
   return (
@@ -250,15 +354,17 @@ function ErrorState({ message, onRetry }) {
   );
 }
 
-function EmptyState({ icon: Icon = Users, title, message }) {
+// ─── EMPTY STATE ─────────────────────────────────────────────────────────────
+
+function EmptyState({ message }) {
   return (
-    <div className="atlas-empty py-16 text-center space-y-2">
-      {Icon && <Icon className="h-8 w-8 mx-auto text-[hsl(var(--fg-2)/0.5)]" />}
-      {title && <p className="text-[14px] font-medium text-[hsl(var(--fg))]">{title}</p>}
-      <p className="text-[13px] text-[hsl(var(--fg-2))]">{message}</p>
+    <div className="atlas-empty py-16 text-center">
+      <p className="text-[14px] text-[hsl(var(--fg-2))]">{message}</p>
     </div>
   );
 }
+
+// ─── TABLE WRAPPER ───────────────────────────────────────────────────────────
 
 function TableWrap({ children }) {
   return (
@@ -286,6 +392,14 @@ function Td({ children, className }) {
   );
 }
 
+function Badge({ label, className }) {
+  return (
+    <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium', className)}>
+      {label}
+    </span>
+  );
+}
+
 function Pagination({ page, total, pageSize, onPrev, onNext }) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   return (
@@ -308,166 +422,6 @@ function Pagination({ page, total, pageSize, onPrev, onNext }) {
         >
           Next
         </button>
-      </div>
-    </div>
-  );
-}
-
-function FilterPill({ label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'h-7 px-3 rounded-full text-[11px] font-medium transition-all whitespace-nowrap',
-        active
-          ? 'bg-[hsl(var(--fg))] text-[hsl(var(--bg))] shadow-[var(--shadow-xs)]'
-          : 'bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]'
-      )}
-    >
-      {label}
-    </button>
-  );
-}
-
-// ─── USER DETAILS DRAWER ────────────────────────────────────────────────────
-
-function UserDetailsModal({ user, onClose, onUpdated }) {
-  const latestSubscription = user?.subscriptions?.[0] || null;
-  const [tier, setTier] = useState(latestSubscription?.plan_code || 'free');
-  const [status, setStatus] = useState(latestSubscription?.status || 'inactive');
-  const [saving, setSaving] = useState(false);
-  const hasSubscription = Boolean(latestSubscription?.user_id);
-  const hasChanges =
-    hasSubscription &&
-    (tier !== (latestSubscription?.plan_code || 'free') ||
-      status !== (latestSubscription?.status || 'inactive'));
-
-  const handleSave = async () => {
-    if (!hasSubscription) return;
-    setSaving(true);
-    try {
-      if (tier !== latestSubscription?.plan_code) {
-        await updateSubscriptionTier(user.id, tier);
-      }
-      if (status !== latestSubscription?.status) {
-        await updateSubscriptionStatus(user.id, status);
-      }
-      toast.success('Subscription updated');
-      onUpdated?.();
-      onClose?.();
-    } catch (error) {
-      toast.error(error.message || 'Failed to update');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
-      <div className="w-full max-w-xl rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-xl)] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 px-6 pt-6 pb-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--fill))] text-[hsl(var(--fg-2))]">
-              <User className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-[16px] font-semibold text-[hsl(var(--fg))] truncate">
-                {user?.full_name || user?.display_name || 'Unknown'}
-              </h3>
-              <p className="text-[12px] text-[hsl(var(--fg-2))] truncate">{user?.email || '—'}</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] p-1">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="px-6 pb-6 space-y-5">
-          {/* Info grid */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-xl bg-[hsl(var(--shell)/0.5)] p-3 space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Role</p>
-              <Badge label={user?.role || '—'} className={roleBadge(user?.role)} />
-            </div>
-            <div className="rounded-xl bg-[hsl(var(--shell)/0.5)] p-3 space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Status</p>
-              {user?.is_suspended
-                ? <Badge label="suspended" className="bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]" />
-                : <Badge label="active" className="bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]" />
-              }
-            </div>
-            <div className="rounded-xl bg-[hsl(var(--shell)/0.5)] p-3 space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Joined</p>
-              <p className="text-[12px] font-medium text-[hsl(var(--fg))]">{fmt(user?.created_at)}</p>
-            </div>
-          </div>
-
-          {/* ID */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(var(--shell)/0.4)]">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">ID</p>
-            <p className="text-[11px] font-mono text-[hsl(var(--fg-2))] select-all">{user?.id || '—'}</p>
-          </div>
-
-          {/* Subscription editor */}
-          <div className="space-y-3">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-[hsl(var(--fg-2))]">Subscription</p>
-            {!hasSubscription ? (
-              <p className="text-[13px] text-[hsl(var(--fg-2))]">No subscription record found.</p>
-            ) : (
-              <>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="block mb-1.5 text-[12px] font-medium text-[hsl(var(--fg))]">Plan</label>
-                    <select
-                      value={tier}
-                      onChange={(e) => setTier(e.target.value)}
-                      disabled={saving}
-                      className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50"
-                    >
-                      {TIERS.map((t) => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block mb-1.5 text-[12px] font-medium text-[hsl(var(--fg))]">Status</label>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value)}
-                      disabled={saving}
-                      className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50"
-                    >
-                      {SUBSCRIPTION_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-[hsl(var(--fg-2))]">
-                  <span>Expires: {fmt(latestSubscription?.expires_at)}</span>
-                  <span>Started: {fmt(latestSubscription?.started_at)}</span>
-                  <span>Stripe: {latestSubscription?.stripe_subscription_id || 'none'}</span>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={onClose}
-              className="flex-1 h-10 rounded-xl border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))] transition-colors"
-            >
-              Close
-            </button>
-            {hasSubscription && (
-              <button
-                onClick={handleSave}
-                disabled={!hasChanges || saving}
-                className="flex-1 h-10 rounded-xl bg-[hsl(var(--primary))] text-[13px] font-medium text-white hover:bg-[hsl(var(--primary)/0.88)] transition-colors disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Save changes'}
-              </button>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -505,37 +459,22 @@ function OverviewTab() {
 
   return (
     <div className="space-y-6">
-      {/* Primary metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
-        <MetricCard label="Total Users"   value={metrics?.totalUsers}            icon={Users}        accent="default" />
-        <MetricCard label="Active"        value={metrics?.activeSubscriptions}   icon={CheckCircle2} accent="ok" />
-        <MetricCard label="Trialing"      value={metrics?.trialingSubscriptions} icon={Clock}        accent="warn" />
-        <MetricCard label="Admins"        value={metrics?.adminCount}            icon={Shield}       accent="err" />
-        <MetricCard label="New (7d)"      value={metrics?.newUsersLast7Days}     icon={TrendingUp}   accent="default"
-          sub="Last 7 days"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+        <MetricCard label="Total Users"        value={metrics?.totalUsers}          icon={Users}       />
+        <MetricCard label="Active Subs"        value={metrics?.activeSubscriptions} icon={CheckCircle2} />
+        <MetricCard label="Trialing"           value={metrics?.trialingSubscriptions} icon={Clock}    />
+        <MetricCard label="Admins"             value={metrics?.adminCount}          icon={Shield}      />
+        <MetricCard label="New (7 days)"       value={metrics?.newUsersLast7Days}   icon={TrendingUp}  />
       </div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="atlas-card p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-[hsl(var(--primary))]" />
-            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Quick Actions</p>
-          </div>
-          <p className="text-[12px] text-[hsl(var(--fg-2))] leading-relaxed">
-            Use the Users tab to manage roles, grant or revoke access, suspend accounts, and edit subscriptions. All actions are logged in the Audit Log.
-          </p>
-        </div>
-        <div className="atlas-card p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-[hsl(var(--ok))]" />
-            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Realtime Sync</p>
-          </div>
-          <p className="text-[12px] text-[hsl(var(--fg-2))] leading-relaxed">
-            Role and access changes take effect immediately for all users. No logout required — the app syncs in realtime via Supabase Realtime.
-          </p>
-        </div>
+      <div className="rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--shell)/0.4)] p-5 space-y-2">
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">DB Schema Requirements</p>
+        <p className="text-[12px] text-[hsl(var(--fg-2))] leading-relaxed">
+          Suspend/unsuspend requires <code className="font-mono text-[11px] bg-[hsl(var(--shell))] px-1 rounded">is_suspended boolean</code> on <code className="font-mono text-[11px] bg-[hsl(var(--shell))] px-1 rounded">profiles</code>.
+          Onboarding reset requires <code className="font-mono text-[11px] bg-[hsl(var(--shell))] px-1 rounded">onboarding_completed boolean</code> on <code className="font-mono text-[11px] bg-[hsl(var(--shell))] px-1 rounded">profiles</code>.
+          Audit logging requires the <code className="font-mono text-[11px] bg-[hsl(var(--shell))] px-1 rounded">admin_audit_logs</code> table.
+          See <code className="font-mono text-[11px] bg-[hsl(var(--shell))] px-1 rounded">supabase_admin_console.sql</code> at the project root.
+        </p>
       </div>
     </div>
   );
@@ -547,17 +486,15 @@ function UsersTab() {
   const [users, setUsers] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(25);
+  const [pageSize] = useState(20);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detailsUser, setDetailsUser] = useState(null);
-  const [confirm, setConfirm] = useState(null);
+  const [confirm, setConfirm] = useState(null); // { type, user }
   const [actionLoading, setActionLoading] = useState(false);
-  const [roleEdit, setRoleEdit] = useState(null);
+  const [roleEdit, setRoleEdit] = useState(null); // { userId, currentRole }
   const [selectedRole, setSelectedRole] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
 
   const searchTimeout = useRef(null);
 
@@ -603,60 +540,20 @@ function UsersTab() {
     }
   }, [page, search, load]);
 
-  // Client-side filtering
-  const filteredUsers = useMemo(() => {
-    let result = users;
-    if (filterRole !== 'all') {
-      result = result.filter((u) => u.role === filterRole);
-    }
-    if (filterStatus !== 'all') {
-      const sub = (u) => u.subscriptions?.[0];
-      result = result.filter((u) => sub(u)?.status === filterStatus);
-    }
-    return result;
-  }, [users, filterRole, filterStatus]);
-
   const subscription = (u) => u.subscriptions?.[0] || null;
-
-  // Role distribution for filter pills
-  const roleCounts = useMemo(() => {
-    const counts = { all: users.length };
-    users.forEach((u) => { counts[u.role] = (counts[u.role] || 0) + 1; });
-    return counts;
-  }, [users]);
 
   return (
     <div className="space-y-4">
-      {/* Search + Filters */}
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--fg-2))]" />
-          <input
-            type="text"
-            placeholder="Search by ID, name, or email…"
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="w-full h-10 pl-9 pr-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[13px] text-[hsl(var(--fg))] placeholder-[hsl(var(--fg-2))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
-          />
-        </div>
-
-        {/* Role filter pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          <Filter className="h-3.5 w-3.5 text-[hsl(var(--fg-2))] shrink-0" />
-          <FilterPill
-            label={`All (${roleCounts.all || 0})`}
-            active={filterRole === 'all'}
-            onClick={() => setFilterRole('all')}
-          />
-          {ROLES.filter((r) => roleCounts[r]).map((r) => (
-            <FilterPill
-              key={r}
-              label={`${r} (${roleCounts[r] || 0})`}
-              active={filterRole === r}
-              onClick={() => setFilterRole(filterRole === r ? 'all' : r)}
-            />
-          ))}
-        </div>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--fg-2))]" />
+        <input
+          type="text"
+          placeholder="Search by ID, name, or email…"
+          value={search}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="w-full h-10 pl-9 pr-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[13px] text-[hsl(var(--fg))] placeholder-[hsl(var(--fg-2))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)]"
+        />
       </div>
 
       {error && <ErrorState message={error} onRetry={() => load(page, search)} />}
@@ -665,8 +562,8 @@ function UsersTab() {
         <div className="flex justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--primary))]" />
         </div>
-      ) : filteredUsers.length === 0 ? (
-        <EmptyState icon={Users} title="No users found" message="Try adjusting your search or filters." />
+      ) : users.length === 0 ? (
+        <EmptyState message="No users found." />
       ) : (
         <TableWrap>
           <thead>
@@ -681,34 +578,26 @@ function UsersTab() {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((u) => {
+            {users.map((u) => {
               const sub = subscription(u);
               const isSuspended = u.is_suspended;
               return (
                 <tr key={u.id} className="border-t border-[hsl(var(--border)/0.6)] hover:bg-[hsl(var(--fill)/0.5)] transition-colors">
                   <Td>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--fill))] text-[hsl(var(--fg-2))]">
-                        <span className="text-[11px] font-semibold uppercase">
-                          {(u.full_name || u.email || '?')[0]}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-[hsl(var(--fg))] truncate">
-                          {u.full_name || u.display_name || '—'}
-                        </p>
-                        <p className="text-[11px] text-[hsl(var(--fg-2))] truncate">{u.email || shortId(u.id)}</p>
-                      </div>
+                    <div>
+                      <p className="font-medium text-[hsl(var(--fg))]">
+                        {u.full_name || u.display_name || u.email || '—'}
+                      </p>
+                      <p className="text-[11px] font-mono text-[hsl(var(--fg-2))]">{shortId(u.id)}</p>
+                      {u.email && <p className="text-[11px] text-[hsl(var(--fg-2))]">{u.email}</p>}
                     </div>
                   </Td>
                   <Td>
-                    <div className="flex items-center gap-1.5">
-                      <Badge label={u.role || '—'} className={roleBadge(u.role)} />
-                      {isSuspended && <Badge label="suspended" className="bg-[hsl(var(--warn)/0.1)] text-[hsl(var(--warn))]" />}
-                    </div>
+                    <Badge label={u.role || '—'} className={roleBadge(u.role)} />
+                    {isSuspended && <Badge label="suspended" className="ml-1 bg-[hsl(var(--warn)/0.1)] text-[hsl(var(--warn))]" />}
                   </Td>
                   <Td>
-                    <Badge label={sub?.plan_code || 'free'} className={planBadge(sub?.plan_code || 'free')} />
+                    <span className="text-[hsl(var(--fg-2))]">{sub?.plan_code || '—'}</span>
                   </Td>
                   <Td>
                     {sub ? (
@@ -717,8 +606,8 @@ function UsersTab() {
                       <span className="text-[hsl(var(--fg-2))]">—</span>
                     )}
                   </Td>
-                  <Td className="text-[hsl(var(--fg-2))] text-[12px]">{fmt(sub?.expires_at)}</Td>
-                  <Td className="text-[hsl(var(--fg-2))] text-[12px]">{fmt(u.created_at)}</Td>
+                  <Td className="text-[hsl(var(--fg-2))]">{fmt(sub?.expires_at)}</Td>
+                  <Td className="text-[hsl(var(--fg-2))]">{fmt(u.created_at)}</Td>
                   <Td>
                     <ActionMenu items={[
                       {
@@ -727,39 +616,37 @@ function UsersTab() {
                         onClick: () => setDetailsUser(u),
                       },
                       {
-                        label: 'Edit role',
+                        label: 'Edit Role',
                         icon: UserCheck,
-                        onClick: () => { setRoleEdit({ userId: u.id, name: u.full_name || u.email || shortId(u.id) }); setSelectedRole(u.role || 'athlete'); },
+                        onClick: () => { setRoleEdit({ userId: u.id, name: u.full_name || shortId(u.id) }); setSelectedRole(u.role || 'athlete'); },
                       },
                       {
                         label: isSuspended ? 'Unsuspend' : 'Suspend',
                         icon: isSuspended ? UserPlus : UserMinus,
                         onClick: () => setConfirm({ type: isSuspended ? 'unsuspend' : 'suspend', user: u }),
                         danger: !isSuspended,
-                        separator: true,
                       },
                       {
-                        label: 'Grant pro access',
+                        label: 'Grant Access',
                         icon: ShieldCheck,
                         onClick: () => setConfirm({ type: 'grant', user: u }),
                       },
                       {
-                        label: 'Revoke access',
+                        label: 'Revoke Access',
                         icon: UserMinus,
                         danger: true,
                         onClick: () => setConfirm({ type: 'revoke', user: u }),
                       },
                       {
-                        label: 'Extend trial (+7d)',
+                        label: 'Extend Trial (+7d)',
                         icon: Clock,
                         disabled: sub?.status !== 'trialing',
                         onClick: () => setConfirm({ type: 'extendTrial', user: u }),
                       },
                       {
-                        label: 'Reset onboarding',
+                        label: 'Reset Onboarding',
                         icon: RefreshCw,
                         danger: true,
-                        separator: true,
                         onClick: () => setConfirm({ type: 'resetOnboarding', user: u }),
                       },
                     ]} />
@@ -781,7 +668,7 @@ function UsersTab() {
         />
       )}
 
-      {/* User Details Modal */}
+      {/* Role Edit Modal */}
       {detailsUser && (
         <UserDetailsModal
           user={detailsUser}
@@ -790,19 +677,18 @@ function UsersTab() {
         />
       )}
 
-      {/* Role Edit Modal */}
       {roleEdit && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px]">
           <div className="w-full max-w-sm rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-xl)] space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">Edit Role</h3>
-              <button onClick={() => setRoleEdit(null)} className="text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] p-1">
+              <button onClick={() => setRoleEdit(null)} className="text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]">
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="text-[13px] text-[hsl(var(--fg-2))]">{roleEdit.name}</p>
+            <p className="text-[12px] font-mono text-[hsl(var(--fg-2))]">{roleEdit.name}</p>
             <div>
-              <label className="text-[12px] font-medium text-[hsl(var(--fg))] block mb-1.5">New role</label>
+              <label className="text-[12px] font-medium text-[hsl(var(--fg))] block mb-2">New role</label>
               <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value)}
@@ -811,14 +697,6 @@ function UsersTab() {
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
-            {selectedRole === 'admin' && (
-              <div className="flex items-start gap-2 rounded-lg bg-[hsl(var(--warn)/0.08)] border border-[hsl(var(--warn)/0.2)] p-3">
-                <AlertTriangle className="h-3.5 w-3.5 text-[hsl(var(--warn))] mt-0.5 shrink-0" />
-                <p className="text-[11px] text-[hsl(var(--warn))] leading-relaxed">
-                  Admin role grants full access to all features and this console.
-                </p>
-              </div>
-            )}
             <div className="flex gap-2">
               <button
                 onClick={() => setRoleEdit(null)}
@@ -832,12 +710,7 @@ function UsersTab() {
                   `Role updated to ${selectedRole}`
                 )}
                 disabled={actionLoading}
-                className={cn(
-                  'flex-1 h-9 rounded-xl text-[13px] font-medium text-white transition-colors disabled:opacity-50',
-                  selectedRole === 'admin'
-                    ? 'bg-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.88)]'
-                    : 'bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)/0.88)]'
-                )}
+                className="flex-1 h-9 rounded-xl bg-[hsl(var(--primary))] text-[13px] font-medium text-white hover:bg-[hsl(var(--primary)/0.88)] transition-colors disabled:opacity-50"
               >
                 {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Save'}
               </button>
@@ -852,27 +725,27 @@ function UsersTab() {
           title={
             confirm.type === 'suspend'         ? 'Suspend User'
             : confirm.type === 'unsuspend'     ? 'Unsuspend User'
-            : confirm.type === 'grant'         ? 'Grant Pro Access'
+            : confirm.type === 'grant'         ? 'Grant Access'
             : confirm.type === 'revoke'        ? 'Revoke Access'
-            : confirm.type === 'extendTrial'   ? 'Extend Trial'
+            : confirm.type === 'extendTrial'   ? 'Extend Trial +7 Days'
             : confirm.type === 'resetOnboarding' ? 'Reset Onboarding'
             : 'Confirm'
           }
           description={
-            confirm.type === 'suspend'         ? `Suspend ${confirm.user.full_name || confirm.user.email || shortId(confirm.user.id)}? They will lose access immediately.`
-            : confirm.type === 'unsuspend'     ? `Restore access for ${confirm.user.full_name || confirm.user.email || shortId(confirm.user.id)}.`
-            : confirm.type === 'grant'         ? `Grant pro access to ${confirm.user.full_name || confirm.user.email || shortId(confirm.user.id)}. This takes effect immediately.`
-            : confirm.type === 'revoke'        ? `Revoke access for ${confirm.user.full_name || confirm.user.email || shortId(confirm.user.id)}. Their subscription will be set to inactive.`
-            : confirm.type === 'extendTrial'   ? `Extend trial by 7 days for ${confirm.user.full_name || confirm.user.email || shortId(confirm.user.id)}.`
-            : confirm.type === 'resetOnboarding' ? `Reset onboarding for ${confirm.user.full_name || confirm.user.email || shortId(confirm.user.id)}. They will see the onboarding flow again on next login.`
+            confirm.type === 'suspend'         ? `Suspend ${confirm.user.full_name || shortId(confirm.user.id)}? They will lose access.`
+            : confirm.type === 'unsuspend'     ? `Restore access for ${confirm.user.full_name || shortId(confirm.user.id)}.`
+            : confirm.type === 'grant'         ? `Grant pro access to ${confirm.user.full_name || shortId(confirm.user.id)}.`
+            : confirm.type === 'revoke'        ? `Revoke access for ${confirm.user.full_name || shortId(confirm.user.id)}. This sets subscription to inactive.`
+            : confirm.type === 'extendTrial'   ? `Extend trial by 7 days for ${confirm.user.full_name || shortId(confirm.user.id)}.`
+            : confirm.type === 'resetOnboarding' ? `Reset onboarding flags for ${confirm.user.full_name || shortId(confirm.user.id)}. They will see the onboarding flow again.`
             : null
           }
           confirmLabel={
             confirm.type === 'suspend'         ? 'Suspend'
             : confirm.type === 'unsuspend'     ? 'Unsuspend'
-            : confirm.type === 'grant'         ? 'Grant Access'
+            : confirm.type === 'grant'         ? 'Grant'
             : confirm.type === 'revoke'        ? 'Revoke'
-            : confirm.type === 'extendTrial'   ? 'Extend +7d'
+            : confirm.type === 'extendTrial'   ? 'Extend'
             : confirm.type === 'resetOnboarding' ? 'Reset'
             : 'Confirm'
           }
@@ -884,7 +757,7 @@ function UsersTab() {
             const actions = {
               suspend:         () => runAction(() => suspendUser(user.id),         'User suspended'),
               unsuspend:       () => runAction(() => unsuspendUser(user.id),       'User unsuspended'),
-              grant:           () => runAction(() => grantAccess(user.id, 'pro', 'Admin console grant'), 'Pro access granted'),
+              grant:           () => runAction(() => grantAccess(user.id, 'pro', 'Admin console grant'), 'Access granted'),
               revoke:          () => runAction(() => revokeAccess(user.id),        'Access revoked'),
               extendTrial:     () => runAction(() => extendTrial(user.id, 7),      'Trial extended by 7 days'),
               resetOnboarding: () => runAction(() => resetOnboarding(user.id),     'Onboarding reset'),
@@ -901,7 +774,6 @@ function UsersTab() {
 
 function SubscriptionsTab() {
   const [subs, setSubs] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(25);
@@ -909,19 +781,14 @@ function SubscriptionsTab() {
   const [error, setError] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('all');
 
   const load = useCallback(async (p = page) => {
     setLoading(true);
     setError(null);
     try {
-      const [subResult, userResult] = await Promise.all([
-        fetchAllSubscriptions(p, pageSize),
-        fetchAllUsers(1, 200),
-      ]);
-      setSubs(subResult.subscriptions);
-      setTotal(subResult.total);
-      setAllUsers(userResult.users);
+      const result = await fetchAllSubscriptions(p, pageSize);
+      setSubs(result.subscriptions);
+      setTotal(result.total);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -945,123 +812,74 @@ function SubscriptionsTab() {
     }
   }, [page, load]);
 
-  // Map user_id → user for enrichment
-  const userMap = useMemo(() => {
-    const map = {};
-    allUsers.forEach((u) => { map[u.id] = u; });
-    return map;
-  }, [allUsers]);
-
-  // Status counts for filter pills
-  const statusCounts = useMemo(() => {
-    const counts = { all: subs.length };
-    subs.forEach((s) => { counts[s.status] = (counts[s.status] || 0) + 1; });
-    return counts;
-  }, [subs]);
-
-  const filteredSubs = useMemo(() => {
-    if (filterStatus === 'all') return subs;
-    return subs.filter((s) => s.status === filterStatus);
-  }, [subs, filterStatus]);
-
   return (
     <div className="space-y-4">
-      {/* Status filter pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <Filter className="h-3.5 w-3.5 text-[hsl(var(--fg-2))] shrink-0" />
-        <FilterPill
-          label={`All (${statusCounts.all || 0})`}
-          active={filterStatus === 'all'}
-          onClick={() => setFilterStatus('all')}
-        />
-        {SUBSCRIPTION_STATUSES.filter((s) => statusCounts[s]).map((s) => (
-          <FilterPill
-            key={s}
-            label={`${s} (${statusCounts[s] || 0})`}
-            active={filterStatus === s}
-            onClick={() => setFilterStatus(filterStatus === s ? 'all' : s)}
-          />
-        ))}
-      </div>
-
       {error && <ErrorState message={error} onRetry={() => load(page)} />}
 
       {loading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--primary))]" />
         </div>
-      ) : filteredSubs.length === 0 ? (
-        <EmptyState icon={CreditCard} title="No subscriptions found" message="Try adjusting your filters." />
+      ) : subs.length === 0 ? (
+        <EmptyState message="No subscriptions found." />
       ) : (
         <TableWrap>
           <thead>
             <tr>
-              <Th>User</Th>
+              <Th>User ID</Th>
               <Th>Plan</Th>
               <Th>Status</Th>
               <Th>Stripe</Th>
               <Th>Expires</Th>
+              <Th>Started</Th>
               <Th>Created</Th>
               <Th className="w-12" />
             </tr>
           </thead>
           <tbody>
-            {filteredSubs.map((s) => {
-              const u = userMap[s.user_id];
-              return (
-                <tr key={s.id} className="border-t border-[hsl(var(--border)/0.6)] hover:bg-[hsl(var(--fill)/0.5)] transition-colors">
-                  <Td>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--fill))] text-[hsl(var(--fg-2))]">
-                        <span className="text-[11px] font-semibold uppercase">
-                          {(u?.full_name || u?.email || '?')[0]}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-[hsl(var(--fg))] truncate text-[12px]">
-                          {u?.full_name || u?.display_name || shortId(s.user_id)}
-                        </p>
-                        <p className="text-[11px] text-[hsl(var(--fg-2))] truncate">{u?.email || shortId(s.user_id)}</p>
-                      </div>
-                    </div>
-                  </Td>
-                  <Td>
-                    <Badge label={s.plan_code || 'free'} className={planBadge(s.plan_code || 'free')} />
-                  </Td>
-                  <Td>
-                    <Badge label={s.status || '—'} className={statusBadge(s.status)} />
-                  </Td>
-                  <Td>
-                    <span className="text-[11px] font-mono text-[hsl(var(--fg-2))]">
-                      {s.stripe_subscription_id ? shortId(s.stripe_subscription_id) : 'manual'}
-                    </span>
-                  </Td>
-                  <Td className="text-[hsl(var(--fg-2))] text-[12px]">{fmt(s.expires_at)}</Td>
-                  <Td className="text-[hsl(var(--fg-2))] text-[12px]">{fmt(s.created_at)}</Td>
-                  <Td>
-                    <ActionMenu items={[
-                      {
-                        label: 'Grant pro access',
-                        icon: CheckCircle2,
-                        onClick: () => setConfirm({ type: 'activate', sub: s }),
-                      },
-                      {
-                        label: 'Extend trial (+7d)',
-                        icon: Clock,
-                        onClick: () => setConfirm({ type: 'grantTrial', sub: s }),
-                      },
-                      {
-                        label: 'Revoke access',
-                        icon: UserMinus,
-                        danger: true,
-                        separator: true,
-                        onClick: () => setConfirm({ type: 'revoke', sub: s }),
-                      },
-                    ]} />
-                  </Td>
-                </tr>
-              );
-            })}
+            {subs.map((s) => (
+              <tr key={s.id} className="border-t border-[hsl(var(--border)/0.6)] hover:bg-[hsl(var(--fill)/0.5)] transition-colors">
+                <Td>
+                  <p className="font-mono text-[12px] text-[hsl(var(--fg-2))]">{shortId(s.user_id)}</p>
+                </Td>
+                <Td>
+                  <span className="text-[hsl(var(--fg))]">{s.plan_code || '—'}</span>
+                </Td>
+                <Td>
+                  <Badge label={s.status || '—'} className={statusBadge(s.status)} />
+                </Td>
+                <Td className="text-[hsl(var(--fg-2))]">{s.stripe_subscription_id || 'manual'}</Td>
+                <Td className="text-[hsl(var(--fg-2))]">{fmt(s.expires_at)}</Td>
+                <Td className="text-[hsl(var(--fg-2))]">{fmt(s.started_at)}</Td>
+                <Td className="text-[hsl(var(--fg-2))]">{fmt(s.created_at)}</Td>
+                <Td>
+                  <ActionMenu items={[
+                    {
+                      label: 'Activate Premium',
+                      icon: CheckCircle2,
+                      onClick: () => setConfirm({ type: 'activate', sub: s }),
+                    },
+                    {
+                      label: 'Grant Trial (+7d)',
+                      icon: Clock,
+                      onClick: () => setConfirm({ type: 'grantTrial', sub: s }),
+                    },
+                    {
+                      label: 'Revoke Access',
+                      icon: UserMinus,
+                      danger: true,
+                      onClick: () => setConfirm({ type: 'revoke', sub: s }),
+                    },
+                    {
+                      label: 'Resync Billing (backend)',
+                      icon: RefreshCw,
+                      disabled: true,
+                      onClick: () => setConfirm({ type: 'resync', sub: s }),
+                    },
+                  ]} />
+                </Td>
+              </tr>
+            ))}
           </tbody>
         </TableWrap>
       )}
@@ -1079,21 +897,24 @@ function SubscriptionsTab() {
       {confirm && (
         <ConfirmModal
           title={
-            confirm.type === 'activate'    ? 'Grant Pro Access'
-            : confirm.type === 'grantTrial' ? 'Extend Trial'
-            : confirm.type === 'revoke'    ? 'Revoke Access'
+            confirm.type === 'activate'   ? 'Activate Premium'
+            : confirm.type === 'grantTrial' ? 'Grant Trial +7 Days'
+            : confirm.type === 'revoke'   ? 'Revoke Access'
+            : confirm.type === 'resync'   ? 'Resync Billing'
             : 'Confirm'
           }
           description={
-            confirm.type === 'activate'    ? `Set this subscription to active with pro plan for ${userMap[confirm.sub.user_id]?.full_name || shortId(confirm.sub.user_id)}.`
-            : confirm.type === 'grantTrial' ? `Extend trial by 7 days for ${userMap[confirm.sub.user_id]?.full_name || shortId(confirm.sub.user_id)}.`
-            : confirm.type === 'revoke'    ? `Revoke access for ${userMap[confirm.sub.user_id]?.full_name || shortId(confirm.sub.user_id)}. Their subscription will be set to inactive.`
+            confirm.type === 'activate'   ? 'Set this subscription to active with pro tier.'
+            : confirm.type === 'grantTrial' ? 'Extend this subscription trial by 7 days.'
+            : confirm.type === 'revoke'   ? 'Set this subscription to inactive. The user will lose access.'
+            : confirm.type === 'resync'   ? 'Request a billing status resync. This requires a backend Edge Function.'
             : null
           }
           confirmLabel={
-            confirm.type === 'activate'    ? 'Grant Access'
-            : confirm.type === 'grantTrial' ? 'Extend +7d'
-            : confirm.type === 'revoke'    ? 'Revoke'
+            confirm.type === 'activate'   ? 'Activate'
+            : confirm.type === 'grantTrial' ? 'Grant'
+            : confirm.type === 'revoke'   ? 'Revoke'
+            : confirm.type === 'resync'   ? 'Request Resync'
             : 'Confirm'
           }
           danger={confirm.type === 'revoke'}
@@ -1101,10 +922,131 @@ function SubscriptionsTab() {
           onCancel={() => setConfirm(null)}
           onConfirm={() => {
             const { type, sub } = confirm;
-            if (type === 'activate')    runAction(() => grantAccess(sub.user_id, 'pro', 'Admin activate'), 'Pro access granted');
+            if (type === 'activate')    runAction(() => grantAccess(sub.user_id, 'pro', 'Admin activate'), 'Subscription activated');
             if (type === 'grantTrial')  runAction(() => extendTrial(sub.user_id, 7), 'Trial extended');
             if (type === 'revoke')      runAction(() => revokeAccess(sub.user_id), 'Access revoked');
+            if (type === 'resync')      runAction(() => resyncBillingStatus(sub.user_id), 'Resync requested');
           }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── ROLES TAB ───────────────────────────────────────────────────────────────
+
+function RolesTab() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(null);
+  const [confirm, setConfirm] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch first 200 users for role overview
+      const result = await fetchAllUsers(1, 200);
+      setUsers(result.users);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleRoleChange = (user, newRole) => {
+    setConfirm({ user, newRole });
+  };
+
+  const confirmRoleChange = async () => {
+    if (!confirm) return;
+    setSaving(confirm.user.id);
+    try {
+      await updateUserRole(confirm.user.id, confirm.newRole);
+      toast.success(`Role updated to ${confirm.newRole}`);
+      setConfirm(null);
+      await load();
+    } catch (e) {
+      toast.error(e.message || 'Failed to update role');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  // Group users by role
+  const grouped = ROLES.reduce((acc, r) => {
+    acc[r] = users.filter((u) => u.role === r);
+    return acc;
+  }, {});
+
+  if (loading) return (
+    <div className="flex justify-center py-16">
+      <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--primary))]" />
+    </div>
+  );
+
+  if (error) return <ErrorState message={error} onRetry={load} />;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        {ROLES.map((r) => (
+          <div key={r} className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 text-center space-y-1">
+            <p className="text-[22px] font-bold text-[hsl(var(--fg))]">{grouped[r]?.length ?? 0}</p>
+            <Badge label={r} className={cn(roleBadge(r), 'text-[12px]')} />
+          </div>
+        ))}
+      </div>
+
+      <TableWrap>
+        <thead>
+          <tr>
+            <Th>User</Th>
+            <Th>Current Role</Th>
+            <Th>Joined</Th>
+            <Th>Change Role</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((u) => (
+            <tr key={u.id} className="border-t border-[hsl(var(--border)/0.6)] hover:bg-[hsl(var(--fill)/0.5)] transition-colors">
+              <Td>
+                <p className="font-medium">{u.full_name || u.email || '—'}</p>
+                <p className="font-mono text-[11px] text-[hsl(var(--fg-2))]">{shortId(u.id)}</p>
+              </Td>
+              <Td>
+                <Badge label={u.role || '—'} className={roleBadge(u.role)} />
+              </Td>
+              <Td className="text-[hsl(var(--fg-2))]">{fmt(u.created_at)}</Td>
+              <Td>
+                <select
+                  value={u.role || 'athlete'}
+                  onChange={(e) => handleRoleChange(u, e.target.value)}
+                  disabled={saving === u.id}
+                  className="h-8 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[12px] text-[hsl(var(--fg))] px-2 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50"
+                >
+                  {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                </select>
+                {saving === u.id && <Loader2 className="inline-block ml-2 h-3 w-3 animate-spin text-[hsl(var(--primary))]" />}
+              </Td>
+            </tr>
+          ))}
+        </tbody>
+      </TableWrap>
+
+      {confirm && (
+        <ConfirmModal
+          title="Change User Role"
+          description={`Set ${confirm.user.full_name || shortId(confirm.user.id)} role to "${confirm.newRole}"?`}
+          confirmLabel="Confirm Change"
+          danger={confirm.newRole === 'admin'}
+          loading={saving === confirm.user.id}
+          onCancel={() => setConfirm(null)}
+          onConfirm={confirmRoleChange}
         />
       )}
     </div>
@@ -1148,6 +1090,7 @@ function AuditLogTab() {
   );
 
   if (error) {
+    // Table missing — surface a helpful prompt instead of a raw error
     if (error.includes('42P01') || error.toLowerCase().includes('relation') || error.toLowerCase().includes('does not exist')) {
       return (
         <div className="rounded-2xl border border-[hsl(var(--warn)/0.3)] bg-[hsl(var(--warn)/0.06)] p-6 space-y-2">
@@ -1166,11 +1109,11 @@ function AuditLogTab() {
 
   if (logs.length === 0) {
     return (
-      <EmptyState
-        icon={FileText}
-        title="No audit logs yet"
-        message="Admin actions will appear here once performed."
-      />
+      <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-8 text-center space-y-2">
+        <FileText className="h-8 w-8 mx-auto text-[hsl(var(--fg-2))]" />
+        <p className="text-[14px] font-medium text-[hsl(var(--fg))]">No audit logs yet</p>
+        <p className="text-[12px] text-[hsl(var(--fg-2))]">Admin actions will appear here once the table is set up and actions are performed.</p>
+      </div>
     );
   }
 
@@ -1254,41 +1197,40 @@ export default function AdminPanel() {
         {/* Header */}
         <div className="atlas-page-header px-5 py-6 sm:px-6">
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2.5 mb-1">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))] shadow-[var(--shadow-xs)]">
-                  <ShieldCheck className="h-4 w-4" />
-                </div>
-                <h1 className="text-[22px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">Admin Console</h1>
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))] shadow-[var(--shadow-xs)]">
+                <ShieldCheck className="h-4 w-4 text-[hsl(var(--err))]" />
               </div>
-              <p className="ml-[50px] text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                Manage users, subscriptions, and audit activity
-              </p>
+              <h1 className="text-[22px] font-bold tracking-[-0.05em] text-[hsl(var(--fg))]">Admin Console</h1>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] px-3 py-1.5 text-[11px] font-medium text-[hsl(var(--err))]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--err))] animate-pulse" />
-                Admin
-              </span>
-            </div>
+            <p className="ml-[50px] text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+              Manage users, subscriptions, roles, and audit activity
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] px-3 py-1.5 text-[11px] font-medium text-[hsl(var(--err))]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--err))] animate-pulse" />
+              Admin
+            </span>
           </div>
         </div>
+        </div>
 
-        {/* Tab navigation — icons + labels */}
+        {/* Tab navigation */}
         <div className="flex gap-1 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.46)] p-1.5">
           {TABS.map((tab, idx) => (
             <button
-              key={tab.key}
+              key={tab}
               onClick={() => setActiveTab(idx)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 h-9 rounded-[14px] px-2 text-[12px] font-medium transition-all duration-150',
+                'flex-1 h-9 rounded-[14px] px-2 text-[12px] font-medium transition-all duration-150',
                 activeTab === idx
                   ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
                   : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
               )}
             >
-              <tab.icon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{tab.label}</span>
+              {tab}
             </button>
           ))}
         </div>
@@ -1298,7 +1240,8 @@ export default function AdminPanel() {
           {activeTab === 0 && <OverviewTab />}
           {activeTab === 1 && <UsersTab />}
           {activeTab === 2 && <SubscriptionsTab />}
-          {activeTab === 3 && <AuditLogTab />}
+          {activeTab === 3 && <RolesTab />}
+          {activeTab === 4 && <AuditLogTab />}
         </div>
       </div>
     </StablePage>

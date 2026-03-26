@@ -509,36 +509,12 @@
       "subtitle": "Isso define o foco do seu dashboard e insights semanais",
       "basics": "Info básica",
       "goals": [
-        {
-          "id": "fat_loss",
-          "emoji": "🔥",
-          "label": "Perda de gordura"
-        },
-        {
-          "id": "muscle_gain",
-          "emoji": "💪",
-          "label": "Ganho de massa"
-        },
-        {
-          "id": "recomp",
-          "emoji": "⚡",
-          "label": "Recomp corporal"
-        },
-        {
-          "id": "performance",
-          "emoji": "🏆",
-          "label": "Performance"
-        },
-        {
-          "id": "health",
-          "emoji": "❤️",
-          "label": "Saúde geral"
-        },
-        {
-          "id": "longevity",
-          "emoji": "🌱",
-          "label": "Longevidade"
-        }
+        {"id": "fat_loss", "emoji": "🔥", "label": "Perda de gordura"},
+        {"id": "muscle_gain", "emoji": "💪", "label": "Ganho de massa"},
+        {"id": "recomp", "emoji": "⚡", "label": "Recomp corporal"},
+        {"id": "performance", "emoji": "🏆", "label": "Performance"},
+        {"id": "health", "emoji": "❤️", "label": "Saúde geral"},
+        {"id": "longevity", "emoji": "🌱", "label": "Longevidade"}
       ],
       "fields": {
         "height": "Altura (cm)",
@@ -555,31 +531,11 @@
       "subtitle": "Calibra metas e personaliza planos",
       "activityLevel": "Nível de atividade",
       "activities": [
-        {
-          "id": "sedentary",
-          "label": "Sedentário",
-          "desc": "Sem exercício regular"
-        },
-        {
-          "id": "light",
-          "label": "Leve",
-          "desc": "1–2× por semana"
-        },
-        {
-          "id": "moderate",
-          "label": "Moderado",
-          "desc": "3–4× por semana"
-        },
-        {
-          "id": "active",
-          "label": "Ativo",
-          "desc": "5–6× por semana"
-        },
-        {
-          "id": "very_active",
-          "label": "Muito ativo",
-          "desc": "2× por dia / atleta"
-        }
+        {"id": "sedentary", "label": "Sedentário", "desc": "Sem exercício regular"},
+        {"id": "light", "label": "Leve", "desc": "1–2× por semana"},
+        {"id": "moderate", "label": "Moderado", "desc": "3–4× por semana"},
+        {"id": "active", "label": "Ativo", "desc": "5–6× por semana"},
+        {"id": "very_active", "label": "Muito ativo", "desc": "2× por dia / atleta"}
       ],
       "fields": {
         "workoutsPerWeek": "Treinos por semana",
@@ -604,42 +560,12 @@
       "subtitle": "Isso constrói seu dashboard inicial. Você pode ativar/desativar a qualquer hora.",
       "hint": "Selecione quantos quiser — mais contexto significa insights melhores",
       "options": [
-        {
-          "id": "protocol",
-          "emoji": "�",
-          "label": "Planos",
-          "desc": "Suplementos, doses e planos de saúde"
-        },
-        {
-          "id": "body",
-          "emoji": "📏",
-          "label": "Composição corporal",
-          "desc": "Peso, medidas, fotos"
-        },
-        {
-          "id": "exams",
-          "emoji": "🧬",
-          "label": "Exames",
-          "desc": "Hormônios, sangue, saúde"
-        },
-        {
-          "id": "nutrition",
-          "emoji": "🥗",
-          "label": "Nutrição",
-          "desc": "Refeições e macros"
-        },
-        {
-          "id": "workouts",
-          "emoji": "🏋️",
-          "label": "Treinos",
-          "desc": "Sessões e progresso"
-        },
-        {
-          "id": "symptoms",
-          "emoji": "📊",
-          "label": "Sintomas e humor",
-          "desc": "Check-ins diários"
-        }
+        {"id": "protocol", "emoji": "�", "label": "Planos", "desc": "Suplementos, doses e planos de saúde"},
+        {"id": "body", "emoji": "📏", "label": "Composição corporal", "desc": "Peso, medidas, fotos"},
+        {"id": "exams", "emoji": "🧬", "label": "Exames", "desc": "Hormônios, sangue, saúde"},
+        {"id": "nutrition", "emoji": "🥗", "label": "Nutrição", "desc": "Refeições e macros"},
+        {"id": "workouts", "emoji": "🏋️", "label": "Treinos", "desc": "Sessões e progresso"},
+        {"id": "symptoms", "emoji": "📊", "label": "Sintomas e humor", "desc": "Check-ins diários"}
       ]
     },
     "setup": {
@@ -747,9 +673,7 @@
     "trainingGoal": "Objetivo de treino",
     "targetWeight": "Peso alvo (kg)",
     "bodyFatGoal": "Meta de gordura corporal (%)",
-    "macros": {
-      "pending": "Macros pendentes"
-    },
+    "macros": {"pending": "Macros pendentes"},
     "calories": "Calorias (kcal)",
     "protein": "Proteína (g)",
     "carbs": "Carboidratos (g)",
@@ -1116,77 +1040,25 @@
     },
     "lab_exams": {
       "title": "Exames Laboratoriais",
-      "subtitle": "Acompanhe seus marcadores ao longo do tempo",
+      "subtitle": "Registro clínico de seus marcadores laboratoriais",
       "status": {
         "low": "Baixo",
         "high": "Alto",
         "critical": "Crítico",
         "normal": "Normal"
       },
-      "new_exam": "Novo exame",
-      "panels": "Painéis",
-      "panels_hint": "Total de painéis registrados",
-      "out_of_range_markers": "Fora da faixa",
-      "out_of_range_hint": "Marcadores fora da referência",
-      "out_of_range": "fora da faixa",
-      "all_in_range": "Todos na faixa",
-      "tracked_markers": "Rastreados",
-      "tracked_hint": "Total de pontos de dados",
-      "markers_count": "marcadores",
-      "evolution": "Tendências",
-      "recent_trends": "Marcadores com dados suficientes para análise de tendência",
-      "history": "Histórico de exames",
-      "history_subtitle": "Toque em um exame para ver detalhes",
-      "empty_title": "Nenhum exame ainda",
-      "empty_state": "Importe um PDF ou adicione seu primeiro exame manualmente.",
-      "add_first": "Adicionar primeiro exame",
-      "filter_all": "Todos",
-      "filter_abnormal": "Fora da faixa",
-      "filter_normal": "Na faixa",
-      "add_exam": "Adicionar exame",
-      "add_exam_description": "Envie um PDF para extrair marcadores automaticamente, ou insira manualmente.",
-      "lab_import": "Importar exame",
-      "import_pdf_title": "Importar PDF ou imagem do exame",
-      "import_pdf_hint": "Extraímos nome, data e marcadores para revisão antes de salvar.",
-      "importing": "Analisando arquivo…",
-      "import_analyzing": "Extraindo marcadores do documento…",
-      "import_success": "{count} marcadores extraídos",
-      "import_error": "Não foi possível extrair dados. Tente novamente ou insira manualmente.",
-      "import_banner": "{count} marcadores extraídos e preenchidos",
-      "import_review_hint": "Revise valores e faixas de referência antes de salvar.",
-      "auto_extracted": "auto-extraídos",
-      "panel_name": "Painel / exame",
-      "panel_placeholder": "ex: Hemograma, hormônios, perfil lipídico",
-      "exam_date": "Data",
+      "add_panel": "Adicionar painel",
+      "upload_pdf": "Enviar PDF ou imagem",
+      "panel_name": "Nome do painel",
+      "exam_date": "Data do exame",
       "panel_name_required": "Nome do painel é obrigatório.",
       "date_required": "Data é obrigatória.",
-      "markers_title": "Marcadores",
-      "markers_subtitle": "Revise valor, unidade e status clínico.",
-      "add_marker": "Adicionar marcador",
-      "marker_name": "Nome do marcador",
-      "marker_value": "Valor",
-      "marker_unit": "Unidade",
-      "ref_min": "Ref mín",
-      "ref_max": "Ref máx",
-      "notes_title": "Observações",
-      "notes_placeholder": "Contexto clínico, observações ou próximos passos…",
-      "save_exam": "Salvar exame",
-      "saving": "Salvando…",
-      "exam_saved": "Exame salvo",
-      "save_error": "Falha ao salvar. Tente novamente.",
-      "exam_deleted": "Exame removido",
-      "delete_confirm_title": "Excluir este exame?",
-      "delete_confirm_description": "Esta ação não pode ser desfeita. Todos os marcadores e notas serão removidos permanentemente.",
-      "cancel": "Cancelar",
-      "delete": "Excluir",
-      "ai_insights": "Insights IA",
-      "ai_insights_subtitle": "Análise rápida com inteligência artificial",
-      "generate_insights": "Gerar insights",
-      "insights_description": "A IA analisa seus marcadores e fornece observações práticas.",
-      "generating_insights": "Analisando seus resultados…",
-      "insights_generated": "Insights prontos",
-      "insights_error": "Não foi possível gerar insights. Tente novamente mais tarde.",
-      "recommendations": "Recomendações"
+      "import_error": "Não foi possível importar o arquivo.",
+      "panels": "Painéis",
+      "evolution": "Evolução de marcadores",
+      "history": "Histórico de exames",
+      "empty_state": "Adicione manualmente ou importe um PDF ou imagem para começar o histórico laboratorial.",
+      "recent_trends": "Leitura rápida de tendências para o que já tem histórico suficiente."
     },
     "insights": {
       "title": "Insights",

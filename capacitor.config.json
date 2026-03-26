@@ -22,10 +22,6 @@
     "Keyboard": {
       "resize": "body",
       "style": "dark"
-    },
-    "FirebaseAnalytics": {
-      "collectionEnabled": true,
-      "sessionTimeoutDuration": 1800
     }
   },
   "android": {

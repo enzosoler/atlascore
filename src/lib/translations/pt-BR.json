@@ -238,14 +238,12 @@
             "Registro de treino e nutrição",
             "Acompanhamento de medidas",
             "Insights semanais",
-            "1 insight IA por semana",
             "Cards de compartilhamento social"
           ],
           "missing": [
             "Ferramentas de plano estruturado",
             "Acompanhamento de exames",
             "Fotos de progresso",
-            "Insights IA completos",
             "Análises avançadas"
           ],
           "cta": "Criar conta grátis"
@@ -263,7 +261,6 @@
             "Ferramentas de plano de treino",
             "Acompanhamento de exames",
             "Fotos de progresso ilimitadas",
-            "Insights IA diários",
             "Análises completas",
             "Exportação PDF e CSV"
           ],
@@ -280,7 +277,6 @@
           "features": [
             "Tudo do Pro",
             "Acompanhamento inteligente de protocolos",
-            "Insights IA clínicos (exames + protocolos)",
             "Relatórios premium",
             "Histórico ilimitado",
             "Resumos avançados de progresso"
@@ -374,14 +370,12 @@
           "Perfil e configurações",
           "30 dias de histórico",
           "Insights semanais",
-          "1 insight IA por semana",
           "Cards de compartilhamento social"
         ],
         "missing": [
           "Ferramentas de plano estruturado",
           "Acompanhamento completo de exames",
           "Fotos de progresso",
-          "Insights IA completos",
           "Análises avançadas",
           "Exportações PDF/CSV"
         ]
@@ -403,7 +397,7 @@
           "Fotos de progresso ilimitadas",
           "1 ano de histórico",
           "Análises avançadas",
-          "Insights IA diários (treino + nutrição + recuperação)",
+          "Insights de progresso",
           "Exportações PDF e CSV",
           "Alertas de estoque"
         ],
@@ -420,7 +414,6 @@
           "Tudo do Pro",
           "Acompanhamento inteligente de protocolos",
           "Curvas de meia-vida e próxima dose",
-          "Insights IA clínicos (exames + protocolos + hormônios)",
           "Gerenciamento avançado de estoque",
           "Relatórios premium",
           "Dashboards profundos",
@@ -1110,41 +1103,6 @@
       "delete_success": "Protocolo excluído.",
       "loading": "Aguarde enquanto seus protocolos são carregados.",
       "loading_partial": "Dados não carregaram completamente, mas você ainda pode adicionar novos itens."
-    }
-  },
-  "ai_insights": {
-    "section_title": "Insights IA",
-    "badge_label": "IA Integrada",
-    "subtitle_free": "Um resumo gratuito dos seus padrões recentes, gerado por IA.",
-    "subtitle_pro": "Correlações inteligentes entre treino, nutrição e recuperação.",
-    "subtitle_performance": "Análise clínica completa: treino, nutrição, recuperação, exames e protocolos.",
-    "loading": "Analisando seus dados e gerando insights personalizados...",
-    "analyzing": "Analisando...",
-    "refresh": "Atualizar",
-    "cached": "Resultado em cache",
-    "generate_button": "Gerar Insights IA",
-    "cta_free": "Receba um resumo gratuito dos seus padrões recentes gerado por IA. Um insight por semana no plano grátis.",
-    "cta_paid": "Gere insights personalizados correlacionando todos os seus dados.",
-    "locked_label": "Análise completa bloqueada",
-    "unlock_cta": "Desbloquear com {tier}",
-    "upgrade_title": "Quer insights mais profundos para sua performance?",
-    "upgrade_body": "Assine o Pro para desbloquear {count}+ correlações inteligentes entre treino, nutrição e recuperação \u2014 atualizadas diariamente.",
-    "see_plans": "Ver planos",
-    "clinical_title": "Insights de exames e protocolos",
-    "clinical_body": "Correlacione seus exames laboratoriais e protocolos com treino e nutrição no plano Performance.",
-    "error_generic": "Não foi possível gerar insights agora. Tente novamente mais tarde.",
-    "rate_limited": "Atualização de insights disponível em {hours}h. Volte mais tarde.",
-    "blur_placeholder": "Este insight contém uma análise detalhada correlacionando seu volume de treino, padrões de sono e adesão nutricional da última semana com recomendações práticas.",
-    "blur_action_placeholder": "Recomendação de ação específica baseada na análise dos seus dados.",
-    "categories": {
-      "headline": "Destaque",
-      "training": "Treino",
-      "nutrition": "Nutrição",
-      "recovery": "Recuperação",
-      "lab_exams": "Exames",
-      "protocols": "Protocolos",
-      "risk_alert": "Alerta",
-      "next_action": "Próxima Ação"
     }
   }
 }
