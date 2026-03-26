@@ -1897,8 +1897,8 @@ export default function NutritionPage() {
       </AppContainer>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-xl p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
-          <div className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-xl p-0 max-h-[90vh]" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <DialogPanelHeader
               eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
               title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
