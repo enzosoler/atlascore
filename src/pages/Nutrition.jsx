@@ -1882,7 +1882,7 @@ export default function NutritionPage() {
       </AppContainer>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto p-0">
           <DialogPanelHeader
             eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
             title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
