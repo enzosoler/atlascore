@@ -1,18 +1,18 @@
-import { useTranslation } from 'react-i18nextext';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function PrivacyPolicy() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[hsl(var(--bg))]">
       <div className="container mx-auto max-w-3xl px-4 py-16 md:py-24">
         <h1 className="mb-8 text-4xl font-semibold tracking-tight">Privacy Policy</h1>
-        <p className="mb-12 text-muted-foreground">
+        <p className="mb-12 text-[hsl(var(--fg-2))]">
           Last Updated: March 26, 2026
         </p>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none">
-          <p className="lead text-lg text-muted-foreground">
+          <p className="lead text-lg text-[hsl(var(--fg-2))]">
             Atlas Core is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your personal information when you use our fitness application and related services.
           </p>
 

@@ -1,13 +1,13 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function TermsOfService() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[hsl(var(--bg))]">
       <div className="container mx-auto max-w-3xl px-4 py-16 md:py-24">
         <h1 className="mb-8 text-4xl font-semibold tracking-tight">Terms of Service</h1>
-        <p className="mb-12 text-muted-foreground">
+        <p className="mb-12 text-[hsl(var(--fg-2))]">
           Last Updated: March 26, 2026
         </p>
 
