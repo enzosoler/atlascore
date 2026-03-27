@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Mail, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
+import { useAuth } from '@/lib/AuthContext';
+import { inviteClient } from '@/services/professionalLinksService';
 
 /**
  * InviteModal - Send invite to student/client/patient
@@ -12,6 +13,7 @@ import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
  */
 export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [sending, setSending] = useState(false);
@@ -34,33 +36,28 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
     },
   };
 
+  // Map role to link_type (coach -> 'coach', etc.)
+  const linkTypeMap = { coach: 'coach', nutritionist: 'nutritionist', clinician: 'clinician' };
   const label = roleLabels[role] || roleLabels.coach;
 
   const handleSend = async () => {
-    if (!email.trim() || !name.trim()) {
-      toast.error('Enter both name and email');
+    if (!email.trim()) {
+      toast.error('Enter an email address');
       return;
     }
 
     setSending(true);
     try {
-      const res = await base44.functions.invoke('sendInviteEmail', {
-        recipient_email: email,
-        recipient_name: name,
-        invited_by_role: role,
-      });
-
-      if (res.data?.success) {
-        toast.success(`Invite sent to ${email}`);
-        qc.invalidateQueries({ queryKey: ['invites'] });
-        setEmail('');
-        setName('');
-        onOpenChange(false);
-      } else {
-        toast.error(res.data?.error || 'Error sending invite');
-      }
+      await inviteClient(user.id, email.trim(), linkTypeMap[role] || role);
+      toast.success(`Invite sent to ${email}`);
+      qc.invalidateQueries({ queryKey: ['coach-students'] });
+      qc.invalidateQueries({ queryKey: ['clinician-patients'] });
+      qc.invalidateQueries({ queryKey: ['nutritionist-clients'] });
+      setEmail('');
+      setName('');
+      onOpenChange(false);
     } catch (err) {
-      toast.error('Error sending invite');
+      toast.error(err.message || 'Error sending invite');
       console.error(err);
     } finally {
       setSending(false);
@@ -84,7 +81,7 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
         <div className="space-y-5 px-6 pb-6 pt-2">
           <div className="atlas-field px-4 py-3">
             <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Full name
+              Full name (optional)
             </label>
             <div className="flex items-center gap-3">
               <User className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />

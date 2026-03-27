@@ -7,17 +7,23 @@ import { ChevronLeft, Loader2, Mail } from 'lucide-react';
 import RoleGate from '@/components/rbac/RoleGate';
 import ClientPdfExport from '@/components/nutritionist/ClientPdfExport';
 import DietPlanVsExecution from '@/components/nutritionist/DietPlanVsExecution';
+import { getMyClients } from '@/services/professionalLinksService';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function NutritionistClientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const { data: link, isLoading: loadingLink } = useQuery({
-    queryKey: ['nutritionist-client', id],
-    queryFn: async () => null,
+  const { data: allLinks = [], isLoading: loadingLink } = useQuery({
+    queryKey: ['nutritionist-clients', user?.id],
+    queryFn: () => getMyClients(user.id, 'nutritionist'),
+    enabled: !!user?.id,
   });
 
-  // Client data requires professional_links RLS policy (pending migration)
+  const link = allLinks.find((l) => l.id === id) || null;
+
+  // Client data (meals, measurements, etc.) require additional Supabase RLS migration
   const meals = [];
   const measurements = [];
   const photos = [];
