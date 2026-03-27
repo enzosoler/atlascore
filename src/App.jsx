@@ -35,15 +35,6 @@ const BodyProfile = lazy(() => import('@/pages/BodyProfile'));
 const Account = lazy(() => import('@/pages/Account'));
 const Export = lazy(() => import('@/pages/Export'));
 const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
-const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
-const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
-const AdminOverview = lazy(() => import('@/pages/admin/AdminOverview'));
-const AdminAuditLog = lazy(() => import('@/pages/admin/AdminAuditLog'));
-const AdminRoles = lazy(() => import('@/pages/admin/AdminRoles'));
-const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
-const ModerationConsole = lazy(() => import('@/pages/admin/ModerationConsole'));
-const AdminErrors = lazy(() => import('@/pages/admin/AdminErrors'));
-const SubscriptionManager = lazy(() => import('@/components/admin/SubscriptionManager'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const MyDiet = lazy(() => import('@/pages/MyDiet'));
@@ -387,18 +378,9 @@ const AppRoutes = () => (
         </Route>
       </Route>
 
-      {/* Admin routes - completely separate from AppLayout */}
+      {/* Admin panel */}
       <Route element={<RequireAuthenticatedApp />}>
-        <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminLayout /></RouteGuard>}>
-          <Route index element={<AdminOverview />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="subscriptions" element={<SubscriptionManager />} />
-          <Route path="roles" element={<AdminRoles />} />
-          <Route path="audit" element={<AdminAuditLog />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="errors" element={<AdminErrors />} />
-          <Route path="moderation" element={<RouteGuard roles={['admin', 'moderator']}><ModerationConsole /></RouteGuard>} />
-        </Route>
+        <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminPanel /></RouteGuard>} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

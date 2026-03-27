@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useRoleAndSubscription } from '@/hooks/useRoleAndSubscription';
+import { ROUTES } from '@/lib/routes';
 import {
   fetchAllUsers,
   searchUsers,
@@ -1186,6 +1188,7 @@ export default function AdminPanel() {
   const { user } = useAuth();
   const { role, loading: roleLoading } = useRoleAndSubscription(user?.id);
   const [activeTab, setActiveTab] = useState(0);
+  const navigate = useNavigate();
 
   if (roleLoading) {
     return (
@@ -1229,7 +1232,13 @@ export default function AdminPanel() {
               Manage users, subscriptions, roles, and audit activity
             </p>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(ROUTES.today)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.5)] px-3 py-1.5 text-[11px] font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))] transition-colors"
+            >
+              ← Back to app
+            </button>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--err)/0.16)] bg-[hsl(var(--err)/0.08)] px-3 py-1.5 text-[11px] font-medium text-[hsl(var(--err))]">
               <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--err))] animate-pulse" />
               Admin
