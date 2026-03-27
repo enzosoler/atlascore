@@ -1,6 +1,6 @@
 /**
  * Atlas Core — Diet Plan Service (Supabase)
- * Replaces base44.entities.DietPlan in MyDiet and related pages.
+ * Supabase diet plan service — diet_plans table
  * Tabela: diet_plans
  * Colunas esperadas: id, user_id, name, objective, total_calories, total_protein,
  *   total_carbs, total_fat, meals (jsonb), active, created_by_type, version,

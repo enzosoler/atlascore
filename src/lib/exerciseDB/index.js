@@ -8,7 +8,7 @@
  *   import { searchExercises, fetchExercise, fetchByBodyPart } from '@/lib/exerciseDB';
  *
  * Fallback chain:
- *   ExerciseDB API → base44 ExerciseMaster → empty result
+ *   ExerciseDB API → empty result
  *
  * React Query integration:
  *   All functions return plain promises. Wire them into useQuery() with
@@ -107,7 +107,7 @@ export function localSearch(exercises, query = '') {
  *   2. Hit ExerciseDB name search API
  *   3. Normalize results
  *   4. Apply local filter for aliased PT terms
- *   5. Fallback to base44 if API unavailable
+ *
  *
  * @param {string} query
  * @param {number} limit
@@ -233,7 +233,7 @@ export async function searchByEquipment(equipment, limit = 50) {
 
 /**
  * Fetch a single exercise by its Atlas ID.
- * Handles both "edb_xxx" (ExerciseDB) and plain IDs (base44).
+ * Handles both "edb_xxx" (ExerciseDB) and plain IDs.
  *
  * @param {string} id  Atlas exercise ID
  */
@@ -345,17 +345,17 @@ export async function fetchExerciseLibrary({ bodyPart, muscle, equipment, limit 
 // ─── Exercise log helpers (user history) ─────────────────────────────────────
 
 export async function logExerciseUse(exerciseId, exerciseName) {
-  // No-op since base44 is not used
+  
   return;
 }
 
 export async function fetchRecentExercises() {
-  // Return empty since base44 is not used
+  
   return [];
 }
 
 export async function fetchFavoriteExercises() {
-  // Return empty since base44 is not used
+  
   return [];
 }
 

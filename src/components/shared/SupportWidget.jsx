@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MessageCircle, X, Bug, Lightbulb, HelpCircle, Mail } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
 
@@ -32,10 +32,11 @@ export default function SupportWidget() {
     if (!text.trim()) return;
     setSending(true);
     try {
-      await base44.integrations.Core.SendEmail({
-        to: 'suporte@atlascore.app',
-        subject: `[Atlas Core] ${OPTIONS.find(o => o.id === selected)?.label} — ${user?.email || 'anon'}`,
-        body: `Type: ${selected}\nUser: ${user?.email || 'not identified'}\nName: ${user?.full_name || '—'}\n\nMessage:\n${text}`,
+      await supabase.from('support_requests').insert({
+        user_id: user?.id || null,
+        user_email: user?.email || null,
+        type: selected,
+        message: text,
       });
       toast.success('Message sent! Thanks for the feedback.');
       setOpen(false);

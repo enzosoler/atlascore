@@ -1,6 +1,6 @@
 /**
  * Atlas Core — Workout Plan Service (Supabase)
- * Replaces base44.entities.WorkoutPlan in MyWorkout and related pages.
+ * Supabase workout plan service — workout_plans table
  * Tabela: workout_plans
  * Colunas esperadas: id, user_id, name, objective, frequency, days (jsonb),
  *   active, created_by_type, version, start_date, notes, created_at

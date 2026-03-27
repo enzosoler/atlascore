@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ArrowRight, Compass, Home, LifeBuoy } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { EmptyState, PageShell, PrimaryButton, SecondaryButton, SectionCard } from '@/components/shared/StablePage';
 import { ROUTES } from '@/lib/routes';
 
@@ -18,8 +18,8 @@ export default function PageNotFound() {
     queryKey: ['page-not-found-user'],
     queryFn: async () => {
       try {
-        const user = await base44.auth.me();
-        return { user, isAuthenticated: true };
+        const { data: { user } } = await supabase.auth.getUser();
+        return { user, isAuthenticated: !!user };
       } catch {
         return { user: null, isAuthenticated: false };
       }

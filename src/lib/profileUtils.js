@@ -295,11 +295,19 @@ export function getResetEntities(t) {
   ];
 }
 
+const ENTITY_TABLE_MAP = {
+  ProgressPhoto: 'progress_photos',
+  DailyCheckin:  'daily_checkins',
+  Measurement:   'measurements',
+};
+
 async function wipeEntity(entityName) {
+  const table = ENTITY_TABLE_MAP[entityName];
+  if (!table) return; // Table not yet in Supabase — skip silently
   try {
-    const records = await base44.entities[entityName].list('-created_date', 1000);
-    if (!records || records.length === 0) return;
-    await Promise.all(records.map((r) => base44.entities[entityName].delete(r.id)));
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from(table).delete().eq('user_id', user.id);
   } catch {
     // Non-fatal: skip this entity and continue with the rest
   }
