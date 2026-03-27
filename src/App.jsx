@@ -35,6 +35,7 @@ const BodyProfile = lazy(() => import('@/pages/BodyProfile'));
 const Account = lazy(() => import('@/pages/Account'));
 const Export = lazy(() => import('@/pages/Export'));
 const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
+const AdminUserProfile = lazy(() => import('@/pages/admin/AdminUserProfile'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const MyDiet = lazy(() => import('@/pages/MyDiet'));
@@ -381,6 +382,7 @@ const AppRoutes = () => (
       {/* Admin panel */}
       <Route element={<RequireAuthenticatedApp />}>
         <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminPanel /></RouteGuard>} />
+        <Route path="/AdminPanel/user/:userId" element={<RouteGuard roles={['admin']}><AdminUserProfile /></RouteGuard>} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

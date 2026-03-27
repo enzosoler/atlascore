@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useRoleAndSubscription } from '@/hooks/useRoleAndSubscription';
 import { ROUTES } from '@/lib/routes';
@@ -488,6 +488,7 @@ function OverviewTab() {
 // ─── USERS TAB ───────────────────────────────────────────────────────────────
 
 function UsersTab() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -616,6 +617,11 @@ function UsersTab() {
                   <Td className="text-[hsl(var(--fg-2))]">{fmt(u.created_at)}</Td>
                   <Td>
                     <ActionMenu items={[
+                      {
+                        label: 'View full profile',
+                        icon: User,
+                        onClick: () => navigate(`/AdminPanel/user/${u.id}`),
+                      },
                       {
                         label: 'View details',
                         icon: User,
@@ -1248,21 +1254,23 @@ export default function AdminPanel() {
         </div>
 
         {/* Tab navigation */}
-        <div className="flex gap-1 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.46)] p-1.5">
-          {TABS.map((tab, idx) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(idx)}
-              className={cn(
-                'flex-1 h-9 rounded-[14px] px-2 text-[12px] font-medium transition-all duration-150',
-                activeTab === idx
-                  ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
-                  : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
-              )}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+          <div className="flex gap-1 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.46)] p-1.5 min-w-max lg:min-w-0">
+            {TABS.map((tab, idx) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(idx)}
+                className={cn(
+                  'h-9 rounded-[14px] px-3 text-[12px] font-medium transition-all duration-150 whitespace-nowrap',
+                  activeTab === idx
+                    ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
+                    : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
+                )}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Tab content */}
