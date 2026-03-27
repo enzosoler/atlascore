@@ -3,7 +3,7 @@
  *
  * Architecture:
  *   1. Show recents + favorites on open (no query)
- *   2. On query → searchExercises() (PT/EN, accents, aliases, ExerciseDB + base44 fallback)
+ *   2. On query → searchExercises() (PT/EN, accents, aliases, ExerciseDB fallback)
  *   3. Filter chips: by muscle or by equipment (searchByMuscle / searchByEquipment)
  *   4. Manual entry as last resort
  *   5. On select: log use via logExerciseUse(), call onSelect() with unified payload

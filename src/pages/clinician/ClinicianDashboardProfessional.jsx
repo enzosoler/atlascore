@@ -36,7 +36,7 @@ export default function ClinicianDashboardProfessional() {
     enabled: !!user?.id,
   });
 
-  // measurements, labExams, and protocols remain base44 entities (not yet migrated)
+  
   const measurements = [];
   const labExams = [];
   const protocols = [];
