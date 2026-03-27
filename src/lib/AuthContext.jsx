@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import { fetchProfileRole, normalizeAtlasRole } from '@/hooks/useRole';
 import { sendWelcomeEmailAsync } from '@/lib/emailService';
+import { setSentryUser, trackEvent } from '@/lib/sentry';
 
 const AuthContext = createContext(null);
 
@@ -136,6 +137,7 @@ export const AuthProvider = ({ children }) => {
     setUser(resolvedUser);
     setAuthState(AUTH_STATES.AUTHENTICATED);
     setAuthError(null);
+    setSentryUser(resolvedUser);
 
     return resolvedUser;
   }, []);
@@ -299,11 +301,12 @@ export const AuthProvider = ({ children }) => {
         options: { data: metadata },
       });
       if (error) throw error;
-      
+
       if (data.user && data.session) {
+        trackEvent('signup', { email });
         return await applyAuthenticatedUser(data.user);
       }
-      
+
       return { needsEmailConfirmation: true };
     } catch (error) {
       handleAuthError(error);
@@ -317,6 +320,7 @@ export const AuthProvider = ({ children }) => {
     hadAuthenticatedSessionRef.current = false;
     setAuthState(AUTH_STATES.UNAUTHENTICATED);
     setAuthError(null);
+    setSentryUser(null);
 
     try {
       await supabase.auth.signOut();

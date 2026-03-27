@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { EmptyState, PageShell, PrimaryButton, SectionCard, SecondaryButton } from '@/components/shared/StablePage';
+import { captureException } from '@/lib/sentry';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -13,7 +14,7 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo);
+    captureException(error, { componentStack: errorInfo?.componentStack });
   }
 
   render() {

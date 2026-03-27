@@ -17,7 +17,7 @@ import {
   UtensilsCrossed,
   Zap,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
@@ -30,6 +30,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/sentry';
 import AIGenerateWizard from '@/components/ai/AIGenerateWizard';
 
 // Helper functions
@@ -807,11 +808,21 @@ function TodayContent() {
   const { can } = useSubscription();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [aiWizardOpen, setAiWizardOpen] = useState(false);
   const [insightsLoading, setInsightsLoading] = useState(false);
 
   const hasAIAccess = can('atlas_ai');
+
+  // Handle Stripe success redirect
+  useEffect(() => {
+    if (searchParams.get('subscribed') === '1') {
+      toast.success('Subscription activated! Welcome to Atlas Core Pro.');
+      trackEvent('payment_success', { user_id: user?.id, plan: searchParams.get('plan') });
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
   const preferredName = getPreferredName(user?.full_name || user?.email, 'Athlete');
 
   // Data queries
