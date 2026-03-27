@@ -36,7 +36,12 @@ import Export from '@/pages/Export';
 import AdminPanel from '@/pages/AdminPanel';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminUsers from '@/pages/admin/AdminUsers';
+import AdminOverview from '@/pages/admin/AdminOverview';
+import AdminAuditLog from '@/pages/admin/AdminAuditLog';
+import AdminRoles from '@/pages/admin/AdminRoles';
+import AdminSettings from '@/pages/admin/AdminSettings';
 import ModerationConsole from '@/pages/admin/ModerationConsole';
+import SubscriptionManager from '@/components/admin/SubscriptionManager';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import TermsOfService from '@/pages/TermsOfService';
 import MyDiet from '@/pages/MyDiet';
@@ -382,14 +387,14 @@ const AppRoutes = () => (
     {/* Admin routes - completely separate from AppLayout */}
     <Route element={<RequireAuthenticatedApp />}>
       <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminLayout /></RouteGuard>}>
-        <Route index element={<div className="p-8 text-[hsl(var(--fg))]">Admin Overview (coming soon)</div>} />
+        <Route index element={<AdminOverview />} />
         <Route path="users" element={<AdminUsers />} />
-        <Route path="subscriptions" element={<div className="p-8 text-[hsl(var(--fg))]">Subscriptions (coming soon)</div>} />
-        <Route path="roles" element={<div className="p-8 text-[hsl(var(--fg))]">Roles & Permissions (coming soon)</div>} />
-        <Route path="audit" element={<div className="p-8 text-[hsl(var(--fg))]">Audit Log (coming soon)</div>} />
-        <Route path="settings" element={<div className="p-8 text-[hsl(var(--fg))]">Admin Settings (coming soon)</div>} />
+        <Route path="subscriptions" element={<SubscriptionManager />} />
+        <Route path="roles" element={<AdminRoles />} />
+        <Route path="audit" element={<AdminAuditLog />} />
+        <Route path="settings" element={<AdminSettings />} />
+        <Route path="moderation" element={<RouteGuard roles={['admin', 'moderator']}><ModerationConsole /></RouteGuard>} />
       </Route>
-      <Route path="/moderation" element={<RouteGuard roles={['admin', 'moderator']}><ModerationConsole /></RouteGuard>} />
     </Route>
 
     <Route path="*" element={<PageNotFound />} />

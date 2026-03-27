@@ -159,7 +159,7 @@ export default function AdminLayout() {
           {/* Moderation Console Link (separate module) */}
           {hasPermission('moderate_photos') && (
             <NavLink
-              to="/moderation"
+              to={`${ROUTES.admin}/moderation`}
               className={({ isActive }) =>
                 cn(
                   'mt-4 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
