@@ -25,6 +25,7 @@ const SAMPLE_VARS: Record<string, Record<string, string>> = {
     weekly_report_url: `${APP}/insights`,
   },
   invite_beta: {
+    first_name: 'Enzo',
     invite_url: `${APP}/invite?token=preview_token`,
     invite_expiry_date: 'April 3, 2026',
   },
