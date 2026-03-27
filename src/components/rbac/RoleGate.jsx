@@ -1,7 +1,6 @@
 import { useAuth } from '@/lib/AuthContext';
 import { canAccess } from '@/lib/rbac';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { ROUTES } from '@/lib/routes';
 
 /**
@@ -17,19 +16,6 @@ export default function RoleGate({ page, roles, redirect = true, children }) {
   const allowed = isAuthenticated
     ? page ? canAccess(role, page) : (roles || []).includes(role)
     : false;
-
-  // Redirect effects — always called, conditionally active
-  useEffect(() => {
-    if (!isLoadingAuth && !isAuthenticated) {
-      navigate(ROUTES.home, { replace: true });
-    }
-  }, [isLoadingAuth, isAuthenticated, navigate]);
-
-  useEffect(() => {
-    if (!isLoadingAuth && isAuthenticated && !allowed && redirect) {
-      navigate(ROUTES.today, { replace: true });
-    }
-  }, [isLoadingAuth, isAuthenticated, allowed, redirect, navigate]);
 
   if (isLoadingAuth) {
     return (

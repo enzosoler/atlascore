@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { canAccess } from '@/lib/rbac';
@@ -8,16 +8,16 @@ import { ROUTES } from '@/lib/routes';
  * RouteGuard — proteger rotas com estados bem definidos.
  * All hooks are called unconditionally (React Rules of Hooks).
  */
-export default function RouteGuard({ 
-  page, 
-  roles, 
+export default function RouteGuard({
+  page,
+  roles,
   children,
   fallback = 'redirect' // 'redirect' | 'show_403'
 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLoadingAuth, isAuthenticated, authState } = useAuth();
-  
+
   const userRole = user?.atlas_role || 'athlete';
 
   // beta_tester can access any route unless it's admin-only
@@ -29,21 +29,6 @@ export default function RouteGuard({
   const isAuthorized = isAuthenticated
     ? page ? canAccess(userRole, page) : (roles || []).includes(userRole) || isBetaTesterAllowed
     : false;
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isLoadingAuth && !isAuthenticated && location.pathname !== ROUTES.home && location.pathname !== ROUTES.auth) {
-      const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
-      navigate(`${ROUTES.auth}?mode=login&next=${encodeURIComponent(nextUrl)}`, { replace: true });
-    }
-  }, [isLoadingAuth, isAuthenticated, navigate, location.pathname]);
-
-  // Redirect if not authorized
-  useEffect(() => {
-    if (!isLoadingAuth && isAuthenticated && !isAuthorized && fallback === 'redirect') {
-      navigate(ROUTES.today, { replace: true });
-    }
-  }, [isLoadingAuth, isAuthenticated, isAuthorized, fallback, navigate]);
 
   if (isLoadingAuth || authState === 'loading') {
     return (
