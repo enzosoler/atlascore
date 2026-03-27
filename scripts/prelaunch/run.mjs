@@ -73,7 +73,7 @@ function listChangedFiles() {
 
 function listEnvReferences() {
   const result = runCommand(
-    "rg -o \"(import\\.meta\\.env|process\\.env)\\.[A-Z0-9_]+\" src supabase base44 shared scripts -g '!dist' | sed 's/.*\\.//' | sort -u"
+    "rg -o \"(import\\.meta\\.env|process\\.env)\\.[A-Z0-9_]+\" src supabase shared scripts -g '!dist' | sed 's/.*\\.//' | sort -u"
   );
 
   return result.stdout ? result.stdout.split('\n').filter(Boolean) : [];
@@ -182,9 +182,9 @@ const buildWarningPresent = Boolean(
 const hasRlsPolicies =
   runCommand("rg -n \"ENABLE ROW LEVEL SECURITY|CREATE POLICY\" supabase/migrations").exitCode === 0;
 const hasCspConfig =
-  runCommand("rg -n \"Content-Security-Policy|helmet|CSP\" src supabase base44 .vercel").exitCode === 0;
+  runCommand("rg -n \"Content-Security-Policy|helmet|CSP\" src supabase .vercel").exitCode === 0;
 const hasTraceId =
-  runCommand("rg -n \"trace_id|traceId\" src supabase base44").exitCode === 0;
+  runCommand("rg -n \"trace_id|traceId\" src supabase").exitCode === 0;
 const hasRunbook =
   fileExists('docs/runbooks/launch.md') || fileExists('src/docs/launch.md');
 const hasPolicyDocs =
@@ -193,7 +193,7 @@ const hasPolicyDocs =
     .trim().length > 0;
 const hasDualTrialProvisioning =
   fileExists('supabase/functions/on-auth-user-created/index.ts') &&
-  fileExists('base44/functions/ensureTrialActivated/entry.ts');
+  fileExists('
 
 const checks = [
   createCheck(
@@ -290,7 +290,7 @@ const checks = [
     'The repo has account deletion functionality but no complete policy/consent audit or launch evidence for LGPD sign-off.',
     [
       `policy_docs_detected=${hasPolicyDocs}`,
-      'delete_account_function=base44/functions/deleteAccount/entry.ts',
+      'delete_account_function=
       'privacy_review=not_run',
     ]
   ),

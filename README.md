@@ -23,7 +23,6 @@ VITE_BASE44_APP_BASE_URL=your_backend_url
 
 e.g.
 VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
 ```
 
 Run the app: `npm run dev`
@@ -34,6 +33,4 @@ Open [Base44.com](http://Base44.com) and click on Publish.
 
 **Docs & Support**
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)

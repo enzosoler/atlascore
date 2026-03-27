@@ -120,7 +120,7 @@ VITE_RECAPTCHA_SITE_KEY=sua_recaptcha_site_key
 
 # Base44 (se estiver usando)
 VITE_BASE44_APP_ID=seu_app_id
-VITE_BASE44_APP_BASE_URL=https://seu-backend.base44.app
+# VITE_BASE44_APP_BASE_URL removed — app uses Supabase only
 ```
 
 **Importante**: Nunca commite o arquivo `.env.local`! Adicione ao `.gitignore`.
