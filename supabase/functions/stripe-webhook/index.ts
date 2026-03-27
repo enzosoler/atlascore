@@ -2,17 +2,22 @@
  * stripe-webhook - Handle Stripe webhook events for subscription sync
  *
  * Deploy:
- *   supabase functions deploy stripe-webhook
+ *   supabase functions deploy stripe-webhook --no-verify-jwt
  *
  * Secrets required:
- *   supabase secrets set STRIPE_SECRET_KEY=sk_test_...
- *   supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+ *   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+ *   RESEND_API_KEY, FROM_EMAIL, APP_URL
+ *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ *   + all STRIPE_PRICE_* env vars
+ *
+ * NOTE: Email helpers are inlined here (not imported from _shared/) to avoid
+ * the Supabase Edge Runtime BOOT_ERROR caused by the logger+templates module
+ * chain exceeding the runtime's module budget when combined with stripe@12.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
-import { sendPaymentSuccess, sendPaymentFailed, sendSubscriptionCanceled } from '../_shared/email-service.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -85,6 +90,67 @@ async function getUserProfile(
   if (!profile?.email) return null;
   return { email: profile.email, firstName: profile.first_name || '' };
 }
+
+// ── Inline email helpers ─────────────────────────────────────────────────────
+// These are inlined rather than imported from _shared/ to avoid BOOT_ERROR.
+// The logger+templates module chain combined with stripe@12 exceeds the Edge
+// Runtime module budget and crashes the function at startup.
+
+async function sendSimpleEmail(to: string, subject: string, html: string): Promise<void> {
+  const resendApiKey = Deno.env.get('RESEND_API_KEY');
+  const fromEmail = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@useatlascore.com>';
+  if (!resendApiKey) {
+    console.warn('stripe-webhook: RESEND_API_KEY not set, skipping email');
+    return;
+  }
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: fromEmail, to: [to.trim().toLowerCase()], subject, html }),
+    });
+    if (!res.ok) {
+      console.error('stripe-webhook: Resend error', res.status, await res.text());
+    }
+  } catch (e) {
+    console.error('stripe-webhook: email send failed:', e);
+  }
+}
+
+async function sendPaymentSuccessEmail(
+  to: string, firstName: string, planName: string, amount: string, billingUrl: string
+): Promise<void> {
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  await sendSimpleEmail(
+    to,
+    `Payment confirmed — ${planName} plan`,
+    `<p>Hi ${firstName},</p><p>Your payment of <strong>${amount}</strong> for the <strong>${planName}</strong> plan was successful.</p><p><a href="${billingUrl}">View billing details</a></p><p>– Atlas Core</p><p><small><a href="${appUrl}">useatlascore.com</a></small></p>`
+  );
+}
+
+async function sendPaymentFailedEmail(
+  to: string, firstName: string, billingUrl: string
+): Promise<void> {
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  await sendSimpleEmail(
+    to,
+    'Action required: payment failed',
+    `<p>Hi ${firstName},</p><p>We were unable to process your latest payment. Please update your billing information to keep your subscription active.</p><p><a href="${billingUrl}">Update payment method</a></p><p>– Atlas Core</p><p><small><a href="${appUrl}">useatlascore.com</a></small></p>`
+  );
+}
+
+async function sendSubscriptionCanceledEmail(
+  to: string, firstName: string, periodEnd: string
+): Promise<void> {
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  await sendSimpleEmail(
+    to,
+    'Your subscription has been canceled',
+    `<p>Hi ${firstName},</p><p>Your Atlas Core subscription has been canceled. You'll continue to have access until <strong>${periodEnd}</strong>.</p><p><a href="${appUrl}/settings/billing">Reactivate subscription</a></p><p>– Atlas Core</p>`
+  );
+}
+
+// ── Main handler ─────────────────────────────────────────────────────────────
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -268,12 +334,7 @@ serve(async (req) => {
             const periodEnd = subscription.current_period_end
               ? new Date(subscription.current_period_end * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
               : 'the end of your billing period';
-            await sendSubscriptionCanceled(
-              profile.email,
-              profile.firstName,
-              periodEnd,
-              existingSub.user_id
-            );
+            await sendSubscriptionCanceledEmail(profile.email, profile.firstName, periodEnd);
           }
         }
         break;
@@ -320,13 +381,12 @@ serve(async (req) => {
               const amountFormatted = invoice.amount_paid
                 ? new Intl.NumberFormat('en-US', { style: 'currency', currency: invoice.currency?.toUpperCase() || 'USD' }).format(invoice.amount_paid / 100)
                 : '';
-              await sendPaymentSuccess(
+              await sendPaymentSuccessEmail(
                 profile.email,
                 profile.firstName,
                 planName,
                 amountFormatted,
-                `${appUrl}/settings/billing`,
-                existingSub.user_id
+                `${appUrl}/settings/billing`
               );
             }
           }
@@ -361,11 +421,10 @@ serve(async (req) => {
           const profile = await getUserProfile(supabaseAdmin, existingSub.user_id);
           if (profile) {
             const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
-            await sendPaymentFailed(
+            await sendPaymentFailedEmail(
               profile.email,
               profile.firstName,
-              `${appUrl}/settings/billing`,
-              existingSub.user_id
+              `${appUrl}/settings/billing`
             );
           }
         }
