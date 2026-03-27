@@ -293,6 +293,15 @@ export default function AppLayout() {
   useViewportHeight();
   usePrimaryRouteScrollReset(mainRef);
 
+  // Lock body scroll so the app shell is the only scroll container.
+  // Scoped to AppLayout so public pages (Landing, Auth) are unaffected.
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   useEffect(() => {
     previousPathnameRef.current = pathname;
   }, [pathname]);
