@@ -13,5 +13,8 @@ verify_jwt = false
 [functions.send-email-v2]
 verify_jwt = true
 
+[functions.log-food-text]
+verify_jwt = false
+
 [functions.stripe-webhook]
 verify_jwt = false
