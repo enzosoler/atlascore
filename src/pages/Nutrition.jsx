@@ -205,7 +205,11 @@ function buildSnapshotDate(selectedDate) {
 }
 
 function getMealTypeFromDate(value) {
-  const parsed = value ? new Date(value) : new Date();
+  // Date-only strings (YYYY-MM-DD) have no time component — JS parses them as UTC
+  // midnight, which in local timezones (e.g. UTC-3) becomes 9pm → incorrectly maps
+  // to 'dinner'. Fall back to breakfast for date-only strings.
+  if (!value || /^\d{4}-\d{2}-\d{2}$/.test(String(value))) return 'breakfast';
+  const parsed = new Date(value);
   const hour = Number.isNaN(parsed.getTime()) ? 8 : parsed.getHours();
   if (hour < 10) return 'breakfast';
   if (hour < 12) return 'morning_snack';
@@ -1912,7 +1916,7 @@ export default function NutritionPage() {
           />
           <div className="p-6 pt-0">
             <MealForm
-              meal={editingMeal}
+              meal={editingMeal || (quickAddType ? { meal_type: quickAddType } : null)}
               selectedDate={selectedDate}
               onSave={handleSaveMeal}
               isSaving={isSavingMeal}
