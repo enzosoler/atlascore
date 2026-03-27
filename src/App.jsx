@@ -196,7 +196,7 @@ const MissingConfigScreen = () => (
 );
 
 const RequireAuthenticatedApp = () => {
-  const { authError, isAuthenticated, authState } = useAuth();
+  const { authError, isAuthenticated, authState, user } = useAuth();
   const location = useLocation();
 
   if (authState === 'loading') {
@@ -208,6 +208,13 @@ const RequireAuthenticatedApp = () => {
   if (!isAuthenticated) {
     const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
+  }
+
+  // Admins go straight to the admin panel — they have no use for Today/Social/etc.
+  const isAdmin = user?.atlas_role === 'admin';
+  const isAdminRoute = location.pathname.startsWith('/AdminPanel');
+  if (isAdmin && !isAdminRoute) {
+    return <Navigate to={ROUTES.admin} replace />;
   }
 
   return <Outlet />;
