@@ -1,5 +1,5 @@
 /**
- * send-test-emails — fires one test email per template to a target address
+ * send-test-emails — fires one test email per template × locale to a target address
  *
  * Deploy:  supabase functions deploy send-test-emails
  * Invoke:  curl -X POST <url> -H "Authorization: Bearer <service_role_key>" \
@@ -9,25 +9,27 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { renderEmail, templates } from '../_shared/templates.ts';
 
-const APP = Deno.env.get('APP_URL') || 'https://www.useatlascore.com';
+type Locale = 'pt-BR' | 'en';
 
-// Sample variables for templates that require them
+const APP = Deno.env.get('APP_URL') || 'https://www.useatlascore.com';
+const LOCALES: Locale[] = ['pt-BR', 'en'];
+
 const SAMPLE_VARS: Record<string, Record<string, string>> = {
   confirm_email: { confirm_email_url: `${APP}/auth?confirm=preview_token` },
   reset_password: { reset_password_url: `${APP}/auth/update-password?token=preview` },
-  trial_started: { trial_end_date: 'April 3, 2026' },
-  trial_ending: { trial_end_date: 'April 3, 2026' },
+  trial_started: { trial_end_date: '3 de abril de 2026' },
+  trial_ending: {},
   payment_success: { receipt_id: 'RCP-001-PREVIEW' },
-  payment_failed: { retry_date: 'April 2, 2026' },
-  subscription_canceled: { access_end_date: 'April 30, 2026' },
+  payment_failed: { retry_date: '2 de abril de 2026' },
+  subscription_canceled: { access_end_date: '30 de abril de 2026' },
   weekly_report: {
-    report_date_range: 'Mar 17–23',
+    report_date_range: '17–23 mar',
     weekly_report_url: `${APP}/insights`,
   },
   invite_beta: {
     first_name: 'Enzo',
     invite_url: `${APP}/invite?token=preview_token`,
-    invite_expiry_date: 'April 3, 2026',
+    invite_expiry_date: '3 de abril de 2026',
   },
 };
 
@@ -47,22 +49,30 @@ serve(async (req) => {
   }
 
   let to = 'admin@useatlascore.com';
-  try { const b = await req.json(); if (b.to) to = b.to; } catch { /* use default */ }
+  let localeFilter: Locale | undefined;
+  try {
+    const b = await req.json();
+    if (b.to) to = b.to;
+    if (b.locale) localeFilter = b.locale;
+  } catch { /* use defaults */ }
 
-  const results: { type: string; ok: boolean; id?: string; error?: string }[] = [];
+  const locales = localeFilter ? [localeFilter] : LOCALES;
+  const results: { type: string; locale: string; ok: boolean; id?: string; error?: string }[] = [];
 
-  for (const key of Object.keys(templates)) {
-    const vars = SAMPLE_VARS[key] ?? {};
-    const { subject, html } = renderEmail(key, vars);
+  for (const locale of locales) {
+    for (const key of Object.keys(templates)) {
+      const vars = SAMPLE_VARS[key] ?? {};
+      const { subject, html } = renderEmail(key, locale, vars);
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: fromEmail, to: [to], subject: `[TEST] ${subject}`, html }),
-    });
-    const data = await res.json();
-    results.push({ type: key, ok: res.ok, id: data.id, error: data.message });
-    await new Promise(r => setTimeout(r, 250));
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: fromEmail, to: [to], subject: `[TEST][${locale}] ${subject}`, html }),
+      });
+      const data = await res.json();
+      results.push({ type: key, locale, ok: res.ok, id: data.id, error: data.message });
+      await new Promise(r => setTimeout(r, 200));
+    }
   }
 
   const sent = results.filter(r => r.ok).length;
