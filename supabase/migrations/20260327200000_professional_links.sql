@@ -1,6 +1,6 @@
 -- ============================================================================
 -- Atlas Core — Professional Links
--- Replaces base44 CoachStudent / ClinicianPatient / NutritionistClientLink
+-- Professional links: coach, clinician, and nutritionist client relationships
 -- ============================================================================
 
 -- ─── TABLE ────────────────────────────────────────────────────────────────
