@@ -382,8 +382,12 @@ const AppRoutes = () => (
     {/* Admin routes - completely separate from AppLayout */}
     <Route element={<RequireAuthenticatedApp />}>
       <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminLayout /></RouteGuard>}>
-        <Route index element={<div className="p-8">Admin Overview (coming soon)</div>} />
+        <Route index element={<div className="p-8 text-[hsl(var(--fg))]">Admin Overview (coming soon)</div>} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="subscriptions" element={<div className="p-8 text-[hsl(var(--fg))]">Subscriptions (coming soon)</div>} />
+        <Route path="roles" element={<div className="p-8 text-[hsl(var(--fg))]">Roles & Permissions (coming soon)</div>} />
+        <Route path="audit" element={<div className="p-8 text-[hsl(var(--fg))]">Audit Log (coming soon)</div>} />
+        <Route path="settings" element={<div className="p-8 text-[hsl(var(--fg))]">Admin Settings (coming soon)</div>} />
       </Route>
       <Route path="/moderation" element={<RouteGuard roles={['admin', 'moderator']}><ModerationConsole /></RouteGuard>} />
     </Route>

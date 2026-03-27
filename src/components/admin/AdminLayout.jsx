@@ -20,12 +20,12 @@ import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
 
 const navItems = [
-  { path: '/admin', label: 'Overview', icon: LayoutDashboard, permission: 'manage_users' },
-  { path: '/admin/users', label: 'Users', icon: Users, permission: 'manage_users' },
-  { path: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard, permission: 'manage_subscriptions' },
-  { path: '/admin/roles', label: 'Roles & Permissions', icon: Shield, permission: 'manage_roles' },
-  { path: '/admin/audit', label: 'Audit Log', icon: FileText, permission: 'view_audit_logs' },
-  { path: '/admin/settings', label: 'Settings', icon: Settings, permission: 'manage_feature_flags' },
+  { path: ROUTES.admin,                       label: 'Overview',           icon: LayoutDashboard, permission: 'manage_users' },
+  { path: `${ROUTES.admin}/users`,            label: 'Users',              icon: Users,           permission: 'manage_users' },
+  { path: `${ROUTES.admin}/subscriptions`,    label: 'Subscriptions',      icon: CreditCard,      permission: 'manage_subscriptions' },
+  { path: `${ROUTES.admin}/roles`,            label: 'Roles & Permissions',icon: Shield,          permission: 'manage_roles' },
+  { path: `${ROUTES.admin}/audit`,            label: 'Audit Log',          icon: FileText,        permission: 'view_audit_logs' },
+  { path: `${ROUTES.admin}/settings`,         label: 'Settings',           icon: Settings,        permission: 'manage_feature_flags' },
 ];
 
 export default function AdminLayout() {
