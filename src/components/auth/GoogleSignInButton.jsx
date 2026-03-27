@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { signInWithGoogle } from '@/lib/googleSignIn';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 /**
  * GoogleSignInButton — OAuth button for Google Sign-In

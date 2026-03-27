@@ -1251,3 +1251,15 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
 }
+
+/* ── Transition performance override ────────────────────────────────
+   Tailwind's `transition-all` animates every CSS property including
+   layout-triggering props (width, height, padding) which forces full
+   reflows. Override with specific, compositor-friendly properties. */
+@layer utilities {
+  .transition-all {
+    transition-property: opacity, transform, background-color, border-color, color, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+}

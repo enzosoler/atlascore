@@ -25,7 +25,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { base44 } from '@/api/base44Client';
 import { deactivateAllWorkoutPlans, createWorkoutPlan } from '@/services/workoutPlanService';
 import { useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // STEP 1: QUICK INTAKE - Comprehensive questionnaire
