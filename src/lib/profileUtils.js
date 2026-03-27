@@ -245,6 +245,98 @@ export function getMacroSignature(form, t) {
   return parts.length ? parts.join(' · ') : t('profile.macros.pending');
 }
 
+// ---------------------------------------------------------------------------
+// Metabolic rate estimation — Mifflin-St Jeor + score-based TDEE
+// ---------------------------------------------------------------------------
+
+/**
+ * Estimates BMR, TDEE, calorie target, and macro targets.
+ *
+ * @param {object} params
+ * @param {'male'|'female'} params.sex
+ * @param {number} params.age
+ * @param {number} params.weight_kg
+ * @param {number} params.height_cm
+ * @param {number} [params.strength_sessions]   — sessions/week (0–7)
+ * @param {number} [params.cardio_sessions]     — sessions/week (0–7)
+ * @param {'sedentary'|'light'|'moderate'|'active'} [params.occupation]
+ * @param {string} [params.goal]                — training_goal value
+ * @returns {{ bmr, tdee, target_kcal, protein_g, fat_g, carbs_g } | null}
+ */
+export function calculateMetabolicTargets({
+  sex,
+  age,
+  weight_kg,
+  height_cm,
+  strength_sessions = 3,
+  cardio_sessions = 1,
+  occupation = 'sedentary',
+  goal = '',
+} = {}) {
+  if (!sex || !age || !weight_kg || !height_cm) return null;
+
+  const w = Number(weight_kg);
+  const h = Number(height_cm);
+  const a = Number(age);
+  if (!w || !h || !a) return null;
+
+  // Mifflin-St Jeor
+  const bmr = Math.round(
+    sex === 'female'
+      ? (10 * w) + (6.25 * h) - (5 * a) - 161
+      : (10 * w) + (6.25 * h) - (5 * a) + 5,
+  );
+
+  // Score-based TDEE multiplier
+  let score = 1.2;
+
+  const st = Number(strength_sessions) || 0;
+  if (st >= 6) score += 0.175;
+  else if (st >= 4) score += 0.15;
+  else if (st >= 2) score += 0.10;
+  else if (st >= 1) score += 0.05;
+
+  const ct = Number(cardio_sessions) || 0;
+  if (ct >= 5) score += 0.12;
+  else if (ct >= 3) score += 0.08;
+  else if (ct >= 1) score += 0.05;
+
+  const occupationBonus = { sedentary: 0, light: 0.05, moderate: 0.10, active: 0.15 };
+  score += occupationBonus[occupation] ?? 0;
+
+  const tdee = Math.round(bmr * score);
+
+  // Calorie target by goal
+  const g = String(goal).toLowerCase();
+  let target_kcal;
+  if (g.includes('loss') || g.includes('fat') || g.includes('cut') || g.includes('perda')) {
+    target_kcal = Math.round(tdee * 0.80); // ~20% deficit
+  } else if (g.includes('gain') || g.includes('muscle') || g.includes('bulk') || g.includes('massa')) {
+    target_kcal = Math.round(tdee * 1.10); // ~10% surplus
+  } else {
+    target_kcal = tdee;
+  }
+
+  // Macros — protein from body weight (more accurate for athletic population)
+  const protein_g = Math.round(
+    w * (g.includes('loss') || g.includes('fat') || g.includes('cut') ? 2.2 : 2.0),
+  );
+  const fat_g = Math.round((target_kcal * 0.25) / 9);
+  const carbs_g = Math.max(
+    50,
+    Math.round((target_kcal - protein_g * 4 - fat_g * 9) / 4),
+  );
+
+  return {
+    bmr,
+    tdee,
+    target_kcal,
+    protein_g: Math.max(protein_g, 50),
+    fat_g: Math.max(fat_g, 30),
+    carbs_g,
+  };
+}
+
 // Calculate macros based on calories and training goal
 export function calculateMacros(calorieTarget, trainingGoal) {
   if (!calorieTarget || calorieTarget === '') return {};
