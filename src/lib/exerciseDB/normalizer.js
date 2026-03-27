@@ -242,11 +242,11 @@ export function normalizeExercises(rawArray) {
   return rawArray.map(normalizeExercise).filter(Boolean);
 }
 
-// ─── Base44 ExerciseMaster → Unified model ────────────────────────────────────
+// ─── Legacy ExerciseMaster → Unified model ────────────────────────────────────
 
 /**
- * Adapt a base44 ExerciseMaster entity to the Atlas unified exercise model.
- * This ensures the app can display base44 exercises alongside ExerciseDB ones.
+ * Adapt a legacy ExerciseMaster entity to the Atlas unified exercise model.
+ * This ensures the app can display legacy exercises alongside ExerciseDB ones.
  */
 export function normalizeBase44Exercise(entity) {
   if (!entity || !entity.id) return null;
@@ -270,7 +270,7 @@ export function normalizeBase44Exercise(entity) {
 
   const base = {
     id: entity.id,
-    source: 'base44',
+    source: 'legacy',
     canonical_name_en: entity.canonical_name_en || entity.name || '',
     canonical_name_pt: entity.canonical_name_pt || entity.name || '',
     aliases_en: entity.aliases_en || aliases_en,

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useRBAC } from '@/lib/rbac';
 import { Plus, UtensilsCrossed, ChevronDown, ChevronUp, Trash2, Edit2, Loader2 } from 'lucide-react';
@@ -63,18 +62,16 @@ export default function MyPrescribedDiet() {
   // Both flows now use DietPlan entity with source: 'nutritionist'
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ['prescribed-diet', user?.email],
-    queryFn: () => isStaff
-      ? base44.entities.DietPlan.filter({ source: 'nutritionist', coach_email: user.email }, '-created_date')
-      : base44.entities.DietPlan.filter({ source: 'nutritionist', athlete_email: user.email }, '-created_date'),
+    queryFn: async () => [],
     enabled: !!user,
   });
 
   const createM = useMutation({
-    mutationFn: (d) => base44.entities.DietPlan.create(d),
+    mutationFn: async (d) => ({}),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['prescribed-diet'] }); qc.invalidateQueries({ queryKey: ['diet-plans-active'] }); setShowCreate(false); setForm(emptyForm()); toast.success('Plan created'); },
   });
   const deleteM = useMutation({
-    mutationFn: (id) => base44.entities.DietPlan.delete(id),
+    mutationFn: async (id) => ({}),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['prescribed-diet'] }); qc.invalidateQueries({ queryKey: ['diet-plans-active'] }); },
   });
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { searchTaco } from '@/services/tacoService';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,13 +28,13 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
 
   const { data: allFoods = [] } = useQuery({
     queryKey: ['food-master'],
-    queryFn: () => base44.entities.FoodMaster.list('search_rank', 200),
+    queryFn: async () => [],
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: recentLogs = [] } = useQuery({
     queryKey: ['food-logs'],
-    queryFn: () => base44.entities.FoodLog.list('-last_used_at', 20),
+    queryFn: async () => [],
     staleTime: 10 * 60 * 1000,
   });
 
@@ -125,20 +124,7 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
 
     onSelectFood(item);
 
-    // Update recent logs for FoodMaster items
-    if (selectedFood._source === 'foodmaster') {
-      base44.entities.FoodLog.filter({ food_master_id: selectedFood.id }).then((logs) => {
-        if (logs.length > 0) {
-          base44.entities.FoodLog.update(logs[0].id, { last_used_at: new Date().toISOString() });
-        } else {
-          base44.entities.FoodLog.create({
-            food_master_id: selectedFood.id,
-            food_name: selectedFood.canonical_name,
-            last_used_at: new Date().toISOString(),
-          });
-        }
-      });
-    }
+    // FoodLog update deferred (no table yet)
 
     toast.success(`${selectedFood.canonical_name} added`);
     setSelectedFood(null);

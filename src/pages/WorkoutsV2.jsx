@@ -29,7 +29,6 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
-import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';

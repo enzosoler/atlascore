@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Plus, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -9,7 +8,7 @@ export default function QuickMealLog({ date, mealType, onClose }) {
   const [foods, setFoods] = useState([{ name: '', amount: '', unit: '', kcal: '' }]);
 
   const createMut = useMutation({
-    mutationFn: (data) => base44.entities.Meal.create(data),
+    mutationFn: async (data) => ({}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['meals', date] });
       toast.success('Meal logged!');

@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
 import {
@@ -82,15 +81,12 @@ function ProtocolsContent() {
 
   const protocolsQuery = useQuery({
     queryKey: PROTOCOLS_QUERY_KEY,
-    queryFn: () => base44.entities.Protocol.list('-start_date', 100),
+    queryFn: async () => [],
     retry: 1,
   });
 
   const saveProtocol = useMutation({
-    mutationFn: ({ protocolId, payload }) =>
-      protocolId
-        ? base44.entities.Protocol.update(protocolId, payload)
-        : base44.entities.Protocol.create(payload),
+    mutationFn: async ({ protocolId, payload }) => ({}),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
       setIsFormOpen(false);
@@ -112,7 +108,7 @@ function ProtocolsContent() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, payload }) => base44.entities.Protocol.update(id, payload),
+    mutationFn: async ({ id, payload }) => ({}),
     onMutate: ({ actionKey }) => {
       setPendingActionKey(actionKey);
     },
@@ -136,7 +132,7 @@ function ProtocolsContent() {
   });
 
   const deleteProtocol = useMutation({
-    mutationFn: ({ id }) => base44.entities.Protocol.delete(id),
+    mutationFn: async ({ id }) => ({}),
     onMutate: ({ actionKey }) => {
       setPendingActionKey(actionKey);
     },

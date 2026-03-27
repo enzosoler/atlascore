@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabaseClient';
-import { base44 } from '@/api/base44Client';
+import { invokeLLMJson } from '@/lib/llm';
 import { deactivateAllWorkoutPlans, createWorkoutPlan } from '@/services/workoutPlanService';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -621,11 +621,7 @@ Gere o plano em português ou inglês conforme apropriado.`;
         required: ['plan', 'days', 'weekly_volume', 'rationale']
       };
 
-      const res = await base44.integrations.Core.InvokeLLM({
-        systemPrompt,
-        prompt: userPrompt,
-        response_json_schema: responseSchema,
-      });
+      const res = await invokeLLMJson(`${systemPrompt}\n\n${userPrompt}`, responseSchema);
 
       setStage('validating');
       await new Promise(r => setTimeout(r, 500));

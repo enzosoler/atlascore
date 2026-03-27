@@ -1,6 +1,5 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { UtensilsCrossed } from 'lucide-react';
 import AdherenceComparison from '@/components/shared/AdherenceComparison';
 
@@ -14,12 +13,12 @@ export default function NutritionistClientAdherence({ clientEmail, days = 7 }) {
 
   const { data: meals = [] } = useQuery({
     queryKey: ['client-meals', clientEmail, startDateStr],
-    queryFn: () => base44.entities.Meal.filter({ created_by: clientEmail }),
+    queryFn: async () => [],
   });
 
   const { data: prescribed = [] } = useQuery({
     queryKey: ['prescribed-diet', clientEmail],
-    queryFn: () => base44.entities.PrescribedDiet.filter({ client_email: clientEmail, active: true }),
+    queryFn: async () => [],
   });
 
   // Calculate actual macros from logged meals

@@ -2,7 +2,7 @@
  * Exercises — Exercise Library Page
  *
  * Primary source: ExerciseDB API (via @/lib/exerciseDB)
- * Fallback:       base44 ExerciseMaster
+ * Fallback:       Legacy ExerciseMaster
  *
  * Features:
  *  - Debounced text search (PT + EN, accents, aliases)

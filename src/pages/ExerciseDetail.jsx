@@ -11,7 +11,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
 import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
 import {
   ActionRow,
@@ -114,10 +113,7 @@ export default function ExerciseDetail() {
 
   const { data: log } = useQuery({
     queryKey: ['exercise-log', id],
-    queryFn: () =>
-      base44.entities.ExerciseLog
-        .filter({ exercise_master_id: id })
-        .then((rows) => rows?.[0]),
+    queryFn: async () => null,
     enabled: !!id,
     staleTime: 60_000,
   });
@@ -133,16 +129,7 @@ export default function ExerciseDetail() {
       const nextFavorite = !isFavorite;
       const exerciseName = exercise?.canonical_name_en || exercise?.name || exercise?.canonical_name_pt || '';
 
-      if (!log?.id) {
-        await base44.entities.ExerciseLog.create({
-          exercise_master_id: id,
-          exercise_name: exerciseName,
-          is_favorite: nextFavorite,
-          last_used_at: new Date().toISOString(),
-        });
-      } else {
-        await base44.entities.ExerciseLog.update(log.id, { is_favorite: nextFavorite });
-      }
+      // ExerciseLog table not yet migrated — favorite state is local-only for now
 
       setIsFavorite(nextFavorite);
       queryClient.invalidateQueries({ queryKey: ['exercise-log', id] });

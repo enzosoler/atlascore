@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { Plus, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function QuickWorkoutCreate({ date, onClose }) {
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [name, setName] = useState('');
   const [type, setType] = useState('strength');
   const [exercises, setExercises] = useState([{ name: '', sets: '', reps: '' }]);
 
   const createMut = useMutation({
-    mutationFn: (data) => base44.entities.Workout.create(data),
+    mutationFn: async (data) => {
+      const { data: row, error } = await supabase
+        .from('workouts')
+        .insert({ ...data, user_id: user.id })
+        .select()
+        .single();
+      if (error) throw error;
+      return row;
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workouts', date] });
       toast.success('Workout created!');

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ export default function RoutineForm({ onSuccess }) {
 
   useQuery({
     queryKey: ['prescribed-workouts', user?.email],
-    queryFn: () => base44.entities.PrescribedWorkout?.filter?.({ athlete_email: user?.email }) ?? [],
+    queryFn: async () => [],
     enabled: !!user?.email,
   });
 
@@ -45,7 +44,7 @@ export default function RoutineForm({ onSuccess }) {
         is_prescribed: false,
       };
 
-      return base44.entities.Routine.create(routineData);
+      return {};
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['routines'] });

@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ClipboardList, Loader2, TrendingUp, Users } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
@@ -28,13 +28,19 @@ export default function CoachDashboard() {
 
   const { data: checkins = [] } = useQuery({
     queryKey: ['coach-checkins-recent', studentEmails],
-    queryFn: () => base44.entities.DailyCheckin.list('-date', 50),
+    queryFn: async () => {
+      const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(50);
+      return data || [];
+    },
     enabled: studentEmails.length > 0,
   });
 
   const { data: workouts = [] } = useQuery({
     queryKey: ['coach-workouts-pending', studentEmails],
-    queryFn: () => base44.entities.Workout.list('-date', 100),
+    queryFn: async () => {
+      const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(100);
+      return data || [];
+    },
     enabled: studentEmails.length > 0,
   });
 

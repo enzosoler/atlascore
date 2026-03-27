@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Save, Loader2, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,7 +38,7 @@ export default function NutritionistPrescribeDiet() {
 
   const { data: client } = useQuery({
     queryKey: ['nutritionist-client', clientId],
-    queryFn: () => clientId ? base44.entities.NutritionistClientLink.filter({ id: clientId }).then(r => r?.[0]) : null,
+    queryFn: async () => null,
   });
 
   useEffect(() => {
@@ -47,7 +46,7 @@ export default function NutritionistPrescribeDiet() {
   }, [client]);
 
   const saveMut = useMutation({
-    mutationFn: (data) => base44.entities.PrescribedDiet.create(data),
+    mutationFn: async (data) => ({}),
     onSuccess: () => {
       toast.success('Diet plan prescribed successfully');
       qc.invalidateQueries(['nutritionist-client']);

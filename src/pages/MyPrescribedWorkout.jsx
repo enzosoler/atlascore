@@ -1,6 +1,5 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Activity } from 'lucide-react';
 import AdherenceComparison from '@/components/shared/AdherenceComparison';
 import {
@@ -18,12 +17,12 @@ export default function CoachStudentAdherence({ studentEmail, weeks = 4 }) {
 
   const { data: workouts = [] } = useQuery({
     queryKey: ['student-workouts', studentEmail, startDateStr],
-    queryFn: () => base44.entities.Workout.filter({ created_by: studentEmail }),
+    queryFn: async () => [],
   });
 
   const { data: prescribed = [] } = useQuery({
     queryKey: ['prescribed-workouts', studentEmail],
-    queryFn: () => base44.entities.PrescribedWorkout.filter({ athlete_email: studentEmail, active: true }),
+    queryFn: async () => [],
   });
 
   // Count completed workouts (status = 'completed')

@@ -10,7 +10,6 @@ import {
   Loader2,
   Scale,
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
@@ -69,40 +68,35 @@ export default function CoachStudentProfile() {
     [coachLinks, studentId]
   );
 
-  // Keep base44 calls for workouts/checkins/measurements/photos/prescribed
-  // (these are not CoachStudent entities and remain until those are migrated)
   const studentEmail = studentLink?.client_email;
 
   const { data: workouts = [], isLoading: loadingWorkouts } = useQuery({
     queryKey: ['coach-student-workouts', studentId],
-    queryFn: () => base44.entities.Workout.list('-date', 50).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    queryFn: async () => [],
     enabled: !!studentEmail,
   });
 
   const { data: checkins = [], isLoading: loadingCheckins } = useQuery({
     queryKey: ['coach-student-checkins', studentId],
-    queryFn: () => base44.entities.DailyCheckin.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    queryFn: async () => [],
     enabled: !!studentEmail,
   });
 
   const { data: measurements = [], isLoading: loadingMeasurements } = useQuery({
     queryKey: ['coach-student-measurements', studentId],
-    queryFn: () => base44.entities.Measurement.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    queryFn: async () => [],
     enabled: !!studentEmail,
   });
 
   const { data: photos = [], isLoading: loadingPhotos } = useQuery({
     queryKey: ['coach-student-photos', studentId],
-    queryFn: () => base44.entities.ProgressPhoto.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
+    queryFn: async () => [],
     enabled: !!studentEmail,
   });
 
   const { data: prescribedWorkouts = [], isLoading: loadingPrescribed } = useQuery({
     queryKey: ['coach-prescribed-workouts', studentId],
-    queryFn: () =>
-      base44.entities.PrescribedWorkout
-        .filter({ athlete_email: studentEmail }, '-created_date', 20)
-        .then((items) => items.filter((item) => item.athlete_email === studentEmail)),
+    queryFn: async () => [],
     enabled: !!studentEmail,
   });
 

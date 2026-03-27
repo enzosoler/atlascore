@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { ACHIEVEMENTS, computeAchievements } from '@/lib/achievements';
 import { Trophy, Lock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -49,27 +50,44 @@ function AchievementBadge({ def, progress, unlocked, isNew }) {
 }
 
 export default function AchievementsSection() {
+  const { user } = useAuth();
   const qc = useQueryClient();
 
   const { data: checkins = [] } = useQuery({
-    queryKey: ['checkins-achievements'],
-    queryFn: () => base44.entities.DailyCheckin.list('-date', 200),
+    queryKey: ['checkins-achievements', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(200);
+      return data || [];
+    },
+    enabled: !!user?.id,
   });
   const { data: workouts = [] } = useQuery({
-    queryKey: ['workouts-achievements'],
-    queryFn: () => base44.entities.Workout.list('-date', 200),
+    queryKey: ['workouts-achievements', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(200);
+      return data || [];
+    },
+    enabled: !!user?.id,
   });
   const { data: measurements = [] } = useQuery({
-    queryKey: ['measurements-achievements'],
-    queryFn: () => base44.entities.Measurement.list('-date', 100),
+    queryKey: ['measurements-achievements', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(100);
+      return data || [];
+    },
+    enabled: !!user?.id,
   });
   const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => { const p = await base44.entities.UserProfile.list(); return p?.[0] || null; },
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      return data || null;
+    },
+    enabled: !!user?.id,
   });
   const { data: saved = [] } = useQuery({
     queryKey: ['achievements'],
-    queryFn: () => base44.entities.Achievement.list(),
+    queryFn: async () => [],
   });
 
   const computed = useMemo(() =>
@@ -78,13 +96,12 @@ export default function AchievementsSection() {
   );
 
   const saveMut = useMutation({
-    mutationFn: ({ key, progress }) =>
-      base44.entities.Achievement.create({ key, progress, unlocked_at: new Date().toISOString().split('T')[0], notified: false }),
+    mutationFn: async ({ key, progress }) => ({}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['achievements'] }),
   });
 
   const updateMut = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Achievement.update(id, data),
+    mutationFn: async ({ id, data }) => ({}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['achievements'] }),
   });
 

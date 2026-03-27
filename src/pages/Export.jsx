@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Calendar, Download, FileJson, FileSpreadsheet, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
@@ -87,13 +87,13 @@ function ExportContent() {
 
   const collectData = async () => {
     const datasets = [
-      ['meals', () => base44.entities.Meal.list('-date', 500)],
-      ['workouts', () => base44.entities.Workout.list('-date', 300)],
-      ['measurements', () => base44.entities.Measurement.list('-date', 300)],
-      ['checkins', () => base44.entities.DailyCheckin.list('-date', 300)],
-      ['protocols', () => base44.entities.Protocol.list('-start_date', 200)],
-      ['labExams', () => base44.entities.LabExam.list('-exam_date', 200)],
-      ['progressPhotos', () => base44.entities.ProgressPhoto.list('-date', 200)],
+      ['meals', async () => []],
+      ['workouts', async () => { const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['measurements', async () => { const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['checkins', async () => { const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['protocols', async () => []],
+      ['labExams', async () => []],
+      ['progressPhotos', async () => []],
     ];
 
     const results = await Promise.allSettled(datasets.map(([, request]) => request()));

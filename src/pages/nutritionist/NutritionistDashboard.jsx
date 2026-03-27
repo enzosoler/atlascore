@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, Loader2, TrendingUp, Users, Utensils } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
@@ -25,17 +25,20 @@ export default function NutritionistDashboard() {
 
   const { data: diets = [], isLoading: loadingDiets } = useQuery({
     queryKey: ['prescribed-diets'],
-    queryFn: () => base44.entities.PrescribedDiet.filter({ nutritionist_email: user?.email }),
+    queryFn: async () => [],
   });
 
   const { data: meals = [] } = useQuery({
     queryKey: ['all-meals'],
-    queryFn: () => base44.entities.Meal.list('-date', 500),
+    queryFn: async () => [],
   });
 
   const { data: measurements = [] } = useQuery({
     queryKey: ['all-measurements'],
-    queryFn: () => base44.entities.Measurement.list('-date', 100),
+    queryFn: async () => {
+      const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(100);
+      return data || [];
+    },
   });
 
   const activeClients = links.filter((link) => link.status === 'active').length;

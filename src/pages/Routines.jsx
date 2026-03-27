@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -22,18 +21,18 @@ export default function Routines() {
 
   const { data: routines = [] } = useQuery({
     queryKey: ['routines', user?.email],
-    queryFn: () => base44.entities.Routine.filter({ athlete_email: user?.email }, '-created_date'),
+    queryFn: async () => [],
     enabled: !!user?.email,
   });
 
   const { data: prescribedRoutines = [] } = useQuery({
     queryKey: ['prescribed-routines', user?.email],
-    queryFn: () => base44.entities.Routine.filter({ athlete_email: user?.email, is_prescribed: true }),
+    queryFn: async () => [],
     enabled: !!user?.email,
   });
 
   const deleteRoutine = useMutation({
-    mutationFn: (id) => base44.entities.Routine.delete(id),
+    mutationFn: async (id) => ({}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['routines'] });
       toast.success('Routine deleted');
@@ -50,7 +49,7 @@ export default function Routines() {
         updated_date: undefined,
       };
       delete newRoutine.id;
-      return base44.entities.Routine.create(newRoutine);
+      return {};
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['routines'] });
