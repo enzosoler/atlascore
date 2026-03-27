@@ -9,7 +9,51 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { sendEmail, EmailType, SendResult } from '../_shared/email-service.ts';
+
+type EmailType = 'welcome' | 'confirm_email' | 'reset_password';
+interface SendResult { success: boolean; id?: string; error?: string; }
+
+async function sendEmail(opts: {
+  type: EmailType; to: string; userId?: string; language?: string; payload: Record<string, unknown>;
+}): Promise<SendResult> {
+  const resendApiKey = Deno.env.get('RESEND_API_KEY');
+  const fromEmail = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@useatlascore.com>';
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  if (!resendApiKey) return { success: false, error: 'RESEND_API_KEY not set' };
+
+  const { type, to, payload } = opts;
+  const firstName = String(payload.firstName || to.split('@')[0]);
+  let subject = '';
+  let html = '';
+
+  if (type === 'welcome') {
+    subject = `Welcome to Atlas Core, ${firstName}!`;
+    html = `<p>Hi ${firstName},</p><p>Welcome to <strong>Atlas Core</strong>! Your account is ready.</p><p><a href="${appUrl}">Open Atlas Core</a></p>`;
+  } else if (type === 'confirm_email') {
+    const confirmUrl = String(payload.confirmUrl || appUrl);
+    subject = 'Confirm your Atlas Core email';
+    html = `<p>Hi ${firstName},</p><p>Please confirm your email address:</p><p><a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#10b981;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Confirm email</a></p><p>Or copy: <a href="${confirmUrl}">${confirmUrl}</a></p>`;
+  } else if (type === 'reset_password') {
+    const resetUrl = String(payload.resetUrl || appUrl);
+    subject = 'Reset your Atlas Core password';
+    html = `<p>Hi ${firstName},</p><p>You requested a password reset:</p><p><a href="${resetUrl}" style="display:inline-block;padding:10px 20px;background:#10b981;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Reset password</a></p><p>If you didn't request this, ignore this email.</p>`;
+  } else {
+    return { success: false, error: 'Unknown email type' };
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: fromEmail, to: [to.trim().toLowerCase()], subject, html }),
+    });
+    if (!res.ok) return { success: false, error: `Resend ${res.status}` };
+    const data = await res.json();
+    return { success: true, id: data.id };
+  } catch (e) {
+    return { success: false, error: String(e) };
+  }
+}
 
 // CORS headers
 const CORS = {

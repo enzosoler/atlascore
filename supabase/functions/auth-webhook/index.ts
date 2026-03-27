@@ -1,41 +1,37 @@
 /**
  * Auth Webhook - Send Email Hook for Supabase Auth
- * 
+ *
  * Uses standardwebhooks to verify signature from Supabase Auth
  * verify_jwt = false (set in config.toml) - Supabase uses webhook secret, not JWT
- * 
- * Flow: Supabase Auth -> this function -> sends welcome/trial emails
+ *
+ * Flow: Supabase Auth -> this function -> creates profile/subscription + sends welcome email
+ *
+ * NOTE: Email sending is inlined (not imported from _shared/) to avoid
+ * the Supabase Edge Runtime BOOT_ERROR caused by the logger+templates
+ * module chain.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { sendWelcome, sendTrialStarted } from '../_shared/email-service.ts';
-import { logWebhook } from '../_shared/logger.ts';
 
-// CORS headers
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, webhook-id, webhook-timestamp, webhook-signature',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// Environment
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://useatlascore.com';
-
-// Get hook secret and remove v1,whsec_ prefix if present
 const rawHookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') ?? '';
 const HOOK_SECRET = rawHookSecret.replace(/^v1,whsec_/, '');
 
-// Types for Supabase Auth webhook payload
 interface AuthWebhookPayload {
   user: {
     id: string;
     email: string;
     user_metadata?: Record<string, unknown>;
-    confirmation_sent_at?: string;
   };
   email_data?: {
     token: string;
@@ -43,54 +39,65 @@ interface AuthWebhookPayload {
     redirect_to: string;
     email_action_type: string;
     site_url: string;
-    token_new?: string;
-    token_hash_new?: string;
-    old_email?: string;
-    old_phone?: string;
-    provider?: string;
-    factor_type?: string;
   };
 }
 
-// Extract first name from metadata
 function getFirstName(metadata: Record<string, unknown> | undefined, email: string): string {
   const fullName = (metadata?.full_name || metadata?.name || '') as string;
-  if (fullName) {
-    return fullName.split(' ')[0];
-  }
+  if (fullName) return fullName.split(' ')[0];
   return email.split('@')[0];
 }
 
-// Main handler
-serve(async (req) => {
-  const requestId = crypto.randomUUID();
-  const startTime = Date.now();
+async function sendSimpleEmail(to: string, subject: string, html: string): Promise<boolean> {
+  const resendApiKey = Deno.env.get('RESEND_API_KEY');
+  const fromEmail = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@useatlascore.com>';
+  if (!resendApiKey) return false;
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: fromEmail, to: [to.trim().toLowerCase()], subject, html }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
-  // Handle CORS preflight
+async function sendWelcomeEmail(to: string, firstName: string): Promise<boolean> {
+  return sendSimpleEmail(
+    to,
+    `Welcome to Atlas Core, ${firstName}!`,
+    `<p>Hi ${firstName},</p><p>Welcome to <strong>Atlas Core</strong>! Your account is ready.</p><p>Start tracking your nutrition, workouts, and progress today.</p><p><a href="${APP_URL}" style="display:inline-block;padding:10px 20px;background:#10b981;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Open Atlas Core</a></p><p>– The Atlas Core team</p>`
+  );
+}
+
+async function sendTrialStartedEmail(to: string, firstName: string, trialDays: number): Promise<boolean> {
+  return sendSimpleEmail(
+    to,
+    'Your 7-day free trial has started',
+    `<p>Hi ${firstName},</p><p>Your <strong>${trialDays}-day free trial</strong> of Atlas Core has started. You have full access to all features.</p><p>After your trial, choose a plan to continue.</p><p><a href="${APP_URL}/subscription" style="display:inline-block;padding:10px 20px;background:#10b981;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">View plans</a></p><p>– The Atlas Core team</p>`
+  );
+}
+
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS });
   }
 
-  // Only accept POST
   if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
   }
 
-  logWebhook('request_start', { requestId, url: req.url });
-
-  // Verify webhook signature using standardwebhooks
   if (!HOOK_SECRET) {
     console.error('SEND_EMAIL_HOOK_SECRET not configured');
-    return new Response(
-      JSON.stringify({ error: 'Webhook secret not configured' }),
-      { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Webhook secret not configured' }), {
+      status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
   }
 
-  // Get raw payload for verification
   const payload = await req.text();
   const headers = Object.fromEntries(req.headers.entries());
   const wh = new Webhook(HOOK_SECRET);
@@ -98,32 +105,22 @@ serve(async (req) => {
   let data: AuthWebhookPayload;
   try {
     data = wh.verify(payload, headers) as AuthWebhookPayload;
-    logWebhook('signature_verified', { requestId, userId: data.user?.id });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Webhook signature verification failed:', err);
-    logWebhook('signature_failed', { requestId, error: err?.message || String(err) });
-    return new Response(
-      JSON.stringify({ error: 'Invalid webhook signature' }),
-      { status: 401, headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Invalid webhook signature' }), {
+      status: 401, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
   }
 
-  // Validate required fields
   if (!data.user?.id || !data.user?.email) {
-    return new Response(
-      JSON.stringify({ error: 'Missing user id or email' }),
-      { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Missing user id or email' }), {
+      status: 400, headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
   }
 
-  const userId = data.user.id;
-  const email = data.user.email;
-  const metadata = data.user.user_metadata;
+  const { id: userId, email, user_metadata: metadata } = data.user;
   const firstName = getFirstName(metadata, email);
 
-  logWebhook('payload_valid', { requestId, userId, email: email.substring(0, 3) + '...' });
-
-  // Initialize Supabase admin client
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
   const results = {
@@ -135,7 +132,7 @@ serve(async (req) => {
   };
 
   try {
-    // 1. Create or update profile (includes email for admin panel visibility)
+    // 1. Create or update profile
     const { error: profileError } = await admin.from('profiles').upsert({
       id: userId,
       role: 'user',
@@ -150,7 +147,6 @@ serve(async (req) => {
       results.errors.push(`Profile: ${profileError.message}`);
     } else {
       results.profileCreated = true;
-      logWebhook('profile_created', { requestId, userId });
     }
 
     // 2. Create trial subscription
@@ -170,52 +166,25 @@ serve(async (req) => {
       results.errors.push(`Subscription: ${subError.message}`);
     } else {
       results.subscriptionCreated = true;
-      logWebhook('subscription_created', { requestId, userId, trialEndsAt });
     }
 
     // 3. Send welcome email
-    const welcomeResult = await sendWelcome(email, firstName, userId, 'en');
-    if (welcomeResult.success) {
-      results.welcomeSent = true;
-      logWebhook('welcome_sent', { requestId, userId, resendId: welcomeResult.id });
-    } else {
-      results.errors.push(`Welcome email: ${welcomeResult.error}`);
-      logWebhook('welcome_failed', { requestId, userId, error: welcomeResult.error });
-    }
+    results.welcomeSent = await sendWelcomeEmail(email, firstName);
+    if (!results.welcomeSent) results.errors.push('Welcome email failed');
 
     // 4. Send trial started email
-    const trialResult = await sendTrialStarted(email, firstName, 7, userId, 'en');
-    if (trialResult.success) {
-      results.trialSent = true;
-      logWebhook('trial_sent', { requestId, userId, resendId: trialResult.id });
-    } else {
-      results.errors.push(`Trial email: ${trialResult.error}`);
-      logWebhook('trial_failed', { requestId, userId, error: trialResult.error });
-    }
+    results.trialSent = await sendTrialStartedEmail(email, firstName, 7);
+    if (!results.trialSent) results.errors.push('Trial email failed');
 
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    results.errors.push(`Unexpected: ${errorMsg}`);
+    const msg = error instanceof Error ? error.message : String(error);
+    results.errors.push(`Unexpected: ${msg}`);
     console.error('Webhook processing error:', error);
   }
 
-  const duration = Date.now() - startTime;
+  console.log('auth-webhook: complete', { userId, ...results });
 
-  logWebhook('request_complete', {
-    requestId,
-    duration,
-    ...results,
+  return new Response(JSON.stringify({ success: true, results }), {
+    status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
   });
-
-  // Always return 200 to Supabase Auth
-  return new Response(
-    JSON.stringify({
-      success: true,
-      requestId,
-      duration,
-      results,
-    }),
-    { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } }
-  );
 });
-
