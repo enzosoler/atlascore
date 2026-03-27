@@ -9,6 +9,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/lib/AuthContext';
 import { ROLE_HOME, ROUTES } from '@/lib/routes';
 import { supabase } from '@/lib/supabaseClient';
+import { email as emailService } from '@/lib/emailService';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
 import { useReCaptcha, IS_CAPTCHA_ENABLED } from '@/lib/ReCaptchaContext';
@@ -318,37 +319,23 @@ export default function Auth() {
         return;
       }
 
-      const result = await signUp(normalizedEmail, password, { fullName });
+      const result = await signUp(normalizedEmail, password, { full_name: fullName });
+      const needsEmailConfirmation = result?.needsEmailConfirmation;
 
-      // Record terms acceptance
       try {
         await supabase.functions.invoke('terms-acceptance', {
-          body: {
-            user_id: result.user?.id,
-          },
+          body: { user_id: result?.id },
         });
       } catch (termsError) {
-        // Log but don't block signup if terms recording fails
+        // Don't block signup if terms recording fails
         console.error('Failed to record terms acceptance:', termsError);
       }
 
-      // Send welcome email via edge function
-      if (!result.needsEmailConfirmation) {
-        try {
-          await supabase.functions.invoke('send-welcome-email', {
-            body: {
-              email: normalizedEmail,
-              firstName: fullName,
-              appUrl: window.location.origin,
-            },
-          });
-        } catch (emailError) {
-          // Log but don't block signup if email fails
-          console.error('Failed to send welcome email:', emailError);
-        }
+      if (!needsEmailConfirmation) {
+        emailService.welcome({ email: normalizedEmail, firstName: fullName, userId: result?.id });
       }
 
-      if (result.needsEmailConfirmation) {
+      if (needsEmailConfirmation) {
         setSuccessMessage(ui.emailConfirmation);
         setPassword('');
         return;
