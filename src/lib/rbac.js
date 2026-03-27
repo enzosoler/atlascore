@@ -133,6 +133,7 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.workouts,           label: 'Train',          icon: 'Dumbbell' },
     { path: ROUTES.body,               label: 'Body',           icon: 'TrendingUp' },
     { path: ROUTES.insights,           label: 'Progress',       icon: 'BarChart3' },
+    { path: ROUTES.labExams,           label: 'Health',         icon: 'ClipboardList' },
     { path: ROUTES.social,             label: 'Social',         icon: 'MessageSquare' },
     { path: ROUTES.export,             label: 'Export',         icon: 'Download' },
     { path: ROUTES.profile,            label: 'Profile',        icon: 'User' },
