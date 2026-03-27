@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-// Supabase workout plan services removed — base44 is now the single source of truth
 import { useAuth } from '@/lib/AuthContext';
+import { getActiveWorkoutPlans, createWorkoutPlan, deactivateAllWorkoutPlans } from '@/services/workoutPlanService';
+import { supabase } from '@/lib/supabaseClient';
+import { invokeLLMJson } from '@/lib/llm';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
 import { ClipboardList, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus, User, Users } from 'lucide-react';
@@ -136,24 +137,25 @@ export default function MyWorkout() {
   }, [isAuthenticated, isLoadingAuth, navigate]);
 
   const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
+    queryKey: ['user-profile', user?.id],
     queryFn: async () => {
+      if (!user?.id) return null;
       try {
-        const p = await base44.entities.UserProfile.list();
-        return p?.[0] || null;
+        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        return data || null;
       } catch {
         return null;
       }
     },
+    enabled: !!user?.id,
   });
 
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ['workout-plans', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      // base44 is the single source of truth for workout plans
       try {
-        return await base44.entities.WorkoutPlan.filter({ active: true }, '-created_date');
+        return await getActiveWorkoutPlans(user.id);
       } catch {
         return [];
       }
@@ -172,15 +174,15 @@ export default function MyWorkout() {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Create a detailed weekly workout plan in polished English for a user with the following profile:
+      const res = await invokeLLMJson(
+        `Create a detailed weekly workout plan in polished English for a user with the following profile:
 - Goal: ${profile?.training_goal || 'muscle gain'}
 - Level: ${profile?.fitness_level || 'intermediate'}
 - Frequency: ${profile?.workout_frequency || '4x per week'}
 - Restrictions: ${profile?.health_restrictions || 'none'}
 
 Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
-        response_json_schema: {
+        {
           type: 'object',
           properties: {
             name: { type: 'string' },
@@ -212,16 +214,14 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
             },
           },
         },
-      });
+      );
 
       clearTimeout(timeoutId);
 
       if (res?.name) {
-        // Deactivate previous plans in base44 (single source of truth)
-        for (const p of plans) {
-          try { await base44.entities.WorkoutPlan.update(p.id, { active: false }); } catch { /* noop */ }
-        }
-        await base44.entities.WorkoutPlan.create({
+        // Deactivate previous plans
+        try { await deactivateAllWorkoutPlans(user.id); } catch { /* noop */ }
+        await createWorkoutPlan(user.id, {
           ...res,
           source: 'ai',
           created_by_type: 'ai',

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { getActiveDietPlans, createDietPlan, deactivateAllDietPlans } from '@/services/dietPlanService';
+import { supabase } from '@/lib/supabaseClient';
+import { invokeLLMJson } from '@/lib/llm';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
 import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, ClipboardList, User, Users } from 'lucide-react';
@@ -10,7 +12,6 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, StatusBanner } from '@/components/shared/StablePage';
-// Supabase diet plan services removed — base44 is now the single source of truth
 
 const CREATOR_LABELS = { ai: 'Generated', coach: 'Coach', user: 'You' };
 const CREATOR_BADGE  = { ai: 'badge-neutral', coach: 'badge-blue', user: 'badge-neutral' };
@@ -78,24 +79,25 @@ export default function MyDiet() {
   }, [isAuthenticated, isLoadingAuth, navigate]);
 
   const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
+    queryKey: ['user-profile', user?.id],
     queryFn: async () => {
+      if (!user?.id) return null;
       try {
-        const p = await base44.entities.UserProfile.list();
-        return p?.[0] || null;
+        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        return data || null;
       } catch {
         return null;
       }
     },
+    enabled: !!user?.id,
   });
 
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ['diet-plans', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      // base44 is the single source of truth for diet plans
       try {
-        return await base44.entities.DietPlan.filter({ active: true, source: 'ai' }, '-created_date');
+        return await getActiveDietPlans(user.id);
       } catch {
         return [];
       }
@@ -113,8 +115,8 @@ export default function MyDiet() {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Create a detailed diet plan in English for a user with the following profile:
+      const res = await invokeLLMJson(
+        `Create a detailed diet plan in English for a user with the following profile:
 - Goal: ${profile?.training_goal || 'general health'}
 - Target calories: ${profile?.calories_target || 0} kcal
 - Target protein: ${profile?.protein_target || 160}g
@@ -123,7 +125,7 @@ export default function MyDiet() {
 - Dietary style: ${profile?.dietary_style || 'balanced'}
 
 Create a plan with 5-6 meals distributed throughout the day, with real foods and quantities in grams/units.`,
-        response_json_schema: {
+        {
           type: 'object',
           properties: {
             name: { type: 'string' },
@@ -163,17 +165,14 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
             },
           },
         },
-      });
+      );
 
       clearTimeout(timeoutId);
 
       if (res?.name) {
-        // Deactivate previous generated plans in base44
-        for (const p of plans) {
-          try { await base44.entities.DietPlan.update(p.id, { active: false }); } catch { /* noop */ }
-        }
-        // Create new plan in base44 (single source of truth)
-        await base44.entities.DietPlan.create({
+        // Deactivate previous plans
+        try { await deactivateAllDietPlans(user.id); } catch { /* noop */ }
+        await createDietPlan(user.id, {
           ...res,
           source: 'ai',
           created_by_type: 'ai',

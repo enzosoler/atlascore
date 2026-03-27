@@ -9,8 +9,8 @@ import {
   Search, 
   Loader2,
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { createWorkoutPlan, deactivateAllWorkoutPlans } from '@/services/workoutPlanService';
 import { ROUTES } from '@/lib/routes';
 import { toast } from 'sonner';
 import { searchExercises } from '@/lib/exerciseDB';
@@ -96,13 +96,10 @@ export default function ManualWorkoutPlan() {
     setIsSaving(true);
     try {
       // Deactivate current plans
-      const currentPlans = await base44.entities.WorkoutPlan.filter({ active: true });
-      for (const p of currentPlans) {
-        await base44.entities.WorkoutPlan.update(p.id, { active: false });
-      }
+      await deactivateAllWorkoutPlans(user.id);
 
       // Create new plan
-      await base44.entities.WorkoutPlan.create({
+      await createWorkoutPlan(user.id, {
         name: planName,
         objective,
         days: days.map(({ name, focus, exercises }) => ({
