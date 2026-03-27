@@ -25,6 +25,7 @@ const navItems = [
   { path: `${ROUTES.admin}/subscriptions`,    label: 'Subscriptions',      icon: CreditCard,      permission: 'manage_subscriptions' },
   { path: `${ROUTES.admin}/roles`,            label: 'Roles & Permissions',icon: Shield,          permission: 'manage_roles' },
   { path: `${ROUTES.admin}/audit`,            label: 'Audit Log',          icon: FileText,        permission: 'view_audit_logs' },
+  { path: `${ROUTES.admin}/errors`,           label: 'Errors & Events',    icon: AlertTriangle,   permission: 'manage_users' },
   { path: `${ROUTES.admin}/settings`,         label: 'Settings',           icon: Settings,        permission: 'manage_feature_flags' },
 ];
 

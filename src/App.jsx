@@ -42,6 +42,7 @@ const AdminAuditLog = lazy(() => import('@/pages/admin/AdminAuditLog'));
 const AdminRoles = lazy(() => import('@/pages/admin/AdminRoles'));
 const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
 const ModerationConsole = lazy(() => import('@/pages/admin/ModerationConsole'));
+const AdminErrors = lazy(() => import('@/pages/admin/AdminErrors'));
 const SubscriptionManager = lazy(() => import('@/components/admin/SubscriptionManager'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
@@ -393,6 +394,7 @@ const AppRoutes = () => (
           <Route path="roles" element={<AdminRoles />} />
           <Route path="audit" element={<AdminAuditLog />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="errors" element={<AdminErrors />} />
           <Route path="moderation" element={<RouteGuard roles={['admin', 'moderator']}><ModerationConsole /></RouteGuard>} />
         </Route>
       </Route>

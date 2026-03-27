@@ -1,41 +1,56 @@
-import * as Sentry from '@sentry/react';
+/**
+ * Error monitoring — self-hosted via Supabase error_logs table.
+ * Same public API as a Sentry wrapper so callers don't need to change.
+ *
+ * Supports an optional VITE_SENTRY_DSN for when/if Sentry is added later;
+ * until then all captures go to the error_logs table.
+ */
+import { supabase } from '@/lib/supabaseClient';
 
-const dsn = import.meta.env.VITE_SENTRY_DSN;
+let _userId = null;
+let _userEmail = null;
 
 export function initSentry() {
-  if (!dsn) return;
-
-  Sentry.init({
-    dsn,
-    environment: import.meta.env.MODE,
-    // Only send errors in production by default; set VITE_SENTRY_DSN in dev to test
-    enabled: !!dsn,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
-    ],
-    tracesSampleRate: 0.2,
-    replaysSessionSampleRate: 0,
-    replaysOnErrorSampleRate: 1.0,
-  });
+  // No-op for now. Boot-time init not required for Supabase logging.
+  // If VITE_SENTRY_DSN is ever set, wire @sentry/react here.
 }
 
 export function setSentryUser(user) {
-  if (!dsn) return;
-  if (user) {
-    Sentry.setUser({ id: user.id, email: user.email });
-  } else {
-    Sentry.setUser(null);
+  _userId = user?.id ?? null;
+  _userEmail = user?.email ?? null;
+}
+
+export async function captureException(error, context) {
+  // Always log to console so devtools still work
+  console.error(error, context);
+
+  try {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack   = error instanceof Error ? error.stack  : null;
+
+    await supabase.from('error_logs').insert({
+      user_id: _userId || null,
+      message,
+      stack,
+      context: context ? JSON.parse(JSON.stringify(context)) : null,
+      url: typeof window !== 'undefined' ? window.location.href : null,
+    });
+  } catch {
+    // Never let error logging itself crash the app
   }
 }
 
-export function captureException(error, context) {
-  console.error(error);
-  if (!dsn) return;
-  Sentry.captureException(error, context ? { extra: context } : undefined);
-}
-
 export function trackEvent(name, data) {
-  if (!dsn) return;
-  Sentry.addBreadcrumb({ category: 'event', message: name, data, level: 'info' });
+  // Lightweight breadcrumb — writes to error_logs with a special prefix
+  // so conversions are visible alongside errors.
+  try {
+    supabase.from('error_logs').insert({
+      user_id: _userId || null,
+      message: `[event] ${name}`,
+      context: data ? JSON.parse(JSON.stringify(data)) : null,
+      url: typeof window !== 'undefined' ? window.location.href : null,
+    });
+  } catch {
+    // silent
+  }
 }
