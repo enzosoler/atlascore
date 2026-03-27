@@ -18,6 +18,8 @@ export function AppContainer({ children, className = '', maxWidth = 'max-w-5xl' 
       >
         {children}
       </div>
+      {/* Spacer so content clears the fixed mobile tab bar + iPhone safe area */}
+      <div className="h-[calc(env(safe-area-inset-bottom)+76px)] lg:hidden" aria-hidden="true" />
     </div>
   );
 }
