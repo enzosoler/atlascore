@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  AlertTriangle
+  AlertTriangle,
+  ArrowLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -183,6 +184,10 @@ export default function AdminLayout() {
               {permissions.length} permissions granted
             </p>
           </div>
+          <Button variant="ghost" className="w-full mb-2" onClick={() => navigate(ROUTES.today)}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to app
+          </Button>
           <Button variant="outline" className="w-full" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
@@ -204,6 +209,7 @@ export default function AdminLayout() {
 }
 
 function MobileSidebar({ navItems, onLogout, isModerationMode }) {
+  const navigate = useNavigate();
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center border-b px-6">
@@ -228,7 +234,11 @@ function MobileSidebar({ navItems, onLogout, isModerationMode }) {
           </NavLink>
         ))}
       </nav>
-      <div className="border-t p-4">
+      <div className="border-t p-4 space-y-2">
+        <Button variant="ghost" className="w-full" onClick={() => navigate(ROUTES.today)}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to app
+        </Button>
         <Button variant="outline" className="w-full" onClick={onLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           Logout
