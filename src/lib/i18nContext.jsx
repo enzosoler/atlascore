@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { defaultLocale, isValidLocale } from '@/i18n/config';
-import { loadDictionaryWithFallback } from '@/i18n/dictionaries';
+import { getDictionarySync } from '@/i18n/dictionaries';
 import { createTranslator } from '@/i18n/translator';
 import { readableFallback } from '@/i18n/translator';
 
@@ -139,24 +139,11 @@ function buildPathWithLocale(pathname, targetLocale) {
 export function I18nProvider({ children }) {
   const location = useLocation();
   const [locale, setLocaleState] = useState(() => resolveInitialLocale(location.pathname));
-  const [dictionary, setDictionary] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dictionary, setDictionary] = useState(() => getDictionarySync(locale));
+  const [isLoading] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setIsLoading(true);
-      try {
-        const dict = await loadDictionaryWithFallback(locale);
-        if (!cancelled) setDictionary(dict);
-      } catch (err) {
-        console.error('[i18n] Failed to load dictionary:', err);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-    load();
-    return () => { cancelled = true; };
+    setDictionary(getDictionarySync(locale));
   }, [locale]);
 
   useEffect(() => {
@@ -203,15 +190,23 @@ export function I18nProvider({ children }) {
     return null;
   }, [location.pathname]);
 
-  const value = { locale, t, dictionary: dictionary || {}, isLoading, setLocale, switchLocale, getTranslation: (key) => {
-    const keys = key.split('.');
-    let value = dictionary || {};
-    for (const k of keys) {
-      value = value?.[k];
-      if (value === undefined) return null;
-    }
-    return value;
-  } };
+  const value = useMemo(() => ({
+    locale,
+    t,
+    dictionary: dictionary || {},
+    isLoading,
+    setLocale,
+    switchLocale,
+    getTranslation: (key) => {
+      const keys = key.split('.');
+      let val = dictionary || {};
+      for (const k of keys) {
+        val = val?.[k];
+        if (val === undefined) return null;
+      }
+      return val;
+    },
+  }), [locale, t, dictionary, isLoading, setLocale, switchLocale]);
 
   return (
     <I18nContext.Provider value={value}>

@@ -177,15 +177,8 @@ function BrandLockup({ logoWidth, logoHeight, textClassName = '', className = ''
 }
 
 function LanguageToggleNav({ collapsed }) {
-  let locale = 'en';
-  let switchLocale = () => {};
-  try {
-    const i18n = useI18n();
-    locale = i18n.locale || 'en';
-    switchLocale = i18n.switchLocale;
-  } catch (e) {
-    // fallback
-  }
+  const { locale: rawLocale, switchLocale } = useI18n();
+  const locale = rawLocale || 'en';
 
   const isPt = locale === 'pt-BR';
   const nextLocale = isPt ? 'en' : 'pt-BR';
@@ -237,11 +230,8 @@ export default function AppLayout() {
   const { role, nav: rawNav } = useRBAC(user);
 
   // ── Translate nav labels ────────────────────────────────────────
-  let locale = 'en';
-  try {
-    const i18n = useI18n();
-    locale = i18n.locale || 'en';
-  } catch (_) {}
+  const { locale: rawLocale } = useI18n();
+  const locale = rawLocale || 'en';
   const isPt = locale === 'pt-BR';
 
   const ROLE_LABELS_PT = {
