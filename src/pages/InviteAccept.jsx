@@ -31,7 +31,18 @@ export default function InviteAccept() {
     supabase.functions.invoke('redeem-invite', { body: { token } })
       .then(async ({ data, error }) => {
         if (error || data?.error) {
-          const msg = data?.error || data?.message || error?.context?.error || error?.message || 'Something went wrong.';
+          // Extract real error message — on non-2xx, supabase-js puts the Response in error.context
+          let msg = data?.error || data?.message;
+          if (!msg && error?.context) {
+            try {
+              const body = typeof error.context.json === 'function'
+                ? await error.context.json()
+                : error.context;
+              msg = body?.error || body?.message;
+            } catch { /* ignore parse errors */ }
+          }
+          msg = msg || error?.message || 'Something went wrong.';
+
           // If the invite belongs to a different email, sign out and redirect to signup
           if (msg.includes('different email')) {
             await supabase.auth.signOut();
