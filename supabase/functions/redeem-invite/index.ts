@@ -148,23 +148,29 @@ serve(async (req) => {
   }
 
   // 2. Upsert subscription (grant full access)
+  // Don't overwrite an already active paid subscription
   const { data: existingSub } = await supabaseAdmin
     .from('subscriptions')
-    .select('id')
+    .select('id, status, tier')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (existingSub?.id) {
-    await supabaseAdmin
-      .from('subscriptions')
-      .update({ status: 'granted', tier })
-      .eq('id', existingSub.id);
-  } else {
-    await supabaseAdmin
-      .from('subscriptions')
-      .insert({ user_id: user.id, status: 'granted', tier });
+  const activePaidStatuses = ['active', 'trialing'];
+  const alreadyPaid = existingSub && activePaidStatuses.includes(existingSub.status);
+
+  if (!alreadyPaid) {
+    if (existingSub?.id) {
+      await supabaseAdmin
+        .from('subscriptions')
+        .update({ status: 'granted', tier })
+        .eq('id', existingSub.id);
+    } else {
+      await supabaseAdmin
+        .from('subscriptions')
+        .insert({ user_id: user.id, status: 'granted', tier });
+    }
   }
 
   // 3. Mark invite as accepted
