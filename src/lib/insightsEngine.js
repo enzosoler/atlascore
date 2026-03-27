@@ -129,6 +129,8 @@ function normalizeMeasurement(entry = {}) {
   const bodyFatPercent = toNumber(entry.body_fat_percent ?? entry.body_fat);
   const bmi = toNumber(entry.bmi);
   const height = toNumber(entry.height);
+  const bmr = toNumber(entry.bmr);
+  const tdee = toNumber(entry.tdee);
 
   return {
     ...entry,
@@ -139,6 +141,8 @@ function normalizeMeasurement(entry = {}) {
     body_fat: bodyFatPercent,
     bmi,
     height,
+    bmr,
+    tdee,
   };
 }
 
@@ -630,6 +634,26 @@ function getWindowLengthForTrends(rangeDays) {
   return 7;
 }
 
+function getBMRTrend(measurements) {
+  const series = measurements
+    .map((item) => ({ date: item.date, bmr: item.bmr, tdee: item.tdee }))
+    .filter((item) => item.bmr !== null)
+    .sort((left, right) => left.date.localeCompare(right.date));
+
+  if (series.length < 2) return null;
+
+  const first = series[0];
+  const last = series[series.length - 1];
+  return {
+    first,
+    last,
+    delta: last.bmr - first.bmr,
+    tdeeDelta: last.tdee !== null && first.tdee !== null ? last.tdee - first.tdee : null,
+    days: daysBetween(last.date, first.date),
+    samples: series.length,
+  };
+}
+
 function buildProgressInsight(measurements, profile, todayKey) {
   const ordered = sortByDateAsc(measurements);
   const latest = getLatestMeasurement(ordered);
@@ -650,6 +674,7 @@ function buildProgressInsight(measurements, profile, todayKey) {
     ordered.filter((item) => item.body_fat_percent !== null),
     'body_fat_percent'
   );
+  const bmrTrend = getBMRTrend(ordered);
 
   const bodyPieces = [];
   const bodySignals = [];
@@ -678,6 +703,16 @@ function buildProgressInsight(measurements, profile, todayKey) {
       `Body fat ${bodyFatChange.delta < 0 ? 'is down' : 'is up'} ${Math.abs(bodyFatChange.delta).toFixed(1)} points.`
     );
     bodySignals.push(bodyFatChange.delta < 0 ? 'positive' : 'attention');
+  }
+
+  if (bmrTrend && Math.abs(bmrTrend.delta) >= 30) {
+    const ref = bmrTrend.tdeeDelta !== null ? bmrTrend.tdeeDelta : bmrTrend.delta;
+    const metric = bmrTrend.tdeeDelta !== null ? 'TDEE' : 'BMR';
+    const absDelta = Math.abs(ref);
+    bodyPieces.push(
+      `Estimated ${metric} ${ref < 0 ? 'dropped' : 'rose'} ~${Math.round(absDelta)} kcal since ${formatDateLabel(bmrTrend.first.date) || 'the first snapshot'} — ${ref < 0 ? 'possible metabolic adaptation' : 'metabolic rate is up'}.`
+    );
+    bodySignals.push(ref < 0 ? 'attention' : 'positive');
   }
 
   if (latest.bmi !== null || (profile?.current_weight && profile?.height_cm)) {

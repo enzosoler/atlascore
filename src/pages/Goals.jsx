@@ -37,6 +37,7 @@ import {
   formatNumber,
   calculateMetabolicTargets,
 } from '@/lib/profileUtils';
+import { saveBMRSnapshot } from '@/services/bodyProgressService';
 
 // ---------------------------------------------------------------------------
 // Input Field Component
@@ -299,6 +300,8 @@ function MetabolicEstimator({ profileData, onApply }) {
                     protein_target: String(result.protein_g),
                     carbs_target: String(result.carbs_g),
                     fat_target: String(result.fat_g),
+                    _bmr: result.bmr,
+                    _tdee: result.tdee,
                   });
                   setOpen(false);
                 }}
@@ -396,8 +399,16 @@ function GoalsContent() {
   };
 
   const handleApplyEstimate = (estimated) => {
-    setForm((prev) => ({ ...prev, ...estimated }));
+    const { _bmr, _tdee, ...formFields } = estimated;
+    setForm((prev) => ({ ...prev, ...formFields }));
     setSaved(false);
+    if (user?.id && (_bmr || _tdee)) {
+      saveBMRSnapshot(user.id, {
+        bmr: _bmr ?? null,
+        tdee: _tdee ?? null,
+        date: new Date().toISOString().split('T')[0],
+      }).catch(() => {});
+    }
   };
 
   const handleReset = () => {

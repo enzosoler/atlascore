@@ -303,6 +303,34 @@ export async function updateMeasurement(userId, id, payload) {
   return normalizeMeasurementEntry(data);
 }
 
+/**
+ * Upserts a BMR/TDEE snapshot into the measurements table for the given date.
+ * If a row already exists for that date, it updates the bmr/tdee columns only.
+ */
+export async function saveBMRSnapshot(userId, { bmr, tdee, date } = {}) {
+  requireUserId(userId);
+  const dateKey = toDateKey(date);
+
+  const { data: existing } = await supabase
+    .from(MEASUREMENTS_TABLE)
+    .select('id')
+    .eq('user_id', userId)
+    .eq('date', dateKey)
+    .maybeSingle();
+
+  if (existing?.id) {
+    await supabase
+      .from(MEASUREMENTS_TABLE)
+      .update({ bmr: bmr ?? null, tdee: tdee ?? null })
+      .eq('id', existing.id)
+      .eq('user_id', userId);
+  } else {
+    await supabase
+      .from(MEASUREMENTS_TABLE)
+      .insert({ user_id: userId, date: dateKey, bmr: bmr ?? null, tdee: tdee ?? null });
+  }
+}
+
 export async function deleteMeasurement(userId, id) {
   requireUserId(userId);
 
