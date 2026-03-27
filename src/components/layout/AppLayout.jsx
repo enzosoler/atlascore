@@ -729,7 +729,7 @@ export default function AppLayout() {
             transition: isPullingRef.current ? 'none' : 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         >
-          <AnimatePresence mode="popLayout" initial={false}>
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={pathname}
               initial={transitionState.initial}
