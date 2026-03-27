@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/routes';
 
 const navItems = [
   { path: '/admin', label: 'Overview', icon: LayoutDashboard, permission: 'manage_users' },
@@ -28,7 +29,7 @@ const navItems = [
 ];
 
 export default function AdminLayout() {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [permissions, setPermissions] = useState([]);
@@ -45,8 +46,12 @@ export default function AdminLayout() {
       return;
     }
 
+    // If the user already has the admin atlas_role (validated by RouteGuard), grant access
+    // immediately. The user_permissions table adds granular feature-level permissions on top,
+    // but an empty table must not block a valid admin.
+    const isAdminRole = user.atlas_role === 'admin';
+
     try {
-      // Check if user has admin permissions
       const { data: userPermissions, error } = await supabase
         .from('user_permissions')
         .select('permission_name, permission_category')
@@ -57,18 +62,21 @@ export default function AdminLayout() {
       const permNames = userPermissions?.map(p => p.permission_name) || [];
       setPermissions(permNames);
 
-      // Check if user has any admin access
-      const hasAdminAccess = userPermissions?.some(p => 
+      const hasGranularAccess = userPermissions?.some(p =>
         ['manage_users', 'manage_subscriptions', 'view_audit_logs', 'manage_roles', 'moderate_photos'].includes(p.permission_name)
       );
 
-      if (!hasAdminAccess) {
-        navigate('/');
-        return;
+      // Allow if they have either the admin role OR granular permissions
+      if (!isAdminRole && !hasGranularAccess) {
+        navigate(ROUTES.today);
       }
     } catch (error) {
-      console.error('Error checking admin access:', error);
-      navigate('/');
+      console.error('Error loading admin permissions:', error);
+      // Fall back to role-based access — don't kick a valid admin just because
+      // the permissions table query failed.
+      if (!isAdminRole) {
+        navigate(ROUTES.today);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +85,7 @@ export default function AdminLayout() {
   const hasPermission = (permissionName) => permissions.includes(permissionName);
 
   const handleLogout = async () => {
-    await signOut();
+    await logout();
     navigate('/login');
   };
 
