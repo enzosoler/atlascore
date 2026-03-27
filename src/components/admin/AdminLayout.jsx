@@ -82,7 +82,10 @@ export default function AdminLayout() {
     }
   };
 
-  const hasPermission = (permissionName) => permissions.includes(permissionName);
+  // Admins with no granular permissions yet see all nav items by role
+  const isAdminRole = user?.atlas_role === 'admin';
+  const hasPermission = (permissionName) =>
+    isAdminRole || permissions.includes(permissionName);
 
   const handleLogout = async () => {
     await logout();
