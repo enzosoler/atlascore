@@ -15,7 +15,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
-const DEFAULT_APP_URL = 'https://atlascore.app';
+const DEFAULT_APP_URL = 'https://useatlascore.com';
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
 
@@ -115,7 +115,7 @@ function buildHtml({ firstName, appUrl }: { firstName: string; appUrl: string })
       <p class="tagline">Built for clarity, consistency, and real progress.</p>
       <p class="meta">
         You received this because you created an Atlas account.
-        Questions? <a href="mailto:support@atlascore.app">support@atlascore.app</a>
+        Questions? <a href="mailto:support@useatlascore.com">support@useatlascore.com</a>
       </p>
     </div>
 
@@ -143,7 +143,7 @@ Open Atlas: ${appUrl}
 
 ---
 Built for clarity, consistency, and real progress.
-Questions? support@atlascore.app`.trim();
+Questions? support@useatlascore.com`.trim();
 }
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
@@ -221,7 +221,7 @@ serve(async (req) => {
       typeof clientAppUrl === 'string' && clientAppUrl.startsWith('http')
         ? clientAppUrl
         : DEFAULT_APP_URL;
-    const fromAddress = Deno.env.get('FROM_EMAIL') ?? 'Atlas <welcome@atlascore.app>';
+    const fromAddress = Deno.env.get('FROM_EMAIL') ?? 'Atlas <welcome@useatlascore.com>';
 
     // ── Send via Resend ──────────────────────────────────────────────────────
     const resendRes = await fetch(RESEND_API_URL, {

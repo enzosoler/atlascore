@@ -127,7 +127,7 @@ serve(async (req) => {
     });
   }
 
-  const appUrl = Deno.env.get('APP_URL') || 'https://atlascore.app';
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
   const inviteUrl = `${appUrl}/invite?token=${invite.token}`;
 
   // Send invite email

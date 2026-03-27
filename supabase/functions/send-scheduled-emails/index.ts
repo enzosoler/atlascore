@@ -24,7 +24,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const APP_URL = Deno.env.get('APP_URL') || 'https://atlascore.app';
+const APP_URL = Deno.env.get('APP_URL') || 'https://useatlascore.com';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const SEND_EMAIL_URL = `${SUPABASE_URL}/functions/v1/send-email`;

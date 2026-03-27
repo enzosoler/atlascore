@@ -12,12 +12,12 @@
  *   Authentication → Hooks → "Send Email" hook → point to this function
  *
  * Secrets required (beyond default Supabase secrets):
- *   APP_URL — e.g. https://atlascore.app
+ *   APP_URL — e.g. https://useatlascore.com
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const APP_URL = Deno.env.get('APP_URL') || 'https://atlascore.app';
+const APP_URL = Deno.env.get('APP_URL') || 'https://useatlascore.com';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 

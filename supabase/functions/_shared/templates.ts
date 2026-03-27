@@ -1,7 +1,226 @@
 /**
- * Email templates for Atlas Core
- * All templates return both HTML and plain text versions
+ * Email templates for atlas.core
+ * Structured schema with variable interpolation and a single HTML renderer.
  */
+
+type EmailTemplateSchema = {
+  subject: string;
+  preheader: string;
+  headline: string;
+  body: string[];
+  ctaLabel?: string;
+  ctaUrl?: string;
+  secondaryCtaLabel?: string;
+  secondaryCtaUrl?: string;
+  note?: string;
+};
+
+const brand = {
+  name: 'atlas.core',
+  siteUrl: 'https://www.useatlascore.com',
+  supportEmail: 'support@useatlascore.com',
+  colors: {
+    cyan: '#00FFFF',
+    obsidian: '#05070A',
+    white: '#FFFFFF',
+    border: 'rgba(255,255,255,0.10)',
+    textPrimary: 'rgba(255,255,255,0.92)',
+    textSecondary: 'rgba(255,255,255,0.64)',
+  },
+};
+
+export const templates: Record<string, EmailTemplateSchema> = {
+  welcome: {
+    subject: 'atlas.core — welcome',
+    preheader: 'Your workspace is ready.',
+    headline: 'Welcome to atlas.core',
+    body: [
+      'Your workspace is ready.',
+      'Start logging. Start reviewing. Start improving.',
+      'You are active. Let us build.',
+    ],
+    ctaLabel: 'Open workspace',
+    ctaUrl: `${brand.siteUrl}/app`,
+    note: 'You are receiving this email because an account was created for atlas.core.',
+  },
+
+  confirm_email: {
+    subject: 'atlas.core — confirm your account',
+    preheader: 'Confirm your email to activate your workspace.',
+    headline: 'Confirm your email',
+    body: [
+      'Your account is ready.',
+      'Confirm your email address to activate your workspace.',
+    ],
+    ctaLabel: 'Confirm email',
+    ctaUrl: '{{confirm_email_url}}',
+    note: 'If you did not create this account, ignore this email.',
+  },
+
+  reset_password: {
+    subject: 'atlas.core — reset your password',
+    preheader: 'Use this link to set a new password.',
+    headline: 'Reset your password',
+    body: [
+      'Use the link below to set a new password.',
+      'This session expires soon.',
+    ],
+    ctaLabel: 'Reset password',
+    ctaUrl: '{{reset_password_url}}',
+    note: 'If you did not request a password reset, ignore this email.',
+  },
+
+  trial_started: {
+    subject: 'atlas.core — trial started',
+    preheader: 'You now have full access.',
+    headline: 'Your trial is active',
+    body: [
+      'You now have full access to atlas.core.',
+      'Use the trial window with intent.',
+    ],
+    ctaLabel: 'Open workspace',
+    ctaUrl: `${brand.siteUrl}/app`,
+    note: 'Your trial period ends on {{trial_end_date}}.',
+  },
+
+  trial_ending: {
+    subject: 'atlas.core — 2 days remaining',
+    preheader: 'Your trial ends in 2 days.',
+    headline: '2 days remaining',
+    body: [
+      'Your trial ends in 2 days.',
+      'Upgrade to keep access to your workspace, history, and active protocols.',
+    ],
+    ctaLabel: 'View plans',
+    ctaUrl: `${brand.siteUrl}/billing`,
+    secondaryCtaLabel: 'Open workspace',
+    secondaryCtaUrl: `${brand.siteUrl}/app`,
+    note: 'No action is required if you do not plan to continue.',
+  },
+
+  trial_expired: {
+    subject: 'atlas.core — trial ended',
+    preheader: 'Your workspace is paused until you upgrade.',
+    headline: 'Trial ended',
+    body: [
+      'Your workspace is paused.',
+      'Your data remains intact.',
+      'Upgrade to restore access and continue where you left off.',
+    ],
+    ctaLabel: 'Upgrade now',
+    ctaUrl: `${brand.siteUrl}/billing`,
+    note: 'Your data remains available after upgrade.',
+  },
+
+  payment_success: {
+    subject: 'atlas.core — payment confirmed',
+    preheader: 'Your subscription remains active.',
+    headline: 'Payment confirmed',
+    body: [
+      'Your payment was processed successfully.',
+      'Your subscription remains active.',
+    ],
+    ctaLabel: 'Open billing',
+    ctaUrl: `${brand.siteUrl}/billing`,
+    note: 'Receipt ID: {{receipt_id}}',
+  },
+
+  payment_failed: {
+    subject: 'atlas.core — payment failed',
+    preheader: 'Update billing details to avoid interruption.',
+    headline: 'Payment failed',
+    body: [
+      'We could not process your payment.',
+      'Update your billing details to avoid interruption.',
+    ],
+    ctaLabel: 'Update payment',
+    ctaUrl: `${brand.siteUrl}/billing`,
+    note: 'We will retry payment on {{retry_date}}.',
+  },
+
+  subscription_canceled: {
+    subject: 'atlas.core — subscription canceled',
+    preheader: 'Your subscription has been canceled.',
+    headline: 'Subscription canceled',
+    body: [
+      'Your subscription has been canceled.',
+      'Access remains available until {{access_end_date}}.',
+    ],
+    ctaLabel: 'Open workspace',
+    ctaUrl: `${brand.siteUrl}/app`,
+    secondaryCtaLabel: 'Reactivate',
+    secondaryCtaUrl: `${brand.siteUrl}/billing`,
+    note: 'Your data remains intact during the active billing period.',
+  },
+
+  inactivity_nudge: {
+    subject: 'atlas.core — return to your workspace',
+    preheader: 'Your workspace is idle.',
+    headline: 'Your workspace is idle',
+    body: [
+      'You have not logged in recently.',
+      'Return to the work. Continue where you left off.',
+    ],
+    ctaLabel: 'Open workspace',
+    ctaUrl: `${brand.siteUrl}/app`,
+    note: 'You are not here to log data for the sake of it.',
+  },
+
+  weekly_report: {
+    subject: 'atlas.core — your week, {{report_date_range}}',
+    preheader: 'Review the week. Identify the gap. Adjust.',
+    headline: 'Your week',
+    body: [
+      'Review the week. Identify the gap. Adjust.',
+      'Metrics matter only if they change the next decision.',
+    ],
+    ctaLabel: 'View report',
+    ctaUrl: '{{weekly_report_url}}',
+    note: 'Week: {{report_date_range}}',
+  },
+
+  milestone_streak_7: {
+    subject: 'atlas.core — 7-day streak',
+    preheader: 'Seven days. Kept, not claimed.',
+    headline: '7-day streak',
+    body: [
+      'Seven days. Kept, not claimed.',
+      'Most people stop early. You did not.',
+      'Maintain the standard.',
+    ],
+    ctaLabel: 'Open workspace',
+    ctaUrl: `${brand.siteUrl}/app`,
+    note: 'Streak count: 7 days.',
+  },
+
+  invite_beta: {
+    subject: 'atlas.core — early access invitation',
+    preheader: 'You have been invited to atlas.core.',
+    headline: 'Early access',
+    body: [
+      'You have been invited to atlas.core.',
+      'This is early access. Expect precision. Expect iteration.',
+    ],
+    ctaLabel: 'Accept invitation',
+    ctaUrl: '{{invite_url}}',
+    note: 'Invitation expires on {{invite_expiry_date}}.',
+  },
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const interpolate = (input: string, variables: Record<string, string>) =>
+  input.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_, key) => variables[key] ?? `{{${key}}}`);
+
+// ─── Renderer ─────────────────────────────────────────────────────────────────
 
 export interface EmailTemplate {
   subject: string;
@@ -9,390 +228,165 @@ export interface EmailTemplate {
   text: string;
 }
 
-export interface WelcomeData {
-  firstName: string;
-  appUrl: string;
-}
+export function renderEmail(
+  templateKey: string,
+  variables: Record<string, string> = {},
+): EmailTemplate {
+  const template = templates[templateKey];
+  if (!template) {
+    throw new Error(`Unknown template: ${templateKey}`);
+  }
 
-export interface ConfirmEmailData {
-  firstName: string;
-  confirmUrl: string;
-  appUrl: string;
-}
+  const subject = interpolate(template.subject, variables);
+  const preheader = interpolate(template.preheader, variables);
+  const headline = interpolate(template.headline, variables);
+  const body = template.body.map((line) => interpolate(line, variables));
+  const note = template.note ? interpolate(template.note, variables) : '';
+  const ctaUrl = template.ctaUrl ? interpolate(template.ctaUrl, variables) : '';
+  const secondaryCtaUrl = template.secondaryCtaUrl
+    ? interpolate(template.secondaryCtaUrl, variables)
+    : '';
 
-export interface TrialData {
-  firstName: string;
-  trialDaysLeft: number;
-  appUrl: string;
-}
-
-export interface ResetPasswordData {
-  firstName: string;
-  resetUrl: string;
-  appUrl: string;
-}
-
-// Brand colors
-const C = {
-  bg: '#F4F4F5',
-  card: '#FFFFFF',
-  fg: '#09090B',
-  fg2: '#52525B',
-  border: '#E4E4E7',
-  cta: '#09090B',
-  ctaText: '#FFFFFF',
-};
-
-function wrapBase(content: string, appUrl: string, title: string): string {
-  return `<!DOCTYPE html>
+  const html = `<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>${title}</title>
-<style>
-body{margin:0;padding:0;background:${C.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
-.container{max-width:600px;margin:40px auto;background:${C.card};border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);}
-.header{background:${C.fg};padding:32px;text-align:center;}
-.header h1{color:${C.ctaText};margin:0;font-size:24px;font-weight:600;}
-.body{padding:40px 32px;color:${C.fg};line-height:1.6;}
-.body p{color:${C.fg2};margin:16px 0;}
-.cta{display:inline-block;margin:24px 0;padding:14px 28px;background:${C.cta};color:${C.ctaText};text-decoration:none;border-radius:8px;font-weight:500;}
-.footer{padding:24px 32px;background:${C.bg};text-align:center;font-size:13px;color:${C.fg2};border-top:1px solid ${C.border};}
-.footer a{color:${C.fg};text-decoration:none;}
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <h1>Atlas Core</h1>
-  </div>
-  <div class="body">
-    ${content}
-  </div>
-  <div class="footer">
-    <p>© ${new Date().getFullYear()} Atlas Core. All rights reserved.</p>
-    <p><a href="${appUrl}">${appUrl.replace('https://', '')}</a></p>
-  </div>
-</div>
-</body>
-</html>`;
-}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${escapeHtml(subject)}</title>
+  </head>
+  <body style="margin:0;padding:0;background:${brand.colors.obsidian};font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;visibility:hidden;">${escapeHtml(preheader)}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
 
-export function buildWelcome(data: WelcomeData): EmailTemplate {
-  const { firstName, appUrl } = data;
-  const displayName = firstName || 'there';
-  
-  const subject = 'Welcome to Atlas Core!';
-  
-  const html = wrapBase(`
-    <h2>Welcome to Atlas Core, ${displayName}!</h2>
-    <p>Your fitness journey starts now. We're excited to help you reach your goals with personalized training and nutrition tracking.</p>
-    <p>Here's what you can do next:</p>
-    <ul>
-      <li>Complete your profile setup</li>
-      <li>Log your first workout</li>
-      <li>Set up your nutrition targets</li>
-    </ul>
-    <a href="${appUrl}/today" class="cta">Get Started</a>
-    <p>If you have any questions, just reply to this email. We're here to help!</p>
-  `, appUrl, subject);
-  
-  const text = `Welcome to Atlas Core, ${displayName}!
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${brand.colors.obsidian};padding:32px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:${brand.colors.obsidian};border:1px solid ${brand.colors.border};">
 
-Your fitness journey starts now. We're excited to help you reach your goals with personalized training and nutrition tracking.
+            <!-- Wordmark -->
+            <tr>
+              <td style="padding:28px 28px 16px 28px;">
+                <span style="font-size:18px;line-height:1;font-weight:700;letter-spacing:-0.03em;color:${brand.colors.white};">${escapeHtml(brand.name)}</span>
+              </td>
+            </tr>
 
-Here's what you can do next:
-- Complete your profile setup
-- Log your first workout
-- Set up your nutrition targets
+            <!-- Divider -->
+            <tr>
+              <td style="padding:0 28px;">
+                <div style="height:1px;background:${brand.colors.border};"></div>
+              </td>
+            </tr>
 
-Get Started: ${appUrl}/today
+            <!-- Headline -->
+            <tr>
+              <td style="padding:28px 28px 0 28px;">
+                <h1 style="margin:0;color:${brand.colors.white};font-size:30px;line-height:1.1;font-weight:700;letter-spacing:-0.02em;">${escapeHtml(headline)}</h1>
+              </td>
+            </tr>
 
-If you have any questions, just reply to this email. We're here to help!
+            <!-- Body -->
+            <tr>
+              <td style="padding:16px 28px 0 28px;">
+                ${body
+                  .map(
+                    (paragraph) =>
+                      `<p style="margin:0 0 10px 0;color:${brand.colors.textPrimary};font-size:16px;line-height:1.6;">${escapeHtml(paragraph)}</p>`,
+                  )
+                  .join('\n                ')}
+              </td>
+            </tr>
 
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
-  
-  return { subject, html, text };
-}
+            ${template.ctaLabel && ctaUrl ? `
+            <!-- Primary CTA -->
+            <tr>
+              <td style="padding:24px 28px 0 28px;">
+                <a href="${escapeHtml(ctaUrl)}" style="display:inline-block;background:${brand.colors.cyan};color:${brand.colors.obsidian};text-decoration:none;font-size:15px;line-height:1;font-weight:700;padding:14px 20px;border-radius:6px;">${escapeHtml(template.ctaLabel)}</a>
+              </td>
+            </tr>` : ''}
 
-export function buildConfirmEmail(data: ConfirmEmailData): EmailTemplate {
-  const { firstName, confirmUrl, appUrl } = data;
-  const displayName = firstName || 'there';
-  
-  const subject = 'Confirm your Atlas Core account';
-  
-  const html = wrapBase(`
-    <h2>Hi ${displayName},</h2>
-    <p>Thanks for signing up for Atlas Core! Please confirm your email address to get started.</p>
-    <a href="${confirmUrl}" class="cta">Confirm Email Address</a>
-    <p style="font-size:13px;color:${C.fg2};margin-top:32px;">Or copy and paste this link into your browser:<br/>${confirmUrl}</p>
-    <p>If you didn't create an account, you can safely ignore this email.</p>
-  `, appUrl, subject);
-  
-  const text = `Hi ${displayName},
+            ${template.secondaryCtaLabel && secondaryCtaUrl ? `
+            <!-- Secondary CTA -->
+            <tr>
+              <td style="padding:14px 28px 0 28px;">
+                <a href="${escapeHtml(secondaryCtaUrl)}" style="color:${brand.colors.textSecondary};font-size:14px;text-decoration:underline;text-underline-offset:3px;">${escapeHtml(template.secondaryCtaLabel)}</a>
+              </td>
+            </tr>` : ''}
 
-Thanks for signing up for Atlas Core! Please confirm your email address to get started.
+            ${note ? `
+            <!-- Note -->
+            <tr>
+              <td style="padding:24px 28px 0 28px;">
+                <div style="border-top:1px solid ${brand.colors.border};padding-top:20px;">
+                  <p style="margin:0;color:${brand.colors.textSecondary};font-size:13px;line-height:1.5;">${escapeHtml(note)}</p>
+                </div>
+              </td>
+            </tr>` : ''}
 
-Confirm Email: ${confirmUrl}
+            <!-- Footer -->
+            <tr>
+              <td style="padding:24px 28px 28px 28px;">
+                <p style="margin:0;color:${brand.colors.textSecondary};font-size:12px;line-height:1.5;">${escapeHtml(brand.name)} &middot; <a href="${brand.siteUrl}" style="color:${brand.colors.textSecondary};text-decoration:none;">${brand.siteUrl.replace('https://', '')}</a> &middot; <a href="mailto:${brand.supportEmail}" style="color:${brand.colors.textSecondary};text-decoration:none;">${brand.supportEmail}</a></p>
+              </td>
+            </tr>
 
-If you didn't create an account, you can safely ignore this email.
-
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
-  
-  return { subject, html, text };
-}
-
-export function buildTrialStarted(data: TrialData): EmailTemplate {
-  const { firstName, trialDaysLeft, appUrl } = data;
-  const displayName = firstName || 'there';
-  
-  const subject = 'Your Atlas Core trial has started!';
-  
-  const html = wrapBase(`
-    <h2>Hi ${displayName},</h2>
-    <p>Great news! Your ${trialDaysLeft}-day free trial of Atlas Core is now active.</p>
-    <p>You now have full access to all premium features:</p>
-    <ul>
-      <li>Advanced workout tracking</li>
-      <li>Nutrition planning and logging</li>
-      <li>Progress analytics and insights</li>
-      <li>Protocol management</li>
-    </ul>
-    <a href="${appUrl}/today" class="cta">Explore Premium Features</a>
-    <p>Your trial ends in ${trialDaysLeft} days. We'll remind you before it expires.</p>
-  `, appUrl, subject);
-  
-  const text = `Hi ${displayName},
-
-Great news! Your ${trialDaysLeft}-day free trial of Atlas Core is now active.
-
-You now have full access to all premium features:
-- Advanced workout tracking
-- Nutrition planning and logging
-- Progress analytics and insights
-- Protocol management
-
-Explore Premium: ${appUrl}/today
-
-Your trial ends in ${trialDaysLeft} days. We'll remind you before it expires.
-
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
-  
-  return { subject, html, text };
-}
-
-export function buildResetPassword(data: ResetPasswordData): EmailTemplate {
-  const { firstName, resetUrl, appUrl } = data;
-  const displayName = firstName || 'there';
-  
-  const subject = 'Reset your Atlas Core password';
-  
-  const html = wrapBase(`
-    <h2>Hi ${displayName},</h2>
-    <p>We received a request to reset your Atlas Core password. Click the button below to set a new password.</p>
-    <a href="${resetUrl}" class="cta">Reset Password</a>
-    <p style="font-size:13px;color:${C.fg2};margin-top:32px;">Or copy and paste this link:<br/>${resetUrl}</p>
-    <p>This link will expire in 1 hour for security reasons.</p>
-    <p>If you didn't request this reset, please ignore this email or contact support if you have concerns.</p>
-  `, appUrl, subject);
-  
-  const text = `Hi ${displayName},
-
-We received a request to reset your Atlas Core password.
-
-Reset Password: ${resetUrl}
-
-This link will expire in 1 hour for security reasons.
-
-If you didn't request this reset, please ignore this email or contact support.
-
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
-  
-  return { subject, html, text };
-}
-
-export interface InviteBetaData {
-  firstName: string;
-  inviteUrl: string;
-  notes?: string;
-  appUrl: string;
-}
-
-export function buildInviteBeta(data: InviteBetaData): EmailTemplate {
-  const { firstName, inviteUrl, notes, appUrl } = data;
-  const displayName = firstName || 'there';
-
-  const subject = "You're invited to Atlas Core — early access";
-
-  const html = wrapBase(`
-    <h2>Early access, ${displayName}.</h2>
-    <p>I'm building Atlas Core — a training and health platform for athletes and the professionals who work with them. You're one of a small group I've personally invited to try it before launch.</p>
-    ${notes ? `<p style="padding:14px 16px;background:${C.bg};border-radius:8px;border-left:3px solid ${C.border};font-style:italic;color:${C.fg2};margin:20px 0;">"${notes}"</p>` : ''}
-    <p>Your access covers everything — athlete tracking, workout and nutrition logging, lab exams, body composition, progress photos, coach and clinician dashboards, protocols, and more. No paywalls, no limits.</p>
-    <p>I'd love honest feedback on what works, what's confusing, and what's missing.</p>
-    <a href="${inviteUrl}" class="cta">Accept early access</a>
-    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">This link is personal to you and expires in 7 days. If you weren't expecting this, you can ignore it.</p>
-  `, appUrl, subject);
-
-  const text = `Early access, ${displayName}.
-
-I'm building Atlas Core — a training and health platform for athletes and the professionals who work with them. You're one of a small group I've personally invited to try it before launch.
-${notes ? `\n"${notes}"\n` : ''}
-Your access covers everything — athlete tracking, workout and nutrition logging, lab exams, body composition, progress photos, coach and clinician dashboards, protocols, and more.
-
-I'd love honest feedback on what works, what's confusing, and what's missing.
-
-Accept early access: ${inviteUrl}
-
-This link is personal to you and expires in 7 days.
-
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
-
-  return { subject, html, text };
-}
-
-export interface PaymentSuccessData {
-  firstName: string;
-  planName: string;
-  amount: string;
-  billingUrl: string;
-  appUrl: string;
-}
-
-export interface PaymentFailedData {
-  firstName: string;
-  billingUrl: string;
-  appUrl: string;
-}
-
-export interface SubscriptionCanceledData {
-  firstName: string;
-  periodEnd: string;
-  appUrl: string;
-}
-
-export function buildPaymentSuccess(data: PaymentSuccessData): EmailTemplate {
-  const { firstName, planName, amount, billingUrl, appUrl } = data;
-  const displayName = firstName || 'there';
-
-  const subject = 'Payment confirmed — Atlas Core';
-
-  const html = wrapBase(`
-    <h2>Payment confirmed</h2>
-    <p>Hi ${displayName}, your payment was successful.</p>
-    <table style="width:100%;border-collapse:collapse;margin:24px 0;">
-      <tr><td style="padding:10px 0;color:${C.fg2};border-bottom:1px solid ${C.border};">Plan</td><td style="padding:10px 0;text-align:right;font-weight:500;">${planName}</td></tr>
-      <tr><td style="padding:10px 0;color:${C.fg2};">Amount</td><td style="padding:10px 0;text-align:right;font-weight:500;">${amount}</td></tr>
+          </table>
+        </td>
+      </tr>
     </table>
-    <a href="${billingUrl}" class="cta">View Billing</a>
-    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">Questions about your billing? Reply to this email or visit your account.</p>
-  `, appUrl, subject);
+  </body>
+</html>`;
 
-  const text = `Payment confirmed
-
-Hi ${displayName}, your payment was successful.
-
-Plan: ${planName}
-Amount: ${amount}
-
-View Billing: ${billingUrl}
-
-Questions? Reply to this email.
-
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
-
-  return { subject, html, text };
-}
-
-export function buildPaymentFailed(data: PaymentFailedData): EmailTemplate {
-  const { firstName, billingUrl, appUrl } = data;
-  const displayName = firstName || 'there';
-
-  const subject = 'Payment failed — action required';
-
-  const html = wrapBase(`
-    <h2>We couldn't process your payment</h2>
-    <p>Hi ${displayName}, your recent payment for Atlas Core didn't go through.</p>
-    <p>This can happen if your card expired, had insufficient funds, or your bank blocked the charge.</p>
-    <a href="${billingUrl}" class="cta">Update Payment Method</a>
-    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">If we can't collect payment, your subscription may be paused. Update your billing details to keep access.</p>
-  `, appUrl, subject);
-
-  const text = `We couldn't process your payment
-
-Hi ${displayName}, your recent payment for Atlas Core didn't go through.
-
-This can happen if your card expired, had insufficient funds, or your bank blocked the charge.
-
-Update Payment Method: ${billingUrl}
-
-If we can't collect payment, your subscription may be paused.
-
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
+  const text = [
+    brand.name.toUpperCase(),
+    '',
+    headline.toUpperCase(),
+    '',
+    ...body,
+    '',
+    ...(template.ctaLabel && ctaUrl ? [`${template.ctaLabel}: ${ctaUrl}`, ''] : []),
+    ...(template.secondaryCtaLabel && secondaryCtaUrl
+      ? [`${template.secondaryCtaLabel}: ${secondaryCtaUrl}`, '']
+      : []),
+    ...(note ? ['---', note, ''] : []),
+    `${brand.name} · ${brand.siteUrl}`,
+  ].join('\n');
 
   return { subject, html, text };
 }
 
-export function buildSubscriptionCanceled(data: SubscriptionCanceledData): EmailTemplate {
-  const { firstName, periodEnd, appUrl } = data;
-  const displayName = firstName || 'there';
+// ─── Legacy compat for email-service.ts ───────────────────────────────────────
 
-  const subject = 'Your Atlas Core subscription has been canceled';
-
-  const html = wrapBase(`
-    <h2>Subscription canceled</h2>
-    <p>Hi ${displayName}, your Atlas Core subscription has been canceled.</p>
-    <p>You'll have access to your account until <strong>${periodEnd}</strong>. After that, your account will revert to the free plan.</p>
-    <a href="${appUrl}/settings/billing" class="cta">Reactivate Subscription</a>
-    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">Changed your mind? You can reactivate any time before your access ends.</p>
-  `, appUrl, subject);
-
-  const text = `Subscription canceled
-
-Hi ${displayName}, your Atlas Core subscription has been canceled.
-
-You'll have access until ${periodEnd}. After that, your account will revert to the free plan.
-
-Reactivate: ${appUrl}/settings/billing
-
-© ${new Date().getFullYear()} Atlas Core
-${appUrl}`;
-
-  return { subject, html, text };
-}
-
-export type EmailType = 'welcome' | 'confirm_email' | 'trial_started' | 'reset_password' | 'invite_beta' | 'payment_success' | 'payment_failed' | 'subscription_canceled';
+export type EmailType =
+  | 'welcome'
+  | 'confirm_email'
+  | 'trial_started'
+  | 'reset_password'
+  | 'invite_beta'
+  | 'payment_success'
+  | 'payment_failed'
+  | 'subscription_canceled';
 
 export function buildTemplate(
   type: EmailType,
-  data: WelcomeData | ConfirmEmailData | TrialData | ResetPasswordData | InviteBetaData | PaymentSuccessData | PaymentFailedData | SubscriptionCanceledData
+  data: Record<string, unknown>,
 ): EmailTemplate {
-  switch (type) {
-    case 'welcome':
-      return buildWelcome(data as WelcomeData);
-    case 'confirm_email':
-      return buildConfirmEmail(data as ConfirmEmailData);
-    case 'trial_started':
-      return buildTrialStarted(data as TrialData);
-    case 'reset_password':
-      return buildResetPassword(data as ResetPasswordData);
-    case 'invite_beta':
-      return buildInviteBeta(data as InviteBetaData);
-    case 'payment_success':
-      return buildPaymentSuccess(data as PaymentSuccessData);
-    case 'payment_failed':
-      return buildPaymentFailed(data as PaymentFailedData);
-    case 'subscription_canceled':
-      return buildSubscriptionCanceled(data as SubscriptionCanceledData);
-    default:
-      throw new Error(`Unknown email type: ${type}`);
+  const variables: Record<string, string> = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (v !== undefined && v !== null) variables[k] = String(v);
   }
+
+  // Map legacy payload keys → template variable names
+  const remap: Record<string, Record<string, string>> = {
+    confirm_email: { confirmUrl: 'confirm_email_url' },
+    reset_password: { resetUrl: 'reset_password_url' },
+    trial_started: { trialDaysLeft: 'trial_end_date' },
+    invite_beta: { inviteUrl: 'invite_url' },
+    payment_failed: { billingUrl: 'billing_url' },
+    subscription_canceled: { periodEnd: 'access_end_date' },
+  };
+
+  for (const [from, to] of Object.entries(remap[type] ?? {})) {
+    if (variables[from] !== undefined) variables[to] = variables[from];
+  }
+
+  return renderEmail(type, variables);
 }

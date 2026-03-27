@@ -23,7 +23,7 @@ const CORS = {
 // Environment
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const APP_URL = Deno.env.get('APP_URL') ?? 'https://atlascore.app';
+const APP_URL = Deno.env.get('APP_URL') ?? 'https://useatlascore.com';
 
 // Get hook secret and remove v1,whsec_ prefix if present
 const rawHookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') ?? '';

@@ -314,7 +314,7 @@ serve(async (req) => {
           if (invoice.billing_reason !== 'subscription_create') {
             const profile = await getUserProfile(supabaseAdmin, existingSub.user_id);
             if (profile) {
-              const appUrl = Deno.env.get('APP_URL') || 'https://atlascore.app';
+              const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
               const planCode = getPlanFromPriceId(invoice.lines?.data[0]?.price?.id || '') || 'Pro';
               const planName = planCode.charAt(0).toUpperCase() + planCode.slice(1);
               const amountFormatted = invoice.amount_paid
@@ -360,7 +360,7 @@ serve(async (req) => {
 
           const profile = await getUserProfile(supabaseAdmin, existingSub.user_id);
           if (profile) {
-            const appUrl = Deno.env.get('APP_URL') || 'https://atlascore.app';
+            const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
             await sendPaymentFailed(
               profile.email,
               profile.firstName,

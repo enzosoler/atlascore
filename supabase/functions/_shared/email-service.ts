@@ -27,7 +27,7 @@ export interface SendResult {
 function getConfig() {
   const resendApiKey = Deno.env.get('RESEND_API_KEY');
   const fromEmail = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@useatlascore.com>';
-  const appUrl = Deno.env.get('APP_URL') || 'https://atlascore.app';
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
   
   if (!resendApiKey) {
     throw new ConfigurationError('RESEND_API_KEY not configured');

@@ -9,7 +9,7 @@
  *
  * Secrets required:
  *   supabase secrets set RESEND_API_KEY=re_xxxx
- *   supabase secrets set FROM_EMAIL="Atlas Core <noreply@atlascore.app>"
+ *   supabase secrets set FROM_EMAIL="Atlas Core <noreply@useatlascore.com>"
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -165,8 +165,8 @@ a{text-decoration:none}
     </p>
     <p class="ft-copy">
       © ${new Date().getFullYear()} Atlas Core. All rights reserved.<br/>
-      Questions? <a href="mailto:support@atlascore.app">support@atlascore.app</a>
-      &nbsp;·&nbsp; <a href="${appUrl}">atlascore.app</a>
+      Questions? <a href="mailto:support@useatlascore.com">support@useatlascore.com</a>
+      &nbsp;·&nbsp; <a href="${appUrl}">useatlascore.com</a>
     </p>
     <p class="ft-copy" style="margin-top: 16px; font-size: 10px; color: ${C.fg3};">
       Tired of being elite? <a href="${appUrl}/settings/notifications" style="color: ${C.fg3}; text-decoration: underline;">Unsubscribe here</a> and return to mediocrity. We won't judge (much).
@@ -340,7 +340,7 @@ function buildTrialEnding(p: EmailPayload, _lang: RenderLang, appUrl: string): E
     copy1: `Your Atlas Core trial expires in ${days} day${days !== 1 ? 's' : ''}. Your workouts, nutrition history, progress photos, and AI context stay with you when you upgrade.`,
     copy2: 'If Atlas Core has become part of your system, this is the moment to keep that momentum intact.',
     cta: 'Choose a plan →',
-    postscript: 'Questions? Reply to this email or contact support@atlascore.app.',
+    postscript: 'Questions? Reply to this email or contact support@useatlascore.com.',
   };
 
   const html = wrap(`
@@ -370,7 +370,7 @@ function buildTrialExpired(p: EmailPayload, _lang: RenderLang, appUrl: string): 
     copy1: 'Your trial period has ended. Your account, workouts, nutrition logs, and progress history are still saved and waiting for you.',
     copy2: 'Upgrade whenever you are ready and pick up exactly where you left off.',
     cta: 'Reactivate my account →',
-    postscript: 'Need help? Contact support@atlascore.app.',
+    postscript: 'Need help? Contact support@useatlascore.com.',
   };
 
   const html = wrap(`
@@ -444,7 +444,7 @@ function buildPaymentFailed(p: EmailPayload, _lang: RenderLang, appUrl: string):
     copy1: 'Your most recent Atlas Core payment failed. This can happen because of an expired card, insufficient funds, or a bank decline.',
     copy2: 'Update your payment method to keep your subscription active. Your data is safe while you sort this out.',
     cta: 'Update payment method →',
-    postscript: 'Need help? Contact support@atlascore.app.',
+    postscript: 'Need help? Contact support@useatlascore.com.',
   };
 
   const html = wrap(`
@@ -752,9 +752,9 @@ serve(async (req) => {
     });
   }
 
-  const appUrl = (payload.appUrl as string | undefined) || Deno.env.get('APP_URL') || 'https://atlascore.app';
+  const appUrl = (payload.appUrl as string | undefined) || Deno.env.get('APP_URL') || 'https://useatlascore.com';
   const lang = resolveLanguage(language);
-  const fromAddress = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@atlascore.app>';
+  const fromAddress = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@useatlascore.com>';
 
   let email: EmailResult;
   try {
