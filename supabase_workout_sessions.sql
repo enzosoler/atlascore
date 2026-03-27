@@ -3,9 +3,7 @@
 -- Run in the Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/<your-project>/sql/new
 --
--- NOTE: The app currently stores workout sessions in the Base44
--- backend (base44.entities.Workout). This table is provided as
--- a future-proof Supabase fallback and for analytics queries.
+-- NOTE: This table stores workout sessions in Supabase.
 -- It mirrors the structure produced by WorkoutExecutionScreen.
 -- ============================================================
 
