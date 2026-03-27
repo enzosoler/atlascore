@@ -3,17 +3,36 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { EmptyState, PageShell, PrimaryButton, SectionCard, SecondaryButton } from '@/components/shared/StablePage';
 import { captureException } from '@/lib/sentry';
 
+function isChunkLoadError(error) {
+  const msg = error?.message || '';
+  return (
+    msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes('Importing a module script failed') ||
+    msg.includes('error loading dynamically imported module')
+  );
+}
+
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, isChunkError: false };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, isChunkError: isChunkLoadError(error) };
   }
 
   componentDidCatch(error, errorInfo) {
+    if (isChunkLoadError(error)) {
+      // Stale deployment: chunk hashes rotated after deploy. Force a full reload
+      // to pick up the new assets. Guard against reload loops with sessionStorage.
+      const key = 'atlas_chunk_reload';
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+        window.location.reload();
+        return;
+      }
+    }
     captureException(error, { componentStack: errorInfo?.componentStack });
   }
 

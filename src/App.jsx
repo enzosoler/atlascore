@@ -413,6 +413,12 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
+  // Clear chunk-reload guard on every clean boot so future stale-chunk errors
+  // can still trigger a reload (avoids permanent loop suppression).
+  React.useEffect(() => {
+    sessionStorage.removeItem('atlas_chunk_reload');
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider>
