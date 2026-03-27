@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ClipboardList, Loader2, TrendingUp, Users } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import { PageShell, SectionCard } from '@/components/shared/StablePage';
@@ -18,12 +19,12 @@ export default function CoachDashboard() {
   const { user } = useAuth();
 
   const { data: students = [], isLoading } = useQuery({
-    queryKey: ['coach-students', user?.email],
-    queryFn: () => base44.entities.CoachStudent.filter({ coach_email: user?.email, status: 'active' }),
-    enabled: !!user?.email,
+    queryKey: ['coach-students', user?.id],
+    queryFn: () => getMyClients(user.id, 'coach').then((all) => all.filter((s) => s.status === 'active')),
+    enabled: !!user?.id,
   });
 
-  const studentEmails = students.map((student) => student.student_email);
+  const studentEmails = students.map((student) => student.client_email);
 
   const { data: checkins = [] } = useQuery({
     queryKey: ['coach-checkins-recent', studentEmails],
@@ -111,10 +112,10 @@ export default function CoachDashboard() {
               {students.slice(0, 5).map((student) => (
                 <WorkspacePersonRow
                   key={student.id}
-                  to={`/coach/student/${student.student_email}`}
-                  initial={(student.student_name || student.student_email)?.[0]?.toUpperCase() || 'A'}
-                  title={student.student_name || student.student_email}
-                  subtitle={student.student_email}
+                  to={`/coach/student/${student.client_id}`}
+                  initial={(student.client_name || student.client_email)?.[0]?.toUpperCase() || 'A'}
+                  title={student.client_name || student.client_email}
+                  subtitle={student.client_email}
                   meta={student.status === 'active' ? 'Active coaching link' : student.status}
                   accentTone="brand"
                 />

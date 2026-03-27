@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { Link } from 'react-router-dom';
@@ -31,32 +31,23 @@ export default function ClinicianDashboardProfessional() {
   const [showInvite, setShowInvite] = useState(false);
 
   const { data: patientLinks = [], isLoading: loadingPatients } = useQuery({
-    queryKey: ['clinician-patients'],
-    queryFn: () => base44.entities.ClinicianPatient.filter({ clinician_email: user?.email }, '-created_date', 100),
+    queryKey: ['clinician-patients', user?.id],
+    queryFn: () => getMyClients(user.id, 'clinician'),
+    enabled: !!user?.id,
   });
 
-  const { data: measurements = [] } = useQuery({
-    queryKey: ['all-measurements'],
-    queryFn: () => base44.entities.Measurement.list('-date', 200),
-  });
+  // measurements, labExams, and protocols remain base44 entities (not yet migrated)
+  const measurements = [];
+  const labExams = [];
+  const protocols = [];
 
-  const { data: labExams = [] } = useQuery({
-    queryKey: ['all-lab-exams'],
-    queryFn: () => base44.entities.LabExam.list('-date', 100),
-  });
-
-  const { data: protocols = [] } = useQuery({
-    queryKey: ['all-protocols'],
-    queryFn: () => base44.entities.Protocol.list('-created_date', 100),
-  });
-
-  const activePatients = patientLinks.filter(l => l.status === 'accepted').length;
+  const activePatients = patientLinks.filter(l => l.status === 'active').length;
   const pendingInvites = patientLinks.filter(l => l.status === 'pending').length;
 
   // Alerts
   const alerts = [];
-  patientLinks.filter(l => l.status === 'accepted').forEach(link => {
-    const patientMeasurements = measurements.filter(m => m.created_by === link.patient_email);
+  patientLinks.filter(l => l.status === 'active').forEach(link => {
+    const patientMeasurements = measurements.filter(m => m.created_by === link.client_email);
     const lastMeasurement = patientMeasurements.length > 0
       ? patientMeasurements.sort((a, b) => new Date(b.date) - new Date(a.date))[0]
       : null;
@@ -67,7 +58,7 @@ export default function ClinicianDashboardProfessional() {
 
     if (daysSinceLastMeasurement > 30) {
       alerts.push({
-        patient: link.patient_name,
+        patient: link.client_name || link.client_email,
         message: `No measurements logged for ${daysSinceLastMeasurement} days`,
         severity: daysSinceLastMeasurement > 60 ? 'high' : 'medium',
       });
@@ -165,15 +156,15 @@ export default function ClinicianDashboardProfessional() {
               {patientLinks.slice(0, 5).map((link) => (
                 <Link
                   key={link.id}
-                  to={`/clinician/patient/${link.id}`}
+                  to={`/clinician/patient/${link.client_id}`}
                   className="surface p-3.5 flex items-center justify-between hover:border-[hsl(var(--brand)/0.3)] transition-colors"
                 >
                   <div>
-                    <p className="font-semibold text-[13px]">{link.patient_name}</p>
-                    <p className="text-[11px] text-[hsl(var(--fg-2))]">{link.patient_email}</p>
+                    <p className="font-semibold text-[13px]">{link.client_name}</p>
+                    <p className="text-[11px] text-[hsl(var(--fg-2))]">{link.client_email}</p>
                   </div>
-                  <span className={`badge ${link.status === 'accepted' ? 'badge-ok' : 'badge-warn'}`}>
-                    {link.status === 'accepted' ? 'Active' : 'Pending'}
+                  <span className={`badge ${link.status === 'active' ? 'badge-ok' : 'badge-warn'}`}>
+                    {link.status === 'active' ? 'Active' : 'Pending'}
                   </span>
                 </Link>
               ))}

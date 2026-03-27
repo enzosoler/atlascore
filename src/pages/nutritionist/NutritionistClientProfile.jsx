@@ -1,7 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChevronLeft, Loader2, Mail } from 'lucide-react';
@@ -15,38 +14,15 @@ export default function NutritionistClientProfile() {
 
   const { data: link, isLoading: loadingLink } = useQuery({
     queryKey: ['nutritionist-client', id],
-    queryFn: () => base44.entities.NutritionistClientLink.list().then(l => l.find(x => x.id === id)),
+    queryFn: async () => null,
   });
 
-  const { data: meals = [] } = useQuery({
-    queryKey: ['client-meals', link?.client_email],
-    queryFn: () => base44.entities.Meal.filter({ created_by: link?.client_email }),
-    enabled: !!link?.client_email && link?.permissions?.can_view_meals,
-  });
-
-  const { data: measurements = [] } = useQuery({
-    queryKey: ['client-measurements', link?.client_email],
-    queryFn: () => base44.entities.Measurement.list('-date', 60).then(m => m.filter(x => x.created_by === link?.client_email)),
-    enabled: !!link?.client_email && link?.permissions?.can_view_measurements,
-  });
-
-  const { data: photos = [] } = useQuery({
-    queryKey: ['client-photos', link?.client_email],
-    queryFn: () => base44.entities.ProgressPhoto.list('-date', 30).then(p => p.filter(x => x.created_by === link?.client_email)),
-    enabled: !!link?.client_email && link?.permissions?.can_view_progress_photos,
-  });
-
-  const { data: exams = [] } = useQuery({
-    queryKey: ['client-exams', link?.client_email],
-    queryFn: () => base44.entities.LabExam.list('-exam_date', 10).then(e => e.filter(x => x.created_by === link?.client_email)),
-    enabled: !!link?.client_email && link?.permissions?.can_view_lab_exams,
-  });
-
-  const { data: diets = [] } = useQuery({
-    queryKey: ['client-diets', link?.client_email],
-    queryFn: () => base44.entities.PrescribedDiet.filter({ athlete_email: link?.client_email }),
-    enabled: !!link?.client_email,
-  });
+  // Client data requires professional_links RLS policy (pending migration)
+  const meals = [];
+  const measurements = [];
+  const photos = [];
+  const exams = [];
+  const diets = [];
 
   if (loadingLink) {
     return (

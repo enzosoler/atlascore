@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabaseClient';
-import { base44 } from '@/api/base44Client';
 
 // ---------------------------------------------------------------------------
 // Constants

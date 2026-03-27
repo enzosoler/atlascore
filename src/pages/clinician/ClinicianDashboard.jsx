@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ClipboardList, FlaskConical, Loader2, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import { PageShell, SectionCard } from '@/components/shared/StablePage';
@@ -18,29 +18,14 @@ export default function ClinicianDashboard() {
   const { user } = useAuth();
 
   const { data: patients = [], isLoading } = useQuery({
-    queryKey: ['clinician-patients', user?.email],
-    queryFn: () => base44.entities.ClinicianPatient.filter({ clinician_email: user?.email, status: 'active' }),
-    enabled: !!user?.email,
+    queryKey: ['clinician-patients', user?.id],
+    queryFn: () => getMyClients(user.id, 'clinician').then((all) => all.filter((p) => p.status === 'active')),
+    enabled: !!user?.id,
   });
 
-  const patientEmails = patients.map((patient) => patient.patient_email);
-
-  const { data: exams = [] } = useQuery({
-    queryKey: ['clinician-exams', patientEmails],
-    queryFn: () => base44.entities.LabExam.list('-exam_date', 50),
-    enabled: patientEmails.length > 0,
-  });
-
-  const { data: protocols = [] } = useQuery({
-    queryKey: ['clinician-protocols', patientEmails],
-    queryFn: () => base44.entities.Protocol.list('-created_date', 100),
-    enabled: patientEmails.length > 0,
-  });
-
-  const patientExams = exams.filter((exam) => patientEmails.includes(exam.created_by));
-  const patientProtocols = protocols.filter(
-    (protocol) => patientEmails.includes(protocol.created_by) && protocol.active
-  );
+  // Lab exams and protocols remain base44 entities (not yet migrated)
+  const patientExams = [];
+  const patientProtocols = [];
 
   return (
     <RoleGate roles={['clinician', 'admin']}>
@@ -110,10 +95,10 @@ export default function ClinicianDashboard() {
               {patients.slice(0, 5).map((patient) => (
                 <WorkspacePersonRow
                   key={patient.id}
-                  to={`/clinician/patient/${patient.patient_email}`}
-                  initial={(patient.patient_name || patient.patient_email)?.[0]?.toUpperCase() || 'P'}
-                  title={patient.patient_name || patient.patient_email}
-                  subtitle={patient.patient_email}
+                  to={`/clinician/patient/${patient.client_id}`}
+                  initial={(patient.client_name || patient.client_email)?.[0]?.toUpperCase() || 'P'}
+                  title={patient.client_name || patient.client_email}
+                  subtitle={patient.client_email}
                   meta="Clinical record available"
                   badge="Active"
                   badgeTone="success"

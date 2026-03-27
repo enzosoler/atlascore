@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Trash2, Users } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { getMyClients, removeLink } from '@/services/professionalLinksService';
 import InviteModal from '@/components/shared/InviteModal';
 import RoleGate from '@/components/rbac/RoleGate';
 import { PageShell, SectionCard } from '@/components/shared/StablePage';
@@ -19,13 +19,13 @@ export default function CoachStudents() {
   const [showInvite, setShowInvite] = useState(false);
 
   const { data: students = [], isLoading } = useQuery({
-    queryKey: ['coach-students', user?.email],
-    queryFn: () => base44.entities.CoachStudent.filter({ coach_email: user?.email }, '-created_date', 100),
-    enabled: !!user?.email,
+    queryKey: ['coach-students', user?.id],
+    queryFn: () => getMyClients(user.id, 'coach'),
+    enabled: !!user?.id,
   });
 
   const removeM = useMutation({
-    mutationFn: (id) => base44.entities.CoachStudent.delete(id),
+    mutationFn: (id) => removeLink(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['coach-students'] }),
   });
 
@@ -62,17 +62,17 @@ export default function CoachStudents() {
             {students.map((student) => (
               <WorkspacePersonRow
                 key={student.id}
-                to={student.status === 'accepted' ? `/coach/student/${student.student_email}` : undefined}
-                initial={(student.student_name || student.student_email)?.[0]?.toUpperCase() || 'A'}
-                title={student.student_name || student.student_email}
-                subtitle={student.student_email}
+                to={student.status === 'active' ? `/coach/student/${student.client_id}` : undefined}
+                initial={(student.client_name || student.client_email)?.[0]?.toUpperCase() || 'A'}
+                title={student.client_name || student.client_email}
+                subtitle={student.client_email}
                 meta={
-                  student.status === 'accepted'
+                  student.status === 'active'
                     ? 'Accepted and ready for programming'
                     : 'Invite sent, awaiting acceptance'
                 }
-                badge={student.status === 'accepted' ? 'Active' : 'Pending'}
-                badgeTone={student.status === 'accepted' ? 'success' : 'warning'}
+                badge={student.status === 'active' ? 'Active' : 'Pending'}
+                badgeTone={student.status === 'active' ? 'success' : 'warning'}
                 accentTone="brand"
                 actions={
                   <button

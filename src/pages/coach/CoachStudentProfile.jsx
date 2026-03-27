@@ -11,6 +11,7 @@ import {
   Scale,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import {
@@ -54,46 +55,50 @@ function SummaryRow({ label, value }) {
 }
 
 export default function CoachStudentProfile() {
-  const { id: studentEmail } = useParams();
+  const { id: studentId } = useParams();
   const { user } = useAuth();
 
   const { data: coachLinks = [], isLoading: loadingLink } = useQuery({
-    queryKey: ['coach-students', user?.email],
-    queryFn: () => base44.entities.CoachStudent.filter({ coach_email: user?.email }, '-created_date', 100),
-    enabled: !!user?.email,
+    queryKey: ['coach-students', user?.id],
+    queryFn: () => getMyClients(user.id, 'coach'),
+    enabled: !!user?.id,
   });
 
   const studentLink = useMemo(
-    () => coachLinks.find((item) => item.student_email === studentEmail) || null,
-    [coachLinks, studentEmail]
+    () => coachLinks.find((item) => item.client_id === studentId) || null,
+    [coachLinks, studentId]
   );
 
+  // Keep base44 calls for workouts/checkins/measurements/photos/prescribed
+  // (these are not CoachStudent entities and remain until those are migrated)
+  const studentEmail = studentLink?.client_email;
+
   const { data: workouts = [], isLoading: loadingWorkouts } = useQuery({
-    queryKey: ['coach-student-workouts', studentEmail],
+    queryKey: ['coach-student-workouts', studentId],
     queryFn: () => base44.entities.Workout.list('-date', 50).then((items) => items.filter((item) => item.created_by === studentEmail)),
     enabled: !!studentEmail,
   });
 
   const { data: checkins = [], isLoading: loadingCheckins } = useQuery({
-    queryKey: ['coach-student-checkins', studentEmail],
+    queryKey: ['coach-student-checkins', studentId],
     queryFn: () => base44.entities.DailyCheckin.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
     enabled: !!studentEmail,
   });
 
   const { data: measurements = [], isLoading: loadingMeasurements } = useQuery({
-    queryKey: ['coach-student-measurements', studentEmail],
+    queryKey: ['coach-student-measurements', studentId],
     queryFn: () => base44.entities.Measurement.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
     enabled: !!studentEmail,
   });
 
   const { data: photos = [], isLoading: loadingPhotos } = useQuery({
-    queryKey: ['coach-student-photos', studentEmail],
+    queryKey: ['coach-student-photos', studentId],
     queryFn: () => base44.entities.ProgressPhoto.list('-date', 30).then((items) => items.filter((item) => item.created_by === studentEmail)),
     enabled: !!studentEmail,
   });
 
   const { data: prescribedWorkouts = [], isLoading: loadingPrescribed } = useQuery({
-    queryKey: ['coach-prescribed-workouts', studentEmail],
+    queryKey: ['coach-prescribed-workouts', studentId],
     queryFn: () =>
       base44.entities.PrescribedWorkout
         .filter({ athlete_email: studentEmail }, '-created_date', 20)
@@ -118,7 +123,7 @@ export default function CoachStudentProfile() {
     <RoleGate roles={['coach', 'admin']}>
       <PageShell
         eyebrow="Coach role"
-        title={studentLink?.student_name || studentEmail || 'Athlete'}
+        title={studentLink?.client_name || studentLink?.client_email || 'Athlete'}
         subtitle="Review adherence, recent body checkpoints, and active prescribed work from one calm profile surface."
         maxWidth="max-w-6xl"
         actions={
@@ -127,7 +132,7 @@ export default function CoachStudentProfile() {
               <ArrowLeft className="h-4 w-4" strokeWidth={2} />
               Back
             </SecondaryButton>
-            <Link to={`/coach/prescribe-workout/${studentEmail}`}>
+            <Link to={`/coach/prescribe-workout/${studentId}`}>
               <PrimaryButton type="button">
                 <ClipboardList className="h-4 w-4" strokeWidth={2} />
                 Prescribe workout
@@ -216,7 +221,7 @@ export default function CoachStudentProfile() {
                 <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] px-5 py-5">
                   <p className="atlas-overline">Coach actions</p>
                   <div className="mt-4 space-y-3">
-                    <Link to={`/coach/prescribe-workout/${studentEmail}`} className="block">
+                    <Link to={`/coach/prescribe-workout/${studentId}`} className="block">
                       <PrimaryButton type="button" className="w-full justify-center">
                         <ClipboardList className="h-4 w-4" strokeWidth={2} />
                         Create or replace plan
@@ -232,7 +237,7 @@ export default function CoachStudentProfile() {
                   <div className="mt-5 rounded-[16px] border border-[hsl(var(--border)/0.78)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
                     <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Access level</p>
                     <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      {studentLink.status === 'accepted'
+                      {studentLink.status === 'active'
                         ? 'Accepted link. You can review athlete progress and prescribe training.'
                         : 'Pending link. Profile data may remain limited until the invite is accepted.'}
                     </p>
@@ -245,14 +250,14 @@ export default function CoachStudentProfile() {
               title="Adherence"
               subtitle="Compare completed training against the current prescription before adjusting volume."
             >
-              <CoachStudentAdherence studentEmail={studentEmail} />
+              <CoachStudentAdherence studentEmail={studentLink?.client_email} />
             </SectionCard>
 
             <SectionCard
               title="Active prescribed workouts"
               subtitle="Current plans assigned to this athlete."
               actions={
-                <Link to={`/coach/prescribe-workout/${studentEmail}`}>
+                <Link to={`/coach/prescribe-workout/${studentId}`}>
                   <PrimaryButton type="button">
                     <ClipboardList className="h-4 w-4" strokeWidth={2} />
                     New prescription
@@ -296,7 +301,7 @@ export default function CoachStudentProfile() {
                   title="No active plan yet"
                   description="Create the first workout prescription to give this athlete a clear execution target."
                   action={
-                    <Link to={`/coach/prescribe-workout/${studentEmail}`}>
+                    <Link to={`/coach/prescribe-workout/${studentId}`}>
                       <PrimaryButton type="button">Prescribe workout</PrimaryButton>
                     </Link>
                   }

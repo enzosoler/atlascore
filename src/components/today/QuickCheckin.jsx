@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { getToday } from '@/lib/atlas-theme';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ const rows = [
 ];
 
 export default function QuickCheckin({ existingCheckin }) {
+  const { user } = useAuth();
   const [vals, setVals] = useState({
     mood: existingCheckin?.mood || 3,
     energy: existingCheckin?.energy || 3,
@@ -24,16 +26,37 @@ export default function QuickCheckin({ existingCheckin }) {
   const qc = useQueryClient();
 
   const handleSave = async () => {
+    if (!user?.id) return;
     setSaving(true);
-    const data = { date: getToday(), ...vals };
-    if (existingCheckin?.id) {
-      await base44.entities.DailyCheckin.update(existingCheckin.id, data);
-    } else {
-      await base44.entities.DailyCheckin.create(data);
+    try {
+      const payload = {
+        user_id: user.id,
+        date: getToday(),
+        mood: vals.mood,
+        energy: vals.energy,
+        sleep_hours: vals.sleep_hours,
+      };
+      if (existingCheckin?.id) {
+        const { error } = await supabase
+          .from('daily_checkins')
+          .update(payload)
+          .eq('id', existingCheckin.id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('daily_checkins')
+          .insert(payload);
+        if (error) throw error;
+      }
+      qc.invalidateQueries({ queryKey: ['daily-checkin'] });
+      toast.success('Check-in saved');
+    } catch (err) {
+      toast.error('Failed to save check-in');
+      console.error('[QuickCheckin] save error:', err);
+    } finally {
+      setSaving(false);
     }
-    qc.invalidateQueries({ queryKey: ['daily-checkin'] });
-    toast.success('Check-in saved');
-    setSaving(false);
   };
 
   return (

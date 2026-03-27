@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Users } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { getMyClients, removeLink } from '@/services/professionalLinksService';
 import InviteModal from '@/components/shared/InviteModal';
 import RoleGate from '@/components/rbac/RoleGate';
 import { PageShell, SectionCard } from '@/components/shared/StablePage';
@@ -19,13 +19,13 @@ export default function ClinicianPatients() {
   const [showInvite, setShowInvite] = useState(false);
 
   const { data: patients = [], isLoading } = useQuery({
-    queryKey: ['clinician-patients', user?.email],
-    queryFn: () => base44.entities.ClinicianPatient.filter({ clinician_email: user?.email }),
-    enabled: !!user?.email,
+    queryKey: ['clinician-patients', user?.id],
+    queryFn: () => getMyClients(user.id, 'clinician'),
+    enabled: !!user?.id,
   });
 
   const removeM = useMutation({
-    mutationFn: (id) => base44.entities.ClinicianPatient.delete(id),
+    mutationFn: (id) => removeLink(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['clinician-patients'] }),
   });
 
@@ -63,10 +63,10 @@ export default function ClinicianPatients() {
             {patients.map((patient) => (
               <WorkspacePersonRow
                 key={patient.id}
-                to={`/clinician/patient/${patient.patient_email}`}
-                initial={(patient.patient_name || patient.patient_email)?.[0]?.toUpperCase() || 'P'}
-                title={patient.patient_name || patient.patient_email}
-                subtitle={patient.patient_email}
+                to={`/clinician/patient/${patient.client_id}`}
+                initial={(patient.client_name || patient.client_email)?.[0]?.toUpperCase() || 'P'}
+                title={patient.client_name || patient.client_email}
+                subtitle={patient.client_email}
                 meta={patient.status === 'active' ? 'Clinical access active' : 'Invitation pending'}
                 badge={patient.status === 'active' ? 'Active' : 'Inactive'}
                 badgeTone={patient.status === 'active' ? 'success' : 'neutral'}

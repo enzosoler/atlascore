@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { hasFeatureAccess } from '@/lib/entitlements';
@@ -45,14 +44,6 @@ function normalizeSupabaseSubscription(row) {
   };
 }
 
-function normalizeLegacySubscription(row) {
-  if (!row) return null;
-  return {
-    ...row,
-    plan_code: row.plan_code || row.tier || 'free',
-    source: 'legacy',
-  };
-}
 
 export function SubscriptionProvider({ children }) {
   const { user, isAuthenticated, authState } = useAuth();
@@ -86,28 +77,10 @@ export function SubscriptionProvider({ children }) {
     gcTime: 0,
   });
 
-  const { data: legacySubscriptions = [] } = useQuery({
-    queryKey: ['subscription-legacy', user?.email],
-    queryFn: () => base44.entities.Subscription.filter({ user_email: user.email }),
-    enabled: shouldFetch,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 0, // Don't keep in cache after disable
-  });
-
-  const { data: overrides = [] } = useQuery({
-    queryKey: ['entitlement-overrides', user?.email],
-    queryFn: () => base44.entities.EntitlementOverride.filter({ user_email: user.email }),
-    enabled: shouldFetch,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 0,
-  });
-
   // Use the most recent active subscription
   const subscriptions = useMemo(() => {
-    const normalizedSupabase = supabaseSubscriptions.map(normalizeSupabaseSubscription).filter(Boolean);
-    if (normalizedSupabase.length > 0) return normalizedSupabase;
-    return legacySubscriptions.map(normalizeLegacySubscription).filter(Boolean);
-  }, [legacySubscriptions, supabaseSubscriptions]);
+    return supabaseSubscriptions.map(normalizeSupabaseSubscription).filter(Boolean);
+  }, [supabaseSubscriptions]);
 
   const subscription = useMemo(() => {
     const active = subscriptions.filter((s) => ['active', 'trialing', 'granted'].includes(s.status));
@@ -117,7 +90,7 @@ export function SubscriptionProvider({ children }) {
     )[0];
   }, [subscriptions]);
 
-  const can = (featureKey) => hasFeatureAccess(user, subscription, overrides, featureKey);
+  const can = (featureKey) => hasFeatureAccess(user, subscription, [], featureKey);
 
   // Calculate trial days remaining
   const trialDaysRemaining = useMemo(() => {
@@ -133,7 +106,7 @@ export function SubscriptionProvider({ children }) {
   const isTrialExpired = subscription?.status === 'trialing' && trialDaysRemaining === 0;
 
   return (
-    <SubscriptionContext.Provider value={{ subscription, overrides, can, trialDaysRemaining, isTrialExpired }}>
+    <SubscriptionContext.Provider value={{ subscription, overrides: [], can, trialDaysRemaining, isTrialExpired }}>
       {children}
     </SubscriptionContext.Provider>
   );

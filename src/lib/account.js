@@ -4,7 +4,6 @@ function getAccessToken() {
   if (typeof window === 'undefined') return appParams.token;
 
   return (
-    window.localStorage.getItem('base44_access_token') ||
     window.localStorage.getItem('token') ||
     appParams.token
   );

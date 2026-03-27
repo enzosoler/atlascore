@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabaseClient';
-import { base44 } from '@/api/base44Client';
 import {
   MEASUREMENT_FIELD_DEFINITIONS,
   normalizeMeasurementEntry,
@@ -204,13 +203,6 @@ async function uploadToSupabaseStorage(userId, file) {
   return buildSupabaseStorageRef(filePath);
 }
 
-async function uploadViaBase44(file) {
-  const { file_url } = await base44.integrations.Core.UploadFile({ file });
-  if (!file_url) {
-    throw new Error('Base44 upload returned an empty file URL.');
-  }
-  return file_url;
-}
 
 export async function listMeasurements(userId, limit = 200) {
   requireUserId(userId);
@@ -364,13 +356,7 @@ export async function uploadProgressPhoto(userId, file) {
   try {
     return await uploadToSupabaseStorage(userId, file);
   } catch (storageError) {
-    try {
-      return await uploadViaBase44(file);
-    } catch (base44Error) {
-      throw new Error(
-        `Progress photo upload failed. Supabase storage error: ${storageError.message}. Base44 fallback error: ${base44Error.message}.`
-      );
-    }
+    throw new Error(`Progress photo upload failed: ${storageError.message}`);
   }
 }
 

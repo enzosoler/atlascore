@@ -1,6 +1,5 @@
 /**
  * Atlas Core — LLM Client
- * Replaces base44.integrations.Core.InvokeLLM across the app.
  *
  * Uses Supabase Edge Function `invoke-llm` which proxies to Claude/Anthropic.
  * Falls back gracefully (returns null) when the function is unreachable so

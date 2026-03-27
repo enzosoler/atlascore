@@ -71,15 +71,8 @@ export default function SubscriptionManager() {
     },
   });
 
-  // Fetch entitlement overrides from Base44 (legacy system)
-  const { data: overrides = [] } = useQuery({
-    queryKey: ['admin-overrides'],
-    queryFn: async () => {
-      // Import dynamically to avoid issues if base44 is not configured
-      const { base44 } = await import('@/api/base44Client');
-      return base44.entities.EntitlementOverride.list('-created_date', 100);
-    },
-  });
+  // Entitlement overrides table not yet migrated to Supabase
+  const overrides = [];
 
   // Grant subscription mutation using Supabase
   const grantSubM = useMutation({
@@ -112,23 +105,9 @@ export default function SubscriptionManager() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-subscriptions'] }),
   });
 
-  // Override mutations using Base44 (legacy system)
   const createOvM = useMutation({
-    mutationFn: async (d) => {
-      const { base44 } = await import('@/api/base44Client');
-      const payload = {
-        user_email: d.user_email.toLowerCase().trim(),
-        feature_key: d.feature_key,
-        enabled: d.enabled,
-        reason: d.reason || 'Admin override',
-        expires_at: d.expires_at || null,
-      };
-      return base44.entities.EntitlementOverride.create(payload);
-    },
-    onSuccess: () => { 
-      qc.invalidateQueries({ queryKey: ['admin-overrides'] }); 
-      setShowOverride(false); 
-      toast.success('Override created'); 
+    mutationFn: async () => {
+      throw new Error('Entitlement overrides not yet migrated to Supabase.');
     },
     onError: (err) => {
       toast.error('Failed to create override: ' + err.message);
@@ -136,11 +115,9 @@ export default function SubscriptionManager() {
   });
 
   const deleteOvM = useMutation({
-    mutationFn: async (id) => {
-      const { base44 } = await import('@/api/base44Client');
-      return base44.entities.EntitlementOverride.delete(id);
+    mutationFn: async () => {
+      throw new Error('Entitlement overrides not yet migrated to Supabase.');
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-overrides'] }),
   });
 
   return (

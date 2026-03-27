@@ -1,7 +1,8 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { getMyClients } from '@/services/professionalLinksService';
+import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChevronLeft, Loader2, Download } from 'lucide-react';
@@ -23,10 +24,11 @@ function MacroSummary({ label, value, color }) {
 }
 
 function OverviewTab({ email }) {
-  const { data: checkins = [] } = useQuery({ queryKey: ['cp-checkins', email], queryFn: () => base44.entities.DailyCheckin.list('-date', 7) });
-  const { data: measurements = [] } = useQuery({ queryKey: ['cp-measurements', email], queryFn: () => base44.entities.Measurement.list('-date', 1) });
-  const { data: protocols = [] } = useQuery({ queryKey: ['cp-protocols', email], queryFn: () => base44.entities.Protocol.filter({ active: true }) });
-  const { data: exams = [] } = useQuery({ queryKey: ['cp-exams', email], queryFn: () => base44.entities.LabExam.list('-exam_date', 3) });
+  // Patient data requires professional_links RLS policy (pending migration)
+  const checkins = [];
+  const measurements = [];
+  const protocols = [];
+  const exams = [];
 
   const latest = measurements[0];
   const avgMood = checkins.length ? (checkins.reduce((s, c) => s + (c.mood || 0), 0) / checkins.length).toFixed(1) : null;
@@ -54,7 +56,8 @@ function OverviewTab({ email }) {
 }
 
 function ExamsTab() {
-  const { data: exams = [] } = useQuery({ queryKey: ['cp-exams-all'], queryFn: () => base44.entities.LabExam.list('-exam_date', 20) });
+  // Patient lab exams require professional_links RLS policy (pending migration)
+  const exams = [];
   if (exams.length === 0) return <p className="t-caption p-4">No exams recorded.</p>;
   return (
     <div className="space-y-3">
@@ -85,7 +88,8 @@ function ExamsTab() {
 }
 
 function MeasurementsTab() {
-  const { data: measurements = [] } = useQuery({ queryKey: ['cp-measurements-all'], queryFn: () => base44.entities.Measurement.list('-date', 20) });
+  // Patient measurements require professional_links RLS policy (pending migration)
+  const measurements = [];
   const chartData = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date)).map(m => ({
     date: new Date(m.date + 'T12:00').toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }),
     Weight: m.weight, BodyFat: m.body_fat,
@@ -124,7 +128,8 @@ function MeasurementsTab() {
 }
 
 function PhotosTab() {
-  const { data: photos = [] } = useQuery({ queryKey: ['cp-photos'], queryFn: () => base44.entities.ProgressPhoto.list('-date', 20) });
+  // Patient photos require professional_links RLS policy (pending migration)
+  const photos = [];
   if (photos.length === 0) return <p className="t-caption p-4">No photos recorded.</p>;
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -142,7 +147,8 @@ function PhotosTab() {
 }
 
 function ProtocolsTab() {
-  const { data: protocols = [] } = useQuery({ queryKey: ['cp-protocols-all'], queryFn: () => base44.entities.Protocol.list('-created_date', 30) });
+  // Patient protocols require professional_links RLS policy (pending migration)
+  const protocols = [];
   if (protocols.length === 0) return <p className="t-caption p-4">No protocols recorded.</p>;
   return (
     <div className="space-y-2">
@@ -166,11 +172,8 @@ function ProtocolsTab() {
 
 function ExportsTab({ patientEmail }) {
   const exportCSV = async () => {
-    const [exams, measurements, protocols] = await Promise.all([
-      base44.entities.LabExam.list('-exam_date', 50),
-      base44.entities.Measurement.list('-date', 50),
-      base44.entities.Protocol.list('-created_date', 50),
-    ]);
+    // Patient data export requires professional_links RLS policy (pending migration)
+    const [exams, measurements, protocols] = [[], [], []];
 
     const rows = [
       ['Type', 'Date', 'Detail', 'Value'],
@@ -200,15 +203,17 @@ function ExportsTab({ patientEmail }) {
 }
 
 export default function ClinicianPatientProfile() {
-  const { id: patientEmail } = useParams();
+  const { id: patientId } = useParams();
+  const { user } = useAuth();
 
-  const { data: patientRecord } = useQuery({
-    queryKey: ['clinician-patient-record', patientEmail],
-    queryFn: () => base44.entities.ClinicianPatient.filter({ patient_email: patientEmail }),
+  const { data: patientLinks = [] } = useQuery({
+    queryKey: ['clinician-patients', user?.id],
+    queryFn: () => getMyClients(user.id, 'clinician'),
+    enabled: !!user?.id,
   });
 
-  const patient = patientRecord?.[0];
-  const displayName = patient?.patient_name || patientEmail;
+  const patient = patientLinks.find((p) => p.client_id === patientId) || null;
+  const displayName = patient?.client_name || patient?.client_email || patientId;
 
   return (
     <RoleGate roles={['clinician', 'admin']}>
@@ -223,7 +228,7 @@ export default function ClinicianPatientProfile() {
             </div>
             <div>
               <h1 className="t-title">{displayName}</h1>
-              <p className="t-caption">{patientEmail}</p>
+              <p className="t-caption">{patient?.client_email || patientId}</p>
             </div>
           </div>
         </div>
@@ -237,12 +242,12 @@ export default function ClinicianPatientProfile() {
               </TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent value="overview" className="mt-4"><OverviewTab email={patientEmail} /></TabsContent>
+          <TabsContent value="overview" className="mt-4"><OverviewTab email={patient?.client_email} /></TabsContent>
           <TabsContent value="exams" className="mt-4"><ExamsTab /></TabsContent>
           <TabsContent value="measurements" className="mt-4"><MeasurementsTab /></TabsContent>
           <TabsContent value="photos" className="mt-4"><PhotosTab /></TabsContent>
           <TabsContent value="protocols" className="mt-4"><ProtocolsTab /></TabsContent>
-          <TabsContent value="exports" className="mt-4"><ExportsTab patientEmail={patientEmail} /></TabsContent>
+          <TabsContent value="exports" className="mt-4"><ExportsTab patientEmail={patient?.client_email || patientId} /></TabsContent>
         </Tabs>
       </div>
     </RoleGate>

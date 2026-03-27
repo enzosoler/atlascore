@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Users } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { getMyClients, removeLink } from '@/services/professionalLinksService';
 import InviteModal from '@/components/shared/InviteModal';
 import RoleGate from '@/components/rbac/RoleGate';
 import { PageShell, SectionCard } from '@/components/shared/StablePage';
@@ -19,17 +19,13 @@ export default function NutritionistClients() {
   const qc = useQueryClient();
 
   const { data: links = [], isLoading } = useQuery({
-    queryKey: ['nutritionist-clients'],
-    queryFn: () =>
-      base44.entities.NutritionistClientLink.filter(
-        { nutritionist_email: user?.email },
-        '-created_date',
-        100
-      ),
+    queryKey: ['nutritionist-clients', user?.id],
+    queryFn: () => getMyClients(user.id, 'nutritionist'),
+    enabled: !!user?.id,
   });
 
   const deleteM = useMutation({
-    mutationFn: (id) => base44.entities.NutritionistClientLink.delete(id),
+    mutationFn: (id) => removeLink(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['nutritionist-clients'] }),
   });
 
@@ -71,15 +67,9 @@ export default function NutritionistClients() {
                 initial={(link.client_name || link.client_email)?.[0]?.toUpperCase() || 'C'}
                 title={link.client_name || link.client_email}
                 subtitle={link.client_email}
-                meta={[
-                  link.permissions?.can_view_meals ? 'Meals' : null,
-                  link.permissions?.can_create_diet_plan ? 'Diet plans' : null,
-                  link.permissions?.can_view_lab_exams ? 'Labs' : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-                badge={link.status === 'accepted' ? 'Active' : 'Pending'}
-                badgeTone={link.status === 'accepted' ? 'success' : 'warning'}
+                meta=""
+                badge={link.status === 'active' ? 'Active' : 'Pending'}
+                badgeTone={link.status === 'active' ? 'success' : 'warning'}
                 accentTone="brand"
                 actions={
                   <button

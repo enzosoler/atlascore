@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, Loader2, TrendingUp, Users, Utensils } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import NutritionistAlertsPanel from '@/components/nutritionist/NutritionistAlertsPanel';
@@ -17,8 +18,9 @@ export default function NutritionistDashboard() {
   const { user } = useAuth();
 
   const { data: links = [], isLoading: loadingLinks } = useQuery({
-    queryKey: ['nutritionist-clients'],
-    queryFn: () => base44.entities.NutritionistClientLink.filter({ nutritionist_email: user?.email }),
+    queryKey: ['nutritionist-clients', user?.id],
+    queryFn: () => getMyClients(user.id, 'nutritionist'),
+    enabled: !!user?.id,
   });
 
   const { data: diets = [], isLoading: loadingDiets } = useQuery({
@@ -36,7 +38,7 @@ export default function NutritionistDashboard() {
     queryFn: () => base44.entities.Measurement.list('-date', 100),
   });
 
-  const activeClients = links.filter((link) => link.status === 'accepted').length;
+  const activeClients = links.filter((link) => link.status === 'active').length;
   const activeDiets = diets.filter((diet) => diet.active).length;
   const adherenceRate = links.length > 0 ? Math.round((activeClients / links.length) * 100) : 0;
 

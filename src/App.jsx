@@ -71,7 +71,6 @@ const NewCheckpointPage = lazy(() => import('@/pages/body/NewCheckpointPage'));
 const HelpCenter = lazy(() => import('@/pages/HelpCenter.jsx'));
 const UseCase = lazy(() => import('@/pages/UseCase'));
 const GettingStartedGuide = lazy(() => import('@/pages/guides/GettingStartedGuide'));
-const GitHubPRTracker = lazy(() => import('@/pages/GitHubPRTracker'));
 const WorkoutLoggingGuide = lazy(() => import('@/pages/guides/WorkoutLoggingGuide'));
 const PlanVsExecutionGuide = lazy(() => import('@/pages/guides/PlanVsExecutionGuide'));
 const AIWorkoutGenerationGuide = lazy(() => import('@/pages/guides/AIWorkoutGenerationGuide'));
@@ -369,8 +368,6 @@ const AppRoutes = () => (
           <Route path={ROUTES.clinicianDashboard} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianDashboard /></RouteGuard>} />
           <Route path={ROUTES.clinicianPatients} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatients /></RouteGuard>} />
           <Route path="/clinician/patient/:id" element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard>} />
-
-          <Route path={ROUTES.githubPRs} element={<GitHubPRTracker />} />
 
           {/* Profile Extension */}
           <Route path="/profile/content" element={<UserContent />} />
