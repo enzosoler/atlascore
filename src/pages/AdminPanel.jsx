@@ -19,6 +19,8 @@ import {
   resyncBillingStatus,
 } from '@/lib/adminService';
 import { SafePageBoundary as StablePage } from '@/components/shared/StablePage';
+import AdminInvites from '@/pages/admin/AdminInvites';
+import AdminErrors from '@/pages/admin/AdminErrors';
 import {
   AlertCircle,
   AlertTriangle,
@@ -44,7 +46,7 @@ import { cn } from '@/lib/utils';
 
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
-const TABS = ['Overview', 'Users', 'Subscriptions', 'Roles', 'Audit Log'];
+const TABS = ['Overview', 'Users', 'Subscriptions', 'Roles', 'Audit Log', 'Invites', 'Errors'];
 
 const ROLES = ['athlete', 'user', 'admin', 'coach', 'nutritionist', 'clinician'];
 
@@ -1261,6 +1263,8 @@ export default function AdminPanel() {
           {activeTab === 2 && <SubscriptionsTab />}
           {activeTab === 3 && <RolesTab />}
           {activeTab === 4 && <AuditLogTab />}
+          {activeTab === 5 && <AdminInvites />}
+          {activeTab === 6 && <AdminErrors />}
         </div>
       </div>
     </StablePage>

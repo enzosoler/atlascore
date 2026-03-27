@@ -19,8 +19,15 @@ export default function RouteGuard({
   const { user, isLoadingAuth, isAuthenticated, authState } = useAuth();
   
   const userRole = user?.atlas_role || 'athlete';
+
+  // beta_tester can access any route unless it's admin-only
+  const isBetaTesterAllowed =
+    userRole === 'beta_tester' &&
+    !(roles?.length === 1 && roles[0] === 'admin') &&
+    !(page === 'AdminPanel');
+
   const isAuthorized = isAuthenticated
-    ? page ? canAccess(userRole, page) : (roles || []).includes(userRole)
+    ? page ? canAccess(userRole, page) : (roles || []).includes(userRole) || isBetaTesterAllowed
     : false;
 
   // Redirect if not authenticated

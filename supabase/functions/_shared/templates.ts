@@ -216,11 +216,161 @@ ${appUrl}`;
   return { subject, html, text };
 }
 
-export type EmailType = 'welcome' | 'confirm_email' | 'trial_started' | 'reset_password';
+export interface InviteBetaData {
+  firstName: string;
+  inviteUrl: string;
+  notes?: string;
+  appUrl: string;
+}
+
+export function buildInviteBeta(data: InviteBetaData): EmailTemplate {
+  const { firstName, inviteUrl, notes, appUrl } = data;
+  const displayName = firstName || 'there';
+
+  const subject = "You're invited to test Atlas Core";
+
+  const html = wrapBase(`
+    <h2>You're in, ${displayName}.</h2>
+    <p>You've been personally invited to test Atlas Core — a precision health and performance platform for athletes, coaches, clinicians, and nutritionists.</p>
+    ${notes ? `<p style="padding:12px 16px;background:${C.bg};border-radius:8px;border-left:3px solid ${C.border};font-style:italic;color:${C.fg2};">"${notes}"</p>` : ''}
+    <p>Your invite gives you full access to every feature in the app — track workouts, monitor nutrition, run protocols, view lab data, and explore every professional tool.</p>
+    <a href="${inviteUrl}" class="cta">Accept Invitation</a>
+    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">This invite link expires in 7 days. If you weren't expecting this, you can safely ignore this email.</p>
+  `, appUrl, subject);
+
+  const text = `You're invited to test Atlas Core
+
+Hi ${displayName}, you've been personally invited to test Atlas Core.
+${notes ? `\n"${notes}"\n` : ''}
+Your invite gives you full access to every feature in the app.
+
+Accept Invitation: ${inviteUrl}
+
+This invite expires in 7 days. If you weren't expecting this, ignore this email.
+
+© ${new Date().getFullYear()} Atlas Core
+${appUrl}`;
+
+  return { subject, html, text };
+}
+
+export interface PaymentSuccessData {
+  firstName: string;
+  planName: string;
+  amount: string;
+  billingUrl: string;
+  appUrl: string;
+}
+
+export interface PaymentFailedData {
+  firstName: string;
+  billingUrl: string;
+  appUrl: string;
+}
+
+export interface SubscriptionCanceledData {
+  firstName: string;
+  periodEnd: string;
+  appUrl: string;
+}
+
+export function buildPaymentSuccess(data: PaymentSuccessData): EmailTemplate {
+  const { firstName, planName, amount, billingUrl, appUrl } = data;
+  const displayName = firstName || 'there';
+
+  const subject = 'Payment confirmed — Atlas Core';
+
+  const html = wrapBase(`
+    <h2>Payment confirmed</h2>
+    <p>Hi ${displayName}, your payment was successful.</p>
+    <table style="width:100%;border-collapse:collapse;margin:24px 0;">
+      <tr><td style="padding:10px 0;color:${C.fg2};border-bottom:1px solid ${C.border};">Plan</td><td style="padding:10px 0;text-align:right;font-weight:500;">${planName}</td></tr>
+      <tr><td style="padding:10px 0;color:${C.fg2};">Amount</td><td style="padding:10px 0;text-align:right;font-weight:500;">${amount}</td></tr>
+    </table>
+    <a href="${billingUrl}" class="cta">View Billing</a>
+    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">Questions about your billing? Reply to this email or visit your account.</p>
+  `, appUrl, subject);
+
+  const text = `Payment confirmed
+
+Hi ${displayName}, your payment was successful.
+
+Plan: ${planName}
+Amount: ${amount}
+
+View Billing: ${billingUrl}
+
+Questions? Reply to this email.
+
+© ${new Date().getFullYear()} Atlas Core
+${appUrl}`;
+
+  return { subject, html, text };
+}
+
+export function buildPaymentFailed(data: PaymentFailedData): EmailTemplate {
+  const { firstName, billingUrl, appUrl } = data;
+  const displayName = firstName || 'there';
+
+  const subject = 'Payment failed — action required';
+
+  const html = wrapBase(`
+    <h2>We couldn't process your payment</h2>
+    <p>Hi ${displayName}, your recent payment for Atlas Core didn't go through.</p>
+    <p>This can happen if your card expired, had insufficient funds, or your bank blocked the charge.</p>
+    <a href="${billingUrl}" class="cta">Update Payment Method</a>
+    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">If we can't collect payment, your subscription may be paused. Update your billing details to keep access.</p>
+  `, appUrl, subject);
+
+  const text = `We couldn't process your payment
+
+Hi ${displayName}, your recent payment for Atlas Core didn't go through.
+
+This can happen if your card expired, had insufficient funds, or your bank blocked the charge.
+
+Update Payment Method: ${billingUrl}
+
+If we can't collect payment, your subscription may be paused.
+
+© ${new Date().getFullYear()} Atlas Core
+${appUrl}`;
+
+  return { subject, html, text };
+}
+
+export function buildSubscriptionCanceled(data: SubscriptionCanceledData): EmailTemplate {
+  const { firstName, periodEnd, appUrl } = data;
+  const displayName = firstName || 'there';
+
+  const subject = 'Your Atlas Core subscription has been canceled';
+
+  const html = wrapBase(`
+    <h2>Subscription canceled</h2>
+    <p>Hi ${displayName}, your Atlas Core subscription has been canceled.</p>
+    <p>You'll have access to your account until <strong>${periodEnd}</strong>. After that, your account will revert to the free plan.</p>
+    <a href="${appUrl}/settings/billing" class="cta">Reactivate Subscription</a>
+    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">Changed your mind? You can reactivate any time before your access ends.</p>
+  `, appUrl, subject);
+
+  const text = `Subscription canceled
+
+Hi ${displayName}, your Atlas Core subscription has been canceled.
+
+You'll have access until ${periodEnd}. After that, your account will revert to the free plan.
+
+Reactivate: ${appUrl}/settings/billing
+
+© ${new Date().getFullYear()} Atlas Core
+${appUrl}`;
+
+  return { subject, html, text };
+}
+
+export type EmailType = 'welcome' | 'confirm_email' | 'trial_started' | 'reset_password' | 'invite_beta' | 'payment_success' | 'payment_failed' | 'subscription_canceled';
 
 export function buildTemplate(
   type: EmailType,
-  data: WelcomeData | ConfirmEmailData | TrialData | ResetPasswordData
+  data: WelcomeData | ConfirmEmailData | TrialData | ResetPasswordData | InviteBetaData | PaymentSuccessData | PaymentFailedData | SubscriptionCanceledData
 ): EmailTemplate {
   switch (type) {
     case 'welcome':
@@ -231,6 +381,14 @@ export function buildTemplate(
       return buildTrialStarted(data as TrialData);
     case 'reset_password':
       return buildResetPassword(data as ResetPasswordData);
+    case 'invite_beta':
+      return buildInviteBeta(data as InviteBetaData);
+    case 'payment_success':
+      return buildPaymentSuccess(data as PaymentSuccessData);
+    case 'payment_failed':
+      return buildPaymentFailed(data as PaymentFailedData);
+    case 'subscription_canceled':
+      return buildSubscriptionCanceled(data as SubscriptionCanceledData);
     default:
       throw new Error(`Unknown email type: ${type}`);
   }

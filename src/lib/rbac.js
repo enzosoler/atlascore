@@ -22,6 +22,7 @@ export const ROLES = {
   NUTRITIONIST: 'nutritionist',
   CLINICIAN:    'clinician',
   ADMIN:        'admin',
+  BETA_TESTER:  'beta_tester',
 };
 
 export const ROLE_LABELS = {
@@ -31,6 +32,7 @@ export const ROLE_LABELS = {
   nutritionist: 'Nutritionist',
   clinician:    'Clinician',
   admin:        'Admin',
+  beta_tester:  'Beta Tester',
 };
 
 export const ROLE_BADGE = {
@@ -40,6 +42,7 @@ export const ROLE_BADGE = {
   nutritionist: 'badge badge-blue',
   clinician:    'badge badge-ok',
   admin:        'badge badge-err',
+  beta_tester:  'badge badge-warn',
 };
 
 /**
@@ -47,43 +50,45 @@ export const ROLE_BADGE = {
  * Each entry lists which roles can load this page at all.
  * Fine-grained data access (per linked athlete) is handled in each page/component.
  */
+// Shorthand — all roles that can access standard (non-admin) pages
+const ALL_NON_ADMIN = ['athlete', 'coach', 'nutritionist', 'clinician', 'admin', 'beta_tester'];
+
 export const PAGE_ACCESS = {
   // ── Athlete workspace ──────────────────────────────────
-  Today:           ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
-  Diary:           ['athlete', 'admin'],
-  Nutrition:       ['athlete', 'admin'],
-  Workouts:        ['athlete', 'admin'],
-  Protocols:       ['athlete', 'admin'],
-  Measurements:    ['athlete', 'admin'],
-  LabExams:        ['athlete', 'admin'],
-  ProgressPhotos:  ['athlete', 'admin'],
-  Body:            ['athlete', 'admin'],
-  MyDiet:          ['athlete', 'admin'],
-  MyWorkout:       ['athlete', 'admin'],
-  MyPrescribedDiet:    ['athlete', 'admin'],
-  MyPrescribedWorkout: ['athlete', 'admin'],
-  ProgressReview:  ['athlete', 'admin'],
-  Insights:        ['athlete', 'admin'],
-  BlockReview:     ['athlete', 'admin'],
-  Social:          ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
-  Export:          ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
-  Profile:         ['athlete', 'coach', 'nutritionist', 'clinician', 'admin'],
+  Today:           ALL_NON_ADMIN,
+  Diary:           ['athlete', 'admin', 'beta_tester'],
+  Nutrition:       ['athlete', 'admin', 'beta_tester'],
+  Workouts:        ['athlete', 'admin', 'beta_tester'],
+  Protocols:       ['athlete', 'admin', 'beta_tester'],
+  Measurements:    ['athlete', 'admin', 'beta_tester'],
+  LabExams:        ['athlete', 'admin', 'beta_tester'],
+  ProgressPhotos:  ['athlete', 'admin', 'beta_tester'],
+  Body:            ['athlete', 'admin', 'beta_tester'],
+  MyDiet:          ['athlete', 'admin', 'beta_tester'],
+  MyWorkout:       ['athlete', 'admin', 'beta_tester'],
+  MyPrescribedDiet:    ['athlete', 'admin', 'beta_tester'],
+  MyPrescribedWorkout: ['athlete', 'admin', 'beta_tester'],
+  ProgressReview:  ['athlete', 'admin', 'beta_tester'],
+  Insights:        ['athlete', 'admin', 'beta_tester'],
+  BlockReview:     ['athlete', 'admin', 'beta_tester'],
+  Social:          ALL_NON_ADMIN,
+  Export:          ALL_NON_ADMIN,
+  Profile:         ALL_NON_ADMIN,
 
   // ── Coach area ─────────────────────────────────────────
-  // Coach sees /today as a landing point (own profile/tools)
-  CoachDashboard:      ['coach', 'admin'],
-  CoachStudents:       ['coach', 'admin'],
-  CoachStudentProfile: ['coach', 'admin'],
+  CoachDashboard:      ['coach', 'admin', 'beta_tester'],
+  CoachStudents:       ['coach', 'admin', 'beta_tester'],
+  CoachStudentProfile: ['coach', 'admin', 'beta_tester'],
 
   // ── Nutritionist area ──────────────────────────────────
-  NutritionistDashboard:      ['nutritionist', 'admin'],
-  NutritionistClients:        ['nutritionist', 'admin'],
-  NutritionistClientProfile:  ['nutritionist', 'admin'],
+  NutritionistDashboard:      ['nutritionist', 'admin', 'beta_tester'],
+  NutritionistClients:        ['nutritionist', 'admin', 'beta_tester'],
+  NutritionistClientProfile:  ['nutritionist', 'admin', 'beta_tester'],
 
   // ── Clinician area ─────────────────────────────────────
-  ClinicianDashboard:      ['clinician', 'admin'],
-  ClinicianPatients:       ['clinician', 'admin'],
-  ClinicianPatientProfile: ['clinician', 'admin'],
+  ClinicianDashboard:      ['clinician', 'admin', 'beta_tester'],
+  ClinicianPatients:       ['clinician', 'admin', 'beta_tester'],
+  ClinicianPatientProfile: ['clinician', 'admin', 'beta_tester'],
 
   // ── Admin only ─────────────────────────────────────────
   AdminPanel: ['admin'],
@@ -94,6 +99,18 @@ export const PAGE_ACCESS = {
  * Determines what shows in the sidebar/bottom nav.
  */
 export const NAV_BY_ROLE = {
+  beta_tester: [
+    { path: ROUTES.today,              label: 'Today',      icon: 'Home' },
+    { path: ROUTES.nutrition,          label: 'Nutrition',  icon: 'UtensilsCrossed' },
+    { path: ROUTES.workouts,           label: 'Train',      icon: 'Dumbbell' },
+    { path: ROUTES.body,               label: 'Body',       icon: 'TrendingUp' },
+    { path: ROUTES.coachDashboard,     label: 'Coach',      icon: 'LayoutDashboard' },
+    { path: ROUTES.nutritionistDashboard, label: 'Nutrition Pro', icon: 'LayoutDashboard' },
+    { path: ROUTES.clinicianDashboard, label: 'Clinician',  icon: 'LayoutDashboard' },
+    { path: ROUTES.protocols,          label: 'Plans',      icon: 'FlaskConical' },
+    { path: ROUTES.insights,           label: 'Progress',   icon: 'BarChart3' },
+    { path: ROUTES.profile,            label: 'More',       icon: 'User' },
+  ],
   athlete: [
     { path: ROUTES.today,      label: 'Today',     icon: 'Home' },
     { path: ROUTES.nutrition,  label: 'Nutrition', icon: 'UtensilsCrossed' },
@@ -146,6 +163,7 @@ export const BOTTOM_PATHS_BY_ROLE = {
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.profile],
   admin: [ROUTES.today, ROUTES.admin, ROUTES.social, ROUTES.profile],
+  beta_tester: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.coachDashboard, ROUTES.profile],
 };
 
 /** Returns true if the given role can access a page */
@@ -170,6 +188,7 @@ export const useRBAC = (user) => {
     isNutritionist: role === 'nutritionist',
     isClinician:    role === 'clinician',
     isAdmin:        role === 'admin',
+    isBetaTester:   role === 'beta_tester',
     isStaff:        ['coach', 'nutritionist', 'clinician', 'admin'].includes(role),
     can:            (page) => canAccess(role, page),
     nav:            getNavForRole(role),

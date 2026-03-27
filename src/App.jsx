@@ -54,6 +54,7 @@ const ProgressPhotos = lazy(() => import('@/pages/ProgressPhotos'));
 const Social = lazy(() => import('@/pages/Social'));
 const MyPrescribedDiet = lazy(() => import('@/pages/MyPrescribedDiet'));
 const Pricing = lazy(() => import('@/pages/Pricing.jsx'));
+const InviteAccept = lazy(() => import('@/pages/InviteAccept'));
 const MyPrescribedWorkout = lazy(() => import('@/pages/MyPrescribedWorkout'));
 const CoachDashboard = lazy(() => import('@/pages/coach/CoachDashboard'));
 const CoachStudents = lazy(() => import('@/pages/coach/CoachStudents'));
@@ -299,6 +300,7 @@ const AppRoutes = () => (
 
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/invite" element={<InviteAccept />} />
 
       <Route path="/use-case/:role" element={<UseCase />} />
       <Route path="/guides/getting-started" element={<GettingStartedGuide />} />

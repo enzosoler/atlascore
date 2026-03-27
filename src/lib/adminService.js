@@ -440,3 +440,70 @@ export async function resyncBillingStatus(userId) {
   await logAdminAction('subscription.resync_requested', userId, { note: 'Manual resync requested from admin console' });
   throw new Error('Billing resync requires a Supabase Edge Function. This action has been logged.');
 }
+
+// ─── BETA INVITES ─────────────────────────────────────────────────────────────
+
+export async function fetchBetaInvites() {
+  const { data, error } = await supabase
+    .from('beta_invites')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    if (error.code === '42P01') return []; // table not migrated yet
+    throw error;
+  }
+  return data || [];
+}
+
+export async function sendBetaInvite({ email, firstName = '', notes = '' }) {
+  const { data, error } = await supabase.functions.invoke('send-beta-invite', {
+    body: { email, firstName, notes },
+  });
+
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+
+  await logAdminAction('invite.send', null, { email, notes });
+  return data;
+}
+
+export async function revokeBetaInvite(inviteId) {
+  const { data, error } = await supabase
+    .from('beta_invites')
+    .update({ status: 'revoked' })
+    .eq('id', inviteId)
+    .eq('status', 'pending')
+    .select()
+    .single();
+
+  if (error) throw error;
+  await logAdminAction('invite.revoke', null, { inviteId });
+  return data;
+}
+
+export async function resendBetaInvite(inviteId) {
+  // Get the original invite
+  const { data: invite, error: fetchError } = await supabase
+    .from('beta_invites')
+    .select('*')
+    .eq('id', inviteId)
+    .single();
+
+  if (fetchError || !invite) throw new Error('Invite not found');
+
+  // Extend expiry and re-send email via edge function
+  const newExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  await supabase
+    .from('beta_invites')
+    .update({ expires_at: newExpiry, status: 'pending' })
+    .eq('id', inviteId);
+
+  const { data, error } = await supabase.functions.invoke('send-beta-invite', {
+    body: { email: invite.email, notes: invite.notes || '' },
+  });
+
+  if (error) throw error;
+  await logAdminAction('invite.resend', null, { inviteId, email: invite.email });
+  return data;
+}

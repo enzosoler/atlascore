@@ -235,3 +235,74 @@ export async function sendPasswordReset(
     payload: { firstName, resetUrl, appUrl },
   });
 }
+
+export async function sendBetaInvite(
+  to: string,
+  firstName: string,
+  inviteUrl: string,
+  notes?: string,
+  userId?: string,
+  language?: string
+): Promise<SendResult> {
+  const { appUrl } = getConfig();
+  return sendEmail({
+    type: 'invite_beta',
+    to,
+    userId,
+    language,
+    payload: { firstName, inviteUrl, notes, appUrl },
+  });
+}
+
+export async function sendPaymentSuccess(
+  to: string,
+  firstName: string,
+  planName: string,
+  amount: string,
+  billingUrl: string,
+  userId?: string,
+  language?: string
+): Promise<SendResult> {
+  const { appUrl } = getConfig();
+  return sendEmail({
+    type: 'payment_success',
+    to,
+    userId,
+    language,
+    payload: { firstName, planName, amount, billingUrl, appUrl },
+  });
+}
+
+export async function sendPaymentFailed(
+  to: string,
+  firstName: string,
+  billingUrl: string,
+  userId?: string,
+  language?: string
+): Promise<SendResult> {
+  const { appUrl } = getConfig();
+  return sendEmail({
+    type: 'payment_failed',
+    to,
+    userId,
+    language,
+    payload: { firstName, billingUrl, appUrl },
+  });
+}
+
+export async function sendSubscriptionCanceled(
+  to: string,
+  firstName: string,
+  periodEnd: string,
+  userId?: string,
+  language?: string
+): Promise<SendResult> {
+  const { appUrl } = getConfig();
+  return sendEmail({
+    type: 'subscription_canceled',
+    to,
+    userId,
+    language,
+    payload: { firstName, periodEnd, appUrl },
+  });
+}

@@ -12,6 +12,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'https://esm.sh/stripe@12.0.0?target=deno';
+import { sendPaymentSuccess, sendPaymentFailed, sendSubscriptionCanceled } from '../_shared/email-service.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -69,6 +70,20 @@ const STATUS_MAP: Record<string, string> = {
 
 function getPlanFromPriceId(priceId: string): string | null {
   return PRICE_TO_PLAN[priceId] || null;
+}
+
+async function getUserProfile(
+  supabase: ReturnType<typeof createClient>,
+  userId: string
+): Promise<{ email: string; firstName: string } | null> {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, first_name')
+    .eq('id', userId)
+    .single();
+
+  if (!profile?.email) return null;
+  return { email: profile.email, firstName: profile.first_name || '' };
 }
 
 serve(async (req) => {
@@ -247,6 +262,19 @@ serve(async (req) => {
           console.error('stripe-webhook: Failed to mark subscription as canceled:', error);
         } else {
           console.log(`stripe-webhook: Subscription marked as canceled for user=${existingSub.user_id}`);
+
+          const profile = await getUserProfile(supabaseAdmin, existingSub.user_id);
+          if (profile) {
+            const periodEnd = subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+              : 'the end of your billing period';
+            await sendSubscriptionCanceled(
+              profile.email,
+              profile.firstName,
+              periodEnd,
+              existingSub.user_id
+            );
+          }
         }
         break;
       }
@@ -281,6 +309,27 @@ serve(async (req) => {
           console.error('stripe-webhook: Failed to update subscription after payment:', error);
         } else {
           console.log(`stripe-webhook: Subscription renewed for user=${existingSub.user_id}`);
+
+          // Send payment success email (skip for first invoice — welcome/trial_started covers that)
+          if (invoice.billing_reason !== 'subscription_create') {
+            const profile = await getUserProfile(supabaseAdmin, existingSub.user_id);
+            if (profile) {
+              const appUrl = Deno.env.get('APP_URL') || 'https://atlascore.app';
+              const planCode = getPlanFromPriceId(invoice.lines?.data[0]?.price?.id || '') || 'Pro';
+              const planName = planCode.charAt(0).toUpperCase() + planCode.slice(1);
+              const amountFormatted = invoice.amount_paid
+                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: invoice.currency?.toUpperCase() || 'USD' }).format(invoice.amount_paid / 100)
+                : '';
+              await sendPaymentSuccess(
+                profile.email,
+                profile.firstName,
+                planName,
+                amountFormatted,
+                `${appUrl}/settings/billing`,
+                existingSub.user_id
+              );
+            }
+          }
         }
         break;
       }
@@ -308,6 +357,17 @@ serve(async (req) => {
           console.error('stripe-webhook: Failed to update subscription status to past_due:', error);
         } else {
           console.log(`stripe-webhook: Subscription marked as past_due for user=${existingSub.user_id}`);
+
+          const profile = await getUserProfile(supabaseAdmin, existingSub.user_id);
+          if (profile) {
+            const appUrl = Deno.env.get('APP_URL') || 'https://atlascore.app';
+            await sendPaymentFailed(
+              profile.email,
+              profile.firstName,
+              `${appUrl}/settings/billing`,
+              existingSub.user_id
+            );
+          }
         }
         break;
       }
