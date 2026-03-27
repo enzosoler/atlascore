@@ -50,7 +50,7 @@ import { cn } from '@/lib/utils';
 
 const TABS = ['Overview', 'Users', 'Subscriptions', 'Roles', 'Audit Log', 'Invites', 'Errors'];
 
-const ROLES = ['athlete', 'user', 'admin', 'coach', 'nutritionist', 'clinician'];
+const ROLES = ['athlete', 'user', 'admin', 'coach', 'nutritionist', 'clinician', 'beta_tester'];
 
 const TIERS = ['free', 'pro', 'premium', 'internal', 'custom'];
 
@@ -79,6 +79,7 @@ function roleBadge(role) {
     clinician:    'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]',
     athlete:      'bg-[hsl(var(--border))] text-[hsl(var(--fg-2))]',
     user:         'bg-[hsl(var(--border))] text-[hsl(var(--fg-2))]',
+    beta_tester:  'bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]',
   };
   return map[role] || 'bg-[hsl(var(--border))] text-[hsl(var(--fg-2))]';
 }

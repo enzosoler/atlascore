@@ -203,7 +203,7 @@ export async function getAdminMetrics() {
 
 // ─── ROLE MANAGEMENT ────────────────────────────────────────────────────────
 
-const VALID_ROLES = ['athlete', 'user', 'admin', 'coach', 'nutritionist', 'clinician'];
+const VALID_ROLES = ['athlete', 'user', 'admin', 'coach', 'nutritionist', 'clinician', 'beta_tester'];
 
 export async function updateUserRole(userId, newRole) {
   if (!VALID_ROLES.includes(newRole)) throw new Error(`Invalid role: ${newRole}`);
