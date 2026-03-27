@@ -297,7 +297,7 @@ serve(async (req: Request) => {
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: body.success_url || `${origin}/Today?subscribed=1`,
+      success_url: body.success_url || `${origin}/Today?subscribed=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: body.cancel_url || `${origin}/Pricing`,
       metadata: {
         user_id: userId,

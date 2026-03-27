@@ -815,13 +815,46 @@ function TodayContent() {
 
   const hasAIAccess = can('atlas_ai');
 
-  // Handle Stripe success redirect
+  // Handle Stripe success redirect — call complete-checkout to write subscription row
   useEffect(() => {
-    if (searchParams.get('subscribed') === '1') {
-      toast.success('Subscription activated! Welcome to Atlas Core Pro.');
-      trackEvent('payment_success', { user_id: user?.id, plan: searchParams.get('plan') });
-      setSearchParams({}, { replace: true });
-    }
+    const sessionId = searchParams.get('session_id');
+    if (searchParams.get('subscribed') !== '1' || !sessionId) return;
+
+    // Clean the URL immediately so a refresh doesn't re-trigger
+    setSearchParams({}, { replace: true });
+
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (!token) return;
+
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/complete-checkout`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ session_id: sessionId }),
+          }
+        );
+        const data = await res.json();
+        if (data?.success) {
+          toast.success('Subscription activated! Welcome to Atlas Core Pro.');
+          trackEvent('payment_success', { user_id: user?.id, plan: data.plan });
+          // Force subscription context to refetch
+          queryClient.invalidateQueries({ queryKey: ['subscription-supabase'] });
+        } else {
+          toast.error('Payment recorded but activation failed. Contact support if access is missing.');
+          trackEvent('payment_activation_failed', { user_id: user?.id, error: data?.error });
+        }
+      } catch {
+        toast.success('Payment received! Refreshing your access…');
+        queryClient.invalidateQueries({ queryKey: ['subscription-supabase'] });
+      }
+    })();
   }, []);
   const preferredName = getPreferredName(user?.full_name || user?.email, 'Athlete');
 
