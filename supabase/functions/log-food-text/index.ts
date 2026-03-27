@@ -381,7 +381,13 @@ serve(async (req) => {
         error_message: `OpenAI ${response.status}`,
       });
 
-      return json({ error: 'AI analysis failed. Please try again.' }, 502);
+      if (response.status === 429) {
+        return json({ error: 'AI service is busy. Please try again in a moment.', code: 'RATE_LIMIT' }, 429);
+      }
+      if (response.status === 401 || response.status === 403) {
+        return json({ error: 'AI service configuration error. Please contact support.', code: 'AUTH_ERROR' }, 502);
+      }
+      return json({ error: 'AI analysis failed. Please try again.', code: 'AI_ERROR' }, 502);
     }
 
     const data = await response.json();
