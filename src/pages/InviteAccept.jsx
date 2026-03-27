@@ -29,9 +29,17 @@ export default function InviteAccept() {
     setState('redeeming');
 
     supabase.functions.invoke('redeem-invite', { body: { token } })
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error || data?.error) {
-          setErrorMsg(data?.error || error?.message || 'Something went wrong.');
+          const msg = data?.error || data?.message || error?.context?.error || error?.message || 'Something went wrong.';
+          // If the invite belongs to a different email, sign out and redirect to signup
+          if (msg.includes('different email')) {
+            await supabase.auth.signOut();
+            const next = encodeURIComponent(`/invite?token=${token}`);
+            navigate(`/auth?mode=signup&next=${next}`, { replace: true });
+            return;
+          }
+          setErrorMsg(msg);
           setState('error');
         } else {
           setState('success');
