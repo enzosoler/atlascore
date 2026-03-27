@@ -30,3 +30,6 @@ dist-ssr
 *.sw?
 .vercel
 .env*.local
+e2e/.auth/
+playwright-report/
+test-results/
