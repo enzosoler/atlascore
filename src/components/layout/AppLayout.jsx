@@ -121,18 +121,18 @@ function getTransitionState(pathname, previousPathname, bottomPaths) {
     const direction = currentIndex > previousIndex ? 1 : -1;
 
     return {
-      initial: { opacity: 0, x: 22 * direction, scale: 0.995 },
-      animate: { opacity: 1, x: 0, scale: 1 },
-      exit: { opacity: 0, x: -18 * direction, scale: 0.995 },
-      transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+      initial: { opacity: 0, x: 16 * direction },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: -12 * direction },
+      transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] },
     };
   }
 
   return {
-    initial: { opacity: 0, y: 14 },
+    initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
-    transition: { duration: 0.18, ease: 'easeOut' },
+    exit: { opacity: 0 },
+    transition: { duration: 0.14, ease: 'easeOut' },
   };
 }
 
@@ -542,7 +542,7 @@ export default function AppLayout() {
             className="flex h-10 w-10 items-center justify-center rounded-[18px] text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence mode="sync" initial={false}>
               <motion.div
                 key={mobileOpen ? 'close' : 'open'}
                 initial={{ rotate: -90, opacity: 0 }}
@@ -673,7 +673,7 @@ export default function AppLayout() {
       <main
         ref={mainRef}
         className={cn(
-          'flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300',
+          'flex-1 overflow-y-auto overflow-x-hidden transition-[margin] duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'lg:pt-0',
           'pb-[calc(94px+env(safe-area-inset-bottom))] lg:pb-0'
@@ -729,7 +729,7 @@ export default function AppLayout() {
             transition: isPullingRef.current ? 'none' : 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         >
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="sync" initial={false}>
             <motion.div
               key={pathname}
               initial={transitionState.initial}

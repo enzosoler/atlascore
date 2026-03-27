@@ -149,10 +149,10 @@ export function TabBar({ items, className = '' }) {
           const Icon = item.icon;
           const key = item.key || item.to || item.label;
           const classes = cn(
-            'flex min-h-[58px] flex-1 min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 text-center text-[11.5px] font-semibold tracking-[-0.014em] leading-none transition-all duration-200',
+            'flex min-h-[58px] flex-1 min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 text-center text-[11.5px] font-semibold tracking-[-0.014em] leading-none transition-[background-color,color,box-shadow] duration-150',
             item.active
               ? 'border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
-              : 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.86)] hover:text-[hsl(var(--fg))]'
+              : 'text-[hsl(var(--fg-2))]'
           );
 
           if (item.to) {
@@ -161,7 +161,7 @@ export function TabBar({ items, className = '' }) {
                 {Icon ? (
                   <div
                     className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-[14px] transition-all duration-200',
+                      'flex h-9 w-9 items-center justify-center rounded-[14px] transition-[background-color,box-shadow] duration-150',
                       item.active
                         ? 'bg-[hsl(var(--brand)/0.14)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.12)]'
                         : 'bg-transparent'
@@ -182,7 +182,7 @@ export function TabBar({ items, className = '' }) {
               {Icon ? (
                 <div
                   className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-[14px] transition-all duration-200',
+                    'flex h-9 w-9 items-center justify-center rounded-[14px] transition-[background-color,box-shadow] duration-150',
                     item.active
                       ? 'bg-[hsl(var(--brand)/0.14)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.12)]'
                       : 'bg-transparent'
