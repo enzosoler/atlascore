@@ -227,26 +227,29 @@ export function buildInviteBeta(data: InviteBetaData): EmailTemplate {
   const { firstName, inviteUrl, notes, appUrl } = data;
   const displayName = firstName || 'there';
 
-  const subject = "You're invited to test Atlas Core";
+  const subject = "You're invited to Atlas Core — early access";
 
   const html = wrapBase(`
-    <h2>You're in, ${displayName}.</h2>
-    <p>You've been personally invited to test Atlas Core — a precision health and performance platform for athletes, coaches, clinicians, and nutritionists.</p>
-    ${notes ? `<p style="padding:12px 16px;background:${C.bg};border-radius:8px;border-left:3px solid ${C.border};font-style:italic;color:${C.fg2};">"${notes}"</p>` : ''}
-    <p>Your invite gives you full access to every feature in the app — track workouts, monitor nutrition, run protocols, view lab data, and explore every professional tool.</p>
-    <a href="${inviteUrl}" class="cta">Accept Invitation</a>
-    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">This invite link expires in 7 days. If you weren't expecting this, you can safely ignore this email.</p>
+    <h2>Early access, ${displayName}.</h2>
+    <p>I'm building Atlas Core — a training and health platform for athletes and the professionals who work with them. You're one of a small group I've personally invited to try it before launch.</p>
+    ${notes ? `<p style="padding:14px 16px;background:${C.bg};border-radius:8px;border-left:3px solid ${C.border};font-style:italic;color:${C.fg2};margin:20px 0;">"${notes}"</p>` : ''}
+    <p>Your access covers everything — athlete tracking, workout and nutrition logging, lab exams, body composition, progress photos, coach and clinician dashboards, protocols, and more. No paywalls, no limits.</p>
+    <p>I'd love honest feedback on what works, what's confusing, and what's missing.</p>
+    <a href="${inviteUrl}" class="cta">Accept early access</a>
+    <p style="font-size:13px;color:${C.fg2};margin-top:24px;">This link is personal to you and expires in 7 days. If you weren't expecting this, you can ignore it.</p>
   `, appUrl, subject);
 
-  const text = `You're invited to test Atlas Core
+  const text = `Early access, ${displayName}.
 
-Hi ${displayName}, you've been personally invited to test Atlas Core.
+I'm building Atlas Core — a training and health platform for athletes and the professionals who work with them. You're one of a small group I've personally invited to try it before launch.
 ${notes ? `\n"${notes}"\n` : ''}
-Your invite gives you full access to every feature in the app.
+Your access covers everything — athlete tracking, workout and nutrition logging, lab exams, body composition, progress photos, coach and clinician dashboards, protocols, and more.
 
-Accept Invitation: ${inviteUrl}
+I'd love honest feedback on what works, what's confusing, and what's missing.
 
-This invite expires in 7 days. If you weren't expecting this, ignore this email.
+Accept early access: ${inviteUrl}
+
+This link is personal to you and expires in 7 days.
 
 © ${new Date().getFullYear()} Atlas Core
 ${appUrl}`;
