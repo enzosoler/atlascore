@@ -224,7 +224,7 @@ function mapFoodLogToMeal(log) {
     source: 'supabase',
     source_row_id: log?.id || null,
     date: formatDateKey(log?.date),
-    meal_type: getMealTypeFromDate(log?.date),
+    meal_type: log?.meal_type || getMealTypeFromDate(log?.date),
     title: foodName,
     foods: [{
       name: foodName,
@@ -1524,7 +1524,8 @@ export default function NutritionPage() {
       for (const food of foods) {
         const snapshot = {
           user_id: user.id,
-          date: buildMealTimestamp(form.date, form.meal_type),
+          date: form.date || TODAY,
+          meal_type: form.meal_type || null,
           food_name: food.name,
           calories: Math.round(food.kcal || 0),
           protein: Math.round((food.protein || 0) * 10) / 10,
@@ -1534,7 +1535,7 @@ export default function NutritionPage() {
           serving_unit: food.unit || 'g',
           serving_size: food.amount || 100,
           external_id: food.external_id || null,
-          source_api: food.source_api || 'Open Food Facts',
+          source_api: food.source_api || null,
         };
 
         const { data, error } = await supabase
