@@ -141,7 +141,6 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
           // FunctionsHttpError contains the response context
           if (fnError.context && typeof fnError.context.json === 'function') {
             const errorBody = await fnError.context.json();
-            if (errorBody?.error) errorMsg = errorBody.error;
             if (errorBody?.code) {
               // Handle specific error codes from the edge function
               if (errorBody.code === 'KILL_SWITCH') {
@@ -164,6 +163,17 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
                 setSuggestedSearch(rawText);
                 return;
               }
+              if (errorBody.code === 'RATE_LIMIT') {
+                setError('AI service is busy. Try again in a moment or use the search below.');
+                setSuggestedSearch(rawText);
+                return;
+              }
+            }
+            // Surface the actual error message from the edge function instead of a generic one
+            if (errorBody?.error) {
+              setError(errorBody.error);
+              setSuggestedSearch(rawText);
+              return;
             }
           }
         } catch {
@@ -217,6 +227,8 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
         setError('Too many requests. AI is busy — try search below or wait a moment.');
       } else if (msg.includes('limit') || msg.includes('cap')) {
         setError('Daily AI limit reached. Use the search feature to find your food.');
+      } else if (msg && !msg.includes('fetch') && !msg.includes('network') && msg.length < 200) {
+        setError(msg);
       } else {
         setError('Couldn\'t analyze automatically. Try search below or rephrase your description.');
       }
