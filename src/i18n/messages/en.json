@@ -12,7 +12,8 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "termsOfUse": "terms of service"
+    "termsOfUse": "terms of service",
+    "athlete": "Athlete"
   },
   "auth": {
     "kicker": "Personal evolution system",

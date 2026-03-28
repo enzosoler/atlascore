@@ -322,5 +322,167 @@
         "plan_save_error": "Não foi possível salvar o plano."
       }
     }
+  },
+  "es": {
+    "workouts": {
+      "plan_sources": {
+        "self": "Por ti",
+        "ai": "Generado",
+        "coach": "Asignado por el entrenador"
+      },
+      "plan_card": {
+        "no_plan_title": "Sin plan de entrenamiento para hoy",
+        "no_plan_description": "Crea uno tú mismo, usa el constructor de planes estructurado, o espera a que tu entrenador lo asigne.",
+        "log_session": "Registrar sesión del plan",
+        "assigned_plan": "Plan asignado"
+      },
+      "workout_card": {
+        "volume": "Volumen",
+        "date": "Fecha",
+        "status": "Estado",
+        "exercises": "Ejercicios",
+        "notes": "Notas",
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "form": {
+        "date": "Fecha",
+        "workout_name": "Nombre del entrenamiento",
+        "workout_name_placeholder": "Ej.: Tren Superior A",
+        "type": "Tipo",
+        "status": "Estado",
+        "status_pending": "Pendiente",
+        "status_completed": "Completado",
+        "duration": "Duración",
+        "rpe": "RPE",
+        "volume_total": "Volumen total",
+        "exercises_subtitle": "Mantén cada bloque limpio para que la lectura de ejecución sea fácil de escanear.",
+        "add_exercise": "Agregar ejercicio"
+      }
+    },
+    "exercises": {
+      "eyebrow": "Ejercicios",
+      "title": "Biblioteca de ejercicios diseñada para navegación rápida y selección limpia.",
+      "subtitle": "Busca por nombre, filtra por región corporal o equipo, y pasa de la navegación a la ejecución con mínima fricción.",
+      "search": {
+        "eyebrow": "Búsqueda",
+        "title": "Encuentra el movimiento correcto",
+        "subtitle": "Búsqueda rápida y ajustada para consultas comunes de atletas.",
+        "placeholder": "Busca por nombre, alias, patrón de movimiento o grupo muscular"
+      },
+      "actions": {
+        "filters": "Filtros",
+        "grid_view": "Vista de cuadrícula",
+        "list_view": "Vista de lista",
+        "favorites": "Favoritos",
+        "recents": "Recientes",
+        "clear": "Limpiar",
+        "clear_filters": "Limpiar filtros"
+      },
+      "filters": {
+        "active_filters": "Filtros activos",
+        "body_region": "Región corporal",
+        "target_muscle": "Músculo objetivo",
+        "equipment": "Equipo"
+      },
+      "summary": {
+        "search_results": "Resultados de búsqueda",
+        "library": "Biblioteca",
+        "results_for": "Resultados para \"{query}\"",
+        "available_exercises": "Ejercicios disponibles en la vista actual.",
+        "body_focus": "Enfoque corporal",
+        "all_groups": "Todos los grupos",
+        "filtered_body_region": "Región corporal filtrada.",
+        "browse_catalog": "Explorar el catálogo completo.",
+        "equipment": "Equipo",
+        "mixed": "Mixto",
+        "specific_setup": "Configuración específica seleccionada.",
+        "any_equipment": "Cualquier equipo disponible."
+      },
+      "library": {
+        "eyebrow": "Biblioteca",
+        "results_title": "{count} resultado(s) para \"{query}\"",
+        "exercises_in_view": "{count} ejercicio(s) en vista",
+        "subtitle": "Diseñado para escaneo rápido: nombre del movimiento primero, músculo y equipo después.",
+        "compact_list": "Lista compacta",
+        "card_grid": "Cuadrícula de tarjetas",
+        "loading_title": "Cargando la biblioteca",
+        "loading_subtitle": "Obteniendo las coincidencias y metadatos de ejercicios.",
+        "empty_title": "No se encontraron ejercicios",
+        "empty_description": "Intenta un término de búsqueda más amplio o limpia los filtros activos para reabrir el catálogo completo."
+      }
+    },
+    "myWorkout": {
+      "eyebrow": "Entrenar",
+      "title": "Mi Entrenamiento",
+      "subtitle": "Revisa el plan activo, compara su origen y escanea la estructura de días y ejercicios rápidamente.",
+      "empty": {
+        "title": "Sin plan de entrenamiento activo",
+        "description": "Crea uno manualmente o genera un plan estructurado basado en tu perfil y objetivos."
+      },
+      "actions": {
+        "create_manually": "Crear manualmente",
+        "generate_plan": "Generar plan",
+        "generate_new_plan": "Generar nuevo plan"
+      },
+      "messages": {
+        "loading": "Cargando...",
+        "plan_generated": "Plan de entrenamiento generado correctamente.",
+        "plan_invalid_structure": "La respuesta del plan no incluyó una estructura válida. Intenta de nuevo.",
+        "plan_generate_error": "No se pudo generar el plan. Intenta de nuevo.",
+        "plan_timeout": "La generación tardó demasiado. Verifica tu conexión e intenta de nuevo.",
+        "request_timeout": "Tiempo de solicitud agotado. Intenta de nuevo.",
+        "plan_connect_error": "No se pudo conectar al servicio de planes. Intenta de nuevo en un momento."
+      },
+      "plan": {
+        "eyebrow": "Plan",
+        "active_plan_subtitle": "Plan activo listo para ejecutar.",
+        "frequency": "Frecuencia",
+        "since": "Desde",
+        "notes": "Notas"
+      },
+      "structure": {
+        "eyebrow": "Estructura",
+        "title": "Días de entrenamiento ({count})",
+        "subtitle": "Cada tarjeta muestra el enfoque del día y abre los ejercicios detallados."
+      },
+      "exercise_card": {
+        "sets": "series",
+        "reps": "repeticiones",
+        "rest": "descanso",
+        "technique": "Técnica"
+      },
+      "day_card": {
+        "session": "Sesión",
+        "exercise": "ejercicio",
+        "exercises": "ejercicios",
+        "no_exercises": "Sin ejercicios detallados aún."
+      }
+    },
+    "manualWorkout": {
+      "eyebrow": "Entrenar",
+      "title": "Crear Plan Manual",
+      "fields": {
+        "plan_name": "Nombre del Plan",
+        "plan_name_placeholder": "Ej.: Tren Superior / Inferior",
+        "goal": "Objetivo",
+        "goal_placeholder": "Ej.: Ganar músculo"
+      },
+      "actions": {
+        "add_day": "Agregar Día",
+        "save_plan": "Guardar Plan"
+      },
+      "day_editor": {
+        "focus_placeholder": "Enfoque (ej.: Pecho y Tríceps)",
+        "sets": "Series",
+        "reps": "Repeticiones",
+        "rest": "Descanso",
+        "search_placeholder": "Buscar ejercicio para agregar..."
+      },
+      "messages": {
+        "plan_saved": "Plan de entrenamiento guardado correctamente",
+        "plan_save_error": "No se pudo guardar el plan."
+      }
+    }
   }
 }
