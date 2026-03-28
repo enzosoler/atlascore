@@ -20,6 +20,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import AppLayout from '@/components/layout/AppLayout.jsx';
+import AppBootstrap from '@/components/app/AppBootstrap';
 import RouteGuard from '@/components/rbac/RouteGuard';
 import { WebOnlyRoute } from '@/components/routing/WebOnlyRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -204,7 +205,7 @@ const RequireAuthenticatedApp = () => {
   const location = useLocation();
 
   if (authState === 'loading') {
-    return <FullScreenSpinner />;
+    return <AppBootstrap />;
   }
 
   if (authError?.type === 'user_not_registered') return <UserNotRegisteredError />;
