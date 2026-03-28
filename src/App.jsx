@@ -18,6 +18,7 @@ import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralT
 import { Capacitor } from '@capacitor/core';
 import AppLayout from '@/components/layout/AppLayout.jsx';
 import RouteGuard from '@/components/rbac/RouteGuard';
+import { WebOnlyRoute } from '@/components/routing/WebOnlyRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -210,10 +211,10 @@ const RequireAuthenticatedApp = () => {
     return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
   }
 
-  // Admins go straight to the admin panel — they have no use for Today/Social/etc.
+  // Admins go straight to the admin panel on web — on mobile they use the core app
   const isAdmin = user?.atlas_role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/AdminPanel');
-  if (isAdmin && !isAdminRoute) {
+  if (isAdmin && !isAdminRoute && !Capacitor.isNativePlatform()) {
     return <Navigate to={ROUTES.admin} replace />;
   }
 
@@ -223,14 +224,16 @@ const RequireAuthenticatedApp = () => {
 const AppRoutes = () => (
   <Suspense fallback={<FullScreenSpinner />}>
     <Routes>
-      <Route path={ROUTES.home} element={<Landing />} />
-      <Route path={ROUTES.blog} element={<BlogIndex />} />
-      <Route path={`${ROUTES.blog}/:slug`} element={<BlogPost />} />
+      {/* Web-only: marketing & content */}
+      <Route path={ROUTES.home} element={<WebOnlyRoute><Landing /></WebOnlyRoute>} />
+      <Route path={ROUTES.blog} element={<WebOnlyRoute fallback="/Today"><BlogIndex /></WebOnlyRoute>} />
+      <Route path={`${ROUTES.blog}/:slug`} element={<WebOnlyRoute fallback="/Today"><BlogPost /></WebOnlyRoute>} />
+      <Route path={ROUTES.pricing} element={<WebOnlyRoute fallback="/upgrade"><Pricing /></WebOnlyRoute>} />
+      <Route path={ROUTES.help} element={<WebOnlyRoute fallback="/Today"><HelpCenter /></WebOnlyRoute>} />
+      {/* Shared auth */}
       <Route path={ROUTES.auth} element={<Auth />} />
       <Route path={ROUTES.signup} element={<Auth />} />
       <Route path={ROUTES.login} element={<Auth />} />
-      <Route path={ROUTES.pricing} element={<Pricing />} />
-      <Route path={ROUTES.help} element={<HelpCenter />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/auth/update-password" element={<UpdatePassword />} />
 
@@ -291,7 +294,7 @@ const AppRoutes = () => (
       <Route path="/calendar" element={<Calendar />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/integrations" element={<Integrations />} />
-      <Route path="/waitlist" element={<Waitlist />} />
+      <Route path="/waitlist" element={<WebOnlyRoute fallback="/Today"><Waitlist /></WebOnlyRoute>} />
       <Route path="/welcome-back" element={<Reactivation />} />
 
       {/* Viral loop */}
@@ -302,20 +305,21 @@ const AppRoutes = () => (
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/invite" element={<InviteAccept />} />
 
-      <Route path="/use-case/:role" element={<UseCase />} />
-      <Route path="/guides/getting-started" element={<GettingStartedGuide />} />
-      <Route path="/guides/workout-logging" element={<WorkoutLoggingGuide />} />
-      <Route path="/guides/plan-vs-execution" element={<PlanVsExecutionGuide />} />
-      <Route path="/guides/ai-workout-generation" element={<AIWorkoutGenerationGuide />} />
-      <Route path="/guides/ai-plan-building" element={<AIPlanBuildingGuide />} />
-      <Route path="/guides/adjusting-plans" element={<AdjustingPlansGuide />} />
-      <Route path="/guides/ai-vs-manual" element={<AIVsManualGuide />} />
-      <Route path="/guides/progress-photos" element={<ProgressPhotosGuide />} />
-      <Route path="/guides/export-reports" element={<ExportReportsGuide />} />
-      <Route path="/guides/nutrition-tracking" element={<NutritionTrackingGuide />} />
-      <Route path="/guides/mobile-workouts" element={<MobileWorkoutsGuide />} />
-      <Route path="/guides/account-settings" element={<AccountSettingsGuide />} />
-      <Route path="/guides/coach-management" element={<CoachManagementGuide />} />
+      {/* Web-only: use-cases and guides */}
+      <Route path="/use-case/:role" element={<WebOnlyRoute fallback="/Today"><UseCase /></WebOnlyRoute>} />
+      <Route path="/guides/getting-started" element={<WebOnlyRoute fallback="/Today"><GettingStartedGuide /></WebOnlyRoute>} />
+      <Route path="/guides/workout-logging" element={<WebOnlyRoute fallback="/Today"><WorkoutLoggingGuide /></WebOnlyRoute>} />
+      <Route path="/guides/plan-vs-execution" element={<WebOnlyRoute fallback="/Today"><PlanVsExecutionGuide /></WebOnlyRoute>} />
+      <Route path="/guides/ai-workout-generation" element={<WebOnlyRoute fallback="/Today"><AIWorkoutGenerationGuide /></WebOnlyRoute>} />
+      <Route path="/guides/ai-plan-building" element={<WebOnlyRoute fallback="/Today"><AIPlanBuildingGuide /></WebOnlyRoute>} />
+      <Route path="/guides/adjusting-plans" element={<WebOnlyRoute fallback="/Today"><AdjustingPlansGuide /></WebOnlyRoute>} />
+      <Route path="/guides/ai-vs-manual" element={<WebOnlyRoute fallback="/Today"><AIVsManualGuide /></WebOnlyRoute>} />
+      <Route path="/guides/progress-photos" element={<WebOnlyRoute fallback="/Today"><ProgressPhotosGuide /></WebOnlyRoute>} />
+      <Route path="/guides/export-reports" element={<WebOnlyRoute fallback="/Today"><ExportReportsGuide /></WebOnlyRoute>} />
+      <Route path="/guides/nutrition-tracking" element={<WebOnlyRoute fallback="/Today"><NutritionTrackingGuide /></WebOnlyRoute>} />
+      <Route path="/guides/mobile-workouts" element={<WebOnlyRoute fallback="/Today"><MobileWorkoutsGuide /></WebOnlyRoute>} />
+      <Route path="/guides/account-settings" element={<WebOnlyRoute fallback="/Today"><AccountSettingsGuide /></WebOnlyRoute>} />
+      <Route path="/guides/coach-management" element={<WebOnlyRoute fallback="/Today"><CoachManagementGuide /></WebOnlyRoute>} />
       {LEGACY_ROUTE_REDIRECTS.map(([from, to]) => (
         <Route
           key={from}
@@ -358,17 +362,18 @@ const AppRoutes = () => (
           <Route path={ROUTES.social} element={<Social />} />
           <Route path={ROUTES.prescribedDiet} element={<MyPrescribedDiet />} />
           <Route path={ROUTES.prescribedWorkout} element={<MyPrescribedWorkout />} />
-          <Route path={ROUTES.coachDashboard} element={<RouteGuard roles={['coach', 'admin']}><CoachDashboard /></RouteGuard>} />
-          <Route path={ROUTES.coachStudents} element={<RouteGuard roles={['coach', 'admin']}><CoachStudents /></RouteGuard>} />
-          <Route path="/coach/student/:id" element={<RouteGuard roles={['coach', 'admin']}><CoachStudentProfile /></RouteGuard>} />
-          <Route path="/coach/prescribe-workout/:studentId" element={<RouteGuard roles={['coach', 'admin']}><CoachPrescribeWorkout /></RouteGuard>} />
-          <Route path={ROUTES.nutritionistDashboard} element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistDashboard /></RouteGuard>} />
-          <Route path={ROUTES.nutritionistClients} element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistClients /></RouteGuard>} />
-          <Route path="/nutritionist/client/:id" element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistClientProfile /></RouteGuard>} />
-          <Route path="/nutritionist/prescribe-diet/:clientId" element={<RouteGuard roles={['nutritionist', 'admin']}><NutritionistPrescribeDiet /></RouteGuard>} />
-          <Route path={ROUTES.clinicianDashboard} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianDashboard /></RouteGuard>} />
-          <Route path={ROUTES.clinicianPatients} element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatients /></RouteGuard>} />
-          <Route path="/clinician/patient/:id" element={<RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard>} />
+          {/* Web-only: professional dashboards */}
+          <Route path={ROUTES.coachDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachDashboard /></RouteGuard></WebOnlyRoute>} />
+          <Route path={ROUTES.coachStudents} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachStudents /></RouteGuard></WebOnlyRoute>} />
+          <Route path="/coach/student/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachStudentProfile /></RouteGuard></WebOnlyRoute>} />
+          <Route path="/coach/prescribe-workout/:studentId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachPrescribeWorkout /></RouteGuard></WebOnlyRoute>} />
+          <Route path={ROUTES.nutritionistDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistDashboard /></RouteGuard></WebOnlyRoute>} />
+          <Route path={ROUTES.nutritionistClients} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistClients /></RouteGuard></WebOnlyRoute>} />
+          <Route path="/nutritionist/client/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistClientProfile /></RouteGuard></WebOnlyRoute>} />
+          <Route path="/nutritionist/prescribe-diet/:clientId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistPrescribeDiet /></RouteGuard></WebOnlyRoute>} />
+          <Route path={ROUTES.clinicianDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianDashboard /></RouteGuard></WebOnlyRoute>} />
+          <Route path={ROUTES.clinicianPatients} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianPatients /></RouteGuard></WebOnlyRoute>} />
+          <Route path="/clinician/patient/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard></WebOnlyRoute>} />
 
           {/* Profile Extension */}
           <Route path="/profile/content" element={<UserContent />} />
@@ -385,10 +390,10 @@ const AppRoutes = () => (
         </Route>
       </Route>
 
-      {/* Admin panel */}
+      {/* Admin panel — web only */}
       <Route element={<RequireAuthenticatedApp />}>
-        <Route path={ROUTES.admin} element={<RouteGuard roles={['admin']}><AdminPanel /></RouteGuard>} />
-        <Route path="/AdminPanel/user/:userId" element={<RouteGuard roles={['admin']}><AdminUserProfile /></RouteGuard>} />
+        <Route path={ROUTES.admin} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminPanel /></RouteGuard></WebOnlyRoute>} />
+        <Route path="/AdminPanel/user/:userId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminUserProfile /></RouteGuard></WebOnlyRoute>} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
