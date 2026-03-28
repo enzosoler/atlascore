@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { Activity, Clock, Plus, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
@@ -52,6 +52,20 @@ function getProtocolStatus(protocol) {
   if (protocol?.end_date) return 'finished';
   if (protocol?.active === false) return 'paused';
   return 'active';
+}
+
+function estimateIntervalDays(frequency) {
+  if (!frequency) return 7;
+  const f = frequency.toLowerCase();
+  if (f.includes('daily') || f.includes('diário') || f.includes('1x/day') || f.includes('1x/dia')) return 1;
+  if (f.includes('2x/day') || f.includes('2x/dia')) return 0.5;
+  if (f.includes('eod') || f.includes('every other day') || f.includes('dia sim')) return 2;
+  if (f.includes('3x/week') || f.includes('3x/sem')) return 7 / 3;
+  if (f.includes('2x/week') || f.includes('2x/sem')) return 3.5;
+  if (f.includes('1x/week') || f.includes('1x/sem') || f.includes('weekly') || f.includes('semanal')) return 7;
+  if (f.includes('biweekly') || f.includes('quinzenal') || f.includes('2x/month') || f.includes('2x/mês')) return 14;
+  if (f.includes('monthly') || f.includes('mensal') || f.includes('1x/month')) return 30;
+  return 7;
 }
 
 // ── Supabase data-access helpers ──────────────────────────────────────────────
@@ -138,12 +152,16 @@ async function deleteProtocol(protocolId) {
 // ── Concentration Chart based on Actual Dose Logs ────────────────────────────
 
 import {
+  calculateConcentrationAtTime,
   generateConcentrationSeries,
+  getCurrentConcentration,
+  getConcentrationStats,
   getSubstanceHalfLife,
 } from '@/lib/concentrationCalculator';
 
 function ConcentrationChart({ protocols }) {
-  const qc = useQueryClient();
+  const { locale } = useI18n();
+  const isPt = locale === 'pt-BR';
   const { user } = useAuth();
 
   // Fetch logs for all active protocols
@@ -158,7 +176,7 @@ function ConcentrationChart({ protocols }) {
 
   const isLoading = logsQueries.some((q) => q.isLoading);
 
-  // Combine protocols with their logs and calculate series
+  // Combine protocols with their logs, series, stats, and projections
   const protocolsWithData = useMemo(() => {
     return protocols.map((protocol, index) => {
       const logs = logsQueries[index]?.data || [];
@@ -167,13 +185,33 @@ function ConcentrationChart({ protocols }) {
         logs.length > 0
           ? generateConcentrationSeries(logs, halfLife, 30, 14, 4)
           : [];
+      const stats = logs.length > 0 ? getConcentrationStats(logs, halfLife) : null;
+      const currentConc = logs.length > 0 ? getCurrentConcentration(logs, halfLife) : 0;
+
+      const lastDose = logs.length > 0
+        ? logs.reduce((latest, log) =>
+            new Date(log.taken_at) > new Date(latest.taken_at) ? log : latest)
+        : null;
+
+      const intervalDays = estimateIntervalDays(protocol.frequency);
+      const nextDoseTime = lastDose
+        ? new Date(new Date(lastDose.taken_at).getTime() + intervalDays * 86400000)
+        : null;
+      const concAtNextDose = lastDose && nextDoseTime
+        ? calculateConcentrationAtTime(logs, nextDoseTime, halfLife) : 0;
+      const missedTime = lastDose
+        ? new Date(new Date(lastDose.taken_at).getTime() + intervalDays * 2 * 86400000)
+        : null;
+      const concIfMissed = lastDose && missedTime
+        ? calculateConcentrationAtTime(logs, missedTime, halfLife) : 0;
+
+      const peakPct = stats && stats.peak > 0 ? (currentConc / stats.peak) * 100 : 0;
+      const decayPhase = peakPct > 80 ? 'peak' : peakPct > 50 ? 'moderate' : peakPct > 20 ? 'declining' : 'low';
 
       return {
-        protocol,
-        logs,
-        halfLife,
-        series,
-        hasLogs: logs.length > 0,
+        protocol, logs, halfLife, series, stats, currentConc,
+        lastDose, nextDoseTime, concAtNextDose, concIfMissed,
+        peakPct, decayPhase, hasLogs: logs.length > 0,
       };
     });
   }, [protocols, logsQueries]);
@@ -200,26 +238,109 @@ function ConcentrationChart({ protocols }) {
 
   return (
     <div className="space-y-4">
-      {!hasAnyLogs ? (
+      {/* ── Hero Summary ──────────────────────────────────────────────── */}
+      {hasAnyLogs && (
+        <div className="rounded-[20px] border border-[hsl(var(--brand)/0.2)] bg-gradient-to-br from-[hsl(var(--brand)/0.08)] to-[hsl(var(--fill)/0.3)] p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="h-4 w-4 text-[hsl(var(--brand))]" />
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+              {isPt ? 'Estado atual do protocolo' : 'Current protocol state'}
+            </p>
+          </div>
+          <div className="space-y-3">
+            {protocolsWithData.filter(p => p.hasLogs).map((data) => {
+              const statusLabel = { peak: isPt ? 'Pico' : 'Peak', moderate: isPt ? 'Estável' : 'Stable', declining: isPt ? 'Em queda' : 'Declining', low: isPt ? 'Baixo' : 'Low' }[data.decayPhase];
+              const statusColor = { peak: 'hsl(var(--ok))', moderate: 'hsl(var(--brand))', declining: 'hsl(var(--warn))', low: 'hsl(var(--err))' }[data.decayPhase];
+              return (
+                <div key={data.protocol.id} className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: statusColor }} />
+                    <span className="text-[13px] text-[hsl(var(--fg))] truncate">{data.protocol.substance_name || data.protocol.name}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[12px] shrink-0">
+                    <span style={{ color: statusColor }} className="font-medium">{statusLabel}</span>
+                    <span className="text-[hsl(var(--fg-2))]">{Math.round(data.peakPct)}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {!hasAnyLogs && (
         <div className="rounded-[16px] border border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.08)] px-4 py-3">
           <p className="text-[13px] text-[hsl(var(--warn))]">
-            No doses logged yet. Click "Log dose" on a protocol to see concentration curves.
+            {isPt ? 'Nenhuma dose registrada. Registre doses para ver curvas.' : 'No doses logged yet. Log doses to see concentration curves.'}
           </p>
         </div>
-      ) : null}
+      )}
 
-      {protocolsWithData.map((data, index) => (
-        <ProtocolConcentrationCard
-          key={data.protocol.id}
-          data={data}
-          color={CURVE_COLORS[index % CURVE_COLORS.length]}
-        />
-      ))}
+      {/* ── Per-compound analysis ─────────────────────────────────────── */}
+      {protocolsWithData.map((data, index) => {
+        const color = CURVE_COLORS[index % CURVE_COLORS.length];
+        return (
+          <div key={data.protocol.id} className="space-y-3">
+            {/* Concentration Curve */}
+            <ProtocolConcentrationCard data={data} color={color} locale={locale} />
+
+            {/* Half-life + Projection grid */}
+            {data.hasLogs && data.stats && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Half-life Panel */}
+                <div className="rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.3)] p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Clock className="h-3.5 w-3.5 text-[hsl(var(--fg-2))]" />
+                    <p className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">{isPt ? 'Meia-vida' : 'Half-life'}</p>
+                  </div>
+                  <p className="text-[22px] font-semibold text-[hsl(var(--fg))]">
+                    ~{data.halfLife < 1 ? `${(data.halfLife * 24).toFixed(0)}h` : `${data.halfLife.toFixed(1)}d`}
+                  </p>
+                  <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
+                    {data.decayPhase === 'peak' && (isPt ? 'Fase de pico — concentração máxima' : 'Peak phase — maximum concentration')}
+                    {data.decayPhase === 'moderate' && (isPt ? 'Declínio moderado — níveis estáveis' : 'Moderate decline — stable levels')}
+                    {data.decayPhase === 'declining' && (isPt ? 'Em queda — próxima dose importante' : 'Declining — next dose matters')}
+                    {data.decayPhase === 'low' && (isPt ? 'Concentração baixa — dose atrasada?' : 'Low concentration — dose overdue?')}
+                  </p>
+                </div>
+
+                {/* Projection Panel */}
+                <div className="rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.3)] p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <TrendingUp className="h-3.5 w-3.5 text-[hsl(var(--fg-2))]" />
+                    <p className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">{isPt ? 'Projeção' : 'Projection'}</p>
+                  </div>
+                  {data.nextDoseTime && data.concAtNextDose > 0 ? (
+                    <>
+                      <p className="text-[13px] text-[hsl(var(--fg))] leading-relaxed">
+                        {data.peakPct > 40
+                          ? (isPt ? 'Se tomar no horário, níveis permanecem estáveis.' : 'If next dose on time, levels remain stable.')
+                          : (isPt ? 'Concentração caindo. Tome a próxima dose logo.' : 'Concentration dropping. Take next dose soon.')}
+                      </p>
+                      {data.concIfMissed > 0 && data.stats.peak > 0 && (
+                        <p className="mt-2 text-[12px] text-[hsl(var(--warn))] leading-relaxed">
+                          {isPt
+                            ? `Se pular: cai para ${Math.round((data.concIfMissed / data.stats.peak) * 100)}% do pico.`
+                            : `If missed: drops to ${Math.round((data.concIfMissed / data.stats.peak) * 100)}% of peak.`}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-[13px] text-[hsl(var(--fg-2))]">
+                      {isPt ? 'Registre doses para ver projeções.' : 'Log doses to see projections.'}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function ProtocolConcentrationCard({ data, color }) {
+function ProtocolConcentrationCard({ data, color, locale }) {
   const { protocol, halfLife, series, hasLogs } = data;
 
   const VIEWBOX_WIDTH = 400;
@@ -790,27 +911,16 @@ function ProtocolsContent() {
         <AdherenceWidget protocols={activeProtocols} logs={logs} />
       )}
 
-      {/* ── Advanced features (Paywall at bottom) ───────────────────────────────── */}
+      {/* ── Pharmacokinetic Analysis: Concentration, Half-life, Projections ──── */}
       {!isLoading && hasAnyProtocols && (
-        <div className="rounded-[20px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)] p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-                {isPt ? "Análise avançada" : "Advanced analysis"}
-              </p>
-              <p className="text-[13px] text-[hsl(var(--fg-2))]">
-                {isPt 
-                  ? "Concentração, meia-vida e projeções" 
-                  : "Concentration curves, half-life tracking, and projections"}
-              </p>
-            </div>
-            <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
-              <button className="rounded-full bg-[hsl(var(--brand))] px-4 py-2 text-[13px] font-medium text-white">
-                {isPt ? "Atualizar" : "Upgrade"}
-              </button>
-            </UpgradeGate>
-          </div>
-        </div>
+        <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
+          <SectionCard
+            title={isPt ? "Análise Farmacocinética" : "Pharmacokinetic Analysis"}
+            subtitle={isPt ? "Concentração, meia-vida e projeções" : "Concentration curves, half-life, and projections"}
+          >
+            <ConcentrationChart protocols={activeProtocols} />
+          </SectionCard>
+        </UpgradeGate>
       )}
 
       {/* ── Add/Edit Dialog ─────────────────────────────────────────────────── */}
