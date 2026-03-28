@@ -126,7 +126,7 @@ export default function AdminUserProfile() {
         <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">Failed to load profile</p>
         <p className="text-[13px] text-[hsl(var(--fg-2))]">{error}</p>
         <button
-          onClick={() => navigate('/AdminPanel')}
+          onClick={() => navigate('/AdminPanel/users')}
           className="mt-2 text-[13px] text-[hsl(var(--primary))] hover:underline"
         >
           ← Back to admin
@@ -154,7 +154,7 @@ export default function AdminUserProfile() {
         {/* Header */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/AdminPanel')}
+            onClick={() => navigate('/AdminPanel/users')}
             className="inline-flex items-center gap-1.5 text-[13px] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
