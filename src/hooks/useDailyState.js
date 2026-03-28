@@ -89,34 +89,36 @@ export function useDailyState() {
     staleTime: 60_000,
   });
 
-  // ── Body — last weight (for delta) ─────────────────────────────────────────
+  // ── Body — last weight (for delta, non-throwing) ────────────────────────────
   const { data: lastWeight } = useQuery({
     queryKey: DAILY_QUERY_KEYS.lastWeight(uid),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('measurements')
-        .select('*')
-        .eq('user_id', uid)
-        .order('date', { ascending: false })
-        .limit(2);
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data } = await supabase
+          .from('measurements')
+          .select('*')
+          .eq('user_id', uid)
+          .order('date', { ascending: false })
+          .limit(2);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!uid,
     staleTime: 120_000,
   });
 
-  // ── Protocols — active protocols + today's logs ────────────────────────────
+  // ── Protocols — active protocols + today's logs (non-throwing, graceful fallback) ──
   const { data: activeProtocols = [] } = useQuery({
     queryKey: DAILY_QUERY_KEYS.todayProtocols(uid),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('protocols')
-        .select('id, compound, name, frequency_per_week, active')
-        .eq('active', true)
-        .limit(20);
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data } = await supabase
+          .from('protocols')
+          .select('id, compound, name, frequency_per_week, active')
+          .eq('active', true)
+          .limit(20);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!uid,
     staleTime: 120_000,
@@ -125,30 +127,32 @@ export function useDailyState() {
   const { data: todayProtocolLogs = [] } = useQuery({
     queryKey: DAILY_QUERY_KEYS.todayLogs(uid),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('protocol_logs')
-        .select('protocol_id, taken_at')
-        .gte('taken_at', `${today}T00:00:00`)
-        .lte('taken_at', `${today}T23:59:59`)
-        .limit(50);
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data } = await supabase
+          .from('protocol_logs')
+          .select('protocol_id, taken_at')
+          .gte('taken_at', `${today}T00:00:00`)
+          .lte('taken_at', `${today}T23:59:59`)
+          .limit(50);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!uid,
     staleTime: 30_000,
   });
 
-  // ── Profile targets ────────────────────────────────────────────────────────
+  // ── Profile targets (non-throwing) ──────────────────────────────────────────
   const { data: profileData } = useQuery({
     queryKey: DAILY_QUERY_KEYS.profile(uid),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('profile_data')
-        .eq('id', uid)
-        .single();
-      if (error && error.code !== 'PGRST116') throw error;
-      return data?.profile_data ?? {};
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('profile_data')
+          .eq('id', uid)
+          .single();
+        return data?.profile_data ?? {};
+      } catch { return {}; }
     },
     enabled: !!uid,
     staleTime: 300_000,
