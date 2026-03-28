@@ -13,7 +13,7 @@ export default function AccountSettingsGuide() {
     >
       <h2>Personalizing Your Atlas Experience</h2>
       <p>
-        Atlas Core adapts to your preferences. From language to notifications, here's how to
+        atlas.core adapts to your preferences. From language to notifications, here's how to
         configure the app to work best for you.
       </p>
 

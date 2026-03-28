@@ -36,7 +36,7 @@ export default function UpgradePrompts() {
           </div>
           <h2 className="text-2xl font-bold mb-2">Upgrade to Premium</h2>
           <p className="text-[hsl(var(--fg-2))] text-sm">
-            Unlock the full power of Atlas Core
+            Unlock the full power of atlas.core
           </p>
         </div>
 

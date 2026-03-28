@@ -58,7 +58,7 @@ const SETUP_MESSAGES = [
   'Calculating your nutrition targets...',
   'Saving your first checkpoint...',
   'Setting up your dashboard...',
-  'Your Atlas Core is ready.',
+  'Your atlas.core is ready.',
 ];
 
 const TOTAL_STEPS = 4; // 0=welcome, 1=profile+goals, 2=first checkpoint, 3=path choice
@@ -664,7 +664,7 @@ function SetupGenerationScreen({ onDone }) {
           </motion.p>
         </AnimatePresence>
         {!done && (
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">Setting up your Atlas Core...</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">Setting up your atlas.core...</p>
         )}
       </div>
 
@@ -707,7 +707,7 @@ function SuccessScreen({ chosenPath, onDone }) {
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
           {isFresh
             ? 'Your first checkpoint is saved. Go to Today and start your first log of the day.'
-            : 'Your Atlas Core is ready. Explore the modules at your own pace.'}
+            : 'Your atlas.core is ready. Explore the modules at your own pace.'}
         </p>
       </motion.div>
 
@@ -959,7 +959,7 @@ export default function Onboarding() {
                 >
                   {saving
                     ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : <><Zap className="w-4 h-4" strokeWidth={2} /> Set up my Atlas Core</>
+                    : <><Zap className="w-4 h-4" strokeWidth={2} /> Set up my atlas.core</>
                   }
                 </button>
               )}

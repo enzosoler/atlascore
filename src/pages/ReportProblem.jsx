@@ -36,7 +36,7 @@ export default function ReportProblem() {
               <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-xl font-bold mb-2">Thank You!</h2>
               <p className="text-[hsl(var(--fg-2))] mb-6">
-                Your feedback helps us improve Atlas Core.
+                Your feedback helps us improve atlas.core.
               </p>
               <Button onClick={() => navigate('/settings')}>
                 Back to Settings

@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
 
         <div className="prose prose-neutral dark:prose-invert max-w-none">
           <p className="lead text-lg text-[hsl(var(--fg-2))]">
-            Atlas Core is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your personal information when you use our fitness application and related services.
+            atlas.core is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your personal information when you use our fitness application and related services.
           </p>
 
           <section className="mt-12">
@@ -74,7 +74,7 @@ export default function PrivacyPolicy() {
 
             <h3 className="mt-6 text-lg font-medium">Internal Review</h3>
             <p>
-              To maintain a safe and trusted environment, Atlas Core may review user-generated content—including photos—when necessary for:
+              To maintain a safe and trusted environment, atlas.core may review user-generated content—including photos—when necessary for:
             </p>
             <ul className="list-disc pl-6">
               <li>Safety and abuse prevention</li>
@@ -95,7 +95,7 @@ export default function PrivacyPolicy() {
           <section className="mt-12">
             <h2 className="text-2xl font-semibold">4. Data Sharing & Processors</h2>
             <p>
-              We do not sell your personal information. We share data only with trusted service providers who help us operate Atlas Core:
+              We do not sell your personal information. We share data only with trusted service providers who help us operate atlas.core:
             </p>
 
             <div className="mt-4 overflow-hidden rounded-lg border">
@@ -196,7 +196,7 @@ export default function PrivacyPolicy() {
           <section className="mt-12">
             <h2 className="text-2xl font-semibold">8. Children's Privacy</h2>
             <p>
-              Atlas Core is not intended for users under 16. We do not knowingly collect data from children. If you believe we have collected data from a minor, contact us immediately for deletion.
+              atlas.core is not intended for users under 16. We do not knowingly collect data from children. If you believe we have collected data from a minor, contact us immediately for deletion.
             </p>
           </section>
 

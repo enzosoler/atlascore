@@ -10,7 +10,7 @@ export default function TestimonialsSection() {
       name: 'Marcus Silva',
       role: 'Competitive Athlete',
       rating: 5,
-      text: 'Atlas Core transformed how I train. For the first time I can actually see progress over time, and comparing workouts from six months ago with today is incredibly motivating.',
+      text: 'atlas.core transformed how I train. For the first time I can actually see progress over time, and comparing workouts from six months ago with today is incredibly motivating.',
       avatar: '👨‍💼',
     },
     {
@@ -41,13 +41,13 @@ export default function TestimonialsSection() {
       <div className="max-w-5xl mx-auto px-5 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-[12px] font-semibold uppercase tracking-wider text-[hsl(var(--brand))] mb-2">
-            Trusted by Atlas Core users
+            Trusted by atlas.core users
           </p>
           <h2 className="text-3xl font-bold tracking-tight mb-3 text-[hsl(var(--fg))]">
             What our users say
           </h2>
           <p className="text-[16px] text-[hsl(var(--fg-2))] max-w-2xl mx-auto">
-            Athletes, coaches, nutritionists, and clinicians share how Atlas Core changed their workflow and results.
+            Athletes, coaches, nutritionists, and clinicians share how atlas.core changed their workflow and results.
           </p>
         </div>
 

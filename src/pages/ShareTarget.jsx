@@ -2,7 +2,7 @@
  * ShareTarget — Handles incoming content from the OS Share Menu
  *
  * When a user sees a workout or recipe video on Instagram and taps "Share" →
- * selects Atlas Core, the PWA receives the shared URL/text/files here.
+ * selects atlas.core, the PWA receives the shared URL/text/files here.
  *
  * This page:
  *   1. Reads the shared data from URL params (GET) or FormData (POST)

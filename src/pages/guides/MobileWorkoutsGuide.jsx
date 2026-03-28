@@ -13,7 +13,7 @@ export default function MobileWorkoutsGuide() {
     >
       <h2>Mobile-First Design</h2>
       <p>
-        Atlas Core is designed for the gym. Every feature works seamlessly on mobile,
+        atlas.core is designed for the gym. Every feature works seamlessly on mobile,
         from logging sets to reviewing plans. Here's how to get the most from mobile training.
       </p>
 

@@ -34,7 +34,7 @@ export default function Referral() {
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[hsl(var(--accent-primary))] to-[hsl(var(--accent-secondary))] flex items-center justify-center mx-auto mb-4">
               <Gift className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Share Atlas Core</h2>
+            <h2 className="text-2xl font-bold mb-2">Share atlas.core</h2>
             <p className="text-[hsl(var(--fg-2))]">
               Invite friends and earn free Premium time
             </p>

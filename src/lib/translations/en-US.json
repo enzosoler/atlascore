@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Atlas Core",
+    "appName": "atlas.core",
     "back": "← Back to app",
     "continue": "Continue",
     "cancel": "Cancel",
@@ -30,14 +30,14 @@
     },
     "login": {
       "title": "Welcome back",
-      "subtitle": "Signing you in to Atlas Core…",
+      "subtitle": "Signing you in to atlas.core…",
       "noAccount": "Don't have an account yet?",
       "createAccount": "Create free account",
       "forgotPassword": "Forgot my password"
     },
     "signup": {
       "title": "Start your progress",
-      "subtitle": "Creating your Atlas Core access…",
+      "subtitle": "Creating your atlas.core access…",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in"
     },
@@ -57,7 +57,7 @@
       "cancel": "Cancel anytime"
     },
     "backHome": "← Back to home",
-    "footer": "© 2026 Atlas Core. All rights reserved."
+    "footer": "© 2026 atlas.core. All rights reserved."
   },
   "landing": {
     "nav": {
@@ -117,7 +117,7 @@
     "solution": {
       "label": "The Real Solution",
       "title": "Centralizing everything\nchanges how you see progress.",
-      "subtitle": "Atlas Core isn't another app. It's the operating system that brings together training, nutrition, labs, measurements, and protocols in one view. Real history. Real context. Data that actually matters.",
+      "subtitle": "atlas.core isn't another app. It's the operating system that brings together training, nutrition, labs, measurements, and protocols in one view. Real history. Real context. Data that actually matters.",
       "gains": {
         "dashboard": {
           "title": "Your entire dashboard",
@@ -151,7 +151,7 @@
       "subtitle": "If you measure by data, not feeling. If you want to know exactly what works.",
       "athlete": {
         "title": "Athlete & enthusiast",
-        "desc": "You train consistently, nail your diet, check your labs. But it's all scattered. Atlas Core brings it together.",
+        "desc": "You train consistently, nail your diet, check your labs. But it's all scattered. atlas.core brings it together.",
         "features": [
           "Complete workout + nutrition logging",
           "Progress tracking with photos & measurements",
@@ -291,12 +291,12 @@
       "title": "Frequently asked",
       "items": [
         {
-          "q": "Does Atlas Core replace my coach or nutritionist?",
-          "a": "No. Atlas Core organizes your data and makes working with professionals easier — it doesn't replace them. Actually, it works best with a coach or doctor on your team. You both see the same data. No screenshots needed."
+          "q": "Does atlas.core replace my coach or nutritionist?",
+          "a": "No. atlas.core organizes your data and makes working with professionals easier — it doesn't replace them. Actually, it works best with a coach or doctor on your team. You both see the same data. No screenshots needed."
         },
         {
           "q": "Can I use it with my coach, nutritionist, and doctor at once?",
-          "a": "Absolutely. Atlas Core is built for this. Each professional sees only what you allow them to see. Everyone views your real history together."
+          "a": "Absolutely. atlas.core is built for this. Each professional sees only what you allow them to see. Everyone views your real history together."
         },
         {
           "q": "What's included in the Free plan?",
@@ -312,7 +312,7 @@
         },
         {
           "q": "Does it work on mobile?",
-          "a": "100%. Atlas Core is fully responsive and optimized for iOS and Android. Same experience logging and tracking on your phone as desktop."
+          "a": "100%. atlas.core is fully responsive and optimized for iOS and Android. Same experience logging and tracking on your phone as desktop."
         },
         {
           "q": "Can I export my data?",
@@ -328,7 +328,7 @@
         },
         {
           "q": "What if I already have a plan from my coach?",
-          "a": "Perfect. Log it into Atlas Core, mark it as prescribed, and track your adherence vs. the plan. Your coach sees everything and adjusts when needed."
+          "a": "Perfect. Log it into atlas.core, mark it as prescribed, and track your adherence vs. the plan. Your coach sees everything and adjusts when needed."
         },
         {
           "q": "How does Atlas build insights for me?",
@@ -342,7 +342,7 @@
       "noCard": "No credit card · No commitment · Free history forever"
     },
     "footer": {
-      "copyright": "© 2026 Atlas Core. All rights reserved."
+      "copyright": "© 2026 atlas.core. All rights reserved."
     }
   },
   "pricing_page": {
@@ -473,7 +473,7 @@
   },
   "onboarding": {
     "welcome": {
-      "title": "Welcome to Atlas Core",
+      "title": "Welcome to atlas.core",
       "subtitle": "Let's set up your app. Takes less than 2 minutes.",
       "benefits": [
         {
@@ -635,10 +635,10 @@
     "setup": {
       "analyzing": "Analyzing your goals...",
       "building": "Building your personalized dashboard...",
-      "configuring": "Set up my Atlas Core",
+      "configuring": "Set up my atlas.core",
       "calculating": "Computing your nutrition targets...",
       "preparing": "Preparing your timeline...",
-      "ready": "Your Atlas Core is ready.",
+      "ready": "Your atlas.core is ready.",
       "enter": "Enter the app"
     }
   },
@@ -680,7 +680,7 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Personalize your Atlas Core experience.",
+    "subtitle": "Personalize your atlas.core experience.",
     "account": {
       "title": "Account",
       "subtitle": "Your current account information.",

@@ -9,7 +9,7 @@ const STEPS = [
   'Calculating nutrition targets...',
   'Creating personalized workout plan...',
   'Optimizing for your goals...',
-  'Your Atlas Core is ready!',
+  'Your atlas.core is ready!',
 ];
 
 export default function ValueCreation() {

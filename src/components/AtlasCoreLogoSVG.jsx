@@ -10,7 +10,7 @@ export default function AtlasCoreLogoSVG({
   height = 24,
   className = '',
   color = 'currentColor',
-  alt = 'Atlas Core',
+  alt = 'atlas.core',
 }) {
   return (
     <svg

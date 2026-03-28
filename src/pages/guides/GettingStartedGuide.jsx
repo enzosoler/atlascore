@@ -4,16 +4,16 @@ import BlogPostLayout from '@/components/content/BlogPostLayout';
 export default function GettingStartedGuide() {
   return (
     <BlogPostLayout
-      title="Getting Started with Atlas Core"
+      title="Getting Started with atlas.core"
       excerpt="A complete guide to getting started — create your account, finish onboarding, and understand the dashboard in five minutes."
       publishedAt="2026-03-17"
       readingTime={5}
       author="Team Atlas"
       breadcrumb={{ href: '/help', label: 'Help Center' }}
     >
-      <h2>Welcome to Atlas Core</h2>
+      <h2>Welcome to atlas.core</h2>
       <p>
-        Atlas Core is your unified platform for tracking training, nutrition, and health.
+        atlas.core is your unified platform for tracking training, nutrition, and health.
         Whether you are an athlete, coach, nutritionist, or clinician, Atlas gives you professional tools
         to follow progress with precision.
       </p>
@@ -42,7 +42,7 @@ export default function GettingStartedGuide() {
 
       <h2>Step 3: Understand the Dashboard (Today)</h2>
       <p>
-        After onboarding, you land on your "Today" dashboard. This is the center of Atlas Core.
+        After onboarding, you land on your "Today" dashboard. This is the center of atlas.core.
       </p>
 
       <h3>Daily Check-in</h3>

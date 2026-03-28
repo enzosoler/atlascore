@@ -135,7 +135,7 @@ export default function AdminLayout() {
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 flex-col border-r bg-card lg:flex">
         <div className="flex h-16 items-center border-b px-6">
-          <span className="text-lg font-semibold">Atlas Core Admin</span>
+          <span className="text-lg font-semibold">atlas.core Admin</span>
         </div>
 
         <nav className="flex-1 space-y-1 p-4">
@@ -213,7 +213,7 @@ function MobileSidebar({ navItems, onLogout, isModerationMode }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center border-b px-6">
-        <span className="text-lg font-semibold">Atlas Core Admin</span>
+        <span className="text-lg font-semibold">atlas.core Admin</span>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {navItems.map((item) => (

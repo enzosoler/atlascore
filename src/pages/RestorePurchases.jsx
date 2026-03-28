@@ -33,7 +33,7 @@ export default function RestorePurchases() {
           
           <h2 className="text-xl font-bold mb-2">Restore Your Purchases</h2>
           <p className="text-[hsl(var(--fg-2))] mb-6">
-            If you've previously purchased Atlas Core Premium, tap below to restore your access.
+            If you've previously purchased atlas.core Premium, tap below to restore your access.
           </p>
 
           <Button onClick={handleRestore} className="w-full mb-4">

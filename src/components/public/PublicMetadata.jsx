@@ -1,8 +1,8 @@
 import React from 'react';
 
-const DEFAULT_TITLE = 'Atlas Core';
+const DEFAULT_TITLE = 'atlas.core';
 const DEFAULT_DESCRIPTION =
-  'Atlas Core is the performance operating system for training, nutrition, measurements, and real-world progress.';
+  'atlas.core is the performance operating system for training, nutrition, measurements, and real-world progress.';
 const DEFAULT_ROBOTS = 'index,follow';
 
 function upsertMeta({ name, property, content }) {

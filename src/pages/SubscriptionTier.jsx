@@ -51,7 +51,7 @@ export default function SubscriptionTier() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-2">Choose Your Plan</h2>
-            <p className="text-[hsl(var(--fg-2))]">Unlock the full power of Atlas Core</p>
+            <p className="text-[hsl(var(--fg-2))]">Unlock the full power of atlas.core</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-4">

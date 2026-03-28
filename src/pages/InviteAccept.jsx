@@ -95,7 +95,7 @@ export default function InviteAccept() {
               <p className="mt-2 t-caption">
                 {isLoadingAuth || state === 'redeeming'
                   ? 'Activating your access…'
-                  : 'Sign up or sign in to accept your invitation to Atlas Core beta.'}
+                  : 'Sign up or sign in to accept your invitation to atlas.core beta.'}
               </p>
             </div>
             {(isLoadingAuth || state === 'redeeming') && (
@@ -108,7 +108,7 @@ export default function InviteAccept() {
           <>
             <CheckCircle2 className="w-10 h-10 mx-auto text-[hsl(var(--ok))]" />
             <div>
-              <p className="text-[17px] font-semibold text-[hsl(var(--fg))]">Welcome to Atlas Core!</p>
+              <p className="text-[17px] font-semibold text-[hsl(var(--fg))]">Welcome to atlas.core!</p>
               <p className="mt-1 t-caption">Full access activated. Redirecting you now…</p>
             </div>
           </>

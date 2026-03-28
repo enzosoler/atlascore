@@ -209,6 +209,9 @@ function TodayContent() {
   // ── Shared daily state (single source of truth) ──────────────────────────
   const daily = useDailyState();
 
+  // ── AI coaching engine ──────────────────────────────────────────────────
+  const ai = useAICoach({ userId: user?.id });
+
   // ── Stripe checkout completion ────────────────────────────────────────────
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
@@ -229,7 +232,7 @@ function TodayContent() {
         );
         const data = await res.json();
         if (data?.success) {
-          toast.success('Subscription activated! Welcome to Atlas Core Pro.');
+          toast.success('Subscription activated! Welcome to atlas.core Pro.');
           trackEvent('payment_success', { user_id: user?.id, plan: data.plan });
           queryClient.invalidateQueries({ queryKey: ['subscription-supabase'] });
         } else {
@@ -340,22 +343,29 @@ function TodayContent() {
   // ── Derived values ────────────────────────────────────────────────────────
   const isLoading = daily.isLoading || planLoading || measurementsLoading;
 
-  const briefing = useMemo(
+  // Rules-based fallbacks (used when AI engine hasn't returned yet)
+  const rulesBriefing = useMemo(
     () => buildBriefing({ todaySession, todayMeals, activeWorkoutPlan, profile, preferredName, totalKcal }),
     [todaySession, todayMeals, activeWorkoutPlan, profile, preferredName, totalKcal]
   );
-
-  const alerts = useMemo(
+  const rulesAlerts = useMemo(
     () => buildAlerts({ todaySession, todayMeals, recentMeasurements, lastWorkout }),
     [todaySession, todayMeals, recentMeasurements, lastWorkout]
   );
-
-  const recommendations = useMemo(
+  const rulesRecommendations = useMemo(
     () => buildRecommendations({
       todaySession, todayMeals, activeWorkoutPlan, recentMeasurements, profile, progressPhotos,
     }),
     [todaySession, todayMeals, activeWorkoutPlan, recentMeasurements, profile, progressPhotos]
   );
+
+  // AI output when available, rules-based fallback when not
+  const briefing = ai.briefing
+    ? { text: ai.briefing.body, focus: ai.briefing.focus, primaryAction: null, secondaryAction: null }
+    : rulesBriefing;
+  const priorities = ai.priorities ?? [];
+  const alerts = rulesAlerts; // alerts are always rules-based (time-sensitive, need fresh data)
+  const recommendations = ai.recommendations.length > 0 ? ai.recommendations : rulesRecommendations;
 
   // ── AI plan generation ────────────────────────────────────────────────────
   const handleAIGenerate = async (answers) => {
@@ -442,11 +452,44 @@ function TodayContent() {
         loading={isLoading}
       />
 
+      {/* 2b — Priorities: top 1-3 next actions from AI */}
+      {priorities.length > 0 && (
+        <div className="space-y-2">
+          {priorities.map((p, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                const routes = {
+                  open_quick_meal: ROUTES.nutrition,
+                  start_workout: ROUTES.workouts,
+                  open_nutrition: ROUTES.nutrition,
+                  open_progress: ROUTES.progress,
+                  log_dose: ROUTES.protocols,
+                };
+                if (p.action === 'log_weight' || p.action === 'open_water_sheet') {
+                  setCheckinOpen(true);
+                } else if (routes[p.action]) {
+                  navigate(routes[p.action]);
+                }
+              }}
+              className="w-full flex items-center gap-3 rounded-[14px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.06)] px-4 py-3 text-left active:bg-[hsl(var(--brand)/0.12)] transition-colors"
+            >
+              <div className="w-8 h-8 rounded-[10px] bg-[hsl(var(--brand)/0.15)] flex items-center justify-center text-[hsl(var(--brand))]">
+                <span className="text-[13px] font-bold">{i + 1}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{p.title}</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))] mt-0.5">{p.reason}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* 3 — Readiness Row: Sleep / Energy / Recovery / Water */}
       <ReadinessRow
         signals={{}}
         onSignalSave={(key, value) => {
-          // TODO: persist to daily checkin
           toast.success(`${key}: ${value} saved`);
         }}
       />
@@ -485,6 +528,8 @@ function TodayContent() {
       {/* 8 — AI Recommendations: below fold, max 3, high signal only */}
       <AIRecommendations
         recommendations={recommendations}
+        onFollow={ai.followRec}
+        onDismiss={ai.dismissRec}
       />
 
       {/* Modals */}

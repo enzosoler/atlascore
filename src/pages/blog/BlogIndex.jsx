@@ -163,7 +163,7 @@ export default function BlogIndex() {
       }
     >
       <PublicMetadata
-        title={`Blog — Atlas Core`}
+        title={`Blog — atlas.core`}
         description={ui.description}
         canonicalPath={ROUTES.blog}
       />

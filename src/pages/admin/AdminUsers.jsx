@@ -419,7 +419,7 @@ export default function AdminUsers() {
             </DialogTitle>
             <DialogDescription>
               You are about to suspend {selectedUser?.email}. This will immediately block 
-              access to Atlas Core and preserve all user data.
+              access to atlas.core and preserve all user data.
             </DialogDescription>
           </DialogHeader>
 

@@ -85,8 +85,8 @@ export default function BlogPost() {
         actions={<BlogActions />}
       >
         <PublicMetadata
-          title="Blog Post Not Found — Atlas Core"
-          description="The requested Atlas Core blog post could not be found."
+          title="Blog Post Not Found — atlas.core"
+          description="The requested atlas.core blog post could not be found."
           canonicalPath={ROUTES.blog}
           robots="noindex,nofollow"
         />
@@ -121,7 +121,7 @@ export default function BlogPost() {
       actions={<BlogActions />}
     >
       <PublicMetadata
-        title={`${post.title} — Atlas Core`}
+        title={`${post.title} — atlas.core`}
         description={post.excerpt}
         canonicalPath={`${ROUTES.blog}/${post.slug}`}
         type="article"

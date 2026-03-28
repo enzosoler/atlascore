@@ -122,7 +122,7 @@ const ALL_GUIDES = [
   // Getting Started
   {
     title: 'How to create your account and start tracking',
-    excerpt: 'Complete onboarding, set up your profile, and understand how Atlas Core organizes your routine from day one.',
+    excerpt: 'Complete onboarding, set up your profile, and understand how atlas.core organizes your routine from day one.',
     readingTime: 5,
     icon: BookOpen,
     href: '/guides/getting-started',
@@ -267,7 +267,7 @@ const GUIDE_CATEGORIES = [
 // Expanded FAQ items
 const FAQ_ITEMS = [
   {
-    q: 'How much does Atlas Core cost?',
+    q: 'How much does atlas.core cost?',
     a: 'There is a free plan to get started, plus paid tiers for richer insights, exports, reports, AI features, and professional workflows. See our pricing page for a full comparison.',
   },
   {
@@ -284,7 +284,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Does the product work on mobile?',
-    a: 'Yes. Atlas Core is designed for both desktop and mobile with the same visual language and navigational clarity. Perfect for logging at the gym.',
+    a: 'Yes. atlas.core is designed for both desktop and mobile with the same visual language and navigational clarity. Perfect for logging at the gym.',
   },
   {
     q: 'Can I use Atlas without a coach?',
@@ -300,7 +300,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I share data with a coach or nutritionist?',
-    a: 'Yes. Atlas Core keeps your complete training history accessible to both athletes and professionals, without relying on scattered screenshots.',
+    a: 'Yes. atlas.core keeps your complete training history accessible to both athletes and professionals, without relying on scattered screenshots.',
   },
   {
     q: 'Can I export my data?',
@@ -379,8 +379,8 @@ export default function HelpCenter() {
       )}
     >
       <PublicMetadata
-        title="Help Center — Atlas Core"
-        description="Comprehensive guides and support for Atlas Core. Learn how to track workouts, use AI features, manage nutrition, and get the most from your training."
+        title="Help Center — atlas.core"
+        description="Comprehensive guides and support for atlas.core. Learn how to track workouts, use AI features, manage nutrition, and get the most from your training."
         canonicalPath={ROUTES.help}
       />
 

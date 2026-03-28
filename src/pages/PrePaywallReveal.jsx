@@ -32,7 +32,7 @@ export default function PrePaywallReveal() {
             </div>
             <h1 className="text-3xl font-bold mb-2">Unlock Your Transformation</h1>
             <p className="text-[hsl(var(--fg-2))]">
-              Join thousands who achieved their goals with Atlas Core Premium
+              Join thousands who achieved their goals with atlas.core Premium
             </p>
           </div>
 

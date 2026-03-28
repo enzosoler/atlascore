@@ -7,7 +7,7 @@ const supabaseKey =
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn(
-    '[Atlas Core] Supabase env vars are missing.\n' +
+    '[atlas.core] Supabase env vars are missing.\n' +
     'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local\n' +
     'Food logging and profile role lookups will not work until these are set.'
   );

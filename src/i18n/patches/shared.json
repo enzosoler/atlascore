@@ -74,7 +74,7 @@
       "trialBanner": {
         "daysRemaining": "Performance trial — {days} day{plural} remaining",
         "endsToday": "Your trial ends today",
-        "keepWorkflow": "Keep your current workflow and retain access to the full Atlas Core workspace.",
+        "keepWorkflow": "Keep your current workflow and retain access to the full atlas.core workspace.",
         "subscribeNow": "Subscribe now",
         "closeBanner": "Close banner"
       },
@@ -85,7 +85,7 @@
         "msg4": "Calculating your nutrition targets...",
         "msg5": "Preparing your timeline...",
         "msg6": "Everything is ready.",
-        "settingUp": "Atlas Core is setting up...",
+        "settingUp": "atlas.core is setting up...",
         "buttonLabel": "Continue"
       },
       "adherence": {
@@ -169,7 +169,7 @@
       "trialBanner": {
         "daysRemaining": "Período de teste — {days} dia{plural} restante{plural}",
         "endsToday": "Seu período de teste termina hoje",
-        "keepWorkflow": "Mantenha seu fluxo de trabalho atual e acesso completo ao Atlas Core.",
+        "keepWorkflow": "Mantenha seu fluxo de trabalho atual e acesso completo ao atlas.core.",
         "subscribeNow": "Assinar agora",
         "closeBanner": "Fechar banner"
       },
@@ -180,7 +180,7 @@
         "msg4": "Calculando suas metas nutricionais...",
         "msg5": "Preparando sua linha do tempo...",
         "msg6": "Tudo está pronto.",
-        "settingUp": "Atlas Core está configurando...",
+        "settingUp": "atlas.core está configurando...",
         "buttonLabel": "Continuar"
       },
       "adherence": {

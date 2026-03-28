@@ -103,7 +103,7 @@ export default function AdminErrors() {
         body: {
           type: 'custom',
           to: profile?.email || user?.email,
-          subject: `[Atlas Core] Error spike detected — ${recentErrors.length} errors in last hour`,
+          subject: `[atlas.core] Error spike detected — ${recentErrors.length} errors in last hour`,
           body: `${recentErrors.length} errors logged in the last hour.\n\nLatest: ${recentErrors[0]?.message}\n\nCheck the admin panel for details.`,
         },
       }).catch(() => null); // fire-and-forget, ignore if not supported

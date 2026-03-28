@@ -67,11 +67,11 @@
 
 	<!-- Camera Permission (for food vision / barcode scanning) -->
 	<key>NSCameraUsageDescription</key>
-	<string>Atlas Core uses your camera to scan food items and barcodes for nutrition tracking.</string>
+	<string>atlas.core uses your camera to scan food items and barcodes for nutrition tracking.</string>
 
 	<!-- Photo Library Permission (for social sharing cards) -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Atlas Core needs access to your photos to save and share your progress cards.</string>
+	<string>atlas.core needs access to your photos to save and share your progress cards.</string>
 
 	<!-- Status bar style -->
 	<key>UIStatusBarStyle</key>

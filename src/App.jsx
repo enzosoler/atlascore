@@ -472,8 +472,8 @@ function App() {
                   </Router>
                   <Toaster />
                   <Sonner richColors position="top-right" />
-                  <Analytics />
-                  <SpeedInsights />
+                  {!Capacitor.isNativePlatform() && <Analytics />}
+                  {!Capacitor.isNativePlatform() && <SpeedInsights />}
                 </DailyStoreProvider>
               </SubscriptionProvider>
             </QueryClientProvider>

@@ -25,7 +25,7 @@ export default function RateApp() {
         >
           <div className="text-6xl mb-4">🎉</div>
           <h2 className="text-2xl font-bold mb-2">Thank You!</h2>
-          <p className="text-[hsl(var(--fg-2))] mb-6">Your feedback helps us improve Atlas Core.</p>
+          <p className="text-[hsl(var(--fg-2))] mb-6">Your feedback helps us improve atlas.core.</p>
           <Button onClick={() => navigate('/today')}>Continue</Button>
         </motion.div>
       </div>
@@ -43,7 +43,7 @@ export default function RateApp() {
           <div className="w-16 h-16 rounded-full bg-[hsl(var(--accent-primary))]/10 flex items-center justify-center mx-auto mb-4">
             <Star className="w-8 h-8 text-[hsl(var(--accent-primary))]" />
           </div>
-          <h2 className="text-xl font-bold mb-2">Enjoying Atlas Core?</h2>
+          <h2 className="text-xl font-bold mb-2">Enjoying atlas.core?</h2>
           <p className="text-sm text-[hsl(var(--fg-2))]">Rate your experience</p>
         </div>
 

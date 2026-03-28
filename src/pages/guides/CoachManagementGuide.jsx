@@ -5,7 +5,7 @@ export default function CoachManagementGuide() {
   return (
     <BlogPostLayout
       title="For Coaches: How to Manage Client Training"
-      excerpt="Guide for coaches on managing athlete plans, reviewing logs, and sharing feedback through Atlas Core."
+      excerpt="Guide for coaches on managing athlete plans, reviewing logs, and sharing feedback through atlas.core."
       publishedAt="2026-03-26"
       readingTime={10}
       author="Team Atlas"
@@ -13,7 +13,7 @@ export default function CoachManagementGuide() {
     >
       <h2>Atlas for Coaching Professionals</h2>
       <p>
-        Atlas Core includes professional features designed for coaches, trainers, and nutritionists
+        atlas.core includes professional features designed for coaches, trainers, and nutritionists
         who manage multiple clients. This guide covers the complete workflow from client onboarding
         to ongoing program management.
       </p>

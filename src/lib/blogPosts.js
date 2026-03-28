@@ -19,7 +19,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Tools'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'tracking',
     featured: false,
   },
@@ -36,7 +36,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Tracking'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'measurements',
     featured: true,
   },
@@ -53,7 +53,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Mindset'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'planning',
     featured: false,
   },
@@ -70,7 +70,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Training'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'workout',
     featured: false,
   },
@@ -87,7 +87,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Tools'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'tracking',
     featured: false,
   },
@@ -104,7 +104,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Mindset'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'planning',
     featured: false,
   },
@@ -121,7 +121,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Tracking'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'tracking',
     featured: false,
   },
@@ -138,7 +138,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Nutrition'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'nutrition',
     featured: false,
   },
@@ -155,7 +155,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Tracking'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'tracking',
     featured: false,
   },
@@ -172,7 +172,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'Nutrition'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'nutrition',
     featured: false,
   },
@@ -189,7 +189,7 @@ export const BLOG_POSTS = [
     category: {
       'en-US': 'AI Training'
     },
-    author: 'Atlas Core',
+    author: 'atlas.core',
     ctaType: 'workout',
     featured: true,
   },
@@ -234,9 +234,9 @@ Most apps fail at least two of these. Here's the list.
 
 ---
 
-## 1. Atlas Core — The All-in-One Performance System
+## 1. atlas.core — The All-in-One Performance System
 
-Atlas Core was built specifically to solve the fragmentation problem. Instead of using one app for workouts, another for macros, a spreadsheet for measurements, and your camera roll for progress photos, everything lives in one system with shared context.
+atlas.core was built specifically to solve the fragmentation problem. Instead of using one app for workouts, another for macros, a spreadsheet for measurements, and your camera roll for progress photos, everything lives in one system with shared context.
 
 **Where it excels:** workout logging + nutrition + supplement management + body measurements + progress photos + lab tracking + data-driven insights that connect all of it. It's the only app on this list where your food choices, training load, supplement protocol, and body composition history inform each other.
 

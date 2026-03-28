@@ -13,7 +13,7 @@ export default function TermsOfService() {
 
         <div className="prose prose-neutral dark:prose-invert max-w-none">
           <p className="lead text-lg text-muted-foreground">
-            Welcome to Atlas Core. These Terms of Service govern your access to and use of our fitness application, website, and related services. By creating an account or using Atlas Core, you agree to these Terms.
+            Welcome to atlas.core. These Terms of Service govern your access to and use of our fitness application, website, and related services. By creating an account or using atlas.core, you agree to these Terms.
           </p>
 
           <section className="mt-12">
@@ -21,7 +21,7 @@ export default function TermsOfService() {
 
             <h3 className="mt-6 text-lg font-medium">Eligibility</h3>
             <p>
-              You must be at least 16 years old to use Atlas Core. By registering, you represent that you meet this requirement and that all information you provide is accurate and complete.
+              You must be at least 16 years old to use atlas.core. By registering, you represent that you meet this requirement and that all information you provide is accurate and complete.
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Account Security</h3>
@@ -66,7 +66,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold">3. Acceptable Use</h2>
 
             <h3 className="mt-6 text-lg font-medium">Prohibited Activities</h3>
-            <p>You may not use Atlas Core to:</p>
+            <p>You may not use atlas.core to:</p>
             <ul className="list-disc pl-6">
               <li>Harass, abuse, or threaten other users</li>
               <li>Upload illegal, harmful, or sexually explicit content</li>
@@ -80,7 +80,7 @@ export default function TermsOfService() {
 
             <h3 className="mt-6 text-lg font-medium">Health Disclaimers</h3>
             <p>
-              Atlas Core provides fitness guidance but is not a medical service. Consult healthcare professionals before beginning any exercise program. We are not liable for injuries or health issues arising from your use of the app.
+              atlas.core provides fitness guidance but is not a medical service. Consult healthcare professionals before beginning any exercise program. We are not liable for injuries or health issues arising from your use of the app.
             </p>
           </section>
 
@@ -89,7 +89,7 @@ export default function TermsOfService() {
 
             <h3 className="mt-6 text-lg font-medium">Your Content</h3>
             <p>
-              You retain ownership of photos, posts, and other content you upload. By uploading content, you grant Atlas Core a limited license to store, display, and process it solely to operate and improve our services.
+              You retain ownership of photos, posts, and other content you upload. By uploading content, you grant atlas.core a limited license to store, display, and process it solely to operate and improve our services.
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Content Representations</h3>
@@ -111,7 +111,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold">5. Moderation & Enforcement</h2>
 
             <h3 className="mt-6 text-lg font-medium">Our Rights</h3>
-            <p>Atlas Core may, at our discretion:</p>
+            <p>atlas.core may, at our discretion:</p>
             <ul className="list-disc pl-6">
               <li>Review user-generated content for policy compliance</li>
               <li>Remove content that violates our guidelines</li>
@@ -137,12 +137,12 @@ export default function TermsOfService() {
 
             <h3 className="mt-6 text-lg font-medium">Our Rights</h3>
             <p>
-              Atlas Core and its content (excluding user-generated content) are protected by copyright, trademark, and other laws. You may not copy, modify, or distribute our materials without written permission.
+              atlas.core and its content (excluding user-generated content) are protected by copyright, trademark, and other laws. You may not copy, modify, or distribute our materials without written permission.
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Feedback</h3>
             <p>
-              Suggestions or feedback you provide may be used by Atlas Core without compensation or attribution.
+              Suggestions or feedback you provide may be used by atlas.core without compensation or attribution.
             </p>
           </section>
 
@@ -165,7 +165,7 @@ export default function TermsOfService() {
 
             <h3 className="mt-6 text-lg font-medium">Effect of Termination</h3>
             <p>
-              Upon termination, your access to Atlas Core ceases immediately. Provisions regarding liability, indemnification, and dispute resolution survive termination.
+              Upon termination, your access to atlas.core ceases immediately. Provisions regarding liability, indemnification, and dispute resolution survive termination.
             </p>
           </section>
 
@@ -174,12 +174,12 @@ export default function TermsOfService() {
 
             <h3 className="mt-6 text-lg font-medium">As-Is Basis</h3>
             <p>
-              Atlas Core is provided "as is" without warranties of any kind, express or implied. We do not guarantee uninterrupted, error-free service.
+              atlas.core is provided "as is" without warranties of any kind, express or implied. We do not guarantee uninterrupted, error-free service.
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Limitation of Liability</h3>
             <p>
-              To the maximum extent permitted by law, Atlas Core and its affiliates shall not be liable for:
+              To the maximum extent permitted by law, atlas.core and its affiliates shall not be liable for:
             </p>
             <ul className="list-disc pl-6">
               <li>Indirect, incidental, or consequential damages</li>
@@ -197,7 +197,7 @@ export default function TermsOfService() {
           <section className="mt-12">
             <h2 className="text-2xl font-semibold">9. Indemnification</h2>
             <p>
-              You agree to indemnify and hold harmless Atlas Core from claims arising from:
+              You agree to indemnify and hold harmless atlas.core from claims arising from:
             </p>
             <ul className="list-disc pl-6">
               <li>Your use of the service</li>
@@ -231,7 +231,7 @@ export default function TermsOfService() {
 
             <h3 className="mt-6 text-lg font-medium">Entire Agreement</h3>
             <p>
-              These Terms constitute the entire agreement between you and Atlas Core regarding the service.
+              These Terms constitute the entire agreement between you and atlas.core regarding the service.
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Severability</h3>

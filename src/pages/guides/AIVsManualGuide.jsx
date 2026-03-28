@@ -13,7 +13,7 @@ export default function AIVsManualGuide() {
     >
       <h2>AI and Manual: Complementary Approaches</h2>
       <p>
-        Atlas Core is designed with flexibility in mind. AI accelerates planning and provides
+        atlas.core is designed with flexibility in mind. AI accelerates planning and provides
         guidance, but manual tracking remains essential for learning, autonomy, and specific
         situations. Understanding when to use each approach maximizes your results.
       </p>
