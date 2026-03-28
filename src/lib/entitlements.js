@@ -163,7 +163,7 @@ export const PLAN_LEVELS = {
  * @param {string} feature - Feature key to check
  */
 export function hasFeatureAccess(user, subscription, overrides, feature) {
-  if (user?.atlas_role === 'admin') return true;
+  if (user?.atlas_role === 'admin' || user?.atlas_role === 'beta_tester') return true;
 
   const lock = FEATURE_LOCKS[feature];
   if (!lock) return true; // unknown feature = allow
@@ -176,9 +176,6 @@ export function hasFeatureAccess(user, subscription, overrides, feature) {
   if (lock.roles && !lock.roles.includes(user?.atlas_role)) {
     return false;
   }
-
-  // Beta testers get all non-role-gated features
-  if (user?.atlas_role === 'beta_tester') return true;
 
   // Plan-based features
   const userPlanCode = subscription?.tier || subscription?.plan_code || 'free';
