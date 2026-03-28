@@ -215,14 +215,6 @@ const RequireAuthenticatedApp = () => {
   const { authError, isAuthenticated, authState, user } = useAuth();
   const location = useLocation();
 
-  // Hide native splash once auth resolves — small delay lets WebView paint first
-  useEffect(() => {
-    if (authState !== 'loading' && Capacitor.isNativePlatform()) {
-      const t = setTimeout(() => CapSplash.hide({ fadeOutDuration: 300 }), 150);
-      return () => clearTimeout(t);
-    }
-  }, [authState]);
-
   if (authState === 'loading') {
     return <AppBootstrap />;
   }
@@ -438,13 +430,23 @@ const AppRoutes = () => (
 );
 
 const AuthenticatedApp = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, authState } = useAuth();
 
   React.useEffect(() => {
     captureReferralParams();
   }, []);
 
   useReferralTracking(user);
+
+  // Hide native splash as soon as auth resolves — fires regardless of which route is active.
+  // Previously this was in RequireAuthenticatedApp, which is only mounted on authenticated
+  // routes. Unauthenticated users routed to /welcome never triggered it.
+  useEffect(() => {
+    if (authState !== 'loading' && Capacitor.isNativePlatform()) {
+      const t = setTimeout(() => CapSplash.hide({ fadeOutDuration: 300 }), 150);
+      return () => clearTimeout(t);
+    }
+  }, [authState]);
 
   return (
     <>

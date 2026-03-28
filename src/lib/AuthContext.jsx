@@ -118,9 +118,16 @@ export const AuthProvider = ({ children }) => {
 
     let profileRole = normalizedUser?.atlas_role || 'athlete';
     try {
-      profileRole = await fetchProfileRole(authUser?.id, profileRole);
+      // Hard 3 s timeout — on slow mobile networks this query can hang indefinitely,
+      // keeping authState at 'loading' forever and preventing the splash from hiding.
+      profileRole = await Promise.race([
+        fetchProfileRole(authUser?.id, profileRole),
+        new Promise((_, reject) =>
+          window.setTimeout(() => reject(new Error('Profile role fetch timeout')), 3000)
+        ),
+      ]);
     } catch (e) {
-      console.warn('[AuthContext] Profile role fetch failed, using fallback:', e);
+      console.warn('[AuthContext] Profile role fetch failed, using fallback:', e.message);
     }
 
     const resolvedUser = {
