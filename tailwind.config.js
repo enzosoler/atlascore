@@ -4,6 +4,19 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+  		// Override h-screen / min-h-screen / max-h-screen to use --app-height
+  		// (set by useViewportHeight hook to window.innerHeight) instead of 100vh.
+  		// 100vh on iOS includes the hidden browser chrome, causing overflow.
+  		// This fixes all ~91 screens using these classes in one shot.
+  		height: {
+  			screen: 'var(--app-height)',
+  		},
+  		minHeight: {
+  			screen: 'var(--app-height)',
+  		},
+  		maxHeight: {
+  			screen: 'var(--app-height)',
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

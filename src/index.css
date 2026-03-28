@@ -1253,6 +1253,55 @@
   flex-shrink: 0;
 }
 
+/* ── Tab bar height token ────────────────────────────────────────────
+   Single source of truth for the 94px bottom tab bar height.
+   Used in sticky-bottom-bar and any standalone screen that must clear the nav.
+   ------------------------------------------------------------------ */
+:root {
+  --tab-bar-h: 94px;
+}
+
+/* ── Standalone mobile screen (outside AppLayout) ────────────────────
+   Use on screens that live outside the AppLayout shell:
+   splash, welcome, auth pages, onboarding steps, full-screen modals.
+   Gives the full visual viewport with safe-area gutters.
+   ------------------------------------------------------------------ */
+.mobile-screen {
+  min-height: var(--app-height);
+  padding-top: max(var(--safe-top), 0px);
+  padding-bottom: max(var(--safe-bottom), 0px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Sticky action bar (inside AppLayout pages) ──────────────────────
+   Sticks to the bottom of the scroll container (the AppLayout <main>).
+   Because <main> already has pb for the tab bar, this lands just above it.
+   Use for primary CTAs that must always be visible without scrolling.
+   ------------------------------------------------------------------ */
+.sticky-bottom-bar {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 1rem;
+  background: hsl(var(--bg) / 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  z-index: 10;
+}
+
+/* ── Safe scroll child ────────────────────────────────────────────────
+   For content that must scroll inside a fixed-height container
+   (e.g. inside a bottom sheet or modal). Prevents iOS bounce bleed.
+   ------------------------------------------------------------------ */
+.safe-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  flex: 1;
+  min-height: 0;
+}
+
 /* ── Transition performance override ────────────────────────────────
    Tailwind's `transition-all` animates every CSS property including
    layout-triggering props (width, height, padding) which forces full
