@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { AI_COACH_KEY } from '@/hooks/useAICoach';
+import { DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
 import { ROUTES } from '@/lib/routes';
 
 /**
@@ -39,9 +40,9 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
 
       if (error) throw error;
       toast.success(`Weight logged: ${val} kg`);
-      queryClient.invalidateQueries({ queryKey: ['progress-measurements'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-measurements'] });
-      queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY] });
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayWeight(user.id) });
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.lastWeight(user.id) });
+      queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setWeight('');
     } catch {
       toast.error('Failed to log weight');
