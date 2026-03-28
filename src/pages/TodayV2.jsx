@@ -9,7 +9,7 @@
  *  - Every component receives safe defaults
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell, Sparkles, Dumbbell, UtensilsCrossed, Scale, Heart,
@@ -24,12 +24,41 @@ import { ROUTES } from '@/lib/routes';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
 
-// ─── Date label ────────────────────────────────────────────────────────────────
+// ─── Date / greeting / weather helpers ─────────────────────────────────────────
 
 function getDateLabel(locale) {
   return new Intl.DateTimeFormat(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
   }).format(new Date());
+}
+
+function getGreeting(name) {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return `Good morning, ${name}`;
+  if (h >= 12 && h < 17) return `Good afternoon, ${name}`;
+  if (h >= 17 && h < 21) return `Good evening, ${name}`;
+  return `Hey ${name}, up late?`;
+}
+
+function interpretWeather(temp, code) {
+  let icon, condition;
+  if (code === 0)       { icon = '☀️'; condition = 'clear'; }
+  else if (code <= 3)   { icon = '⛅'; condition = 'cloudy'; }
+  else if (code <= 48)  { icon = '🌫️'; condition = 'foggy'; }
+  else if (code <= 67)  { icon = '🌧️'; condition = 'rainy'; }
+  else if (code <= 77)  { icon = '❄️'; condition = 'snowy'; }
+  else if (code <= 82)  { icon = '🌦️'; condition = 'showers'; }
+  else                  { icon = '⛈️'; condition = 'stormy'; }
+  const comments = {
+    clear:   temp > 28 ? 'Hot outside. Stay hydrated.' : temp < 10 ? 'Cold but clear — good energy.' : 'Clear skies. No excuses today.',
+    cloudy:  'Overcast. Perfect for a focused session.',
+    foggy:   'Moody out there. Channel it.',
+    rainy:   "Rain can't stop the work.",
+    snowy:   'Frozen outside. Even better reason to warm up.',
+    showers: 'Wet out there. Train indoors.',
+    stormy:  'Stay in and train hard.',
+  };
+  return { temp, icon, comment: comments[condition] ?? null };
 }
 
 // ─── Hero Card ─────────────────────────────────────────────────────────────────
@@ -133,6 +162,27 @@ function TodayContent() {
   const { locale } = useI18n();
   const navigate = useNavigate();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [weather, setWeather] = useState(null);
+
+  useEffect(() => {
+    if (!navigator?.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude.toFixed(4)}&longitude=${coords.longitude.toFixed(4)}&current=temperature_2m,weather_code`
+          );
+          if (!res.ok) return;
+          const json = await res.json();
+          const temp = Math.round(json.current?.temperature_2m ?? 0);
+          const code = json.current?.weather_code ?? 0;
+          setWeather(interpretWeather(temp, code));
+        } catch {}
+      },
+      () => {},
+      { timeout: 6000, maximumAge: 600000 }
+    );
+  }, []);
 
   const daily = useDailyStateV2();
   const ai = useAICoach({ userId: user?.id });
@@ -166,19 +216,32 @@ function TodayContent() {
     <TodayScreen>
 
       {/* Header */}
-      <header className="flex items-center justify-between pt-1">
-        <div>
-          <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
-          <h1 className="text-[26px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight mt-0.5">
-            {daily.preferredName}
-          </h1>
+      <header className="pt-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
+            <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight mt-0.5">
+              {getGreeting(daily.preferredName)}
+            </h1>
+            {weather?.comment && (
+              <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">{weather.comment}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 shrink-0 mt-1">
+            {weather && (
+              <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--fill)/0.8)] border border-[hsl(var(--border)/0.5)] px-2.5 py-1">
+                <span className="text-[15px] leading-none">{weather.icon}</span>
+                <span className="text-[12px] font-semibold text-[hsl(var(--fg-2))]">{weather.temp}°</span>
+              </div>
+            )}
+            <button
+              onClick={() => navigate('/notifications')}
+              className="w-9 h-9 flex items-center justify-center rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]"
+            >
+              <Bell className="w-4 h-4" strokeWidth={2} />
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => navigate('/notifications')}
-          className="w-10 h-10 flex items-center justify-center rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]"
-        >
-          <Bell className="w-4 h-4" strokeWidth={2} />
-        </button>
       </header>
 
       {/* AI Hero */}
@@ -244,7 +307,7 @@ function TodayContent() {
       )}
 
       {/* Body Check-in Sheet */}
-      <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />}
+      <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
 
     </TodayScreen>
   );
