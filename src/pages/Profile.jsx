@@ -95,8 +95,8 @@ function MoreContent() {
   const roleLabel = ROLE_LABELS[role] || role;
 
   return (
-    <div className="min-h-full bg-[hsl(var(--bg))] pb-8">
-      <div className="mx-auto max-w-lg px-4 pt-5 space-y-5">
+    <div className="min-h-full bg-[hsl(var(--bg))]">
+      <div className="mx-auto max-w-lg px-4 pt-6 pb-6 space-y-5">
 
         {/* Identity card */}
         <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-5 py-5">
