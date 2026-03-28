@@ -19,10 +19,13 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
+import { useCoachChat } from '@/hooks/useCoachChat';
 import { buildBriefing, buildRecommendations } from '@/lib/rulesEngine';
 import { ROUTES } from '@/lib/routes';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
+import CoachChatTrigger from '@/components/ai/CoachChatTrigger';
+import CoachChatSheet from '@/components/ai/CoachChatSheet';
 
 // ─── Date / greeting / weather helpers ─────────────────────────────────────────
 
@@ -176,6 +179,7 @@ function TodayContent() {
   const t = useT();
   const navigate = useNavigate();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [weather, setWeather] = useState(null);
 
   useEffect(() => {
@@ -200,6 +204,12 @@ function TodayContent() {
 
   const daily = useDailyStateV2();
   const ai = useAICoach({ userId: user?.id });
+
+  const chat = useCoachChat({
+    userId: user?.id,
+    invalidateAfterAction: daily.invalidateAfterAction,
+    activePlan: daily.activePlan,
+  });
 
   // Briefing: AI when available, rules-based fallback
   const kcalRemaining = Math.max(0, (daily.nutrition.caloriesTarget || 2000) - daily.nutrition.caloriesConsumed);
@@ -266,6 +276,13 @@ function TodayContent() {
         loading={daily.isLoading}
       />
 
+      {/* AI Coach Chat Trigger */}
+      <CoachChatTrigger
+        pageContext="today"
+        onOpen={() => setChatOpen(true)}
+        onSuggestion={(text) => { setChatOpen(true); chat.sendMessage(text, 'today'); }}
+      />
+
       {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <ActionTile icon={Dumbbell} label={daily.workoutDone ? t('today.actions.done') : t('today.actions.train')} done={daily.workoutDone} to={ROUTES.workouts} />
@@ -322,6 +339,19 @@ function TodayContent() {
 
       {/* Body Check-in Sheet */}
       <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
+
+      {/* AI Coach Chat Sheet */}
+      <CoachChatSheet
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={chat.messages}
+        isTyping={chat.isTyping}
+        actionStates={chat.actionStates}
+        onSendMessage={chat.sendMessage}
+        onConfirmAction={chat.executeAction}
+        onDismissAction={chat.dismissAction}
+        pageContext="today"
+      />
 
     </TodayScreen>
   );
