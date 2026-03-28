@@ -972,14 +972,14 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
       </div>
 
       <div className="mt-5">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-4">
           <button
             type="button"
             onClick={() => setInputMode('ai')}
             className={cn(
-              'flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all',
+              'flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all',
               inputMode === 'ai'
-                ? 'bg-[hsl(var(--brand))] text-white shadow-lg shadow-[hsl(var(--brand)/0.2)]'
+                ? 'bg-[hsl(var(--brand))] text-white shadow-lg shadow-[hsl(var(--brand)/0.3)]'
                 : 'bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)]'
             )}
           >
@@ -990,25 +990,22 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             type="button"
             onClick={() => setInputMode('search')}
             className={cn(
-              'flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-medium transition-all',
+              'flex items-center justify-center rounded-xl p-2.5 transition-all',
               inputMode === 'search'
                 ? 'bg-[hsl(var(--fg))] text-white'
                 : 'bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)]'
             )}
+            aria-label="Search foods"
           >
             <Search className="h-4 w-4" />
-            Search
           </button>
           <button
             type="button"
             onClick={() => setShowCamera(true)}
-            className={cn(
-              'flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-[13px] font-medium transition-all',
-              'bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)]'
-            )}
+            className="flex items-center justify-center rounded-xl p-2.5 bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] transition-all hover:bg-[hsl(var(--fill)/0.72)]"
+            aria-label="Scan food photo"
           >
             <Camera className="h-4 w-4" />
-            Photo
           </button>
         </div>
 
@@ -1023,7 +1020,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             <div className="rounded-[18px] border-2 border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)] p-4">
               <p className="text-[13px] font-medium text-[hsl(var(--fg))] mb-2 flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" />
-                Just describe your meal
+                What did you eat?
               </p>
               <AIFoodInput 
                 onFoodsDetected={handleAIFoodsDetected} 
@@ -1193,15 +1190,20 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
         </div>
       )}
 
-      <div className="sticky bottom-0 bg-[hsl(var(--bg))] pt-4 pb-2 mt-6 -mx-6 px-6 border-t border-[hsl(var(--border)/0.4)]">
-        <ActionRow>
-          <SecondaryButton type="button" onClick={onCancel} disabled={isSaving}>
+      <div className="sticky bottom-0 bg-[hsl(var(--bg))] pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] mt-6 -mx-6 px-6 border-t border-[hsl(var(--border)/0.4)]">
+        <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:items-center sm:gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSaving}
+            className="atlas-button atlas-button-ghost w-full justify-center text-[hsl(var(--fg-2))] sm:w-auto"
+          >
             Cancelar
-          </SecondaryButton>
+          </button>
           <PrimaryButton
             type="submit"
             disabled={isSaving || foods.length === 0}
-            className="gap-2"
+            className="gap-2 w-full justify-center sm:w-auto sm:flex-1"
           >
             {isSaving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -1210,7 +1212,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             )}
             {meal ? t('pages.nutrition.save_changes') : t('pages.nutrition.add_meal')}
           </PrimaryButton>
-        </ActionRow>
+        </div>
       </div>
     </form>
   );
@@ -1789,7 +1791,7 @@ export default function NutritionPage() {
           <DialogPanelHeader
             eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
             title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
-            description={editingMeal ? t('pages.nutrition.meal_subtitle') : 'Describe your meal with AI for instant logging'}
+            description={editingMeal ? t('pages.nutrition.meal_subtitle') : 'Log what you ate — AI makes it instant'}
           />
           <div className="p-6 pt-0">
             <MealForm

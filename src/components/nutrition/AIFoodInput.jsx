@@ -320,7 +320,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
                 handleAnalyze();
               }
             }}
-            placeholder="Describe what you ate... (e.g., arroz com feijão e frango grelhado)"
+            placeholder="e.g. eggs, toast, coffee"
             rows={2}
             disabled={isAnalyzing}
             className="w-full px-3 py-2.5 pr-10 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.46)] text-[13px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] resize-none focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.3)] focus:border-[hsl(var(--brand))] disabled:opacity-50 transition-all"
