@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import MobileSheet from '@/components/shared/MobileSheet';
 import {
   X,
   Zap,
@@ -226,39 +226,9 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
 
   const headerLabel = mode === 'ai' ? 'AI Workout' : mode === 'manual' ? 'Manual' : 'Quick Workout';
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="flex w-full flex-col overflow-hidden rounded-t-[28px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-w-lg sm:rounded-[24px]"
-        style={{ maxHeight: 'calc(var(--app-height, 100dvh) * 0.92)' }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[hsl(var(--border))] flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
-              <Zap className="w-5 h-5 text-[hsl(var(--brand))]" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold tracking-widest text-[hsl(var(--fg-3))] uppercase">{headerLabel}</p>
-              <h2 className="text-lg font-bold text-[hsl(var(--fg))] mt-0.5">Quick Workout</h2>
-            </div>
-          </div>
-          <button
-            onClick={handleClose}
-            className="h-9 w-9 flex items-center justify-center rounded-xl text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] hover:bg-[hsl(var(--fill))] transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-5">
+    <MobileSheet open={open} onOpenChange={(v) => { if (!v) handleClose(); }} title="Quick Workout" description={headerLabel}>
+      <MobileSheet.Body>
           <AnimatePresence mode="wait">
 
             {/* Mode picker */}
@@ -552,13 +522,10 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
             )}
 
           </AnimatePresence>
-        </div>
 
+      </MobileSheet.Body>
         {/* Footer */}
-        <div
-          className="flex items-center justify-between px-5 py-4 border-t border-[hsl(var(--border))] flex-shrink-0"
-          style={{ paddingBottom: 'calc(var(--tab-bar-h, 94px) + env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
-        >
+        <MobileSheet.Footer className="flex items-center justify-between">
           {/* Back button */}
           {(mode !== null && !(mode === 'ai' && step === 4)) && !generating && (
             <button
@@ -606,8 +573,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
               <Play className="w-4 h-4 fill-current" /> Start Workout
             </button>
           )}
-        </div>
-      </motion.div>
-    </div>
+        </MobileSheet.Footer>
+    </MobileSheet>
   );
 }

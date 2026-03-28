@@ -13,6 +13,7 @@ import { ROUTES } from '@/lib/routes';
 import { SafePageBoundary } from '@/components/shared/StablePage';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
 import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
+import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
 import { AICoachBriefing } from '@/components/today/AICoachBriefing';
 import { ReadinessRow } from '@/components/today/ReadinessRow';
 import { QuickActions } from '@/components/today/QuickActions';
@@ -487,7 +488,7 @@ function TodayContent() {
       />
 
       {/* Modals */}
-      <WeeklyCheckinModal open={checkinOpen} onClose={() => setCheckinOpen(false)} />
+      <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
       <QuickWorkoutModal
         open={quickWorkoutOpen}
         onClose={() => setQuickWorkoutOpen(false)}
