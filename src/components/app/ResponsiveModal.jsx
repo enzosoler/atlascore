@@ -31,7 +31,7 @@ export function ResponsiveModal({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
         <DrawerContent className={cn('mobile-sheet', drawerClassName)}>
           {children}
         </DrawerContent>

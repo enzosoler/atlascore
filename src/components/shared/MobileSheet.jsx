@@ -33,7 +33,7 @@ export default function MobileSheet({
   className,
 }) {
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
       <DrawerContent
         className={cn(
           'mobile-sheet flex flex-col',
