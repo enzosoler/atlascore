@@ -97,7 +97,7 @@ export default function AdminLayout() {
       {/* Main */}
       <main className="flex-1 overflow-auto pt-14 lg:pt-0">
         <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
-          <Outlet context={{ permissions }} />
+          <Outlet context={{ permissions, hasPermission: () => true, setIsModerationMode: () => {} }} />
         </div>
       </main>
     </div>
