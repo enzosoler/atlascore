@@ -1683,7 +1683,17 @@
     "start_logging": "Start logging",
     "page_title": "Progress",
     "page_subtitle": "Your data, visualized",
-    "safe_boundary_fallback": "Progress opened in safe mode."
+    "safe_boundary_fallback": "Progress opened in safe mode.",
+    "no_data_tooltip": "No data",
+    "fallback_weight_down": "Weight trending down at {rate} kg/week — on track for a cut.",
+    "fallback_weight_up": "Weight trending up at {rate} kg/week.",
+    "fallback_weight_stable": "Weight is stable this period.",
+    "fallback_nutrition_strong": "Nutrition logging is strong at {pct}%.",
+    "fallback_nutrition_low": "Nutrition adherence is low at {pct}%. Consistency drives results.",
+    "fallback_training_solid": "Training adherence is solid at {pct}%.",
+    "fallback_training_low": "Training adherence dropped to {pct}%.",
+    "rate_stable": "Stable",
+    "target_label": "Target: {value} {unit}"
   },
   "progressPhotos": {
     "eyebrow": "Visual Progress",

@@ -1684,7 +1684,17 @@
     "start_logging": "Começar a registrar",
     "page_title": "Progresso",
     "page_subtitle": "Seus dados, visualizados",
-    "safe_boundary_fallback": "Progresso aberto em modo seguro."
+    "safe_boundary_fallback": "Progresso aberto em modo seguro.",
+    "no_data_tooltip": "Sem dados",
+    "fallback_weight_down": "Peso em queda a {rate} kg/semana — no caminho para o cut.",
+    "fallback_weight_up": "Peso subindo a {rate} kg/semana.",
+    "fallback_weight_stable": "Peso estável neste período.",
+    "fallback_nutrition_strong": "Registro nutricional está forte em {pct}%.",
+    "fallback_nutrition_low": "Aderência nutricional baixa em {pct}%. Consistência gera resultados.",
+    "fallback_training_solid": "Aderência ao treino está sólida em {pct}%.",
+    "fallback_training_low": "Aderência ao treino caiu para {pct}%.",
+    "rate_stable": "Estável",
+    "target_label": "Meta: {value} {unit}"
   },
   "progressPhotos": {
     "eyebrow": "Progresso Visual",

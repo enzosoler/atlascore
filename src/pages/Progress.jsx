@@ -25,6 +25,7 @@ import { listMeasurements, listProgressPhotos } from '@/services/bodyProgressSer
 import { getMeasurementFieldValue } from '@/lib/measurementModel';
 import { ROUTES } from '@/lib/routes';
 import { useAICoach } from '@/hooks/useAICoach';
+import { useT } from '@/lib/i18nContext';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -84,9 +85,10 @@ function Tip({ active, payload, label, unit, fmt }) {
 // ─── Rate badge ────────────────────────────────────────────────────────────────
 
 function RateBadge({ slope, unit = 'kg/wk' }) {
+  const t = useT();
   const rate = slope * 7;
   if (Math.abs(rate) < 0.05) {
-    return <span className="flex items-center gap-1 rounded-full bg-[hsl(var(--fill)/0.8)] px-2 py-1 text-[10px] font-semibold text-[hsl(var(--fg-2))]"><Minus className="w-3 h-3" />Stable</span>;
+    return <span className="flex items-center gap-1 rounded-full bg-[hsl(var(--fill)/0.8)] px-2 py-1 text-[10px] font-semibold text-[hsl(var(--fg-2))]"><Minus className="w-3 h-3" />{t('progress.rate_stable')}</span>;
   }
   const down = rate < 0;
   return (
@@ -116,8 +118,8 @@ function RangeTabs({ selected, onChange }) {
 
 // ─── Trend Line Chart (reused for weight + body fat) ──────────────────────────
 
-function TrendLineChart({ data, dataKey, gradientId, color, days, unit, showRegression }) {
-  if (!data || data.length < 2) return <EmptyChart label={`Need 2+ data points`} cta="Log measurement" to={ROUTES.measurements} />;
+function TrendLineChart({ data, dataKey, gradientId, color, days, unit, showRegression, emptyLabel, emptyCta }) {
+  if (!data || data.length < 2) return <EmptyChart label={emptyLabel} cta={emptyCta} to={ROUTES.measurements} />;
 
   const regression = showRegression && data.length >= 3 ? (() => {
     const base = data[0].ts;
@@ -145,14 +147,14 @@ function TrendLineChart({ data, dataKey, gradientId, color, days, unit, showRegr
 
 // ─── Bar Chart (reused for calories, protein, workout) ────────────────────────
 
-function TargetBarChart({ data, dataKey, targetValue, color, days, unit }) {
-  if (!data || !data.some((d) => d[dataKey] != null)) return <EmptyChart label="No data in this period" cta="Start logging" to={ROUTES.nutrition} />;
+function TargetBarChart({ data, dataKey, targetValue, color, days, unit, emptyLabel, emptyCta, noDataLabel = 'No data' }) {
+  if (!data || !data.some((d) => d[dataKey] != null)) return <EmptyChart label={emptyLabel} cta={emptyCta} to={ROUTES.nutrition} />;
   return (
     <ResponsiveContainer width="100%" height={110}>
       <BarChart data={data} margin={{ top: 4, right: 4, left: -28, bottom: 0 }} barCategoryGap="25%">
         <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} interval={days <= 7 ? 0 : days <= 28 ? 3 : 6} />
         <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} width={36} tickCount={3} />
-        <Tooltip content={<Tip unit={unit} fmt={(v) => v != null ? `${Math.round(v)} ${unit}` : 'No data'} />} />
+        <Tooltip content={<Tip unit={unit} fmt={(v) => v != null ? `${Math.round(v)} ${unit}` : noDataLabel} />} />
         {targetValue > 0 && <ReferenceLine y={targetValue} stroke="hsl(var(--brand))" strokeDasharray="4 3" strokeOpacity={0.5} strokeWidth={1.5} />}
         <Bar dataKey={dataKey} fill={color} fillOpacity={0.75} radius={[3, 3, 0, 0]} />
       </BarChart>
@@ -163,6 +165,7 @@ function TargetBarChart({ data, dataKey, targetValue, color, days, unit }) {
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
 function ProgressContent() {
+  const t = useT();
   const { user } = useAuth();
   const ai = useAICoach({ userId: user?.id });
   const [range, setRange] = useState('4w');
@@ -307,14 +310,14 @@ function ProgressContent() {
     const lines = [];
     if (weightData.length >= 2) {
       const weekRate = weightSlope * 7;
-      if (weekRate < -0.1) lines.push(`Weight trending down at ${Math.abs(weekRate).toFixed(2)} kg/week — on track for a cut.`);
-      else if (weekRate > 0.1) lines.push(`Weight trending up at ${weekRate.toFixed(2)} kg/week.`);
-      else lines.push('Weight is stable this period.');
+      if (weekRate < -0.1) lines.push(t('progress.fallback_weight_down').replace('{rate}', Math.abs(weekRate).toFixed(2)));
+      else if (weekRate > 0.1) lines.push(t('progress.fallback_weight_up').replace('{rate}', weekRate.toFixed(2)));
+      else lines.push(t('progress.fallback_weight_stable'));
     }
-    if (adherence.nutrition >= 80) lines.push(`Nutrition logging is strong at ${adherence.nutrition}%.`);
-    else if (adherence.nutrition < 50) lines.push(`Nutrition adherence is low at ${adherence.nutrition}%. Consistency drives results.`);
-    if (adherence.training >= 70) lines.push(`Training adherence is solid at ${adherence.training}%.`);
-    else if (adherence.training < 40) lines.push(`Training adherence dropped to ${adherence.training}%.`);
+    if (adherence.nutrition >= 80) lines.push(t('progress.fallback_nutrition_strong').replace('{pct}', adherence.nutrition));
+    else if (adherence.nutrition < 50) lines.push(t('progress.fallback_nutrition_low').replace('{pct}', adherence.nutrition));
+    if (adherence.training >= 70) lines.push(t('progress.fallback_training_solid').replace('{pct}', adherence.training));
+    else if (adherence.training < 40) lines.push(t('progress.fallback_training_low').replace('{pct}', adherence.training));
     return lines.slice(0, 3);
   }, [ai.progress, weightData, weightSlope, adherence]);
 
@@ -325,43 +328,43 @@ function ProgressContent() {
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">Progress</h1>
+          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">{t('progress.page_title')}</h1>
           <RangeTabs selected={range} onChange={setRange} />
         </div>
 
         {/* ── Weight Trend ──────────────────────────────────────── */}
         <ChartCard>
-          <ChartHeader label="Weight" value={weightData.at(-1)?.value ?? null} unit="kg"
+          <ChartHeader label={t('progress.chart_weight')} value={weightData.at(-1)?.value ?? null} unit="kg"
             badge={weightData.length >= 2 && <RateBadge slope={weightSlope} />} />
-          <TrendLineChart data={weightData} dataKey="value" gradientId="wg" color="hsl(var(--brand))" days={days} unit="kg" showRegression />
+          <TrendLineChart data={weightData} dataKey="value" gradientId="wg" color="hsl(var(--brand))" days={days} unit="kg" showRegression emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
         </ChartCard>
 
         {/* ── Body Fat Trend ────────────────────────────────────── */}
         {bfData.length > 0 && (
           <ChartCard>
-            <ChartHeader label="Body Fat" value={bfData.at(-1)?.value ?? null} unit="%" />
-            <TrendLineChart data={bfData} dataKey="value" gradientId="bf" color="hsl(var(--warn))" days={days} unit="%" />
+            <ChartHeader label={t('progress.chart_body_fat')} value={bfData.at(-1)?.value ?? null} unit="%" />
+            <TrendLineChart data={bfData} dataKey="value" gradientId="bf" color="hsl(var(--warn))" days={days} unit="%" emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
           </ChartCard>
         )}
 
         {/* ── Calories vs Target ────────────────────────────────── */}
         <ChartCard>
-          <ChartHeader label="Calories" value={calorieData.filter((d) => d.calories != null).at(-1)?.calories ?? null} unit="kcal"
-            sublabel={kcalTarget > 0 ? `Target: ${kcalTarget} kcal` : undefined} />
-          <TargetBarChart data={calorieData} dataKey="calories" targetValue={kcalTarget} color="hsl(var(--brand))" days={days} unit="kcal" />
+          <ChartHeader label={t('progress.chart_calories')} value={calorieData.filter((d) => d.calories != null).at(-1)?.calories ?? null} unit="kcal"
+            sublabel={kcalTarget > 0 ? t('progress.target_label').replace('{value}', kcalTarget).replace('{unit}', 'kcal') : undefined} />
+          <TargetBarChart data={calorieData} dataKey="calories" targetValue={kcalTarget} color="hsl(var(--brand))" days={days} unit="kcal" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
         </ChartCard>
 
         {/* ── Protein vs Target ─────────────────────────────────── */}
         <ChartCard>
-          <ChartHeader label="Protein" value={proteinData.filter((d) => d.protein != null).at(-1)?.protein ?? null} unit="g"
-            sublabel={proteinTarget > 0 ? `Target: ${proteinTarget}g` : undefined} />
-          <TargetBarChart data={proteinData} dataKey="protein" targetValue={proteinTarget} color="hsl(var(--ok))" days={days} unit="g" />
+          <ChartHeader label={t('progress.chart_protein')} value={proteinData.filter((d) => d.protein != null).at(-1)?.protein ?? null} unit="g"
+            sublabel={proteinTarget > 0 ? t('progress.target_label').replace('{value}', proteinTarget).replace('{unit}', 'g') : undefined} />
+          <TargetBarChart data={proteinData} dataKey="protein" targetValue={proteinTarget} color="hsl(var(--ok))" days={days} unit="g" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
         </ChartCard>
 
         {/* ── Workout Trend ─────────────────────────────────────── */}
         {workoutWeekData.length > 0 && (
           <ChartCard>
-            <ChartHeader label="Workouts / Week" />
+            <ChartHeader label={t('progress.chart_workouts_week')} />
             <ResponsiveContainer width="100%" height={90}>
               <BarChart data={workoutWeekData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                 <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} />
@@ -375,11 +378,11 @@ function ProgressContent() {
 
         {/* ── Adherence ─────────────────────────────────────────── */}
         <ChartCard>
-          <ChartHeader label="Adherence" />
+          <ChartHeader label={t('progress.chart_adherence')} />
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Nutrition', pct: adherence.nutrition, color: 'hsl(var(--brand))' },
-              { label: 'Training', pct: adherence.training, color: 'hsl(var(--ok))' },
+              { label: t('progress.chart_adherence_nutrition'), pct: adherence.nutrition, color: 'hsl(var(--brand))' },
+              { label: t('progress.chart_adherence_training'), pct: adherence.training, color: 'hsl(var(--ok))' },
             ].map(({ label, pct, color }) => (
               <div key={label} className="rounded-[14px] bg-[hsl(var(--fill)/0.4)] px-3 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2">{label}</p>
@@ -395,7 +398,7 @@ function ProgressContent() {
         {/* ── Photos Timeline ───────────────────────────────────── */}
         {photos.length > 0 && (
           <ChartCard>
-            <ChartHeader label="Progress Photos" />
+            <ChartHeader label={t('progress.chart_progress_photos')} />
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
               {photos.slice(0, 6).map((p) => (
                 <div key={p.id} className="w-16 h-20 rounded-[10px] bg-[hsl(var(--fill)/0.6)] shrink-0 overflow-hidden">
@@ -404,7 +407,7 @@ function ProgressContent() {
               ))}
             </div>
             <Link to={ROUTES.progressPhotos} className="mt-3 flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--brand))]">
-              View all photos <ArrowRight className="w-3 h-3" />
+              {t('progress.view_all_photos')} <ArrowRight className="w-3 h-3" />
             </Link>
           </ChartCard>
         )}
@@ -414,7 +417,7 @@ function ProgressContent() {
           <ChartCard className="border-[hsl(var(--brand-ai)/0.2)] bg-[hsl(var(--brand-ai)/0.04)]">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand-ai))]">AI Interpretation</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand-ai))]">{t('progress.ai_interpretation')}</p>
             </div>
             <div className="space-y-2">
               {insights.map((line, i) => (
@@ -428,11 +431,11 @@ function ProgressContent() {
         <div className="flex gap-3">
           <Link to={ROUTES.labExams}
             className="flex-1 flex items-center justify-center gap-2 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] py-3 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
-            <FlaskConical className="w-3.5 h-3.5" /> Lab Results <ArrowRight className="w-3 h-3" />
+            <FlaskConical className="w-3.5 h-3.5" /> {t('progress.lab_results_link')} <ArrowRight className="w-3 h-3" />
           </Link>
           <Link to={ROUTES.progressPhotos}
             className="flex-1 flex items-center justify-center gap-2 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] py-3 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
-            <Camera className="w-3.5 h-3.5" /> Photos <ArrowRight className="w-3 h-3" />
+            <Camera className="w-3.5 h-3.5" /> {t('progress.photos_link')} <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
 
@@ -442,11 +445,12 @@ function ProgressContent() {
 }
 
 export default function Progress({ embedded = false }) {
+  const t = useT();
   if (embedded) {
     return <ProgressContent />;
   }
   return (
-    <SafePageBoundary title="Progress" subtitle="Your data, visualized" fallbackDescription="Progress opened in safe mode.">
+    <SafePageBoundary title={t('progress.page_title')} subtitle={t('progress.page_subtitle')} fallbackDescription={t('progress.safe_boundary_fallback')}>
       <ProgressContent />
     </SafePageBoundary>
   );
