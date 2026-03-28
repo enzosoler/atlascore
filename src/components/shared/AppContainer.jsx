@@ -143,9 +143,11 @@ export function TabBar({ items, className = '' }) {
         'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.84)] bg-[hsl(var(--bg)/0.92)] shadow-[0_-12px_34px_hsl(var(--label)/0.05)] backdrop-blur-[24px] lg:hidden',
         className
       )}
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="mx-auto flex w-full max-w-[28rem] items-stretch gap-1 px-3 py-2.5">
+      <div
+        className="mx-auto flex w-full max-w-[28rem] items-stretch gap-1 px-3 pt-2.5"
+        style={{ paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}
+      >
         {items.map((item) => {
           const Icon = item.icon;
           const key = item.key || item.to || item.label;
