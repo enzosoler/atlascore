@@ -12,9 +12,11 @@ import {
   WorkspacePersonRow,
   WorkspaceRosterSection,
 } from '@/components/shared/ProfessionalUI';
+import { useT } from '@/lib/i18nContext';
 
 export default function ClinicianPatients() {
   const { user } = useAuth();
+  const t = useT();
   const qc = useQueryClient();
   const [showInvite, setShowInvite] = useState(false);
 
@@ -32,33 +34,33 @@ export default function ClinicianPatients() {
   return (
     <RoleGate roles={['clinician', 'admin']}>
       <PageShell
-        title="Patients"
-        subtitle="Manage invited and active patients in a more restrained clinical workspace."
+        title={t('clinician.patientsPageTitle')}
+        subtitle={t('clinician.patientsPageSubtitle')}
         maxWidth="max-w-4xl"
       >
         <WorkspaceHeader
-          eyebrow="Clinician role"
-          title="Patients"
-          subtitle="Accepted patients open into detailed clinical records. Pending invites stay visible until confirmed."
+          eyebrow={t('clinician.roleEyebrow')}
+          title={t('clinician.patientsPageTitle')}
+          subtitle={t('clinician.patientsHeaderSubtitle')}
           icon={Users}
           tone="success"
-          badge={`${patients.length} linked`}
-          actions={<WorkspaceInviteAction label="Invite patient" onClick={() => setShowInvite(true)} />}
+          badge={`${patients.length} ${t('clinician.linked')}`}
+          actions={<WorkspaceInviteAction label={t('clinician.invitePatient')} onClick={() => setShowInvite(true)} />}
         />
 
         {isLoading ? (
-          <SectionCard title="Loading patients" subtitle="Fetching patient relationships.">
-            <div className="py-12 text-center text-[13px] text-[hsl(var(--fg-2))]">Loading patients...</div>
+          <SectionCard title={t('clinician.loadingPatientsTitle')} subtitle={t('clinician.loadingPatientsSubtitle')}>
+            <div className="py-12 text-center text-[13px] text-[hsl(var(--fg-2))]">{t('clinician.loadingPatients')}</div>
           </SectionCard>
         ) : (
           <WorkspaceRosterSection
-            eyebrow="Panel"
-            title="All linked patients"
-            subtitle="Use patient records to review abnormal markers, body composition, and protocol compliance."
+            eyebrow={t('clinician.panelEyebrow')}
+            title={t('clinician.allLinkedPatients')}
+            subtitle={t('clinician.allLinkedPatientsSubtitle')}
             emptyIcon={Users}
-            emptyTitle="No patients linked"
-            emptyDescription="Invite your first patient to establish a clinical workspace."
-            emptyAction={<WorkspaceInviteAction label="Invite patient" onClick={() => setShowInvite(true)} />}
+            emptyTitle={t('clinician.noPatientsLinked')}
+            emptyDescription={t('clinician.noPatientsLinkedInviteDesc')}
+            emptyAction={<WorkspaceInviteAction label={t('clinician.invitePatient')} onClick={() => setShowInvite(true)} />}
           >
             {patients.map((patient) => (
               <WorkspacePersonRow
@@ -67,8 +69,8 @@ export default function ClinicianPatients() {
                 initial={(patient.client_name || patient.client_email)?.[0]?.toUpperCase() || 'P'}
                 title={patient.client_name || patient.client_email}
                 subtitle={patient.client_email}
-                meta={patient.status === 'active' ? 'Clinical access active' : 'Invitation pending'}
-                badge={patient.status === 'active' ? 'Active' : 'Inactive'}
+                meta={patient.status === 'active' ? t('clinician.clinicalAccessActive') : t('clinician.invitationPending')}
+                badge={patient.status === 'active' ? t('clinician.badgeActive') : t('clinician.badgeInactive')}
                 badgeTone={patient.status === 'active' ? 'success' : 'neutral'}
                 accentTone="success"
                 actions={

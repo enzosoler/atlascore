@@ -9,6 +9,7 @@ import { ChevronLeft, Loader2, Download } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { formatDate } from '@/lib/atlas-theme';
 import { toast } from 'sonner';
+import { useT } from '@/lib/i18nContext';
 
 const ROUTES = { oral:'Oral', sublingual:'Sublingual', intramuscular:'IM', subcutaneous:'SC', topical:'Topical', intravenous:'IV', nasal:'Nasal', other:'Other' };
 const STATUS_BADGE = { normal:'badge-ok', low:'badge-warn', high:'badge-warn', critical:'badge-err' };
@@ -24,6 +25,7 @@ function MacroSummary({ label, value, color }) {
 }
 
 function OverviewTab({ email }) {
+  const t = useT();
   // Patient data requires professional_links RLS policy (pending migration)
   const checkins = [];
   const measurements = [];
@@ -36,17 +38,17 @@ function OverviewTab({ email }) {
   return (
     <div className="space-y-4">
       <div className="surface p-5">
-        <p className="t-label mb-3">Overview</p>
+        <p className="t-label mb-3">{t('clinician.overviewLabel')}</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <MacroSummary label="Weight" value={latest?.weight ? `${latest.weight}kg` : null} color="hsl(var(--brand))" />
-          <MacroSummary label="Body fat" value={latest?.body_fat ? `${latest.body_fat}%` : null} color="hsl(var(--warn))" />
-          <MacroSummary label="Average mood" value={avgMood ? `${avgMood}/5` : null} color="hsl(var(--ok))" />
-          <MacroSummary label="Protocols" value={protocols.length} color="hsl(var(--brand-ai))" />
+          <MacroSummary label={t('clinician.weight')} value={latest?.weight ? `${latest.weight}kg` : null} color="hsl(var(--brand))" />
+          <MacroSummary label={t('clinician.bodyFat')} value={latest?.body_fat ? `${latest.body_fat}%` : null} color="hsl(var(--warn))" />
+          <MacroSummary label={t('clinician.averageMood')} value={avgMood ? `${avgMood}/5` : null} color="hsl(var(--ok))" />
+          <MacroSummary label={t('clinician.protocols')} value={protocols.length} color="hsl(var(--brand-ai))" />
         </div>
       </div>
       {exams.length > 0 && (
         <div className="surface p-4">
-          <p className="t-label mb-2">Latest exam</p>
+          <p className="t-label mb-2">{t('clinician.latestExam')}</p>
           <p className="text-[13px] font-semibold">{exams[0].panel_name}</p>
           <p className="t-caption">{formatDate(exams[0].exam_date)}</p>
         </div>
@@ -56,9 +58,10 @@ function OverviewTab({ email }) {
 }
 
 function ExamsTab() {
+  const t = useT();
   // Patient lab exams require professional_links RLS policy (pending migration)
   const exams = [];
-  if (exams.length === 0) return <p className="t-caption p-4">No exams recorded.</p>;
+  if (exams.length === 0) return <p className="t-caption p-4">{t('clinician.noExamsRecorded')}</p>;
   return (
     <div className="space-y-3">
       {exams.map(exam => (
@@ -88,6 +91,7 @@ function ExamsTab() {
 }
 
 function MeasurementsTab() {
+  const t = useT();
   // Patient measurements require professional_links RLS policy (pending migration)
   const measurements = [];
   const chartData = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date)).map(m => ({
@@ -99,7 +103,7 @@ function MeasurementsTab() {
     <div className="space-y-4">
       {chartData.length >= 2 && (
         <div className="surface p-5">
-          <p className="t-label mb-4">Progress</p>
+          <p className="t-label mb-4">{t('clinician.progress')}</p>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="2 6" stroke="hsl(var(--border))" />
@@ -116,10 +120,10 @@ function MeasurementsTab() {
         <div key={m.id} className="surface px-4 py-3">
           <p className="text-[13px] font-semibold mb-1">{formatDate(m.date)}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 t-caption">
-            {m.weight && <span>Weight <b>{m.weight}kg</b></span>}
-            {m.body_fat && <span>Body fat <b>{m.body_fat}%</b></span>}
-            {m.waist && <span>Waist <b>{m.waist}cm</b></span>}
-            {m.arms && <span>Arms <b>{m.arms}cm</b></span>}
+            {m.weight && <span>{t('clinician.weight')} <b>{m.weight}kg</b></span>}
+            {m.body_fat && <span>{t('clinician.bodyFat')} <b>{m.body_fat}%</b></span>}
+            {m.waist && <span>{t('clinician.waist')} <b>{m.waist}cm</b></span>}
+            {m.arms && <span>{t('clinician.arms')} <b>{m.arms}cm</b></span>}
           </div>
         </div>
       ))}
@@ -128,9 +132,10 @@ function MeasurementsTab() {
 }
 
 function PhotosTab() {
+  const t = useT();
   // Patient photos require professional_links RLS policy (pending migration)
   const photos = [];
-  if (photos.length === 0) return <p className="t-caption p-4">No photos recorded.</p>;
+  if (photos.length === 0) return <p className="t-caption p-4">{t('clinician.noPhotosRecorded')}</p>;
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
       {photos.map(p => (
@@ -147,16 +152,17 @@ function PhotosTab() {
 }
 
 function ProtocolsTab() {
+  const t = useT();
   // Patient protocols require professional_links RLS policy (pending migration)
   const protocols = [];
-  if (protocols.length === 0) return <p className="t-caption p-4">No protocols recorded.</p>;
+  if (protocols.length === 0) return <p className="t-caption p-4">{t('clinician.noProtocolsRecorded')}</p>;
   return (
     <div className="space-y-2">
       {protocols.map(p => (
         <div key={p.id} className={`surface px-4 py-3 ${!p.active ? 'opacity-50' : ''}`}>
           <div className="flex items-center gap-2 mb-0.5">
             <p className="text-[13px] font-semibold">{p.name}</p>
-            <span className={`badge ${p.active ? 'badge-ok' : 'badge-neutral'}`}>{p.active ? 'Active' : 'Inactive'}</span>
+            <span className={`badge ${p.active ? 'badge-ok' : 'badge-neutral'}`}>{p.active ? t('clinician.badgeActive') : t('clinician.badgeInactive')}</span>
           </div>
           <div className="flex flex-wrap gap-x-3 t-caption">
             {p.substance_name && <span>{p.substance_name}</span>}
@@ -171,16 +177,17 @@ function ProtocolsTab() {
 }
 
 function ExportsTab({ patientEmail }) {
+  const t = useT();
   const exportCSV = async () => {
     // Patient data export requires professional_links RLS policy (pending migration)
     const [exams, measurements, protocols] = [[], [], []];
 
     const rows = [
-      ['Type', 'Date', 'Detail', 'Value'],
-      ...measurements.map(m => ['Measurement', m.date, 'Weight', m.weight ?? '']),
-      ...measurements.map(m => ['Measurement', m.date, 'Body Fat %', m.body_fat ?? '']),
-      ...exams.flatMap(e => (e.markers || []).map(mk => ['Exam', e.exam_date, mk.name, `${mk.value} ${mk.unit}`])),
-      ...protocols.map(p => ['Protocol', p.start_date || '', p.name, p.dose || '']),
+      [t('clinician.exportColType'), t('clinician.exportColDate'), t('clinician.exportColDetail'), t('clinician.exportColValue')],
+      ...measurements.map(m => [t('clinician.exportTypeMeasurement'), m.date, t('clinician.weight'), m.weight ?? '']),
+      ...measurements.map(m => [t('clinician.exportTypeMeasurement'), m.date, t('clinician.bodyFatPercent'), m.body_fat ?? '']),
+      ...exams.flatMap(e => (e.markers || []).map(mk => [t('clinician.exportTypeExam'), e.exam_date, mk.name, `${mk.value} ${mk.unit}`])),
+      ...protocols.map(p => [t('clinician.exportTypeProtocol'), p.start_date || '', p.name, p.dose || '']),
     ];
 
     const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
@@ -188,15 +195,15 @@ function ExportsTab({ patientEmail }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = `patient_${patientEmail}.csv`; a.click();
     URL.revokeObjectURL(url);
-    toast.success('CSV exported!');
+    toast.success(t('clinician.csvExported'));
   };
 
   return (
     <div className="surface p-5 space-y-4">
-      <p className="t-label">Exports</p>
-      <p className="t-body text-[hsl(var(--fg-2))]">Export the patient’s clinical data to CSV for external use or analysis.</p>
+      <p className="t-label">{t('clinician.exportsLabel')}</p>
+      <p className="t-body text-[hsl(var(--fg-2))]">{t('clinician.exportsDescription')}</p>
       <button onClick={exportCSV} className="btn btn-primary gap-1.5 h-10">
-        <Download className="w-4 h-4" /> Export CSV
+        <Download className="w-4 h-4" /> {t('clinician.exportCsv')}
       </button>
     </div>
   );
@@ -205,6 +212,7 @@ function ExportsTab({ patientEmail }) {
 export default function ClinicianPatientProfile() {
   const { id: patientId } = useParams();
   const { user } = useAuth();
+  const t = useT();
 
   const { data: patientLinks = [] } = useQuery({
     queryKey: ['clinician-patients', user?.id],
@@ -215,12 +223,21 @@ export default function ClinicianPatientProfile() {
   const patient = patientLinks.find((p) => p.client_id === patientId) || null;
   const displayName = patient?.client_name || patient?.client_email || patientId;
 
+  const tabs = [
+    ['overview', t('clinician.tabOverview')],
+    ['exams', t('clinician.tabExams')],
+    ['measurements', t('clinician.tabMeasurements')],
+    ['photos', t('clinician.tabPhotos')],
+    ['protocols', t('clinician.tabProtocols')],
+    ['exports', t('clinician.tabExport')],
+  ];
+
   return (
     <RoleGate roles={['clinician', 'admin']}>
       <div className="mx-auto max-w-3xl p-5 lg:p-8 space-y-6">
         <div className="pb-5 border-b border-[hsl(var(--border-h))]">
           <Link to="/clinician/patients" className="flex items-center gap-1 t-caption text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] mb-3 transition-colors">
-            <ChevronLeft className="w-3.5 h-3.5" strokeWidth={2} /> Back to patients
+            <ChevronLeft className="w-3.5 h-3.5" strokeWidth={2} /> {t('clinician.backToPatients')}
           </Link>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-[hsl(var(--ok)/0.1)] flex items-center justify-center font-bold text-[hsl(var(--ok))] text-[17px] shrink-0">
@@ -235,7 +252,7 @@ export default function ClinicianPatientProfile() {
 
         <Tabs defaultValue="overview">
           <TabsList className="bg-[hsl(var(--card-hi))] border border-[hsl(var(--border))] h-10 rounded-xl w-full p-1 gap-1 flex-wrap">
-            {[['overview','Overview'], ['exams','Exams'], ['measurements','Measurements'], ['photos','Photos'], ['protocols','Protocols'], ['exports','Export']].map(([v, l]) => (
+            {tabs.map(([v, l]) => (
               <TabsTrigger key={v} value={v}
                 className="flex-1 rounded-lg text-[10px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
                 {l}
