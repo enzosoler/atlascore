@@ -504,15 +504,6 @@ export default function Landing() {
                 </Button>
               </motion.div>
 
-              <motion.div variants={fade} custom={3.5} className="flex flex-wrap gap-3">
-                <a href="https://apps.apple.com/app/atlas-core/id6742876975" target="_blank" rel="noopener noreferrer">
-                  <img src="/assets/appstore.png" alt="Download on the App Store" className="h-10 w-auto" />
-                </a>
-                <a href="https://play.google.com/store/apps/details?id=com.atlascore.app" target="_blank" rel="noopener noreferrer">
-                  <img src="/assets/playstore.png" alt="Get it on Google Play" className="h-10 w-auto" />
-                </a>
-              </motion.div>
-
               <motion.div variants={fade} custom={4} className="grid grid-cols-3 gap-3">
                 {[
                   [c.hero.s1t, c.hero.s1d],
