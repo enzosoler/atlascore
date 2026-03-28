@@ -438,7 +438,8 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
   );
 }
 
-function AIInsight({ meals, dailyTotals, profile, isPt }) {
+function AIInsight({ meals, dailyTotals, profile }) {
+  const { t } = useI18n();
   const hasMeals = meals.length > 0;
   const hasHistory = meals.length > 5;
 
@@ -449,32 +450,24 @@ function AIInsight({ meals, dailyTotals, profile, isPt }) {
 
   if (!hasMeals) {
     insight = {
-      text: isPt
-        ? '💡 Dica: Comece o dia com proteína para manter a saciedade'
-        : '💡 Tip: Start your day with protein to stay fuller longer',
+      text: `💡 ${t('pages.nutrition.tip_start_with_protein')}`,
       tone: 'neutral',
     };
   } else if (missedBreakfast) {
     insight = {
-      text: isPt
-        ? '⚠️ Você costuma pular café da manhã — tente começar mais cedo hoje'
-        : "⚠️ You tend to miss breakfast — try starting earlier today",
+      text: `⚠️ ${t('pages.nutrition.warn_missed_breakfast')}`,
       tone: 'warn',
     };
   } else if (dailyTotals.protein > 0 && profile.protein_target > 0) {
     const proteinPct = dailyTotals.protein / profile.protein_target;
     if (proteinPct < 0.5) {
       insight = {
-        text: isPt
-          ? '🎯 Sua ingestão de proteína está baixa — priorize no próximo lanche'
-          : '🎯 Your protein intake has been low — prioritize it in your next snack',
+        text: `🎯 ${t('pages.nutrition.protein_intake_low')}`,
         tone: 'action',
       };
     } else if (proteinPct >= 0.9) {
       insight = {
-        text: isPt
-          ? '✅ Excelente ingestão de proteína! Continue assim'
-          : '✅ Great protein intake! Keep this up',
+        text: `✅ ${t('pages.nutrition.protein_intake_great')}`,
         tone: 'success',
       };
     }
@@ -536,11 +529,12 @@ function InterpretedMacroTrack({ label, consumed, target, unit, tone = 'calories
   );
 }
 
-function QuickAddButtons({ onQuickAdd, isPt }) {
+function QuickAddButtons({ onQuickAdd }) {
+  const { t } = useI18n();
   const buttons = [
-    { type: 'breakfast', icon: Sunrise, label: isPt ? 'Café' : 'Breakfast' },
-    { type: 'lunch', icon: Sun, label: isPt ? 'Almoço' : 'Lunch' },
-    { type: 'dinner', icon: Moon, label: isPt ? 'Jantar' : 'Dinner' },
+    { type: 'breakfast', icon: Sunrise, label: t('pages.nutrition.quick_breakfast') },
+    { type: 'lunch', icon: Sun, label: t('pages.nutrition.quick_lunch') },
+    { type: 'dinner', icon: Moon, label: t('pages.nutrition.quick_dinner') },
   ];
 
   return (
@@ -559,7 +553,8 @@ function QuickAddButtons({ onQuickAdd, isPt }) {
   );
 }
 
-function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing, isPt }) {
+function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing }) {
+  const { t } = useI18n();
   const config = MEAL_BUCKETS[bucketKey];
   if (!config) return null;
 
@@ -606,7 +601,7 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing, i
             className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] font-medium text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.1)]"
           >
             <Plus className="h-3.5 w-3.5" />
-            {isPt ? 'Adicionar' : 'Add'}
+            {t('pages.nutrition.add_button')}
           </button>
         )}
       </div>
@@ -648,7 +643,7 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing, i
             className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[hsl(var(--border)/0.5)] py-2 text-[12px] font-medium text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.08)]"
           >
             <Plus className="h-3.5 w-3.5" />
-            {isPt ? 'Adicionar item' : 'Add item'}
+            {t('pages.nutrition.add_item')}
           </button>
         </div>
       )}
@@ -1213,8 +1208,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
 // Main Page Component
 export default function NutritionPage() {
   const { user } = useAuth();
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useI18n();
   const ai = useAICoach({ userId: user?.id });
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
@@ -1666,20 +1660,20 @@ export default function NutritionPage() {
     const pct = consumed / target;
 
     if (consumed === 0) {
-      if (type === 'protein') return isPt ? 'Prioritize proteína na próxima refeição' : 'Prioritize protein in your next meal';
-      return isPt ? 'Você ainda não comeu' : "You haven't eaten yet";
+      if (type === 'protein') return t('pages.nutrition.interp_prioritize_protein');
+      return t('pages.nutrition.interp_not_eaten');
     }
     if (pct < 0.3) {
-      if (type === 'protein') return isPt ? 'Proteína muito baixa — corrija agora' : 'Protein very low — fix this now';
-      return isPt ? 'Abaixo do esperado para esta altura' : 'Below expected for this time of day';
+      if (type === 'protein') return t('pages.nutrition.interp_protein_very_low');
+      return t('pages.nutrition.interp_below_expected');
     }
-    if (pct >= 0.9) return isPt ? 'Meta quase atingida!' : 'Goal almost reached!';
+    if (pct >= 0.9) return t('pages.nutrition.interp_goal_almost');
     return null;
   };
 
   return (
     <SafePageBoundary
-      title={isPt ? "Nutrição" : "Nutrition"}
+      title={t('pages.nutrition.title')}
       subtitle="Daily nutrition tracking and guidance"
       fallbackDescription="Nutrition loaded in safe mode."
     >
@@ -1689,7 +1683,7 @@ export default function NutritionPage() {
         {/* Header + Date */}
         <div className="flex items-center justify-between">
           <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
-            {isPt ? 'Nutrição' : 'Nutrition'}
+            {t('pages.nutrition.title')}
           </h1>
           <DateStepper date={selectedDate} onChange={handleDateChange} />
         </div>
@@ -1712,7 +1706,7 @@ export default function NutritionPage() {
             const yesterday = shiftDate(selectedDate, -1);
             const yesterdayMeals = meals.filter((m) => m.date === yesterday);
             if (yesterdayMeals.length === 0) {
-              setNotice({ tone: 'warning', message: isPt ? 'Nada registrado ontem.' : 'Nothing logged yesterday.' });
+              setNotice({ tone: 'warning', message: t('pages.nutrition.nothing_logged_yesterday') });
               return;
             }
             for (const meal of yesterdayMeals) {
@@ -1735,7 +1729,7 @@ export default function NutritionPage() {
                 });
               }
             }
-            setNotice({ tone: 'success', message: isPt ? 'Refeições de ontem copiadas!' : 'Yesterday\'s meals copied!' });
+            setNotice({ tone: 'success', message: t('pages.nutrition.meals_copied') });
           }}
           onSearch={() => {
             setFoodQuery('');
