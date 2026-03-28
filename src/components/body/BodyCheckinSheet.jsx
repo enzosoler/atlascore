@@ -44,6 +44,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.lastWeight(user.id) });
       queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setWeight('');
+      onOpenChange(false);
     } catch {
       toast.error('Failed to log weight');
     } finally {

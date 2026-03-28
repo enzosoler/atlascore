@@ -475,7 +475,7 @@ function TodayContent() {
       )}
 
       {/* Modals — only rendered when open */}
-      {checkinOpen && <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />}
+      <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />}
       {quickWorkoutOpen && (
         <QuickWorkoutModal
           open={quickWorkoutOpen}

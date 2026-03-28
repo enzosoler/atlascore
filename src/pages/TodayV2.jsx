@@ -244,7 +244,7 @@ function TodayContent() {
       )}
 
       {/* Body Check-in Sheet */}
-      {checkinOpen && <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />}
+      <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />}
 
     </TodayScreen>
   );
