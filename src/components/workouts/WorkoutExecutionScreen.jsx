@@ -463,7 +463,7 @@ export default function WorkoutExecutionScreen({
     const durationMin = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
 
     return (
-      <div className="fixed inset-0 z-[75] flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.14),transparent_32%),linear-gradient(180deg,hsl(var(--bg))_0%,hsl(var(--shell))_100%)] p-5">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.14),transparent_32%),linear-gradient(180deg,hsl(var(--bg))_0%,hsl(var(--shell))_100%)] p-5">
         <div className="atlas-card flex w-full max-w-md flex-col items-center gap-6 rounded-[28px] px-6 py-8 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--ok)/0.15)]">
             <Trophy className="h-8 w-8 text-[hsl(var(--ok))]" />
@@ -517,7 +517,7 @@ export default function WorkoutExecutionScreen({
     const urgent = restRemaining > 0 && restRemaining <= 5;
 
     return (
-      <div className="fixed inset-0 z-[75] flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_30%,hsl(var(--brand)/0.14),transparent_55%),hsl(var(--bg))]">
+      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_30%,hsl(var(--brand)/0.14),transparent_55%),hsl(var(--bg))]">
 
         {/* Context header */}
         <div className="flex flex-col items-center gap-2.5 px-8 mb-10 text-center">
