@@ -27,6 +27,7 @@ import AIGenerateWizard from '@/components/ai/AIGenerateWizard';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { useT, useI18n } from '@/lib/i18nContext';
 import { useDailyState, DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
+import { useAICoach } from '@/hooks/useAICoach';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 

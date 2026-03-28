@@ -206,10 +206,11 @@ const RequireAuthenticatedApp = () => {
   const { authError, isAuthenticated, authState, user } = useAuth();
   const location = useLocation();
 
-  // Hide native splash once auth resolves (loading → any other state)
+  // Hide native splash once auth resolves — small delay lets WebView paint first
   useEffect(() => {
     if (authState !== 'loading' && Capacitor.isNativePlatform()) {
-      CapSplash.hide({ fadeOutDuration: 200 });
+      const t = setTimeout(() => CapSplash.hide({ fadeOutDuration: 300 }), 150);
+      return () => clearTimeout(t);
     }
   }, [authState]);
 
