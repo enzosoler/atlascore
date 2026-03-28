@@ -1,197 +1,150 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  Shield,
-  FileText,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-  AlertTriangle,
-  ArrowLeft,
-  Brain,
-  Mail,
+  LayoutDashboard, Users, CreditCard, Shield, FileText, Settings,
+  LogOut, Menu, Brain, Mail, ArrowLeft, X,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
 
 const ADMIN = ROUTES.admin;
 
 const primaryNav = [
-  { path: ADMIN,                    label: 'Overview',       icon: LayoutDashboard, end: true },
-  { path: `${ADMIN}/users`,        label: 'Users',          icon: Users },
-  { path: `${ADMIN}/ai-system`,    label: 'AI System',      icon: Brain },
-  { path: `${ADMIN}/logs`,         label: 'Logs & Errors',  icon: FileText },
-  { path: `${ADMIN}/subscriptions`,label: 'Subscriptions',  icon: CreditCard },
+  { path: ADMIN,                     label: 'Overview',      icon: LayoutDashboard, end: true },
+  { path: `${ADMIN}/users`,         label: 'Users',         icon: Users },
+  { path: `${ADMIN}/ai-system`,     label: 'AI System',     icon: Brain },
+  { path: `${ADMIN}/logs`,          label: 'Logs & Errors', icon: FileText },
+  { path: `${ADMIN}/subscriptions`, label: 'Subscriptions', icon: CreditCard },
 ];
 
 const secondaryNav = [
-  { path: `${ADMIN}/roles`,    label: 'Roles',     icon: Shield },
-  { path: `${ADMIN}/invites`,  label: 'Invites',   icon: Mail },
-  { path: `${ADMIN}/settings`, label: 'Settings',  icon: Settings },
+  { path: `${ADMIN}/roles`,    label: 'Roles',    icon: Shield },
+  { path: `${ADMIN}/invites`,  label: 'Invites',  icon: Mail },
+  { path: `${ADMIN}/settings`, label: 'Settings', icon: Settings },
 ];
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [permissions, setPermissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModerationMode, setIsModerationMode] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    checkAdminAccess();
+    if (!user) { navigate('/login'); return; }
+    const isAdmin = user.atlas_role === 'admin';
+    supabase.from('user_permissions').select('permission_name').eq('user_id', user.id)
+      .then(({ data }) => { setPermissions(data?.map(p => p.permission_name) || []); })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+    if (!isAdmin) navigate(ROUTES.today);
   }, [user]);
 
-  const checkAdminAccess = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    // If the user already has the admin atlas_role (validated by RouteGuard), grant access
-    // immediately. The user_permissions table adds granular feature-level permissions on top,
-    // but an empty table must not block a valid admin.
-    const isAdminRole = user.atlas_role === 'admin';
-
-    try {
-      const { data: userPermissions, error } = await supabase
-        .from('user_permissions')
-        .select('permission_name, permission_category')
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      const permNames = userPermissions?.map(p => p.permission_name) || [];
-      setPermissions(permNames);
-
-      const hasGranularAccess = userPermissions?.some(p =>
-        ['manage_users', 'manage_subscriptions', 'view_audit_logs', 'manage_roles', 'moderate_photos'].includes(p.permission_name)
-      );
-
-      // Allow if they have either the admin role OR granular permissions
-      if (!isAdminRole && !hasGranularAccess) {
-        navigate(ROUTES.today);
-      }
-    } catch (error) {
-      console.error('Error loading admin permissions:', error);
-      // Fall back to role-based access — don't kick a valid admin just because
-      // the permissions table query failed.
-      if (!isAdminRole) {
-        navigate(ROUTES.today);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Admins with no granular permissions yet see all nav items by role
-  const isAdminRole = user?.atlas_role === 'admin';
-  const hasPermission = (permissionName) =>
-    isAdminRole || permissions.includes(permissionName);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const handleLogout = async () => { await logout(); navigate('/login'); };
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="flex h-screen items-center justify-center bg-[hsl(var(--bg))]">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[hsl(var(--border))] border-t-[hsl(var(--brand))]" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Top bar — logout always visible */}
-      <div className="fixed top-0 right-0 z-50 flex items-center gap-2 p-3 lg:p-4">
-        <Button variant="ghost" size="sm" className="text-xs" onClick={() => { navigate(ROUTES.today + '?skip_admin=1'); }}>
-          <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
-          Back to app
-        </Button>
-        <Button variant="destructive" size="sm" className="text-xs" onClick={handleLogout}>
-          <LogOut className="mr-1.5 h-3.5 w-3.5" />
-          Logout
-        </Button>
+    <div className="flex min-h-screen bg-[hsl(var(--bg))] text-[hsl(var(--fg))]">
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="fixed left-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))] lg:hidden"
+      >
+        <Menu className="h-4 w-4" />
+      </button>
+
+      {/* Top-right actions */}
+      <div className="fixed right-3 top-3 z-50 flex items-center gap-2">
+        <button
+          onClick={() => navigate(ROUTES.today + '?skip_admin=1')}
+          className="flex items-center gap-1.5 rounded-[10px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> App
+        </button>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 rounded-[10px] bg-[hsl(var(--err))] px-3 py-1.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          <LogOut className="h-3.5 w-3.5" /> Logout
+        </button>
       </div>
 
-      {/* Mobile Sidebar */}
-      <Sheet>
-        <SheetTrigger asChild className="lg:hidden">
-          <Button variant="ghost" size="icon" className="fixed left-4 top-3 z-40">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
-          <Sidebar user={user} onLogout={handleLogout} navigate={navigate} />
-        </SheetContent>
-      </Sheet>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[60] flex lg:hidden">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
+          <div className="relative w-64 bg-[hsl(var(--card))]">
+            <button onClick={() => setMobileOpen(false)} className="absolute right-3 top-3 text-[hsl(var(--fg-2))]"><X className="h-4 w-4" /></button>
+            <SidebarContent user={user} onNav={() => setMobileOpen(false)} />
+          </div>
+        </div>
+      )}
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card lg:flex">
-        <Sidebar user={user} onLogout={handleLogout} navigate={navigate} />
+      {/* Desktop sidebar */}
+      <aside className="hidden w-56 shrink-0 border-r border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card))] lg:flex lg:flex-col">
+        <SidebarContent user={user} />
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-14 lg:pt-4">
-        <div className="mx-auto max-w-6xl p-4 lg:p-6">
-          <Outlet context={{ permissions, hasPermission, setIsModerationMode }} />
+      {/* Main */}
+      <main className="flex-1 overflow-auto pt-14 lg:pt-0">
+        <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8 lg:py-8">
+          <Outlet context={{ permissions }} />
         </div>
       </main>
     </div>
   );
 }
 
-function NavItem({ item }) {
+function SidebarContent({ user, onNav }) {
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex h-14 items-center gap-2 border-b border-[hsl(var(--border)/0.5)] px-5">
+        <span className="text-[14px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))]">atlas.core</span>
+        <span className="rounded-[6px] bg-[hsl(var(--brand)/0.12)] px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[hsl(var(--brand))]">ADMIN</span>
+      </div>
+
+      <nav className="flex-1 space-y-1 p-3">
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Core</p>
+        {primaryNav.map((item) => <NavItem key={item.path} item={item} onClick={onNav} />)}
+        <div className="my-3 border-t border-[hsl(var(--border)/0.4)]" />
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">System</p>
+        {secondaryNav.map((item) => <NavItem key={item.path} item={item} onClick={onNav} />)}
+      </nav>
+
+      <div className="border-t border-[hsl(var(--border)/0.5)] px-5 py-3">
+        <p className="truncate text-[12px] font-medium text-[hsl(var(--fg))]">{user?.email}</p>
+        <p className="text-[11px] text-[hsl(var(--fg-3))]">{user?.atlas_role}</p>
+      </div>
+    </div>
+  );
+}
+
+function NavItem({ item, onClick }) {
   return (
     <NavLink
       to={item.path}
       end={item.end}
+      onClick={onClick}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
+          'flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-[13px] font-medium transition-all',
           isActive
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            ? 'bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]'
+            : 'text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.6)] hover:text-[hsl(var(--fg))]'
         )
       }
     >
-      <item.icon className="h-4 w-4" />
+      <item.icon className="h-4 w-4" strokeWidth={1.8} />
       {item.label}
     </NavLink>
-  );
-}
-
-function Sidebar({ user, onLogout, navigate }) {
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-14 items-center border-b px-5">
-        <span className="text-[15px] font-bold tracking-tight">atlas.core</span>
-        <span className="ml-2 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">ADMIN</span>
-      </div>
-
-      <nav className="flex-1 space-y-0.5 p-3">
-        <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Core</p>
-        {primaryNav.map((item) => <NavItem key={item.path} item={item} />)}
-
-        <div className="my-3 border-t" />
-        <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">System</p>
-        {secondaryNav.map((item) => <NavItem key={item.path} item={item} />)}
-      </nav>
-
-      <div className="border-t p-3">
-        <p className="truncate px-3 text-[12px] font-medium text-foreground">{user?.email}</p>
-        <p className="px-3 text-[11px] text-muted-foreground">{user?.atlas_role}</p>
-      </div>
-    </div>
   );
 }
