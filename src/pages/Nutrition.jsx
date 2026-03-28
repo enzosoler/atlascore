@@ -44,6 +44,11 @@ import { searchFoods, getFoodDetails } from '@/services/foodSearchService';
 import { searchTaco } from '@/services/tacoService';
 import AIFoodInput from '@/components/nutrition/AIFoodInput';
 import FoodCameraScanner from '@/components/nutrition/FoodCameraScanner';
+import NutritionHeroCard from '@/components/nutrition/NutritionHeroCard';
+import NutritionQuickActions from '@/components/nutrition/NutritionQuickActions';
+import MealTimeline from '@/components/nutrition/MealTimeline';
+import MacroProgressBar from '@/components/nutrition/MacroProgressBar';
+import AINutritionSuggestions from '@/components/nutrition/AINutritionSuggestions';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -1680,237 +1685,94 @@ export default function NutritionPage() {
       subtitle="Daily nutrition tracking and guidance"
       fallbackDescription="Nutrition loaded in safe mode."
     >
-      <AppContainer>
-        <StatusHeader
+      <div className="min-h-full bg-[hsl(var(--bg))] pb-8">
+        <div className="mx-auto max-w-lg px-4 pt-5 space-y-4">
+
+        {/* Header + Date */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
+            {isPt ? 'Nutrição' : 'Nutrition'}
+          </h1>
+          <DateStepper date={selectedDate} onChange={handleDateChange} />
+        </div>
+
+        {notice && <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>}
+
+        {/* 1 — Hero Card */}
+        <NutritionHeroCard
           dailyTotals={dailyTotals}
           profile={profile}
-          sortedMeals={sortedMeals}
-          onAddMeal={handleAddMeal}
-          isPt={isPt}
+          mealCount={sortedMeals.length}
         />
 
-        {notice && (
-          <div className="mt-5">
-            <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>
+        {/* 2 — Quick Actions */}
+        <NutritionQuickActions
+          onAddMeal={handleAddMeal}
+          onQuickAI={handleAddMeal}
+          onCopyYesterday={() => {
+            const yesterday = shiftDate(selectedDate, -1);
+            const yesterdayMeals = meals.filter((m) => m.date === yesterday);
+            if (yesterdayMeals.length === 0) {
+              setNotice({ tone: 'warning', message: isPt ? 'Nada registrado ontem.' : 'Nothing logged yesterday.' });
+              return;
+            }
+            for (const meal of yesterdayMeals) {
+              for (const food of meal.foods || []) {
+                const snapshot = {
+                  user_id: user.id,
+                  date: buildSnapshotDate(selectedDate),
+                  meal_type: meal.meal_type,
+                  food_name: food.name,
+                  calories: Math.round(food.kcal || 0),
+                  protein: Math.round((food.protein || 0) * 10) / 10,
+                  carbs: Math.round((food.carbs || 0) * 10) / 10,
+                  fat: Math.round((food.fat || 0) * 10) / 10,
+                  quantity: 1,
+                  serving_unit: food.unit || 'g',
+                  serving_size: food.amount || 100,
+                };
+                supabase.from('food_logs').insert(snapshot).select().single().then(({ data }) => {
+                  if (data) setMeals((cur) => [...cur, mapFoodLogToMeal(data)]);
+                });
+              }
+            }
+            setNotice({ tone: 'success', message: isPt ? 'Refeições de ontem copiadas!' : 'Yesterday\'s meals copied!' });
+          }}
+          onSearch={() => {
+            setFoodQuery('');
+            setQuickAddType(null);
+            setEditingMeal(null);
+            setIsFormOpen(true);
+          }}
+        />
+
+        {/* 3 — Meal Timeline */}
+        {isLoadingMeals ? (
+          <div className="flex items-center justify-center gap-3 rounded-[16px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading meals...
           </div>
+        ) : (
+          <MealTimeline
+            meals={sortedMeals}
+            onEdit={handleEditMeal}
+            onDelete={handleDeleteMeal}
+            onAddMeal={handleAddMeal}
+          />
         )}
 
-        <div className="mt-5">
-          <NextAction
-            dailyTotals={dailyTotals}
-            profile={profile}
-            sortedMeals={sortedMeals}
-            onAddMeal={handleAddMeal}
-            isPt={isPt}
-          />
+        {/* 4 — Macro Progress */}
+        <MacroProgressBar dailyTotals={dailyTotals} profile={profile} />
+
+        {/* 5 — AI Suggestions */}
+        <AINutritionSuggestions
+          dailyTotals={dailyTotals}
+          profile={profile}
+          mealCount={sortedMeals.length}
+        />
+
         </div>
-
-        <div className="mt-4">
-          <AIInsight
-            meals={meals}
-            dailyTotals={dailyTotals}
-            profile={profile}
-            isPt={isPt}
-          />
-        </div>
-
-        <Section
-          className="mt-5"
-          eyebrow={isPt ? "Metas" : "Goals"}
-          title={isPt ? "Metas Diárias" : "Daily Goals"}
-          subtitle={isPt ? "Progresso com orientação personalizada" : "Progress with personalized guidance"}
-          actions={loggingStreak >= 2 ? (
-            <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--warn)/0.12)] border border-[hsl(var(--warn)/0.25)] px-3 py-1">
-              <span className="text-[13px]">🔥</span>
-              <span className="text-[12px] font-semibold text-[hsl(var(--warn))]">
-                {`${loggingStreak}-day streak`}
-              </span>
-            </div>
-          ) : null}
-        >
-          {!showTargetsEditor && (
-            <div className={'mb-4 flex items-center justify-between gap-3 rounded-[18px] border px-4 py-3 ' + (profile.calories_target === 0 ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)]' : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)]')}>
-              <div className="flex items-center gap-2.5 text-[13px] text-[hsl(var(--fg-2))]">
-                <Target className={'h-4 w-4 shrink-0 ' + (profile.calories_target === 0 ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--brand))]')} strokeWidth={1.9} />
-                <span>
-                  {profile.calories_target === 0
-                    ? 'Set your daily calorie and macro targets to get started.'
-                    : `${profile.calories_target} kcal · ${profile.protein_target}g protein · ${profile.carbs_target}g carbs · ${profile.fat_target}g fat`}
-                </span>
-              </div>
-              <SecondaryButton
-                type="button"
-                onClick={handleOpenTargetsEditor}
-                className="shrink-0"
-              >
-                {profile.calories_target === 0 ? 'Set targets' : 'Edit targets'}
-              </SecondaryButton>
-            </div>
-          )}
-
-          {showTargetsEditor && targetDraft && (
-            <div className="mb-4 rounded-[22px] border border-[hsl(var(--brand)/0.25)] bg-[hsl(var(--brand)/0.03)] px-5 py-5 space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-                    {profile.calories_target === 0 ? 'Set up your nutrition targets' : 'Daily Nutrition Targets'}
-                  </p>
-                  {profile.calories_target === 0 && (
-                    <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
-                      Enter your daily goals to track progress against them.
-                    </p>
-                  )}
-                </div>
-                <Target className="h-5 w-5 text-[hsl(var(--brand))]" strokeWidth={1.8} />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[
-                  { key: 'calories_target', label: 'Calories', unit: 'kcal' },
-                  { key: 'protein_target', label: 'Protein', unit: 'g' },
-                  { key: 'carbs_target', label: 'Carbs', unit: 'g' },
-                  { key: 'fat_target', label: 'Fat', unit: 'g' },
-                ].map(({ key, label, unit }) => (
-                  <div key={key}>
-                    <label className="block text-[11px] font-medium text-[hsl(var(--fg-2))] mb-1">{label} ({unit})</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={targetDraft[key] || ''}
-                      onChange={(e) => setTargetDraft((d) => ({ ...d, [key]: e.target.value }))}
-                      placeholder="0"
-                      className="atlas-field h-11 w-full px-3.5 text-[14px]"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-col gap-2 pt-1 sm:flex-row">
-                {profile.calories_target > 0 && (
-                  <SecondaryButton
-                    onClick={() => { setShowTargetsEditor(false); setTargetDraft(null); }}
-                    disabled={isSavingTargets}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </SecondaryButton>
-                )}
-                <PrimaryButton
-                  onClick={handleSaveTargets}
-                  disabled={isSavingTargets}
-                  className="flex-1 gap-2"
-                >
-                  {isSavingTargets ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save'}
-                </PrimaryButton>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <InterpretedMacroTrack
-              label={isPt ? "Calorias" : "Calories"}
-              consumed={dailyTotals.calories}
-              target={profile.calories_target}
-              unit="kcal"
-              tone="calories"
-              interpretation={getMacroInterpretation(dailyTotals.calories, profile.calories_target, 'calories')}
-            />
-            <InterpretedMacroTrack
-              label={isPt ? "Proteína" : "Protein"}
-              consumed={dailyTotals.protein}
-              target={profile.protein_target}
-              unit="g"
-              tone="protein"
-              interpretation={getMacroInterpretation(dailyTotals.protein, profile.protein_target, 'protein')}
-            />
-            <InterpretedMacroTrack
-              label={isPt ? "Carboidratos" : "Carbohydrates"}
-              consumed={dailyTotals.carbs}
-              target={profile.carbs_target}
-              unit="g"
-              tone="carbs"
-              interpretation={getMacroInterpretation(dailyTotals.carbs, profile.carbs_target, 'carbs')}
-            />
-            <InterpretedMacroTrack
-              label={isPt ? "Gorduras" : "Fats"}
-              consumed={dailyTotals.fat}
-              target={profile.fat_target}
-              unit="g"
-              tone="fat"
-              interpretation={getMacroInterpretation(dailyTotals.fat, profile.fat_target, 'fat')}
-            />
-          </div>
-        </Section>
-
-        <Section
-          eyebrow={isPt ? "Rápido" : "Quick"}
-          title={isPt ? "Adicionar Rápido" : "Quick Add"}
-          subtitle={isPt ? "Registre refeições comuns em um clique" : "Log common meals in one click"}
-        >
-          <QuickAddButtons onQuickAdd={handleQuickAdd} isPt={isPt} />
-        </Section>
-
-        <Section
-          eyebrow={isPt ? "Hoje" : "Today"}
-          title={isPt ? "Registro Diário" : "Daily Log"}
-          subtitle={isPt ? "Refeições organizadas por período" : "Meals organized by time of day"}
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
-            <DateStepper date={selectedDate} onChange={handleDateChange} />
-            <PrimaryButton onClick={handleAddMeal} className="gap-2 self-start sm:self-auto">
-              <Plus className="h-4 w-4" />
-              Add meal
-            </PrimaryButton>
-          </div>
-
-          {isLoadingMeals ? (
-            <div className="flex items-center justify-center gap-3 rounded-lg bg-[hsl(var(--fill))] p-8 text-sm text-[hsl(var(--fg-2))]">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Loading meals...
-            </div>
-          ) : sortedMeals.length === 0 ? (
-            <div className="rounded-[18px] border border-dashed border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.3)] px-6 py-10 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[hsl(var(--brand)/0.1)]">
-                  <UtensilsCrossed className="h-7 w-7 text-[hsl(var(--brand))]" strokeWidth={1.5} />
-                </div>
-              </div>
-              <p className="text-[16px] font-semibold text-[hsl(var(--fg))]">
-                {isPt ? 'Nada registrado hoje' : 'Nothing logged yet today'}
-              </p>
-              <p className="mt-1 text-[14px] text-[hsl(var(--fg-2))]">
-                {isPt ? 'Comece adicionando sua primeira refeição' : 'Start by adding your first meal'}
-              </p>
-              <div className="mt-4 flex justify-center gap-2">
-                <button
-                  onClick={() => handleQuickAdd('breakfast')}
-                  className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.7)] px-3 py-1.5 text-[12px] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
-                >
-                  <Sunrise className="h-3.5 w-3.5" />
-                  {isPt ? 'Ex: ovos, aveia' : 'e.g. eggs, oats'}
-                </button>
-              </div>
-              <PrimaryButton onClick={handleAddMeal} className="mt-4 gap-2">
-                <Plus className="h-4 w-4" />
-                {isPt ? 'Adicionar refeição' : 'Add meal'}
-              </PrimaryButton>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {MEAL_ORDER.map((bucketKey) => (
-                <MealBucket
-                  key={bucketKey}
-                  bucketKey={bucketKey}
-                  meals={sortedMeals}
-                  onEdit={handleEditMeal}
-                  onDelete={handleDeleteMeal}
-                  onAdd={handleQuickAdd}
-                  isProcessing={false}
-                  isPt={isPt}
-                />
-              ))}
-            </div>
-          )}
-        </Section>
-      </AppContainer>
+      </div>
 
       <ResponsiveModal
         open={isFormOpen}
