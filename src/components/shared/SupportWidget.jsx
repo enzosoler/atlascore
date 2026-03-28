@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageCircle, X, Bug, Lightbulb, HelpCircle, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
 import { useT } from '@/lib/i18nContext';
 import MobileSheet from '@/components/shared/MobileSheet';
+import { hasSession } from '@/lib/workoutSession';
 
 export default function SupportWidget() {
   const t = useT();
@@ -13,6 +14,15 @@ export default function SupportWidget() {
   const [selected, setSelected] = useState(null);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [sessionActive, setSessionActive] = useState(() => hasSession());
+
+  useEffect(() => {
+    const handler = () => setSessionActive(hasSession());
+    window.addEventListener('atlas:session:change', handler);
+    return () => window.removeEventListener('atlas:session:change', handler);
+  }, []);
+
+  if (sessionActive) return null;
 
   const OPTIONS = [
     { id: 'bug',     icon: Bug,        label: t('shared.supportWidget.optionBug'),     color: 'text-[hsl(var(--err))]',  bg: 'bg-[hsl(var(--err)/0.07)]' },

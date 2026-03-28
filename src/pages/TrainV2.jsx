@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useBlocker } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Play, CheckCircle2, Dumbbell, Clock, Zap, Plus,
@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useDailyStateV2, DAILY_KEYS } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
+import WorkoutGuardSheet from '@/components/workouts/WorkoutGuardSheet';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import { AppContainer } from '@/components/shared/AppContainer';
@@ -34,6 +35,7 @@ import {
   createWorkoutPlan,
 } from '@/services/workoutPlanService';
 import { saveCompletedWorkout } from '@/services/workoutService';
+import { loadSession, clearSession, hasSession } from '@/lib/workoutSession';
 
 // ─── Build session from plan day ───────────────────────────────────────────────
 
@@ -84,8 +86,10 @@ export default function TrainV2() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState('list');
   const [activeSession, setActiveSession] = useState(null);
+  const [initialSession, setInitialSession] = useState(null);
   const [showQuickWorkout, setShowQuickWorkout] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
+  const [showGuard, setShowGuard] = useState(false);
 
   const daily = useDailyStateV2();
   const ai = useAICoach({ userId: user?.id });
@@ -102,13 +106,26 @@ export default function TrainV2() {
   const saveMut = useMutation({
     mutationFn: ({ userId, payload, originalWorkout }) => saveCompletedWorkout(userId, payload, originalWorkout),
     onSuccess: () => {
+      clearSession();
+      window.dispatchEvent(new Event('atlas:session:change'));
       toast.success('Workout saved!');
       daily.invalidateAfterAction('workout');
       setMode('list');
       setActiveSession(null);
+      setInitialSession(null);
     },
     onError: () => toast.error('Failed to save workout.'),
   });
+
+  // Resume saved session on mount
+  useEffect(() => {
+    const saved = loadSession();
+    if (saved?.workout) {
+      setActiveSession(saved.workout);
+      setInitialSession(saved);
+      setMode('execution');
+    }
+  }, []);
 
   // Auto-start from URL param
   useEffect(() => {
@@ -116,17 +133,47 @@ export default function TrainV2() {
       setSearchParams({}, { replace: true });
       const dayIdx = daily.activePlan.current_day_index ?? 0;
       setActiveSession(buildSessionFromPlan(daily.activePlan, dayIdx));
+      setInitialSession(null);
       setMode('execution');
     }
   }, [searchParams, daily.activePlan, mode]);
 
+  // Navigation guard — block leaving when a session is active
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      mode === 'execution' && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setShowGuard(true);
+    }
+  }, [blocker.state]);
+
+  const handleGuardResume = () => {
+    setShowGuard(false);
+    blocker.reset?.();
+  };
+
+  const handleGuardEnd = () => {
+    setShowGuard(false);
+    clearSession();
+    window.dispatchEvent(new Event('atlas:session:change'));
+    setMode('list');
+    setActiveSession(null);
+    setInitialSession(null);
+    blocker.proceed?.();
+  };
+
   const handleStartDay = (dayIndex) => {
     setActiveSession(buildSessionFromPlan(daily.activePlan, dayIndex));
+    setInitialSession(null);
     setMode('execution');
   };
 
   const handleStartQuickWorkout = (session) => {
     setActiveSession(session);
+    setInitialSession(null);
     setShowQuickWorkout(false);
     setMode('execution');
   };
@@ -139,13 +186,20 @@ export default function TrainV2() {
   // ── Execution mode: full takeover ──────────────────────────────────────────
   if (mode === 'execution' && activeSession) {
     return (
-      <WorkoutExecutionScreen
-        workout={activeSession}
-        onComplete={handleComplete}
-        onBack={() => { setMode('list'); setActiveSession(null); }}
-        workoutHistory={workoutHistory}
-        personalRecords={personalRecords}
-      />
+      <>
+        <WorkoutExecutionScreen
+          workout={activeSession}
+          initialSession={initialSession}
+          onComplete={handleComplete}
+          workoutHistory={workoutHistory}
+          personalRecords={personalRecords}
+        />
+        <WorkoutGuardSheet
+          open={showGuard}
+          onResume={handleGuardResume}
+          onEnd={handleGuardEnd}
+        />
+      </>
     );
   }
 
