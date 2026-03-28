@@ -16,6 +16,9 @@ import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralTracking';
 import { Capacitor } from '@capacitor/core';
+import { supabase } from '@/lib/supabaseClient';
+import { App as CapApp } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import AppLayout from '@/components/layout/AppLayout.jsx';
 import RouteGuard from '@/components/rbac/RouteGuard';
 import { WebOnlyRoute } from '@/components/routing/WebOnlyRoute';
@@ -430,29 +433,23 @@ function App() {
     if (!Capacitor.isNativePlatform()) return;
 
     let listener;
-    (async () => {
-      const { App: CapApp } = await import('@capacitor/app');
-      const { supabase } = await import('@/lib/supabaseClient');
-      const { Browser } = await import('@capacitor/browser');
 
-      listener = await CapApp.addListener('appUrlOpen', async ({ url }) => {
-        if (!url.includes('atlascore://auth/callback')) return;
-        await Browser.close();
+    CapApp.addListener('appUrlOpen', async ({ url }) => {
+      if (!url.includes('atlascore://auth/callback')) return;
+      await Browser.close();
 
-        // Extract code or tokens from the URL
-        const urlObj = new URL(url.replace('atlascore://', 'https://x.com/'));
-        const code = urlObj.searchParams.get('code');
-        const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
+      const urlObj = new URL(url.replace('atlascore://', 'https://x.com/'));
+      const code = urlObj.searchParams.get('code');
+      const hashParams = new URLSearchParams(urlObj.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
 
-        if (code) {
-          await supabase.auth.exchangeCodeForSession(code);
-        } else if (accessToken) {
-          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-        }
-      });
-    })();
+      if (code) {
+        await supabase.auth.exchangeCodeForSession(code);
+      } else if (accessToken) {
+        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+      }
+    }).then(h => { listener = h; });
 
     return () => { listener?.remove(); };
   }, []);
