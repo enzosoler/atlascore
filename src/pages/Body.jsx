@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Camera, Ruler, TrendingUp, ArrowRight, Target, Zap, Scale, Activity } from 'lucide-react';
+import { Camera, Ruler, TrendingUp, ArrowRight, Target, Zap, Scale, Activity, Sparkles } from 'lucide-react';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { FilterChip, EmptyState } from '@/components/shared/StablePage';
 import { useAuth } from '@/lib/AuthContext';
@@ -125,15 +125,22 @@ function TrendInterpretation({ weightData, bodyFatData }) {
   };
 
   return (
-    <Card className="px-5 py-5 space-y-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.trends.analysis_title')}</p>
-      {insights.map((ins, i) => (
-        <div key={i} className="flex items-start gap-2">
-          <Activity className={`w-4 h-4 mt-0.5 shrink-0 ${toneColors[ins.tone]}`} strokeWidth={2} />
-          <p className="text-[13px] leading-relaxed text-[hsl(var(--fg))]">{ins.text}</p>
+    <div className="rounded-[var(--atlas-card-radius,20px)] border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden"
+         style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
+      <div className="h-[1.5px] bg-gradient-to-r from-[hsl(var(--brand-ai)/0.7)] via-[hsl(var(--brand-ai)/0.3)] to-transparent" />
+      <div className="px-5 py-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--brand-ai))]">{t('body.trends.analysis_title')}</p>
         </div>
-      ))}
-    </Card>
+        {insights.map((ins, i) => (
+          <div key={i} className="flex items-start gap-2.5">
+            <Activity className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${toneColors[ins.tone]}`} strokeWidth={2} />
+            <p className="text-[13px] leading-relaxed text-[hsl(var(--fg))]">{ins.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -216,37 +223,46 @@ function BodySummary({ measurements }) {
     return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${color}`}>{label}</span>;
   };
 
+  const score = measurements.length > 0 ? Math.min(100, Math.round(60 + measurements.length * 2 + Math.abs(weightChange) * 5)) : null;
+
   return (
     <div className="grid gap-3 md:grid-cols-3">
-      <Card className="px-5 py-5">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.summary.weight')}</p>
-          {getTrendBadge(weightChange, 'kg')}
+      <Card className="px-5 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{t('body.summary.weight')}</p>
+        <div className="mt-2 flex items-baseline gap-1.5">
+          <p className="text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))] leading-none">
+            {latestWeight ? latestWeight.toFixed(1) : '—'}
+          </p>
+          {latestWeight && <span className="text-[14px] font-medium text-[hsl(var(--fg-3))]">kg</span>}
         </div>
-        <p className="mt-3 text-[1.5rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-          {latestWeight ? `${latestWeight.toFixed(1)} kg` : '—'}
-        </p>
+        <div className="mt-2">{getTrendBadge(weightChange, 'kg')}</div>
       </Card>
 
-      <Card className="px-5 py-5">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.summary.body_fat')}</p>
-          {getTrendBadge(bodyFatChange, '%')}
+      <Card className="px-5 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{t('body.summary.body_fat')}</p>
+        <div className="mt-2 flex items-baseline gap-1.5">
+          <p className="text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))] leading-none">
+            {latestBodyFat ? latestBodyFat.toFixed(1) : '—'}
+          </p>
+          {latestBodyFat && <span className="text-[14px] font-medium text-[hsl(var(--fg-3))]">%</span>}
         </div>
-        <p className="mt-3 text-[1.5rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-          {latestBodyFat ? `${latestBodyFat.toFixed(1)}%` : '—'}
-        </p>
+        <div className="mt-2">{getTrendBadge(bodyFatChange, '%')}</div>
       </Card>
 
-      <Card className="px-5 py-5">
-        <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.summary.progress_score')}</p>
-          <Zap className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={1.9} />
+      <Card className="px-5 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{t('body.summary.progress_score')}</p>
+        <div className="mt-2 flex items-baseline gap-1.5">
+          <p className="text-[2rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))] leading-none">
+            {score ?? '—'}
+          </p>
+          {score && <span className="text-[14px] font-medium text-[hsl(var(--fg-3))]">{t('body.summary.out_of_100')}</span>}
         </div>
-        <p className="mt-3 text-[1.5rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-          {measurements.length > 0 ? Math.min(100, Math.round(60 + measurements.length * 2 + Math.abs(weightChange) * 5)) : '—'}
-          <span className="ml-1 text-[14px] font-medium text-[hsl(var(--fg-2))]">{t('body.summary.out_of_100')}</span>
-        </p>
+        <div className="mt-2">
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[hsl(var(--brand))]">
+            <Zap className="h-3 w-3" strokeWidth={2} />
+            {t('body.summary.progress_score')}
+          </span>
+        </div>
       </Card>
     </div>
   );

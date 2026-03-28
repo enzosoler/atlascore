@@ -1283,3 +1283,75 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Sonner toast overrides ─────────────────────────────────────────────────── */
+
+[data-sonner-toaster] {
+  --width: min(360px, calc(100vw - 32px));
+}
+
+.atlas-sonner-toast {
+  background: hsl(var(--card) / 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--fg)) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.03) inset !important;
+  padding: 13px 15px !important;
+  gap: 10px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+}
+
+.atlas-sonner-title {
+  color: hsl(var(--fg)) !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.atlas-sonner-desc {
+  color: hsl(var(--fg-2)) !important;
+  font-size: 12px !important;
+}
+
+.atlas-sonner-success {
+  border-left: 2.5px solid hsl(var(--ok)) !important;
+}
+
+.atlas-sonner-success .atlas-sonner-icon {
+  color: hsl(var(--ok)) !important;
+}
+
+.atlas-sonner-error {
+  border-left: 2.5px solid hsl(var(--err)) !important;
+}
+
+.atlas-sonner-error .atlas-sonner-icon {
+  color: hsl(var(--err)) !important;
+}
+
+.atlas-sonner-warning {
+  border-left: 2.5px solid hsl(var(--warn)) !important;
+}
+
+.atlas-sonner-warning .atlas-sonner-icon {
+  color: hsl(var(--warn)) !important;
+}
+
+.atlas-sonner-info {
+  border-left: 2.5px solid hsl(var(--brand)) !important;
+}
+
+.atlas-sonner-info .atlas-sonner-icon {
+  color: hsl(var(--brand)) !important;
+}
+
+.atlas-sonner-close {
+  background: hsl(var(--fill)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--fg-2)) !important;
+  border-radius: 6px !important;
+}
