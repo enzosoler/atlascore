@@ -229,7 +229,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
@@ -557,7 +557,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
         {/* Footer */}
         <div
           className="flex items-center justify-between px-5 py-4 border-t border-[hsl(var(--border))] flex-shrink-0"
-          style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+          style={{ paddingBottom: 'calc(var(--tab-bar-h, 94px) + env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
         >
           {/* Back button */}
           {(mode !== null && !(mode === 'ai' && step === 4)) && !generating && (

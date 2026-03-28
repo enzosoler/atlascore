@@ -23,8 +23,9 @@ import { AIRecommendations } from '@/components/today/AIRecommendations';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/sentry';
 import AIGenerateWizard from '@/components/ai/AIGenerateWizard';
+import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { useT, useI18n } from '@/lib/i18nContext';
-import { useAICoach } from '@/hooks/useAICoach';
+import { useDailyState, DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -200,18 +201,12 @@ function TodayContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [aiWizardOpen, setAiWizardOpen] = useState(false);
+  const [quickWorkoutOpen, setQuickWorkoutOpen] = useState(false);
 
   const hasAIAccess = can('atlas_ai');
 
-  // ── AI coaching engine ────────────────────────────────────────────────────
-  const {
-    briefing: aiBriefing,
-    alerts: aiAlerts,
-    recommendations: aiRecommendations,
-    loading: aiLoading,
-    followRec,
-    dismissRec,
-  } = useAICoach({ userId: user?.id });
+  // ── Shared daily state (single source of truth) ──────────────────────────
+  const daily = useDailyState();
 
   // ── Stripe checkout completion ────────────────────────────────────────────
   useEffect(() => {
@@ -248,37 +243,10 @@ function TodayContent() {
 
   const preferredName = getPreferredName(user?.full_name || user?.email, 'Athlete');
 
-  // ── Data queries ──────────────────────────────────────────────────────────
-  const { data: todayMeals = [], isLoading: mealsLoading } = useQuery({
-    queryKey: ['today-meals', user?.id],
-    queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('food_logs')
-        .eq('user_id', user.id)
-        .gte('date', `${today}T00:00:00`)
-        .lte('date', `${today}T23:59:59`);
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user?.id,
-  });
+  // ── Daily data from shared hook ──────────────────────────────────────────
+  const { todayMeals, todaySession, workoutDone, nutritionLogged, weightLogged, totalKcal } = daily;
 
-  const { data: todaySession, isLoading: sessionLoading } = useQuery({
-    queryKey: ['today-session', user?.id],
-    queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('workout_logs')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-
+  // ── Supplementary queries (not in shared daily state) ────────────────────
   const { data: activeWorkoutPlan, isLoading: planLoading } = useQuery({
     queryKey: ['active-workout-plan', user?.id],
     queryFn: async () => {
@@ -369,42 +337,24 @@ function TodayContent() {
   });
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const isLoading = mealsLoading || sessionLoading || planLoading || measurementsLoading || aiLoading;
+  const isLoading = daily.isLoading || planLoading || measurementsLoading;
 
-  const totalKcal = useMemo(
-    () => todayMeals.reduce((s, m) => s + (m.calories || m.total_calories || 0), 0),
-    [todayMeals]
-  );
-
-  const hasRecentWeight = useMemo(
-    () => recentMeasurements.length > 0 &&
-      Date.now() - new Date(recentMeasurements[0].date).getTime() < 7 * 86_400_000,
-    [recentMeasurements]
-  );
-
-  const rulesBriefing = useMemo(
+  const briefing = useMemo(
     () => buildBriefing({ todaySession, todayMeals, activeWorkoutPlan, profile, preferredName, totalKcal }),
     [todaySession, todayMeals, activeWorkoutPlan, profile, preferredName, totalKcal]
   );
 
-  const rulesAlerts = useMemo(
+  const alerts = useMemo(
     () => buildAlerts({ todaySession, todayMeals, recentMeasurements, lastWorkout }),
     [todaySession, todayMeals, recentMeasurements, lastWorkout]
   );
 
-  const rulesRecommendations = useMemo(
+  const recommendations = useMemo(
     () => buildRecommendations({
       todaySession, todayMeals, activeWorkoutPlan, recentMeasurements, profile, progressPhotos,
     }),
     [todaySession, todayMeals, activeWorkoutPlan, recentMeasurements, profile, progressPhotos]
   );
-
-  // Merge: use engine output when available, fall back to rules-based
-  const briefing = aiBriefing
-    ? { text: aiBriefing.body, focus: aiBriefing.focus, primaryAction: null, secondaryAction: null }
-    : rulesBriefing;
-  const alerts = aiAlerts.length > 0 ? aiAlerts : rulesAlerts;
-  const recommendations = aiRecommendations.length > 0 ? aiRecommendations : rulesRecommendations;
 
   // ── AI plan generation ────────────────────────────────────────────────────
   const handleAIGenerate = async (answers) => {
@@ -494,15 +444,19 @@ function TodayContent() {
       {/* 3 — Readiness Row: Sleep / Energy / Recovery / Water */}
       <ReadinessRow
         signals={{}}
-        onTap={() => setCheckinOpen(true)}
+        onSignalSave={(key, value) => {
+          // TODO: persist to daily checkin
+          toast.success(`${key}: ${value} saved`);
+        }}
       />
 
       {/* 4 — Quick Actions: 2×2 grid */}
       <QuickActions
-        workoutDone={todaySession?.status === 'completed'}
-        nutritionLogged={todayMeals.length > 0}
-        weightLogged={hasRecentWeight}
+        workoutDone={workoutDone}
+        nutritionLogged={nutritionLogged}
+        weightLogged={weightLogged}
         onCheckin={() => setCheckinOpen(true)}
+        onQuickWorkout={() => setQuickWorkoutOpen(true)}
       />
 
       {/* 5 — Today's Plan */}
@@ -530,12 +484,18 @@ function TodayContent() {
       {/* 8 — AI Recommendations: below fold, max 3, high signal only */}
       <AIRecommendations
         recommendations={recommendations}
-        onFollow={followRec}
-        onDismiss={dismissRec}
       />
 
       {/* Modals */}
       <WeeklyCheckinModal open={checkinOpen} onClose={() => setCheckinOpen(false)} />
+      <QuickWorkoutModal
+        open={quickWorkoutOpen}
+        onClose={() => setQuickWorkoutOpen(false)}
+        onStart={(session) => {
+          navigate(ROUTES.workouts);
+          setQuickWorkoutOpen(false);
+        }}
+      />
       <AIGenerateWizard
         open={aiWizardOpen}
         onClose={() => setAiWizardOpen(false)}

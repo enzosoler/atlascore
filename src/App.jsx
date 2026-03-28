@@ -72,6 +72,7 @@ const BlockReview = lazy(() => import('@/pages/BlockReview'));
 const Exercises = lazy(() => import('@/pages/Exercises'));
 const ExerciseDetail = lazy(() => import('@/pages/ExerciseDetail'));
 const Progress = lazy(() => import('@/pages/Progress'));
+const Plan = lazy(() => import('@/pages/Plan'));
 const Body = lazy(() => import('@/pages/Body'));
 const NewCheckpointPage = lazy(() => import('@/pages/body/NewCheckpointPage'));
 const HelpCenter = lazy(() => import('@/pages/HelpCenter.jsx'));
@@ -351,6 +352,7 @@ const AppRoutes = () => (
           <Route path={ROUTES.exercises} element={<Exercises />} />
           <Route path="/exercise/:id" element={<ExerciseDetail />} />
           <Route path={ROUTES.progress} element={<Progress />} />
+          <Route path={ROUTES.plan} element={<Plan />} />
           <Route path={ROUTES.body} element={<Body />} />
           <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
           <Route path={ROUTES.profile} element={<Profile />} />

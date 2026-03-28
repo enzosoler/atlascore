@@ -21,6 +21,7 @@ import {
   Menu,
   MessageSquare,
   ShieldCheck,
+  Target,
   TrendingUp,
   User,
   Users,
@@ -53,6 +54,7 @@ const ICON_MAP = {
   Heart,
   BookOpen,
   ShieldCheck,
+  Target,
   Users,
   Download,
   Camera,
@@ -65,7 +67,7 @@ const ICON_MAP = {
 };
 
 const BOTTOM_PATHS_BY_ROLE = {
-  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.body, ROUTES.profile],
+  athlete: [ROUTES.today, ROUTES.plan, ROUTES.progress, ROUTES.profile],
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.profile],

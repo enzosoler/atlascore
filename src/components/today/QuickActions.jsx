@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Dumbbell, Scale, CalendarCheck, CheckCircle2 } from 'lucide-react';
+import { Plus, Dumbbell, Scale, CalendarCheck, CheckCircle2, Zap } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
 
 function ActionTile({ icon: Icon, label, path, onClick, done, highlighted }) {
@@ -36,7 +36,7 @@ function ActionTile({ icon: Icon, label, path, onClick, done, highlighted }) {
   );
 
   if (onClick) {
-    return <button onClick={onClick} className={`${base} ${variant}`}>{content}</button>;
+    return <button type="button" onClick={onClick} className={`${base} ${variant}`}>{content}</button>;
   }
   return <Link to={path} className={`${base} ${variant}`}>{content}</Link>;
 }
@@ -46,17 +46,17 @@ function ActionTile({ icon: Icon, label, path, onClick, done, highlighted }) {
  * The most contextually relevant action is highlighted.
  * Done state = green check.
  */
-export function QuickActions({ workoutDone, nutritionLogged, weightLogged, onCheckin }) {
-  // Highlight: workout first if not done, else nutrition
+export function QuickActions({ workoutDone, nutritionLogged, weightLogged, onCheckin, onQuickWorkout }) {
   const highlightWorkout = !workoutDone;
   const highlightNutrition = workoutDone && !nutritionLogged;
 
   return (
     <div className="grid grid-cols-2 gap-2.5">
       <ActionTile
-        icon={Dumbbell}
-        label={workoutDone ? 'Workout done' : 'Start workout'}
-        path={ROUTES.workouts}
+        icon={workoutDone ? Dumbbell : Zap}
+        label={workoutDone ? 'Workout done' : 'Quick workout'}
+        onClick={workoutDone ? undefined : onQuickWorkout}
+        path={workoutDone ? ROUTES.workouts : undefined}
         done={workoutDone}
         highlighted={highlightWorkout}
       />

@@ -38,6 +38,7 @@ import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import { useI18n } from '@/lib/i18nContext';
+import { DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
 import {
   getActiveWorkoutPlans,
   createWorkoutPlan,
@@ -936,6 +937,7 @@ export default function WorkoutsV2() {
       qc.invalidateQueries({ queryKey: ['recent-workouts'] });
       qc.invalidateQueries({ queryKey: ['workout-history', user?.id] });
       qc.invalidateQueries({ queryKey: ['today-sessions', user?.id] });
+      qc.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todaySession(user?.id) });
       setMode('list');
       setActiveSession(null);
       toast.success('Session saved!');

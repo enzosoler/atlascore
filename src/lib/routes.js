@@ -16,6 +16,7 @@ export const ROUTES = {
   blockReview: '/block-review',
   exercises: '/Exercises',
   progress: '/Progress',
+  plan: '/Plan',
   profile: '/Profile',
   goals: '/goals',
   bodyProfile: '/body-profile',

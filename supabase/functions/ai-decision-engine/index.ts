@@ -47,14 +47,14 @@ const MAX_ALERTS = 3;
 interface UserProfile {
   full_name: string | null;
   age: number | null;
-  gender: string | null;
-  weight_kg: number | null;
+  sex: string | null;
+  current_weight: number | null;
   height_cm: number | null;
-  goal: string | null;
+  training_goal: string | null;
   activity_level: string | null;
-  dietary_preferences: string[] | null;
-  daily_protein_target: number | null;
-  daily_calorie_target: number | null;
+  food_preferences: string | null;
+  protein_target: number | null;
+  calories_target: number | null;
 }
 
 interface TodayNutrition {
@@ -178,13 +178,13 @@ const OUTPUT_SCHEMA = {
 function buildSystemPrompt(ctx: EngineContext): string {
   const { profile, today, week, measurements, ai_state, recent_dismissed } = ctx;
 
-  const latestWeight = measurements[0]?.weight_kg ?? profile.weight_kg;
+  const latestWeight = measurements[0]?.weight_kg ?? profile.current_weight;
   const weightDelta = measurements.length >= 2
     ? ((measurements[0]?.weight_kg ?? 0) - (measurements[1]?.weight_kg ?? 0)).toFixed(1)
     : null;
 
-  const calorieTarget = profile.daily_calorie_target ?? 2000;
-  const proteinTarget = profile.daily_protein_target ?? 150;
+  const calorieTarget = profile.calories_target ?? 2000;
+  const proteinTarget = profile.protein_target ?? 150;
   const calorieRemaining = calorieTarget - today.nutrition.total_kcal;
   const proteinRemaining = proteinTarget - today.nutrition.total_protein;
 
@@ -209,7 +209,7 @@ Your job is to generate a personalized daily coaching output for the user. Be co
 
 ## User Profile
 - Name: ${profile.full_name ?? 'User'}
-- Goal: ${profile.goal ?? 'general fitness'}
+- Goal: ${profile.training_goal ?? 'general fitness'}
 - Current weight: ${latestWeight ? `${latestWeight}kg` : 'unknown'}${weightDelta ? ` (${Number(weightDelta) > 0 ? '+' : ''}${weightDelta}kg vs prior)` : ''}
 - Calorie target: ${calorieTarget} kcal/day
 - Protein target: ${proteinTarget}g/day
@@ -345,48 +345,48 @@ serve(async (req) => {
     // Profile
     supabase
       .from('profiles')
-      .select('full_name, age, gender, weight_kg, height_cm, goal, activity_level, dietary_preferences, daily_protein_target, daily_calorie_target')
-      .eq('user_id', userId)
+      .select('full_name, age, sex, current_weight, height_cm, training_goal, activity_level, food_preferences, protein_target, calories_target')
+      .eq('id', userId)
       .single(),
 
     // Today's food logs (aggregated)
     supabase
       .from('food_logs')
-      .select('kcal, protein, carbs, fat, logged_at')
+      .select('calories, protein, carbs, fat, date')
       .eq('user_id', userId)
-      .gte('logged_at', todayStart)
-      .lte('logged_at', todayEnd),
+      .gte('date', todayStart)
+      .lte('date', todayEnd),
 
     // Workout logged today
     supabase
       .from('workout_logs')
       .select('id')
       .eq('user_id', userId)
-      .gte('logged_at', todayStart)
-      .lte('logged_at', todayEnd)
+      .gte('date', todayStart)
+      .lte('date', todayEnd)
       .limit(1),
 
     // Workouts this week
     supabase
       .from('workout_logs')
-      .select('logged_at, workout_name, duration_min')
+      .select('date, workout_name, duration_min')
       .eq('user_id', userId)
-      .gte('logged_at', sevenDaysAgo)
-      .order('logged_at', { ascending: false }),
+      .gte('date', sevenDaysAgo)
+      .order('date', { ascending: false }),
 
     // Nutrition this week (for averages)
     supabase
       .from('food_logs')
-      .select('kcal, protein, logged_at')
+      .select('calories, protein, date')
       .eq('user_id', userId)
-      .gte('logged_at', sevenDaysAgo),
+      .gte('date', sevenDaysAgo),
 
     // Last 5 measurements
     supabase
       .from('measurements')
-      .select('recorded_at, weight_kg, body_fat_pct')
+      .select('date, weight, body_fat')
       .eq('user_id', userId)
-      .order('recorded_at', { ascending: false })
+      .order('date', { ascending: false })
       .limit(5),
 
     // Active workout plan
@@ -394,7 +394,7 @@ serve(async (req) => {
       .from('workout_plans')
       .select('id')
       .eq('user_id', userId)
-      .eq('is_active', true)
+      .eq('active', true)
       .limit(1),
 
     // user_ai_state
@@ -418,31 +418,31 @@ serve(async (req) => {
   // ── 4. Build compact context object ──────────────────────────────────────
 
   const profile: UserProfile = profileRes.data ?? {
-    full_name: null, age: null, gender: null, weight_kg: null,
-    height_cm: null, goal: null, activity_level: null,
-    dietary_preferences: null, daily_protein_target: null, daily_calorie_target: null,
+    full_name: null, age: null, sex: null, current_weight: null,
+    height_cm: null, training_goal: null, activity_level: null,
+    food_preferences: null, protein_target: null, calories_target: null,
   };
 
   // Aggregate today's nutrition
   const todayFoodLogs = todayNutritionRes.data ?? [];
   const todayNutrition: TodayNutrition = {
-    total_kcal: todayFoodLogs.reduce((s: number, r: any) => s + (r.kcal ?? 0), 0),
+    total_kcal: todayFoodLogs.reduce((s: number, r: any) => s + (r.calories ?? 0), 0),
     total_protein: todayFoodLogs.reduce((s: number, r: any) => s + (r.protein ?? 0), 0),
     total_carbs: todayFoodLogs.reduce((s: number, r: any) => s + (r.carbs ?? 0), 0),
     total_fat: todayFoodLogs.reduce((s: number, r: any) => s + (r.fat ?? 0), 0),
     meal_count: todayFoodLogs.length,
     last_logged_at: todayFoodLogs.length > 0
-      ? todayFoodLogs.sort((a: any, b: any) => b.logged_at.localeCompare(a.logged_at))[0].logged_at
+      ? todayFoodLogs.sort((a: any, b: any) => (b.date ?? '').localeCompare(a.date ?? ''))[0].date
       : null,
   };
 
   // Week averages
   const weekFoodLogs = weekNutritionRes.data ?? [];
-  const uniqueDaysWithFood = new Set(weekFoodLogs.map((r: any) => r.logged_at?.split('T')[0])).size;
+  const uniqueDaysWithFood = new Set(weekFoodLogs.map((r: any) => r.date?.split('T')[0])).size;
   const week = {
     workout_count: (weekWorkoutsRes.data ?? []).length,
     avg_kcal: uniqueDaysWithFood > 0
-      ? weekFoodLogs.reduce((s: number, r: any) => s + (r.kcal ?? 0), 0) / uniqueDaysWithFood
+      ? weekFoodLogs.reduce((s: number, r: any) => s + (r.calories ?? 0), 0) / uniqueDaysWithFood
       : 0,
     avg_protein: uniqueDaysWithFood > 0
       ? weekFoodLogs.reduce((s: number, r: any) => s + (r.protein ?? 0), 0) / uniqueDaysWithFood
@@ -451,14 +451,14 @@ serve(async (req) => {
 
   // Measurements
   const measurements: LatestMeasurement[] = (measurementsRes.data ?? []).map((m: any) => ({
-    recorded_at: m.recorded_at,
-    weight_kg: m.weight_kg,
-    body_fat_pct: m.body_fat_pct,
+    recorded_at: m.date,
+    weight_kg: m.weight,
+    body_fat_pct: m.body_fat,
   }));
 
   // Compute adherence (7-day window)
-  const daysWithFood = new Set(weekFoodLogs.map((r: any) => r.logged_at?.split('T')[0])).size;
-  const daysWithWorkout = new Set((weekWorkoutsRes.data ?? []).map((r: any) => r.logged_at?.split('T')[0])).size;
+  const daysWithFood = new Set(weekFoodLogs.map((r: any) => r.date?.split('T')[0])).size;
+  const daysWithWorkout = new Set((weekWorkoutsRes.data ?? []).map((r: any) => r.date?.split('T')[0])).size;
   const daysWithMeasurement = measurements.filter((m) => {
     const d = new Date(m.recorded_at);
     return d >= new Date(sevenDaysAgo);
