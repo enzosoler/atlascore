@@ -31,7 +31,7 @@ export default function LanguageScreen() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-2 mb-3">
             <Globe className="w-4 h-4 text-[hsl(var(--fg-3))]" />
-            <h2 className="text-sm font-semibold text-[hsl(var(--fg-3))] uppercase tracking-wider">
+            <h2 className="text-sm font-semibold text-[hsl(var(--fg-3))]">
               Select Language
             </h2>
           </div>

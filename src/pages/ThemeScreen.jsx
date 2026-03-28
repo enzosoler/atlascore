@@ -24,7 +24,7 @@ export default function ThemeScreen() {
 
       <div className="p-4 max-w-md mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h2 className="text-sm font-semibold text-[hsl(var(--fg-3))] uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-semibold text-[hsl(var(--fg-3))] mb-3">
             Theme
           </h2>
           <div className="space-y-2">

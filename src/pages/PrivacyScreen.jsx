@@ -61,7 +61,7 @@ export default function PrivacyScreen() {
             <div key={section.title} className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <section.icon className="w-4 h-4 text-[hsl(var(--fg-3))]" />
-                <h2 className="text-sm font-semibold text-[hsl(var(--fg-3))] uppercase tracking-wider">
+                <h2 className="text-sm font-semibold text-[hsl(var(--fg-3))]">
                   {section.title}
                 </h2>
               </div>
