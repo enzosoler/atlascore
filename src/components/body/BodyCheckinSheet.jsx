@@ -129,7 +129,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
                 className={`h-11 rounded-[12px] text-[14px] font-semibold transition-all ${
                   subVal === h
                     ? 'bg-[hsl(var(--brand))] text-white'
-                    : 'bg-[hsl(var(--fill)/0.6)] border border-[hsl(var(--border)/0.6)] text-[hsl(var(--fg-2))]'
+                    : 'bg-[hsl(var(--fill)/0.6)] border border-[hsl(var(--border)/0.7)] text-[hsl(var(--fg-2))]'
                 }`}
               >
                 {h % 1 === 0 ? `${h}h` : `${h}h`}
@@ -188,7 +188,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
                 className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-[12px] border transition-all ${
                   subVal === o.val
                     ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]'
-                    : 'border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]'
+                    : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]'
                 }`}
               >
                 <span className="text-[18px] font-bold">{o.label}</span>
