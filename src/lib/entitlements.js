@@ -163,7 +163,8 @@ export const PLAN_LEVELS = {
  * @param {string} feature - Feature key to check
  */
 export function hasFeatureAccess(user, subscription, overrides, feature) {
-  if (user?.atlas_role === 'admin' || user?.atlas_role === 'beta_tester') return true;
+  if (user?.atlas_role === 'admin') return true;
+  if (user?.atlas_role === 'beta_tester' && feature !== 'admin_panel') return true;
 
   const lock = FEATURE_LOCKS[feature];
   if (!lock) return true; // unknown feature = allow
