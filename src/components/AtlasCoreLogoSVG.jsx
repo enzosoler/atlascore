@@ -1,31 +1,27 @@
+import { cn } from '@/lib/utils';
+
 /**
- * AtlasCoreLogoSVG
+ * AtlasCoreLogoSVG — icon mark using the new gradient wave PNG branding asset.
  *
- * Inline SVG mark — works at any size, no network request, theme-safe.
- * The shape is an "A" crossbar with a center dot, mirroring the favicon.
- * Color defaults to currentColor so it inherits from the parent text color.
+ * The icon is always square. `width` controls the size.
+ * `height` and `color` props are accepted for backwards-compatibility
+ * but are not used — the gradient is baked into the PNG.
  */
 export default function AtlasCoreLogoSVG({
-  width = 24,
-  height = 24,
+  width = 32,
+  height, // unused — icon is always square
   className = '',
-  color = 'currentColor',
+  color, // unused — gradient is baked in
   alt = 'atlas.core',
 }) {
   return (
-    <svg
+    <img
+      src="/branding/dark/icon-192.png"
       width={width}
-      height={height}
-      viewBox="136 106 428 148"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label={alt}
-      role="img"
-      className={className}
-    >
-      {/* Heartbeat-to-Arrow Icon */}
-      <path d="M150 200H250L275 240L325 120L375 240L400 200H450L550 140" stroke={color} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M530 140H550V160" stroke={color} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+      height={width}
+      alt={alt}
+      draggable={false}
+      className={cn('rounded-[22%] shrink-0 object-cover', className)}
+    />
   );
 }

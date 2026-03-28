@@ -18,7 +18,7 @@ export default function AppBootstrap() {
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-col items-center gap-8"
       >
-        <AtlasCoreLogoSVG width={80} height={40} />
+        <AtlasCoreLogoSVG width={72} />
 
         {/* Three pulsing dots — minimal, not a spinner */}
         <div className="flex gap-2">

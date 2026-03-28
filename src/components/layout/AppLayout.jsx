@@ -440,7 +440,7 @@ export default function AppLayout() {
           {collapsed ? (
             <AtlasCoreLogoSVG width={34} height={34} className="shrink-0" color="hsl(var(--accent-primary))" />
           ) : (
-            <BrandLockup logoWidth={82} logoHeight={28} textClassName="text-[18px]" />
+            <BrandLockup logoWidth={32} logoHeight={32} textClassName="text-[18px]" />
           )}
         </div>
 
@@ -551,8 +551,8 @@ export default function AppLayout() {
           <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center">
             <div className="flex items-center rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.84)] px-3.5 py-1.5 shadow-[var(--shadow-xs)] backdrop-blur-[18px]">
               <BrandLockup
-                logoWidth={58}
-                logoHeight={19}
+                logoWidth={26}
+                logoHeight={26}
                 textClassName="text-[17px] sm:text-[18px]"
               />
             </div>
@@ -586,7 +586,7 @@ export default function AppLayout() {
               <div className="flex shrink-0 items-center justify-between border-b border-[hsl(var(--border)/0.72)] px-4"
                 style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.75rem + env(safe-area-inset-top, 0px))' }}
               >
-                <BrandLockup logoWidth={78} logoHeight={27} />
+                <BrandLockup logoWidth={32} logoHeight={32} />
                 <button
                   onClick={() => setMobileOpen(false)}
                   className="flex h-10 w-10 items-center justify-center rounded-[18px] text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"

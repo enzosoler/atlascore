@@ -28,7 +28,7 @@ function syncBrandAssets(theme) {
   const themeColor = document.getElementById('app-theme-color');
 
   if (favicon) {
-    favicon.setAttribute('href', isDark ? '/branding/dark/favicon.ico' : '/branding/light/favicon.ico');
+    favicon.setAttribute('href', isDark ? '/branding/dark/favicon.png' : '/branding/light/favicon.png');
   }
 
   if (appleTouchIcon) {
