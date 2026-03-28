@@ -25,6 +25,7 @@ import { SafePageBoundary } from '@/components/shared/StablePage';
 import { useAuth } from '@/lib/AuthContext';
 import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
+import { useT } from '@/lib/i18nContext';
 
 // ─── Row component ─────────────────────────────────────────────────────────────
 
@@ -89,8 +90,9 @@ function MenuSection({ title, children }) {
 function MoreContent() {
   const { user, logout } = useAuth();
   const { role } = useRBAC(user);
+  const t = useT();
 
-  const displayName = user?.full_name || user?.email || 'User';
+  const displayName = user?.full_name || user?.email || t('profile.more.fallbackUser');
   const email = user?.email || '';
   const roleLabel = ROLE_LABELS[role] || role;
 
@@ -117,75 +119,75 @@ function MoreContent() {
         </div>
 
         {/* Your Plan */}
-        <MenuSection title="Your Plan">
+        <MenuSection title={t('profile.more.sectionYourPlan')}>
           <MenuRow
             to={ROUTES.goals}
             icon={Target}
-            label="Goals & Targets"
-            sublabel="Nutrition targets, goal weight, macros"
+            label={t('profile.more.goalsAndTargets')}
+            sublabel={t('profile.more.goalsAndTargetsDesc')}
           />
           <MenuRow
             to={ROUTES.plan}
             icon={Target}
-            label="Training Plan"
-            sublabel="Active plan and schedule"
+            label={t('profile.more.trainingPlan')}
+            sublabel={t('profile.more.trainingPlanDesc')}
           />
         </MenuSection>
 
         {/* Health */}
-        <MenuSection title="Health">
+        <MenuSection title={t('profile.more.sectionHealth')}>
           <MenuRow
             to={ROUTES.labExams}
             icon={FlaskConical}
-            label="Lab Results"
-            sublabel="Blood work, hormones, markers"
+            label={t('profile.more.labResults')}
+            sublabel={t('profile.more.labResultsDesc')}
           />
           <MenuRow
             to={ROUTES.protocols}
             icon={Pill}
-            label="Protocols & Hormones"
-            sublabel="TRT, supplements, compounds"
+            label={t('profile.more.protocolsAndHormones')}
+            sublabel={t('profile.more.protocolsAndHormonesDesc')}
           />
         </MenuSection>
 
         {/* Account */}
-        <MenuSection title="Account">
+        <MenuSection title={t('profile.more.sectionAccount')}>
           <MenuRow
             to={ROUTES.account}
             icon={User}
-            label="Account"
-            sublabel="Email, password, profile"
+            label={t('profile.more.account')}
+            sublabel={t('profile.more.accountDesc')}
           />
           <MenuRow
             to={ROUTES.pricing}
             icon={CreditCard}
-            label="Subscription"
-            sublabel="Manage your plan"
+            label={t('profile.more.subscription')}
+            sublabel={t('profile.more.subscriptionDesc')}
           />
           <MenuRow
             to="/notifications"
             icon={Bell}
-            label="Notifications"
+            label={t('profile.more.notifications')}
           />
         </MenuSection>
 
         {/* App */}
-        <MenuSection title="App">
+        <MenuSection title={t('profile.more.sectionApp')}>
           <MenuRow
             to={ROUTES.settings}
             icon={Settings}
-            label="Settings"
-            sublabel="Theme, language, preferences"
+            label={t('profile.more.settings')}
+            sublabel={t('profile.more.settingsDesc')}
           />
           <MenuRow
             to={ROUTES.export}
             icon={Download}
-            label="Export Data"
+            label={t('profile.more.exportData')}
           />
           <MenuRow
             to={ROUTES.help}
             icon={HelpCircle}
-            label="Help & Support"
+            label={t('profile.more.helpAndSupport')}
           />
         </MenuSection>
 
@@ -194,7 +196,7 @@ function MoreContent() {
           <MenuRow
             onClick={() => logout()}
             icon={LogOut}
-            label="Sign Out"
+            label={t('profile.more.signOut')}
             destructive
           />
         </MenuSection>
@@ -205,11 +207,12 @@ function MoreContent() {
 }
 
 export default function Profile() {
+  const t = useT();
   return (
     <SafePageBoundary
-      title="More"
-      subtitle="Settings and account"
-      fallbackDescription="The More screen opened in safe mode."
+      title={t('profile.more.title')}
+      subtitle={t('profile.more.subtitle')}
+      fallbackDescription={t('profile.more.fallbackDescription')}
     >
       <MoreContent />
     </SafePageBoundary>

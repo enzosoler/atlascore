@@ -1170,6 +1170,34 @@
       "subtitle": "Describe the main focus of the moment so the experience feels more yours and less generic.",
       "label": "Training goal",
       "placeholder": "E.g., lose fat with high energy, gain muscle with control, improve consistency and routine."
+    },
+    "more": {
+      "title": "More",
+      "subtitle": "Settings and account",
+      "fallbackDescription": "The More screen opened in safe mode.",
+      "fallbackUser": "User",
+      "sectionYourPlan": "Your Plan",
+      "goalsAndTargets": "Goals & Targets",
+      "goalsAndTargetsDesc": "Nutrition targets, goal weight, macros",
+      "trainingPlan": "Training Plan",
+      "trainingPlanDesc": "Active plan and schedule",
+      "sectionHealth": "Health",
+      "labResults": "Lab Results",
+      "labResultsDesc": "Blood work, hormones, markers",
+      "protocolsAndHormones": "Protocols & Hormones",
+      "protocolsAndHormonesDesc": "TRT, supplements, compounds",
+      "sectionAccount": "Account",
+      "account": "Account",
+      "accountDesc": "Email, password, profile",
+      "subscription": "Subscription",
+      "subscriptionDesc": "Manage your plan",
+      "notifications": "Notifications",
+      "sectionApp": "App",
+      "settings": "Settings",
+      "settingsDesc": "Theme, language, preferences",
+      "exportData": "Export Data",
+      "helpAndSupport": "Help & Support",
+      "signOut": "Sign Out"
     }
   },
   "today_page": {
@@ -1439,6 +1467,30 @@
       "track_energy": "Track your energy levels daily",
       "log_checkpoint": "Log your next checkpoint",
       "take_photos": "Take progress photos"
+    },
+    "trends": {
+      "section_title": "Trends",
+      "weight_label": "Weight",
+      "body_fat_label": "Body Fat",
+      "need_data_points": "Need at least 2 data points to show a trend.",
+      "analysis_title": "Trend Analysis",
+      "weight_stable": "Weight is stable — great for maintenance phases.",
+      "weight_trending_down": "Weight trending down {n}kg — monitor energy and recovery.",
+      "weight_trending_up": "Weight trending up {n}kg — check if this aligns with your goal.",
+      "body_fat_dropping": "Body fat dropping — your training and nutrition are working.",
+      "body_fat_increasing": "Body fat increasing — consider reviewing calorie intake."
+    },
+    "next_action": {
+      "log_first_checkpoint": "Log your first body checkpoint",
+      "log_first_checkpoint_desc": "Start tracking to unlock trend analysis.",
+      "add_weight": "Add a weight measurement",
+      "add_weight_desc": "Weight is the foundation of body tracking.",
+      "log_body_fat": "Log body fat percentage",
+      "log_body_fat_desc": "Unlock body composition trends.",
+      "keep_logging": "Keep logging weekly",
+      "keep_logging_desc": "{n} more entries to unlock trend charts.",
+      "take_photo": "Take a progress photo",
+      "take_photo_desc": "Visual evidence compounds over time."
     }
   },
   "measurements": {
