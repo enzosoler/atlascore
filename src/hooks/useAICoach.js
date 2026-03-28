@@ -17,7 +17,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-decision-engine`;
 const STALE_TIME = 4 * 60 * 60 * 1000; // 4 hours
-const AI_COACH_KEY = 'ai-coach';
+export const AI_COACH_KEY = 'ai-coach';
 
 async function fetchCoachingOutput() {
   const { data: { session } } = await supabase.auth.getSession();

@@ -19,6 +19,7 @@ import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/lib/supabaseClient';
 import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
+import { SplashScreen as CapSplash } from '@capacitor/splash-screen';
 import AppLayout from '@/components/layout/AppLayout.jsx';
 import AppBootstrap from '@/components/app/AppBootstrap';
 import RouteGuard from '@/components/rbac/RouteGuard';
@@ -204,6 +205,13 @@ const MissingConfigScreen = () => (
 const RequireAuthenticatedApp = () => {
   const { authError, isAuthenticated, authState, user } = useAuth();
   const location = useLocation();
+
+  // Hide native splash once auth resolves (loading → any other state)
+  useEffect(() => {
+    if (authState !== 'loading' && Capacitor.isNativePlatform()) {
+      CapSplash.hide({ fadeOutDuration: 200 });
+    }
+  }, [authState]);
 
   if (authState === 'loading') {
     return <AppBootstrap />;

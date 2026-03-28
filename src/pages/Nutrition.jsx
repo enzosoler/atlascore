@@ -1590,6 +1590,8 @@ export default function NutritionPage() {
         ? `${foods.length} food item(s) updated in ${mealLabel}.`
         : `${foods.length} food item(s) added to ${mealLabel}.`,
     });
+    // Cascade: invalidate AI coach so briefing/priorities update with new nutrition data
+    ai.invalidateCoach();
   };
 
   const handleDeleteMeal = async (meal) => {

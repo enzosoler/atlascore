@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { getMeasurementFieldValue } from '@/lib/measurementModel';
+import { AI_COACH_KEY } from '@/hooks/useAICoach';
 
 /**
  * useDailyState — single unified truth for today's state.
@@ -31,6 +32,7 @@ export function useDailyState() {
   const { user } = useAuth();
   const uid = user?.id;
   const today = todayISO();
+  const queryClient = useQueryClient();
 
   // ── Workout ────────────────────────────────────────────────────────────────
   const { data: todaySession, isLoading: sessionLoading } = useQuery({
@@ -226,6 +228,30 @@ export function useDailyState() {
   const nutritionLogged = nutrition.mealsLogged > 0;
   const weightLogged = body.weightToday != null;
 
+  /**
+   * Cascade invalidation — call after any user action that changes daily state.
+   * Invalidates daily data queries + AI coach cache so the engine refreshes.
+   * @param {'meal'|'workout'|'weight'|'protocol'|'all'} scope
+   */
+  const invalidateAfterAction = useCallback((scope = 'all') => {
+    if (scope === 'meal' || scope === 'all') {
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayMeals(uid) });
+    }
+    if (scope === 'workout' || scope === 'all') {
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todaySession(uid) });
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.weekWorkouts(uid) });
+    }
+    if (scope === 'weight' || scope === 'all') {
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayWeight(uid) });
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.lastWeight(uid) });
+    }
+    if (scope === 'protocol' || scope === 'all') {
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayLogs(uid) });
+    }
+    // Always invalidate AI coach cache so engine regenerates with fresh data
+    queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, uid] });
+  }, [uid, queryClient]);
+
   return {
     // Structured state (for AI engine and typed consumers)
     workout,
@@ -253,5 +279,8 @@ export function useDailyState() {
 
     // Loading
     isLoading: sessionLoading || mealsLoading,
+
+    // Cascade invalidation — call after user actions
+    invalidateAfterAction,
   };
 }
