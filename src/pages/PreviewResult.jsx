@@ -16,12 +16,12 @@ export default function PreviewResult() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))] flex flex-col">
-      <div className="p-4">
+    <div className="mobile-page bg-[hsl(var(--bg))]">
+      <div className="shrink-0 px-4 pt-3 pb-2" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))' }}>
         <AtlasCoreLogoSVG width={32} height={16} />
       </div>
 
-      <div className="flex-1 px-6 py-4 max-w-md mx-auto w-full">
+      <div className="safe-scroll flex-1 px-6 py-4 max-w-md mx-auto w-full">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold mb-2">Your plan is ready!</h1>
@@ -36,8 +36,8 @@ export default function PreviewResult() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
                 className={`p-4 rounded-xl border flex items-center gap-4 ${
-                  item.locked 
-                    ? 'border-[hsl(var(--border))] bg-[hsl(var(--card))] opacity-60' 
+                  item.locked
+                    ? 'border-[hsl(var(--border))] bg-[hsl(var(--card))] opacity-60'
                     : 'border-[hsl(var(--accent-primary))] bg-[hsl(var(--accent-primary))]/5'
                 }`}
               >
@@ -53,25 +53,26 @@ export default function PreviewResult() {
             ))}
           </div>
 
-          <div className="bg-[hsl(var(--accent-primary))]/10 border border-[hsl(var(--accent-primary))]/30 rounded-xl p-4 mb-6">
+          <div className="bg-[hsl(var(--accent-primary))]/10 border border-[hsl(var(--accent-primary))]/30 rounded-xl p-4 pb-4">
             <p className="text-sm font-medium mb-1">Unlock your full plan</p>
             <p className="text-xs text-[hsl(var(--fg-2))]">
               Get access to all features including advanced analytics, custom protocols, and more.
             </p>
           </div>
-
-          <Button onClick={() => navigate('/onboarding/pre-paywall')} className="w-full">
-            Unlock Full Plan
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-
-          <button 
-            onClick={() => navigate('/today')}
-            className="w-full mt-3 text-sm text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
-          >
-            Continue with free version
-          </button>
         </motion.div>
+      </div>
+
+      <div className="shrink-0 px-6 pt-3 pb-4 border-t border-[hsl(var(--border)/0.4)] bg-[hsl(var(--bg)/0.96)]" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}>
+        <Button onClick={() => navigate('/onboarding/pre-paywall')} className="w-full">
+          Unlock Full Plan
+          <ArrowRight className="ml-2 w-4 h-4" />
+        </Button>
+        <button
+          onClick={() => navigate('/today')}
+          className="w-full mt-3 text-sm text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
+        >
+          Continue with free version
+        </button>
       </div>
     </div>
   );

@@ -12,6 +12,9 @@ import { supabase } from '@/lib/supabaseClient';
 import { email as emailService } from '@/lib/emailService';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
+import { Capacitor } from '@capacitor/core';
+
+const IS_NATIVE = Capacitor.isNativePlatform();
 import { useReCaptcha, IS_CAPTCHA_ENABLED } from '@/lib/ReCaptchaContext';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
@@ -378,10 +381,8 @@ export default function Auth() {
     }
   };
 
-  return (
-    <PublicSiteShell compactNav showFooter={false}>
-      <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="w-full max-w-[380px]">
+  const formContent = (
+    <div className="w-full max-w-[380px]">
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <Link to={ROUTES.home} className="flex items-center gap-2">
@@ -628,16 +629,34 @@ export default function Auth() {
             )}
           </div>
 
-          {/* Back to home - outside card */}
-          <div className="mt-6 text-center">
-            <Link
-              to={ROUTES.home}
-              className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
-            >
-              {ui.backHome}
-            </Link>
-          </div>
+          {/* Back to home - outside card, hidden on native (no public landing) */}
+          {!IS_NATIVE && (
+            <div className="mt-6 text-center">
+              <Link
+                to={ROUTES.home}
+                className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+              >
+                {ui.backHome}
+              </Link>
+            </div>
+          )}
         </div>
+  );
+
+  if (IS_NATIVE) {
+    return (
+      <div className="mobile-screen bg-[hsl(var(--bg))]">
+        <div className="safe-scroll flex-1 flex flex-col items-center justify-center px-4 py-10">
+          {formContent}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <PublicSiteShell compactNav showFooter={false}>
+      <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        {formContent}
       </div>
     </PublicSiteShell>
   );

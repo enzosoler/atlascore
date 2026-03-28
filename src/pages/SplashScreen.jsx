@@ -14,7 +14,7 @@ export default function SplashScreen() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))] flex items-center justify-center">
+    <div className="mobile-screen bg-[hsl(var(--bg))] items-center justify-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}

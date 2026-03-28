@@ -32,7 +32,7 @@ export default function ValueCreation() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))] flex flex-col items-center justify-center px-6">
+    <div className="mobile-screen bg-[hsl(var(--bg))] items-center justify-center px-6">
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}

@@ -18,12 +18,12 @@ export default function PrePaywallReveal() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))] flex flex-col">
-      <div className="p-4">
+    <div className="mobile-page bg-[hsl(var(--bg))]">
+      <div className="shrink-0 px-4 pt-3 pb-2" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))' }}>
         <AtlasCoreLogoSVG width={32} height={16} />
       </div>
 
-      <div className="flex-1 px-6 py-4 max-w-md mx-auto w-full">
+      <div className="safe-scroll flex-1 px-6 py-4 max-w-md mx-auto w-full">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[hsl(var(--accent-primary))]/10 text-[hsl(var(--accent-primary))] text-sm font-medium mb-4">
@@ -53,23 +53,24 @@ export default function PrePaywallReveal() {
             </ul>
           </div>
 
-          <div className="text-center mb-6">
+          <div className="text-center pb-4">
             <p className="text-4xl font-bold">$9.99<span className="text-lg font-normal text-[hsl(var(--fg-2))]">/month</span></p>
             <p className="text-sm text-[hsl(var(--fg-2))] mt-1">or $79.99/year (save 33%)</p>
           </div>
-
-          <Button onClick={() => navigate('/pricing')} className="w-full mb-3">
-            Start Free Trial
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-
-          <button 
-            onClick={() => navigate('/today')}
-            className="w-full text-sm text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
-          >
-            Continue with limited free version
-          </button>
         </motion.div>
+      </div>
+
+      <div className="shrink-0 px-6 pt-3 pb-4 border-t border-[hsl(var(--border)/0.4)] bg-[hsl(var(--bg)/0.96)]" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}>
+        <Button onClick={() => navigate('/pricing')} className="w-full mb-3">
+          Start Free Trial
+          <ArrowRight className="ml-2 w-4 h-4" />
+        </Button>
+        <button
+          onClick={() => navigate('/today')}
+          className="w-full text-sm text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
+        >
+          Continue with limited free version
+        </button>
       </div>
     </div>
   );

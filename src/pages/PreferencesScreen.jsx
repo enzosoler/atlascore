@@ -27,21 +27,21 @@ export default function PreferencesScreen() {
   const allSelected = PREFERENCES.every(p => preferences[p.id]);
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))] flex flex-col">
-      <div className="flex items-center justify-between p-4">
+    <div className="mobile-page bg-[hsl(var(--bg))]">
+      <div className="flex shrink-0 items-center justify-between px-4 pt-3 pb-2" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))' }}>
         <AtlasCoreLogoSVG width={32} height={16} />
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="flex-1 px-6 py-4 max-w-md mx-auto w-full">
+      <div className="safe-scroll flex-1 px-6 py-4 max-w-md mx-auto w-full">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="mb-2 text-sm text-[hsl(var(--accent-primary))] font-medium">Step 2 of 4</div>
           <h1 className="text-2xl font-bold mb-2">Your preferences</h1>
           <p className="text-[hsl(var(--fg-2))] mb-6">Help us personalize your experience</p>
 
-          <div className="space-y-6">
+          <div className="space-y-6 pb-4">
             {PREFERENCES.map((pref) => (
               <div key={pref.id}>
                 <div className="flex items-center gap-2 mb-3">
@@ -66,16 +66,14 @@ export default function PreferencesScreen() {
               </div>
             ))}
           </div>
-
-          <Button 
-            onClick={handleContinue} 
-            className="w-full mt-8"
-            disabled={!allSelected}
-          >
-            Continue
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
         </motion.div>
+      </div>
+
+      <div className="shrink-0 px-6 pt-3 pb-4 border-t border-[hsl(var(--border)/0.4)] bg-[hsl(var(--bg)/0.96)]" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))' }}>
+        <Button onClick={handleContinue} className="w-full" disabled={!allSelected}>
+          Continue
+          <ArrowRight className="ml-2 w-4 h-4" />
+        </Button>
       </div>
     </div>
   );

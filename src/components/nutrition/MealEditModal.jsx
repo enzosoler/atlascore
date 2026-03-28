@@ -183,12 +183,15 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[hsl(var(--card))] border-border rounded-2xl max-h-[90dvh] overflow-y-auto" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-        <DialogHeader>
+      {/* flex flex-col already set by atlas-dialog-panel via dialog.jsx */}
+      <DialogContent className="bg-[hsl(var(--card))] border-border rounded-2xl max-h-[90dvh]">
+        {/* Fixed header */}
+        <DialogHeader className="shrink-0 px-1 pt-1">
           <DialogTitle className="text-[15px]">Edit Meal</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        {/* Scrollable content */}
+        <div className="safe-scroll flex-1 min-h-0 space-y-4 px-1 pb-2">
           {/* Meal type */}
           <Select value={mealType} onValueChange={setMealType}>
             <SelectTrigger className="h-10 rounded-lg text-base">
@@ -345,36 +348,40 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-2">
-            {foods.length === 0 && (
-              <p className="text-[12px] text-[hsl(var(--err))] flex-1 py-2">
-                Add at least one food to save the meal.
-              </p>
+        </div>
+
+        {/* Sticky footer — always visible, never behind keyboard or tab bar */}
+        <div
+          className="shrink-0 flex gap-2 pt-3 border-t border-[hsl(var(--border)/0.5)]"
+          style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0px))' }}
+        >
+          {foods.length === 0 && (
+            <p className="text-[12px] text-[hsl(var(--err))] flex-1 py-2">
+              Add at least one food to save the meal.
+            </p>
+          )}
+          <Button
+            onClick={saveMeal}
+            disabled={updateMutation.isPending}
+            className="btn btn-primary flex-1 h-11 rounded-xl"
+          >
+            {updateMutation.isPending ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+              </>
+            ) : (
+              'Save changes'
             )}
+          </Button>
+          {meal && (
             <Button
-              onClick={saveMeal}
-              disabled={updateMutation.isPending}
-              className="btn btn-primary flex-1 h-11 rounded-xl"
+              onClick={duplicateMeal}
+              variant="outline"
+              className="h-11 rounded-xl"
             >
-              {updateMutation.isPending ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
-                </>
-              ) : (
-                'Save changes'
-              )}
+              <Plus className="w-3.5 h-3.5" />
             </Button>
-            {meal && (
-              <Button
-                onClick={duplicateMeal}
-                variant="outline"
-                className="h-11 rounded-xl"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </DialogContent>
 
