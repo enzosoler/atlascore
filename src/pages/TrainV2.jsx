@@ -304,7 +304,7 @@ export default function TrainV2() {
             <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5 px-0.5">Recent</p>
             <div className="space-y-1.5">
               {daily.recentSessions.slice(0, 5).map((s, i) => (
-                <div key={s.id || i} className="flex items-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.2)] px-4 py-3">
+                <div key={s.id || i} className="flex items-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.2)] px-4 py-3">
                   <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))] shrink-0" strokeWidth={2} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || 'Session'}</p>
