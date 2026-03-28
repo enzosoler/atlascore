@@ -17,7 +17,7 @@ export default function UpgradePrompts() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)', paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1rem)' }}>
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

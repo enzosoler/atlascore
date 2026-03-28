@@ -15,7 +15,7 @@ export default function TrialStart() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))] flex flex-col">
+    <div className="mobile-screen bg-[hsl(var(--bg))]">
       <div className="flex-1 flex flex-col justify-center px-6 py-8 max-w-md mx-auto w-full">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="text-center mb-8">
