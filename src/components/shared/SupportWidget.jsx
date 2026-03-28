@@ -53,7 +53,7 @@ export default function SupportWidget() {
   return (
     <>
       {/* FAB button */}
-      <div className="fixed bottom-[calc(var(--tab-bar-h,94px)+env(safe-area-inset-bottom,0px)+8px)] right-4 lg:bottom-6 z-50">
+      <div className="fixed bottom-[calc(var(--tab-bar-h,94px)+env(safe-area-inset-bottom,0px)+8px)] right-4 lg:bottom-6 z-[65]">
         <button
           onClick={() => { setOpen(o => !o); reset(); }}
           className={`w-11 h-11 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center

@@ -40,7 +40,7 @@ import {
   SectionCard,
   StatusBanner,
 } from '@/components/shared/StablePage';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/app/ResponsiveModal';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
@@ -1286,14 +1286,17 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
           )}
         </SectionCard>
 
-        <Dialog
+        <ResponsiveModal
           open={isFormOpen}
           onOpenChange={(open) => {
             setIsFormOpen(open);
             if (!open) setEditingMeasurement(null);
           }}
+          dialogClassName="max-h-[90vh] p-0 sm:max-w-[32rem]"
+          dialogProps={{ onOpenAutoFocus: (e) => e.preventDefault() }}
+          drawerClassName="max-h-[85dvh] pb-[calc(var(--tab-bar-h,94px)+env(safe-area-inset-bottom,0px))]"
         >
-          <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-[32rem]">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <DialogPanelHeader
               eyebrow="Body checkpoint"
               title={editingMeasurement ? 'Edit body checkpoint' : 'Log body checkpoint'}
@@ -1317,8 +1320,8 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
               }}
               onSubmit={handleSaveMeasurement}
             />
-          </DialogContent>
-        </Dialog>
+          </div>
+        </ResponsiveModal>
     </>
   );
 
