@@ -40,17 +40,17 @@ import { loadSession, clearSession, hasSession } from '@/lib/workoutSession';
 
 // ─── Build session from plan day ───────────────────────────────────────────────
 
-function buildSessionFromPlan(plan, dayIndex) {
-  if (!plan) return { name: 'Free Workout', exercises: [] };
+function buildSessionFromPlan(plan, dayIndex, t) {
+  if (!plan) return { name: t('train.freeWorkout'), exercises: [] };
   const days = Array.isArray(plan.days) ? plan.days : [];
   const day = days[dayIndex] || days[0];
-  if (!day) return { name: plan.name || 'Workout', exercises: [] };
+  if (!day) return { name: plan.name || t('train.workout'), exercises: [] };
   return {
-    name: day.name || plan.name || `Day ${dayIndex + 1}`,
+    name: day.name || plan.name || t('train.dayN', { n: dayIndex + 1 }),
     plan_id: plan.id,
     day_index: dayIndex,
     exercises: Array.isArray(day.exercises) ? day.exercises.map((ex) => ({
-      name: ex.name || 'Exercise',
+      name: ex.name || t('train.exercise'),
       primary_muscles: ex.primary_muscles || ex.muscle_group ? [ex.muscle_group] : [],
       rest_seconds: ex.rest_seconds || 60,
       target_sets: ex.sets || 3,
@@ -133,14 +133,14 @@ export default function TrainV2() {
     if (searchParams.get('start') === '1' && daily.activePlan && mode === 'list') {
       setSearchParams({}, { replace: true });
       const dayIdx = daily.activePlan.current_day_index ?? 0;
-      setActiveSession(buildSessionFromPlan(daily.activePlan, dayIdx));
+      setActiveSession(buildSessionFromPlan(daily.activePlan, dayIdx, t));
       setInitialSession(null);
       setMode('execution');
     }
   }, [searchParams, daily.activePlan, mode]);
 
   const handleStartDay = (dayIndex) => {
-    setActiveSession(buildSessionFromPlan(daily.activePlan, dayIndex));
+    setActiveSession(buildSessionFromPlan(daily.activePlan, dayIndex, t));
     setInitialSession(null);
     setMode('execution');
   };
@@ -205,7 +205,7 @@ export default function TrainV2() {
               <CheckCircle2 className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
               <div>
                 <p className="text-[16px] font-bold text-[hsl(var(--fg))]">{t('train.sessionComplete')}</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.workout.sessionName || 'Workout'} · {formatDuration(daily.workout.durationMinutes)}</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.workout.sessionName || t('train.workout')} · {formatDuration(daily.workout.durationMinutes)}</p>
               </div>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function TrainV2() {
               {exercises.slice(0, 4).map((ex, i) => (
                 <div key={i} className="flex items-center gap-2 text-[12px]">
                   <span className="w-5 text-right text-[hsl(var(--fg-3))] font-medium">{i + 1}.</span>
-                  <span className="text-[hsl(var(--fg))] font-medium truncate">{ex.name || 'Exercise'}</span>
+                  <span className="text-[hsl(var(--fg))] font-medium truncate">{ex.name || t('train.exercise')}</span>
                   <span className="ml-auto text-[hsl(var(--fg-3))] shrink-0">{ex.sets || 3}×{ex.reps || '10'}</span>
                 </div>
               ))}
@@ -289,7 +289,7 @@ export default function TrainV2() {
                         <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-[hsl(var(--fg))] truncate">{day?.name || `Day ${idx + 1}`}</p>
+                        <p className="text-[13px] font-semibold text-[hsl(var(--fg))] truncate">{day?.name || t('train.dayN', { n: idx + 1 })}</p>
                         <p className="text-[11px] text-[hsl(var(--fg-3))]">{exCount} {t('train.exercises')}</p>
                       </div>
                       <Play className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
@@ -310,7 +310,7 @@ export default function TrainV2() {
                 <div key={s.id || i} className="flex items-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.2)] px-4 py-3">
                   <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))] shrink-0" strokeWidth={2} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || 'Session'}</p>
+                    <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || t('train.session')}</p>
                     <p className="text-[11px] text-[hsl(var(--fg-3))]">{formatRelativeDate(s.completed_at || s.date, t)} · {formatDuration(s.duration_minutes)}</p>
                   </div>
                 </div>
