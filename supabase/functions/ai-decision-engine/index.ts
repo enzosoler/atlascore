@@ -117,52 +117,84 @@ const OUTPUT_SCHEMA = {
   properties: {
     briefing: {
       type: 'object',
+      description: 'Daily coaching headline — one clear message.',
       properties: {
         title: { type: 'string', description: 'Short headline (max 8 words)' },
         body: { type: 'string', description: 'One sentence coaching insight (max 20 words)' },
         reason: { type: 'string', description: 'Why this is the focus today (max 15 words)' },
-        focus: {
-          type: 'string',
-          enum: ['nutrition', 'training', 'recovery', 'consistency', 'measurement'],
-        },
+        focus: { type: 'string', enum: ['nutrition', 'training', 'recovery', 'consistency', 'measurement'] },
+        tone: { type: 'string', enum: ['confident', 'encouraging', 'warning', 'neutral'] },
       },
-      required: ['title', 'body', 'reason', 'focus'],
+      required: ['title', 'body', 'reason', 'focus', 'tone'],
     },
-    alerts: {
+    priorities: {
       type: 'array',
-      maxItems: MAX_ALERTS,
+      description: 'Top 1-3 actions the user should do next, in priority order.',
+      maxItems: 3,
       items: {
         type: 'object',
         properties: {
-          id: { type: 'string' },
-          type: {
-            type: 'string',
-            enum: ['nutrition_gap', 'workout_missed', 'streak_at_risk', 'check_in_due', 'protein_low'],
-          },
-          title: { type: 'string', description: 'Alert headline (max 6 words)' },
-          message: { type: 'string', description: 'Alert body (max 15 words)' },
-          action: { type: 'string', description: 'Action key for client routing' },
-          path: { type: 'string', description: 'App path string, e.g. /nutrition' },
-          cta: { type: 'string', description: 'Button label (max 3 words)' },
+          type: { type: 'string', enum: ['nutrition', 'workout', 'recovery', 'protocol', 'body', 'lab'] },
+          title: { type: 'string', description: 'What to do (max 8 words)' },
+          reason: { type: 'string', description: 'Why this matters (max 15 words)' },
+          action: { type: 'string', description: 'Client action key (e.g. open_quick_meal, start_workout, log_dose, log_weight)' },
         },
-        required: ['id', 'type', 'title', 'message'],
+        required: ['type', 'title', 'reason', 'action'],
       },
+    },
+    train: {
+      type: 'object',
+      description: 'Training surface guidance.',
+      properties: {
+        status: { type: 'string', enum: ['not_started', 'in_progress', 'completed', 'rest_day'] },
+        message: { type: 'string', description: 'One-liner for training page (max 15 words)' },
+        adjustment: { type: 'string', description: 'Optional intensity/volume adjustment suggestion (max 20 words). Empty string if none.' },
+      },
+      required: ['status', 'message', 'adjustment'],
+    },
+    nutrition: {
+      type: 'object',
+      description: 'Nutrition surface guidance.',
+      properties: {
+        status: { type: 'string', enum: ['on_track', 'behind_calories', 'behind_protein', 'over_calories', 'not_started'] },
+        nextMeal: { type: 'string', description: 'Suggested next meal (max 20 words). Empty string if not applicable.' },
+        macroFocus: { type: 'string', description: 'Which macro to prioritize (max 10 words). Empty string if balanced.' },
+      },
+      required: ['status', 'nextMeal', 'macroFocus'],
+    },
+    protocols: {
+      type: 'object',
+      description: 'Protocol/supplement surface guidance.',
+      properties: {
+        status: { type: 'string', enum: ['all_done', 'pending', 'missed', 'no_protocols'] },
+        message: { type: 'string', description: 'Protocol coaching message (max 15 words)' },
+        adherenceNote: { type: 'string', description: 'Pattern-based adherence insight (max 20 words). Empty string if none.' },
+      },
+      required: ['status', 'message', 'adherenceNote'],
+    },
+    progress: {
+      type: 'object',
+      description: 'Progress/trends interpretation.',
+      properties: {
+        headline: { type: 'string', description: 'Trend summary (max 15 words)' },
+        interpretation: { type: 'string', description: 'What the data means (max 25 words)' },
+        action: { type: 'string', description: 'What to do about it (max 15 words)' },
+      },
+      required: ['headline', 'interpretation', 'action'],
     },
     recommendations: {
       type: 'array',
+      description: 'Max 3 tracked recommendations. Usually 1-2.',
       maxItems: MAX_RECOMMENDATIONS,
       items: {
         type: 'object',
         properties: {
           id: { type: 'string' },
-          type: {
-            type: 'string',
-            enum: ['nutrition', 'workout', 'recovery', 'habit'],
-          },
+          type: { type: 'string', enum: ['nutrition', 'workout', 'recovery', 'habit', 'protocol', 'lab', 'body'] },
           title: { type: 'string', description: 'Recommendation headline (max 8 words)' },
           reason: { type: 'string', description: 'Why this recommendation (max 15 words)' },
           confidence: { type: 'number', minimum: 0, maximum: 1 },
-          action: { type: 'string', description: 'Action key for client routing' },
+          action: { type: 'string', description: 'Client action key' },
           actionPath: { type: 'string', description: 'App path string' },
           actionLabel: { type: 'string', description: 'Button label (max 3 words)' },
         },
@@ -170,7 +202,7 @@ const OUTPUT_SCHEMA = {
       },
     },
   },
-  required: ['briefing', 'alerts', 'recommendations'],
+  required: ['briefing', 'priorities', 'train', 'nutrition', 'protocols', 'progress', 'recommendations'],
 };
 
 // ─── System Prompt ────────────────────────────────────────────────────────────
@@ -236,16 +268,32 @@ Your job is to generate a personalized daily coaching output for the user. Be co
 ## User Responsiveness
 - ${responsiveness}
 
-## Instruction Constraints
+## Protocols / Supplements
+- Active compounds: ${ctx.today.active_compounds?.length > 0 ? ctx.today.active_compounds.join(', ') : 'none'}
+- Doses due today: ${ctx.today.protocols_due ?? 0}
+- Doses completed today: ${ctx.today.protocols_completed ?? 0}
+
+## Your Job
+You are the brain behind ALL screens in this app. Generate output for:
+1. **briefing** — one clear daily message for the Today screen
+2. **priorities** — top 1-3 actions the user should do next (sorted by urgency)
+3. **train** — guidance for the training page (status + optional adjustment)
+4. **nutrition** — guidance for the nutrition page (next meal suggestion + macro focus)
+5. **protocols** — guidance for the protocols page (status + adherence insight)
+6. **progress** — trend interpretation for the progress page
+7. **recommendations** — max 3 tracked suggestions with confidence scores
+
+## Constraints
 ${avoidTypes}
 ${avoidLastRecs}
-- Only emit alerts that are genuinely time-sensitive today.
-- Only emit recommendations with confidence ≥ ${CONFIDENCE_THRESHOLD}.
-- Maximum ${MAX_RECOMMENDATIONS} recommendations. Fewer is better if confidence is low.
-- Keep all text extremely brief. This is a mobile UI — brevity is critical.
-- IDs must be short unique slugs (e.g., "rec_protein_dinner", "alert_no_lunch").
+- Priorities: what the user should do RIGHT NOW, in 1-3 steps. Action keys must be one of: open_quick_meal, start_workout, log_dose, log_weight, open_water_sheet, open_nutrition, open_progress, rest.
+- Recommendations: confidence ≥ ${CONFIDENCE_THRESHOLD}. Usually 1-2, max ${MAX_RECOMMENDATIONS}. Fewer is better.
+- Eliminate contradictions: if workout is done, do NOT suggest starting one. If nutrition is on track, do NOT push meals.
+- All text is for a mobile UI. Brevity is critical.
+- IDs must be short unique slugs (e.g., "rec_protein_dinner", "pri_log_dose").
+- Empty strings for optional fields that don't apply (adjustment, nextMeal, macroFocus, adherenceNote, etc.)
 
-Respond ONLY with the JSON object matching the provided schema. No markdown, no explanation.`;
+Respond ONLY with the JSON object matching the provided schema.`;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -341,6 +389,8 @@ serve(async (req) => {
     activePlanRes,
     aiStateRes,
     recentOutcomesRes,
+    activeProtocolsRes,
+    todayProtocolLogsRes,
   ] = await Promise.all([
     // Profile
     supabase
@@ -413,6 +463,21 @@ serve(async (req) => {
       .gte('created_at', sevenDaysAgo)
       .order('created_at', { ascending: false })
       .limit(20),
+
+    // Active protocols
+    supabase
+      .from('protocols')
+      .select('id, compound, name, frequency_per_week, active, start_date')
+      .eq('active', true)
+      .limit(20),
+
+    // Today's protocol logs
+    supabase
+      .from('protocol_logs')
+      .select('protocol_id, taken_at')
+      .gte('taken_at', todayStart)
+      .lte('taken_at', todayEnd)
+      .limit(50),
   ]);
 
   // ── 4. Build compact context object ──────────────────────────────────────
@@ -489,6 +554,13 @@ serve(async (req) => {
     recentOutcomes.filter((o) => o.status === 'dismissed').map((o) => o.rec_type)
   )];
 
+  // Protocol data
+  const activeProtocols = activeProtocolsRes.data ?? [];
+  const todayProtocolLogs = todayProtocolLogsRes.data ?? [];
+  const protocolLoggedIds = new Set(todayProtocolLogs.map((l: any) => l.protocol_id));
+  const protocolsDueToday = activeProtocols.length;
+  const protocolsCompletedToday = activeProtocols.filter((p: any) => protocolLoggedIds.has(p.id)).length;
+
   const ctx: EngineContext = {
     profile,
     today: {
@@ -497,6 +569,9 @@ serve(async (req) => {
       nutrition: todayNutrition,
       has_active_workout_plan: (activePlanRes.data ?? []).length > 0,
       workout_logged_today: (todayWorkoutRes.data ?? []).length > 0,
+      protocols_due: protocolsDueToday,
+      protocols_completed: protocolsCompletedToday,
+      active_compounds: activeProtocols.map((p: any) => p.compound || p.name).filter(Boolean).slice(0, 5),
     },
     week,
     measurements,

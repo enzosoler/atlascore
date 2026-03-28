@@ -1,20 +1,23 @@
 /**
- * useAICoach — fetches today's coaching output from the ai-decision-engine.
+ * useAICoach — central AI coaching hook.
  *
- * Flow:
- *   1. Call ai-decision-engine edge function (POST with user's JWT)
- *   2. Engine returns cached daily_context or generates fresh output
- *   3. Expose followRec / dismissRec helpers that write rec_outcome rows
+ * Fetches the full engine output and exposes per-surface sections:
+ *   briefing, priorities, train, nutrition, protocols, progress, recommendations
  *
- * React Query caches the result for 4 hours (matching the engine TTL).
- * Falls back to null on error — caller provides rules-based fallback.
+ * Every page reads from the same cached result.
+ * followRec / dismissRec write rec_outcome rows for the learning loop.
+ *
+ * Cascade invalidation: call invalidateCoach() from any page after
+ * the user performs an action (logs food, completes workout, etc.)
+ * to force a fresh engine call on next Today page load.
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-decision-engine`;
-const STALE_TIME = 4 * 60 * 60 * 1000; // 4 hours — matches engine TTL
+const STALE_TIME = 4 * 60 * 60 * 1000; // 4 hours
+const AI_COACH_KEY = 'ai-coach';
 
 async function fetchCoachingOutput() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -44,13 +47,12 @@ export function useAICoach({ userId } = {}) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ['ai-coach', userId],
+    queryKey: [AI_COACH_KEY, userId],
     queryFn: fetchCoachingOutput,
     enabled: !!userId,
     staleTime: STALE_TIME,
     gcTime: STALE_TIME,
     retry: 1,
-    // Don't throw — caller handles null gracefully
     throwOnError: false,
   });
 
@@ -67,8 +69,7 @@ export function useAICoach({ userId } = {}) {
       if (error) throw error;
     },
     onSuccess: () => {
-      // Invalidate so the engine learns from this on next fresh fetch
-      queryClient.invalidateQueries({ queryKey: ['ai-coach', userId] });
+      queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, userId] });
     },
   });
 
@@ -86,21 +87,32 @@ export function useAICoach({ userId } = {}) {
     },
   });
 
+  // Cascade invalidation — call this when user performs an action that changes context
+  const invalidateCoach = () => {
+    queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, userId] });
+  };
+
   const data = query.data ?? null;
 
   return {
-    // Structured output from engine (null when loading or error)
-    briefing: data?.briefing ?? null,
-    alerts: data?.alerts ?? [],
+    // ── Per-surface sections ─────────────────────────────────────────────────
+    briefing:        data?.briefing ?? null,
+    priorities:      data?.priorities ?? [],
+    train:           data?.train ?? null,
+    nutrition:       data?.nutrition ?? null,
+    protocols:       data?.protocols ?? null,
+    progress:        data?.progress ?? null,
     recommendations: data?.recommendations ?? [],
-    meta: data?.meta ?? null,
+    meta:            data?.meta ?? null,
 
-    // States
+    // ── States ───────────────────────────────────────────────────────────────
     loading: query.isLoading,
     error: query.error,
+    hasData: !!data,
 
-    // Actions — pass the full rec object so it's stored in rec_outcome
+    // ── Actions ──────────────────────────────────────────────────────────────
     followRec: (rec) => followMutation.mutate(rec),
     dismissRec: (rec) => dismissMutation.mutate(rec),
+    invalidateCoach,
   };
 }
