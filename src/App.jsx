@@ -30,9 +30,9 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // ─── Lazy Pages ──────────────────────────────────────────────────────────────
 const Landing = lazy(() => import('@/pages/Landing.jsx'));
 const Onboarding = lazy(() => import('@/pages/Onboarding'));
-const Today = lazy(() => import('@/pages/Today'));
+const Today = lazy(() => import('@/pages/TodayV2'));
 const Nutrition = lazy(() => import('@/pages/Nutrition'));
-const WorkoutsV2 = lazy(() => import('@/pages/WorkoutsV2'));
+const WorkoutsV2 = lazy(() => import('@/pages/TrainV2'));
 const Routines = lazy(() => import('@/pages/Routines'));
 const Protocols = lazy(() => import('@/pages/Protocols'));
 const Measurements = lazy(() => import('@/pages/Measurements'));
