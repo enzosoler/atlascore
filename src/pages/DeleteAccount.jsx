@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useT } from '@/lib/i18nContext';
 
 export default function DeleteAccount() {
   const navigate = useNavigate();
+  const t = useT();
   const [confirmText, setConfirmText] = useState('');
   const [step, setStep] = useState(1);
 
@@ -26,7 +28,7 @@ export default function DeleteAccount() {
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-semibold">Delete Account</h1>
+        <h1 className="text-lg font-semibold">{t('deleteAccount.title')}</h1>
       </div>
 
       <div className="p-4 max-w-md mx-auto">
@@ -34,48 +36,48 @@ export default function DeleteAccount() {
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
             <div className="flex items-center gap-3 mb-2">
               <AlertTriangle className="w-5 h-5 text-red-500" />
-              <span className="font-medium text-red-500">Warning</span>
+              <span className="font-medium text-red-500">{t('deleteAccount.warning')}</span>
             </div>
             <p className="text-sm text-[hsl(var(--fg-2))]">
-              This action is permanent and cannot be undone. All your data, including workouts, progress photos, and measurements will be permanently deleted.
+              {t('deleteAccount.warningDesc')}
             </p>
           </div>
 
           {step === 1 ? (
             <div className="space-y-4">
-              <h2 className="font-medium">What will be deleted:</h2>
+              <h2 className="font-medium">{t('deleteAccount.whatGetsDeleted')}</h2>
               <ul className="space-y-2 text-sm text-[hsl(var(--fg-2))]">
                 <li className="flex items-center gap-2">
                   <X className="w-4 h-4 text-red-500" />
-                  All workout history and routines
+                  {t('deleteAccount.item.workouts')}
                 </li>
                 <li className="flex items-center gap-2">
                   <X className="w-4 h-4 text-red-500" />
-                  Nutrition logs and meal plans
+                  {t('deleteAccount.item.nutrition')}
                 </li>
                 <li className="flex items-center gap-2">
                   <X className="w-4 h-4 text-red-500" />
-                  Progress photos and measurements
+                  {t('deleteAccount.item.photos')}
                 </li>
                 <li className="flex items-center gap-2">
                   <X className="w-4 h-4 text-red-500" />
-                  Account profile and settings
+                  {t('deleteAccount.item.profileSettings')}
                 </li>
               </ul>
               <Button variant="destructive" onClick={handleDelete} className="w-full mt-4">
                 <Trash2 className="w-4 h-4 mr-2" />
-                Continue to Delete
+                {t('deleteAccount.continueBtn')}
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-[hsl(var(--fg-2))]">
-                To confirm deletion, type <strong className="text-[hsl(var(--fg))]">DELETE</strong> below:
+                {t('deleteAccount.typeToConfirmPrefix')} <strong className="text-[hsl(var(--fg))]">DELETE</strong> {t('deleteAccount.typeToConfirmSuffix')}
               </p>
               <Input
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
-                placeholder="Type DELETE to confirm"
+                placeholder={t('deleteAccount.inputPlaceholder')}
               />
               <Button
                 variant="destructive"
@@ -83,13 +85,13 @@ export default function DeleteAccount() {
                 disabled={confirmText !== 'DELETE'}
                 className="w-full"
               >
-                Permanently Delete Account
+                {t('deleteAccount.permanentlyDeleteBtn')}
               </Button>
               <button
                 onClick={() => setStep(1)}
                 className="w-full text-sm text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] py-2"
               >
-                Cancel
+                {t('deleteAccount.cancel')}
               </button>
             </div>
           )}

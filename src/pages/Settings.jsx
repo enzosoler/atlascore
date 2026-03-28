@@ -122,15 +122,15 @@ function SettingsContent() {
 
   const planName = subscription?.plan_code
     ? subscription.plan_code.charAt(0).toUpperCase() + subscription.plan_code.slice(1)
-    : 'Free';
+    : t('settings.plan.free');
 
   const planStatus = subscription?.status === 'active'
-    ? 'Active'
+    ? t('settings.plan.active')
     : subscription?.status === 'trialing'
-    ? 'Trial'
+    ? t('settings.plan.trial')
     : subscription?.status === 'past_due'
-    ? 'Past due'
-    : 'Free';
+    ? t('settings.plan.pastDue')
+    : t('settings.plan.free');
 
   const lastUpdated = new Date().toLocaleDateString('en-US', {
     month: 'short',
@@ -141,8 +141,8 @@ function SettingsContent() {
     <PageShell maxWidth="max-w-2xl">
       {/* Account — Primary section */}
       <SectionCard
-        title="Account"
-        subtitle="Your profile and plan"
+        title={t('settings.account.title')}
+        subtitle={t('settings.account.planSubtitle')}
       >
         <div className="space-y-3">
           <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
@@ -156,10 +156,10 @@ function SettingsContent() {
               <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">{user?.email || '—'}</p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-[12px] text-[hsl(var(--fg-3))]">Updated {lastUpdated}</span>
+              <span className="text-[12px] text-[hsl(var(--fg-3))]">{t('settings.account.updated')} {lastUpdated}</span>
               <Button asChild variant="outline" size="sm" className="gap-1.5">
                 <Link to={ROUTES.profile}>
-                  Edit your profile
+                  {t('settings.account.editProfile')}
                   <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
                 </Link>
               </Button>
@@ -172,11 +172,11 @@ function SettingsContent() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                {planName} Plan
+                {planName} {t('settings.plan.planLabel')}
               </p>
               <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
                 {planStatus}
-                {subscription?.expires_at && ` • Renews ${new Date(subscription.expires_at).toLocaleDateString()}`}
+                {subscription?.expires_at && ` • ${t('settings.plan.renews')} ${new Date(subscription.expires_at).toLocaleDateString()}`}
               </p>
             </div>
             {subscription && ['active', 'trialing', 'past_due'].includes(subscription.status) && (
@@ -187,7 +187,7 @@ function SettingsContent() {
                 disabled={portalLoading}
                 className="gap-1.5"
               >
-                {portalLoading ? 'Loading...' : 'Manage plan'}
+                {portalLoading ? t('settings.plan.loading') : t('settings.plan.manage')}
                 <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
               </Button>
             )}
@@ -197,48 +197,48 @@ function SettingsContent() {
 
       {/* Experience */}
       <SectionCard
-        title="Interface"
-        subtitle="How atlas.core looks and feels"
+        title={t('settings.interface.title')}
+        subtitle={t('settings.interface.subtitle')}
       >
         <div className="flex gap-3">
           <ThemeOption
             icon={Moon}
-            label="Dark"
-            description="Recommended"
+            label={t('settings.appearance.dark')}
+            description={t('settings.interface.recommended')}
             value="dark"
             currentTheme={theme}
             onSelect={setTheme}
           />
           <ThemeOption
             icon={Sun}
-            label="Light"
-            description="Alternative"
+            label={t('settings.appearance.light')}
+            description={t('settings.interface.alternative')}
             value="light"
             currentTheme={theme}
             onSelect={setTheme}
           />
         </div>
         <p className="mt-3 text-[12px] text-[hsl(var(--fg-3))]">
-          Dark mode preserves the intended contrast and visual hierarchy designed for atlas.core.
+          {t('settings.interface.darkModeNote')}
         </p>
       </SectionCard>
 
       {/* Data & Control */}
       <SectionCard
-        title="Data"
-        subtitle="Exports and privacy controls"
+        title={t('settings.data.title')}
+        subtitle={t('settings.data.subtitle')}
       >
         <div className="space-y-3">
           <ControlRow
             icon={FileOutput}
-            label="Export your data"
-            description="Download CSV, JSON, or PDF with date range selection"
+            label={t('settings.data.exportLabel')}
+            description={t('settings.data.exportDesc')}
             href={ROUTES.export}
           />
           <ControlRow
             icon={Shield}
-            label="Privacy settings"
-            description="Manage data visibility and account controls"
+            label={t('settings.data.privacyLabel')}
+            description={t('settings.data.privacyDesc')}
             href={ROUTES.export}
           />
         </div>
@@ -246,14 +246,14 @@ function SettingsContent() {
 
       {/* Support */}
       <SectionCard
-        title="Support"
-        subtitle="Help and system information"
+        title={t('settings.support.title')}
+        subtitle={t('settings.support.subtitle')}
       >
         <div className="space-y-3">
           <ControlRow
             icon={HelpCircle}
-            label="Help Center"
-            description="Guides, FAQs, and troubleshooting"
+            label={t('settings.support.helpLabel')}
+            description={t('settings.support.helpDesc')}
             href={ROUTES.help}
           />
           <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
@@ -263,10 +263,10 @@ function SettingsContent() {
               </div>
               <div className="min-w-0">
                 <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                  System prompts
+                  {t('settings.support.systemPromptsLabel')}
                 </p>
                 <p className="mt-1 text-[12px] leading-4 text-[hsl(var(--fg-2))]">
-                  Trial notices, password changes, and session events use calm iOS-style confirmations.
+                  {t('settings.support.systemPromptsDesc')}
                 </p>
               </div>
             </div>
@@ -276,15 +276,15 @@ function SettingsContent() {
 
       {/* Session — Danger zone */}
       <SectionCard
-        title="Session"
-        subtitle="Active session control"
+        title={t('settings.signout.title')}
+        subtitle={t('settings.session.subtitle')}
       >
         <ControlRow
           icon={LogOut}
-          label="Sign out"
-          description="End your current session across all devices"
+          label={t('settings.signout.label')}
+          description={t('settings.session.signOutDesc')}
           onClick={handleLogout}
-          meta="Active now"
+          meta={t('settings.session.activeNow')}
           destructive
         />
       </SectionCard>
@@ -293,12 +293,13 @@ function SettingsContent() {
 }
 
 export default function Settings() {
+  const { t } = useI18n();
   return (
     <SafePageBoundary
-      title="Settings"
-      subtitle="Personalize your experience."
+      title={t('settings.title')}
+      subtitle={t('settings.subtitle')}
       maxWidth="max-w-2xl"
-      fallbackDescription="Settings page encountered an error."
+      fallbackDescription={t('settings.errorFallback')}
     >
       <SettingsContent />
     </SafePageBoundary>

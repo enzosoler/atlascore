@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/lib/i18nContext';
 
 /**
  * UpdatePassword - Page for updating password after reset link
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button';
 export default function UpdatePassword() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const t = useT();
   const [status, setStatus] = useState('verifying'); // 'verifying' | 'ready' | 'submitting' | 'success' | 'error'
   const [errorMessage, setErrorMessage] = useState('');
   const [password, setPassword] = useState('');
@@ -33,12 +35,12 @@ export default function UpdatePassword() {
         } else {
           // No session - maybe the link expired or is invalid
           setStatus('error');
-          setErrorMessage('This password reset link is invalid or has expired. Please request a new one.');
+          setErrorMessage(t('updatePassword.errorLinkExpired'));
         }
       } catch (error) {
         console.error('Session verification error:', error);
         setStatus('error');
-        setErrorMessage('Unable to verify your session. Please try again.');
+        setErrorMessage(t('updatePassword.errorVerifySession'));
       }
     };
 
@@ -47,11 +49,11 @@ export default function UpdatePassword() {
 
   const validatePassword = () => {
     if (password.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long.');
+      setErrorMessage(t('updatePassword.errorTooShort'));
       return false;
     }
     if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
+      setErrorMessage(t('updatePassword.errorNoMatch'));
       return false;
     }
     return true;
@@ -80,7 +82,7 @@ export default function UpdatePassword() {
     } catch (error) {
       console.error('Password update error:', error);
       setStatus('ready');
-      setErrorMessage(error.message || 'Failed to update password. Please try again.');
+      setErrorMessage(error.message || t('updatePassword.errorUpdateFailed'));
     }
   };
 
@@ -97,10 +99,10 @@ export default function UpdatePassword() {
               <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--brand))]" />
             </div>
             <h1 className="text-xl font-semibold text-[hsl(var(--fg))]">
-              Verifying your request...
+              {t('updatePassword.verifyingTitle')}
             </h1>
             <p className="text-sm text-[hsl(var(--fg-2))]">
-              Please wait while we verify your password reset link.
+              {t('updatePassword.verifyingDesc')}
             </p>
           </div>
         </div>
@@ -117,13 +119,13 @@ export default function UpdatePassword() {
               <AlertCircle className="h-8 w-8 text-red-600" />
             </div>
             <h1 className="text-xl font-semibold text-[hsl(var(--fg))]">
-              Link Expired
+              {t('updatePassword.linkExpiredTitle')}
             </h1>
             <p className="text-sm text-[hsl(var(--fg-2))]">
               {errorMessage}
             </p>
             <Button onClick={handleRequestNewLink} className="mt-4">
-              Request New Reset Link
+              {t('updatePassword.requestNewLink')}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
@@ -141,10 +143,10 @@ export default function UpdatePassword() {
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
             <h1 className="text-xl font-semibold text-[hsl(var(--fg))]">
-              Password Updated!
+              {t('updatePassword.successTitle')}
             </h1>
             <p className="text-sm text-[hsl(var(--fg-2))]">
-              Your password has been successfully updated. You will be redirected to the login page.
+              {t('updatePassword.successDesc')}
             </p>
           </div>
         </div>
@@ -158,10 +160,10 @@ export default function UpdatePassword() {
         <div className="atlas-public-panel px-6 py-6 lg:px-7 lg:py-7">
           <div className="text-center space-y-2 mb-6">
             <h1 className="text-[1.7rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-              Set New Password
+              {t('updatePassword.title')}
             </h1>
             <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              Enter your new password below.
+              {t('updatePassword.subtitle')}
             </p>
           </div>
 
@@ -171,7 +173,7 @@ export default function UpdatePassword() {
                 htmlFor="password"
                 className="block text-sm font-medium text-[hsl(var(--fg))]"
               >
-                New Password
+                {t('updatePassword.newPasswordLabel')}
               </label>
               <div className="relative">
                 <input
@@ -179,7 +181,7 @@ export default function UpdatePassword() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  placeholder={t('updatePassword.newPasswordPlaceholder')}
                   className="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 pr-10 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--brand)/0.42)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.12)]"
                   required
                   minLength={6}
@@ -200,7 +202,7 @@ export default function UpdatePassword() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-[hsl(var(--fg))]"
               >
-                Confirm Password
+                {t('updatePassword.confirmPasswordLabel')}
               </label>
               <div className="relative">
                 <input
@@ -208,7 +210,7 @@ export default function UpdatePassword() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
+                  placeholder={t('updatePassword.confirmPasswordPlaceholder')}
                   className="w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-3 pr-10 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--brand)/0.42)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.12)]"
                   required
                   minLength={6}
@@ -239,11 +241,11 @@ export default function UpdatePassword() {
               {status === 'submitting' ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Updating...
+                  {t('updatePassword.updating')}
                 </>
               ) : (
                 <>
-                  Update Password
+                  {t('updatePassword.submitBtn')}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}

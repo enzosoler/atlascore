@@ -111,12 +111,12 @@ function AccountContent() {
     .join('') || 'AT';
 
   const roleLabel = {
-    athlete: 'Athlete',
-    coach: 'Coach',
-    nutritionist: 'Nutritionist',
-    clinician: 'Clinician',
-    admin: 'Admin',
-  }[user?.atlas_role] || 'Athlete';
+    athlete: t('account.roleAthlete'),
+    coach: t('account.roleCoach'),
+    nutritionist: t('account.roleNutritionist'),
+    clinician: t('account.roleClinician'),
+    admin: t('account.roleAdmin'),
+  }[user?.atlas_role] || t('account.roleAthlete');
 
   const planLabel = isSubscribed
     ? tier === 'pro'
