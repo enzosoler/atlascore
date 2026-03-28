@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -427,7 +428,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-[28px] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] sm:max-h-[85vh] sm:max-w-lg sm:rounded-[24px]">
 
@@ -551,7 +552,8 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -594,7 +595,7 @@ function DateWheelPicker({ value, onChange }) {
 // New Checkpoint Modal
 function NewCheckpointModal({ onConfirm, onClose }) {
   const [date, setDate] = useState(getToday());
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-sm rounded-[28px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-6 pb-8 pt-6 shadow-[var(--shadow-lg)]">
@@ -613,7 +614,8 @@ function NewCheckpointModal({ onConfirm, onClose }) {
           <PrimaryButton type="button" onClick={() => onConfirm(date)} className="flex-1">Create checkpoint</PrimaryButton>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

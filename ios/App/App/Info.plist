@@ -37,6 +37,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>atlas.core uses your camera to scan food items and barcodes for nutrition tracking.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>atlas.core uses your location to show current weather conditions.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>atlas.core needs access to your photos to save and share your progress cards.</string>
 	<key>UILaunchStoryboardName</key>
