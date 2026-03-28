@@ -4,13 +4,31 @@
  */
 
 import { supabase } from '@/lib/supabaseClient';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 /**
  * Sign in with Google
- * Redirects to Supabase OAuth flow
+ * On native iOS/Android: opens an in-app browser and redirects back via atlascore:// deep link
+ * On web: standard redirect flow
  */
 export const signInWithGoogle = async (redirectUrl = `${window.location.origin}/auth/callback`) => {
   try {
+    const isNative = Capacitor.isNativePlatform();
+
+    if (isNative) {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'atlascore://auth/callback',
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error) throw error;
+      await Browser.open({ url: data.url, windowName: '_self' });
+      return data;
+    }
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

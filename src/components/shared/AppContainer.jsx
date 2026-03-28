@@ -138,6 +138,13 @@ export function ActionRow({ children, className = '' }) {
 
 export function TabBar({ items, className = '' }) {
   return (
+    <>
+    {/* Fill the home-indicator safe area with the same background so there's no gap */}
+    <div
+      className="fixed inset-x-0 bottom-0 z-[59] lg:hidden bg-[hsl(var(--bg)/0.92)] backdrop-blur-[24px]"
+      style={{ height: 'env(safe-area-inset-bottom, 0px)' }}
+      aria-hidden="true"
+    />
     <nav
       className={cn(
         'fixed inset-x-0 bottom-0 z-[60] border-t border-[hsl(var(--border)/0.84)] bg-[hsl(var(--bg)/0.92)] shadow-[0_-12px_34px_hsl(var(--label)/0.05)] backdrop-blur-[24px] lg:hidden',
@@ -200,5 +207,6 @@ export function TabBar({ items, className = '' }) {
         })}
       </div>
     </nav>
+    </>
   );
 }
