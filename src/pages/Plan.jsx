@@ -24,17 +24,20 @@ import {
 import { toast } from 'sonner';
 import { SafePageBoundary } from '@/components/shared/StablePage';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 
 // ─── Goal options ──────────────────────────────────────────────────────────────
 
-const GOALS = [
-  { key: 'cut',      label: 'Cut',      description: 'Lose fat, preserve muscle',  color: 'ok' },
-  { key: 'bulk',     label: 'Bulk',     description: 'Build muscle, accept some fat', color: 'brand' },
-  { key: 'maintain', label: 'Maintain', description: 'Hold weight, improve composition', color: 'warn' },
-  { key: 'recomp',   label: 'Recomp',   description: 'Lose fat and build muscle simultaneously', color: 'brand' },
-];
+function getGoals(t) {
+  return [
+    { key: 'cut',      label: t('planPage.goals.cut'),      description: t('planPage.goals.cutDesc'),      color: 'ok' },
+    { key: 'bulk',     label: t('planPage.goals.bulk'),     description: t('planPage.goals.bulkDesc'),     color: 'brand' },
+    { key: 'maintain', label: t('planPage.goals.maintain'), description: t('planPage.goals.maintainDesc'), color: 'warn' },
+    { key: 'recomp',   label: t('planPage.goals.recomp'),   description: t('planPage.goals.recompDesc'),   color: 'brand' },
+  ];
+}
 
 const GOAL_COLOR = {
   ok:    'border-[hsl(var(--ok)/0.35)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]',
@@ -89,7 +92,9 @@ function MacroInput({ label, unit, value, onChange }) {
 
 function PlanContent() {
   const { user } = useAuth();
+  const t = useT();
   const queryClient = useQueryClient();
+  const GOALS = getGoals(t);
 
   // ── Data ──────────────────────────────────────────────────────────────────────
   const { data: profileRow, isLoading } = useQuery({
@@ -160,12 +165,12 @@ function PlanContent() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success('Plan updated');
+      toast.success(t('planPage.toastUpdated'));
       queryClient.invalidateQueries({ queryKey: ['profile-plan', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['profile-progress', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['user-profile-today', user?.id] });
     },
-    onError: () => toast.error('Failed to save. Try again.'),
+    onError: () => toast.error(t('planPage.toastSaveFailed')),
   });
 
   const isDirty = profileRow && (
@@ -191,7 +196,7 @@ function PlanContent() {
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">Plan</h1>
+          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">{t('planPage.title')}</h1>
           {isDirty && (
             <button
               onClick={() => saveMutation.mutate()}
@@ -203,13 +208,13 @@ function PlanContent() {
               ) : (
                 <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
               )}
-              Save
+              {t('common.save')}
             </button>
           )}
         </div>
 
         {/* ── Goal ─────────────────────────────────────────────────────────── */}
-        <SectionCard icon={Target} label="Goal">
+        <SectionCard icon={Target} label={t('planPage.goal')}>
           <div className="grid grid-cols-2 gap-2 mb-4">
             {GOALS.map((g) => {
               const isSelected = goal === g.key;
@@ -232,10 +237,10 @@ function PlanContent() {
 
           {/* Target weight + date */}
           <div className="grid grid-cols-2 gap-3">
-            <MacroInput label="Target weight" unit="kg" value={targetWeight} onChange={setTargetWeight} />
+            <MacroInput label={t('planPage.targetWeight')} unit="kg" value={targetWeight} onChange={setTargetWeight} />
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">
-                Target date
+                {t('planPage.targetDate')}
               </label>
               <input
                 type="date"
@@ -250,9 +255,9 @@ function PlanContent() {
           {profileRow?.weight_kg && targetWeight && Number(targetWeight) > 0 && (
             <div className="mt-3 rounded-[12px] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5">
               <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                Current: <strong className="text-[hsl(var(--fg))]">{profileRow.current_weight} kg</strong>
+                {t('planPage.currentWeight')} <strong className="text-[hsl(var(--fg))]">{profileRow.current_weight} kg</strong>
                 {' · '}
-                Need to {Number(targetWeight) < profileRow.current_weight ? 'lose' : 'gain'}{' '}
+                {Number(targetWeight) < profileRow.current_weight ? t('planPage.needToLose') : t('planPage.needToGain')}{' '}
                 <strong className="text-[hsl(var(--brand))]">
                   {Math.abs(Number(targetWeight) - profileRow.current_weight).toFixed(1)} kg
                 </strong>
@@ -262,14 +267,14 @@ function PlanContent() {
         </SectionCard>
 
         {/* ── Nutrition Targets ─────────────────────────────────────────────── */}
-        <SectionCard icon={UtensilsCrossed} label="Nutrition Targets">
+        <SectionCard icon={UtensilsCrossed} label={t('planPage.nutritionTargets')}>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <MacroInput label="Calories" unit="kcal" value={calories} onChange={setCalories} />
+              <MacroInput label={t('planPage.calories')} unit="kcal" value={calories} onChange={setCalories} />
             </div>
-            <MacroInput label="Protein" unit="g" value={protein} onChange={setProtein} />
-            <MacroInput label="Carbs" unit="g" value={carbs} onChange={setCarbs} />
-            <MacroInput label="Fat" unit="g" value={fat} onChange={setFat} />
+            <MacroInput label={t('planPage.protein')} unit="g" value={protein} onChange={setProtein} />
+            <MacroInput label={t('planPage.carbs')} unit="g" value={carbs} onChange={setCarbs} />
+            <MacroInput label={t('planPage.fat')} unit="g" value={fat} onChange={setFat} />
           </div>
 
           {/* Macro split preview */}
@@ -280,16 +285,16 @@ function PlanContent() {
             const total = proteinKcal + carbsKcal + fatKcal || 1;
             return (
               <div className="mt-4 space-y-2">
-                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">Macro split</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">{t('planPage.macroSplit')}</p>
                 <div className="flex h-2 overflow-hidden rounded-full gap-0.5">
                   <div className="rounded-full bg-[hsl(var(--brand))]" style={{ width: `${(proteinKcal / total) * 100}%` }} />
                   <div className="rounded-full bg-[hsl(var(--brand-ai))]" style={{ width: `${(carbsKcal / total) * 100}%` }} />
                   <div className="rounded-full bg-[hsl(var(--warn))]" style={{ width: `${(fatKcal / total) * 100}%` }} />
                 </div>
                 <div className="flex justify-between text-[10px] text-[hsl(var(--fg-3))]">
-                  <span>Protein {Math.round((proteinKcal / total) * 100)}%</span>
-                  <span>Carbs {Math.round((carbsKcal / total) * 100)}%</span>
-                  <span>Fat {Math.round((fatKcal / total) * 100)}%</span>
+                  <span>{t('planPage.protein')} {Math.round((proteinKcal / total) * 100)}%</span>
+                  <span>{t('planPage.carbs')} {Math.round((carbsKcal / total) * 100)}%</span>
+                  <span>{t('planPage.fat')} {Math.round((fatKcal / total) * 100)}%</span>
                 </div>
               </div>
             );
@@ -299,13 +304,13 @@ function PlanContent() {
         {/* ── Training Plan ─────────────────────────────────────────────────── */}
         <SectionCard
           icon={Dumbbell}
-          label="Training Plan"
+          label={t('planPage.trainingPlan')}
           action={
             <Link
               to={ROUTES.workouts}
               className="flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--brand))] hover:opacity-80"
             >
-              Manage <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
+              {t('planPage.manage')} <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
             </Link>
           }
         >
@@ -317,29 +322,29 @@ function PlanContent() {
               )}
               {activePlan.frequency_per_week && (
                 <span className="inline-block text-[11px] font-semibold text-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.1)] border border-[hsl(var(--brand)/0.2)] rounded-full px-2.5 py-0.5">
-                  {activePlan.frequency_per_week}× / week
+                  {activePlan.frequency_per_week}{t('planPage.timesPerWeek')}
                 </span>
               )}
             </div>
           ) : (
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[13px] text-[hsl(var(--fg-3))]">No active training plan.</p>
+              <p className="text-[13px] text-[hsl(var(--fg-3))]">{t('planPage.noActivePlan')}</p>
               <Link
                 to={ROUTES.workouts}
                 className="shrink-0 flex items-center gap-1.5 rounded-[11px] bg-[hsl(var(--brand))] px-3 h-8 text-[12px] font-semibold text-white hover:opacity-90 active:opacity-75 transition-opacity"
               >
-                Create plan
+                {t('planPage.createPlan')}
               </Link>
             </div>
           )}
         </SectionCard>
 
         {/* ── Supplements ──────────────────────────────────────────────────── */}
-        <SectionCard icon={Pill} label="Supplements">
+        <SectionCard icon={Pill} label={t('planPage.supplements')}>
           <div className="flex items-center justify-between">
-            <p className="text-[13px] text-[hsl(var(--fg-3))]">Supplement tracking coming soon.</p>
+            <p className="text-[13px] text-[hsl(var(--fg-3))]">{t('planPage.supplementsSoon')}</p>
             <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.1)] border border-[hsl(var(--brand)/0.2)] rounded-full px-2.5 py-1">
-              Soon
+              {t('planPage.soon')}
             </span>
           </div>
         </SectionCard>
@@ -350,11 +355,12 @@ function PlanContent() {
 }
 
 export default function Plan() {
+  const t = useT();
   return (
     <SafePageBoundary
-      title="Plan"
-      subtitle="Your control center"
-      fallbackDescription="The Plan screen opened in safe mode."
+      title={t('planPage.title')}
+      subtitle={t('planPage.subtitle')}
+      fallbackDescription={t('planPage.errorFallback')}
     >
       <PlanContent />
     </SafePageBoundary>
