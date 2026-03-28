@@ -653,7 +653,23 @@
     }
   },
   "today": {
-    "greeting": "Good morning",
+    "greeting": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}",
+      "late": "Hey {name}, up late?"
+    },
+    "weather": {
+      "hot": "Hot outside. Stay hydrated.",
+      "cold": "Cold but clear — good energy.",
+      "clear": "Clear skies. No excuses today.",
+      "cloudy": "Overcast. Perfect for a focused session.",
+      "foggy": "Moody out there. Channel it.",
+      "rainy": "Rain can't stop the work.",
+      "snowy": "Frozen outside. Even better reason to warm up.",
+      "showers": "Wet out there. Train indoors.",
+      "stormy": "Stay in and train hard."
+    },
     "checkin": {
       "title": "Today's check-in",
       "subtitle": "How are you feeling?",

@@ -653,7 +653,23 @@
     }
   },
   "today": {
-    "greeting": "Bom dia",
+    "greeting": {
+      "morning": "Bom dia, {name}",
+      "afternoon": "Boa tarde, {name}",
+      "evening": "Boa noite, {name}",
+      "late": "Ei {name}, de madrugada?"
+    },
+    "weather": {
+      "hot": "Calor lá fora. Mantenha-se hidratado.",
+      "cold": "Frio mas aberto — boa energia.",
+      "clear": "Céu aberto. Sem desculpas hoje.",
+      "cloudy": "Nublado. Perfeito para uma sessão focada.",
+      "foggy": "Tempo fechado. Use isso a seu favor.",
+      "rainy": "A chuva não para o treino.",
+      "snowy": "Congelando lá fora. Melhor razão para aquecer.",
+      "showers": "Tempo chuvoso. Treine em casa.",
+      "stormy": "Fique em casa e treine forte."
+    },
     "checkin": {
       "title": "Check-in de hoje",
       "subtitle": "Como você está se sentindo?",
