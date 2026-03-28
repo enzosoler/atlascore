@@ -177,6 +177,9 @@ export function hasFeatureAccess(user, subscription, overrides, feature) {
     return false;
   }
 
+  // Beta testers get all non-role-gated features
+  if (user?.atlas_role === 'beta_tester') return true;
+
   // Plan-based features
   const userPlanCode = subscription?.tier || subscription?.plan_code || 'free';
   const userLevel = PLAN_LEVELS[userPlanCode] || 0;
