@@ -188,5 +188,100 @@
         "ahead": "Adiantado"
       }
     }
+  },
+  "es": {
+    "shared": {
+      "stablePage": {
+        "loadingTitle": "Cargando datos",
+        "loadingDescription": "La página se abrió en modo seguro y el contenido aparece cuando los datos responden.",
+        "loadingText": "Cargando...",
+        "errorTitle": "Modo seguro activo",
+        "errorDescription": "Algunos datos no se pudieron cargar, pero la página permanece abierta y utilizable.",
+        "errorBannerText": "Algunos datos no se pudieron cargar."
+      },
+      "supportWidget": {
+        "needHelp": "¿Necesitas ayuda?",
+        "earlyAccess": "Estamos aquí durante el acceso anticipado.",
+        "back": "Volver",
+        "send": "Enviar mensaje",
+        "sending": "Enviando...",
+        "toastSuccess": "¡Mensaje enviado! Gracias por tu opinión.",
+        "toastError": "Error al enviar. Por favor, intenta de nuevo.",
+        "optionBug": "Reportar un error",
+        "optionFeature": "Sugerir una función",
+        "optionHelp": "¿Algo confuso?",
+        "optionContact": "Hablar con el equipo",
+        "placeholderBug": "Describe qué pasó y en qué parte de la app...",
+        "placeholderFeature": "¿Qué función haría la app más útil para ti?",
+        "placeholderHelp": "¿Qué es confuso o difícil de entender?",
+        "placeholderContact": "¿Cómo podemos ayudarte?"
+      },
+      "inviteModal": {
+        "coachTitle": "Invitar alumno",
+        "coachSubtitle": "Envía una invitación segura para desbloquear seguimiento, prescripción y adherencia en un historial compartido.",
+        "coachPlaceholder": "alumno@ejemplo.com",
+        "nutritionistTitle": "Invitar cliente",
+        "nutritionistSubtitle": "Invita a un cliente para compartir comidas, medidas, exámenes y planes prescritos.",
+        "nutritionistPlaceholder": "cliente@ejemplo.com",
+        "clinicianTitle": "Invitar paciente",
+        "clinicianSubtitle": "Crea una conexión clínica con acceso claro a protocolos, datos de laboratorio y composición corporal.",
+        "clinicianPlaceholder": "paciente@ejemplo.com",
+        "labelFullName": "Nombre completo (opcional)",
+        "placeholderFullName": "Nombre completo",
+        "labelEmail": "Email",
+        "inviteLabel": "Invitación",
+        "inviteExpiry": "La invitación expira en 30 días si no es aceptada. La conexión solo se activa después de la confirmación.",
+        "cancel": "Cancelar",
+        "sendInvite": "Enviar invitación",
+        "sending": "Enviando...",
+        "errorEnterEmail": "Ingresa una dirección de email",
+        "toastSuccess": "Invitación enviada a {email}",
+        "toastError": "Error al enviar invitación"
+      },
+      "professionalLinks": {
+        "roleCoach": "Entrenador / Personal",
+        "roleNutritionist": "Nutricionista",
+        "roleClinician": "Clínico / Doctor",
+        "pendingInvites": "Invitaciones pendientes ({count})",
+        "accept": "Aceptar",
+        "decline": "Rechazar",
+        "activeProfessionals": "Profesionales activos",
+        "activeBadge": "Activo",
+        "toastAccepted": "¡Conexión aceptada!",
+        "toastDeclined": "Invitación rechazada"
+      },
+      "pendingInvites": {
+        "heading": "Invitaciones pendientes ({count})",
+        "labelCoach": "Entrenador",
+        "labelNutritionist": "Nutricionista",
+        "labelClinician": "Clínico",
+        "wantsAccess": "quiere acceso a tus datos",
+        "accept": "Aceptar",
+        "decline": "Rechazar",
+        "toastAccepted": "Conexión aceptada",
+        "toastDeclined": "Invitación rechazada"
+      },
+      "trialBanner": {
+        "daysRemaining": "Prueba de rendimiento — {days} día{plural} restante{plural}",
+        "endsToday": "Tu período de prueba termina hoy",
+        "keepWorkflow": "Mantén tu flujo de trabajo actual y el acceso completo al espacio de trabajo de atlas.core.",
+        "subscribeNow": "Suscribirse ahora",
+        "closeBanner": "Cerrar banner"
+      },
+      "setupScreen": {
+        "msg1": "Analizando tus objetivos...",
+        "msg2": "Construyendo tu panel personalizado...",
+        "msg3": "Configurando tus categorías de seguimiento...",
+        "msg4": "Calculando tus metas nutricionales...",
+        "msg5": "Preparando tu línea de tiempo...",
+        "msg6": "Todo está listo.",
+        "settingUp": "atlas.core se está configurando...",
+        "buttonLabel": "Continuar"
+      },
+      "adherence": {
+        "target": "Meta",
+        "ahead": "Adelantado"
+      }
+    }
   }
 }
