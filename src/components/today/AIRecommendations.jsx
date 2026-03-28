@@ -27,7 +27,7 @@ const COLOR_CLASSES = {
   },
 };
 
-function RecCard({ rec, onDismiss }) {
+function RecCard({ rec, onDismiss, onFollow }) {
   const meta = TYPE_META[rec.type] || TYPE_META.habit;
   const Icon = meta.icon;
   const cc = COLOR_CLASSES[meta.color];
@@ -67,6 +67,7 @@ function RecCard({ rec, onDismiss }) {
       {rec.actionPath && (
         <Link
           to={rec.actionPath}
+          onClick={() => onFollow?.(rec)}
           className={`flex items-center justify-center gap-1.5 h-9 w-full rounded-[11px] text-[13px] font-semibold transition-opacity hover:opacity-85 active:opacity-70 ${cc.action}`}
         >
           <Sparkles className="w-3 h-3 shrink-0" />
@@ -83,7 +84,7 @@ function RecCard({ rec, onDismiss }) {
  * Hides section when all dismissed or empty.
  * High signal only — caller is responsible for filtering low-confidence recs.
  */
-export function AIRecommendations({ recommendations }) {
+export function AIRecommendations({ recommendations, onFollow, onDismiss: onDismissCallback }) {
   const [dismissed, setDismissed] = useState(new Set());
 
   const visible = recommendations
@@ -92,7 +93,11 @@ export function AIRecommendations({ recommendations }) {
 
   if (!visible.length) return null;
 
-  const dismiss = (id) => setDismissed((prev) => new Set([...prev, id]));
+  const dismiss = (id) => {
+    setDismissed((prev) => new Set([...prev, id]));
+    const rec = recommendations.find((r) => r.id === id);
+    if (rec) onDismissCallback?.(rec);
+  };
 
   return (
     <section className="space-y-2.5">
@@ -104,7 +109,7 @@ export function AIRecommendations({ recommendations }) {
       </div>
       <div className="space-y-2.5">
         {visible.map((rec) => (
-          <RecCard key={rec.id} rec={rec} onDismiss={dismiss} />
+          <RecCard key={rec.id} rec={rec} onDismiss={dismiss} onFollow={onFollow} />
         ))}
       </div>
     </section>

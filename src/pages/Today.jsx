@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import { trackEvent } from '@/lib/sentry';
 import AIGenerateWizard from '@/components/ai/AIGenerateWizard';
 import { useT, useI18n } from '@/lib/i18nContext';
+import { useAICoach } from '@/hooks/useAICoach';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -202,6 +203,16 @@ function TodayContent() {
 
   const hasAIAccess = can('atlas_ai');
 
+  // ── AI coaching engine ────────────────────────────────────────────────────
+  const {
+    briefing: aiBriefing,
+    alerts: aiAlerts,
+    recommendations: aiRecommendations,
+    loading: aiLoading,
+    followRec,
+    dismissRec,
+  } = useAICoach({ userId: user?.id });
+
   // ── Stripe checkout completion ────────────────────────────────────────────
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
@@ -358,7 +369,7 @@ function TodayContent() {
   });
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const isLoading = mealsLoading || sessionLoading || planLoading || measurementsLoading;
+  const isLoading = mealsLoading || sessionLoading || planLoading || measurementsLoading || aiLoading;
 
   const totalKcal = useMemo(
     () => todayMeals.reduce((s, m) => s + (m.calories || m.total_calories || 0), 0),
@@ -371,22 +382,29 @@ function TodayContent() {
     [recentMeasurements]
   );
 
-  const briefing = useMemo(
+  const rulesBriefing = useMemo(
     () => buildBriefing({ todaySession, todayMeals, activeWorkoutPlan, profile, preferredName, totalKcal }),
     [todaySession, todayMeals, activeWorkoutPlan, profile, preferredName, totalKcal]
   );
 
-  const alerts = useMemo(
+  const rulesAlerts = useMemo(
     () => buildAlerts({ todaySession, todayMeals, recentMeasurements, lastWorkout }),
     [todaySession, todayMeals, recentMeasurements, lastWorkout]
   );
 
-  const recommendations = useMemo(
+  const rulesRecommendations = useMemo(
     () => buildRecommendations({
       todaySession, todayMeals, activeWorkoutPlan, recentMeasurements, profile, progressPhotos,
     }),
     [todaySession, todayMeals, activeWorkoutPlan, recentMeasurements, profile, progressPhotos]
   );
+
+  // Merge: use engine output when available, fall back to rules-based
+  const briefing = aiBriefing
+    ? { text: aiBriefing.body, focus: aiBriefing.focus, primaryAction: null, secondaryAction: null }
+    : rulesBriefing;
+  const alerts = aiAlerts.length > 0 ? aiAlerts : rulesAlerts;
+  const recommendations = aiRecommendations.length > 0 ? aiRecommendations : rulesRecommendations;
 
   // ── AI plan generation ────────────────────────────────────────────────────
   const handleAIGenerate = async (answers) => {
@@ -510,7 +528,11 @@ function TodayContent() {
       />
 
       {/* 8 — AI Recommendations: below fold, max 3, high signal only */}
-      <AIRecommendations recommendations={recommendations} />
+      <AIRecommendations
+        recommendations={recommendations}
+        onFollow={followRec}
+        onDismiss={dismissRec}
+      />
 
       {/* Modals */}
       <WeeklyCheckinModal open={checkinOpen} onClose={() => setCheckinOpen(false)} />
