@@ -21,13 +21,9 @@ export default function WelcomeScreen() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 mb-8"
+          className="mb-8"
         >
-          <AtlasCoreLogoSVG width={48} height={24} />
-          <span className="text-xl font-bold">
-            <span className="text-[hsl(var(--accent-primary))]">atlas</span>
-            <span className="text-[hsl(var(--fg))]">.core</span>
-          </span>
+          <AtlasCoreLogoSVG width={160} variant="lockup" />
         </motion.div>
 
         <motion.h1

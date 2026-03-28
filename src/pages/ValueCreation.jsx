@@ -38,7 +38,7 @@ export default function ValueCreation() {
         animate={{ opacity: 1, scale: 1 }}
         className="text-center"
       >
-        <AtlasCoreLogoSVG width={64} height={32} className="mx-auto mb-8" />
+        <AtlasCoreLogoSVG width={160} variant="lockup" className="mx-auto mb-8" />
 
         <div className="relative w-24 h-24 mx-auto mb-8">
           <motion.div
