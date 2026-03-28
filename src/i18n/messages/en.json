@@ -817,7 +817,9 @@
       "title": "Appearance",
       "subtitle": "Choose your interface theme.",
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "switchToLight": "Switch to light mode",
+      "switchToDark": "Switch to dark mode"
     },
     "language": {
       "title": "Language",

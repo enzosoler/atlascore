@@ -809,7 +809,9 @@
       "title": "Aparência",
       "subtitle": "Escolha o tema da interface.",
       "light": "Claro",
-      "dark": "Escuro"
+      "dark": "Escuro",
+      "switchToLight": "Alternar para modo claro",
+      "switchToDark": "Alternar para modo escuro"
     },
     "language": {
       "title": "Idioma",
