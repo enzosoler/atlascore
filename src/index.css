@@ -80,7 +80,7 @@
     --r-sm: 16px;
     --r-md: 18px;
     --r-lg: 24px;
-    --r-xl: 24px;
+    --r-xl: 24px; /* same as --r-lg; prefer --r-lg */
     --r-2xl: 28px;
     --r-pill: 999px;
 
@@ -997,60 +997,7 @@
     border-bottom: 1px solid hsl(var(--separator-opaque) / 0.82);
   }
 
-  .tab-bar {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-    background: var(--glass-bg);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
-    border-top: 1px solid hsl(var(--separator-opaque) / 0.82);
-  }
-
-  .tab-item {
-    display: flex;
-    min-width: 44px;
-    min-height: 44px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 4px 16px;
-    border-radius: var(--r-sm);
-    color: hsl(var(--label-tertiary));
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: color 0.15s ease;
-  }
-
-  .tab-item.active {
-    color: hsl(var(--label));
-  }
-
-  .tab-item svg {
-    width: 24px;
-    height: 24px;
-    stroke-width: 1.8;
-  }
-
-  .table-row {
-    display: flex;
-    min-height: 48px;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-  }
-
-  .table-row + .table-row {
-    border-top: 1px solid hsl(var(--separator-opaque) / 0.82);
-  }
+  /* .tab-bar, .tab-item, .table-row — removed (dead CSS, no JSX references) */
 
   .badge {
     display: inline-flex;
@@ -1262,6 +1209,14 @@
   --header-h: 3.75rem;
   --sidebar-w: 16rem;
   --sidebar-collapsed-w: 4.5rem;
+
+  /* Z-index tokens */
+  --z-sidebar: 40;
+  --z-header: 65;
+  --z-tabbar: 60;
+  --z-drawer-backdrop: 65;
+  --z-drawer: 70;
+  --z-modal: 70;
 }
 
 /* ── Standalone mobile screen (outside AppLayout) ────────────────────
@@ -1314,5 +1269,17 @@
     transition-property: opacity, transform, background-color, border-color, color, box-shadow;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
+  }
+}
+
+/* ── Accessibility: reduced motion ──────────────────────────────────
+   Disable animations and transitions for users who prefer reduced motion.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
