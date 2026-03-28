@@ -183,7 +183,7 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl bg-[hsl(var(--card))] border-border rounded-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-[hsl(var(--card))] border-border rounded-2xl max-h-[90dvh] overflow-y-auto" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
         <DialogHeader>
           <DialogTitle className="text-[15px]">Edit Meal</DialogTitle>
         </DialogHeader>
@@ -212,28 +212,29 @@ export default function MealEditModal({ open, onOpenChange, meal, date, onSucces
 
           {/* Foods list with edit capability */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="section-label">Foods</p>
-              <div className="flex gap-2">
-                {/* AI describe button */}
-                <Button
-                  variant={showAIInput ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setShowAIInput(!showAIInput)}
-                  className={`h-8 gap-1.5 text-[12px] ${showAIInput ? 'bg-[hsl(var(--brand))] text-white' : ''}`}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Describe
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCamera(true)}
-                  className="h-8 gap-1.5 text-[12px]"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  Scan
-                </Button>
+            <p className="section-label">Foods in this meal</p>
+
+            {/* Add food — always visible row above the food list */}
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={showAIInput ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowAIInput(!showAIInput)}
+                className={`h-9 gap-1.5 text-[12px] flex-1 ${showAIInput ? 'bg-[hsl(var(--brand))] text-white' : ''}`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Describe
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCamera(true)}
+                className="h-9 gap-1.5 text-[12px] flex-1"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                Scan photo
+              </Button>
+              <div className="w-full">
                 <FoodSearch
                   onSelectFood={(f) => setFoods([...foods, f])}
                   compact

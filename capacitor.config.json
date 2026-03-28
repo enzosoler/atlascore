@@ -35,6 +35,6 @@
   },
   "ios": {
     "scheme": "atlascore",
-    "contentInset": "automatic"
+    "contentInset": "never"
   }
 }

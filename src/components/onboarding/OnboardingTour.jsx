@@ -151,16 +151,18 @@ export function OnboardingTour() {
             />
           )}
 
-          {/* Tooltip Popup */}
+          {/* Tooltip Popup — centered, clamped inside safe viewport */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="fixed z-50 bg-[hsl(var(--card))] rounded-lg shadow-lg border border-[hsl(var(--border))] max-w-sm p-6 space-y-4"
+            className="fixed z-50 bg-[hsl(var(--card))] rounded-2xl shadow-lg border border-[hsl(var(--border))] w-[calc(100vw-2rem)] max-w-sm p-6 space-y-4"
             style={{
               left: '50%',
               top: '50%',
               transform: 'translate(-50%, -50%)',
+              maxHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4rem)',
+              overflowY: 'auto',
             }}
           >
             {/* Header */}
