@@ -23,22 +23,14 @@ export default function AtlasCoreLogoSVG({
 }) {
   if (variant === 'lockup') {
     return (
-      <div className={cn('flex flex-col items-center gap-2 shrink-0', className)}>
-        <img
-          src="/branding/dark/icon-512.png"
-          width={width}
-          height={width}
-          alt={alt}
-          draggable={false}
-          className="rounded-[22%] shrink-0 object-cover"
-        />
-        <span
-          style={{ fontSize: Math.round(width * 0.2) }}
-          className="font-bold tracking-[-0.03em] text-[hsl(var(--fg))] select-none"
-        >
-          atlas.core
-        </span>
-      </div>
+      <img
+        src="/branding/logo-lockup.svg"
+        width={width}
+        height={width}
+        alt={alt}
+        draggable={false}
+        className={cn('shrink-0 object-contain', className)}
+      />
     );
   }
 
