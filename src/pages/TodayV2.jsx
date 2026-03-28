@@ -262,7 +262,7 @@ function TodayContent() {
       />
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <ActionTile icon={Dumbbell} label={daily.workoutDone ? 'Done' : 'Train'} done={daily.workoutDone} to={ROUTES.workouts} />
         <ActionTile icon={UtensilsCrossed} label={daily.nutritionLogged ? 'Logged' : 'Eat'} done={daily.nutritionLogged} to={ROUTES.nutrition} />
         <ActionTile icon={Scale} label={daily.weightLogged ? 'Logged' : 'Weight'} done={daily.weightLogged} onClick={() => setCheckinOpen(true)} />
