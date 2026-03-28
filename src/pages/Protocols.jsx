@@ -5,6 +5,13 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
+import {
+  calculateConcentrationAtTime,
+  generateConcentrationSeries,
+  getCurrentConcentration,
+  getConcentrationStats,
+  getSubstanceHalfLife,
+} from '@/lib/concentrationCalculator';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
 import LogDoseForm from '@/components/protocols/LogDoseForm';
@@ -150,14 +157,6 @@ async function deleteProtocol(protocolId) {
 }
 
 // ── Concentration Chart based on Actual Dose Logs ────────────────────────────
-
-import {
-  calculateConcentrationAtTime,
-  generateConcentrationSeries,
-  getCurrentConcentration,
-  getConcentrationStats,
-  getSubstanceHalfLife,
-} from '@/lib/concentrationCalculator';
 
 function ConcentrationChart({ protocols }) {
   const { locale } = useI18n();

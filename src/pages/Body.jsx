@@ -266,6 +266,13 @@ export default function Body() {
   const [activeTab, setActiveTab] = useState(validTab);
   const { user } = useAuth();
 
+  // Sync activeTab when URL search params change (e.g. via redirect to /body?tab=measurements)
+  React.useEffect(() => {
+    if (tabFromUrl && TAB_IDS.includes(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const { data: measurements = [] } = useQuery({
     queryKey: ['body-measurements', user?.id],
     queryFn: () => listMeasurements(user.id, 200),

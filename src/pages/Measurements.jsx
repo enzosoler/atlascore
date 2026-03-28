@@ -640,11 +640,11 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
   );
 }
 
-export default function Measurements({ embedded = false }) {
+export default function Measurements({ embedded = false, measurements: propMeasurements }) {
   const { t } = useI18n();
 
   if (embedded) {
-    return <MeasurementsContent embedded />;
+    return <MeasurementsContent embedded measurements={propMeasurements} />;
   }
 
   return (

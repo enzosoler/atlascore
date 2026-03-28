@@ -441,7 +441,10 @@ function ProgressContent() {
   );
 }
 
-export default function Progress() {
+export default function Progress({ embedded = false }) {
+  if (embedded) {
+    return <ProgressContent />;
+  }
   return (
     <SafePageBoundary title="Progress" subtitle="Your data, visualized" fallbackDescription="Progress opened in safe mode.">
       <ProgressContent />

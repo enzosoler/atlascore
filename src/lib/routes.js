@@ -74,7 +74,7 @@ export const LEGACY_ROUTE_REDIRECTS = [
   ['/exercises', ROUTES.exercises],
   ['/progress', ROUTES.progress],
   ['/body', ROUTES.progress],
-  ['/Measurements', ROUTES.progress],
+  ['/Measurements', `${ROUTES.body}?tab=measurements`],
   ['/profile', ROUTES.profile],
   ['/export', ROUTES.export],
   ['/admin', ROUTES.admin],
