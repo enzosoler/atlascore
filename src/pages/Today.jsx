@@ -42,6 +42,37 @@ function getPreferredName(displayName, fallbackName = 'Athlete') {
   return `${sanitized.charAt(0).toLocaleUpperCase()}${sanitized.slice(1)}`;
 }
 
+function getGreeting(name) {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return `Good morning, ${name}`;
+  if (h >= 12 && h < 17) return `Good afternoon, ${name}`;
+  if (h >= 17 && h < 21) return `Good evening, ${name}`;
+  return `Hey ${name}, up late?`;
+}
+
+function interpretWeather(temp, code) {
+  let icon, condition;
+  if (code === 0)        { icon = '☀️'; condition = 'clear'; }
+  else if (code <= 3)   { icon = '⛅'; condition = 'cloudy'; }
+  else if (code <= 48)  { icon = '🌫️'; condition = 'foggy'; }
+  else if (code <= 67)  { icon = '🌧️'; condition = 'rainy'; }
+  else if (code <= 77)  { icon = '❄️'; condition = 'snowy'; }
+  else if (code <= 82)  { icon = '🌦️'; condition = 'showers'; }
+  else                  { icon = '⛈️'; condition = 'stormy'; }
+
+  const comments = {
+    clear:   temp > 28 ? 'Hot outside. Stay hydrated.' : temp < 10 ? 'Cold but clear — good energy.' : 'Clear skies. No excuses today.',
+    cloudy:  'Overcast. Perfect for a focused session.',
+    foggy:   'Moody out there. Channel it in the gym.',
+    rainy:   "Rain can't stop the work.",
+    snowy:   'Frozen outside. Even better reason to warm up.',
+    showers: 'Wet out there. Train indoors.',
+    stormy:  'Stay in and train hard.',
+  };
+
+  return { temp, icon, comment: comments[condition] ?? null };
+}
+
 function getDateLabel(locale) {
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
   return new Intl.DateTimeFormat(intlLocale, {
@@ -204,6 +235,27 @@ function TodayContent() {
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [aiWizardOpen, setAiWizardOpen] = useState(false);
   const [quickWorkoutOpen, setQuickWorkoutOpen] = useState(false);
+  const [weather, setWeather] = useState(null);
+
+  useEffect(() => {
+    if (!navigator?.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude.toFixed(4)}&longitude=${coords.longitude.toFixed(4)}&current=temperature_2m,weather_code`
+          );
+          if (!res.ok) return;
+          const json = await res.json();
+          const temp = Math.round(json.current?.temperature_2m ?? 0);
+          const code = json.current?.weather_code ?? 0;
+          setWeather(interpretWeather(temp, code));
+        } catch {}
+      },
+      () => {},
+      { timeout: 6000, maximumAge: 600000 }
+    );
+  }, []);
 
   const hasAIAccess = can('atlas_ai');
 
@@ -410,19 +462,21 @@ function TodayContent() {
         <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">
           {getDateLabel(locale)}
         </p>
-        <h1 className="text-[26px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight mt-0.5">
-          {preferredName}
-        </h1>
+        <div className="flex items-start justify-between gap-3 mt-0.5">
+          <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight">
+            {getGreeting(preferredName)}
+          </h1>
+          {weather && (
+            <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--fill)/0.8)] border border-[hsl(var(--border)/0.5)] px-2.5 py-1 shrink-0 mt-1">
+              <span className="text-[15px] leading-none">{weather.icon}</span>
+              <span className="text-[12px] font-semibold text-[hsl(var(--fg-2))]">{weather.temp}°</span>
+            </div>
+          )}
+        </div>
+        {weather?.comment && (
+          <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">{weather.comment}</p>
+        )}
       </header>
-
-      <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-4 mt-4">
-        <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Today is loading</p>
-        <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">
-          Workout: {workoutDone ? 'done' : 'not done'} |
-          Meals: {(todayMeals ?? []).length} |
-          AI: {ai.hasData ? 'loaded' : ai.loading ? 'loading' : 'none'}
-        </p>
-      </div>
 
       {/* STEP 1: AICoachBriefing */}
       <AICoachBriefing

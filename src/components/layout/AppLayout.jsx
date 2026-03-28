@@ -549,13 +549,11 @@ export default function AppLayout() {
 
           {/* Brand — absolutely centered so side buttons don't push it */}
           <div className="pointer-events-none absolute inset-x-0 flex items-center justify-center">
-            <div className="flex items-center rounded-full border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--card)/0.84)] px-3.5 py-1.5 shadow-[var(--shadow-xs)] backdrop-blur-[18px]">
-              <BrandLockup
-                logoWidth={26}
-                logoHeight={26}
-                textClassName="text-[17px] sm:text-[18px]"
-              />
-            </div>
+            <BrandLockup
+              logoWidth={26}
+              logoHeight={26}
+              textClassName="text-[17px] sm:text-[18px]"
+            />
           </div>
 
           <ThemeToggleButton compact />

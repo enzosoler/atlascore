@@ -117,7 +117,7 @@ function RangeTabs({ selected, onChange }) {
 // ─── Trend Line Chart (reused for weight + body fat) ──────────────────────────
 
 function TrendLineChart({ data, dataKey, gradientId, color, days, unit, showRegression }) {
-  if (!data || data.length < 2) return <EmptyChart label={`Need 2+ data points`} cta="Log measurement" to={ROUTES.body} />;
+  if (!data || data.length < 2) return <EmptyChart label={`Need 2+ data points`} cta="Log measurement" to={ROUTES.measurements} />;
 
   const regression = showRegression && data.length >= 3 ? (() => {
     const base = data[0].ts;
