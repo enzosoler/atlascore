@@ -46,7 +46,7 @@ function ActionTile({ icon: Icon, label, path, onClick, done, highlighted }) {
  * The most contextually relevant action is highlighted.
  * Done state = green check.
  */
-export function QuickActions({ workoutDone, nutritionLogged, weightLogged, onCheckin, onQuickWorkout }) {
+export function QuickActions({ workoutDone, nutritionLogged, weightLogged, onCheckin, onQuickWorkout, onAddWeight }) {
   const highlightWorkout = !workoutDone;
   const highlightNutrition = workoutDone && !nutritionLogged;
 
@@ -69,8 +69,9 @@ export function QuickActions({ workoutDone, nutritionLogged, weightLogged, onChe
       />
       <ActionTile
         icon={Scale}
-        label={weightLogged ? 'Weight logged' : 'Add weight'}
-        path={ROUTES.measurements}
+        label={weightLogged ? 'Weight logged' : 'Log weight'}
+        onClick={weightLogged ? undefined : onAddWeight}
+        path={weightLogged ? ROUTES.measurements : undefined}
         done={weightLogged}
         highlighted={false}
       />

@@ -439,6 +439,7 @@ function TodayContent() {
         nutritionLogged={!!nutritionLogged}
         weightLogged={!!weightLogged}
         onCheckin={() => setCheckinOpen(true)}
+        onAddWeight={() => setCheckinOpen(true)}
         onQuickWorkout={() => setQuickWorkoutOpen(true)}
       />
 

@@ -24,12 +24,12 @@ export default function AtlasCoreLogoSVG({
   if (variant === 'lockup') {
     return (
       <img
-        src="/branding/logo-lockup.svg"
+        src="/branding/dark/icon-512.png"
         width={width}
         height={width}
         alt={alt}
         draggable={false}
-        className={cn('shrink-0 object-contain', className)}
+        className={cn('rounded-[22%] shrink-0 object-cover', className)}
       />
     );
   }
