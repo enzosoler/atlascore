@@ -5,6 +5,7 @@ import { ClipboardList, Loader2, TrendingUp, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import { PageShell, SectionCard } from '@/components/shared/StablePage';
 import {
@@ -17,6 +18,7 @@ import {
 
 export default function CoachDashboard() {
   const { user } = useAuth();
+  const t = useT();
 
   const { data: students = [], isLoading } = useQuery({
     queryKey: ['coach-students', user?.id],
@@ -57,63 +59,63 @@ export default function CoachDashboard() {
 
   return (
     <RoleGate roles={['coach', 'admin']}>
-      <PageShell title="Coach" subtitle="Operational view of adherence, active athletes, and follow-up priorities." maxWidth="max-w-6xl">
+      <PageShell title={t('coach.dashboard.pageTitle')} subtitle={t('coach.dashboard.pageSubtitle')} maxWidth="max-w-6xl">
         <WorkspaceHeader
-          eyebrow="Coach role"
-          title="Coach dashboard"
-          subtitle="Start with the athletes who need attention, then move into adherence and pending execution."
+          eyebrow={t('coach.dashboard.eyebrow')}
+          title={t('coach.dashboard.title')}
+          subtitle={t('coach.dashboard.subtitle')}
           icon={Users}
           tone="brand"
-          badge={`${students.length} active athletes`}
+          badge={`${students.length} ${t('coach.dashboard.activeAthletesBadge')}`}
         />
 
         {isLoading ? (
-          <SectionCard title="Loading" subtitle="Pulling active athlete context.">
+          <SectionCard title={t('coach.dashboard.loadingTitle')} subtitle={t('coach.dashboard.loadingSubtitle')}>
             <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading coach workspace...
+              {t('coach.dashboard.loadingText')}
             </div>
           </SectionCard>
         ) : (
           <>
             <WorkspaceMetricGrid className="xl:grid-cols-3">
               <WorkspaceMetricTile
-                label="Active athletes"
+                label={t('coach.dashboard.metricActiveAthletes')}
                 value={students.length}
-                hint="Linked and accepted student accounts"
+                hint={t('coach.dashboard.metricActiveAthletesHint')}
                 icon={Users}
               />
               <WorkspaceMetricTile
-                label="Average adherence"
+                label={t('coach.dashboard.metricAvgAdherence')}
                 value={avgAdherence !== null ? `${avgAdherence}%` : '--'}
-                hint="Recent daily check-in adherence"
+                hint={t('coach.dashboard.metricAvgAdherenceHint')}
                 icon={TrendingUp}
                 tone="success"
               />
               <WorkspaceMetricTile
-                label="Pending workouts"
+                label={t('coach.dashboard.metricPendingWorkouts')}
                 value={pendingWorkouts}
-                hint="Incomplete logged sessions across your athletes"
+                hint={t('coach.dashboard.metricPendingWorkoutsHint')}
                 icon={ClipboardList}
                 tone="warning"
               />
             </WorkspaceMetricGrid>
 
             <WorkspaceRosterSection
-              eyebrow="Athletes"
-              title="Recent student activity"
-              subtitle="Quick access to the athletes you are currently coaching."
+              eyebrow={t('coach.dashboard.rosterEyebrow')}
+              title={t('coach.dashboard.rosterTitle')}
+              subtitle={t('coach.dashboard.rosterSubtitle')}
               action={
                 <Link
                   to="/coach/students"
                   className="text-[13px] font-semibold text-[hsl(var(--brand))]"
                 >
-                  View all
+                  {t('coach.dashboard.viewAll')}
                 </Link>
               }
               emptyIcon={Users}
-              emptyTitle="No students linked yet"
-              emptyDescription="Invite your first athlete to unlock adherence, programming, and follow-up."
+              emptyTitle={t('coach.dashboard.emptyTitle')}
+              emptyDescription={t('coach.dashboard.emptyDescription')}
             >
               {students.slice(0, 5).map((student) => (
                 <WorkspacePersonRow
@@ -122,7 +124,7 @@ export default function CoachDashboard() {
                   initial={(student.client_name || student.client_email)?.[0]?.toUpperCase() || 'A'}
                   title={student.client_name || student.client_email}
                   subtitle={student.client_email}
-                  meta={student.status === 'active' ? 'Active coaching link' : student.status}
+                  meta={student.status === 'active' ? t('coach.dashboard.activeCoachingLink') : student.status}
                   accentTone="brand"
                 />
               ))}

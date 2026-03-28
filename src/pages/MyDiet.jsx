@@ -12,8 +12,8 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, StatusBanner } from '@/components/shared/StablePage';
+import { useT } from '@/lib/i18nContext';
 
-const CREATOR_LABELS = { ai: 'Generated', coach: 'Coach', user: 'You' };
 const CREATOR_BADGE  = { ai: 'badge-neutral', coach: 'badge-blue', user: 'badge-neutral' };
 const CREATOR_ICONS  = { ai: ClipboardList, coach: Users, user: User };
 
@@ -28,6 +28,7 @@ function MacroChip({ label, value, unit, color }) {
 }
 
 function MealCard({ meal }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   return (
     <div className="atlas-card rounded-[18px]">
@@ -58,7 +59,7 @@ function MealCard({ meal }) {
             </div>
           ))}
           {(!meal.foods || meal.foods.length === 0) && (
-            <p className="t-caption">No detailed foods listed.</p>
+            <p className="t-caption">{t('myDiet.no_detailed_foods')}</p>
           )}
         </div>
       )}
@@ -67,6 +68,7 @@ function MealCard({ meal }) {
 }
 
 export default function MyDiet() {
+  const t = useT();
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -182,19 +184,19 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
         });
         qc.invalidateQueries({ queryKey: ['diet-plans'] });
         qc.invalidateQueries({ queryKey: ['diet-plans-active'] });
-        toast.success('Diet plan generated!');
+        toast.success(t('myDiet.plan_generated'));
       } else {
-        setGenError('The plan response did not contain a valid structure. Please try again.');
-        toast.error('Error generating. Please try again.');
+        setGenError(t('myDiet.gen_error_structure'));
+        toast.error(t('myDiet.gen_error_toast'));
       }
     } catch (err) {
       clearTimeout(timeoutId);
       if (err?.name === 'AbortError' || controller.signal.aborted) {
-        setGenError('Generation took too long (>15s). Check your connection and try again.');
-        toast.error('Timed out. Please try again.');
+        setGenError(t('myDiet.gen_timeout'));
+        toast.error(t('myDiet.gen_timeout_toast'));
       } else {
-        setGenError('Error connecting to the plan service. Please try again in a moment.');
-        toast.error('Error generating plan.');
+        setGenError(t('myDiet.gen_connect_error'));
+        toast.error(t('myDiet.gen_error_plan'));
       }
     } finally {
       setGenerating(false);
@@ -203,22 +205,23 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
 
   if (isLoading) return (
     <div className="flex min-h-[50vh] items-center justify-center gap-2 t-small text-[hsl(var(--fg-2))]">
-      <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+      <Loader2 className="w-4 h-4 animate-spin" /> {t('myDiet.loading')}
     </div>
   );
 
+  const CREATOR_LABELS = { ai: t('myDiet.creator_generated'), coach: t('myDiet.creator_coach'), user: t('myDiet.creator_you') };
   const CreatorIcon = plan ? (CREATOR_ICONS[plan.created_by_type] || ClipboardList) : null;
 
   return (
     <AppContainer maxWidth="max-w-3xl">
       <PageHeader
-        eyebrow="Nutrition"
-        title="My Diet"
-        subtitle="Review the active diet plan, compare creator source, and keep meal structure readable without visual overload."
+        eyebrow={t('myDiet.eyebrow')}
+        title={t('myDiet.title')}
+        subtitle={t('myDiet.subtitle')}
         actions={can('ai_diet_generation') ? (
           <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {plan ? 'Build new plan' : 'Build plan'}
+            {plan ? t('myDiet.build_new_plan') : t('myDiet.build_plan')}
           </PrimaryButton>
         ) : (
           <UpgradeGate feature="ai_diet_generation" plan="Pro" />
@@ -233,12 +236,12 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
         <Card className="px-5 py-4">
           <EmptyState
             icon={UtensilsCrossed}
-            title="No active diet plan"
-            description="Build a personalized plan from your profile, targets, and food style."
+            title={t('myDiet.no_active_plan_title')}
+            description={t('myDiet.no_active_plan_desc')}
             action={can('ai_diet_generation') ? (
               <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
                 {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                Build plan
+                {t('myDiet.build_plan')}
               </PrimaryButton>
             ) : (
               <UpgradeGate feature="ai_diet_generation" plan="Pro" />
@@ -247,31 +250,31 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
         </Card>
       ) : (
         <>
-          <Section eyebrow="Plan" title={plan.name} subtitle={plan.objective || 'Active nutrition structure'}>
+          <Section eyebrow={t('myDiet.plan_eyebrow')} title={plan.name} subtitle={plan.objective || t('myDiet.plan_subtitle')}>
             <Card className="space-y-4 p-5">
             <div className="flex flex-wrap items-center gap-2">
               <span className={`badge ${CREATOR_BADGE[plan.created_by_type] || 'badge-neutral'} gap-1`}>
                 {CreatorIcon && <CreatorIcon className="w-3 h-3" />}
-                {CREATOR_LABELS[plan.created_by_type] || 'Generated'}
+                {CREATOR_LABELS[plan.created_by_type] || t('myDiet.creator_generated')}
               </span>
               <span className="badge badge-neutral">v{plan.version || 1}</span>
             </div>
             {plan.start_date && (
-              <p className="t-caption">Since {new Date(plan.start_date + 'T12:00').toLocaleDateString('en-US')}</p>
+              <p className="t-caption">{t('myDiet.since').replace('{date}', new Date(plan.start_date + 'T12:00').toLocaleDateString())}</p>
             )}
             </Card>
           </Section>
 
-          <Section eyebrow="Totals" title="Daily totals" subtitle="Macro targets planned for the current version.">
+          <Section eyebrow={t('myDiet.totals_eyebrow')} title={t('myDiet.totals_title')} subtitle={t('myDiet.totals_subtitle')}>
             <div className="grid grid-cols-4 gap-2">
-              <MacroChip label="Calories" value={plan.total_calories ?? plan.target_calories} unit="kcal" color="hsl(var(--brand))" />
-              <MacroChip label="Protein" value={plan.total_protein ?? plan.target_protein} unit="g" color="hsl(var(--accent-primary))" />
-              <MacroChip label="Carbs" value={plan.total_carbs ?? plan.target_carbs} unit="g" color="hsl(var(--accent-secondary))" />
-              <MacroChip label="Fat" value={plan.total_fat ?? plan.target_fat} unit="g" color="hsl(var(--status-warning))" />
+              <MacroChip label={t('myDiet.calories_label')} value={plan.total_calories ?? plan.target_calories} unit="kcal" color="hsl(var(--brand))" />
+              <MacroChip label={t('myDiet.protein_label')} value={plan.total_protein ?? plan.target_protein} unit="g" color="hsl(var(--accent-primary))" />
+              <MacroChip label={t('myDiet.carbs_label')} value={plan.total_carbs ?? plan.target_carbs} unit="g" color="hsl(var(--accent-secondary))" />
+              <MacroChip label={t('myDiet.fat_label')} value={plan.total_fat ?? plan.target_fat} unit="g" color="hsl(var(--status-warning))" />
             </div>
           </Section>
 
-          <Section eyebrow="Meals" title={`Planned meals (${(plan.meals || []).length})`} subtitle="Expandable meal cards with foods and inline macros.">
+          <Section eyebrow={t('myDiet.meals_eyebrow')} title={t('myDiet.meals_title').replace('{n}', String((plan.meals || []).length))} subtitle={t('myDiet.meals_subtitle')}>
             <div className="space-y-2">
               {(plan.meals || []).map((meal, i) => <MealCard key={i} meal={meal} />)}
             </div>
@@ -279,7 +282,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
 
           {plan.notes && (
             <Card className="p-4">
-              <p className="t-label mb-1">Notes</p>
+              <p className="t-label mb-1">{t('myDiet.notes_label')}</p>
               <p className="t-body text-[hsl(var(--fg-2))]">{plan.notes}</p>
             </Card>
           )}

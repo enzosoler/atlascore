@@ -4,6 +4,7 @@ import { BarChart3, Loader2, TrendingUp, Users, Utensils } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import NutritionistAlertsPanel from '@/components/nutritionist/NutritionistAlertsPanel';
 import ClientListWithAdherence from '@/components/nutritionist/ClientListWithAdherence';
@@ -16,6 +17,7 @@ import {
 
 export default function NutritionistDashboard() {
   const { user } = useAuth();
+  const t = useT();
 
   const { data: links = [], isLoading: loadingLinks } = useQuery({
     queryKey: ['nutritionist-clients', user?.id],
@@ -48,46 +50,46 @@ export default function NutritionistDashboard() {
   return (
     <RoleGate page="NutritionistDashboard">
       <PageShell
-        title="Nutritionist"
-        subtitle="Professional oversight for adherence, body change, and active diet plans."
+        title={t('nutritionist.dashboard.pageTitle')}
+        subtitle={t('nutritionist.dashboard.pageSubtitle')}
         maxWidth="max-w-6xl"
       >
         <WorkspaceHeader
-          eyebrow="Nutritionist role"
-          title="Nutrition dashboard"
-          subtitle="Keep macro adherence, client changes, and active prescriptions easy to scan."
+          eyebrow={t('nutritionist.dashboard.eyebrow')}
+          title={t('nutritionist.dashboard.title')}
+          subtitle={t('nutritionist.dashboard.subtitle')}
           icon={Utensils}
           tone="brand"
-          badge={`${activeClients} active clients`}
+          badge={`${activeClients} ${t('nutritionist.dashboard.activeClientsBadge')}`}
         />
 
         {loadingLinks || loadingDiets ? (
-          <SectionCard title="Loading workspace" subtitle="Bringing client and plan data into view.">
+          <SectionCard title={t('nutritionist.dashboard.loadingTitle')} subtitle={t('nutritionist.dashboard.loadingSubtitle')}>
             <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading nutrition workspace...
+              {t('nutritionist.dashboard.loadingText')}
             </div>
           </SectionCard>
         ) : (
           <>
             <WorkspaceMetricGrid className="xl:grid-cols-3">
               <WorkspaceMetricTile
-                label="Active clients"
+                label={t('nutritionist.dashboard.metricActiveClients')}
                 value={activeClients}
-                hint={`${links.length} total linked clients`}
+                hint={`${links.length} ${t('nutritionist.dashboard.metricActiveClientsHint')}`}
                 icon={Users}
               />
               <WorkspaceMetricTile
-                label="Active diets"
+                label={t('nutritionist.dashboard.metricActiveDiets')}
                 value={activeDiets}
-                hint="Prescriptions currently marked active"
+                hint={t('nutritionist.dashboard.metricActiveDietsHint')}
                 icon={BarChart3}
                 tone="success"
               />
               <WorkspaceMetricTile
-                label="Acceptance rate"
+                label={t('nutritionist.dashboard.metricAcceptanceRate')}
                 value={`${adherenceRate}%`}
-                hint="Accepted links relative to all invitations"
+                hint={t('nutritionist.dashboard.metricAcceptanceRateHint')}
                 icon={TrendingUp}
                 tone="warning"
               />
@@ -95,15 +97,15 @@ export default function NutritionistDashboard() {
 
             <div className="grid gap-4 lg:grid-cols-2">
               <SectionCard
-                title="Attention needed"
-                subtitle="Clients or plans that likely need follow-up."
+                title={t('nutritionist.dashboard.attentionTitle')}
+                subtitle={t('nutritionist.dashboard.attentionSubtitle')}
               >
                 <NutritionistAlertsPanel links={links} meals={meals} />
               </SectionCard>
 
               <SectionCard
-                title="Client adherence"
-                subtitle="A quick scan of who is logging and progressing."
+                title={t('nutritionist.dashboard.adherenceTitle')}
+                subtitle={t('nutritionist.dashboard.adherenceSubtitle')}
               >
                 <ClientListWithAdherence links={links} meals={meals} measurements={measurements} />
               </SectionCard>

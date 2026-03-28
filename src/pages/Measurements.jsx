@@ -41,7 +41,7 @@ import {
   StatusBanner,
 } from '@/components/shared/StablePage';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 import {
@@ -167,10 +167,10 @@ function getDeltaIcon(delta) {
   return delta > 0 ? ArrowUpRight : ArrowDownRight;
 }
 
-function getDeltaLabel(delta, metric) {
-  if (delta === null || delta === undefined) return 'No previous data';
-  if (Math.abs(delta) < 0.05) return 'No relevant change';
-  return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} vs previous`.trim();
+function getDeltaLabel(delta, metric, t) {
+  if (delta === null || delta === undefined) return t ? t('measurements.delta.no_previous') : 'No previous data';
+  if (Math.abs(delta) < 0.05) return t ? t('measurements.delta.no_relevant_change') : 'No relevant change';
+  return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} ${t ? t('measurements.delta.vs_previous') : 'vs previous'}`.trim();
 }
 
 function HeroStat({ label, value, detail, icon: Icon, metric }) {
@@ -225,6 +225,7 @@ function SnapshotRow({ label, value, unit }) {
 }
 
 function MetricSelectorCard({ metric, snapshot, isActive, onClick }) {
+  const t = useT();
   const IndicatorIcon = getDeltaIcon(snapshot?.delta);
 
   return (
@@ -254,8 +255,8 @@ function MetricSelectorCard({ metric, snapshot, isActive, onClick }) {
           </p>
           <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
             {snapshot?.entries?.length
-              ? `${snapshot.entries.length} checkpoints with this metric`
-              : 'Insufficient data'}
+              ? t('measurements.metric_selector.checkpoints_with_metric').replace('{n}', snapshot.entries.length)
+              : t('measurements.metric_selector.insufficient_data')}
           </p>
         </div>
 
@@ -331,6 +332,7 @@ function ChangePill({ label, delta, metric }) {
 
 // Compact history row
 function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
+  const t = useT();
   const daysSincePrevious = previousMeasurement
     ? getDayDifference(previousMeasurement.date, measurement.date)
     : null;
@@ -365,7 +367,7 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
           {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' })}
         </p>
         <p className="text-[11px] text-[hsl(var(--fg-3))]">
-          {daysSincePrevious ? `${daysSincePrevious}d after` : 'First'}
+          {daysSincePrevious ? t('measurements.history.days_after').replace('{n}', daysSincePrevious) : t('measurements.history.first')}
         </p>
       </div>
 
@@ -504,6 +506,7 @@ function MeasurementFieldGroup({ section, form, fieldErrors, onFieldChange }) {
 }
 
 function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, submitError = null, onClearError }) {
+  const t = useT();
   const [form, setForm] = useState(() => getMeasurementFormState(measurement));
   const validation = useMemo(() => measurementFormSchema.safeParse(form), [form]);
   const fieldErrors = useMemo(() => getMeasurementFieldErrors(validation), [validation]);
@@ -542,12 +545,12 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
       <div className="rounded-[24px] border border-[hsl(var(--border)/0.85)] bg-[linear-gradient(180deg,rgba(14,165,233,0.08),hsl(var(--card)/0.88))] px-5 py-5">
         <div className="flex flex-col gap-4">
           <div className="max-w-2xl">
-            <p className="atlas-overline">Checkpoint</p>
+            <p className="atlas-overline">{t('measurements.form.checkpoint_overline')}</p>
             <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              Record the manual and imported measurements for this checkpoint.
+              {t('measurements.form.checkpoint_heading')}
             </p>
             <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              Derived fields are calculated automatically from the source inputs. Imported body-composition values can be added here or later without changing the checkpoint date.
+              {t('measurements.form.checkpoint_description')}
             </p>
           </div>
 
@@ -558,7 +561,7 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
 
         <div className="mt-5 grid gap-4">
           <MeasurementField
-            label="Date"
+            label={t('measurements.form.date_label')}
             type="date"
             value={form.date}
             onChange={(event) => updateField('date', event.target.value)}
@@ -566,19 +569,19 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
           />
 
           <MeasurementField
-            label="Source"
+            label={t('measurements.form.source_label')}
             as="select"
             value={form.source}
             onChange={(event) => updateField('source', event.target.value)}
             error={fieldErrors.source}
             options={sourceOptions}
-            hint="Record provenance"
+            hint={t('measurements.form.source_hint')}
           />
 
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
-            <p className="atlas-metric-label">Quick guide</p>
+            <p className="atlas-metric-label">{t('measurements.form.quick_guide_label')}</p>
             <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              You can save with any combination of manual or imported measurements. Weight is optional, but at least one source measurement is required.
+              {t('measurements.form.quick_guide_text')}
             </p>
           </div>
         </div>
@@ -595,30 +598,30 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
       ))}
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <p className="atlas-overline">Derived preview</p>
+        <p className="atlas-overline">{t('measurements.form.derived_preview_overline')}</p>
         <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-          These values are computed locally from the source inputs. Imported values will keep their own provenance if a device or clinician workflow supplies them later.
+          {t('measurements.form.derived_preview_description')}
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <SnapshotRow label="BMI" value={toDisplayNumber(derivedPreview.bmi, 2)} unit="kg/m²" />
-          <SnapshotRow label="Fat mass" value={toDisplayNumber(derivedPreview.fat_mass, 2)} unit="kg" />
-          <SnapshotRow label="Lean mass" value={toDisplayNumber(derivedPreview.lean_mass, 2)} unit="kg" />
-          <SnapshotRow label="Lean mass %" value={toDisplayNumber(derivedPreview.lean_mass_percent, 1)} unit="%" />
-          <SnapshotRow label="Muscle/fat ratio" value={toDisplayNumber(derivedPreview.muscle_fat_ratio, 2)} unit="ratio" />
-          <SnapshotRow label="Intracellular water %" value={toDisplayNumber(derivedPreview.intracellular_water_percent, 1)} unit="%" />
-          <SnapshotRow label="Water in lean mass" value={toDisplayNumber(derivedPreview.water_in_lean_mass, 2)} unit="L/kg" />
-          <SnapshotRow label="Muscle mass %" value={toDisplayNumber(derivedPreview.muscle_mass_percent, 1)} unit="%" />
+          <SnapshotRow label={t('measurements.form.bmi_label')} value={toDisplayNumber(derivedPreview.bmi, 2)} unit="kg/m²" />
+          <SnapshotRow label={t('measurements.form.fat_mass_label')} value={toDisplayNumber(derivedPreview.fat_mass, 2)} unit="kg" />
+          <SnapshotRow label={t('measurements.form.lean_mass_label')} value={toDisplayNumber(derivedPreview.lean_mass, 2)} unit="kg" />
+          <SnapshotRow label={t('measurements.form.lean_mass_percent_label')} value={toDisplayNumber(derivedPreview.lean_mass_percent, 1)} unit="%" />
+          <SnapshotRow label={t('measurements.form.muscle_fat_ratio_label')} value={toDisplayNumber(derivedPreview.muscle_fat_ratio, 2)} unit="ratio" />
+          <SnapshotRow label={t('measurements.form.intracellular_water_label')} value={toDisplayNumber(derivedPreview.intracellular_water_percent, 1)} unit="%" />
+          <SnapshotRow label={t('measurements.form.water_in_lean_mass_label')} value={toDisplayNumber(derivedPreview.water_in_lean_mass, 2)} unit="L/kg" />
+          <SnapshotRow label={t('measurements.form.muscle_mass_percent_label')} value={toDisplayNumber(derivedPreview.muscle_mass_percent, 1)} unit="%" />
         </div>
       </div>
 
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <label className={FIELD_LABEL_CLASS}>
-          Context notes
+          {t('measurements.form.notes_label')}
           <textarea
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
-            placeholder="e.g. waist dropping, pump maintained, better sleep, or any detail that helps interpret the checkpoint later."
+            placeholder={t('measurements.form.notes_placeholder')}
             className={cn(TEXTAREA_CLASS_NAME, 'mt-2')}
           />
         </label>
@@ -626,10 +629,10 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
 
       <div className="flex flex-col-reverse gap-3 border-t border-[hsl(var(--border)/0.85)] pt-6 sm:flex-row sm:justify-end">
         <SecondaryButton type="button" onClick={onCancel}>
-          Cancel
+          {t('measurements.form.cancel')}
         </SecondaryButton>
         <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? 'Saving...' : measurement ? 'Save checkpoint' : 'Log checkpoint'}
+          {isSaving ? t('measurements.form.saving') : measurement ? t('measurements.form.save_checkpoint') : t('measurements.form.log_checkpoint')}
         </PrimaryButton>
       </div>
     </form>
@@ -688,12 +691,12 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       invalidateMeasurements();
       setIsFormOpen(false);
       setEditingMeasurement(null);
-      setNotice({ tone: 'success', message: 'Body checkpoint recorded.' });
+      setNotice({ tone: 'success', message: t('measurements.mutation.created') });
     },
     onError: (error) =>
       setNotice({
         tone: 'error',
-        message: `Could not record the checkpoint. ${getMutationErrorMessage(error, 'Please try again.')}`,
+        message: t('measurements.mutation.create_error').replace('{msg}', getMutationErrorMessage(error, t('measurements.mutation.please_try_again'))),
       }),
   });
 
@@ -703,12 +706,12 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       invalidateMeasurements();
       setIsFormOpen(false);
       setEditingMeasurement(null);
-      setNotice({ tone: 'success', message: 'Body checkpoint updated.' });
+      setNotice({ tone: 'success', message: t('measurements.mutation.updated') });
     },
     onError: (error) =>
       setNotice({
         tone: 'error',
-        message: `Could not update the checkpoint. ${getMutationErrorMessage(error, 'Please try again.')}`,
+        message: t('measurements.mutation.update_error').replace('{msg}', getMutationErrorMessage(error, t('measurements.mutation.please_try_again'))),
       }),
   });
 
@@ -716,12 +719,12 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
     mutationFn: (id) => deleteMeasurement(user.id, id),
     onSuccess: () => {
       invalidateMeasurements();
-      setNotice({ tone: 'success', message: 'Body checkpoint removed.' });
+      setNotice({ tone: 'success', message: t('measurements.mutation.deleted') });
     },
     onError: (error) =>
       setNotice({
         tone: 'error',
-        message: `Could not remove the checkpoint. ${getMutationErrorMessage(error, 'Please try again.')}`,
+        message: t('measurements.mutation.delete_error').replace('{msg}', getMutationErrorMessage(error, t('measurements.mutation.please_try_again'))),
       }),
   });
 

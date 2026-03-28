@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useT } from '@/lib/i18nContext';
 import {
   Activity,
   ArrowLeft,
@@ -56,6 +57,7 @@ function SummaryRow({ label, value }) {
 export default function CoachStudentProfile() {
   const { id: studentId } = useParams();
   const { user } = useAuth();
+  const t = useT();
 
   const { data: coachLinks = [], isLoading: loadingLink } = useQuery({
     queryKey: ['coach-students', user?.id],
@@ -116,40 +118,40 @@ export default function CoachStudentProfile() {
   return (
     <RoleGate roles={['coach', 'admin']}>
       <PageShell
-        eyebrow="Coach role"
-        title={studentLink?.client_name || studentLink?.client_email || 'Athlete'}
-        subtitle="Review adherence, recent body checkpoints, and active prescribed work from one calm profile surface."
+        eyebrow={t('coach.profile.eyebrow')}
+        title={studentLink?.client_name || studentLink?.client_email || t('coach.profile.defaultTitle')}
+        subtitle={t('coach.profile.pageSubtitle')}
         maxWidth="max-w-6xl"
         actions={
           <div className="flex flex-wrap gap-2">
             <SecondaryButton type="button" asChild={false} onClick={() => window.history.back()}>
               <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-              Back
+              {t('coach.profile.back')}
             </SecondaryButton>
             <Link to={`/coach/prescribe-workout/${studentId}`}>
               <PrimaryButton type="button">
                 <ClipboardList className="h-4 w-4" strokeWidth={2} />
-                Prescribe workout
+                {t('coach.profile.prescribeWorkout')}
               </PrimaryButton>
             </Link>
           </div>
         }
       >
         {loading ? (
-          <SectionCard title="Loading athlete profile" subtitle="Collecting adherence, recent checkpoints, and plan data.">
+          <SectionCard title={t('coach.profile.loadingTitle')} subtitle={t('coach.profile.loadingSubtitle')}>
             <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading athlete profile...
+              {t('coach.profile.loadingText')}
             </div>
           </SectionCard>
         ) : !studentLink ? (
-          <SectionCard title="Athlete not available" subtitle="This athlete is not linked to your coach account.">
+          <SectionCard title={t('coach.profile.notAvailableTitle')} subtitle={t('coach.profile.notAvailableSubtitle')}>
             <EmptyState
-              title="No linked athlete found"
-              description="Open the students list and use an accepted athlete link to access this profile."
+              title={t('coach.profile.notFoundTitle')}
+              description={t('coach.profile.notFoundDescription')}
               action={
                 <Link to="/coach/students">
-                  <PrimaryButton type="button">Go to students</PrimaryButton>
+                  <PrimaryButton type="button">{t('coach.profile.goToStudents')}</PrimaryButton>
                 </Link>
               }
               icon={Activity}
@@ -159,81 +161,81 @@ export default function CoachStudentProfile() {
           <>
             <WorkspaceMetricGrid className="xl:grid-cols-4">
               <WorkspaceMetricTile
-                label="Completed sessions"
+                label={t('coach.profile.metricCompletedSessions')}
                 value={workouts.filter((item) => item.status === 'completed').length}
-                hint="Recent logged workouts"
+                hint={t('coach.profile.metricCompletedSessionsHint')}
                 icon={Dumbbell}
                 tone="brand"
               />
               <WorkspaceMetricTile
-                label="Active plans"
+                label={t('coach.profile.metricActivePlans')}
                 value={activePlans.length}
-                hint="Coach-prescribed workouts currently live"
+                hint={t('coach.profile.metricActivePlansHint')}
                 icon={ClipboardList}
                 tone="warning"
               />
               <WorkspaceMetricTile
-                label="Latest weight"
+                label={t('coach.profile.metricLatestWeight')}
                 value={latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '--'}
-                hint={latestMeasurement?.date ? formatDate(latestMeasurement.date) : 'No measurement yet'}
+                hint={latestMeasurement?.date ? formatDate(latestMeasurement.date) : t('coach.profile.noMeasurementYet')}
                 icon={Scale}
                 tone="success"
               />
               <WorkspaceMetricTile
-                label="Progress photos"
+                label={t('coach.profile.metricProgressPhotos')}
                 value={photos.length}
-                hint={latestPhoto?.date ? `Last added ${formatShortDate(latestPhoto.date)}` : 'No photos uploaded'}
+                hint={latestPhoto?.date ? `${t('coach.profile.lastAdded')} ${formatShortDate(latestPhoto.date)}` : t('coach.profile.noPhotosUploaded')}
                 icon={Camera}
                 tone="neutral"
               />
             </WorkspaceMetricGrid>
 
             <SectionCard
-              title="Current status"
-              subtitle="A compact snapshot of the latest body checkpoint and check-in context."
+              title={t('coach.profile.currentStatusTitle')}
+              subtitle={t('coach.profile.currentStatusSubtitle')}
             >
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                 <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-5 py-5">
-                  <p className="atlas-overline">Latest checkpoint</p>
+                  <p className="atlas-overline">{t('coach.profile.latestCheckpoint')}</p>
                   <div className="mt-4 space-y-1">
                     <p className="text-[20px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                      {latestMeasurement?.date ? formatDate(latestMeasurement.date) : 'No body data yet'}
+                      {latestMeasurement?.date ? formatDate(latestMeasurement.date) : t('coach.profile.noBodyDataYet')}
                     </p>
                     <p className="text-[13px] text-[hsl(var(--fg-2))]">
-                      Use this alongside adherence trends before changing workload.
+                      {t('coach.profile.checkpointHint')}
                     </p>
                   </div>
                   <div className="mt-5">
-                    <SummaryRow label="Weight" value={latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '--'} />
-                    <SummaryRow label="Body fat" value={latestMeasurement?.body_fat ? `${latestMeasurement.body_fat}%` : '--'} />
-                    <SummaryRow label="Waist" value={latestMeasurement?.waist ? `${latestMeasurement.waist} cm` : '--'} />
-                    <SummaryRow label="Check-in mood" value={latestCheckin?.mood ? `${latestCheckin.mood}/5` : '--'} />
-                    <SummaryRow label="Check-in energy" value={latestCheckin?.energy ? `${latestCheckin.energy}/5` : '--'} />
+                    <SummaryRow label={t('coach.profile.labelWeight')} value={latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '--'} />
+                    <SummaryRow label={t('coach.profile.labelBodyFat')} value={latestMeasurement?.body_fat ? `${latestMeasurement.body_fat}%` : '--'} />
+                    <SummaryRow label={t('coach.profile.labelWaist')} value={latestMeasurement?.waist ? `${latestMeasurement.waist} cm` : '--'} />
+                    <SummaryRow label={t('coach.profile.labelCheckinMood')} value={latestCheckin?.mood ? `${latestCheckin.mood}/5` : '--'} />
+                    <SummaryRow label={t('coach.profile.labelCheckinEnergy')} value={latestCheckin?.energy ? `${latestCheckin.energy}/5` : '--'} />
                   </div>
                 </div>
 
                 <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] px-5 py-5">
-                  <p className="atlas-overline">Coach actions</p>
+                  <p className="atlas-overline">{t('coach.profile.coachActions')}</p>
                   <div className="mt-4 space-y-3">
                     <Link to={`/coach/prescribe-workout/${studentId}`} className="block">
                       <PrimaryButton type="button" className="w-full justify-center">
                         <ClipboardList className="h-4 w-4" strokeWidth={2} />
-                        Create or replace plan
+                        {t('coach.profile.createOrReplacePlan')}
                       </PrimaryButton>
                     </Link>
                     <Link to="/coach/students" className="block">
                       <SecondaryButton type="button" className="w-full justify-center">
                         <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-                        Back to roster
+                        {t('coach.profile.backToRoster')}
                       </SecondaryButton>
                     </Link>
                   </div>
                   <div className="mt-5 rounded-[16px] border border-[hsl(var(--border)/0.78)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
-                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Access level</p>
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('coach.profile.accessLevel')}</p>
                     <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
                       {studentLink.status === 'active'
-                        ? 'Accepted link. You can review athlete progress and prescribe training.'
-                        : 'Pending link. Profile data may remain limited until the invite is accepted.'}
+                        ? t('coach.profile.accessLevelActive')
+                        : t('coach.profile.accessLevelPending')}
                     </p>
                   </div>
                 </div>
@@ -241,20 +243,20 @@ export default function CoachStudentProfile() {
             </SectionCard>
 
             <SectionCard
-              title="Adherence"
-              subtitle="Compare completed training against the current prescription before adjusting volume."
+              title={t('coach.profile.adherenceTitle')}
+              subtitle={t('coach.profile.adherenceSubtitle')}
             >
               <CoachStudentAdherence studentEmail={studentLink?.client_email} />
             </SectionCard>
 
             <SectionCard
-              title="Active prescribed workouts"
-              subtitle="Current plans assigned to this athlete."
+              title={t('coach.profile.activePrescribedTitle')}
+              subtitle={t('coach.profile.activePrescribedSubtitle')}
               actions={
                 <Link to={`/coach/prescribe-workout/${studentId}`}>
                   <PrimaryButton type="button">
                     <ClipboardList className="h-4 w-4" strokeWidth={2} />
-                    New prescription
+                    {t('coach.profile.newPrescription')}
                   </PrimaryButton>
                 </Link>
               }
@@ -271,20 +273,20 @@ export default function CoachStudentProfile() {
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                              {plan.name || 'Untitled plan'}
+                              {plan.name || t('coach.profile.untitledPlan')}
                             </p>
                             <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-                              {plan.objective || plan.notes || 'Structured coach prescription for upcoming sessions.'}
+                              {plan.objective || plan.notes || t('coach.profile.planDefaultDescription')}
                             </p>
                           </div>
                           <span className="inline-flex rounded-full border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.14)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
-                            {plan.frequency || 'Custom frequency'}
+                            {plan.frequency || t('coach.profile.customFrequency')}
                           </span>
                         </div>
                         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                          <SummaryRow label="Exercises" value={exerciseCount ? `${exerciseCount}` : '--'} />
-                          <SummaryRow label="Start date" value={plan.start_date ? formatDate(plan.start_date) : '--'} />
-                          <SummaryRow label="Status" value={plan.active !== false ? 'Active' : 'Paused'} />
+                          <SummaryRow label={t('coach.profile.labelExercises')} value={exerciseCount ? `${exerciseCount}` : '--'} />
+                          <SummaryRow label={t('coach.profile.labelStartDate')} value={plan.start_date ? formatDate(plan.start_date) : '--'} />
+                          <SummaryRow label={t('coach.profile.labelStatus')} value={plan.active !== false ? t('coach.common.active') : t('coach.common.paused')} />
                         </div>
                       </div>
                     );
@@ -292,11 +294,11 @@ export default function CoachStudentProfile() {
                 </div>
               ) : (
                 <EmptyState
-                  title="No active plan yet"
-                  description="Create the first workout prescription to give this athlete a clear execution target."
+                  title={t('coach.profile.noActivePlanTitle')}
+                  description={t('coach.profile.noActivePlanDescription')}
                   action={
                     <Link to={`/coach/prescribe-workout/${studentId}`}>
-                      <PrimaryButton type="button">Prescribe workout</PrimaryButton>
+                      <PrimaryButton type="button">{t('coach.profile.prescribeWorkout')}</PrimaryButton>
                     </Link>
                   }
                   icon={ClipboardList}
@@ -304,7 +306,7 @@ export default function CoachStudentProfile() {
               )}
             </SectionCard>
 
-            <SectionCard title="Recent workouts" subtitle="Last completed or logged training sessions for fast review.">
+            <SectionCard title={t('coach.profile.recentWorkoutsTitle')} subtitle={t('coach.profile.recentWorkoutsSubtitle')}>
               {recentCompletedWorkouts.length ? (
                 <div className="space-y-3">
                   {recentCompletedWorkouts.map((workout) => (
@@ -314,24 +316,24 @@ export default function CoachStudentProfile() {
                     >
                       <div className="min-w-0">
                         <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-                          {workout.name || 'Workout session'}
+                          {workout.name || t('coach.profile.workoutSession')}
                         </p>
                         <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
-                          {workout.date ? formatDate(workout.date) : 'No recorded date'}
+                          {workout.date ? formatDate(workout.date) : t('coach.profile.noRecordedDate')}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-[12px] text-[hsl(var(--fg-2))]">
-                        <span>{workout.duration_minutes ? `${workout.duration_minutes} min` : 'Duration --'}</span>
-                        <span>{workout.volume_load ? `${workout.volume_load} kg` : 'Volume --'}</span>
-                        <span>{workout.perceived_effort ? `RPE ${workout.perceived_effort}` : 'RPE --'}</span>
+                        <span>{workout.duration_minutes ? `${workout.duration_minutes} min` : t('coach.profile.durationBlank')}</span>
+                        <span>{workout.volume_load ? `${workout.volume_load} kg` : t('coach.profile.volumeBlank')}</span>
+                        <span>{workout.perceived_effort ? `RPE ${workout.perceived_effort}` : t('coach.profile.rpeBlank')}</span>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <EmptyState
-                  title="No logged workouts yet"
-                  description="Completed sessions will appear here once the athlete starts executing the plan."
+                  title={t('coach.profile.noWorkoutsTitle')}
+                  description={t('coach.profile.noWorkoutsDescription')}
                   icon={Dumbbell}
                 />
               )}

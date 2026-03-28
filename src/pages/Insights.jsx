@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ROUTES } from '@/lib/routes';
 import { useAuth } from '@/lib/AuthContext';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
 import { generateMvpInsights } from '@/lib/insightsEngine';
@@ -54,23 +54,23 @@ const ALL_RANGE_DAYS = {
 
 const CATEGORY_META = {
   progress: {
-    label: 'Progress',
+    labelKey: 'insights.categoryProgress',
     icon: Scale,
   },
   training: {
-    label: 'Training',
+    labelKey: 'insights.categoryTraining',
     icon: Dumbbell,
   },
   nutrition: {
-    label: 'Nutrition',
+    labelKey: 'insights.categoryNutrition',
     icon: UtensilsCrossed,
   },
   recovery: {
-    label: 'Recovery',
+    labelKey: 'insights.categoryRecovery',
     icon: Moon,
   },
   next_action: {
-    label: 'Next action',
+    labelKey: 'insights.categoryNextAction',
     icon: ArrowRight,
   },
 };
@@ -115,24 +115,24 @@ const SAMPLE_INSIGHTS = [
 const QUICK_ACTIONS = [
   {
     id: 'workout',
-    label: 'Log workout',
-    description: 'Record your training session',
+    labelKey: 'insights.quickActionWorkoutLabel',
+    descriptionKey: 'insights.quickActionWorkoutDesc',
     icon: Dumbbell,
     route: ROUTES.workouts,
     color: 'brand',
   },
   {
     id: 'meal',
-    label: 'Add meal',
-    description: 'Log your nutrition',
+    labelKey: 'insights.quickActionMealLabel',
+    descriptionKey: 'insights.quickActionMealDesc',
     icon: UtensilsCrossed,
     route: ROUTES.nutrition,
     color: 'warn',
   },
   {
     id: 'measurement',
-    label: 'Add weight',
-    description: 'Track body metrics',
+    labelKey: 'insights.quickActionMeasurementLabel',
+    descriptionKey: 'insights.quickActionMeasurementDesc',
     icon: Scale,
     route: ROUTES.body,
     color: 'ok',
@@ -167,27 +167,27 @@ function formatWindow(window, locale = 'en') {
   return `${formatShortDate(window.start, locale)} - ${formatShortDate(window.end, locale)}`;
 }
 
-function directionLabel(direction) {
-  if (direction === 'positive') return 'On track';
-  if (direction === 'attention') return 'Needs attention';
-  return 'Stable';
+function directionLabel(direction, t) {
+  if (direction === 'positive') return t('insights.directionOnTrack');
+  if (direction === 'attention') return t('insights.directionNeedsAttention');
+  return t('insights.directionStable');
 }
 
-function metricLabel(metricKey) {
-  const labels = {
-    body_progress: 'Body progress',
-    workout_adherence: 'Training',
-    protein_adherence: 'Protein',
-    nutrition_adherence: 'Nutrition',
-    meal_logging: 'Meal logging',
-    recovery_trend: 'Recovery',
-    hydration_adherence: 'Hydration',
-    sleep_adherence: 'Sleep',
-    checkin_logging: 'Check-ins',
-    data_baseline: 'Baseline',
+function metricLabel(metricKey, t) {
+  const keys = {
+    body_progress: 'insights.metricBodyProgress',
+    workout_adherence: 'insights.metricTraining',
+    protein_adherence: 'insights.metricProtein',
+    nutrition_adherence: 'insights.metricNutrition',
+    meal_logging: 'insights.metricMealLogging',
+    recovery_trend: 'insights.metricRecovery',
+    hydration_adherence: 'insights.metricHydration',
+    sleep_adherence: 'insights.metricSleep',
+    checkin_logging: 'insights.metricCheckins',
+    data_baseline: 'insights.metricBaseline',
   };
 
-  return labels[metricKey] || 'Focus';
+  return t(keys[metricKey] || 'insights.metricFocus');
 }
 
 function routeForMetric(metricKey) {
@@ -206,20 +206,20 @@ function routeForMetric(metricKey) {
   return routes[metricKey] || ROUTES.today;
 }
 
-function routeLabel(metricKey) {
-  const labels = {
-    workout_adherence: 'Open Workouts',
-    protein_adherence: 'Open Nutrition',
-    nutrition_adherence: 'Open Nutrition',
-    meal_logging: 'Open Nutrition',
-    hydration_adherence: 'Open Today',
-    sleep_adherence: 'Open Today',
-    checkin_logging: 'Open Today',
-    data_baseline: 'Add measurement',
-    body_progress: 'Open Body',
+function routeLabel(metricKey, t) {
+  const keys = {
+    workout_adherence: 'insights.routeLabelWorkouts',
+    protein_adherence: 'insights.routeLabelNutrition',
+    nutrition_adherence: 'insights.routeLabelNutrition',
+    meal_logging: 'insights.routeLabelNutrition',
+    hydration_adherence: 'insights.routeLabelToday',
+    sleep_adherence: 'insights.routeLabelToday',
+    checkin_logging: 'insights.routeLabelToday',
+    data_baseline: 'insights.routeLabelMeasurement',
+    body_progress: 'insights.routeLabelBody',
   };
 
-  return labels[metricKey] || 'Open Today';
+  return t(keys[metricKey] || 'insights.routeLabelToday');
 }
 
 // Calculate unlock progress based on user data
@@ -229,9 +229,9 @@ function calculateUnlockProgress(workouts, meals, measurements) {
   const measurementCount = measurements?.length || 0;
 
   const steps = [
-    { id: 'workout', label: 'Log 1 workout', completed: workoutCount >= 1 },
-    { id: 'meals', label: 'Log 2 meals', completed: mealCount >= 2 },
-    { id: 'measurement', label: 'Add 1 measurement', completed: measurementCount >= 1 },
+    { id: 'workout', labelKey: 'insights.unlockStepWorkout', completed: workoutCount >= 1 },
+    { id: 'meals', labelKey: 'insights.unlockStepMeals', completed: mealCount >= 2 },
+    { id: 'measurement', labelKey: 'insights.unlockStepMeasurement', completed: measurementCount >= 1 },
   ];
 
   const completedCount = steps.filter((s) => s.completed).length;
@@ -249,14 +249,15 @@ function calculateInsightLevel(workouts, meals, measurements, checkins) {
 
   const totalDataPoints = workoutCount + mealCount + measurementCount + checkinCount;
 
-  if (totalDataPoints === 0) return { level: 0, label: 'Insight level: 0%', stage: 'empty' };
-  if (totalDataPoints <= 3) return { level: 25, label: 'Insight level: 25%', stage: 'starting' };
-  if (totalDataPoints <= 7) return { level: 50, label: 'Insight level: 50%', stage: 'building' };
-  if (totalDataPoints <= 15) return { level: 75, label: 'Insight level: 75%', stage: 'growing' };
-  return { level: 100, label: 'Insight level: 100%', stage: 'full' };
+  if (totalDataPoints === 0) return { level: 0, labelKey: 'insights.insightLevel0', stage: 'empty' };
+  if (totalDataPoints <= 3) return { level: 25, labelKey: 'insights.insightLevel25', stage: 'starting' };
+  if (totalDataPoints <= 7) return { level: 50, labelKey: 'insights.insightLevel50', stage: 'building' };
+  if (totalDataPoints <= 15) return { level: 75, labelKey: 'insights.insightLevel75', stage: 'growing' };
+  return { level: 100, labelKey: 'insights.insightLevel100', stage: 'full' };
 }
 
 function SummaryItem({ item }) {
+  const t = useT();
   const tone = TONE_STYLES[item.tone] || TONE_STYLES.neutral;
 
   return (
@@ -271,7 +272,7 @@ function SummaryItem({ item }) {
           </p>
         </div>
         <span className={cn('shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', tone.badge)}>
-          {directionLabel(item.tone)}
+          {directionLabel(item.tone, t)}
         </span>
       </div>
       {item.detail ? (
@@ -282,6 +283,7 @@ function SummaryItem({ item }) {
 }
 
 function SummaryPanel({ title, subtitle, icon: Icon, items, emptyText, className = '' }) {
+  const t = useT();
   return (
     <SectionCard title={title} subtitle={subtitle} className={className}>
       <div className="mb-4 flex items-center gap-2">
@@ -289,7 +291,7 @@ function SummaryPanel({ title, subtitle, icon: Icon, items, emptyText, className
           <Icon className="h-4 w-4" strokeWidth={2} />
         </div>
         <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-          Deterministic
+          {t('insights.deterministic')}
         </p>
       </div>
       {items.length > 0 ? (
@@ -306,13 +308,14 @@ function SummaryPanel({ title, subtitle, icon: Icon, items, emptyText, className
 }
 
 function NextActionPanel({ insight }) {
+  const t = useT();
   const route = routeForMetric(insight?.metric_key);
   const tone = TONE_STYLES[insight?.direction || 'neutral'] || TONE_STYLES.neutral;
 
   return (
     <SectionCard
-      title="Next best action"
-      subtitle="One deterministic step, chosen from the weakest meaningful signal."
+      title={t('insights.nextBestActionTitle')}
+      subtitle={t('insights.nextBestActionSubtitle')}
       className={cn(
         'border-[hsl(var(--accent-secondary)/0.18)] bg-[radial-gradient(circle_at_top_right,hsl(var(--accent-secondary)/0.09),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)]',
         tone.panel,
@@ -323,14 +326,14 @@ function NextActionPanel({ insight }) {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="atlas-overline text-[hsl(var(--accent-secondary))]">
-                {metricLabel(insight.metric_key)}
+                {metricLabel(insight.metric_key, t)}
               </p>
               <p className="mt-2 text-[1.1rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
                 {insight.title}
               </p>
             </div>
             <span className={cn('shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', tone.badge)}>
-              {directionLabel(insight.direction)}
+              {directionLabel(insight.direction, t)}
             </span>
           </div>
 
@@ -340,11 +343,11 @@ function NextActionPanel({ insight }) {
 
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="rounded-full border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.66)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              {metricLabel(insight.metric_key)}
+              {metricLabel(insight.metric_key, t)}
             </span>
             <Button asChild size="sm" variant="outline" className="shrink-0">
               <Link to={route}>
-                {routeLabel(insight.metric_key)}
+                {routeLabel(insight.metric_key, t)}
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -352,7 +355,7 @@ function NextActionPanel({ insight }) {
         </div>
       ) : (
         <p className="text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-          Add a few more check-ins, meals, or workouts to unlock a more specific next move.
+          {t('insights.nextBestActionEmpty')}
         </p>
       )}
     </SectionCard>
@@ -360,6 +363,7 @@ function NextActionPanel({ insight }) {
 }
 
 function CategoryInsightCard({ insight }) {
+  const t = useT();
   const meta = CATEGORY_META[insight.category] || CATEGORY_META.progress;
   const Icon = meta.icon;
   const tone = TONE_STYLES[insight.direction || 'neutral'] || TONE_STYLES.neutral;
@@ -372,14 +376,14 @@ function CategoryInsightCard({ insight }) {
             <Icon className="h-4.5 w-4.5" strokeWidth={2} />
           </div>
           <div className="min-w-0">
-            <p className="atlas-overline">{meta.label}</p>
+            <p className="atlas-overline">{t(meta.labelKey)}</p>
             <p className="mt-2 text-[1.05rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
               {insight.title}
             </p>
           </div>
         </div>
         <span className={cn('shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', tone.badge)}>
-          {directionLabel(insight.direction)}
+          {directionLabel(insight.direction, t)}
         </span>
       </div>
 
@@ -387,7 +391,7 @@ function CategoryInsightCard({ insight }) {
 
       <div className="mt-4 flex flex-wrap gap-2">
         <span className="rounded-full border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.66)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-          {metricLabel(insight.metric_key)}
+          {metricLabel(insight.metric_key, t)}
         </span>
       </div>
     </article>
@@ -396,6 +400,7 @@ function CategoryInsightCard({ insight }) {
 
 // Sample/Preview insight card - shown when no real data exists
 function PreviewInsightCard({ insight, isSample = false }) {
+  const t = useT();
   const meta = CATEGORY_META[insight.category] || CATEGORY_META.progress;
   const Icon = meta.icon;
   const tone = TONE_STYLES[insight.direction || 'neutral'] || TONE_STYLES.neutral;
@@ -413,10 +418,10 @@ function PreviewInsightCard({ insight, isSample = false }) {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <p className="atlas-overline">{meta.label}</p>
+              <p className="atlas-overline">{t(meta.labelKey)}</p>
               {isSample && (
                 <span className="rounded-full border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
-                  Example
+                  {t('insights.exampleBadge')}
                 </span>
               )}
             </div>
@@ -426,7 +431,7 @@ function PreviewInsightCard({ insight, isSample = false }) {
           </div>
         </div>
         <span className={cn('shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', tone.badge)}>
-          {directionLabel(insight.direction)}
+          {directionLabel(insight.direction, t)}
         </span>
       </div>
 
@@ -437,8 +442,7 @@ function PreviewInsightCard({ insight, isSample = false }) {
 
 // Unlock progress component - shows checklist of steps to unlock insights
 function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) {
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const t = useT();
 
   return (
     <div className="rounded-[24px] border border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5">
@@ -449,12 +453,10 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
           </div>
           <div>
             <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-              {isPt ? 'Desbloqueie seu primeiro insight' : 'Unlock your first insight'}
+              {t('insights.unlockTitle')}
             </p>
             <p className="mt-1 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
-              {isPt
-                ? 'Complete estes 3 passos para gerar insights personalizados baseados nos seus dados.'
-                : 'Complete these 3 steps to generate personalized insights based on your data.'}
+              {t('insights.unlockSubtitle')}
             </p>
           </div>
         </div>
@@ -463,7 +465,7 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
             {completedCount}/{totalCount}
           </p>
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-            {isPt ? 'completo' : 'complete'}
+            {t('insights.unlockComplete')}
           </p>
         </div>
       </div>
@@ -504,10 +506,10 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
                   'text-[13px] font-medium',
                   step.completed ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]'
                 )}>
-                  {step.label}
+                  {t(step.labelKey)}
                 </p>
                 <p className="text-[11px] text-[hsl(var(--fg-3))]">
-                  {isPt ? `Passo ${index + 1}` : `Step ${index + 1}`}
+                  {t('insights.unlockStep').replace('{n}', index + 1)}
                 </p>
               </div>
             </div>
@@ -518,9 +520,7 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
       {completedCount === totalCount && (
         <div className="mt-4 rounded-[16px] border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.08)] px-4 py-3">
           <p className="text-[13px] font-medium text-[hsl(var(--ok))]">
-            {isPt
-              ? 'Parabéns! Seu primeiro insight será gerado em breve.'
-              : 'Great! Your first insight will be generated shortly.'}
+            {t('insights.unlockAllDone')}
           </p>
         </div>
       )}
@@ -530,8 +530,7 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
 
 // Quick action buttons for empty state
 function QuickActionButtons() {
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const t = useT();
 
   return (
     <div className="grid gap-3 sm:grid-cols-3">
@@ -553,9 +552,9 @@ function QuickActionButtons() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[14px] font-semibold text-[hsl(var(--fg))] group-hover:text-[hsl(var(--brand))] transition-colors">
-                {action.label}
+                {t(action.labelKey)}
               </p>
-              <p className="text-[12px] text-[hsl(var(--fg-3))]">{action.description}</p>
+              <p className="text-[12px] text-[hsl(var(--fg-3))]">{t(action.descriptionKey)}</p>
             </div>
             <ChevronRight className="h-5 w-5 shrink-0 text-[hsl(var(--fg-3))] group-hover:text-[hsl(var(--brand))] transition-colors" />
           </Link>
@@ -567,8 +566,7 @@ function QuickActionButtons() {
 
 // AI Coaching message component
 function AICoachingMessage({ hasSomeData }) {
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const t = useT();
 
   return (
     <div className="rounded-[20px] border border-[hsl(var(--accent-secondary)/0.2)] bg-[radial-gradient(circle_at_top_left,hsl(var(--accent-secondary)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-5 py-4">
@@ -578,16 +576,12 @@ function AICoachingMessage({ hasSomeData }) {
         </div>
         <div>
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-            {isPt ? 'Análise por IA' : 'AI Analysis'}
+            {t('insights.aiAnalysisTitle')}
           </p>
           <p className="mt-1 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
             {hasSomeData
-              ? isPt
-                ? 'Continue registrando consistentemente para desbloquear insights mais significativos sobre tendências e padrões.'
-                : 'Keep logging consistently to unlock more meaningful insights about trends and patterns.'
-              : isPt
-                ? 'Comece a registrar seus dados consistentemente. Após 3-5 dias de atividade, insights significativos começarão a aparecer aqui.'
-                : 'Start logging your data consistently. After 3-5 days of activity, meaningful insights will begin appearing here.'}
+              ? t('insights.aiAnalysisHasSomeData')
+              : t('insights.aiAnalysisNoData')}
           </p>
         </div>
       </div>
@@ -596,16 +590,15 @@ function AICoachingMessage({ hasSomeData }) {
 }
 
 // Insight Level indicator
-function InsightLevelIndicator({ level, label, stage }) {
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+function InsightLevelIndicator({ level, labelKey, stage }) {
+  const t = useT();
 
   const stageLabels = {
-    empty: isPt ? 'Aguardando dados' : 'Waiting for data',
-    starting: isPt ? 'Começando' : 'Starting',
-    building: isPt ? 'Construindo' : 'Building',
-    growing: isPt ? 'Crescendo' : 'Growing',
-    full: isPt ? 'Completo' : 'Complete',
+    empty: t('insights.stageEmpty'),
+    starting: t('insights.stageStarting'),
+    building: t('insights.stageBuilding'),
+    growing: t('insights.stageGrowing'),
+    full: t('insights.stageFull'),
   };
 
   const stageColors = {

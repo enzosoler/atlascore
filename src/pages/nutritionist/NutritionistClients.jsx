@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Users } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { getMyClients, removeLink } from '@/services/professionalLinksService';
 import InviteModal from '@/components/shared/InviteModal';
 import RoleGate from '@/components/rbac/RoleGate';
@@ -15,6 +16,7 @@ import {
 
 export default function NutritionistClients() {
   const { user } = useAuth();
+  const t = useT();
   const [showInvite, setShowInvite] = useState(false);
   const qc = useQueryClient();
 
@@ -32,33 +34,33 @@ export default function NutritionistClients() {
   return (
     <RoleGate page="NutritionistClients">
       <PageShell
-        title="Clients"
-        subtitle="Manage client relationships and move directly into detailed nutrition reviews."
+        title={t('nutritionist.clients.pageTitle')}
+        subtitle={t('nutritionist.clients.pageSubtitle')}
         maxWidth="max-w-4xl"
       >
         <WorkspaceHeader
-          eyebrow="Nutritionist role"
-          title="Clients"
-          subtitle="Pending invites stay visible, while accepted clients open into richer profile review."
+          eyebrow={t('nutritionist.clients.eyebrow')}
+          title={t('nutritionist.clients.title')}
+          subtitle={t('nutritionist.clients.subtitle')}
           icon={Users}
           tone="brand"
-          badge={`${links.length} linked`}
-          actions={<WorkspaceInviteAction label="Invite client" onClick={() => setShowInvite(true)} />}
+          badge={`${links.length} ${t('nutritionist.clients.linkedBadge')}`}
+          actions={<WorkspaceInviteAction label={t('nutritionist.clients.inviteClient')} onClick={() => setShowInvite(true)} />}
         />
 
         {isLoading ? (
-          <SectionCard title="Loading clients" subtitle="Fetching client relationships.">
-            <div className="py-12 text-center text-[13px] text-[hsl(var(--fg-2))]">Loading clients...</div>
+          <SectionCard title={t('nutritionist.clients.loadingTitle')} subtitle={t('nutritionist.clients.loadingSubtitle')}>
+            <div className="py-12 text-center text-[13px] text-[hsl(var(--fg-2))]">{t('nutritionist.clients.loadingText')}</div>
           </SectionCard>
         ) : (
           <WorkspaceRosterSection
-            eyebrow="Roster"
-            title="All linked clients"
-            subtitle="Use accepted client records for meals, measurements, diet plans, and exam review."
+            eyebrow={t('nutritionist.clients.rosterEyebrow')}
+            title={t('nutritionist.clients.rosterTitle')}
+            subtitle={t('nutritionist.clients.rosterSubtitle')}
             emptyIcon={Users}
-            emptyTitle="No clients linked"
-            emptyDescription="Invite a client to start prescribing diets and reviewing adherence."
-            emptyAction={<WorkspaceInviteAction label="Invite client" onClick={() => setShowInvite(true)} />}
+            emptyTitle={t('nutritionist.clients.emptyTitle')}
+            emptyDescription={t('nutritionist.clients.emptyDescription')}
+            emptyAction={<WorkspaceInviteAction label={t('nutritionist.clients.inviteClient')} onClick={() => setShowInvite(true)} />}
           >
             {links.map((link) => (
               <WorkspacePersonRow
@@ -68,7 +70,7 @@ export default function NutritionistClients() {
                 title={link.client_name || link.client_email}
                 subtitle={link.client_email}
                 meta=""
-                badge={link.status === 'active' ? 'Active' : 'Pending'}
+                badge={link.status === 'active' ? t('nutritionist.common.active') : t('nutritionist.common.pending')}
                 badgeTone={link.status === 'active' ? 'success' : 'warning'}
                 accentTone="brand"
                 actions={

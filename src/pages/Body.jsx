@@ -11,29 +11,13 @@ import { format, subDays } from 'date-fns';
 import Progress from './Progress';
 import Measurements from './Measurements';
 import ProgressPhotos from './ProgressPhotos';
+import { useT } from '@/lib/i18nContext';
 
-const TABS = [
-  {
-    id: 'overview',
-    label: 'Progress',
-    description: 'Weight, composition, and body trend insights.',
-    icon: TrendingUp,
-  },
-  {
-    id: 'measurements',
-    label: 'Measurements',
-    description: 'Structured body checkpoints and historical entries.',
-    icon: Ruler,
-  },
-  {
-    id: 'photos',
-    label: 'Photos',
-    description: 'Private visual checkpoints grouped by date.',
-    icon: Camera,
-  },
-];
+const TAB_IDS = ['overview', 'measurements', 'photos'];
+const TAB_ICONS = { overview: TrendingUp, measurements: Ruler, photos: Camera };
 
 function BodySummary({ measurements, photos }) {
+  const t = useT();
   const weeksBack = 4;
   const startDate = subDays(new Date(), weeksBack * 7);
 
@@ -74,45 +58,45 @@ function BodySummary({ measurements, photos }) {
     <div className="grid gap-3 md:grid-cols-3">
       <Card className="px-5 py-5">
         <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Weight</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.summary.weight')}</p>
           <div className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getTrendBg(weightTrend, weightIsGood)} ${getTrendColor(weightTrend, weightIsGood)}`}>
-            {weightTrend === 'stable' ? 'Stable' : weightChange > 0 ? `+${Math.abs(weightChange).toFixed(1)}kg` : `${Math.abs(weightChange).toFixed(1)}kg`}
+            {weightTrend === 'stable' ? t('body.summary.stable') : weightChange > 0 ? `+${Math.abs(weightChange).toFixed(1)}kg` : `${Math.abs(weightChange).toFixed(1)}kg`}
           </div>
         </div>
         <p className="mt-3 text-[1.5rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
           {latestWeight ? `${latestWeight.toFixed(1)} kg` : '—'}
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          {weightTrend === 'stable' ? 'No change in the last 4 weeks' : weightIsGood ? 'Moving in the right direction' : 'Consider reviewing nutrition'}
+          {weightTrend === 'stable' ? t('body.summary.no_change_4w') : weightIsGood ? t('body.summary.moving_right_direction') : t('body.summary.consider_nutrition')}
         </p>
       </Card>
 
       <Card className="px-5 py-5">
         <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Body Fat</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.summary.body_fat')}</p>
           <div className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getTrendBg(bodyFatTrend, bodyFatIsGood)} ${getTrendColor(bodyFatTrend, bodyFatIsGood)}`}>
-            {bodyFatTrend === 'stable' ? 'Stable' : bodyFatChange > 0 ? `+${Math.abs(bodyFatChange).toFixed(1)}%` : `${Math.abs(bodyFatChange).toFixed(1)}%`}
+            {bodyFatTrend === 'stable' ? t('body.summary.stable') : bodyFatChange > 0 ? `+${Math.abs(bodyFatChange).toFixed(1)}%` : `${Math.abs(bodyFatChange).toFixed(1)}%`}
           </div>
         </div>
         <p className="mt-3 text-[1.5rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
           {latestBodyFat ? `${latestBodyFat.toFixed(1)}%` : '—'}
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          {bodyFatTrend === 'stable' ? 'Holding steady' : bodyFatIsGood ? 'Fat loss progress' : 'Monitor calorie intake'}
+          {bodyFatTrend === 'stable' ? t('body.summary.holding_steady') : bodyFatIsGood ? t('body.summary.fat_loss_progress') : t('body.summary.monitor_calorie')}
         </p>
       </Card>
 
       <Card className="px-5 py-5">
         <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Progress Score</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.summary.progress_score')}</p>
           <Zap className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={1.9} />
         </div>
         <p className="mt-3 text-[1.5rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
           {measurements.length > 0 ? Math.min(100, Math.round(60 + measurements.length * 2 + Math.abs(weightChange) * 5)) : '—'}
-          <span className="ml-1 text-[14px] font-medium text-[hsl(var(--fg-2))]">/ 100</span>
+          <span className="ml-1 text-[14px] font-medium text-[hsl(var(--fg-2))]">{t('body.summary.out_of_100')}</span>
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          Based on consistency and trends
+          {t('body.summary.based_on_consistency')}
         </p>
       </Card>
     </div>
@@ -120,6 +104,7 @@ function BodySummary({ measurements, photos }) {
 }
 
 function WhatToDoNext({ measurements }) {
+  const t = useT();
   const latest = measurements[0];
   const weight = getMeasurementFieldValue(latest, 'weight');
   const bodyFat = getMeasurementFieldValue(latest, 'body_fat_percent');
@@ -127,24 +112,24 @@ function WhatToDoNext({ measurements }) {
   const actions = [];
 
   if (measurements.length < 3) {
-    actions.push('Record measurements weekly for better trends');
+    actions.push(t('body.what_to_do_next.record_measurements_weekly'));
   }
 
   if (bodyFat !== null && bodyFat > 20) {
-    actions.push('Keep current training volume');
-    actions.push('Prioritize protein at every meal');
+    actions.push(t('body.what_to_do_next.keep_training_volume'));
+    actions.push(t('body.what_to_do_next.prioritize_protein'));
   } else if (bodyFat !== null && bodyFat < 12) {
-    actions.push('Consider a slight surplus for muscle gain');
+    actions.push(t('body.what_to_do_next.consider_surplus'));
   }
 
   if (weight !== null) {
-    actions.push('Stay consistent this week');
-    actions.push('Track your energy levels daily');
+    actions.push(t('body.what_to_do_next.stay_consistent'));
+    actions.push(t('body.what_to_do_next.track_energy'));
   }
 
   if (actions.length === 0) {
-    actions.push('Log your next checkpoint');
-    actions.push('Take progress photos');
+    actions.push(t('body.what_to_do_next.log_checkpoint'));
+    actions.push(t('body.what_to_do_next.take_photos'));
   }
 
   return (
@@ -154,8 +139,8 @@ function WhatToDoNext({ measurements }) {
           <Target className="h-4 w-4" strokeWidth={1.9} />
         </div>
         <div>
-          <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">What to do next</p>
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">Based on your latest data</p>
+          <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">{t('body.what_to_do_next.title')}</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('body.what_to_do_next.subtitle')}</p>
         </div>
       </div>
       <div className="mt-4 space-y-2">
@@ -171,8 +156,31 @@ function WhatToDoNext({ measurements }) {
 }
 
 export default function Body() {
+  const t = useT();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabFromUrl = searchParams.get('tab');
+
+  const TABS = useMemo(() => [
+    {
+      id: 'overview',
+      label: t('body.tabs.overview_label'),
+      description: t('body.tabs.overview_description'),
+      icon: TrendingUp,
+    },
+    {
+      id: 'measurements',
+      label: t('body.tabs.measurements_label'),
+      description: t('body.tabs.measurements_description'),
+      icon: Ruler,
+    },
+    {
+      id: 'photos',
+      label: t('body.tabs.photos_label'),
+      description: t('body.tabs.photos_description'),
+      icon: Camera,
+    },
+  ], [t]);
+
   const validTab = TABS.some((tab) => tab.id === tabFromUrl) ? tabFromUrl : 'overview';
   const [activeTab, setActiveTab] = useState(validTab);
   const { user } = useAuth();
@@ -191,7 +199,7 @@ export default function Body() {
 
   const activeTabMeta = useMemo(
     () => TABS.find((tab) => tab.id === activeTab) || TABS[0],
-    [activeTab]
+    [activeTab, TABS]
   );
   const ActiveIcon = activeTabMeta.icon;
 
@@ -203,9 +211,9 @@ export default function Body() {
   return (
     <AppContainer maxWidth="max-w-6xl">
       <PageHeader
-        eyebrow="Body"
-        title="Your body is changing. Here's what it means."
-        subtitle="Track your progress, understand trends, and see what's working"
+        eyebrow={t('body.eyebrow')}
+        title={t('body.title')}
+        subtitle={t('body.subtitle')}
         accentClassName="from-[hsl(var(--brand)/0.14)] via-[hsl(var(--brand)/0.04)]"
         actions={null}
       >

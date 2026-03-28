@@ -56,26 +56,28 @@ function getStatusMeta(t) {
   };
 }
 
-const PLAN_SOURCES = {
-  self: {
-    label: 'By you',
-    Icon: User,
-    className:
-      'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]',
-  },
-  ai: {
-    label: 'Generated',
-    Icon: ClipboardList,
-    className:
-      'border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]',
-  },
-  coach: {
-    label: 'Coach assigned',
-    Icon: UserCheck,
-    className:
-      'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]',
-  },
-};
+function getPlanSources(t) {
+  return {
+    self: {
+      label: t('workouts.plan_sources.self'),
+      Icon: User,
+      className:
+        'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]',
+    },
+    ai: {
+      label: t('workouts.plan_sources.ai'),
+      Icon: ClipboardList,
+      className:
+        'border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]',
+    },
+    coach: {
+      label: t('workouts.plan_sources.coach'),
+      Icon: UserCheck,
+      className:
+        'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]',
+    },
+  };
+}
 
 const TODAY = getToday();
 const YESTERDAY = shiftDate(TODAY, -1);
@@ -366,6 +368,8 @@ function ComparisonPanel({ title, eyebrow, workout, planned = false, statusMeta 
 }
 
 function PlanCard({ plan, onLogSession }) {
+  const { t } = useI18n();
+  const planSources = getPlanSources(t);
   if (!plan) {
     return (
       <div className="rounded-[28px] border border-dashed border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.3)] px-6 py-8 text-center">
@@ -373,23 +377,23 @@ function PlanCard({ plan, onLogSession }) {
           <Dumbbell className="h-5 w-5" strokeWidth={1.7} />
         </div>
         <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-          No training plan for today
+          {t('workouts.plan_card.no_plan_title')}
         </p>
         <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-          Build one yourself, use the structured plan builder, or wait for your coach to assign it.
+          {t('workouts.plan_card.no_plan_description')}
         </p>
       </div>
     );
   }
 
-  const sourceMeta = PLAN_SOURCES[plan.source] || PLAN_SOURCES.self;
+  const sourceMeta = planSources[plan.source] || planSources.self;
   const SourceIcon = sourceMeta.Icon;
 
   return (
     <div className="rounded-[28px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-5 py-5 shadow-[var(--shadow-xs)]">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="atlas-overline">Assigned plan</p>
+          <p className="atlas-overline">{t('workouts.plan_card.assigned_plan')}</p>
           <h3 className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
             {plan.name}
           </h3>
@@ -422,13 +426,14 @@ function PlanCard({ plan, onLogSession }) {
         onClick={onLogSession}
         className="atlas-button mt-5 h-10 w-full"
       >
-        Log plan session
+        {t('workouts.plan_card.log_session')}
       </button>
     </div>
   );
 }
 
 function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta, locale = 'en' }) {
+  const { t: workoutCardT } = useI18n();
   const status = getWorkoutStatusMeta(workout.status, statusMeta);
 
   return (
@@ -461,15 +466,15 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta, lo
 
           <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.55)]">
             <div className="grid gap-px bg-[hsl(var(--border)/0.7)] sm:grid-cols-3">
-              <WorkoutMetric label="Volume" value={formatVolume(workout.volume_load || 0, locale)} suffix="kg" />
-              <WorkoutMetric label="Date" value={workout.date} />
-              <WorkoutMetric label="Status" value={status.label} />
+              <WorkoutMetric label={workoutCardT('workouts.workout_card.volume')} value={formatVolume(workout.volume_load || 0, locale)} suffix="kg" />
+              <WorkoutMetric label={workoutCardT('workouts.workout_card.date')} value={workout.date} />
+              <WorkoutMetric label={workoutCardT('workouts.workout_card.status')} value={status.label} />
             </div>
           </div>
 
           <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Exercises
+              {workoutCardT('workouts.workout_card.exercises')}
             </p>
             <div className="mt-3 space-y-3">
               {workout.exercises.map((exercise, index) => (
@@ -490,7 +495,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta, lo
           {workout.notes ? (
             <div className="rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                Notes
+                {workoutCardT('workouts.workout_card.notes')}
               </p>
               <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">{workout.notes}</p>
             </div>
@@ -504,7 +509,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta, lo
             className="atlas-button atlas-button-secondary h-10 flex-1"
           >
             <Pencil className="h-4 w-4" strokeWidth={1.9} />
-            Edit
+            {workoutCardT('workouts.workout_card.edit')}
           </button>
           <button
             type="button"
@@ -524,7 +529,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta, lo
             className="atlas-button h-10 flex-1 border border-[hsl(var(--err)/0.18)] bg-[hsl(var(--err)/0.06)] text-[hsl(var(--err))] hover:bg-[hsl(var(--err)/0.1)]"
           >
             <Trash2 className="h-4 w-4" strokeWidth={1.9} />
-            Delete
+            {workoutCardT('workouts.workout_card.delete')}
           </button>
         </div>
       </div>
@@ -533,6 +538,7 @@ function WorkoutCard({ workout, onEdit, onToggleStatus, onDelete, statusMeta, lo
 }
 
 function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
+  const { t: formT } = useI18n();
   const [form, setForm] = useState(() => getWorkoutFormState(workout, selectedDate));
 
   const updateField = (field, value) => {
@@ -590,10 +596,10 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 lg:px-7 lg:py-7">
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5">
-        <p className="atlas-overline">Session basics</p>
+        <p className="atlas-overline">{formT('workouts.form.session_basics')}</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
-            Date
+            {formT('workouts.form.date')}
             <input
               type="date"
               value={form.date}
@@ -603,12 +609,12 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            Workout name
+            {formT('workouts.form.workout_name')}
             <input
               type="text"
               value={form.name}
               onChange={(event) => updateField('name', event.target.value)}
-              placeholder="Ex: Upper A"
+              placeholder={formT('workouts.form.workout_name_placeholder')}
               className={INPUT_CLASS_NAME}
             />
           </label>
@@ -616,7 +622,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className={FIELD_LABEL_CLASS}>
-            Type
+            {formT('workouts.form.type')}
             <select
               value={form.type}
               onChange={(event) => updateField('type', event.target.value)}
@@ -631,19 +637,19 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            Status
+            {formT('workouts.form.status')}
             <select
               value={form.status}
               onChange={(event) => updateField('status', event.target.value)}
               className={SELECT_CLASS_NAME}
             >
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
+              <option value="pending">{formT('workouts.form.status_pending')}</option>
+              <option value="completed">{formT('workouts.form.status_completed')}</option>
             </select>
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            Duration
+            {formT('workouts.form.duration')}
             <input
               type="number"
               min="0"
@@ -654,7 +660,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
           </label>
 
           <label className={FIELD_LABEL_CLASS}>
-            RPE
+            {formT('workouts.form.rpe')}
             <input
               type="number"
               min="0"
@@ -667,7 +673,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
         </div>
 
         <label className={cn(FIELD_LABEL_CLASS, 'mt-4')}>
-          Volume total
+          {formT('workouts.form.volume_total')}
           <input
             type="number"
             min="0"
@@ -681,9 +687,9 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
       <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="atlas-overline">Exercises</p>
+            <p className="atlas-overline">{formT('workouts.form.exercises')}</p>
             <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-              Keep each block clean so the execution read stays easy to scan.
+              {formT('workouts.form.exercises_subtitle')}
             </p>
           </div>
           <button
@@ -691,7 +697,7 @@ function WorkoutForm({ workout, selectedDate, onCancel, onSubmit }) {
             onClick={addExercise}
             className="atlas-button atlas-button-secondary h-9 px-4 text-[12px]"
           >
-            + Add exercise
+            + {formT('workouts.form.add_exercise')}
           </button>
         </div>
 
@@ -802,6 +808,7 @@ function WorkoutsContent() {
   const { t, locale } = useI18n();
   const isPt = locale === 'pt-BR';
   const statusMeta = getStatusMeta(t);
+  const PLAN_SOURCES = getPlanSources(t);
 
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [freeFilter, setFreeFilter] = useState('all');

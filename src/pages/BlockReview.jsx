@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/routes';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
 import {
@@ -34,9 +35,9 @@ import { listMeasurements } from '@/services/bodyProgressService';
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const BLOCK_SIZES = [
-  { key: '4w', weeks: 4, label: '4 weeks', minPlan: 'free' },
-  { key: '8w', weeks: 8, label: '8 weeks', minPlan: 'pro' },
-  { key: '12w', weeks: 12, label: '12 weeks', minPlan: 'performance' },
+  { key: '4w', weeks: 4, labelKey: 'blockReview.blockSize4w', minPlan: 'free' },
+  { key: '8w', weeks: 8, labelKey: 'blockReview.blockSize8w', minPlan: 'pro' },
+  { key: '12w', weeks: 12, labelKey: 'blockReview.blockSize12w', minPlan: 'performance' },
 ];
 
 const PLAN_LEVELS = {
@@ -114,12 +115,13 @@ function InsightRow({ tone, text }) {
 // ─── Page shell ───────────────────────────────────────────────────────────────
 
 export default function BlockReview() {
+  const t = useT();
   return (
     <SafePageBoundary
-      title="Block Review"
-      subtitle="Consolidated readout of a defined time block."
+      title={t('blockReview.title')}
+      subtitle={t('blockReview.subtitle')}
       maxWidth="max-w-5xl"
-      fallbackDescription="The Block Review page opened in safe mode. The main content failed, but the route remains accessible."
+      fallbackDescription={t('blockReview.fallbackDescription')}
     >
       <BlockReviewContent />
     </SafePageBoundary>
@@ -131,6 +133,7 @@ export default function BlockReview() {
 function BlockReviewContent() {
   const { user } = useAuth();
   const { subscription } = useSubscription();
+  const t = useT();
   const planCode = subscription?.plan_code || 'free';
   const isAdmin = user?.role === 'admin' || user?.atlas_role === 'admin';
   const planLevel = isAdmin ? 999 : (PLAN_LEVELS[planCode] || 0);
@@ -325,17 +328,17 @@ function BlockReviewContent() {
       if (Math.abs(weightDelta) < 0.3) {
         list.push({
           tone: 'neutral',
-          text: 'Weight stayed stable in this block. If the goal is fat loss, it may be time to review the calorie deficit or improve logging precision.',
+          text: t('blockReview.insightWeightStable'),
         });
       } else if (weightDelta < 0) {
         list.push({
           tone: 'ok',
-          text: `Loss of ${Math.abs(weightDelta).toFixed(1)} kg in this block — a positive trend for anyone aiming to reduce body weight.`,
+          text: t('blockReview.insightWeightLoss').replace('{delta}', Math.abs(weightDelta).toFixed(1)),
         });
       } else {
         list.push({
           tone: 'neutral',
-          text: `Gain of ${weightDelta.toFixed(1)} kg in this block. Check whether that aligns with the goal (planned muscle gain or off-plan weight gain).`,
+          text: t('blockReview.insightWeightGain').replace('{delta}', weightDelta.toFixed(1)),
         });
       }
     }
@@ -345,17 +348,17 @@ function BlockReviewContent() {
       if (nutritionAdherence < 50) {
         list.push({
           tone: 'warn',
-          text: `Meals were logged on only ${nutritionAdherence.toFixed(0)}% of days. Without consistent logging, it is hard to identify what is limiting progress.`,
+          text: t('blockReview.insightNutritionLow').replace('{pct}', nutritionAdherence.toFixed(0)),
         });
       } else if (nutritionAdherence < 70) {
         list.push({
           tone: 'warn',
-          text: `Food logging adherence is below 70% (${nutritionAdherence.toFixed(0)}%). More consistent logging improves the quality of the analysis.`,
+          text: t('blockReview.insightNutritionMedium').replace('{pct}', nutritionAdherence.toFixed(0)),
         });
       } else {
         list.push({
           tone: 'ok',
-          text: `Strong food logging consistency — ${nutritionAdherence.toFixed(0)}% of days in this block were logged.`,
+          text: t('blockReview.insightNutritionGood').replace('{pct}', nutritionAdherence.toFixed(0)),
         });
       }
     }
@@ -365,12 +368,12 @@ function BlockReviewContent() {
       if (workoutsPerWeek < 1.5) {
         list.push({
           tone: 'warn',
-          text: `Low training frequency: ${workoutsPerWeek.toFixed(1)} sessions/week. For most goals, 3+ sessions per week creates more consistent adaptation.`,
+          text: t('blockReview.insightWorkoutLow').replace('{freq}', workoutsPerWeek.toFixed(1)),
         });
       } else if (workoutsPerWeek >= 3) {
         list.push({
           tone: 'ok',
-          text: `Consistent training frequency: ${workoutsPerWeek.toFixed(1)} sessions/week — solid volume for progressive adaptation.`,
+          text: t('blockReview.insightWorkoutGood').replace('{freq}', workoutsPerWeek.toFixed(1)),
         });
       }
     }
@@ -379,12 +382,13 @@ function BlockReviewContent() {
     if (blockProtocols.length > 0 && weightDelta !== null) {
       list.push({
         tone: 'neutral',
-        text: `${blockProtocols.length} active protocol${blockProtocols.length !== 1 ? 's' : ''} during this block. Consider correlating them with weight and composition trends.`,
+        text: t('blockReview.insightProtocols').replace('{n}', blockProtocols.length),
       });
     }
 
     return list.slice(0, 3);
   }, [
+    t,
     weightDelta,
     nutritionAdherence,
     workoutsPerWeek,
@@ -399,48 +403,44 @@ function BlockReviewContent() {
   const doThisNext = useMemo(() => {
     if (nutritionAdherence < 60 && blockMeals.length > 0) {
       return {
-        action: 'Increase food logging consistency',
-        reason:
-          'Without enough nutrition data, it is impossible to diagnose what is limiting progress. Focus on logging at least 5 of 7 days.',
+        action: t('blockReview.nextActionNutritionAction'),
+        reason: t('blockReview.nextActionNutritionReason'),
         route: ROUTES.nutrition,
-        label: 'Go to Nutrition',
+        label: t('blockReview.nextActionNutritionLabel'),
       };
     }
     if (workoutsPerWeek < 2 && (blockWorkouts.length > 0 || blockMeals.length > 0)) {
       return {
-        action: 'Increase workout frequency',
-        reason:
-          'Training volume in this block stayed below the ideal level for adaptation. Add 1–2 sessions per week in the next block.',
+        action: t('blockReview.nextActionWorkoutAction'),
+        reason: t('blockReview.nextActionWorkoutReason'),
         route: ROUTES.workouts,
-        label: 'Go to Workouts',
+        label: t('blockReview.nextActionWorkoutLabel'),
       };
     }
     if (blockMeasurements.length < 2) {
       return {
-        action: 'Log measurements more often',
-        reason:
-          'Without body composition checkpoints, real changes across the block are impossible to track.',
+        action: t('blockReview.nextActionMeasurementAction'),
+        reason: t('blockReview.nextActionMeasurementReason'),
         route: ROUTES.measurements,
-        label: 'Log measurement',
+        label: t('blockReview.nextActionMeasurementLabel'),
       };
     }
     if (weightDelta !== null && Math.abs(weightDelta) < 0.3 && nutritionAdherence > 70) {
       return {
-        action: 'Review calorie target',
-        reason:
-          'Weight is stable with strong nutrition adherence. If the goal is body composition change, it may be time to adjust the deficit or surplus.',
+        action: t('blockReview.nextActionCalorieAction'),
+        reason: t('blockReview.nextActionCalorieReason'),
         route: ROUTES.myDiet,
-        label: 'Open nutrition plan',
+        label: t('blockReview.nextActionCalorieLabel'),
       };
     }
     return {
-      action: 'Maintain consistency in the next block',
-      reason:
-        'The data in this block is in good shape. Keep the same rhythm to build a stronger comparative history.',
+      action: t('blockReview.nextActionDefaultAction'),
+      reason: t('blockReview.nextActionDefaultReason'),
       route: ROUTES.today,
-      label: 'Go to Today',
+      label: t('blockReview.nextActionDefaultLabel'),
     };
   }, [
+    t,
     nutritionAdherence,
     workoutsPerWeek,
     blockMeasurements.length,
@@ -456,8 +456,8 @@ function BlockReviewContent() {
 
   return (
     <PageShell
-      title="Block Review"
-      subtitle="Consolidated review of a time block — what worked, what did not, and what to do next."
+      title={t('blockReview.title')}
+      subtitle={t('blockReview.pageSubtitle')}
       actions={
         <>
           {BLOCK_SIZES.map((bs) => {
@@ -472,9 +472,9 @@ function BlockReviewContent() {
                 }}
                 active={blockKey === bs.key}
                 className={locked ? 'opacity-40 cursor-not-allowed' : ''}
-                title={locked ? `Available on the ${bs.minPlan} plan` : undefined}
+                title={locked ? t('blockReview.lockedPlan').replace('{plan}', bs.minPlan) : undefined}
               >
-                {bs.label}
+                {t(bs.labelKey)}
                 {locked ? ' 🔒' : ''}
               </FilterChip>
             );
@@ -490,7 +490,7 @@ function BlockReviewContent() {
           className="flex items-center gap-1.5 text-sm font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
-          Previous block
+          {t('blockReview.previousBlock')}
         </button>
 
         <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">
@@ -502,7 +502,7 @@ function BlockReviewContent() {
           disabled={blockOffset === 0}
           className="flex items-center gap-1.5 text-sm font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          Next block
+          {t('blockReview.nextBlock')}
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -510,40 +510,40 @@ function BlockReviewContent() {
       {/* Free plan notice - hide for admins */}
       {planCode === 'free' && !isAdmin && (
         <div className="atlas-banner px-4 py-3 text-sm leading-6">
-          <p className="font-semibold text-[hsl(var(--fg))]">Free plan block limit</p>
+          <p className="font-semibold text-[hsl(var(--fg))]">{t('blockReview.freePlanTitle')}</p>
           <p className="mt-1">
-            Free accounts can review only 4-week blocks.{' '}
+            {t('blockReview.freePlanDesc')}{' '}
             <Link to={ROUTES.pricing} className="font-semibold text-[hsl(var(--brand))] hover:opacity-80">
-              Upgrade to Pro
+              {t('blockReview.upgradeToPro')}
             </Link>{' '}
-            to unlock 8-week and 12-week reviews.
+            {t('blockReview.freePlanDescSuffix')}
           </p>
         </div>
       )}
 
       {isLoading && (
         <LoadingState
-          title="Loading block"
-          description="Aggregating data for the selected period."
+          title={t('blockReview.loadingTitle')}
+          description={t('blockReview.loadingDesc')}
         />
       )}
 
       {!isLoading && hasError && (
         <ErrorState
-          title="Could not load block"
-          description="Some data may be incomplete. Try refreshing the page."
+          title={t('blockReview.errorTitle')}
+          description={t('blockReview.errorDesc')}
         />
       )}
 
       {!isLoading && !hasAnyData && (
-        <SectionCard title="Insufficient data for this block" subtitle="Block review needs repeated checkpoints and routine logs to say something credible.">
+        <SectionCard title={t('blockReview.noDataTitle')} subtitle={t('blockReview.noDataSubtitle')}>
           <EmptyState
             icon={BarChart3}
-            title="No data in this block"
-            description="Log measurements, meals, or workouts inside the selected period to generate a useful block review."
+            title={t('blockReview.emptyTitle')}
+            description={t('blockReview.emptyDesc')}
             action={
               <Button asChild size="default">
-                <Link to={ROUTES.today}>Go to Today</Link>
+                <Link to={ROUTES.today}>{t('blockReview.goToToday')}</Link>
               </Button>
             }
           />
@@ -555,7 +555,7 @@ function BlockReviewContent() {
           {/* ── Top-line metrics ── */}
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              label="Weight change"
+              label={t('blockReview.metricWeightChange')}
               value={
                 weightDelta !== null
                   ? `${weightDelta >= 0 ? '+' : ''}${weightDelta.toFixed(1)} kg`
@@ -563,13 +563,13 @@ function BlockReviewContent() {
               }
               hint={
                 blockMeasurements.length < 2
-                  ? 'Requires 2+ measurements in the block'
-                  : `${blockMeasurements.length} checkpoints recorded`
+                  ? t('blockReview.metricWeightHintInsufficient')
+                  : t('blockReview.metricWeightHintCount').replace('{n}', blockMeasurements.length)
               }
               icon={Scale}
             />
             <MetricCard
-              label="Body fat change"
+              label={t('blockReview.metricBodyFatChange')}
               value={
                 bodyFatDelta !== null
                   ? `${bodyFatDelta >= 0 ? '+' : ''}${bodyFatDelta.toFixed(1)}%`
@@ -577,47 +577,49 @@ function BlockReviewContent() {
               }
               hint={
                 bodyFatDelta !== null
-                  ? 'Based on measurements with body fat %'
-                  : 'No body fat % data in this block'
+                  ? t('blockReview.metricBodyFatHintAvailable')
+                  : t('blockReview.metricBodyFatHintNone')
               }
               icon={TrendingDown}
             />
             <MetricCard
-              label="Completed workouts"
+              label={t('blockReview.metricCompletedWorkouts')}
               value={formatNumber(completedWorkouts.length)}
-              hint={`${workoutsPerWeek.toFixed(1)} sessions/week`}
+              hint={t('blockReview.metricWorkoutsHint').replace('{freq}', workoutsPerWeek.toFixed(1))}
               icon={Dumbbell}
             />
             <MetricCard
-              label="Overall consistency"
+              label={t('blockReview.metricOverallConsistency')}
               value={`${overallAdherence.toFixed(0)}%`}
-              hint="Average of nutrition adherence and workout frequency"
+              hint={t('blockReview.metricConsistencyHint')}
               icon={Target}
             />
           </section>
 
           {/* ── Adherence breakdown ── */}
           <SectionCard
-            title="Adherence by area"
-            subtitle="How engagement looked across each pillar in the block."
+            title={t('blockReview.adherenceTitle')}
+            subtitle={t('blockReview.adherenceSubtitle')}
           >
             <div className="grid gap-4 md:grid-cols-3">
               {/* Nutrition */}
               <div className="atlas-card-muted p-4 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Nutrition
+                  {t('blockReview.adherenceNutritionLabel')}
                 </p>
                 <p className="text-2xl font-bold text-[hsl(var(--fg))]">
                   {nutritionAdherence.toFixed(0)}%
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                  {new Set(blockMeals.map((m) => m.date)).size} of {blockDays} days logged
+                  {t('blockReview.adherenceNutritionDays')
+                    .replace('{logged}', new Set(blockMeals.map((m) => m.date)).size)
+                    .replace('{total}', blockDays)}
                 </p>
                 <AdherenceBar value={nutritionAdherence} />
                 {avgDailyCalories > 0 && (
                   <p className="text-[12px] text-[hsl(var(--fg-2))] pt-1 leading-5">
-                    Average: {formatNumber(avgDailyCalories)} kcal/day
-                    {avgDailyProtein > 0 && ` · ${avgDailyProtein.toFixed(0)}g protein`}
+                    {t('blockReview.adherenceNutritionAvg').replace('{kcal}', formatNumber(avgDailyCalories))}
+                    {avgDailyProtein > 0 && ` · ${avgDailyProtein.toFixed(0)}g ${t('blockReview.protein')}`}
                   </p>
                 )}
               </div>
@@ -625,40 +627,40 @@ function BlockReviewContent() {
               {/* Workouts */}
               <div className="atlas-card-muted p-4 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Workouts
+                  {t('blockReview.adherenceWorkoutsLabel')}
                 </p>
                 <p className="text-2xl font-bold text-[hsl(var(--fg))]">
                   {completedWorkouts.length}
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                  {workoutsPerWeek.toFixed(1)} sessions/week
+                  {t('blockReview.adherenceWorkoutsFreq').replace('{freq}', workoutsPerWeek.toFixed(1))}
                 </p>
                 <AdherenceBar value={workoutAdherenceScore} />
                 <p className="text-[12px] text-[hsl(var(--fg-2))] pt-1 leading-5">
-                  Score relative to a 3× /week target
+                  {t('blockReview.adherenceWorkoutsScore')}
                 </p>
               </div>
 
               {/* Protocols */}
               <div className="atlas-card-muted p-4 space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-                  Protocols
+                  {t('blockReview.adherenceProtocolsLabel')}
                 </p>
                 <p className="text-2xl font-bold text-[hsl(var(--fg))]">
                   {blockProtocols.length}
                 </p>
                 <p className="text-[12px] text-[hsl(var(--fg-2))]">
                   {blockProtocols.length === 0
-                    ? 'No active protocols in this block'
-                    : `${blockProtocols.length} active protocol${blockProtocols.length !== 1 ? 's' : ''}`}
+                    ? t('blockReview.adherenceProtocolsNone')
+                    : t('blockReview.adherenceProtocolsCount').replace('{n}', blockProtocols.length)}
                 </p>
                 {blockProtocols.length > 0 && (
                   <p className="text-[12px] text-[hsl(var(--fg-2))] pt-2 leading-5">
                     {blockProtocols
                       .slice(0, 3)
-                      .map((p) => p.substance_name || 'Protocol')
+                      .map((p) => p.substance_name || t('blockReview.protocolDefault'))
                       .join(', ')}
-                    {blockProtocols.length > 3 && ` and ${blockProtocols.length - 3} more`}
+                    {blockProtocols.length > 3 && ` ${t('blockReview.andMore').replace('{n}', blockProtocols.length - 3)}`}
                   </p>
                 )}
               </div>
@@ -668,8 +670,8 @@ function BlockReviewContent() {
           {/* ── Opinionated insights ── */}
           {insights.length > 0 && (
             <SectionCard
-              title="Block insights"
-              subtitle="Objective analysis based on the data logged in this period."
+              title={t('blockReview.insightsTitle')}
+              subtitle={t('blockReview.insightsSubtitle')}
             >
               <div className="space-y-3">
                 {insights.map((insight, i) => (
@@ -687,7 +689,7 @@ function BlockReviewContent() {
               </div>
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--brand))]">
-                  Next step
+                  {t('blockReview.nextStep')}
                 </p>
                 <p className="text-[16px] font-semibold text-[hsl(var(--fg))] leading-snug">
                   {doThisNext.action}

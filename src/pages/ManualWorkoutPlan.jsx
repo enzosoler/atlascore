@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useT } from '@/lib/i18nContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -23,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function ManualWorkoutPlan() {
+  const t = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -121,12 +123,12 @@ export default function ManualWorkoutPlan() {
         start_date: new Date().toISOString().split('T')[0],
       });
 
-      toast.success('Workout plan saved successfully');
+      toast.success(t('manualWorkout.messages.plan_saved'));
       qc.invalidateQueries({ queryKey: ['workout-plans'] });
       navigate(ROUTES.myWorkout);
     } catch (error) {
       console.error(error);
-      toast.error('Could not save the plan.');
+      toast.error(t('manualWorkout.messages.plan_save_error'));
     } finally {
       setIsSaving(false);
     }
@@ -139,8 +141,8 @@ export default function ManualWorkoutPlan() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <p className="atlas-overline">Train</p>
-          <h1 className="atlas-display-title text-2xl">Create Manual Plan</h1>
+          <p className="atlas-overline">{t('manualWorkout.eyebrow')}</p>
+          <h1 className="atlas-display-title text-2xl">{t('manualWorkout.title')}</h1>
         </div>
       </div>
 
@@ -148,20 +150,20 @@ export default function ManualWorkoutPlan() {
         <Card className="p-6 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="atlas-overline">Plan Name</label>
-              <Input 
-                value={planName} 
+              <label className="atlas-overline">{t('manualWorkout.fields.plan_name')}</label>
+              <Input
+                value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
-                placeholder="Ex: Upper / Lower Split"
+                placeholder={t('manualWorkout.fields.plan_name_placeholder')}
                 className="atlas-field h-11 rounded-[12px] border-0 px-4"
               />
             </div>
             <div className="space-y-2">
-              <label className="atlas-overline">Goal</label>
-              <Input 
-                value={objective} 
+              <label className="atlas-overline">{t('manualWorkout.fields.goal')}</label>
+              <Input
+                value={objective}
                 onChange={(e) => setObjective(e.target.value)}
-                placeholder="Ex: Build muscle"
+                placeholder={t('manualWorkout.fields.goal_placeholder')}
                 className="atlas-field h-11 rounded-[12px] border-0 px-4"
               />
             </div>
@@ -184,11 +186,11 @@ export default function ManualWorkoutPlan() {
 
         <div className="flex items-center justify-between pt-4">
           <SecondaryButton onClick={addDay} className="gap-2">
-            <Plus className="w-4 h-4" /> Add Day
+            <Plus className="w-4 h-4" /> {t('manualWorkout.actions.add_day')}
           </SecondaryButton>
           <PrimaryButton onClick={handleSave} disabled={isSaving} className="gap-2">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Plan
+            {t('manualWorkout.actions.save_plan')}
           </PrimaryButton>
         </div>
       </div>
@@ -197,6 +199,7 @@ export default function ManualWorkoutPlan() {
 }
 
 function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, onRemoveExercise }) {
+  const t = useT();
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -230,7 +233,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
           <Input 
             value={day.focus} 
             onChange={(e) => onUpdate({ focus: e.target.value })}
-            placeholder="Focus (ex: Chest and Triceps)"
+            placeholder={t('manualWorkout.day_editor.focus_placeholder')}
             className="max-w-[250px] h-8 border-none bg-transparent px-0 text-sm text-[hsl(var(--fg-2))] focus-visible:ring-0"
           />
         </div>
@@ -254,7 +257,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
             
             <div className="flex items-center gap-2">
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">Sets</label>
+                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">{t('manualWorkout.day_editor.sets')}</label>
                 <Input 
                   type="number" 
                   value={ex.sets} 
@@ -263,7 +266,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">Reps</label>
+                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">{t('manualWorkout.day_editor.reps')}</label>
                 <Input 
                   value={ex.reps} 
                   onChange={(e) => onUpdateExercise(ex.id, { reps: e.target.value })}
@@ -271,7 +274,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">Rest</label>
+                <label className="text-[9px] uppercase tracking-wider text-[hsl(var(--fg-3))] font-bold">{t('manualWorkout.day_editor.rest')}</label>
                 <Input 
                   type="number" 
                   value={ex.rest_seconds} 
@@ -290,7 +293,7 @@ function DayEditor({ day, onUpdate, onRemove, onAddExercise, onUpdateExercise, o
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--fg-3))]" />
             <Input 
-              placeholder="Search exercise to add..." 
+              placeholder={t('manualWorkout.day_editor.search_placeholder')} 
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="atlas-field h-11 rounded-[12px] border-0 pl-9 text-sm"

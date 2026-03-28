@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useT } from '@/lib/i18nContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { getActiveWorkoutPlans, createWorkoutPlan, deactivateAllWorkoutPlans } from '@/services/workoutPlanService';
@@ -16,6 +17,7 @@ const CREATOR_BADGE = { ai: 'badge-neutral', coach: 'badge-blue', user: 'badge-n
 const CREATOR_ICONS = { ai: ClipboardList, coach: Users, user: User };
 
 function ExerciseCard({ exercise, index }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   return (
     <div className="atlas-card rounded-[18px]">
@@ -36,10 +38,10 @@ function ExerciseCard({ exercise, index }) {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex gap-3 t-caption">
-            {exercise.sets > 0 && <span>{exercise.sets} sets</span>}
-            {exercise.reps && <span className="hidden sm:inline">{exercise.reps} reps</span>}
+            {exercise.sets > 0 && <span>{exercise.sets} {t('myWorkout.exercise_card.sets')}</span>}
+            {exercise.reps && <span className="hidden sm:inline">{exercise.reps} {t('myWorkout.exercise_card.reps')}</span>}
             {exercise.rest_seconds > 0 && (
-              <span className="hidden sm:inline">{exercise.rest_seconds}s rest</span>
+              <span className="hidden sm:inline">{exercise.rest_seconds}s {t('myWorkout.exercise_card.rest')}</span>
             )}
           </div>
           {open ? (
@@ -54,19 +56,19 @@ function ExerciseCard({ exercise, index }) {
           <div className="grid grid-cols-3 gap-2 text-[12px]">
             {exercise.sets > 0 && (
             <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
-                <p className="t-label">Sets</p>
+                <p className="t-label">{t('myWorkout.exercise_card.sets')}</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.sets}</p>
               </div>
             )}
             {exercise.reps && (
             <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
-                <p className="t-label">Reps</p>
+                <p className="t-label">{t('myWorkout.exercise_card.reps')}</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.reps}</p>
               </div>
             )}
             {exercise.rest_seconds > 0 && (
             <div className="rounded-[12px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.54)] p-2 text-center">
-                <p className="t-label">Rest</p>
+                <p className="t-label">{t('myWorkout.exercise_card.rest')}</p>
                 <p className="font-semibold text-[hsl(var(--fg))] mt-0.5">{exercise.rest_seconds}s</p>
               </div>
             )}
@@ -76,7 +78,7 @@ function ExerciseCard({ exercise, index }) {
           )}
           {exercise.technique && (
             <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              <span className="font-semibold">Technique:</span> {exercise.technique}
+              <span className="font-semibold">{t('myWorkout.exercise_card.technique')}:</span> {exercise.technique}
             </p>
           )}
         </div>
@@ -86,6 +88,7 @@ function ExerciseCard({ exercise, index }) {
 }
 
 function WorkoutDayCard({ day }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const exercises = day.exercises || [];
   return (
@@ -96,12 +99,12 @@ function WorkoutDayCard({ day }) {
       >
         <div>
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-            {day.name || day.day || 'Session'}
+            {day.name || day.day || t('myWorkout.day_card.session')}
           </p>
           {day.focus && <p className="t-caption mt-0.5">{day.focus}</p>}
         </div>
         <div className="flex items-center gap-3">
-          <span className="t-caption">{exercises.length} exercise{exercises.length !== 1 ? 's' : ''}</span>
+          <span className="t-caption">{exercises.length} {exercises.length !== 1 ? t('myWorkout.day_card.exercises') : t('myWorkout.day_card.exercise')}</span>
           {open ? (
             <ChevronUp className="w-4 h-4 text-[hsl(var(--fg-2))] shrink-0" />
           ) : (
@@ -118,7 +121,7 @@ function WorkoutDayCard({ day }) {
       )}
       {open && exercises.length === 0 && (
         <div className="border-t border-[hsl(var(--border-h))] px-5 py-4">
-          <p className="t-caption">No detailed exercises yet.</p>
+          <p className="t-caption">{t('myWorkout.day_card.no_exercises')}</p>
         </div>
       )}
     </div>
@@ -126,6 +129,7 @@ function WorkoutDayCard({ day }) {
 }
 
 export default function MyWorkout() {
+  const t = useT();
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -231,19 +235,19 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
         });
         qc.invalidateQueries({ queryKey: ['workout-plans'] });
         qc.invalidateQueries({ queryKey: ['workout-plans-active'] });
-        toast.success('Workout plan generated successfully.');
+        toast.success(t('myWorkout.messages.plan_generated'));
       } else {
-        setGenError('The plan response did not include a valid structure. Please try again.');
-        toast.error('Could not generate the plan. Please try again.');
+        setGenError(t('myWorkout.messages.plan_invalid_structure'));
+        toast.error(t('myWorkout.messages.plan_generate_error'));
       }
     } catch (err) {
       clearTimeout(timeoutId);
       if (err?.name === 'AbortError' || controller.signal.aborted) {
-        setGenError('Generation took too long (>15s). Check your connection and try again.');
-        toast.error('Request timed out. Please try again.');
+        setGenError(t('myWorkout.messages.plan_timeout'));
+        toast.error(t('myWorkout.messages.request_timeout'));
       } else {
-        setGenError('Could not connect to the plan service. Please try again in a moment.');
-        toast.error('Error generating plan.');
+        setGenError(t('myWorkout.messages.plan_connect_error'));
+        toast.error(t('myWorkout.messages.plan_generate_error'));
       }
     } finally {
       setGenerating(false);
@@ -253,7 +257,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
   if (isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center gap-2 t-small text-[hsl(var(--fg-2))]">
-        <Loader2 className="w-4 h-4 animate-spin" /> Loading...
+        <Loader2 className="w-4 h-4 animate-spin" /> {t('myWorkout.messages.loading')}
       </div>
     );
   }
@@ -261,9 +265,9 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
   return (
     <AppContainer maxWidth="max-w-3xl">
       <PageHeader
-        eyebrow="Train"
-        title="My Workout"
-        subtitle="Review the active plan, compare its origin, and scan the structure of days and exercises quickly."
+        eyebrow={t('myWorkout.eyebrow')}
+        title={t('myWorkout.title')}
+        subtitle={t('myWorkout.subtitle')}
         actions={(
           <div className="flex flex-wrap gap-2">
             <SecondaryButton
@@ -271,7 +275,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
-              Create manually
+              {t('myWorkout.actions.create_manually')}
             </SecondaryButton>
             <PrimaryButton
               onClick={generate}
@@ -283,7 +287,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
               ) : (
                 <ClipboardList className="h-4 w-4" />
               )}
-              {plan ? 'Generate new plan' : 'Generate plan'}
+              {plan ? t('myWorkout.actions.generate_new_plan') : t('myWorkout.actions.generate_plan')}
             </PrimaryButton>
           </div>
         )}
@@ -297,8 +301,8 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
         <Card className="px-5 py-4">
           <EmptyState
             icon={Dumbbell}
-            title="No active workout plan"
-            description="Create one manually or generate a structured plan based on your profile and goals."
+            title={t('myWorkout.empty.title')}
+            description={t('myWorkout.empty.description')}
             action={(
               <div className="flex flex-col gap-3 sm:flex-row">
                 <SecondaryButton
@@ -306,7 +310,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
                   className="gap-2"
                 >
                   <Plus className="h-4 w-4" />
-                  Create manually
+                  {t('myWorkout.actions.create_manually')}
                 </SecondaryButton>
                 <PrimaryButton
                   onClick={generate}
@@ -318,7 +322,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
                   ) : (
                     <ClipboardList className="h-4 w-4" />
                   )}
-                  Generate plan
+                  {t('myWorkout.actions.generate_plan')}
                 </PrimaryButton>
               </div>
             )}
@@ -326,7 +330,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
         </Card>
       ) : (
         <>
-          <Section eyebrow="Plan" title={plan.name} subtitle={plan.objective || 'Active plan ready to execute.'}>
+          <Section eyebrow={t('myWorkout.plan.eyebrow')} title={plan.name} subtitle={plan.objective || t('myWorkout.plan.active_plan_subtitle')}>
             <Card className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
               <span
@@ -342,12 +346,12 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
             )}
             {plan.frequency && (
               <p className="t-caption">
-                <span className="font-semibold">Frequency:</span> {plan.frequency}
+                <span className="font-semibold">{t('myWorkout.plan.frequency')}:</span> {plan.frequency}
               </p>
             )}
             {plan.start_date && (
               <p className="t-caption">
-                Since{' '}
+                {t('myWorkout.plan.since')}{' '}
                 {new Date(plan.start_date + 'T12:00').toLocaleDateString('en-US')}
               </p>
             )}
@@ -355,9 +359,9 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
           </Section>
 
           <Section
-            eyebrow="Structure"
-            title={`Training days (${(plan.days || []).length})`}
-            subtitle="Each card shows the day's focus and opens the detailed exercises."
+            eyebrow={t('myWorkout.structure.eyebrow')}
+            title={t('myWorkout.structure.title').replace('{count}', (plan.days || []).length)}
+            subtitle={t('myWorkout.structure.subtitle')}
           >
             <div className="space-y-2">
               {(plan.days || []).map((day, i) => (
@@ -368,7 +372,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
 
           {plan.notes && (
             <Card className="p-4">
-              <p className="t-label mb-1">Notes</p>
+              <p className="t-label mb-1">{t('myWorkout.plan.notes')}</p>
               <p className="t-body text-[hsl(var(--fg-2))]">{plan.notes}</p>
             </Card>
           )}

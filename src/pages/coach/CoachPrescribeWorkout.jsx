@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock3, FlaskConical, PauseCircle, Plus } from 'lucide-react';
+import { useT } from '@/lib/i18nContext';
 import ProtocolCard from '@/components/protocols/ProtocolCard';
 import ProtocolForm from '@/components/protocols/ProtocolForm';
 import {
@@ -59,12 +60,13 @@ function SummaryTile({ label, value, hint, icon: Icon }) {
 }
 
 export default function Protocols() {
+  const t = useT();
   return (
     <SafePageBoundary
-      title="Protocols"
-      subtitle="Manage medications, hormones, peptides, supplements, and other compounds you use or monitor."
+      title={t('coach.prescribeWorkout.pageTitle')}
+      subtitle={t('coach.prescribeWorkout.pageSubtitle')}
       maxWidth="max-w-6xl"
-      fallbackDescription="The Protocols route stayed available in safe mode even though the main content failed."
+      fallbackDescription={t('coach.prescribeWorkout.fallbackDescription')}
     >
       <ProtocolsContent />
     </SafePageBoundary>
@@ -72,6 +74,7 @@ export default function Protocols() {
 }
 
 function ProtocolsContent() {
+  const t = useT();
   const qc = useQueryClient();
   const [filter, setFilter] = useState('active');
   const [notice, setNotice] = useState(null);
@@ -94,15 +97,14 @@ function ProtocolsContent() {
       setNotice({
         tone: 'success',
         message: variables.protocolId
-          ? 'Protocol updated.'
-          : 'Protocol added.',
+          ? t('coach.prescribeWorkout.protocolUpdated')
+          : t('coach.prescribeWorkout.protocolAdded'),
       });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
-        message:
-          'Could not save the protocol. Try again.',
+        message: t('coach.prescribeWorkout.couldNotSave'),
       });
     },
   });
@@ -122,8 +124,7 @@ function ProtocolsContent() {
     onError: () => {
       setNotice({
         tone: 'warning',
-        message:
-          'Could not update the status. Try again.',
+        message: t('coach.prescribeWorkout.couldNotUpdateStatus'),
       });
     },
     onSettled: () => {
@@ -140,14 +141,13 @@ function ProtocolsContent() {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
       setNotice({
         tone: 'success',
-        message: 'Protocol deleted.',
+        message: t('coach.prescribeWorkout.protocolDeleted'),
       });
     },
     onError: () => {
       setNotice({
         tone: 'warning',
-        message:
-          'Could not delete the protocol. Try again.',
+        message: t('coach.prescribeWorkout.couldNotDelete'),
       });
     },
     onSettled: () => {
@@ -206,9 +206,9 @@ function ProtocolsContent() {
     };
 
     const successMessages = {
-      active: 'Protocol reactivated.',
-      paused: 'Protocol paused.',
-      finished: 'Protocol marked as finished.',
+      active: t('coach.prescribeWorkout.protocolReactivated'),
+      paused: t('coach.prescribeWorkout.protocolPaused'),
+      finished: t('coach.prescribeWorkout.protocolFinished'),
     };
 
     statusMutation.mutate({
@@ -235,8 +235,8 @@ function ProtocolsContent() {
 
   return (
     <PageShell
-      title="Protocols"
-      subtitle="A focused V1 workspace for current compounds, simple scheduling, status control, and visible adherence context without breaking the stable app shell."
+      title={t('coach.prescribeWorkout.contentTitle')}
+      subtitle={t('coach.prescribeWorkout.contentSubtitle')}
       actions={
         <PrimaryButton
           type="button"
@@ -244,7 +244,7 @@ function ProtocolsContent() {
           className="inline-flex items-center gap-2"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
-          Add protocol
+          {t('coach.prescribeWorkout.addProtocol')}
         </PrimaryButton>
       }
       maxWidth="max-w-6xl"
@@ -253,42 +253,42 @@ function ProtocolsContent() {
 
       {isLoading ? (
         <LoadingState
-          title="Loading protocols"
-          description="The page is already open in safe mode while your current protocol items load."
+          title={t('coach.prescribeWorkout.loadingTitle')}
+          description={t('coach.prescribeWorkout.loadingDescription')}
         />
       ) : null}
 
       {!isLoading && hasLoadError ? (
         <ErrorState
-          title="Protocols in safe mode"
-          description="Existing protocol data did not fully load, but you can still open the page and create new items."
+          title={t('coach.prescribeWorkout.errorTitle')}
+          description={t('coach.prescribeWorkout.errorDescription')}
         />
       ) : null}
 
       <section className="grid gap-3 md:grid-cols-3">
         <SummaryTile
-          label="Active"
+          label={t('coach.prescribeWorkout.tileActive')}
           value={groupedProtocols.active.length}
-          hint="Current compounds still in rotation right now."
+          hint={t('coach.prescribeWorkout.tileActiveHint')}
           icon={FlaskConical}
         />
         <SummaryTile
-          label="Paused"
+          label={t('coach.prescribeWorkout.tilePaused')}
           value={groupedProtocols.paused.length}
-          hint="Items temporarily stopped but still being tracked."
+          hint={t('coach.prescribeWorkout.tilePausedHint')}
           icon={PauseCircle}
         />
         <SummaryTile
-          label="Finished"
+          label={t('coach.prescribeWorkout.tileFinished')}
           value={groupedProtocols.finished.length}
-          hint="Completed cycles and protocols kept in history."
+          hint={t('coach.prescribeWorkout.tileFinishedHint')}
           icon={Clock3}
         />
       </section>
 
       <SectionCard
-        title="Current protocol items"
-        subtitle="Clean, status-driven tracking for the substances you are currently using or still monitoring."
+        title={t('coach.prescribeWorkout.sectionTitle')}
+        subtitle={t('coach.prescribeWorkout.sectionSubtitle')}
         actions={
           <div className="flex flex-wrap gap-2">
             {FILTERS.map((option) => {
@@ -296,6 +296,13 @@ function ProtocolsContent() {
                 option === 'all'
                   ? groupedProtocols.all.length
                   : groupedProtocols[option]?.length || 0;
+
+              const filterLabels = {
+                all: t('coach.prescribeWorkout.filterAll'),
+                active: t('coach.prescribeWorkout.filterActive'),
+                paused: t('coach.prescribeWorkout.filterPaused'),
+                finished: t('coach.prescribeWorkout.filterFinished'),
+              };
 
               return (
                 <button
@@ -308,7 +315,7 @@ function ProtocolsContent() {
                       : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] text-[hsl(var(--fg-2))] hover:border-[hsl(var(--border-strong))] hover:bg-[hsl(var(--fill)/0.78)] hover:text-[hsl(var(--fg))]'
                   }`}
                 >
-                  {({'all': 'All', 'active': 'Active', 'paused': 'Paused', 'finished': 'Finished'}[option] || option)} ({count})
+                  {(filterLabels[option] || option)} ({count})
                 </button>
               );
             })}
@@ -335,15 +342,15 @@ function ProtocolsContent() {
 
         {!isLoading && !hasAnyProtocols ? (
           <EmptyState
-            title="No protocol items yet"
+            title={t('coach.prescribeWorkout.emptyTitle')}
             description={
               hasLoadError
-                ? 'The list could not be loaded, but you can still add new protocols.'
-                : 'Start with a medication, hormone, peptide, supplement, or another tracked compound.'
+                ? t('coach.prescribeWorkout.emptyLoadError')
+                : t('coach.prescribeWorkout.emptyDescription')
             }
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Add protocol
+                {t('coach.prescribeWorkout.addProtocol')}
               </PrimaryButton>
             }
           />
@@ -351,11 +358,11 @@ function ProtocolsContent() {
 
         {!isLoading && hasAnyProtocols && filteredProtocols.length === 0 ? (
           <EmptyState
-            title={`No ${filter} protocol items`}
-            description="Try another status filter or add a new protocol item."
+            title={t('coach.prescribeWorkout.emptyFilterTitle')}
+            description={t('coach.prescribeWorkout.emptyFilterDescription')}
             action={
               <PrimaryButton type="button" onClick={handleCreate}>
-                Add protocol
+                {t('coach.prescribeWorkout.addProtocol')}
               </PrimaryButton>
             }
           />
@@ -397,11 +404,10 @@ function ProtocolsContent() {
         <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[32px] border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-0 shadow-[var(--shadow-lg)] sm:max-w-3xl">
           <DialogHeader className="border-b border-[hsl(var(--border)/0.82)] px-6 pb-5 pt-6 text-left">
             <DialogTitle className="text-[28px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-              {editingProtocol ? 'Edit protocol' : 'Add protocol'}
+              {editingProtocol ? t('coach.prescribeWorkout.dialogEditTitle') : t('coach.prescribeWorkout.dialogAddTitle')}
             </DialogTitle>
             <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-[hsl(var(--fg-2))]">
-              Capture the core details that make this protocol useful right away: substance,
-              category, dose, frequency, schedule, notes, and current status handling.
+              {t('coach.prescribeWorkout.dialogDescription')}
             </DialogDescription>
           </DialogHeader>
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Trash2, Users } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { getMyClients, removeLink } from '@/services/professionalLinksService';
 import InviteModal from '@/components/shared/InviteModal';
 import RoleGate from '@/components/rbac/RoleGate';
@@ -15,6 +16,7 @@ import {
 
 export default function CoachStudents() {
   const { user } = useAuth();
+  const t = useT();
   const qc = useQueryClient();
   const [showInvite, setShowInvite] = useState(false);
 
@@ -31,33 +33,33 @@ export default function CoachStudents() {
 
   return (
     <RoleGate roles={['coach', 'admin']}>
-      <PageShell title="Students" subtitle="Manage active coaching relationships and pending invites." maxWidth="max-w-4xl">
+      <PageShell title={t('coach.students.pageTitle')} subtitle={t('coach.students.pageSubtitle')} maxWidth="max-w-4xl">
         <WorkspaceHeader
-          eyebrow="Coach role"
-          title="Students"
-          subtitle="Invite athletes, monitor acceptance, and jump into individual profiles."
+          eyebrow={t('coach.students.eyebrow')}
+          title={t('coach.students.title')}
+          subtitle={t('coach.students.subtitle')}
           icon={Users}
           tone="brand"
-          badge={`${students.length} linked`}
-          actions={<WorkspaceInviteAction label="Invite student" onClick={() => setShowInvite(true)} />}
+          badge={`${students.length} ${t('coach.students.linkedBadge')}`}
+          actions={<WorkspaceInviteAction label={t('coach.students.inviteStudent')} onClick={() => setShowInvite(true)} />}
         />
 
         {isLoading ? (
-          <SectionCard title="Loading students" subtitle="Fetching your active and pending links.">
+          <SectionCard title={t('coach.students.loadingTitle')} subtitle={t('coach.students.loadingSubtitle')}>
             <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-[hsl(var(--fg-2))]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading student roster...
+              {t('coach.students.loadingText')}
             </div>
           </SectionCard>
         ) : (
           <WorkspaceRosterSection
-            eyebrow="Roster"
-            title="All linked students"
-            subtitle="Accepted athletes are ready for profile review. Pending invites stay visible until confirmed."
+            eyebrow={t('coach.students.rosterEyebrow')}
+            title={t('coach.students.rosterTitle')}
+            subtitle={t('coach.students.rosterSubtitle')}
             emptyIcon={Users}
-            emptyTitle="No students yet"
-            emptyDescription="Invite your first athlete to start prescribing and reviewing adherence."
-            emptyAction={<WorkspaceInviteAction label="Invite student" onClick={() => setShowInvite(true)} />}
+            emptyTitle={t('coach.students.emptyTitle')}
+            emptyDescription={t('coach.students.emptyDescription')}
+            emptyAction={<WorkspaceInviteAction label={t('coach.students.inviteStudent')} onClick={() => setShowInvite(true)} />}
           >
             {students.map((student) => (
               <WorkspacePersonRow
@@ -68,10 +70,10 @@ export default function CoachStudents() {
                 subtitle={student.client_email}
                 meta={
                   student.status === 'active'
-                    ? 'Accepted and ready for programming'
-                    : 'Invite sent, awaiting acceptance'
+                    ? t('coach.students.metaAccepted')
+                    : t('coach.students.metaPending')
                 }
-                badge={student.status === 'active' ? 'Active' : 'Pending'}
+                badge={student.status === 'active' ? t('coach.common.active') : t('coach.common.pending')}
                 badgeTone={student.status === 'active' ? 'success' : 'warning'}
                 accentTone="brand"
                 actions={

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useT } from '@/lib/i18nContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChevronLeft, Loader2, Mail } from 'lucide-react';
@@ -14,6 +15,7 @@ export default function NutritionistClientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const t = useT();
 
   const { data: allLinks = [], isLoading: loadingLink } = useQuery({
     queryKey: ['nutritionist-clients', user?.id],
@@ -33,7 +35,7 @@ export default function NutritionistClientProfile() {
   if (loadingLink) {
     return (
       <div className="flex items-center justify-center min-h-screen gap-2 text-[hsl(var(--fg-2))]">
-        <Loader2 className="w-4 h-4 animate-spin" /> Loading...
+        <Loader2 className="w-4 h-4 animate-spin" /> {t('nutritionist.clientProfile.loading')}
       </div>
     );
   }
@@ -42,9 +44,9 @@ export default function NutritionistClientProfile() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="t-subtitle mb-2">Client not found</p>
+          <p className="t-subtitle mb-2">{t('nutritionist.clientProfile.notFound')}</p>
           <button onClick={() => navigate('/nutritionist/clients')} className="btn btn-secondary">
-            Back
+            {t('nutritionist.clientProfile.back')}
           </button>
         </div>
       </div>
@@ -89,31 +91,31 @@ export default function NutritionistClientProfile() {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="bg-[hsl(var(--card-hi))] border border-[hsl(var(--border))] h-10 rounded-xl w-full p-1 gap-1">
             <TabsTrigger value="overview" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-              Overview
+              {t('nutritionist.clientProfile.tabOverview')}
             </TabsTrigger>
             {link.permissions?.can_view_meals && (
               <TabsTrigger value="meals" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                Meals
+                {t('nutritionist.clientProfile.tabMeals')}
               </TabsTrigger>
             )}
             {link.permissions?.can_view_measurements && (
               <TabsTrigger value="measurements" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                Measurements
+                {t('nutritionist.clientProfile.tabMeasurements')}
               </TabsTrigger>
             )}
             {link.permissions?.can_view_progress_photos && (
               <TabsTrigger value="photos" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                Photos
+                {t('nutritionist.clientProfile.tabPhotos')}
               </TabsTrigger>
             )}
             {link.permissions?.can_view_lab_exams && (
                <TabsTrigger value="exams" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                 Labs
+                 {t('nutritionist.clientProfile.tabLabs')}
                </TabsTrigger>
              )}
              {link.permissions?.can_view_meals && (
                <TabsTrigger value="adherence" className="flex-1 rounded-lg text-[12px] font-medium h-8 transition-all data-[state=active]:bg-[hsl(var(--card))] data-[state=active]:text-[hsl(var(--fg))] data-[state=active]:shadow-sm text-[hsl(var(--fg-2))]">
-                 Adherence
+                 {t('nutritionist.clientProfile.tabAdherence')}
                </TabsTrigger>
              )}
             </TabsList>

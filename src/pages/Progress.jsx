@@ -21,10 +21,11 @@ import {
   listMeasurements,
   listProgressPhotos,
 } from '@/services/bodyProgressService';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 
 // AI Insight component for interpretation
 function AIInsight({ title, insights }) {
+  const t = useT();
   if (!insights || insights.length === 0) return null;
   return (
     <Card className="px-5 py-5">
@@ -34,7 +35,7 @@ function AIInsight({ title, insights }) {
         </div>
         <div>
           <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">{title}</p>
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">What your data means</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('progress.ai_insight_subtitle')}</p>
         </div>
       </div>
       <div className="mt-4 space-y-2">
@@ -77,34 +78,34 @@ function TrendMetric({ label, value, unit, change, percentChange, trend, interpr
 }
 
 // Generate insights from measurements
-function generateInsights(latest, oldest, weightChange, bodyFatChange, bmiChange, measurements) {
+function generateInsights(latest, oldest, weightChange, bodyFatChange, bmiChange, measurements, t) {
   const insights = [];
 
   if (measurements.length < 2) {
-    insights.push('Record more checkpoints to see trends and insights');
+    insights.push(t('progress.insights.record_more'));
     return insights;
   }
 
   // Weight insight
   if (Math.abs(weightChange) > 0.5) {
     if (weightChange < 0) {
-      insights.push(`You're losing weight steadily (${Math.abs(weightChange).toFixed(1)}kg down). Keep your current approach.`);
+      insights.push(t('progress.insights.weight_loss').replace('{n}', Math.abs(weightChange).toFixed(1)));
     } else {
-      insights.push(`Weight is up ${weightChange.toFixed(1)}kg. If unintentional, review your daily calorie intake.`);
+      insights.push(t('progress.insights.weight_gain').replace('{n}', weightChange.toFixed(1)));
     }
   } else {
-    insights.push('Weight is stable. Good for maintaining or building muscle.');
+    insights.push(t('progress.insights.weight_stable'));
   }
 
   // Body fat insight
   const latestBodyFat = getMeasurementFieldValue(latest, 'body_fat_percent');
   if (latestBodyFat !== null) {
     if (bodyFatChange < -0.5) {
-      insights.push('Body fat dropping — excellent fat loss progress!');
+      insights.push(t('progress.insights.body_fat_dropping'));
     } else if (bodyFatChange > 0.5) {
-      insights.push('Body fat increased. Consider adjusting cardio or nutrition.');
+      insights.push(t('progress.insights.body_fat_rising'));
     } else {
-      insights.push('Body fat is holding steady.');
+      insights.push(t('progress.insights.body_fat_steady'));
     }
   }
 
@@ -112,19 +113,19 @@ function generateInsights(latest, oldest, weightChange, bodyFatChange, bmiChange
   const latestBmi = getMeasurementFieldValue(latest, 'bmi');
   if (latestBmi !== null) {
     if (latestBmi < 18.5) {
-      insights.push('BMI indicates underweight. Focus on muscle gain nutrition.');
+      insights.push(t('progress.insights.bmi_underweight'));
     } else if (latestBmi > 25) {
-      insights.push('BMI is elevated. Consistent habits will move the needle.');
+      insights.push(t('progress.insights.bmi_elevated'));
     } else {
-      insights.push('BMI in healthy range. Keep building strength!');
+      insights.push(t('progress.insights.bmi_healthy'));
     }
   }
 
   // Consistency insight
   if (measurements.length >= 4) {
-    insights.push(`Great consistency — ${measurements.length} checkpoints logged!`);
+    insights.push(t('progress.insights.great_consistency').replace('{n}', measurements.length));
   } else {
-    insights.push(`Log weekly checkpoints for more accurate trend analysis.`);
+    insights.push(t('progress.insights.log_weekly'));
   }
 
   return insights.slice(0, 4);
@@ -226,6 +227,7 @@ const PROGRESS_FIELD_GROUPS = [
 ];
 
 function ProgressContent({ embedded = false, measurements: propMeasurements, photos: propPhotos }) {
+  const t = useT();
   const [timeframe, setTimeframe] = useState('12w');
   const { user } = useAuth();
 
@@ -320,9 +322,9 @@ function ProgressContent({ embedded = false, measurements: propMeasurements, pho
     <>
       {!embedded ? (
         <PageHeader
-          eyebrow="Body"
-          title="Progress trends that stay readable at a glance."
-          subtitle="Weight, composition, and checkpoint photos are grouped into a calm body-progress hub instead of scattered metrics."
+          eyebrow={t('progress.eyebrow')}
+          title={t('progress.title')}
+          subtitle={t('progress.subtitle')}
           accentClassName="from-[hsl(var(--brand)/0.13)] via-[hsl(var(--brand)/0.04)]"
         >
           <div className="flex flex-wrap gap-2">
@@ -340,10 +342,10 @@ function ProgressContent({ embedded = false, measurements: propMeasurements, pho
           <div className="flex flex-col items-center gap-3 text-center">
             <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={1.9} />
             <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              Loading progress
+              {t('progress.loading_title')}
             </p>
             <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              Pulling measurements and photo checkpoints.
+              {t('progress.loading_subtitle')}
             </p>
           </div>
         </Card>
@@ -353,8 +355,8 @@ function ProgressContent({ embedded = false, measurements: propMeasurements, pho
         <Card className="px-0 py-0">
           <EmptyState
             icon={TrendingUp}
-            title="No progress data yet"
-            description="Record your first body checkpoint to unlock trends, summaries, and comparison cards."
+            title={t('progress.empty_title')}
+            description={t('progress.empty_description')}
           />
         </Card>
       ) : null}
@@ -372,7 +374,7 @@ function ProgressContent({ embedded = false, measurements: propMeasurements, pho
           ) : null}
 
           {(() => {
-            const insights = generateInsights(latest, oldest, weightChange, bodyFatChange, bmiChange, filteredMeasurements);
+            const insights = generateInsights(latest, oldest, weightChange, bodyFatChange, bmiChange, filteredMeasurements, t);
 
             // Calculate percent changes for trend metrics
             const weightPercentChange = oldestWeight && oldestWeight !== 0 ? ((latestWeight - oldestWeight) / oldestWeight) * 100 : null;
@@ -399,77 +401,77 @@ function ProgressContent({ embedded = false, measurements: propMeasurements, pho
 
             return (
               <>
-                <AIInsight title="Your Progress Analysis" insights={insights} />
+                <AIInsight title={t('progress.ai_insight_title')} insights={insights} />
 
                 <Section
-                  eyebrow="Key Trends"
-                  title="What changed"
-                  subtitle="Your top metrics with direction and interpretation"
+                  eyebrow={t('progress.key_trends_eyebrow')}
+                  title={t('progress.key_trends_title')}
+                  subtitle={t('progress.key_trends_subtitle')}
                   actions={null}
                 >
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <TrendMetric
-                      label="Weight"
+                      label={t('progress.trend_metrics.weight')}
                       value={latestWeight}
                       unit="kg"
                       change={weightChange}
                       percentChange={weightPercentChange}
                       trend={weightChange < 0 ? 'good' : weightChange > 0.5 ? 'bad' : 'neutral'}
-                      interpretation={weightChange < -1 ? 'Good progress — steady loss' : weightChange > 1 ? 'Trending up — review intake' : 'Stable — maintain course'}
+                      interpretation={weightChange < -1 ? t('progress.trend_metrics.weight_good') : weightChange > 1 ? t('progress.trend_metrics.weight_bad') : t('progress.trend_metrics.weight_neutral')}
                     />
                     {latestBodyFat !== null && (
                       <TrendMetric
-                        label="Body Fat"
+                        label={t('progress.trend_metrics.body_fat')}
                         value={latestBodyFat}
                         unit="%"
                         change={bodyFatChange}
                         percentChange={bodyFatPercentChange}
                         trend={bodyFatChange < 0 ? 'good' : bodyFatChange > 0.5 ? 'bad' : 'neutral'}
-                        interpretation={bodyFatChange < -0.5 ? 'Fat loss in progress' : bodyFatChange > 0.5 ? 'Monitor closely' : 'Holding steady'}
+                        interpretation={bodyFatChange < -0.5 ? t('progress.trend_metrics.body_fat_good') : bodyFatChange > 0.5 ? t('progress.trend_metrics.body_fat_bad') : t('progress.trend_metrics.body_fat_neutral')}
                       />
                     )}
                     {latestMuscle !== null && (
                       <TrendMetric
-                        label="Muscle Mass"
+                        label={t('progress.trend_metrics.muscle_mass')}
                         value={latestMuscle}
                         unit="kg"
                         change={muscleChange}
                         percentChange={musclePercentChange}
                         trend={muscleChange > 0 ? 'good' : muscleChange < -0.5 ? 'bad' : 'neutral'}
-                        interpretation={muscleChange > 0.2 ? 'Building muscle!' : muscleChange < -0.5 ? 'Potential loss — check protein' : 'Stable'}
+                        interpretation={muscleChange > 0.2 ? t('progress.trend_metrics.muscle_good') : muscleChange < -0.5 ? t('progress.trend_metrics.muscle_bad') : t('progress.trend_metrics.muscle_neutral')}
                       />
                     )}
                     {latestWaist !== null && (
                       <TrendMetric
-                        label="Waist"
+                        label={t('progress.trend_metrics.waist')}
                         value={latestWaist}
                         unit="cm"
                         change={waistChange}
                         percentChange={waistPercentChange}
                         trend={waistChange < 0 ? 'good' : waistChange > 0.5 ? 'bad' : 'neutral'}
-                        interpretation={waistChange < -1 ? 'Great — midsection shrinking' : waistChange > 1 ? 'Review core routine' : 'Consistent'}
+                        interpretation={waistChange < -1 ? t('progress.trend_metrics.waist_good') : waistChange > 1 ? t('progress.trend_metrics.waist_bad') : t('progress.trend_metrics.waist_neutral')}
                       />
                     )}
                     {latestChest !== null && (
                       <TrendMetric
-                        label="Chest"
+                        label={t('progress.trend_metrics.chest')}
                         value={latestChest}
                         unit="cm"
                         change={chestChange}
                         percentChange={chestPercentChange}
                         trend={chestChange > 0 ? 'good' : chestChange < -0.5 ? 'bad' : 'neutral'}
-                        interpretation={chestChange > 0.5 ? 'Upper body growing' : chestChange < -0.5 ? 'Monitor training' : 'Stable'}
+                        interpretation={chestChange > 0.5 ? t('progress.trend_metrics.chest_good') : chestChange < -0.5 ? t('progress.trend_metrics.chest_bad') : t('progress.trend_metrics.chest_neutral')}
                       />
                     )}
                     {latestBmi !== null && (
                       <TrendMetric
-                        label="BMI"
+                        label={t('progress.trend_metrics.bmi')}
                         value={latestBmi}
                         unit=""
                         change={bmiChange}
                         percentChange={bmiPercentChange}
                         trend={bmiChange < 0 && latestBmi > 18.5 ? 'good' : bmiChange > 0 && latestBmi < 25 ? 'good' : 'neutral'}
-                        interpretation={latestBmi < 18.5 ? 'Underweight — prioritize gain' : latestBmi > 25 ? 'Working toward healthy range' : 'In healthy range'}
+                        interpretation={latestBmi < 18.5 ? t('progress.trend_metrics.bmi_underweight') : latestBmi > 25 ? t('progress.trend_metrics.bmi_elevated') : t('progress.trend_metrics.bmi_healthy')}
                       />
                     )}
                   </div>
@@ -480,9 +482,9 @@ function ProgressContent({ embedded = false, measurements: propMeasurements, pho
 
           {photos.length > 0 ? (
             <Section
-              eyebrow="Photos"
-              title="Visual evolution"
-              subtitle="Compare your progress visually"
+              eyebrow={t('progress.photos_eyebrow')}
+              title={t('progress.photos_title')}
+              subtitle={t('progress.photos_subtitle')}
               actions={null}
             >
               <ProgressPhotoCarousel photos={photos} />

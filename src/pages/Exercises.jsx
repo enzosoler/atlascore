@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useT } from '@/lib/i18nContext';
 import { useQuery } from '@tanstack/react-query';
 import {
   Clock,
@@ -59,6 +60,7 @@ import {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Exercises() {
+  const t = useT();
   const [search, setSearch]               = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [bodyPart, setBodyPart]           = useState('');
@@ -175,23 +177,23 @@ export default function Exercises() {
   const hasActiveFilters = bodyPart || muscle || equipment || showFavorites || showRecent || search;
   const summaryCards = [
     {
-      label: isSearching ? 'Search results' : 'Library',
+      label: isSearching ? t('exercises.summary.search_results') : t('exercises.summary.library'),
       value: exercises.length,
       detail: isSearching
-        ? `Results for "${debouncedSearch || search}"`
-        : 'Available exercises in the current view.',
+        ? t('exercises.summary.results_for').replace('{query}', debouncedSearch || search)
+        : t('exercises.summary.available_exercises'),
       icon: Search,
     },
     {
-      label: 'Body focus',
-      value: bodyPart ? bodyPartToPT(bodyPart) : 'All groups',
-      detail: bodyPart ? 'Filtered body region.' : 'Browse the full catalog.',
+      label: t('exercises.summary.body_focus'),
+      value: bodyPart ? bodyPartToPT(bodyPart) : t('exercises.summary.all_groups'),
+      detail: bodyPart ? t('exercises.summary.filtered_body_region') : t('exercises.summary.browse_catalog'),
       icon: Target,
     },
     {
-      label: 'Equipment',
-      value: equipment ? equipmentToPT(equipment) : 'Mixed',
-      detail: equipment ? 'Specific setup selected.' : 'Any available equipment.',
+      label: t('exercises.summary.equipment'),
+      value: equipment ? equipmentToPT(equipment) : t('exercises.summary.mixed'),
+      detail: equipment ? t('exercises.summary.specific_setup') : t('exercises.summary.any_equipment'),
       icon: Wrench,
     },
   ];
@@ -225,9 +227,9 @@ export default function Exercises() {
   return (
     <AppContainer maxWidth="max-w-7xl">
       <PageHeader
-        eyebrow="Exercises"
-        title="Exercise library built for quick browsing and clean selection."
-        subtitle="Search by name, filter by body region or equipment, and move from browsing into execution with minimal friction."
+        eyebrow={t('exercises.eyebrow')}
+        title={t('exercises.title')}
+        subtitle={t('exercises.subtitle')}
         accentClassName="from-[hsl(var(--brand)/0.14)] via-[hsl(var(--brand)/0.04)]"
         actions={
           <ActionRow>
@@ -237,11 +239,11 @@ export default function Exercises() {
               className={showFilters || hasActiveFilters ? 'border-[hsl(var(--brand)/0.42)] text-[hsl(var(--brand))]' : ''}
             >
               <SlidersHorizontal className="h-4 w-4" strokeWidth={1.9} />
-              Filters
+              {t('exercises.actions.filters')}
             </SecondaryButton>
             <SecondaryButton type="button" onClick={() => setCompactView((v) => !v)}>
               {compactView ? <LayoutGrid className="h-4 w-4" strokeWidth={1.9} /> : <LayoutList className="h-4 w-4" strokeWidth={1.9} />}
-              {compactView ? 'Grid view' : 'List view'}
+              {compactView ? t('exercises.actions.grid_view') : t('exercises.actions.list_view')}
             </SecondaryButton>
           </ActionRow>
         }
@@ -267,9 +269,9 @@ export default function Exercises() {
       </PageHeader>
 
       <Section
-        eyebrow="Search"
-        title="Find the right movement"
-        subtitle="Search is bilingual, fast, and tuned for common athlete queries."
+        eyebrow={t('exercises.search.eyebrow')}
+        title={t('exercises.search.title')}
+        subtitle={t('exercises.search.subtitle')}
       >
         <Card className="space-y-4 px-4 py-4 sm:px-5">
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -278,7 +280,7 @@ export default function Exercises() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name, alias, movement pattern, or muscle group"
+                placeholder={t('exercises.search.placeholder')}
                 className="atlas-field h-11 rounded-[14px] border-[hsl(var(--border)/0.86)] pl-10 pr-10 text-base"
               />
               {isLoading ? (
@@ -302,7 +304,7 @@ export default function Exercises() {
                 className={showFavorites ? 'border-[hsl(var(--err)/0.32)] text-[hsl(var(--err))]' : ''}
               >
                 <Heart className="h-4 w-4" strokeWidth={1.9} />
-                Favorites
+                {t('exercises.actions.favorites')}
               </SecondaryButton>
               <SecondaryButton
                 type="button"
@@ -310,12 +312,12 @@ export default function Exercises() {
                 className={showRecent ? 'border-[hsl(var(--brand)/0.32)] text-[hsl(var(--brand))]' : ''}
               >
                 <Clock className="h-4 w-4" strokeWidth={1.9} />
-                Recents
+                {t('exercises.actions.recents')}
               </SecondaryButton>
               {hasActiveFilters ? (
                 <SecondaryButton type="button" onClick={clearFilters}>
                   <X className="h-4 w-4" strokeWidth={1.9} />
-                  Clear
+                  {t('exercises.actions.clear')}
                 </SecondaryButton>
               ) : null}
             </ActionRow>
@@ -323,7 +325,7 @@ export default function Exercises() {
 
           {(bodyPart || muscle || equipment) ? (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[12px] font-medium text-[hsl(var(--fg-2))]">Active filters</span>
+              <span className="text-[12px] font-medium text-[hsl(var(--fg-2))]">{t('exercises.filters.active_filters')}</span>
               {bodyPart ? (
                 <FilterChip active onClick={() => setBodyPart('')}>
                   {bodyPartToPT(bodyPart)}
@@ -345,7 +347,7 @@ export default function Exercises() {
           {showFilters && !isSearching ? (
             <div className="grid gap-4 border-t border-[hsl(var(--border)/0.8)] pt-4 lg:grid-cols-3">
               <div className="space-y-2.5">
-                <p className="atlas-metric-label">Body region</p>
+                <p className="atlas-metric-label">{t('exercises.filters.body_region')}</p>
                 <div className="flex flex-wrap gap-2">
                   {bodyParts.map((bp) => (
                     <FilterChip key={bp} active={bodyPart === bp} onClick={() => toggleBodyPart(bp)}>
@@ -356,7 +358,7 @@ export default function Exercises() {
               </div>
 
               <div className="space-y-2.5">
-                <p className="atlas-metric-label">Target muscle</p>
+                <p className="atlas-metric-label">{t('exercises.filters.target_muscle')}</p>
                 <div className="flex flex-wrap gap-2">
                   {muscles.map((m) => (
                     <FilterChip key={m} active={muscle === m} onClick={() => toggleMuscle(m)}>
@@ -367,7 +369,7 @@ export default function Exercises() {
               </div>
 
               <div className="space-y-2.5">
-                <p className="atlas-metric-label">Equipment</p>
+                <p className="atlas-metric-label">{t('exercises.filters.equipment')}</p>
                 <div className="flex flex-wrap gap-2">
                   {equipmentList.map((eq) => (
                     <FilterChip key={eq} active={equipment === eq} onClick={() => toggleEquipment(eq)}>
@@ -382,17 +384,17 @@ export default function Exercises() {
       </Section>
 
       <Section
-        eyebrow="Library"
+        eyebrow={t('exercises.library.eyebrow')}
         title={
           isSearching
-            ? `${exercises.length} result${exercises.length !== 1 ? 's' : ''} for "${debouncedSearch}"`
-            : `${exercises.length} exercise${exercises.length !== 1 ? 's' : ''} in view`
+            ? t('exercises.library.results_title').replace('{count}', exercises.length).replace('{query}', debouncedSearch)
+            : t('exercises.library.exercises_in_view').replace('{count}', exercises.length)
         }
-        subtitle="Designed for fast scan: movement name first, muscle and equipment second, execution detail on entry."
+        subtitle={t('exercises.library.subtitle')}
         actions={
           <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.84)] px-3 py-1.5 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
             <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={1.9} />
-            {compactView ? 'Compact list' : 'Card grid'}
+            {compactView ? t('exercises.library.compact_list') : t('exercises.library.card_grid')}
           </div>
         }
       >
@@ -401,10 +403,10 @@ export default function Exercises() {
             <div className="flex flex-col items-center gap-3 text-center">
               <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={1.9} />
               <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                Loading the library
+                {t('exercises.library.loading_title')}
               </p>
               <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                Pulling the latest exercise matches and metadata.
+                {t('exercises.library.loading_subtitle')}
               </p>
             </div>
           </Card>
@@ -412,12 +414,12 @@ export default function Exercises() {
           <Card className="px-0 py-0">
             <EmptyState
               icon={Search}
-              title="No exercises found"
-              description="Try a broader search term or clear the active filters to reopen the full catalog."
+              title={t('exercises.library.empty_title')}
+              description={t('exercises.library.empty_description')}
               action={
                 hasActiveFilters ? (
                   <PrimaryButton type="button" onClick={clearFilters}>
-                    Clear filters
+                    {t('exercises.actions.clear_filters')}
                   </PrimaryButton>
                 ) : null
               }
