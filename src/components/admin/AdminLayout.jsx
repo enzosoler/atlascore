@@ -14,20 +14,28 @@ import {
   X,
   AlertTriangle,
   ArrowLeft,
+  Brain,
+  Mail,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
 
-const navItems = [
-  { path: ROUTES.admin,                       label: 'Overview',           icon: LayoutDashboard, permission: 'manage_users' },
-  { path: `${ROUTES.admin}/users`,            label: 'Users',              icon: Users,           permission: 'manage_users' },
-  { path: `${ROUTES.admin}/subscriptions`,    label: 'Subscriptions',      icon: CreditCard,      permission: 'manage_subscriptions' },
-  { path: `${ROUTES.admin}/roles`,            label: 'Roles & Permissions',icon: Shield,          permission: 'manage_roles' },
-  { path: `${ROUTES.admin}/audit`,            label: 'Audit Log',          icon: FileText,        permission: 'view_audit_logs' },
-  { path: `${ROUTES.admin}/errors`,           label: 'Errors & Events',    icon: AlertTriangle,   permission: 'manage_users' },
-  { path: `${ROUTES.admin}/settings`,         label: 'Settings',           icon: Settings,        permission: 'manage_feature_flags' },
+const ADMIN = ROUTES.admin;
+
+const primaryNav = [
+  { path: ADMIN,                    label: 'Overview',       icon: LayoutDashboard, end: true },
+  { path: `${ADMIN}/users`,        label: 'Users',          icon: Users },
+  { path: `${ADMIN}/ai-system`,    label: 'AI System',      icon: Brain },
+  { path: `${ADMIN}/logs`,         label: 'Logs & Errors',  icon: FileText },
+  { path: `${ADMIN}/subscriptions`,label: 'Subscriptions',  icon: CreditCard },
+];
+
+const secondaryNav = [
+  { path: `${ADMIN}/roles`,    label: 'Roles',     icon: Shield },
+  { path: `${ADMIN}/invites`,  label: 'Invites',   icon: Mail },
+  { path: `${ADMIN}/settings`, label: 'Settings',  icon: Settings },
 ];
 
 export default function AdminLayout() {
@@ -94,11 +102,9 @@ export default function AdminLayout() {
     navigate('/login');
   };
 
-  const filteredNavItems = navItems.filter(item => hasPermission(item.permission));
-
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -106,101 +112,38 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Moderation Mode Warning Banner */}
-      {isModerationMode && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-amber-950 px-4 py-2 text-sm font-medium">
-          <div className="flex items-center justify-center gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            <span>Moderation Mode Active — All actions are logged</span>
-          </div>
-        </div>
-      )}
+      {/* Top bar — logout always visible */}
+      <div className="fixed top-0 right-0 z-50 flex items-center gap-2 p-3 lg:p-4">
+        <Button variant="ghost" size="sm" className="text-xs" onClick={() => { navigate(ROUTES.today + '?skip_admin=1'); }}>
+          <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
+          Back to app
+        </Button>
+        <Button variant="destructive" size="sm" className="text-xs" onClick={handleLogout}>
+          <LogOut className="mr-1.5 h-3.5 w-3.5" />
+          Logout
+        </Button>
+      </div>
 
       {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild className="lg:hidden">
-          <Button variant="ghost" size="icon" className="fixed left-4 top-4 z-40">
-            <Menu className="h-6 w-6" />
+          <Button variant="ghost" size="icon" className="fixed left-4 top-3 z-40">
+            <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64 p-0">
-          <MobileSidebar 
-            navItems={filteredNavItems} 
-            onLogout={handleLogout}
-            isModerationMode={isModerationMode}
-          />
+          <Sidebar user={user} onLogout={handleLogout} navigate={navigate} />
         </SheetContent>
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden w-64 flex-col border-r bg-card lg:flex">
-        <div className="flex h-16 items-center border-b px-6">
-          <span className="text-lg font-semibold">atlas.core Admin</span>
-        </div>
-
-        <nav className="flex-1 space-y-1 p-4">
-          {filteredNavItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/admin'}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                )
-              }
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </NavLink>
-          ))}
-
-          {/* Moderation Console Link (separate module) */}
-          {hasPermission('moderate_photos') && (
-            <NavLink
-              to={`${ROUTES.admin}/moderation`}
-              className={({ isActive }) =>
-                cn(
-                  'mt-4 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  isActive || isModerationMode
-                    ? 'bg-amber-500 text-amber-950'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                )
-              }
-            >
-              <AlertTriangle className="h-4 w-4" />
-              Enter Moderation
-            </NavLink>
-          )}
-        </nav>
-
-        <div className="border-t p-4">
-          <div className="mb-4 px-3">
-            <p className="text-sm font-medium">{user?.email}</p>
-            <p className="text-xs text-muted-foreground">
-              {permissions.length} permissions granted
-            </p>
-          </div>
-          <Button variant="ghost" className="w-full mb-2" onClick={() => navigate(ROUTES.today)}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to app
-          </Button>
-          <Button variant="outline" className="w-full" onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </div>
+      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card lg:flex">
+        <Sidebar user={user} onLogout={handleLogout} navigate={navigate} />
       </aside>
 
       {/* Main Content */}
-      <main className={cn(
-        "flex-1 overflow-auto",
-        isModerationMode && "pt-10"
-      )}>
-        <div className="container mx-auto p-6">
+      <main className="flex-1 overflow-auto pt-14 lg:pt-4">
+        <div className="mx-auto max-w-6xl p-4 lg:p-6">
           <Outlet context={{ permissions, hasPermission, setIsModerationMode }} />
         </div>
       </main>
@@ -208,41 +151,46 @@ export default function AdminLayout() {
   );
 }
 
-function MobileSidebar({ navItems, onLogout, isModerationMode }) {
-  const navigate = useNavigate();
+function NavItem({ item }) {
+  return (
+    <NavLink
+      to={item.path}
+      end={item.end}
+      className={({ isActive }) =>
+        cn(
+          'flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
+          isActive
+            ? 'bg-primary text-primary-foreground'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+        )
+      }
+    >
+      <item.icon className="h-4 w-4" />
+      {item.label}
+    </NavLink>
+  );
+}
+
+function Sidebar({ user, onLogout, navigate }) {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b px-6">
-        <span className="text-lg font-semibold">atlas.core Admin</span>
+      <div className="flex h-14 items-center border-b px-5">
+        <span className="text-[15px] font-bold tracking-tight">atlas.core</span>
+        <span className="ml-2 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">ADMIN</span>
       </div>
-      <nav className="flex-1 space-y-1 p-4">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              )
-            }
-          >
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </NavLink>
-        ))}
+
+      <nav className="flex-1 space-y-0.5 p-3">
+        <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Core</p>
+        {primaryNav.map((item) => <NavItem key={item.path} item={item} />)}
+
+        <div className="my-3 border-t" />
+        <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">System</p>
+        {secondaryNav.map((item) => <NavItem key={item.path} item={item} />)}
       </nav>
-      <div className="border-t p-4 space-y-2">
-        <Button variant="ghost" className="w-full" onClick={() => navigate(ROUTES.today)}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to app
-        </Button>
-        <Button variant="outline" className="w-full" onClick={onLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+
+      <div className="border-t p-3">
+        <p className="truncate px-3 text-[12px] font-medium text-foreground">{user?.email}</p>
+        <p className="px-3 text-[11px] text-muted-foreground">{user?.atlas_role}</p>
       </div>
     </div>
   );

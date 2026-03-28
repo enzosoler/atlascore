@@ -42,8 +42,17 @@ const Goals = lazy(() => import('@/pages/Goals'));
 const BodyProfile = lazy(() => import('@/pages/BodyProfile'));
 const Account = lazy(() => import('@/pages/Account'));
 const Export = lazy(() => import('@/pages/Export'));
-const AdminPanel = lazy(() => import('@/pages/AdminPanel'));
+const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
+const AdminOverview = lazy(() => import('@/pages/admin/AdminOverview'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const AdminUserProfile = lazy(() => import('@/pages/admin/AdminUserProfile'));
+const AdminAISystem = lazy(() => import('@/pages/admin/AdminAISystem'));
+const AdminLogs = lazy(() => import('@/pages/admin/AdminLogs'));
+const AdminSubscriptions = lazy(() => import('@/pages/admin/AdminSubscriptions'));
+const AdminRoles = lazy(() => import('@/pages/admin/AdminRoles'));
+const AdminInvites = lazy(() => import('@/pages/admin/AdminInvites'));
+const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
+const ModerationConsole = lazy(() => import('@/pages/admin/ModerationConsole'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const MyDiet = lazy(() => import('@/pages/MyDiet'));
@@ -407,10 +416,20 @@ const AppRoutes = () => (
         </Route>
       </Route>
 
-      {/* Admin panel — web only */}
+      {/* Admin panel — web only, nested under AdminLayout */}
       <Route element={<RequireAuthenticatedApp />}>
-        <Route path={ROUTES.admin} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminPanel /></RouteGuard></WebOnlyRoute>} />
-        <Route path="/AdminPanel/user/:userId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminUserProfile /></RouteGuard></WebOnlyRoute>} />
+        <Route path={ROUTES.admin} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminLayout /></RouteGuard></WebOnlyRoute>}>
+          <Route index element={<AdminOverview />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="users/:userId" element={<AdminUserProfile />} />
+          <Route path="ai-system" element={<AdminAISystem />} />
+          <Route path="logs" element={<AdminLogs />} />
+          <Route path="subscriptions" element={<AdminSubscriptions />} />
+          <Route path="roles" element={<AdminRoles />} />
+          <Route path="invites" element={<AdminInvites />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="moderation" element={<ModerationConsole />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

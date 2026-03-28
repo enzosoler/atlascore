@@ -252,17 +252,14 @@ function TodayContent() {
   const { todayMeals, todaySession, workoutDone, nutritionLogged, weightLogged, totalKcal } = daily;
 
   // ── Supplementary queries (not in shared daily state) ────────────────────
+  // All queries use try/catch — a single failed query must NOT crash the page
   const { data: activeWorkoutPlan, isLoading: planLoading } = useQuery({
     queryKey: ['active-workout-plan', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('workout_plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('active', true)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      try {
+        const { data } = await supabase.from('workout_plans').select('*').eq('user_id', user.id).eq('active', true).maybeSingle();
+        return data ?? null;
+      } catch { return null; }
     },
     enabled: !!user?.id,
   });
@@ -270,14 +267,10 @@ function TodayContent() {
   const { data: recentMeasurements = [], isLoading: measurementsLoading } = useQuery({
     queryKey: ['recent-measurements', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('measurements')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(5);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!user?.id,
   });
@@ -285,14 +278,10 @@ function TodayContent() {
   const { data: progressPhotos = [] } = useQuery({
     queryKey: ['progress-photos', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('progress_photos')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data } = await supabase.from('progress_photos').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!user?.id,
   });
@@ -300,16 +289,10 @@ function TodayContent() {
   const { data: lastWorkout } = useQuery({
     queryKey: ['last-workout', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('workout_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'completed')
-        .order('completed_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      try {
+        const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).eq('status', 'completed').order('completed_at', { ascending: false }).limit(1).maybeSingle();
+        return data ?? null;
+      } catch { return null; }
     },
     enabled: !!user?.id,
   });
@@ -317,16 +300,12 @@ function TodayContent() {
   const { data: weekWorkouts = [] } = useQuery({
     queryKey: ['week-workouts', user?.id],
     queryFn: async () => {
-      const monday = new Date();
-      monday.setDate(monday.getDate() - monday.getDay() + 1);
-      const { data, error } = await supabase
-        .from('workout_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'completed')
-        .gte('date', monday.toISOString().split('T')[0]);
-      if (error) throw error;
-      return data || [];
+      try {
+        const monday = new Date();
+        monday.setDate(monday.getDate() - monday.getDay() + 1);
+        const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).eq('status', 'completed').gte('date', monday.toISOString().split('T')[0]);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!user?.id,
   });
@@ -334,13 +313,10 @@ function TodayContent() {
   const { data: profile } = useQuery({
     queryKey: ['user-profile-today', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('profile_data')
-        .eq('id', user.id)
-        .single();
-      if (error) throw error;
-      return data?.profile_data || {};
+      try {
+        const { data } = await supabase.from('profiles').select('profile_data').eq('id', user.id).single();
+        return data?.profile_data || {};
+      } catch { return {}; }
     },
     enabled: !!user?.id,
   });
@@ -448,101 +424,61 @@ function TodayContent() {
         </button>
       </header>
 
-      {/* 2 — AI Coach Briefing: dominant above-the-fold card (~35–45% viewport) */}
+      {/* 2 — AI Coach Briefing */}
       <AICoachBriefing
-        briefing={briefing.text}
-        focus={briefing.focus}
-        primaryAction={briefing.primaryAction}
-        secondaryAction={briefing.secondaryAction}
+        briefing={briefing?.text ?? ''}
+        focus={briefing?.focus ?? 'Today'}
+        primaryAction={briefing?.primaryAction ?? null}
+        secondaryAction={briefing?.secondaryAction ?? null}
         loading={isLoading}
       />
 
-      {/* 2b — Priorities: top 1-3 next actions from AI */}
-      {priorities.length > 0 && (
-        <div className="space-y-2">
-          {priorities.map((p, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                const routes = {
-                  open_quick_meal: ROUTES.nutrition,
-                  start_workout: ROUTES.workouts,
-                  open_nutrition: ROUTES.nutrition,
-                  open_progress: ROUTES.progress,
-                  log_dose: ROUTES.protocols,
-                };
-                if (p.action === 'log_weight' || p.action === 'open_water_sheet') {
-                  setCheckinOpen(true);
-                } else if (routes[p.action]) {
-                  navigate(routes[p.action]);
-                }
-              }}
-              className="w-full flex items-center gap-3 rounded-[14px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.06)] px-4 py-3 text-left active:bg-[hsl(var(--brand)/0.12)] transition-colors"
-            >
-              <div className="w-8 h-8 rounded-[10px] bg-[hsl(var(--brand)/0.15)] flex items-center justify-center text-[hsl(var(--brand))]">
-                <span className="text-[13px] font-bold">{i + 1}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{p.title}</p>
-                <p className="text-[11px] text-[hsl(var(--fg-3))] mt-0.5">{p.reason}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* 3 — Readiness Row: Sleep / Energy / Recovery / Water */}
-      <ReadinessRow
-        signals={{}}
-        onSignalSave={(key, value) => {
-          toast.success(`${key}: ${value} saved`);
-        }}
-      />
-
-      {/* 4 — Quick Actions: 2×2 grid */}
+      {/* 3 — Quick Actions */}
       <QuickActions
-        workoutDone={workoutDone}
-        nutritionLogged={nutritionLogged}
-        weightLogged={weightLogged}
+        workoutDone={!!workoutDone}
+        nutritionLogged={!!nutritionLogged}
+        weightLogged={!!weightLogged}
         onCheckin={() => setCheckinOpen(true)}
         onQuickWorkout={() => setQuickWorkoutOpen(true)}
       />
 
-      {/* 5 — Today's Plan */}
+      {/* 4 — Today's Plan */}
       <TodayPlanSection
-        activeWorkoutPlan={activeWorkoutPlan}
-        todaySession={todaySession}
-        todayMeals={todayMeals}
-        kcalTarget={profile?.targets?.calories}
-        macros={profile?.targets}
-        hasAIAccess={hasAIAccess}
+        activeWorkoutPlan={activeWorkoutPlan ?? null}
+        todaySession={todaySession ?? null}
+        todayMeals={todayMeals ?? []}
+        kcalTarget={profile?.targets?.calories ?? 0}
+        macros={profile?.targets ?? {}}
+        hasAIAccess={!!hasAIAccess}
         onGenerateWorkout={() => setAiWizardOpen(true)}
       />
 
-      {/* 6 — Alerts: only renders when relevant */}
-      <AlertsSection alerts={alerts} />
+      {/* 5 — Alerts */}
+      {Array.isArray(alerts) && alerts.length > 0 && <AlertsSection alerts={alerts} />}
 
-      {/* 7 — Progress Snapshot */}
+      {/* 6 — Progress Snapshot */}
       <ProgressSnapshot
-        recentMeasurements={recentMeasurements}
-        todaySession={todaySession}
-        lastWorkout={lastWorkout}
-        weekWorkoutCount={weekWorkouts.length}
+        recentMeasurements={recentMeasurements ?? []}
+        todaySession={todaySession ?? null}
+        lastWorkout={lastWorkout ?? null}
+        weekWorkoutCount={(weekWorkouts ?? []).length}
       />
 
-      {/* 8 — AI Recommendations: below fold, max 3, high signal only */}
-      <AIRecommendations
-        recommendations={recommendations}
-        onFollow={ai.followRec}
-        onDismiss={ai.dismissRec}
-      />
+      {/* 7 — AI Recommendations */}
+      {Array.isArray(recommendations) && recommendations.length > 0 && (
+        <AIRecommendations
+          recommendations={recommendations}
+          onFollow={ai.followRec}
+          onDismiss={ai.dismissRec}
+        />
+      )}
 
       {/* Modals */}
       <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
       <QuickWorkoutModal
         open={quickWorkoutOpen}
         onClose={() => setQuickWorkoutOpen(false)}
-        onStart={(session) => {
+        onStart={() => {
           navigate(ROUTES.workouts);
           setQuickWorkoutOpen(false);
         }}
@@ -551,7 +487,7 @@ function TodayContent() {
         open={aiWizardOpen}
         onClose={() => setAiWizardOpen(false)}
         type="workout"
-        profile={profile}
+        profile={profile ?? {}}
         onGenerate={handleAIGenerate}
       />
 

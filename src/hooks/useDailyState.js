@@ -34,56 +34,40 @@ export function useDailyState() {
   const today = todayISO();
   const queryClient = useQueryClient();
 
-  // ── Workout ────────────────────────────────────────────────────────────────
+  // ── Workout (non-throwing) ──────────────────────────────────────────────────
   const { data: todaySession, isLoading: sessionLoading } = useQuery({
     queryKey: DAILY_QUERY_KEYS.todaySession(uid),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('workout_logs')
-        .select('*')
-        .eq('user_id', uid)
-        .eq('date', today)
-        .order('completed_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      try {
+        const { data } = await supabase.from('workout_logs').select('*').eq('user_id', uid).eq('date', today).order('completed_at', { ascending: false }).limit(1).maybeSingle();
+        return data ?? null;
+      } catch { return null; }
     },
     enabled: !!uid,
     staleTime: 30_000,
   });
 
-  // ── Nutrition ──────────────────────────────────────────────────────────────
+  // ── Nutrition (non-throwing) ──────────────────────────────────────────────
   const { data: todayMeals = [], isLoading: mealsLoading } = useQuery({
     queryKey: DAILY_QUERY_KEYS.todayMeals(uid),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('food_logs')
-        .select('*')
-        .eq('user_id', uid)
-        .gte('date', `${today}T00:00:00`)
-        .lte('date', `${today}T23:59:59`);
-      if (error) throw error;
-      return data || [];
+      try {
+        const { data } = await supabase.from('food_logs').select('*').eq('user_id', uid).gte('date', `${today}T00:00:00`).lte('date', `${today}T23:59:59`);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!uid,
     staleTime: 30_000,
   });
 
-  // ── Body — today's weight ──────────────────────────────────────────────────
+  // ── Body — today's weight (non-throwing) ──────────────────────────────────
   const { data: todayWeight } = useQuery({
     queryKey: DAILY_QUERY_KEYS.todayWeight(uid),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('measurements')
-        .select('*')
-        .eq('user_id', uid)
-        .gte('date', today)
-        .order('date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      try {
+        const { data } = await supabase.from('measurements').select('*').eq('user_id', uid).gte('date', today).order('date', { ascending: false }).limit(1).maybeSingle();
+        return data ?? null;
+      } catch { return null; }
     },
     enabled: !!uid,
     staleTime: 60_000,
@@ -158,20 +142,16 @@ export function useDailyState() {
     staleTime: 300_000,
   });
 
-  // ── Week workouts (for adherence) ──────────────────────────────────────────
+  // ── Week workouts (non-throwing) ────────────────────────────────────────────
   const { data: weekWorkouts = [] } = useQuery({
     queryKey: DAILY_QUERY_KEYS.weekWorkouts(uid),
     queryFn: async () => {
-      const monday = new Date();
-      monday.setDate(monday.getDate() - monday.getDay() + 1);
-      const { data, error } = await supabase
-        .from('workout_logs')
-        .select('date, status')
-        .eq('user_id', uid)
-        .eq('status', 'completed')
-        .gte('date', monday.toISOString().split('T')[0]);
-      if (error) throw error;
-      return data || [];
+      try {
+        const monday = new Date();
+        monday.setDate(monday.getDate() - monday.getDay() + 1);
+        const { data } = await supabase.from('workout_logs').select('date, status').eq('user_id', uid).eq('status', 'completed').gte('date', monday.toISOString().split('T')[0]);
+        return data || [];
+      } catch { return []; }
     },
     enabled: !!uid,
     staleTime: 60_000,
