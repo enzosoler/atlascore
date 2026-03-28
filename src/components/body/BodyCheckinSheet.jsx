@@ -24,7 +24,9 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
 
   const handleLogWeight = async () => {
     const val = parseFloat(weight);
-    if (!val || val < 20 || val > 300 || !user?.id) return;
+    if (!val || isNaN(val)) { toast.error('Enter a weight value first'); return; }
+    if (val < 20 || val > 300) { toast.error('Weight must be between 20 and 300 kg'); return; }
+    if (!user?.id) return;
 
     setSaving(true);
     try {
@@ -79,7 +81,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
               <span className="flex items-center text-[13px] text-[hsl(var(--fg-3))] pr-1">kg</span>
               <button
                 onClick={handleLogWeight}
-                disabled={!weight || saving}
+                disabled={saving}
                 className="h-11 px-4 rounded-[12px] bg-[hsl(var(--brand))] text-white text-[13px] font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" strokeWidth={2.5} />}
