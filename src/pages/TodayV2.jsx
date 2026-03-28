@@ -74,6 +74,8 @@ function interpretWeather(temp, code, t) {
 // ─── Hero Card ─────────────────────────────────────────────────────────────────
 
 function HeroCard({ text, focus, primaryAction, loading }) {
+  const t = useT();
+
   if (loading) {
     return (
       <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-5 space-y-3">
