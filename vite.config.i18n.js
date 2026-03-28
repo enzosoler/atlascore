@@ -40,8 +40,6 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         external: [
           '@capacitor-community/firebase-analytics',
-          '@capacitor/core',
-          '@capacitor/app',
           '@capacitor/haptics',
           '@capacitor/keyboard',
           '@capacitor/status-bar',
