@@ -32,6 +32,7 @@ import { WeeklyCheckinModal } from '@/components/today/WeeklyCheckinModal';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/sentry';
 import AIGenerateWizard from '@/components/ai/AIGenerateWizard';
+import { useT, useI18n } from '@/lib/i18nContext';
 
 // Helper functions
 function getPreferredName(displayName, fallbackName = 'Athlete') {
@@ -51,25 +52,27 @@ function getPreferredName(displayName, fallbackName = 'Athlete') {
   return `${candidate.charAt(0).toLocaleUpperCase()}${candidate.slice(1)}`;
 }
 
-function getDateLabel() {
-  return new Intl.DateTimeFormat('en-US', {
+function getDateLabel(locale) {
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
+  return new Intl.DateTimeFormat(intlLocale, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   }).format(new Date());
 }
 
-function formatRelativeDate(dateString) {
+function formatRelativeDate(dateString, t) {
   if (!dateString) return '';
   const date = new Date(dateString);
   const today = new Date();
   const diffDays = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (diffDays === 0) return t('today.relative.today');
+  if (diffDays === 1) return t('today.relative.yesterday');
+  if (diffDays < 7) return t('today.relative.daysAgo').replace('{days}', diffDays);
+  if (diffDays < 30) return t('today.relative.weeksAgo').replace('{weeks}', Math.floor(diffDays / 7));
+  const intlLocale = 'en-US'; // fallback for date format
+  return date.toLocaleDateString(intlLocale, { month: 'short', day: 'numeric' });
 }
 
 // AI Insights Generator
@@ -80,6 +83,7 @@ function generateTodayInsights({
   activeWorkoutPlan,
   lastWorkoutDate,
   profile,
+  t,
 }) {
   const insights = [];
 
@@ -93,12 +97,12 @@ function generateTodayInsights({
         type: 'urgent',
         icon: Flame,
         title: daysSinceWorkout >= 3
-          ? `You haven't trained in ${daysSinceWorkout} days`
-          : 'You skipped yesterday',
+          ? t('today.insightMessages.trainingGapPlural').replace('{days}', daysSinceWorkout)
+          : t('today.insightMessages.trainingGapSkip'),
         message: daysSinceWorkout >= 3
-          ? 'Today is important — get back on track'
-          : 'Don\'t let it become two days. Train today.',
-        action: 'Start workout',
+          ? t('today.insightMessages.trainingGapBack')
+          : t('today.insightMessages.trainingGapDontLet'),
+        action: t('today.insightMessages.startWorkout'),
         actionPath: ROUTES.workouts,
       });
     }
@@ -109,9 +113,9 @@ function generateTodayInsights({
     insights.push({
       type: 'success',
       icon: CheckCircle2,
-      title: 'Workout completed today',
-      message: `Great job! ${todaySession.name || 'Session'} done and logged.`,
-      action: 'View summary',
+      title: t('today.insightMessages.workoutCompleted'),
+      message: t('today.insightMessages.workoutCompletedMsg').replace('{name}', todaySession.name || t('today.training.session')),
+      action: t('today.insightMessages.viewSummary'),
       actionPath: ROUTES.workouts,
     });
   }
@@ -121,9 +125,9 @@ function generateTodayInsights({
     insights.push({
       type: 'action',
       icon: Target,
-      title: 'No active workout plan',
-      message: 'Build your plan first to unlock daily guidance.',
-      action: 'Create plan',
+      title: t('today.insightMessages.noActivePlan'),
+      message: t('today.insightMessages.noActivePlanMsg'),
+      action: t('today.insightMessages.createPlan'),
       actionPath: ROUTES.workouts,
     });
   }
@@ -133,9 +137,9 @@ function generateTodayInsights({
     insights.push({
       type: 'action',
       icon: UtensilsCrossed,
-      title: 'No meals logged yet',
-      message: 'Start by logging your first meal of the day.',
-      action: 'Log meal',
+      title: t('today.insightMessages.noMeals'),
+      message: t('today.insightMessages.noMealsMsg'),
+      action: t('today.insightMessages.logMeal'),
       actionPath: ROUTES.nutrition,
     });
   }
@@ -147,8 +151,8 @@ function generateTodayInsights({
     insights.push({
       type: 'success',
       icon: TrendingUp,
-      title: 'You\'re on fire today',
-      message: 'Workout done, nutrition logged. Keep this momentum.',
+      title: t('today.insightMessages.onFire'),
+      message: t('today.insightMessages.onFireMsg'),
     });
   }
 
@@ -163,6 +167,7 @@ function getPriorityActions({
   todayMeals,
   recentMeasurements,
   progressPhotos,
+  t,
 }) {
   const actions = [];
 
@@ -171,8 +176,8 @@ function getPriorityActions({
     actions.push({
       priority: 1,
       icon: CheckCircle2,
-      title: 'Workout completed',
-      description: todaySession.name || 'Today\'s session',
+      title: t('today.priorityItems.workoutCompleted'),
+      description: todaySession.name || t('today.priorityItems.scheduledSession'),
       path: ROUTES.workouts,
       completed: true,
       tone: 'green',
@@ -181,10 +186,10 @@ function getPriorityActions({
     actions.push({
       priority: 1,
       icon: Dumbbell,
-      title: 'Start today\'s workout',
-      description: activeWorkoutPlan.name || 'Your scheduled session',
+      title: t('today.priorityItems.startWorkout'),
+      description: activeWorkoutPlan.name || t('today.priorityItems.scheduledSession'),
       path: ROUTES.workouts,
-      cta: 'Start now',
+      cta: t('today.priorityItems.startNow'),
       tone: 'blue',
       highlighted: true,
     });
@@ -192,10 +197,10 @@ function getPriorityActions({
     actions.push({
       priority: 1,
       icon: Target,
-      title: 'Build your workout plan',
-      description: 'Create a plan to get daily workout guidance',
+      title: t('today.priorityItems.buildPlan'),
+      description: t('today.priorityItems.buildPlanDesc'),
       path: ROUTES.workouts,
-      cta: 'Create plan',
+      cta: t('today.insightMessages.createPlan'),
       tone: 'orange',
       highlighted: true,
     });
@@ -206,18 +211,20 @@ function getPriorityActions({
     actions.push({
       priority: 2,
       icon: UtensilsCrossed,
-      title: 'Log your first meal',
-      description: 'You haven\'t logged anything yet today',
+      title: t('today.priorityItems.logFirstMeal'),
+      description: t('today.priorityItems.haventLoggedYet'),
       path: ROUTES.nutrition,
-      cta: 'Add meal',
+      cta: t('today.priorityItems.addMeal'),
       tone: 'blue',
     });
   } else {
+    const count = todayMeals.length;
+    const mealCountKey = count === 1 ? 'today.priorityItems.mealsLoggedToday_one' : 'today.priorityItems.mealsLoggedToday_other';
     actions.push({
       priority: 2,
       icon: UtensilsCrossed,
-      title: 'Nutrition on track',
-      description: `${todayMeals.length} meal${todayMeals.length > 1 ? 's' : ''} logged today`,
+      title: t('today.priorityItems.nutritionOnTrack'),
+      description: t(mealCountKey).replace('{count}', count),
       path: ROUTES.nutrition,
       completed: true,
       tone: 'green',
@@ -232,12 +239,12 @@ function getPriorityActions({
     actions.push({
       priority: 3,
       icon: Scale,
-      title: recentMeasurements.length === 0 ? 'Add your first measurement' : 'Log today\'s weight',
+      title: recentMeasurements.length === 0 ? t('today.priorityItems.addFirstMeasurement') : t('today.priorityItems.logWeight'),
       description: recentMeasurements.length === 0
-        ? 'Start tracking your body composition'
-        : 'Keep your progress data current',
+        ? t('today.priorityItems.startTrackingBody')
+        : t('today.priorityItems.keepProgressCurrent'),
       path: ROUTES.measurements,
-      cta: 'Log weight',
+      cta: t('today.priorityItems.logWeightCta'),
       tone: 'blue',
     });
   }
@@ -247,10 +254,10 @@ function getPriorityActions({
     actions.push({
       priority: 4,
       icon: Camera,
-      title: 'Add progress photo',
-      description: 'Capture a visual checkpoint',
+      title: t('today.priorityItems.addProgressPhoto'),
+      description: t('today.priorityItems.captureCheckpoint'),
       path: ROUTES.progressPhotos,
-      cta: 'Take photo',
+      cta: t('today.priorityItems.takePhoto'),
       tone: 'blue',
     });
   }
@@ -267,6 +274,7 @@ function DominantWorkoutCard({
   hasAIAccess,
 }) {
   const navigate = useNavigate();
+  const t = useT();
 
   // State: Workout completed today
   if (todaySession?.status === 'completed') {
@@ -279,14 +287,14 @@ function DominantWorkoutCard({
                 <CheckCircle2 className="h-4 w-4 text-[hsl(var(--ok))]" strokeWidth={2} />
               </div>
               <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--ok))]">
-                Workout Completed
+                {t('today.training.completedLabel')}
               </p>
             </div>
             <h3 className="mt-3 text-[28px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] sm:text-[32px]">
-              {todaySession.name || 'Today\'s Session'}
+              {todaySession.name || t('today.training.workoutDay')}
             </h3>
             <p className="mt-2 text-[15px] text-[hsl(var(--fg-2))]">
-              {todaySession.duration_minutes || 0} min · {todaySession.exercises_completed?.length || 0} exercises · Done for today
+              {todaySession.duration_minutes || 0} {t('today.training.minEstimate')} · {todaySession.exercises_completed?.length || 0} {t('today.workout.exercises')} · {t('today.training.doneForToday')}
             </p>
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]">
@@ -299,7 +307,7 @@ function DominantWorkoutCard({
             variant="outline"
             className="h-12 rounded-[16px] px-6 text-[14px] font-semibold"
           >
-            View Summary
+            {t('today.training.viewSummary')}
           </Button>
         </div>
       </div>
@@ -320,20 +328,20 @@ function DominantWorkoutCard({
                 <Zap className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
               </div>
               <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--brand))]">
-                Today&apos;s Training
+                {t('today.training.label')}
               </p>
             </div>
             <h3 className="mt-3 text-[28px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] sm:text-[32px]">
-              {activeWorkoutPlan.name || 'Workout Day'}
+              {activeWorkoutPlan.name || t('today.training.workoutDay')}
             </h3>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-[14px] text-[hsl(var(--fg-2))]">
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-4 w-4" strokeWidth={2} />
-                ~{estimatedDuration} min
+                ~{estimatedDuration} {t('today.training.minEstimate')}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Dumbbell className="h-4 w-4" strokeWidth={2} />
-                {exerciseCount} exercises
+                {exerciseCount} {t('today.workout.exercises')}
               </span>
             </div>
           </div>
@@ -355,7 +363,7 @@ function DominantWorkoutCard({
             ))}
             {activeWorkoutPlan.exercises.length > 4 && (
               <span className="inline-flex rounded-full border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.6)] px-3 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-3))]">
-                +{activeWorkoutPlan.exercises.length - 4} more
+                +{activeWorkoutPlan.exercises.length - 4} {t('today.training.more')}
               </span>
             )}
           </div>
@@ -366,7 +374,7 @@ function DominantWorkoutCard({
             onClick={() => navigate(ROUTES.workouts)}
             className="h-14 rounded-[16px] px-8 text-[15px] font-semibold bg-[hsl(var(--brand))] text-white hover:bg-[hsl(var(--brand)/0.9)]"
           >
-            Start Workout
+            {t('today.training.startWorkout')}
             <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2} />
           </Button>
           {hasAIAccess && (
@@ -376,7 +384,7 @@ function DominantWorkoutCard({
               className="h-14 rounded-[16px] px-6 text-[14px] font-semibold border-[hsl(var(--brand)/0.3)]"
             >
               <Sparkles className="mr-2 h-4 w-4" strokeWidth={2} />
-              Adjust with AI
+              {t('today.training.adjustWithAI')}
             </Button>
           )}
         </div>
@@ -394,14 +402,14 @@ function DominantWorkoutCard({
               <Target className="h-4 w-4 text-[hsl(var(--warn))]" strokeWidth={2} />
             </div>
             <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--warn))]">
-              Action Required
+              {t('today.training.actionRequired')}
             </p>
           </div>
           <h3 className="mt-3 text-[28px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] sm:text-[32px]">
-            Build Your Plan First
+            {t('today.training.buildPlanFirst')}
           </h3>
           <p className="mt-2 max-w-md text-[15px] leading-relaxed text-[hsl(var(--fg-2))]">
-            Create a workout plan to unlock daily guidance, tracking, and AI-powered adjustments.
+            {t('today.training.buildPlanDesc')}
           </p>
         </div>
         <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]">
@@ -413,7 +421,7 @@ function DominantWorkoutCard({
           onClick={() => navigate(ROUTES.workouts)}
           className="h-14 rounded-[16px] px-8 text-[15px] font-semibold bg-[hsl(var(--warn))] text-white hover:bg-[hsl(var(--warn)/0.9)]"
         >
-          Create Workout Plan
+          {t('today.training.createPlan')}
           <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2} />
         </Button>
         {hasAIAccess && (
@@ -423,7 +431,7 @@ function DominantWorkoutCard({
             className="h-14 rounded-[16px] px-6 text-[14px] font-semibold border-[hsl(var(--brand)/0.3)]"
           >
             <Sparkles className="mr-2 h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
-            Generate with AI
+            {t('today.training.generateWithAI')}
           </Button>
         )}
       </div>
@@ -434,6 +442,7 @@ function DominantWorkoutCard({
 // Action-Based Nutrition Card
 function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
   const navigate = useNavigate();
+  const t = useT();
   const hasLoggedMeals = todayMeals.length > 0;
   const totalCalories = todayMeals.reduce((sum, m) => sum + (m.calories || 0), 0);
   const totalProtein = todayMeals.reduce((sum, m) => sum + (m.protein_g || 0), 0);
@@ -445,13 +454,13 @@ function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-              Today&apos;s Nutrition
+              {t('today.nutritionCard.label')}
             </p>
             <h3 className="mt-3 text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              Nothing logged yet
+              {t('today.nutritionCard.nothingLogged')}
             </h3>
             <p className="mt-2 text-[14px] text-[hsl(var(--fg-2))]">
-              Start by logging your first meal of the day
+              {t('today.nutritionCard.startLogging')}
             </p>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.6)] text-[hsl(var(--fg-2))]">
@@ -463,7 +472,7 @@ function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
           className="mt-5 h-12 w-full rounded-[16px] text-[14px] font-semibold"
         >
           <Plus className="mr-2 h-4 w-4" strokeWidth={2} />
-          Log First Meal
+          {t('today.nutritionCard.logFirstMeal')}
         </Button>
       </div>
     );
@@ -478,14 +487,14 @@ function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--accent-secondary))]">
-            Today&apos;s Nutrition
+            {t('today.nutritionCard.label')}
           </p>
           <h3 className="mt-2 text-[28px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
             {totalCalories.toLocaleString()}
             <span className="ml-1 text-[16px] font-medium text-[hsl(var(--fg-3))]">kcal</span>
           </h3>
           <p className="mt-1 text-[14px] text-[hsl(var(--fg-2))]">
-            {todayMeals.length} meal{todayMeals.length > 1 ? 's' : ''} logged
+            {todayMeals.length} {todayMeals.length > 1 ? t('today.nutritionCard.mealsLogged') : t('today.nutritionCard.mealLogged')}
           </p>
         </div>
         <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[hsl(var(--accent-secondary)/0.2)] bg-[hsl(var(--accent-secondary)/0.08)] text-[hsl(var(--accent-secondary))]">
@@ -498,7 +507,7 @@ function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
         <div className="mt-4 space-y-3">
           <div>
             <div className="flex items-center justify-between text-[12px]">
-              <span className="text-[hsl(var(--fg-3))]">Calories</span>
+              <span className="text-[hsl(var(--fg-3))]">{t('today.nutritionCard.calories')}</span>
               <span className="font-semibold text-[hsl(var(--fg))]">{caloriePercentage}%</span>
             </div>
             <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
@@ -511,7 +520,7 @@ function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
           {macros?.protein > 0 && (
             <div>
               <div className="flex items-center justify-between text-[12px]">
-                <span className="text-[hsl(var(--fg-3))]">Protein</span>
+                <span className="text-[hsl(var(--fg-3))]">{t('today.nutritionCard.protein')}</span>
                 <span className="font-semibold text-[hsl(var(--fg))]">{totalProtein}g / {macros.protein}g</span>
               </div>
               <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
@@ -530,7 +539,7 @@ function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
         variant="outline"
         className="mt-5 h-11 w-full rounded-[14px] text-[13px] font-semibold"
       >
-        Add Another Meal
+        {t('today.nutritionCard.addAnother')}
         <Plus className="ml-2 h-4 w-4" strokeWidth={2} />
       </Button>
     </div>
@@ -540,12 +549,13 @@ function ActionNutritionCard({ todayMeals, calorieTarget, macros }) {
 // AI Insight Card (1-2 max)
 function AIInsightCard({ insights, loading }) {
   const navigate = useNavigate();
+  const t = useT();
 
   if (loading) {
     return (
       <Card className="flex items-center gap-3 border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.02)] p-4">
         <Loader2 className="h-5 w-5 animate-spin text-[hsl(var(--brand))]" strokeWidth={2} />
-        <p className="text-[14px] text-[hsl(var(--fg-2))]">Analyzing your day...</p>
+        <p className="text-[14px] text-[hsl(var(--fg-2))]">{t('today.insightCards.analyzing')}</p>
       </Card>
     );
   }
@@ -558,9 +568,9 @@ function AIInsightCard({ insights, loading }) {
             <Sparkles className="h-4 w-4" strokeWidth={2} />
           </div>
           <div>
-            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Start logging to get insights</p>
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">{t('today.insightCards.startLogging')}</p>
             <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-              Log workouts, meals, and measurements to unlock personalized guidance.
+              {t('today.insightCards.startLoggingDesc')}
             </p>
           </div>
         </div>
@@ -612,6 +622,7 @@ function AIInsightCard({ insights, loading }) {
 // Priority Action List Item
 function PriorityActionItem({ action, index }) {
   const navigate = useNavigate();
+  const t = useT();
 
   const toneStyles = {
     blue: {
@@ -672,7 +683,7 @@ function PriorityActionItem({ action, index }) {
           </p>
           {action.completed && (
             <span className="rounded-full bg-[hsl(var(--ok)/0.12)] px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--ok))]">
-              Done
+              {t('today.priorityItems.done')}
             </span>
           )}
         </div>
@@ -697,7 +708,7 @@ function PriorityActionItem({ action, index }) {
 }
 
 // Timeline Component with guided empty state
-function TodayTimeline({ todaySession, todayMeals, recentMeasurements }) {
+function TodayTimeline({ todaySession, todayMeals, recentMeasurements, t }) {
   const events = useMemo(() => {
     const items = [];
 
@@ -706,9 +717,9 @@ function TodayTimeline({ todaySession, todayMeals, recentMeasurements }) {
       items.push({
         type: 'workout',
         time: todaySession.completed_at || todaySession.created_at,
-        title: todaySession.name || 'Workout',
-        status: todaySession.status === 'completed' ? 'Completed' : 'In progress',
-        detail: `${todaySession.duration_minutes || 0} min · ${todaySession.exercises_completed?.length || 0} exercises`,
+        title: todaySession.name || t('today.workout.label'),
+        status: todaySession.status === 'completed' ? t('today.timelineCard.completed') : t('today.timelineCard.inProgress'),
+        detail: `${todaySession.duration_minutes || 0} ${t('today.training.minEstimate')} · ${todaySession.exercises_completed?.length || 0} ${t('today.workout.exercises')}`,
         icon: Dumbbell,
         completed: todaySession.status === 'completed',
       });
@@ -719,8 +730,8 @@ function TodayTimeline({ todaySession, todayMeals, recentMeasurements }) {
       items.push({
         type: 'nutrition',
         time: meal.created_at || meal.date,
-        title: meal.name || `Meal ${i + 1}`,
-        detail: `${meal.calories || 0} kcal · ${meal.protein_g || 0}g protein`,
+        title: meal.name || `${t('today.nutrition.label')} ${i + 1}`,
+        detail: `${meal.calories || 0} kcal · ${meal.protein_g || 0}g ${t('today.nutritionCard.protein').toLowerCase()}`,
         icon: UtensilsCrossed,
         completed: true,
       });
@@ -734,7 +745,7 @@ function TodayTimeline({ todaySession, todayMeals, recentMeasurements }) {
         items.push({
           type: 'measurement',
           time: latest.date,
-          title: 'Weight logged',
+          title: t('today.timelineCard.weightLogged'),
           detail: `${latest.weight} kg`,
           icon: Scale,
           completed: true,
@@ -754,9 +765,9 @@ function TodayTimeline({ todaySession, todayMeals, recentMeasurements }) {
             <CalendarCheck className="h-4 w-4" strokeWidth={2} />
           </div>
           <div>
-            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Nothing logged yet today</p>
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">{t('today.timelineCard.nothingLogged')}</p>
             <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-              Start by logging your first action — workout, meal, or measurement.
+              {t('today.timelineCard.nothingLoggedDesc')}
             </p>
           </div>
         </div>
@@ -792,7 +803,7 @@ function TodayTimeline({ todaySession, todayMeals, recentMeasurements }) {
               <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">{event.title}</p>
               <p className="text-[13px] text-[hsl(var(--fg-2))]">{event.detail}</p>
               <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-3))]">
-                {formatRelativeDate(event.time)}
+                {formatRelativeDate(event.time, t)}
               </p>
             </div>
           </div>
@@ -807,6 +818,8 @@ function TodayContent() {
   const { user } = useAuth();
   const { can } = useSubscription();
   const navigate = useNavigate();
+  const t = useT();
+  const { locale } = useI18n();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [checkinOpen, setCheckinOpen] = useState(false);
@@ -971,8 +984,9 @@ function TodayContent() {
       activeWorkoutPlan,
       lastWorkoutDate: lastWorkout?.completed_at || lastWorkout?.date,
       profile,
+      t,
     });
-  }, [todaySession, todayMeals, recentMeasurements, activeWorkoutPlan, lastWorkout, profile]);
+  }, [todaySession, todayMeals, recentMeasurements, activeWorkoutPlan, lastWorkout, profile, t]);
 
   // Generate priority actions
   const priorityActions = useMemo(() => {
@@ -982,8 +996,9 @@ function TodayContent() {
       todayMeals,
       recentMeasurements,
       progressPhotos,
+      t,
     });
-  }, [activeWorkoutPlan, todaySession, todayMeals, recentMeasurements, progressPhotos]);
+  }, [activeWorkoutPlan, todaySession, todayMeals, recentMeasurements, progressPhotos, t]);
 
   const handleGenerateWorkout = async () => {
     console.log('[Today] Generate with AI clicked - opening wizard');
@@ -1065,7 +1080,7 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
         <div className="flex h-96 items-center justify-center">
           <div className="flex items-center gap-3">
             <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={2} />
-            <p className="text-[15px] text-[hsl(var(--fg-2))]">Loading your day...</p>
+            <p className="text-[15px] text-[hsl(var(--fg-2))]">{t('today.hero.loading')}</p>
           </div>
         </div>
       </TodayScreen>
@@ -1076,12 +1091,12 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
     <TodayScreen>
       {/* New Header Section */}
       <header className="space-y-2">
-        <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{getDateLabel()}</p>
+        <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
         <h1 className="text-[32px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] sm:text-[40px]">
-          Here&apos;s your plan for today
+          {t('today.hero.planTitle')}
         </h1>
         <p className="max-w-xl text-[16px] leading-relaxed text-[hsl(var(--fg-2))]">
-          Stay on track: complete your workout, log your meals, and hit your targets.
+          {t('today.hero.planSubtitle')}
         </p>
       </header>
 
@@ -1109,7 +1124,7 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-                Today&apos;s Progress
+                {t('today.progressCard.label')}
               </p>
               <p className="mt-2 text-[32px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
                 {(() => {
@@ -1136,20 +1151,20 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
               {todaySession?.status === 'completed' && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--ok))]">
                   <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-                  Workout
+                  {t('today.progressCard.workout')}
                 </span>
               )}
               {todayMeals.length > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--ok))]">
                   <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-                  Nutrition
+                  {t('today.progressCard.nutrition')}
                 </span>
               )}
               {recentMeasurements.length > 0 &&
                 (new Date().getTime() - new Date(recentMeasurements[0].date).getTime()) / (1000 * 60 * 60 * 24) < 7 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--ok))]">
                   <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-                  Weight
+                  {t('today.progressCard.weight')}
                 </span>
               )}
             </div>
@@ -1158,12 +1173,12 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
       </section>
 
       {/* AI Insights Section */}
-      <TodaySection title="AI Insights" description="Personalized guidance based on your data">
+      <TodaySection title={t('today.sectionTitles.aiInsights')} description={t('today.sectionTitles.aiInsightsDesc')}>
         <AIInsightCard insights={insights} loading={insightsLoading} />
       </TodaySection>
 
       {/* Priority Actions Section */}
-      <TodaySection title="Priority Actions" description="Complete these to stay on track today">
+      <TodaySection title={t('today.sectionTitles.priorityActions')} description={t('today.sectionTitles.priorityActionsDesc')}>
         <div className="space-y-3">
           {priorityActions.map((action, index) => (
             <PriorityActionItem key={action.priority} action={action} index={index} />
@@ -1172,11 +1187,12 @@ Generate a complete workout plan with exercises, sets, reps, and rest periods.`,
       </TodaySection>
 
       {/* Timeline Section */}
-      <TodaySection title="Today&apos;s Timeline" description="Your activity so far">
+      <TodaySection title={t('today.sectionTitles.timeline')} description={t('today.sectionTitles.timelineDesc')}>
         <TodayTimeline
           todaySession={todaySession}
           todayMeals={todayMeals}
           recentMeasurements={recentMeasurements}
+          t={t}
         />
       </TodaySection>
 

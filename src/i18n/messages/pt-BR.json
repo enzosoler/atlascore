@@ -612,7 +612,114 @@
     "focus": "Foco",
     "continue": "Continue assim.",
     "completePending": "Complete as tarefas pendentes.",
-    "professionals": "Profissionais vinculados"
+    "professionals": "Profissionais vinculados",
+    "hero": {
+      "planTitle": "Seu plano para hoje",
+      "planSubtitle": "Mantenha o foco: complete seu treino, registre suas refeições e bata suas metas.",
+      "loading": "Carregando seu dia..."
+    },
+    "training": {
+      "label": "TREINO DE HOJE",
+      "completedLabel": "Treino Concluído",
+      "actionRequired": "Ação Necessária",
+      "buildPlanFirst": "Crie seu plano primeiro",
+      "buildPlanDesc": "Crie um plano de treino para desbloquear orientação diária, acompanhamento e ajustes com IA.",
+      "startWorkout": "Iniciar Treino",
+      "adjustWithAI": "Ajustar com IA",
+      "createPlan": "Criar Plano de Treino",
+      "generateWithAI": "Gerar com IA",
+      "viewSummary": "Ver Resumo",
+      "doneForToday": "Feito por hoje",
+      "more": "mais",
+      "session": "sessão",
+      "workoutDay": "Dia de Treino",
+      "minEstimate": "min"
+    },
+    "nutritionCard": {
+      "label": "NUTRIÇÃO DE HOJE",
+      "nothingLogged": "Nenhum registro ainda",
+      "startLogging": "Comece registrando sua primeira refeição do dia",
+      "logFirstMeal": "Registrar Primeira Refeição",
+      "addAnother": "Adicionar outra refeição",
+      "mealLogged": "refeição registrada",
+      "mealsLogged": "refeições registradas",
+      "calories": "Calorias",
+      "protein": "Proteína"
+    },
+    "progressCard": {
+      "label": "PROGRESSO DE HOJE",
+      "workout": "Treino",
+      "nutrition": "Nutrição",
+      "weight": "Peso",
+      "done": "Feito"
+    },
+    "sectionTitles": {
+      "aiInsights": "Insights de IA",
+      "aiInsightsDesc": "Orientação personalizada com base nos seus dados",
+      "priorityActions": "Ações Prioritárias",
+      "priorityActionsDesc": "Complete estas para ficar no caminho certo hoje",
+      "timeline": "Linha do Tempo de Hoje",
+      "timelineDesc": "Sua atividade até agora"
+    },
+    "timelineCard": {
+      "nothingLogged": "Nenhum registro hoje ainda",
+      "nothingLoggedDesc": "Comece registrando sua primeira ação — treino, refeição ou medição.",
+      "completed": "Concluído",
+      "inProgress": "Em andamento",
+      "weightLogged": "Peso registrado"
+    },
+    "insightCards": {
+      "analyzing": "Analisando seu dia...",
+      "startLogging": "Comece a registrar para obter insights",
+      "startLoggingDesc": "Registre treinos, refeições e medições para desbloquear orientação personalizada."
+    },
+    "insightMessages": {
+      "trainingGapPlural": "Você não treinou há {days} dias",
+      "trainingGapSkip": "Você pulou ontem",
+      "trainingGapBack": "Hoje é importante — volte aos trilhos",
+      "trainingGapDontLet": "Não deixe virar dois dias. Treine hoje.",
+      "workoutCompleted": "Treino concluído hoje",
+      "workoutCompletedMsg": "Ótimo trabalho! {name} feito e registrado.",
+      "noActivePlan": "Nenhum plano de treino ativo",
+      "noActivePlanMsg": "Crie seu plano primeiro para desbloquear orientação diária.",
+      "noMeals": "Nenhuma refeição registrada ainda",
+      "noMealsMsg": "Comece registrando sua primeira refeição do dia.",
+      "onFire": "Você está em chamas hoje",
+      "onFireMsg": "Treino feito, nutrição registrada. Mantenha esse ritmo.",
+      "startWorkout": "Iniciar treino",
+      "viewSummary": "Ver resumo",
+      "createPlan": "Criar plano",
+      "logMeal": "Registrar refeição"
+    },
+    "priorityItems": {
+      "workoutCompleted": "Treino concluído",
+      "startWorkout": "Iniciar treino de hoje",
+      "buildPlan": "Criar plano de treino",
+      "buildPlanDesc": "Crie um plano para ter orientação de treino diária",
+      "scheduledSession": "Sua sessão programada",
+      "logFirstMeal": "Registre sua primeira refeição",
+      "haventLoggedYet": "Você ainda não registrou nada hoje",
+      "nutritionOnTrack": "Nutrição em dia",
+      "mealsLoggedToday_one": "{count} refeição registrada hoje",
+      "mealsLoggedToday_other": "{count} refeições registradas hoje",
+      "addFirstMeasurement": "Adicione sua primeira medição",
+      "logWeight": "Registrar peso de hoje",
+      "startTrackingBody": "Comece a acompanhar sua composição corporal",
+      "keepProgressCurrent": "Mantenha seus dados de progresso atualizados",
+      "addProgressPhoto": "Adicionar foto de progresso",
+      "captureCheckpoint": "Capture um checkpoint visual",
+      "startNow": "Começar agora",
+      "addMeal": "Adicionar refeição",
+      "logWeightCta": "Registrar peso",
+      "takePhoto": "Tirar foto",
+      "done": "Feito"
+    },
+    "relative": {
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "daysAgo": "há {days} dias",
+      "weeksAgo": "há {weeks} semanas"
+    }
   },
   "settings": {
     "title": "Configurações",

@@ -694,7 +694,114 @@
       "timeline": "Timeline"
     },
     "noInsights": "Log your first data to get personalized insights.",
-    "emptyTimeline": "No recent activity. Start logging to build your timeline."
+    "emptyTimeline": "No recent activity. Start logging to build your timeline.",
+    "hero": {
+      "planTitle": "Here's your plan for today",
+      "planSubtitle": "Stay on track: complete your workout, log your meals, and hit your targets.",
+      "loading": "Loading your day..."
+    },
+    "training": {
+      "label": "TODAY'S TRAINING",
+      "completedLabel": "Workout Completed",
+      "actionRequired": "Action Required",
+      "buildPlanFirst": "Build Your Plan First",
+      "buildPlanDesc": "Create a workout plan to unlock daily guidance, tracking, and AI-powered adjustments.",
+      "startWorkout": "Start Workout",
+      "adjustWithAI": "Adjust with AI",
+      "createPlan": "Create Workout Plan",
+      "generateWithAI": "Generate with AI",
+      "viewSummary": "View Summary",
+      "doneForToday": "Done for today",
+      "more": "more",
+      "session": "session",
+      "workoutDay": "Workout Day",
+      "minEstimate": "min"
+    },
+    "nutritionCard": {
+      "label": "TODAY'S NUTRITION",
+      "nothingLogged": "Nothing logged yet",
+      "startLogging": "Start by logging your first meal of the day",
+      "logFirstMeal": "Log First Meal",
+      "addAnother": "Add Another Meal",
+      "mealLogged": "meal logged",
+      "mealsLogged": "meals logged",
+      "calories": "Calories",
+      "protein": "Protein"
+    },
+    "progressCard": {
+      "label": "TODAY'S PROGRESS",
+      "workout": "Workout",
+      "nutrition": "Nutrition",
+      "weight": "Weight",
+      "done": "Done"
+    },
+    "sectionTitles": {
+      "aiInsights": "AI Insights",
+      "aiInsightsDesc": "Personalized guidance based on your data",
+      "priorityActions": "Priority Actions",
+      "priorityActionsDesc": "Complete these to stay on track today",
+      "timeline": "Today's Timeline",
+      "timelineDesc": "Your activity so far"
+    },
+    "timelineCard": {
+      "nothingLogged": "Nothing logged yet today",
+      "nothingLoggedDesc": "Start by logging your first action — workout, meal, or measurement.",
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "weightLogged": "Weight logged"
+    },
+    "insightCards": {
+      "analyzing": "Analyzing your day...",
+      "startLogging": "Start logging to get insights",
+      "startLoggingDesc": "Log workouts, meals, and measurements to unlock personalized guidance."
+    },
+    "insightMessages": {
+      "trainingGapPlural": "You haven't trained in {days} days",
+      "trainingGapSkip": "You skipped yesterday",
+      "trainingGapBack": "Today is important — get back on track",
+      "trainingGapDontLet": "Don't let it become two days. Train today.",
+      "workoutCompleted": "Workout completed today",
+      "workoutCompletedMsg": "Great job! {name} done and logged.",
+      "noActivePlan": "No active workout plan",
+      "noActivePlanMsg": "Build your plan first to unlock daily guidance.",
+      "noMeals": "No meals logged yet",
+      "noMealsMsg": "Start by logging your first meal of the day.",
+      "onFire": "You're on fire today",
+      "onFireMsg": "Workout done, nutrition logged. Keep this momentum.",
+      "startWorkout": "Start workout",
+      "viewSummary": "View summary",
+      "createPlan": "Create plan",
+      "logMeal": "Log meal"
+    },
+    "priorityItems": {
+      "workoutCompleted": "Workout completed",
+      "startWorkout": "Start today's workout",
+      "buildPlan": "Build your workout plan",
+      "buildPlanDesc": "Create a plan to get daily workout guidance",
+      "scheduledSession": "Your scheduled session",
+      "logFirstMeal": "Log your first meal",
+      "haventLoggedYet": "You haven't logged anything yet today",
+      "nutritionOnTrack": "Nutrition on track",
+      "mealsLoggedToday_one": "{count} meal logged today",
+      "mealsLoggedToday_other": "{count} meals logged today",
+      "addFirstMeasurement": "Add your first measurement",
+      "logWeight": "Log today's weight",
+      "startTrackingBody": "Start tracking your body composition",
+      "keepProgressCurrent": "Keep your progress data current",
+      "addProgressPhoto": "Add progress photo",
+      "captureCheckpoint": "Capture a visual checkpoint",
+      "startNow": "Start now",
+      "addMeal": "Add meal",
+      "logWeightCta": "Log weight",
+      "takePhoto": "Take photo",
+      "done": "Done"
+    },
+    "relative": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{days} days ago",
+      "weeksAgo": "{weeks} weeks ago"
+    }
   },
   "settings": {
     "title": "Settings",
