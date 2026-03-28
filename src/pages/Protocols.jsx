@@ -11,6 +11,7 @@ import LogDoseForm from '@/components/protocols/LogDoseForm';
 import TodayDoseSection from '@/components/protocols/TodayDoseSection';
 import AdherenceWidget from '@/components/protocols/AdherenceWidget';
 import AIInsightsBanner from '@/components/protocols/AIInsightsBanner';
+import { useAICoach } from '@/hooks/useAICoach';
 import CadenceScheduleView from '@/components/protocols/CadenceScheduleView';
 import ProtocolTimeline from '@/components/protocols/ProtocolTimeline';
 import QuickAddTemplates from '@/components/protocols/QuickAddTemplates';
@@ -414,6 +415,7 @@ function ProtocolsContent() {
   const { locale } = useI18n();
   const isPt = locale === 'pt-BR';
   const qc = useQueryClient();
+  const ai = useAICoach({ userId: user?.id });
 
   const [notice, setNotice] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -690,8 +692,25 @@ function ProtocolsContent() {
         </SectionCard>
       )}
 
-      {/* ── AI Insights Banner ──────────────────────────────────────────────── */}
-      {!isLoading && hasAnyProtocols && (
+      {/* ── AI Protocol Coaching (engine-driven) ─────────────────────────────── */}
+      {!isLoading && ai.protocols && ai.protocols.status !== 'no_protocols' && (
+        <SectionCard>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-[10px] bg-[hsl(var(--brand-ai)/0.12)] flex items-center justify-center shrink-0">
+              <span className="text-[14px]">🧠</span>
+            </div>
+            <div>
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{ai.protocols.message}</p>
+              {ai.protocols.adherenceNote && (
+                <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">{ai.protocols.adherenceNote}</p>
+              )}
+            </div>
+          </div>
+        </SectionCard>
+      )}
+
+      {/* ── AI Insights Banner (rules-based fallback) ────────────────────────── */}
+      {!isLoading && hasAnyProtocols && !ai.protocols && (
         <AIInsightsBanner protocols={activeProtocols} logs={logs} />
       )}
 

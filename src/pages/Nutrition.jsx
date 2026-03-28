@@ -49,6 +49,7 @@ import NutritionQuickActions from '@/components/nutrition/NutritionQuickActions'
 import MealTimeline from '@/components/nutrition/MealTimeline';
 import MacroProgressBar from '@/components/nutrition/MacroProgressBar';
 import AINutritionSuggestions from '@/components/nutrition/AINutritionSuggestions';
+import { useAICoach } from '@/hooks/useAICoach';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -1220,6 +1221,7 @@ export default function NutritionPage() {
   const { user } = useAuth();
   const { t, locale } = useI18n();
   const isPt = locale === 'pt-BR';
+  const ai = useAICoach({ userId: user?.id });
   const [selectedDate, setSelectedDate] = useState(TODAY);
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [notice, setNotice] = useState(null);
@@ -1703,6 +1705,7 @@ export default function NutritionPage() {
           dailyTotals={dailyTotals}
           profile={profile}
           mealCount={sortedMeals.length}
+          aiDirective={ai.nutrition?.nextMeal || ai.nutrition?.macroFocus || null}
         />
 
         {/* 2 — Quick Actions */}

@@ -5,7 +5,7 @@ import { Sparkles, Flame, Target } from 'lucide-react';
  * NutritionHeroCard — dominant above-fold card.
  * Shows calories remaining, protein remaining, and 1 AI directive.
  */
-export default function NutritionHeroCard({ dailyTotals, profile, mealCount }) {
+export default function NutritionHeroCard({ dailyTotals, profile, mealCount, aiDirective }) {
   const kcalTarget = profile.calories_target || 0;
   const proteinTarget = profile.protein_target || 0;
   const kcalRemaining = Math.max(0, kcalTarget - dailyTotals.calories);
@@ -13,8 +13,9 @@ export default function NutritionHeroCard({ dailyTotals, profile, mealCount }) {
   const kcalPct = kcalTarget > 0 ? Math.min((dailyTotals.calories / kcalTarget) * 100, 100) : 0;
   const proteinPct = proteinTarget > 0 ? Math.min((dailyTotals.protein / proteinTarget) * 100, 100) : 0;
 
-  // AI directive — rules-based one-liner
-  let directive = null;
+  // AI directive — engine-driven when available, rules-based fallback
+  let directive = aiDirective || null;
+  if (!directive) {
   if (kcalTarget === 0) {
     directive = 'Set your calorie target in Plan to start tracking.';
   } else if (mealCount === 0) {
@@ -28,6 +29,7 @@ export default function NutritionHeroCard({ dailyTotals, profile, mealCount }) {
   } else if (kcalRemaining >= 400) {
     directive = `${Math.round(kcalRemaining)} kcal remaining. Plan your next meal.`;
   }
+  } // end rules-based fallback
 
   return (
     <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] overflow-hidden">

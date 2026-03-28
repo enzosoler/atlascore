@@ -24,6 +24,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { listMeasurements, listProgressPhotos } from '@/services/bodyProgressService';
 import { getMeasurementFieldValue } from '@/lib/measurementModel';
 import { ROUTES } from '@/lib/routes';
+import { useAICoach } from '@/hooks/useAICoach';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -163,6 +164,7 @@ function TargetBarChart({ data, dataKey, targetValue, color, days, unit }) {
 
 function ProgressContent() {
   const { user } = useAuth();
+  const ai = useAICoach({ userId: user?.id });
   const [range, setRange] = useState('4w');
   const days = RANGES.find((r) => r.key === range)?.days ?? 28;
   const cutoff = subDays(new Date(), days);
@@ -292,8 +294,16 @@ function ProgressContent() {
     };
   }, [foodLogs, workoutLogs, days]);
 
-  // ── AI interpretation ───────────────────────────────────────────────────────
+  // ── AI interpretation — engine-driven when available, rules-based fallback ──
   const insights = useMemo(() => {
+    // Use engine's progress section if available
+    if (ai.progress?.headline) {
+      const lines = [ai.progress.headline];
+      if (ai.progress.interpretation) lines.push(ai.progress.interpretation);
+      if (ai.progress.action) lines.push(ai.progress.action);
+      return lines;
+    }
+    // Fallback to rules-based
     const lines = [];
     if (weightData.length >= 2) {
       const weekRate = weightSlope * 7;
@@ -306,7 +316,7 @@ function ProgressContent() {
     if (adherence.training >= 70) lines.push(`Training adherence is solid at ${adherence.training}%.`);
     else if (adherence.training < 40) lines.push(`Training adherence dropped to ${adherence.training}%.`);
     return lines.slice(0, 3);
-  }, [weightData, weightSlope, adherence]);
+  }, [ai.progress, weightData, weightSlope, adherence]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
