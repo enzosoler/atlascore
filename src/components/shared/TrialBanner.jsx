@@ -9,6 +9,7 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import { useAuth } from '@/lib/AuthContext';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18nContext';
 
 function daysLeft(dateStr) {
   if (!dateStr) return 0;
@@ -19,6 +20,7 @@ function daysLeft(dateStr) {
 }
 
 export default function TrialBanner() {
+  const t = useT();
   const { subscription } = useSubscription();
   const [dismissed, setDismissed] = React.useState(false);
   const { user } = useAuth();
@@ -53,11 +55,11 @@ export default function TrialBanner() {
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
           {days > 0
-            ? `Performance trial — ${days} day${days !== 1 ? 's' : ''} remaining`
-            : 'Your trial ends today'}
+            ? t('shared.trialBanner.daysRemaining', { days, plural: days !== 1 ? 's' : '' })
+            : t('shared.trialBanner.endsToday')}
         </p>
         <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-          Keep your current workflow and retain access to the full Atlas Core workspace.
+          {t('shared.trialBanner.keepWorkflow')}
         </p>
       </div>
 
@@ -69,12 +71,12 @@ export default function TrialBanner() {
             isUrgent ? 'atlas-button-danger' : 'atlas-button-primary'
           )}
         >
-          Subscribe now
+          {t('shared.trialBanner.subscribeNow')}
         </Link>
         <button
           onClick={() => setDismissed(true)}
           className="flex h-9 w-9 items-center justify-center rounded-2xl text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]"
-          aria-label="Close banner"
+          aria-label={t('shared.trialBanner.closeBanner')}
         >
           <X className="h-4 w-4" strokeWidth={2} />
         </button>

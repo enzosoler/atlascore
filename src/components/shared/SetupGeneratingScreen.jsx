@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Zap } from 'lucide-react';
-
-const DEFAULT_MESSAGES = [
-  'Analyzing your goals...',
-  'Building your personalized dashboard...',
-  'Configuring your tracking categories...',
-  'Calculating your nutrition targets...',
-  'Preparing your timeline...',
-  'Everything is ready.',
-];
+import { useT } from '@/lib/i18nContext';
 
 /**
  * Reusable "system is building something" loading screen.
@@ -23,12 +15,23 @@ const DEFAULT_MESSAGES = [
  *   buttonLabel?: string
  */
 export default function SetupGeneratingScreen({
-  messages = DEFAULT_MESSAGES,
+  messages,
   onDone,
   autoFinishMs = 650,
   showButton = false,
-  buttonLabel = 'Continue',
+  buttonLabel,
 }) {
+  const t = useT();
+  const defaultMessages = [
+    t('shared.setupScreen.msg1'),
+    t('shared.setupScreen.msg2'),
+    t('shared.setupScreen.msg3'),
+    t('shared.setupScreen.msg4'),
+    t('shared.setupScreen.msg5'),
+    t('shared.setupScreen.msg6'),
+  ];
+  const resolvedMessages = messages ?? defaultMessages;
+  const resolvedButtonLabel = buttonLabel ?? t('shared.setupScreen.buttonLabel');
   const [msgIdx, setMsgIdx] = useState(0);
   const [done, setDone] = useState(false);
 
@@ -36,10 +39,10 @@ export default function SetupGeneratingScreen({
     let i = 0;
     const interval = setInterval(() => {
       i++;
-      if (i < messages.length - 1) {
+      if (i < resolvedMessages.length - 1) {
         setMsgIdx(i);
       } else {
-        setMsgIdx(messages.length - 1);
+        setMsgIdx(resolvedMessages.length - 1);
         setDone(true);
         clearInterval(interval);
         if (!showButton && onDone) {
@@ -78,17 +81,17 @@ export default function SetupGeneratingScreen({
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22 }}
             className="text-[15px] font-semibold text-[hsl(var(--fg))]">
-            {messages[msgIdx]}
+            {resolvedMessages[msgIdx]}
           </motion.p>
         </AnimatePresence>
-        {!done && <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">Atlas Core is setting up...</p>}
+        {!done && <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">{t('shared.setupScreen.settingUp')}</p>}
       </div>
 
       {/* Button (optional) */}
       {done && showButton && onDone && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <button onClick={onDone} className="btn btn-primary h-12 px-8 rounded-2xl text-[14px]">
-            {buttonLabel}
+            {resolvedButtonLabel}
           </button>
         </motion.div>
       )}

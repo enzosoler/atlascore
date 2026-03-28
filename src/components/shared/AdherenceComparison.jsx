@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
+import { useT } from '@/lib/i18nContext';
 
 /**
  * AdherenceComparison — Shows actual vs prescribed metrics
@@ -13,6 +14,7 @@ import { CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
  * />
  */
 export default function AdherenceComparison({ label, actual, prescribed, unit = '' }) {
+  const t = useT();
   const percentage = prescribed > 0 ? Math.round((actual / prescribed) * 100) : 0;
   const isExceeded = actual > prescribed;
   const isMet = actual >= prescribed;
@@ -41,8 +43,8 @@ export default function AdherenceComparison({ label, actual, prescribed, unit = 
 
       <div className="space-y-1">
         <div className="flex items-center justify-between text-[12px]">
-          <span className="text-[hsl(var(--fg-2))]">Target: {prescribed} {unit}</span>
-          {isExceeded && <span className="text-[hsl(var(--ok))] font-medium flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Ahead</span>}
+          <span className="text-[hsl(var(--fg-2))]">{t('shared.adherence.target')}: {prescribed} {unit}</span>
+          {isExceeded && <span className="text-[hsl(var(--ok))] font-medium flex items-center gap-1"><TrendingUp className="w-3 h-3" /> {t('shared.adherence.ahead')}</span>}
         </div>
         <div className="h-2 bg-[hsl(var(--shell))] rounded-full overflow-hidden">
           <div

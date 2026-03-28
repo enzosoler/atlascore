@@ -8,17 +8,19 @@ import { useAuth } from '@/lib/AuthContext';
 import { Check, X, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { getMyProfessionals, respondToInvite } from '@/services/professionalLinksService';
-
-const PROF_LABELS = {
-  coach: { label: 'Coach / Personal', badge: 'badge-blue', icon: '🏋️' },
-  nutritionist: { label: 'Nutritionist', badge: 'badge-ok', icon: '🥗' },
-  clinician: { label: 'Clinician / Doctor', badge: 'badge-ai', icon: '⚕️' },
-};
+import { useT } from '@/lib/i18nContext';
 
 export default function ProfessionalLinks({ showPending = true, showActive = true, user: userProp }) {
+  const t = useT();
   const { user: authUser } = useAuth();
   const user = userProp || authUser;
   const qc = useQueryClient();
+
+  const PROF_LABELS = {
+    coach: { label: t('shared.professionalLinks.roleCoach'), badge: 'badge-blue', icon: '🏋️' },
+    nutritionist: { label: t('shared.professionalLinks.roleNutritionist'), badge: 'badge-ok', icon: '🥗' },
+    clinician: { label: t('shared.professionalLinks.roleClinician'), badge: 'badge-ai', icon: '⚕️' },
+  };
 
   const { data: allLinks = [] } = useQuery({
     queryKey: ['my-professionals', user?.id],
@@ -29,7 +31,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
   const respond = (linkId, accept) => async () => {
     await respondToInvite(linkId, accept);
     qc.invalidateQueries({ queryKey: ['my-professionals'] });
-    toast.success(accept ? 'Connection accepted!' : 'Invite declined');
+    toast.success(accept ? t('shared.professionalLinks.toastAccepted') : t('shared.professionalLinks.toastDeclined'));
   };
 
   const pendingLinks = allLinks.filter(l => l.status === 'pending');
@@ -44,7 +46,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
         <div className="surface border-[hsl(var(--warn)/0.4)] p-4 space-y-3">
           <div className="flex items-center gap-2">
             <UserCheck className="w-4 h-4 text-[hsl(var(--warn))]" strokeWidth={2} />
-            <p className="t-subtitle text-[hsl(var(--warn))]">Pending invites ({pendingLinks.length})</p>
+            <p className="t-subtitle text-[hsl(var(--warn))]">{t('shared.professionalLinks.pendingInvites', { count: pendingLinks.length })}</p>
           </div>
           <div className="space-y-2">
             {pendingLinks.map(link => {
@@ -62,13 +64,13 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
                       onClick={respond(link.id, true)}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))] border border-[hsl(var(--ok)/0.2)] text-[11px] font-semibold hover:bg-[hsl(var(--ok)/0.2)] transition-colors"
                     >
-                      <Check className="w-3 h-3" strokeWidth={2.5} /> Accept
+                      <Check className="w-3 h-3" strokeWidth={2.5} /> {t('shared.professionalLinks.accept')}
                     </button>
                     <button
                       onClick={respond(link.id, false)}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[hsl(var(--err)/0.07)] text-[hsl(var(--err))] border border-[hsl(var(--err)/0.2)] text-[11px] font-semibold hover:bg-[hsl(var(--err)/0.15)] transition-colors"
                     >
-                      <X className="w-3 h-3" strokeWidth={2.5} /> Decline
+                      <X className="w-3 h-3" strokeWidth={2.5} /> {t('shared.professionalLinks.decline')}
                     </button>
                   </div>
                 </div>
@@ -81,7 +83,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
       {/* Active professional links */}
       {showActive && activeLinks.length > 0 && (
         <div className="surface p-4 space-y-2">
-          <p className="t-label">Active professionals</p>
+          <p className="t-label">{t('shared.professionalLinks.activeProfessionals')}</p>
           {activeLinks.map(link => {
             const meta = PROF_LABELS[link.link_type] || { label: link.link_type, badge: 'badge-neutral', icon: '👤' };
             return (
@@ -89,7 +91,7 @@ export default function ProfessionalLinks({ showPending = true, showActive = tru
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className={`badge ${meta.badge}`}>{meta.icon} {meta.label}</span>
-                    <span className="badge badge-ok text-[9px]">Active</span>
+                    <span className="badge badge-ok text-[9px]">{t('shared.professionalLinks.activeBadge')}</span>
                   </div>
                   <p className="text-[12px] text-[hsl(var(--fg-2))]">{link.professional_name || link.professional_email}</p>
                 </div>

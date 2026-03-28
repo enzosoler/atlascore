@@ -6,12 +6,14 @@ import { toast } from 'sonner';
 import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import { useAuth } from '@/lib/AuthContext';
 import { inviteClient } from '@/services/professionalLinksService';
+import { useT } from '@/lib/i18nContext';
 
 /**
  * InviteModal - Send invite to student/client/patient
  * Usage: <InviteModal open={show} onOpenChange={setShow} role="coach" />
  */
 export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
+  const t = useT();
   const qc = useQueryClient();
   const { user } = useAuth();
   const [email, setEmail] = useState('');
@@ -20,19 +22,19 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
   const roleLabels = {
     coach: {
-      title: 'Invite student',
-      subtitle: 'Send a secure invite to unlock tracking, prescription, and adherence inside one shared history.',
-      placeholder: 'student@example.com',
+      title: t('shared.inviteModal.coachTitle'),
+      subtitle: t('shared.inviteModal.coachSubtitle'),
+      placeholder: t('shared.inviteModal.coachPlaceholder'),
     },
     nutritionist: {
-      title: 'Invite client',
-      subtitle: 'Invite a client to share meals, measurements, labs, and prescribed plans.',
-      placeholder: 'client@example.com',
+      title: t('shared.inviteModal.nutritionistTitle'),
+      subtitle: t('shared.inviteModal.nutritionistSubtitle'),
+      placeholder: t('shared.inviteModal.nutritionistPlaceholder'),
     },
     clinician: {
-      title: 'Invite patient',
-      subtitle: 'Create a clinical connection with clear access to protocols, lab data, and body composition.',
-      placeholder: 'patient@example.com',
+      title: t('shared.inviteModal.clinicianTitle'),
+      subtitle: t('shared.inviteModal.clinicianSubtitle'),
+      placeholder: t('shared.inviteModal.clinicianPlaceholder'),
     },
   };
 
@@ -42,14 +44,14 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
   const handleSend = async () => {
     if (!email.trim()) {
-      toast.error('Enter an email address');
+      toast.error(t('shared.inviteModal.errorEnterEmail'));
       return;
     }
 
     setSending(true);
     try {
       await inviteClient(user.id, email.trim(), linkTypeMap[role] || role);
-      toast.success(`Invite sent to ${email}`);
+      toast.success(t('shared.inviteModal.toastSuccess', { email }));
       qc.invalidateQueries({ queryKey: ['coach-students'] });
       qc.invalidateQueries({ queryKey: ['clinician-patients'] });
       qc.invalidateQueries({ queryKey: ['nutritionist-clients'] });
@@ -57,7 +59,7 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
       setName('');
       onOpenChange(false);
     } catch (err) {
-      toast.error(err.message || 'Error sending invite');
+      toast.error(err.message || t('shared.inviteModal.toastError'));
       console.error(err);
     } finally {
       setSending(false);
@@ -81,13 +83,13 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
         <div className="space-y-5 px-6 pb-6 pt-2">
           <div className="atlas-field px-4 py-3">
             <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Full name (optional)
+              {t('shared.inviteModal.labelFullName')}
             </label>
             <div className="flex items-center gap-3">
               <User className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
               <input
                 type="text"
-                placeholder="Full name"
+                placeholder={t('shared.inviteModal.placeholderFullName')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="flex-1 bg-transparent text-[14px] text-[hsl(var(--fg))] outline-none placeholder:text-[hsl(var(--fg-3))]"
@@ -97,7 +99,7 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
           <div className="atlas-field px-4 py-3">
             <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Email
+              {t('shared.inviteModal.labelEmail')}
             </label>
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
@@ -113,16 +115,16 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
 
           <div className="rounded-[16px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.52)] px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-              Invite
+              {t('shared.inviteModal.inviteLabel')}
             </p>
             <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-              The invite expires in 30 days if it is not accepted. The connection only becomes active after confirmation.
+              {t('shared.inviteModal.inviteExpiry')}
             </p>
           </div>
 
           <div className="flex gap-3">
             <SecondaryButton type="button" className="flex-1" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t('shared.inviteModal.cancel')}
             </SecondaryButton>
             <PrimaryButton
               type="button"
@@ -131,7 +133,7 @@ export default function InviteModal({ open, onOpenChange, role = 'coach' }) {
               className="flex-1 justify-center"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {sending ? 'Sending...' : 'Send invite'}
+              {sending ? t('shared.inviteModal.sending') : t('shared.inviteModal.sendInvite')}
             </PrimaryButton>
           </div>
         </div>

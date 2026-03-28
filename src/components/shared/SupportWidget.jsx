@@ -4,27 +4,29 @@ import { MessageCircle, X, Bug, Lightbulb, HelpCircle, Mail } from 'lucide-react
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
-
-const OPTIONS = [
-  { id: 'bug',     icon: Bug,        label: 'Report a bug',            color: 'text-[hsl(var(--err))]',  bg: 'bg-[hsl(var(--err)/0.07)]' },
-  { id: 'feature', icon: Lightbulb,  label: 'Suggest a feature',       color: 'text-[hsl(var(--warn))]', bg: 'bg-[hsl(var(--warn)/0.07)]' },
-  { id: 'help',    icon: HelpCircle, label: 'Something confusing?',    color: 'text-[hsl(var(--brand))]', bg: 'bg-[hsl(var(--brand)/0.07)]' },
-  { id: 'contact', icon: Mail,       label: 'Talk to the team',        color: 'text-[hsl(var(--fg-2))]', bg: 'bg-[hsl(var(--shell))]' },
-];
-
-const PLACEHOLDERS = {
-  bug:     'Describe what happened and in which part of the app...',
-  feature: 'What feature would make the app more useful for you?',
-  help:    'What is confusing or hard to understand?',
-  contact: 'How can we help?',
-};
+import { useT } from '@/lib/i18nContext';
 
 export default function SupportWidget() {
+  const t = useT();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+
+  const OPTIONS = [
+    { id: 'bug',     icon: Bug,        label: t('shared.supportWidget.optionBug'),     color: 'text-[hsl(var(--err))]',  bg: 'bg-[hsl(var(--err)/0.07)]' },
+    { id: 'feature', icon: Lightbulb,  label: t('shared.supportWidget.optionFeature'), color: 'text-[hsl(var(--warn))]', bg: 'bg-[hsl(var(--warn)/0.07)]' },
+    { id: 'help',    icon: HelpCircle, label: t('shared.supportWidget.optionHelp'),    color: 'text-[hsl(var(--brand))]', bg: 'bg-[hsl(var(--brand)/0.07)]' },
+    { id: 'contact', icon: Mail,       label: t('shared.supportWidget.optionContact'), color: 'text-[hsl(var(--fg-2))]', bg: 'bg-[hsl(var(--shell))]' },
+  ];
+
+  const PLACEHOLDERS = {
+    bug:     t('shared.supportWidget.placeholderBug'),
+    feature: t('shared.supportWidget.placeholderFeature'),
+    help:    t('shared.supportWidget.placeholderHelp'),
+    contact: t('shared.supportWidget.placeholderContact'),
+  };
 
   const reset = () => { setSelected(null); setText(''); };
 
@@ -38,11 +40,11 @@ export default function SupportWidget() {
         type: selected,
         message: text,
       });
-      toast.success('Message sent! Thanks for the feedback.');
+      toast.success(t('shared.supportWidget.toastSuccess'));
       setOpen(false);
       reset();
     } catch {
-      toast.error('Error sending. Please try again.');
+      toast.error(t('shared.supportWidget.toastError'));
     } finally {
       setSending(false);
     }
@@ -77,8 +79,8 @@ export default function SupportWidget() {
             {!selected ? (
               <>
                 <div className="mb-3">
-                  <p className="text-[13px] font-semibold">Need help?</p>
-                  <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">We're here during early access.</p>
+                  <p className="text-[13px] font-semibold">{t('shared.supportWidget.needHelp')}</p>
+                  <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">{t('shared.supportWidget.earlyAccess')}</p>
                 </div>
                 <div className="space-y-1.5">
                   {OPTIONS.map(opt => {
@@ -96,7 +98,7 @@ export default function SupportWidget() {
             ) : (
               <>
                 <button onClick={reset} className="flex items-center gap-1.5 text-[11px] text-[hsl(var(--fg-2))] mb-3 hover:text-[hsl(var(--fg))] transition-colors">
-                  ← Back
+                  ← {t('shared.supportWidget.back')}
                 </button>
                 <p className="text-[13px] font-semibold mb-2">{OPTIONS.find(o => o.id === selected)?.label}</p>
                 <textarea
@@ -110,7 +112,7 @@ export default function SupportWidget() {
                   disabled={!text.trim() || sending}
                   className="btn btn-primary w-full h-9 rounded-xl text-[12px] mt-2 gap-1.5 disabled:opacity-50"
                 >
-                  {sending ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Sending...</> : 'Send message'}
+                  {sending ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> {t('shared.supportWidget.sending')}</> : t('shared.supportWidget.send')}
                 </button>
               </>
             )}

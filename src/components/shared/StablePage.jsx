@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18nContext';
 
 export function formatNumber(value, options = {}) {
   return new Intl.NumberFormat('en-US', options).format(Number(value || 0));
@@ -130,20 +131,23 @@ export function SectionCard({ title, subtitle, actions, children, className = ''
 }
 
 export function LoadingState({
-  title = 'Loading data',
-  description = 'The page has opened in safe mode and content appears when data responds.',
+  title,
+  description,
 }) {
+  const t = useT();
+  const resolvedTitle = title ?? t('shared.stablePage.loadingTitle');
+  const resolvedDescription = description ?? t('shared.stablePage.loadingDescription');
   return (
-    <SectionCard title={title} subtitle={description}>
+    <SectionCard title={resolvedTitle} subtitle={resolvedDescription}>
       <div className="atlas-banner flex items-start gap-3 px-4 py-4">
         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">
           <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
         </div>
         <div>
           <p className="text-sm font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-            Loading...
+            {t('shared.stablePage.loadingText')}
           </p>
-          <p className="atlas-copy mt-1">{description}</p>
+          <p className="atlas-copy mt-1">{resolvedDescription}</p>
         </div>
       </div>
     </SectionCard>
@@ -151,18 +155,21 @@ export function LoadingState({
 }
 
 export function ErrorState({
-  title = 'Safe mode active',
-  description = 'Some data failed to load, but the page remains open and usable.',
+  title,
+  description,
 }) {
+  const t = useT();
+  const resolvedTitle = title ?? t('shared.stablePage.errorTitle');
+  const resolvedDescription = description ?? t('shared.stablePage.errorDescription');
   return (
-    <SectionCard title={title} subtitle={description}>
+    <SectionCard title={resolvedTitle} subtitle={resolvedDescription}>
       <div className="atlas-banner flex items-start gap-3 px-4 py-4" data-tone="warning">
         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--warn))]">
           <AlertTriangle className="h-4 w-4" strokeWidth={2} />
         </div>
         <div>
-          <p className="text-sm font-semibold tracking-[-0.018em]">Alguns dados nao carregaram.</p>
-          <p className="mt-1 text-sm leading-6">{description}</p>
+          <p className="text-sm font-semibold tracking-[-0.018em]">{t('shared.stablePage.errorBannerText')}</p>
+          <p className="mt-1 text-sm leading-6">{resolvedDescription}</p>
         </div>
       </div>
     </SectionCard>
