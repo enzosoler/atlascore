@@ -272,6 +272,7 @@ function TodayContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('measurements')
+        .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(5);
@@ -286,6 +287,7 @@ function TodayContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('progress_photos')
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -300,6 +302,7 @@ function TodayContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('workout_logs')
+        .select('*')
         .eq('user_id', user.id)
         .eq('status', 'completed')
         .order('completed_at', { ascending: false })
@@ -318,6 +321,7 @@ function TodayContent() {
       monday.setDate(monday.getDate() - monday.getDay() + 1);
       const { data, error } = await supabase
         .from('workout_logs')
+        .select('*')
         .eq('user_id', user.id)
         .eq('status', 'completed')
         .gte('date', monday.toISOString().split('T')[0]);
