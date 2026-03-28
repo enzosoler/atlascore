@@ -268,7 +268,7 @@ const MEAL_TYPE_HOURS = {
 
 // ============ NEW COMPONENTS ============
 
-function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
+function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
   const hasTargets = profile.calories_target > 0;
   const hasMeals = sortedMeals.length > 0;
   const caloriesPct = hasTargets ? getProgressPercent(dailyTotals.calories, profile.calories_target) : 0;
@@ -284,38 +284,30 @@ function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
   const configs = {
     empty: {
       icon: Sunrise,
-      title: isPt ? 'Comece sua nutrição hoje' : 'Start your nutrition today',
-      subtitle: isPt
-        ? 'Registre sua primeira refeição para começar a acompanhar calorias e macros'
-        : 'Log your first meal to begin tracking calories and macros',
-      cta: isPt ? 'Adicionar primeira refeição' : 'Add first meal',
+      title: t('pages.nutrition.status_empty_title'),
+      subtitle: t('pages.nutrition.status_empty_subtitle'),
+      cta: t('pages.nutrition.status_empty_cta'),
       tone: 'brand',
     },
     partial: {
       icon: Zap,
-      title: isPt ? `Você está em ${Math.round(caloriesPct)}% da meta` : `You're at ${Math.round(caloriesPct)}% of your target`,
-      subtitle: isPt
-        ? 'Foque em proteína e calorias para manter o progresso'
-        : 'Focus on protein and calories to stay on track',
-      cta: isPt ? 'Continuar registrando' : 'Keep logging',
+      title: t('pages.nutrition.status_partial_title', { pct: Math.round(caloriesPct) }),
+      subtitle: t('pages.nutrition.status_partial_subtitle'),
+      cta: t('pages.nutrition.status_partial_cta'),
       tone: 'warn',
     },
     good: {
       icon: TrendingUp,
-      title: isPt ? 'Bom progresso hoje' : 'Good progress today',
-      subtitle: isPt
-        ? 'Você está no caminho certo. Continue assim!'
-        : "You're on track. Keep it up!",
-      cta: isPt ? 'Adicionar mais' : 'Add more',
+      title: t('pages.nutrition.status_good_title'),
+      subtitle: t('pages.nutrition.status_good_subtitle'),
+      cta: t('pages.nutrition.status_good_cta'),
       tone: 'success',
     },
     complete: {
       icon: Target,
-      title: isPt ? 'Você atingiu suas metas!' : 'You hit your targets today!',
-      subtitle: isPt
-        ? 'Excelente trabalho mantendo suas metas de nutrição'
-        : 'Great job staying on top of your nutrition goals',
-      cta: isPt ? 'Ver detalhes' : 'View details',
+      title: t('pages.nutrition.status_complete_title'),
+      subtitle: t('pages.nutrition.status_complete_subtitle'),
+      cta: t('pages.nutrition.status_complete_cta'),
       tone: 'success',
     },
   };
@@ -349,7 +341,7 @@ function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
           </p>
           {!hasTargets && (
             <p className="mt-2 text-[12px] text-[hsl(var(--brand))]">
-              {isPt ? '⚠️ Configure suas metas para acompanhar o progresso' : '⚠️ Set your targets to track progress'}
+              {'⚠️ ' + t('pages.nutrition.set_targets_warning')}
             </p>
           )}
         </div>
@@ -362,7 +354,7 @@ function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
   );
 }
 
-function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
+function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
   const hasTargets = profile.calories_target > 0;
   const hasMeals = sortedMeals.length > 0;
 
@@ -370,14 +362,14 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
 
   if (!hasTargets) {
     action = {
-      label: isPt ? 'Definir metas nutricionais' : 'Set nutrition targets',
-      sublabel: isPt ? 'Configure calorias e macros para começar' : 'Set up calories and macros to begin',
+      label: t('pages.nutrition.set_targets'),
+      sublabel: t('pages.nutrition.set_targets_sub'),
       priority: 'high',
     };
   } else if (!hasMeals) {
     action = {
-      label: isPt ? 'Adicionar primeira refeição' : 'Add your first meal',
-      sublabel: isPt ? 'Comece com o café da manhã' : 'Start with breakfast',
+      label: t('pages.nutrition.add_first_meal'),
+      sublabel: t('pages.nutrition.start_with_breakfast'),
       priority: 'high',
     };
   } else {
@@ -386,26 +378,26 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
 
     if (proteinRemaining > 30 && dailyTotals.protein / profile.protein_target < 0.5) {
       action = {
-        label: isPt ? `Priorize proteína (${proteinRemaining}g restantes)` : `Prioritize protein (${proteinRemaining}g remaining)`,
-        sublabel: isPt ? 'Adicione frango, ovos ou whey' : 'Add chicken, eggs, or protein shake',
+        label: t('pages.nutrition.prioritize_protein', { remaining: proteinRemaining }),
+        sublabel: t('pages.nutrition.prioritize_protein_sub'),
         priority: 'medium',
       };
     } else if (caloriesRemaining > 500) {
       action = {
-        label: isPt ? `${caloriesRemaining} kcal restantes` : `${caloriesRemaining} kcal remaining`,
-        sublabel: isPt ? 'Planeje sua próxima refeição' : 'Plan your next meal',
+        label: t('pages.nutrition.kcal_remaining', { remaining: caloriesRemaining }),
+        sublabel: t('pages.nutrition.plan_next_meal'),
         priority: 'medium',
       };
     } else if (caloriesRemaining < 200 && dailyTotals.calories >= profile.calories_target * 0.9) {
       action = {
-        label: isPt ? 'Meta quase atingida!' : 'Almost at your goal!',
-        sublabel: isPt ? 'Ótimo trabalho hoje' : 'Great work today',
+        label: t('pages.nutrition.almost_at_goal'),
+        sublabel: t('pages.nutrition.great_work_today'),
         priority: 'low',
       };
     } else {
       action = {
-        label: isPt ? 'Adicionar próxima refeição' : 'Add next meal',
-        sublabel: isPt ? 'Continue registrando para acompanhar' : 'Keep logging to stay on track',
+        label: t('pages.nutrition.add_next_meal'),
+        sublabel: t('pages.nutrition.keep_logging_track'),
         priority: 'low',
       };
     }
@@ -427,7 +419,7 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
           </div>
           <div>
             <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-              {isPt ? 'Próxima ação' : 'Next action'}
+              {t('pages.nutrition.next_action_label')}
             </p>
             <p className="text-[15px] font-semibold text-[hsl(var(--fg))] mt-0.5">
               {action.label}
@@ -439,7 +431,7 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
         </div>
         <SecondaryButton size="sm" onClick={onAddMeal} className="shrink-0">
           <Plus className="h-4 w-4 mr-1.5" />
-          {isPt ? 'Adicionar' : 'Add'}
+          {t('pages.nutrition.add_button')}
         </SecondaryButton>
       </div>
     </div>

@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
+import { locales, localeLabels } from '@/i18n/config';
 import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { ROUTES } from '@/lib/routes';
@@ -107,10 +108,28 @@ function ControlRow({ icon: Icon, label, description, href, onClick, meta, destr
 
 // ── Settings content ──────────────────────────────────────────────────────────
 
+function LanguageOption({ label, value, currentLocale, onSelect }) {
+  const active = currentLocale === value;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(value)}
+      className={[
+        'flex flex-1 items-center justify-center gap-2 rounded-[22px] border px-4 py-4 text-center transition-all duration-200',
+        active
+          ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]'
+          : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)] hover:text-[hsl(var(--fg))]',
+      ].join(' ')}
+    >
+      <span className="text-[14px] font-semibold tracking-[-0.016em]">{label}</span>
+    </button>
+  );
+}
+
 function SettingsContent() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { t, locale } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const { openCustomerPortal, loading: portalLoading } = useCustomerPortal();
   const { subscription } = useSubscription();
 
@@ -132,7 +151,8 @@ function SettingsContent() {
     ? t('settings.plan.pastDue')
     : t('settings.plan.free');
 
-  const lastUpdated = new Date().toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es' : 'en-US';
+  const lastUpdated = new Date().toLocaleDateString(intlLocale, {
     month: 'short',
     day: 'numeric',
   });
@@ -221,6 +241,24 @@ function SettingsContent() {
         <p className="mt-3 text-[12px] text-[hsl(var(--fg-3))]">
           {t('settings.interface.darkModeNote')}
         </p>
+      </SectionCard>
+
+      {/* Language */}
+      <SectionCard
+        title={t('settings.language.title')}
+        subtitle={t('settings.language.subtitle')}
+      >
+        <div className="flex gap-3">
+          {locales.map((loc) => (
+            <LanguageOption
+              key={loc}
+              label={localeLabels[loc]}
+              value={loc}
+              currentLocale={locale}
+              onSelect={setLocale}
+            />
+          ))}
+        </div>
       </SectionCard>
 
       {/* Data & Control */}

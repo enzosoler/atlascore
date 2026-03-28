@@ -149,6 +149,7 @@ function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
 // ─── Recommendation Card ───────────────────────────────────────────────────────
 
 function RecCard({ rec, onDismiss }) {
+  const t = useT();
   return (
     <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] p-3.5">
       <div className="flex items-start justify-between gap-2">
@@ -160,7 +161,7 @@ function RecCard({ rec, onDismiss }) {
       </div>
       {rec.actionPath && (
         <Link to={rec.actionPath} className="mt-2.5 flex items-center gap-1.5 text-[12px] font-semibold text-[hsl(var(--brand))]">
-          {rec.actionLabel || 'Do this'} <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
+          {rec.actionLabel || t('today.doThis')} <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
         </Link>
       )}
     </div>
