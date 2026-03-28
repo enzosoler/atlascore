@@ -225,9 +225,11 @@ const RequireAuthenticatedApp = () => {
   }
 
   // Admins go straight to the admin panel on web — on mobile they use the core app
+  // Skip with ?skip_admin=1 to escape if admin panel is broken
   const isAdmin = user?.atlas_role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/AdminPanel');
-  if (isAdmin && !isAdminRoute && !Capacitor.isNativePlatform()) {
+  const skipAdmin = new URLSearchParams(location.search).get('skip_admin') === '1';
+  if (isAdmin && !isAdminRoute && !skipAdmin && !Capacitor.isNativePlatform()) {
     return <Navigate to={ROUTES.admin} replace />;
   }
 

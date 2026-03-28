@@ -79,20 +79,22 @@ export class SafePageBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       const title = this.props.title || 'Page';
-      const subtitle =
-        this.props.subtitle || 'Safe mode is active to avoid a blank screen.';
 
       return (
-        <PageShell title={title} subtitle={subtitle} maxWidth={this.props.maxWidth || 'max-w-5xl'}>
-          <StatusBanner tone="warning">
-            We detected a rendering failure and opened the page safety fallback.
-          </StatusBanner>
-          <SectionCard title={`${title} page loaded`} subtitle="Minimal fallback guaranteed.">
+        <PageShell title={title} subtitle="We couldn't load this section." maxWidth={this.props.maxWidth || 'max-w-5xl'}>
+          <SectionCard title="Try again">
             <EmptyState
-              title={`${title} page loaded`}
-              description={
-                this.props.fallbackDescription ||
-                'The main content failed, but the route remains accessible.'
+              title="We couldn't load this section"
+              description="Please try again. If the problem continues, go back and try a different route."
+              action={
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button type="button" onClick={() => window.location.reload()} className="atlas-button atlas-button-primary gap-2">
+                    Try again
+                  </button>
+                  <button type="button" onClick={() => window.history.back()} className="atlas-button atlas-button-secondary gap-2">
+                    Go back
+                  </button>
+                </div>
               }
             />
           </SectionCard>
