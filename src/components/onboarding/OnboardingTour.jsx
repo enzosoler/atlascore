@@ -159,12 +159,8 @@ export function OnboardingTour() {
             className="fixed z-50 bg-[hsl(var(--card))] rounded-lg shadow-lg border border-[hsl(var(--border))] max-w-sm p-6 space-y-4"
             style={{
               left: '50%',
-              top: targetRect
-                ? Math.max(targetRect.top - 200, 50)
-                : '50%',
-              transform: targetRect
-                ? 'translateX(-50%)'
-                : 'translate(-50%, -50%)',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
             }}
           >
             {/* Header */}

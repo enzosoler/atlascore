@@ -644,6 +644,14 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing, i
               </div>
             </div>
           ))}
+          <button
+            onClick={() => onAdd(bucketKey)}
+            disabled={isProcessing}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[hsl(var(--border)/0.6)] py-2 text-[12px] font-medium text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.08)]"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {isPt ? 'Adicionar item' : 'Add item'}
+          </button>
         </div>
       )}
     </div>
@@ -1179,23 +1187,25 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
         </div>
       )}
 
-      <ActionRow className="mt-6">
-        <SecondaryButton type="button" onClick={onCancel} disabled={isSaving}>
-          Cancelar
-        </SecondaryButton>
-        <PrimaryButton
-          type="submit"
-          disabled={isSaving || foods.length === 0}
-          className="gap-2"
-        >
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4" />
-          )}
-          {meal ? t('pages.nutrition.save_changes') : t('pages.nutrition.add_meal')}
-        </PrimaryButton>
-      </ActionRow>
+      <div className="sticky bottom-0 bg-[hsl(var(--bg))] pt-4 pb-2 mt-6 -mx-6 px-6 border-t border-[hsl(var(--border)/0.4)]">
+        <ActionRow>
+          <SecondaryButton type="button" onClick={onCancel} disabled={isSaving}>
+            Cancelar
+          </SecondaryButton>
+          <PrimaryButton
+            type="submit"
+            disabled={isSaving || foods.length === 0}
+            className="gap-2"
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+            {meal ? t('pages.nutrition.save_changes') : t('pages.nutrition.add_meal')}
+          </PrimaryButton>
+        </ActionRow>
+      </div>
     </form>
   );
 }
