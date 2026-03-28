@@ -9,6 +9,104 @@ import { toast } from 'sonner';
 import { getLastSession, checkSetIsPR } from '@/services/workoutHistoryService';
 import { saveSession, clearSession } from '@/lib/workoutSession';
 
+// ─── Set suggestion engine ────────────────────────────────────────────────────
+
+/**
+ * Compute the pre-fill suggestion for weight/reps based on history.
+ *
+ * Priority:
+ *   1. Last completed session for the same exercise (with progressive overload)
+ *   2. Last completed set in the current session
+ *   3. Program target weight / rep range
+ *   4. Empty
+ *
+ * Returns { weight, reps, rir, source, label, lastDisplay }
+ */
+function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, lastSession }) {
+  const none = { weight: '', reps: '', rir: '', source: null, label: null, lastDisplay: null };
+  if (!exercise) return none;
+
+  // Parse a rep range string ("6-8", "10", "8–12") into { min, max }
+  function parseReps(str) {
+    const s = String(str || '');
+    const range = s.match(/^(\d+)[-–](\d+)$/);
+    if (range) return { min: parseInt(range[1]), max: parseInt(range[2]) };
+    const single = s.match(/^(\d+)/);
+    if (single) { const n = parseInt(single[1]); return { min: n, max: n }; }
+    return null;
+  }
+
+  // ── 1. Last session ────────────────────────────────────────────────────────
+  if (lastSession?.sets?.length > 0) {
+    const histSet = lastSession.sets[Math.min(setIdx, lastSession.sets.length - 1)];
+    if (histSet && (histSet.load > 0 || histSet.reps > 0)) {
+      const target = parseReps(exercise.target_reps);
+      let sugWeight = histSet.load > 0 ? histSet.load : null;
+      let sugReps   = histSet.reps > 0 ? histSet.reps : (target?.max ?? null);
+      let label     = 'Based on last session';
+
+      if (sugWeight !== null && target) {
+        if (histSet.reps >= target.max) {
+          // Met or beat max reps — progressive overload: +2.5kg, back to target min
+          sugWeight = Math.round((sugWeight + 2.5) * 4) / 4;
+          sugReps   = target.min;
+          label     = 'Progressive overload';
+        } else if (histSet.reps < target.min) {
+          // Missed target — keep weight, aim for target min
+          sugReps = target.min;
+        }
+        // else: within range — repeat same weight/reps
+      }
+
+      const lastDisplay = [
+        histSet.load > 0 ? `${histSet.load}kg` : null,
+        histSet.reps > 0 ? `${histSet.reps}` : null,
+      ].filter(Boolean).join(' × ');
+
+      return {
+        weight: sugWeight !== null ? String(sugWeight) : '',
+        reps:   sugReps   !== null ? String(sugReps)   : '',
+        rir: '',
+        source: 'last_session',
+        label,
+        lastDisplay: lastDisplay || null,
+      };
+    }
+  }
+
+  // ── 2. Previous set in current session ────────────────────────────────────
+  if (setIdx > 0) {
+    const prev = completedSets[exerciseIdx]?.[setIdx - 1];
+    if (prev && (prev.weight || prev.reps)) {
+      return {
+        weight: prev.weight || '',
+        reps:   prev.reps   || '',
+        rir: '',
+        source: 'previous_set',
+        label: 'Based on previous set',
+        lastDisplay: null,
+      };
+    }
+  }
+
+  // ── 3. Plan target ─────────────────────────────────────────────────────────
+  const tw = exercise.target_weight;
+  const repsMatch = String(exercise.target_reps || '').match(/^(\d+)/);
+  const tr = repsMatch ? repsMatch[1] : '';
+  if (tw || tr) {
+    return {
+      weight: tw ? String(tw) : '',
+      reps:   tr,
+      rir: '',
+      source: 'target',
+      label: 'Target from plan',
+      lastDisplay: null,
+    };
+  }
+
+  return none;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function searchResultToExecution(ex) {
@@ -105,6 +203,7 @@ export default function WorkoutExecutionScreen({
   const [restDuration, setRestDuration] = useState(() => initialSession?.restDuration ?? 0);
   const [formData, setFormData] = useState(() => initialSession?.formData ?? { weight: '', reps: '', rir: '' });
   const [completedSets, setCompletedSets] = useState(() => initialSession?.completedSets ?? {});
+  const [suggestionMeta, setSuggestionMeta] = useState(null);
   const [showAddExercise, setShowAddExercise] = useState(
     () => (initialSession?.exercises ?? workout.exercises ?? []).length === 0
   );
@@ -137,6 +236,24 @@ export default function WorkoutExecutionScreen({
     () => (exercise ? getLastSession(workoutHistory, exercise.name) : null),
     [workoutHistory, exercise?.name]
   );
+
+  // ── Current suggestion (for UI display) ──────────────────────────────────
+  const currentSuggestion = useMemo(
+    () => computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, lastSession }),
+    [exercise, setIdx, exerciseIdx, completedSets, lastSession]
+  );
+
+  // ── Auto-fill on history load (fires when lastSession resolves from null) ─
+  useEffect(() => {
+    if (!exercise) return;
+    setFormData((prev) => {
+      if (prev.weight || prev.reps) return prev; // preserve user/session values
+      const s = computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, lastSession });
+      if (!s.source) return prev;
+      setSuggestionMeta({ source: s.source, label: s.label, lastDisplay: s.lastDisplay });
+      return { weight: s.weight, reps: s.reps, rir: prev.rir || '' };
+    });
+  }, [lastSession]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Live PR check ─────────────────────────────────────────────────────────
   const livePR = useMemo(() => {
@@ -184,14 +301,6 @@ export default function WorkoutExecutionScreen({
     window.dispatchEvent(new Event('atlas:session:change'));
   }, [exercises, exerciseIdx, setIdx, completedSets, formData, resting, restStartedAt, restDuration, isDone]);
 
-  // ── Set/exercise recording ────────────────────────────────────────────────
-  const recordSet = (exIdx, stIdx, data) => {
-    setCompletedSets((prev) => ({
-      ...prev,
-      [exIdx]: { ...(prev[exIdx] || {}), [stIdx]: data },
-    }));
-  };
-
   // ── Payload builder ───────────────────────────────────────────────────────
   const buildCompletedPayload = () => {
     const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
@@ -237,49 +346,69 @@ export default function WorkoutExecutionScreen({
     setExercises((prev) => [...prev, newEx]);
     setShowAddExercise(false);
 
-    if (wasDone) {
-      setExerciseIdx(prevCount);
+    if (wasDone || prevCount === 0) {
+      const nextExIdx  = wasDone ? prevCount : 0;
+      const nextLast   = getLastSession(workoutHistory, newEx.name);
+      const s = computeSetSuggestion({ exercise: newEx, setIdx: 0, exerciseIdx: nextExIdx, completedSets, lastSession: nextLast });
+      setExerciseIdx(nextExIdx);
       setSetIdx(0);
-      setFormData({ weight: '', reps: '', rir: '' });
-      setResting(false);
-      setRestStartedAt(null);
-      setIsDone(false);
-    } else if (prevCount === 0) {
-      setExerciseIdx(0);
+      setFormData({ weight: s.weight, reps: s.reps, rir: '' });
+      setSuggestionMeta(s.source ? { source: s.source, label: s.label, lastDisplay: s.lastDisplay } : null);
+      if (wasDone) {
+        setResting(false);
+        setRestStartedAt(null);
+        setIsDone(false);
+      }
     }
   };
 
   // ── Exercise/set progression ──────────────────────────────────────────────
-  const handleExerciseComplete = () => {
+  const handleExerciseComplete = (latestCompletedSets) => {
+    const cs = latestCompletedSets ?? completedSets;
     setResting(false);
     setRestStartedAt(null);
     if (exerciseIdx < exercises.length - 1) {
-      setExerciseIdx((i) => i + 1);
+      const nextExIdx = exerciseIdx + 1;
+      const nextEx    = exercises[nextExIdx];
+      const nextLast  = getLastSession(workoutHistory, nextEx.name);
+      const s = computeSetSuggestion({ exercise: nextEx, setIdx: 0, exerciseIdx: nextExIdx, completedSets: cs, lastSession: nextLast });
+      setExerciseIdx(nextExIdx);
       setSetIdx(0);
-      setFormData({ weight: '', reps: '', rir: '' });
+      setFormData({ weight: s.weight, reps: s.reps, rir: '' });
+      setSuggestionMeta(s.source ? { source: s.source, label: s.label, lastDisplay: s.lastDisplay } : null);
       return;
     }
     setIsDone(true);
   };
 
   const handleSetComplete = () => {
-    if (formData.weight || formData.reps || formData.rir) {
-      recordSet(exerciseIdx, setIdx, { ...formData });
+    // Build the updated completedSets synchronously so suggestion can read it
+    const hasData = formData.weight || formData.reps || formData.rir;
+    const nextCompletedSets = hasData
+      ? { ...completedSets, [exerciseIdx]: { ...(completedSets[exerciseIdx] || {}), [setIdx]: { ...formData } } }
+      : completedSets;
+
+    if (hasData) {
+      setCompletedSets(nextCompletedSets);
       if (livePR) {
         setPrFlash(exerciseIdx);
         setTimeout(() => setPrFlash(null), 3000);
       }
     }
+
     if (setIdx < sets.length - 1) {
-      setSetIdx((i) => i + 1);
-      setFormData({ weight: '', reps: '', rir: '' });
+      const nextSetIdx = setIdx + 1;
+      const s = computeSetSuggestion({ exercise, setIdx: nextSetIdx, exerciseIdx, completedSets: nextCompletedSets, lastSession });
+      setSetIdx(nextSetIdx);
+      setFormData({ weight: s.weight, reps: s.reps, rir: '' });
+      setSuggestionMeta(s.source ? { source: s.source, label: s.label, lastDisplay: s.lastDisplay } : null);
       const duration = exercise.rest_seconds || 60;
       setResting(true);
       setRestStartedAt(Date.now());
       setRestDuration(duration);
       return;
     }
-    handleExerciseComplete();
+    handleExerciseComplete(nextCompletedSets);
   };
 
   const handleSkipRest = () => {
@@ -388,8 +517,16 @@ export default function WorkoutExecutionScreen({
           <div className="space-y-2">
             <p className="atlas-overline">Rest</p>
             <p className="text-sm text-[hsl(var(--fg-2))]">
-              Next set: {exercise.name} (Set {setIdx + 1})
+              Next: {exercise.name} — Set {setIdx + 1}
             </p>
+            {(formData.weight || formData.reps) && (
+              <p className="text-[12px] font-semibold text-[hsl(var(--brand))]">
+                {[formData.weight && `${formData.weight}kg`, formData.reps && `${formData.reps} reps`].filter(Boolean).join(' × ')}
+                {suggestionMeta?.label && (
+                  <span className="ml-1.5 font-normal text-[hsl(var(--fg-3))]">· {suggestionMeta.label}</span>
+                )}
+              </p>
+            )}
           </div>
 
           {/* Timer ring */}
@@ -538,12 +675,28 @@ export default function WorkoutExecutionScreen({
         <div className="flex items-center gap-2.5 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-4 py-2.5">
           <Clock className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2} />
           <span className="text-[12px] text-[hsl(var(--fg-2))]">
-            Last time:
-            {' '}
-            <span className="font-semibold text-[hsl(var(--fg))]">
-              {lastSession.setCount}×{lastSession.maxWeight > 0 ? ` ${lastSession.maxWeight}kg` : ''}
-              {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} reps` : ''}
-            </span>
+            {currentSuggestion?.lastDisplay ? (
+              <>
+                <span>Last: </span>
+                <span className="font-semibold text-[hsl(var(--fg))]">{currentSuggestion.lastDisplay}</span>
+                {currentSuggestion.label === 'Progressive overload' && currentSuggestion.weight && (
+                  <>
+                    <span className="mx-1.5 text-[hsl(var(--fg-3))]">→</span>
+                    <span className="font-semibold text-[hsl(var(--brand))]">
+                      {currentSuggestion.weight}kg × {currentSuggestion.reps}
+                    </span>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <span>Last: </span>
+                <span className="font-semibold text-[hsl(var(--fg))]">
+                  {lastSession.setCount}×{lastSession.maxWeight > 0 ? ` ${lastSession.maxWeight}kg` : ''}
+                  {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} reps` : ''}
+                </span>
+              </>
+            )}
             <span className="ml-1.5 text-[hsl(var(--fg-3))]">
               {new Date(lastSession.date).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
             </span>
@@ -573,13 +726,13 @@ export default function WorkoutExecutionScreen({
               label="Weight (kg)"
               value={formData.weight}
               placeholder="0"
-              onChange={(value) => setFormData((prev) => ({ ...prev, weight: value }))}
+              onChange={(value) => { setSuggestionMeta(null); setFormData((prev) => ({ ...prev, weight: value })); }}
             />
             <FieldInput
               label="Reps"
               value={formData.reps}
               placeholder="0"
-              onChange={(value) => setFormData((prev) => ({ ...prev, reps: value }))}
+              onChange={(value) => { setSuggestionMeta(null); setFormData((prev) => ({ ...prev, reps: value })); }}
             />
             <FieldInput
               label="RIR"
@@ -588,6 +741,11 @@ export default function WorkoutExecutionScreen({
               onChange={(value) => setFormData((prev) => ({ ...prev, rir: value }))}
             />
           </div>
+          {suggestionMeta?.label && (
+            <p className="text-[11px] font-medium text-[hsl(var(--brand)/0.8)]">
+              ✦ {suggestionMeta.label}
+            </p>
+          )}
           <Button className="h-12 w-full rounded-[12px] sm:w-auto" onClick={handleSetComplete}>
             {setIdx < sets.length - 1 ? 'Save and next set' : 'Finish exercise'}
             <ArrowRight className="h-4 w-4" />
