@@ -6,6 +6,7 @@ import MobileSheet from '@/components/shared/MobileSheet';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { AI_COACH_KEY } from '@/hooks/useAICoach';
 import { ROUTES } from '@/lib/routes';
 
 /**
@@ -38,6 +39,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
       toast.success(`Weight logged: ${val} kg`);
       queryClient.invalidateQueries({ queryKey: ['progress-measurements'] });
       queryClient.invalidateQueries({ queryKey: ['recent-measurements'] });
+      queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY] });
       setWeight('');
     } catch {
       toast.error('Failed to log weight');
