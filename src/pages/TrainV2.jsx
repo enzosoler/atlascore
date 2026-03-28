@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useDailyStateV2, DAILY_KEYS } from '@/hooks/useDailyStateV2';
@@ -68,13 +69,13 @@ function formatDuration(min) {
   return min < 60 ? `${min} min` : `${Math.floor(min / 60)}h ${min % 60}m`;
 }
 
-function formatRelativeDate(dateStr) {
+function formatRelativeDate(dateStr, t) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Yesterday';
-  return `${diff}d ago`;
+  if (diff === 0) return t('train.today');
+  if (diff === 1) return t('train.yesterday');
+  return t('train.daysAgo', { count: diff });
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -82,6 +83,7 @@ function formatRelativeDate(dateStr) {
 export default function TrainV2() {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const { t } = useI18n();
   const { can } = useSubscription();
   const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState('list');
@@ -107,13 +109,13 @@ export default function TrainV2() {
     onSuccess: () => {
       clearSession();
       window.dispatchEvent(new Event('atlas:session:change'));
-      toast.success('Workout saved!');
+      toast.success(t('train.toastSaved'));
       daily.invalidateAfterAction('workout');
       setMode('list');
       setActiveSession(null);
       setInitialSession(null);
     },
-    onError: () => toast.error('Failed to save workout.'),
+    onError: () => toast.error(t('train.toastSaveFailed')),
   });
 
   // Resume saved session on mount
@@ -182,7 +184,7 @@ export default function TrainV2() {
 
         {/* Header */}
         <div>
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">Train</h1>
+          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">{t('train.title')}</h1>
           {hasPlan && (
             <p className="text-[13px] text-[hsl(var(--fg-3))] mt-0.5">{daily.plan.name} · {daily.plan.frequency ?? '—'}×/week</p>
           )}
@@ -202,7 +204,7 @@ export default function TrainV2() {
             <div className="flex items-center gap-3 mb-2">
               <CheckCircle2 className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
               <div>
-                <p className="text-[16px] font-bold text-[hsl(var(--fg))]">Session Complete</p>
+                <p className="text-[16px] font-bold text-[hsl(var(--fg))]">{t('train.sessionComplete')}</p>
                 <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.workout.sessionName || 'Workout'} · {formatDuration(daily.workout.durationMinutes)}</p>
               </div>
             </div>
@@ -215,7 +217,7 @@ export default function TrainV2() {
                 <p className="text-[18px] font-bold text-[hsl(var(--fg))] mt-1">{daily.plan.name}</p>
               </div>
               <div className="text-right">
-                <p className="text-[11px] text-[hsl(var(--fg-3))]">{exercises.length} exercises</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">{exercises.length} {t('train.exercises')}</p>
               </div>
             </div>
             {/* Exercise preview */}
@@ -228,26 +230,26 @@ export default function TrainV2() {
                 </div>
               ))}
               {exercises.length > 4 && (
-                <p className="text-[11px] text-[hsl(var(--fg-3))] pl-7">+{exercises.length - 4} more</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))] pl-7">{t('train.more', { count: exercises.length - 4 })}</p>
               )}
             </div>
             <button
               onClick={() => handleStartDay(0)}
               className="w-full flex items-center justify-center gap-2 h-12 rounded-[14px] bg-[hsl(var(--brand))] text-white text-[15px] font-bold transition-opacity hover:opacity-90 active:opacity-75"
             >
-              <Play className="w-4 h-4 fill-current" /> Start Workout
+              <Play className="w-4 h-4 fill-current" /> {t('train.startWorkout')}
             </button>
           </div>
         ) : (
           <div className="rounded-[20px] border border-dashed border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.2)] p-5 text-center">
             <Dumbbell className="w-8 h-8 text-[hsl(var(--fg-3))] mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">No plan active</p>
-            <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">Create a training plan or start a quick workout</p>
+            <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('train.noPlanActive')}</p>
+            <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">{t('train.noPlanDesc')}</p>
             <button
               onClick={() => setShowPlanBuilder(true)}
               className="mt-4 inline-flex items-center gap-2 rounded-[12px] bg-[hsl(var(--brand))] px-4 py-2.5 text-[13px] font-semibold text-white"
             >
-              <Plus className="w-3.5 h-3.5" /> Create Plan
+              <Plus className="w-3.5 h-3.5" /> {t('train.createPlan')}
             </button>
           </div>
         )}
@@ -261,8 +263,8 @@ export default function TrainV2() {
             <Zap className="w-5 h-5 text-[hsl(var(--brand))]" strokeWidth={2} />
           </div>
           <div className="flex-1">
-            <p className="text-[14px] font-bold text-[hsl(var(--fg))]">Quick Workout</p>
-            <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5">AI-generated or manual · 15-60 min</p>
+            <p className="text-[14px] font-bold text-[hsl(var(--fg))]">{t('train.quickWorkout')}</p>
+            <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5">{t('train.quickWorkoutDesc')}</p>
           </div>
           <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
         </button>
@@ -273,7 +275,7 @@ export default function TrainV2() {
           if (days.length === 0) return null;
           return (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5 px-0.5">Weekly Plan</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5 px-0.5">{t('train.weeklyPlan')}</p>
               <div className="space-y-1.5">
                 {days.map((day, idx) => {
                   const exCount = Array.isArray(day?.exercises) ? day.exercises.length : 0;
@@ -288,7 +290,7 @@ export default function TrainV2() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-semibold text-[hsl(var(--fg))] truncate">{day?.name || `Day ${idx + 1}`}</p>
-                        <p className="text-[11px] text-[hsl(var(--fg-3))]">{exCount} exercises</p>
+                        <p className="text-[11px] text-[hsl(var(--fg-3))]">{exCount} {t('train.exercises')}</p>
                       </div>
                       <Play className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
                     </button>
@@ -302,14 +304,14 @@ export default function TrainV2() {
         {/* Recent Sessions */}
         {daily.recentSessions.length > 0 && (
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5 px-0.5">Recent</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5 px-0.5">{t('train.recent')}</p>
             <div className="space-y-1.5">
               {daily.recentSessions.slice(0, 5).map((s, i) => (
                 <div key={s.id || i} className="flex items-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.2)] px-4 py-3">
                   <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))] shrink-0" strokeWidth={2} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || 'Session'}</p>
-                    <p className="text-[11px] text-[hsl(var(--fg-3))]">{formatRelativeDate(s.completed_at || s.date)} · {formatDuration(s.duration_minutes)}</p>
+                    <p className="text-[11px] text-[hsl(var(--fg-3))]">{formatRelativeDate(s.completed_at || s.date, t)} · {formatDuration(s.duration_minutes)}</p>
                   </div>
                 </div>
               ))}
@@ -335,7 +337,7 @@ export default function TrainV2() {
           onPlanCreated={() => {
             setShowPlanBuilder(false);
             daily.invalidateAfterAction('plan');
-            toast.success('Plan created!');
+            toast.success(t('train.toastPlanCreated'));
           }}
         />
       )}

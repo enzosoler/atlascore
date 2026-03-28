@@ -2768,7 +2768,6 @@
     "plus30s": "+30s",
     "skipRest": "Pular descanso",
     "workoutInProgress": "Treino em andamento",
-    "setsSaved": "{count} {count, plural, one {série} other {séries}} salva(s)",
     "setSaved": "série salva",
     "setsSavedPlural": "séries salvas",
     "exerciseOf": "Exercício {current} de {total}",

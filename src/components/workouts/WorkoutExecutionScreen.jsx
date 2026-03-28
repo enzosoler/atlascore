@@ -44,14 +44,14 @@ function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, la
       const target = parseReps(exercise.target_reps);
       let sugWeight = histSet.load > 0 ? histSet.load : null;
       let sugReps   = histSet.reps > 0 ? histSet.reps : (target?.max ?? null);
-      let label     = 'Based on last session';
+      let label     = 'lastSession';
 
       if (sugWeight !== null && target) {
         if (histSet.reps >= target.max) {
           // Met or beat max reps — progressive overload: +2.5kg, back to target min
           sugWeight = Math.round((sugWeight + 2.5) * 4) / 4;
           sugReps   = target.min;
-          label     = 'Progressive overload';
+          label     = 'progressiveOverload';
         } else if (histSet.reps < target.min) {
           // Missed target — keep weight, aim for target min
           sugReps = target.min;
@@ -84,7 +84,7 @@ function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, la
         reps:   prev.reps   || '',
         rir: '',
         source: 'previous_set',
-        label: 'Based on previous set',
+        label: 'previousSet',
         lastDisplay: null,
       };
     }
@@ -100,7 +100,7 @@ function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, la
       reps:   tr,
       rir: '',
       source: 'target',
-      label: 'Target from plan',
+      label: 'targetFromPlan',
       lastDisplay: null,
     };
   }
@@ -191,7 +191,7 @@ export default function WorkoutExecutionScreen({
   workoutHistory = [],
   personalRecords = {},
 }) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
 
   // All state initialised from saved session if provided
   const [exercises, setExercises] = useState(
@@ -423,14 +423,14 @@ export default function WorkoutExecutionScreen({
     clearSession();
     window.dispatchEvent(new Event('atlas:session:change'));
     const payload = buildCompletedPayload();
-    toast.success('Workout completed and saved! 💪');
+    toast.success(t('workoutExecution.toastCompleted') + ' 💪');
     onComplete?.(payload);
   };
 
   const handleCancelWorkout = () => {
     clearSession();
     window.dispatchEvent(new Event('atlas:session:change'));
-    toast('Workout cancelled');
+    toast(t('workoutExecution.toastCancelled'));
     onCancel?.();
   };
 
@@ -441,12 +441,12 @@ export default function WorkoutExecutionScreen({
         <div className="atlas-card space-y-4 rounded-[22px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="atlas-overline">Session</p>
+              <p className="atlas-overline">{t('workoutExecution.session')}</p>
               <h2 className="mt-2 text-[1.3rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                Add exercise
+                {t('workoutExecution.addExercise')}
               </h2>
               <p className="mt-1 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                Search the library or add manually.
+                {t('workoutExecution.searchLibrary')}
               </p>
             </div>
             {exercises.length > 0 && (
@@ -454,7 +454,7 @@ export default function WorkoutExecutionScreen({
                 onClick={() => setShowAddExercise(false)}
                 className="shrink-0 text-[12px] font-medium text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors pt-1"
               >
-                ← Cancel
+                {t('workoutExecution.cancelLabel')}
               </button>
             )}
           </div>
@@ -480,14 +480,14 @@ export default function WorkoutExecutionScreen({
           </div>
           <div>
             <p className="text-[1.5rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-              Workout Completed!
+              {t('workoutExecution.completed')}
             </p>
             <p className="mt-1 text-sm text-[hsl(var(--fg-2))]">{workout.name}</p>
           </div>
           <div className="grid w-full grid-cols-3 gap-3">
             <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
-                Exercises
+                {t('workoutExecution.statsExercises')}
               </p>
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">
                 {exercises.length}
@@ -495,23 +495,23 @@ export default function WorkoutExecutionScreen({
             </div>
             <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
-                Sets
+                {t('workoutExecution.statsSets')}
               </p>
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{totalSets}</p>
             </div>
             <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] p-3 text-center">
               <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">
-                Time
+                {t('workoutExecution.statsTime')}
               </p>
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{durationMin}min</p>
             </div>
           </div>
           <div className="flex w-full gap-3">
             <Button variant="outline" className="h-12 flex-1 rounded-[12px]" onClick={() => setShowAddExercise(true)}>
-              Add more
+              {t('workoutExecution.addMore')}
             </Button>
             <Button className="h-12 flex-1 rounded-[12px]" onClick={handleFinish}>
-              Save and close
+              {t('workoutExecution.saveAndClose')}
             </Button>
           </div>
         </div>
@@ -533,17 +533,17 @@ export default function WorkoutExecutionScreen({
         {/* Context header */}
         <div className="flex flex-col items-center gap-2.5 px-8 mb-10 text-center">
           <span className="inline-flex items-center rounded-full border border-[hsl(var(--brand)/0.28)] bg-[hsl(var(--brand)/0.1)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">
-            Rest
+            {t('workoutExecution.rest')}
           </span>
           <p className="text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
             {exercise.name}
-            <span className="ml-2 text-[15px] font-normal text-[hsl(var(--fg-3))]">Set {setIdx + 1}</span>
+            <span className="ml-2 text-[15px] font-normal text-[hsl(var(--fg-3))]">{t('workoutExecution.setLabel', { n: setIdx + 1 })}</span>
           </p>
           {(formData.weight || formData.reps) && (
             <p className="text-[14px] font-medium text-[hsl(var(--fg-2))]">
-              {[formData.weight && `${formData.weight} kg`, formData.reps && `${formData.reps} reps`].filter(Boolean).join(' × ')}
+              {[formData.weight && `${formData.weight} kg`, formData.reps && `${formData.reps} ${t('workoutExecution.reps').toLowerCase()}`].filter(Boolean).join(' × ')}
               {suggestionMeta?.label && (
-                <span className="ml-2 text-[13px] text-[hsl(var(--fg-3))]">· {suggestionMeta.label}</span>
+                <span className="ml-2 text-[13px] text-[hsl(var(--fg-3))]">· {t('workoutExecution.suggestion.' + suggestionMeta.label)}</span>
               )}
             </p>
           )}
@@ -592,7 +592,7 @@ export default function WorkoutExecutionScreen({
               onClick={() => setRestDuration((d) => d + 30)}
               className="rounded-full border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--fill)/0.5)] px-3.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
             >
-              +30s
+              {t('workoutExecution.plus30s')}
             </button>
           </div>
         </div>
@@ -603,7 +603,7 @@ export default function WorkoutExecutionScreen({
             className="h-14 w-full rounded-[16px] text-[15px] font-semibold tracking-[-0.01em]"
             onClick={handleSkipRest}
           >
-            Skip Rest
+            {t('workoutExecution.skipRest')}
           </Button>
         </div>
 
@@ -621,7 +621,7 @@ export default function WorkoutExecutionScreen({
             <div className="min-w-0 flex-1">
               <p className="atlas-overline">{workout.name}</p>
               <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-                Workout in progress
+                {t('workoutExecution.workoutInProgress')}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -631,7 +631,7 @@ export default function WorkoutExecutionScreen({
                 </span>
                 {totalSavedSets > 0 && (
                   <span className="text-[10px] font-semibold text-[hsl(var(--ok))]">
-                    {totalSavedSets} {totalSavedSets === 1 ? 'set' : 'sets'} saved
+                    {totalSavedSets} {totalSavedSets === 1 ? t('workoutExecution.setSaved') : t('workoutExecution.setsSavedPlural')}
                   </span>
                 )}
               </div>
@@ -639,7 +639,7 @@ export default function WorkoutExecutionScreen({
                 type="button"
                 onClick={() => setShowCancelConfirm(true)}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]"
-                aria-label="Cancel workout"
+                aria-label={t('workoutExecution.cancelWorkout')}
               >
                 <X className="h-4 w-4" strokeWidth={2} />
               </button>
@@ -660,7 +660,7 @@ export default function WorkoutExecutionScreen({
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <p className="atlas-overline">
-              Exercise {exerciseIdx + 1} of {exercises.length}
+              {t('workoutExecution.exerciseOf', { current: exerciseIdx + 1, total: exercises.length })}
             </p>
             <h1 className="text-[1.6rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
               {exercise.name}
@@ -685,7 +685,7 @@ export default function WorkoutExecutionScreen({
             ) : null}
             {exercise.rest_seconds ? (
               <span className="badge badge-neutral text-[11px]">
-                {exercise.rest_seconds}s rest
+                {t('workoutExecution.restBadge', { seconds: exercise.rest_seconds })}
               </span>
             ) : null}
           </div>
@@ -698,12 +698,12 @@ export default function WorkoutExecutionScreen({
 
           <div className="grid gap-3 md:grid-cols-3">
             <MetricTile
-              label="Target reps"
+              label={t('workoutExecution.targetReps')}
               value={currentSet?.target_reps ?? exercise.target_reps ?? '—'}
               accent
             />
             <MetricTile
-              label="Target load"
+              label={t('workoutExecution.targetLoad')}
               value={
                 (currentSet?.target_weight ?? exercise.target_weight)
                   ? `${currentSet?.target_weight ?? exercise.target_weight} kg`
@@ -711,7 +711,7 @@ export default function WorkoutExecutionScreen({
               }
             />
             <MetricTile
-              label="Sets"
+              label={t('workoutExecution.setsLabel')}
               value={currentSet?.target_sets ?? exercise.target_sets ?? '—'}
             />
           </div>
@@ -724,9 +724,9 @@ export default function WorkoutExecutionScreen({
           <span className="text-[12px] text-[hsl(var(--fg-2))]">
             {currentSuggestion?.lastDisplay ? (
               <>
-                <span>Last: </span>
+                <span>{t('workoutExecution.last')} </span>
                 <span className="font-semibold text-[hsl(var(--fg))]">{currentSuggestion.lastDisplay}</span>
-                {currentSuggestion.label === 'Progressive overload' && currentSuggestion.weight && (
+                {currentSuggestion.label === 'progressiveOverload' && currentSuggestion.weight && (
                   <>
                     <span className="mx-1.5 text-[hsl(var(--fg-3))]">→</span>
                     <span className="font-semibold text-[hsl(var(--brand))]">
@@ -737,10 +737,10 @@ export default function WorkoutExecutionScreen({
               </>
             ) : (
               <>
-                <span>Last: </span>
+                <span>{t('workoutExecution.last')} </span>
                 <span className="font-semibold text-[hsl(var(--fg))]">
                   {lastSession.setCount}×{lastSession.maxWeight > 0 ? ` ${lastSession.maxWeight}kg` : ''}
-                  {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} reps` : ''}
+                  {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} ${t('workoutExecution.reps').toLowerCase()}` : ''}
                 </span>
               </>
             )}
@@ -756,33 +756,33 @@ export default function WorkoutExecutionScreen({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="atlas-overline">
-                Log set {setIdx + 1}/{sets.length}
+                {t('workoutExecution.logSet', { current: setIdx + 1, total: sets.length })}
               </p>
             </div>
             {livePR && (
               <div className="flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] border border-[hsl(var(--ok)/0.3)] px-2.5 py-1">
                 <Trophy className="h-3 w-3 text-[hsl(var(--ok))]" strokeWidth={2.5} />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--ok))]">
-                  {livePR === 'weight' ? 'New weight PR!' : 'New volume PR!'}
+                  {livePR === 'weight' ? t('workoutExecution.newWeightPR') : t('workoutExecution.newVolumePR')}
                 </span>
               </div>
             )}
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <FieldInput
-              label="Weight (kg)"
+              label={t('workoutExecution.weightKg')}
               value={formData.weight}
               placeholder="0"
               onChange={(value) => { setSuggestionMeta(null); setFormData((prev) => ({ ...prev, weight: value })); }}
             />
             <FieldInput
-              label="Reps"
+              label={t('workoutExecution.reps')}
               value={formData.reps}
               placeholder="0"
               onChange={(value) => { setSuggestionMeta(null); setFormData((prev) => ({ ...prev, reps: value })); }}
             />
             <FieldInput
-              label="RIR"
+              label={t('workoutExecution.rir')}
               value={formData.rir}
               placeholder="0"
               onChange={(value) => setFormData((prev) => ({ ...prev, rir: value }))}
@@ -790,11 +790,11 @@ export default function WorkoutExecutionScreen({
           </div>
           {suggestionMeta?.label && (
             <p className="text-[11px] font-medium text-[hsl(var(--brand)/0.8)]">
-              ✦ {suggestionMeta.label}
+              ✦ {t('workoutExecution.suggestion.' + suggestionMeta.label)}
             </p>
           )}
           <Button className="h-12 w-full rounded-[12px] sm:w-auto" onClick={handleSetComplete}>
-            {setIdx < sets.length - 1 ? 'Save and next set' : 'Finish exercise'}
+            {setIdx < sets.length - 1 ? t('workoutExecution.saveAndNextSet') : t('workoutExecution.finishExercise')}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
@@ -804,9 +804,9 @@ export default function WorkoutExecutionScreen({
         <section className="atlas-card rounded-[22px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
           <div className="space-y-3">
             <div>
-              <p className="atlas-overline">Immediate history</p>
+              <p className="atlas-overline">{t('workoutExecution.immediateHistory')}</p>
               <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                Summary of sets already logged for the current exercise.
+                {t('workoutExecution.immediateHistoryDesc')}
               </p>
             </div>
             <div className="space-y-2">
@@ -816,11 +816,11 @@ export default function WorkoutExecutionScreen({
                   className="flex flex-wrap items-center gap-3 rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.68)_0%,hsl(var(--card))_100%)] px-4 py-3 text-[13px] text-[hsl(var(--fg-2))]"
                 >
                   <span className="inline-flex items-center gap-1 font-semibold text-[hsl(var(--fg))]">
-                    Set {Number(si) + 1}
+                    {t('workoutExecution.setLabel', { n: Number(si) + 1 })}
                   </span>
                   {data.weight ? <span>{data.weight} kg</span> : null}
-                  {data.reps ? <span>{data.reps} reps</span> : null}
-                  {data.rir != null && data.rir !== '' ? <span>RIR {data.rir}</span> : null}
+                  {data.reps ? <span>{data.reps} {t('workoutExecution.reps').toLowerCase()}</span> : null}
+                  {data.rir != null && data.rir !== '' ? <span>{t('workoutExecution.rir')} {data.rir}</span> : null}
                 </div>
               ))}
             </div>
@@ -834,7 +834,7 @@ export default function WorkoutExecutionScreen({
           className="flex items-center gap-1.5 rounded-[12px] px-4 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--shell))] hover:text-[hsl(var(--fg))]"
         >
           <Plus className="h-3.5 w-3.5" />
-          Add exercise
+          {t('workoutExecution.addExercise')}
         </button>
       </div>
 
@@ -849,10 +849,10 @@ export default function WorkoutExecutionScreen({
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
           <div className="relative w-full max-w-[320px] rounded-[24px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-6 py-6 shadow-[var(--shadow-lg)]">
             <h3 className="text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              Cancel workout?
+              {t('workoutExecution.cancelWorkoutTitle')}
             </h3>
             <p className="mt-2 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
-              Your progress will be lost. This can't be undone.
+              {t('workoutExecution.cancelWorkoutDesc')}
             </p>
             <div className="mt-5 flex gap-3">
               <Button
@@ -860,13 +860,13 @@ export default function WorkoutExecutionScreen({
                 className="h-11 flex-1 rounded-[12px]"
                 onClick={() => setShowCancelConfirm(false)}
               >
-                Keep going
+                {t('workoutExecution.keepGoing')}
               </Button>
               <Button
                 className="h-11 flex-1 rounded-[12px] bg-[hsl(var(--err))] text-white hover:bg-[hsl(var(--err)/0.9)]"
                 onClick={handleCancelWorkout}
               >
-                Cancel workout
+                {t('workoutExecution.cancelWorkout')}
               </Button>
             </div>
           </div>

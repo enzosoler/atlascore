@@ -2767,7 +2767,6 @@
     "plus30s": "+30s",
     "skipRest": "Skip Rest",
     "workoutInProgress": "Workout in progress",
-    "setsSaved": "{count} {count, plural, one {set} other {sets}} saved",
     "setSaved": "set saved",
     "setsSavedPlural": "sets saved",
     "exerciseOf": "Exercise {current} of {total}",
@@ -2817,6 +2816,11 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "daysAgo": "{count}d ago",
-    "more": "+{count} more"
+    "more": "+{count} more",
+    "workout": "Workout",
+    "exercise": "Exercise",
+    "session": "Session",
+    "freeWorkout": "Free Workout",
+    "dayN": "Day {n}"
   }
 }
