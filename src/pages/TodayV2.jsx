@@ -32,7 +32,16 @@ function getDateLabel(locale) {
   }).format(new Date());
 }
 
-function getGreeting(name) {
+function getFirstName(fullName) {
+  if (!fullName) return 'Athlete';
+  const [first] = String(fullName).split(/[\s@._-]+/).filter(Boolean);
+  if (!first) return 'Athlete';
+  const clean = first.replace(/\d+$/u, '') || first;
+  return `${clean.charAt(0).toLocaleUpperCase()}${clean.slice(1)}`;
+}
+
+function getGreeting(fullName) {
+  const name = getFirstName(fullName);
   const h = new Date().getHours();
   if (h >= 5 && h < 12) return `Good morning, ${name}`;
   if (h >= 12 && h < 17) return `Good afternoon, ${name}`;

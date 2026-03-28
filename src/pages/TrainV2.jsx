@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams, useBlocker } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Play, CheckCircle2, Dumbbell, Clock, Zap, Plus,
@@ -89,7 +89,6 @@ export default function TrainV2() {
   const [initialSession, setInitialSession] = useState(null);
   const [showQuickWorkout, setShowQuickWorkout] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
-  const [showGuard, setShowGuard] = useState(false);
 
   const daily = useDailyStateV2();
   const ai = useAICoach({ userId: user?.id });
@@ -138,33 +137,6 @@ export default function TrainV2() {
     }
   }, [searchParams, daily.activePlan, mode]);
 
-  // Navigation guard — block leaving when a session is active
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      mode === 'execution' && currentLocation.pathname !== nextLocation.pathname
-  );
-
-  useEffect(() => {
-    if (blocker.state === 'blocked') {
-      setShowGuard(true);
-    }
-  }, [blocker.state]);
-
-  const handleGuardResume = () => {
-    setShowGuard(false);
-    blocker.reset?.();
-  };
-
-  const handleGuardEnd = () => {
-    setShowGuard(false);
-    clearSession();
-    window.dispatchEvent(new Event('atlas:session:change'));
-    setMode('list');
-    setActiveSession(null);
-    setInitialSession(null);
-    blocker.proceed?.();
-  };
-
   const handleStartDay = (dayIndex) => {
     setActiveSession(buildSessionFromPlan(daily.activePlan, dayIndex));
     setInitialSession(null);
@@ -193,11 +165,6 @@ export default function TrainV2() {
           onComplete={handleComplete}
           workoutHistory={workoutHistory}
           personalRecords={personalRecords}
-        />
-        <WorkoutGuardSheet
-          open={showGuard}
-          onResume={handleGuardResume}
-          onEnd={handleGuardEnd}
         />
       </>
     );
