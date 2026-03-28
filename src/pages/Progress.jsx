@@ -320,7 +320,7 @@ function ProgressContent() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-full bg-[hsl(var(--bg))] pb-8">
+    <div className="min-h-full bg-[hsl(var(--bg))]">
       <div className="mx-auto max-w-lg px-4 pt-5 space-y-5">
 
         {/* Header */}
