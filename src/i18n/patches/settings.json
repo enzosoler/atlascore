@@ -228,5 +228,120 @@
       "permanentlyDeleteBtn": "Excluir Conta Permanentemente",
       "cancel": "Cancelar"
     }
+  },
+  "es": {
+    "settings": {
+      "errorFallback": "La página de configuración encontró un error.",
+      "account": {
+        "planSubtitle": "Tu perfil y plan",
+        "updated": "Actualizado"
+      },
+      "plan": {
+        "free": "Gratuito",
+        "active": "Activo",
+        "trial": "Prueba",
+        "pastDue": "Pago vencido",
+        "planLabel": "Plan",
+        "renews": "Renueva",
+        "loading": "Cargando...",
+        "manage": "Administrar plan"
+      },
+      "interface": {
+        "title": "Interfaz",
+        "subtitle": "Cómo se ve y se siente atlas.core",
+        "recommended": "Recomendado",
+        "alternative": "Alternativo",
+        "darkModeNote": "El modo oscuro preserva el contraste y la jerarquía visual diseñados para atlas.core."
+      },
+      "data": {
+        "title": "Datos",
+        "subtitle": "Exportaciones y controles de privacidad",
+        "exportLabel": "Exportar tus datos",
+        "exportDesc": "Descarga CSV, JSON o PDF con selección de rango de fechas",
+        "privacyLabel": "Configuración de privacidad",
+        "privacyDesc": "Administra la visibilidad de datos y controles de la cuenta"
+      },
+      "support": {
+        "title": "Soporte",
+        "subtitle": "Ayuda e información del sistema",
+        "helpLabel": "Centro de Ayuda",
+        "helpDesc": "Guías, preguntas frecuentes y solución de problemas",
+        "systemPromptsLabel": "Avisos del sistema",
+        "systemPromptsDesc": "Avisos de prueba, cambios de contraseña y eventos de sesión usan confirmaciones al estilo iOS."
+      },
+      "session": {
+        "subtitle": "Control de sesión activa",
+        "signOutDesc": "Finaliza tu sesión actual en todos los dispositivos",
+        "activeNow": "Activa ahora"
+      }
+    },
+    "account": {
+      "pageTitle": "Tu Cuenta",
+      "pageSubtitle": "Administra tu identidad, plan y configuración de cuenta.",
+      "backToProfile": "Volver al Perfil",
+      "emailLabel": "Email",
+      "noEmail": "Sin email",
+      "nameLabel": "Nombre",
+      "noName": "Sin nombre",
+      "planTitle": "Plan",
+      "currentPlan": "Plan actual",
+      "planFree": "Gratuito",
+      "planActive": "Activo",
+      "planPro": "Pro",
+      "planPremium": "Premium",
+      "upgradeCta": "Mejorar a Pro",
+      "manageBilling": "Administrar Facturación",
+      "settingsTitle": "Configuración",
+      "settingsLink": "Configuración de la App",
+      "settingsSubtitle": "Preferencias, tema y notificaciones.",
+      "dangerZone": "Zona de peligro",
+      "deleteAccount": "Eliminar Cuenta",
+      "deleteAccountSubtitle": "Elimina permanentemente tu cuenta y todos los datos.",
+      "logOut": "Cerrar sesión",
+      "roleAthlete": "Atleta",
+      "roleCoach": "Entrenador",
+      "roleNutritionist": "Nutricionista",
+      "roleClinician": "Clínico",
+      "roleAdmin": "Admin"
+    },
+    "updatePassword": {
+      "verifyingTitle": "Verificando tu solicitud...",
+      "verifyingDesc": "Espera mientras verificamos tu enlace de restablecimiento de contraseña.",
+      "linkExpiredTitle": "Enlace Expirado",
+      "requestNewLink": "Solicitar Nuevo Enlace",
+      "successTitle": "¡Contraseña Actualizada!",
+      "successDesc": "Tu contraseña ha sido actualizada correctamente. Serás redirigido a la página de inicio de sesión.",
+      "title": "Establecer Nueva Contraseña",
+      "subtitle": "Ingresa tu nueva contraseña a continuación.",
+      "newPasswordLabel": "Nueva Contraseña",
+      "newPasswordPlaceholder": "Ingresa la nueva contraseña",
+      "confirmPasswordLabel": "Confirmar Contraseña",
+      "confirmPasswordPlaceholder": "Confirma la nueva contraseña",
+      "submitBtn": "Actualizar Contraseña",
+      "updating": "Actualizando...",
+      "errorLinkExpired": "Este enlace de restablecimiento de contraseña es inválido o ha expirado. Solicita uno nuevo.",
+      "errorVerifySession": "No se pudo verificar tu sesión. Intenta de nuevo.",
+      "errorTooShort": "La contraseña debe tener al menos 6 caracteres.",
+      "errorNoMatch": "Las contraseñas no coinciden.",
+      "errorUpdateFailed": "Error al actualizar la contraseña. Intenta de nuevo."
+    },
+    "deleteAccount": {
+      "title": "Eliminar Cuenta",
+      "warning": "Advertencia",
+      "warningDesc": "Esta acción es permanente y no se puede deshacer. Todos tus datos, incluyendo entrenamientos, fotos de progreso y mediciones, serán eliminados permanentemente.",
+      "whatGetsDeleted": "Lo que se eliminará:",
+      "item": {
+        "workouts": "Todo el historial de entrenamientos y rutinas",
+        "nutrition": "Registros de nutrición y planes alimenticios",
+        "photos": "Fotos de progreso y mediciones",
+        "profileSettings": "Perfil de cuenta y configuración"
+      },
+      "continueBtn": "Continuar para Eliminar",
+      "typeToConfirmPrefix": "Para confirmar la eliminación, escribe",
+      "typeToConfirmSuffix": "a continuación:",
+      "inputPlaceholder": "Escribe DELETE para confirmar",
+      "permanentlyDeleteBtn": "Eliminar Cuenta Permanentemente",
+      "cancel": "Cancelar"
+    }
   }
 }

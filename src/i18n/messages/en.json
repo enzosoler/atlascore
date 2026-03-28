@@ -716,6 +716,28 @@
       "planSubtitle": "Stay on track: complete your workout, log your meals, and hit your targets.",
       "loading": "Loading your day..."
     },
+    "aiCoach": "Atlas Coach",
+    "forYou": "For you",
+    "actions": {
+      "done": "Done",
+      "train": "Train",
+      "logged": "Logged",
+      "eat": "Eat",
+      "weight": "Weight",
+      "checkin": "Check in"
+    },
+    "plan": {
+      "title": "Today's plan",
+      "workoutComplete": "Workout complete",
+      "noPlan": "No plan",
+      "nutrition": "Nutrition",
+      "left": "left",
+      "meals": "meals",
+      "protein": "protein",
+      "protocols": "Protocols",
+      "pending": "pending",
+      "allDone": "All done"
+    },
     "training": {
       "label": "TODAY'S TRAINING",
       "completedLabel": "Workout Completed",

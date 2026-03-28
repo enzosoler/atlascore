@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { email as emailService } from '@/lib/emailService';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Capacitor } from '@capacitor/core';
 
 const IS_NATIVE = Capacitor.isNativePlatform();
@@ -113,14 +114,13 @@ function AuthField({
       <label htmlFor={id} className="text-[13px] font-medium text-[hsl(var(--fg))]">
         {label}
       </label>
-      <input
+      <Input
         id={id}
         type={type}
         autoComplete={autoComplete}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full h-11 px-4 rounded-xl border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] transition-all focus:outline-none focus:border-[hsl(var(--brand)/0.5)] focus:ring-2 focus:ring-[hsl(var(--brand)/0.08)]"
       />
     </div>
   );
@@ -437,7 +437,7 @@ export default function Auth() {
 
                 <Button
                   type="submit"
-                  className="w-full h-10 rounded-lg"
+                  className="w-full"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -561,7 +561,7 @@ export default function Auth() {
                 {/* Primary CTA */}
                 <Button
                   type="submit"
-                  className="w-full h-10 rounded-lg"
+                  className="w-full"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -592,7 +592,7 @@ export default function Auth() {
                 {/* Google Sign In */}
                 <GoogleSignInButton
                   redirectUrl={`${window.location.origin}/auth/callback`}
-                  className="w-full h-10 rounded-lg"
+                  className="w-full h-11 rounded-lg"
                 />
               </form>
             )}

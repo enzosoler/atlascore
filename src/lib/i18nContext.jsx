@@ -24,13 +24,13 @@ function getBuildLocale() {
 
 /**
  * Detect locale from browser language (navigator.language).
- * If the browser is set to Portuguese (pt, pt-BR, pt-PT, etc.), return 'pt-BR'.
- * Otherwise return 'en'.
+ * Portuguese → 'pt-BR', Spanish → 'es', otherwise 'en'.
  */
 function getBrowserLocale() {
   if (typeof navigator === 'undefined') return defaultLocale;
   const lang = (navigator.language || navigator.userLanguage || '').toLowerCase();
   if (lang.startsWith('pt')) return 'pt-BR';
+  if (lang.startsWith('es')) return 'es';
   return 'en';
 }
 

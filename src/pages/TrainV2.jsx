@@ -163,6 +163,7 @@ export default function TrainV2() {
           workout={activeSession}
           initialSession={initialSession}
           onComplete={handleComplete}
+          onCancel={() => { setMode('list'); setActiveSession(null); setInitialSession(null); }}
           workoutHistory={workoutHistory}
           personalRecords={personalRecords}
         />

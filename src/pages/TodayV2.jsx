@@ -16,7 +16,7 @@ import {
   ArrowRight, Flame, Target, Pill,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
 import { buildBriefing, buildRecommendations } from '@/lib/rulesEngine';
@@ -27,29 +27,30 @@ import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
 // ─── Date / greeting / weather helpers ─────────────────────────────────────────
 
 function getDateLabel(locale) {
-  return new Intl.DateTimeFormat(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es' : 'en-US';
+  return new Intl.DateTimeFormat(intlLocale, {
     weekday: 'long', month: 'long', day: 'numeric',
   }).format(new Date());
 }
 
 function getFirstName(fullName) {
-  if (!fullName) return 'Athlete';
+  if (!fullName) return '';
   const [first] = String(fullName).split(/[\s@._-]+/).filter(Boolean);
-  if (!first) return 'Athlete';
+  if (!first) return '';
   const clean = first.replace(/\d+$/u, '') || first;
   return `${clean.charAt(0).toLocaleUpperCase()}${clean.slice(1)}`;
 }
 
-function getGreeting(fullName) {
-  const name = getFirstName(fullName);
+function getGreeting(fullName, t) {
+  const name = getFirstName(fullName) || t('common.athlete');
   const h = new Date().getHours();
-  if (h >= 5 && h < 12) return `Good morning, ${name}`;
-  if (h >= 12 && h < 17) return `Good afternoon, ${name}`;
-  if (h >= 17 && h < 21) return `Good evening, ${name}`;
-  return `Hey ${name}, up late?`;
+  if (h >= 5 && h < 12) return t('today.greeting.morning', { name });
+  if (h >= 12 && h < 17) return t('today.greeting.afternoon', { name });
+  if (h >= 17 && h < 21) return t('today.greeting.evening', { name });
+  return t('today.greeting.late', { name });
 }
 
-function interpretWeather(temp, code) {
+function interpretWeather(temp, code, t) {
   let icon, condition;
   if (code === 0)       { icon = '☀️'; condition = 'clear'; }
   else if (code <= 3)   { icon = '⛅'; condition = 'cloudy'; }
@@ -59,13 +60,13 @@ function interpretWeather(temp, code) {
   else if (code <= 82)  { icon = '🌦️'; condition = 'showers'; }
   else                  { icon = '⛈️'; condition = 'stormy'; }
   const comments = {
-    clear:   temp > 28 ? 'Hot outside. Stay hydrated.' : temp < 10 ? 'Cold but clear — good energy.' : 'Clear skies. No excuses today.',
-    cloudy:  'Overcast. Perfect for a focused session.',
-    foggy:   'Moody out there. Channel it.',
-    rainy:   "Rain can't stop the work.",
-    snowy:   'Frozen outside. Even better reason to warm up.',
-    showers: 'Wet out there. Train indoors.',
-    stormy:  'Stay in and train hard.',
+    clear:   temp > 28 ? t('today.weather.hot') : temp < 10 ? t('today.weather.cold') : t('today.weather.clear'),
+    cloudy:  t('today.weather.cloudy'),
+    foggy:   t('today.weather.foggy'),
+    rainy:   t('today.weather.rainy'),
+    snowy:   t('today.weather.snowy'),
+    showers: t('today.weather.showers'),
+    stormy:  t('today.weather.stormy'),
   };
   return { temp, icon, comment: comments[condition] ?? null };
 }
@@ -88,12 +89,12 @@ function HeroCard({ text, focus, primaryAction, loading }) {
       <div className="p-5">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand-ai))]">Atlas Coach</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand-ai))]">{t('today.aiCoach')}</span>
           {focus && (
             <span className="ml-auto text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] bg-[hsl(var(--fill)/0.6)] px-2 py-0.5 rounded-full">{focus}</span>
           )}
         </div>
-        <p className="text-[15px] font-semibold text-[hsl(var(--fg))] leading-snug">{text || 'Welcome back.'}</p>
+        <p className="text-[15px] font-semibold text-[hsl(var(--fg))] leading-snug">{text}</p>
         {primaryAction && (
           <Link
             to={primaryAction.path}
@@ -153,7 +154,7 @@ function RecCard({ rec, onDismiss }) {
           <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{rec.title}</p>
           {rec.reason && <p className="text-[11px] text-[hsl(var(--fg-3))] mt-1 leading-4">{rec.reason}</p>}
         </div>
-        <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] shrink-0">dismiss</button>
+        <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] shrink-0">{rec.dismissLabel || '×'}</button>
       </div>
       {rec.actionPath && (
         <Link to={rec.actionPath} className="mt-2.5 flex items-center gap-1.5 text-[12px] font-semibold text-[hsl(var(--brand))]">
@@ -169,6 +170,7 @@ function RecCard({ rec, onDismiss }) {
 function TodayContent() {
   const { user } = useAuth();
   const { locale } = useI18n();
+  const t = useT();
   const navigate = useNavigate();
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [weather, setWeather] = useState(null);
@@ -185,7 +187,7 @@ function TodayContent() {
           const json = await res.json();
           const temp = Math.round(json.current?.temperature_2m ?? 0);
           const code = json.current?.weather_code ?? 0;
-          setWeather(interpretWeather(temp, code));
+          setWeather(interpretWeather(temp, code, t));
         } catch {}
       },
       () => {},
@@ -230,7 +232,7 @@ function TodayContent() {
           <div className="min-w-0">
             <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
             <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight mt-0.5">
-              {getGreeting(daily.preferredName)}
+              {getGreeting(daily.preferredName, t)}
             </h1>
             {weather?.comment && (
               <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">{weather.comment}</p>
@@ -263,19 +265,19 @@ function TodayContent() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <ActionTile icon={Dumbbell} label={daily.workoutDone ? 'Done' : 'Train'} done={daily.workoutDone} to={ROUTES.workouts} />
-        <ActionTile icon={UtensilsCrossed} label={daily.nutritionLogged ? 'Logged' : 'Eat'} done={daily.nutritionLogged} to={ROUTES.nutrition} />
-        <ActionTile icon={Scale} label={daily.weightLogged ? 'Logged' : 'Weight'} done={daily.weightLogged} onClick={() => setCheckinOpen(true)} />
-        <ActionTile icon={Heart} label="Check in" onClick={() => setCheckinOpen(true)} />
+        <ActionTile icon={Dumbbell} label={daily.workoutDone ? t('today.actions.done') : t('today.actions.train')} done={daily.workoutDone} to={ROUTES.workouts} />
+        <ActionTile icon={UtensilsCrossed} label={daily.nutritionLogged ? t('today.actions.logged') : t('today.actions.eat')} done={daily.nutritionLogged} to={ROUTES.nutrition} />
+        <ActionTile icon={Scale} label={daily.weightLogged ? t('today.actions.logged') : t('today.actions.weight')} done={daily.weightLogged} onClick={() => setCheckinOpen(true)} />
+        <ActionTile icon={Heart} label={t('today.actions.checkin')} onClick={() => setCheckinOpen(true)} />
       </div>
 
       {/* Today Plan */}
       <div className="space-y-2.5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] px-0.5">Today's plan</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] px-0.5">{t('today.plan.title')}</p>
 
         <PlanCard
           icon={Dumbbell}
-          label={daily.workoutDone ? 'Workout complete' : (daily.plan.name || 'No plan')}
+          label={daily.workoutDone ? t('today.plan.workoutComplete') : (daily.plan.name || t('today.plan.noPlan'))}
           value={daily.workoutDone ? '✓' : (daily.plan.todayExercises.length > 0 ? `${daily.plan.todayExercises.length} ex` : '—')}
           sub={daily.workoutDone ? daily.workout.sessionName : daily.plan.todayDayLabel}
           to={ROUTES.workouts}
@@ -284,18 +286,18 @@ function TodayContent() {
 
         <PlanCard
           icon={Flame}
-          label="Nutrition"
-          value={daily.nutrition.caloriesTarget > 0 ? `${Math.round(kcalRemaining)} left` : '—'}
-          sub={`${daily.nutrition.mealsLogged} meals · ${Math.round(daily.nutrition.proteinConsumed)}g protein`}
+          label={t('today.plan.nutrition')}
+          value={daily.nutrition.caloriesTarget > 0 ? `${Math.round(kcalRemaining)} ${t('today.plan.left')}` : '—'}
+          sub={`${daily.nutrition.mealsLogged} ${t('today.plan.meals')} · ${Math.round(daily.nutrition.proteinConsumed)}g ${t('today.plan.protein')}`}
           to={ROUTES.nutrition}
         />
 
         {daily.protocols.dueToday > 0 && (
           <PlanCard
             icon={Pill}
-            label="Protocols"
+            label={t('today.plan.protocols')}
             value={`${daily.protocols.completedToday}/${daily.protocols.dueToday}`}
-            sub={daily.protocols.pending > 0 ? `${daily.protocols.pending} pending` : 'All done'}
+            sub={daily.protocols.pending > 0 ? `${daily.protocols.pending} ${t('today.plan.pending')}` : t('today.plan.allDone')}
             to={ROUTES.protocols}
             color={daily.protocols.pending > 0 ? 'warn' : 'ok'}
           />
@@ -307,7 +309,7 @@ function TodayContent() {
         <div className="space-y-2">
           <div className="flex items-center gap-2 px-0.5">
             <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">For you</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('today.forYou')}</p>
           </div>
           {recs.map((rec, i) => (
             <RecCard key={rec.id || i} rec={rec} onDismiss={ai.dismissRec} />

@@ -414,7 +414,7 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, isPt }) {
   if (!action) return null;
 
   return (
-    <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-4 py-4">
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-4 py-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className={cn(
@@ -491,7 +491,7 @@ function AIInsight({ meals, dailyTotals, profile, isPt }) {
   if (!insight) return null;
 
   return (
-    <div className="flex items-start gap-2 rounded-[12px] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5">
+    <div className="flex items-start gap-2 rounded-[14px] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5">
       <span className="text-[13px] leading-5 text-[hsl(var(--fg-2))]">{insight.text}</span>
     </div>
   );
@@ -590,7 +590,7 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing, i
         ? 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))]'
         : 'border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)]'
     )}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border)/0.4)]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border)/0.5)]">
         <div className="flex items-center gap-2.5">
           <div className={cn(
             'flex h-8 w-8 items-center justify-center rounded-lg',
@@ -653,7 +653,7 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing, i
           <button
             onClick={() => onAdd(bucketKey)}
             disabled={isProcessing}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[hsl(var(--border)/0.6)] py-2 text-[12px] font-medium text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.08)]"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[hsl(var(--border)/0.5)] py-2 text-[12px] font-medium text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.08)]"
           >
             <Plus className="h-3.5 w-3.5" />
             {isPt ? 'Adicionar item' : 'Add item'}
@@ -687,7 +687,7 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
       type="button"
       onClick={() => onSelect(food)}
       disabled={isSaving}
-      className="w-full rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-4 text-left transition-colors hover:bg-[hsl(var(--fill)/0.72)] disabled:cursor-wait disabled:opacity-70"
+      className="w-full rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.46)] px-4 py-4 text-left transition-colors hover:bg-[hsl(var(--fill)/0.72)] disabled:cursor-wait disabled:opacity-70"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -1073,7 +1073,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             )}
 
             {!isSearching && searchResults.length > 0 && (
-              <div className="max-h-56 overflow-y-auto rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]">
+              <div className="max-h-56 overflow-y-auto rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]">
                 {searchResults.map((food) => (
                   <button
                     key={food.id}
@@ -1122,7 +1122,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             {foods.map((food, idx) => (
               <div
                 key={idx}
-                className="rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] px-4 py-2.5"
+                className="rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.46)] px-4 py-2.5"
               >
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
@@ -1140,7 +1140,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                   </button>
                 </div>
                 {food._baseAmount && (
-                  <div className="mt-2 flex items-center gap-2 pt-2 border-t border-[hsl(var(--border)/0.4)]">
+                  <div className="mt-2 flex items-center gap-2 pt-2 border-t border-[hsl(var(--border)/0.5)]">
                     <label className="text-[11px] text-[hsl(var(--fg-3))] shrink-0">Portion</label>
                     <input
                       type="number"
@@ -1157,7 +1157,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             ))}
           </div>
 
-          <div className="mt-3 grid grid-cols-4 gap-3 rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
+          <div className="mt-3 grid grid-cols-4 gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
             {[
               { label: 'kcal', value: Math.round(totals.kcal), tone: 'calories' },
               { label: 'Prot', value: `${Math.round(totals.protein)}g`, tone: 'protein' },
@@ -1179,7 +1179,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
       )}
 
       {foods.length === 0 && (
-        <div className="mt-5 flex flex-col items-center justify-center rounded-[16px] border border-dashed border-[hsl(var(--border-h))] py-8 text-center">
+        <div className="mt-5 flex flex-col items-center justify-center rounded-[18px] border border-dashed border-[hsl(var(--border-h))] py-8 text-center">
           <Sparkles className="h-8 w-8 text-[hsl(var(--brand))]" strokeWidth={1.5} />
           <p className="mt-3 text-[13px] font-medium text-[hsl(var(--fg-2))]">
             Describe your meal with AI for instant logging
@@ -1190,7 +1190,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
         </div>
       )}
 
-      <div className="sticky bottom-0 bg-[hsl(var(--bg))] pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] mt-6 -mx-6 px-6 border-t border-[hsl(var(--border)/0.4)]">
+      <div className="sticky bottom-0 bg-[hsl(var(--bg))] pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] mt-6 -mx-6 px-6 border-t border-[hsl(var(--border)/0.5)]">
         <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:items-center sm:gap-3">
           <button
             type="button"
@@ -1691,7 +1691,7 @@ export default function NutritionPage() {
       subtitle="Daily nutrition tracking and guidance"
       fallbackDescription="Nutrition loaded in safe mode."
     >
-      <div className="min-h-full bg-[hsl(var(--bg))] pb-8">
+      <div className="min-h-full bg-[hsl(var(--bg))]">
         <div className="mx-auto max-w-lg px-4 pt-5 space-y-4">
 
         {/* Header + Date */}
@@ -1755,7 +1755,7 @@ export default function NutritionPage() {
 
         {/* 3 — Meal Timeline */}
         {isLoadingMeals ? (
-          <div className="flex items-center justify-center gap-3 rounded-[16px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
+          <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading meals...
           </div>
@@ -1846,7 +1846,7 @@ export default function NutritionPage() {
                   </div>
 
                   {amount > 0 && (
-                    <div className="grid grid-cols-4 gap-3 rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
+                    <div className="grid grid-cols-4 gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
                       {[
                         { label: 'kcal', value: scaled.calories, tone: 'calories' },
                         { label: 'Prot', value: `${scaled.protein}g`, tone: 'protein' },

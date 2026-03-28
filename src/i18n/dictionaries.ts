@@ -8,12 +8,14 @@ import type { Locale } from './config';
 // Eager-loaded raw dictionaries (bundled at build time, never fetched at runtime)
 import enMessages from './messages/en.json';
 import ptBRMessages from './messages/pt-BR.json';
+import esMessages from './messages/es.json';
 
 export type Dictionary = Record<string, any>;
 
 const rawDicts: Record<string, Dictionary> = {
   en: enMessages as unknown as Dictionary,
   'pt-BR': ptBRMessages as unknown as Dictionary,
+  es: esMessages as unknown as Dictionary,
 };
 
 /**

@@ -261,7 +261,7 @@ function SummaryItem({ item }) {
   const tone = TONE_STYLES[item.tone] || TONE_STYLES.neutral;
 
   return (
-    <div className={cn('rounded-[20px] border px-4 py-4', tone.panel)}>
+    <div className={cn('rounded-[18px] border px-4 py-4', tone.panel)}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
@@ -287,7 +287,7 @@ function SummaryPanel({ title, subtitle, icon: Icon, items, emptyText, className
   return (
     <SectionCard title={title} subtitle={subtitle} className={className}>
       <div className="mb-4 flex items-center gap-2">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.7)] text-[hsl(var(--fg-2))]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.7)] text-[hsl(var(--fg-2))]">
           <Icon className="h-4 w-4" strokeWidth={2} />
         </div>
         <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
@@ -342,7 +342,7 @@ function NextActionPanel({ insight }) {
           </p>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="rounded-full border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.66)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+            <span className="rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.66)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
               {metricLabel(insight.metric_key, t)}
             </span>
             <Button asChild size="sm" variant="outline" className="shrink-0">
@@ -369,10 +369,10 @@ function CategoryInsightCard({ insight }) {
   const tone = TONE_STYLES[insight.direction || 'neutral'] || TONE_STYLES.neutral;
 
   return (
-    <article className={cn('rounded-[24px] border px-5 py-5 shadow-[var(--shadow-sm)]', tone.panel)}>
+    <article className={cn('rounded-[20px] border px-5 py-5 shadow-[var(--shadow-sm)]', tone.panel)}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.92)] text-[hsl(var(--fg))]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.92)] text-[hsl(var(--fg))]">
             <Icon className="h-4.5 w-4.5" strokeWidth={2} />
           </div>
           <div className="min-w-0">
@@ -390,7 +390,7 @@ function CategoryInsightCard({ insight }) {
       <p className="mt-3 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{insight.body}</p>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <span className="rounded-full border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.66)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+        <span className="rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.66)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
           {metricLabel(insight.metric_key, t)}
         </span>
       </div>
@@ -407,20 +407,20 @@ function PreviewInsightCard({ insight, isSample = false }) {
 
   return (
     <article className={cn(
-      'rounded-[24px] border px-5 py-5 shadow-[var(--shadow-sm)] transition-all duration-300',
+      'rounded-[20px] border px-5 py-5 shadow-[var(--shadow-sm)] transition-all duration-300',
       tone.panel,
       isSample && 'opacity-80 hover:opacity-100'
     )}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.92)] text-[hsl(var(--fg))]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.92)] text-[hsl(var(--fg))]">
             <Icon className="h-4.5 w-4.5" strokeWidth={2} />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <p className="atlas-overline">{t(meta.labelKey)}</p>
               {isSample && (
-                <span className="rounded-full border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.5)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
+                <span className="rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
                   {t('insights.exampleBadge')}
                 </span>
               )}
@@ -445,10 +445,10 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
   const t = useT();
 
   return (
-    <div className="rounded-[24px] border border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5">
+    <div className="rounded-[20px] border border-[hsl(var(--brand)/0.2)] bg-[radial-gradient(circle_at_top_right,hsl(var(--brand)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
             <Lightbulb className="h-5 w-5" />
           </div>
           <div>
@@ -481,10 +481,10 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
             <div
               key={step.id}
               className={cn(
-                'flex items-center gap-3 rounded-[16px] border px-4 py-3 transition-all duration-200',
+                'flex items-center gap-3 rounded-[14px] border px-4 py-3 transition-all duration-200',
                 step.completed
                   ? 'border-[hsl(var(--ok)/0.3)] bg-[hsl(var(--ok)/0.08)]'
-                  : 'border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card)/0.5)]'
+                  : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.5)]'
               )}
             >
               <div
@@ -518,7 +518,7 @@ function UnlockProgress({ steps, completedCount, totalCount, progressPercent }) 
       </div>
 
       {completedCount === totalCount && (
-        <div className="mt-4 rounded-[16px] border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.08)] px-4 py-3">
+        <div className="mt-4 rounded-[14px] border border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.08)] px-4 py-3">
           <p className="text-[13px] font-medium text-[hsl(var(--ok))]">
             {t('insights.unlockAllDone')}
           </p>
@@ -542,10 +542,10 @@ function QuickActionButtons() {
           <Link
             key={action.id}
             to={action.route}
-            className="group flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] p-4 transition-all duration-200 hover:border-[hsl(var(--brand)/0.3)] hover:shadow-[var(--shadow-sm)]"
+            className="group flex items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] p-4 transition-all duration-200 hover:border-[hsl(var(--brand)/0.3)] hover:shadow-[var(--shadow-sm)]"
           >
             <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px]"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px]"
               style={{ backgroundColor: `hsl(${colorVar}/0.1)`, color: `hsl(${colorVar})` }}
             >
               <Icon className="h-5 w-5" />
@@ -569,7 +569,7 @@ function AICoachingMessage({ hasSomeData }) {
   const t = useT();
 
   return (
-    <div className="rounded-[20px] border border-[hsl(var(--accent-secondary)/0.2)] bg-[radial-gradient(circle_at_top_left,hsl(var(--accent-secondary)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-5 py-4">
+    <div className="rounded-[18px] border border-[hsl(var(--accent-secondary)/0.2)] bg-[radial-gradient(circle_at_top_left,hsl(var(--accent-secondary)/0.06),transparent_40%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] px-5 py-4">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--accent-secondary)/0.1)] text-[hsl(var(--accent-secondary))]">
           <Brain className="h-5 w-5" />
@@ -610,7 +610,7 @@ function InsightLevelIndicator({ level, labelKey, stage }) {
   };
 
   return (
-    <div className="flex items-center justify-between rounded-[16px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-4 py-3">
+    <div className="flex items-center justify-between rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-4 py-3">
       <div className="flex items-center gap-3">
         <div
           className="flex h-9 w-9 items-center justify-center rounded-[12px]"
@@ -686,7 +686,7 @@ function CategoryPreviews() {
         return (
           <div
             key={cat.key}
-            className="rounded-[20px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.6)] p-4 transition-all duration-200 hover:border-[hsl(var(--border)/0.9)] hover:bg-[hsl(var(--card))]"
+            className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] p-4 transition-all duration-200 hover:border-[hsl(var(--border)/0.9)] hover:bg-[hsl(var(--card))]"
           >
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[hsl(var(--fill)/0.6)] text-[hsl(var(--fg-2))]">
@@ -729,9 +729,9 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
   return (
     <div className="space-y-6">
       {/* Header with immediate value */}
-      <div className="rounded-[24px] border border-[hsl(var(--brand)/0.15)] bg-[radial-gradient(ellipse_at_top,hsl(var(--brand)/0.08),transparent_60%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6">
+      <div className="rounded-[20px] border border-[hsl(var(--brand)/0.15)] bg-[radial-gradient(ellipse_at_top,hsl(var(--brand)/0.08),transparent_60%),linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-6">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
             <Sparkles className="h-7 w-7" />
           </div>
           <div className="min-w-0 flex-1">
@@ -819,7 +819,7 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
       </SectionCard>
 
       {/* Time-based expectations */}
-      <div className="rounded-[16px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.5)] px-4 py-4">
+      <div className="rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.5)] px-4 py-4">
         <div className="flex items-start gap-3">
           <Clock className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--fg-3))]" />
           <div>
@@ -1169,7 +1169,7 @@ function InsightsContent() {
             </StatusBanner>
           ) : null}
 
-          <div className="rounded-[20px] border border-[hsl(var(--brand)/0.18)] bg-[linear-gradient(180deg,hsl(var(--brand)/0.08)_0%,hsl(var(--card)/0.92)_100%)] px-5 py-4 flex items-center justify-between gap-4">
+          <div className="rounded-[18px] border border-[hsl(var(--brand)/0.18)] bg-[linear-gradient(180deg,hsl(var(--brand)/0.08)_0%,hsl(var(--card)/0.92)_100%)] px-5 py-4 flex items-center justify-between gap-4">
             <div>
               <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Block Review</p>
               <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">

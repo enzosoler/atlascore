@@ -670,5 +670,341 @@
         "enter_one": "Insira pelo menos uma medida"
       }
     }
+  },
+  "es": {
+    "body": {
+      "eyebrow": "Cuerpo",
+      "title": "Tu cuerpo está cambiando. Esto es lo que significa.",
+      "subtitle": "Sigue tu progreso, entiende las tendencias y descubre qué está funcionando",
+      "tabs": {
+        "overview_label": "Progreso",
+        "overview_description": "Peso, composición y tendencias corporales.",
+        "measurements_label": "Medidas",
+        "measurements_description": "Checkpoints corporales estructurados y registros históricos.",
+        "photos_label": "Fotos",
+        "photos_description": "Checkpoints visuales privados agrupados por fecha."
+      },
+      "summary": {
+        "weight": "Peso",
+        "body_fat": "Grasa Corporal",
+        "progress_score": "Puntuación de Progreso",
+        "stable": "Estable",
+        "no_change_4w": "Sin cambios en las últimas 4 semanas",
+        "moving_right_direction": "Avanzando en la dirección correcta",
+        "consider_nutrition": "Considera revisar la nutrición",
+        "holding_steady": "Manteniéndose estable",
+        "fat_loss_progress": "Progreso en pérdida de grasa",
+        "monitor_calorie": "Monitorea la ingesta calórica",
+        "based_on_consistency": "Basado en consistencia y tendencias",
+        "out_of_100": "/ 100"
+      },
+      "what_to_do_next": {
+        "title": "Qué hacer a continuación",
+        "subtitle": "Basado en tus datos más recientes",
+        "record_measurements_weekly": "Registra medidas semanalmente para mejores tendencias",
+        "keep_training_volume": "Mantén el volumen de entrenamiento actual",
+        "prioritize_protein": "Prioriza la proteína en cada comida",
+        "consider_surplus": "Considera un ligero superávit para ganar músculo",
+        "stay_consistent": "Mantén la consistencia esta semana",
+        "track_energy": "Registra tus niveles de energía diariamente",
+        "log_checkpoint": "Registra tu próximo checkpoint",
+        "take_photos": "Toma fotos de progreso"
+      }
+    },
+    "measurements": {
+      "eyebrow": "Medidas",
+      "title": "Medidas con cuidado, jerarquía y lectura limpia.",
+      "subtitle": "Un espacio dedicado para checkpoints corporales: peso, composición y medidas en una vista premium, limpia y rítmica.",
+      "embedded_title": "Checkpoints corporales estructurados",
+      "embedded_subtitle": "Checkpoints de peso, grasa corporal y circunferencias organizados para lectura rápida en el hub Cuerpo.",
+      "log_measurements": "Registrar medidas",
+      "last_checkpoint_on": "Último checkpoint el",
+      "status_banner": "Checkpoints, gráficos e historial en esta ruta están organizados como una lectura corporal única, independiente de otros módulos.",
+      "loading": "Cargando checkpoints…",
+      "error_loading": "Error al cargar datos de medición. Verifica tu conexión e intenta de nuevo.",
+      "hero": {
+        "current_weight": "Peso Actual",
+        "body_fat_percent": "Grasa Corporal %",
+        "bmi": "IMC",
+        "cadence": "Cadencia",
+        "cadence_detail": "{n} checkpoints en el historial."
+      },
+      "latest_checkpoint": {
+        "section_title": "Último checkpoint",
+        "section_subtitle": "Resumen inmediato de la entrada más reciente, antes de abrir la tendencia o el historial.",
+        "overline": "Último checkpoint",
+        "summary": "Resumen inmediato del checkpoint más reciente, sin ruido de otros módulos.",
+        "source_label": "Fuente",
+        "context_label": "Contexto",
+        "weight": "Peso",
+        "body_fat": "Grasa Corporal %",
+        "waist": "Cintura",
+        "bmi": "IMC",
+        "fat_mass": "Masa grasa",
+        "lean_mass": "Masa magra",
+        "no_records_title": "Sin registros aún",
+        "no_records_description": "Registra tu primer checkpoint para activar la lectura más reciente."
+      },
+      "trend": {
+        "section_title": "Tendencia",
+        "section_subtitle": "Selecciona la métrica principal y lee la curva con suficiente contexto para decidir sin exceso visual.",
+        "selected_metric_overline": "Métrica seleccionada",
+        "current": "Actual",
+        "since_start": "Desde el inicio",
+        "records": "Registros",
+        "records_value": "{n} puntos",
+        "no_data": "Sin datos",
+        "no_measurements_title": "No hay medidas para mostrar",
+        "no_measurements_description": "Registra tu primera entrada para activar el gráfico, la tendencia y el resumen lateral.",
+        "checkpoint_tooltip": "Checkpoint {n}"
+      },
+      "coverage": {
+        "overline": "Cobertura",
+        "analysis_window_title": "Ventana de análisis",
+        "analysis_window_detail": "{n} días entre el primer y el último checkpoint.",
+        "latest_coverage_title": "Cobertura de la última entrada",
+        "latest_coverage_detail": "{n} campos completados en el checkpoint más reciente.",
+        "starting_baseline_title": "Línea base inicial",
+        "latest_context_title": "Contexto registrado más reciente"
+      },
+      "metric_selector": {
+        "checkpoints_with_metric": "{n} checkpoints con esta métrica",
+        "insufficient_data": "Datos insuficientes"
+      },
+      "history": {
+        "section_title": "Historial de Medidas",
+        "section_subtitle": "Entradas organizadas como checkpoints corporales completos, con contexto y variación comparada con la entrada anterior.",
+        "no_records_title": "Sin registros de medidas",
+        "no_records_description": "Abre el modal en esta página para crear tu primer checkpoint corporal.",
+        "first": "Primero",
+        "days_after": "{n}d después"
+      },
+      "form": {
+        "dialog_eyebrow": "Checkpoint corporal",
+        "dialog_title_edit": "Editar checkpoint corporal",
+        "dialog_title_new": "Registrar checkpoint corporal",
+        "dialog_description": "Ingresa peso, composición corporal y medidas de circunferencia para este checkpoint.",
+        "checkpoint_overline": "Checkpoint",
+        "checkpoint_heading": "Registra las medidas manuales e importadas para este checkpoint.",
+        "checkpoint_description": "Los campos derivados se calculan automáticamente a partir de los datos de origen. Los valores de composición corporal importados pueden agregarse aquí o después sin cambiar la fecha del checkpoint.",
+        "date_label": "Fecha",
+        "source_label": "Fuente",
+        "source_hint": "Registrar procedencia",
+        "quick_guide_label": "Guía rápida",
+        "quick_guide_text": "Puedes guardar con cualquier combinación de medidas manuales o importadas. El peso es opcional, pero se requiere al menos una medida de origen.",
+        "derived_preview_overline": "Vista previa derivada",
+        "derived_preview_description": "Estos valores se calculan localmente a partir de los datos de origen. Los valores importados mantendrán su propia procedencia si un dispositivo o flujo de trabajo clínico los proporciona después.",
+        "bmi_label": "IMC",
+        "fat_mass_label": "Masa grasa",
+        "lean_mass_label": "Masa magra",
+        "lean_mass_percent_label": "Masa magra %",
+        "muscle_fat_ratio_label": "Relación músculo/grasa",
+        "intracellular_water_label": "Agua intracelular %",
+        "water_in_lean_mass_label": "Agua en masa magra",
+        "muscle_mass_percent_label": "Masa muscular %",
+        "notes_label": "Notas de contexto",
+        "notes_placeholder": "ej.: cintura reduciéndose, bombeo mantenido, mejor sueño, o cualquier detalle que ayude a interpretar el checkpoint después.",
+        "cancel": "Cancelar",
+        "save_checkpoint": "Guardar checkpoint",
+        "log_checkpoint": "Registrar checkpoint",
+        "saving": "Guardando..."
+      },
+      "delta": {
+        "no_previous": "Sin datos anteriores",
+        "no_relevant_change": "Sin cambio relevante",
+        "vs_previous": "vs anterior"
+      },
+      "mutation": {
+        "created": "Checkpoint corporal registrado.",
+        "updated": "Checkpoint corporal actualizado.",
+        "deleted": "Checkpoint corporal eliminado.",
+        "create_error": "No se pudo registrar el checkpoint. {msg}",
+        "update_error": "No se pudo actualizar el checkpoint. {msg}",
+        "delete_error": "No se pudo eliminar el checkpoint. {msg}",
+        "please_try_again": "Por favor, intenta de nuevo.",
+        "validation_error": "Verifica los campos resaltados antes de guardar."
+      },
+      "confirm_delete": "¿Eliminar medidas del {date}?"
+    },
+    "progress": {
+      "eyebrow": "Cuerpo",
+      "title": "Tendencias de progreso fáciles de leer.",
+      "subtitle": "Peso, composición y fotos de checkpoint se agrupan en un hub de progreso corporal, en lugar de métricas dispersas.",
+      "loading_title": "Cargando progreso",
+      "loading_subtitle": "Obteniendo medidas y checkpoints de fotos.",
+      "empty_title": "Sin datos de progreso aún",
+      "empty_description": "Registra tu primer checkpoint corporal para desbloquear tendencias, resúmenes y tarjetas de comparación.",
+      "ai_insight_title": "Análisis de Tu Progreso",
+      "ai_insight_subtitle": "Qué significan tus datos",
+      "key_trends_eyebrow": "Tendencias Clave",
+      "key_trends_title": "Qué cambió",
+      "key_trends_subtitle": "Tus métricas principales con dirección e interpretación",
+      "photos_eyebrow": "Fotos",
+      "photos_title": "Evolución visual",
+      "photos_subtitle": "Compara tu progreso visualmente",
+      "insights": {
+        "record_more": "Registra más checkpoints para ver tendencias e insights",
+        "weight_loss": "Estás perdiendo peso de forma constante ({n}kg menos). Mantén tu enfoque actual.",
+        "weight_gain": "El peso subió {n}kg. Si no fue intencional, revisa tu ingesta calórica diaria.",
+        "weight_stable": "Peso estable. Bueno para mantener o ganar músculo.",
+        "body_fat_dropping": "Grasa corporal bajando — ¡excelente progreso en pérdida de grasa!",
+        "body_fat_rising": "La grasa corporal aumentó. Considera ajustar cardio o nutrición.",
+        "body_fat_steady": "La grasa corporal se mantiene estable.",
+        "bmi_underweight": "El IMC indica bajo peso. Enfócate en nutrición para ganar masa.",
+        "bmi_elevated": "IMC elevado. Los hábitos consistentes harán la diferencia.",
+        "bmi_healthy": "IMC en rango saludable. ¡Sigue ganando fuerza!",
+        "great_consistency": "Gran consistencia — ¡{n} checkpoints registrados!",
+        "log_weekly": "Registra checkpoints semanales para un análisis de tendencias más preciso."
+      },
+      "trend_metrics": {
+        "weight": "Peso",
+        "body_fat": "Grasa Corporal",
+        "muscle_mass": "Masa Muscular",
+        "waist": "Cintura",
+        "chest": "Pecho",
+        "bmi": "IMC",
+        "weight_good": "Buen progreso — pérdida constante",
+        "weight_bad": "Tendencia al alza — revisa la ingesta",
+        "weight_neutral": "Estable — mantén el rumbo",
+        "body_fat_good": "Pérdida de grasa en curso",
+        "body_fat_bad": "Monitorea de cerca",
+        "body_fat_neutral": "Manteniéndose estable",
+        "muscle_good": "¡Ganando músculo!",
+        "muscle_bad": "Posible pérdida — revisa la proteína",
+        "muscle_neutral": "Estable",
+        "waist_good": "Genial — cintura reduciéndose",
+        "waist_bad": "Revisa la rutina de core",
+        "waist_neutral": "Consistente",
+        "chest_good": "Tren superior creciendo",
+        "chest_bad": "Monitorea el entrenamiento",
+        "chest_neutral": "Estable",
+        "bmi_underweight": "Bajo peso — prioriza la ganancia",
+        "bmi_elevated": "Avanzando hacia el rango saludable",
+        "bmi_healthy": "En rango saludable"
+      }
+    },
+    "progressPhotos": {
+      "eyebrow": "Progreso Visual",
+      "title": "Ve lo que la báscula no puede mostrar",
+      "subtitle": "Sigue tu progreso visual y compara tu cuerpo a lo largo del tiempo.",
+      "new_checkpoint": "Nuevo checkpoint",
+      "limit_reached": "Límite alcanzado (5 checkpoints)",
+      "upgrade_to_pro": "Mejorar a Pro",
+      "checkpoints_label": "Checkpoints",
+      "photos_label": "Fotos",
+      "of_possible": "de {n} posibles",
+      "time_tracked_label": "Tiempo registrado",
+      "time_tracked_value": "{n} días",
+      "records_eyebrow": "Checkpoints",
+      "records_title": "Tus registros",
+      "records_subtitle": "Cada checkpoint agrupa las 4 poses estándar para la fecha seleccionada.",
+      "new_short": "Nuevo",
+      "today_badge": "Hoy",
+      "latest_badge": "Más reciente",
+      "poses_filled": "{filled} de {total} poses completadas",
+      "not_authenticated_title": "Ve lo que la báscula no puede mostrar",
+      "not_authenticated_subtitle": "Sigue tu progreso visual y compara tu cuerpo a lo largo del tiempo.",
+      "sign_in": "Inicia sesión para comenzar",
+      "safe_boundary_title": "Fotos de Progreso",
+      "safe_boundary_subtitle": "Modo seguro de la página de fotos.",
+      "safe_boundary_fallback": "La página de fotos se cargó en modo seguro.",
+      "empty_state": {
+        "title": "Inicia tu línea de tiempo visual",
+        "description": "Toma tu primer checkpoint para seguir el cambio real a lo largo del tiempo. La báscula miente — las fotos no.",
+        "free_plan_limit": "Plan gratuito: límite de 5 checkpoints alcanzado",
+        "create_first": "Crear primer checkpoint"
+      },
+      "visual_preview": {
+        "eyebrow": "Tus Futuros Checkpoints",
+        "description": "Así se verá tu progreso",
+        "before": "Antes",
+        "month_1": "Mes 1",
+        "after": "Después",
+        "month_3": "Mes 3",
+        "comparisons": "Comparaciones lado a lado",
+        "ai_insights": "Insights con IA",
+        "timeline": "Línea de tiempo visual"
+      },
+      "ai_analysis": {
+        "eyebrow": "Análisis IA",
+        "comparing": "Comparando checkpoint {latest} con {previous}",
+        "days_between": "{n} días entre checkpoints"
+      },
+      "consistency": {
+        "checkpoint_today": "Checkpoint hoy — ¡gran consistencia!",
+        "last_checkpoint_stay": "Último checkpoint: hace {n} días — ¡mantén la consistencia!",
+        "last_checkpoint_weekly": "Último checkpoint: hace {n} días — apunta a fotos semanales",
+        "last_checkpoint_overdue": "Último checkpoint: hace {n} días — hora de actualizar",
+        "last_checkpoint_days": "Último checkpoint: hace {n} días",
+        "checkpoints_total": "{n} checkpoint{plural} en total"
+      },
+      "comparison": {
+        "eyebrow": "Comparación Visual",
+        "drag_hint": "Arrastra para comparar",
+        "before": "Antes",
+        "after": "Después"
+      },
+      "timeline": {
+        "eyebrow": "Línea de Tiempo de Checkpoints"
+      },
+      "new_checkpoint_modal": {
+        "eyebrow": "Nuevo Checkpoint",
+        "title": "Registra tu progreso",
+        "description": "Selecciona la fecha de tu checkpoint. Luego agregarás fotos para las 4 poses.",
+        "date_label": "Fecha del checkpoint",
+        "cancel": "Cancelar",
+        "create": "Crear checkpoint"
+      },
+      "guide": {
+        "title": "Cómo registrar fotos",
+        "description": "Sigue las poses estándar para asegurar comparaciones consistentes entre checkpoints."
+      },
+      "pose_slot": {
+        "add_photo": "Agregar foto"
+      },
+      "poses": {
+        "front_label": "Frente",
+        "front_hint": "Brazos a los lados, mirando a la cámara",
+        "side_label": "Lateral",
+        "side_hint": "Perfil derecho, brazos relajados",
+        "back_label": "Espalda",
+        "back_hint": "De espaldas a la cámara, brazos a los lados",
+        "pose_label": "Pose libre",
+        "pose_hint": "Pose de tu elección para comparación"
+      },
+      "mutations": {
+        "photo_removed": "Foto eliminada.",
+        "photo_remove_error": "Error al eliminar foto.",
+        "photo_saved": "Foto guardada correctamente.",
+        "photo_upload_error": "Error al subir foto. Por favor, intenta de nuevo.",
+        "sign_in_to_upload": "Inicia sesión para subir fotos.",
+        "confirm_remove": "¿Eliminar esta foto del checkpoint?"
+      },
+      "relative_date": {
+        "today": "hoy",
+        "yesterday": "ayer",
+        "days_ago": "hace {n} días",
+        "weeks_ago": "hace {n} semanas"
+      }
+    },
+    "newCheckpoint": {
+      "title": "Nuevo Checkpoint",
+      "save": "Guardar",
+      "date_label": "Fecha",
+      "go_back": "Volver",
+      "fields": {
+        "weight": "Peso",
+        "body_fat": "Grasa Corporal",
+        "muscle_mass": "Masa Muscular",
+        "waist": "Cintura",
+        "hip": "Cadera",
+        "chest": "Pecho"
+      },
+      "toast": {
+        "saved": "Checkpoint guardado",
+        "failed": "Error al guardar",
+        "enter_one": "Ingresa al menos una medida"
+      }
+    }
   }
 }

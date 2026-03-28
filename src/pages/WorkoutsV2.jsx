@@ -1001,7 +1001,7 @@ export default function WorkoutsV2() {
       <WorkoutExecutionScreen
         workout={activeSession}
         onComplete={handleCompleteWorkout}
-        onBack={() => { setMode('list'); setActiveSession(null); }}
+        onCancel={() => { setMode('list'); setActiveSession(null); }}
         workoutHistory={workoutHistory}
         personalRecords={personalRecords}
       />

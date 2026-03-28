@@ -858,8 +858,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
-    min-height: 46px;
+    gap: 8px;
+    min-height: 44px;
     padding: 0 20px;
     border-radius: var(--atlas-control-radius);
     border: 1px solid transparent;
@@ -932,7 +932,7 @@
 
   .atlas-field {
     width: 100%;
-    border-radius: var(--atlas-card-radius);
+    border-radius: var(--atlas-control-radius);
     border: 1px solid hsl(var(--input));
     background: linear-gradient(180deg, hsl(var(--fill-secondary) / 0.92) 0%, hsl(var(--card)) 100%);
     color: hsl(var(--foreground));
@@ -1157,7 +1157,7 @@
   }
 
   .pb-tab-bar {
-    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--tab-bar-h) + env(safe-area-inset-bottom));
   }
 
   @keyframes slideUp {
@@ -1223,7 +1223,7 @@
   overscroll-behavior: contain;
   padding-left: max(16px, var(--safe-left));
   padding-right: max(16px, var(--safe-right));
-  padding-bottom: calc(76px + var(--safe-bottom));
+  padding-bottom: calc(var(--tab-bar-h) + var(--safe-bottom));
 }
 
 /* ── Standalone mobile page (MobileFormLayout) ──────────────────── */
@@ -1259,6 +1259,9 @@
    ------------------------------------------------------------------ */
 :root {
   --tab-bar-h: 94px;
+  --header-h: 3.75rem;
+  --sidebar-w: 16rem;
+  --sidebar-collapsed-w: 4.5rem;
 }
 
 /* ── Standalone mobile screen (outside AppLayout) ────────────────────

@@ -524,7 +524,7 @@ export default function AppLayout() {
       {/* ── Mobile top bar ──────────────────────────────────────── */}
       {/* padding-top: env(safe-area-inset-top) pushes content below notch/Dynamic Island */}
       <header
-        className="glass fixed inset-x-0 top-0 z-[60] border-b border-[hsl(var(--border)/0.72)] lg:hidden"
+        className="glass fixed inset-x-0 top-0 z-[65] border-b border-[hsl(var(--border)/0.72)] lg:hidden"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         {/* relative so the brand can be absolutely centered regardless of side-button widths */}
@@ -666,7 +666,7 @@ export default function AppLayout() {
           'flex-1 overflow-y-auto overflow-x-hidden transition-[margin] duration-300',
           collapsed ? 'lg:ml-[4.5rem]' : 'lg:ml-64',
           'lg:pt-0',
-          'pb-[calc(94px+env(safe-area-inset-bottom))] lg:pb-0'
+          'pb-[calc(var(--tab-bar-h)+env(safe-area-inset-bottom))] lg:pb-0'
         )}
         style={{ paddingTop: 'calc(3.75rem + env(safe-area-inset-top, 0px))' }}
       >
@@ -704,10 +704,10 @@ export default function AppLayout() {
             </div>
             <span className="text-[11px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
               {isRefreshing
-                ? 'Refreshing...'
+                ? (isPt ? 'Atualizando...' : 'Refreshing...')
                 : pullDistance >= PULL_REFRESH_THRESHOLD
-                  ? 'Release to refresh'
-                  : 'Pull to refresh'}
+                  ? (isPt ? 'Solte para atualizar' : 'Release to refresh')
+                  : (isPt ? 'Puxe para atualizar' : 'Pull to refresh')}
             </span>
           </div>
         </motion.div>

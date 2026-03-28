@@ -708,6 +708,28 @@
       "planSubtitle": "Mantenha o foco: complete seu treino, registre suas refeições e bata suas metas.",
       "loading": "Carregando seu dia..."
     },
+    "aiCoach": "Atlas Coach",
+    "forYou": "Para você",
+    "actions": {
+      "done": "Feito",
+      "train": "Treinar",
+      "logged": "Registrado",
+      "eat": "Comer",
+      "weight": "Peso",
+      "checkin": "Check-in"
+    },
+    "plan": {
+      "title": "Plano de hoje",
+      "workoutComplete": "Treino concluído",
+      "noPlan": "Sem plano",
+      "nutrition": "Nutrição",
+      "left": "restantes",
+      "meals": "refeições",
+      "protein": "proteína",
+      "protocols": "Protocolos",
+      "pending": "pendentes",
+      "allDone": "Tudo feito"
+    },
     "training": {
       "label": "TREINO DE HOJE",
       "completedLabel": "Treino Concluído",

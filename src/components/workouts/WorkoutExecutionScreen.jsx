@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowRight, Clock, Play, Plus, Trophy } from 'lucide-react';
+import { ArrowRight, Clock, Play, Plus, Trophy, X } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -187,6 +187,7 @@ export default function WorkoutExecutionScreen({
   workout,
   initialSession = null,
   onComplete,
+  onCancel,
   workoutHistory = [],
   personalRecords = {},
 }) {
@@ -210,6 +211,7 @@ export default function WorkoutExecutionScreen({
   );
   const [isDone, setIsDone] = useState(false);
   const [prFlash, setPrFlash] = useState(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   // Tick counter — increments twice/sec to drive re-renders for the live countdown
   const [, forceUpdate] = useState(0);
 
@@ -425,6 +427,13 @@ export default function WorkoutExecutionScreen({
     onComplete?.(payload);
   };
 
+  const handleCancelWorkout = () => {
+    clearSession();
+    window.dispatchEvent(new Event('atlas:session:change'));
+    toast('Workout cancelled');
+    onCancel?.();
+  };
+
   // ── Render: Add Exercise Panel ────────────────────────────────────────────
   if (showAddExercise) {
     return (
@@ -609,21 +618,31 @@ export default function WorkoutExecutionScreen({
       <div className="sticky top-0 z-10 -mx-5 bg-[hsl(var(--bg)/0.8)] px-5 py-3 backdrop-blur-md lg:-mx-8 lg:px-8">
         <div className="atlas-card rounded-[18px] px-4 py-3">
           <div className="mb-3 flex items-start justify-between gap-4">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="atlas-overline">{workout.name}</p>
               <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
                 Workout in progress
               </p>
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <span className="font-mono text-[11px] font-bold text-[hsl(var(--fg-3))]">
-                {Math.round(completionRatio)}%
-              </span>
-              {totalSavedSets > 0 && (
-                <span className="text-[10px] font-semibold text-[hsl(var(--ok))]">
-                  {totalSavedSets} {totalSavedSets === 1 ? 'set' : 'sets'} saved
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end gap-1">
+                <span className="font-mono text-[11px] font-bold text-[hsl(var(--fg-3))]">
+                  {Math.round(completionRatio)}%
                 </span>
-              )}
+                {totalSavedSets > 0 && (
+                  <span className="text-[10px] font-semibold text-[hsl(var(--ok))]">
+                    {totalSavedSets} {totalSavedSets === 1 ? 'set' : 'sets'} saved
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCancelConfirm(true)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]"
+                aria-label="Cancel workout"
+              >
+                <X className="h-4 w-4" strokeWidth={2} />
+              </button>
             </div>
           </div>
           <div className="flex-1">
@@ -823,6 +842,37 @@ export default function WorkoutExecutionScreen({
         ref={audioRef}
         src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA=="
       />
+
+      {/* Cancel confirmation */}
+      {showCancelConfirm && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
+          <div className="relative w-full max-w-[320px] rounded-[24px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-6 py-6 shadow-[var(--shadow-lg)]">
+            <h3 className="text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+              Cancel workout?
+            </h3>
+            <p className="mt-2 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
+              Your progress will be lost. This can't be undone.
+            </p>
+            <div className="mt-5 flex gap-3">
+              <Button
+                variant="outline"
+                className="h-11 flex-1 rounded-[12px]"
+                onClick={() => setShowCancelConfirm(false)}
+              >
+                Keep going
+              </Button>
+              <Button
+                className="h-11 flex-1 rounded-[12px] bg-[hsl(var(--err))] text-white hover:bg-[hsl(var(--err)/0.9)]"
+                onClick={handleCancelWorkout}
+              >
+                Cancel workout
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

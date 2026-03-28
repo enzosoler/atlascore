@@ -26,7 +26,7 @@ export default function BillingManagement() {
     (subscription?.status === 'past_due');
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))]">
+    <div className="mobile-screen bg-[hsl(var(--bg))]">
       <div className="flex items-center gap-4 p-4 border-b border-[hsl(var(--border))]">
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg">
           <ArrowLeft className="w-5 h-5" />
