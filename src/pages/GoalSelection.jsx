@@ -54,10 +54,10 @@ export default function GoalSelection() {
                 <button
                   key={goal.id}
                   onClick={() => toggleGoal(goal.id)}
-                  className={`p-4 rounded-xl border text-left transition-all ${
+                  className={`p-4 rounded-[16px] border text-left transition-all ${
                     isSelected
                       ? 'border-[hsl(var(--accent-primary))] bg-[hsl(var(--accent-primary))]/10'
-                      : 'border-[hsl(var(--border))] bg-[hsl(var(--card))] hover:border-[hsl(var(--border-h))]'
+                      : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] hover:border-[hsl(var(--border-h))]'
                   }`}
                 >
                   <goal.icon className={`w-6 h-6 mb-2 ${isSelected ? 'text-[hsl(var(--accent-primary))]' : ''}`} />

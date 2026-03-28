@@ -100,10 +100,10 @@ export default function SetupInput() {
                   <button
                     key={system.id}
                     onClick={() => setUnitSystem(system.id)}
-                    className={`p-3 rounded-lg border text-sm transition-colors ${
+                    className={`p-3 rounded-[14px] border text-sm transition-colors ${
                       unitSystem === system.id
                         ? 'border-[hsl(var(--accent-primary))] bg-[hsl(var(--accent-primary))]/10'
-                        : 'border-[hsl(var(--border))] bg-[hsl(var(--card))]'
+                        : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))]'
                     }`}
                   >
                     {system.label}
@@ -121,10 +121,10 @@ export default function SetupInput() {
                   <button
                     key={sex}
                     onClick={() => updateField('sex', sex)}
-                    className={`p-3 rounded-lg border capitalize transition-colors ${
+                    className={`p-3 rounded-[14px] border capitalize transition-colors ${
                       form.sex === sex
                         ? 'border-[hsl(var(--accent-primary))] bg-[hsl(var(--accent-primary))]/10'
-                        : 'border-[hsl(var(--border))] bg-[hsl(var(--card))]'
+                        : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))]'
                     }`}
                   >
                     {sex}

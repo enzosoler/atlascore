@@ -53,10 +53,10 @@ export default function PreferencesScreen() {
                     <button
                       key={option}
                       onClick={() => selectOption(pref.id, option)}
-                      className={`p-2 rounded-lg text-sm border transition-colors ${
+                      className={`p-2 rounded-[14px] text-sm border transition-colors ${
                         preferences[pref.id] === option
                           ? 'border-[hsl(var(--accent-primary))] bg-[hsl(var(--accent-primary))]/10 text-[hsl(var(--accent-primary))]'
-                          : 'border-[hsl(var(--border))] bg-[hsl(var(--card))] hover:border-[hsl(var(--border-h))]'
+                          : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] hover:border-[hsl(var(--border-h))]'
                       }`}
                     >
                       {option}
