@@ -37,6 +37,7 @@ import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
+import { useI18n } from '@/lib/i18nContext';
 import {
   getActiveWorkoutPlans,
   createWorkoutPlan,
@@ -96,7 +97,7 @@ function formatVolume(kg) {
   return kg >= 1000 ? `${(kg / 1000).toFixed(1)}t` : `${kg}kg`;
 }
 
-function formatRelativeDate(iso) {
+function formatRelativeDate(iso, locale = 'en-US') {
   if (!iso) return '';
   const d = new Date(iso);
   const now = new Date();
@@ -105,7 +106,7 @@ function formatRelativeDate(iso) {
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
   if (diffDays < 7) return `${diffDays} days ago`;
-  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 }
 
 // Get today's day index based on plan start date and frequency
@@ -842,6 +843,7 @@ function AIInsightsCard({ plan, recentSessions }) {
 }
 
 function SessionCard({ session }) {
+  const { locale } = useI18n();
   const exerciseCount = Array.isArray(session.exercises_completed)
     ? session.exercises_completed.length
     : 0;
@@ -854,7 +856,7 @@ function SessionCard({ session }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-[hsl(var(--fg))] truncate">{session.name}</p>
         <p className="text-xs text-[hsl(var(--fg-3))] mt-0.5">
-          {formatRelativeDate(session.completed_at)}
+          {formatRelativeDate(session.completed_at, locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
           {exerciseCount > 0 && ` · ${exerciseCount} exercises`}
         </p>
       </div>

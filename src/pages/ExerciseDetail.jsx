@@ -24,6 +24,7 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from '@/components/shared/StablePage';
+import { useI18n } from '@/lib/i18nContext';
 import {
   bodyPartToPT,
   equipmentToPT,
@@ -103,6 +104,7 @@ export default function ExerciseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { locale } = useI18n();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const { data: exercise, isLoading } = useQuery({
@@ -340,7 +342,7 @@ export default function ExerciseDetail() {
               <DetailCard label="Used" value={`${log.use_count || 0} times`} hint="How often this movement appears in your logs." icon={Zap} />
               <DetailCard
                 label="Last used"
-                value={log.last_used_at ? new Date(log.last_used_at).toLocaleDateString('en-US') : 'Never'}
+                value={log.last_used_at ? new Date(log.last_used_at).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US') : 'Never'}
                 hint="Most recent logged session."
                 icon={Timer}
               />

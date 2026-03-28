@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { FileDown, Loader2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18nContext';
 
 export default function ClientPdfExport({ link, measurements, meals, photos, exams, diets }) {
   const [loading, setLoading] = useState(false);
+  const { locale } = useI18n();
   const getBodyFatValue = (measurement) => measurement?.body_fat_percent ?? measurement?.body_fat ?? null;
 
   const generate = async () => {
@@ -34,7 +36,7 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text('Client Nutrition Report', margin, 26);
-      doc.text(new Date().toLocaleDateString('en-US'), pageW - margin, 26, { align: 'right' });
+      doc.text(new Date().toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US'), pageW - margin, 26, { align: 'right' });
 
       y = 50;
 

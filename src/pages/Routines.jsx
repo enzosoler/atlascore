@@ -9,11 +9,13 @@ import RoutineCard from '@/components/routines/RoutineCard';
 import RoutineForm from '@/components/routines/RoutineForm';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
+import { useI18n } from '@/lib/i18nContext';
 
 const DAYS_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function Routines() {
   const { user } = useAuth();
+  const { locale } = useI18n();
   const [showCreate, setShowCreate] = useState(false);
   const [showClone, setShowClone] = useState(false);
   const [cloneSource, setCloneSource] = useState(null);
@@ -91,7 +93,7 @@ export default function Routines() {
             {activeRoutine.last_completed_date && (
               <div className="text-right">
                 <p className="text-[11px] text-[hsl(var(--fg-3))]">Last completed</p>
-                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{new Date(activeRoutine.last_completed_date).toLocaleDateString('en-US')}</p>
+                <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{new Date(activeRoutine.last_completed_date).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')}</p>
               </div>
             )}
           </div>

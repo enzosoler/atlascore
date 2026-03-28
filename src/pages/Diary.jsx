@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { useT } from '@/lib/i18nContext';
+import { useT, useI18n } from '@/lib/i18nContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -136,6 +136,7 @@ export default function Diary() {
 
 function DiaryContent() {
   const t = useT();
+  const { locale } = useI18n();
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -513,7 +514,7 @@ function DiaryContent() {
                         <div className="mt-1.5 flex flex-wrap gap-3 text-[12px] text-[hsl(var(--fg-2))]">
                           {w.duration_minutes > 0 && <span>{w.duration_minutes} min</span>}
                           {w.volume_load > 0 && (
-                            <span>{w.volume_load.toLocaleString('en-US')} kg vol.</span>
+                            <span>{w.volume_load.toLocaleString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')} kg vol.</span>
                           )}
                           {w.perceived_effort > 0 && <span>RPE {w.perceived_effort}</span>}
                         </div>

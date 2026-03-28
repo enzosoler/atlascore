@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertCircle, ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getMeasurementFieldValue } from '@/lib/measurementModel';
+import { useI18n } from '@/lib/i18nContext';
 
 const ICON_TONE_CLASS = {
   positive: 'border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]',
@@ -10,6 +11,7 @@ const ICON_TONE_CLASS = {
 };
 
 export default function MeasurementInsights({ measurements, latest }) {
+  const { locale } = useI18n();
   if (!latest || measurements.length < 2) return null;
 
   const sorted = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -44,7 +46,7 @@ export default function MeasurementInsights({ measurements, latest }) {
       tone: weightChange > 0 ? 'attention' : 'positive',
       text: `${weightChange > 0 ? 'Increased' : 'Decreased'} ${Math.abs(weightChange).toFixed(1)}kg since ${new Date(
         `${oldest.date}T12:00:00`
-      ).toLocaleDateString('en-US')}.`,
+      ).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')}.`,
     });
   }
 

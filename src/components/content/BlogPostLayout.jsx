@@ -1,11 +1,12 @@
 import React from 'react';
 import { ArrowLeft, CalendarDays, Clock3, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useI18n } from '@/lib/i18nContext';
 
-function formatPublishedDate(date) {
+function formatPublishedDate(date, locale = 'en-US') {
   if (!date) return '--';
 
-  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
+  return new Date(`${date}T12:00:00`).toLocaleDateString(locale, {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -31,6 +32,7 @@ export default function BlogPostLayout({
   eyebrow = 'Guide',
   children,
 }) {
+  const { locale } = useI18n();
   return (
     <div className="atlas-page-shell">
       <div className="mx-auto max-w-4xl space-y-8 px-5 py-6 lg:px-8 lg:py-10">
@@ -62,7 +64,7 @@ export default function BlogPostLayout({
 
             <div className="flex flex-wrap gap-2.5">
               {publishedAt ? (
-                <MetaItem icon={CalendarDays}>{formatPublishedDate(publishedAt)}</MetaItem>
+                <MetaItem icon={CalendarDays}>{formatPublishedDate(publishedAt, locale)}</MetaItem>
               ) : null}
               {readingTime ? <MetaItem icon={Clock3}>{readingTime} min read</MetaItem> : null}
               {author ? <MetaItem icon={User}>{author}</MetaItem> : null}

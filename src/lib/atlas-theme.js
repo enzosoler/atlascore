@@ -23,7 +23,9 @@ export const WORKOUT_TYPES = {
 
 export const formatDate = (date) => {
   if (!date) return '';
-  return new Date(date + 'T12:00').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  const loc = (typeof localStorage !== 'undefined' && localStorage.getItem('atlas_locale')) || 'en';
+  const intlLoc = loc === 'pt-BR' ? 'pt-BR' : 'en-US';
+  return new Date(date + 'T12:00').toLocaleDateString(intlLoc, { month: '2-digit', day: '2-digit', year: 'numeric' });
 };
 
 export const getToday = () => new Date().toISOString().split('T')[0];

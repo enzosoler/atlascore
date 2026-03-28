@@ -127,11 +127,11 @@ function getMutationErrorMessage(error, fallbackMessage) {
   return error?.message || fallbackMessage;
 }
 
-function formatMeasurementDate(date, options) {
+function formatMeasurementDate(date, options, locale = 'en-US') {
   if (!date) return '--';
 
   return new Date(`${date}T12:00:00`).toLocaleDateString(
-    'en-US',
+    locale,
     options || {
       day: '2-digit',
       month: '2-digit',
@@ -333,6 +333,7 @@ function ChangePill({ label, delta, metric }) {
 // Compact history row
 function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
   const t = useT();
+  const { locale } = useI18n();
   const daysSincePrevious = previousMeasurement
     ? getDayDifference(previousMeasurement.date, measurement.date)
     : null;
@@ -364,7 +365,7 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
     <div className="flex items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.82)] px-4 py-3 hover:bg-[hsl(var(--card))]">
       <div className="min-w-[100px]">
         <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-          {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' })}
+          {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' }, locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
         </p>
         <p className="text-[11px] text-[hsl(var(--fg-3))]">
           {daysSincePrevious ? t('measurements.history.days_after').replace('{n}', daysSincePrevious) : t('measurements.history.first')}
@@ -661,6 +662,7 @@ export default function Measurements({ embedded = false }) {
 function MeasurementsContent({ embedded = false, measurements: propMeasurements }) {
   const { t, locale } = useI18n();
   const isPt = locale === 'pt-BR';
+  const intlLocale = isPt ? 'pt-BR' : 'en-US';
   const { user } = useAuth();
   const [metricKey, setMetricKey] = useState('weight');
   const [notice, setNotice] = useState(null);
@@ -814,7 +816,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
   };
 
   const chartData = selectedSnapshot.entries.map((measurement) => ({
-    date: formatMeasurementDate(measurement.date),
+    date: formatMeasurementDate(measurement.date, undefined, intlLocale),
     value: getMeasurementFieldValue(measurement, metricKey),
   }));
 
@@ -834,7 +836,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
 
   const handleDelete = (measurement) => {
     const confirmed = window.confirm(
-      `Delete measurements from ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}?`
+      `Delete measurements from ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' }, intlLocale)}?`
     );
     if (!confirmed) return;
     deleteMutation.mutate(measurement.id);
@@ -906,7 +908,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                     {formatMeasurementDate(latestMeasurement.date, {
                       day: '2-digit',
                       month: 'long',
-                    })}
+                    }, intlLocale)}
                   </span>
                 </span>
               ) : null}
@@ -988,7 +990,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                         day: '2-digit',
                         month: 'long',
                         year: 'numeric',
-                      })}
+                      }, intlLocale)}
                     </p>
                     <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
                       Immediate summary of the most recent checkpoint, without noise from other modules.
@@ -1230,7 +1232,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                               day: '2-digit',
                               month: 'long',
                               year: 'numeric',
-                            })
+                            }, intlLocale)
                           : '--'}
                       </p>
                     </div>

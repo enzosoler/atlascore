@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ArrowRight, Clock, Play, Plus, Trophy } from 'lucide-react';
+import { useI18n } from '@/lib/i18nContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
@@ -88,6 +89,7 @@ function FieldInput({ label, value, onChange, placeholder }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function WorkoutExecutionScreen({ workout, onComplete, workoutHistory = [], personalRecords = {} }) {
+  const { locale } = useI18n();
   // Local exercises list — starts from workout.exercises, user can extend it
   const [exercises, setExercises] = useState(() => workout.exercises || []);
   const [exerciseIdx, setExerciseIdx] = useState(0);
@@ -507,7 +509,7 @@ export default function WorkoutExecutionScreen({ workout, onComplete, workoutHis
               {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} reps` : ''}
             </span>
             <span className="ml-1.5 text-[hsl(var(--fg-3))]">
-              {new Date(lastSession.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {new Date(lastSession.date).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
             </span>
           </span>
         </div>

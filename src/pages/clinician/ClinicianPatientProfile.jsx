@@ -9,7 +9,7 @@ import { ChevronLeft, Loader2, Download } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { formatDate } from '@/lib/atlas-theme';
 import { toast } from 'sonner';
-import { useT } from '@/lib/i18nContext';
+import { useT, useI18n } from '@/lib/i18nContext';
 
 const ROUTES = { oral:'Oral', sublingual:'Sublingual', intramuscular:'IM', subcutaneous:'SC', topical:'Topical', intravenous:'IV', nasal:'Nasal', other:'Other' };
 const STATUS_BADGE = { normal:'badge-ok', low:'badge-warn', high:'badge-warn', critical:'badge-err' };
@@ -92,10 +92,11 @@ function ExamsTab() {
 
 function MeasurementsTab() {
   const t = useT();
+  const { locale } = useI18n();
   // Patient measurements require professional_links RLS policy (pending migration)
   const measurements = [];
   const chartData = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date)).map(m => ({
-    date: new Date(m.date + 'T12:00').toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }),
+    date: new Date(m.date + 'T12:00').toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { day: '2-digit', month: '2-digit' }),
     Weight: m.weight, BodyFat: m.body_fat,
   })).filter(d => d.Weight);
 

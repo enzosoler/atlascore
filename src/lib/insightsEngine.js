@@ -104,7 +104,9 @@ function formatSigned(value, digits = 1, unit = '') {
 
 function formatDateLabel(dateKey) {
   if (!dateKey) return null;
-  return new Date(`${dateKey}T12:00:00`).toLocaleDateString('en-US', {
+  const loc = (typeof localStorage !== 'undefined' && localStorage.getItem('atlas_locale')) || 'en';
+  const intlLoc = loc === 'pt-BR' ? 'pt-BR' : 'en-US';
+  return new Date(`${dateKey}T12:00:00`).toLocaleDateString(intlLoc, {
     month: 'short',
     day: 'numeric',
   });

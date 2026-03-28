@@ -179,6 +179,8 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
   const latest = checkpoints[0];
   const previous = checkpoints[1];
   const daysDiff = daysBetween(previous, latest);
+  const { locale } = useI18n();
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
 
   const formatRelativeDateSafe = (dateStr) => {
     const date = new Date(dateStr);
@@ -188,7 +190,7 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
     if (diffDays === 1) return 'yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(intlLocale, { month: 'short', day: 'numeric' });
   };
 
   return (
@@ -321,6 +323,8 @@ function ComparisonSlider({ beforePhoto, afterPhoto, beforeDate, afterDate }) {
 // Timeline Component
 function Timeline({ checkpoints, photosByDate, onSelect }) {
   if (checkpoints.length === 0) return null;
+  const { locale } = useI18n();
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 py-4">
@@ -348,7 +352,7 @@ function Timeline({ checkpoints, photosByDate, onSelect }) {
                   {index === 0 && <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[hsl(var(--brand))] text-[8px] font-bold text-white">L</div>}
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] font-medium text-[hsl(var(--fg))]">{new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                  <p className="text-[10px] font-medium text-[hsl(var(--fg))]">{new Date(date).toLocaleDateString(intlLocale, { month: 'short', day: 'numeric' })}</p>
                   <p className="text-[9px] text-[hsl(var(--fg-3))]">#{checkpoints.length - index}</p>
                 </div>
               </button>
@@ -701,8 +705,8 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
               <ComparisonSlider
                 beforePhoto={comparisonData.before}
                 afterPhoto={comparisonData.after}
-                beforeDate={new Date(comparisonData.beforeDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                afterDate={new Date(comparisonData.afterDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                beforeDate={new Date(comparisonData.beforeDate).toLocaleDateString(isPt ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
+                afterDate={new Date(comparisonData.afterDate).toLocaleDateString(isPt ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
               />
             </Section>
           )}

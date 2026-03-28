@@ -16,13 +16,17 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
+function getIntlLocale() {
+  const loc = localStorage.getItem('atlas_locale') || 'en';
+  return loc === 'pt-BR' ? 'pt-BR' : 'en-US';
+}
 function fmt(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString(getIntlLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 }
 function fmtTime(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleString(getIntlLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function Section({ icon: Icon, title, count, children, defaultOpen = true }) {

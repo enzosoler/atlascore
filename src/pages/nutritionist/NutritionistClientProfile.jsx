@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useT } from '@/lib/i18nContext';
+import { useT, useI18n } from '@/lib/i18nContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChevronLeft, Loader2, Mail } from 'lucide-react';
@@ -16,6 +16,7 @@ export default function NutritionistClientProfile() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const t = useT();
+  const { locale } = useI18n();
 
   const { data: allLinks = [], isLoading: loadingLink } = useQuery({
     queryKey: ['nutritionist-clients', user?.id],
@@ -55,7 +56,7 @@ export default function NutritionistClientProfile() {
 
   const sorted = [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date));
   const chartData = sorted.map(m => ({
-    date: new Date(m.date + 'T12:00').toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }),
+    date: new Date(m.date + 'T12:00').toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { day: '2-digit', month: '2-digit' }),
     weight: m.weight,
     bf: m.body_fat,
   }));

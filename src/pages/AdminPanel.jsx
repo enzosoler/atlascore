@@ -86,12 +86,16 @@ function roleBadge(role) {
 
 function fmt(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const loc = localStorage.getItem('atlas_locale') || 'en';
+  const intlLoc = loc === 'pt-BR' ? 'pt-BR' : 'en-US';
+  return new Date(dateStr).toLocaleDateString(intlLoc, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function fmtFull(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const loc = localStorage.getItem('atlas_locale') || 'en';
+  const intlLoc = loc === 'pt-BR' ? 'pt-BR' : 'en-US';
+  return new Date(dateStr).toLocaleString(intlLoc, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function shortId(id) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useT } from '@/lib/i18nContext';
+import { useT, useI18n } from '@/lib/i18nContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { getActiveWorkoutPlans, createWorkoutPlan, deactivateAllWorkoutPlans } from '@/services/workoutPlanService';
@@ -130,6 +130,7 @@ function WorkoutDayCard({ day }) {
 
 export default function MyWorkout() {
   const t = useT();
+  const { locale } = useI18n();
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -352,7 +353,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
             {plan.start_date && (
               <p className="t-caption">
                 {t('myWorkout.plan.since')}{' '}
-                {new Date(plan.start_date + 'T12:00').toLocaleDateString('en-US')}
+                {new Date(plan.start_date + 'T12:00').toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
               </p>
             )}
             </Card>

@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { TrendingUp, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS } from 'date-fns/locale';
+import { useI18n } from '@/lib/i18nContext';
 
 /**
  * ClientListWithAdherence — detailed client list with adherence %, last meal, current weight
  */
 export default function ClientListWithAdherence({ links = [], meals = [], measurements = [] }) {
+  const { locale } = useI18n();
   const clientData = links.filter(l => l.status === 'accepted').map(link => {
     const clientMeals = meals.filter(m => m.created_by === link.client_email);
     const lastMeal = clientMeals.length > 0 
@@ -74,7 +76,7 @@ export default function ClientListWithAdherence({ links = [], meals = [], measur
                 )}
                 {latestMeasurement?.weight && (
                   <div className="flex items-center gap-1">
-                    Weight: {latestMeasurement.weight}kg on {new Date(latestMeasurement.date).toLocaleDateString('en-US')}
+                    Weight: {latestMeasurement.weight}kg on {new Date(latestMeasurement.date).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
                   </div>
                 )}
                 {!lastMeal && (

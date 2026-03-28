@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useI18n } from '@/lib/i18nContext';
 import { ArrowLeft, ChevronLeft, ChevronRight, Dumbbell, Utensils, Camera } from 'lucide-react';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function Calendar() {
   const navigate = useNavigate();
+  const { locale } = useI18n();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -108,7 +110,7 @@ export default function Calendar() {
 
           <div className="mt-6 p-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
             <h3 className="font-medium mb-3">
-              {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              {selectedDate.toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </h3>
             <div className="space-y-2">
               {(events[selectedDate.getDate()] || []).length === 0 ? (

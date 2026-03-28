@@ -1,11 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Dumbbell, Calendar, Clock, Copy, Trash2, ChevronRight } from 'lucide-react';
+import { useI18n } from '@/lib/i18nContext';
 
 const DAYS_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export default function RoutineCard({ routine, isPrescribed, onDelete, onClone }) {
+  const { locale } = useI18n();
   const daysWithWorkout = routine.days_of_week?.filter(d => d.workout_id) || [];
 
   return (
@@ -78,7 +80,7 @@ export default function RoutineCard({ routine, isPrescribed, onDelete, onClone }
         {routine.last_completed_date && (
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
-            <span>{new Date(routine.last_completed_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            <span>{new Date(routine.last_completed_date).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}</span>
           </div>
         )}
       </div>

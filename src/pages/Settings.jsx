@@ -110,7 +110,7 @@ function ControlRow({ icon: Icon, label, description, href, onClick, meta, destr
 function SettingsContent() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { openCustomerPortal, loading: portalLoading } = useCustomerPortal();
   const { subscription } = useSubscription();
 
@@ -132,7 +132,7 @@ function SettingsContent() {
     ? t('settings.plan.pastDue')
     : t('settings.plan.free');
 
-  const lastUpdated = new Date().toLocaleDateString('en-US', {
+  const lastUpdated = new Date().toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
     month: 'short',
     day: 'numeric',
   });

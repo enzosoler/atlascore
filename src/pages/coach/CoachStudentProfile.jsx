@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useT } from '@/lib/i18nContext';
+import { useT, useI18n } from '@/lib/i18nContext';
 import {
   Activity,
   ArrowLeft,
@@ -28,18 +28,18 @@ import {
 import CoachStudentAdherence from '@/components/coach/CoachStudentAdherence';
 import { flattenPrescribedWorkoutExercises } from '@/lib/prescribedWorkout';
 
-function formatDate(date) {
+function formatDate(date, locale = 'en-US') {
   if (!date) return 'No date';
-  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
+  return new Date(`${date}T12:00:00`).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
 }
 
-function formatShortDate(date) {
+function formatShortDate(date, locale = 'en-US') {
   if (!date) return 'No date';
-  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
+  return new Date(`${date}T12:00:00`).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
   });
@@ -58,6 +58,8 @@ export default function CoachStudentProfile() {
   const { id: studentId } = useParams();
   const { user } = useAuth();
   const t = useT();
+  const { locale } = useI18n();
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
 
   const { data: coachLinks = [], isLoading: loadingLink } = useQuery({
     queryKey: ['coach-students', user?.id],
@@ -177,14 +179,14 @@ export default function CoachStudentProfile() {
               <WorkspaceMetricTile
                 label={t('coach.profile.metricLatestWeight')}
                 value={latestMeasurement?.weight ? `${latestMeasurement.weight} kg` : '--'}
-                hint={latestMeasurement?.date ? formatDate(latestMeasurement.date) : t('coach.profile.noMeasurementYet')}
+                hint={latestMeasurement?.date ? formatDate(latestMeasurement.date, intlLocale) : t('coach.profile.noMeasurementYet')}
                 icon={Scale}
                 tone="success"
               />
               <WorkspaceMetricTile
                 label={t('coach.profile.metricProgressPhotos')}
                 value={photos.length}
-                hint={latestPhoto?.date ? `${t('coach.profile.lastAdded')} ${formatShortDate(latestPhoto.date)}` : t('coach.profile.noPhotosUploaded')}
+                hint={latestPhoto?.date ? `${t('coach.profile.lastAdded')} ${formatShortDate(latestPhoto.date, intlLocale)}` : t('coach.profile.noPhotosUploaded')}
                 icon={Camera}
                 tone="neutral"
               />
@@ -199,7 +201,7 @@ export default function CoachStudentProfile() {
                   <p className="atlas-overline">{t('coach.profile.latestCheckpoint')}</p>
                   <div className="mt-4 space-y-1">
                     <p className="text-[20px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                      {latestMeasurement?.date ? formatDate(latestMeasurement.date) : t('coach.profile.noBodyDataYet')}
+                      {latestMeasurement?.date ? formatDate(latestMeasurement.date, intlLocale) : t('coach.profile.noBodyDataYet')}
                     </p>
                     <p className="text-[13px] text-[hsl(var(--fg-2))]">
                       {t('coach.profile.checkpointHint')}
@@ -285,7 +287,7 @@ export default function CoachStudentProfile() {
                         </div>
                         <div className="mt-4 grid gap-3 sm:grid-cols-3">
                           <SummaryRow label={t('coach.profile.labelExercises')} value={exerciseCount ? `${exerciseCount}` : '--'} />
-                          <SummaryRow label={t('coach.profile.labelStartDate')} value={plan.start_date ? formatDate(plan.start_date) : '--'} />
+                          <SummaryRow label={t('coach.profile.labelStartDate')} value={plan.start_date ? formatDate(plan.start_date, intlLocale) : '--'} />
                           <SummaryRow label={t('coach.profile.labelStatus')} value={plan.active !== false ? t('coach.common.active') : t('coach.common.paused')} />
                         </div>
                       </div>
@@ -319,7 +321,7 @@ export default function CoachStudentProfile() {
                           {workout.name || t('coach.profile.workoutSession')}
                         </p>
                         <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
-                          {workout.date ? formatDate(workout.date) : t('coach.profile.noRecordedDate')}
+                          {workout.date ? formatDate(workout.date, intlLocale) : t('coach.profile.noRecordedDate')}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-[12px] text-[hsl(var(--fg-2))]">

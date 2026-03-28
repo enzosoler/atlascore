@@ -9,7 +9,7 @@ import { useI18n } from '@/lib/i18nContext';
 
 function formatDate(dateStr, locale) {
   if (!dateStr) return '';
-  return new Date(`${dateStr}T12:00:00`).toLocaleDateString('en-US', {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',

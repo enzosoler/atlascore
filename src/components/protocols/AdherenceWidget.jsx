@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Minus, Target, Calendar } from 'lucide-react';
+import { useI18n } from '@/lib/i18nContext';
 
 function getWeekDates() {
   const dates = [];
@@ -85,7 +86,8 @@ function getTrend(currentRate, previousRate) {
 
 function DayDot({ day, isActive }) {
   const date = new Date(day.date);
-  const dayLabel = date.toLocaleDateString('en-US', { weekday: 'narrow' });
+  const { locale } = useI18n();
+  const dayLabel = date.toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { weekday: 'narrow' });
   const isToday = day.isToday;
   
   let status = 'empty';
