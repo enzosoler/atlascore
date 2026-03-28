@@ -511,66 +511,91 @@ export default function WorkoutExecutionScreen({
 
   // ── Render: Rest Screen ───────────────────────────────────────────────────
   if (resting) {
+    const R = 110;
+    const CIRC = 2 * Math.PI * R;
+    const pct = restDuration > 0 ? restRemaining / restDuration : 0;
+    const urgent = restRemaining > 0 && restRemaining <= 5;
+
     return (
-      <div className="fixed inset-0 z-[75] flex items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--brand)/0.1),transparent_40%),hsl(var(--bg))] p-5">
-        <div className="flex w-full max-w-sm flex-col items-center gap-8 text-center">
-          <div className="space-y-2">
-            <p className="atlas-overline">Rest</p>
-            <p className="text-sm text-[hsl(var(--fg-2))]">
-              Next: {exercise.name} — Set {setIdx + 1}
+      <div className="fixed inset-0 z-[75] flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_30%,hsl(var(--brand)/0.14),transparent_55%),hsl(var(--bg))]">
+
+        {/* Context header */}
+        <div className="flex flex-col items-center gap-2.5 px-8 mb-10 text-center">
+          <span className="inline-flex items-center rounded-full border border-[hsl(var(--brand)/0.28)] bg-[hsl(var(--brand)/0.1)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">
+            Rest
+          </span>
+          <p className="text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+            {exercise.name}
+            <span className="ml-2 text-[15px] font-normal text-[hsl(var(--fg-3))]">Set {setIdx + 1}</span>
+          </p>
+          {(formData.weight || formData.reps) && (
+            <p className="text-[14px] font-medium text-[hsl(var(--fg-2))]">
+              {[formData.weight && `${formData.weight} kg`, formData.reps && `${formData.reps} reps`].filter(Boolean).join(' × ')}
+              {suggestionMeta?.label && (
+                <span className="ml-2 text-[13px] text-[hsl(var(--fg-3))]">· {suggestionMeta.label}</span>
+              )}
             </p>
-            {(formData.weight || formData.reps) && (
-              <p className="text-[12px] font-semibold text-[hsl(var(--brand))]">
-                {[formData.weight && `${formData.weight}kg`, formData.reps && `${formData.reps} reps`].filter(Boolean).join(' × ')}
-                {suggestionMeta?.label && (
-                  <span className="ml-1.5 font-normal text-[hsl(var(--fg-3))]">· {suggestionMeta.label}</span>
-                )}
-              </p>
-            )}
-          </div>
+          )}
+        </div>
 
-          {/* Timer ring */}
-          <div className="relative flex h-48 w-48 items-center justify-center">
-            <svg className="absolute inset-0 h-full w-full -rotate-90">
-              <circle
-                cx="96"
-                cy="96"
-                r="88"
-                fill="none"
-                stroke="hsl(var(--border)/0.4)"
-                strokeWidth="6"
-              />
-              <circle
-                cx="96"
-                cy="96"
-                r="88"
-                fill="none"
-                stroke="hsl(var(--brand))"
-                strokeWidth="6"
-                strokeDasharray={552}
-                strokeDashoffset={restDuration > 0 ? 552 - (552 * restRemaining) / restDuration : 552}
-                className="transition-all duration-500 ease-linear"
-              />
-            </svg>
-            <div className="flex flex-col items-center gap-1">
-              <span className="font-mono text-[4rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
-                {formatRestCountdown(restRemaining)}
-              </span>
-              {/* +30s as ghost tertiary inside the ring */}
-              <button
-                onClick={() => setRestDuration((d) => d + 30)}
-                className="text-[11px] font-medium text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
-              >
-                +30s
-              </button>
-            </div>
+        {/* Timer ring */}
+        <div className="relative flex h-[260px] w-[260px] items-center justify-center">
+          <svg
+            className="absolute inset-0 h-full w-full -rotate-90"
+            viewBox="0 0 260 260"
+          >
+            <defs>
+              <linearGradient id="restArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="hsl(var(--brand))" stopOpacity="0.45" />
+                <stop offset="100%" stopColor="hsl(var(--brand))" />
+              </linearGradient>
+            </defs>
+            {/* Track */}
+            <circle
+              cx="130" cy="130" r={R}
+              fill="none"
+              stroke="hsl(var(--border)/0.2)"
+              strokeWidth="10"
+            />
+            {/* Progress arc */}
+            <circle
+              cx="130" cy="130" r={R}
+              fill="none"
+              stroke={urgent ? 'hsl(var(--warn))' : 'url(#restArcGrad)'}
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeDasharray={CIRC}
+              strokeDashoffset={CIRC - CIRC * pct}
+              className="transition-all duration-500 ease-linear"
+            />
+          </svg>
+          <div className="flex flex-col items-center gap-3">
+            <span
+              className={`text-[5.25rem] font-bold tabular-nums leading-none tracking-[-0.08em] transition-colors duration-300 ${
+                urgent ? 'text-[hsl(var(--warn))]' : 'text-[hsl(var(--fg))]'
+              }`}
+            >
+              {formatRestCountdown(restRemaining)}
+            </span>
+            <button
+              onClick={() => setRestDuration((d) => d + 30)}
+              className="rounded-full border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--fill)/0.5)] px-3.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
+            >
+              +30s
+            </button>
           </div>
+        </div>
 
-          {/* Skip as dominant CTA */}
-          <Button className="h-13 w-full rounded-[14px] text-[15px] font-semibold" onClick={handleSkipRest}>
+        {/* Skip CTA */}
+        <div className="mt-10 w-full max-w-[280px] px-4">
+          <Button
+            className="h-14 w-full rounded-[16px] text-[15px] font-semibold tracking-[-0.01em]"
+            onClick={handleSkipRest}
+          >
             Skip Rest
           </Button>
         </div>
+
       </div>
     );
   }

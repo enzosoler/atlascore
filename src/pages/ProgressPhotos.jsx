@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -473,13 +473,131 @@ function GuideSection() {
   );
 }
 
+// ── Scroll-wheel date picker ──────────────────────────────────────────────────
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function WheelColumn({ items, value, onChange, label, renderItem }) {
+  const ref = useRef(null);
+  const ITEM_H = 44;
+  const PADDING = ITEM_H * 2; // 2 items of padding top/bottom → 5-item visible window
+  const scrollingRef = useRef(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current || scrollingRef.current) return;
+    const idx = items.indexOf(value);
+    if (idx >= 0) ref.current.scrollTop = idx * ITEM_H;
+  }, [value, items]);
+
+  const handleScroll = () => {
+    scrollingRef.current = true;
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      scrollingRef.current = false;
+      if (!ref.current) return;
+      const idx = Math.round(ref.current.scrollTop / ITEM_H);
+      const clamped = Math.max(0, Math.min(items.length - 1, idx));
+      onChange(items[clamped]);
+    }, 80);
+  };
+
+  return (
+    <div className="flex flex-1 flex-col items-center gap-1.5">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{label}</p>
+      <div className="relative w-full" style={{ height: ITEM_H * 5 }}>
+        {/* Gradient masks */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-[hsl(var(--card))] to-transparent"
+          style={{ height: PADDING }}
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-[hsl(var(--card))] to-transparent"
+          style={{ height: PADDING }}
+        />
+        {/* Selection band */}
+        <div
+          className="pointer-events-none absolute inset-x-1 z-10 rounded-[10px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.45)]"
+          style={{ top: PADDING, height: ITEM_H }}
+        />
+        {/* Scroll container */}
+        <div
+          ref={ref}
+          onScroll={handleScroll}
+          className="h-full overflow-y-scroll"
+          style={{
+            scrollSnapType: 'y mandatory',
+            paddingTop: PADDING,
+            paddingBottom: PADDING,
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          {items.map((item, i) => (
+            <div
+              key={i}
+              style={{ scrollSnapAlign: 'center', height: ITEM_H }}
+              className="flex items-center justify-center select-none"
+            >
+              <span className="text-[17px] font-semibold text-[hsl(var(--fg))]">
+                {renderItem ? renderItem(item) : item}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DateWheelPicker({ value, onChange }) {
+  const parsed = useMemo(() => {
+    const [y, m, d] = value.split('-').map(Number);
+    return { year: y, month: m, day: d };
+  }, [value]);
+
+  const currentYear = new Date().getFullYear();
+  const years = useMemo(() => Array.from({ length: 6 }, (_, i) => currentYear - 5 + i), [currentYear]);
+  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+  const daysInMonth = new Date(parsed.year, parsed.month, 0).getDate();
+  const days = useMemo(() => Array.from({ length: daysInMonth }, (_, i) => i + 1), [daysInMonth]);
+
+  const fmt = (y, m, d) =>
+    `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+  const safeDay = Math.min(parsed.day, daysInMonth);
+
+  return (
+    <div className="flex gap-2">
+      <WheelColumn
+        items={days}
+        value={safeDay}
+        onChange={(d) => onChange(fmt(parsed.year, parsed.month, d))}
+        label="Day"
+      />
+      <WheelColumn
+        items={months}
+        value={parsed.month}
+        onChange={(m) => onChange(fmt(parsed.year, m, Math.min(parsed.day, new Date(parsed.year, m, 0).getDate())))}
+        label="Month"
+        renderItem={(m) => MONTH_LABELS[m - 1]}
+      />
+      <WheelColumn
+        items={years}
+        value={parsed.year}
+        onChange={(y) => onChange(fmt(y, parsed.month, Math.min(parsed.day, new Date(y, parsed.month, 0).getDate())))}
+        label="Year"
+      />
+    </div>
+  );
+}
+
 // New Checkpoint Modal
 function NewCheckpointModal({ onConfirm, onClose }) {
   const [date, setDate] = useState(getToday());
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm rounded-t-[28px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-6 pb-8 pt-6 shadow-[var(--shadow-lg)] sm:rounded-[28px]">
+      <div className="relative w-full max-w-sm rounded-[28px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-6 pb-8 pt-6 shadow-[var(--shadow-lg)]">
         <button type="button" onClick={onClose} className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.8)]">
           <X className="h-4 w-4" strokeWidth={2} />
         </button>
@@ -487,8 +605,8 @@ function NewCheckpointModal({ onConfirm, onClose }) {
         <h2 className="mt-2 text-[1.25rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">Record your progress</h2>
         <p className="mt-1.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]">Select the date for your checkpoint. You will then add photos for all 4 poses.</p>
         <div className="mt-5">
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Checkpoint date</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="atlas-input w-full" />
+          <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Checkpoint date</label>
+          <DateWheelPicker value={date} onChange={setDate} />
         </div>
         <div className="mt-5 flex gap-3">
           <button type="button" onClick={onClose} className="atlas-button atlas-button-secondary flex-1">Cancel</button>

@@ -70,8 +70,7 @@ export function QuickActions({ workoutDone, nutritionLogged, weightLogged, onChe
       <ActionTile
         icon={Scale}
         label={weightLogged ? 'Weight logged' : 'Log weight'}
-        onClick={weightLogged ? undefined : onAddWeight}
-        path={weightLogged ? ROUTES.measurements : undefined}
+        onClick={onAddWeight}
         done={weightLogged}
         highlighted={false}
       />
