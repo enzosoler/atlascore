@@ -543,49 +543,24 @@ function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, su
 
       {validationSummary ? <StatusBanner tone={validationSummary.tone}>{validationSummary.message}</StatusBanner> : null}
 
-      <div className="rounded-[24px] border border-[hsl(var(--border)/0.85)] bg-[linear-gradient(180deg,rgba(14,165,233,0.08),hsl(var(--card)/0.88))] px-5 py-5">
-        <div className="flex flex-col gap-4">
-          <div className="max-w-2xl">
-            <p className="atlas-overline">{t('measurements.form.checkpoint_overline')}</p>
-            <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {t('measurements.form.checkpoint_heading')}
-            </p>
-            <p className="mt-2 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              {t('measurements.form.checkpoint_description')}
-            </p>
-          </div>
+      <div className="grid gap-4">
+        <MeasurementField
+          label={t('measurements.form.date_label')}
+          type="date"
+          value={form.date}
+          onChange={(event) => updateField('date', event.target.value)}
+          error={fieldErrors.date}
+        />
 
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border border-[rgba(8,145,178,0.2)] bg-[rgba(8,145,178,0.12)] text-[#0891b2]">
-            <BarChart3 className="h-5 w-5" strokeWidth={1.9} />
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-4">
-          <MeasurementField
-            label={t('measurements.form.date_label')}
-            type="date"
-            value={form.date}
-            onChange={(event) => updateField('date', event.target.value)}
-            error={fieldErrors.date}
-          />
-
-          <MeasurementField
-            label={t('measurements.form.source_label')}
-            as="select"
-            value={form.source}
-            onChange={(event) => updateField('source', event.target.value)}
-            error={fieldErrors.source}
-            options={sourceOptions}
-            hint={t('measurements.form.source_hint')}
-          />
-
-          <div className="rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-4">
-            <p className="atlas-metric-label">{t('measurements.form.quick_guide_label')}</p>
-            <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-              {t('measurements.form.quick_guide_text')}
-            </p>
-          </div>
-        </div>
+        <MeasurementField
+          label={t('measurements.form.source_label')}
+          as="select"
+          value={form.source}
+          onChange={(event) => updateField('source', event.target.value)}
+          error={fieldErrors.source}
+          options={sourceOptions}
+          hint={t('measurements.form.source_hint')}
+        />
       </div>
 
       {FORM_SECTIONS.map((section) => (
