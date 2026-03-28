@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CAPACITOR_DEBUG</key>
+	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
@@ -20,10 +20,27 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.atlascore.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>atlascore</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>atlas.core uses your camera to scan food items and barcodes for nutrition tracking.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string></string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>atlas.core needs access to your photos to save and share your progress cards.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -32,6 +49,8 @@
 	<array>
 		<string>armv7</string>
 	</array>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -45,36 +64,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-
-	<!-- Deep Linking: Custom URL Scheme (atlascore://) -->
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.atlascore.app</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>atlascore</string>
-			</array>
-		</dict>
-	</array>
-
-	<!-- Deep Linking: Universal Links (useatlascore.com) -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:useatlascore.com</string>
 	</array>
-
-	<!-- Camera Permission (for food vision / barcode scanning) -->
-	<key>NSCameraUsageDescription</key>
-	<string>atlas.core uses your camera to scan food items and barcodes for nutrition tracking.</string>
-
-	<!-- Photo Library Permission (for social sharing cards) -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>atlas.core needs access to your photos to save and share your progress cards.</string>
-
-	<!-- Status bar style -->
-	<key>UIStatusBarStyle</key>
-	<string>UIStatusBarStyleLightContent</string>
 </dict>
 </plist>

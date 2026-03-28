@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link id="app-favicon" rel="icon" type="image/x-icon" href="/branding/dark/favicon.ico" sizes="any" />
+    <link id="app-favicon" rel="icon" type="image/png" href="/branding/dark/favicon.png" sizes="32x32" />
     <link id="app-apple-touch-icon" rel="apple-touch-icon" href="/branding/dark/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -53,7 +53,7 @@
         root.dataset.theme = theme;
         localStorage.setItem(THEME_KEY, theme);
 
-        if (favicon) favicon.setAttribute('href', isDark ? '/branding/dark/favicon.ico' : '/branding/light/favicon.ico');
+        if (favicon) favicon.setAttribute('href', isDark ? '/branding/dark/favicon.png' : '/branding/light/favicon.png');
         if (appleTouchIcon) appleTouchIcon.setAttribute('href', isDark ? '/branding/dark/apple-touch-icon.png' : '/branding/light/apple-touch-icon.png');
         if (themeColor) themeColor.setAttribute('content', isDark ? '#05070A' : '#FFFFFF');
       })();
