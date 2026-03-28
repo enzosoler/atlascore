@@ -1,293 +1,217 @@
-import React, { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+/**
+ * More — Control Center
+ *
+ * Clean list-based hub for account, goals, health, settings, and logout.
+ * Replaces the old summary-card Profile page.
+ */
+
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
-  Droplets,
-  Flame,
-  Scale,
-  Target,
+  Bell,
+  ChevronRight,
+  CreditCard,
+  Download,
+  FlaskConical,
+  HelpCircle,
+  LogOut,
+  Pill,
   Settings,
+  Target,
   User,
-  Activity,
 } from 'lucide-react';
+import { SafePageBoundary } from '@/components/shared/StablePage';
 import { useAuth } from '@/lib/AuthContext';
-import { useI18n } from '@/lib/i18nContext';
+import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
-import {
-  ActionRow,
-  AppContainer,
-  Card,
-  PageHeader,
-} from '@/components/shared/AppContainer';
-import {
-  ErrorState,
-  LoadingState,
-  SafePageBoundary,
-  formatNumber,
-} from '@/components/shared/StablePage';
-import { Button } from '@/components/ui/button';
-import {
-  loadLocalProfile,
-  hasValue,
-  getPreferredName,
-  getWeightDirection,
-  getMacroSignature,
-} from '@/lib/profileUtils';
 
-// ---------------------------------------------------------------------------
-// Summary Card Component
-// ---------------------------------------------------------------------------
+// ─── Row component ─────────────────────────────────────────────────────────────
 
-function SummaryCard({ icon: Icon, label, value, detail, to }) {
-  return (
-    <Link to={to} className="block">
-      <Card className="h-full px-5 py-5 transition-all duration-200 hover:border-[hsl(var(--fg)/0.2)]">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-3">
-            <p className="atlas-metric-label">{label}</p>
-            <p className="text-[1.375rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-              {value}
-            </p>
-          </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]">
-            <Icon className="h-4 w-4" strokeWidth={1.9} />
-          </div>
-        </div>
-        <p className="mt-4 text-[13px] leading-5 text-[hsl(var(--fg-2))]">{detail}</p>
-      </Card>
-    </Link>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Quick Action Link
-// ---------------------------------------------------------------------------
-
-function QuickAction({ to, icon: Icon, title, subtitle }) {
-  return (
-    <Link to={to} className="block">
-      <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.8)] px-4 py-4 transition-all duration-200 hover:border-[hsl(var(--fg)/0.2)] hover:bg-[hsl(var(--card))]">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]">
-          <Icon className="h-4 w-4" strokeWidth={1.9} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-            {title}
-          </p>
-          <p className="text-[13px] text-[hsl(var(--fg-2))]">{subtitle}</p>
-        </div>
-        <ArrowRight className="h-4 w-4 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
+function MenuRow({ to, icon: Icon, label, sublabel, badge, onClick, destructive }) {
+  const content = (
+    <div className={`flex items-center gap-3.5 px-4 py-3.5 transition-colors ${
+      destructive
+        ? 'active:bg-[hsl(var(--err)/0.08)]'
+        : 'active:bg-[hsl(var(--fill)/0.6)]'
+    }`}>
+      <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 ${
+        destructive
+          ? 'bg-[hsl(var(--err)/0.1)] text-[hsl(var(--err))]'
+          : 'bg-[hsl(var(--fill)/0.8)] text-[hsl(var(--fg-2))]'
+      }`}>
+        <Icon className="w-4 h-4" strokeWidth={1.9} />
       </div>
-    </Link>
+      <div className="flex-1 min-w-0">
+        <p className={`text-[14px] font-semibold tracking-[-0.01em] ${
+          destructive ? 'text-[hsl(var(--err))]' : 'text-[hsl(var(--fg))]'
+        }`}>{label}</p>
+        {sublabel && (
+          <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5 leading-4">{sublabel}</p>
+        )}
+      </div>
+      {badge && (
+        <span className="text-[11px] font-semibold text-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.1)] border border-[hsl(var(--brand)/0.2)] rounded-full px-2 py-0.5 shrink-0">
+          {badge}
+        </span>
+      )}
+      {!destructive && (
+        <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-3))] shrink-0" strokeWidth={1.8} />
+      )}
+    </div>
+  );
+
+  if (onClick) {
+    return <button onClick={onClick} className="w-full text-left">{content}</button>;
+  }
+  return <Link to={to}>{content}</Link>;
+}
+
+// ─── Section ───────────────────────────────────────────────────────────────────
+
+function MenuSection({ title, children }) {
+  return (
+    <div>
+      {title && (
+        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] px-4 mb-1.5">
+          {title}
+        </p>
+      )}
+      <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] overflow-hidden divide-y divide-[hsl(var(--border)/0.5)]">
+        {children}
+      </div>
+    </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main Profile Page
-// ---------------------------------------------------------------------------
+// ─── Main ──────────────────────────────────────────────────────────────────────
 
-export default function Profile() {
-  const { t } = useI18n();
+function MoreContent() {
+  const { user, logout } = useAuth();
+  const { role } = useRBAC(user);
 
-  return (
-    <SafePageBoundary
-      title={t('profile.sections_labels.profile')}
-      maxWidth="max-w-4xl"
-      fallbackDescription={t('profile.pageSubtitle')}
-    >
-      <ProfileContent />
-    </SafePageBoundary>
-  );
-}
-
-function ProfileContent() {
-  const { user } = useAuth();
-  const { t } = useI18n();
-  const [form, setForm] = useState({
-    height: '',
-    current_weight: '',
-    target_weight: '',
-    calories_target: '',
-    protein_target: '',
-    carbs_target: '',
-    fat_target: '',
-    water_target: '',
-  });
-
-  const profileScope = user?.email || user?.id || 'anonymous';
-  const profileQueryKey = ['profile-stable', profileScope];
-
-  const profileQuery = useQuery({
-    queryKey: profileQueryKey,
-    queryFn: () => loadLocalProfile(user),
-  });
-
-  const profileData = profileQuery.data && typeof profileQuery.data === 'object' ? profileQuery.data : null;
-
-  useEffect(() => {
-    if (!profileData) return;
-    setForm({
-      height: profileData.height || '',
-      current_weight: profileData.current_weight || '',
-      target_weight: profileData.target_weight || '',
-      calories_target: profileData.calories_target || '',
-      protein_target: profileData.protein_target || '',
-      carbs_target: profileData.carbs_target || '',
-      fat_target: profileData.fat_target || '',
-      water_target: profileData.water_target || '',
-    });
-  }, [profileData]);
-
-  const displayName = user?.full_name || user?.email || 'Athlete';
-  const preferredName = getPreferredName(displayName);
-
-  const weightDirection = getWeightDirection(form.current_weight, form.target_weight, t);
-  const macroSignature = getMacroSignature(form, t);
-
-  const goalText = hasValue(form.target_weight) && hasValue(form.current_weight)
-    ? Number(form.target_weight) < Number(form.current_weight)
-      ? t('profile.goal.loseFat')
-      : Number(form.target_weight) > Number(form.current_weight)
-        ? t('profile.goal.gainMuscle')
-        : t('profile.goal.maintain')
-    : t('profile.goal.notSet');
-
-  const calorieTargetValue = hasValue(form.calories_target)
-    ? `${formatNumber(form.calories_target)} kcal`
-    : t('profile.targets.notSet');
-
-  const waterValue = hasValue(form.water_target)
-    ? `${formatNumber(form.water_target, { maximumFractionDigits: 1 })} L`
-    : t('profile.targets.notSet');
-
-  if (profileQuery.isLoading) {
-    return (
-      <AppContainer>
-        <LoadingState
-          title={t('profile.loadingProfile')}
-          description={t('profile.loadingProfileDesc')}
-        />
-      </AppContainer>
-    );
-  }
-
-  if (profileQuery.isError) {
-    return (
-      <AppContainer>
-        <ErrorState
-          title={t('profile.safeMode')}
-          description={t('profile.safeModeDesc')}
-        />
-      </AppContainer>
-    );
-  }
+  const displayName = user?.full_name || user?.email || 'User';
+  const email = user?.email || '';
+  const roleLabel = ROLE_LABELS[role] || role;
 
   return (
-    <AppContainer>
-      <PageHeader
-        eyebrow={t('profile.sections_labels.yourSetup')}
-        title={t('profile.overview.title')}
-        subtitle={t('profile.overview.subtitle')}
-        accentClassName="from-[hsl(var(--brand)/0.06)] via-[hsl(var(--ok)/0.02)]"
-        actions={
-          <ActionRow>
-            <Button asChild variant="outline">
-              <Link to={ROUTES.myDiet}>
-                {t('profile.openMyDiet')}
-                <ArrowRight className="h-4 w-4" strokeWidth={2} />
-              </Link>
-            </Button>
-          </ActionRow>
-        }
-      />
+    <div className="min-h-full bg-[hsl(var(--bg))] pb-8">
+      <div className="mx-auto max-w-lg px-4 pt-5 space-y-5">
 
-      {/* Summary Cards - 4 key metrics only */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard
-          icon={Target}
-          label={t('profile.overview.goal')}
-          value={goalText}
-          detail={weightDirection.value}
-          to={ROUTES.bodyProfile}
-        />
-        <SummaryCard
-          icon={Flame}
-          label={t('profile.overview.calories')}
-          value={calorieTargetValue}
-          detail={macroSignature}
-          to={ROUTES.goals}
-        />
-        <SummaryCard
-          icon={Scale}
-          label={t('profile.overview.weightTarget')}
-          value={weightDirection.value}
-          detail={weightDirection.detail}
-          to={ROUTES.bodyProfile}
-        />
-        <SummaryCard
-          icon={Droplets}
-          label={t('profile.overview.hydration')}
-          value={waterValue}
-          detail={hasValue(form.water_target) ? t('profile.metrics.hydrationTargetSet') : t('profile.metrics.hydrationTargetNotSet')}
-          to={ROUTES.goals}
-        />
-      </section>
+        {/* Identity card */}
+        <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-5 py-5">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-[hsl(var(--brand)/0.12)] flex items-center justify-center text-[hsl(var(--brand))]">
+              <User className="w-5 h-5" strokeWidth={1.8} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[16px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))] truncate">
+                {displayName}
+              </p>
+              <p className="text-[13px] text-[hsl(var(--fg-3))] truncate">{email}</p>
+              <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.1)] border border-[hsl(var(--brand)/0.2)] rounded-full px-2 py-0.5">
+                {roleLabel}
+              </span>
+            </div>
+          </div>
+        </div>
 
-      {/* Quick Actions - Navigation to dedicated pages */}
-      <section className="mt-8">
-        <h3 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-          {t('profile.overview.manageSections')}
-        </h3>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <QuickAction
+        {/* Your Plan */}
+        <MenuSection title="Your Plan">
+          <MenuRow
             to={ROUTES.goals}
-            icon={Flame}
-            title={t('profile.sections.goals')}
-            subtitle={t('profile.sections.goalsSubtitle')}
+            icon={Target}
+            label="Goals & Targets"
+            sublabel="Nutrition targets, goal weight, macros"
           />
-          <QuickAction
-            to={ROUTES.bodyProfile}
-            icon={Activity}
-            title={t('profile.sections.body')}
-            subtitle={t('profile.sections.bodySubtitle')}
+          <MenuRow
+            to={ROUTES.plan}
+            icon={Target}
+            label="Training Plan"
+            sublabel="Active plan and schedule"
           />
-          <QuickAction
+        </MenuSection>
+
+        {/* Health */}
+        <MenuSection title="Health">
+          <MenuRow
+            to={ROUTES.labExams}
+            icon={FlaskConical}
+            label="Lab Results"
+            sublabel="Blood work, hormones, markers"
+          />
+          <MenuRow
+            to={ROUTES.protocols}
+            icon={Pill}
+            label="Protocols & Hormones"
+            sublabel="TRT, supplements, compounds"
+          />
+        </MenuSection>
+
+        {/* Account */}
+        <MenuSection title="Account">
+          <MenuRow
             to={ROUTES.account}
             icon={User}
-            title={t('profile.sections.account')}
-            subtitle={t('profile.sections.accountSubtitle')}
+            label="Account"
+            sublabel="Email, password, profile"
           />
-          <QuickAction
+          <MenuRow
+            to={ROUTES.pricing}
+            icon={CreditCard}
+            label="Subscription"
+            sublabel="Manage your plan"
+          />
+          <MenuRow
+            to="/notifications"
+            icon={Bell}
+            label="Notifications"
+          />
+        </MenuSection>
+
+        {/* App */}
+        <MenuSection title="App">
+          <MenuRow
             to={ROUTES.settings}
             icon={Settings}
-            title={t('profile.sections.settings')}
-            subtitle={t('profile.sections.settingsSubtitle')}
+            label="Settings"
+            sublabel="Theme, language, preferences"
           />
-        </div>
-      </section>
+          <MenuRow
+            to={ROUTES.export}
+            icon={Download}
+            label="Export Data"
+          />
+          <MenuRow
+            to={ROUTES.help}
+            icon={HelpCircle}
+            label="Help & Support"
+          />
+        </MenuSection>
 
-      {/* Edit CTA */}
-      <section className="mt-8">
-        <Card className="px-5 py-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                {t('profile.overview.editPrompt')}
-              </p>
-              <p className="mt-1 text-[14px] text-[hsl(var(--fg-2))]">
-                {t('profile.overview.editPromptSubtitle')}
-              </p>
-            </div>
-            <Button asChild>
-              <Link to={ROUTES.goals}>
-                {t('profile.overview.editGoals')}
-                <ArrowRight className="h-4 w-4" strokeWidth={2} />
-              </Link>
-            </Button>
-          </div>
-        </Card>
-      </section>
-    </AppContainer>
+        {/* Logout */}
+        <MenuSection>
+          <MenuRow
+            onClick={() => logout()}
+            icon={LogOut}
+            label="Sign Out"
+            destructive
+          />
+        </MenuSection>
+
+      </div>
+    </div>
+  );
+}
+
+export default function Profile() {
+  return (
+    <SafePageBoundary
+      title="More"
+      subtitle="Settings and account"
+      fallbackDescription="The More screen opened in safe mode."
+    >
+      <MoreContent />
+    </SafePageBoundary>
   );
 }

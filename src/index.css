@@ -21,14 +21,14 @@
     --border-default: 204 14% 87%;
     --border-strong: 204 14% 78%;
 
-    --accent-primary: 180 35% 45%;
-    --accent-primary-hover: 180 35% 40%;
-    --accent-secondary: 180 8% 57%;
+    --accent-primary: 230 65% 55%;
+    --accent-primary-hover: 230 65% 48%;
+    --accent-secondary: 255 55% 58%;
 
     --status-success: 150 40% 49%;
     --status-warning: 38 60% 55%;
     --status-danger: 0 68% 62%;
-    --status-ai: 180 35% 45%;
+    --status-ai: 255 55% 58%;
 
     /* Legacy / compatibility aliases */
     --tint: var(--accent-primary);
@@ -166,13 +166,13 @@
     --border-default: 180 19% 15%;
     --border-strong: 180 19% 20%;
 
-    --accent-primary: 180 35% 45%;
-    --accent-primary-hover: 180 35% 40%;
-    --accent-secondary: 180 8% 57%;
+    --accent-primary: 230 65% 60%;
+    --accent-primary-hover: 230 65% 52%;
+    --accent-secondary: 255 55% 63%;
 
     --status-success: 150 40% 49%;
     --status-danger: 0 68% 62%;
-    --status-ai: 180 35% 45%;
+    --status-ai: 255 55% 63%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
