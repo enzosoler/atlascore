@@ -20,11 +20,12 @@ const TAB_IDS = ['overview', 'measurements', 'photos'];
 // ── Trend chart ─────────────────────────────────────────────────────────────
 
 function TrendChart({ data, dataKey, color, unit, label }) {
+  const t = useT();
   if (!data || data.length < 2) {
     return (
       <Card className="px-5 py-5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))] mb-3">{label}</p>
-        <p className="text-[13px] text-[hsl(var(--fg-2))]">Need at least 2 data points to show a trend.</p>
+        <p className="text-[13px] text-[hsl(var(--fg-2))]">{t('body.trends.need_data_points')}</p>
       </Card>
     );
   }
@@ -82,6 +83,7 @@ function TrendChart({ data, dataKey, color, unit, label }) {
 // ── Trend interpretation ────────────────────────────────────────────────────
 
 function TrendInterpretation({ weightData, bodyFatData }) {
+  const t = useT();
   const insights = [];
 
   if (weightData.length >= 3) {
@@ -91,11 +93,11 @@ function TrendInterpretation({ weightData, bodyFatData }) {
     if (oldest) {
       const delta = avg - oldest;
       if (Math.abs(delta) < 0.5) {
-        insights.push({ text: 'Weight is stable — great for maintenance phases.', tone: 'neutral' });
+        insights.push({ text: t('body.trends.weight_stable'), tone: 'neutral' });
       } else if (delta < 0) {
-        insights.push({ text: `Weight trending down ${Math.abs(delta).toFixed(1)}kg — monitor energy and recovery.`, tone: 'ok' });
+        insights.push({ text: t('body.trends.weight_trending_down').replace('{n}', Math.abs(delta).toFixed(1)), tone: 'ok' });
       } else {
-        insights.push({ text: `Weight trending up ${delta.toFixed(1)}kg — check if this aligns with your goal.`, tone: 'warn' });
+        insights.push({ text: t('body.trends.weight_trending_up').replace('{n}', delta.toFixed(1)), tone: 'warn' });
       }
     }
   }
@@ -107,9 +109,9 @@ function TrendInterpretation({ weightData, bodyFatData }) {
     if (oldest) {
       const delta = avg - oldest;
       if (delta < -1) {
-        insights.push({ text: `Body fat dropping — your training and nutrition are working.`, tone: 'ok' });
+        insights.push({ text: t('body.trends.body_fat_dropping'), tone: 'ok' });
       } else if (delta > 1) {
-        insights.push({ text: `Body fat increasing — consider reviewing calorie intake.`, tone: 'warn' });
+        insights.push({ text: t('body.trends.body_fat_increasing'), tone: 'warn' });
       }
     }
   }
@@ -124,7 +126,7 @@ function TrendInterpretation({ weightData, bodyFatData }) {
 
   return (
     <Card className="px-5 py-5 space-y-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Trend Analysis</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{t('body.trends.analysis_title')}</p>
       {insights.map((ins, i) => (
         <div key={i} className="flex items-start gap-2">
           <Activity className={`w-4 h-4 mt-0.5 shrink-0 ${toneColors[ins.tone]}`} strokeWidth={2} />
@@ -138,6 +140,7 @@ function TrendInterpretation({ weightData, bodyFatData }) {
 // ── Next action ─────────────────────────────────────────────────────────────
 
 function NextAction({ measurements }) {
+  const t = useT();
   const latest = measurements[0];
   const weight = getMeasurementFieldValue(latest, 'weight');
   const bodyFat = getMeasurementFieldValue(latest, 'body_fat_percent');
@@ -145,24 +148,24 @@ function NextAction({ measurements }) {
   let action, description, path;
 
   if (measurements.length === 0) {
-    action = 'Log your first body checkpoint';
-    description = 'Start tracking to unlock trend analysis.';
+    action = t('body.next_action.log_first_checkpoint');
+    description = t('body.next_action.log_first_checkpoint_desc');
     path = ROUTES.measurements;
   } else if (!weight) {
-    action = 'Add a weight measurement';
-    description = 'Weight is the foundation of body tracking.';
+    action = t('body.next_action.add_weight');
+    description = t('body.next_action.add_weight_desc');
     path = ROUTES.measurements;
   } else if (!bodyFat) {
-    action = 'Log body fat percentage';
-    description = 'Unlock body composition trends.';
+    action = t('body.next_action.log_body_fat');
+    description = t('body.next_action.log_body_fat_desc');
     path = ROUTES.measurements;
   } else if (measurements.length < 3) {
-    action = 'Keep logging weekly';
-    description = `${3 - measurements.length} more entries to unlock trend charts.`;
+    action = t('body.next_action.keep_logging');
+    description = t('body.next_action.keep_logging_desc').replace('{n}', 3 - measurements.length);
     path = ROUTES.measurements;
   } else {
-    action = 'Take a progress photo';
-    description = 'Visual evidence compounds over time.';
+    action = t('body.next_action.take_photo');
+    description = t('body.next_action.take_photo_desc');
     path = '/Body?tab=photos';
   }
 
@@ -324,10 +327,10 @@ export default function Body() {
       <BodySummary measurements={measurements} />
 
       {/* Trend charts */}
-      <Section title="Trends">
+      <Section title={t('body.trends.section_title')}>
         <div className="grid gap-3 md:grid-cols-2">
-          <TrendChart data={weightData} dataKey="weight" color="hsl(var(--brand))" unit=" kg" label="Weight" />
-          <TrendChart data={bodyFatData} dataKey="bodyFat" color="hsl(var(--warn))" unit="%" label="Body Fat" />
+          <TrendChart data={weightData} dataKey="weight" color="hsl(var(--brand))" unit=" kg" label={t('body.trends.weight_label')} />
+          <TrendChart data={bodyFatData} dataKey="bodyFat" color="hsl(var(--warn))" unit="%" label={t('body.trends.body_fat_label')} />
         </div>
       </Section>
 

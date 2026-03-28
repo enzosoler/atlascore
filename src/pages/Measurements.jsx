@@ -811,7 +811,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
 
   const handleDelete = (measurement) => {
     const confirmed = window.confirm(
-      `Delete measurements from ${formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' }, intlLocale)}?`
+      t('measurements.confirm_delete').replace('{date}', formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' }, intlLocale))
     );
     if (!confirmed) return;
     deleteMutation.mutate(measurement.id);
@@ -823,7 +823,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       const validationNotice = getMeasurementValidationSummary(validation, payload);
       setNotice({
         tone: validationNotice?.tone === 'error' ? 'error' : 'warning',
-        message: validationNotice?.message || 'Please check the highlighted fields before saving.',
+        message: validationNotice?.message || t('measurements.mutation.validation_error'),
       });
       return;
     }
@@ -843,7 +843,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       <div className="flex items-center justify-center py-24">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[hsl(var(--brand)/0.18)] border-t-[hsl(var(--brand))]" />
-          <p className="text-[13px] text-[hsl(var(--fg-2))]">Loading checkpoints…</p>
+          <p className="text-[13px] text-[hsl(var(--fg-2))]">{t('measurements.loading')}</p>
         </div>
       </div>
     );
@@ -854,7 +854,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
   if (isError) {
     const errorBody = (
       <StatusBanner tone="error">
-        Error loading measurement data. Check your connection and try again.
+        {t('measurements.error_loading')}
       </StatusBanner>
     );
 
@@ -865,20 +865,20 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
     <>
       {!embedded ? (
         <PageHeader
-          eyebrow={isPt ? "Medidas" : "Measurements"}
-          title="Measurements with care, hierarchy and clean reading."
-          subtitle="A dedicated space for body checkpoints: weight, composition and measurements in a premium, clean and rhythmic view."
+          eyebrow={t('measurements.eyebrow')}
+          title={t('measurements.title')}
+          subtitle={t('measurements.subtitle')}
           accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"
           actions={
             <ActionRow>
               <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
                 <Plus className="h-4 w-4" strokeWidth={1.9} />
-                Log measurements
+                {t('measurements.log_measurements')}
               </PrimaryButton>
 
               {latestMeasurement ? (
                 <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
-                  Last checkpoint on{' '}
+                  {t('measurements.last_checkpoint_on')}{' '}
                   <span className="text-[hsl(var(--fg))]">
                     {formatMeasurementDate(latestMeasurement.date, {
                       day: '2-digit',
@@ -892,30 +892,30 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
         >
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <HeroStat
-              label="Current Weight"
+              label={t('measurements.hero.current_weight')}
               value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))} kg` : '--'}
-              detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight)}
+              detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight, t)}
               icon={Scale}
               metric={METRIC_LOOKUP.weight}
             />
             <HeroStat
-              label="Body Fat %"
+              label={t('measurements.hero.body_fat_percent')}
               value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} %` : '--'}
-              detail={getDeltaLabel(metricSnapshots.body_fat_percent?.delta, METRIC_LOOKUP.body_fat_percent)}
+              detail={getDeltaLabel(metricSnapshots.body_fat_percent?.delta, METRIC_LOOKUP.body_fat_percent, t)}
               icon={Activity}
               metric={METRIC_LOOKUP.body_fat_percent}
             />
             <HeroStat
-              label="BMI"
+              label={t('measurements.hero.bmi')}
               value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)} kg/m²` : '--'}
-              detail={getDeltaLabel(metricSnapshots.bmi?.delta, METRIC_LOOKUP.bmi)}
+              detail={getDeltaLabel(metricSnapshots.bmi?.delta, METRIC_LOOKUP.bmi, t)}
               icon={Ruler}
               metric={METRIC_LOOKUP.bmi}
             />
             <HeroStat
-              label="Cadence"
+              label={t('measurements.hero.cadence')}
               value={averageCadenceDays ? `${averageCadenceDays} days` : '--'}
-              detail={`${sortedMeasurements.length || 0} checkpoints in history.`}
+              detail={t('measurements.hero.cadence_detail').replace('{n}', sortedMeasurements.length || 0)}
               icon={CalendarClock}
               metric={METRIC_LOOKUP.weight}
             />
@@ -924,23 +924,23 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-2xl">
-            <p className="atlas-overline">Measurements</p>
+            <p className="atlas-overline">{t('measurements.eyebrow')}</p>
             <h2 className="mt-3 text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-              Structured body checkpoints
+              {t('measurements.embedded_title')}
             </h2>
             <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              Weight, body-fat, and circumference checkpoints organized for quick scan inside the Body hub.
+              {t('measurements.embedded_subtitle')}
             </p>
           </div>
           <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2 self-start">
             <Plus className="h-4 w-4" strokeWidth={1.9} />
-            Log measurements
+            {t('measurements.log_measurements')}
           </PrimaryButton>
         </div>
       )}
 
       <StatusBanner tone="neutral">
-        Checkpoints, charts and history on this route are organized as a single body reading, independent of other modules.
+        {t('measurements.status_banner')}
       </StatusBanner>
 
       {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
@@ -951,15 +951,15 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       ) : null}
 
       <Section
-          title="Latest checkpoint"
-          subtitle="Immediate summary of the most recent entry, before opening the trend or history."
+          title={t('measurements.latest_checkpoint.section_title')}
+          subtitle={t('measurements.latest_checkpoint.section_subtitle')}
         >
           <Card className="px-5 py-5">
             {latestMeasurement ? (
               <>
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="atlas-overline">Latest checkpoint</p>
+                    <p className="atlas-overline">{t('measurements.latest_checkpoint.overline')}</p>
                     <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
                       {formatMeasurementDate(latestMeasurement.date, {
                         day: '2-digit',
@@ -968,10 +968,10 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                       }, intlLocale)}
                     </p>
                     <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      Immediate summary of the most recent checkpoint, without noise from other modules.
+                      {t('measurements.latest_checkpoint.summary')}
                     </p>
                     <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
-                      Source
+                      {t('measurements.latest_checkpoint.source_label')}
                       <span className="text-[hsl(var(--fg))]">{getMeasurementFieldSourceLabel(latestMeasurement?.source)}</span>
                     </div>
                   </div>
@@ -982,12 +982,12 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                 </div>
 
                 <div className="mt-5 space-y-3">
-                  <SnapshotRow label="Weight" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))} unit="kg" />
-                  <SnapshotRow label="Body Fat %" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} unit="%" />
-                  <SnapshotRow label="Waist" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'waist'))} unit="cm" />
-                  <SnapshotRow label="BMI" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)} unit="kg/m²" />
-                  <SnapshotRow label="Fat mass" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'fat_mass'), 2)} unit="kg" />
-                  <SnapshotRow label="Lean mass" value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'lean_mass'), 2)} unit="kg" />
+                  <SnapshotRow label={t('measurements.latest_checkpoint.weight')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))} unit="kg" />
+                  <SnapshotRow label={t('measurements.latest_checkpoint.body_fat')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} unit="%" />
+                  <SnapshotRow label={t('measurements.latest_checkpoint.waist')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'waist'))} unit="cm" />
+                  <SnapshotRow label={t('measurements.latest_checkpoint.bmi')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)} unit="kg/m²" />
+                  <SnapshotRow label={t('measurements.latest_checkpoint.fat_mass')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'fat_mass'), 2)} unit="kg" />
+                  <SnapshotRow label={t('measurements.latest_checkpoint.lean_mass')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'lean_mass'), 2)} unit="kg" />
                   {latestBodyFields.map((field) => (
                     <SnapshotRow
                       key={field.key}
@@ -1007,7 +1007,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                 </div>
 
                 <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
-                  <p className="atlas-metric-label">Context</p>
+                  <p className="atlas-metric-label">{t('measurements.latest_checkpoint.context_label')}</p>
                   <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
                     {latestMeasurement.notes || t('pages.measurements.no_notes')}
                   </p>
@@ -1015,11 +1015,11 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
               </>
             ) : (
               <EmptyState
-                title="No records yet"
-                description="Record your first checkpoint to activate the latest reading."
+                title={t('measurements.latest_checkpoint.no_records_title')}
+                description={t('measurements.latest_checkpoint.no_records_description')}
                 action={
                   <PrimaryButton type="button" onClick={handleCreate}>
-                    Log measurements
+                    {t('measurements.log_measurements')}
                   </PrimaryButton>
                 }
               />
@@ -1028,8 +1028,8 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
         </Section>
 
         <SectionCard
-          title="Trend"
-          subtitle="Select the main metric and read the curve with enough context to decide without visual excess."
+          title={t('measurements.trend.section_title')}
+          subtitle={t('measurements.trend.section_subtitle')}
         >
           {sortedMeasurements.length ? (
             <div className="grid gap-6">
@@ -1055,7 +1055,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                   >
                   <div className="flex flex-col gap-5">
                       <div className="max-w-2xl">
-                        <p className="atlas-overline">Selected metric</p>
+                        <p className="atlas-overline">{t('measurements.trend.selected_metric_overline')}</p>
                         <div className="mt-3 flex flex-wrap items-center gap-3">
                           <h3 className="text-[1.5rem] font-semibold tracking-[-0.045em] text-[hsl(var(--fg))]">
                             {selectedMetric.label}
@@ -1078,14 +1078,14 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
 
                       <div className="grid gap-3 sm:grid-cols-3">
                         <TrendPill
-                          label="Current"
+                          label={t('measurements.trend.current')}
                           value={formatMetricValue(selectedSnapshot.value, selectedMetric)}
                         />
                         <TrendPill
-                          label="Since start"
+                          label={t('measurements.trend.since_start')}
                           value={
                             selectedSnapshot.rangeDelta === null
-                              ? 'No data'
+                              ? t('measurements.trend.no_data')
                               : `${selectedSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(
                                   selectedSnapshot.rangeDelta,
                                   selectedMetric.digits
@@ -1093,8 +1093,8 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                           }
                         />
                         <TrendPill
-                          label="Records"
-                          value={`${selectedSnapshot.entries.length} points`}
+                          label={t('measurements.trend.records')}
+                          value={t('measurements.trend.records_value').replace('{n}', selectedSnapshot.entries.length)}
                         />
                       </div>
                     </div>
@@ -1146,7 +1146,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                             fontWeight: 600,
                           }}
                           formatter={(value) => [formatMetricValue(value, selectedMetric), selectedMetric.label]}
-                          labelFormatter={(label) => `Checkpoint ${label}`}
+                          labelFormatter={(label) => t('measurements.trend.checkpoint_tooltip').replace('{n}', label)}
                         />
                         <Area
                           type="monotone"
@@ -1177,29 +1177,29 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                 <MeasurementInsights measurements={sortedMeasurements} latest={latestMeasurement} />
 
                 <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.56)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                  <p className="atlas-overline">Coverage</p>
+                  <p className="atlas-overline">{t('measurements.coverage.overline')}</p>
                   <div className="mt-4 space-y-4">
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Analysis window
+                        {t('measurements.coverage.analysis_window_title')}
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {captureSpanDays} days between first and last checkpoint.
+                        {t('measurements.coverage.analysis_window_detail').replace('{n}', captureSpanDays)}
                       </p>
                     </div>
 
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Latest entry coverage
+                        {t('measurements.coverage.latest_coverage_title')}
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {latestMeasurement ? countFilledMetrics(latestMeasurement) : 0} fields filled in the most recent checkpoint.
+                        {t('measurements.coverage.latest_coverage_detail').replace('{n}', latestMeasurement ? countFilledMetrics(latestMeasurement) : 0)}
                       </p>
                     </div>
 
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Starting baseline
+                        {t('measurements.coverage.starting_baseline_title')}
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
                         {firstMeasurement
@@ -1214,7 +1214,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
 
                     <div>
                       <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        Latest recorded context
+                        {t('measurements.coverage.latest_context_title')}
                       </p>
                       <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
                         {latestMeasurement?.notes || t('pages.measurements.no_notes_recent')}
@@ -1226,23 +1226,23 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
             </div>
           ) : (
             <EmptyState
-              title="No measurements to show"
-              description="Record your first entry to activate the chart, trend reading and side summary."
+              title={t('measurements.trend.no_measurements_title')}
+              description={t('measurements.trend.no_measurements_description')}
             />
           )}
         </SectionCard>
 
         <SectionCard
-          title="Measurement History"
-          subtitle="Entries organized as complete body checkpoints, with context and variation compared to previous entry."
+          title={t('measurements.history.section_title')}
+          subtitle={t('measurements.history.section_subtitle')}
         >
           {!measurementHistory.length ? (
             <EmptyState
-              title="No measurement records"
-              description="Open the modal on this page to create your first body checkpoint."
+              title={t('measurements.history.no_records_title')}
+              description={t('measurements.history.no_records_description')}
               action={
                 <PrimaryButton type="button" onClick={handleCreate}>
-                  Log measurements
+                  {t('measurements.log_measurements')}
                 </PrimaryButton>
               }
             />
@@ -1273,9 +1273,9 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
         >
           <div className="flex-1 min-h-0 overflow-y-auto">
             <DialogPanelHeader
-              eyebrow="Body checkpoint"
-              title={editingMeasurement ? 'Edit body checkpoint' : 'Log body checkpoint'}
-              description="Enter weight, body composition and circumference measurements for this checkpoint."
+              eyebrow={t('measurements.form.dialog_eyebrow')}
+              title={editingMeasurement ? t('measurements.form.dialog_title_edit') : t('measurements.form.dialog_title_new')}
+              description={t('measurements.form.dialog_description')}
               accentClassName="from-[rgba(14,165,233,0.12)]"
             />
 
