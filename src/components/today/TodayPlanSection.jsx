@@ -86,13 +86,14 @@ function WorkoutPlanCard({ activeWorkoutPlan, todaySession, hasAIAccess, onGener
 }
 
 function NutritionCard({ todayMeals, kcalTarget = 2000, macros }) {
-  const totalKcal = todayMeals.reduce((s, m) => s + (m.calories || m.total_calories || 0), 0);
-  const totalProtein = todayMeals.reduce((s, m) => s + (m.protein_g || m.total_protein || 0), 0);
+  const meals = Array.isArray(todayMeals) ? todayMeals : [];
+  const totalKcal = meals.reduce((s, m) => s + (m.calories || m.total_calories || 0), 0);
+  const totalProtein = meals.reduce((s, m) => s + (m.protein_g || m.total_protein || 0), 0);
   const kcalRemaining = Math.max(0, kcalTarget - totalKcal);
-  const kcalPct = Math.min(100, Math.round((totalKcal / kcalTarget) * 100));
+  const kcalPct = kcalTarget > 0 ? Math.min(100, Math.round((totalKcal / kcalTarget) * 100)) : 0;
   const proteinTarget = macros?.protein || 150;
-  const proteinPct = Math.min(100, Math.round((totalProtein / proteinTarget) * 100));
-  const logged = todayMeals.length > 0;
+  const proteinPct = proteinTarget > 0 ? Math.min(100, Math.round((totalProtein / proteinTarget) * 100)) : 0;
+  const logged = meals.length > 0;
 
   return (
     <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.35)] p-4 flex flex-col gap-3">

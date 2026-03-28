@@ -401,30 +401,30 @@ function TodayContent() {
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── BINARY ISOLATION: stripped render — add sections back one by one ───────
+  // If this bare version crashes, the bug is in the hooks above.
+  // If it renders, add back components one at a time to find the culprit.
   return (
     <TodayScreen>
-
-      {/* 1 — Header */}
-      <header className="flex items-center justify-between pt-1">
-        <div>
-          <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">
-            {getDateLabel(locale)}
-          </p>
-          <h1 className="text-[26px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight mt-0.5">
-            {preferredName}
-          </h1>
-        </div>
-        <button
-          onClick={() => navigate('/notifications')}
-          className="w-10 h-10 flex items-center justify-center rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors active:scale-95"
-          aria-label="Notifications"
-        >
-          <Bell className="w-4 h-4" strokeWidth={2} />
-        </button>
+      <header className="pt-1">
+        <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">
+          {getDateLabel(locale)}
+        </p>
+        <h1 className="text-[26px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight mt-0.5">
+          {preferredName}
+        </h1>
       </header>
 
-      {/* 2 — AI Coach Briefing */}
+      <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-4 mt-4">
+        <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Today is loading</p>
+        <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">
+          Workout: {workoutDone ? 'done' : 'not done'} |
+          Meals: {(todayMeals ?? []).length} |
+          AI: {ai.hasData ? 'loaded' : ai.loading ? 'loading' : 'none'}
+        </p>
+      </div>
+
+      {/* STEP 1: AICoachBriefing */}
       <AICoachBriefing
         briefing={briefing?.text ?? ''}
         focus={briefing?.focus ?? 'Today'}
@@ -433,7 +433,7 @@ function TodayContent() {
         loading={isLoading}
       />
 
-      {/* 3 — Quick Actions */}
+      {/* STEP 2: QuickActions */}
       <QuickActions
         workoutDone={!!workoutDone}
         nutritionLogged={!!nutritionLogged}
@@ -442,7 +442,7 @@ function TodayContent() {
         onQuickWorkout={() => setQuickWorkoutOpen(true)}
       />
 
-      {/* 4 — Today's Plan */}
+      {/* STEP 3: TodayPlanSection */}
       <TodayPlanSection
         activeWorkoutPlan={activeWorkoutPlan ?? null}
         todaySession={todaySession ?? null}
@@ -453,10 +453,10 @@ function TodayContent() {
         onGenerateWorkout={() => setAiWizardOpen(true)}
       />
 
-      {/* 5 — Alerts */}
+      {/* STEP 4: AlertsSection */}
       {Array.isArray(alerts) && alerts.length > 0 && <AlertsSection alerts={alerts} />}
 
-      {/* 6 — Progress Snapshot */}
+      {/* STEP 5: ProgressSnapshot */}
       <ProgressSnapshot
         recentMeasurements={recentMeasurements ?? []}
         todaySession={todaySession ?? null}
@@ -464,7 +464,7 @@ function TodayContent() {
         weekWorkoutCount={(weekWorkouts ?? []).length}
       />
 
-      {/* 7 — AI Recommendations */}
+      {/* STEP 6: AIRecommendations */}
       {Array.isArray(recommendations) && recommendations.length > 0 && (
         <AIRecommendations
           recommendations={recommendations}
@@ -473,23 +473,24 @@ function TodayContent() {
         />
       )}
 
-      {/* Modals */}
-      <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
-      <QuickWorkoutModal
-        open={quickWorkoutOpen}
-        onClose={() => setQuickWorkoutOpen(false)}
-        onStart={() => {
-          navigate(ROUTES.workouts);
-          setQuickWorkoutOpen(false);
-        }}
-      />
-      <AIGenerateWizard
-        open={aiWizardOpen}
-        onClose={() => setAiWizardOpen(false)}
-        type="workout"
-        profile={profile ?? {}}
-        onGenerate={handleAIGenerate}
-      />
+      {/* Modals — only rendered when open */}
+      {checkinOpen && <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />}
+      {quickWorkoutOpen && (
+        <QuickWorkoutModal
+          open={quickWorkoutOpen}
+          onClose={() => setQuickWorkoutOpen(false)}
+          onStart={() => { navigate(ROUTES.workouts); setQuickWorkoutOpen(false); }}
+        />
+      )}
+      {aiWizardOpen && (
+        <AIGenerateWizard
+          open={aiWizardOpen}
+          onClose={() => setAiWizardOpen(false)}
+          type="workout"
+          profile={profile ?? {}}
+          onGenerate={handleAIGenerate}
+        />
+      )}
 
     </TodayScreen>
   );

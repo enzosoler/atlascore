@@ -86,8 +86,9 @@ function RecCard({ rec, onDismiss, onFollow }) {
  */
 export function AIRecommendations({ recommendations, onFollow, onDismiss: onDismissCallback }) {
   const [dismissed, setDismissed] = useState(new Set());
+  const recs = Array.isArray(recommendations) ? recommendations : [];
 
-  const visible = recommendations
+  const visible = recs
     .filter((r) => !dismissed.has(r.id))
     .slice(0, 3);
 
@@ -95,7 +96,7 @@ export function AIRecommendations({ recommendations, onFollow, onDismiss: onDism
 
   const dismiss = (id) => {
     setDismissed((prev) => new Set([...prev, id]));
-    const rec = recommendations.find((r) => r.id === id);
+    const rec = recs.find((r) => r.id === id);
     if (rec) onDismissCallback?.(rec);
   };
 
