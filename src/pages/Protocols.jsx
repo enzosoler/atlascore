@@ -11,6 +11,8 @@ import LogDoseForm from '@/components/protocols/LogDoseForm';
 import TodayDoseSection from '@/components/protocols/TodayDoseSection';
 import AdherenceWidget from '@/components/protocols/AdherenceWidget';
 import AIInsightsBanner from '@/components/protocols/AIInsightsBanner';
+import CadenceScheduleView from '@/components/protocols/CadenceScheduleView';
+import ProtocolTimeline from '@/components/protocols/ProtocolTimeline';
 import QuickAddTemplates from '@/components/protocols/QuickAddTemplates';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import {
@@ -691,6 +693,26 @@ function ProtocolsContent() {
       {/* ── AI Insights Banner ──────────────────────────────────────────────── */}
       {!isLoading && hasAnyProtocols && (
         <AIInsightsBanner protocols={activeProtocols} logs={logs} />
+      )}
+
+      {/* ── Cadence Schedule ─────────────────────────────────────────────────── */}
+      {!isLoading && hasAnyProtocols && (
+        <SectionCard
+          title={isPt ? "Cronograma" : "Schedule"}
+          subtitle={isPt ? "Visualize suas doses semanais" : "Visualize your weekly doses"}
+        >
+          <CadenceScheduleView protocols={protocols} logs={logs} />
+        </SectionCard>
+      )}
+
+      {/* ── Protocol Timeline ────────────────────────────────────────────────── */}
+      {!isLoading && hasAnyProtocols && (
+        <SectionCard
+          title={isPt ? "Linha do Tempo" : "Timeline"}
+          subtitle={isPt ? "Duração e sobreposição dos protocolos" : "Protocol duration and overlap"}
+        >
+          <ProtocolTimeline protocols={protocols} />
+        </SectionCard>
       )}
 
       {/* ── Active Items: Simplified cards ──────────────────────────────────── */}
