@@ -67,9 +67,10 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
       } catch (fetchErr) {
         // fetch() itself threw — network error or CORS block
         console.error('[ai-coach-chat] fetch() threw:', fetchErr?.name, fetchErr?.message, fetchErr);
+        const urlShort = supabaseUrl ? supabaseUrl.split('.')[0].replace('https://', '') : 'NO_URL';
         appendMessage({
           role: 'assistant',
-          content: `Network error: ${fetchErr?.message ?? 'fetch failed'}`,
+          content: `fetch threw ${fetchErr?.name}: ${fetchErr?.message}\nURL: ${fnUrl}\nproject: ${urlShort}\nsession: ${!!session}`,
           actions: [],
           suggestions: [],
         });
