@@ -115,13 +115,14 @@ export const NAV_BY_ROLE = {
     { path: ROUTES.profile,            label: 'More',       icon: 'User' },
   ],
   athlete: [
-    { path: ROUTES.today,      label: 'Today',     icon: 'Home' },
-    { path: ROUTES.workouts,   label: 'Train',     icon: 'Dumbbell' },
-    { path: ROUTES.nutrition,  label: 'Nutrition', icon: 'UtensilsCrossed' },
-    { path: ROUTES.progress,   label: 'Progress',  icon: 'BarChart3' },
-    { path: ROUTES.protocols,  label: 'Protocols', icon: 'FlaskConical' },
-    { path: ROUTES.labExams,   label: 'Labs',      icon: 'ClipboardList' },
-    { path: ROUTES.profile,    label: 'More',      icon: 'User' },
+    { path: ROUTES.today,         label: 'Today',        icon: 'Home' },
+    { path: ROUTES.workouts,      label: 'Train',        icon: 'Dumbbell' },
+    { path: ROUTES.nutrition,     label: 'Nutrition',    icon: 'UtensilsCrossed' },
+    { path: ROUTES.progress,      label: 'Progress',     icon: 'BarChart3' },
+    { path: ROUTES.measurements,  label: 'Body',         icon: 'Ruler' },
+    { path: ROUTES.protocols,     label: 'Protocols',    icon: 'FlaskConical' },
+    { path: ROUTES.labExams,      label: 'Labs',         icon: 'ClipboardList' },
+    { path: ROUTES.profile,       label: 'More',         icon: 'User' },
   ],
   coach: [
     { path: ROUTES.today,              label: 'Today',          icon: 'Home' },
@@ -173,7 +174,7 @@ export const NAV_BY_ROLE = {
  * Bottom nav (mobile) — max 4 items per role, most used pages
  */
 export const BOTTOM_PATHS_BY_ROLE = {
-  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.body, ROUTES.profile],
+  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.measurements, ROUTES.profile],
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.workouts, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.nutrition, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.body, ROUTES.profile],

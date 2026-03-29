@@ -1611,7 +1611,13 @@
   "measurements": {
     "eyebrow": "Medidas",
     "title": "Medidas com cuidado, hierarquia e leitura limpa.",
+    "title_short": "Checkpoints Corporais",
     "subtitle": "Um espaço dedicado para checkpoints corporais: peso, composição e medidas em uma visualização premium e rítmica.",
+    "tabs": {
+      "overview": "Resumo",
+      "history": "Histórico",
+      "trends": "Tendências"
+    },
     "embedded_title": "Checkpoints corporais estruturados",
     "embedded_subtitle": "Checkpoints de peso, gordura corporal e circunferências organizados para leitura rápida no hub Corpo.",
     "log_measurements": "Registrar medidas",
@@ -1704,7 +1710,17 @@
       "cancel": "Cancelar",
       "save_checkpoint": "Salvar checkpoint",
       "log_checkpoint": "Registrar checkpoint",
-      "saving": "Salvando..."
+      "saving": "Salvando...",
+      "step_of": "Etapa {current} de {total}",
+      "step_basics": "Data e Fonte",
+      "step_core": "Métricas Principais",
+      "step_upper": "Parte Superior",
+      "step_lower": "Parte Inferior",
+      "step_composition": "Composição",
+      "step_notes": "Notas e Prévia",
+      "next": "Próximo",
+      "previous": "Voltar",
+      "skip": "Pular"
     },
     "delta": {
       "no_previous": "Sem dados anteriores",

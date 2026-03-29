@@ -1,16 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity,
   ArrowDownRight,
   ArrowUpRight,
   BarChart3,
-  CalendarClock,
+  ChevronLeft,
+  ChevronRight,
   Minus,
   Pencil,
   Plus,
-  Ruler,
-  Scale,
   Trash2,
 } from 'lucide-react';
 import {
@@ -25,19 +24,14 @@ import {
 } from 'recharts';
 import MeasurementInsights from '@/components/measurements/MeasurementInsights';
 import {
-  ActionRow,
   AppContainer,
   Card,
-  PageHeader,
-  Section,
 } from '@/components/shared/AppContainer';
 import {
-  DialogPanelHeader,
   EmptyState,
   PrimaryButton,
   SafePageBoundary,
   SecondaryButton,
-  SectionCard,
   StatusBanner,
 } from '@/components/shared/StablePage';
 import { ResponsiveModal } from '@/components/app/ResponsiveModal';
@@ -66,84 +60,80 @@ import {
   updateMeasurement,
 } from '@/services/bodyProgressService';
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
-const INPUT_CLASS_NAME = 'atlas-field h-11 px-4 py-2 text-base';
-const TEXTAREA_CLASS_NAME = 'atlas-field min-h-[120px] resize-y px-4 py-3 text-base';
+const INPUT_CLASS_NAME = 'atlas-field h-10 px-3.5 py-2 text-[14px]';
+const TEXTAREA_CLASS_NAME = 'atlas-field min-h-[88px] resize-y px-3.5 py-3 text-[14px]';
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
+const TABS = ['overview', 'history', 'trends'];
+
 const METRIC_STYLES = {
-  teal: { color: '#0f766e', tint: 'rgba(15, 118, 110, 0.10)', border: 'rgba(15, 118, 110, 0.24)' },
-  blue: { color: '#2563eb', tint: 'rgba(37, 99, 235, 0.10)', border: 'rgba(37, 99, 235, 0.22)' },
-  cyan: { color: '#0891b2', tint: 'rgba(8, 145, 178, 0.10)', border: 'rgba(8, 145, 178, 0.22)' },
-  indigo: { color: '#1d4ed8', tint: 'rgba(29, 78, 216, 0.10)', border: 'rgba(29, 78, 216, 0.22)' },
-  emerald: { color: '#047857', tint: 'rgba(4, 120, 87, 0.10)', border: 'rgba(4, 120, 87, 0.22)' },
-  lime: { color: '#16a34a', tint: 'rgba(22, 163, 74, 0.10)', border: 'rgba(22, 163, 74, 0.22)' },
-  amber: { color: '#a16207', tint: 'rgba(161, 98, 7, 0.10)', border: 'rgba(161, 98, 7, 0.22)' },
-  orange: { color: '#c2410c', tint: 'rgba(194, 65, 12, 0.10)', border: 'rgba(194, 65, 12, 0.22)' },
-  violet: { color: '#7c3aed', tint: 'rgba(124, 58, 237, 0.10)', border: 'rgba(124, 58, 237, 0.22)' },
-  slate: { color: '#475569', tint: 'rgba(71, 85, 105, 0.10)', border: 'rgba(71, 85, 105, 0.22)' },
+  weight:                 { color: '#0f766e', tint: 'rgba(15, 118, 110, 0.10)', border: 'rgba(15, 118, 110, 0.24)' },
+  body_fat_percent:       { color: '#2563eb', tint: 'rgba(37, 99, 235, 0.10)', border: 'rgba(37, 99, 235, 0.22)' },
+  waist:                  { color: '#0891b2', tint: 'rgba(8, 145, 178, 0.10)', border: 'rgba(8, 145, 178, 0.22)' },
+  bmi:                    { color: '#1d4ed8', tint: 'rgba(29, 78, 216, 0.10)', border: 'rgba(29, 78, 216, 0.22)' },
+  lean_mass:              { color: '#047857', tint: 'rgba(4, 120, 87, 0.10)', border: 'rgba(4, 120, 87, 0.22)' },
+  lean_mass_percent:      { color: '#16a34a', tint: 'rgba(22, 163, 74, 0.10)', border: 'rgba(22, 163, 74, 0.22)' },
+  fat_mass:               { color: '#a16207', tint: 'rgba(161, 98, 7, 0.10)', border: 'rgba(161, 98, 7, 0.22)' },
+  muscle_mass:            { color: '#c2410c', tint: 'rgba(194, 65, 12, 0.10)', border: 'rgba(194, 65, 12, 0.22)' },
+  muscle_fat_ratio:       { color: '#7c3aed', tint: 'rgba(124, 58, 237, 0.10)', border: 'rgba(124, 58, 237, 0.22)' },
+  total_body_water:       { color: '#475569', tint: 'rgba(71, 85, 105, 0.10)', border: 'rgba(71, 85, 105, 0.22)' },
 };
 
 const METRIC_OPTIONS = MEASUREMENT_TREND_FIELD_KEYS.map((key) => {
   const field = MEASUREMENT_FIELD_MAP[key];
-
   return {
     ...field,
     digits: field?.precision ?? 1,
-    ...(METRIC_STYLES[key] || METRIC_STYLES.slate),
+    ...(METRIC_STYLES[key] || { color: '#475569', tint: 'rgba(71,85,105,0.10)', border: 'rgba(71,85,105,0.22)' }),
   };
 });
 
-const METRIC_LOOKUP = METRIC_OPTIONS.reduce((accumulator, metric) => {
-  accumulator[metric.key] = metric;
-  return accumulator;
+const METRIC_LOOKUP = METRIC_OPTIONS.reduce((acc, m) => {
+  acc[m.key] = m;
+  return acc;
 }, {});
 
-const BODY_SITE_FIELDS = MEASUREMENT_MANUAL_FIELD_SECTIONS.flatMap((section) => section.fields).filter(
-  (field) => !['weight', 'age', 'height', 'waist', 'body_fat_percent'].includes(field.key)
-);
-const BODY_SITE_FIELDS_NO_WAIST = BODY_SITE_FIELDS.filter((field) => field.key !== 'waist');
+// Step definitions for the stepped form
+const FORM_STEPS = [
+  { key: 'basics',      isBasics: true },
+  { key: 'core',        section: MEASUREMENT_MANUAL_FIELD_SECTIONS[0] },
+  { key: 'upper',       section: MEASUREMENT_MANUAL_FIELD_SECTIONS[1] },
+  { key: 'lower',       section: MEASUREMENT_MANUAL_FIELD_SECTIONS[2] },
+  { key: 'composition', section: MEASUREMENT_COMPOSITION_SECTION },
+  { key: 'notes',       isNotes: true },
+];
 
-const FORM_IMPORTED_SECTION = {
-  ...MEASUREMENT_COMPOSITION_SECTION,
-  className: 'rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5',
+const FORM_STEP_TITLE_KEYS = {
+  basics:      'measurements.form.step_basics',
+  core:        'measurements.form.step_core',
+  upper:       'measurements.form.step_upper',
+  lower:       'measurements.form.step_lower',
+  composition: 'measurements.form.step_composition',
+  notes:       'measurements.form.step_notes',
 };
 
-const FORM_SECTIONS = MEASUREMENT_MANUAL_FIELD_SECTIONS.map((section, index) => ({
-  ...section,
-  className:
-    index === 0
-      ? 'rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--fill)/0.5)] px-5 py-5'
-      : 'rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5',
-})).concat(FORM_IMPORTED_SECTION);
+// ── Utility ───────────────────────────────────────────────────────────────────
 
-function getMutationErrorMessage(error, fallbackMessage) {
-  if (typeof error === 'string' && error.trim()) {
-    return error;
-  }
-
-  return error?.message || fallbackMessage;
+function getMutationErrorMessage(error, fallback) {
+  if (typeof error === 'string' && error.trim()) return error;
+  return error?.message || fallback;
 }
 
 function formatMeasurementDate(date, options, locale = 'en-US') {
   if (!date) return '--';
-
   return new Date(`${date}T12:00:00`).toLocaleDateString(
     locale,
-    options || {
-      day: '2-digit',
-      month: '2-digit',
-    }
+    options || { day: '2-digit', month: '2-digit' }
   );
 }
 
 function toDisplayNumber(value, digits = 1) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
-    return '--';
-  }
-
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return '--';
   return Number(value).toFixed(digits);
 }
 
@@ -154,56 +144,63 @@ function formatMetricValue(value, metric) {
 
 function getDayDifference(fromDate, toDate) {
   if (!fromDate || !toDate) return 0;
-  const difference = new Date(`${toDate}T12:00:00`) - new Date(`${fromDate}T12:00:00`);
-  return Math.max(0, Math.round(difference / DAY_IN_MS));
-}
-
-function countFilledMetrics(measurement) {
-  return countFilledMeasurementFields(measurement);
-}
-
-function getDeltaIcon(delta) {
-  if (delta === null || delta === undefined || Math.abs(delta) < 0.05) return Minus;
-  return delta > 0 ? ArrowUpRight : ArrowDownRight;
+  const diff = new Date(`${toDate}T12:00:00`) - new Date(`${fromDate}T12:00:00`);
+  return Math.max(0, Math.round(diff / DAY_IN_MS));
 }
 
 function getDeltaLabel(delta, metric, t) {
-  if (delta === null || delta === undefined) return t ? t('measurements.delta.no_previous') : 'No previous data';
-  if (Math.abs(delta) < 0.05) return t ? t('measurements.delta.no_relevant_change') : 'No relevant change';
+  if (delta === null || delta === undefined)
+    return t ? t('measurements.delta.no_previous') : 'No previous data';
+  if (Math.abs(delta) < 0.05)
+    return t ? t('measurements.delta.no_relevant_change') : 'No relevant change';
   return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} ${t ? t('measurements.delta.vs_previous') : 'vs previous'}`.trim();
 }
 
-// ─── Unified MetricCard component ────────────────────────────────────────────
+// ── Sub-components ────────────────────────────────────────────────────────────
 
-function MetricCard({ label, value, unit, detail, size = 'md', isActive, onClick }) {
-  const isLarge = size === 'lg';
-
-  // Size variants
-  const radius = 'rounded-[20px]';
-  const numberSize = isLarge ? 'text-[1.75rem]' : 'text-[1.125rem]';
-  const padding = isLarge ? 'px-5 py-4' : 'px-4 py-4';
-  const tracking = isLarge ? 'tracking-[-0.04em]' : 'tracking-[-0.035em]';
-
-  const content = (
-    <div className={cn('text-left', padding)}>
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-          {label}
+function QuickStatCard({ label, value, unit, deltaLabel, deltaPositive }) {
+  return (
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-3.5 py-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))] truncate">
+        {label}
+      </p>
+      <div className="mt-1 flex items-baseline gap-1">
+        <p className="text-[1.25rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] leading-none">
+          {value}
         </p>
-        <div className={cn('flex items-baseline gap-1.5', isLarge ? 'mt-2' : 'mt-1')}>
-          <p className={cn('font-bold text-[hsl(var(--fg))] leading-none', numberSize, tracking)}>
-            {value}
-          </p>
-          {unit && (
-            <span className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{unit}</span>
-          )}
-        </div>
-        {detail && (
-          <p className={cn('text-[12px] leading-5 text-[hsl(var(--fg-2))]', isLarge ? 'mt-1' : 'mt-2')}>
-            {detail}
-          </p>
+        {unit && (
+          <span className="text-[12px] font-medium text-[hsl(var(--fg-3))]">{unit}</span>
         )}
       </div>
+      {deltaLabel && (
+        <p className={cn(
+          'mt-1 text-[11px] font-medium leading-4 truncate',
+          deltaPositive === true  ? 'text-[hsl(var(--ok))]'   :
+          deltaPositive === false ? 'text-[hsl(var(--warn))]' :
+          'text-[hsl(var(--fg-3))]'
+        )}>
+          {deltaLabel}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function MetricCard({ label, value, unit, detail, isActive, onClick }) {
+  const content = (
+    <div className="px-3.5 py-3.5 text-left">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))] truncate">
+        {label}
+      </p>
+      <div className="mt-1.5 flex items-baseline gap-1">
+        <p className="text-[1.0625rem] font-bold tracking-[-0.035em] text-[hsl(var(--fg))] leading-none">
+          {value}
+        </p>
+        {unit && <span className="text-[12px] font-medium text-[hsl(var(--fg-3))]">{unit}</span>}
+      </div>
+      {detail && (
+        <p className="mt-1.5 text-[11px] leading-4 text-[hsl(var(--fg-2))]">{detail}</p>
+      )}
     </div>
   );
 
@@ -213,10 +210,9 @@ function MetricCard({ label, value, unit, detail, size = 'md', isActive, onClick
         type="button"
         onClick={onClick}
         className={cn(
-          radius,
-          'border text-left transition-all w-full',
+          'rounded-[18px] border text-left transition-all w-full',
           isActive
-            ? 'shadow-[var(--shadow-sm)] border-[hsl(var(--brand))] bg-[hsl(var(--card))]'
+            ? 'border-[hsl(var(--brand))] bg-[hsl(var(--card))] shadow-[var(--shadow-sm)]'
             : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--card))]'
         )}
       >
@@ -226,25 +222,24 @@ function MetricCard({ label, value, unit, detail, size = 'md', isActive, onClick
   }
 
   return (
-    <article className={cn(radius, 'border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)]')}>
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)]">
       {content}
-    </article>
+    </div>
   );
 }
 
 function SnapshotRow({ label, value, unit }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-[hsl(var(--border)/0.3)] last:border-0">
+    <div className="flex items-center justify-between py-2 border-b border-[hsl(var(--border)/0.25)] last:border-0">
       <p className="text-[13px] text-[hsl(var(--fg-2))]">{label}</p>
-      <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+      <p className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
         {value}
-        {unit ? <span className="ml-1 text-[12px] font-medium text-[hsl(var(--fg-3))]">{unit}</span> : null}
+        {unit ? <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">{unit}</span> : null}
       </p>
     </div>
   );
 }
 
-// Compact history row
 function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
   const t = useT();
   const { locale } = useI18n();
@@ -252,7 +247,7 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
     ? getDayDifference(previousMeasurement.date, measurement.date)
     : null;
 
-  const weight = getMeasurementFieldValue(measurement, 'weight');
+  const weight   = getMeasurementFieldValue(measurement, 'weight');
   const prevWeight = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, 'weight') : null;
   const weightDelta = weight !== null && prevWeight !== null ? weight - prevWeight : null;
 
@@ -266,27 +261,28 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
 
   const formatDelta = (delta, unit, lowerIsBetter = false) => {
     if (delta === null) return null;
-    const isPositive = delta > 0;
     const isGood = lowerIsBetter ? delta < 0 : delta > 0;
     return (
       <span className={`text-[11px] font-semibold ${isGood ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--warn))]'}`}>
-        {isPositive ? '+' : ''}{delta.toFixed(1)}{unit}
+        {delta > 0 ? '+' : ''}{delta.toFixed(1)}{unit}
       </span>
     );
   };
 
   return (
-    <div className="flex items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.82)] px-4 py-3 hover:bg-[hsl(var(--card))]">
-      <div className="min-w-[100px]">
+    <div className="flex items-center gap-3 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.82)] px-4 py-3 hover:bg-[hsl(var(--card))]">
+      <div className="min-w-[90px]">
         <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
           {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' }, locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
         </p>
         <p className="text-[11px] text-[hsl(var(--fg-3))]">
-          {daysSincePrevious ? t('measurements.history.days_after').replace('{n}', daysSincePrevious) : t('measurements.history.first')}
+          {daysSincePrevious
+            ? t('measurements.history.days_after').replace('{n}', daysSincePrevious)
+            : t('measurements.history.first')}
         </p>
       </div>
 
-      <div className="flex flex-1 items-center gap-6">
+      <div className="flex flex-1 items-center gap-5 flex-wrap">
         {weight !== null && (
           <div className="text-center">
             <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{weight.toFixed(1)}kg</p>
@@ -307,7 +303,7 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
         )}
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 shrink-0">
         <button
           type="button"
           onClick={onEdit}
@@ -343,27 +339,19 @@ function MeasurementField({
       <div className="flex items-center justify-between gap-3">
         <span>{label}</span>
         {hint ? (
-          <span className="text-[11px] font-medium tracking-normal text-[hsl(var(--fg-3))]">
-            {hint}
-          </span>
+          <span className="text-[11px] font-medium tracking-normal text-[hsl(var(--fg-3))]">{hint}</span>
         ) : null}
       </div>
 
-      <div className="relative mt-2">
+      <div className="relative mt-1.5">
         {as === 'select' ? (
           <select
             {...props}
             aria-invalid={!!error}
-            className={cn(
-              INPUT_CLASS_NAME,
-              error && 'border-[hsl(var(--err)/0.52)] ring-1 ring-[hsl(var(--err)/0.18)]',
-              inputClassName
-            )}
+            className={cn(INPUT_CLASS_NAME, error && 'border-[hsl(var(--err)/0.52)] ring-1 ring-[hsl(var(--err)/0.18)]', inputClassName)}
           >
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+            {options.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
         ) : (
@@ -372,162 +360,235 @@ function MeasurementField({
             aria-invalid={!!error}
             className={cn(
               INPUT_CLASS_NAME,
-              unit ? 'pr-14' : '',
+              unit ? 'pr-12' : '',
               error && 'border-[hsl(var(--err)/0.52)] ring-1 ring-[hsl(var(--err)/0.18)]',
               inputClassName
             )}
           />
         )}
         {unit ? (
-          <span className="pointer-events-none absolute inset-y-0 right-4 inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">
+          <span className="pointer-events-none absolute inset-y-0 right-3.5 inline-flex items-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">
             {unit}
           </span>
         ) : null}
       </div>
 
-      {error ? <p className="mt-2 text-[12px] font-medium leading-5 text-[hsl(var(--err))]">{error}</p> : null}
+      {error ? <p className="mt-1.5 text-[12px] font-medium leading-5 text-[hsl(var(--err))]">{error}</p> : null}
     </label>
   );
 }
 
-function MeasurementFieldGroup({ section, form, fieldErrors, onFieldChange }) {
-  if (!section?.fields?.length) {
-    return null;
-  }
+// ── Stepped form ──────────────────────────────────────────────────────────────
+
+function MeasurementSteppedForm({ measurement, onCancel, onSubmit, isSaving, submitError, onClearError }) {
+  const t = useT();
+  const [form, setForm] = useState(() => getMeasurementFormState(measurement));
+  const [stepIndex, setStepIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+
+  const validation    = useMemo(() => measurementFormSchema.safeParse(form), [form]);
+  const fieldErrors   = useMemo(() => getMeasurementFieldErrors(validation), [validation]);
+  const derivedPreview = useMemo(() => computeDerivedMeasurementFields(form), [form]);
+  const canSubmit     = validation.success && !isSaving;
+
+  const isLastStep    = stepIndex === FORM_STEPS.length - 1;
+  const currentStep   = FORM_STEPS[stepIndex];
+
+  const updateField = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    onClearError?.();
+  };
+
+  const goNext = () => {
+    setDirection(1);
+    setStepIndex((prev) => Math.min(prev + 1, FORM_STEPS.length - 1));
+  };
+
+  const goPrev = () => {
+    setDirection(-1);
+    setStepIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleSubmit = () => {
+    const parsed = measurementFormSchema.safeParse(form);
+    if (!parsed.success) return;
+    onSubmit(form);
+  };
 
   return (
-    <div className={section.className}>
-      <p className="atlas-overline">{section.label}</p>
-      {section.description ? (
-        <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">{section.description}</p>
-      ) : null}
-
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        {section.fields.map((field) => (
-          <MeasurementField
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            type="text"
-            inputMode="decimal"
-            value={form[field.key]}
-            onChange={(event) => onFieldChange(field.key, event.target.value)}
-            error={fieldErrors[field.key]}
+    <div className="flex flex-col" style={{ minHeight: 0 }}>
+      {/* Progress dots */}
+      <div className="flex items-center justify-center gap-1.5 px-6 pt-5 pb-1">
+        {FORM_STEPS.map((step, i) => (
+          <div
+            key={step.key}
+            className={cn(
+              'h-1.5 rounded-full transition-all duration-200',
+              i === stepIndex
+                ? 'w-5 bg-[hsl(var(--brand))]'
+                : i < stepIndex
+                  ? 'w-1.5 bg-[hsl(var(--brand)/0.4)]'
+                  : 'w-1.5 bg-[hsl(var(--border))]'
+            )}
           />
         ))}
+      </div>
+
+      {/* Step header */}
+      <div className="px-6 pt-3 pb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
+          {t('measurements.form.step_of')
+            .replace('{current}', stepIndex + 1)
+            .replace('{total}', FORM_STEPS.length)}
+        </p>
+        <h3 className="mt-0.5 text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+          {t(FORM_STEP_TITLE_KEYS[currentStep.key])}
+        </h3>
+      </div>
+
+      {/* Step content — scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-4">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentStep.key}
+            custom={direction}
+            initial={{ opacity: 0, x: 14 * direction }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 * direction }}
+            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {/* Step: Date & Source */}
+            {currentStep.isBasics && (
+              <div className="grid gap-4">
+                <MeasurementField
+                  label={t('measurements.form.date_label')}
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => updateField('date', e.target.value)}
+                  error={fieldErrors.date}
+                />
+                <MeasurementField
+                  label={t('measurements.form.source_label')}
+                  as="select"
+                  value={form.source}
+                  onChange={(e) => updateField('source', e.target.value)}
+                  error={fieldErrors.source}
+                  options={MEASUREMENT_SOURCE_OPTIONS}
+                  hint={t('measurements.form.source_hint')}
+                />
+              </div>
+            )}
+
+            {/* Step: field section (core / upper / lower / composition) */}
+            {currentStep.section && (
+              <div className="grid gap-3.5 sm:grid-cols-2">
+                {currentStep.section.fields.map((field) => (
+                  <MeasurementField
+                    key={field.key}
+                    label={field.label}
+                    unit={field.unit}
+                    type="text"
+                    inputMode="decimal"
+                    value={form[field.key]}
+                    onChange={(e) => updateField(field.key, e.target.value)}
+                    error={fieldErrors[field.key]}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Step: Notes & derived preview */}
+            {currentStep.isNotes && (
+              <div className="space-y-4">
+                {submitError ? <StatusBanner tone="error">{submitError}</StatusBanner> : null}
+
+                {/* Compact derived preview */}
+                <div className="rounded-[18px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.5)] px-4 py-3.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5">
+                    {t('measurements.form.derived_preview_overline')}
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-5">
+                    {[
+                      { key: 'bmi',              labelKey: 'measurements.form.bmi_label',              unit: 'kg/m²', d: 2 },
+                      { key: 'fat_mass',          labelKey: 'measurements.form.fat_mass_label',          unit: 'kg',    d: 2 },
+                      { key: 'lean_mass',         labelKey: 'measurements.form.lean_mass_label',         unit: 'kg',    d: 2 },
+                      { key: 'lean_mass_percent', labelKey: 'measurements.form.lean_mass_percent_label', unit: '%',     d: 1 },
+                    ].map(({ key, labelKey, unit, d }) => (
+                      <div key={key} className="flex items-baseline justify-between gap-2 py-1.5 border-b border-[hsl(var(--border)/0.2)] last:border-0">
+                        <p className="text-[12px] text-[hsl(var(--fg-2))] truncate">{t(labelKey)}</p>
+                        <p className="text-[13px] font-semibold text-[hsl(var(--fg))] shrink-0 tabular-nums">
+                          {toDisplayNumber(derivedPreview[key], d)}{' '}
+                          <span className="text-[11px] font-medium text-[hsl(var(--fg-3))]">{unit}</span>
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <label className={FIELD_LABEL_CLASS}>
+                  {t('measurements.form.notes_label')}
+                  <textarea
+                    value={form.notes}
+                    onChange={(e) => updateField('notes', e.target.value)}
+                    placeholder={t('measurements.form.notes_placeholder')}
+                    className={cn(TEXTAREA_CLASS_NAME, 'mt-1.5 w-full')}
+                  />
+                </label>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Navigation footer */}
+      <div className="flex items-center justify-between gap-3 border-t border-[hsl(var(--border)/0.7)] px-6 py-4">
+        {stepIndex === 0 ? (
+          <SecondaryButton type="button" onClick={onCancel}>
+            {t('measurements.form.cancel')}
+          </SecondaryButton>
+        ) : (
+          <button
+            type="button"
+            onClick={goPrev}
+            className="inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+            {t('measurements.form.previous')}
+          </button>
+        )}
+
+        {isLastStep ? (
+          <PrimaryButton type="button" onClick={handleSubmit} disabled={!canSubmit}>
+            {isSaving
+              ? t('measurements.form.saving')
+              : measurement
+                ? t('measurements.form.save_checkpoint')
+                : t('measurements.form.log_checkpoint')}
+          </PrimaryButton>
+        ) : (
+          <div className="flex items-center gap-3">
+            {!currentStep.isBasics && (
+              <button
+                type="button"
+                onClick={goNext}
+                className="text-[13px] font-medium text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+              >
+                {t('measurements.form.skip')}
+              </button>
+            )}
+            <PrimaryButton type="button" onClick={goNext}>
+              {t('measurements.form.next')}
+              <ChevronRight className="ml-1 h-4 w-4" strokeWidth={2} />
+            </PrimaryButton>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function MeasurementForm({ measurement, onCancel, onSubmit, isSaving = false, submitError = null, onClearError }) {
-  const t = useT();
-  const [form, setForm] = useState(() => getMeasurementFormState(measurement));
-  const validation = useMemo(() => measurementFormSchema.safeParse(form), [form]);
-  const fieldErrors = useMemo(() => getMeasurementFieldErrors(validation), [validation]);
-  const validationSummary = useMemo(
-    () => getMeasurementValidationSummary(validation, form),
-    [validation, form]
-  );
-  const derivedPreview = useMemo(() => computeDerivedMeasurementFields(form), [form]);
-  const sourceOptions = useMemo(() => MEASUREMENT_SOURCE_OPTIONS, []);
-  const canSubmit = validation.success && !isSaving;
-
-  const updateField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }));
-    onClearError?.();
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const parsed = measurementFormSchema.safeParse(form);
-
-    if (!parsed.success) {
-      return;
-    }
-
-    // Pass the raw form state upward so the parent can normalize it once
-    // before persisting it to Supabase.
-    onSubmit(form);
-  };
-
-  return (
-    <form noValidate onSubmit={handleSubmit} className="space-y-5 px-6 py-6 lg:px-7 lg:py-7">
-      {submitError ? <StatusBanner tone="error">{submitError}</StatusBanner> : null}
-
-      {validationSummary ? <StatusBanner tone={validationSummary.tone}>{validationSummary.message}</StatusBanner> : null}
-
-      <div className="grid gap-4">
-        <MeasurementField
-          label={t('measurements.form.date_label')}
-          type="date"
-          value={form.date}
-          onChange={(event) => updateField('date', event.target.value)}
-          error={fieldErrors.date}
-        />
-
-        <MeasurementField
-          label={t('measurements.form.source_label')}
-          as="select"
-          value={form.source}
-          onChange={(event) => updateField('source', event.target.value)}
-          error={fieldErrors.source}
-          options={sourceOptions}
-          hint={t('measurements.form.source_hint')}
-        />
-      </div>
-
-      {FORM_SECTIONS.map((section) => (
-        <MeasurementFieldGroup
-          key={section.key}
-          section={section}
-          form={form}
-          fieldErrors={fieldErrors}
-          onFieldChange={updateField}
-        />
-      ))}
-
-      <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <p className="atlas-overline">{t('measurements.form.derived_preview_overline')}</p>
-        <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-          {t('measurements.form.derived_preview_description')}
-        </p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <SnapshotRow label={t('measurements.form.bmi_label')} value={toDisplayNumber(derivedPreview.bmi, 2)} unit="kg/m²" />
-          <SnapshotRow label={t('measurements.form.fat_mass_label')} value={toDisplayNumber(derivedPreview.fat_mass, 2)} unit="kg" />
-          <SnapshotRow label={t('measurements.form.lean_mass_label')} value={toDisplayNumber(derivedPreview.lean_mass, 2)} unit="kg" />
-          <SnapshotRow label={t('measurements.form.lean_mass_percent_label')} value={toDisplayNumber(derivedPreview.lean_mass_percent, 1)} unit="%" />
-          <SnapshotRow label={t('measurements.form.muscle_fat_ratio_label')} value={toDisplayNumber(derivedPreview.muscle_fat_ratio, 2)} unit="ratio" />
-          <SnapshotRow label={t('measurements.form.intracellular_water_label')} value={toDisplayNumber(derivedPreview.intracellular_water_percent, 1)} unit="%" />
-          <SnapshotRow label={t('measurements.form.water_in_lean_mass_label')} value={toDisplayNumber(derivedPreview.water_in_lean_mass, 2)} unit="L/kg" />
-          <SnapshotRow label={t('measurements.form.muscle_mass_percent_label')} value={toDisplayNumber(derivedPreview.muscle_mass_percent, 1)} unit="%" />
-        </div>
-      </div>
-
-      <div className="rounded-[26px] border border-[hsl(var(--border)/0.85)] bg-[hsl(var(--card)/0.82)] px-5 py-5">
-        <label className={FIELD_LABEL_CLASS}>
-          {t('measurements.form.notes_label')}
-          <textarea
-            value={form.notes}
-            onChange={(event) => updateField('notes', event.target.value)}
-            placeholder={t('measurements.form.notes_placeholder')}
-            className={cn(TEXTAREA_CLASS_NAME, 'mt-2')}
-          />
-        </label>
-      </div>
-
-      <div className="flex flex-col-reverse gap-3 border-t border-[hsl(var(--border)/0.85)] pt-6 sm:flex-row sm:justify-end">
-        <SecondaryButton type="button" onClick={onCancel}>
-          {t('measurements.form.cancel')}
-        </SecondaryButton>
-        <PrimaryButton type="submit" disabled={isSaving}>
-          {isSaving ? t('measurements.form.saving') : measurement ? t('measurements.form.save_checkpoint') : t('measurements.form.log_checkpoint')}
-        </PrimaryButton>
-      </div>
-    </form>
-  );
-}
+// ── Page export ───────────────────────────────────────────────────────────────
 
 export default function Measurements({ embedded = false, measurements: propMeasurements }) {
   const { t } = useI18n();
@@ -548,29 +609,32 @@ export default function Measurements({ embedded = false, measurements: propMeasu
   );
 }
 
+// ── Main content ──────────────────────────────────────────────────────────────
+
 function MeasurementsContent({ embedded = false, measurements: propMeasurements }) {
   const t = useT();
   const { locale } = useI18n();
   const isPt = locale === 'pt-BR';
   const intlLocale = isPt ? 'pt-BR' : 'en-US';
   const { user } = useAuth();
-  const [metricKey, setMetricKey] = useState('weight');
-  const [notice, setNotice] = useState(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const [activeTab, setActiveTab]               = useState('overview');
+  const [metricKey, setMetricKey]               = useState('weight');
+  const [notice, setNotice]                     = useState(null);
+  const [isFormOpen, setIsFormOpen]             = useState(false);
   const [editingMeasurement, setEditingMeasurement] = useState(null);
 
   const queryClient = useQueryClient();
 
-  // ── Data fetching ────────────────────────────────────────────────
   const { data: fetchedMeasurements = [], isLoading, isError } = useQuery({
     queryKey: ['measurements', user?.id],
-    queryFn: () => listMeasurements(user.id, 200),
-    enabled: !!user?.id && !propMeasurements,
+    queryFn:  () => listMeasurements(user.id, 200),
+    enabled:  !!user?.id && !propMeasurements,
   });
 
   const measurements = propMeasurements || fetchedMeasurements;
 
-  // ── Mutations ────────────────────────────────────────────────────
+  // ── Mutations ──────────────────────────────────────────────────────
   const invalidateMeasurements = () => {
     queryClient.invalidateQueries({ queryKey: ['measurements', user?.id] });
     queryClient.invalidateQueries({ queryKey: ['measurements-progress', user?.id] });
@@ -620,613 +684,458 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       }),
   });
 
-  const sortedMeasurements = useMemo(() => {
-    return [...measurements].sort((left, right) => new Date(left.date) - new Date(right.date));
-  }, [measurements]);
+  // ── Derived data ───────────────────────────────────────────────────
+  const sortedMeasurements = useMemo(
+    () => [...measurements].sort((a, b) => new Date(a.date) - new Date(b.date)),
+    [measurements]
+  );
 
-  const measurementHistory = useMemo(() => {
-    return sortedMeasurements
-      .map((measurement, index) => ({
-        measurement,
-        previousMeasurement: index > 0 ? sortedMeasurements[index - 1] : null,
-      }))
-      .reverse();
-  }, [sortedMeasurements]);
+  const measurementHistory = useMemo(
+    () =>
+      sortedMeasurements
+        .map((m, i) => ({ measurement: m, previousMeasurement: i > 0 ? sortedMeasurements[i - 1] : null }))
+        .reverse(),
+    [sortedMeasurements]
+  );
 
   const latestMeasurement = sortedMeasurements[sortedMeasurements.length - 1] || null;
-  const firstMeasurement = sortedMeasurements[0] || null;
-  const latestBodyFields = useMemo(
-    () =>
-      BODY_SITE_FIELDS_NO_WAIST.filter((field) => getMeasurementFieldValue(latestMeasurement, field.key) !== null).slice(0, 8),
-    [latestMeasurement]
-  );
-  const latestCompositionFields = useMemo(
-    () =>
-      [
-        'lean_mass_percent',
-        'muscle_mass',
-        'muscle_mass_percent',
-        'muscle_fat_ratio',
-        'total_body_water',
-        'intracellular_water_percent',
-        'water_in_lean_mass',
-      ]
-        .map((key) => MEASUREMENT_FIELD_MAP[key])
-        .filter((field) => field && getMeasurementFieldValue(latestMeasurement, field.key) !== null)
-        .slice(0, 6),
-    [latestMeasurement]
-  );
-  const latestConsistencyIssues = latestMeasurement?.consistency_issues || [];
+  const firstMeasurement  = sortedMeasurements[0] || null;
 
   const captureSpanDays =
     latestMeasurement && firstMeasurement
       ? getDayDifference(firstMeasurement.date, latestMeasurement.date)
       : 0;
 
-  const averageCadenceDays =
-    sortedMeasurements.length > 1
-      ? Math.max(1, Math.round(captureSpanDays / (sortedMeasurements.length - 1)))
-      : null;
-
   const metricSnapshots = useMemo(() => {
-    return METRIC_OPTIONS.reduce((accumulator, metric) => {
-      const entries = sortedMeasurements.filter((measurement) => getMeasurementFieldValue(measurement, metric.key) !== null);
-      const latestEntry = entries[entries.length - 1] || null;
+    return METRIC_OPTIONS.reduce((acc, metric) => {
+      const entries      = sortedMeasurements.filter((m) => getMeasurementFieldValue(m, metric.key) !== null);
+      const latestEntry  = entries[entries.length - 1] || null;
       const previousEntry = entries[entries.length - 2] || null;
 
-      accumulator[metric.key] = {
+      acc[metric.key] = {
         entries,
         latestEntry,
         previousEntry,
         value: latestEntry ? getMeasurementFieldValue(latestEntry, metric.key) : null,
         delta:
           latestEntry && previousEntry
-            ? getMeasurementFieldValue(latestEntry, metric.key) -
-              getMeasurementFieldValue(previousEntry, metric.key)
+            ? getMeasurementFieldValue(latestEntry, metric.key) - getMeasurementFieldValue(previousEntry, metric.key)
             : null,
         rangeDelta:
           entries.length > 1
-            ? getMeasurementFieldValue(latestEntry, metric.key) -
-              getMeasurementFieldValue(entries[0], metric.key)
+            ? getMeasurementFieldValue(latestEntry, metric.key) - getMeasurementFieldValue(entries[0], metric.key)
             : null,
       };
-
-      return accumulator;
+      return acc;
     }, {});
   }, [sortedMeasurements]);
 
-  const selectedMetric = METRIC_LOOKUP[metricKey] || METRIC_OPTIONS[0];
-  const selectedSnapshot = metricSnapshots[metricKey] || {
-    entries: [],
-    latestEntry: null,
-    previousEntry: null,
-    value: null,
-    delta: null,
-    rangeDelta: null,
-  };
+  const selectedMetric   = METRIC_LOOKUP[metricKey] || METRIC_OPTIONS[0];
+  const selectedSnapshot = metricSnapshots[metricKey] || { entries: [], value: null, delta: null, rangeDelta: null };
 
-  const chartData = selectedSnapshot.entries.map((measurement) => ({
-    date: formatMeasurementDate(measurement.date, undefined, intlLocale),
-    value: getMeasurementFieldValue(measurement, metricKey),
+  const chartData = selectedSnapshot.entries.map((m) => ({
+    date:  formatMeasurementDate(m.date, undefined, intlLocale),
+    value: getMeasurementFieldValue(m, metricKey),
   }));
 
-  const isSavingMeasurement = createMutation.isPending || updateMutation.isPending;
+  const isSaving = createMutation.isPending || updateMutation.isPending;
 
+  // ── Handlers ───────────────────────────────────────────────────────
   const handleCreate = () => {
     setNotice(null);
     setEditingMeasurement(null);
     setIsFormOpen(true);
   };
 
-  const handleEdit = (measurement) => {
+  const handleEdit = (m) => {
     setNotice(null);
-    setEditingMeasurement(measurement);
+    setEditingMeasurement(m);
     setIsFormOpen(true);
   };
 
-  const handleDelete = (measurement) => {
+  const handleDelete = (m) => {
     const confirmed = window.confirm(
-      t('measurements.confirm_delete').replace('{date}', formatMeasurementDate(measurement.date, { day: '2-digit', month: '2-digit', year: 'numeric' }, intlLocale))
+      t('measurements.confirm_delete').replace(
+        '{date}',
+        formatMeasurementDate(m.date, { day: '2-digit', month: '2-digit', year: 'numeric' }, intlLocale)
+      )
     );
     if (!confirmed) return;
-    deleteMutation.mutate(measurement.id);
+    deleteMutation.mutate(m.id);
   };
 
   const handleSaveMeasurement = (payload) => {
-    const validation = measurementFormSchema.safeParse(payload);
-    if (!validation.success) {
-      const validationNotice = getMeasurementValidationSummary(validation, payload);
+    const parsed = measurementFormSchema.safeParse(payload);
+    if (!parsed.success) {
+      const summary = getMeasurementValidationSummary(parsed, payload);
       setNotice({
-        tone: validationNotice?.tone === 'error' ? 'error' : 'warning',
-        message: validationNotice?.message || t('measurements.mutation.validation_error'),
+        tone:    summary?.tone === 'error' ? 'error' : 'warning',
+        message: summary?.message || t('measurements.mutation.validation_error'),
       });
       return;
     }
-
-    const data = validation.data;
-
     if (editingMeasurement?.id) {
-      updateMutation.mutate({ id: editingMeasurement.id, data });
+      updateMutation.mutate({ id: editingMeasurement.id, data: parsed.data });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(parsed.data);
     }
   };
 
-  // ── Loading / error guards ───────────────────────────────────────
+  // ── Loading / error ────────────────────────────────────────────────
   if (isLoading) {
-    const loadingBody = (
-      <div className="flex items-center justify-center py-24">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[hsl(var(--brand)/0.18)] border-t-[hsl(var(--brand))]" />
-          <p className="text-[13px] text-[hsl(var(--fg-2))]">{t('measurements.loading')}</p>
-        </div>
+    const spinner = (
+      <div className="flex items-center justify-center py-20">
+        <div className="h-7 w-7 animate-spin rounded-full border-[3px] border-[hsl(var(--brand)/0.18)] border-t-[hsl(var(--brand))]" />
       </div>
     );
-
-    return embedded ? loadingBody : <AppContainer>{loadingBody}</AppContainer>;
+    return embedded ? spinner : <AppContainer>{spinner}</AppContainer>;
   }
 
   if (isError) {
-    const errorBody = (
-      <StatusBanner tone="error">
-        {t('measurements.error_loading')}
-      </StatusBanner>
-    );
-
-    return embedded ? errorBody : <AppContainer>{errorBody}</AppContainer>;
+    const err = <StatusBanner tone="error">{t('measurements.error_loading')}</StatusBanner>;
+    return embedded ? err : <AppContainer>{err}</AppContainer>;
   }
+
+  // ── Layout ─────────────────────────────────────────────────────────
+
+  const weightSnap   = metricSnapshots.weight;
+  const bfSnap       = metricSnapshots.body_fat_percent;
+  const waistSnap    = metricSnapshots.waist;
 
   const pageBody = (
     <>
-      {!embedded ? (
-        <PageHeader
-          eyebrow={t('measurements.eyebrow')}
-          title={t('measurements.title')}
-          subtitle={t('measurements.subtitle')}
-          accentClassName="from-[rgba(14,165,233,0.12)] via-[rgba(14,165,233,0.03)]"
-          actions={
-            <ActionRow>
-              <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2">
-                <Plus className="h-4 w-4" strokeWidth={1.9} />
-                {t('measurements.log_measurements')}
-              </PrimaryButton>
-
-              {latestMeasurement ? (
-                <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
-                  {t('measurements.last_checkpoint_on')}{' '}
-                  <span className="text-[hsl(var(--fg))]">
-                    {formatMeasurementDate(latestMeasurement.date, {
-                      day: '2-digit',
-                      month: 'long',
-                    }, intlLocale)}
-                  </span>
-                </span>
-              ) : null}
-            </ActionRow>
-          }
-        >
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard
-              size="lg"
-              label={t('measurements.hero.current_weight')}
-              value={latestMeasurement ? toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight')) : '--'}
-              unit={latestMeasurement ? 'kg' : undefined}
-              detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight, t)}
-            />
-            <MetricCard
-              size="lg"
-              label={t('measurements.hero.body_fat_percent')}
-              value={latestMeasurement ? toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent')) : '--'}
-              unit={latestMeasurement ? '%' : undefined}
-              detail={getDeltaLabel(metricSnapshots.body_fat_percent?.delta, METRIC_LOOKUP.body_fat_percent, t)}
-            />
-            <MetricCard
-              size="lg"
-              label={t('measurements.hero.bmi')}
-              value={latestMeasurement ? toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2) : '--'}
-              unit={latestMeasurement ? 'kg/m²' : undefined}
-              detail={getDeltaLabel(metricSnapshots.bmi?.delta, METRIC_LOOKUP.bmi, t)}
-            />
-            <MetricCard
-              size="lg"
-              label={t('measurements.hero.cadence')}
-              value={averageCadenceDays ? averageCadenceDays.toString() : '--'}
-              unit={averageCadenceDays ? t('measurements.hero.days') : undefined}
-              detail={t('measurements.hero.cadence_detail').replace('{n}', sortedMeasurements.length || 0)}
-            />
-          </div>
-        </PageHeader>
-      ) : (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="max-w-2xl">
+      {/* ── Compact header ── */}
+      {!embedded && (
+        <div className="flex items-start justify-between gap-4 pt-2 pb-1">
+          <div>
             <p className="atlas-overline">{t('measurements.eyebrow')}</p>
-            <h2 className="mt-3 text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">
-              {t('measurements.embedded_title')}
-            </h2>
-            <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-              {t('measurements.embedded_subtitle')}
-            </p>
+            <h1 className="mt-1.5 text-[22px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
+              {t('measurements.title_short')}
+            </h1>
           </div>
-          <PrimaryButton type="button" onClick={handleCreate} className="inline-flex items-center gap-2 self-start">
+          <PrimaryButton
+            type="button"
+            onClick={handleCreate}
+            className="mt-1 shrink-0 inline-flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" strokeWidth={1.9} />
-            {t('measurements.log_measurements')}
+            <span className="hidden sm:inline">{t('measurements.log_measurements')}</span>
+            <span className="sm:hidden">Log</span>
           </PrimaryButton>
         </div>
       )}
 
-      <StatusBanner tone="neutral">
-        {t('measurements.status_banner')}
-      </StatusBanner>
-
-      {notice?.message ? <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner> : null}
-      {latestConsistencyIssues.length ? (
-        <StatusBanner tone={latestConsistencyIssues.some((issue) => issue.severity === 'error') ? 'error' : 'warning'}>
-          {latestConsistencyIssues[0].message}
-        </StatusBanner>
+      {/* ── Notice banner ── */}
+      {notice?.message ? (
+        <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>
       ) : null}
 
-      <Section
-          title={t('measurements.latest_checkpoint.section_title')}
-          subtitle={t('measurements.latest_checkpoint.section_subtitle')}
+      {/* ── Quick stats row ── */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <QuickStatCard
+          label={t('measurements.hero.current_weight')}
+          value={latestMeasurement ? toDisplayNumber(weightSnap?.value) : '--'}
+          unit={latestMeasurement ? 'kg' : undefined}
+          deltaLabel={weightSnap?.delta !== null && weightSnap?.delta !== undefined
+            ? getDeltaLabel(weightSnap.delta, METRIC_LOOKUP.weight, t)
+            : undefined}
+          deltaPositive={weightSnap?.delta !== null ? weightSnap?.delta < 0 : undefined}
+        />
+        <QuickStatCard
+          label={t('measurements.hero.body_fat_percent')}
+          value={latestMeasurement ? toDisplayNumber(bfSnap?.value) : '--'}
+          unit={latestMeasurement ? '%' : undefined}
+          deltaLabel={bfSnap?.delta !== null && bfSnap?.delta !== undefined
+            ? getDeltaLabel(bfSnap.delta, METRIC_LOOKUP.body_fat_percent, t)
+            : undefined}
+          deltaPositive={bfSnap?.delta !== null ? bfSnap?.delta < 0 : undefined}
+        />
+        <QuickStatCard
+          label={t('measurements.latest_checkpoint.waist')}
+          value={latestMeasurement ? toDisplayNumber(waistSnap?.value) : '--'}
+          unit={latestMeasurement ? 'cm' : undefined}
+          deltaLabel={waistSnap?.delta !== null && waistSnap?.delta !== undefined
+            ? getDeltaLabel(waistSnap.delta, METRIC_LOOKUP.waist, t)
+            : undefined}
+          deltaPositive={waistSnap?.delta !== null ? waistSnap?.delta < 0 : undefined}
+        />
+      </div>
+
+      {/* ── Tab bar ── */}
+      <div className="flex items-center -mb-px border-b border-[hsl(var(--border)/0.5)]">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              'px-4 py-2.5 text-[13px] font-semibold tracking-[-0.01em] border-b-2 transition-colors',
+              activeTab === tab
+                ? 'border-[hsl(var(--brand))] text-[hsl(var(--fg))]'
+                : 'border-transparent text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
+            )}
+          >
+            {t(`measurements.tabs.${tab}`)}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Tab content ── */}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.14, ease: 'easeOut' }}
+          className="space-y-5"
         >
-          <Card className="px-5 py-5">
-            {latestMeasurement ? (
-              <>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="atlas-overline">{t('measurements.latest_checkpoint.overline')}</p>
-                    <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                      {formatMeasurementDate(latestMeasurement.date, {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
-                      }, intlLocale)}
-                    </p>
-                    <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                      {t('measurements.latest_checkpoint.summary')}
-                    </p>
-                    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3 py-1.5 text-[12px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg-2))]">
-                      {t('measurements.latest_checkpoint.source_label')}
-                      <span className="text-[hsl(var(--fg))]">{getMeasurementFieldSourceLabel(latestMeasurement?.source)}</span>
+          {/* ──── Overview tab ──── */}
+          {activeTab === 'overview' && (
+            <>
+              {latestMeasurement ? (
+                <Card className="px-5 py-5">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                      <p className="atlas-overline">{t('measurements.latest_checkpoint.overline')}</p>
+                      <p className="mt-2 text-[16px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                        {formatMeasurementDate(latestMeasurement.date, { day: '2-digit', month: 'long', year: 'numeric' }, intlLocale)}
+                      </p>
+                      <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.6)] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--fg-2))]">
+                        {t('measurements.latest_checkpoint.source_label')}
+                        <span className="text-[hsl(var(--fg))]">{getMeasurementFieldSourceLabel(latestMeasurement?.source)}</span>
+                      </div>
+                    </div>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[16px] border border-[rgba(14,165,233,0.18)] bg-[rgba(14,165,233,0.1)] text-[#0891b2]">
+                      <BarChart3 className="h-4 w-4" strokeWidth={1.9} />
                     </div>
                   </div>
 
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[20px] border border-[rgba(14,165,233,0.18)] bg-[rgba(14,165,233,0.12)] text-[#0891b2]">
-                    <BarChart3 className="h-4 w-4" strokeWidth={1.9} />
+                  <div className="space-y-0">
+                    <SnapshotRow label={t('measurements.latest_checkpoint.weight')}   value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))}           unit="kg" />
+                    <SnapshotRow label={t('measurements.latest_checkpoint.body_fat')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} unit="%" />
+                    <SnapshotRow label={t('measurements.latest_checkpoint.waist')}    value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'waist'))}            unit="cm" />
+                    <SnapshotRow label={t('measurements.latest_checkpoint.bmi')}      value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)}           unit="kg/m²" />
+                    <SnapshotRow label={t('measurements.latest_checkpoint.fat_mass')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'fat_mass'), 2)}      unit="kg" />
+                    <SnapshotRow label={t('measurements.latest_checkpoint.lean_mass')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'lean_mass'), 2)}   unit="kg" />
                   </div>
-                </div>
 
-                <div className="mt-5 space-y-3">
-                  <SnapshotRow label={t('measurements.latest_checkpoint.weight')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))} unit="kg" />
-                  <SnapshotRow label={t('measurements.latest_checkpoint.body_fat')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} unit="%" />
-                  <SnapshotRow label={t('measurements.latest_checkpoint.waist')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'waist'))} unit="cm" />
-                  <SnapshotRow label={t('measurements.latest_checkpoint.bmi')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)} unit="kg/m²" />
-                  <SnapshotRow label={t('measurements.latest_checkpoint.fat_mass')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'fat_mass'), 2)} unit="kg" />
-                  <SnapshotRow label={t('measurements.latest_checkpoint.lean_mass')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'lean_mass'), 2)} unit="kg" />
-                  {latestBodyFields.map((field) => (
-                    <SnapshotRow
-                      key={field.key}
-                      label={field.label}
-                      value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, field.key))}
-                      unit={field.unit}
-                    />
-                  ))}
-                  {latestCompositionFields.map((field) => (
-                    <SnapshotRow
-                      key={field.key}
-                      label={field.label}
-                      value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, field.key), field.precision ?? 2)}
-                      unit={field.unit}
-                    />
-                  ))}
-                </div>
+                  {latestMeasurement.notes ? (
+                    <div className="mt-4 rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-1.5">
+                        {t('measurements.latest_checkpoint.context_label')}
+                      </p>
+                      <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">{latestMeasurement.notes}</p>
+                    </div>
+                  ) : null}
+                </Card>
+              ) : (
+                <EmptyState
+                  title={t('measurements.latest_checkpoint.no_records_title')}
+                  description={t('measurements.latest_checkpoint.no_records_description')}
+                  action={
+                    <PrimaryButton type="button" onClick={handleCreate}>
+                      {t('measurements.log_measurements')}
+                    </PrimaryButton>
+                  }
+                />
+              )}
 
-                <div className="mt-5 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.42)] px-4 py-4">
-                  <p className="atlas-metric-label">{t('measurements.latest_checkpoint.context_label')}</p>
-                  <p className="mt-3 text-[13px] leading-7 text-[hsl(var(--fg-2))]">
-                    {latestMeasurement.notes || t('pages.measurements.no_notes')}
-                  </p>
-                </div>
-              </>
-            ) : (
-              <EmptyState
-                title={t('measurements.latest_checkpoint.no_records_title')}
-                description={t('measurements.latest_checkpoint.no_records_description')}
-                action={
-                  <PrimaryButton type="button" onClick={handleCreate}>
-                    {t('measurements.log_measurements')}
-                  </PrimaryButton>
-                }
-              />
-            )}
-          </Card>
-        </Section>
-
-        <SectionCard
-          title={t('measurements.trend.section_title')}
-          subtitle={t('measurements.trend.section_subtitle')}
-        >
-          {sortedMeasurements.length ? (
-            <div className="grid gap-6">
-              <div className="space-y-5">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {METRIC_OPTIONS.map((metric) => (
-                    <MetricCard
-                      key={metric.key}
-                      label={metric.label}
-                      value={formatMetricValue(metricSnapshots[metric.key]?.value, metric)}
-                      detail={metricSnapshots[metric.key]?.entries?.length
-                        ? t('measurements.metric_selector.checkpoints_with_metric').replace('{n}', metricSnapshots[metric.key].entries.length)
-                        : t('measurements.metric_selector.insufficient_data')}
-                      isActive={metricKey === metric.key}
-                      onClick={() => setMetricKey(metric.key)}
-                    />
-                  ))}
-                </div>
-
-                <div className="overflow-hidden rounded-[30px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] shadow-[var(--shadow-xs)]">
-                  <div
-                    className="border-b border-[hsl(var(--border)/0.82)] px-5 py-5 lg:px-6"
-                    style={{
-                      background: `linear-gradient(180deg, ${selectedMetric.tint} 0%, hsl(var(--card) / 0.82) 100%)`,
-                    }}
-                  >
-                  <div className="flex flex-col gap-5">
-                      <div className="max-w-2xl">
-                        <p className="atlas-overline">{t('measurements.trend.selected_metric_overline')}</p>
-                        <div className="mt-3 flex flex-wrap items-center gap-3">
-                          <h3 className="text-[1.5rem] font-semibold tracking-[-0.045em] text-[hsl(var(--fg))]">
-                            {selectedMetric.label}
-                          </h3>
-                          <span
-                            className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[12px] font-semibold tracking-[-0.016em]"
-                            style={{
-                              borderColor: selectedMetric.border,
-                              background: selectedMetric.tint,
-                              color: selectedMetric.color,
-                            }}
-                          >
-                            {getDeltaLabel(selectedSnapshot.delta, selectedMetric)}
-                          </span>
-                        </div>
-                        <p className="mt-3 text-[14px] leading-7 text-[hsl(var(--fg-2))]">
-                          {selectedMetric.description}
+              {sortedMeasurements.length > 0 && (
+                <>
+                  {/* Coverage */}
+                  <div className="rounded-[20px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.5)] px-5 py-4">
+                    <p className="atlas-overline mb-3">{t('measurements.coverage.overline')}</p>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.coverage.analysis_window_title')}</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{captureSpanDays}d</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.coverage.latest_coverage_title')}</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">
+                          {t('measurements.coverage.latest_coverage_detail').replace('{n}', latestMeasurement ? countFilledMeasurementFields(latestMeasurement) : 0)}
                         </p>
                       </div>
-
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        <div className="space-y-1">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-                            {t('measurements.trend.current')}
-                          </p>
-                          <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
-                            {formatMetricValue(selectedSnapshot.value, selectedMetric)}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-                            {t('measurements.trend.since_start')}
-                          </p>
-                          <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
-                            {selectedSnapshot.rangeDelta === null
-                              ? t('measurements.trend.no_data')
-                              : `${selectedSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(
-                                  selectedSnapshot.rangeDelta,
-                                  selectedMetric.digits
-                                )} ${selectedMetric.unit}`}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-                            {t('measurements.trend.records')}
-                          </p>
-                          <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
-                            {t('measurements.trend.records_value').replace('{n}', selectedSnapshot.entries.length)}
-                          </p>
-                        </div>
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.coverage.starting_baseline_title')}</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">
+                          {firstMeasurement ? formatMeasurementDate(firstMeasurement.date, { day: '2-digit', month: 'short', year: 'numeric' }, intlLocale) : '--'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.hero.cadence')}</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{sortedMeasurements.length} entries</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="h-[340px] px-4 pb-4 pt-3 lg:px-6 lg:pb-6">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData}>
-                        <defs>
-                          <linearGradient id={`measurement-fill-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={selectedMetric.color} stopOpacity={0.22} />
-                            <stop offset="95%" stopColor={selectedMetric.color} stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-
-                        <CartesianGrid
-                          vertical={false}
-                          stroke="hsl(var(--border) / 0.75)"
-                          strokeDasharray="4 6"
-                        />
-                        <XAxis
-                          dataKey="date"
-                          axisLine={false}
-                          tickLine={false}
-                          tickMargin={12}
-                          fontSize={12}
-                          stroke="hsl(var(--fg-3))"
-                        />
-                        <YAxis
-                          axisLine={false}
-                          tickLine={false}
-                          tickMargin={12}
-                          width={42}
-                          fontSize={12}
-                          stroke="hsl(var(--fg-3))"
-                          tickFormatter={(value) => toDisplayNumber(value, selectedMetric.digits)}
-                        />
-                        <Tooltip
-                          cursor={{ stroke: 'hsl(var(--border) / 0.9)', strokeDasharray: '4 4' }}
-                          contentStyle={{
-                            background: 'hsl(var(--card))',
-                            border: '1px solid hsl(var(--border) / 0.88)',
-                            borderRadius: '18px',
-                            boxShadow: 'var(--shadow-md)',
-                          }}
-                          labelStyle={{
-                            color: 'hsl(var(--fg-2))',
-                            fontSize: 12,
-                            fontWeight: 600,
-                          }}
-                          formatter={(value) => [formatMetricValue(value, selectedMetric), selectedMetric.label]}
-                          labelFormatter={(label) => t('measurements.trend.checkpoint_tooltip').replace('{n}', label)}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="value"
-                          stroke="transparent"
-                          fill={`url(#measurement-fill-${metricKey})`}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="value"
-                          stroke={selectedMetric.color}
-                          strokeWidth={3}
-                          dot={{ r: 3.5, fill: selectedMetric.color, stroke: '#ffffff', strokeWidth: 2 }}
-                          activeDot={{
-                            r: 5.5,
-                            fill: selectedMetric.color,
-                            stroke: '#ffffff',
-                            strokeWidth: 2,
-                          }}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-
-              <aside className="space-y-4">
-                <MeasurementInsights measurements={sortedMeasurements} latest={latestMeasurement} />
-
-                <div className="rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--fill)/0.56)] px-5 py-5 shadow-[var(--shadow-xs)]">
-                  <p className="atlas-overline">{t('measurements.coverage.overline')}</p>
-                  <div className="mt-4 space-y-4">
-                    <div>
-                      <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        {t('measurements.coverage.analysis_window_title')}
-                      </p>
-                      <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {t('measurements.coverage.analysis_window_detail').replace('{n}', captureSpanDays)}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        {t('measurements.coverage.latest_coverage_title')}
-                      </p>
-                      <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {t('measurements.coverage.latest_coverage_detail').replace('{n}', latestMeasurement ? countFilledMetrics(latestMeasurement) : 0)}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        {t('measurements.coverage.starting_baseline_title')}
-                      </p>
-                      <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {firstMeasurement
-                          ? formatMeasurementDate(firstMeasurement.date, {
-                              day: '2-digit',
-                              month: 'long',
-                              year: 'numeric',
-                            }, intlLocale)
-                          : '--'}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">
-                        {t('measurements.coverage.latest_context_title')}
-                      </p>
-                      <p className="mt-1 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
-                        {latestMeasurement?.notes || t('pages.measurements.no_notes_recent')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </aside>
-            </div>
-          ) : (
-            <EmptyState
-              title={t('measurements.trend.no_measurements_title')}
-              description={t('measurements.trend.no_measurements_description')}
-            />
+                  {/* AI Insights */}
+                  <MeasurementInsights measurements={sortedMeasurements} latest={latestMeasurement} />
+                </>
+              )}
+            </>
           )}
-        </SectionCard>
 
-        <SectionCard
-          title={t('measurements.history.section_title')}
-          subtitle={t('measurements.history.section_subtitle')}
-        >
-          {!measurementHistory.length ? (
-            <EmptyState
-              title={t('measurements.history.no_records_title')}
-              description={t('measurements.history.no_records_description')}
-              action={
-                <PrimaryButton type="button" onClick={handleCreate}>
-                  {t('measurements.log_measurements')}
-                </PrimaryButton>
-              }
-            />
-          ) : (
-            <div className="space-y-3">
-              {measurementHistory.map(({ measurement, previousMeasurement }) => (
-                <HistoryRow
-                  key={measurement.id}
-                  measurement={measurement}
-                  previousMeasurement={previousMeasurement}
-                  onEdit={() => handleEdit(measurement)}
-                  onDelete={() => handleDelete(measurement)}
+          {/* ──── History tab ──── */}
+          {activeTab === 'history' && (
+            <>
+              {!measurementHistory.length ? (
+                <EmptyState
+                  title={t('measurements.history.no_records_title')}
+                  description={t('measurements.history.no_records_description')}
+                  action={
+                    <PrimaryButton type="button" onClick={handleCreate}>
+                      {t('measurements.log_measurements')}
+                    </PrimaryButton>
+                  }
                 />
-              ))}
-            </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {measurementHistory.map(({ measurement, previousMeasurement }) => (
+                    <HistoryRow
+                      key={measurement.id}
+                      measurement={measurement}
+                      previousMeasurement={previousMeasurement}
+                      onEdit={() => handleEdit(measurement)}
+                      onDelete={() => handleDelete(measurement)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
-        </SectionCard>
 
-        <ResponsiveModal
-          open={isFormOpen}
-          onOpenChange={(open) => {
-            setIsFormOpen(open);
-            if (!open) setEditingMeasurement(null);
-          }}
-          dialogClassName="max-h-[90vh] p-0 sm:max-w-[32rem]"
-          dialogProps={{ onOpenAutoFocus: (e) => e.preventDefault() }}
-          drawerClassName="max-h-[85dvh] pb-[calc(var(--tab-bar-h,94px)+env(safe-area-inset-bottom,0px))]"
-        >
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <DialogPanelHeader
-              eyebrow={t('measurements.form.dialog_eyebrow')}
-              title={editingMeasurement ? t('measurements.form.dialog_title_edit') : t('measurements.form.dialog_title_new')}
-              description={t('measurements.form.dialog_description')}
-              accentClassName="from-[rgba(14,165,233,0.12)]"
-            />
+          {/* ──── Trends tab ──── */}
+          {activeTab === 'trends' && (
+            <>
+              {!sortedMeasurements.length ? (
+                <EmptyState
+                  title={t('measurements.trend.no_measurements_title')}
+                  description={t('measurements.trend.no_measurements_description')}
+                />
+              ) : (
+                <>
+                  {/* Metric selector grid */}
+                  <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    {METRIC_OPTIONS.map((metric) => (
+                      <MetricCard
+                        key={metric.key}
+                        label={metric.label}
+                        value={formatMetricValue(metricSnapshots[metric.key]?.value, metric)}
+                        detail={
+                          metricSnapshots[metric.key]?.entries?.length
+                            ? t('measurements.metric_selector.checkpoints_with_metric').replace('{n}', metricSnapshots[metric.key].entries.length)
+                            : t('measurements.metric_selector.insufficient_data')
+                        }
+                        isActive={metricKey === metric.key}
+                        onClick={() => setMetricKey(metric.key)}
+                      />
+                    ))}
+                  </div>
 
-            <MeasurementForm
-              key={editingMeasurement?.id || 'new-measurement'}
-              measurement={editingMeasurement}
-              isSaving={isSavingMeasurement}
-              submitError={notice?.tone === 'error' ? notice.message : null}
-              onClearError={() => {
-                if (notice?.tone === 'error') {
-                  setNotice(null);
-                }
-              }}
-              onCancel={() => {
-                setIsFormOpen(false);
-                setEditingMeasurement(null);
-              }}
-              onSubmit={handleSaveMeasurement}
-            />
-          </div>
-        </ResponsiveModal>
+                  {/* Chart card */}
+                  <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] shadow-[var(--shadow-xs)]">
+                    <div
+                      className="border-b border-[hsl(var(--border)/0.82)] px-5 py-4"
+                      style={{ background: `linear-gradient(180deg, ${selectedMetric.tint} 0%, hsl(var(--card) / 0.82) 100%)` }}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="atlas-overline">{t('measurements.trend.selected_metric_overline')}</p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <h3 className="text-[1.25rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+                              {selectedMetric.label}
+                            </h3>
+                            <span
+                              className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold tracking-[-0.01em]"
+                              style={{ borderColor: selectedMetric.border, background: selectedMetric.tint, color: selectedMetric.color }}
+                            >
+                              {getDeltaLabel(selectedSnapshot.delta, selectedMetric)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-5">
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.trend.current')}</p>
+                            <p className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--fg))]">{formatMetricValue(selectedSnapshot.value, selectedMetric)}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.trend.since_start')}</p>
+                            <p className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--fg))]">
+                              {selectedSnapshot.rangeDelta === null
+                                ? t('measurements.trend.no_data')
+                                : `${selectedSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(selectedSnapshot.rangeDelta, selectedMetric.digits)} ${selectedMetric.unit}`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="h-[280px] px-4 pb-4 pt-3 lg:px-6 lg:pb-5">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                          <defs>
+                            <linearGradient id={`mfill-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%"  stopColor={selectedMetric.color} stopOpacity={0.22} />
+                              <stop offset="95%" stopColor={selectedMetric.color} stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid vertical={false} stroke="hsl(var(--border) / 0.75)" strokeDasharray="4 6" />
+                          <XAxis dataKey="date" axisLine={false} tickLine={false} tickMargin={10} fontSize={11} stroke="hsl(var(--fg-3))" />
+                          <YAxis axisLine={false} tickLine={false} tickMargin={10} width={38} fontSize={11} stroke="hsl(var(--fg-3))" tickFormatter={(v) => toDisplayNumber(v, selectedMetric.digits)} />
+                          <Tooltip
+                            cursor={{ stroke: 'hsl(var(--border) / 0.9)', strokeDasharray: '4 4' }}
+                            contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border) / 0.88)', borderRadius: '16px', boxShadow: 'var(--shadow-md)' }}
+                            labelStyle={{ color: 'hsl(var(--fg-2))', fontSize: 11, fontWeight: 600 }}
+                            formatter={(v) => [formatMetricValue(v, selectedMetric), selectedMetric.label]}
+                            labelFormatter={(label) => t('measurements.trend.checkpoint_tooltip').replace('{n}', label)}
+                          />
+                          <Area type="monotone" dataKey="value" stroke="transparent" fill={`url(#mfill-${metricKey})`} />
+                          <Line
+                            type="monotone"
+                            dataKey="value"
+                            stroke={selectedMetric.color}
+                            strokeWidth={2.5}
+                            dot={{ r: 3, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
+                            activeDot={{ r: 5, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* ── Stepped form modal ── */}
+      <ResponsiveModal
+        open={isFormOpen}
+        onOpenChange={(open) => {
+          setIsFormOpen(open);
+          if (!open) setEditingMeasurement(null);
+        }}
+        dialogClassName="max-h-[88vh] p-0 sm:max-w-[30rem] overflow-hidden flex flex-col"
+        dialogProps={{ onOpenAutoFocus: (e) => e.preventDefault() }}
+        drawerClassName="max-h-[88dvh] pb-[calc(var(--tab-bar-h,80px)+env(safe-area-inset-bottom,0px))] overflow-hidden flex flex-col"
+      >
+        <MeasurementSteppedForm
+          key={editingMeasurement?.id || 'new'}
+          measurement={editingMeasurement}
+          isSaving={isSaving}
+          submitError={notice?.tone === 'error' ? notice.message : null}
+          onClearError={() => { if (notice?.tone === 'error') setNotice(null); }}
+          onCancel={() => { setIsFormOpen(false); setEditingMeasurement(null); }}
+          onSubmit={handleSaveMeasurement}
+        />
+      </ResponsiveModal>
     </>
   );
 
-  return embedded ? <div className="space-y-7">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>;
+  return embedded
+    ? <div className="space-y-5">{pageBody}</div>
+    : <AppContainer className="space-y-5">{pageBody}</AppContainer>;
 }

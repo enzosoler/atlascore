@@ -1610,7 +1610,13 @@
   "measurements": {
     "eyebrow": "Measurements",
     "title": "Measurements with care, hierarchy and clean reading.",
+    "title_short": "Body Checkpoints",
     "subtitle": "A dedicated space for body checkpoints: weight, composition and measurements in a premium, clean and rhythmic view.",
+    "tabs": {
+      "overview": "Overview",
+      "history": "History",
+      "trends": "Trends"
+    },
     "embedded_title": "Structured body checkpoints",
     "embedded_subtitle": "Weight, body-fat, and circumference checkpoints organized for quick scan inside the Body hub.",
     "log_measurements": "Log measurements",
@@ -1703,7 +1709,17 @@
       "cancel": "Cancel",
       "save_checkpoint": "Save checkpoint",
       "log_checkpoint": "Log checkpoint",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "step_of": "Step {current} of {total}",
+      "step_basics": "Date & Source",
+      "step_core": "Core Metrics",
+      "step_upper": "Upper Body",
+      "step_lower": "Lower Body",
+      "step_composition": "Composition",
+      "step_notes": "Notes & Preview",
+      "next": "Next",
+      "previous": "Back",
+      "skip": "Skip"
     },
     "delta": {
       "no_previous": "No previous data",

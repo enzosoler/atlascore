@@ -20,6 +20,7 @@ import {
   Settings,
   Menu,
   MessageSquare,
+  Ruler,
   ShieldCheck,
   Target,
   TrendingUp,
@@ -50,6 +51,7 @@ const ICON_MAP = {
   FlaskConical,
   BarChart3,
   Brain,
+  Ruler,
   User,
   Heart,
   BookOpen,
@@ -67,7 +69,7 @@ const ICON_MAP = {
 };
 
 const BOTTOM_PATHS_BY_ROLE = {
-  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.progress, ROUTES.profile],
+  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.measurements, ROUTES.profile],
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.profile],

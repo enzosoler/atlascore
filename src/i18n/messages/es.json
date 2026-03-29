@@ -1623,7 +1623,13 @@
   "measurements": {
     "eyebrow": "Medidas",
     "title": "Medidas con cuidado, jerarquía y lectura limpia.",
+    "title_short": "Puntos de Control Corporal",
     "subtitle": "Un espacio dedicado a puntos de control corporales: peso, composición y medidas en una vista premium, limpia y rítmica.",
+    "tabs": {
+      "overview": "Resumen",
+      "history": "Historial",
+      "trends": "Tendencias"
+    },
     "embedded_title": "Puntos de control corporales estructurados",
     "embedded_subtitle": "Peso, grasa corporal y circunferencias organizados para escaneo rápido dentro del hub de Cuerpo.",
     "log_measurements": "Registrar medidas",
@@ -1716,7 +1722,17 @@
       "cancel": "Cancelar",
       "save_checkpoint": "Guardar punto de control",
       "log_checkpoint": "Registrar punto de control",
-      "saving": "Guardando..."
+      "saving": "Guardando...",
+      "step_of": "Paso {current} de {total}",
+      "step_basics": "Fecha y Fuente",
+      "step_core": "Métricas Principales",
+      "step_upper": "Parte Superior",
+      "step_lower": "Parte Inferior",
+      "step_composition": "Composición",
+      "step_notes": "Notas y Vista Previa",
+      "next": "Siguiente",
+      "previous": "Atrás",
+      "skip": "Saltar"
     },
     "delta": {
       "no_previous": "Sin datos previos",
