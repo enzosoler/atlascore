@@ -27,6 +27,9 @@ function getAllowedOrigin(requestOrigin: string): string {
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:8080',
+    // Capacitor iOS — WKWebView sends this as the origin for cross-origin requests
+    'capacitor://localhost',
+    'atlascore://localhost',
   ];
   return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
 }
@@ -124,6 +127,8 @@ serve(async (req) => {
 
   // Top-level catch: ensures ALL responses include CORS headers
   try {
+
+  console.log('[ai-coach-chat] origin:', req.headers.get('origin'), '| method:', req.method);
 
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
