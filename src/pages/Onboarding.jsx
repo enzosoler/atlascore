@@ -879,34 +879,12 @@ export default function Onboarding() {
   const handleSuccessDone = async () => {
     console.log('[Onboarding] handleSuccessDone: starting revalidation');
     const result = await revalidateSession();
-    console.log('[Onboarding] handleSuccessDone: revalidation result:', {
-      id: result?.id,
-      onboarding_completed: result?.onboarding_completed,
-      role: result?.atlas_role,
-    });
-
-    // If revalidation didn't pick up onboarding_completed, verify directly in DB
-    if (!result?.onboarding_completed) {
-      console.warn('[Onboarding] handleSuccessDone: still false after revalidation, direct DB check');
-      const { data } = await supabase
-        .from('profiles')
-        .select('onboarding_completed')
-        .eq('id', user?.id)
-        .maybeSingle();
-      console.log('[Onboarding] handleSuccessDone: direct DB result:', data);
-
-      if (!data?.onboarding_completed) {
-        // Profile doesn't have true — save actually failed somehow
-        setSaveError(t('onboarding.saveError'));
-        return;
-      }
-      // DB has true but revalidation missed it — retry once
-      console.log('[Onboarding] handleSuccessDone: DB has true, retrying revalidation');
-      await revalidateSession();
-    }
+    
+    // Give context one more cycle to update
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     const target = ROLE_HOME[result?.atlas_role || user?.atlas_role] || ROUTES.today;
-    console.log('[Onboarding] handleSuccessDone: navigating to', target);
+    console.log('[Onboarding] handleSuccessDone: final navigation to', target);
     navigate(target, { replace: true });
   };
 
