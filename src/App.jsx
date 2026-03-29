@@ -253,9 +253,11 @@ const RequireAuthenticatedApp = () => {
   // Defensive onboarding guard: authenticated users who have not completed onboarding
   // are always redirected to /Onboarding, regardless of which app route they reached.
   // The onboarding route itself is exempted to prevent an infinite redirect loop.
-  // STRICT: only redirect if onboarding_completed is explicitly false.
   const isOnboardingRoute = location.pathname === ROUTES.onboarding;
-  if (user?.onboarding_completed === false && !isOnboardingRoute) {
+  
+  // If onboarding_completed is explicitly false OR null, and we're not on the onboarding route,
+  // we redirect to Onboarding. This prevents staying stuck on splash if state is null.
+  if ((user?.onboarding_completed === false || user?.onboarding_completed === null) && !isOnboardingRoute) {
     console.log(
       '[RequireAuthenticatedApp] guard triggered: redirecting to onboarding',
       '| user:', user?.id,
@@ -263,12 +265,6 @@ const RequireAuthenticatedApp = () => {
       '| attempted route:', location.pathname,
     );
     return <Navigate to={ROUTES.onboarding} replace />;
-  }
-
-  // If onboarding_completed is null (and not loading), it's an invalid state
-  if (user?.onboarding_completed === null && !isOnboardingRoute) {
-    console.warn('[RequireAuthenticatedApp] user.onboarding_completed is null but authState is authenticated');
-    return <AppBootstrap />; // Keep splash while we figure it out
   }
 
   console.log(
