@@ -767,20 +767,11 @@ export default function Onboarding() {
   const [form, setForm] = useState(INITIAL_FORM);
 
   useEffect(() => {
-    console.log('[Onboarding] guard effect:', {
-      isAuthenticated,
-      userId: user?.id,
-      onboarding_completed: user?.onboarding_completed,
-    });
-    if (!isAuthenticated || !user) {
-      console.log('[Onboarding] guard: not authenticated, redirecting to home');
-      navigate(ROUTES.home, { replace: true });
-    }
     if (user?.onboarding_completed) {
       console.log('[Onboarding] guard: onboarding complete, redirecting to app');
       navigate(ROLE_HOME[user?.atlas_role] || ROUTES.today, { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [user?.onboarding_completed, user?.atlas_role, navigate]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const toggle = (k, id) =>
