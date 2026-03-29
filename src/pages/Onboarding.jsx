@@ -767,8 +767,17 @@ export default function Onboarding() {
   const [form, setForm] = useState(INITIAL_FORM);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) navigate(ROUTES.home, { replace: true });
+    console.log('[Onboarding] guard effect:', {
+      isAuthenticated,
+      userId: user?.id,
+      onboarding_completed: user?.onboarding_completed,
+    });
+    if (!isAuthenticated || !user) {
+      console.log('[Onboarding] guard: not authenticated, redirecting to home');
+      navigate(ROUTES.home, { replace: true });
+    }
     if (user?.onboarding_completed) {
+      console.log('[Onboarding] guard: onboarding complete, redirecting to app');
       navigate(ROLE_HOME[user?.atlas_role] || ROUTES.today, { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
@@ -877,8 +886,37 @@ export default function Onboarding() {
   };
 
   const handleSuccessDone = async () => {
-    await revalidateSession();
-    navigate(ROLE_HOME[user?.atlas_role] || ROUTES.today, { replace: true });
+    console.log('[Onboarding] handleSuccessDone: starting revalidation');
+    const result = await revalidateSession();
+    console.log('[Onboarding] handleSuccessDone: revalidation result:', {
+      id: result?.id,
+      onboarding_completed: result?.onboarding_completed,
+      role: result?.atlas_role,
+    });
+
+    // If revalidation didn't pick up onboarding_completed, verify directly in DB
+    if (!result?.onboarding_completed) {
+      console.warn('[Onboarding] handleSuccessDone: still false after revalidation, direct DB check');
+      const { data } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user?.id)
+        .maybeSingle();
+      console.log('[Onboarding] handleSuccessDone: direct DB result:', data);
+
+      if (!data?.onboarding_completed) {
+        // Profile doesn't have true — save actually failed somehow
+        setSaveError(t('onboarding.saveError'));
+        return;
+      }
+      // DB has true but revalidation missed it — retry once
+      console.log('[Onboarding] handleSuccessDone: DB has true, retrying revalidation');
+      await revalidateSession();
+    }
+
+    const target = ROLE_HOME[result?.atlas_role || user?.atlas_role] || ROUTES.today;
+    console.log('[Onboarding] handleSuccessDone: navigating to', target);
+    navigate(target, { replace: true });
   };
 
   const stepContent = () => {

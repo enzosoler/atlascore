@@ -118,6 +118,7 @@ export const AuthProvider = ({ children }) => {
 
     let profileRole = normalizedUser?.atlas_role || 'athlete';
     let profileOnboardingCompleted = normalizedUser.onboarding_completed;
+    let profileSource = 'user_metadata';
     try {
       // Hard 3 s timeout — on slow mobile networks this query can hang indefinitely,
       // keeping authState at 'loading' forever and preventing the splash from hiding.
@@ -139,8 +140,12 @@ export const AuthProvider = ({ children }) => {
       // profiles table is the authoritative source for onboarding_completed
       if (profileRow?.onboarding_completed != null) {
         profileOnboardingCompleted = normalizeBoolean(profileRow.onboarding_completed);
+        profileSource = 'profiles_table';
+      } else {
+        profileSource = profileRow === null ? 'no_profile_row' : 'profile_row_null_field';
       }
     } catch (e) {
+      profileSource = `fallback(${e.message})`;
       console.warn('[AuthContext] Profile fetch failed, using fallback:', e.message);
     }
 
@@ -155,7 +160,8 @@ export const AuthProvider = ({ children }) => {
       '[AuthContext] user resolved',
       'id:', resolvedUser.id,
       '| onboarding_completed:', resolvedUser.onboarding_completed,
-      '| source: profiles table (authoritative)',
+      '| source:', profileSource,
+      '| metadata_value:', normalizedUser.onboarding_completed,
       '| role:', resolvedUser.atlas_role,
     );
 
