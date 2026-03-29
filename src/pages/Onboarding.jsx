@@ -821,6 +821,9 @@ export default function Onboarding() {
         .upsert({ ...payload, id: user.id, updated_at: new Date().toISOString() }, { onConflict: 'id' });
       if (profileError) throw profileError;
 
+      // SUCCESS: Set a local flag immediately to prevent loop while session catches up
+      localStorage.setItem(`onboarding_done_${user.id}`, 'true');
+
       // Sync to user_metadata (non-fatal — profiles table is authoritative)
       const { error: metaError } = await supabase.auth.updateUser({
         data: {

@@ -252,16 +252,19 @@ const RequireAuthenticatedApp = () => {
 
   // Defensive onboarding guard: authenticated users who have not completed onboarding
   // are always redirected to /Onboarding, regardless of which app route they reached.
-  // The onboarding route itself is exempted to prevent an infinite redirect loop.
   const isOnboardingRoute = location.pathname === ROUTES.onboarding;
   
-  // If onboarding_completed is explicitly false OR null, and we're not on the onboarding route,
-  // we redirect to Onboarding. This prevents staying stuck on splash if state is null.
-  if ((user?.onboarding_completed === false || user?.onboarding_completed === null) && !isOnboardingRoute) {
+  // SECURE FALLBACK: Check localStorage if the user object says false/null.
+  // This prevents loops if the DB update hasn't propagated to the session yet.
+  const localOnboardingDone = localStorage.getItem(`onboarding_done_${user?.id}`) === 'true';
+  const effectiveOnboardingCompleted = user?.onboarding_completed || localOnboardingDone;
+
+  if ((effectiveOnboardingCompleted === false || effectiveOnboardingCompleted === null) && !isOnboardingRoute) {
     console.log(
       '[RequireAuthenticatedApp] guard triggered: redirecting to onboarding',
       '| user:', user?.id,
       '| onboarding_completed:', user?.onboarding_completed,
+      '| local_fallback:', localOnboardingDone,
       '| attempted route:', location.pathname,
     );
     return <Navigate to={ROUTES.onboarding} replace />;
