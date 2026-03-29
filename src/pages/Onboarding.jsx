@@ -108,20 +108,28 @@ export default function Onboarding() {
         id: user.id,
         full_name: formData.full_name,
         sex: formData.sex,
-        age: parseInt(formData.age),
-        height_cm: parseFloat(formData.height_cm),
-        current_weight: parseFloat(formData.current_weight),
+        age: parseInt(formData.age) || 0,
+        height_cm: parseFloat(formData.height_cm) || 0,
+        current_weight: parseFloat(formData.current_weight) || 0,
         health_goals: formData.health_goals,
         onboarding_completed: true,
         updated_at: new Date().toISOString(),
       };
 
-      // 2. Save to profiles table (Single source of truth)
-      const { error: saveError } = await supabase
-        .from('profiles')
-        .upsert(payload, { onConflict: 'id' });
+      console.log('[Onboarding] Saving payload:', payload);
 
-      if (saveError) throw saveError;
+      // 2. Save to profiles table (Single source of truth)
+      const { data, error: saveError } = await supabase
+        .from('profiles')
+        .upsert(payload, { onConflict: 'id' })
+        .select();
+
+      if (saveError) {
+        console.error('[Onboarding] Supabase error:', saveError);
+        throw saveError;
+      }
+
+      console.log('[Onboarding] Save successful:', data);
 
       // 3. Set local fallback to prevent race condition loop
       localStorage.setItem(`onboarding_done_${user.id}`, 'true');
@@ -139,7 +147,8 @@ export default function Onboarding() {
 
     } catch (err) {
       console.error('[Onboarding] Error saving profile:', err);
-      setError(t('onboarding.error_saving') || 'Could not save your profile. Please try again.');
+      const errorMessage = err.message || err.error_description || 'Could not save your profile. Please try again.';
+      setError(t('onboarding.error_saving') === 'onboarding.error_saving' ? errorMessage : t('onboarding.error_saving'));
       setLoading(false);
     }
   };
@@ -271,6 +280,7 @@ export default function Onboarding() {
                       return (
                         <button
                           key={g.id}
+                          type="button"
                           onClick={() => updateForm('health_goals', [g.id])} // Single choice for simplicity
                           className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left
                             ${selected 

@@ -4,30 +4,41 @@
       "title": "Welcome to atlas.core",
       "description": "Your unified system for workouts, nutrition, progress, and performance. Let us show you around."
     },
-    "nutrition": {
-      "title": "Nutrition",
-      "description": "Manage your daily calorie intake, macros, and supplements. Build personalized diet plans with structured guidance."
+    "step1": {
+      "title": "Basic Profile",
+      "desc": "Let’s start with the basics."
     },
-    "workouts": {
-      "title": "Workouts",
-      "description": "Create, organize, and track your workouts. Choose from pre-built templates or build manually. Log every set and rep."
+    "full_name": "Full Name",
+    "sex": {
+      "label": "Biological Sex",
+      "placeholder": "Select...",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
     },
-    "progress": {
-      "title": "Progress",
-      "description": "Take photos regularly to track your body transformation. Visualize your evolution over time."
+    "step2": {
+      "title": "Metrics",
+      "desc": "Essential data for your plan."
     },
-    "profile": {
-      "title": "Your Profile",
-      "description": "Set your goal, weight, height, and other metrics. This helps us personalize everything for you."
+    "age": "Age",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "step3": {
+      "title": "Your Goal",
+      "desc": "What are you aiming for?"
     },
+    "goals": {
+      "fat_loss": "Fat Loss",
+      "muscle_gain": "Muscle Gain",
+      "performance": "Performance",
+      "health": "General Health"
+    },
+    "finish": "Enter Atlas",
+    "continue": "Continue",
+    "error_saving": "Could not save your profile. Please try again.",
     "complete": {
       "title": "You're all set",
       "description": "Everything is ready. Good luck on your performance journey!"
-    },
-    "tour": {
-      "skip": "Skip",
-      "next": "Continue",
-      "finish": "Let's go"
     }
   }
 }
