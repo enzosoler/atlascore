@@ -85,9 +85,11 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
         });
       }
     } catch (err) {
+      console.error('[ai-coach-chat] error:', err);
+      const detail = err?.message || String(err) || 'Unknown error';
       appendMessage({
         role: 'assistant',
-        content: 'Something went wrong. Please try again.',
+        content: `Something went wrong: ${detail}`,
         actions: [],
         suggestions: [],
       });
