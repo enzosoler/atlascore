@@ -39,19 +39,30 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
     setIsTyping(true);
 
     try {
+      // Debug: verify auth token exists before calling
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('[ai-coach-chat] debug — has session:', !!session, '| access_token prefix:', session?.access_token?.slice(0, 20));
+
       const { data, error: fnError } = await supabase.functions.invoke('ai-coach-chat', {
         body: { message: text.trim(), page_context: pageContext },
       });
 
+      console.log('[ai-coach-chat] invoke result — data:', data, '| error:', fnError);
+
       if (fnError) {
-        const errMsg = fnError?.message ?? 'AI coach error';
-        console.error('[ai-coach-chat] function error:', fnError);
-        appendMessage({ role: 'assistant', content: errMsg, actions: [], suggestions: [] });
+        // Expose the real error shape — context, status, message
+        const status = fnError?.status ?? fnError?.statusCode ?? '?';
+        const detail = fnError?.message ?? JSON.stringify(fnError);
+        console.error('[ai-coach-chat] FunctionsFetchError:', { status, detail, raw: fnError });
+        const displayMsg = `Error ${status}: ${detail}`;
+        appendMessage({ role: 'assistant', content: displayMsg, actions: [], suggestions: [] });
         return;
       }
 
       if (data?.error) {
-        appendMessage({ role: 'assistant', content: data.error, actions: [], suggestions: [] });
+        console.warn('[ai-coach-chat] backend error response:', data);
+        const displayMsg = `[${data.code ?? 'ERR'}] ${data.error}`;
+        appendMessage({ role: 'assistant', content: displayMsg, actions: [], suggestions: [] });
         return;
       }
 
@@ -77,11 +88,11 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
         });
       }
     } catch (err) {
-      console.error('[ai-coach-chat] error:', err);
       const detail = err?.message || String(err) || 'Unknown error';
+      console.error('[ai-coach-chat] caught exception:', { message: detail, name: err?.name, raw: err });
       appendMessage({
         role: 'assistant',
-        content: `Something went wrong: ${detail}`,
+        content: `Exception: ${detail}`,
         actions: [],
         suggestions: [],
       });
