@@ -159,7 +159,7 @@ async function deleteProtocol(protocolId) {
 // ── Concentration Chart based on Actual Dose Logs ────────────────────────────
 
 function ConcentrationChart({ protocols }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { user } = useAuth();
 
   // Fetch logs for all active protocols

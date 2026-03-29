@@ -70,7 +70,7 @@ export function useDailyStateV2() {
   const { data: rawProtocols = [] } = useQuery({
     queryKey: DAILY_KEYS.protocols(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('protocols').select('id, compound, name, frequency_per_week, active').eq('user_id', uid).eq('active', true).limit(20);
+      const { data } = await supabase.from('protocols').select('id, substance_name, name, frequency, active').eq('user_id', uid).eq('active', true).limit(20);
       return data || [];
     }),
     enabled: !!uid, staleTime: 120_000,
@@ -155,7 +155,7 @@ export function useDailyStateV2() {
       dueToday: protos.length,
       completedToday: protos.filter((p) => loggedIds.has(p.id)).length,
       pending: protos.length - protos.filter((p) => loggedIds.has(p.id)).length,
-      activeCompounds: protos.map((p) => p.compound || p.name).filter(Boolean),
+      activeCompounds: protos.map((p) => p.substance_name || p.name).filter(Boolean),
     };
   }, [rawProtocols, rawProtocolLogs]);
 
