@@ -1637,6 +1637,55 @@
       "keep_logging_desc": "{n} more entries to unlock trend charts.",
       "take_photo": "Take a progress photo",
       "take_photo_desc": "Visual evidence compounds over time."
+    },
+    "checkin": {
+      "title": "Body Check-in",
+      "description": "Log your body state",
+      "back": "Back",
+      "logged": "logged",
+      "logWeight": "Log Weight",
+      "weightPlaceholder": "e.g. 82.5",
+      "unit": "kg",
+      "log": "Log",
+      "sleep": "Sleep",
+      "energy": "Energy",
+      "recovery": "Recovery",
+      "sleepDesc": "How many hours did you sleep?",
+      "energyDesc": "How is your energy today?",
+      "recoveryDesc": "How recovered do you feel?",
+      "logSleepVal": "Log {val}h",
+      "logSleepFallback": "Log sleep",
+      "logEnergy": "Log energy",
+      "logRecovery": "Log recovery",
+      "scale": {
+        "drained": "Drained",
+        "low": "Low",
+        "moderate": "Moderate",
+        "good": "Good",
+        "peak": "Peak",
+        "wrecked": "Wrecked",
+        "sore": "Sore",
+        "okay": "Okay",
+        "fresh": "Fresh"
+      },
+      "menu": {
+        "measurementsLabel": "Body Measurements",
+        "measurementsSub": "Waist, chest, arms, legs",
+        "photoLabel": "Progress Photo",
+        "photoSub": "Take a checkpoint photo",
+        "sleepLabel": "Sleep",
+        "sleepSub": "Log hours slept",
+        "energyLabel": "Energy",
+        "energySub": "Rate your energy today",
+        "recoveryLabel": "Recovery",
+        "recoverySub": "How recovered do you feel"
+      },
+      "errorEnterWeight": "Enter a weight value first",
+      "errorWeightRange": "Weight must be between 20 and 300 kg",
+      "weightLogged": "Weight logged: {val} kg",
+      "errorWeightFailed": "Failed to log weight",
+      "errorSaveFailed": "Failed to save",
+      "subLogged": "{type} logged"
     }
   },
   "measurements": {
@@ -2524,6 +2573,38 @@
       "couldNotSave": "Could not save the prescription.",
       "couldNotDelete": "Could not delete the prescription.",
       "couldNotUpdateStatus": "Could not update the status."
+    },
+    "chat": {
+      "title": "Coach",
+      "done": "Done",
+      "confirm": "Confirm",
+      "dismiss": "Dismiss",
+      "emptyTitle": "Ask me anything",
+      "emptyDesc": "Training, nutrition, recovery — I know your data.",
+      "placeholder": "Message your coach...",
+      "triggerBar": "Ask your coach...",
+      "suggestions": {
+        "today": {
+          "focus": "What should I focus on today?",
+          "summarize": "Summarize my day",
+          "logMeal": "Log a meal"
+        },
+        "training": {
+          "swap": "Swap an exercise",
+          "explain": "Explain today's workout",
+          "shorter": "Make it shorter"
+        },
+        "nutrition": {
+          "logMeal": "Log a meal",
+          "highProtein": "Suggest a high-protein meal",
+          "calories": "Adjust my calories"
+        },
+        "progress": {
+          "stalled": "Why has my weight stalled?",
+          "trends": "Summarize my trends",
+          "deficit": "Am I in a deficit?"
+        }
+      }
     }
   },
   "nutritionist": {

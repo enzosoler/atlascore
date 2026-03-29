@@ -6,6 +6,7 @@ import MobileSheet from '@/components/shared/MobileSheet';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { useT } from '@/lib/i18nContext';
 import { AI_COACH_KEY } from '@/hooks/useAICoach';
 import { DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
 import { ROUTES } from '@/lib/routes';
@@ -20,6 +21,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const t = useT();
   const [weight, setWeight] = useState('');
   const [saving, setSaving] = useState(false);
   // Sub-panel: null | 'sleep' | 'energy' | 'recovery'
@@ -29,8 +31,8 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
 
   const handleLogWeight = async () => {
     const val = parseFloat(weight);
-    if (!val || isNaN(val)) { toast.error('Enter a weight value first'); return; }
-    if (val < 20 || val > 300) { toast.error('Weight must be between 20 and 300 kg'); return; }
+    if (!val || isNaN(val)) { toast.error(t('body.checkin.errorEnterWeight')); return; }
+    if (val < 20 || val > 300) { toast.error(t('body.checkin.errorWeightRange')); return; }
     if (!user?.id) return;
 
     setSaving(true);
@@ -43,14 +45,14 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
       }, { onConflict: 'user_id,date' });
 
       if (error) throw error;
-      toast.success(`Weight logged: ${val} kg`);
+      toast.success(t('body.checkin.weightLogged', { val }));
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayWeight(user.id) });
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.lastWeight(user.id) });
       queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setWeight('');
       onOpenChange(false);
     } catch {
-      toast.error('Failed to log weight');
+      toast.error(t('body.checkin.errorWeightFailed'));
     } finally {
       setSaving(false);
     }
@@ -90,13 +92,13 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
       }
 
       queryClient.invalidateQueries({ queryKey: ['daily-checkin', user.id] });
-      const labels = { sleep: 'Sleep', energy: 'Energy', recovery: 'Recovery' };
-      toast.success(`${labels[subPanel]} logged`);
+      const typeLabel = t(`body.checkin.${subPanel}`);
+      toast.success(t('body.checkin.subLogged', { type: typeLabel }));
       setSubPanel(null);
       setSubVal(null);
       onOpenChange(false);
     } catch {
-      toast.error('Failed to save');
+      toast.error(t('body.checkin.errorSaveFailed'));
     } finally {
       setSavingSub(false);
     }
@@ -116,10 +118,10 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
   if (subPanel === 'sleep') {
     const hours = [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 12];
     return (
-      <MobileSheet open={open} onOpenChange={(o) => { if (!o) { closeSubPanel(); onOpenChange(false); } }} title="Sleep" description="How many hours did you sleep?">
+      <MobileSheet open={open} onOpenChange={(o) => { if (!o) { closeSubPanel(); onOpenChange(false); } }} title={t('body.checkin.sleep')} description={t('body.checkin.sleepDesc')}>
         <MobileSheet.Body>
           <button onClick={closeSubPanel} className="flex items-center gap-1 text-[12px] text-[hsl(var(--fg-2))] mb-4">
-            <ChevronLeft className="w-3.5 h-3.5" /> Back
+            <ChevronLeft className="w-3.5 h-3.5" /> {t('body.checkin.back')}
           </button>
           <div className="grid grid-cols-4 gap-2">
             {hours.map((h) => (
@@ -132,7 +134,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
                     : 'bg-[hsl(var(--fill)/0.6)] border border-[hsl(var(--border)/0.7)] text-[hsl(var(--fg-2))]'
                 }`}
               >
-                {h % 1 === 0 ? `${h}h` : `${h}h`}
+                {`${h}h`}
               </button>
             ))}
           </div>
@@ -143,7 +145,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
             disabled={subVal === null || savingSub}
             className="atlas-button atlas-button-primary w-full disabled:opacity-50"
           >
-            {savingSub ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : `Log ${subVal !== null ? subVal + 'h' : 'sleep'}`}
+            {savingSub ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : (subVal !== null ? t('body.checkin.logSleepVal', { val: subVal }) : t('body.checkin.logSleepFallback'))}
           </button>
         </MobileSheet.Footer>
       </MobileSheet>
@@ -155,30 +157,30 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
     const isEnergy = subPanel === 'energy';
     const options = isEnergy
       ? [
-          { val: 1, label: '1', desc: 'Drained' },
-          { val: 2, label: '2', desc: 'Low' },
-          { val: 3, label: '3', desc: 'Moderate' },
-          { val: 4, label: '4', desc: 'Good' },
-          { val: 5, label: '5', desc: 'Peak' },
+          { val: 1, label: '1', desc: t('body.checkin.scale.drained') },
+          { val: 2, label: '2', desc: t('body.checkin.scale.low') },
+          { val: 3, label: '3', desc: t('body.checkin.scale.moderate') },
+          { val: 4, label: '4', desc: t('body.checkin.scale.good') },
+          { val: 5, label: '5', desc: t('body.checkin.scale.peak') },
         ]
       : [
-          { val: 1, label: '1', desc: 'Wrecked' },
-          { val: 2, label: '2', desc: 'Sore' },
-          { val: 3, label: '3', desc: 'Okay' },
-          { val: 4, label: '4', desc: 'Good' },
-          { val: 5, label: '5', desc: 'Fresh' },
+          { val: 1, label: '1', desc: t('body.checkin.scale.wrecked') },
+          { val: 2, label: '2', desc: t('body.checkin.scale.sore') },
+          { val: 3, label: '3', desc: t('body.checkin.scale.okay') },
+          { val: 4, label: '4', desc: t('body.checkin.scale.good') },
+          { val: 5, label: '5', desc: t('body.checkin.scale.fresh') },
         ];
 
     return (
       <MobileSheet
         open={open}
         onOpenChange={(o) => { if (!o) { closeSubPanel(); onOpenChange(false); } }}
-        title={isEnergy ? 'Energy' : 'Recovery'}
-        description={isEnergy ? 'How is your energy today?' : 'How recovered do you feel?'}
+        title={isEnergy ? t('body.checkin.energy') : t('body.checkin.recovery')}
+        description={isEnergy ? t('body.checkin.energyDesc') : t('body.checkin.recoveryDesc')}
       >
         <MobileSheet.Body>
           <button onClick={closeSubPanel} className="flex items-center gap-1 text-[12px] text-[hsl(var(--fg-2))] mb-4">
-            <ChevronLeft className="w-3.5 h-3.5" /> Back
+            <ChevronLeft className="w-3.5 h-3.5" /> {t('body.checkin.back')}
           </button>
           <div className="flex gap-2">
             {options.map((o) => (
@@ -203,7 +205,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
             disabled={subVal === null || savingSub}
             className="atlas-button atlas-button-primary w-full disabled:opacity-50"
           >
-            {savingSub ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : `Log ${isEnergy ? 'energy' : 'recovery'}`}
+            {savingSub ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : (isEnergy ? t('body.checkin.logEnergy') : t('body.checkin.logRecovery'))}
           </button>
         </MobileSheet.Footer>
       </MobileSheet>
@@ -212,7 +214,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
 
   // ── Main view ────────────────────────────────────────────────────────────────
   return (
-    <MobileSheet open={open} onOpenChange={onOpenChange} title="Body Check-in" description="Log your body state">
+    <MobileSheet open={open} onOpenChange={onOpenChange} title={t('body.checkin.title')} description={t('body.checkin.description')}>
       <MobileSheet.Body>
         <div className="space-y-4">
 
@@ -220,7 +222,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
           <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] p-4">
             <div className="flex items-center gap-2 mb-3">
               <Scale className="w-4 h-4 text-[hsl(var(--brand))]" strokeWidth={2} />
-              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Log Weight</p>
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('body.checkin.logWeight')}</p>
             </div>
             <div className="flex gap-2">
               <input
@@ -230,18 +232,18 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
                 max="300"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
-                placeholder="e.g. 82.5"
+                placeholder={t('body.checkin.weightPlaceholder')}
                 className="flex-1 h-11 rounded-[12px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--card))] px-3 text-[15px] font-semibold text-[hsl(var(--fg))] outline-none focus:border-[hsl(var(--brand)/0.5)]"
                 onKeyDown={(e) => { if (e.key === 'Enter') handleLogWeight(); }}
               />
-              <span className="flex items-center text-[13px] text-[hsl(var(--fg-3))] pr-1">kg</span>
+              <span className="flex items-center text-[13px] text-[hsl(var(--fg-3))] pr-1">{t('body.checkin.unit')}</span>
               <button
                 onClick={handleLogWeight}
                 disabled={saving || !weight}
                 className="h-11 px-4 rounded-[12px] bg-[hsl(var(--brand))] text-white text-[13px] font-semibold disabled:opacity-50 flex items-center gap-1.5 shrink-0"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" strokeWidth={2.5} />}
-                Log
+                {t('body.checkin.log')}
               </button>
             </div>
           </div>
@@ -249,11 +251,11 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
           {/* Action list */}
           <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] divide-y divide-[hsl(var(--border)/0.4)]">
             {[
-              { icon: Ruler,  label: 'Body Measurements', sub: 'Waist, chest, arms, legs',  action: () => goTo(ROUTES.measurements) },
-              { icon: Camera, label: 'Progress Photo',     sub: 'Take a checkpoint photo',   action: () => goTo(ROUTES.progressPhotos) },
-              { icon: Moon,   label: 'Sleep',              sub: 'Log hours slept',            action: () => { setSubVal(null); setSubPanel('sleep'); } },
-              { icon: Zap,    label: 'Energy',             sub: 'Rate your energy today',     action: () => { setSubVal(null); setSubPanel('energy'); } },
-              { icon: Heart,  label: 'Recovery',           sub: 'How recovered do you feel',  action: () => { setSubVal(null); setSubPanel('recovery'); } },
+              { icon: Ruler,  label: t('body.checkin.menu.measurementsLabel'), sub: t('body.checkin.menu.measurementsSub'),  action: () => goTo(ROUTES.measurements) },
+              { icon: Camera, label: t('body.checkin.menu.photoLabel'),         sub: t('body.checkin.menu.photoSub'),          action: () => goTo(ROUTES.progressPhotos) },
+              { icon: Moon,   label: t('body.checkin.menu.sleepLabel'),         sub: t('body.checkin.menu.sleepSub'),          action: () => { setSubVal(null); setSubPanel('sleep'); } },
+              { icon: Zap,    label: t('body.checkin.menu.energyLabel'),        sub: t('body.checkin.menu.energySub'),         action: () => { setSubVal(null); setSubPanel('energy'); } },
+              { icon: Heart,  label: t('body.checkin.menu.recoveryLabel'),      sub: t('body.checkin.menu.recoverySub'),       action: () => { setSubVal(null); setSubPanel('recovery'); } },
             ].map(({ icon: Icon, label, sub, action }) => (
               <button
                 key={label}

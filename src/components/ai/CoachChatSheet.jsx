@@ -14,6 +14,7 @@ import {
 import { Sparkles, Send, X, Check, Loader2, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
+import { useT } from '@/lib/i18nContext';
 
 // ─── Markdown components ───────────────────────────────────────────────────────
 
@@ -37,12 +38,13 @@ const mdComponents = {
 // ─── Action card ───────────────────────────────────────────────────────────────
 
 function ActionCard({ action, actionKey, state, onConfirm, onDismiss }) {
+  const t = useT();
   if (state === 'dismissed') return null;
   if (state === 'done') {
     return (
       <div className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--ok))] font-medium mt-2">
         <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
-        <span>{action.description ?? 'Done'}</span>
+        <span>{action.description ?? t('coach.chat.done')}</span>
       </div>
     );
   }
@@ -65,14 +67,14 @@ function ActionCard({ action, actionKey, state, onConfirm, onDismiss }) {
           ) : (
             <Check className="w-3 h-3" strokeWidth={2.5} />
           )}
-          Confirm
+          {t('coach.chat.confirm')}
         </button>
         <button
           disabled={isLoading}
           onClick={() => onDismiss(actionKey)}
           className="rounded-[10px] border border-[hsl(var(--border)/0.6)] px-3 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))] disabled:opacity-60"
         >
-          Dismiss
+          {t('coach.chat.dismiss')}
         </button>
       </div>
     </div>
@@ -175,6 +177,7 @@ export default function CoachChatSheet({
   pageContext = 'today',
   suggestions = [],
 }) {
+  const t = useT();
   const [input, setInput] = useState('');
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
@@ -229,7 +232,7 @@ export default function CoachChatSheet({
               <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
             </div>
             <span className="text-[15px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              Coach
+              {t('coach.chat.title')}
             </span>
           </div>
           <button
@@ -251,9 +254,9 @@ export default function CoachChatSheet({
                 <Sparkles className="h-6 w-6 text-[hsl(var(--brand-ai))]" strokeWidth={1.8} />
               </div>
               <div>
-                <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">Ask me anything</p>
+                <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('coach.chat.emptyTitle')}</p>
                 <p className="mt-1 text-[13px] text-[hsl(var(--fg-3))] leading-5 max-w-[220px]">
-                  Training, nutrition, recovery — I know your data.
+                  {t('coach.chat.emptyDesc')}
                 </p>
               </div>
             </div>
@@ -294,7 +297,7 @@ export default function CoachChatSheet({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message your coach..."
+            placeholder={t('coach.chat.placeholder')}
             rows={1}
             className={cn(
               'flex-1 resize-none rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] px-3.5 py-2.5',

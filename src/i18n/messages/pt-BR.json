@@ -1638,6 +1638,55 @@
       "keep_logging_desc": "Mais {n} entradas para desbloquear gráficos de tendência.",
       "take_photo": "Tire uma foto de progresso",
       "take_photo_desc": "Evidência visual se acumula com o tempo."
+    },
+    "checkin": {
+      "title": "Check-in Corporal",
+      "description": "Registre seu estado físico",
+      "back": "Voltar",
+      "logged": "registrado",
+      "logWeight": "Registrar Peso",
+      "weightPlaceholder": "ex: 82.5",
+      "unit": "kg",
+      "log": "Registrar",
+      "sleep": "Sono",
+      "energy": "Energia",
+      "recovery": "Recuperação",
+      "sleepDesc": "Quantas horas você dormiu?",
+      "energyDesc": "Como está sua energia hoje?",
+      "recoveryDesc": "Como você se sente recuperado?",
+      "logSleepVal": "Registrar {val}h",
+      "logSleepFallback": "Registrar sono",
+      "logEnergy": "Registrar energia",
+      "logRecovery": "Registrar recuperação",
+      "scale": {
+        "drained": "Esgotado",
+        "low": "Baixo",
+        "moderate": "Moderado",
+        "good": "Bom",
+        "peak": "Ótimo",
+        "wrecked": "Destruído",
+        "sore": "Dolorido",
+        "okay": "Razoável",
+        "fresh": "Descansado"
+      },
+      "menu": {
+        "measurementsLabel": "Medidas Corporais",
+        "measurementsSub": "Cintura, peito, braços, pernas",
+        "photoLabel": "Foto de Progresso",
+        "photoSub": "Tire uma foto de checkpoint",
+        "sleepLabel": "Sono",
+        "sleepSub": "Registrar horas dormidas",
+        "energyLabel": "Energia",
+        "energySub": "Avalie sua energia hoje",
+        "recoveryLabel": "Recuperação",
+        "recoverySub": "Como você se sente recuperado"
+      },
+      "errorEnterWeight": "Insira um valor de peso primeiro",
+      "errorWeightRange": "O peso deve estar entre 20 e 300 kg",
+      "weightLogged": "Peso registrado: {val} kg",
+      "errorWeightFailed": "Falha ao registrar peso",
+      "errorSaveFailed": "Falha ao salvar",
+      "subLogged": "{type} registrado"
     }
   },
   "measurements": {
@@ -2525,6 +2574,38 @@
       "couldNotSave": "Não foi possível salvar a prescrição.",
       "couldNotDelete": "Não foi possível excluir a prescrição.",
       "couldNotUpdateStatus": "Não foi possível atualizar o status."
+    },
+    "chat": {
+      "title": "Coach",
+      "done": "Feito",
+      "confirm": "Confirmar",
+      "dismiss": "Dispensar",
+      "emptyTitle": "Me pergunte qualquer coisa",
+      "emptyDesc": "Treino, nutrição, recuperação — conheço seus dados.",
+      "placeholder": "Mensagem para seu coach...",
+      "triggerBar": "Pergunte ao seu coach...",
+      "suggestions": {
+        "today": {
+          "focus": "No que devo focar hoje?",
+          "summarize": "Resumir meu dia",
+          "logMeal": "Registrar refeição"
+        },
+        "training": {
+          "swap": "Trocar um exercício",
+          "explain": "Explicar o treino de hoje",
+          "shorter": "Fazer mais curto"
+        },
+        "nutrition": {
+          "logMeal": "Registrar refeição",
+          "highProtein": "Sugerir refeição rica em proteína",
+          "calories": "Ajustar minhas calorias"
+        },
+        "progress": {
+          "stalled": "Por que meu peso estacionou?",
+          "trends": "Resumir minhas tendências",
+          "deficit": "Estou em déficit?"
+        }
+      }
     }
   },
   "nutritionist": {

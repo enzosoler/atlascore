@@ -7,32 +7,37 @@
 
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import { useT } from '@/lib/i18nContext';
 
-const PAGE_SUGGESTIONS = {
-  today: [
-    'What should I focus on today?',
-    'Summarize my day',
-    'Log a meal',
-  ],
-  training: [
-    'Swap an exercise',
-    "Explain today's workout",
-    'Make it shorter',
-  ],
-  nutrition: [
-    'Log a meal',
-    'Suggest a high-protein meal',
-    'Adjust my calories',
-  ],
-  progress: [
-    'Why has my weight stalled?',
-    'Summarize my trends',
-    'Am I in a deficit?',
-  ],
-};
+function getPageSuggestions(t) {
+  return {
+    today: [
+      t('coach.chat.suggestions.today.focus'),
+      t('coach.chat.suggestions.today.summarize'),
+      t('coach.chat.suggestions.today.logMeal'),
+    ],
+    training: [
+      t('coach.chat.suggestions.training.swap'),
+      t('coach.chat.suggestions.training.explain'),
+      t('coach.chat.suggestions.training.shorter'),
+    ],
+    nutrition: [
+      t('coach.chat.suggestions.nutrition.logMeal'),
+      t('coach.chat.suggestions.nutrition.highProtein'),
+      t('coach.chat.suggestions.nutrition.calories'),
+    ],
+    progress: [
+      t('coach.chat.suggestions.progress.stalled'),
+      t('coach.chat.suggestions.progress.trends'),
+      t('coach.chat.suggestions.progress.deficit'),
+    ],
+  };
+}
 
 export default function CoachChatTrigger({ pageContext = 'today', onOpen, onSuggestion }) {
-  const suggestions = PAGE_SUGGESTIONS[pageContext] ?? PAGE_SUGGESTIONS.today;
+  const t = useT();
+  const allSuggestions = getPageSuggestions(t);
+  const suggestions = allSuggestions[pageContext] ?? allSuggestions.today;
 
   return (
     <div className="space-y-2">
@@ -44,7 +49,7 @@ export default function CoachChatTrigger({ pageContext = 'today', onOpen, onSugg
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand-ai)/0.15)] border border-[hsl(var(--brand-ai)/0.2)]">
           <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
         </div>
-        <span className="flex-1 text-[14px] text-[hsl(var(--fg-3))]">Ask your coach...</span>
+        <span className="flex-1 text-[14px] text-[hsl(var(--fg-3))]">{t('coach.chat.triggerBar')}</span>
         <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--brand-ai))]">
           AI
         </span>
