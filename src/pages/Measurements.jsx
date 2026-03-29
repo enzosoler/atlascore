@@ -2,12 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  Minus,
   Pencil,
   Plus,
   Trash2,
@@ -273,7 +270,7 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
     <div className="flex items-center gap-3 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.82)] px-4 py-3 hover:bg-[hsl(var(--card))]">
       <div className="min-w-[90px]">
         <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-          {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' }, locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
+          {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' }, locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US')}
         </p>
         <p className="text-[11px] text-[hsl(var(--fg-3))]">
           {daysSincePrevious
@@ -889,7 +886,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.14, ease: 'easeOut' }}
-          className="space-y-5"
+          className="space-y-5 pb-6"
         >
           {/* ──── Overview tab ──── */}
           {activeTab === 'overview' && (
@@ -912,7 +909,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                     </div>
                   </div>
 
-                  <div className="space-y-0">
+                  <div>
                     <SnapshotRow label={t('measurements.latest_checkpoint.weight')}   value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))}           unit="kg" />
                     <SnapshotRow label={t('measurements.latest_checkpoint.body_fat')} value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} unit="%" />
                     <SnapshotRow label={t('measurements.latest_checkpoint.waist')}    value={toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'waist'))}            unit="cm" />
@@ -950,7 +947,9 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.coverage.analysis_window_title')}</p>
-                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{captureSpanDays}d</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">
+                          {captureSpanDays} {t('measurements.hero.days')}
+                        </p>
                       </div>
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.coverage.latest_coverage_title')}</p>
@@ -1054,7 +1053,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                               className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold tracking-[-0.01em]"
                               style={{ borderColor: selectedMetric.border, background: selectedMetric.tint, color: selectedMetric.color }}
                             >
-                              {getDeltaLabel(selectedSnapshot.delta, selectedMetric)}
+                              {getDeltaLabel(selectedSnapshot.delta, selectedMetric, t)}
                             </span>
                           </div>
                         </div>
@@ -1121,9 +1120,9 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
           setIsFormOpen(open);
           if (!open) setEditingMeasurement(null);
         }}
-        dialogClassName="max-h-[88vh] p-0 sm:max-w-[30rem] overflow-hidden flex flex-col"
+        dialogClassName="h-[84vh] p-0 sm:max-w-[30rem] overflow-hidden flex flex-col"
         dialogProps={{ onOpenAutoFocus: (e) => e.preventDefault() }}
-        drawerClassName="max-h-[92dvh] pb-0 overflow-hidden flex flex-col"
+        drawerClassName="h-[84dvh] pb-0 overflow-hidden flex flex-col"
       >
         <MeasurementSteppedForm
           key={editingMeasurement?.id || 'new'}
