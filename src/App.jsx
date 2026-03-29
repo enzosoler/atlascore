@@ -11,7 +11,7 @@ import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
-import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
+import { LEGACY_ROUTE_REDIRECTS, ROUTES, ROLE_HOME } from '@/lib/routes';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralTracking';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
