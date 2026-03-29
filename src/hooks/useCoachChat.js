@@ -21,7 +21,7 @@ function nextId() {
   return `msg-${++msgIdCounter}`;
 }
 
-export function useCoachChat({ userId, invalidateAfterAction, activePlan } = {}) {
+export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -100,7 +100,7 @@ export function useCoachChat({ userId, invalidateAfterAction, activePlan } = {})
     setActionStates((prev) => ({ ...prev, [actionKey]: 'loading' }));
 
     try {
-      await dispatchAction(action, { userId, activePlan, navigate });
+      await dispatchAction(action, { activePlan, navigate });
       setActionStates((prev) => ({ ...prev, [actionKey]: 'done' }));
       invalidateAfterAction?.('all');
 
@@ -115,7 +115,7 @@ export function useCoachChat({ userId, invalidateAfterAction, activePlan } = {})
       setActionStates((prev) => ({ ...prev, [actionKey]: 'pending' }));
       toast.error(err?.message ?? 'Action failed');
     }
-  }, [userId, activePlan, navigate, invalidateAfterAction, appendMessage]);
+  }, [activePlan, navigate, invalidateAfterAction, appendMessage]);
 
   const dismissAction = useCallback((actionKey) => {
     setActionStates((prev) => ({ ...prev, [actionKey]: 'dismissed' }));
@@ -139,8 +139,15 @@ export function useCoachChat({ userId, invalidateAfterAction, activePlan } = {})
 
 // ─── Action dispatcher ─────────────────────────────────────────────────────────
 
-async function dispatchAction(action, { userId, activePlan, navigate }) {
+async function getCurrentUserId() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  return user.id;
+}
+
+async function dispatchAction(action, { activePlan, navigate }) {
   const { type, params = {} } = action;
+  const userId = await getCurrentUserId();
 
   switch (type) {
     case 'update_calorie_target': {

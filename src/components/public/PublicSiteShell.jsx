@@ -4,63 +4,27 @@ import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import ThemeToggleButton from '@/components/shared/ThemeToggleButton';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
-import { useI18n } from '@/lib/i18nContext';
-
-const FOOTER_LINKS = {
-  en: [
-    { href: ROUTES.home, label: 'Home' },
-    { href: ROUTES.blog, label: 'Blog' },
-    { href: ROUTES.pricing, label: 'Pricing' },
-    { href: ROUTES.help, label: 'Help' },
-    { href: `${ROUTES.auth}?mode=login`, label: 'Login' },
-  ],
-  'pt-BR': [
-    { href: ROUTES.home, label: 'Início' },
-    { href: ROUTES.blog, label: 'Blog' },
-    { href: ROUTES.pricing, label: 'Planos' },
-    { href: ROUTES.help, label: 'Ajuda' },
-    { href: `${ROUTES.auth}?mode=login`, label: 'Entrar' },
-  ],
-};
-
-const FOOTER_TAGLINE = {
-  en: 'Calm, connected tracking for real-world performance.',
-  'pt-BR': 'Acompanhamento calmo e conectado para performance real.',
-};
-
-const SUBTITLE = {
-  en: 'Performance OS',
-  'pt-BR': 'Sistema de Performance',
-};
+import { useT } from '@/lib/i18nContext';
 
 /**
  * Language toggle button — compact pill that switches between EN and PT-BR.
  */
 export function LanguageToggle({ className = '' }) {
-  let locale = 'en';
-  let switchLocale = () => {};
-  try {
-    const i18n = useI18n();
-    locale = i18n.locale || 'en';
-    switchLocale = i18n.switchLocale;
-  } catch (e) {
-    // fallback if not in I18nProvider
-  }
-
+  const { locale, switchLocale, t } = useT();
   const isPt = locale === 'pt-BR';
   const nextLocale = isPt ? 'en' : 'pt-BR';
-  const label = isPt ? 'EN' : 'PT';
+  const currentLabel = isPt ? 'PT' : 'EN';
 
   return (
     <button
       onClick={() => switchLocale(nextLocale)}
+      title={isPt ? t('layout.language.switchToEn') : t('layout.language.switchToPt')}
       className={cn(
         'inline-flex items-center justify-center rounded-full border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.56)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[hsl(var(--fg-2))] transition-all hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]',
         className
       )}
-      title={isPt ? 'Switch to English' : 'Mudar para Português'}
     >
-      {label}
+      {currentLabel}
     </button>
   );
 }
@@ -94,13 +58,8 @@ export function PublicSectionHeader({
 }
 
 export function PublicNav({ links = [], actions, compact = false }) {
-  let locale = 'en';
-  try {
-    const i18n = useI18n();
-    locale = i18n.locale || 'en';
-  } catch (e) {
-    // fallback if not in I18nProvider
-  }
+  const { locale: rawLocale, t } = useT();
+  const locale = rawLocale || 'en';
 
   return (
     <header className="atlas-public-nav">
@@ -114,7 +73,7 @@ export function PublicNav({ links = [], actions, compact = false }) {
             <p className="truncate text-[16px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] sm:text-[20px]">
               <span className="text-[hsl(var(--accent-primary))]">atlas</span><span className="font-light">.core</span>
             </p>
-            <p className="hidden truncate text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] sm:block">{SUBTITLE[locale] || SUBTITLE.en}</p>
+            <p className="hidden truncate text-[10px] font-medium uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] sm:block">{t('landing.footer.subtitle')}</p>
           </div>
         </Link>
 
@@ -162,16 +121,17 @@ export default function PublicSiteShell({
   footerLinks,
   mainClassName = '',
 }) {
-  let locale = 'en';
-  try {
-    const i18n = useI18n();
-    locale = i18n.locale || 'en';
-  } catch (e) {
-    // fallback if not in I18nProvider
-  }
+  const { locale: rawLocale, t } = useT();
+  const locale = rawLocale || 'en';
 
-  const resolvedFooterLinks = footerLinks || FOOTER_LINKS[locale] || FOOTER_LINKS.en;
-  const tagline = FOOTER_TAGLINE[locale] || FOOTER_TAGLINE.en;
+  const resolvedFooterLinks = footerLinks || [
+    { href: ROUTES.home, label: t('landing.footer.home') },
+    { href: ROUTES.blog, label: t('landing.footer.blog') },
+    { href: ROUTES.pricing, label: t('landing.footer.pricing') },
+    { href: ROUTES.help, label: t('landing.footer.help') },
+    { href: `${ROUTES.auth}?mode=login`, label: t('landing.footer.login') },
+  ];
+  const tagline = t('landing.footer.tagline');
 
   return (
     <div className="atlas-public-shell">

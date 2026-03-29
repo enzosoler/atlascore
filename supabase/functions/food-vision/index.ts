@@ -26,10 +26,26 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': getAllowedOrigin(),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+function getAllowedOrigin(): string {
+  const requestOrigin = '';
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  const appUrls = Deno.env.get('APP_URLS') || '';
+  
+  const allowedList = [
+    appUrl,
+    ...appUrls.split(',').map(u => u.trim()).filter(Boolean),
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:8080',
+  ];
+  
+  return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
+}
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const MODEL_NAME = 'gemini-2.0-flash';

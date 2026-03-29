@@ -342,7 +342,14 @@
       "noCard": "No credit card · No commitment · Free history forever"
     },
     "footer": {
-      "copyright": "© 2026 atlas.core. All rights reserved."
+      "copyright": "© 2026 atlas.core. All rights reserved.",
+      "home": "Home",
+      "blog": "Blog",
+      "pricing": "Pricing",
+      "help": "Help",
+      "login": "Log in",
+      "tagline": "Atlas reads your actual workouts, meals, labs, and history. No generic assumptions — clear trends from YOUR real data.",
+      "subtitle": "Performance OS"
     }
   },
   "pricing_page": {
@@ -1470,7 +1477,50 @@
       "delete_error": "Could not delete the protocol. Try again.",
       "delete_success": "Protocol deleted.",
       "loading": "Wait while your protocols are loaded.",
-      "loading_partial": "Data didn't load completely, but you can still add new items."
+      "loading_partial": "Data didn't load completely, but you can still add new items.",
+      "eyebrow": "Supplements & Meds",
+      "page_title": "What you're taking",
+      "page_subtitle": "Log doses, stay consistent, and track your protocol over time.",
+      "add_new": "Add new",
+      "today_section": "Today",
+      "today_subtitle": "What you need to take now",
+      "schedule_section": "Schedule",
+      "schedule_subtitle": "Visualize your weekly doses",
+      "timeline_section": "Timeline",
+      "timeline_subtitle": "Protocol duration and overlap",
+      "active_items": "Active items",
+      "active_items_subtitle": "Your supplements and medications in use",
+      "no_items": "No items yet",
+      "no_items_desc": "Add your supplements, medications, or compounds to start tracking.",
+      "add_first_item": "Add your first item",
+      "pk_analysis": "Pharmacokinetic Analysis",
+      "pk_subtitle": "Concentration curves, half-life, and projections",
+      "current_state": "Current protocol state",
+      "status_peak": "Peak",
+      "status_stable": "Stable",
+      "status_declining": "Declining",
+      "status_low": "Low",
+      "no_doses": "No doses logged yet. Log doses to see concentration curves.",
+      "half_life": "Half-life",
+      "projection": "Projection",
+      "peak_phase": "Peak phase — maximum concentration",
+      "moderate_decline": "Moderate decline — stable levels",
+      "declining_phase": "Declining — next dose matters",
+      "low_phase": "Low concentration — dose overdue?",
+      "dose_on_time": "If next dose on time, levels remain stable.",
+      "dose_dropping": "Concentration dropping. Take next dose soon.",
+      "missed_dose": "If missed: drops to {pct}% of peak.",
+      "log_for_projections": "Log doses to see projections.",
+      "dialog_add_eyebrow": "Add new",
+      "dialog_add_title": "What are you taking?",
+      "dialog_add_desc": "Choose a template or describe what you take for AI-powered setup.",
+      "dialog_edit_eyebrow": "Items",
+      "dialog_edit_title": "Edit",
+      "dialog_add_title_short": "Add",
+      "dialog_edit_desc": "Enter item details: substance, dose, frequency, and timing.",
+      "log_dose_eyebrow": "Log dose",
+      "log_dose_title": "Log dose",
+      "log_dose_desc": "Record when you took this dose."
     }
   },
   "body": {
@@ -1882,7 +1932,36 @@
     "unlockStep": "Step {n}",
     "unlockComplete": "Complete",
     "unlockAllDone": "All steps complete",
-    "exampleBadge": "Example"
+    "exampleBadge": "Example",
+    "pageTitle": "Insights",
+    "pageSubtitle": "A focused read on your recent history, without noisy charts or artificial blockers.",
+    "categoryTraining": "Training",
+    "categoryNutrition": "Nutrition",
+    "categoryBody": "Body",
+    "categoryConsistency": "Consistency",
+    "trainingExample1": "Volume is trending up consistently",
+    "trainingExample2": "You are getting stronger on bench press",
+    "nutritionExample1": "Protein hit on 5 of last 7 days",
+    "nutritionExample2": "Calorie average within target",
+    "bodyExample1": "Weight down 2kg over 4 weeks",
+    "bodyExample2": "Waist circumference decreasing",
+    "consistencyExample1": "Consecutive check-in days: 12",
+    "consistencyExample2": "You train better with 7+ hours sleep",
+    "yourProgressInsights": "Your progress insights",
+    "loggedTodayContinue": "You logged something today. Keep it up to unlock deeper insights about your patterns and trends.",
+    "nothingLoggedToday": "You haven't logged anything yet today. Start with your first action to begin building meaningful insights.",
+    "startLoggingData": "Start logging your data",
+    "quickActionsSubtitle": "Quick actions to generate meaningful insights",
+    "whatYouWillSee": "Here's what you'll start seeing",
+    "exampleInsightsSubtitle": "Example insights based on typical data patterns",
+    "examplesDisclaimer": "These are examples. Real insights will appear once you have sufficient data.",
+    "insightCategories": "Insight categories",
+    "categoriesPreviewSubtitle": "A preview of what each section will analyze for you",
+    "whenWillInsightsAppear": "When will insights appear?",
+    "insightsTimeline": "Basic insights appear after 1-2 days of logging. Meaningful insights and trends unlock after 3-5 days of consistent data.",
+    "unlockStepWorkout": "Log a workout",
+    "unlockStepMeals": "Log meals",
+    "unlockStepMeasurement": "Add measurement"
   },
   "blockReview": {
     "title": "Block Review",
@@ -2893,7 +2972,10 @@
     "workout": "Workout",
     "exercise": "Exercise",
     "session": "Session",
-    "freeWorkout": "Free Workout",
+    "workouts": {
+      "sectionTitle": "Workouts",
+      "freeWorkout": "Free Workout"
+    },
     "dayN": "Day {n}"
   },
   "planPage": {
@@ -2932,5 +3014,66 @@
     "timesPerWeek": "× / week",
     "toastUpdated": "Plan updated",
     "toastSaveFailed": "Failed to save. Try again."
+  },
+  "layout": {
+    "collapse": "Collapse",
+    "language": {
+      "english": "English",
+      "portuguese": "Português",
+      "switchToEn": "Switch to English",
+      "switchToPt": "Mudar para Português"
+    },
+    "refresh": {
+      "refreshing": "Refreshing...",
+      "releaseToRefresh": "Release to refresh",
+      "pullToRefresh": "Pull to refresh"
+    },
+    "mobileTab": {
+      "train": "Train",
+      "more": "More"
+    }
+  },
+  "goals": {
+    "pageTitle": "Goals & Targets",
+    "pageSubtitle": "Adjust your nutrition targets and daily goals.",
+    "backToProfile": "Back to Profile",
+    "currentSummary": "Current summary",
+    "caloriesTitle": "Calories",
+    "caloriesSubtitle": "Daily energy target",
+    "macrosTitle": "Macros",
+    "macrosSubtitle": "Protein, carbs and fat distribution",
+    "macroTotal": "Total",
+    "hydrationTitle": "Hydration",
+    "hydrationSubtitle": "Daily water intake goal",
+    "saved": "Saved",
+    "saving": "Saving",
+    "saveChanges": "Save changes",
+    "reset": "Reset",
+    "metabolicEstimator": {
+      "title": "Estimate metabolism",
+      "description": "Calculates BMR, TDEE and macros automatically",
+      "sex": "Biological sex",
+      "sexMale": "Male",
+      "sexFemale": "Female",
+      "age": "Age",
+      "ageUnit": "yrs",
+      "weight": "Current weight",
+      "height": "Height",
+      "strengthSessions": "Strength sessions / week",
+      "sessionsUnit": "sessions",
+      "cardioSessions": "Cardio sessions / week",
+      "occupation": "Occupational activity",
+      "occupationSedentary": "Sedentary (desk job)",
+      "occupationLight": "Light (some walking)",
+      "occupationModerate": "Moderate (on feet)",
+      "occupationActive": "Active (physical job)",
+      "bmr": "BMR",
+      "tdee": "TDEE",
+      "calorieTarget": "Calorie target",
+      "protein": "Protein",
+      "macros": "Macros: {protein}g protein · {carbs}g carbs · {fat}g fat",
+      "apply": "Apply targets",
+      "fillFields": "Fill all fields to see the result."
+    }
   }
 }

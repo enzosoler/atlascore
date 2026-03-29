@@ -42,7 +42,7 @@ import {
   listProgressPhotos,
   uploadProgressPhoto,
 } from '@/services/bodyProgressService';
-import { useI18n } from '@/lib/i18nContext';
+import { useT } from '@/lib/i18nContext';
 
 // Standard poses for physique tracking
 const POSES = [
@@ -180,17 +180,17 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
   const latest = checkpoints[0];
   const previous = checkpoints[1];
   const daysDiff = daysBetween(previous, latest);
-  const { locale } = useI18n();
+  const { locale, t } = useT();
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
 
   const formatRelativeDateSafe = (dateStr) => {
     const date = new Date(dateStr);
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'today';
-    if (diffDays === 1) return 'yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays === 0) return t('progressPhotos.relative_date.today');
+    if (diffDays === 1) return t('progressPhotos.relative_date.yesterday');
+    if (diffDays < 7) return t('progressPhotos.relative_date.days_ago', { n: diffDays });
+    if (diffDays < 30) return t('progressPhotos.relative_date.weeks_ago', { n: Math.floor(diffDays / 7) });
     return date.toLocaleDateString(intlLocale, { month: 'short', day: 'numeric' });
   };
 
@@ -199,7 +199,7 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
       <div className="px-5 py-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">AI Analysis</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">{t('progressPhotos.ai_analysis.eyebrow')}</span>
         </div>
         <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
           Comparing checkpoint {formatRelativeDateSafe(latest)} with {formatRelativeDateSafe(previous)}
@@ -220,7 +220,7 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
         </div>
         <div className="mt-3 flex items-center gap-1 text-[11px] text-[hsl(var(--fg-3))]">
           <Clock className="h-3 w-3" strokeWidth={2} />
-          <span>{daysDiff} days between checkpoints</span>
+          <span>{t('progressPhotos.ai_analysis.days_between', { n: daysDiff })}</span>
         </div>
       </div>
     </Card>
@@ -230,6 +230,7 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
 // Consistency Component
 function ConsistencyIndicator({ checkpoints }) {
   if (checkpoints.length === 0) return null;
+  const { t } = useT();
   const latest = checkpoints[0];
   const daysSince = daysBetween(latest, getToday());
   const isRecent = daysSince <= 7;
@@ -239,16 +240,16 @@ function ConsistencyIndicator({ checkpoints }) {
   let message = '';
   let tone = 'neutral';
   if (isRecent) {
-    message = daysSince === 0 ? 'Checkpoint today — great consistency!' : `Last checkpoint: ${daysSince} days ago — stay consistent!`;
+    message = daysSince === 0 ? t('progressPhotos.consistency.checkpoint_today') : t('progressPhotos.consistency.last_checkpoint_stay', { n: daysSince });
     tone = 'success';
   } else if (isWarning) {
-    message = `Last checkpoint: ${daysSince} days ago — aim for weekly photos`;
+    message = t('progressPhotos.consistency.last_checkpoint_weekly', { n: daysSince });
     tone = 'warning';
   } else if (isOverdue) {
-    message = `Last checkpoint: ${daysSince} days ago — time for an update`;
+    message = t('progressPhotos.consistency.last_checkpoint_overdue', { n: daysSince });
     tone = 'urgent';
   } else {
-    message = `Last checkpoint: ${daysSince} days ago`;
+    message = t('progressPhotos.consistency.last_checkpoint_days', { n: daysSince });
   }
 
   return (
@@ -258,7 +259,7 @@ function ConsistencyIndicator({ checkpoints }) {
       </div>
       <div className="flex-1">
         <p className={cn('text-[13px] font-medium', tone === 'success' && 'text-[hsl(var(--success))]', tone === 'warning' && 'text-[hsl(var(--warning))]', tone === 'urgent' && 'text-[hsl(var(--err))]')}>{message}</p>
-        <p className="text-[11px] text-[hsl(var(--fg-3))]">{checkpoints.length} checkpoint{checkpoints.length !== 1 ? 's' : ''} total</p>
+        <p className="text-[11px] text-[hsl(var(--fg-3))]">{t('progressPhotos.consistency.checkpoints_total', { n: checkpoints.length, plural: checkpoints.length !== 1 ? 's' : '' })}</p>
       </div>
     </div>
   );
@@ -324,14 +325,14 @@ function ComparisonSlider({ beforePhoto, afterPhoto, beforeDate, afterDate }) {
 // Timeline Component
 function Timeline({ checkpoints, photosByDate, onSelect }) {
   if (checkpoints.length === 0) return null;
-  const { locale } = useI18n();
+  const { locale, t } = useT();
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 py-4">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">Checkpoint Timeline</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">{t('progressPhotos.timeline.eyebrow')}</span>
         </div>
       </div>
       <div className="border-t border-[hsl(var(--border)/0.5)] px-5 py-4">
@@ -395,7 +396,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
 
 // Checkpoint Card
 function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose, isLatest }) {
-  const { locale } = useI18n();
+  const { locale, t } = useT();
   const [expanded, setExpanded] = useState(isLatest);
   const { label, isToday } = formatCheckpointDate(date, locale);
   const filledCount = photos.filter((p) => p?.photo_url).length;
@@ -442,21 +443,20 @@ function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose, isLat
 
 // Guide Section
 function GuideSection() {
-  const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useT();
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="rounded-[20px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.3)]">
       <button type="button" onClick={() => setExpanded(!expanded)} className="flex w-full items-center justify-between px-5 py-4 text-left">
         <div className="flex items-center gap-3">
           <Info className="h-4 w-4 text-[hsl(var(--fg-2))]" strokeWidth={2} />
-          <span className="text-[13px] font-medium text-[hsl(var(--fg))]">{isPt ? 'Como registrar fotos' : 'How to record photos'}</span>
+          <span className="text-[13px] font-medium text-[hsl(var(--fg))]">{t('progressPhotos.guide.title')}</span>
         </div>
         {expanded ? <ChevronUp className="h-4 w-4 text-[hsl(var(--fg-2))]" strokeWidth={2} /> : <ChevronDown className="h-4 w-4 text-[hsl(var(--fg-2))]" strokeWidth={2} />}
       </button>
       {expanded && (
         <div className="border-t border-[hsl(var(--border)/0.4)] px-5 py-4">
-          <p className="mb-3 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{isPt ? 'Siga as poses padrão para garantir comparações consistentes entre checkpoints.' : 'Follow the standard poses to ensure consistent comparisons between checkpoints.'}</p>
+          <p className="mb-3 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{t('progressPhotos.guide.description')}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {POSES.map((pose, i) => (
               <div key={pose.key} className="flex items-start gap-3 rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-2.5">
@@ -621,8 +621,7 @@ function NewCheckpointModal({ onConfirm, onClose }) {
 
 // Main page
 export default function ProgressPhotos({ embedded = false, photos: propPhotos }) {
-  const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useT();
   if (embedded) {
     return <ProgressPhotosContent embedded photos={propPhotos} />;
   }
@@ -632,18 +631,18 @@ export default function ProgressPhotos({ embedded = false, photos: propPhotos })
   if (!isLoadingAuth && !isAuthenticated) {
     return (
       <div className="flex flex-col items-center justify-center p-10">
-        <h2 className="text-[1.75rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">{isPt ? 'Veja o que a balança não mostra' : "See what the scale can't show"}</h2>
-        <p className="mt-3 max-w-md text-center text-[15px] leading-7 text-[hsl(var(--fg-2))]">{isPt ? 'Acompanhe sua evolução visual e compare seu corpo ao longo do tempo.' : 'Track your visual progress and compare your body over time.'}</p>
+        <h2 className="text-[1.75rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">{t('progressPhotos.not_authenticated_title')}</h2>
+        <p className="mt-3 max-w-md text-center text-[15px] leading-7 text-[hsl(var(--fg-2))]">{t('progressPhotos.not_authenticated_subtitle')}</p>
         <PrimaryButton type="button" onClick={() => navigate(ROUTES.auth)} className="mt-6 inline-flex items-center gap-2">
           <Lock className="h-4 w-4" strokeWidth={1.9} />
-          {isPt ? 'Entrar para começar' : 'Sign in to start'}
+          {t('progressPhotos.sign_in')}
         </PrimaryButton>
       </div>
     );
   }
 
   return (
-    <SafePageBoundary title={isPt ? "Fotos de Progresso" : "Progress Photos"} subtitle="Photos page safe mode." fallbackDescription="The photos page loaded in safe mode.">
+    <SafePageBoundary title={t('progressPhotos.safe_boundary_title')} subtitle={t('progressPhotos.safe_boundary_subtitle')} fallbackDescription={t('progressPhotos.safe_boundary_fallback')}>
       <ProgressPhotosContent photos={propPhotos} />
     </SafePageBoundary>
   );
@@ -652,8 +651,7 @@ export default function ProgressPhotos({ embedded = false, photos: propPhotos })
 function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const { subscription } = useSubscription();
-  const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useT();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -749,22 +747,22 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     <>
       {!embedded ? (
         <PageHeader
-          eyebrow={isPt ? 'Progresso Visual' : 'Visual Progress'}
-          title={isPt ? 'Veja o que a balança não mostra' : "See what the scale can't show"}
-          subtitle={isPt ? 'Acompanhe sua evolução visual e compare seu corpo ao longo do tempo.' : 'Track your visual progress and compare your body over time.'}
+          eyebrow={t('progressPhotos.eyebrow')}
+          title={t('progressPhotos.title')}
+          subtitle={t('progressPhotos.subtitle')}
           accentClassName="from-[hsl(var(--brand)/0.08)] via-[hsl(var(--brand)/0.03)] to-transparent"
           actions={hasCheckpoints && !isAtLimit ? (
             <PrimaryButton type="button" onClick={() => setShowNewModal(true)} className="inline-flex items-center gap-2">
               <Plus className="h-4 w-4" strokeWidth={1.9} />
-              {isPt ? 'Novo checkpoint' : 'New checkpoint'}
+              {t('progressPhotos.new_checkpoint')}
             </PrimaryButton>
           ) : isAtLimit ? (
             <div className="space-y-2 text-left sm:text-right">
-              <p className="text-xs text-[hsl(var(--fg-3))]">Limit reached (5 checkpoints)</p>
+              <p className="text-xs text-[hsl(var(--fg-3))]">{t('progressPhotos.limit_reached')}</p>
               <Link to="/pricing">
                 <Button size="sm" className="gap-1.5">
                   <Lock className="h-3.5 w-3.5" />
-                  Upgrade to Pro
+                  {t('progressPhotos.upgrade_to_pro')}
                 </Button>
               </Link>
             </div>
@@ -773,17 +771,17 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
           {hasCheckpoints && (
             <div className="grid gap-3 sm:grid-cols-3">
               <Card className="px-4 py-4">
-                <p className="atlas-metric-label">Checkpoints</p>
+                <p className="atlas-metric-label">{t('progressPhotos.checkpoints_label')}</p>
                 <p className="mt-2 text-[1.5rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">{allDates.length}</p>
               </Card>
               <Card className="px-4 py-4">
-                <p className="atlas-metric-label">Photos</p>
+                <p className="atlas-metric-label">{t('progressPhotos.photos_label')}</p>
                 <p className="mt-2 text-[1.5rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">{photos.length}</p>
-                <p className="text-[11px] text-[hsl(var(--fg-3))]">of {allDates.length * 4} possible</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">{t('progressPhotos.of_possible', { n: allDates.length * 4 })}</p>
               </Card>
               <Card className="px-4 py-4">
-                <p className="atlas-metric-label">Time tracked</p>
-                <p className="mt-2 text-[1.5rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">{allDates.length >= 2 ? `${daysBetween(allDates[allDates.length - 1], allDates[0])} days` : '—'}</p>
+                <p className="atlas-metric-label">{t('progressPhotos.time_tracked_label')}</p>
+                <p className="mt-2 text-[1.5rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">{allDates.length >= 2 ? t('progressPhotos.time_tracked_value', { n: daysBetween(allDates[allDates.length - 1], allDates[0]) }) : '—'}</p>
               </Card>
             </div>
           )}
@@ -791,14 +789,14 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-2xl">
-            <p className="atlas-overline">{isPt ? 'Progresso Visual' : 'Visual Progress'}</p>
-            <h2 className="mt-3 text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">{isPt ? 'Veja o que a balança não mostra' : "See what the scale can't show"}</h2>
-            <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">{isPt ? 'Acompanhe sua evolução visual e compare seu corpo ao longo do tempo.' : 'Track your visual progress and compare your body over time.'}</p>
+            <p className="atlas-overline">{t('progressPhotos.eyebrow')}</p>
+            <h2 className="mt-3 text-[1.4rem] font-semibold tracking-[-0.05em] text-[hsl(var(--fg))]">{t('progressPhotos.title')}</h2>
+            <p className="mt-2 text-[14px] leading-7 text-[hsl(var(--fg-2))]">{t('progressPhotos.subtitle')}</p>
           </div>
           {!isAtLimit && (
             <PrimaryButton type="button" onClick={() => setShowNewModal(true)} className="inline-flex items-center gap-2 self-start">
               <Plus className="h-4 w-4" strokeWidth={1.9} />
-              {isPt ? 'Novo checkpoint' : 'New checkpoint'}
+              {t('progressPhotos.new_checkpoint')}
             </PrimaryButton>
           )}
         </div>
@@ -825,17 +823,17 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
               <ComparisonSlider
                 beforePhoto={comparisonData.before}
                 afterPhoto={comparisonData.after}
-                beforeDate={new Date(comparisonData.beforeDate).toLocaleDateString(isPt ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
-                afterDate={new Date(comparisonData.afterDate).toLocaleDateString(isPt ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
+                beforeDate={new Date(comparisonData.beforeDate).toLocaleDateString(navigator.language, { month: 'short', day: 'numeric' })}
+                afterDate={new Date(comparisonData.afterDate).toLocaleDateString(navigator.language, { month: 'short', day: 'numeric' })}
               />
             </Section>
           )}
           <Section><Timeline checkpoints={allDates} photosByDate={photosByDate} onSelect={setSelectedDate} /></Section>
           <Section
-            eyebrow={isPt ? 'Checkpoints' : 'Checkpoints'}
-            title={isPt ? 'Seus registros' : 'Your records'}
-            subtitle={isPt ? 'Cada checkpoint agrupa as 4 poses padrão para a data selecionada.' : 'Each checkpoint groups the 4 standard poses for the selected date.'}
-            actions={!isAtLimit ? <PrimaryButton type="button" onClick={() => setShowNewModal(true)} className="inline-flex items-center gap-2"><Plus className="h-4 w-4" strokeWidth={1.9} />{isPt ? 'Novo' : 'New'}</PrimaryButton> : null}
+            eyebrow={t('progressPhotos.records_eyebrow')}
+            title={t('progressPhotos.records_title')}
+            subtitle={t('progressPhotos.records_subtitle')}
+            actions={!isAtLimit ? <PrimaryButton type="button" onClick={() => setShowNewModal(true)} className="inline-flex items-center gap-2"><Plus className="h-4 w-4" strokeWidth={1.9} />{t('progressPhotos.new_short')}</PrimaryButton> : null}
           >
             <div className="space-y-4">
               {allDates.map((date, index) => (

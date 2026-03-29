@@ -173,159 +173,73 @@ function getDeltaLabel(delta, metric, t) {
   return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} ${t ? t('measurements.delta.vs_previous') : 'vs previous'}`.trim();
 }
 
-function HeroStat({ label, value, detail, icon: Icon, metric }) {
-  return (
-    <article
-      className="rounded-[26px] border bg-[hsl(var(--card)/0.78)] px-4 py-4 shadow-[var(--shadow-xs)]"
-      style={{
-        borderColor: metric?.border || 'hsl(var(--border) / 0.88)',
-        background: metric
-          ? `linear-gradient(180deg, ${metric.tint} 0%, hsl(var(--card) / 0.88) 100%)`
-          : undefined,
-      }}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="atlas-metric-label">{label}</p>
-          <p className="mt-3 text-[1.35rem] font-semibold tracking-[-0.045em] text-[hsl(var(--fg))]">
+// ─── Unified MetricCard component ────────────────────────────────────────────
+
+function MetricCard({ label, value, unit, detail, size = 'md', isActive, onClick }) {
+  const isLarge = size === 'lg';
+
+  // Size variants
+  const radius = 'rounded-[20px]';
+  const numberSize = isLarge ? 'text-[1.75rem]' : 'text-[1.125rem]';
+  const padding = isLarge ? 'px-5 py-4' : 'px-4 py-4';
+  const tracking = isLarge ? 'tracking-[-0.04em]' : 'tracking-[-0.035em]';
+
+  const content = (
+    <div className={cn('text-left', padding)}>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+          {label}
+        </p>
+        <div className={cn('flex items-baseline gap-1.5', isLarge ? 'mt-2' : 'mt-1')}>
+          <p className={cn('font-bold text-[hsl(var(--fg))] leading-none', numberSize, tracking)}>
             {value}
           </p>
-          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
+          {unit && (
+            <span className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{unit}</span>
+          )}
         </div>
-
-        {Icon ? (
-          <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[18px] border"
-            style={{
-              borderColor: metric?.border || 'hsl(var(--border) / 0.88)',
-              background: metric?.tint || 'hsl(var(--fill) / 0.76)',
-              color: metric?.color || 'hsl(var(--fg-2))',
-            }}
-          >
-            <Icon className="h-4 w-4" strokeWidth={1.9} />
-          </div>
-        ) : null}
+        {detail && (
+          <p className={cn('text-[12px] leading-5 text-[hsl(var(--fg-2))]', isLarge ? 'mt-1' : 'mt-2')}>
+            {detail}
+          </p>
+        )}
       </div>
+    </div>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          radius,
+          'border text-left transition-all w-full',
+          isActive
+            ? 'shadow-[var(--shadow-sm)] border-[hsl(var(--brand))] bg-[hsl(var(--card))]'
+            : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--card))]'
+        )}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <article className={cn(radius, 'border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)]')}>
+      {content}
     </article>
   );
 }
 
 function SnapshotRow({ label, value, unit }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.78)] px-4 py-3">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-        {label}
-      </p>
+    <div className="flex items-center justify-between py-2 border-b border-[hsl(var(--border)/0.3)] last:border-0">
+      <p className="text-[13px] text-[hsl(var(--fg-2))]">{label}</p>
       <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
         {value}
-        {unit ? <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]">{unit}</span> : null}
+        {unit ? <span className="ml-1 text-[12px] font-medium text-[hsl(var(--fg-3))]">{unit}</span> : null}
       </p>
-    </div>
-  );
-}
-
-function MetricSelectorCard({ metric, snapshot, isActive, onClick }) {
-  const t = useT();
-  const IndicatorIcon = getDeltaIcon(snapshot?.delta);
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'rounded-[24px] border px-4 py-4 text-left transition-all',
-        isActive
-          ? 'shadow-[var(--shadow-sm)]'
-          : 'bg-[hsl(var(--card)/0.82)] hover:border-[hsl(var(--separator-strong))] hover:bg-[hsl(var(--card))]'
-      )}
-      style={
-        isActive
-          ? {
-              borderColor: metric.border,
-              background: `linear-gradient(180deg, ${metric.tint} 0%, hsl(var(--card)) 100%)`,
-            }
-          : undefined
-      }
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="atlas-metric-label">{metric.label}</p>
-          <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-            {formatMetricValue(snapshot?.value, metric)}
-          </p>
-          <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-            {snapshot?.entries?.length
-              ? t('measurements.metric_selector.checkpoints_with_metric').replace('{n}', snapshot.entries.length)
-              : t('measurements.metric_selector.insufficient_data')}
-          </p>
-        </div>
-
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[18px] border"
-          style={{
-            borderColor: metric.border,
-            background: metric.tint,
-            color: metric.color,
-          }}
-        >
-          <IndicatorIcon className="h-4 w-4" strokeWidth={1.9} />
-        </div>
-      </div>
-    </button>
-  );
-}
-
-function TrendPill({ label, value }) {
-  return (
-    <div className="rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-4 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-        {label}
-      </p>
-      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function HistoryMetricChip({ label, value, unit }) {
-  return (
-    <div className="rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.48)] px-4 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-        {label}
-      </p>
-      <p className="mt-2 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-        {toDisplayNumber(value)}
-        {unit ? <span className="ml-1 text-[11px] font-medium text-[hsl(var(--fg-2))]">{unit}</span> : null}
-      </p>
-    </div>
-  );
-}
-
-function ChangePill({ label, delta, metric }) {
-  const Icon = getDeltaIcon(delta);
-
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.82)] px-3.5 py-3">
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-          {label}
-        </p>
-        <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-          {getDeltaLabel(delta, metric)}
-        </p>
-      </div>
-
-      <div
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[16px] border"
-        style={{
-          borderColor: metric.border,
-          background: metric.tint,
-          color: metric.color,
-        }}
-      >
-        <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
-      </div>
     </div>
   );
 }
@@ -635,7 +549,8 @@ export default function Measurements({ embedded = false, measurements: propMeasu
 }
 
 function MeasurementsContent({ embedded = false, measurements: propMeasurements }) {
-  const { t, locale } = useI18n();
+  const t = useT();
+  const { locale } = useI18n();
   const isPt = locale === 'pt-BR';
   const intlLocale = isPt ? 'pt-BR' : 'en-US';
   const { user } = useAuth();
@@ -891,33 +806,33 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
           }
         >
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <HeroStat
+            <MetricCard
+              size="lg"
               label={t('measurements.hero.current_weight')}
-              value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight'))} kg` : '--'}
+              value={latestMeasurement ? toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'weight')) : '--'}
+              unit={latestMeasurement ? 'kg' : undefined}
               detail={getDeltaLabel(metricSnapshots.weight?.delta, METRIC_LOOKUP.weight, t)}
-              icon={Scale}
-              metric={METRIC_LOOKUP.weight}
             />
-            <HeroStat
+            <MetricCard
+              size="lg"
               label={t('measurements.hero.body_fat_percent')}
-              value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent'))} %` : '--'}
+              value={latestMeasurement ? toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'body_fat_percent')) : '--'}
+              unit={latestMeasurement ? '%' : undefined}
               detail={getDeltaLabel(metricSnapshots.body_fat_percent?.delta, METRIC_LOOKUP.body_fat_percent, t)}
-              icon={Activity}
-              metric={METRIC_LOOKUP.body_fat_percent}
             />
-            <HeroStat
+            <MetricCard
+              size="lg"
               label={t('measurements.hero.bmi')}
-              value={latestMeasurement ? `${toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2)} kg/m²` : '--'}
+              value={latestMeasurement ? toDisplayNumber(getMeasurementFieldValue(latestMeasurement, 'bmi'), 2) : '--'}
+              unit={latestMeasurement ? 'kg/m²' : undefined}
               detail={getDeltaLabel(metricSnapshots.bmi?.delta, METRIC_LOOKUP.bmi, t)}
-              icon={Ruler}
-              metric={METRIC_LOOKUP.bmi}
             />
-            <HeroStat
+            <MetricCard
+              size="lg"
               label={t('measurements.hero.cadence')}
-              value={averageCadenceDays ? `${averageCadenceDays} days` : '--'}
+              value={averageCadenceDays ? averageCadenceDays.toString() : '--'}
+              unit={averageCadenceDays ? t('measurements.hero.days') : undefined}
               detail={t('measurements.hero.cadence_detail').replace('{n}', sortedMeasurements.length || 0)}
-              icon={CalendarClock}
-              metric={METRIC_LOOKUP.weight}
             />
           </div>
         </PageHeader>
@@ -1036,10 +951,13 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
               <div className="space-y-5">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {METRIC_OPTIONS.map((metric) => (
-                    <MetricSelectorCard
+                    <MetricCard
                       key={metric.key}
-                      metric={metric}
-                      snapshot={metricSnapshots[metric.key]}
+                      label={metric.label}
+                      value={formatMetricValue(metricSnapshots[metric.key]?.value, metric)}
+                      detail={metricSnapshots[metric.key]?.entries?.length
+                        ? t('measurements.metric_selector.checkpoints_with_metric').replace('{n}', metricSnapshots[metric.key].entries.length)
+                        : t('measurements.metric_selector.insufficient_data')}
                       isActive={metricKey === metric.key}
                       onClick={() => setMetricKey(metric.key)}
                     />
@@ -1077,25 +995,35 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                       </div>
 
                       <div className="grid gap-3 sm:grid-cols-3">
-                        <TrendPill
-                          label={t('measurements.trend.current')}
-                          value={formatMetricValue(selectedSnapshot.value, selectedMetric)}
-                        />
-                        <TrendPill
-                          label={t('measurements.trend.since_start')}
-                          value={
-                            selectedSnapshot.rangeDelta === null
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+                            {t('measurements.trend.current')}
+                          </p>
+                          <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
+                            {formatMetricValue(selectedSnapshot.value, selectedMetric)}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+                            {t('measurements.trend.since_start')}
+                          </p>
+                          <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
+                            {selectedSnapshot.rangeDelta === null
                               ? t('measurements.trend.no_data')
                               : `${selectedSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(
                                   selectedSnapshot.rangeDelta,
                                   selectedMetric.digits
-                                )} ${selectedMetric.unit}`
-                          }
-                        />
-                        <TrendPill
-                          label={t('measurements.trend.records')}
-                          value={t('measurements.trend.records_value').replace('{n}', selectedSnapshot.entries.length)}
-                        />
+                                )} ${selectedMetric.unit}`}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+                            {t('measurements.trend.records')}
+                          </p>
+                          <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
+                            {t('measurements.trend.records_value').replace('{n}', selectedSnapshot.entries.length)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>

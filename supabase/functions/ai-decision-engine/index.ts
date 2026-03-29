@@ -29,10 +29,26 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': getAllowedOrigin(),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+function getAllowedOrigin(): string {
+  const requestOrigin = '';
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  const appUrls = Deno.env.get('APP_URLS') || '';
+  
+  const allowedList = [
+    appUrl,
+    ...appUrls.split(',').map(u => u.trim()).filter(Boolean),
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:8080',
+  ];
+  
+  return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
+}
 
 const MODEL = 'gpt-4.1-mini';
 const ENGINE_VERSION = '1.0';
@@ -468,6 +484,7 @@ serve(async (req) => {
     supabase
       .from('protocols')
       .select('id, compound, name, frequency_per_week, active, start_date')
+      .eq('user_id', userId)
       .eq('active', true)
       .limit(20),
 
@@ -475,6 +492,7 @@ serve(async (req) => {
     supabase
       .from('protocol_logs')
       .select('protocol_id, taken_at')
+      .eq('user_id', userId)
       .gte('taken_at', todayStart)
       .lte('taken_at', todayEnd)
       .limit(50),

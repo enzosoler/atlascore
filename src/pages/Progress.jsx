@@ -324,7 +324,7 @@ function ProgressContent() {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-full bg-[hsl(var(--bg))]">
-      <div className="mx-auto max-w-lg px-4 pt-5 space-y-5">
+      <div className="mx-auto max-w-lg px-4 pt-6 pb-8 space-y-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -333,61 +333,71 @@ function ProgressContent() {
         </div>
 
         {/* ── Weight Trend ──────────────────────────────────────── */}
-        <ChartCard>
+        <ChartCard className="py-5">
           <ChartHeader label={t('progress.chart_weight')} value={weightData.at(-1)?.value ?? null} unit="kg"
             badge={weightData.length >= 2 && <RateBadge slope={weightSlope} />} />
-          <TrendLineChart data={weightData} dataKey="value" gradientId="wg" color="hsl(var(--brand))" days={days} unit="kg" showRegression emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
+          <div className="mt-4">
+            <TrendLineChart data={weightData} dataKey="value" gradientId="wg" color="hsl(var(--brand))" days={days} unit="kg" showRegression emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
+          </div>
         </ChartCard>
 
         {/* ── Body Fat Trend ────────────────────────────────────── */}
         {bfData.length > 0 && (
-          <ChartCard>
+          <ChartCard className="py-5">
             <ChartHeader label={t('progress.chart_body_fat')} value={bfData.at(-1)?.value ?? null} unit="%" />
-            <TrendLineChart data={bfData} dataKey="value" gradientId="bf" color="hsl(var(--warn))" days={days} unit="%" emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
+            <div className="mt-4">
+              <TrendLineChart data={bfData} dataKey="value" gradientId="bf" color="hsl(var(--warn))" days={days} unit="%" emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
+            </div>
           </ChartCard>
         )}
 
         {/* ── Calories vs Target ────────────────────────────────── */}
-        <ChartCard>
+        <ChartCard className="py-5">
           <ChartHeader label={t('progress.chart_calories')} value={calorieData.filter((d) => d.calories != null).at(-1)?.calories ?? null} unit="kcal"
             sublabel={kcalTarget > 0 ? t('progress.target_label').replace('{value}', kcalTarget).replace('{unit}', 'kcal') : undefined} />
-          <TargetBarChart data={calorieData} dataKey="calories" targetValue={kcalTarget} color="hsl(var(--brand))" days={days} unit="kcal" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
+          <div className="mt-4">
+            <TargetBarChart data={calorieData} dataKey="calories" targetValue={kcalTarget} color="hsl(var(--brand))" days={days} unit="kcal" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
+          </div>
         </ChartCard>
 
         {/* ── Protein vs Target ─────────────────────────────────── */}
-        <ChartCard>
+        <ChartCard className="py-5">
           <ChartHeader label={t('progress.chart_protein')} value={proteinData.filter((d) => d.protein != null).at(-1)?.protein ?? null} unit="g"
             sublabel={proteinTarget > 0 ? t('progress.target_label').replace('{value}', proteinTarget).replace('{unit}', 'g') : undefined} />
-          <TargetBarChart data={proteinData} dataKey="protein" targetValue={proteinTarget} color="hsl(var(--ok))" days={days} unit="g" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
+          <div className="mt-4">
+            <TargetBarChart data={proteinData} dataKey="protein" targetValue={proteinTarget} color="hsl(var(--ok))" days={days} unit="g" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
+          </div>
         </ChartCard>
 
         {/* ── Workout Trend ─────────────────────────────────────── */}
         {workoutWeekData.length > 0 && (
-          <ChartCard>
+          <ChartCard className="py-5">
             <ChartHeader label={t('progress.chart_workouts_week')} />
-            <ResponsiveContainer width="100%" height={90}>
-              <BarChart data={workoutWeekData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
-                <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} width={28} tickCount={3} />
-                <Tooltip content={<Tip unit="sessions" />} />
-                <Bar dataKey="count" fill="hsl(var(--ok))" fillOpacity={0.75} radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={90}>
+                <BarChart data={workoutWeekData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                  <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} width={28} tickCount={3} />
+                  <Tooltip content={<Tip unit="sessions" />} />
+                  <Bar dataKey="count" fill="hsl(var(--ok))" fillOpacity={0.75} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </ChartCard>
         )}
 
         {/* ── Adherence ─────────────────────────────────────────── */}
-        <ChartCard>
+        <ChartCard className="py-5">
           <ChartHeader label={t('progress.chart_adherence')} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-2 gap-4">
             {[
               { label: t('progress.chart_adherence_nutrition'), pct: adherence.nutrition, color: 'hsl(var(--brand))' },
               { label: t('progress.chart_adherence_training'), pct: adherence.training, color: 'hsl(var(--ok))' },
             ].map(({ label, pct, color }) => (
-              <div key={label} className="rounded-[14px] bg-[hsl(var(--fill)/0.4)] px-3 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2">{label}</p>
-                <p className="text-[22px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">{pct}%</p>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--fill)/0.8)]">
+              <div key={label} className="rounded-[14px] bg-[hsl(var(--fill)/0.4)] px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</p>
+                <p className="mt-2 text-[1.75rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">{pct}%</p>
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--fill)/0.8)]">
                   <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />
                 </div>
               </div>
@@ -397,16 +407,16 @@ function ProgressContent() {
 
         {/* ── Photos Timeline ───────────────────────────────────── */}
         {photos.length > 0 && (
-          <ChartCard>
+          <ChartCard className="py-5">
             <ChartHeader label={t('progress.chart_progress_photos')} />
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
               {photos.slice(0, 6).map((p) => (
                 <div key={p.id} className="w-16 h-20 rounded-[10px] bg-[hsl(var(--fill)/0.6)] shrink-0 overflow-hidden">
                   {p.url && <img src={p.url} alt="" className="w-full h-full object-cover" />}
                 </div>
               ))}
             </div>
-            <Link to={ROUTES.progressPhotos} className="mt-3 flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--brand))]">
+            <Link to={ROUTES.progressPhotos} className="mt-4 flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--brand))]">
               {t('progress.view_all_photos')} <ArrowRight className="w-3 h-3" />
             </Link>
           </ChartCard>
@@ -414,17 +424,22 @@ function ProgressContent() {
 
         {/* ── AI Interpretation ──────────────────────────────────── */}
         {insights.length > 0 && (
-          <ChartCard className="border-[hsl(var(--brand-ai)/0.2)] bg-[hsl(var(--brand-ai)/0.04)]">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand-ai))]">{t('progress.ai_interpretation')}</p>
-            </div>
-            <div className="space-y-2">
+          <div className="rounded-[20px] border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden"
+               style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
+            <div className="h-[2px] bg-gradient-to-r from-[hsl(var(--brand-ai)/0.7)] via-[hsl(var(--brand-ai)/0.3)] to-transparent" />
+            <div className="px-5 py-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--brand-ai))]">{t('progress.ai_interpretation')}</p>
+              </div>
               {insights.map((line, i) => (
-                <p key={i} className="text-[12px] text-[hsl(var(--fg))] leading-[1.5]">{line}</p>
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className="w-1 h-1 rounded-full bg-[hsl(var(--brand-ai))] mt-2 shrink-0" />
+                  <p className="text-[13px] leading-relaxed text-[hsl(var(--fg))]">{line}</p>
+                </div>
               ))}
             </div>
-          </ChartCard>
+          </div>
         )}
 
         {/* ── Quick links ───────────────────────────────────────── */}

@@ -204,6 +204,46 @@ serve(async (req) => {
 
   console.log(`stripe-webhook: Received event type=${event.type} id=${event.id}`);
 
+  // ── Idempotency check: skip already processed events ───────────────────────
+  const { data: existingEvent } = await supabaseAdmin
+    .from('stripe_webhook_events')
+    .select('id')
+    .eq('stripe_event_id', event.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (existingEvent) {
+    console.log(`stripe-webhook: Event ${event.id} already processed, skipping`);
+    return new Response(JSON.stringify({ received: true, idempotency: 'skipped' }), {
+      status: 200,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Store event ID with duplicate-safe insert (handles race conditions)
+  const { error: insertError } = await supabaseAdmin
+    .from('stripe_webhook_events')
+    .insert({
+      stripe_event_id: event.id,
+      event_type: event.type,
+      processed_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+
+  // If insert failed due to unique constraint, another worker processed this event
+  if (insertError) {
+    if (insertError.code === '23505' || insertError.message?.includes('duplicate')) {
+      console.log(`stripe-webhook: Event ${event.id} already processed by another worker, skipping`);
+      return new Response(JSON.stringify({ received: true, idempotency: 'skipped' }), {
+        status: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
+    // Log other errors but continue processing (idempotency is best-effort)
+    console.error('stripe-webhook: Failed to log event idempotency:', insertError);
+  }
+
   try {
     switch (event.type) {
       case 'checkout.session.completed': {

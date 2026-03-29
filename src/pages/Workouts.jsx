@@ -929,7 +929,7 @@ function WorkoutsContent() {
   return (
     <AppContainer>
       <PageHeader
-        eyebrow={isPt ? "Treinos" : "Workouts"}
+        eyebrow={t('train.sectionTitle')}
         title="Planned and free execution, side by side."
         subtitle="Your assigned plan on top, free workouts below. Two distinct spaces with no mixing."
         accentClassName="from-[hsl(var(--brand)/0.09)] via-[hsl(var(--brand)/0.03)]"
@@ -1094,7 +1094,7 @@ function WorkoutsContent() {
 
       {/* ── SECTION 2: FREE WORKOUT ── */}
       <SectionCard
-        title={isPt ? "Treino Livre" : "Free Workout"}
+        title={t('train.freeWorkout')}
         subtitle="Workouts done outside your training plan — extra sessions, cardio, mobility, anything goes."
         actions={
           <div className="flex flex-wrap items-center gap-2">

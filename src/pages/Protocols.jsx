@@ -159,8 +159,7 @@ async function deleteProtocol(protocolId) {
 // ── Concentration Chart based on Actual Dose Logs ────────────────────────────
 
 function ConcentrationChart({ protocols }) {
-  const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useI18n();
   const { user } = useAuth();
 
   // Fetch logs for all active protocols
@@ -243,12 +242,12 @@ function ConcentrationChart({ protocols }) {
           <div className="flex items-center gap-2 mb-4">
             <Activity className="h-4 w-4 text-[hsl(var(--brand))]" />
             <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-              {isPt ? 'Estado atual do protocolo' : 'Current protocol state'}
+              {t('pages.protocols.current_state')}
             </p>
           </div>
           <div className="space-y-3">
             {protocolsWithData.filter(p => p.hasLogs).map((data) => {
-              const statusLabel = { peak: isPt ? 'Pico' : 'Peak', moderate: isPt ? 'Estável' : 'Stable', declining: isPt ? 'Em queda' : 'Declining', low: isPt ? 'Baixo' : 'Low' }[data.decayPhase];
+              const statusLabel = { peak: t('pages.protocols.status_peak'), moderate: t('pages.protocols.status_stable'), declining: t('pages.protocols.status_declining'), low: t('pages.protocols.status_low') }[data.decayPhase];
               const statusColor = { peak: 'hsl(var(--ok))', moderate: 'hsl(var(--brand))', declining: 'hsl(var(--warn))', low: 'hsl(var(--err))' }[data.decayPhase];
               return (
                 <div key={data.protocol.id} className="flex items-center justify-between gap-2">
@@ -270,7 +269,7 @@ function ConcentrationChart({ protocols }) {
       {!hasAnyLogs && (
         <div className="rounded-[16px] border border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.08)] px-4 py-3">
           <p className="text-[13px] text-[hsl(var(--warn))]">
-            {isPt ? 'Nenhuma dose registrada. Registre doses para ver curvas.' : 'No doses logged yet. Log doses to see concentration curves.'}
+            {t('pages.protocols.no_doses')}
           </p>
         </div>
       )}
@@ -290,16 +289,16 @@ function ConcentrationChart({ protocols }) {
                 <div className="rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.3)] p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Clock className="h-3.5 w-3.5 text-[hsl(var(--fg-2))]" />
-                    <p className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">{isPt ? 'Meia-vida' : 'Half-life'}</p>
+                    <p className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">{t('pages.protocols.half_life')}</p>
                   </div>
                   <p className="text-[22px] font-semibold text-[hsl(var(--fg))]">
                     ~{data.halfLife < 1 ? `${(data.halfLife * 24).toFixed(0)}h` : `${data.halfLife.toFixed(1)}d`}
                   </p>
                   <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
-                    {data.decayPhase === 'peak' && (isPt ? 'Fase de pico — concentração máxima' : 'Peak phase — maximum concentration')}
-                    {data.decayPhase === 'moderate' && (isPt ? 'Declínio moderado — níveis estáveis' : 'Moderate decline — stable levels')}
-                    {data.decayPhase === 'declining' && (isPt ? 'Em queda — próxima dose importante' : 'Declining — next dose matters')}
-                    {data.decayPhase === 'low' && (isPt ? 'Concentração baixa — dose atrasada?' : 'Low concentration — dose overdue?')}
+                    {data.decayPhase === 'peak' && t('pages.protocols.peak_phase')}
+                    {data.decayPhase === 'moderate' && t('pages.protocols.moderate_decline')}
+                    {data.decayPhase === 'declining' && t('pages.protocols.declining_phase')}
+                    {data.decayPhase === 'low' && t('pages.protocols.low_phase')}
                   </p>
                 </div>
 
@@ -307,26 +306,24 @@ function ConcentrationChart({ protocols }) {
                 <div className="rounded-[16px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.3)] p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <TrendingUp className="h-3.5 w-3.5 text-[hsl(var(--fg-2))]" />
-                    <p className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">{isPt ? 'Projeção' : 'Projection'}</p>
+                    <p className="text-[12px] font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">{t('pages.protocols.projection')}</p>
                   </div>
                   {data.nextDoseTime && data.concAtNextDose > 0 ? (
                     <>
                       <p className="text-[13px] text-[hsl(var(--fg))] leading-relaxed">
                         {data.peakPct > 40
-                          ? (isPt ? 'Se tomar no horário, níveis permanecem estáveis.' : 'If next dose on time, levels remain stable.')
-                          : (isPt ? 'Concentração caindo. Tome a próxima dose logo.' : 'Concentration dropping. Take next dose soon.')}
+                          ? t('pages.protocols.dose_on_time')
+                          : t('pages.protocols.dose_dropping')}
                       </p>
                       {data.concIfMissed > 0 && data.stats.peak > 0 && (
                         <p className="mt-2 text-[12px] text-[hsl(var(--warn))] leading-relaxed">
-                          {isPt
-                            ? `Se pular: cai para ${Math.round((data.concIfMissed / data.stats.peak) * 100)}% do pico.`
-                            : `If missed: drops to ${Math.round((data.concIfMissed / data.stats.peak) * 100)}% of peak.`}
+                          {t('pages.protocols.missed_dose', { pct: Math.round((data.concIfMissed / data.stats.peak) * 100) })}
                         </p>
                       )}
                     </>
                   ) : (
                     <p className="text-[13px] text-[hsl(var(--fg-2))]">
-                      {isPt ? 'Registre doses para ver projeções.' : 'Log doses to see projections.'}
+                      {t('pages.protocols.log_for_projections')}
                     </p>
                   )}
                 </div>
@@ -515,7 +512,6 @@ function SummaryTile({ label, value, hint, icon: Icon }) {
 
 export default function Protocols() {
   const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
   return (
     <SafePageBoundary
       title={t('pages.protocols.title')}
@@ -532,8 +528,7 @@ export default function Protocols() {
 
 function ProtocolsContent() {
   const { user } = useAuth();
-  const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useI18n();
   const qc = useQueryClient();
   const ai = useAICoach({ userId: user?.id });
 
@@ -761,11 +756,9 @@ function ProtocolsContent() {
 
   return (
     <PageShell
-      eyebrow={isPt ? "Suplementos & Medicação" : "Supplements & Meds"}
-      title={isPt ? "O que você está tomando" : "What you're taking"}
-      subtitle={isPt 
-        ? "Acompanhe suas doses diárias e mantenha consistência." 
-        : "Log doses, stay consistent, and track your protocol over time."}
+      eyebrow={t('pages.protocols.eyebrow')}
+      title={t('pages.protocols.page_title')}
+      subtitle={t('pages.protocols.page_subtitle')}
       actions={
         <button
           type="button"
@@ -773,7 +766,7 @@ function ProtocolsContent() {
           className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand))] px-4 py-2.5 text-[14px] font-semibold text-white transition-all hover:bg-[hsl(var(--brand)/0.9)]"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
-          Add new
+          {t('pages.protocols.add_new')}
         </button>
       }
       maxWidth="max-w-4xl"
@@ -799,8 +792,8 @@ function ProtocolsContent() {
       {/* ── TODAY: Critical daily focus section ─────────────────────────────── */}
       {!isLoading && (
         <SectionCard
-          title={isPt ? "Hoje" : "Today"}
-          subtitle={isPt ? "O que você precisa tomar agora" : "What you need to take now"}
+          title={t('pages.protocols.today_section')}
+          subtitle={t('pages.protocols.today_subtitle')}
         >
           <TodayDoseSection
             protocols={activeProtocols}
@@ -837,8 +830,8 @@ function ProtocolsContent() {
       {/* ── Cadence Schedule ─────────────────────────────────────────────────── */}
       {!isLoading && hasAnyProtocols && (
         <SectionCard
-          title={isPt ? "Cronograma" : "Schedule"}
-          subtitle={isPt ? "Visualize suas doses semanais" : "Visualize your weekly doses"}
+          title={t('pages.protocols.schedule_section')}
+          subtitle={t('pages.protocols.schedule_subtitle')}
         >
           <CadenceScheduleView protocols={protocols} logs={logs} />
         </SectionCard>
@@ -847,8 +840,8 @@ function ProtocolsContent() {
       {/* ── Protocol Timeline ────────────────────────────────────────────────── */}
       {!isLoading && hasAnyProtocols && (
         <SectionCard
-          title={isPt ? "Linha do Tempo" : "Timeline"}
-          subtitle={isPt ? "Duração e sobreposição dos protocolos" : "Protocol duration and overlap"}
+          title={t('pages.protocols.timeline_section')}
+          subtitle={t('pages.protocols.timeline_subtitle')}
         >
           <ProtocolTimeline protocols={protocols} />
         </SectionCard>
@@ -857,17 +850,13 @@ function ProtocolsContent() {
       {/* ── Active Items: Simplified cards ──────────────────────────────────── */}
       {!isLoading && (
         <SectionCard
-          title={isPt ? "Itens ativos" : "Active items"}
-          subtitle={isPt 
-            ? "Seus suplementos e medicações em uso" 
-            : "Your supplements and medications in use"}
+          title={t('pages.protocols.active_items')}
+          subtitle={t('pages.protocols.active_items_subtitle')}
         >
           {!hasAnyProtocols ? (
             <EmptyState
-              title={isPt ? "Nenhum item ainda" : "No items yet"}
-              description={isPt
-                ? "Adicione seus suplementos, medicações ou compostos para começar a acompanhar."
-                : "Add your supplements, medications, or compounds to start tracking."}
+              title={t('pages.protocols.no_items')}
+              description={t('pages.protocols.no_items_desc')}
               action={
                 <button
                   type="button"
@@ -875,7 +864,7 @@ function ProtocolsContent() {
                   className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--brand))] px-4 py-2.5 text-[14px] font-semibold text-white transition-all hover:bg-[hsl(var(--brand)/0.9)]"
                 >
                   <Plus className="h-4 w-4" strokeWidth={2} />
-                  Add your first item
+                  {t('pages.protocols.add_first_item')}
                 </button>
               }
             />
@@ -914,8 +903,8 @@ function ProtocolsContent() {
       {!isLoading && hasAnyProtocols && (
         <UpgradeGate feature="advanced_protocol_tracking" plan="Performance">
           <SectionCard
-            title={isPt ? "Análise Farmacocinética" : "Pharmacokinetic Analysis"}
-            subtitle={isPt ? "Concentração, meia-vida e projeções" : "Concentration curves, half-life, and projections"}
+            title={t('pages.protocols.pk_analysis')}
+            subtitle={t('pages.protocols.pk_subtitle')}
           >
             <ConcentrationChart protocols={activeProtocols} />
           </SectionCard>
@@ -938,11 +927,9 @@ function ProtocolsContent() {
           {isTemplateMode && !editingProtocol ? (
             <>
               <DialogPanelHeader
-                eyebrow={isPt ? "Adicionar" : "Add new"}
-                title={isPt ? "O que você está tomando?" : "What are you taking?"}
-                description={isPt
-                  ? "Escolha um modelo ou descreva para que a IA estruture automaticamente."
-                  : "Choose a template or describe what you take for AI-powered setup."}
+                eyebrow={t('pages.protocols.dialog_add_eyebrow')}
+                title={t('pages.protocols.dialog_add_title')}
+                description={t('pages.protocols.dialog_add_desc')}
                 accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
               />
               <div className="p-6">
@@ -955,11 +942,9 @@ function ProtocolsContent() {
           ) : (
             <>
               <DialogPanelHeader
-                eyebrow={isPt ? "Itens" : "Items"}
-                title={editingProtocol ? (isPt ? "Editar" : "Edit") : (isPt ? "Adicionar" : "Add")}
-                description={isPt
-                  ? "Insira os dados do item: substância, dose, frequência e horário."
-                  : "Enter item details: substance, dose, frequency, and timing."}
+                eyebrow={t('pages.protocols.dialog_edit_eyebrow')}
+                title={editingProtocol ? t('pages.protocols.dialog_edit_title') : t('pages.protocols.dialog_add_title_short')}
+                description={t('pages.protocols.dialog_edit_desc')}
                 accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
               />
               <DialogHeader className="sr-only">
@@ -990,11 +975,9 @@ function ProtocolsContent() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto p-0 sm:max-w-lg">
           <DialogPanelHeader
-            eyebrow={isPt ? "Registrar dose" : "Log dose"}
-            title={loggingProtocol?.substance_name || (isPt ? "Registrar dose" : "Log dose")}
-            description={isPt
-              ? "Registre quando você tomou esta dose."
-              : "Record when you took this dose."}
+            eyebrow={t('pages.protocols.log_dose_eyebrow')}
+            title={loggingProtocol?.substance_name || t('pages.protocols.log_dose_title')}
+            description={t('pages.protocols.log_dose_desc')}
             accentClassName="from-[hsl(var(--ok)/0.18)] via-[hsl(var(--brand)/0.08)]"
           />
           <DialogHeader className="sr-only">

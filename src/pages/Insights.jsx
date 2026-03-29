@@ -641,41 +641,32 @@ function InsightLevelIndicator({ level, labelKey, stage }) {
 
 // Category preview cards - show what insights each category will provide
 function CategoryPreviews() {
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useI18n();
 
   const categories = [
     {
       key: 'training',
       icon: Dumbbell,
-      title: isPt ? 'Treinamento' : 'Training',
-      examples: isPt
-        ? ['Volume está aumentando consistentemente', 'Você está mais forte no supino']
-        : ['Volume is trending up consistently', 'You are getting stronger on bench press'],
+      title: t('insights.categoryTraining'),
+      examples: [t('insights.trainingExample1'), t('insights.trainingExample2')],
     },
     {
       key: 'nutrition',
       icon: UtensilsCrossed,
-      title: isPt ? 'Nutrição' : 'Nutrition',
-      examples: isPt
-        ? ['Proteína atingida em 5 dos últimos 7 dias', 'Média de calorias dentro do alvo']
-        : ['Protein hit on 5 of last 7 days', 'Calorie average within target'],
+      title: t('insights.categoryNutrition'),
+      examples: [t('insights.nutritionExample1'), t('insights.nutritionExample2')],
     },
     {
       key: 'progress',
       icon: TrendingUp,
-      title: isPt ? 'Corpo' : 'Body',
-      examples: isPt
-        ? ['Peso reduziu 2kg em 4 semanas', 'Circunferência da cintura diminuindo']
-        : ['Weight down 2kg over 4 weeks', 'Waist circumference decreasing'],
+      title: t('insights.categoryBody'),
+      examples: [t('insights.bodyExample1'), t('insights.bodyExample2')],
     },
     {
       key: 'recovery',
       icon: Moon,
-      title: isPt ? 'Consistência' : 'Consistency',
-      examples: isPt
-        ? ['Dias consecutivos de check-in: 12', 'Você treina melhor com 7+ horas de sono']
-        : ['Consecutive check-in days: 12', 'You train better with 7+ hours sleep'],
+      title: t('insights.categoryConsistency'),
+      examples: [t('insights.consistencyExample1'), t('insights.consistencyExample2')],
     },
   ];
 
@@ -711,8 +702,7 @@ function CategoryPreviews() {
 
 // Empty state redesigned - now shows value immediately
 function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useI18n();
 
   const unlockProgress = calculateUnlockProgress(workouts, meals, measurements);
   const insightLevel = calculateInsightLevel(workouts, meals, measurements, checkins);
@@ -736,16 +726,12 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              {isPt ? 'Suas análises de progresso' : 'Your progress insights'}
+              {t('insights.yourProgressInsights')}
             </h2>
             <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">
               {hasLoggedToday
-                ? isPt
-                  ? 'Você fez um check-in hoje. Continue assim para desbloquear insights mais profundos sobre seus padrões e tendências.'
-                  : 'You logged something today. Keep it up to unlock deeper insights about your patterns and trends.'
-                : isPt
-                  ? 'Você ainda não registrou nada hoje. Comece com sua primeira ação para começar a construir insights significativos.'
-                  : "You haven't logged anything yet today. Start with your first action to begin building meaningful insights."}
+                ? t('insights.loggedTodayContinue')
+                : t('insights.nothingLoggedToday')}
             </p>
           </div>
         </div>
@@ -765,12 +751,8 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
 
       {/* Quick Actions */}
       <SectionCard
-        title={isPt ? 'Comece a registrar seus dados' : 'Start logging your data'}
-        subtitle={
-          isPt
-            ? 'Ações rápidas para gerar insights significativos'
-            : 'Quick actions to generate meaningful insights'
-        }
+        title={t('insights.startLoggingData')}
+        subtitle={t('insights.quickActionsSubtitle')}
         actions={null}
       >
         <QuickActionButtons />
@@ -781,20 +763,14 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
 
       {/* Preview Insights - Always Visible */}
       <SectionCard
-        title={isPt ? 'Aqui está o que você começará a ver' : "Here's what you'll start seeing"}
-        subtitle={
-          isPt
-            ? 'Exemplos de insights baseados em dados típicos'
-            : 'Example insights based on typical data patterns'
-        }
+        title={t('insights.whatYouWillSee')}
+        subtitle={t('insights.exampleInsightsSubtitle')}
         actions={null}
       >
         <div className="mb-4 flex items-center gap-2 rounded-[12px] border border-[hsl(var(--warn)/0.15)] bg-[hsl(var(--warn)/0.06)] px-3 py-2">
           <Lightbulb className="h-4 w-4 shrink-0 text-[hsl(var(--warn))]" />
           <p className="text-[12px] text-[hsl(var(--warn))]">
-            {isPt
-              ? 'Estes são exemplos. Insights reais aparecerão quando você tiver dados suficientes.'
-              : 'These are examples. Real insights will appear once you have sufficient data.'}
+            {t('insights.examplesDisclaimer')}
           </p>
         </div>
 
@@ -807,12 +783,8 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
 
       {/* Category Previews */}
       <SectionCard
-        title={isPt ? 'Categorias de insights' : 'Insight categories'}
-        subtitle={
-          isPt
-            ? 'Uma prévia do que cada seção analisará para você'
-            : 'A preview of what each section will analyze for you'
-        }
+        title={t('insights.insightCategories')}
+        subtitle={t('insights.categoriesPreviewSubtitle')}
         actions={null}
       >
         <CategoryPreviews />
@@ -824,12 +796,10 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
           <Clock className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--fg-3))]" />
           <div>
             <p className="text-[13px] font-medium text-[hsl(var(--fg))]">
-              {isPt ? 'Quando os insights aparecerão?' : 'When will insights appear?'}
+              {t('insights.whenWillInsightsAppear')}
             </p>
             <p className="mt-1 text-[13px] leading-5 text-[hsl(var(--fg-2))]">
-              {isPt
-                ? 'Insights básicos aparecem após 1-2 dias de registro. Insights significativos e tendências são desbloqueados após 3-5 dias de dados consistentes.'
-                : 'Basic insights appear after 1-2 days of logging. Meaningful insights and trends unlock after 3-5 days of consistent data.'}
+              {t('insights.insightsTimeline')}
             </p>
           </div>
         </div>
@@ -839,8 +809,7 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
 }
 
 export default function Insights() {
-  const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
+  const { t } = useI18n();
   return (
     <SafePageBoundary
       title={t('pages.insights.title')}
@@ -857,7 +826,6 @@ function InsightsContent() {
   const { user } = useAuth();
   const { subscription } = useSubscription();
   const { t, locale } = useI18n();
-  const isPt = locale === 'pt-BR';
   const [range, setRange] = useState('30d');
 
   const planCode = subscription?.plan_code || 'free';
@@ -1056,8 +1024,8 @@ function InsightsContent() {
 
   return (
     <PageShell
-      title={isPt ? "Insights" : "Insights"}
-      subtitle={isPt ? "Uma leitura focada do seu histórico recente, sem gráficos ruidosos ou bloqueios artificiais." : "A focused read on your recent history, without noisy charts or artificial blockers."}
+      title={t('insights.pageTitle')}
+      subtitle={t('insights.pageSubtitle')}
       actions={
         <>
           {visibleRanges.map(([option]) => (

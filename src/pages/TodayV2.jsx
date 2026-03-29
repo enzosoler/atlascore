@@ -81,7 +81,8 @@ function HeroCard({ text, focus, primaryAction, loading }) {
 
   if (loading) {
     return (
-      <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-5 space-y-3">
+      <div className="rounded-[20px] border border-[hsl(var(--brand-ai)/0.18)] p-5 space-y-3 overflow-hidden"
+           style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
         <div className="h-4 w-32 rounded-md bg-[hsl(var(--fill)/0.6)] animate-pulse" />
         <div className="h-3 w-48 rounded-md bg-[hsl(var(--fill)/0.4)] animate-pulse" />
       </div>
@@ -89,12 +90,13 @@ function HeroCard({ text, focus, primaryAction, loading }) {
   }
 
   return (
-    <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] overflow-hidden">
+    <div className="rounded-[20px] border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden"
+         style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
       <div className="h-[2px] bg-gradient-to-r from-[hsl(var(--brand))] via-[hsl(var(--brand-ai))] to-transparent" />
       <div className="p-5">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand-ai))]">{t('today.aiCoach')}</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--brand-ai))]">{t('today.aiCoach')}</span>
           {focus && (
             <span className="ml-auto text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] bg-[hsl(var(--fill)/0.6)] px-2 py-0.5 rounded-full">{focus}</span>
           )}
@@ -118,7 +120,7 @@ function HeroCard({ text, focus, primaryAction, loading }) {
 
 function ActionTile({ icon: Icon, label, done, to, onClick }) {
   const content = (
-    <div className={`flex flex-col items-center justify-center gap-1.5 rounded-[16px] border p-3 transition-colors active:scale-[0.97] ${
+    <div className={`flex flex-col items-center justify-center gap-1.5 rounded-[20px] border p-3 transition-colors active:scale-[0.97] ${
       done
         ? 'border-[hsl(var(--ok)/0.25)] bg-[hsl(var(--ok)/0.06)]'
         : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)]'
@@ -136,15 +138,15 @@ function ActionTile({ icon: Icon, label, done, to, onClick }) {
 
 function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
   return (
-    <Link to={to} className="flex items-center gap-3 rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-4 py-3.5 active:bg-[hsl(var(--fill)/0.4)] transition-colors">
-      <div className={`w-9 h-9 rounded-[12px] flex items-center justify-center bg-[hsl(var(--${color})/0.1)] text-[hsl(var(--${color}))]`}>
+    <Link to={to} className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-5 py-4 active:bg-[hsl(var(--fill)/0.4)] transition-colors">
+      <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center bg-[hsl(var(--${color})/0.1)] text-[hsl(var(--${color}))]`}>
         <Icon className="w-4 h-4" strokeWidth={1.9} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{label}</p>
-        {sub && <p className="text-[11px] text-[hsl(var(--fg-3))] mt-0.5">{sub}</p>}
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</p>
+        {sub && <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{sub}</p>}
       </div>
-      <p className="text-[15px] font-bold text-[hsl(var(--fg))] shrink-0">{value}</p>
+      <p className="text-[1.75rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] shrink-0">{value}</p>
     </Link>
   );
 }
@@ -154,19 +156,18 @@ function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
 function RecCard({ rec, onDismiss }) {
   const t = useT();
   return (
-    <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] p-3.5">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{rec.title}</p>
-          {rec.reason && <p className="text-[11px] text-[hsl(var(--fg-3))] mt-1 leading-4">{rec.reason}</p>}
-        </div>
-        <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] shrink-0">{rec.dismissLabel || '×'}</button>
+    <div className="flex items-start gap-3 py-3">
+      <div className="w-1 h-1 rounded-full bg-[hsl(var(--brand-ai))] mt-2 shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-medium text-[hsl(var(--fg))]">{rec.title}</p>
+        {rec.reason && <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5 leading-relaxed">{rec.reason}</p>}
+        {rec.actionPath && (
+          <Link to={rec.actionPath} className="mt-2 flex items-center gap-1.5 text-[12px] font-semibold text-[hsl(var(--brand))]">
+            {rec.actionLabel || t('today.doThis')} <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
+          </Link>
+        )}
       </div>
-      {rec.actionPath && (
-        <Link to={rec.actionPath} className="mt-2.5 flex items-center gap-1.5 text-[12px] font-semibold text-[hsl(var(--brand))]">
-          {rec.actionLabel || t('today.doThis')} <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
-        </Link>
-      )}
+      <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] shrink-0 px-1">{rec.dismissLabel || '×'}</button>
     </div>
   );
 }

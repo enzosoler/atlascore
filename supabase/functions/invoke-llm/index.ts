@@ -12,11 +12,30 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': getAllowedOrigin(),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function getAllowedOrigin(): string {
+  const requestOrigin = '';
+  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  const appUrls = Deno.env.get('APP_URLS') || '';
+  
+  const allowedList = [
+    appUrl,
+    ...appUrls.split(',').map(u => u.trim()).filter(Boolean),
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:8080',
+  ];
+  
+  return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
+}
+
 const MODEL = 'gpt-4.1-nano';
+
+// Rate limiting: max 20 calls per hour per user
+const MAX_CALLS_PER_HOUR = 20;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -28,8 +47,6 @@ serve(async (req) => {
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 
-  // Accept either a real user JWT or the service-role key (for internal server calls)
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
   if (!token) {
@@ -39,19 +56,38 @@ serve(async (req) => {
     });
   }
 
-  // Allow service-role calls (internal server-to-server)
-  const isServiceRole = token === serviceRoleKey;
+  // Validate user JWT
+  const supabase = createClient(supabaseUrl, anonKey);
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
+  }
 
-  if (!isServiceRole) {
-    // Validate user JWT
-    const supabase = createClient(supabaseUrl, anonKey);
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
-      });
-    }
+  // ── Rate limiting check ───────────────────────────────────────────────────
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { data: recentCalls, error: countError } = await supabaseAdmin
+    .from('ai_usage_log')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('feature', 'invoke_llm')
+    .gte('created_at', hourAgo);
+
+  if (!countError && recentCalls && recentCalls.length >= MAX_CALLS_PER_HOUR) {
+    return new Response(JSON.stringify({
+      error: 'Rate limit exceeded. Maximum 20 calls per hour.',
+      code: 'RATE_LIMITED'
+    }), {
+      status: 429,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -123,6 +159,18 @@ serve(async (req) => {
         // Return raw text if JSON parse fails
       }
     }
+
+    // Log usage for rate limiting
+    supabaseAdmin.from('ai_usage_log').insert({
+      user_id: user.id,
+      feature: 'invoke_llm',
+      model: MODEL,
+      input_tokens: result.usage?.prompt_tokens ?? 0,
+      output_tokens: result.usage?.completion_tokens ?? 0,
+      estimated_cost: 0,
+      cache_hit: false,
+      success: true,
+    }).then(() => {}).catch((e) => console.error('[invoke-llm] Failed to log usage:', e));
 
     return new Response(JSON.stringify({ text, data: text }), {
       headers: { ...CORS, 'Content-Type': 'application/json' },

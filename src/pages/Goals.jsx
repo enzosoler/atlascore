@@ -17,7 +17,7 @@ import {
   Calculator,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
-import { useI18n } from '@/lib/i18nContext';
+import { useT } from '@/lib/i18nContext';
 import { ROUTES } from '@/lib/routes';
 import {
   AppContainer,
@@ -106,37 +106,52 @@ function SummaryCard({ icon: Icon, label, value, color = 'brand' }) {
 // ---------------------------------------------------------------------------
 
 const OCCUPATION_OPTIONS = [
-  { value: 'sedentary', labelEn: 'Sedentary (desk job)', labelPt: 'Sedentário (trabalho sentado)' },
-  { value: 'light',     labelEn: 'Light (some walking)',  labelPt: 'Leve (alguma caminhada)' },
-  { value: 'moderate',  labelEn: 'Moderate (on feet)',    labelPt: 'Moderado (bastante em pé)' },
-  { value: 'active',    labelEn: 'Active (physical job)', labelPt: 'Ativo (trabalho físico)' },
+  { value: 'sedentary', labelKey: 'goals.metabolicEstimator.occupationSedentary' },
+  { value: 'light',     labelKey: 'goals.metabolicEstimator.occupationLight' },
+  { value: 'moderate',  labelKey: 'goals.metabolicEstimator.occupationModerate' },
+  { value: 'active',    labelKey: 'goals.metabolicEstimator.occupationActive' },
 ];
 
-function SelectField({ label, value, onChange, options, isPt }) {
+function SelectField({ label, value, onChange, options, t }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
   return (
     <label className="block rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.8)] px-4 py-4 transition-all duration-200 focus-within:border-[hsl(var(--fg)/0.18)] focus-within:bg-[hsl(var(--card))]">
       <span className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
         {label}
       </span>
-      <select
-        value={value}
-        onChange={onChange}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
         className="mt-3 w-full border-0 bg-transparent p-0 text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))] outline-none"
       >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {isPt ? opt.labelPt : opt.labelEn}
-          </option>
-        ))}
-      </select>
+        {options.find((opt) => opt.value === value)?.labelKey
+          ? t(options.find((opt) => opt.value === value).labelKey)
+          : options.find((opt) => opt.value === value)?.labelEn}
+      </button>
+      {open && (
+        <div className="absolute z-10 mt-2 w-full rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.8)] p-4 shadow-lg">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left text-[14px] transition-colors hover:bg-[hsl(var(--fill))]"
+            >
+              <span className="text-[hsl(var(--fg))]">{t(`goals.metabolicEstimator.occupation${opt.value.charAt(0).toUpperCase() + opt.value.slice(1)}`)}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </label>
   );
 }
 
-function MetabolicEstimator({ profileData, onApply }) {
-  const { locale } = useI18n();
-  const isPt = locale === 'pt-BR';
-
+function MetabolicEstimator({ profileData, onApply, t }) {
   const [open, setOpen] = useState(false);
   const [inputs, setInputs] = useState({
     sex: profileData?.sex || 'male',
@@ -168,8 +183,8 @@ function MetabolicEstimator({ profileData, onApply }) {
   const result = calculateMetabolicTargets(inputs);
 
   const SEX_OPTIONS = [
-    { value: 'male',   labelEn: 'Male',   labelPt: 'Masculino' },
-    { value: 'female', labelEn: 'Female', labelPt: 'Feminino' },
+    { value: 'male',   labelKey: 'goals.metabolicEstimator.sexMale' },
+    { value: 'female', labelKey: 'goals.metabolicEstimator.sexFemale' },
   ];
 
   return (
@@ -185,12 +200,10 @@ function MetabolicEstimator({ profileData, onApply }) {
           </div>
           <div>
             <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              {isPt ? 'Estimar metabolismo' : 'Estimate metabolism'}
+              {t('goals.metabolicEstimator.title')}
             </p>
             <p className="text-[12px] text-[hsl(var(--fg-2))]">
-              {isPt
-                ? 'Calcula TMB, TDEE e macros automaticamente'
-                : 'Calculates BMR, TDEE and macros automatically'}
+              {t('goals.metabolicEstimator.description')}
             </p>
           </div>
         </div>
@@ -204,22 +217,22 @@ function MetabolicEstimator({ profileData, onApply }) {
           {/* Inputs grid */}
           <div className="grid gap-3 sm:grid-cols-2">
             <SelectField
-              label={isPt ? 'Sexo biológico' : 'Biological sex'}
+              label={t('goals.metabolicEstimator.sex')}
               value={inputs.sex}
               onChange={set('sex')}
               options={SEX_OPTIONS}
-              isPt={isPt}
+              t={t}
             />
             <FormField
-              label={isPt ? 'Idade' : 'Age'}
+              label={t('goals.metabolicEstimator.age')}
               value={inputs.age}
               onChange={set('age')}
-              unit={isPt ? 'anos' : 'yrs'}
+              unit={t('goals.metabolicEstimator.ageUnit')}
               placeholder="28"
               min="10" max="100"
             />
             <FormField
-              label={isPt ? 'Peso atual' : 'Current weight'}
+              label={t('goals.metabolicEstimator.weight')}
               value={inputs.weight_kg}
               onChange={set('weight_kg')}
               unit="kg"
@@ -227,7 +240,7 @@ function MetabolicEstimator({ profileData, onApply }) {
               min="30" max="300" step="0.1"
             />
             <FormField
-              label={isPt ? 'Altura' : 'Height'}
+              label={t('goals.metabolicEstimator.height')}
               value={inputs.height_cm}
               onChange={set('height_cm')}
               unit="cm"
@@ -235,27 +248,27 @@ function MetabolicEstimator({ profileData, onApply }) {
               min="100" max="250"
             />
             <FormField
-              label={isPt ? 'Treinos de força / semana' : 'Strength sessions / week'}
+              label={t('goals.metabolicEstimator.strengthSessions')}
               value={inputs.strength_sessions}
               onChange={set('strength_sessions')}
-              unit={isPt ? 'sessões' : 'sessions'}
+              unit={t('goals.metabolicEstimator.sessionsUnit')}
               placeholder="3"
               min="0" max="14"
             />
             <FormField
-              label={isPt ? 'Cardio / semana' : 'Cardio sessions / week'}
+              label={t('goals.metabolicEstimator.cardioSessions')}
               value={inputs.cardio_sessions}
               onChange={set('cardio_sessions')}
-              unit={isPt ? 'sessões' : 'sessions'}
+              unit={t('goals.metabolicEstimator.sessionsUnit')}
               placeholder="1"
               min="0" max="14"
             />
             <SelectField
-              label={isPt ? 'Atividade no trabalho' : 'Occupational activity'}
+              label={t('goals.metabolicEstimator.occupation')}
               value={inputs.occupation}
               onChange={set('occupation')}
               options={OCCUPATION_OPTIONS}
-              isPt={isPt}
+              t={t}
             />
           </div>
 
@@ -264,10 +277,10 @@ function MetabolicEstimator({ profileData, onApply }) {
             <div className="mt-5">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
-                  { label: 'TMB / BMR', value: `${result.bmr} kcal` },
-                  { label: 'TDEE', value: `${result.tdee} kcal` },
-                  { label: isPt ? 'Meta calórica' : 'Calorie target', value: `${result.target_kcal} kcal`, highlight: true },
-                  { label: isPt ? 'Proteína' : 'Protein', value: `${result.protein_g}g` },
+                  { label: t('goals.metabolicEstimator.bmr'), value: `${result.bmr} kcal` },
+                  { label: t('goals.metabolicEstimator.tdee'), value: `${result.tdee} kcal` },
+                  { label: t('goals.metabolicEstimator.calorieTarget'), value: `${result.target_kcal} kcal`, highlight: true },
+                  { label: t('goals.metabolicEstimator.protein'), value: `${result.protein_g}g` },
                 ].map((item) => (
                   <div
                     key={item.label}
@@ -286,9 +299,11 @@ function MetabolicEstimator({ profileData, onApply }) {
               </div>
 
               <div className="mt-3 rounded-[12px] bg-[hsl(var(--fill)/0.5)] px-4 py-3 text-[13px] text-[hsl(var(--fg-2))]">
-                {isPt
-                  ? `Macros: ${result.protein_g}g proteína · ${result.carbs_g}g carbo · ${result.fat_g}g gordura`
-                  : `Macros: ${result.protein_g}g protein · ${result.carbs_g}g carbs · ${result.fat_g}g fat`}
+                {t('goals.metabolicEstimator.macros', {
+                  protein: result.protein_g,
+                  carbs: result.carbs_g,
+                  fat: result.fat_g,
+                })}
               </div>
 
               <Button
@@ -307,14 +322,12 @@ function MetabolicEstimator({ profileData, onApply }) {
                 }}
               >
                 <Zap className="h-4 w-4" strokeWidth={1.9} />
-                {isPt ? 'Aplicar metas' : 'Apply targets'}
+                {t('goals.metabolicEstimator.apply')}
               </Button>
             </div>
           ) : (
             <p className="mt-4 text-[13px] text-[hsl(var(--fg-2))]">
-              {isPt
-                ? 'Preencha todos os campos para ver o resultado.'
-                : 'Fill all fields to see the result.'}
+              {t('goals.metabolicEstimator.fillFields')}
             </p>
           )}
         </div>
@@ -328,7 +341,7 @@ function MetabolicEstimator({ profileData, onApply }) {
 // ---------------------------------------------------------------------------
 
 export default function Goals() {
-  const { t } = useI18n();
+  const { t } = useT();
 
   return (
     <SafePageBoundary
@@ -344,7 +357,7 @@ export default function Goals() {
 function GoalsContent() {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const { t, locale } = useI18n();
+  const { t } = useT();
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
@@ -502,7 +515,7 @@ function GoalsContent() {
       </section>
 
       {/* Metabolic Estimator */}
-      <MetabolicEstimator profileData={profileData} onApply={handleApplyEstimate} />
+      <MetabolicEstimator profileData={profileData} onApply={handleApplyEstimate} t={t} />
 
       {/* Calorie Target */}
       <section className="mb-6">

@@ -39,7 +39,7 @@ import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 import { LanguageToggle } from '@/components/public/PublicSiteShell';
-import { useI18n } from '@/lib/i18nContext';
+import { useT } from '@/lib/i18nContext';
 import { getPrimaryScrollTop, resetPrimaryScroll, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
 import { useViewportHeight } from '@/hooks/use-viewport-height';
 
@@ -179,24 +179,23 @@ function BrandLockup({ logoWidth, logoHeight, textClassName = '', className = ''
 }
 
 function LanguageToggleNav({ collapsed }) {
-  const { locale: rawLocale, switchLocale } = useI18n();
+  const { locale: rawLocale, switchLocale, t } = useT();
   const locale = rawLocale || 'en';
 
   const isPt = locale === 'pt-BR';
   const nextLocale = isPt ? 'en' : 'pt-BR';
   const currentLabel = isPt ? 'PT' : 'EN';
-  const nextLabel = isPt ? 'EN' : 'PT';
 
   return (
     <button
       onClick={() => switchLocale(nextLocale)}
-      title={isPt ? 'Switch to English' : 'Mudar para Português'}
+      title={isPt ? t('layout.language.switchToEn') : t('layout.language.switchToPt')}
       className={getDesktopNavItemClass(false, collapsed)}
     >
       <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[10px] font-bold uppercase tracking-[0.04em]">
         {currentLabel}
       </span>
-      {!collapsed ? <span>{isPt ? 'English' : 'Português'}</span> : null}
+      {!collapsed ? <span>{isPt ? t('layout.language.english') : t('layout.language.portuguese')}</span> : null}
     </button>
   );
 }
@@ -232,18 +231,9 @@ export default function AppLayout() {
   const { role, nav: rawNav } = useRBAC(user);
 
   // ── Translate nav labels ────────────────────────────────────────
-  const { locale: rawLocale } = useI18n();
+  const { locale: rawLocale, t } = useT();
   const locale = rawLocale || 'en';
   const isPt = locale === 'pt-BR';
-
-  const ROLE_LABELS_PT = {
-    visitor: 'Visitante',
-    athlete: 'Atleta',
-    coach: 'Treinador',
-    nutritionist: 'Nutricionista',
-    clinician: 'Médico',
-    admin: 'Admin',
-  };
 
   const NAV_LABELS_PT = {
     Today: 'Hoje',
@@ -479,7 +469,7 @@ export default function AppLayout() {
                 {user?.full_name || user?.email}
               </p>
               <span className="mt-1 inline-block text-[11px] font-medium text-[hsl(var(--fg-2))]">
-                {isPt ? (ROLE_LABELS_PT[role] || role) : (ROLE_LABELS[role] || role)}
+                {t(`account.role${role.charAt(0).toUpperCase() + role.slice(1)}`) || role}
               </span>
             </div>
           ) : null}
@@ -490,7 +480,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(isActive(ROUTES.settings), collapsed)}
             >
               <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>{isPt ? 'Configurações' : 'Settings'}</span> : null}
+              {!collapsed ? <span>{t('settings.title')}</span> : null}
             </Link>
             <LanguageToggleNav collapsed={collapsed} />
             <ThemeToggleButton
@@ -502,7 +492,7 @@ export default function AppLayout() {
               className={getDesktopNavItemClass(false, collapsed, true)}
             >
               <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-              {!collapsed ? <span>{isPt ? 'Sair' : 'Sign out'}</span> : null}
+              {!collapsed ? <span>{t('settings.signout.label')}</span> : null}
             </button>
             <button
               onClick={() => setCollapsed((value) => !value)}
@@ -515,7 +505,7 @@ export default function AppLayout() {
                 )}
                 strokeWidth={1.95}
               />
-              {!collapsed ? <span>{isPt ? 'Recolher' : 'Collapse'}</span> : null}
+              {!collapsed ? <span>{t('layout.collapse')}</span> : null}
             </button>
           </div>
         </div>
@@ -627,17 +617,17 @@ export default function AppLayout() {
                     {user?.email}
                   </p>
                   <span className="mt-1 inline-block text-[11px] font-medium text-[hsl(var(--fg-2))]">
-                    {isPt ? (ROLE_LABELS_PT[role] || role) : (ROLE_LABELS[role] || role)}
+                    {t(`account.role${role.charAt(0).toUpperCase() + role.slice(1)}`) || role}
                   </span>
                 </div>
                 <LanguageToggleNav collapsed={false} />
                 <Link to={ROUTES.settings} className={getMobileNavItemClass(isActive(ROUTES.settings))}>
                   <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>{isPt ? 'Configurações' : 'Settings'}</span>
+                  <span>{t('settings.title')}</span>
                 </Link>
                 <button onClick={() => logout()} className={getMobileNavItemClass(false, true)}>
                   <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
-                  <span>{isPt ? 'Sair' : 'Sign out'}</span>
+                  <span>{t('settings.signout.label')}</span>
                 </button>
               </div>
             </motion.div>
@@ -652,7 +642,9 @@ export default function AppLayout() {
             key: path,
             to: getBottomTabTarget(path),
             onClick: (event) => handleBottomTabPress(event, path),
-            label: isPt ? label : (MOBILE_TAB_LABEL_OVERRIDES[path] || label),
+            label: MOBILE_TAB_LABEL_OVERRIDES[path]
+              ? t(`layout.mobileTab.${MOBILE_TAB_LABEL_OVERRIDES[path].toLowerCase()}`)
+              : label,
             icon: ICON_MAP[icon] || Home,
             active: currentTabRoot === path,
           })),
@@ -704,10 +696,10 @@ export default function AppLayout() {
             </div>
             <span className="text-[11px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg))]">
               {isRefreshing
-                ? (isPt ? 'Atualizando...' : 'Refreshing...')
+                ? t('layout.refresh.refreshing')
                 : pullDistance >= PULL_REFRESH_THRESHOLD
-                  ? (isPt ? 'Solte para atualizar' : 'Release to refresh')
-                  : (isPt ? 'Puxe para atualizar' : 'Pull to refresh')}
+                  ? t('layout.refresh.releaseToRefresh')
+                  : t('layout.refresh.pullToRefresh')}
             </span>
           </div>
         </motion.div>
