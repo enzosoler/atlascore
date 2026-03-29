@@ -19,19 +19,24 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 
 function getAllowedOrigin(requestOrigin: string): string {
-  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
   const appUrls = Deno.env.get('APP_URLS') || '';
+  const extraAllowed = appUrls.split(',').map((u) => u.trim()).filter(Boolean);
+
+  // Allow any subdomain of useatlascore.com (www, non-www, future subdomains)
+  if (requestOrigin?.endsWith('useatlascore.com')) return requestOrigin;
+
   const allowedList = [
-    appUrl,
-    ...appUrls.split(',').map((u) => u.trim()).filter(Boolean),
+    ...extraAllowed,
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:8080',
-    // Capacitor iOS — WKWebView sends this as the origin for cross-origin requests
     'capacitor://localhost',
     'atlascore://localhost',
   ];
-  return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
+  if (allowedList.includes(requestOrigin)) return requestOrigin;
+
+  console.warn('[ai-coach-chat] CORS blocked origin:', requestOrigin);
+  return 'https://useatlascore.com';
 }
 
 function getCorsHeaders(req: Request) {

@@ -29,18 +29,23 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 
 function getAllowedOrigin(requestOrigin: string): string {
-  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
   const appUrls = Deno.env.get('APP_URLS') || '';
+  const extraAllowed = appUrls.split(',').map((u) => u.trim()).filter(Boolean);
+
+  if (requestOrigin?.endsWith('useatlascore.com')) return requestOrigin;
 
   const allowedList = [
-    appUrl,
-    ...appUrls.split(',').map(u => u.trim()).filter(Boolean),
+    ...extraAllowed,
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:8080',
+    'capacitor://localhost',
+    'atlascore://localhost',
   ];
+  if (allowedList.includes(requestOrigin)) return requestOrigin;
 
-  return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
+  console.warn('[ai-decision-engine] CORS blocked origin:', requestOrigin);
+  return 'https://useatlascore.com';
 }
 
 function getCorsHeaders(req: Request) {

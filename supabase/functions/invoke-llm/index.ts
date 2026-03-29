@@ -12,25 +12,9 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS = {
-  'Access-Control-Allow-Origin': getAllowedOrigin(),
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-function getAllowedOrigin(): string {
-  const requestOrigin = '';
-  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
-  const appUrls = Deno.env.get('APP_URLS') || '';
-  
-  const allowedList = [
-    appUrl,
-    ...appUrls.split(',').map(u => u.trim()).filter(Boolean),
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:8080',
-  ];
-  
-  return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
-}
 
 const MODEL = 'gpt-4.1-nano';
 
