@@ -2,32 +2,32 @@
   "onboarding": {
     "welcome": {
       "title": "Bem-vindo ao atlas.core",
-      "description": "Seu sistema unificado para treinos, nutrição, progresso e performance. Vamos mostrar como começar."
+      "description": "Seu sistema unificado para treinos, nutrição, progresso e performance. Vamos mostrar como tudo funciona."
     },
     "nutrition": {
-      "title": "📊 Nutrição",
-      "description": "Gerencie sua ingestão diária de calorias, macros e suplementos. Construa planos alimentares personalizados com orientação estruturada."
+      "title": "Nutrição",
+      "description": "Gerencie sua ingestão diária de calorias, macros e suplementos. Construa planos alimentares personalizados."
     },
     "workouts": {
-      "title": "💪 Treinos",
-      "description": "Crie, organize e acompanhe seus treinos. Escolha entre templates pré-montados ou construa manualmente. Registre cada série e repetição."
+      "title": "Treinos",
+      "description": "Crie, organize e acompanhe seus treinos. Escolha templates ou construa manualmente. Registre cada série e repetição."
     },
     "progress": {
-      "title": "📸 Progresso",
+      "title": "Progresso",
       "description": "Tire fotos regularmente para acompanhar sua transformação corporal. Visualize sua evolução ao longo do tempo."
     },
     "profile": {
-      "title": "👤 Perfil",
+      "title": "Seu Perfil",
       "description": "Defina seu objetivo, peso, altura e outras métricas. Isso nos ajuda a personalizar tudo para você."
     },
     "complete": {
-      "title": "Pronto para começar!",
-      "description": "Você está pronto para explorar o atlas.core. Boa sorte na sua jornada de performance!"
+      "title": "Tudo pronto",
+      "description": "Está tudo configurado. Boa sorte na sua jornada de performance!"
     },
     "tour": {
-      "skip": "Pular tour",
-      "next": "Próximo",
-      "finish": "Concluir"
+      "skip": "Pular",
+      "next": "Continuar",
+      "finish": "Vamos lá"
     }
   }
 }

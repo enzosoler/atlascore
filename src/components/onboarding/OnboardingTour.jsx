@@ -1,251 +1,263 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 
-/**
- * OnboardingTour — Product tour for new users
- * Shows a series of popups explaining key features
- */
+// ─── Step config (icons are decorative — not translated) ──────────────────────
 
 const TOUR_STEPS = [
   {
     id: 'welcome',
-    target: null,
+    icon: '👋',
     title: 'onboarding.welcome.title',
     description: 'onboarding.welcome.description',
-    position: 'center',
   },
   {
     id: 'nutrition',
-    target: '[data-tour="nutrition"]',
+    icon: '📊',
     title: 'onboarding.nutrition.title',
     description: 'onboarding.nutrition.description',
-    position: 'bottom',
   },
   {
     id: 'workouts',
-    target: '[data-tour="workouts"]',
+    icon: '💪',
     title: 'onboarding.workouts.title',
     description: 'onboarding.workouts.description',
-    position: 'bottom',
   },
   {
     id: 'progress',
-    target: '[data-tour="progress"]',
+    icon: '📸',
     title: 'onboarding.progress.title',
     description: 'onboarding.progress.description',
-    position: 'bottom',
   },
   {
     id: 'profile',
-    target: '[data-tour="profile"]',
+    icon: '👤',
     title: 'onboarding.profile.title',
     description: 'onboarding.profile.description',
-    position: 'bottom',
   },
   {
     id: 'complete',
-    target: null,
+    icon: '🚀',
     title: 'onboarding.complete.title',
     description: 'onboarding.complete.description',
-    position: 'center',
   },
 ];
 
-const ONBOARDING_STORAGE_KEY = 'atlas_onboarding_completed';
+const TOUR_STORAGE_KEY = 'atlas_onboarding_completed';
+// Keep the old key as an alias so existing users who already skipped the tour
+// don't see it again after upgrading.
+const TOUR_STORAGE_KEY_LEGACY = 'atlas_onboarding_completed';
+
+// ─── Step slide animation (direction-aware) ───────────────────────────────────
+
+function stepVariants(direction) {
+  return {
+    enter: { opacity: 0, x: direction > 0 ? 40 : -40 },
+    center: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: direction > 0 ? -40 : 40 },
+  };
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function OnboardingTour() {
   const { t } = useI18n();
   const { user } = useAuth();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [isVisible, setIsVisible] = useState(false);
-  const [targetRect, setTargetRect] = useState(null);
+  const timerRef = useRef(null);
 
-  // Guard: tour is a post-onboarding feature. Do NOT show it until the user
-  // has completed real onboarding (profiles.onboarding_completed === true).
-  // Without this gate the tour fires on /Onboarding itself for new users.
+  // Guard: only show after real onboarding is complete, and only once per device.
   useEffect(() => {
     if (!user?.onboarding_completed) {
       console.log('[OnboardingTour] suppressed — onboarding_completed:', user?.onboarding_completed);
       return;
     }
-    const tourDone = localStorage.getItem(ONBOARDING_STORAGE_KEY);
-    if (!tourDone) {
+    const done =
+      localStorage.getItem(TOUR_STORAGE_KEY) ||
+      localStorage.getItem(TOUR_STORAGE_KEY_LEGACY);
+    if (!done) {
       console.log('[OnboardingTour] showing tour for user:', user?.id);
-      setTimeout(() => setIsVisible(true), 500);
+      timerRef.current = setTimeout(() => setIsVisible(true), 600);
     }
+    return () => clearTimeout(timerRef.current);
   }, [user?.onboarding_completed, user?.id]);
 
-  // Update target element position
+  // Lock body scroll while tour is open.
   useEffect(() => {
     if (!isVisible) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isVisible]);
 
-    const step = TOUR_STEPS[currentStep];
-    if (!step.target) {
-      setTargetRect(null);
-      return;
-    }
+  const dismiss = useCallback(() => {
+    localStorage.setItem(TOUR_STORAGE_KEY, 'true');
+    setIsVisible(false);
+  }, []);
 
-    const element = document.querySelector(step.target);
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      setTargetRect({
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-      });
-    }
-  }, [currentStep, isVisible]);
-
-  const handleNext = () => {
-    if (currentStep < TOUR_STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+  const goNext = useCallback(() => {
+    if (step < TOUR_STEPS.length - 1) {
+      setDirection(1);
+      setStep((s) => s + 1);
     } else {
-      handleComplete();
+      dismiss();
     }
-  };
-
-  const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleComplete = () => {
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
-    setIsVisible(false);
-  };
-
-  const handleSkip = () => {
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
-    setIsVisible(false);
-  };
+  }, [step, dismiss]);
 
   if (!isVisible) return null;
 
-  const step = TOUR_STEPS[currentStep];
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === TOUR_STEPS.length - 1;
+  const current = TOUR_STEPS[step];
+  const isLast = step === TOUR_STEPS.length - 1;
 
-  return (
+  const panel = (
     <AnimatePresence>
-      {isVisible && (
-        <>
-          {/* Backdrop — pointer-events-none so page content remains interactive */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/40 pointer-events-none"
-          />
+      <div
+        // Full-screen overlay — sits above everything including native tabs (z-[1000])
+        className="fixed inset-0 z-[1000] flex flex-col items-center justify-end sm:justify-center"
+        // Trap pointer events so underlying UI is completely blocked.
+        style={{ pointerEvents: 'auto' }}
+      >
+        {/* Backdrop */}
+        <motion.div
+          key="tour-backdrop"
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={dismiss}
+          aria-hidden="true"
+        />
 
-          {/* Spotlight (highlight target element) */}
-          {targetRect && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed z-40 border-2 border-[hsl(var(--primary))] rounded-lg pointer-events-none"
-              style={{
-                top: targetRect.top - 8,
-                left: targetRect.left - 8,
-                width: targetRect.width + 16,
-                height: targetRect.height + 16,
-                boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.4)',
-              }}
-            />
-          )}
+        {/* Sheet / modal */}
+        <motion.div
+          key="tour-sheet"
+          className={[
+            // Mobile: full-width bottom sheet
+            'relative w-full max-w-lg',
+            'bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.7)]',
+            // Rounded top corners on mobile, all corners on sm+
+            'rounded-t-[28px] sm:rounded-[24px]',
+            // Safe-area padding at bottom on mobile
+            'px-6 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6',
+            'shadow-2xl',
+            // On desktop, don't stretch to full width
+            'sm:mx-4',
+          ].join(' ')}
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 60 }}
+          transition={{ type: 'spring', stiffness: 340, damping: 34, mass: 0.9 }}
+          // Stop clicks inside the sheet from hitting the backdrop dismiss handler.
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Drag handle (decorative, mobile) */}
+          <div className="mx-auto mb-5 h-[5px] w-10 rounded-full bg-[hsl(var(--border-h))] sm:hidden" />
 
-          {/* Tooltip Popup — centered, clamped inside safe viewport */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="fixed z-50 bg-[hsl(var(--card))] rounded-2xl shadow-lg border border-[hsl(var(--border))] w-[calc(100vw-2rem)] max-w-sm p-6 space-y-4"
-            style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              maxHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4rem)',
-              overflowY: 'auto',
-            }}
+          {/* Dismiss button */}
+          <button
+            onClick={dismiss}
+            aria-label={t('onboarding.tour.skip')}
+            className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--fill)/0.7)] hover:text-[hsl(var(--fg))] transition-colors"
           >
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-2 flex-1">
-                <h3 className="text-lg font-semibold text-[hsl(var(--fg))]">
-                  {t(step.title)}
-                </h3>
-                <p className="text-sm text-[hsl(var(--fg-2))] leading-relaxed">
-                  {t(step.description)}
-                </p>
-              </div>
-              <button
-                onClick={handleSkip}
-                className="text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            <X className="h-4 w-4" strokeWidth={2} />
+          </button>
 
-            {/* Progress */}
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1 bg-[hsl(var(--border))] rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-[hsl(var(--primary))]"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${((currentStep + 1) / TOUR_STEPS.length) * 100}%` }}
-                  transition={{ duration: 0.3 }}
-                />
+          {/* Step content — slides on step change */}
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={current.id}
+              custom={direction}
+              variants={stepVariants(direction)}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="space-y-3"
+            >
+              {/* Icon */}
+              <div className="text-[36px] leading-none select-none" aria-hidden="true">
+                {current.icon}
               </div>
-              <span className="text-xs text-[hsl(var(--fg-2))]">
-                {currentStep + 1} / {TOUR_STEPS.length}
-              </span>
-            </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between gap-3">
+              {/* Title */}
+              <h2 className="text-[20px] font-bold tracking-[-0.025em] text-[hsl(var(--fg))] leading-tight pr-8">
+                {t(current.title)}
+              </h2>
+
+              {/* Description */}
+              <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">
+                {t(current.description)}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Progress dots */}
+          <div className="mt-6 flex items-center justify-center gap-1.5">
+            {TOUR_STEPS.map((s, i) => (
+              <motion.div
+                key={s.id}
+                animate={{
+                  width: i === step ? 20 : 6,
+                  backgroundColor:
+                    i === step
+                      ? 'hsl(var(--brand))'
+                      : i < step
+                      ? 'hsl(var(--brand)/0.35)'
+                      : 'hsl(var(--border-h))',
+                }}
+                transition={{ duration: 0.25 }}
+                className="h-1.5 rounded-full"
+              />
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="mt-5 flex items-center gap-3">
+            {/* Skip (hidden on last step) */}
+            {!isLast && (
               <button
-                onClick={handleSkip}
-                className="text-sm text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
+                onClick={dismiss}
+                className="flex-1 rounded-[14px] border border-[hsl(var(--border)/0.7)] py-3 text-[14px] font-semibold text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.5)] active:bg-[hsl(var(--fill)/0.8)] transition-colors"
               >
                 {t('onboarding.tour.skip')}
               </button>
-              <div className="flex gap-2">
-                <button
-                  onClick={handlePrev}
-                  disabled={isFirstStep}
-                  className="p-2 rounded-lg border border-[hsl(var(--border))] text-[hsl(var(--fg))] hover:bg-[hsl(var(--shell))] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={handleNext}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[hsl(var(--primary))] text-white hover:opacity-90 transition-opacity"
-                >
-                  {isLastStep ? t('onboarding.tour.finish') : t('onboarding.tour.next')}
-                  {!isLastStep && <ChevronRight className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </>
-      )}
+            )}
+
+            {/* Continue / Finish */}
+            <button
+              onClick={goNext}
+              className="flex flex-1 items-center justify-center gap-2 rounded-[14px] bg-[hsl(var(--brand))] py-3 text-[14px] font-semibold text-white hover:opacity-90 active:opacity-80 transition-opacity"
+            >
+              {isLast ? t('onboarding.tour.finish') : t('onboarding.tour.next')}
+              {!isLast && <ArrowRight className="h-4 w-4" strokeWidth={2.5} />}
+            </button>
+          </div>
+        </motion.div>
+      </div>
     </AnimatePresence>
   );
+
+  // Render into document.body via portal so the tour is never clipped by
+  // any parent overflow, z-index stacking context, or layout container.
+  return createPortal(panel, document.body);
 }
 
 export default OnboardingTour;
 
 /**
- * Hook to restart onboarding (for testing/settings)
+ * Hook to reset the tour (for settings / testing).
  */
 export function useResetOnboarding() {
   return () => {
-    localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+    localStorage.removeItem(TOUR_STORAGE_KEY);
     window.location.reload();
   };
 }
