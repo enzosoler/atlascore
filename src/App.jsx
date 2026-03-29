@@ -212,7 +212,7 @@ const MissingConfigScreen = () => (
 );
 
 const RequireAuthenticatedApp = () => {
-  const { authError, isAuthenticated, authState, user } = useAuth();
+  const { authError, isAuthenticated, authState, user, logout } = useAuth();
   const location = useLocation();
 
   if (authState === 'loading') {
@@ -221,6 +221,30 @@ const RequireAuthenticatedApp = () => {
 
   if (authError?.type === 'user_not_registered') return <UserNotRegisteredError />;
   if (authError?.type === 'missing_config') return <MissingConfigScreen />;
+  
+  if (authError?.type === 'profile_fetch_failed') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-[hsl(var(--bg))]">
+        <h2 className="text-xl font-bold mb-2">Profile Sync Error</h2>
+        <p className="text-[hsl(var(--fg-2))] mb-6">{authError.message}</p>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <button 
+            onClick={() => window.location.reload()} 
+            className="w-full py-3 rounded-xl bg-[hsl(var(--brand))] text-white font-medium"
+          >
+            Retry Connection
+          </button>
+          <button 
+            onClick={() => logout()} 
+            className="w-full py-3 rounded-xl bg-[hsl(var(--shell))] text-[hsl(var(--fg))] font-medium"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
@@ -229,16 +253,22 @@ const RequireAuthenticatedApp = () => {
   // Defensive onboarding guard: authenticated users who have not completed onboarding
   // are always redirected to /Onboarding, regardless of which app route they reached.
   // The onboarding route itself is exempted to prevent an infinite redirect loop.
+  // STRICT: only redirect if onboarding_completed is explicitly false.
   const isOnboardingRoute = location.pathname === ROUTES.onboarding;
-  if (!user?.onboarding_completed && !isOnboardingRoute) {
+  if (user?.onboarding_completed === false && !isOnboardingRoute) {
     console.log(
-      '[RequireAuthenticatedApp] guard triggered',
+      '[RequireAuthenticatedApp] guard triggered: redirecting to onboarding',
       '| user:', user?.id,
       '| onboarding_completed:', user?.onboarding_completed,
       '| attempted route:', location.pathname,
-      '| redirecting to:', ROUTES.onboarding,
     );
     return <Navigate to={ROUTES.onboarding} replace />;
+  }
+
+  // If onboarding_completed is null (and not loading), it's an invalid state
+  if (user?.onboarding_completed === null && !isOnboardingRoute) {
+    console.warn('[RequireAuthenticatedApp] user.onboarding_completed is null but authState is authenticated');
+    return <AppBootstrap />; // Keep splash while we figure it out
   }
 
   console.log(

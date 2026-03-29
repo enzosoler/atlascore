@@ -282,7 +282,10 @@ export default function Auth() {
   React.useEffect(() => {
     if (!isAuthenticated) return;
 
-    if (!user?.onboarding_completed) {
+    // Wait for onboarding_completed to be resolved (true or false)
+    if (user?.onboarding_completed === null) return;
+
+    if (user?.onboarding_completed === false) {
       navigate(ROUTES.onboarding, { replace: true });
       return;
     }
@@ -322,14 +325,18 @@ export default function Auth() {
 
       if (isLogin) {
         const loggedInUser = await signIn(normalizedEmail, password);
-        const destination = loggedInUser?.onboarding_completed
-          ? (requestedDestination || ROLE_HOME[loggedInUser?.atlas_role] || ROUTES.today)
+        if (!loggedInUser) return; // Error handled by AuthContext
+
+        const destination = loggedInUser.onboarding_completed
+          ? (requestedDestination || ROLE_HOME[loggedInUser.atlas_role] || ROUTES.today)
           : ROUTES.onboarding;
         navigate(destination, { replace: true });
         return;
       }
 
       const result = await signUp(normalizedEmail, password, { full_name: fullName });
+      if (!result) return;
+      
       const needsEmailConfirmation = result?.needsEmailConfirmation;
 
       try {
@@ -352,7 +359,11 @@ export default function Auth() {
       }
 
       // Brand-new accounts always start onboarding; result is the resolved user object.
-      navigate(result?.onboarding_completed ? (requestedDestination || ROUTES.today) : ROUTES.onboarding, { replace: true });
+      // onboarding_completed will be false for new accounts.
+      const destination = result.onboarding_completed
+        ? (requestedDestination || ROUTES.today)
+        : ROUTES.onboarding;
+      navigate(destination, { replace: true });
     } catch (error) {
       setErrorMessage(getAuthErrorMessage(error));
     } finally {

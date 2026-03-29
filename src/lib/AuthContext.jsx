@@ -65,7 +65,8 @@ function normalizeSupabaseUser(authUser) {
       ) || fallbackName,
     atlas_role: metadataAtlasRole,
     profile_role: null,
-    onboarding_completed: normalizeBoolean(userMetadata.onboarding_completed),
+    // onboarding_completed is strictly resolved from DB later
+    onboarding_completed: null, 
     role: firstNonEmptyString(appMetadata.role, userMetadata.role) || 'user',
     phone: authUser.phone || firstNonEmptyString(userMetadata.phone) || null,
     user_metadata: userMetadata,
@@ -110,15 +111,16 @@ export const AuthProvider = ({ children }) => {
     window.sessionStorage.clear();
   }, []);
 
-  const applyAuthenticatedUser = useCallback(async (authUser) => {
+  const applyAuthenticatedUser = useCallback(async (authUser, retryCount = 0) => {
     const normalizedUser = normalizeSupabaseUser(authUser);
     if (!normalizedUser) {
       return null;
     }
 
     let profileRole = normalizedUser?.atlas_role || 'athlete';
-    let profileOnboardingCompleted = normalizedUser.onboarding_completed;
-    let profileSource = 'user_metadata';
+    let profileOnboardingCompleted = null; // Strict: start with null, no metadata fallback
+    let profileSource = 'unknown';
+
     try {
       // Hard 3 s timeout — on slow mobile networks this query can hang indefinitely,
       // keeping authState at 'loading' forever and preventing the splash from hiding.
@@ -130,23 +132,41 @@ export const AuthProvider = ({ children }) => {
             .select('onboarding_completed')
             .eq('id', authUser?.id)
             .maybeSingle()
-            .then(({ data }) => data),
+            .then(({ data, error }) => {
+              if (error) throw error;
+              return data;
+            }),
         ]),
         new Promise((_, reject) =>
           window.setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
         ),
       ]);
+
       profileRole = role;
+
       // profiles table is the authoritative source for onboarding_completed
-      if (profileRow?.onboarding_completed != null) {
+      if (profileRow && profileRow.onboarding_completed !== undefined) {
         profileOnboardingCompleted = normalizeBoolean(profileRow.onboarding_completed);
         profileSource = 'profiles_table';
       } else {
-        profileSource = profileRow === null ? 'no_profile_row' : 'profile_row_null_field';
+        // If row doesn't exist yet, it's effectively false (new user)
+        profileOnboardingCompleted = false;
+        profileSource = profileRow === null ? 'no_profile_row' : 'profile_row_missing_field';
       }
     } catch (e) {
-      profileSource = `fallback(${e.message})`;
-      console.warn('[AuthContext] Profile fetch failed, using fallback:', e.message);
+      console.error('[AuthContext] Profile fetch failed:', e.message);
+      
+      if (retryCount < 2) {
+        console.log(`[AuthContext] Retrying profile fetch (${retryCount + 1}/2)...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return applyAuthenticatedUser(authUser, retryCount + 1);
+      }
+
+      // If we've exhausted retries, we MUST NOT fallback to metadata.
+      // We set authState to ERROR to prevent navigation to protected routes.
+      setAuthState(AUTH_STATES.ERROR);
+      setAuthError(buildAuthError('profile_fetch_failed', 'Could not load user profile from database. Please check your connection.'));
+      return null;
     }
 
     const resolvedUser = {
@@ -157,11 +177,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     console.log(
-      '[AuthContext] user resolved',
+      '[AuthContext] user resolved from database',
       'id:', resolvedUser.id,
       '| onboarding_completed:', resolvedUser.onboarding_completed,
       '| source:', profileSource,
-      '| metadata_value:', normalizedUser.onboarding_completed,
       '| role:', resolvedUser.atlas_role,
     );
 
