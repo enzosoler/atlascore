@@ -659,7 +659,19 @@
       "preparing": "Preparing your timeline...",
       "ready": "Your atlas.core is ready.",
       "enter": "Enter the app"
-    }
+    },
+    "success": {
+      "title": "All set! 🎉",
+      "descFresh": "Your first checkpoint is saved. Go to Today and start your first log of the day.",
+      "descExplore": "Your atlas.core is ready. Explore the modules at your own pace.",
+      "focusTitle": "This week, focus on",
+      "focusMeals": "Log meals in Nutrition",
+      "focusWorkouts": "Create or start a plan in Workouts",
+      "focusMeasurements": "Log measurements twice this week"
+    },
+    "continue": "Continue",
+    "saveError": "Something went wrong saving your data. Please try again.",
+    "retry": "Tap to retry"
   },
   "today": {
     "greeting": {

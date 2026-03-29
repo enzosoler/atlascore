@@ -659,7 +659,19 @@
       "preparing": "Preparando sua timeline...",
       "ready": "Seu atlas.core está pronto.",
       "enter": "Entrar no app"
-    }
+    },
+    "success": {
+      "title": "Tudo pronto! 🎉",
+      "descFresh": "Seu primeiro checkpoint foi salvo. Vá para Hoje e comece seu primeiro registro do dia.",
+      "descExplore": "Seu atlas.core está pronto. Explore os módulos no seu ritmo.",
+      "focusTitle": "Essa semana, foque em",
+      "focusMeals": "Registrar refeições em Nutrição",
+      "focusWorkouts": "Criar ou iniciar um plano em Treinos",
+      "focusMeasurements": "Registrar medidas duas vezes essa semana"
+    },
+    "continue": "Continuar",
+    "saveError": "Algo deu errado ao salvar seus dados. Tente novamente.",
+    "retry": "Toque para tentar novamente"
   },
   "today": {
     "greeting": {

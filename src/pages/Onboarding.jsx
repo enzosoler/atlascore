@@ -23,6 +23,7 @@ import {
   Crown,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -54,12 +55,14 @@ const HEAR_ABOUT_US = [
   { id: 'other',         label: 'Other' },
 ];
 
-const SETUP_MESSAGES = [
-  'Calculating your nutrition targets...',
-  'Saving your first checkpoint...',
-  'Setting up your dashboard...',
-  'Your atlas.core is ready.',
-];
+function getSetupMessages(t) {
+  return [
+    t('onboarding.setup.calculating'),
+    t('onboarding.setup.building'),
+    t('onboarding.setup.preparing'),
+    t('onboarding.setup.ready'),
+  ];
+}
 
 const TOTAL_STEPS = 4; // 0=welcome, 1=profile+goals, 2=first checkpoint, 3=path choice
 
@@ -610,7 +613,8 @@ function PaywallPrimingScreen({ onContinue }) {
 
 // ─── Setup generation ─────────────────────────────────────────────────────────
 
-function SetupGenerationScreen({ onDone }) {
+function SetupGenerationScreen({ onDone, t }) {
+  const messages = getSetupMessages(t);
   const [msgIdx, setMsgIdx] = useState(0);
   const [done, setDone] = useState(false);
   const intervalRef = useRef(null);
@@ -619,16 +623,16 @@ function SetupGenerationScreen({ onDone }) {
     let i = 0;
     intervalRef.current = setInterval(() => {
       i++;
-      if (i < SETUP_MESSAGES.length - 1) {
+      if (i < messages.length - 1) {
         setMsgIdx(i);
       } else {
-        setMsgIdx(SETUP_MESSAGES.length - 1);
+        setMsgIdx(messages.length - 1);
         setDone(true);
         clearInterval(intervalRef.current);
       }
     }, 700);
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [messages.length]);
 
   return (
     <div className="text-center py-6 space-y-8">
@@ -660,18 +664,18 @@ function SetupGenerationScreen({ onDone }) {
             transition={{ duration: 0.25 }}
             className="text-[15px] font-semibold text-[hsl(var(--fg))]"
           >
-            {SETUP_MESSAGES[msgIdx]}
+            {messages[msgIdx]}
           </motion.p>
         </AnimatePresence>
         {!done && (
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">Setting up your atlas.core...</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('onboarding.setup.configuring')}...</p>
         )}
       </div>
 
       {done && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <button onClick={onDone} className="btn btn-primary h-12 px-8 rounded-2xl text-[14px] gap-2">
-            <ArrowRight className="w-4 h-4" strokeWidth={2} /> Enter the app
+            <ArrowRight className="w-4 h-4" strokeWidth={2} /> {t('onboarding.setup.enter')}
           </button>
         </motion.div>
       )}
@@ -681,7 +685,7 @@ function SetupGenerationScreen({ onDone }) {
 
 // ─── Success screen ───────────────────────────────────────────────────────────
 
-function SuccessScreen({ chosenPath, onDone }) {
+function SuccessScreen({ chosenPath, onDone, t }) {
   useEffect(() => {
     confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
   }, []);
@@ -703,11 +707,11 @@ function SuccessScreen({ chosenPath, onDone }) {
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
         className="space-y-2"
       >
-        <h2 className="text-[24px] font-bold">All set! 🎉</h2>
+        <h2 className="text-[24px] font-bold">{t('onboarding.success.title')}</h2>
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
           {isFresh
-            ? 'Your first checkpoint is saved. Go to Today and start your first log of the day.'
-            : 'Your atlas.core is ready. Explore the modules at your own pace.'}
+            ? t('onboarding.success.descFresh')
+            : t('onboarding.success.descExplore')}
         </p>
       </motion.div>
 
@@ -717,12 +721,12 @@ function SuccessScreen({ chosenPath, onDone }) {
           className="rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] p-4 text-left space-y-2"
         >
           <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-            This week, focus on
+            {t('onboarding.success.focusTitle')}
           </p>
           {[
-            { icon: UtensilsCrossed, text: 'Log meals in Nutrition' },
-            { icon: Dumbbell, text: 'Create or start a plan in Workouts' },
-            { icon: Scale, text: 'Log measurements twice this week' },
+            { icon: UtensilsCrossed, text: t('onboarding.success.focusMeals') },
+            { icon: Dumbbell, text: t('onboarding.success.focusWorkouts') },
+            { icon: Scale, text: t('onboarding.success.focusMeasurements') },
           ].map(({ icon: Icon, text }, i) => (
             <motion.div
               key={i}
@@ -742,7 +746,7 @@ function SuccessScreen({ chosenPath, onDone }) {
         onClick={onDone}
         className="btn btn-primary w-full h-12 rounded-2xl text-[14px] gap-2 mt-2"
       >
-        <ArrowRight className="w-4 h-4" strokeWidth={2} /> Enter the app
+        <ArrowRight className="w-4 h-4" strokeWidth={2} /> {t('onboarding.setup.enter')}
       </motion.button>
     </div>
   );
@@ -752,9 +756,11 @@ function SuccessScreen({ chosenPath, onDone }) {
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, revalidateSession } = useAuth();
+  const t = useT();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   const [showPaywallPriming, setShowPaywallPriming] = useState(false);
   const [showGeneration, setShowGeneration] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -787,6 +793,7 @@ export default function Onboarding() {
   const saveAndFinish = async () => {
     if (!isAuthenticated || !user) { navigate(ROUTES.home, { replace: true }); return; }
     setSaving(true);
+    setSaveError(null);
     try {
       const nums = ['age', 'height', 'current_weight', 'target_weight'];
       const payload = { onboarding_completed: true };
@@ -808,21 +815,22 @@ export default function Onboarding() {
       payload.fat_target = Math.round((payload.calories_target * 0.25) / 9);
       payload.water_target = parseFloat((w * 0.035).toFixed(1));
 
-      await supabase
+      // Profiles table is the authoritative source — must succeed
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({ ...payload, id: user.id, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+      if (profileError) throw profileError;
 
-      // Sync onboarding completion + optional remarketing data into user_metadata.
-      // This keeps user_metadata in sync with the profiles table so AuthContext
-      // always reflects the correct onboarding_completed flag without a DB round-trip.
-      await supabase.auth.updateUser({
+      // Sync to user_metadata (non-fatal — profiles table is authoritative)
+      const { error: metaError } = await supabase.auth.updateUser({
         data: {
           onboarding_completed: true,
           ...(form.hear_about_us ? { hear_about_us: form.hear_about_us } : {}),
         },
       });
+      if (metaError) console.warn('[Onboarding] user_metadata sync failed (non-fatal):', metaError.message);
 
-      // Insert first measurement checkpoint
+      // Insert first measurement checkpoint (non-fatal)
       const checkpointWeight = Number(form.checkpoint_weight) || Number(form.current_weight);
       if (checkpointWeight) {
         const measurementPayload = {
@@ -836,10 +844,12 @@ export default function Onboarding() {
         if (form.checkpoint_waist !== '') {
           measurementPayload.waist = Number(form.checkpoint_waist);
         }
-        await supabase.from('measurements').insert(measurementPayload);
+        const { error: measError } = await supabase.from('measurements').insert(measurementPayload);
+        if (measError) console.warn('[Onboarding] measurement insert failed (non-fatal):', measError.message);
       }
     } catch (err) {
-      console.error('Onboarding save error:', err);
+      console.error('[Onboarding] save failed:', err);
+      throw err;
     } finally {
       setSaving(false);
     }
@@ -847,8 +857,12 @@ export default function Onboarding() {
 
   // Step 3 finish → save → show paywall priming
   const handleFinish = async () => {
-    await saveAndFinish();
-    setShowPaywallPriming(true);
+    try {
+      await saveAndFinish();
+      setShowPaywallPriming(true);
+    } catch {
+      setSaveError(t('onboarding.saveError'));
+    }
   };
 
   // Paywall priming CTA → setup generation
@@ -862,7 +876,8 @@ export default function Onboarding() {
     setShowSuccess(true);
   };
 
-  const handleSuccessDone = () => {
+  const handleSuccessDone = async () => {
+    await revalidateSession();
     navigate(ROLE_HOME[user?.atlas_role] || ROUTES.today, { replace: true });
   };
 
@@ -895,7 +910,7 @@ export default function Onboarding() {
           <>
             <Logo />
             <div className="surface rounded-[22px] p-8">
-              <SetupGenerationScreen onDone={handleGenerationDone} />
+              <SetupGenerationScreen onDone={handleGenerationDone} t={t} />
             </div>
           </>
         )}
@@ -905,7 +920,7 @@ export default function Onboarding() {
           <>
             <Logo />
             <div className="surface rounded-[22px] p-8">
-              <SuccessScreen chosenPath={form.chosen_path} onDone={handleSuccessDone} />
+              <SuccessScreen chosenPath={form.chosen_path} onDone={handleSuccessDone} t={t} />
             </div>
           </>
         )}
@@ -936,6 +951,18 @@ export default function Onboarding() {
               </motion.div>
             </AnimatePresence>
 
+            {saveError && (
+              <div className="mb-3 rounded-[14px] border border-red-300 bg-red-50 px-4 py-3 text-center dark:border-red-800 dark:bg-red-950/30">
+                <p className="text-[13px] font-medium text-red-700 dark:text-red-400">{saveError}</p>
+                <button
+                  onClick={() => { setSaveError(null); handleFinish(); }}
+                  className="mt-2 text-[12px] font-semibold text-red-700 underline dark:text-red-400"
+                >
+                  {t('onboarding.retry')}
+                </button>
+              </div>
+            )}
+
             <div className="flex gap-2.5">
               {step > 0 && (
                 <button
@@ -952,7 +979,7 @@ export default function Onboarding() {
                   disabled={!canContinue()}
                   className="btn btn-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1"
                 >
-                  Continue <ChevronRight className="w-4 h-4" strokeWidth={2} />
+                  {t('onboarding.continue')} <ChevronRight className="w-4 h-4" strokeWidth={2} />
                 </button>
               ) : (
                 <button
@@ -962,7 +989,7 @@ export default function Onboarding() {
                 >
                   {saving
                     ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : <><Zap className="w-4 h-4" strokeWidth={2} /> Set up my atlas.core</>
+                    : <><Zap className="w-4 h-4" strokeWidth={2} /> {t('onboarding.setup.configuring')}</>
                   }
                 </button>
               )}
@@ -970,8 +997,7 @@ export default function Onboarding() {
 
             {step === 0 && (
               <p className="text-center text-[11px] text-[hsl(var(--fg-2))] mt-4">
-                By continuing, you accept the{' '}
-                <span className="underline cursor-pointer">Terms of Use</span>.
+                {t('onboarding.welcome.terms', { termsOfUse: t('termsOfUse') })}
               </p>
             )}
           </>
