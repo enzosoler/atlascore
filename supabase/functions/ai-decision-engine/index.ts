@@ -26,19 +26,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// ─── CORS ─────────────────────────────────────────────────────────────────────
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': getAllowedOrigin(),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
-function getAllowedOrigin(): string {
-  const requestOrigin = '';
+function getAllowedOrigin(requestOrigin: string): string {
   const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
   const appUrls = Deno.env.get('APP_URLS') || '';
-  
+
   const allowedList = [
     appUrl,
     ...appUrls.split(',').map(u => u.trim()).filter(Boolean),
@@ -46,9 +39,20 @@ function getAllowedOrigin(): string {
     'http://localhost:3000',
     'http://localhost:8080',
   ];
-  
+
   return allowedList.includes(requestOrigin) ? requestOrigin : appUrl;
 }
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') ?? '';
+  return {
+    'Access-Control-Allow-Origin': getAllowedOrigin(origin),
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const MODEL = 'gpt-4.1-mini';
 const ENGINE_VERSION = '1.0';
@@ -314,11 +318,13 @@ Respond ONLY with the JSON object matching the provided schema.`;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function json(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-  });
+function makeJson(corsHeaders: Record<string, string>) {
+  return function json(payload: unknown, status = 200) {
+    return new Response(JSON.stringify(payload), {
+      status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  };
 }
 
 function getDayOfWeek(dateStr: string): string {
@@ -333,8 +339,11 @@ function todayDateString(): string {
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  const json = makeJson(corsHeaders);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   if (req.method !== 'POST') {
@@ -363,7 +372,45 @@ serve(async (req) => {
   const userId = user.id;
   const today = todayDateString();
 
-  // ── 2. Check cache — return if fresh daily_context exists ─────────────────
+  // ── 2. Kill switch + global spending caps ─────────────────────────────────
+
+  const { data: config } = await supabase
+    .from('ai_spending_config')
+    .select('kill_switch, monthly_cap_usd, daily_cap_usd')
+    .eq('id', 1)
+    .single();
+
+  if (!config) {
+    console.error('[ai-decision-engine] ai_spending_config not found');
+    return json({ error: 'Service configuration error' }, 503);
+  }
+
+  if (config.kill_switch) {
+    return json({
+      error: 'AI coaching is temporarily unavailable. Please try again later.',
+      code: 'KILL_SWITCH',
+    }, 503);
+  }
+
+  const { data: monthlySpend } = await supabase.rpc('get_ai_spend_current_month');
+  if (typeof monthlySpend === 'number' && monthlySpend >= config.monthly_cap_usd) {
+    console.error(`[ai-decision-engine] Monthly cap reached: $${monthlySpend}`);
+    return json({
+      error: 'AI coaching has reached its monthly limit.',
+      code: 'MONTHLY_CAP',
+    }, 429);
+  }
+
+  const { data: dailySpend } = await supabase.rpc('get_ai_spend_today');
+  if (typeof dailySpend === 'number' && dailySpend >= config.daily_cap_usd) {
+    console.error(`[ai-decision-engine] Daily cap reached: $${dailySpend}`);
+    return json({
+      error: 'AI coaching has reached its daily limit.',
+      code: 'DAILY_CAP',
+    }, 429);
+  }
+
+  // ── 3. Check cache — return if fresh daily_context exists ─────────────────
 
   const { data: cached } = await supabase
     .from('ai_recommendations')
@@ -390,7 +437,7 @@ serve(async (req) => {
     });
   }
 
-  // ── 3. Load user context ──────────────────────────────────────────────────
+  // ── 4. Load user context ──────────────────────────────────────────────────
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const todayStart = `${today}T00:00:00.000Z`;

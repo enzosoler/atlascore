@@ -70,7 +70,7 @@ export function useDailyStateV2() {
   const { data: rawProtocols = [] } = useQuery({
     queryKey: DAILY_KEYS.protocols(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('protocols').select('id, compound, name, frequency_per_week, active').eq('active', true).limit(20);
+      const { data } = await supabase.from('protocols').select('id, compound, name, frequency_per_week, active').eq('user_id', uid).eq('active', true).limit(20);
       return data || [];
     }),
     enabled: !!uid, staleTime: 120_000,
@@ -79,7 +79,7 @@ export function useDailyStateV2() {
   const { data: rawProtocolLogs = [] } = useQuery({
     queryKey: DAILY_KEYS.protocolLogs(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('protocol_logs').select('protocol_id, taken_at').gte('taken_at', `${today}T00:00:00`).lte('taken_at', `${today}T23:59:59`).limit(50);
+      const { data } = await supabase.from('protocol_logs').select('protocol_id, taken_at').eq('user_id', uid).gte('taken_at', `${today}T00:00:00`).lte('taken_at', `${today}T23:59:59`).limit(50);
       return data || [];
     }),
     enabled: !!uid, staleTime: 30_000,
