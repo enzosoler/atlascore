@@ -14,7 +14,6 @@ import { supabase } from '@/lib/supabaseClient';
 import { updateWorkoutPlan } from '@/services/workoutPlanService';
 import { createMeasurement } from '@/services/bodyProgressService';
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach-chat`;
 
 let msgIdCounter = 0;
 function nextId() {
@@ -40,24 +39,19 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
     setIsTyping(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Not authenticated');
-
-      const res = await fetch(CHAT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        // Function loads history from DB — only send the current message
-        body: JSON.stringify({ message: text.trim(), page_context: pageContext }),
+      const { data, error: fnError } = await supabase.functions.invoke('ai-coach-chat', {
+        body: { message: text.trim(), page_context: pageContext },
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        const errMsg = data?.error ?? `Error ${res.status}`;
+      if (fnError) {
+        const errMsg = fnError?.message ?? 'AI coach error';
+        console.error('[ai-coach-chat] function error:', fnError);
         appendMessage({ role: 'assistant', content: errMsg, actions: [], suggestions: [] });
+        return;
+      }
+
+      if (data?.error) {
+        appendMessage({ role: 'assistant', content: data.error, actions: [], suggestions: [] });
         return;
       }
 
@@ -65,9 +59,9 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
       const assistantMsg = {
         id: assistantId,
         role: 'assistant',
-        content: data.message ?? '',
-        actions: Array.isArray(data.actions) ? data.actions : [],
-        suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
+        content: data?.message ?? '',
+        actions: Array.isArray(data?.actions) ? data.actions : [],
+        suggestions: Array.isArray(data?.suggestions) ? data.suggestions : [],
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, assistantMsg]);
