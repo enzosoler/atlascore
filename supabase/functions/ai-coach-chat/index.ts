@@ -156,21 +156,26 @@ serve(async (req) => {
   const userId = user.id;
   console.log('[ai-coach-chat] stage: auth ok, userId:', userId);
 
+  // Service role client — bypasses RLS for admin/global tables
+  // (ai_spending_config, ai_usage_quotas, ai_usage_log, subscriptions)
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const adminSupabase = createClient(supabaseUrl, serviceRoleKey);
+
   // ── 2. Kill switch + global spending caps ─────────────────────────────────
 
   console.log('[ai-coach-chat] stage: spending config');
-  const { data: config } = await supabase
+  const { data: config } = await adminSupabase
     .from('ai_spending_config').select('*').eq('id', 1).single();
 
   if (!config) return json({ error: 'Service configuration error' }, 503);
   if (config.kill_switch) return json({ error: 'AI coach is temporarily unavailable.', code: 'KILL_SWITCH' }, 503);
 
-  const { data: monthlySpend } = await supabase.rpc('get_ai_spend_current_month');
+  const { data: monthlySpend } = await adminSupabase.rpc('get_ai_spend_current_month');
   if (typeof monthlySpend === 'number' && monthlySpend >= config.monthly_cap_usd) {
     return json({ error: 'AI coach has reached its monthly limit.', code: 'MONTHLY_CAP' }, 429);
   }
 
-  const { data: dailySpend } = await supabase.rpc('get_ai_spend_today');
+  const { data: dailySpend } = await adminSupabase.rpc('get_ai_spend_today');
   if (typeof dailySpend === 'number' && dailySpend >= config.daily_cap_usd) {
     return json({ error: 'AI coach has reached its daily limit.', code: 'DAILY_CAP' }, 429);
   }
@@ -180,7 +185,7 @@ serve(async (req) => {
   console.log('[ai-coach-chat] stage: rate limit');
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: subscription } = await supabase
+  const { data: subscription } = await adminSupabase
     .from('subscriptions').select('tier, status').eq('user_id', userId)
     .in('status', ['active', 'trialing', 'granted'])
     .order('created_at', { ascending: false }).limit(1).single();
@@ -197,13 +202,13 @@ serve(async (req) => {
       maxChatCallsPerDay = config.free_chat_calls_per_day ?? 5;
   }
 
-  let { data: quota } = await supabase.from('ai_usage_quotas').select('*').eq('user_id', userId).single();
+  let { data: quota } = await adminSupabase.from('ai_usage_quotas').select('*').eq('user_id', userId).single();
   if (!quota) {
-    const { data: newQuota } = await supabase.from('ai_usage_quotas')
+    const { data: newQuota } = await adminSupabase.from('ai_usage_quotas')
       .insert({ user_id: userId, quota_date: today }).select().single();
     quota = newQuota;
   } else if (quota.quota_date !== today) {
-    const { data: resetQuota } = await supabase.from('ai_usage_quotas')
+    const { data: resetQuota } = await adminSupabase.from('ai_usage_quotas')
       .update({ chat_calls_today: 0, text_calls_today: 0, photo_calls_today: 0, quota_date: today })
       .eq('user_id', userId).select().single();
     quota = resetQuota;
@@ -455,14 +460,14 @@ serve(async (req) => {
 
   // ── 12. Update quota + log usage ──────────────────────────────────────────
 
-  await supabase.from('ai_usage_quotas').update({
+  await adminSupabase.from('ai_usage_quotas').update({
     chat_calls_today:    (quota?.chat_calls_today    ?? 0) + 1,
     chat_calls_lifetime: (quota?.chat_calls_lifetime ?? 0) + 1,
   }).eq('user_id', userId);
 
-  supabase.from('ai_usage_log').insert({
+  adminSupabase.from('ai_usage_log').insert({
     user_id:        userId,
-    feature:        'coach_chat_v2',
+    feature:        'chat',
     model:          MODEL,
     input_tokens:   inputTokens,
     output_tokens:  outputTokens,
