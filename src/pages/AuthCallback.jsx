@@ -5,6 +5,20 @@ import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 
+async function resolvePostAuthRoute(userId) {
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', userId)
+      .maybeSingle();
+    if (data?.onboarding_completed) return ROUTES.today;
+  } catch {
+    // On error, default to onboarding — safe fallback
+  }
+  return ROUTES.onboarding;
+}
+
 /**
  * AuthCallback - Handles OAuth callback from Google/Supabase
  * Processes the auth code and redirects appropriately
@@ -27,33 +41,34 @@ export default function AuthCallback() {
 
         if (session?.user) {
           setStatus('success');
-          // Small delay to show success state before redirect
+          const destination = await resolvePostAuthRoute(session.user.id);
           setTimeout(() => {
-            navigate(ROUTES.today, { replace: true });
+            navigate(destination, { replace: true });
           }, 1500);
         } else {
           // Check for hash-based tokens (PKCE flow)
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
           const accessToken = hashParams.get('access_token');
           const refreshToken = hashParams.get('refresh_token');
-          
+
           if (accessToken) {
             const { data, error: setSessionError } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
-            
+
             if (setSessionError) throw setSessionError;
-            
+
             if (data.session?.user) {
               setStatus('success');
+              const destination = await resolvePostAuthRoute(data.session.user.id);
               setTimeout(() => {
-                navigate(ROUTES.today, { replace: true });
+                navigate(destination, { replace: true });
               }, 1500);
               return;
             }
           }
-          
+
           throw new Error('No session found. Please try signing in again.');
         }
       } catch (error) {

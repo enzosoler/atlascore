@@ -1189,6 +1189,8 @@
       "goalsAndTargetsDesc": "Nutrition targets, goal weight, macros",
       "trainingPlan": "Training Plan",
       "trainingPlanDesc": "Active plan and schedule",
+      "bodyProfile": "Body Profile",
+      "bodyProfileDesc": "Height, weight, age, activity level",
       "sectionHealth": "Health",
       "labResults": "Lab Results",
       "labResultsDesc": "Blood work, hormones, markers",

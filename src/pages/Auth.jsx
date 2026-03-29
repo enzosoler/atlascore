@@ -282,9 +282,14 @@ export default function Auth() {
   React.useEffect(() => {
     if (!isAuthenticated) return;
 
+    if (!user?.onboarding_completed) {
+      navigate(ROUTES.onboarding, { replace: true });
+      return;
+    }
+
     const fallbackRoute = ROLE_HOME[user?.atlas_role] || ROUTES.today;
     navigate(requestedDestination || fallbackRoute, { replace: true });
-  }, [isAuthenticated, navigate, requestedDestination, user?.atlas_role]);
+  }, [isAuthenticated, navigate, requestedDestination, user?.atlas_role, user?.onboarding_completed]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -316,9 +321,11 @@ export default function Auth() {
       }
 
       if (isLogin) {
-        await signIn(normalizedEmail, password);
-
-        navigate(requestedDestination || ROUTES.today, { replace: true });
+        const loggedInUser = await signIn(normalizedEmail, password);
+        const destination = loggedInUser?.onboarding_completed
+          ? (requestedDestination || ROLE_HOME[loggedInUser?.atlas_role] || ROUTES.today)
+          : ROUTES.onboarding;
+        navigate(destination, { replace: true });
         return;
       }
 
@@ -344,7 +351,8 @@ export default function Auth() {
         return;
       }
 
-      navigate(requestedDestination || ROUTES.today, { replace: true });
+      // Brand-new accounts always start onboarding; result is the resolved user object.
+      navigate(result?.onboarding_completed ? (requestedDestination || ROUTES.today) : ROUTES.onboarding, { replace: true });
     } catch (error) {
       setErrorMessage(getAuthErrorMessage(error));
     } finally {

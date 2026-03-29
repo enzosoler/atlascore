@@ -812,12 +812,15 @@ export default function Onboarding() {
         .from('profiles')
         .upsert({ ...payload, id: user.id, updated_at: new Date().toISOString() }, { onConflict: 'id' });
 
-      // Store remarketing data in user metadata (no schema change needed)
-      if (form.hear_about_us) {
-        await supabase.auth.updateUser({
-          data: { hear_about_us: form.hear_about_us },
-        });
-      }
+      // Sync onboarding completion + optional remarketing data into user_metadata.
+      // This keeps user_metadata in sync with the profiles table so AuthContext
+      // always reflects the correct onboarding_completed flag without a DB round-trip.
+      await supabase.auth.updateUser({
+        data: {
+          onboarding_completed: true,
+          ...(form.hear_about_us ? { hear_about_us: form.hear_about_us } : {}),
+        },
+      });
 
       // Insert first measurement checkpoint
       const checkpointWeight = Number(form.checkpoint_weight) || Number(form.current_weight);

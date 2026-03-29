@@ -225,6 +225,14 @@ const RequireAuthenticatedApp = () => {
     return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
   }
 
+  // Defensive onboarding guard: authenticated users who have not completed onboarding
+  // are always redirected to /Onboarding, regardless of which app route they reached.
+  // The onboarding route itself is exempted to prevent an infinite redirect loop.
+  const isOnboardingRoute = location.pathname === ROUTES.onboarding;
+  if (!user?.onboarding_completed && !isOnboardingRoute) {
+    return <Navigate to={ROUTES.onboarding} replace />;
+  }
+
   // Admins go straight to the admin panel on web — on mobile they use the core app
   // Skip with ?skip_admin=1 to escape if admin panel is broken
   const isAdmin = user?.atlas_role === 'admin';

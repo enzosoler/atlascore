@@ -8,6 +8,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Activity,
   ArrowRight,
   Bell,
   ChevronRight,
@@ -125,6 +126,12 @@ function MoreContent() {
             icon={Target}
             label={t('profile.more.goalsAndTargets')}
             sublabel={t('profile.more.goalsAndTargetsDesc')}
+          />
+          <MenuRow
+            to={ROUTES.bodyProfile}
+            icon={Activity}
+            label={t('profile.more.bodyProfile')}
+            sublabel={t('profile.more.bodyProfileDesc')}
           />
           <MenuRow
             to={ROUTES.plan}

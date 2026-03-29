@@ -117,23 +117,38 @@ export const AuthProvider = ({ children }) => {
     }
 
     let profileRole = normalizedUser?.atlas_role || 'athlete';
+    let profileOnboardingCompleted = normalizedUser.onboarding_completed;
     try {
       // Hard 3 s timeout — on slow mobile networks this query can hang indefinitely,
       // keeping authState at 'loading' forever and preventing the splash from hiding.
-      profileRole = await Promise.race([
-        fetchProfileRole(authUser?.id, profileRole),
+      const [role, profileRow] = await Promise.race([
+        Promise.all([
+          fetchProfileRole(authUser?.id, profileRole),
+          supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('id', authUser?.id)
+            .maybeSingle()
+            .then(({ data }) => data),
+        ]),
         new Promise((_, reject) =>
-          window.setTimeout(() => reject(new Error('Profile role fetch timeout')), 3000)
+          window.setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
         ),
       ]);
+      profileRole = role;
+      // profiles table is the authoritative source for onboarding_completed
+      if (profileRow?.onboarding_completed != null) {
+        profileOnboardingCompleted = normalizeBoolean(profileRow.onboarding_completed);
+      }
     } catch (e) {
-      console.warn('[AuthContext] Profile role fetch failed, using fallback:', e.message);
+      console.warn('[AuthContext] Profile fetch failed, using fallback:', e.message);
     }
 
     const resolvedUser = {
       ...normalizedUser,
       atlas_role: profileRole,
       profile_role: profileRole,
+      onboarding_completed: profileOnboardingCompleted,
     };
 
     if (!mountedRef.current) {
