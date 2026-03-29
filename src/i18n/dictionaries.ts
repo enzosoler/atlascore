@@ -7,16 +7,38 @@ import type { Locale } from './config';
 
 // Eager-loaded raw dictionaries (bundled at build time, never fetched at runtime)
 import enMessages from './messages/en.json';
+import enOnboardingMessages from './messages/en-onboarding.json';
 import ptBRMessages from './messages/pt-BR.json';
+import ptBROnboardingMessages from './messages/pt-BR-onboarding.json';
 import esMessages from './messages/es.json';
 
 export type Dictionary = Record<string, any>;
 
+// Pre-merge onboarding overlays into their base locale so tour keys resolve
+// without a separate runtime import. en-onboarding.json was previously orphaned.
 const rawDicts: Record<string, Dictionary> = {
-  en: enMessages as unknown as Dictionary,
-  'pt-BR': ptBRMessages as unknown as Dictionary,
+  en: deepMergeStatic(enMessages as unknown as Dictionary, enOnboardingMessages as unknown as Dictionary),
+  'pt-BR': deepMergeStatic(ptBRMessages as unknown as Dictionary, ptBROnboardingMessages as unknown as Dictionary),
   es: esMessages as unknown as Dictionary,
 };
+
+// Simple recursive merge used only at module init — before deepMerge is defined below.
+function deepMergeStatic(base: Dictionary, overlay: Dictionary): Dictionary {
+  const result: Dictionary = { ...base };
+  for (const key in overlay) {
+    if (Object.prototype.hasOwnProperty.call(overlay, key)) {
+      if (
+        typeof overlay[key] === 'object' && overlay[key] !== null && !Array.isArray(overlay[key]) &&
+        typeof base[key] === 'object' && base[key] !== null && !Array.isArray(base[key])
+      ) {
+        result[key] = deepMergeStatic(base[key], overlay[key]);
+      } else {
+        result[key] = overlay[key];
+      }
+    }
+  }
+  return result;
+}
 
 /**
  * Deep merge two objects (used for EN fallback)

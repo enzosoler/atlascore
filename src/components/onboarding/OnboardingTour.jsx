@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
+import { useAuth } from '@/lib/AuthContext';
 
 /**
  * OnboardingTour — Product tour for new users
@@ -57,18 +58,25 @@ const ONBOARDING_STORAGE_KEY = 'atlas_onboarding_completed';
 
 export function OnboardingTour() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [targetRect, setTargetRect] = useState(null);
 
-  // Check if onboarding has been completed
+  // Guard: tour is a post-onboarding feature. Do NOT show it until the user
+  // has completed real onboarding (profiles.onboarding_completed === true).
+  // Without this gate the tour fires on /Onboarding itself for new users.
   useEffect(() => {
-    const completed = localStorage.getItem(ONBOARDING_STORAGE_KEY);
-    if (!completed) {
-      // Show onboarding after a short delay
+    if (!user?.onboarding_completed) {
+      console.log('[OnboardingTour] suppressed — onboarding_completed:', user?.onboarding_completed);
+      return;
+    }
+    const tourDone = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    if (!tourDone) {
+      console.log('[OnboardingTour] showing tour for user:', user?.id);
       setTimeout(() => setIsVisible(true), 500);
     }
-  }, []);
+  }, [user?.onboarding_completed, user?.id]);
 
   // Update target element position
   useEffect(() => {
@@ -204,7 +212,7 @@ export function OnboardingTour() {
                 onClick={handleSkip}
                 className="text-sm text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
               >
-                Skip tour
+                {t('onboarding.tour.skip')}
               </button>
               <div className="flex gap-2">
                 <button
@@ -218,7 +226,7 @@ export function OnboardingTour() {
                   onClick={handleNext}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[hsl(var(--primary))] text-white hover:opacity-90 transition-opacity"
                 >
-                  {isLastStep ? 'Finish' : 'Next'}
+                  {isLastStep ? t('onboarding.tour.finish') : t('onboarding.tour.next')}
                   {!isLastStep && <ChevronRight className="w-4 h-4" />}
                 </button>
               </div>

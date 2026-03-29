@@ -230,8 +230,22 @@ const RequireAuthenticatedApp = () => {
   // The onboarding route itself is exempted to prevent an infinite redirect loop.
   const isOnboardingRoute = location.pathname === ROUTES.onboarding;
   if (!user?.onboarding_completed && !isOnboardingRoute) {
+    console.log(
+      '[RequireAuthenticatedApp] guard triggered',
+      '| user:', user?.id,
+      '| onboarding_completed:', user?.onboarding_completed,
+      '| attempted route:', location.pathname,
+      '| redirecting to:', ROUTES.onboarding,
+    );
     return <Navigate to={ROUTES.onboarding} replace />;
   }
+
+  console.log(
+    '[RequireAuthenticatedApp] access granted',
+    '| user:', user?.id,
+    '| onboarding_completed:', user?.onboarding_completed,
+    '| route:', location.pathname,
+  );
 
   // Admins go straight to the admin panel on web — on mobile they use the core app
   // Skip with ?skip_admin=1 to escape if admin panel is broken
@@ -458,7 +472,7 @@ const AuthenticatedApp = () => {
   return (
     <>
       <AppRoutes />
-      {isAuthenticated && <OnboardingTour />}
+      {isAuthenticated && user?.onboarding_completed && <OnboardingTour />}
     </>
   );
 };

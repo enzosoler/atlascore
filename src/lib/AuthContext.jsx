@@ -151,6 +151,14 @@ export const AuthProvider = ({ children }) => {
       onboarding_completed: profileOnboardingCompleted,
     };
 
+    console.log(
+      '[AuthContext] user resolved',
+      'id:', resolvedUser.id,
+      '| onboarding_completed:', resolvedUser.onboarding_completed,
+      '| source: profiles table (authoritative)',
+      '| role:', resolvedUser.atlas_role,
+    );
+
     if (!mountedRef.current) {
       return resolvedUser;
     }

@@ -490,6 +490,11 @@
     }
   },
   "onboarding": {
+    "tour": {
+      "skip": "Saltar tour",
+      "next": "Siguiente",
+      "finish": "Finalizar"
+    },
     "welcome": {
       "title": "Bienvenido a atlas.core",
       "subtitle": "Vamos a configurar tu app. Toma menos de 2 minutos.",

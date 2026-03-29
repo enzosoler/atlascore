@@ -23,6 +23,11 @@
     "complete": {
       "title": "Pronto para começar!",
       "description": "Você está pronto para explorar o atlas.core. Boa sorte na sua jornada de performance!"
+    },
+    "tour": {
+      "skip": "Pular tour",
+      "next": "Próximo",
+      "finish": "Concluir"
     }
   }
 }
