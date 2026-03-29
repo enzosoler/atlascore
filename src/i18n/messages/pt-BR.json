@@ -1203,6 +1203,25 @@
       "signOut": "Sair"
     }
   },
+  "permissions": {
+    "title": "Ativar permissões",
+    "subtitle": "Isso nos ajuda a oferecer a melhor experiência.",
+    "changeInSettings": "Você pode alterar isso nas Configurações.",
+    "onFirstUse": "No primeiro uso",
+    "notifications": {
+      "title": "Notificações",
+      "desc": "Lembretes de treinos, refeições e check-ins de progresso.",
+      "denied": "Bloqueado — ative nas Configurações do iPhone."
+    },
+    "camera": {
+      "title": "Câmera",
+      "desc": "Fotos de progresso e leitura de código de barras."
+    },
+    "location": {
+      "title": "Localização",
+      "desc": "Atividades ao ar livre e recursos locais."
+    }
+  },
   "today_page": {
     "title": "Hoje",
     "subtitle": "Visão geral diária.",

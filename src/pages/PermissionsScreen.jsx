@@ -1,24 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Bell, MapPin, Camera, Check } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Bell, MapPin, Camera, Check, X } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { Button } from '@/components/ui/button';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
+import { notificationService } from '@/services/notificationService';
+import { useT } from '@/lib/i18nContext';
 
-const PERMISSIONS = [
-  { id: 'notifications', icon: Bell, title: 'Notifications', desc: 'Get reminders for workouts and meals', required: true },
-  { id: 'location', icon: MapPin, title: 'Location', desc: 'For outdoor activities and local features', required: false },
-  { id: 'camera', icon: Camera, title: 'Camera', desc: 'For progress photos and barcode scanning', required: false },
-];
+const IS_NATIVE = Capacitor.isNativePlatform();
+
+// Permission status for a single permission item.
+// 'idle' | 'granted' | 'denied'
+const IDLE = 'idle';
+const GRANTED = 'granted';
+const DENIED = 'denied';
 
 export default function PermissionsScreen() {
   const navigate = useNavigate();
-  const [granted, setGranted] = useState([]);
+  const t = useT();
 
-  const togglePermission = (id) => {
-    setGranted(prev => 
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
+  const [notifStatus, setNotifStatus] = useState(IDLE);
+  const [requesting, setRequesting] = useState(false);
+
+  // On mount, check if notification permission was already decided.
+  useEffect(() => {
+    notificationService.checkPermissions().then((status) => {
+      if (status === 'granted') setNotifStatus(GRANTED);
+      if (status === 'denied')  setNotifStatus(DENIED);
+    });
+  }, []);
+
+  const handleRequestNotifications = async () => {
+    if (requesting || notifStatus === GRANTED) return;
+    setRequesting(true);
+    try {
+      const result = await notificationService.requestPermissions();
+      setNotifStatus(result === 'granted' ? GRANTED : DENIED);
+    } finally {
+      setRequesting(false);
+    }
   };
 
   const handleContinue = () => {
@@ -29,48 +50,107 @@ export default function PermissionsScreen() {
     <div className="min-h-screen bg-[hsl(var(--bg))] flex flex-col">
       <div className="flex items-center justify-between p-4">
         <AtlasCoreLogoSVG width={32} height={16} />
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg">
+        <button
+          onClick={() => navigate(-1)}
+          aria-label={t('common.back')}
+          className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg transition-colors"
+        >
           <ArrowLeft className="w-5 h-5" />
         </button>
       </div>
 
       <div className="flex-1 px-6 py-4 max-w-md mx-auto w-full">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl font-bold mb-2">Enable permissions</h1>
-          <p className="text-[hsl(var(--fg-2))] mb-6">
-            These help us provide a better experience
-          </p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          <div>
+            <h1 className="text-2xl font-bold mb-2">
+              {t('permissions.title')}
+            </h1>
+            <p className="text-[hsl(var(--fg-2))] text-[15px]">
+              {t('permissions.subtitle')}
+            </p>
+          </div>
 
-          <div className="space-y-3">
-            {PERMISSIONS.map((perm) => (
-              <button
-                key={perm.id}
-                onClick={() => togglePermission(perm.id)}
-                className={`w-full p-4 rounded-xl border flex items-center gap-4 transition-colors ${
-                  granted.includes(perm.id)
-                    ? 'border-[hsl(var(--accent-primary))] bg-[hsl(var(--accent-primary))]/10'
-                    : 'border-[hsl(var(--border))] bg-[hsl(var(--card))]'
-                }`}
+          {/* Notifications permission */}
+          <button
+            onClick={handleRequestNotifications}
+            disabled={requesting || notifStatus === GRANTED}
+            className={[
+              'w-full p-4 rounded-xl border flex items-center gap-4 transition-colors text-left',
+              notifStatus === GRANTED
+                ? 'border-[hsl(var(--brand)/0.6)] bg-[hsl(var(--brand)/0.06)]'
+                : notifStatus === DENIED
+                ? 'border-[hsl(var(--err)/0.4)] bg-[hsl(var(--err)/0.05)]'
+                : 'border-[hsl(var(--border))] bg-[hsl(var(--card))] active:bg-[hsl(var(--fill)/0.6)]',
+            ].join(' ')}
+          >
+            <div className={[
+              'p-2 rounded-lg shrink-0',
+              notifStatus === GRANTED ? 'bg-[hsl(var(--brand)/0.12)]' : 'bg-[hsl(var(--fill))]',
+            ].join(' ')}>
+              <Bell className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-[14px] tracking-[-0.01em]">
+                {t('permissions.notifications.title')}
+              </p>
+              <p className="text-[13px] text-[hsl(var(--fg-2))] mt-0.5 leading-4">
+                {notifStatus === DENIED
+                  ? t('permissions.notifications.denied')
+                  : t('permissions.notifications.desc')}
+              </p>
+            </div>
+            {notifStatus === GRANTED && (
+              <Check className="w-5 h-5 text-[hsl(var(--brand))] shrink-0" strokeWidth={2.5} />
+            )}
+            {notifStatus === DENIED && (
+              <X className="w-5 h-5 text-[hsl(var(--err))] shrink-0" strokeWidth={2} />
+            )}
+          </button>
+
+          {/* Camera and Location are handled by native prompts on first use.
+              Only notification permission is requested explicitly here because
+              it requires an upfront user decision before the OS prompt appears. */}
+          <div className="space-y-2">
+            {[
+              { icon: Camera, titleKey: 'permissions.camera.title', descKey: 'permissions.camera.desc' },
+              { icon: MapPin,  titleKey: 'permissions.location.title', descKey: 'permissions.location.desc' },
+            ].map(({ icon: Icon, titleKey, descKey }) => (
+              <div
+                key={titleKey}
+                className="w-full p-4 rounded-xl border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.5)] flex items-center gap-4"
               >
-                <div className={`p-2 rounded-lg ${granted.includes(perm.id) ? 'bg-[hsl(var(--accent-primary))]/20' : 'bg-[hsl(var(--fill))]'}`}>
-                  <perm.icon className="w-5 h-5" />
+                <div className="p-2 rounded-lg bg-[hsl(var(--fill))] shrink-0">
+                  <Icon className="w-5 h-5 text-[hsl(var(--fg-2))]" />
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="font-medium">{perm.title}</p>
-                  <p className="text-sm text-[hsl(var(--fg-2))]">{perm.desc}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-[14px] tracking-[-0.01em] text-[hsl(var(--fg-2))]">
+                    {t(titleKey)}
+                  </p>
+                  <p className="text-[13px] text-[hsl(var(--fg-3))] mt-0.5 leading-4">
+                    {t(descKey)}
+                  </p>
                 </div>
-                {granted.includes(perm.id) && <Check className="w-5 h-5 text-[hsl(var(--accent-primary))]" />}
-              </button>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] shrink-0">
+                  {t('permissions.onFirstUse')}
+                </span>
+              </div>
             ))}
           </div>
 
-          <Button onClick={handleContinue} className="w-full mt-8">
-            Continue
+          <Button
+            onClick={handleContinue}
+            className="w-full"
+          >
+            {t('common.continue')}
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
 
-          <p className="text-center mt-4 text-sm text-[hsl(var(--fg-3))]">
-            You can change these later in Settings
+          <p className="text-center text-[13px] text-[hsl(var(--fg-3))]">
+            {t('permissions.changeInSettings')}
           </p>
         </motion.div>
       </div>

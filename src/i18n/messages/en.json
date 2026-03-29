@@ -1210,6 +1210,25 @@
       "signOut": "Sign Out"
     }
   },
+  "permissions": {
+    "title": "Enable permissions",
+    "subtitle": "These help us give you the best experience.",
+    "changeInSettings": "You can change these later in Settings.",
+    "onFirstUse": "On first use",
+    "notifications": {
+      "title": "Notifications",
+      "desc": "Reminders for workouts, meals, and progress check-ins.",
+      "denied": "Blocked — enable in iPhone Settings."
+    },
+    "camera": {
+      "title": "Camera",
+      "desc": "Progress photos and barcode scanning."
+    },
+    "location": {
+      "title": "Location",
+      "desc": "Outdoor activities and local features."
+    }
+  },
   "today_page": {
     "title": "Today",
     "subtitle": "Daily overview.",

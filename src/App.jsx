@@ -14,6 +14,7 @@ import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
 import { LEGACY_ROUTE_REDIRECTS, ROUTES } from '@/lib/routes';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralTracking';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/lib/supabaseClient';
 import { App as CapApp } from '@capacitor/app';
@@ -458,6 +459,7 @@ const AuthenticatedApp = () => {
   }, []);
 
   useReferralTracking(user);
+  usePushNotifications();
 
   // Hide native splash as soon as auth resolves — fires regardless of which route is active.
   // Previously this was in RequireAuthenticatedApp, which is only mounted on authenticated
