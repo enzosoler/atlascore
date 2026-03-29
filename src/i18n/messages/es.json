@@ -1642,7 +1642,10 @@
       "body_fat_percent": "% Grasa Corporal",
       "bmi": "IMC",
       "cadence": "Cadencia",
-      "cadence_detail": "{n} puntos de control en el historial."
+      "cadence_detail": "{n} puntos de control en el historial.",
+      "days": "días",
+      "entries": "{n} registros",
+      "log_short": "Registrar"
     },
     "latest_checkpoint": {
       "section_title": "Último punto de control",

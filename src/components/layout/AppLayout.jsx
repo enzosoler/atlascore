@@ -69,7 +69,7 @@ const ICON_MAP = {
 };
 
 const BOTTOM_PATHS_BY_ROLE = {
-  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.measurements, ROUTES.profile],
+  athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.progress, ROUTES.profile],
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.profile],
@@ -242,6 +242,7 @@ export default function AppLayout() {
     Nutrition: 'Nutrição',
     Train: 'Treino',
     Body: 'Corpo',
+    Measurements: 'Medidas',
     Plans: 'Planos',
     Progress: 'Progresso',
     Photos: 'Fotos',

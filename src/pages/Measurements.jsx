@@ -416,9 +416,9 @@ function MeasurementSteppedForm({ measurement, onCancel, onSubmit, isSaving, sub
   };
 
   return (
-    <div className="flex flex-col" style={{ minHeight: 0 }}>
+    <div className="flex flex-col h-full" style={{ minHeight: 0 }}>
       {/* Progress dots */}
-      <div className="flex items-center justify-center gap-1.5 px-6 pt-5 pb-1">
+      <div className="flex items-center justify-center gap-1.5 px-6 pt-5 pb-1 shrink-0">
         {FORM_STEPS.map((step, i) => (
           <div
             key={step.key}
@@ -435,7 +435,7 @@ function MeasurementSteppedForm({ measurement, onCancel, onSubmit, isSaving, sub
       </div>
 
       {/* Step header */}
-      <div className="px-6 pt-3 pb-4">
+      <div className="px-6 pt-3 pb-4 shrink-0">
         <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
           {t('measurements.form.step_of')
             .replace('{current}', stepIndex + 1)
@@ -541,8 +541,9 @@ function MeasurementSteppedForm({ measurement, onCancel, onSubmit, isSaving, sub
         </AnimatePresence>
       </div>
 
-      {/* Navigation footer */}
-      <div className="flex items-center justify-between gap-3 border-t border-[hsl(var(--border)/0.7)] px-6 py-4">
+      {/* Navigation footer — sticky, safe-area aware */}
+      <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[hsl(var(--border)/0.7)] px-6 py-4"
+           style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))' }}>
         {stepIndex === 0 ? (
           <SecondaryButton type="button" onClick={onCancel}>
             {t('measurements.form.cancel')}
@@ -602,7 +603,7 @@ export default function Measurements({ embedded = false, measurements: propMeasu
       title={t('pages.measurements.title')}
       subtitle={t('pages.measurements.subtitle')}
       maxWidth="max-w-6xl"
-      fallbackDescription="The Measurements route remains accessible even if the main interface fails."
+      fallbackDescription={t('measurements.error_loading')}
     >
       <MeasurementsContent />
     </SafePageBoundary>
@@ -820,7 +821,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
           >
             <Plus className="h-4 w-4" strokeWidth={1.9} />
             <span className="hidden sm:inline">{t('measurements.log_measurements')}</span>
-            <span className="sm:hidden">Log</span>
+            <span className="sm:hidden">{t('measurements.hero.log_short')}</span>
           </PrimaryButton>
         </div>
       )}
@@ -861,8 +862,8 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
         />
       </div>
 
-      {/* ── Tab bar ── */}
-      <div className="flex items-center -mb-px border-b border-[hsl(var(--border)/0.5)]">
+      {/* ── Tab bar — sticky below page header ── */}
+      <div className="flex items-center -mb-px border-b border-[hsl(var(--border)/0.5)] sticky top-0 bg-[hsl(var(--bg))] z-10 -mx-4 px-4 sm:-mx-6 sm:px-6">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -965,7 +966,9 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                       </div>
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.hero.cadence')}</p>
-                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{sortedMeasurements.length} entries</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">
+                          {t('measurements.hero.entries').replace('{n}', sortedMeasurements.length)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1120,7 +1123,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
         }}
         dialogClassName="max-h-[88vh] p-0 sm:max-w-[30rem] overflow-hidden flex flex-col"
         dialogProps={{ onOpenAutoFocus: (e) => e.preventDefault() }}
-        drawerClassName="max-h-[88dvh] pb-[calc(var(--tab-bar-h,80px)+env(safe-area-inset-bottom,0px))] overflow-hidden flex flex-col"
+        drawerClassName="max-h-[92dvh] pb-0 overflow-hidden flex flex-col"
       >
         <MeasurementSteppedForm
           key={editingMeasurement?.id || 'new'}
@@ -1137,5 +1140,5 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
 
   return embedded
     ? <div className="space-y-5">{pageBody}</div>
-    : <AppContainer className="space-y-5">{pageBody}</AppContainer>;
+    : <AppContainer><div className="space-y-5">{pageBody}</div></AppContainer>;
 }

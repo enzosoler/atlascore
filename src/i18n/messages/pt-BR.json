@@ -1630,7 +1630,10 @@
       "body_fat_percent": "Gordura Corporal %",
       "bmi": "IMC",
       "cadence": "Cadência",
-      "cadence_detail": "{n} checkpoints no histórico."
+      "cadence_detail": "{n} checkpoints no histórico.",
+      "days": "dias",
+      "entries": "{n} registros",
+      "log_short": "Registrar"
     },
     "latest_checkpoint": {
       "section_title": "Último checkpoint",
