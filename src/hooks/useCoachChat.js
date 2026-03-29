@@ -39,29 +39,63 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
     setIsTyping(true);
 
     try {
-      // Debug: verify auth token exists before calling
+      // ── Direct fetch diagnostic (bypasses supabase.functions.invoke abstraction) ──
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('[ai-coach-chat] debug — has session:', !!session, '| access_token prefix:', session?.access_token?.slice(0, 20));
+      const accessToken = session?.access_token ?? null;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const fnUrl = `${supabaseUrl}/functions/v1/ai-coach-chat`;
 
-      const { data, error: fnError } = await supabase.functions.invoke('ai-coach-chat', {
-        body: { message: text.trim(), page_context: pageContext },
+      console.log('[ai-coach-chat] direct fetch', {
+        fnUrl,
+        hasSession: !!session,
+        tokenPrefix: accessToken?.slice(0, 20),
+        origin: window.location.origin,
       });
 
-      console.log('[ai-coach-chat] invoke result — data:', data, '| error:', fnError);
-
-      if (fnError) {
-        // Expose the real error shape — context, status, message
-        const status = fnError?.status ?? fnError?.statusCode ?? '?';
-        const detail = fnError?.message ?? JSON.stringify(fnError);
-        console.error('[ai-coach-chat] FunctionsFetchError:', { status, detail, raw: fnError });
-        const displayMsg = `Error ${status}: ${detail}`;
-        appendMessage({ role: 'assistant', content: displayMsg, actions: [], suggestions: [] });
+      let rawResp;
+      try {
+        rawResp = await fetch(fnUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+          },
+          body: JSON.stringify({ message: text.trim(), page_context: pageContext }),
+        });
+      } catch (fetchErr) {
+        // fetch() itself threw — network error or CORS block
+        console.error('[ai-coach-chat] fetch() threw:', fetchErr?.name, fetchErr?.message, fetchErr);
+        appendMessage({
+          role: 'assistant',
+          content: `Network error: ${fetchErr?.message ?? 'fetch failed'}`,
+          actions: [],
+          suggestions: [],
+        });
         return;
       }
 
-      if (data?.error) {
-        console.warn('[ai-coach-chat] backend error response:', data);
-        const displayMsg = `[${data.code ?? 'ERR'}] ${data.error}`;
+      console.log('[ai-coach-chat] response', {
+        status: rawResp.status,
+        ok: rawResp.ok,
+        corsHeader: rawResp.headers.get('access-control-allow-origin'),
+        contentType: rawResp.headers.get('content-type'),
+      });
+
+      let data;
+      try {
+        data = await rawResp.json();
+      } catch {
+        const txt = await rawResp.text().catch(() => '(unreadable)');
+        appendMessage({ role: 'assistant', content: `HTTP ${rawResp.status} (non-JSON): ${txt.slice(0, 200)}`, actions: [], suggestions: [] });
+        return;
+      }
+
+      console.log('[ai-coach-chat] body:', data);
+
+      if (!rawResp.ok || data?.error) {
+        const displayMsg = `[${rawResp.status}] ${data?.error ?? JSON.stringify(data).slice(0, 200)}`;
         appendMessage({ role: 'assistant', content: displayMsg, actions: [], suggestions: [] });
         return;
       }
