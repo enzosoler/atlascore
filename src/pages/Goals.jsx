@@ -17,7 +17,7 @@ import {
   Calculator,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
-import { useT } from '@/lib/i18nContext';
+import { useI18n } from '@/lib/i18nContext';
 import { ROUTES } from '@/lib/routes';
 import {
   AppContainer,
@@ -341,7 +341,7 @@ function MetabolicEstimator({ profileData, onApply, t }) {
 // ---------------------------------------------------------------------------
 
 export default function Goals() {
-  const { t } = useT();
+  const { t } = useI18n();
 
   return (
     <SafePageBoundary
@@ -357,7 +357,7 @@ export default function Goals() {
 function GoalsContent() {
   const qc = useQueryClient();
   const { user } = useAuth();
-  const { t } = useT();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({

@@ -4,13 +4,13 @@ import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import ThemeToggleButton from '@/components/shared/ThemeToggleButton';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
-import { useT } from '@/lib/i18nContext';
+import { useI18n } from '@/lib/i18nContext';
 
 /**
  * Language toggle button — compact pill that switches between EN and PT-BR.
  */
 export function LanguageToggle({ className = '' }) {
-  const { locale, switchLocale, t } = useT();
+  const { locale, switchLocale, t } = useI18n();
   const isPt = locale === 'pt-BR';
   const nextLocale = isPt ? 'en' : 'pt-BR';
   const currentLabel = isPt ? 'PT' : 'EN';
@@ -58,7 +58,7 @@ export function PublicSectionHeader({
 }
 
 export function PublicNav({ links = [], actions, compact = false }) {
-  const { locale: rawLocale, t } = useT();
+  const { locale: rawLocale, t } = useI18n();
   const locale = rawLocale || 'en';
 
   return (
@@ -121,7 +121,7 @@ export default function PublicSiteShell({
   footerLinks,
   mainClassName = '',
 }) {
-  const { locale: rawLocale, t } = useT();
+  const { locale: rawLocale, t } = useI18n();
   const locale = rawLocale || 'en';
 
   const resolvedFooterLinks = footerLinks || [

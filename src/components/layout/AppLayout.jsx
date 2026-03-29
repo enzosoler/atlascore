@@ -40,7 +40,7 @@ import { useRBAC, ROLE_LABELS } from '@/lib/rbac';
 import { ROUTES } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 import { LanguageToggle } from '@/components/public/PublicSiteShell';
-import { useT } from '@/lib/i18nContext';
+import { useI18n } from '@/lib/i18nContext';
 import { getPrimaryScrollTop, resetPrimaryScroll, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
 import { useViewportHeight } from '@/hooks/use-viewport-height';
 
@@ -181,7 +181,7 @@ function BrandLockup({ logoWidth, logoHeight, textClassName = '', className = ''
 }
 
 function LanguageToggleNav({ collapsed }) {
-  const { locale: rawLocale, switchLocale, t } = useT();
+  const { locale: rawLocale, switchLocale, t } = useI18n();
   const locale = rawLocale || 'en';
 
   const isPt = locale === 'pt-BR';
@@ -233,7 +233,7 @@ export default function AppLayout() {
   const { role, nav: rawNav } = useRBAC(user);
 
   // ── Translate nav labels ────────────────────────────────────────
-  const { locale: rawLocale, t } = useT();
+  const { locale: rawLocale, t } = useI18n();
   const locale = rawLocale || 'en';
   const isPt = locale === 'pt-BR';
 

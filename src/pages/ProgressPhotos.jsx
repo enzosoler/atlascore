@@ -42,7 +42,7 @@ import {
   listProgressPhotos,
   uploadProgressPhoto,
 } from '@/services/bodyProgressService';
-import { useT } from '@/lib/i18nContext';
+import { useI18n } from '@/lib/i18nContext';
 
 // Standard poses for physique tracking
 const POSES = [
@@ -180,7 +180,7 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
   const latest = checkpoints[0];
   const previous = checkpoints[1];
   const daysDiff = daysBetween(previous, latest);
-  const { locale, t } = useT();
+  const { locale, t } = useI18n();
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
 
   const formatRelativeDateSafe = (dateStr) => {
@@ -230,7 +230,7 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
 // Consistency Component
 function ConsistencyIndicator({ checkpoints }) {
   if (checkpoints.length === 0) return null;
-  const { t } = useT();
+  const { t } = useI18n();
   const latest = checkpoints[0];
   const daysSince = daysBetween(latest, getToday());
   const isRecent = daysSince <= 7;
@@ -325,7 +325,7 @@ function ComparisonSlider({ beforePhoto, afterPhoto, beforeDate, afterDate }) {
 // Timeline Component
 function Timeline({ checkpoints, photosByDate, onSelect }) {
   if (checkpoints.length === 0) return null;
-  const { locale, t } = useT();
+  const { locale, t } = useI18n();
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
   return (
     <Card className="overflow-hidden p-0">
@@ -396,7 +396,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
 
 // Checkpoint Card
 function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose, isLatest }) {
-  const { locale, t } = useT();
+  const { locale, t } = useI18n();
   const [expanded, setExpanded] = useState(isLatest);
   const { label, isToday } = formatCheckpointDate(date, locale);
   const filledCount = photos.filter((p) => p?.photo_url).length;
@@ -443,7 +443,7 @@ function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose, isLat
 
 // Guide Section
 function GuideSection() {
-  const { t } = useT();
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="rounded-[20px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.3)]">
@@ -621,7 +621,7 @@ function NewCheckpointModal({ onConfirm, onClose }) {
 
 // Main page
 export default function ProgressPhotos({ embedded = false, photos: propPhotos }) {
-  const { t } = useT();
+  const { t } = useI18n();
   if (embedded) {
     return <ProgressPhotosContent embedded photos={propPhotos} />;
   }
@@ -651,7 +651,7 @@ export default function ProgressPhotos({ embedded = false, photos: propPhotos })
 function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const { isAuthenticated, isLoadingAuth, user } = useAuth();
   const { subscription } = useSubscription();
-  const { t } = useT();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
