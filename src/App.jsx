@@ -109,19 +109,6 @@ const PageNotFound = lazy(() => import('./lib/PageNotFound'));
 
 // Entry & Onboarding Screens
 const SplashScreen = lazy(() => import('@/pages/SplashScreen'));
-const WelcomeScreen = lazy(() => import('@/pages/WelcomeScreen'));
-const EmailAuth = lazy(() => import('@/pages/EmailAuth'));
-const SocialAuth = lazy(() => import('@/pages/SocialAuth'));
-const AppleAuth = lazy(() => import('@/pages/AppleAuth'));
-const PermissionsScreen = lazy(() => import('@/pages/PermissionsScreen'));
-
-// Pre-Paywall Screens
-const GoalSelection = lazy(() => import('@/pages/GoalSelection'));
-const PreferencesScreen = lazy(() => import('@/pages/PreferencesScreen'));
-const SetupInput = lazy(() => import('@/pages/SetupInput'));
-const ValueCreation = lazy(() => import('@/pages/ValueCreation'));
-const PreviewResult = lazy(() => import('@/pages/PreviewResult'));
-const PrePaywallReveal = lazy(() => import('@/pages/PrePaywallReveal'));
 
 // Monetization Screens
 const UpgradePrompts = lazy(() => import('@/pages/UpgradePrompts'));
@@ -212,7 +199,7 @@ const MissingConfigScreen = () => (
 );
 
 const RequireAuthenticatedApp = () => {
-  const { authError, isAuthenticated, authState, user, logout } = useAuth();
+  const { authError, isAuthenticated, authState, user } = useAuth();
   const location = useLocation();
 
   if (authState === 'loading') {
@@ -222,63 +209,28 @@ const RequireAuthenticatedApp = () => {
   if (authError?.type === 'user_not_registered') return <UserNotRegisteredError />;
   if (authError?.type === 'missing_config') return <MissingConfigScreen />;
   
-  if (authError?.type === 'profile_fetch_failed') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-[hsl(var(--bg))]">
-        <h2 className="text-xl font-bold mb-2">Profile Sync Error</h2>
-        <p className="text-[hsl(var(--fg-2))] mb-6">{authError.message}</p>
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          <button 
-            onClick={() => window.location.reload()} 
-            className="w-full py-3 rounded-xl bg-[hsl(var(--brand))] text-white font-medium"
-          >
-            Retry Connection
-          </button>
-          <button 
-            onClick={() => logout()} 
-            className="w-full py-3 rounded-xl bg-[hsl(var(--shell))] text-[hsl(var(--fg))] font-medium"
-          >
-            Sign Out
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (!isAuthenticated) {
     const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
   }
 
-  // Defensive onboarding guard: authenticated users who have not completed onboarding
-  // are always redirected to /Onboarding, regardless of which app route they reached.
+  // Onboarding Guard: Single source of truth is profiles.onboarding_completed.
+  // We use a local fallback to handle the immediate transition after save.
   const isOnboardingRoute = location.pathname === ROUTES.onboarding;
-  
-  // SECURE FALLBACK: Check localStorage if the user object says false/null.
-  // This prevents loops if the DB update hasn't propagated to the session yet.
   const localOnboardingDone = localStorage.getItem(`onboarding_done_${user?.id}`) === 'true';
-  const effectiveOnboardingCompleted = user?.onboarding_completed || localOnboardingDone;
+  const isActuallyOnboarded = user?.onboarding_completed === true || localOnboardingDone;
 
-  if ((effectiveOnboardingCompleted === false || effectiveOnboardingCompleted === null) && !isOnboardingRoute) {
-    console.log(
-      '[RequireAuthenticatedApp] guard triggered: redirecting to onboarding',
-      '| user:', user?.id,
-      '| onboarding_completed:', user?.onboarding_completed,
-      '| local_fallback:', localOnboardingDone,
-      '| attempted route:', location.pathname,
-    );
+  if (!isActuallyOnboarded && !isOnboardingRoute) {
+    console.log('[AuthGuard] Redirecting to onboarding:', { userId: user?.id, route: location.pathname });
     return <Navigate to={ROUTES.onboarding} replace />;
   }
 
-  console.log(
-    '[RequireAuthenticatedApp] access granted',
-    '| user:', user?.id,
-    '| onboarding_completed:', user?.onboarding_completed,
-    '| route:', location.pathname,
-  );
+  if (isActuallyOnboarded && isOnboardingRoute) {
+    console.log('[AuthGuard] Onboarding complete, moving to app');
+    return <Navigate to={ROLE_HOME[user?.atlas_role] || ROUTES.today} replace />;
+  }
 
-  // Admins go straight to the admin panel on web — on mobile they use the core app
-  // Skip with ?skip_admin=1 to escape if admin panel is broken
+  // Admin Auto-Redirect (Web only)
   const isAdmin = user?.atlas_role === 'admin';
   const isAdminRoute = location.pathname.startsWith('/AdminPanel');
   const skipAdmin = new URLSearchParams(location.search).get('skip_admin') === '1';
@@ -307,19 +259,6 @@ const AppRoutes = () => (
 
       {/* Entry & Onboarding */}
       <Route path="/splash" element={<SplashScreen />} />
-      <Route path="/welcome" element={<WelcomeScreen />} />
-      <Route path="/auth/email" element={<EmailAuth />} />
-      <Route path="/auth/social" element={<SocialAuth />} />
-      <Route path="/auth/apple" element={<AppleAuth />} />
-      <Route path="/permissions" element={<PermissionsScreen />} />
-
-      {/* Pre-Paywall */}
-      <Route path="/onboarding/goal-selection" element={<GoalSelection />} />
-      <Route path="/onboarding/preferences" element={<PreferencesScreen />} />
-      <Route path="/onboarding/setup-input" element={<SetupInput />} />
-      <Route path="/onboarding/value-creation" element={<ValueCreation />} />
-      <Route path="/onboarding/preview-result" element={<PreviewResult />} />
-      <Route path="/onboarding/pre-paywall" element={<PrePaywallReveal />} />
 
       {/* Monetization */}
       <Route path="/upgrade" element={<UpgradePrompts />} />
