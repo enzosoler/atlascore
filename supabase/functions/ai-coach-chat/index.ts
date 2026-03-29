@@ -122,8 +122,13 @@ serve(async (req) => {
     });
   }
 
+  // Top-level catch: ensures ALL responses include CORS headers
+  try {
+
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+
+  console.log('[ai-coach-chat] stage: auth');
 
   // ── 1. Authenticate ───────────────────────────────────────────────────────
 
@@ -139,9 +144,11 @@ serve(async (req) => {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return json({ error: 'Unauthorized', detail: authError?.message }, 401);
   const userId = user.id;
+  console.log('[ai-coach-chat] stage: auth ok, userId:', userId);
 
   // ── 2. Kill switch + global spending caps ─────────────────────────────────
 
+  console.log('[ai-coach-chat] stage: spending config');
   const { data: config } = await supabase
     .from('ai_spending_config').select('*').eq('id', 1).single();
 
@@ -160,6 +167,7 @@ serve(async (req) => {
 
   // ── 3. Per-user rate limit ────────────────────────────────────────────────
 
+  console.log('[ai-coach-chat] stage: rate limit');
   const today = new Date().toISOString().split('T')[0];
 
   const { data: subscription } = await supabase
@@ -203,6 +211,7 @@ serve(async (req) => {
 
   // ── 4. Parse request ──────────────────────────────────────────────────────
 
+  console.log('[ai-coach-chat] stage: parse request');
   let body: { message?: string; page_context?: string };
   try { body = await req.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
 
@@ -211,6 +220,7 @@ serve(async (req) => {
 
   // ── 5. Load all context in parallel ──────────────────────────────────────
 
+  console.log('[ai-coach-chat] stage: loading context');
   const todayStart = `${today}T00:00:00.000Z`;
   const todayEnd   = `${today}T23:59:59.999Z`;
   const sevenDaysAgo = new Date();
@@ -270,6 +280,17 @@ serve(async (req) => {
   ]);
 
   // ── 6. Derive context ─────────────────────────────────────────────────────
+
+  console.log('[ai-coach-chat] stage: context loaded, errors:', {
+    profile: profileRes.error?.message,
+    todayFood: todayFoodRes.error?.message,
+    todayWorkout: todayWorkoutRes.error?.message,
+    activePlan: activePlanRes.error?.message,
+    recentFood: recentFoodRes.error?.message,
+    recentWorkout: recentWorkoutRes.error?.message,
+    memory: memoryRes.error?.message,
+    history: historyRes.error?.message,
+  });
 
   const profile = profileRes.data as any ?? {};
   const profileData = profile?.profile_data ?? {};
@@ -362,6 +383,7 @@ serve(async (req) => {
 
   // ── 9. Call OpenAI ────────────────────────────────────────────────────────
 
+  console.log('[ai-coach-chat] stage: calling openai, messages:', promptMessages.length);
   const openaiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openaiKey) return json({ error: 'AI service not configured' }, 503);
 
@@ -441,6 +463,7 @@ serve(async (req) => {
 
   // ── 13. Return ────────────────────────────────────────────────────────────
 
+  console.log('[ai-coach-chat] stage: returning response');
   const lower = assistantContent.toLowerCase();
   const suggestions: string[] = [];
   if (lower.includes('log') && (lower.includes('food') || lower.includes('meal'))) suggestions.push('Log a meal');
@@ -449,6 +472,15 @@ serve(async (req) => {
   if (lower.includes('weight') && lower.includes('log')) suggestions.push('Log weight');
 
   return json({ message: assistantContent, actions: [], suggestions: suggestions.slice(0, 3) });
+
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('[ai-coach-chat] unhandled error:', message, err);
+    return new Response(JSON.stringify({ error: 'Internal server error', detail: message }), {
+      status: 500,
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+    });
+  }
 });
 
 // ─── Memory helper ────────────────────────────────────────────────────────────
