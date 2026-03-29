@@ -13,39 +13,41 @@ import { ROUTES } from '@/lib/routes';
  * Build the daily briefing text + focus + actions.
  * @returns {{ text: string, focus: string, primaryAction: {label,path}|null, secondaryAction: {label,path}|null }}
  */
-export function buildBriefing({ workoutDone, nutritionLogged, hasActivePlan, planName, preferredName, kcalRemaining }) {
-  const name = preferredName || 'Athlete';
+export function buildBriefing({ workoutDone, nutritionLogged, hasActivePlan, planName, preferredName, kcalRemaining, t }) {
+  const name = preferredName || (t ? t('common.athlete') : 'Athlete');
+  const _ = t || ((key) => key.split('.').pop());
 
   if (workoutDone && nutritionLogged && kcalRemaining < 300) {
-    return { text: `${name}, you're locked in today. Workout done, nutrition on track.`, focus: 'Recovery', primaryAction: null, secondaryAction: null };
+    return { text: _('today.briefing.lockedIn', { name }), focus: _('today.briefing.focusRecovery'), primaryAction: null, secondaryAction: null };
   }
   if (workoutDone && kcalRemaining >= 300) {
-    return { text: `Session complete. Close the gap — ${Math.round(kcalRemaining)} kcal remaining.`, focus: 'Nutrition', primaryAction: { label: 'Log a meal', path: ROUTES.nutrition }, secondaryAction: null };
+    return { text: _('today.briefing.closeGap', { kcal: Math.round(kcalRemaining) }), focus: _('today.briefing.focusNutrition'), primaryAction: { label: _('today.briefing.actionLogMeal'), path: ROUTES.nutrition }, secondaryAction: null };
   }
   if (!workoutDone && hasActivePlan) {
-    const prefix = nutritionLogged ? 'Nutrition logged. ' : '';
-    return { text: `${prefix}${planName || 'Your workout'} is on the schedule. Get it done.`, focus: 'Training', primaryAction: { label: 'Start workout', path: ROUTES.workouts }, secondaryAction: nutritionLogged ? null : { label: 'Log meal', path: ROUTES.nutrition } };
+    const prefix = nutritionLogged ? _('today.briefing.nutritionPrefix') : '';
+    return { text: _('today.briefing.onSchedule', { prefix, planName: planName || _('today.briefing.yourWorkout') }), focus: _('today.briefing.focusTraining'), primaryAction: { label: _('today.briefing.actionStartWorkout'), path: ROUTES.workouts }, secondaryAction: nutritionLogged ? null : { label: _('today.briefing.actionLogMealShort'), path: ROUTES.nutrition } };
   }
   if (!workoutDone && !hasActivePlan) {
-    return { text: `No active plan, ${name}. Build one now or start a quick workout.`, focus: 'Build', primaryAction: { label: 'Create plan', path: ROUTES.workouts }, secondaryAction: null };
+    return { text: _('today.briefing.noPlan', { name }), focus: _('today.briefing.focusBuild'), primaryAction: { label: _('today.briefing.actionCreatePlan'), path: ROUTES.workouts }, secondaryAction: null };
   }
-  return { text: `Good day to move, ${name}. Log your workouts and meals.`, focus: 'Today', primaryAction: { label: 'Start workout', path: ROUTES.workouts }, secondaryAction: null };
+  return { text: _('today.briefing.goodDay', { name }), focus: _('today.briefing.focusToday'), primaryAction: { label: _('today.briefing.actionStartWorkout'), path: ROUTES.workouts }, secondaryAction: null };
 }
 
 /**
  * Build max 2 recommendations from current state.
  * @returns {Array<{id,type,title,reason,actionLabel,actionPath}>}
  */
-export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsumed, proteinTarget, weightLogged, hasPhotos }) {
+export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsumed, proteinTarget, weightLogged, hasPhotos, t }) {
+  const _ = t || ((key) => key.split('.').pop());
   const recs = [];
 
   if (workoutDone && proteinConsumed < (proteinTarget || 150) * 0.7) {
     recs.push({
       id: 'rec-protein',
       type: 'nutrition',
-      title: 'Protein window closing',
-      reason: `${Math.round(proteinConsumed)}g of ${proteinTarget || 150}g. Recovery depends on closing this gap.`,
-      actionLabel: 'Log protein meal',
+      title: _('today.recs.proteinTitle'),
+      reason: _('today.recs.proteinReason', { consumed: Math.round(proteinConsumed), target: proteinTarget || 150 }),
+      actionLabel: _('today.recs.proteinAction'),
       actionPath: ROUTES.nutrition,
     });
   }
@@ -54,9 +56,9 @@ export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsum
     recs.push({
       id: 'rec-plan',
       type: 'workout',
-      title: 'No training plan active',
-      reason: 'Athletes with a plan are more consistent. Build yours.',
-      actionLabel: 'Build plan',
+      title: _('today.recs.noPlanTitle'),
+      reason: _('today.recs.noPlanReason'),
+      actionLabel: _('today.recs.noPlanAction'),
       actionPath: ROUTES.workouts,
     });
   }
@@ -65,9 +67,9 @@ export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsum
     recs.push({
       id: 'rec-weight',
       type: 'habit',
-      title: 'Log your weight',
-      reason: 'Weekly weigh-ins catch trends early.',
-      actionLabel: 'Log weight',
+      title: _('today.recs.weightTitle'),
+      reason: _('today.recs.weightReason'),
+      actionLabel: _('today.recs.weightAction'),
       actionPath: ROUTES.body,
     });
   }

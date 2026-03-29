@@ -13,7 +13,8 @@
     "error": "Erro",
     "success": "Sucesso",
     "termsOfUse": "termos de serviço",
-    "athlete": "Atleta"
+    "athlete": "Atleta",
+    "dismiss": "×"
   },
   "auth": {
     "kicker": "Sistema de evolução pessoal",
@@ -737,7 +738,9 @@
       "protein": "proteína",
       "protocols": "Protocolos",
       "pending": "pendentes",
-      "allDone": "Tudo feito"
+      "allDone": "Tudo feito",
+      "ex": "ex",
+      "day": "Dia {n}"
     },
     "training": {
       "label": "TREINO DE HOJE",
@@ -840,6 +843,35 @@
       "yesterday": "Ontem",
       "daysAgo": "há {days} dias",
       "weeksAgo": "há {weeks} semanas"
+    },
+    "briefing": {
+      "lockedIn": "{name}, você está focado hoje. Treino feito, nutrição no caminho certo.",
+      "closeGap": "Sessão completa. Feche o gap — {kcal} kcal restantes.",
+      "onSchedule": "{prefix}{planName} está no cronograma. Vai lá.",
+      "noPlan": "Sem plano ativo, {name}. Crie um agora ou faça um treino rápido.",
+      "goodDay": "Bom dia para se mover, {name}. Registre seus treinos e refeições.",
+      "nutritionPrefix": "Nutrição registrada. ",
+      "yourWorkout": "Seu treino",
+      "focusRecovery": "Recuperação",
+      "focusNutrition": "Nutrição",
+      "focusTraining": "Treino",
+      "focusBuild": "Construir",
+      "focusToday": "Hoje",
+      "actionLogMeal": "Registrar refeição",
+      "actionStartWorkout": "Iniciar treino",
+      "actionLogMealShort": "Registrar refeição",
+      "actionCreatePlan": "Criar plano"
+    },
+    "recs": {
+      "proteinTitle": "Janela de proteína fechando",
+      "proteinReason": "{consumed}g de {target}g. A recuperação depende de fechar essa lacuna.",
+      "proteinAction": "Registrar refeição proteica",
+      "noPlanTitle": "Nenhum plano de treino ativo",
+      "noPlanReason": "Atletas com plano são mais consistentes. Monte o seu.",
+      "noPlanAction": "Montar plano",
+      "weightTitle": "Registre seu peso",
+      "weightReason": "Pesagens semanais identificam tendências cedo.",
+      "weightAction": "Registrar peso"
     }
   },
   "settings": {

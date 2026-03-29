@@ -111,8 +111,8 @@ export function useAICoach({ userId } = {}) {
     hasData: !!data,
 
     // ── Actions ──────────────────────────────────────────────────────────────
-    followRec: (rec) => followMutation.mutate(rec),
-    dismissRec: (rec) => dismissMutation.mutate(rec),
+    followRec: (rec) => followMutation.mutate?.(rec),
+    dismissRec: (rec) => dismissMutation.mutate?.(rec),
     invalidateCoach,
   };
 }

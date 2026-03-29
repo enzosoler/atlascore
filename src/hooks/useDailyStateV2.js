@@ -170,7 +170,8 @@ export function useDailyStateV2() {
       name: rawPlan.name || null,
       frequency: rawPlan.frequency_per_week || null,
       todayExercises: Array.isArray(todayDay?.exercises) ? todayDay.exercises : [],
-      todayDayLabel: todayDay?.name || `Day ${dayIndex + 1}`,
+      todayDayLabel: todayDay?.name || null,
+      todayDayIndex: dayIndex,
       totalDays: days.length,
     };
   }, [rawPlan]);

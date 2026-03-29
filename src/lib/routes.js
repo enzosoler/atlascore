@@ -46,6 +46,7 @@ export const ROUTES = {
   settings: '/Settings',
   storyLanding: '/start',
   shareTarget: '/share-target',
+  notifications: '/notifications',
 };
 
 export const ROLE_HOME = {

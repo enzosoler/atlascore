@@ -13,7 +13,8 @@
     "error": "Error",
     "success": "Éxito",
     "termsOfUse": "términos de servicio",
-    "athlete": "Atleta"
+    "athlete": "Atleta",
+    "dismiss": "×"
   },
   "auth": {
     "kicker": "Sistema de evolución personal",
@@ -852,7 +853,38 @@
       "protein": "proteína",
       "protocols": "Protocolos",
       "pending": "pendiente",
-      "allDone": "Todo listo"
+      "allDone": "Todo listo",
+      "ex": "ej",
+      "day": "Día {n}"
+    },
+    "briefing": {
+      "lockedIn": "{name}, estás enfocado hoy. Entrenamiento hecho, nutrición en camino.",
+      "closeGap": "Sesión completa. Cierra la brecha — {kcal} kcal restantes.",
+      "onSchedule": "{prefix}{planName} está en el horario. A por ello.",
+      "noPlan": "Sin plan activo, {name}. Crea uno ahora o haz un entrenamiento rápido.",
+      "goodDay": "Buen día para moverse, {name}. Registra tus entrenamientos y comidas.",
+      "nutritionPrefix": "Nutrición registrada. ",
+      "yourWorkout": "Tu entrenamiento",
+      "focusRecovery": "Recuperación",
+      "focusNutrition": "Nutrición",
+      "focusTraining": "Entrenamiento",
+      "focusBuild": "Construir",
+      "focusToday": "Hoy",
+      "actionLogMeal": "Registrar comida",
+      "actionStartWorkout": "Iniciar entrenamiento",
+      "actionLogMealShort": "Registrar comida",
+      "actionCreatePlan": "Crear plan"
+    },
+    "recs": {
+      "proteinTitle": "Ventana de proteína cerrando",
+      "proteinReason": "{consumed}g de {target}g. La recuperación depende de cerrar esta brecha.",
+      "proteinAction": "Registrar comida proteica",
+      "noPlanTitle": "Sin plan de entrenamiento activo",
+      "noPlanReason": "Los atletas con plan son más consistentes. Crea el tuyo.",
+      "noPlanAction": "Crear plan",
+      "weightTitle": "Registra tu peso",
+      "weightReason": "Los pesajes semanales detectan tendencias temprano.",
+      "weightAction": "Registrar peso"
     }
   },
   "settings": {

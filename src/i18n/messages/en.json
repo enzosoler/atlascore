@@ -13,7 +13,8 @@
     "error": "Error",
     "success": "Success",
     "termsOfUse": "terms of service",
-    "athlete": "Athlete"
+    "athlete": "Athlete",
+    "dismiss": "×"
   },
   "auth": {
     "kicker": "Personal evolution system",
@@ -745,7 +746,9 @@
       "protein": "protein",
       "protocols": "Protocols",
       "pending": "pending",
-      "allDone": "All done"
+      "allDone": "All done",
+      "ex": "ex",
+      "day": "Day {n}"
     },
     "training": {
       "label": "TODAY'S TRAINING",
@@ -848,6 +851,35 @@
       "yesterday": "Yesterday",
       "daysAgo": "{days} days ago",
       "weeksAgo": "{weeks} weeks ago"
+    },
+    "briefing": {
+      "lockedIn": "{name}, you're locked in today. Workout done, nutrition on track.",
+      "closeGap": "Session complete. Close the gap — {kcal} kcal remaining.",
+      "onSchedule": "{prefix}{planName} is on the schedule. Get it done.",
+      "noPlan": "No active plan, {name}. Build one now or start a quick workout.",
+      "goodDay": "Good day to move, {name}. Log your workouts and meals.",
+      "nutritionPrefix": "Nutrition logged. ",
+      "yourWorkout": "Your workout",
+      "focusRecovery": "Recovery",
+      "focusNutrition": "Nutrition",
+      "focusTraining": "Training",
+      "focusBuild": "Build",
+      "focusToday": "Today",
+      "actionLogMeal": "Log a meal",
+      "actionStartWorkout": "Start workout",
+      "actionLogMealShort": "Log meal",
+      "actionCreatePlan": "Create plan"
+    },
+    "recs": {
+      "proteinTitle": "Protein window closing",
+      "proteinReason": "{consumed}g of {target}g. Recovery depends on closing this gap.",
+      "proteinAction": "Log protein meal",
+      "noPlanTitle": "No training plan active",
+      "noPlanReason": "Athletes with a plan are more consistent. Build yours.",
+      "noPlanAction": "Build plan",
+      "weightTitle": "Log your weight",
+      "weightReason": "Weekly weigh-ins catch trends early.",
+      "weightAction": "Log weight"
     }
   },
   "settings": {

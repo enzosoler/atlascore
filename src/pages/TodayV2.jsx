@@ -118,7 +118,7 @@ function HeroCard({ text, focus, primaryAction, loading }) {
 
 // ─── Quick Action Tile ─────────────────────────────────────────────────────────
 
-function ActionTile({ icon: Icon, label, done, to, onClick }) {
+function ActionTile({ icon: Icon, label, done = false, to, onClick }) {
   const content = (
     <div className={`flex flex-col items-center justify-center gap-1.5 rounded-[20px] border p-3 transition-colors active:scale-[0.97] ${
       done
@@ -167,7 +167,7 @@ function RecCard({ rec, onDismiss }) {
           </Link>
         )}
       </div>
-      <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] shrink-0 px-1">{rec.dismissLabel || '×'}</button>
+      <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] shrink-0 px-1">{rec.dismissLabel || t('common.dismiss')}</button>
     </div>
   );
 }
@@ -223,6 +223,7 @@ function TodayContent() {
         planName: daily.plan.name,
         preferredName: daily.preferredName,
         kcalRemaining,
+        t,
       });
 
   // Recommendations: AI when available, rules-based fallback (max 2)
@@ -235,6 +236,7 @@ function TodayContent() {
         proteinTarget: daily.nutrition.proteinTarget,
         weightLogged: daily.weightLogged,
         hasPhotos: false,
+        t,
       });
 
   return (
@@ -260,7 +262,7 @@ function TodayContent() {
               </div>
             )}
             <button
-              onClick={() => navigate('/notifications')}
+              onClick={() => navigate(ROUTES.notifications)}
               className="w-9 h-9 flex items-center justify-center rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]"
             >
               <Bell className="w-4 h-4" strokeWidth={2} />
@@ -299,8 +301,8 @@ function TodayContent() {
         <PlanCard
           icon={Dumbbell}
           label={daily.workoutDone ? t('today.plan.workoutComplete') : (daily.plan.name || t('today.plan.noPlan'))}
-          value={daily.workoutDone ? '✓' : (daily.plan.todayExercises.length > 0 ? `${daily.plan.todayExercises.length} ex` : '—')}
-          sub={daily.workoutDone ? daily.workout.sessionName : daily.plan.todayDayLabel}
+          value={daily.workoutDone ? '✓' : (daily.plan.todayExercises.length > 0 ? `${daily.plan.todayExercises.length} ${t('today.plan.ex')}` : '—')}
+          sub={daily.workoutDone ? daily.workout.sessionName : (daily.plan.todayDayLabel || t('today.plan.day', { n: daily.plan.todayDayIndex + 1 }))}
           to={ROUTES.workouts}
           color={daily.workoutDone ? 'ok' : 'brand'}
         />
