@@ -43,16 +43,14 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Not authenticated');
 
-      // Build messages array for the API (only content, no internal fields)
-      const apiMessages = [...messages, userMsg].map(({ role, content }) => ({ role, content }));
-
       const res = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ messages: apiMessages, page_context: pageContext }),
+        // Function loads history from DB — only send the current message
+        body: JSON.stringify({ message: text.trim(), page_context: pageContext }),
       });
 
       const data = await res.json();
