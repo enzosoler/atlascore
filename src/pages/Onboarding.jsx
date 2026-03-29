@@ -795,12 +795,12 @@ export default function Onboarding() {
     setSaving(true);
     setSaveError(null);
     try {
-      const nums = ['age', 'height', 'current_weight', 'target_weight'];
       const payload = { onboarding_completed: true };
-      // Map form fields to profile columns
-      nums.forEach((k) => {
-        if (form[k] !== '') payload[k] = Number(form[k]);
-      });
+      // Map form fields → profile columns (height → height_cm)
+      const fieldMap = { age: 'age', height: 'height_cm', current_weight: 'current_weight', target_weight: 'target_weight' };
+      for (const [formKey, dbCol] of Object.entries(fieldMap)) {
+        if (form[formKey] !== '') payload[dbCol] = Number(form[formKey]);
+      }
       if (form.sex) payload.sex = form.sex;
       if (form.activity_level) payload.activity_level = form.activity_level;
       if (form.health_goals.length) payload.health_goals = form.health_goals;
