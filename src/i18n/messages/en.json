@@ -59,7 +59,22 @@
       "cancel": "Cancel anytime"
     },
     "backHome": "← Back to home",
-    "footer": "© 2026 atlas.core. All rights reserved."
+    "footer": "© 2026 atlas.core. All rights reserved.",
+    "google": {
+      "signIn": "Sign in with Google",
+      "signingIn": "Signing in...",
+      "error": "Failed to sign in with Google. Please try again."
+    },
+    "callback": {
+      "completing": "Completing sign in...",
+      "verifying": "Please wait while we verify your credentials.",
+      "success": "Sign in successful!",
+      "redirecting": "Redirecting you to your dashboard...",
+      "failed": "Sign in failed",
+      "noSession": "No session found. Please try signing in again.",
+      "genericError": "Authentication failed. Please try again.",
+      "backToSignIn": "Back to sign in"
+    }
   },
   "landing": {
     "nav": {

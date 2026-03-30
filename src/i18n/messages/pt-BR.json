@@ -59,7 +59,22 @@
       "cancel": "Cancele quando quiser"
     },
     "backHome": "← Voltar ao início",
-    "footer": "© 2026 atlas.core. Todos os direitos reservados."
+    "footer": "© 2026 atlas.core. Todos os direitos reservados.",
+    "google": {
+      "signIn": "Entrar com Google",
+      "signingIn": "Entrando...",
+      "error": "Falha ao entrar com Google. Tente novamente."
+    },
+    "callback": {
+      "completing": "Finalizando login...",
+      "verifying": "Aguarde enquanto verificamos suas credenciais.",
+      "success": "Login realizado!",
+      "redirecting": "Redirecionando para seu painel...",
+      "failed": "Falha no login",
+      "noSession": "Sessão não encontrada. Tente fazer login novamente.",
+      "genericError": "Falha na autenticação. Tente novamente.",
+      "backToSignIn": "Voltar ao login"
+    }
   },
   "landing": {
     "nav": {

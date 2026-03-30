@@ -20,7 +20,11 @@ module.exports = {
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			sm: 'calc(var(--radius) - 4px)',
+  			// Atlas design tokens — use these instead of arbitrary values
+  			'atlas-card': 'var(--atlas-card-radius)',     // 18px — cards, tiles
+  			'atlas-control': 'var(--atlas-control-radius)', // 14px — buttons, inputs, chips
+  			'atlas-sheet': 'var(--atlas-sheet-radius)',   // 24px — sheets, modals
   		},
 	  		colors: {
 	        atlas: {

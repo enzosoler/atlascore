@@ -15,6 +15,7 @@ import {
   Bell, Sparkles, Dumbbell, UtensilsCrossed, Scale, Heart,
   ArrowRight, Flame, Target, Pill,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
