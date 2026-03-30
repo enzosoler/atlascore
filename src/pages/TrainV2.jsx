@@ -13,7 +13,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Play, CheckCircle2, Dumbbell, Clock, Zap, Plus,
-  ArrowRight, Sparkles, Calendar, TrendingUp,
+  ArrowRight, Sparkles, Calendar, TrendingUp, Target,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ import WorkoutGuardSheet from '@/components/workouts/WorkoutGuardSheet';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import { AppContainer } from '@/components/shared/AppContainer';
+import { cn } from '@/lib/utils';
 import {
   fetchRecentWorkoutHistory,
   computePersonalRecords,
@@ -61,6 +62,316 @@ function buildSessionFromPlan(plan, dayIndex, t) {
       })),
     })) : [],
   };
+}
+
+// ─── Stats Header Component ───────────────────────────────────────────────────
+
+function StatsHeader({ workoutHistory, daily, t }) {
+  // Calculate streak and weekly stats
+  const stats = useMemo(() => {
+    const now = new Date();
+    const thisWeekStart = new Date(now);
+    thisWeekStart.setDate(now.getDate() - now.getDay());
+    thisWeekStart.setHours(0, 0, 0, 0);
+    
+    const sessionsThisWeek = workoutHistory.filter(w => {
+      const d = new Date(w.completed_at || w.date);
+      return d >= thisWeekStart;
+    }).length;
+    
+    // Calculate streak
+    let streak = 0;
+    const sorted = [...workoutHistory].sort((a, b) => {
+      const dateA = new Date(b.completed_at || b.date).getTime();
+      const dateB = new Date(a.completed_at || a.date).getTime();
+      return dateA - dateB;
+    });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let checkDate = new Date(today);
+    
+    for (const workout of sorted) {
+      const workoutDate = new Date(workout.completed_at || workout.date);
+      workoutDate.setHours(0, 0, 0, 0);
+      const diffDays = Math.floor((checkDate.getTime() - workoutDate.getTime()) / 86400000);
+      
+      if (diffDays === 0 || diffDays === 1) {
+        streak++;
+        checkDate = new Date(workoutDate);
+      } else {
+        break;
+      }
+    }
+    
+    const lastWorkout = sorted[0];
+    const daysSinceLast = lastWorkout 
+      ? Math.floor((today.getTime() - new Date(lastWorkout.completed_at || lastWorkout.date).getTime()) / 86400000)
+      : null;
+    
+    return { sessionsThisWeek, streak, daysSinceLast };
+  }, [workoutHistory]);
+  
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('train.thisWeek')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--brand))] mt-1">{stats.sessionsThisWeek}</p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('train.sessions')}</p>
+      </div>
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('train.streak')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--ok))] mt-1">{stats.streak}</p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('train.days')}</p>
+      </div>
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('train.lastSession')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--fg))] mt-1">
+          {stats.daysSinceLast === null ? '—' : stats.daysSinceLast === 0 ? t('train.today') : stats.daysSinceLast}
+        </p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">
+          {stats.daysSinceLast === null ? '' : stats.daysSinceLast === 0 ? '' : stats.daysSinceLast === 1 ? t('train.dayAgo') : t('train.daysAgo', { count: stats.daysSinceLast })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Resume Session Banner ───────────────────────────────────────────────────
+
+function ResumeSessionBanner({ onResume, sessionName, t }) {
+  return (
+    <div className="rounded-2xl bg-gradient-to-r from-[hsl(var(--brand)/0.15)] to-[hsl(var(--brand-ai)/0.1)] border border-[hsl(var(--brand)/0.3)] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[hsl(var(--brand)/0.2)] flex items-center justify-center">
+            <Clock className="w-5 h-5 text-[hsl(var(--brand))]" />
+          </div>
+          <div>
+            <p className="text-subhead font-bold text-[hsl(var(--fg))]">{t('train.resumeSession')}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))]">{sessionName}</p>
+          </div>
+        </div>
+        <Button onClick={onResume} className="rounded-xl bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand)/0.9)]">
+          {t('train.continue')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Empty State Upgrade Prompt ───────────────────────────────────────────────
+
+function EmptyStateUpgrade({ onCreatePlan, t, can }) {
+  return (
+    <div className="rounded-2xl bg-gradient-to-b from-[hsl(var(--fill)/0.5)] to-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-6 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
+        <Target className="w-8 h-8 text-[hsl(var(--brand))]" strokeWidth={1.5} />
+      </div>
+      <p className="text-title3 font-bold text-[hsl(var(--fg))] mb-2">{t('train.noPlanTitle')}</p>
+      <p className="text-body text-[hsl(var(--fg-2))] mb-4 max-w-[280px] mx-auto">{t('train.noPlanDesc')}</p>
+      <Button 
+        onClick={onCreatePlan} 
+        className="rounded-xl bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand)/0.9)] shadow-[0_4px_14px_hsl(var(--brand)/0.3)]"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        {can('plan_builder') ? t('train.createPlan') : t('train.upgradeToPlan')}
+      </Button>
+      {!can('plan_builder') && (
+        <p className="text-caption1 text-[hsl(var(--fg-3))] mt-3">{t('train.planProFeature')}</p>
+      )}
+    </div>
+  );
+}
+
+// ─── Workout Complete Celebration ─────────────────────────────────────────────
+
+function WorkoutCompleteCard({ workout, onViewSummary, t }) {
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--ok)/0.12)] via-[hsl(var(--ok)/0.06)] to-[hsl(var(--card))] border border-[hsl(var(--ok)/0.3)] p-5">
+      <div className="flex items-start gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--ok))] flex items-center justify-center shadow-lg shadow-[hsl(var(--ok)/0.3)]">
+          <CheckCircle2 className="w-7 h-7 text-white" strokeWidth={2.5} />
+        </div>
+        <div className="flex-1">
+          <p className="text-title3 font-bold text-[hsl(var(--fg))]">{t('train.sessionComplete')}</p>
+          <p className="text-body text-[hsl(var(--fg-2))] mt-1">{workout.sessionName || t('train.workout')}</p>
+          <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-1.5 text-caption1 text-[hsl(var(--fg-3))]">
+              <Clock className="w-3.5 h-3.5" />
+              {formatDuration(workout.durationMinutes)}
+            </div>
+            <button 
+              onClick={onViewSummary}
+              className="text-caption1 font-semibold text-[hsl(var(--brand))] hover:opacity-80"
+            >
+              {t('train.viewSummary')} →
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 pt-4 border-t border-[hsl(var(--ok)/0.2)]">
+        <p className="text-caption1 text-[hsl(var(--fg-3))] text-center">{t('train.streakMessage')}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Weekly Plan Collapsible ─────────────────────────────────────────────────
+
+function WeeklyPlanSection({ days, currentDayIndex, onSelectDay, t }) {
+  const [expanded, setExpanded] = useState(false);
+  
+  if (days.length === 0) return null;
+  
+  const visibleDays = expanded ? days : days.slice(0, 3);
+  
+  return (
+    <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] overflow-hidden">
+      <div className="px-4 py-3 border-b border-[hsl(var(--border)/0.3)]">
+        <p className="atlas-overline">{t('train.weeklyPlan')}</p>
+      </div>
+      <div className="divide-y divide-[hsl(var(--border)/0.2)]">
+        {visibleDays.map((day, idx) => {
+          const exCount = Array.isArray(day?.exercises) ? day.exercises.length : 0;
+          const isToday = idx === currentDayIndex;
+          return (
+            <button
+              key={idx}
+              onClick={() => onSelectDay(idx)}
+              className={cn(
+                "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors",
+                isToday ? "bg-[hsl(var(--brand)/0.05)]" : "hover:bg-[hsl(var(--fill)/0.3)]"
+              )}
+            >
+              <div className={cn(
+                "w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold",
+                isToday 
+                  ? "bg-[hsl(var(--brand))] text-white" 
+                  : "bg-[hsl(var(--fill)/0.8)] text-[hsl(var(--fg-3))]"
+              )}>
+                {idx + 1}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={cn(
+                  "text-footnote font-semibold truncate",
+                  isToday ? "text-[hsl(var(--brand))]" : "text-[hsl(var(--fg))]"
+                )}>{day?.name || t('train.dayN', { n: idx + 1 })}</p>
+                <p className="text-caption1 text-[hsl(var(--fg-3))]">{exCount} {t('train.exercises')}</p>
+              </div>
+              {isToday && <span className="text-[10px] font-bold text-[hsl(var(--brand))] uppercase">{t('train.today')}</span>}
+              <Play className={cn("w-3.5 h-3.5", isToday ? "text-[hsl(var(--brand))]" : "text-[hsl(var(--fg-3))]")} strokeWidth={2} />
+            </button>
+          );
+        })}
+      </div>
+      {days.length > 3 && (
+        <button 
+          onClick={() => setExpanded(!expanded)}
+          className="w-full py-2.5 text-caption1 font-medium text-[hsl(var(--brand))] hover:bg-[hsl(var(--fill)/0.3)] transition-colors"
+        >
+          {expanded ? t('train.showLess') : t('train.showAll', { count: days.length - 3 })}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ─── Quick Workout Card ──────────────────────────────────────────────────────
+
+function QuickWorkoutCard({ onClick, t }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--brand)/0.12)] to-[hsl(var(--brand-ai)/0.06)] border border-[hsl(var(--brand)/0.25)] p-4 text-left transition-all active:scale-[0.98]"
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[hsl(var(--brand)/0.08)] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="relative flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center group-hover:bg-[hsl(var(--brand)/0.25)] transition-colors">
+          <Zap className="w-6 h-6 text-[hsl(var(--brand))]" strokeWidth={2} />
+        </div>
+        <div className="flex-1">
+          <p className="text-subhead font-bold text-[hsl(var(--fg))]">{t('train.quickWorkout')}</p>
+          <p className="text-caption1 text-[hsl(var(--fg-3))]">{t('train.quickWorkoutDesc')}</p>
+        </div>
+        <div className="w-10 h-10 rounded-xl bg-[hsl(var(--card))] flex items-center justify-center shadow-sm">
+          <ArrowRight className="w-5 h-5 text-[hsl(var(--brand))]" strokeWidth={2} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ─── Recent Sessions Compact ─────────────────────────────────────────────────
+
+function RecentSessionsCompact({ sessions, t }) {
+  if (sessions.length === 0) return null;
+  
+  return (
+    <div>
+      <p className="atlas-overline mb-2.5 px-0.5">{t('train.recent')}</p>
+      <div className="space-y-2">
+        {sessions.slice(0, 3).map((s, i) => (
+          <div key={s.id || i} className="flex items-center gap-3 rounded-xl bg-[hsl(var(--fill)/0.3)] px-3 py-2.5">
+            <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok)/0.8)] shrink-0" strokeWidth={2} />
+            <div className="flex-1 min-w-0">
+              <p className="text-footnote font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || t('train.session')}</p>
+            </div>
+            <p className="text-caption1 text-[hsl(var(--fg-3))] shrink-0">{formatDuration(s.duration_minutes)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Today's Workout Hero ────────────────────────────────────────────────────
+
+function TodayWorkoutHero({ plan, exercises, onStart, t }) {
+  return (
+    <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] shadow-[var(--shadow-sm)] overflow-hidden">
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <p className="text-caption1 font-medium text-[hsl(var(--brand))] uppercase tracking-wide">{plan.todayDayLabel}</p>
+            <p className="text-title2 font-bold text-[hsl(var(--fg))] mt-1">{plan.name}</p>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="text-headline font-bold text-[hsl(var(--fg))]">{exercises.length}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))]">{t('train.exercises')}</p>
+          </div>
+        </div>
+        
+        {/* Exercise Preview */}
+        <div className="space-y-2 mb-5">
+          {exercises.slice(0, 4).map((ex, i) => (
+            <div key={i} className="flex items-center gap-3 text-body">
+              <span className="w-6 h-6 rounded-md bg-[hsl(var(--fill)/0.6)] flex items-center justify-center text-[11px] font-semibold text-[hsl(var(--fg-3))]">
+                {i + 1}
+              </span>
+              <span className="text-[hsl(var(--fg))] font-medium truncate flex-1">{ex.name || t('train.exercise')}</span>
+              <span className="text-caption1 text-[hsl(var(--fg-3))] shrink-0">{ex.sets || 3}×{ex.reps || '10'}</span>
+            </div>
+          ))}
+          {exercises.length > 4 && (
+            <p className="text-caption1 text-[hsl(var(--fg-3))] pl-9">+{exercises.length - 4} {t('train.more')}</p>
+          )}
+        </div>
+        
+        <Button 
+          size="lg" 
+          className="w-full rounded-xl bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand)/0.9)] shadow-[0_4px_16px_hsl(var(--brand)/0.35)] h-12"
+          onClick={() => onStart(0)}
+        >
+          <Play className="w-5 h-5 fill-current mr-2" /> {t('train.startWorkout')}
+        </Button>
+      </div>
+      
+      {/* Progress Bar */}
+      <div className="h-1 bg-[hsl(var(--fill)/0.5)]">
+        <div className="h-full bg-[hsl(var(--brand))] w-0" /> {/* Would show plan progress */}
+      </div>
+    </div>
+  );
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -158,25 +469,34 @@ export default function TrainV2() {
     saveMut.mutate({ userId: user.id, payload: completedData, originalWorkout: activeSession });
   };
 
+  const handleResumeSession = () => {
+    const saved = loadSession();
+    if (saved?.workout) {
+      setActiveSession(saved.workout);
+      setInitialSession(saved);
+      setMode('execution');
+    }
+  };
+
   // ── Execution mode: full takeover ──────────────────────────────────────────
   if (mode === 'execution' && activeSession) {
     return (
-      <>
-        <WorkoutExecutionScreen
-          workout={activeSession}
-          initialSession={initialSession}
-          onComplete={handleComplete}
-          onCancel={() => { setMode('list'); setActiveSession(null); setInitialSession(null); }}
-          workoutHistory={workoutHistory}
-          personalRecords={personalRecords}
-        />
-      </>
+      <WorkoutExecutionScreen
+        workout={activeSession}
+        initialSession={initialSession}
+        onComplete={handleComplete}
+        onCancel={() => { setMode('list'); setActiveSession(null); setInitialSession(null); }}
+        workoutHistory={workoutHistory}
+        personalRecords={personalRecords}
+      />
     );
   }
 
   const exercises = daily.plan.todayExercises ?? [];
   const hasPlan = daily.plan.id != null;
   const trainMessage = ai.train?.message || null;
+  const days = Array.isArray(daily.activePlan?.days) ? daily.activePlan.days : [];
+  const currentDayIndex = daily.activePlan?.current_day_index ?? 0;
 
   // ── List mode ──────────────────────────────────────────────────────────────
   return (
@@ -186,10 +506,19 @@ export default function TrainV2() {
         {/* Header */}
         <div>
           <h1 className="text-title3 text-[hsl(var(--fg))]">{t('train.title')}</h1>
-          {hasPlan && (
-            <p className="text-footnote text-[hsl(var(--fg-3))] mt-0.5">{daily.plan.name} · {daily.plan.frequency ?? '—'}×/week</p>
-          )}
         </div>
+
+        {/* Stats Row */}
+        <StatsHeader workoutHistory={workoutHistory} daily={daily} t={t} />
+
+        {/* Resume Session Banner (if saved session exists) */}
+        {hasSession() && (
+          <ResumeSessionBanner 
+            onResume={handleResumeSession}
+            sessionName={loadSession()?.workout?.name || t('train.unfinishedSession')}
+            t={t}
+          />
+        )}
 
         {/* AI insight */}
         {trainMessage && (
@@ -199,124 +528,55 @@ export default function TrainV2() {
           </div>
         )}
 
-        {/* Today's Workout Hero */}
+        {/* Today's Workout / Complete / Empty State */}
         {daily.workoutDone ? (
-          <div className="rounded-2xl bg-[hsl(var(--ok)/0.05)] p-5">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
-              <div>
-                <p className="text-body font-bold text-[hsl(var(--fg))]">{t('train.sessionComplete')}</p>
-                <p className="text-caption1 text-[hsl(var(--fg-3))]">{daily.workout.sessionName || t('train.workout')} · {formatDuration(daily.workout.durationMinutes)}</p>
-              </div>
-            </div>
-          </div>
+          <WorkoutCompleteCard 
+            workout={daily.workout} 
+            onViewSummary={() => {}}
+            t={t}
+          />
         ) : hasPlan && exercises.length > 0 ? (
-          <div className="rounded-2xl bg-[hsl(var(--card))] shadow-[var(--shadow-sm)] p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="atlas-overline">{daily.plan.todayDayLabel}</p>
-                <p className="text-headline text-[hsl(var(--fg))] mt-1">{daily.plan.name}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-caption1 text-[hsl(var(--fg-3))]">{exercises.length} {t('train.exercises')}</p>
-              </div>
-            </div>
-            {/* Exercise preview */}
-            <div className="space-y-1.5 mb-4">
-              {exercises.slice(0, 4).map((ex, i) => (
-                <div key={i} className="flex items-center gap-2 text-caption1">
-                  <span className="w-5 text-right text-[hsl(var(--fg-3))] font-medium">{i + 1}.</span>
-                  <span className="text-[hsl(var(--fg))] font-medium truncate">{ex.name || t('train.exercise')}</span>
-                  <span className="ml-auto text-[hsl(var(--fg-3))] shrink-0">{ex.sets || 3}×{ex.reps || '10'}</span>
-                </div>
-              ))}
-              {exercises.length > 4 && (
-                <p className="text-caption1 text-[hsl(var(--fg-3))] pl-7">{t('train.more', { count: exercises.length - 4 })}</p>
-              )}
-            </div>
-            <Button size="lg" className="w-full rounded-xl shadow-[0_4px_14px_hsl(var(--brand)/0.2)]" onClick={() => handleStartDay(0)}>
-              <Play className="w-4 h-4 fill-current" /> {t('train.startWorkout')}
-            </Button>
-          </div>
+          <TodayWorkoutHero 
+            plan={daily.plan}
+            exercises={exercises}
+            onStart={handleStartDay}
+            t={t}
+          />
         ) : (
-          <div className="rounded-2xl bg-[hsl(var(--fill)/0.4)] p-6 text-center">
-            <Dumbbell className="w-8 h-8 text-[hsl(var(--fg-3))] mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-callout font-semibold text-[hsl(var(--fg))]">{t('train.noPlanActive')}</p>
-            <p className="text-caption1 text-[hsl(var(--fg-3))] mt-1">{t('train.noPlanDesc')}</p>
-            <Button className="mt-4 rounded-xl" onClick={() => setShowPlanBuilder(true)}>
-              <Plus className="w-3.5 h-3.5" /> {t('train.createPlan')}
-            </Button>
-          </div>
+          <EmptyStateUpgrade 
+            onCreatePlan={() => setShowPlanBuilder(true)}
+            t={t}
+            can={can}
+          />
         )}
 
-        {/* Quick Workout — ALWAYS visible */}
-        <button
+        {/* Quick Workout */}
+        <QuickWorkoutCard 
           onClick={() => setShowQuickWorkout(true)}
-          className="w-full flex items-center gap-3.5 rounded-atlas-card border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.06)] px-4 py-4 text-left active:bg-[hsl(var(--brand)/0.12)] transition-colors"
-        >
-          <div className="w-10 h-10 rounded-atlas-control bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
-            <Zap className="w-5 h-5 text-[hsl(var(--brand))]" strokeWidth={2} />
-          </div>
-          <div className="flex-1">
-            <p className="text-subhead font-bold text-[hsl(var(--fg))]">{t('train.quickWorkout')}</p>
-            <p className="text-caption1 text-[hsl(var(--fg-3))] mt-0.5">{t('train.quickWorkoutDesc')}</p>
-          </div>
-          <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
-        </button>
+          t={t}
+        />
 
         {/* Weekly Plan */}
-        {hasPlan && (() => {
-          const days = Array.isArray(daily.activePlan?.days) ? daily.activePlan.days : [];
-          if (days.length === 0) return null;
-          return (
-            <div>
-              <p className="atlas-overline mb-2.5 px-0.5">{t('train.weeklyPlan')}</p>
-              <div className="space-y-1.5">
-                {days.map((day, idx) => {
-                  const exCount = Array.isArray(day?.exercises) ? day.exercises.length : 0;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleStartDay(idx)}
-                      className="w-full flex items-center gap-3 rounded-atlas-control border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-4 py-3 text-left active:bg-[hsl(var(--fill)/0.4)] transition-colors"
-                    >
-                      <div className="w-7 h-7 rounded-[9px] bg-[hsl(var(--fill)/0.8)] flex items-center justify-center text-[hsl(var(--fg-3))]">
-                        <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-footnote font-semibold text-[hsl(var(--fg))] truncate">{day?.name || t('train.dayN', { n: idx + 1 })}</p>
-                        <p className="text-caption1 text-[hsl(var(--fg-3))]">{exCount} {t('train.exercises')}</p>
-                      </div>
-                      <Play className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
+        {hasPlan && days.length > 0 && (
+          <WeeklyPlanSection 
+            days={days}
+            currentDayIndex={currentDayIndex}
+            onSelectDay={handleStartDay}
+            t={t}
+          />
+        )}
 
         {/* Recent Sessions */}
         {daily.recentSessions.length > 0 && (
-          <div>
-            <p className="atlas-overline mb-2.5 px-0.5">{t('train.recent')}</p>
-            <div className="space-y-1.5">
-              {daily.recentSessions.slice(0, 5).map((s, i) => (
-                <div key={s.id || i} className="flex items-center gap-3 rounded-atlas-control border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.2)] px-4 py-3">
-                  <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))] shrink-0" strokeWidth={2} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-footnote font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || t('train.session')}</p>
-                    <p className="text-caption1 text-[hsl(var(--fg-3))]">{formatRelativeDate(s.completed_at || s.date, t)} · {formatDuration(s.duration_minutes)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RecentSessionsCompact 
+            sessions={daily.recentSessions}
+            t={t}
+          />
         )}
 
       </div>
 
-      {/* Modals — only when open */}
+      {/* Modals */}
       {showQuickWorkout && (
         <QuickWorkoutModal
           open={showQuickWorkout}
