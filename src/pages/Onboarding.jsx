@@ -867,8 +867,12 @@ export default function Onboarding() {
   };
 
   const handleSuccessDone = async () => {
-    const updatedUser = await revalidateSession();
-    navigate(ROLE_HOME[updatedUser?.atlas_role || user?.atlas_role] || ROUTES.today, { replace: true });
+    // The DB write already succeeded (saveAndFinish checked the error).
+    // Attempt a session refresh so AuthContext picks up onboarding_completed = true.
+    // If it fails (slow network, timeout), navigate anyway — the guard's
+    // localStorage fallback will let us through without touching authState.
+    try { await revalidateSession(); } catch { /* non-fatal */ }
+    navigate(ROLE_HOME[user?.atlas_role] || ROUTES.today, { replace: true });
   };
 
   const stepContent = () => {
