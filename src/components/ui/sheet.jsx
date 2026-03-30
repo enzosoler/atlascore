@@ -5,6 +5,7 @@ import { cva } from "class-variance-authority";
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useT } from "@/lib/i18nContext"
 
 const Sheet = SheetPrimitive.Root
 
@@ -44,19 +45,23 @@ const sheetVariants = cva(
   }
 )
 
-const SheetContent = React.forwardRef(({ side = "right", className, children, ...props }, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      <SheetPrimitive.Close
-        className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-transparent text-muted-foreground transition-colors hover:border-[hsl(var(--border)/0.9)] hover:bg-[hsl(var(--fill))] hover:text-foreground focus-visible:outline-none disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </SheetPrimitive.Close>
-      {children}
-    </SheetPrimitive.Content>
-  </SheetPortal>
-))
+const SheetContent = React.forwardRef(({ side = "right", className, children, ...props }, ref) => {
+  const t = useT();
+  return (
+    <SheetPortal>
+      <SheetOverlay />
+      <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
+        <SheetPrimitive.Close
+          className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-transparent text-muted-foreground transition-colors hover:border-[hsl(var(--border)/0.9)] hover:bg-[hsl(var(--fill))] hover:text-foreground focus-visible:outline-none disabled:pointer-events-none"
+          aria-label={t('common.close')}
+        >
+          <X className="h-4 w-4" />
+        </SheetPrimitive.Close>
+        {children}
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  );
+});
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({
