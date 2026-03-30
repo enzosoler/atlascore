@@ -16,6 +16,7 @@ import {
   ArrowRight, Sparkles, Calendar, TrendingUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
@@ -184,87 +185,81 @@ export default function TrainV2() {
 
         {/* Header */}
         <div>
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">{t('train.title')}</h1>
+          <h1 className="text-title3 text-[hsl(var(--fg))]">{t('train.title')}</h1>
           {hasPlan && (
-            <p className="text-[13px] text-[hsl(var(--fg-3))] mt-0.5">{daily.plan.name} · {daily.plan.frequency ?? '—'}×/week</p>
+            <p className="text-footnote text-[hsl(var(--fg-3))] mt-0.5">{daily.plan.name} · {daily.plan.frequency ?? '—'}×/week</p>
           )}
         </div>
 
         {/* AI insight */}
         {trainMessage && (
-          <div className="flex items-start gap-2.5 rounded-[14px] border border-[hsl(var(--brand-ai)/0.15)] bg-[hsl(var(--brand-ai)/0.06)] px-3.5 py-3">
+          <div className="flex items-start gap-2.5 rounded-atlas-control border border-[hsl(var(--brand-ai)/0.15)] bg-[hsl(var(--brand-ai)/0.06)] px-3.5 py-3">
             <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))] shrink-0 mt-0.5" strokeWidth={2} />
-            <p className="text-[12px] font-medium text-[hsl(var(--fg))] leading-[1.5]">{trainMessage}</p>
+            <p className="text-caption1 font-medium text-[hsl(var(--fg))] leading-[1.5]">{trainMessage}</p>
           </div>
         )}
 
         {/* Today's Workout Hero */}
         {daily.workoutDone ? (
-          <div className="rounded-[20px] border border-[hsl(var(--ok)/0.25)] bg-[hsl(var(--ok)/0.06)] p-5">
+          <div className="rounded-atlas-card border border-[hsl(var(--ok)/0.25)] bg-[hsl(var(--ok)/0.06)] p-5">
             <div className="flex items-center gap-3 mb-2">
               <CheckCircle2 className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
               <div>
-                <p className="text-[16px] font-bold text-[hsl(var(--fg))]">{t('train.sessionComplete')}</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.workout.sessionName || t('train.workout')} · {formatDuration(daily.workout.durationMinutes)}</p>
+                <p className="text-body font-bold text-[hsl(var(--fg))]">{t('train.sessionComplete')}</p>
+                <p className="text-caption1 text-[hsl(var(--fg-3))]">{daily.workout.sessionName || t('train.workout')} · {formatDuration(daily.workout.durationMinutes)}</p>
               </div>
             </div>
           </div>
         ) : hasPlan && exercises.length > 0 ? (
-          <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-5">
+          <div className="rounded-atlas-card border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{daily.plan.todayDayLabel}</p>
-                <p className="text-[18px] font-bold text-[hsl(var(--fg))] mt-1">{daily.plan.name}</p>
+                <p className="atlas-overline">{daily.plan.todayDayLabel}</p>
+                <p className="text-headline text-[hsl(var(--fg))] mt-1">{daily.plan.name}</p>
               </div>
               <div className="text-right">
-                <p className="text-[11px] text-[hsl(var(--fg-3))]">{exercises.length} {t('train.exercises')}</p>
+                <p className="text-caption1 text-[hsl(var(--fg-3))]">{exercises.length} {t('train.exercises')}</p>
               </div>
             </div>
             {/* Exercise preview */}
             <div className="space-y-1.5 mb-4">
               {exercises.slice(0, 4).map((ex, i) => (
-                <div key={i} className="flex items-center gap-2 text-[12px]">
+                <div key={i} className="flex items-center gap-2 text-caption1">
                   <span className="w-5 text-right text-[hsl(var(--fg-3))] font-medium">{i + 1}.</span>
                   <span className="text-[hsl(var(--fg))] font-medium truncate">{ex.name || t('train.exercise')}</span>
                   <span className="ml-auto text-[hsl(var(--fg-3))] shrink-0">{ex.sets || 3}×{ex.reps || '10'}</span>
                 </div>
               ))}
               {exercises.length > 4 && (
-                <p className="text-[11px] text-[hsl(var(--fg-3))] pl-7">{t('train.more', { count: exercises.length - 4 })}</p>
+                <p className="text-caption1 text-[hsl(var(--fg-3))] pl-7">{t('train.more', { count: exercises.length - 4 })}</p>
               )}
             </div>
-            <button
-              onClick={() => handleStartDay(0)}
-              className="w-full flex items-center justify-center gap-2 h-12 rounded-[14px] bg-[hsl(var(--brand))] text-white text-[15px] font-bold transition-opacity hover:opacity-90 active:opacity-75"
-            >
+            <Button size="lg" className="w-full" onClick={() => handleStartDay(0)}>
               <Play className="w-4 h-4 fill-current" /> {t('train.startWorkout')}
-            </button>
+            </Button>
           </div>
         ) : (
-          <div className="rounded-[20px] border border-dashed border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.2)] p-5 text-center">
+          <div className="rounded-atlas-card border border-dashed border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.2)] p-5 text-center">
             <Dumbbell className="w-8 h-8 text-[hsl(var(--fg-3))] mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('train.noPlanActive')}</p>
-            <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">{t('train.noPlanDesc')}</p>
-            <button
-              onClick={() => setShowPlanBuilder(true)}
-              className="mt-4 inline-flex items-center gap-2 rounded-[12px] bg-[hsl(var(--brand))] px-4 py-2.5 text-[13px] font-semibold text-white"
-            >
+            <p className="text-callout font-semibold text-[hsl(var(--fg))]">{t('train.noPlanActive')}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))] mt-1">{t('train.noPlanDesc')}</p>
+            <Button className="mt-4" onClick={() => setShowPlanBuilder(true)}>
               <Plus className="w-3.5 h-3.5" /> {t('train.createPlan')}
-            </button>
+            </Button>
           </div>
         )}
 
         {/* Quick Workout — ALWAYS visible */}
         <button
           onClick={() => setShowQuickWorkout(true)}
-          className="w-full flex items-center gap-3.5 rounded-[18px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.06)] px-4 py-4 text-left active:bg-[hsl(var(--brand)/0.12)] transition-colors"
+          className="w-full flex items-center gap-3.5 rounded-atlas-card border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.06)] px-4 py-4 text-left active:bg-[hsl(var(--brand)/0.12)] transition-colors"
         >
-          <div className="w-10 h-10 rounded-[12px] bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-atlas-control bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
             <Zap className="w-5 h-5 text-[hsl(var(--brand))]" strokeWidth={2} />
           </div>
           <div className="flex-1">
-            <p className="text-[14px] font-bold text-[hsl(var(--fg))]">{t('train.quickWorkout')}</p>
-            <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5">{t('train.quickWorkoutDesc')}</p>
+            <p className="text-subhead font-bold text-[hsl(var(--fg))]">{t('train.quickWorkout')}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))] mt-0.5">{t('train.quickWorkoutDesc')}</p>
           </div>
           <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
         </button>
@@ -275,7 +270,7 @@ export default function TrainV2() {
           if (days.length === 0) return null;
           return (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5 px-0.5">{t('train.weeklyPlan')}</p>
+              <p className="atlas-overline mb-2.5 px-0.5">{t('train.weeklyPlan')}</p>
               <div className="space-y-1.5">
                 {days.map((day, idx) => {
                   const exCount = Array.isArray(day?.exercises) ? day.exercises.length : 0;
@@ -283,14 +278,14 @@ export default function TrainV2() {
                     <button
                       key={idx}
                       onClick={() => handleStartDay(idx)}
-                      className="w-full flex items-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-4 py-3 text-left active:bg-[hsl(var(--fill)/0.4)] transition-colors"
+                      className="w-full flex items-center gap-3 rounded-atlas-control border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-4 py-3 text-left active:bg-[hsl(var(--fill)/0.4)] transition-colors"
                     >
                       <div className="w-7 h-7 rounded-[9px] bg-[hsl(var(--fill)/0.8)] flex items-center justify-center text-[hsl(var(--fg-3))]">
                         <Calendar className="w-3.5 h-3.5" strokeWidth={2} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-[hsl(var(--fg))] truncate">{day?.name || t('train.dayN', { n: idx + 1 })}</p>
-                        <p className="text-[11px] text-[hsl(var(--fg-3))]">{exCount} {t('train.exercises')}</p>
+                        <p className="text-footnote font-semibold text-[hsl(var(--fg))] truncate">{day?.name || t('train.dayN', { n: idx + 1 })}</p>
+                        <p className="text-caption1 text-[hsl(var(--fg-3))]">{exCount} {t('train.exercises')}</p>
                       </div>
                       <Play className="w-3.5 h-3.5 text-[hsl(var(--fg-3))]" strokeWidth={2} />
                     </button>
@@ -304,14 +299,14 @@ export default function TrainV2() {
         {/* Recent Sessions */}
         {daily.recentSessions.length > 0 && (
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] mb-2.5 px-0.5">{t('train.recent')}</p>
+            <p className="atlas-overline mb-2.5 px-0.5">{t('train.recent')}</p>
             <div className="space-y-1.5">
               {daily.recentSessions.slice(0, 5).map((s, i) => (
-                <div key={s.id || i} className="flex items-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.2)] px-4 py-3">
+                <div key={s.id || i} className="flex items-center gap-3 rounded-atlas-control border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.2)] px-4 py-3">
                   <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))] shrink-0" strokeWidth={2} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || t('train.session')}</p>
-                    <p className="text-[11px] text-[hsl(var(--fg-3))]">{formatRelativeDate(s.completed_at || s.date, t)} · {formatDuration(s.duration_minutes)}</p>
+                    <p className="text-footnote font-medium text-[hsl(var(--fg))] truncate">{s.workout_name || s.name || t('train.session')}</p>
+                    <p className="text-caption1 text-[hsl(var(--fg-3))]">{formatRelativeDate(s.completed_at || s.date, t)} · {formatDuration(s.duration_minutes)}</p>
                   </div>
                 </div>
               ))}
