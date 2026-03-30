@@ -2103,7 +2103,41 @@
     "fallback_training_solid": "Training adherence is solid at {pct}%.",
     "fallback_training_low": "Training adherence dropped to {pct}%.",
     "rate_stable": "Stable",
-    "target_label": "Target: {value} {unit}"
+    "target_label": "Target: {value} {unit}",
+    "stats": {
+      "measurements": "Measurements",
+      "logged": "logged",
+      "workouts": "Workouts",
+      "sessions": "sessions"
+    },
+    "empty": {
+      "title": "No progress data yet",
+      "desc": "Track your body composition, workouts, and nutrition to visualize your journey and unlock AI-powered insights.",
+      "cta": "Add first measurement"
+    },
+    "action": {
+      "logWeight": "Start tracking weight",
+      "logWeightDesc": "Log your weight to begin seeing trends",
+      "addNow": "Add now",
+      "takePhoto": "Take progress photo",
+      "takePhotoDesc": "Visual checkpoints show what the scale can't",
+      "addPhoto": "Add photo",
+      "logWorkout": "Log a workout",
+      "logWorkoutDesc": "Training data completes your progress picture",
+      "trainNow": "Train now",
+      "logNutrition": "Track nutrition",
+      "logNutritionDesc": "Meal logging unlocks calorie and protein trends",
+      "logMeal": "Log meal",
+      "keepGoing": "Keep building your data",
+      "keepGoingDesc": "Consistency creates the best insights",
+      "viewAll": "View all"
+    },
+    "celebration": {
+      "title": "You're building great momentum!",
+      "subtitle": "Your consistency is creating meaningful progress data",
+      "measurements": "measurements logged",
+      "consistency": "Strong adherence"
+    }
   },
   "progressPhotos": {
     "eyebrow": "Visual Progress",

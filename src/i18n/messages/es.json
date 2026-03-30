@@ -1932,7 +1932,41 @@
     "fallback_training_solid": "La adherencia al entrenamiento es sólida al {pct}%.",
     "fallback_training_low": "La adherencia al entrenamiento bajó al {pct}%.",
     "rate_stable": "Estable",
-    "target_label": "Objetivo: {value} {unit}"
+    "target_label": "Objetivo: {value} {unit}",
+    "stats": {
+      "measurements": "Mediciones",
+      "logged": "registradas",
+      "workouts": "Entrenamientos",
+      "sessions": "sesiones"
+    },
+    "empty": {
+      "title": "Aún no hay datos de progreso",
+      "desc": "Registra tu composición corporal, entrenamientos y nutrición para visualizar tu trayectoria y desbloquear insights con IA.",
+      "cta": "Agregar primera medición"
+    },
+    "action": {
+      "logWeight": "Empieza a registrar peso",
+      "logWeightDesc": "Registra tu peso para comenzar a ver tendencias",
+      "addNow": "Agregar ahora",
+      "takePhoto": "Tomar foto de progreso",
+      "takePhotoDesc": "Los checkpoints visuales muestran lo que la balanza no puede",
+      "addPhoto": "Agregar foto",
+      "logWorkout": "Registrar un entrenamiento",
+      "logWorkoutDesc": "Los datos de entrenamiento completan tu cuadro de progreso",
+      "trainNow": "Entrenar ahora",
+      "logNutrition": "Registrar nutrición",
+      "logNutritionDesc": "El registro de comidas desbloquea tendencias de calorías y proteína",
+      "logMeal": "Registrar comida",
+      "keepGoing": "Sigue construyendo tus datos",
+      "keepGoingDesc": "La consistencia crea los mejores insights",
+      "viewAll": "Ver todo"
+    },
+    "celebration": {
+      "title": "¡Estás construyendo gran momentum!",
+      "subtitle": "Tu consistencia está creando datos de progreso significativos",
+      "measurements": "mediciones registradas",
+      "consistency": "Gran adherencia"
+    }
   },
   "progressPhotos": {
     "eyebrow": "Progreso Visual",

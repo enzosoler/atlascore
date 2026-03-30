@@ -14,7 +14,8 @@ import {
 import { format, subDays, parseISO, isValid } from 'date-fns';
 import {
   TrendingDown, TrendingUp, Minus, ArrowRight,
-  Camera, Sparkles, FlaskConical,
+  Camera, Sparkles, FlaskConical, Plus, Target,
+  Zap, Dumbbell, UtensilsCrossed, Scale,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SafePageBoundary } from '@/components/shared/StablePage';
@@ -26,6 +27,7 @@ import { getMeasurementFieldValue } from '@/lib/measurementModel';
 import { ROUTES } from '@/lib/routes';
 import { useAICoach } from '@/hooks/useAICoach';
 import { useT } from '@/lib/i18nContext';
+import { cn } from '@/lib/utils';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -65,6 +67,202 @@ function linearRegression(points) {
     slope: (n * sumXY - sumX * sumY) / denom,
     intercept: (sumY * sumX2 - sumX * sumXY) / (n * denom),
   };
+}
+
+// ─── Progress Stats Header ────────────────────────────────────────────────────
+
+function ProgressStatsHeader({ measurements, workoutLogs, foodLogs, photos, days, t }) {
+  const stats = useMemo(() => {
+    const measurementCount = measurements.filter((m) => {
+      const d = safeDate(m.date);
+      return d && d >= subDays(new Date(), days);
+    }).length;
+    
+    const workoutCount = workoutLogs.length;
+    const nutritionDays = new Set(foodLogs.map((l) => l.date?.split('T')[0]).filter(Boolean)).size;
+    const hasPhotos = photos.length > 0;
+    
+    return { measurementCount, workoutCount, nutritionDays, hasPhotos };
+  }, [measurements, workoutLogs, foodLogs, photos, days]);
+  
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('progress.stats.measurements')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--brand))] mt-1">{stats.measurementCount}</p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('progress.stats.logged')}</p>
+      </div>
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('progress.stats.workouts')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--ok))] mt-1">{stats.workoutCount}</p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('progress.stats.sessions')}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Progress Empty State ─────────────────────────────────────────────────────
+
+function ProgressEmptyState({ hasNoData, t }) {
+  if (!hasNoData) return null;
+  
+  return (
+    <div className="rounded-2xl bg-gradient-to-b from-[hsl(var(--fill)/0.5)] to-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-6 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
+        <TrendingUp className="w-8 h-8 text-[hsl(var(--brand))]" strokeWidth={1.5} />
+      </div>
+      <p className="text-title3 font-bold text-[hsl(var(--fg))] mb-2">{t('progress.empty.title')}</p>
+      <p className="text-body text-[hsl(var(--fg-2))] mb-5 max-w-[280px] mx-auto">{t('progress.empty.desc')}</p>
+      <Link 
+        to={ROUTES.measurements}
+        className="inline-flex items-center gap-2 rounded-xl bg-[hsl(var(--brand))] text-white px-6 py-3 text-[14px] font-semibold hover:bg-[hsl(var(--brand)/0.9)] transition-colors shadow-[0_4px_14px_hsl(var(--brand)/0.3)]"
+      >
+        <Plus className="w-4 h-4" />
+        {t('progress.empty.cta')}
+      </Link>
+    </div>
+  );
+}
+
+// ─── Next Action Card ─────────────────────────────────────────────────────────
+
+function NextActionCard({ weightData, workoutLogs, foodLogs, photos, t }) {
+  const hasWeight = weightData.length >= 2;
+  const hasWorkouts = workoutLogs.length > 0;
+  const hasNutrition = foodLogs.length > 0;
+  const hasPhotos = photos.length > 0;
+  
+  let action = null;
+  let priority = 'medium';
+  
+  if (!hasWeight) {
+    action = {
+      title: t('progress.action.logWeight'),
+      subtitle: t('progress.action.logWeightDesc'),
+      icon: Scale,
+      cta: t('progress.action.addNow'),
+    };
+    priority = 'high';
+  } else if (!hasPhotos) {
+    action = {
+      title: t('progress.action.takePhoto'),
+      subtitle: t('progress.action.takePhotoDesc'),
+      icon: Camera,
+      cta: t('progress.action.addPhoto'),
+    };
+    priority = 'medium';
+  } else if (!hasWorkouts) {
+    action = {
+      title: t('progress.action.logWorkout'),
+      subtitle: t('progress.action.logWorkoutDesc'),
+      icon: Dumbbell,
+      cta: t('progress.action.trainNow'),
+    };
+    priority = 'medium';
+  } else if (!hasNutrition) {
+    action = {
+      title: t('progress.action.logNutrition'),
+      subtitle: t('progress.action.logNutritionDesc'),
+      icon: UtensilsCrossed,
+      cta: t('progress.action.logMeal'),
+    };
+    priority = 'low';
+  } else {
+    action = {
+      title: t('progress.action.keepGoing'),
+      subtitle: t('progress.action.keepGoingDesc'),
+      icon: Sparkles,
+      cta: t('progress.action.viewAll'),
+    };
+    priority = 'low';
+  }
+  
+  if (!action) return null;
+  
+  const Icon = action.icon;
+  const isViewAll = action.cta === t('progress.action.viewAll');
+  
+  const buttonClass = cn(
+    "rounded-xl px-4 py-2 text-[13px] font-semibold transition-colors shrink-0",
+    priority === 'high' && "bg-[hsl(var(--err))] text-white hover:bg-[hsl(var(--err)/0.9)]",
+    priority === 'medium' && "bg-[hsl(var(--warn))] text-white hover:bg-[hsl(var(--warn)/0.9)]",
+    priority === 'low' && "bg-[hsl(var(--success))] text-white hover:bg-[hsl(var(--success)/0.9)]",
+  );
+  
+  return (
+    <div className={cn(
+      "rounded-2xl border p-4",
+      priority === 'high' && "bg-[hsl(var(--err)/0.06)] border-[hsl(var(--err)/0.2)]",
+      priority === 'medium' && "bg-[hsl(var(--warn)/0.06)] border-[hsl(var(--warn)/0.2)]",
+      priority === 'low' && "bg-[hsl(var(--success)/0.06)] border-[hsl(var(--success)/0.2)]",
+    )}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center",
+            priority === 'high' && "bg-[hsl(var(--err)/0.15)] text-[hsl(var(--err))]",
+            priority === 'medium' && "bg-[hsl(var(--warn)/0.15)] text-[hsl(var(--warn))]",
+            priority === 'low' && "bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success))]",
+          )}>
+            <Icon className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-subhead font-bold text-[hsl(var(--fg))]">{action.title}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))]">{action.subtitle}</p>
+          </div>
+        </div>
+        {isViewAll ? (
+          <Link to={ROUTES.measurements} className={buttonClass}>
+            {action.cta}
+          </Link>
+        ) : (
+          <Link to={ROUTES.measurements} className={buttonClass}>
+            {action.cta}
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Goal Celebration Card ────────────────────────────────────────────────────
+
+function GoalCelebrationCard({ weightData, adherence, t }) {
+  const hasWeightGoal = weightData.length >= 2;
+  const strongAdherence = adherence.nutrition >= 80 && adherence.training >= 70;
+  
+  if (!hasWeightGoal && !strongAdherence) return null;
+  
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--ok)/0.12)] via-[hsl(var(--ok)/0.06)] to-[hsl(var(--card))] border border-[hsl(var(--ok)/0.3)] p-5">
+      <div className="flex items-start gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--ok))] flex items-center justify-center shadow-lg shadow-[hsl(var(--ok)/0.3)]">
+          <Target className="w-7 h-7 text-white" strokeWidth={2.5} />
+        </div>
+        <div className="flex-1">
+          <p className="text-title3 font-bold text-[hsl(var(--fg))]">{t('progress.celebration.title')}</p>
+          <p className="text-body text-[hsl(var(--fg-2))] mt-1">{t('progress.celebration.subtitle')}</p>
+          <div className="flex items-center gap-4 mt-3">
+            {hasWeightGoal && (
+              <div className="flex items-center gap-1.5 text-caption1 text-[hsl(var(--fg-3))]">
+                <TrendingUp className="w-3.5 h-3.5" />
+                {weightData.length} {t('progress.celebration.measurements')}
+              </div>
+            )}
+            {strongAdherence && (
+              <div className="flex items-center gap-1.5 text-caption1 text-[hsl(var(--fg-3))]">
+                <Zap className="w-3.5 h-3.5" />
+                {t('progress.celebration.consistency')}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 pt-4 border-t border-[hsl(var(--ok)/0.2)]">
+        <p className="text-caption1 text-[hsl(var(--fg-3))] text-center">{t('progress.celebration.message')}</p>
+      </div>
+    </div>
+  );
 }
 
 // ─── Chart tooltip ─────────────────────────────────────────────────────────────
@@ -323,6 +521,8 @@ function ProgressContent() {
   }, [ai.progress, weightData, weightSlope, adherence]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
+  const hasAnyData = weightData.length > 0 || workoutLogs.length > 0 || foodLogs.length > 0 || photos.length > 0;
+  
   return (
     <div className="min-h-full bg-[hsl(var(--bg))]">
       <div className="mx-auto max-w-lg px-4 pt-6 pb-8 space-y-6">
@@ -333,53 +533,95 @@ function ProgressContent() {
           <RangeTabs selected={range} onChange={setRange} />
         </div>
 
-        {/* ── Weight Trend ──────────────────────────────────────── */}
-        <ChartCard className="py-5">
-          <ChartHeader label={t('progress.chart_weight')} value={weightData.at(-1)?.value ?? null} unit="kg"
-            badge={weightData.length >= 2 && <RateBadge slope={weightSlope} />} />
-          <div className="mt-4">
-            <TrendLineChart data={weightData} dataKey="value" gradientId="wg" color="hsl(var(--brand))" days={days} unit="kg" showRegression emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
-          </div>
-        </ChartCard>
+        {/* 1 — Stats Header */}
+        <ProgressStatsHeader 
+          measurements={measurements}
+          workoutLogs={workoutLogs}
+          foodLogs={foodLogs}
+          photos={photos}
+          days={days}
+          t={t}
+        />
 
-        {/* ── Body Fat Trend ────────────────────────────────────── */}
-        {bfData.length > 0 && (
+        {/* 2 — Empty State (if no data) */}
+        {!hasAnyData && (
+          <ProgressEmptyState 
+            hasNoData={!hasAnyData}
+            t={t}
+          />
+        )}
+
+        {/* 3 — Goal Celebration */}
+        <GoalCelebrationCard 
+          weightData={weightData}
+          adherence={adherence}
+          t={t}
+        />
+
+        {/* 4 — Next Action Guidance */}
+        <NextActionCard 
+          weightData={weightData}
+          workoutLogs={workoutLogs}
+          foodLogs={foodLogs}
+          photos={photos}
+          t={t}
+        />
+
+        {/* 5 — Weight Trend (only if has data) */}
+        {weightData.length > 0 && (
           <ChartCard className="py-5">
-            <ChartHeader label={t('progress.chart_body_fat')} value={bfData.at(-1)?.value ?? null} unit="%" />
+            <ChartHeader label={t('progress.chart_weight')} value={weightData.at(-1)?.value ?? null} unit="kg" badge={null} sublabel={null}
+            />
             <div className="mt-4">
-              <TrendLineChart data={bfData} dataKey="value" gradientId="bf" color="hsl(var(--warn))" days={days} unit="%" emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
+              <TrendLineChart data={weightData} dataKey="value" gradientId="wg" color="hsl(var(--brand))" days={days} unit="kg" showRegression={true} emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
             </div>
           </ChartCard>
         )}
 
-        {/* ── Calories vs Target ────────────────────────────────── */}
-        <ChartCard className="py-5">
-          <ChartHeader label={t('progress.chart_calories')} value={calorieData.filter((d) => d.calories != null).at(-1)?.calories ?? null} unit="kcal"
-            sublabel={kcalTarget > 0 ? t('progress.target_label').replace('{value}', kcalTarget).replace('{unit}', 'kcal') : undefined} />
-          <div className="mt-4">
-            <TargetBarChart data={calorieData} dataKey="calories" targetValue={kcalTarget} color="hsl(var(--brand))" days={days} unit="kcal" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
-          </div>
-        </ChartCard>
+        {/* 6 — Body Fat Trend */}
+        {bfData.length > 0 && (
+          <ChartCard className="py-5">
+            <ChartHeader label={t('progress.chart_body_fat')} value={bfData.at(-1)?.value ?? null} unit="%" badge={null} sublabel={null}
+            />
+            <div className="mt-4">
+              <TrendLineChart data={bfData} dataKey="value" gradientId="bf" color="hsl(var(--warn))" days={days} unit="%" showRegression={false} emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />
+            </div>
+          </ChartCard>
+        )}
 
-        {/* ── Protein vs Target ─────────────────────────────────── */}
-        <ChartCard className="py-5">
-          <ChartHeader label={t('progress.chart_protein')} value={proteinData.filter((d) => d.protein != null).at(-1)?.protein ?? null} unit="g"
-            sublabel={proteinTarget > 0 ? t('progress.target_label').replace('{value}', proteinTarget).replace('{unit}', 'g') : undefined} />
-          <div className="mt-4">
-            <TargetBarChart data={proteinData} dataKey="protein" targetValue={proteinTarget} color="hsl(var(--ok))" days={days} unit="g" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
-          </div>
-        </ChartCard>
+        {/* 7 — Calories vs Target */}
+        {foodLogs.length > 0 && (
+          <ChartCard className="py-5">
+            <ChartHeader label={t('progress.chart_calories')} value={calorieData.filter((d) => d.calories != null).at(-1)?.calories ?? null} unit="kcal" badge={null} sublabel={kcalTarget > 0 ? t('progress.target_label').replace('{value}', kcalTarget).replace('{unit}', 'kcal') : null}
+            />
+            <div className="mt-4">
+              <TargetBarChart data={calorieData} dataKey="calories" targetValue={kcalTarget} color="hsl(var(--brand))" days={days} unit="kcal" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
+            </div>
+          </ChartCard>
+        )}
 
-        {/* ── Workout Trend ─────────────────────────────────────── */}
+        {/* 8 — Protein vs Target */}
+        {foodLogs.length > 0 && (
+          <ChartCard className="py-5">
+            <ChartHeader label={t('progress.chart_protein')} value={proteinData.filter((d) => d.protein != null).at(-1)?.protein ?? null} unit="g" badge={null} sublabel={proteinTarget > 0 ? t('progress.target_label').replace('{value}', proteinTarget).replace('{unit}', 'g') : null}
+            />
+            <div className="mt-4">
+              <TargetBarChart data={proteinData} dataKey="protein" targetValue={proteinTarget} color="hsl(var(--ok))" days={days} unit="g" emptyLabel={t('progress.no_data_period')} emptyCta={t('progress.start_logging')} noDataLabel={t('progress.no_data_tooltip')} />
+            </div>
+          </ChartCard>
+        )}
+
+        {/* 9 — Workout Trend */}
         {workoutWeekData.length > 0 && (
           <ChartCard className="py-5">
-            <ChartHeader label={t('progress.chart_workouts_week')} />
+            <ChartHeader label={t('progress.chart_workouts_week')} value={null} unit="" badge={null} sublabel={null}
+            />
             <div className="mt-4">
               <ResponsiveContainer width="100%" height={90}>
                 <BarChart data={workoutWeekData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                   <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} width={28} tickCount={3} />
-                  <Tooltip content={<Tip unit="sessions" />} />
+                  <Tooltip content={<Tip unit="sessions" fmt={(v) => v != null ? `${Math.round(v)} sessions` : 'No data'} />} />
                   <Bar dataKey="count" fill="hsl(var(--ok))" fillOpacity={0.75} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -387,29 +629,33 @@ function ProgressContent() {
           </ChartCard>
         )}
 
-        {/* ── Adherence ─────────────────────────────────────────── */}
-        <ChartCard className="py-5">
-          <ChartHeader label={t('progress.chart_adherence')} />
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            {[
-              { label: t('progress.chart_adherence_nutrition'), pct: adherence.nutrition, color: 'hsl(var(--brand))' },
-              { label: t('progress.chart_adherence_training'), pct: adherence.training, color: 'hsl(var(--ok))' },
-            ].map(({ label, pct, color }) => (
-              <div key={label} className="rounded-[14px] bg-[hsl(var(--fill)/0.4)] px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</p>
-                <p className="mt-2 text-[1.75rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">{pct}%</p>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--fill)/0.8)]">
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />
+        {/* 10 — Adherence */}
+        {hasAnyData && (
+          <ChartCard className="py-5">
+            <ChartHeader label={t('progress.chart_adherence')} value={null} unit="" badge={null} sublabel={null}
+            />
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              {[
+                { label: t('progress.chart_adherence_nutrition'), pct: adherence.nutrition, color: 'hsl(var(--brand))' },
+                { label: t('progress.chart_adherence_training'), pct: adherence.training, color: 'hsl(var(--ok))' },
+              ].map(({ label, pct, color }) => (
+                <div key={label} className="rounded-[14px] bg-[hsl(var(--fill)/0.4)] px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</p>
+                  <p className="mt-2 text-[1.75rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">{pct}%</p>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--fill)/0.8)]">
+                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </ChartCard>
+              ))}
+            </div>
+          </ChartCard>
+        )}
 
-        {/* ── Photos Timeline ───────────────────────────────────── */}
+        {/* 11 — Photos Timeline */}
         {photos.length > 0 && (
           <ChartCard className="py-5">
-            <ChartHeader label={t('progress.chart_progress_photos')} />
+            <ChartHeader label={t('progress.chart_progress_photos')} value={null} unit="" badge={null} sublabel={null}
+            />
             <div className="mt-4 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
               {photos.slice(0, 6).map((p) => (
                 <div key={p.id} className="w-16 h-20 rounded-[10px] bg-[hsl(var(--fill)/0.6)] shrink-0 overflow-hidden">
@@ -423,7 +669,7 @@ function ProgressContent() {
           </ChartCard>
         )}
 
-        {/* ── AI Interpretation ──────────────────────────────────── */}
+        {/* 12 — AI Interpretation */}
         {insights.length > 0 && (
           <div className="rounded-[20px] border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden"
                style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
@@ -443,7 +689,7 @@ function ProgressContent() {
           </div>
         )}
 
-        {/* ── Quick links ───────────────────────────────────────── */}
+        {/* 13 — Quick links */}
         <div className="flex gap-3">
           <Link to={ROUTES.labExams}
             className="flex-1 flex items-center justify-center gap-2 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] py-3 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
