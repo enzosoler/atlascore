@@ -3238,5 +3238,63 @@
       "apply": "Aplicar metas",
       "fillFields": "Preencha todos os campos para ver o resultado."
     }
+  },
+  "styleguide": {
+    "title": "Sistema de Design",
+    "subtitle": "Tokens e componentes reais — sem valores fixos.",
+    "sections": {
+      "colors": "Cores",
+      "surfaces": "Superfícies",
+      "borders": "Bordas & Ring",
+      "typography": "Tipografia",
+      "buttons": "Botões",
+      "inputs": "Campos",
+      "radius": "Raio & Sombras"
+    },
+    "tokens": {
+      "primary": "Primário",
+      "secondary": "Secundário",
+      "muted": "Suave",
+      "accent": "Destaque",
+      "destructive": "Destrutivo",
+      "success": "Sucesso",
+      "warning": "Alerta",
+      "ai": "IA",
+      "bgApp": "Fundo App",
+      "bgSurface": "Superfície",
+      "bgSurface2": "Superfície 2",
+      "card": "Card",
+      "cardElevated": "Card Elevado",
+      "border": "Borda",
+      "borderStrong": "Borda Forte",
+      "ring": "Ring"
+    },
+    "variants": {
+      "default": "Padrão",
+      "outline": "Contorno",
+      "secondary": "Secundário",
+      "ghost": "Ghost",
+      "destructive": "Destrutivo",
+      "link": "Link"
+    },
+    "sizes": {
+      "lg": "Grande",
+      "default": "Padrão",
+      "sm": "Pequeno",
+      "disabled": "Desabilitado"
+    },
+    "inputLabels": {
+      "text": "Campo de Texto",
+      "textPlaceholder": "Digite algo…",
+      "disabled": "Campo Desabilitado",
+      "disabledPlaceholder": "Não disponível",
+      "textarea": "Área de Texto",
+      "textareaPlaceholder": "Texto em múltiplas linhas…",
+      "select": "Seletor",
+      "selectPlaceholder": "Escolha uma opção",
+      "optionA": "Opção A",
+      "optionB": "Opção B",
+      "optionC": "Opção C"
+    }
   }
 }

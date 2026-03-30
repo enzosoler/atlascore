@@ -3240,5 +3240,63 @@
       "apply": "Apply targets",
       "fillFields": "Fill all fields to see the result."
     }
+  },
+  "styleguide": {
+    "title": "Design System",
+    "subtitle": "Real tokens and components — no hardcoded values.",
+    "sections": {
+      "colors": "Colors",
+      "surfaces": "Surfaces",
+      "borders": "Borders & Ring",
+      "typography": "Typography",
+      "buttons": "Buttons",
+      "inputs": "Inputs",
+      "radius": "Radius & Shadows"
+    },
+    "tokens": {
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "muted": "Muted",
+      "accent": "Accent",
+      "destructive": "Destructive",
+      "success": "Success",
+      "warning": "Warning",
+      "ai": "AI",
+      "bgApp": "Background App",
+      "bgSurface": "Surface",
+      "bgSurface2": "Surface 2",
+      "card": "Card",
+      "cardElevated": "Card Elevated",
+      "border": "Border",
+      "borderStrong": "Border Strong",
+      "ring": "Ring"
+    },
+    "variants": {
+      "default": "Default",
+      "outline": "Outline",
+      "secondary": "Secondary",
+      "ghost": "Ghost",
+      "destructive": "Destructive",
+      "link": "Link"
+    },
+    "sizes": {
+      "lg": "Large",
+      "default": "Default",
+      "sm": "Small",
+      "disabled": "Disabled"
+    },
+    "inputLabels": {
+      "text": "Text Input",
+      "textPlaceholder": "Type something…",
+      "disabled": "Disabled Input",
+      "disabledPlaceholder": "Not available",
+      "textarea": "Textarea",
+      "textareaPlaceholder": "Multi-line text…",
+      "select": "Select",
+      "selectPlaceholder": "Choose an option",
+      "optionA": "Option A",
+      "optionB": "Option B",
+      "optionC": "Option C"
+    }
   }
 }

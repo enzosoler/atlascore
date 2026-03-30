@@ -110,6 +110,9 @@ const PageNotFound = lazy(() => import('./lib/PageNotFound'));
 // Entry & Onboarding Screens
 const SplashScreen = lazy(() => import('@/pages/SplashScreen'));
 
+// Dev-only: Design System Styleguide
+const StyleguidePage = import.meta.env.DEV ? lazy(() => import('@/pages/styleguide/StyleguidePage')) : null;
+
 // Monetization Screens
 const UpgradePrompts = lazy(() => import('@/pages/UpgradePrompts'));
 const BillingManagement = lazy(() => import('@/pages/BillingManagement'));
@@ -259,6 +262,11 @@ const AppRoutes = () => (
 
       {/* Entry & Onboarding */}
       <Route path="/splash" element={<SplashScreen />} />
+
+      {/* Dev-only: Design System Styleguide */}
+      {import.meta.env.DEV && StyleguidePage && (
+        <Route path="/styleguide" element={<StyleguidePage />} />
+      )}
 
       {/* Monetization */}
       <Route path="/upgrade" element={<UpgradePrompts />} />
