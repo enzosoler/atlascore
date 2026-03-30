@@ -2403,6 +2403,40 @@
     "food_save_error": "Could not save {name}. Try again.",
     "food_removed": "{name} was removed.",
     "food_remove_error": "Could not remove {name}.",
+    "mealCard": {
+      "kcal": "kcal",
+      "proteinAbbr": "P",
+      "carbsAbbr": "C",
+      "fatAbbr": "F"
+    },
+    "foodPicker": {
+      "search": "Search",
+      "describe": "Describe",
+      "scan": "Scan"
+    },
+    "manualEntry": {
+      "title": "Add manually",
+      "foodName": "Food name",
+      "foodNamePlaceholder": "Example: Homemade roast chicken",
+      "amount": "Amount",
+      "unit": "Unit",
+      "unitPlaceholder": "g, ml, serving...",
+      "caloriesLabel": "Calories (kcal)",
+      "proteinLabel": "Protein (g)",
+      "carbsLabel": "Carbs (g)",
+      "fatLabel": "Fat (g)",
+      "fiberLabel": "Fiber (g)",
+      "addFood": "Add food",
+      "fillIn": "Please fill in: {fields}"
+    },
+    "quickLog": {
+      "mealLogged": "Meal logged!",
+      "addAtLeastOne": "Add at least one food item",
+      "foodNamePlaceholder": "Food name",
+      "amountPlaceholder": "Amount",
+      "addFood": "Add Food",
+      "saveMeal": "Save Meal"
+    },
     "items_updated": "{n} food item(s) updated in {meal}.",
     "items_added": "{n} food item(s) added to {meal}.",
     "macro_protein_prioritize": "Prioritize protein in your next meal",

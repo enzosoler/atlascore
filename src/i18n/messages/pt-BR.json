@@ -2404,6 +2404,40 @@
     "food_save_error": "Não foi possível salvar {name}. Tente novamente.",
     "food_removed": "{name} foi removido.",
     "food_remove_error": "Não foi possível remover {name}.",
+    "mealCard": {
+      "kcal": "kcal",
+      "proteinAbbr": "P",
+      "carbsAbbr": "C",
+      "fatAbbr": "G"
+    },
+    "foodPicker": {
+      "search": "Buscar",
+      "describe": "Descrever",
+      "scan": "Escanear"
+    },
+    "manualEntry": {
+      "title": "Adicionar manualmente",
+      "foodName": "Nome do alimento",
+      "foodNamePlaceholder": "Ex: Frango assado caseiro",
+      "amount": "Quantidade",
+      "unit": "Unidade",
+      "unitPlaceholder": "g, ml, porção...",
+      "caloriesLabel": "Calorias (kcal)",
+      "proteinLabel": "Proteína (g)",
+      "carbsLabel": "Carboidratos (g)",
+      "fatLabel": "Gordura (g)",
+      "fiberLabel": "Fibra (g)",
+      "addFood": "Adicionar alimento",
+      "fillIn": "Preencha: {fields}"
+    },
+    "quickLog": {
+      "mealLogged": "Refeição registrada!",
+      "addAtLeastOne": "Adicione pelo menos um alimento",
+      "foodNamePlaceholder": "Nome do alimento",
+      "amountPlaceholder": "Quantidade",
+      "addFood": "Adicionar",
+      "saveMeal": "Salvar refeição"
+    },
     "items_updated": "{n} item(s) atualizado(s) em {meal}.",
     "items_added": "{n} item(s) adicionado(s) a {meal}.",
     "macro_protein_prioritize": "Priorize proteína na próxima refeição",

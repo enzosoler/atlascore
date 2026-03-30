@@ -3,14 +3,17 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Search, Sparkles, Camera } from 'lucide-react';
 import FoodSearch from './FoodSearch';
 import AIFoodInput from './AIFoodInput';
-
-const TABS = [
-  { id: 'search', label: 'Search', icon: Search },
-  { id: 'ai', label: 'Describe', icon: Sparkles },
-];
+import { useI18n } from '@/lib/i18nContext';
+import { cn } from '@/lib/utils';
 
 export default function FoodPickerSheet({ open, onOpenChange, onFoodAdded, onOpenCamera }) {
+  const { t } = useI18n();
   const [tab, setTab] = useState('search');
+
+  const TABS = [
+    { id: 'search', label: t('nutrition.foodPicker.search'), icon: Search },
+    { id: 'ai', label: t('nutrition.foodPicker.describe'), icon: Sparkles },
+  ];
 
   const handleAIFoods = (foods) => {
     foods.forEach(f => onFoodAdded({
@@ -32,47 +35,37 @@ export default function FoodPickerSheet({ open, onOpenChange, onFoodAdded, onOpe
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="mobile-sheet">
-        {/* Tab bar */}
-        <div className="flex border-b border-border shrink-0 px-4 pt-1">
+        <div className="flex border-b border-[hsl(var(--border))] shrink-0 px-4 pt-1">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
+              className={cn(
+                'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors',
                 tab === id
                   ? 'border-[hsl(var(--brand))] text-[hsl(var(--brand))]'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+                  : 'border-transparent text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'
+              )}
             >
               <Icon className="w-3.5 h-3.5" />
               {label}
             </button>
           ))}
-          {/* Camera — closes sheet, opens camera modal in parent */}
           <button
             onClick={() => { onOpenChange(false); onOpenCamera?.(); }}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[13px] font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground -mb-px transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[13px] font-medium border-b-2 border-transparent text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] -mb-px transition-colors"
           >
             <Camera className="w-3.5 h-3.5" />
-            Scan
+            {t('nutrition.foodPicker.scan')}
           </button>
         </div>
 
-        {/* Scrollable body */}
         <div className="mobile-sheet-body p-4">
           {tab === 'search' && (
-            <FoodSearch
-              onSelectFood={(f) => {
-                onFoodAdded(f);
-                onOpenChange(false);
-              }}
-            />
+            <FoodSearch onSelectFood={(f) => { onFoodAdded(f); onOpenChange(false); }} />
           )}
           {tab === 'ai' && (
-            <AIFoodInput
-              onFoodsDetected={handleAIFoods}
-              onFallbackToSearch={() => setTab('search')}
-            />
+            <AIFoodInput onFoodsDetected={handleAIFoods} onFallbackToSearch={() => setTab('search')} />
           )}
         </div>
 
