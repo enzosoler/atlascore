@@ -25,5 +25,5 @@ export function WebOnlyRoute({ children, fallback = null }) {
 
   // Auth-aware redirect (for landing page, blog, etc.)
   if (authState === 'loading') return null;
-  return <Navigate to={isAuthenticated ? '/Today' : '/welcome'} replace />;
+  return <Navigate to={isAuthenticated ? '/Today' : '/auth'} replace />;
 }
