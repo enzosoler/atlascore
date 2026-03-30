@@ -254,7 +254,7 @@ serve(async (req) => {
     historyRes,
   ] = await Promise.all([
     supabase.from('profiles')
-      .select('full_name, calories_target, protein_target, training_goal, profile_data')
+      .select('full_name, profile_data')
       .eq('id', userId).single(),
 
     supabase.from('food_logs')
@@ -265,10 +265,10 @@ serve(async (req) => {
     supabase.from('workout_logs')
       .select('workout_name, status, completed_at')
       .eq('user_id', userId)
-      .gte('date', todayStart).lte('date', todayEnd)
+      .eq('date', today)
       .limit(3),
 
-    supabase.from('workout_plans')
+    adminSupabase.from('workout_plans')
       .select('id, name, days, frequency_per_week')
       .eq('user_id', userId).eq('active', true)
       .limit(1).maybeSingle(),
@@ -282,6 +282,7 @@ serve(async (req) => {
       .select('date, status')
       .eq('user_id', userId)
       .gte('date', sevenDaysAgoDate)
+      .lte('date', today)
       .eq('status', 'completed'),
 
     supabase.from('coach_memory')
@@ -296,15 +297,12 @@ serve(async (req) => {
 
   // ── 6. Derive context ─────────────────────────────────────────────────────
 
-  console.log('[ai-coach-chat] stage: context loaded, errors:', {
-    profile: profileRes.error?.message,
-    todayFood: todayFoodRes.error?.message,
-    todayWorkout: todayWorkoutRes.error?.message,
-    activePlan: activePlanRes.error?.message,
-    recentFood: recentFoodRes.error?.message,
-    recentWorkout: recentWorkoutRes.error?.message,
-    memory: memoryRes.error?.message,
-    history: historyRes.error?.message,
+  console.log('[ai-coach-chat] stage: context loaded', {
+    profileErr: profileRes.error?.message,
+    activePlanData: activePlanRes.data ? `id=${activePlanRes.data.id} name="${activePlanRes.data.name}"` : null,
+    activePlanErr: activePlanRes.error?.message,
+    todayWorkoutErr: todayWorkoutRes.error?.message,
+    todayFoodCount: (todayFoodRes.data ?? []).length,
   });
 
   const profile = profileRes.data as any ?? {};
