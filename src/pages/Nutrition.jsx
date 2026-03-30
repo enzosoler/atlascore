@@ -266,7 +266,224 @@ const MEAL_TYPE_HOURS = {
   evening_snack: 22,
 };
 
-// ============ NEW COMPONENTS ============
+// ─── Nutrition Stats Header ───────────────────────────────────────────────────
+
+function NutritionStatsHeader({ dailyTotals, profile, sortedMeals, loggingStreak, t }) {
+  const mealsToday = sortedMeals.length;
+  const caloriesRemaining = Math.max(0, (profile.calories_target || 0) - dailyTotals.calories);
+  const proteinRemaining = Math.max(0, (profile.protein_target || 0) - dailyTotals.protein);
+  
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('nutrition.stats.streak')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--brand))] mt-1">{loggingStreak}</p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.days')}</p>
+      </div>
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('nutrition.stats.meals')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--fg))] mt-1">{mealsToday}</p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.logged')}</p>
+      </div>
+      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('nutrition.stats.remaining')}</p>
+        <p className="text-[22px] font-bold text-[hsl(var(--ok))] mt-1">{caloriesRemaining}</p>
+        <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.kcal')}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Nutrition Complete Card ──────────────────────────────────────────────────
+
+function NutritionCompleteCard({ dailyTotals, profile, t }) {
+  const caloriesPct = profile.calories_target > 0 
+    ? Math.min((dailyTotals.calories / profile.calories_target) * 100, 100)
+    : 0;
+  const proteinPct = profile.protein_target > 0 
+    ? Math.min((dailyTotals.protein / profile.protein_target) * 100, 100)
+    : 0;
+  
+  const isComplete = caloriesPct >= 100 && proteinPct >= 80;
+  
+  if (!isComplete) return null;
+  
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-[hsl(var(--ok)/0.12)] via-[hsl(var(--ok)/0.06)] to-[hsl(var(--card))] border border-[hsl(var(--ok)/0.3)] p-5">
+      <div className="flex items-start gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--ok))] flex items-center justify-center shadow-lg shadow-[hsl(var(--ok)/0.3)]">
+          <Target className="w-7 h-7 text-white" strokeWidth={2.5} />
+        </div>
+        <div className="flex-1">
+          <p className="text-title3 font-bold text-[hsl(var(--fg))]">{t('nutrition.complete.title')}</p>
+          <p className="text-body text-[hsl(var(--fg-2))] mt-1">{t('nutrition.complete.subtitle')}</p>
+          <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-1.5 text-caption1 text-[hsl(var(--fg-3))]">
+              <TrendingUp className="w-3.5 h-3.5" />
+              {Math.round(caloriesPct)}% {t('nutrition.complete.calories')}
+            </div>
+            <div className="flex items-center gap-1.5 text-caption1 text-[hsl(var(--fg-3))]">
+              <Zap className="w-3.5 h-3.5" />
+              {Math.round(proteinPct)}% {t('nutrition.complete.protein')}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 pt-4 border-t border-[hsl(var(--ok)/0.2)]">
+        <p className="text-caption1 text-[hsl(var(--fg-3))] text-center">{t('nutrition.complete.message')}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Next Meal Suggestion ─────────────────────────────────────────────────────
+
+function NextMealSuggestion({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
+  const hasTargets = profile.calories_target > 0;
+  const hasMeals = sortedMeals.length > 0;
+  
+  if (!hasTargets) {
+    return (
+      <div className="rounded-2xl bg-gradient-to-r from-[hsl(var(--brand)/0.1)] to-[hsl(var(--brand-ai)/0.08)] border border-[hsl(var(--brand)/0.25)] p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
+            <Target className="w-5 h-5 text-[hsl(var(--brand))]" />
+          </div>
+          <div className="flex-1">
+            <p className="text-subhead font-bold text-[hsl(var(--fg))]">{t('nutrition.suggestion.setTargets')}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))]">{t('nutrition.suggestion.setTargetsDesc')}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  const caloriesRemaining = Math.max(0, profile.calories_target - dailyTotals.calories);
+  const proteinRemaining = Math.max(0, profile.protein_target - dailyTotals.protein);
+  
+  let suggestion = null;
+  let priority = 'medium';
+  
+  if (!hasMeals) {
+    suggestion = {
+      title: t('nutrition.suggestion.startDay'),
+      subtitle: t('nutrition.suggestion.startDayDesc'),
+      icon: Sunrise,
+      action: t('nutrition.suggestion.logBreakfast'),
+    };
+    priority = 'high';
+  } else if (caloriesRemaining > 500 && proteinRemaining > 40) {
+    suggestion = {
+      title: t('nutrition.suggestion.prioritizeProtein', { remaining: proteinRemaining }),
+      subtitle: t('nutrition.suggestion.prioritizeProteinDesc'),
+      icon: Zap,
+      action: t('nutrition.suggestion.addProtein'),
+    };
+  } else if (caloriesRemaining < 200) {
+    suggestion = {
+      title: t('nutrition.suggestion.almostThere'),
+      subtitle: t('nutrition.suggestion.almostThereDesc'),
+      icon: TrendingUp,
+      action: t('nutrition.suggestion.addSnack'),
+    };
+    priority = 'low';
+  } else {
+    suggestion = {
+      title: t('nutrition.suggestion.keepGoing'),
+      subtitle: t('nutrition.suggestion.keepGoingDesc', { remaining: caloriesRemaining }),
+      icon: Apple,
+      action: t('nutrition.suggestion.addMeal'),
+    };
+  }
+  
+  if (!suggestion) return null;
+  
+  const Icon = suggestion.icon;
+  
+  return (
+    <div className={cn(
+      "rounded-2xl border p-4",
+      priority === 'high' && "bg-[hsl(var(--err)/0.06)] border-[hsl(var(--err)/0.2)]",
+      priority === 'medium' && "bg-[hsl(var(--warn)/0.06)] border-[hsl(var(--warn)/0.2)]",
+      priority === 'low' && "bg-[hsl(var(--success)/0.06)] border-[hsl(var(--success)/0.2)]",
+    )}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center",
+            priority === 'high' && "bg-[hsl(var(--err)/0.15)] text-[hsl(var(--err))]",
+            priority === 'medium' && "bg-[hsl(var(--warn)/0.15)] text-[hsl(var(--warn))]",
+            priority === 'low' && "bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success))]",
+          )}>
+            <Icon className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-subhead font-bold text-[hsl(var(--fg))]">{suggestion.title}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))]">{suggestion.subtitle}</p>
+          </div>
+        </div>
+        <button
+          onClick={onAddMeal}
+          className={cn(
+            "rounded-xl px-4 py-2 text-[13px] font-semibold transition-colors",
+            priority === 'high' && "bg-[hsl(var(--err))] text-white hover:bg-[hsl(var(--err)/0.9)]",
+            priority === 'medium' && "bg-[hsl(var(--warn))] text-white hover:bg-[hsl(var(--warn)/0.9)]",
+            priority === 'low' && "bg-[hsl(var(--success))] text-white hover:bg-[hsl(var(--success)/0.9)]",
+          )}
+        >
+          {suggestion.action}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Empty State Upgrade ──────────────────────────────────────────────────────
+
+function NutritionEmptyState({ onAddMeal, onQuickAdd, hasTargets, t }) {
+  const quickMeals = [
+    { type: 'breakfast', icon: Sunrise, label: t('nutrition.empty.breakfast'), color: 'text-[hsl(var(--brand))]' },
+    { type: 'lunch', icon: Sun, label: t('nutrition.empty.lunch'), color: 'text-[hsl(var(--brand-ai))]' },
+    { type: 'dinner', icon: Moon, label: t('nutrition.empty.dinner'), color: 'text-[hsl(var(--warn))]' },
+  ];
+  
+  return (
+    <div className="rounded-2xl bg-gradient-to-b from-[hsl(var(--fill)/0.5)] to-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-6 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
+        <UtensilsCrossed className="w-8 h-8 text-[hsl(var(--brand))]" strokeWidth={1.5} />
+      </div>
+      <p className="text-title3 font-bold text-[hsl(var(--fg))] mb-2">{t('nutrition.empty.title')}</p>
+      <p className="text-body text-[hsl(var(--fg-2))] mb-5 max-w-[280px] mx-auto">{t('nutrition.empty.desc')}</p>
+      
+      {!hasTargets && (
+        <p className="text-caption1 text-[hsl(var(--brand))] mb-4">{t('nutrition.empty.setTargetsFirst')}</p>
+      )}
+      
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {quickMeals.map(({ type, icon: Icon, label, color }) => (
+          <button
+            key={type}
+            onClick={() => onQuickAdd(type)}
+            className="flex flex-col items-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] p-3 transition-all hover:bg-[hsl(var(--fill)/0.6)] hover:border-[hsl(var(--brand)/0.3)]"
+          >
+            <Icon className={cn("w-5 h-5", color)} strokeWidth={1.8} />
+            <span className="text-[11px] font-medium text-[hsl(var(--fg))]">{label}</span>
+          </button>
+        ))}
+      </div>
+      
+      <button
+        onClick={onAddMeal}
+        className="w-full rounded-xl bg-[hsl(var(--brand))] text-white py-3 text-[14px] font-semibold hover:bg-[hsl(var(--brand)/0.9)] transition-colors shadow-[0_4px_14px_hsl(var(--brand)/0.3)]"
+      >
+        <Plus className="w-4 h-4 inline mr-2" />
+        {t('nutrition.empty.cta')}
+      </button>
+    </div>
+  );
+}
+
+// ============ EXISTING COMPONENTS ============
 
 function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
   const hasTargets = profile.calories_target > 0;
@@ -1691,74 +1908,59 @@ export default function NutritionPage() {
 
         {notice && <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>}
 
-        {/* 1 — Hero Card */}
-        <NutritionHeroCard
+        {/* 1 — Stats Header */}
+        <NutritionStatsHeader 
+          dailyTotals={dailyTotals} 
+          profile={profile} 
+          sortedMeals={sortedMeals}
+          loggingStreak={loggingStreak}
+          t={t}
+        />
+
+        {/* 2 — Complete Celebration (if targets reached) */}
+        <NutritionCompleteCard 
+          dailyTotals={dailyTotals} 
+          profile={profile}
+          t={t}
+        />
+
+        {/* 3 — Next Meal Suggestion */}
+        <NextMealSuggestion 
           dailyTotals={dailyTotals}
           profile={profile}
-          mealCount={sortedMeals.length}
-          aiDirective={ai.nutrition?.nextMeal || ai.nutrition?.macroFocus || null}
-        />
-
-        {/* 2 — Quick Actions */}
-        <NutritionQuickActions
+          sortedMeals={sortedMeals}
           onAddMeal={handleAddMeal}
-          onQuickAI={handleAddMeal}
-          onCopyYesterday={() => {
-            const yesterday = shiftDate(selectedDate, -1);
-            const yesterdayMeals = meals.filter((m) => m.date === yesterday);
-            if (yesterdayMeals.length === 0) {
-              setNotice({ tone: 'warning', message: t('pages.nutrition.nothing_logged_yesterday') });
-              return;
-            }
-            for (const meal of yesterdayMeals) {
-              for (const food of meal.foods || []) {
-                const snapshot = {
-                  user_id: user.id,
-                  date: buildSnapshotDate(selectedDate),
-                  meal_type: meal.meal_type,
-                  food_name: food.name,
-                  calories: Math.round(food.kcal || 0),
-                  protein: Math.round((food.protein || 0) * 10) / 10,
-                  carbs: Math.round((food.carbs || 0) * 10) / 10,
-                  fat: Math.round((food.fat || 0) * 10) / 10,
-                  quantity: 1,
-                  serving_unit: food.unit || 'g',
-                  serving_size: food.amount || 100,
-                };
-                supabase.from('food_logs').insert(snapshot).select().single().then(({ data }) => {
-                  if (data) setMeals((cur) => [...cur, mapFoodLogToMeal(data)]);
-                });
-              }
-            }
-            setNotice({ tone: 'success', message: t('pages.nutrition.meals_copied') });
-          }}
-          onSearch={() => {
-            setFoodQuery('');
-            setQuickAddType(null);
-            setEditingMeal(null);
-            setIsFormOpen(true);
-          }}
+          t={t}
         />
 
-        {/* 3 — Meal Timeline */}
+        {/* 4 — Meal Timeline or Empty State */}
         {isLoadingMeals ? (
           <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading meals...
           </div>
-        ) : (
+        ) : sortedMeals.length > 0 ? (
           <MealTimeline
             meals={sortedMeals}
             onEdit={handleEditMeal}
             onDelete={handleDeleteMeal}
             onAddMeal={handleAddMeal}
           />
+        ) : (
+          <NutritionEmptyState
+            onAddMeal={handleAddMeal}
+            onQuickAdd={handleQuickAdd}
+            hasTargets={profile.calories_target > 0}
+            t={t}
+          />
         )}
 
-        {/* 4 — Macro Progress */}
-        <MacroProgressBar dailyTotals={dailyTotals} profile={profile} />
+        {/* 5 — Macro Progress (if has meals) */}
+        {sortedMeals.length > 0 && (
+          <MacroProgressBar dailyTotals={dailyTotals} profile={profile} />
+        )}
 
-        {/* 5 — AI Suggestions */}
+        {/* 6 — AI Suggestions */}
         <AINutritionSuggestions
           dailyTotals={dailyTotals}
           profile={profile}

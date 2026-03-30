@@ -79,7 +79,47 @@
       "searchPlaceholder": "E.g.: grilled chicken, brown rice, banana...",
       "searchingDatabase": "Searching database...",
       "recentFoods": "Recent foods",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "stats": {
+        "streak": "Streak",
+        "days": "days",
+        "meals": "Meals",
+        "logged": "logged",
+        "remaining": "Remaining",
+        "kcal": "kcal"
+      },
+      "complete": {
+        "title": "Daily goals reached!",
+        "subtitle": "Great job hitting your nutrition targets today",
+        "calories": "calories",
+        "protein": "protein",
+        "message": "Your consistency is paying off!"
+      },
+      "suggestion": {
+        "setTargets": "Set your targets",
+        "setTargetsDesc": "Define your daily goals to get personalized guidance",
+        "startDay": "Start your day",
+        "startDayDesc": "Log breakfast to kickstart your nutrition tracking",
+        "logBreakfast": "Log breakfast",
+        "prioritizeProtein": "Prioritize protein ({remaining}g left)",
+        "prioritizeProteinDesc": "Add protein-rich foods to hit your target",
+        "addProtein": "Add protein",
+        "almostThere": "Almost there!",
+        "almostThereDesc": "Just a small snack away from your goal",
+        "addSnack": "Add snack",
+        "keepGoing": "Keep going",
+        "keepGoingDesc": "{remaining} kcal remaining today",
+        "addMeal": "Add meal"
+      },
+      "empty": {
+        "title": "No meals logged yet",
+        "desc": "Track your nutrition to reach your goals faster with AI-powered insights",
+        "setTargetsFirst": "Set your targets first for personalized recommendations",
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "cta": "Log your first meal"
+      }
     },
     "train": {
       "thisWeek": "This week",
@@ -351,7 +391,47 @@
       "searchPlaceholder": "Ex.: frango grelhado, arroz integral, banana...",
       "searchingDatabase": "Buscando no banco de dados...",
       "recentFoods": "Alimentos recentes",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "stats": {
+        "streak": "Sequência",
+        "days": "dias",
+        "meals": "Refeições",
+        "logged": "registradas",
+        "remaining": "Restantes",
+        "kcal": "kcal"
+      },
+      "complete": {
+        "title": "Metas diárias atingidas!",
+        "subtitle": "Ótimo trabalho alcançando suas metas de nutrição hoje",
+        "calories": "calorias",
+        "protein": "proteína",
+        "message": "Sua consistência está valendo a pena!"
+      },
+      "suggestion": {
+        "setTargets": "Defina suas metas",
+        "setTargetsDesc": "Defina suas metas diárias para obter orientação personalizada",
+        "startDay": "Comece seu dia",
+        "startDayDesc": "Registre o café da manhã para iniciar seu acompanhamento",
+        "logBreakfast": "Registrar café",
+        "prioritizeProtein": "Priorize proteína ({remaining}g restantes)",
+        "prioritizeProteinDesc": "Adicione alimentos ricos em proteína",
+        "addProtein": "Add proteína",
+        "almostThere": "Quase lá!",
+        "almostThereDesc": "Apenas um pequeno lanche para atingir a meta",
+        "addSnack": "Add lanche",
+        "keepGoing": "Continue assim",
+        "keepGoingDesc": "{remaining} kcal restantes hoje",
+        "addMeal": "Add refeição"
+      },
+      "empty": {
+        "title": "Nenhuma refeição registrada",
+        "desc": "Acompanhe sua nutrição para alcançar seus objetivos com insights de IA",
+        "setTargetsFirst": "Defina suas metas primeiro para recomendações personalizadas",
+        "breakfast": "Café",
+        "lunch": "Almoço",
+        "dinner": "Jantar",
+        "cta": "Registrar primeira refeição"
+      }
     },
     "train": {
       "thisWeek": "Esta semana",
@@ -623,7 +703,47 @@
       "searchPlaceholder": "Ej.: pollo a la parrilla, arroz integral, plátano...",
       "searchingDatabase": "Buscando en la base de datos...",
       "recentFoods": "Alimentos recientes",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "stats": {
+        "streak": "Racha",
+        "days": "días",
+        "meals": "Comidas",
+        "logged": "registradas",
+        "remaining": "Restantes",
+        "kcal": "kcal"
+      },
+      "complete": {
+        "title": "¡Objetivos diarios alcanzados!",
+        "subtitle": "Excelente trabajo cumpliendo tus metas de nutrición hoy",
+        "calories": "calorías",
+        "protein": "proteína",
+        "message": "¡Tu consistencia está dando resultados!"
+      },
+      "suggestion": {
+        "setTargets": "Define tus metas",
+        "setTargetsDesc": "Define tus metas diarias para obtener orientación personalizada",
+        "startDay": "Comienza tu día",
+        "startDayDesc": "Registra el desayuno para iniciar tu seguimiento",
+        "logBreakfast": "Registrar desayuno",
+        "prioritizeProtein": "Prioriza proteína ({remaining}g restantes)",
+        "prioritizeProteinDesc": "Agrega alimentos ricos en proteína",
+        "addProtein": "Add proteína",
+        "almostThere": "¡Casi listo!",
+        "almostThereDesc": "Solo un pequeño snack para alcanzar la meta",
+        "addSnack": "Add snack",
+        "keepGoing": "Sigue así",
+        "keepGoingDesc": "{remaining} kcal restantes hoy",
+        "addMeal": "Add comida"
+      },
+      "empty": {
+        "title": "Ninguna comida registrada",
+        "desc": "Registra tu nutrición para alcanzar tus objetivos con insights de IA",
+        "setTargetsFirst": "Define tus metas primero para recomendaciones personalizadas",
+        "breakfast": "Desayuno",
+        "lunch": "Almuerzo",
+        "dinner": "Cena",
+        "cta": "Registrar primera comida"
+      }
     },
     "train": {
       "thisWeek": "Esta semana",
