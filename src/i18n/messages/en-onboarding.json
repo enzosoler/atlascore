@@ -4,41 +4,140 @@
       "title": "Welcome to atlas.core",
       "description": "Your unified system for workouts, nutrition, progress, and performance. Let us show you around."
     },
-    "step1": {
-      "title": "Basic Profile",
-      "desc": "Let’s start with the basics."
+    "nutrition": {
+      "title": "Nutrition",
+      "description": "Track your daily calorie and macro intake. Build personalized meal plans and log everything in one place."
     },
-    "full_name": "Full Name",
-    "sex": {
-      "label": "Biological Sex",
-      "placeholder": "Select...",
-      "male": "Male",
-      "female": "Female",
-      "other": "Other"
+    "workouts": {
+      "title": "Workouts",
+      "description": "Create, organize, and track your training sessions. Pick from templates or build your own. Log every set and rep."
     },
-    "step2": {
-      "title": "Metrics",
-      "desc": "Essential data for your plan."
+    "progress": {
+      "title": "Progress",
+      "description": "Take regular photos to track your body transformation. Visualize your evolution over time."
     },
-    "age": "Age",
-    "height": "Height (cm)",
-    "weight": "Weight (kg)",
-    "step3": {
-      "title": "Your Goal",
-      "desc": "What are you aiming for?"
+    "profile": {
+      "title": "Your Profile",
+      "description": "Set your goal, weight, height, and other metrics. This helps us personalize everything for you."
     },
-    "goals": {
-      "fat_loss": "Fat Loss",
-      "muscle_gain": "Muscle Gain",
-      "performance": "Performance",
-      "health": "General Health"
-    },
-    "finish": "Enter Atlas",
-    "continue": "Continue",
-    "error_saving": "Could not save your profile. Please try again.",
     "complete": {
       "title": "You're all set",
       "description": "Everything is ready. Good luck on your performance journey!"
+    },
+    "tour": {
+      "skip": "Skip",
+      "next": "Continue",
+      "finish": "Let's go"
+    },
+    "page": {
+      "stepOf": "Step {step} of {total}",
+      "welcomeTitle": "Welcome to",
+      "welcomeSubtitle": "Three quick steps to set up your dashboard and save your first data point.",
+      "step01Title": "Profile and goals",
+      "step01Desc": "Who you are and what you want to achieve",
+      "step02Title": "First checkpoint",
+      "step02Desc": "Your starting point so you can compare against it later",
+      "step03Title": "Choose your path",
+      "step03Desc": "How you want to start this week",
+      "goalTitle": "What is your main goal?",
+      "goalSubtitle": "This shapes your dashboard and Atlas AI recommendations",
+      "basicProfile": "Basic profile",
+      "heightLabel": "Height (cm)",
+      "currentWeightLabel": "Current weight (kg)",
+      "biologicalSex": "Biological sex",
+      "ageLabel": "Age",
+      "targetWeightLabel": "Target weight (kg)",
+      "activityLevel": "Activity level",
+      "optional": "optional",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "hearAboutUs": "How did you hear about us?",
+      "checkpointTitle": "First checkpoint",
+      "checkpointSubtitle": "Let's save your starting point so you can compare future Block Reviews against it.",
+      "checkpointWeightLabel": "Weight (kg)",
+      "checkpointBodyFatLabel": "Body fat (%)",
+      "checkpointWaistLabel": "Waist (cm)",
+      "checkpointInfo": "This checkpoint is saved in <strong>Measurements</strong> and serves as the baseline for progress comparisons in <strong>Block Review</strong>.",
+      "pathTitle": "How do you want to start?",
+      "pathSubtitle": "You can change this anytime inside the app",
+      "freshTitle": "Start fresh this week",
+      "freshDesc": "We'll show you exactly what to log over the next 7 days so your first insights are useful.",
+      "freshItem1": "Log meals today in Nutrition",
+      "freshItem2": "Create or start a workout plan in Workouts",
+      "freshItem3": "Track weight and measurements twice this week",
+      "freshItem4": "Set up active protocols, if needed",
+      "ownTitle": "I'll set it up at my own pace",
+      "ownDesc": "I already have a routine. I'll explore the modules that matter to me.",
+      "selectOption": "Select one option to continue",
+      "continue": "Continue",
+      "setUp": "Set up my Atlas Core",
+      "termsNotice": "By continuing, you accept the",
+      "termsLink": "Terms of Use",
+      "goals": {
+        "fat_loss": "Fat loss",
+        "muscle_gain": "Muscle gain",
+        "recomp": "Recomposition",
+        "performance": "Performance",
+        "health": "General health",
+        "longevity": "Longevity"
+      },
+      "activityLevels": {
+        "sedentary": "Sedentary",
+        "sedentaryDesc": "No regular exercise",
+        "light": "Light",
+        "lightDesc": "1–2x per week",
+        "moderate": "Moderate",
+        "moderateDesc": "3–4x per week",
+        "active": "Active",
+        "activeDesc": "5–6x per week",
+        "very_active": "Very active",
+        "very_activeDesc": "2x per day / athlete"
+      },
+      "hearOptions": {
+        "instagram": "Instagram / TikTok",
+        "youtube": "YouTube",
+        "google": "Google",
+        "indication": "Referral",
+        "coach": "My coach / nutritionist",
+        "other": "Other"
+      },
+      "paywall": {
+        "title": "How your free trial works",
+        "subtitle": "7 days of full access. No credit card required right now.",
+        "todayLabel": "Today",
+        "todayTitle": "Full access unlocked",
+        "todayDesc": "Workouts, nutrition, AI, and labs are available from day one.",
+        "day5Label": "Day 5",
+        "day5Title": "Email reminder",
+        "day5Desc": "We'll remind you before your trial ends.",
+        "day7Label": "Day 7",
+        "day7Title": "Trial ends",
+        "day7Desc": "Choose a plan to continue or lose access.",
+        "annualTitle": "Annual plan — save up to 40%",
+        "annualDesc": "After the trial, the annual plan gives you the lowest monthly cost. You can choose it when you activate.",
+        "socialProof": "4.9 · 500+ athletes",
+        "testimonial": "\"Finally, one app that brings training, nutrition, and labs together in the same place.\"",
+        "cta": "Start my free trial",
+        "noCreditCard": "No credit card · Cancel anytime"
+      },
+      "setup": {
+        "msg1": "Calculating your nutrition targets...",
+        "msg2": "Saving your first checkpoint...",
+        "msg3": "Setting up your dashboard...",
+        "msg4": "Your Atlas Core is ready.",
+        "settingUp": "Setting up your Atlas Core..."
+      },
+      "success": {
+        "title": "All set! 🎉",
+        "freshMessage": "Your first checkpoint is saved. Go to Today and start your first log of the day.",
+        "ownMessage": "Your Atlas Core is ready. Explore the modules at your own pace.",
+        "focusTitle": "This week, focus on",
+        "focusItem1": "Log meals in Nutrition",
+        "focusItem2": "Create or start a plan in Workouts",
+        "focusItem3": "Log measurements twice this week",
+        "enterApp": "Enter the app"
+      }
     }
   }
 }

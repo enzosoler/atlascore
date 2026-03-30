@@ -25,43 +25,16 @@ import {
   Crown,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useI18n } from '@/lib/i18nContext';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
+import { cn } from '@/lib/utils';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const GOALS = [
-  { id: 'fat_loss',    emoji: '🔥', label: 'Fat loss' },
-  { id: 'muscle_gain', emoji: '💪', label: 'Muscle gain' },
-  { id: 'recomp',      emoji: '⚡', label: 'Recomposition' },
-  { id: 'performance', emoji: '🏆', label: 'Performance' },
-  { id: 'health',      emoji: '❤️', label: 'General health' },
-  { id: 'longevity',   emoji: '🌱', label: 'Longevity' },
-];
-
-const ACTIVITY_LEVELS = [
-  { id: 'sedentary',   label: 'Sedentary',   desc: 'No regular exercise' },
-  { id: 'light',       label: 'Light',       desc: '1–2x per week' },
-  { id: 'moderate',    label: 'Moderate',    desc: '3–4x per week' },
-  { id: 'active',      label: 'Active',      desc: '5–6x per week' },
-  { id: 'very_active', label: 'Very active', desc: '2x per day / athlete' },
-];
-
-// Remarketing data — collected for retargeting (transcript 2 playbook)
-const HEAR_ABOUT_US = [
-  { id: 'instagram',     label: 'Instagram / TikTok' },
-  { id: 'youtube',       label: 'YouTube' },
-  { id: 'google',        label: 'Google' },
-  { id: 'indication',    label: 'Referral' },
-  { id: 'coach',         label: 'My coach / nutritionist' },
-  { id: 'other',         label: 'Other' },
-];
-
-const SETUP_MESSAGES = [
-  'Calculating your nutrition targets...',
-  'Saving your first checkpoint...',
-  'Setting up your dashboard...',
-  'Your Atlas Core is ready.',
-];
+const GOAL_IDS = ['fat_loss', 'muscle_gain', 'recomp', 'performance', 'health', 'longevity'];
+const GOAL_EMOJIS = { fat_loss: '🔥', muscle_gain: '💪', recomp: '⚡', performance: '🏆', health: '❤️', longevity: '🌱' };
+const ACTIVITY_LEVEL_IDS = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
+const HEAR_ABOUT_US_IDS = ['instagram', 'youtube', 'google', 'indication', 'coach', 'other'];
 
 const TOTAL_STEPS = 4; // 0=welcome, 1=profile+goals, 2=first checkpoint, 3=path choice
 
@@ -96,12 +69,12 @@ function Logo() {
   );
 }
 
-function StepDots({ step, total }) {
+function StepDots({ step, total, t }) {
   return (
     <div className="mb-7 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] px-4 py-3">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
-          Step {step + 1} of {total}
+        <p className="atlas-overline">
+          {t('onboarding.page.stepOf', { step: step + 1, total })}
         </p>
         <span className="font-mono text-[12px] font-semibold text-[hsl(var(--brand))]">
           {Math.round(((step + 1) / total) * 100)}%
@@ -111,13 +84,7 @@ function StepDots({ step, total }) {
         {Array.from({ length: total }).map((_, i) => (
           <div
             key={i}
-            className={`rounded-full transition-all duration-300 ${
-              i === step
-                ? 'h-2 flex-1 bg-[hsl(var(--brand))]'
-                : i < step
-                  ? 'h-2 flex-1 bg-[hsl(var(--brand)/0.38)]'
-                  : 'h-2 flex-1 bg-[hsl(var(--border-h))]'
-            }`}
+            className={cn('h-2 flex-1 rounded-full transition-all duration-300', i === step ? 'bg-[hsl(var(--brand))]' : i < step ? 'bg-[hsl(var(--brand)/0.38)]' : 'bg-[hsl(var(--border-h))]')}
           />
         ))}
       </div>
@@ -156,17 +123,14 @@ function FieldLabel({ children }) {
   );
 }
 
-function OptionalBadge() {
-  return (
-    <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal text-[hsl(var(--fg-3))]">
-      optional
-    </span>
-  );
-}
-
 // ─── Step screens ─────────────────────────────────────────────────────────────
 
-function StepWelcome() {
+function StepWelcome({ t }) {
+  const steps = [
+    { n: '01', title: t('onboarding.page.step01Title'), desc: t('onboarding.page.step01Desc') },
+    { n: '02', title: t('onboarding.page.step02Title'), desc: t('onboarding.page.step02Desc') },
+    { n: '03', title: t('onboarding.page.step03Title'), desc: t('onboarding.page.step03Desc') },
+  ];
   return (
     <div className="text-center space-y-6 py-2">
       <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto">
@@ -174,20 +138,16 @@ function StepWelcome() {
       </div>
       <div>
         <h2 className="text-[22px] font-bold tracking-tight mb-2">
-          Welcome to{' '}
+          {t('onboarding.page.welcomeTitle')}{' '}
           <span className="text-[hsl(var(--accent-primary))]">atlas</span>
           <span className="text-[hsl(var(--fg))]">.core</span>
         </h2>
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
-          Three quick steps to set up your dashboard and save your first data point.
+          {t('onboarding.page.welcomeSubtitle')}
         </p>
       </div>
       <div className="space-y-2 text-left">
-        {[
-          { n: '01', title: 'Profile and goals', desc: 'Who you are and what you want to achieve' },
-          { n: '02', title: 'First checkpoint', desc: 'Your starting point so you can compare against it later' },
-          { n: '03', title: 'Choose your path', desc: 'How you want to start this week' },
-        ].map(({ n, title, desc }) => (
+        {steps.map(({ n, title, desc }) => (
           <div
             key={n}
             className="flex items-start gap-3 px-3 py-2.5 rounded-xl bg-[hsl(var(--card-hi))] border border-[hsl(var(--border-h))]"
@@ -206,35 +166,31 @@ function StepWelcome() {
   );
 }
 
-function StepProfileAndGoals({ form, set, toggle }) {
+function StepProfileAndGoals({ form, set, toggle, t }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-[18px] font-bold mb-1">What is your main goal?</h2>
-        <p className="text-[12px] text-[hsl(var(--fg-2))]">
-          This shapes your dashboard and Atlas AI recommendations
-        </p>
+        <h2 className="text-[18px] font-bold mb-1">{t('onboarding.page.goalTitle')}</h2>
+        <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('onboarding.page.goalSubtitle')}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        {GOALS.map((g) => (
+        {GOAL_IDS.map((id) => (
           <GoalChip
-            key={g.id}
-            selected={form.health_goals.includes(g.id)}
-            onClick={() => toggle('health_goals', g.id)}
-            emoji={g.emoji}
-            label={g.label}
+            key={id}
+            selected={form.health_goals.includes(id)}
+            onClick={() => toggle('health_goals', id)}
+            emoji={GOAL_EMOJIS[id]}
+            label={t(`onboarding.page.goals.${id}`)}
           />
         ))}
       </div>
 
       <div className="border-t border-[hsl(var(--border-h))] pt-4 space-y-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">
-          Basic profile
-        </p>
+        <p className="atlas-overline">{t('onboarding.page.basicProfile')}</p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <FieldLabel>Height (cm)</FieldLabel>
+            <FieldLabel>{t('onboarding.page.heightLabel')}</FieldLabel>
             <Input
               type="number"
               value={form.height}
@@ -244,7 +200,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
             />
           </div>
           <div>
-            <FieldLabel>Current weight (kg)</FieldLabel>
+            <FieldLabel>{t('onboarding.page.currentWeightLabel')}</FieldLabel>
             <Input
               type="number"
               step="0.1"
@@ -259,20 +215,20 @@ function StepProfileAndGoals({ form, set, toggle }) {
             />
           </div>
           <div>
-            <FieldLabel>Biological sex</FieldLabel>
+            <FieldLabel>{t('onboarding.page.biologicalSex')}</FieldLabel>
             <Select value={form.sex} onValueChange={(v) => set('sex', v)}>
               <SelectTrigger className="atlas-field h-11 rounded-[12px] border-0 text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="male">{t('onboarding.page.male')}</SelectItem>
+                <SelectItem value="female">{t('onboarding.page.female')}</SelectItem>
+                <SelectItem value="other">{t('onboarding.page.other')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <FieldLabel>Age</FieldLabel>
+            <FieldLabel>{t('onboarding.page.ageLabel')}</FieldLabel>
             <Input
               type="number"
               value={form.age}
@@ -286,7 +242,7 @@ function StepProfileAndGoals({ form, set, toggle }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>
-              Target weight (kg)<OptionalBadge />
+              {t('onboarding.page.targetWeightLabel')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal text-[hsl(var(--fg-3))]">{t('onboarding.page.optional')}</span>
             </FieldLabel>
             <Input
               type="number"
@@ -298,15 +254,15 @@ function StepProfileAndGoals({ form, set, toggle }) {
             />
           </div>
           <div>
-            <FieldLabel>Activity level</FieldLabel>
+            <FieldLabel>{t('onboarding.page.activityLevel')}</FieldLabel>
             <Select value={form.activity_level} onValueChange={(v) => set('activity_level', v)}>
               <SelectTrigger className="atlas-field h-11 rounded-[12px] border-0 text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {ACTIVITY_LEVELS.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>
-                    {a.label} — {a.desc}
+                {ACTIVITY_LEVEL_IDS.map((id) => (
+                  <SelectItem key={id} value={id}>
+                    {t(`onboarding.page.activityLevels.${id}`)} — {t(`onboarding.page.activityLevels.${id}Desc`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -317,24 +273,20 @@ function StepProfileAndGoals({ form, set, toggle }) {
 
       {/* ── Remarketing data collection (transcript 2 playbook) ── */}
       <div className="border-t border-[hsl(var(--border-h))] pt-4 space-y-2.5">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">
-          How did you hear about us? <OptionalBadge />
+        <p className="atlas-overline">
+          {t('onboarding.page.hearAboutUs')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal">{t('onboarding.page.optional')}</span>
         </p>
         <div className="flex flex-wrap gap-2">
-          {HEAR_ABOUT_US.map((option) => {
-            const selected = form.hear_about_us === option.id;
+          {HEAR_ABOUT_US_IDS.map((id) => {
+            const selected = form.hear_about_us === id;
             return (
               <button
-                key={option.id}
+                key={id}
                 type="button"
-                onClick={() => set('hear_about_us', selected ? '' : option.id)}
-                className={`px-3 py-1.5 rounded-full border text-[12px] font-medium transition-all
-                  ${selected
-                    ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--fg))]'
-                    : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card-hi))]'
-                  }`}
+                onClick={() => set('hear_about_us', selected ? '' : id)}
+                className={cn('px-3 py-1.5 rounded-full border text-[12px] font-medium transition-all', selected ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--fg))]' : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card-hi))]')}
               >
-                {option.label}
+                {t(`onboarding.page.hearOptions.${id}`)}
               </button>
             );
           })}
@@ -344,19 +296,19 @@ function StepProfileAndGoals({ form, set, toggle }) {
   );
 }
 
-function StepFirstCheckpoint({ form, set }) {
+function StepFirstCheckpoint({ form, set, t }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-[18px] font-bold mb-1">First checkpoint</h2>
+        <h2 className="text-[18px] font-bold mb-1">{t('onboarding.page.checkpointTitle')}</h2>
         <p className="text-[12px] text-[hsl(var(--fg-2))] leading-relaxed">
-          Let's save your starting point so you can compare future Block Reviews against it.
+          {t('onboarding.page.checkpointSubtitle')}
         </p>
       </div>
 
       <div className="space-y-3">
         <div>
-          <FieldLabel>Weight (kg)</FieldLabel>
+          <FieldLabel>{t('onboarding.page.checkpointWeightLabel')}</FieldLabel>
           <Input
             type="number"
             step="0.1"
@@ -370,7 +322,7 @@ function StepFirstCheckpoint({ form, set }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <FieldLabel>
-              Body fat (%)<OptionalBadge />
+              {t('onboarding.page.checkpointBodyFatLabel')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal text-[hsl(var(--fg-3))]">{t('onboarding.page.optional')}</span>
             </FieldLabel>
             <Input
               type="number"
@@ -383,7 +335,7 @@ function StepFirstCheckpoint({ form, set }) {
           </div>
           <div>
             <FieldLabel>
-              Waist (cm)<OptionalBadge />
+              {t('onboarding.page.checkpointWaistLabel')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal text-[hsl(var(--fg-3))]">{t('onboarding.page.optional')}</span>
             </FieldLabel>
             <Input
               type="number"
@@ -398,11 +350,7 @@ function StepFirstCheckpoint({ form, set }) {
       </div>
 
       <div className="rounded-xl bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.15)] px-4 py-3">
-        <p className="text-[12px] text-[hsl(var(--fg-2))] leading-5">
-          This checkpoint is saved in <strong className="text-[hsl(var(--fg))]">Measurements</strong> and
-          serves as the baseline for progress comparisons in{' '}
-          <strong className="text-[hsl(var(--fg))]">Block Review</strong>.
-        </p>
+        <p className="text-[12px] text-[hsl(var(--fg-2))] leading-5" dangerouslySetInnerHTML={{ __html: t('onboarding.page.checkpointInfo') }} />
       </div>
     </div>
   );
@@ -451,42 +399,33 @@ function PathCard({ selected, onClick, icon: Icon, title, desc, items }) {
   );
 }
 
-function StepPathChoice({ form, set }) {
+function StepPathChoice({ form, set, t }) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-[18px] font-bold mb-1">How do you want to start?</h2>
-        <p className="text-[12px] text-[hsl(var(--fg-2))]">
-          You can change this anytime inside the app
-        </p>
+        <h2 className="text-[18px] font-bold mb-1">{t('onboarding.page.pathTitle')}</h2>
+        <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('onboarding.page.pathSubtitle')}</p>
       </div>
 
       <PathCard
         selected={form.chosen_path === 'fresh'}
         onClick={() => set('chosen_path', 'fresh')}
         icon={Compass}
-        title="Start fresh this week"
-        desc="We'll show you exactly what to log over the next 7 days so your first insights are useful."
-        items={[
-          'Log meals today in Nutrition',
-          'Create or start a workout plan in Workouts',
-          'Track weight and measurements twice this week',
-          'Set up active protocols, if needed',
-        ]}
+        title={t('onboarding.page.freshTitle')}
+        desc={t('onboarding.page.freshDesc')}
+        items={[t('onboarding.page.freshItem1'), t('onboarding.page.freshItem2'), t('onboarding.page.freshItem3'), t('onboarding.page.freshItem4')]}
       />
 
       <PathCard
         selected={form.chosen_path === 'own'}
         onClick={() => set('chosen_path', 'own')}
         icon={Dumbbell}
-        title="I'll set it up at my own pace"
-        desc="I already have a routine. I'll explore the modules that matter to me."
+        title={t('onboarding.page.ownTitle')}
+        desc={t('onboarding.page.ownDesc')}
       />
 
       {!form.chosen_path && (
-        <p className="text-[11px] text-center text-[hsl(var(--fg-3))]">
-          Select one option to continue
-        </p>
+        <p className="text-[11px] text-center text-[hsl(var(--fg-3))]">{t('onboarding.page.selectOption')}</p>
       )}
     </div>
   );
@@ -496,7 +435,7 @@ function StepPathChoice({ form, set }) {
 // Shows BEFORE the actual setup generation. Builds trust, explains the trial,
 // and primes users toward the annual plan without hard-selling.
 
-function PaywallPrimingScreen({ onContinue }) {
+function PaywallPrimingScreen({ onContinue, t }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -509,38 +448,16 @@ function PaywallPrimingScreen({ onContinue }) {
         <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
           <ShieldCheck className="w-7 h-7 text-[hsl(var(--brand))]" strokeWidth={1.75} />
         </div>
-        <h2 className="text-[20px] font-bold tracking-tight mb-1">
-          How your free trial works
-        </h2>
-        <p className="text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
-          7 days of full access. No credit card required right now.
-        </p>
+        <h2 className="text-[20px] font-bold tracking-tight mb-1">{t('onboarding.page.paywall.title')}</h2>
+        <p className="text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">{t('onboarding.page.paywall.subtitle')}</p>
       </div>
 
       {/* Trial timeline */}
       <div className="space-y-2">
         {[
-          {
-            day: 'Today',
-            title: 'Full access unlocked',
-            desc: 'Workouts, nutrition, AI, and labs are available from day one.',
-            icon: '🚀',
-            highlight: true,
-          },
-          {
-            day: 'Day 5',
-            title: 'Email reminder',
-            desc: "We'll remind you before your trial ends.",
-            icon: '📧',
-            highlight: false,
-          },
-          {
-            day: 'Day 7',
-            title: 'Trial ends',
-            desc: 'Choose a plan to continue or lose access.',
-            icon: '⏰',
-            highlight: false,
-          },
+          { day: t('onboarding.page.paywall.todayLabel'), title: t('onboarding.page.paywall.todayTitle'), desc: t('onboarding.page.paywall.todayDesc'), icon: '🚀', highlight: true },
+          { day: t('onboarding.page.paywall.day5Label'), title: t('onboarding.page.paywall.day5Title'), desc: t('onboarding.page.paywall.day5Desc'), icon: '📧', highlight: false },
+          { day: t('onboarding.page.paywall.day7Label'), title: t('onboarding.page.paywall.day7Title'), desc: t('onboarding.page.paywall.day7Desc'), icon: '⏰', highlight: false },
         ].map(({ day, title, desc, icon, highlight }) => (
           <div
             key={day}
@@ -570,12 +487,8 @@ function PaywallPrimingScreen({ onContinue }) {
         <div className="flex items-start gap-2.5">
           <Crown className="w-4 h-4 text-[hsl(var(--brand))] shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
-            <p className="text-[12px] font-semibold text-[hsl(var(--fg))] leading-snug">
-              Annual plan — save up to 40%
-            </p>
-            <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">
-              After the trial, the annual plan gives you the lowest monthly cost. You can choose it when you activate.
-            </p>
+            <p className="text-[12px] font-semibold text-[hsl(var(--fg))] leading-snug">{t('onboarding.page.paywall.annualTitle')}</p>
+            <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">{t('onboarding.page.paywall.annualDesc')}</p>
           </div>
         </div>
       </div>
@@ -587,24 +500,24 @@ function PaywallPrimingScreen({ onContinue }) {
             <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" strokeWidth={1.5} />
           ))}
           <span className="text-[11px] font-semibold ml-1 text-[hsl(var(--fg-2))]">
-            4.9 · 500+ athletes
+            {t('onboarding.page.paywall.socialProof')}
           </span>
         </div>
         <p className="text-[12px] text-[hsl(var(--fg-2))] italic leading-relaxed">
-          "Finally, one app that brings training, nutrition, and labs together in the same place."
+          {t('onboarding.page.paywall.testimonial')}
         </p>
       </div>
 
       {/* CTA */}
       <button
         onClick={onContinue}
-        className="btn btn-primary w-full h-12 rounded-2xl text-[14px] gap-2"
+        className="atlas-button atlas-button-primary w-full h-12 rounded-2xl text-[14px] gap-2"
       >
-        Start my free trial <ArrowRight className="w-4 h-4" strokeWidth={2} />
+        {t('onboarding.page.paywall.cta')} <ArrowRight className="w-4 h-4" strokeWidth={2} />
       </button>
 
       <p className="text-center text-[11px] text-[hsl(var(--fg-3))]">
-        No credit card · Cancel anytime
+        {t('onboarding.page.paywall.noCreditCard')}
       </p>
     </motion.div>
   );
@@ -612,19 +525,20 @@ function PaywallPrimingScreen({ onContinue }) {
 
 // ─── Setup generation ─────────────────────────────────────────────────────────
 
-function SetupGenerationScreen({ onDone }) {
+function SetupGenerationScreen({ onDone, t }) {
   const [msgIdx, setMsgIdx] = useState(0);
   const [done, setDone] = useState(false);
   const intervalRef = useRef(null);
+  const messages = [t('onboarding.page.setup.msg1'), t('onboarding.page.setup.msg2'), t('onboarding.page.setup.msg3'), t('onboarding.page.setup.msg4')];
 
   useEffect(() => {
     let i = 0;
     intervalRef.current = setInterval(() => {
       i++;
-      if (i < SETUP_MESSAGES.length - 1) {
+      if (i < messages.length - 1) {
         setMsgIdx(i);
       } else {
-        setMsgIdx(SETUP_MESSAGES.length - 1);
+        setMsgIdx(messages.length - 1);
         setDone(true);
         clearInterval(intervalRef.current);
       }
@@ -662,18 +576,18 @@ function SetupGenerationScreen({ onDone }) {
             transition={{ duration: 0.25 }}
             className="text-[15px] font-semibold text-[hsl(var(--fg))]"
           >
-            {SETUP_MESSAGES[msgIdx]}
+            {messages[msgIdx]}
           </motion.p>
         </AnimatePresence>
         {!done && (
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">Setting up your Atlas Core...</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('onboarding.page.setup.settingUp')}</p>
         )}
       </div>
 
       {done && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <button onClick={onDone} className="btn btn-primary h-12 px-8 rounded-2xl text-[14px] gap-2">
-            <ArrowRight className="w-4 h-4" strokeWidth={2} /> Enter the app
+          <button onClick={onDone} className="atlas-button atlas-button-primary h-12 px-8 rounded-2xl text-[14px] gap-2">
+            <ArrowRight className="w-4 h-4" strokeWidth={2} /> {t('onboarding.page.success.enterApp')}
           </button>
         </motion.div>
       )}
@@ -683,7 +597,7 @@ function SetupGenerationScreen({ onDone }) {
 
 // ─── Success screen ───────────────────────────────────────────────────────────
 
-function SuccessScreen({ chosenPath, onDone }) {
+function SuccessScreen({ chosenPath, onDone, t }) {
   useEffect(() => {
     confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
   }, []);
@@ -705,11 +619,9 @@ function SuccessScreen({ chosenPath, onDone }) {
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
         className="space-y-2"
       >
-        <h2 className="text-[24px] font-bold">All set! 🎉</h2>
+        <h2 className="text-[24px] font-bold">{t('onboarding.page.success.title')}</h2>
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
-          {isFresh
-            ? 'Your first checkpoint is saved. Go to Today and start your first log of the day.'
-            : 'Your Atlas Core is ready. Explore the modules at your own pace.'}
+          {isFresh ? t('onboarding.page.success.freshMessage') : t('onboarding.page.success.ownMessage')}
         </p>
       </motion.div>
 
@@ -719,12 +631,12 @@ function SuccessScreen({ chosenPath, onDone }) {
           className="rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] p-4 text-left space-y-2"
         >
           <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-            This week, focus on
+            {t('onboarding.page.success.focusTitle')}
           </p>
           {[
-            { icon: UtensilsCrossed, text: 'Log meals in Nutrition' },
-            { icon: Dumbbell, text: 'Create or start a plan in Workouts' },
-            { icon: Scale, text: 'Log measurements twice this week' },
+            { icon: UtensilsCrossed, text: t('onboarding.page.success.focusItem1') },
+            { icon: Dumbbell, text: t('onboarding.page.success.focusItem2') },
+            { icon: Scale, text: t('onboarding.page.success.focusItem3') },
           ].map(({ icon: Icon, text }, i) => (
             <motion.div
               key={i}
@@ -742,7 +654,7 @@ function SuccessScreen({ chosenPath, onDone }) {
       <motion.button
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
         onClick={onDone}
-        className="btn btn-primary w-full h-12 rounded-2xl text-[14px] gap-2 mt-2"
+        className="atlas-button atlas-button-primary w-full h-12 rounded-2xl text-[14px] gap-2 mt-2"
       >
         <ArrowRight className="w-4 h-4" strokeWidth={2} /> Enter the app
       </motion.button>
@@ -755,6 +667,7 @@ function SuccessScreen({ chosenPath, onDone }) {
 export default function Onboarding() {
   const navigate = useNavigate();
   const { isAuthenticated, user, revalidateSession } = useAuth();
+  const { t } = useI18n();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [showPaywallPriming, setShowPaywallPriming] = useState(false);
@@ -880,10 +793,10 @@ export default function Onboarding() {
 
   const stepContent = () => {
     switch (step) {
-      case 0: return <StepWelcome />;
-      case 1: return <StepProfileAndGoals form={form} set={set} toggle={toggle} />;
-      case 2: return <StepFirstCheckpoint form={form} set={set} />;
-      case 3: return <StepPathChoice form={form} set={set} />;
+      case 0: return <StepWelcome t={t} />;
+      case 1: return <StepProfileAndGoals form={form} set={set} toggle={toggle} t={t} />;
+      case 2: return <StepFirstCheckpoint form={form} set={set} t={t} />;
+      case 3: return <StepPathChoice form={form} set={set} t={t} />;
       default: return null;
     }
   };
@@ -896,8 +809,8 @@ export default function Onboarding() {
         {showPaywallPriming && (
           <>
             <Logo />
-            <div className="surface rounded-[22px] p-6">
-              <PaywallPrimingScreen onContinue={handlePrimingContinue} />
+            <div className="atlas-card rounded-[22px] p-6">
+              <PaywallPrimingScreen onContinue={handlePrimingContinue} t={t} />
             </div>
           </>
         )}
@@ -906,8 +819,8 @@ export default function Onboarding() {
         {!showPaywallPriming && showGeneration && (
           <>
             <Logo />
-            <div className="surface rounded-[22px] p-8">
-              <SetupGenerationScreen onDone={handleGenerationDone} />
+            <div className="atlas-card rounded-[22px] p-8">
+              <SetupGenerationScreen onDone={handleGenerationDone} t={t} />
             </div>
           </>
         )}
@@ -916,8 +829,8 @@ export default function Onboarding() {
         {!showPaywallPriming && !showGeneration && showSuccess && (
           <>
             <Logo />
-            <div className="surface rounded-[22px] p-8">
-              <SuccessScreen chosenPath={form.chosen_path} onDone={handleSuccessDone} />
+            <div className="atlas-card rounded-[22px] p-8">
+              <SuccessScreen chosenPath={form.chosen_path} onDone={handleSuccessDone} t={t} />
             </div>
           </>
         )}
@@ -935,14 +848,14 @@ export default function Onboarding() {
             </div>
 
             <Logo />
-            <StepDots step={step} total={TOTAL_STEPS} />
+            <StepDots step={step} total={TOTAL_STEPS} t={t} />
 
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
                 initial={{ x: 24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -24, opacity: 0 }}
                 transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="surface mb-4 rounded-[22px] p-6"
+                className="atlas-card mb-4 rounded-[22px] p-6"
               >
                 {stepContent()}
               </motion.div>
@@ -952,7 +865,7 @@ export default function Onboarding() {
               {step > 0 && (
                 <button
                   onClick={() => setStep((s) => s - 1)}
-                  className="btn btn-secondary h-11 rounded-[12px] px-4"
+                  className="atlas-button atlas-button-secondary h-11 rounded-[12px] px-4"
                 >
                   <ChevronLeft className="w-4 h-4" strokeWidth={2} />
                 </button>
@@ -962,19 +875,19 @@ export default function Onboarding() {
                 <button
                   onClick={() => setStep((s) => s + 1)}
                   disabled={!canContinue()}
-                  className="btn btn-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1"
+                  className="atlas-button atlas-button-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1"
                 >
-                  Continue <ChevronRight className="w-4 h-4" strokeWidth={2} />
+                  {t('onboarding.page.continue')} <ChevronRight className="w-4 h-4" strokeWidth={2} />
                 </button>
               ) : (
                 <button
                   onClick={handleFinish}
                   disabled={saving || !canContinue()}
-                  className="btn btn-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1.5"
+                  className="atlas-button atlas-button-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1.5"
                 >
                   {saving
                     ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : <><Zap className="w-4 h-4" strokeWidth={2} /> Set up my Atlas Core</>
+                    : <><Zap className="w-4 h-4" strokeWidth={2} /> {t('onboarding.page.setUp')}</>
                   }
                 </button>
               )}
@@ -982,8 +895,8 @@ export default function Onboarding() {
 
             {step === 0 && (
               <p className="text-center text-[11px] text-[hsl(var(--fg-2))] mt-4">
-                By continuing, you accept the{' '}
-                <span className="underline cursor-pointer">Terms of Use</span>.
+                {t('onboarding.page.termsNotice')}{' '}
+                <span className="underline cursor-pointer">{t('onboarding.page.termsLink')}</span>.
               </p>
             )}
           </>

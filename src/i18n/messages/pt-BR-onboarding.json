@@ -6,11 +6,11 @@
     },
     "nutrition": {
       "title": "Nutrição",
-      "description": "Gerencie sua ingestão diária de calorias, macros e suplementos. Construa planos alimentares personalizados."
+      "description": "Acompanhe sua ingestão diária de calorias e macros. Crie planos alimentares personalizados e registre tudo em um lugar."
     },
     "workouts": {
       "title": "Treinos",
-      "description": "Crie, organize e acompanhe seus treinos. Escolha templates ou construa manualmente. Registre cada série e repetição."
+      "description": "Crie, organize e acompanhe seus treinos. Escolha templates ou construa os seus. Registre cada série e repetição."
     },
     "progress": {
       "title": "Progresso",
@@ -28,6 +28,116 @@
       "skip": "Pular",
       "next": "Continuar",
       "finish": "Vamos lá"
+    },
+    "page": {
+      "stepOf": "Etapa {step} de {total}",
+      "welcomeTitle": "Bem-vindo ao",
+      "welcomeSubtitle": "Três passos rápidos para configurar seu painel e salvar seu primeiro ponto de dados.",
+      "step01Title": "Perfil e objetivos",
+      "step01Desc": "Quem você é e o que quer alcançar",
+      "step02Title": "Primeiro checkpoint",
+      "step02Desc": "Seu ponto de partida para comparar no futuro",
+      "step03Title": "Escolha seu caminho",
+      "step03Desc": "Como você quer começar esta semana",
+      "goalTitle": "Qual é seu objetivo principal?",
+      "goalSubtitle": "Isso define seu painel e as recomendações da IA do Atlas",
+      "basicProfile": "Perfil básico",
+      "heightLabel": "Altura (cm)",
+      "currentWeightLabel": "Peso atual (kg)",
+      "biologicalSex": "Sexo biológico",
+      "ageLabel": "Idade",
+      "targetWeightLabel": "Peso alvo (kg)",
+      "activityLevel": "Nível de atividade",
+      "optional": "opcional",
+      "male": "Masculino",
+      "female": "Feminino",
+      "other": "Outro",
+      "hearAboutUs": "Como soube de nós?",
+      "checkpointTitle": "Primeiro checkpoint",
+      "checkpointSubtitle": "Vamos salvar seu ponto de partida para comparar futuras revisões de bloco.",
+      "checkpointWeightLabel": "Peso (kg)",
+      "checkpointBodyFatLabel": "Gordura corporal (%)",
+      "checkpointWaistLabel": "Cintura (cm)",
+      "checkpointInfo": "Este checkpoint é salvo em <strong>Medidas</strong> e serve como base para comparações de progresso na <strong>Revisão de Bloco</strong>.",
+      "pathTitle": "Como você quer começar?",
+      "pathSubtitle": "Você pode mudar isso a qualquer momento no app",
+      "freshTitle": "Começar esta semana",
+      "freshDesc": "Vamos te mostrar exatamente o que registrar nos próximos 7 dias para que seus primeiros insights sejam úteis.",
+      "freshItem1": "Registrar refeições em Nutrição",
+      "freshItem2": "Criar ou iniciar um plano em Treinos",
+      "freshItem3": "Registrar peso e medidas duas vezes esta semana",
+      "freshItem4": "Configurar protocolos ativos, se necessário",
+      "ownTitle": "Vou configurar no meu ritmo",
+      "ownDesc": "Já tenho uma rotina. Vou explorar os módulos que me interessam.",
+      "selectOption": "Selecione uma opção para continuar",
+      "continue": "Continuar",
+      "setUp": "Configurar meu Atlas Core",
+      "termsNotice": "Ao continuar, você aceita os",
+      "termsLink": "Termos de Uso",
+      "goals": {
+        "fat_loss": "Perda de gordura",
+        "muscle_gain": "Ganho muscular",
+        "recomp": "Recomposição",
+        "performance": "Performance",
+        "health": "Saúde geral",
+        "longevity": "Longevidade"
+      },
+      "activityLevels": {
+        "sedentary": "Sedentário",
+        "sedentaryDesc": "Sem exercício regular",
+        "light": "Leve",
+        "lightDesc": "1–2x por semana",
+        "moderate": "Moderado",
+        "moderateDesc": "3–4x por semana",
+        "active": "Ativo",
+        "activeDesc": "5–6x por semana",
+        "very_active": "Muito ativo",
+        "very_activeDesc": "2x por dia / atleta"
+      },
+      "hearOptions": {
+        "instagram": "Instagram / TikTok",
+        "youtube": "YouTube",
+        "google": "Google",
+        "indication": "Indicação",
+        "coach": "Meu coach / nutricionista",
+        "other": "Outro"
+      },
+      "paywall": {
+        "title": "Como funciona seu trial gratuito",
+        "subtitle": "7 dias de acesso completo. Sem cartão de crédito agora.",
+        "todayLabel": "Hoje",
+        "todayTitle": "Acesso completo liberado",
+        "todayDesc": "Treinos, nutrição, IA e exames disponíveis desde o primeiro dia.",
+        "day5Label": "Dia 5",
+        "day5Title": "Lembrete por email",
+        "day5Desc": "Vamos avisar antes do seu trial acabar.",
+        "day7Label": "Dia 7",
+        "day7Title": "Trial encerra",
+        "day7Desc": "Escolha um plano para continuar ou perca o acesso.",
+        "annualTitle": "Plano anual — economize até 40%",
+        "annualDesc": "Após o trial, o plano anual tem o menor custo mensal. Você pode escolhê-lo ao ativar.",
+        "socialProof": "4.9 · 500+ atletas",
+        "testimonial": "\"Finalmente, um app que une treino, nutrição e exames no mesmo lugar.\"",
+        "cta": "Iniciar meu trial gratuito",
+        "noCreditCard": "Sem cartão · Cancele quando quiser"
+      },
+      "setup": {
+        "msg1": "Calculando suas metas nutricionais...",
+        "msg2": "Salvando seu primeiro checkpoint...",
+        "msg3": "Configurando seu painel...",
+        "msg4": "Seu Atlas Core está pronto.",
+        "settingUp": "Configurando seu Atlas Core..."
+      },
+      "success": {
+        "title": "Tudo pronto! 🎉",
+        "freshMessage": "Seu primeiro checkpoint está salvo. Vá para Hoje e comece seu primeiro registro do dia.",
+        "ownMessage": "Seu Atlas Core está pronto. Explore os módulos no seu ritmo.",
+        "focusTitle": "Esta semana, foque em",
+        "focusItem1": "Registrar refeições em Nutrição",
+        "focusItem2": "Criar ou iniciar um plano em Treinos",
+        "focusItem3": "Registrar medidas duas vezes esta semana",
+        "enterApp": "Entrar no app"
+      }
     }
   }
 }
