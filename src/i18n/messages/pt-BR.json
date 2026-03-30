@@ -717,7 +717,21 @@
       "register": "Registrar",
       "pendingTitle": "Check-in diário pendente",
       "pendingDescription": "Complete o check-in para manter sua sequência e tornar a análise mais precisa.",
-      "checkInNow": "Fazer check-in"
+      "checkInNow": "Fazer check-in",
+      "history": {
+        "last7days": "Últimos 7 dias",
+        "moodVeryPoor": "Muito ruim",
+        "moodPoor": "Ruim",
+        "moodNeutral": "Neutro",
+        "moodGood": "Bom",
+        "moodExcellent": "Excelente",
+        "days": { "sun": "Dom", "mon": "Seg", "tue": "Ter", "wed": "Qua", "thu": "Qui", "fri": "Sex", "sat": "Sáb" },
+        "months": { "jan": "Jan", "feb": "Fev", "mar": "Mar", "apr": "Abr", "may": "Mai", "jun": "Jun", "jul": "Jul", "aug": "Ago", "sep": "Set", "oct": "Out", "nov": "Nov", "dec": "Dez" }
+      },
+      "streak": {
+        "day": "{count} dia",
+        "days": "{count} dias"
+      }
     },
     "nutrition": {
       "label": "Nutrição",

@@ -717,7 +717,21 @@
       "register": "Register",
       "pendingTitle": "Daily check-in pending",
       "pendingDescription": "Complete your check-in to keep your streak alive and make the analysis more accurate.",
-      "checkInNow": "Check in now"
+      "checkInNow": "Check in now",
+      "history": {
+        "last7days": "Last 7 days",
+        "moodVeryPoor": "Very poor",
+        "moodPoor": "Poor",
+        "moodNeutral": "Neutral",
+        "moodGood": "Good",
+        "moodExcellent": "Excellent",
+        "days": { "sun": "Sun", "mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat" },
+        "months": { "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr", "may": "May", "jun": "Jun", "jul": "Jul", "aug": "Aug", "sep": "Sep", "oct": "Oct", "nov": "Nov", "dec": "Dec" }
+      },
+      "streak": {
+        "day": "{count} day",
+        "days": "{count} days"
+      }
     },
     "nutrition": {
       "label": "Nutrition",

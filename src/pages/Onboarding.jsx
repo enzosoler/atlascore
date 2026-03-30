@@ -69,25 +69,22 @@ function Logo() {
   );
 }
 
-function StepDots({ step, total, t }) {
+function StepDots({ step, total }) {
   return (
-    <div className="mb-7 rounded-[18px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.52)] px-4 py-3">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="atlas-overline">
-          {t('onboarding.page.stepOf', { step: step + 1, total })}
-        </p>
-        <span className="font-mono text-[12px] font-semibold text-[hsl(var(--brand))]">
-          {Math.round(((step + 1) / total) * 100)}%
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        {Array.from({ length: total }).map((_, i) => (
-          <div
-            key={i}
-            className={cn('h-2 flex-1 rounded-full transition-all duration-300', i === step ? 'bg-[hsl(var(--brand))]' : i < step ? 'bg-[hsl(var(--brand)/0.38)]' : 'bg-[hsl(var(--border-h))]')}
-          />
-        ))}
-      </div>
+    <div className="mb-6 flex items-center justify-center gap-2">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            'h-1.5 rounded-full transition-all duration-300',
+            i === step
+              ? 'w-6 bg-[hsl(var(--brand))]'
+              : i < step
+                ? 'w-1.5 bg-[hsl(var(--brand)/0.4)]'
+                : 'w-1.5 bg-[hsl(var(--border-h))]'
+          )}
+        />
+      ))}
     </div>
   );
 }
@@ -96,21 +93,20 @@ function GoalChip({ selected, onClick, emoji, label }) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1.5 p-4 rounded-2xl border transition-all text-center
-        ${selected
-          ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--brand)/0.08)] shadow-sm'
-          : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--card-hi))]'
-        }`}
+      className={cn(
+        'flex flex-col items-center gap-2 p-3.5 rounded-xl border transition-all text-center',
+        selected
+          ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.06)]'
+          : 'border-[hsl(var(--border)/0.5)] hover:border-[hsl(var(--border))]'
+      )}
     >
-      <span className="text-[22px] leading-none">{emoji}</span>
-      <span className={`text-[12px] font-semibold leading-tight ${selected ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-2))]'}`}>
+      <span className="text-[20px] leading-none">{emoji}</span>
+      <span className={cn(
+        'text-[12px] font-semibold leading-tight',
+        selected ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-3))]'
+      )}>
         {label}
       </span>
-      {selected && (
-        <div className="w-4 h-4 rounded-full bg-[hsl(var(--brand))] flex items-center justify-center">
-          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-        </div>
-      )}
     </button>
   );
 }
@@ -126,41 +122,37 @@ function FieldLabel({ children }) {
 // ─── Step screens ─────────────────────────────────────────────────────────────
 
 function StepWelcome({ t }) {
-  const steps = [
-    { n: '01', title: t('onboarding.page.step01Title'), desc: t('onboarding.page.step01Desc') },
-    { n: '02', title: t('onboarding.page.step02Title'), desc: t('onboarding.page.step02Desc') },
-    { n: '03', title: t('onboarding.page.step03Title'), desc: t('onboarding.page.step03Desc') },
-  ];
   return (
-    <div className="text-center space-y-6 py-2">
-      <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto">
-        <Zap className="w-8 h-8 text-[hsl(var(--brand))]" strokeWidth={1.75} />
-      </div>
+    <div className="text-center space-y-5 py-4">
       <div>
-        <h2 className="text-[22px] font-bold tracking-tight mb-2">
+        <h2 className="text-[24px] font-bold tracking-tight mb-2">
           {t('onboarding.page.welcomeTitle')}{' '}
           <span className="text-[hsl(var(--accent-primary))]">atlas</span>
           <span className="text-[hsl(var(--fg))]">.core</span>
         </h2>
-        <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
+        <p className="text-[15px] text-[hsl(var(--fg-2))] leading-relaxed max-w-[280px] mx-auto">
           {t('onboarding.page.welcomeSubtitle')}
         </p>
       </div>
-      <div className="space-y-2 text-left">
-        {steps.map(({ n, title, desc }) => (
-          <div
-            key={n}
-            className="flex items-start gap-3 px-3 py-2.5 rounded-xl bg-[hsl(var(--card-hi))] border border-[hsl(var(--border-h))]"
-          >
-            <span className="text-[11px] font-bold tabular-nums text-[hsl(var(--brand))] shrink-0 mt-0.5 w-4">
-              {n}
-            </span>
-            <div>
-              <p className="text-[13px] font-semibold leading-snug">{title}</p>
-              <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">{desc}</p>
-            </div>
+      <div className="space-y-3 text-left pt-2">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[hsl(var(--brand)/0.08)] flex items-center justify-center shrink-0">
+            <span className="text-[12px] font-bold text-[hsl(var(--brand))]">1</span>
           </div>
-        ))}
+          <p className="text-[14px] text-[hsl(var(--fg))] font-medium">{t('onboarding.page.step01Title')}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[hsl(var(--brand)/0.08)] flex items-center justify-center shrink-0">
+            <span className="text-[12px] font-bold text-[hsl(var(--brand))]">2</span>
+          </div>
+          <p className="text-[14px] text-[hsl(var(--fg))] font-medium">{t('onboarding.page.step02Title')}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[hsl(var(--brand)/0.08)] flex items-center justify-center shrink-0">
+            <span className="text-[12px] font-bold text-[hsl(var(--brand))]">3</span>
+          </div>
+          <p className="text-[14px] text-[hsl(var(--fg))] font-medium">{t('onboarding.page.step03Title')}</p>
+        </div>
       </div>
     </div>
   );
@@ -438,74 +430,48 @@ function StepPathChoice({ form, set, t }) {
 function PaywallPrimingScreen({ onContinue, t }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="space-y-5 py-2"
+      className="space-y-6 py-2"
     >
       {/* Header */}
       <div className="text-center">
-        <div className="w-14 h-14 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
-          <ShieldCheck className="w-7 h-7 text-[hsl(var(--brand))]" strokeWidth={1.75} />
-        </div>
-        <h2 className="text-[20px] font-bold tracking-tight mb-1">{t('onboarding.page.paywall.title')}</h2>
-        <p className="text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">{t('onboarding.page.paywall.subtitle')}</p>
+        <h2 className="text-[22px] font-bold tracking-tight mb-1.5">{t('onboarding.page.paywall.title')}</h2>
+        <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">{t('onboarding.page.paywall.subtitle')}</p>
       </div>
 
-      {/* Trial timeline */}
-      <div className="space-y-2">
+      {/* Trial timeline — clean, no emojis */}
+      <div className="space-y-0">
         {[
-          { day: t('onboarding.page.paywall.todayLabel'), title: t('onboarding.page.paywall.todayTitle'), desc: t('onboarding.page.paywall.todayDesc'), icon: '🚀', highlight: true },
-          { day: t('onboarding.page.paywall.day5Label'), title: t('onboarding.page.paywall.day5Title'), desc: t('onboarding.page.paywall.day5Desc'), icon: '📧', highlight: false },
-          { day: t('onboarding.page.paywall.day7Label'), title: t('onboarding.page.paywall.day7Title'), desc: t('onboarding.page.paywall.day7Desc'), icon: '⏰', highlight: false },
-        ].map(({ day, title, desc, icon, highlight }) => (
-          <div
-            key={day}
-            className={`flex items-start gap-3 p-3 rounded-xl border transition-all
-              ${highlight
-                ? 'bg-[hsl(var(--brand)/0.06)] border-[hsl(var(--brand)/0.2)]'
-                : 'bg-[hsl(var(--card-hi))] border-[hsl(var(--border-h))]'
-              }`}
-          >
-            <span className="text-[18px] shrink-0 mt-0.5">{icon}</span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className={`text-[10px] font-bold uppercase tracking-wider shrink-0
-                  ${highlight ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--fg-3))]'}`}>
-                  {day}
-                </span>
-                <span className="text-[13px] font-semibold leading-snug">{title}</span>
-              </div>
-              <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5 leading-relaxed">{desc}</p>
+          { day: t('onboarding.page.paywall.todayLabel'), title: t('onboarding.page.paywall.todayTitle'), desc: t('onboarding.page.paywall.todayDesc'), active: true },
+          { day: t('onboarding.page.paywall.day5Label'), title: t('onboarding.page.paywall.day5Title'), desc: t('onboarding.page.paywall.day5Desc'), active: false },
+          { day: t('onboarding.page.paywall.day7Label'), title: t('onboarding.page.paywall.day7Title'), desc: t('onboarding.page.paywall.day7Desc'), active: false },
+        ].map(({ day, title, desc, active }, idx) => (
+          <div key={day} className="flex gap-3.5 py-3">
+            <div className="flex flex-col items-center">
+              <div className={cn(
+                'w-2 h-2 rounded-full shrink-0 mt-1.5',
+                active ? 'bg-[hsl(var(--brand))]' : 'bg-[hsl(var(--border-h))]'
+              )} />
+              {idx < 2 && <div className="w-px flex-1 bg-[hsl(var(--border-h))] mt-1" />}
+            </div>
+            <div className="flex-1 min-w-0 pb-1">
+              <span className={cn(
+                'text-[10px] font-bold uppercase tracking-wider',
+                active ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--fg-3))]'
+              )}>{day}</span>
+              <p className="text-[14px] font-semibold leading-snug mt-0.5">{title}</p>
+              <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5 leading-relaxed">{desc}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Annual plan highlight — pushes LTV (transcript 2 playbook) */}
-      <div className="rounded-xl border border-[hsl(var(--brand)/0.25)] bg-[hsl(var(--brand)/0.04)] p-3">
-        <div className="flex items-start gap-2.5">
-          <Crown className="w-4 h-4 text-[hsl(var(--brand))] shrink-0 mt-0.5" strokeWidth={1.75} />
-          <div>
-            <p className="text-[12px] font-semibold text-[hsl(var(--fg))] leading-snug">{t('onboarding.page.paywall.annualTitle')}</p>
-            <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">{t('onboarding.page.paywall.annualDesc')}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Social proof */}
-      <div className="rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] px-3 py-2.5">
-        <div className="flex items-center gap-1 mb-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" strokeWidth={1.5} />
-          ))}
-          <span className="text-[11px] font-semibold ml-1 text-[hsl(var(--fg-2))]">
-            {t('onboarding.page.paywall.socialProof')}
-          </span>
-        </div>
-        <p className="text-[12px] text-[hsl(var(--fg-2))] italic leading-relaxed">
-          {t('onboarding.page.paywall.testimonial')}
-        </p>
+      {/* Annual plan highlight */}
+      <div className="border-t border-[hsl(var(--border-h))] pt-4">
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('onboarding.page.paywall.annualTitle')}</p>
+        <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{t('onboarding.page.paywall.annualDesc')}</p>
       </div>
 
       {/* CTA */}
@@ -547,47 +513,36 @@ function SetupGenerationScreen({ onDone, t }) {
   }, []);
 
   return (
-    <div className="text-center py-6 space-y-8">
-      <div className="relative w-20 h-20 mx-auto">
-        <svg
-          className="absolute inset-0 -rotate-90 animate-spin"
-          style={{ animationDuration: '2s' }}
-          viewBox="0 0 80 80"
-        >
-          <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(var(--border-h))" strokeWidth="4" />
-          <circle
-            cx="40" cy="40" r="34" fill="none" stroke="hsl(var(--brand))" strokeWidth="4"
-            strokeLinecap="round" strokeDasharray="50 164"
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          {done
-            ? <Check className="w-8 h-8 text-[hsl(var(--ok))]" strokeWidth={2.5} />
-            : <Zap className="w-7 h-7 text-[hsl(var(--brand))]" strokeWidth={2} />
-          }
-        </div>
+    <div className="text-center py-10 space-y-8">
+      <div className="flex items-center justify-center">
+        {done
+          ? <div className="w-12 h-12 rounded-full bg-[hsl(var(--ok)/0.08)] flex items-center justify-center">
+              <Check className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
+            </div>
+          : <Loader2 className="w-8 h-8 text-[hsl(var(--fg-3))] animate-spin" strokeWidth={1.5} />
+        }
       </div>
 
       <div className="space-y-2 min-h-[48px]">
         <AnimatePresence mode="wait">
           <motion.p
             key={msgIdx}
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
+            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
             className="text-[15px] font-semibold text-[hsl(var(--fg))]"
           >
             {messages[msgIdx]}
           </motion.p>
         </AnimatePresence>
         {!done && (
-          <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('onboarding.page.setup.settingUp')}</p>
+          <p className="text-[12px] text-[hsl(var(--fg-3))]">{t('onboarding.page.setup.settingUp')}</p>
         )}
       </div>
 
       {done && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
           <button onClick={onDone} className="atlas-button atlas-button-primary h-12 px-8 rounded-2xl text-[14px] gap-2">
-            <ArrowRight className="w-4 h-4" strokeWidth={2} /> {t('onboarding.page.success.enterApp')}
+            {t('onboarding.page.success.enterApp')} <ArrowRight className="w-4 h-4" strokeWidth={2} />
           </button>
         </motion.div>
       )}
@@ -599,64 +554,55 @@ function SetupGenerationScreen({ onDone, t }) {
 
 function SuccessScreen({ chosenPath, onDone, t }) {
   useEffect(() => {
-    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+    confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
   }, []);
 
   const isFresh = chosenPath === 'fresh';
 
   return (
-    <div className="text-center py-4 space-y-6">
+    <div className="text-center py-6 space-y-6">
       <motion.div
-        initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', duration: 0.5 }}
-        className="w-20 h-20 rounded-full bg-[hsl(var(--ok)/0.1)] flex items-center justify-center mx-auto"
+        initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', duration: 0.4 }}
+        className="w-16 h-16 rounded-full bg-[hsl(var(--ok)/0.08)] flex items-center justify-center mx-auto"
       >
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.6, delay: 0.2 }}>
-          <Check className="w-10 h-10 text-[hsl(var(--ok))]" strokeWidth={2.5} />
-        </motion.div>
+        <Check className="w-8 h-8 text-[hsl(var(--ok))]" strokeWidth={2} />
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
         className="space-y-2"
       >
-        <h2 className="text-[24px] font-bold">{t('onboarding.page.success.title')}</h2>
-        <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-xs mx-auto">
+        <h2 className="text-[24px] font-bold tracking-tight">{t('onboarding.page.success.title')}</h2>
+        <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed max-w-[260px] mx-auto">
           {isFresh ? t('onboarding.page.success.freshMessage') : t('onboarding.page.success.ownMessage')}
         </p>
       </motion.div>
 
       {isFresh && (
         <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] p-4 text-left space-y-2"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}
+          className="text-left space-y-2.5 pt-2"
         >
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
-            {t('onboarding.page.success.focusTitle')}
-          </p>
           {[
             { icon: UtensilsCrossed, text: t('onboarding.page.success.focusItem1') },
             { icon: Dumbbell, text: t('onboarding.page.success.focusItem2') },
             { icon: Scale, text: t('onboarding.page.success.focusItem3') },
           ].map(({ icon: Icon, text }, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 + i * 0.1 }}
-              className="flex items-center gap-2.5 text-[13px] text-[hsl(var(--fg-2))]"
-            >
-              <Icon className="w-3.5 h-3.5 text-[hsl(var(--brand))] shrink-0" strokeWidth={2} />
+            <div key={i} className="flex items-center gap-3 text-[13px] text-[hsl(var(--fg-2))]">
+              <Icon className="w-4 h-4 text-[hsl(var(--fg-3))] shrink-0" strokeWidth={1.8} />
               {text}
-            </motion.div>
+            </div>
           ))}
         </motion.div>
       )}
 
       <motion.button
-        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
         onClick={onDone}
         className="atlas-button atlas-button-primary w-full h-12 rounded-2xl text-[14px] gap-2 mt-2"
       >
-        <ArrowRight className="w-4 h-4" strokeWidth={2} /> Enter the app
+        {t('onboarding.page.success.enterApp')} <ArrowRight className="w-4 h-4" strokeWidth={2} />
       </motion.button>
     </div>
   );
@@ -838,17 +784,8 @@ export default function Onboarding() {
         {/* ── Main onboarding steps ── */}
         {!showPaywallPriming && !showGeneration && !showSuccess && (
           <>
-            <div className="flex justify-end mb-1">
-              <button
-                onClick={() => navigate(ROUTES.home, { replace: true })}
-                className="p-2 rounded-lg hover:bg-[hsl(var(--shell))] transition-colors text-[hsl(var(--fg-2))]"
-              >
-                <X className="w-4 h-4" strokeWidth={2} />
-              </button>
-            </div>
-
             <Logo />
-            <StepDots step={step} total={TOTAL_STEPS} t={t} />
+            <StepDots step={step} total={TOTAL_STEPS} />
 
             <AnimatePresence mode="wait">
               <motion.div
