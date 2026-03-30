@@ -31,7 +31,7 @@ export default function AdminOverview() {
   const { data: todayWorkouts } = useQuery({
     queryKey: ['admin-today-workouts'],
     queryFn: async () => {
-      const { count } = await supabase.from('workout_logs').select('*', { count: 'exact', head: true }).eq('status', 'completed').gte('date', todayISO);
+      const { count } = await supabase.from('workouts').select('*', { count: 'exact', head: true }).eq('status', 'completed').gte('completed_at', `${todayISO}T00:00:00`);
       return count || 0;
     },
     staleTime: 30_000,

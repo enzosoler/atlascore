@@ -46,7 +46,7 @@ export function useDailyStateV2() {
   const { data: rawSession, isLoading: l1 } = useQuery({
     queryKey: DAILY_KEYS.session(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('workout_logs').select('*').eq('user_id', uid).eq('date', today).order('completed_at', { ascending: false }).limit(1).maybeSingle();
+      const { data } = await supabase.from('workouts').select('*').eq('user_id', uid).gte('completed_at', `${today}T00:00:00`).lte('completed_at', `${today}T23:59:59`).order('completed_at', { ascending: false }).limit(1).maybeSingle();
       return data;
     }),
     enabled: !!uid, staleTime: 30_000,
@@ -109,7 +109,7 @@ export function useDailyStateV2() {
   const { data: rawRecentSessions = [] } = useQuery({
     queryKey: DAILY_KEYS.recentWork(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('workout_logs').select('*').eq('user_id', uid).eq('status', 'completed').order('completed_at', { ascending: false }).limit(5);
+      const { data } = await supabase.from('workouts').select('*').eq('user_id', uid).eq('status', 'completed').order('completed_at', { ascending: false }).limit(5);
       return data || [];
     }),
     enabled: !!uid, staleTime: 60_000,
@@ -121,7 +121,7 @@ export function useDailyStateV2() {
       const monday = new Date();
       monday.setDate(monday.getDate() - monday.getDay() + 1);
       const mondayKey = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
-      const { data } = await supabase.from('workout_logs').select('date, status').eq('user_id', uid).eq('status', 'completed').gte('date', mondayKey);
+      const { data } = await supabase.from('workouts').select('completed_at, status').eq('user_id', uid).eq('status', 'completed').gte('completed_at', `${mondayKey}T00:00:00`);
       return data || [];
     }),
     enabled: !!uid, staleTime: 60_000,

@@ -191,8 +191,9 @@ function ProgressContent() {
   const { data: workoutLogs = [] } = useQuery({
     queryKey: ['progress-workouts', user?.id, range],
     queryFn: async () => {
-      const { data } = await supabase.from('workout_logs').select('date, status').eq('user_id', user.id).gte('date', cutoff.toISOString()).order('date');
-      return data || [];
+      const { data } = await supabase.from('workouts').select('completed_at, status').eq('user_id', user.id).gte('completed_at', cutoff.toISOString()).order('completed_at');
+      // Normalize: rest of the page reads .date — map completed_at → date
+      return (data || []).map((w) => ({ ...w, date: w.completed_at }));
     },
     enabled: !!user?.id,
   });

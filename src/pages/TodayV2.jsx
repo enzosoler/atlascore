@@ -13,7 +13,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell, Dumbbell, UtensilsCrossed, Scale, Heart,
-  ArrowRight, Flame, Target, Pill,
+  ArrowRight, Flame, Pill,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
@@ -243,18 +243,18 @@ function TodayContent() {
           </div>
           <div className="flex items-center gap-2 shrink-0 mt-1">
             {weather && (
-              <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--fill)/0.8)] border border-[hsl(var(--border)/0.5)] px-2.5 py-1">
-                <span className="text-callout leading-none">{weather.icon}</span>
-                <span className="text-caption1 font-semibold text-[hsl(var(--fg-2))]">{weather.temp}°</span>
+              <div className="flex items-center gap-1 text-[hsl(var(--fg-3))]">
+                <span className="text-[14px] leading-none">{weather.icon}</span>
+                <span className="text-[13px] font-medium">{weather.temp}°</span>
               </div>
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate(ROUTES.notifications)}
-              className="w-9 h-9 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]"
+              className="w-8 h-8 rounded-full text-[hsl(var(--fg-3))]"
             >
-              <Bell className="w-4 h-4" strokeWidth={2} />
+              <Bell className="w-4 h-4" strokeWidth={1.8} />
             </Button>
           </div>
         </div>
@@ -284,8 +284,8 @@ function TodayContent() {
       </div>
 
       {/* Today Plan */}
-      <div className="space-y-2.5">
-        <p className="atlas-overline px-0.5">{t('today.plan.title')}</p>
+      <div className="space-y-1">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-[hsl(var(--fg-3))] px-0.5">{t('today.plan.title')}</p>
 
         <PlanCard
           icon={Dumbbell}

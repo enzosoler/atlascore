@@ -40,19 +40,14 @@ export default function CoachChatTrigger({ pageContext = 'today', onOpen, onSugg
   const suggestions = allSuggestions[pageContext] ?? allSuggestions.today;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {/* Bar */}
       <button
         onClick={onOpen}
-        className="flex w-full items-center gap-3 rounded-[16px] border border-[hsl(var(--brand-ai)/0.25)] bg-[hsl(var(--brand-ai)/0.05)] px-4 py-3 text-left transition-colors active:bg-[hsl(var(--brand-ai)/0.1)]"
+        className="flex w-full items-center gap-3 rounded-xl bg-[hsl(var(--fill)/0.5)] px-4 py-3 text-left transition-colors active:bg-[hsl(var(--fill)/0.8)]"
       >
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand-ai)/0.15)] border border-[hsl(var(--brand-ai)/0.2)]">
-          <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-        </div>
+        <Sparkles className="h-4 w-4 text-[hsl(var(--fg-3))] shrink-0" strokeWidth={1.8} />
         <span className="flex-1 text-[14px] text-[hsl(var(--fg-3))]">{t('coach.chat.triggerBar')}</span>
-        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--brand-ai))]">
-          AI
-        </span>
       </button>
 
       {/* Suggestion pills */}
@@ -61,7 +56,7 @@ export default function CoachChatTrigger({ pageContext = 'today', onOpen, onSugg
           <button
             key={i}
             onClick={() => onSuggestion?.(s)}
-            className="shrink-0 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] px-3 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))] whitespace-nowrap active:bg-[hsl(var(--fill)/0.7)] transition-colors"
+            className="shrink-0 rounded-full bg-[hsl(var(--fill)/0.5)] px-3 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))] whitespace-nowrap active:bg-[hsl(var(--fill)/0.8)] transition-colors"
           >
             {s}
           </button>

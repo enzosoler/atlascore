@@ -39,12 +39,12 @@ function serializeCsvDataRows(workouts, meals) {
     ]);
   });
 
-  // Add workouts (workout_logs table)
+  // Add workouts (workouts table — uses completed_at, not date)
   workouts.forEach((workout) => {
     rows.push([
-      workout.date || '',
+      (workout.completed_at || '').split('T')[0],
       'Workout',
-      workout.workout_name || workout.name || 'Workout',
+      workout.name || 'Workout',
       workout.duration_minutes ? `${workout.duration_minutes} min` : workout.status || 'N/A',
     ]);
   });
@@ -88,15 +88,19 @@ function ExportContent() {
   }, [endDate, startDate, user?.full_name]);
 
   const collectData = async () => {
-    // Tables must match what the UI uses — see useDailyStateV2, Nutrition, Protocols, LabExams pages.
+    // IMPORTANT: table names and date columns must match the actual DB schema.
+    // workouts table has completed_at (timestamptz), NOT date.
+    // food_logs.date is a timestamp string. measurements.date is DATE.
+    // daily_checkins.date is DATE. protocols.start_date is DATE.
+    // lab_exams.exam_date is DATE. progress_photos.date is DATE.
     const datasets = [
       ['meals', async () => { const { data } = await supabase.from('food_logs').select('*').eq('user_id', user.id).gte('date', `${startDate}T00:00:00`).lte('date', `${endDate}T23:59:59`).order('date', { ascending: false }).limit(500); return data || []; }],
-      ['workouts', async () => { const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['workouts', async () => { const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).gte('completed_at', `${startDate}T00:00:00`).lte('completed_at', `${endDate}T23:59:59`).order('completed_at', { ascending: false }).limit(300); return data || []; }],
       ['measurements', async () => { const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(300); return data || []; }],
-      ['checkins', async () => { const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['checkins', async () => { const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(300); return data || []; }],
       ['protocols', async () => { const { data } = await supabase.from('protocols').select('*').eq('user_id', user.id).order('start_date', { ascending: false }).limit(100); return data || []; }],
       ['labExams', async () => { const { data } = await supabase.from('lab_exams').select('*').eq('user_id', user.id).order('exam_date', { ascending: false }).limit(100); return data || []; }],
-      ['progressPhotos', async () => { const { data } = await supabase.from('progress_photos').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(100); return data || []; }],
+      ['progressPhotos', async () => { const { data } = await supabase.from('progress_photos').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(100); return data || []; }],
     ];
 
     const results = await Promise.allSettled(datasets.map(([, request]) => request()));
@@ -256,9 +260,9 @@ function ExportContent() {
         yPosition += sectionGap;
       };
 
-      // Workouts section — workout_logs table uses workout_name, status, duration_minutes
+      // Workouts section — workouts table: name, status, completed_at, duration_minutes
       const workoutItems = payload.workouts.map(
-        (w) => `${w.date} - ${w.workout_name || w.name || 'Workout'} (${w.status || '?'}, ${w.duration_minutes ? `${w.duration_minutes} min` : 'N/A'})`
+        (w) => `${(w.completed_at || '').split('T')[0]} - ${w.name || 'Workout'} (${w.status || '?'}, ${w.duration_minutes ? `${w.duration_minutes} min` : 'N/A'})`
       );
       addSection('Workouts', workoutItems);
 

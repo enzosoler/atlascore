@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Capacitor } from '@capacitor/core';
 
 const IS_NATIVE = Capacitor.isNativePlatform();
-import { useReCaptcha, IS_CAPTCHA_ENABLED } from '@/lib/ReCaptchaContext';
+import { useReCaptcha } from '@/lib/ReCaptchaContext';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 // Auth page redesign: centered layout, personal copy, lighter UX
