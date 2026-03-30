@@ -29,23 +29,23 @@ function serializeCsvDataRows(workouts, meals) {
     ['date', 'type', 'name_or_description', 'value'],
   ];
 
-  // Add meals
+  // Add meals (food_logs table)
   meals.forEach((meal) => {
     rows.push([
-      meal.date || '',
+      (meal.date || '').split('T')[0],
       'Meal',
-      meal.description || 'Meal',
-      `${meal.total_calories || 0} cal`,
+      meal.description || meal.food_name || 'Meal',
+      `${meal.calories || meal.total_calories || 0} cal`,
     ]);
   });
 
-  // Add workouts
+  // Add workouts (workout_logs table)
   workouts.forEach((workout) => {
     rows.push([
       workout.date || '',
       'Workout',
-      workout.status || workout.name || 'Workout',
-      workout.exercises?.length ? `${workout.exercises.length} exercises` : 'N/A',
+      workout.workout_name || workout.name || 'Workout',
+      workout.duration_minutes ? `${workout.duration_minutes} min` : workout.status || 'N/A',
     ]);
   });
 
@@ -88,14 +88,15 @@ function ExportContent() {
   }, [endDate, startDate, user?.full_name]);
 
   const collectData = async () => {
+    // Tables must match what the UI uses — see useDailyStateV2, Nutrition, Protocols, LabExams pages.
     const datasets = [
-      ['meals', async () => []],
-      ['workouts', async () => { const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(300); return data || []; }],
-      ['measurements', async () => { const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['meals', async () => { const { data } = await supabase.from('food_logs').select('*').eq('user_id', user.id).gte('date', `${startDate}T00:00:00`).lte('date', `${endDate}T23:59:59`).order('date', { ascending: false }).limit(500); return data || []; }],
+      ['workouts', async () => { const { data } = await supabase.from('workout_logs').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['measurements', async () => { const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(300); return data || []; }],
       ['checkins', async () => { const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(300); return data || []; }],
-      ['protocols', async () => []],
-      ['labExams', async () => []],
-      ['progressPhotos', async () => []],
+      ['protocols', async () => { const { data } = await supabase.from('protocols').select('*').eq('user_id', user.id).order('start_date', { ascending: false }).limit(100); return data || []; }],
+      ['labExams', async () => { const { data } = await supabase.from('lab_exams').select('*').eq('user_id', user.id).order('exam_date', { ascending: false }).limit(100); return data || []; }],
+      ['progressPhotos', async () => { const { data } = await supabase.from('progress_photos').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(100); return data || []; }],
     ];
 
     const results = await Promise.allSettled(datasets.map(([, request]) => request()));
@@ -252,15 +253,15 @@ function ExportContent() {
         yPosition += sectionGap;
       };
 
-      // Workouts section
+      // Workouts section — workout_logs table uses workout_name, status, duration_minutes
       const workoutItems = payload.workouts.map(
-        (w) => `${w.date} - ${w.status || w.name || 'Workout'} (${w.exercises?.length || 0} exercises)`
+        (w) => `${w.date} - ${w.workout_name || w.name || 'Workout'} (${w.status || '?'}, ${w.duration_minutes ? `${w.duration_minutes} min` : 'N/A'})`
       );
       addSection('Workouts', workoutItems);
 
-      // Meals/Nutrition section
+      // Meals/Nutrition section — food_logs table uses calories, protein, description
       const mealItems = payload.meals.map(
-        (m) => `${m.date} - ${m.description || 'Meal'} (${m.total_calories || 0} cal, ${m.total_protein || 0}g protein)`
+        (m) => `${(m.date || '').split('T')[0]} - ${m.description || m.food_name || 'Meal'} (${m.calories || m.total_calories || 0} cal, ${m.protein || m.protein_g || m.total_protein || 0}g protein)`
       );
       addSection('Meals and Nutrition', mealItems);
 
@@ -270,15 +271,15 @@ function ExportContent() {
       );
       addSection('Measurements', measurementItems);
 
-      // Protocols section
+      // Protocols section — protocols table uses substance_name, name, active, start_date
       const protocolItems = payload.protocols.map(
-        (p) => `${p.start_date || p.created_date?.slice(0, 10) || '?'} - ${p.name} (${p.status || 'active'})`
+        (p) => `${p.start_date || '?'} - ${p.substance_name || p.name || 'Protocol'} (${p.active ? 'active' : 'inactive'})`
       );
       addSection('Protocols', protocolItems);
 
-      // Lab exams section
+      // Lab exams section — lab_exams table uses exam_date, exam_type/name
       const examItems = payload.labExams.map(
-        (e) => `${e.exam_date} - ${e.exam_type || 'Exam'}`
+        (e) => `${e.exam_date || '?'} - ${e.exam_type || e.name || 'Exam'}`
       );
       addSection('Lab Exams', examItems);
 

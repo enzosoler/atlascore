@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trophy } from 'lucide-react';
+import { useI18n } from '@/lib/i18nContext';
 
 function calcStreak(checkins = []) {
   if (!checkins.length) return 0;
@@ -18,15 +19,15 @@ function calcStreak(checkins = []) {
   return streak;
 }
 
-export default function MilestoneCard({ streak, checkins, workouts }) {
-  // Support both old API (streak number) and new API (checkins array)
+export default function MilestoneCard({ streak, checkins }) {
+  const { t } = useI18n();
   const count = typeof streak === 'number' ? streak : calcStreak(checkins);
 
   const milestones = [
-    { days: 7,   label: '1 week',   emoji: '🔥', message: 'Golden week!' },
-    { days: 14,  label: '2 weeks',  emoji: '🎯', message: 'Discipline in action!' },
-    { days: 30,  label: '1 month',  emoji: '🏆', message: 'Incredible month!' },
-    { days: 100, label: '100 days', emoji: '👑', message: 'Master of consistency!' },
+    { days: 7,   label: t('today.milestone.1week'),   emoji: '🔥', message: t('today.milestone.goldenWeek') },
+    { days: 14,  label: t('today.milestone.2weeks'),  emoji: '🎯', message: t('today.milestone.disciplineInAction') },
+    { days: 30,  label: t('today.milestone.1month'),  emoji: '🏆', message: t('today.milestone.incredibleMonth') },
+    { days: 100, label: t('today.milestone.100days'), emoji: '👑', message: t('today.milestone.masterConsistency') },
   ];
 
   const nextMilestone = milestones.find(m => m.days > count);
@@ -34,10 +35,10 @@ export default function MilestoneCard({ streak, checkins, workouts }) {
 
   if (!nextMilestone) {
     return (
-      <div className="surface p-4 text-center space-y-2">
+      <div className="atlas-card p-4 text-center space-y-2">
         <p className="text-[20px]">👑</p>
-        <p className="text-[13px] font-semibold">You are a legend!</p>
-        <p className="text-[11px] text-[hsl(var(--fg-2))]">{count} days of consistency</p>
+        <p className="text-[13px] font-semibold">{t('today.milestone.legend')}</p>
+        <p className="text-[11px] text-[hsl(var(--fg-2))]">{t('today.milestone.daysConsistency', { count })}</p>
       </div>
     );
   }
@@ -45,10 +46,10 @@ export default function MilestoneCard({ streak, checkins, workouts }) {
   const progress = (count / nextMilestone.days) * 100;
 
   return (
-    <div className="surface p-4 space-y-3">
+    <div className="atlas-card p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Trophy className="w-4 h-4 text-[hsl(var(--warn))]" strokeWidth={2} />
-        <p className="t-label">Next milestone</p>
+        <p className="atlas-overline">{t('today.milestone.nextMilestone')}</p>
       </div>
 
       <div>
@@ -66,7 +67,7 @@ export default function MilestoneCard({ streak, checkins, workouts }) {
 
       {achieved.length > 0 && (
         <div className="pt-2 border-t border-[hsl(var(--border-h))]">
-          <p className="text-[10px] text-[hsl(var(--fg-2))] mb-1.5">Desbloqueadas</p>
+          <p className="atlas-overline mb-1.5">{t('today.milestone.unlocked')}</p>
           <div className="flex gap-1">
             {achieved.map(m => (
               <div key={m.days} className="flex-1 text-center">

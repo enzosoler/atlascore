@@ -843,6 +843,60 @@
       "carbs": "Carbos",
       "fat": "Gordura"
     },
+    "adherenceCard": {
+      "label": "Adesão",
+      "title": "Consistência do bloco atual",
+      "onTrack": "No caminho",
+      "adjust": "Ajustar",
+      "focusUp": "Foque mais"
+    },
+    "milestone": {
+      "nextMilestone": "Próximo marco",
+      "unlocked": "Desbloqueados",
+      "legend": "Você é uma lenda!",
+      "daysConsistency": "{count} dias de consistência",
+      "1week": "1 semana",
+      "2weeks": "2 semanas",
+      "1month": "1 mês",
+      "100days": "100 dias",
+      "goldenWeek": "Semana de ouro!",
+      "disciplineInAction": "Disciplina em ação!",
+      "incredibleMonth": "Mês incrível!",
+      "masterConsistency": "Mestre da consistência!"
+    },
+    "subscriptionBanner": {
+      "welcome": "Bem-vindo ao {name}! 🎉",
+      "trialInfo": "7 dias grátis. Cobrança após o período de trial."
+    },
+    "quickCheckin": {
+      "label": "Check-in",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "saved": "Check-in salvo",
+      "error": "Erro ao salvar check-in",
+      "mood": "Humor",
+      "energy": "Energia",
+      "sleep": "Sono",
+      "water": "Água",
+      "moodTerrible": "Terrível",
+      "moodPoor": "Ruim",
+      "moodNeutral": "Neutro",
+      "moodGood": "Bom",
+      "moodExcellent": "Excelente"
+    },
+    "recommendations": {
+      "forYou": "Para você",
+      "doThis": "Fazer isso",
+      "dismiss": "Dispensar",
+      "training": "Treino",
+      "nutrition": "Nutrição",
+      "recovery": "Recuperação",
+      "habit": "Hábito"
+    },
+    "insightCard": {
+      "insights": "Insights",
+      "viewInsights": "Ver insights"
+    },
     "plan": {
       "title": "Plano de hoje",
       "workoutComplete": "Treino concluído",

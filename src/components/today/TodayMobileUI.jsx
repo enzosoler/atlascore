@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18nContext';
 
 const surfaceClassName =
   'atlas-card rounded-[22px] border-[hsl(var(--border)/0.92)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] shadow-[var(--shadow-sm)]';
@@ -196,7 +197,9 @@ export function TodayStatCard({
   );
 }
 
-export function TodayAdherenceCard({ score, summary, items = [] }) {
+export function TodayAdherenceCard({ score, summary, items = [], t: tProp }) {
+  const { t: tHook } = useI18n();
+  const t = tProp || tHook;
   const circumference = 2 * Math.PI * 26;
   const dashOffset = circumference - (score / 100) * circumference;
   const tone = getAdherenceTone(score);
@@ -234,13 +237,13 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="atlas-overline">Adherence</p>
+              <p className="atlas-overline">{t('today.adherenceCard.label')}</p>
               <p className="mt-1 text-[18px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                Current block consistency
+                {t('today.adherenceCard.title')}
               </p>
             </div>
             <span className={cn('inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold', styles.pill)}>
-              {score >= 75 ? 'On track' : score >= 45 ? 'Adjust' : 'Focus up'}
+              {score >= 75 ? t('today.adherenceCard.onTrack') : score >= 45 ? t('today.adherenceCard.adjust') : t('today.adherenceCard.focusUp')}
             </span>
           </div>
           <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{summary}</p>
@@ -265,12 +268,15 @@ export function TodayAdherenceCard({ score, summary, items = [] }) {
 
 export function TodayInsightCard({
   to,
-  eyebrow = 'Insights',
+  eyebrow,
   title,
   description,
-  cta = 'View insights',
+  cta,
   icon: Icon,
 }) {
+  const { t } = useI18n();
+  const resolvedEyebrow = eyebrow || t('today.insightCard.insights');
+  const resolvedCta = cta || t('today.insightCard.viewInsights');
   return (
     <Link
       to={to}
@@ -286,13 +292,13 @@ export function TodayInsightCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="atlas-overline text-[hsl(var(--accent-secondary))]">{eyebrow}</p>
+          <p className="atlas-overline text-[hsl(var(--accent-secondary))]">{resolvedEyebrow}</p>
           <p className="mt-2 text-[20px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
             {title}
           </p>
           <p className="mt-2 text-[14px] leading-6 text-[hsl(var(--fg-2))]">{description}</p>
           <span className="mt-4 inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--accent-secondary))]">
-            {cta}
+            {resolvedCta}
             <ChevronRight className="h-4 w-4" strokeWidth={2.2} />
           </span>
         </div>

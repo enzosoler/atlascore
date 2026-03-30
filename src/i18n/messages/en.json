@@ -851,6 +851,60 @@
       "carbs": "Carbs",
       "fat": "Fat"
     },
+    "adherenceCard": {
+      "label": "Adherence",
+      "title": "Current block consistency",
+      "onTrack": "On track",
+      "adjust": "Adjust",
+      "focusUp": "Focus up"
+    },
+    "milestone": {
+      "nextMilestone": "Next milestone",
+      "unlocked": "Unlocked",
+      "legend": "You are a legend!",
+      "daysConsistency": "{count} days of consistency",
+      "1week": "1 week",
+      "2weeks": "2 weeks",
+      "1month": "1 month",
+      "100days": "100 days",
+      "goldenWeek": "Golden week!",
+      "disciplineInAction": "Discipline in action!",
+      "incredibleMonth": "Incredible month!",
+      "masterConsistency": "Master of consistency!"
+    },
+    "subscriptionBanner": {
+      "welcome": "Welcome to {name}! 🎉",
+      "trialInfo": "7 days free. Your plan starts billing after the trial period."
+    },
+    "quickCheckin": {
+      "label": "Check-in",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Check-in saved",
+      "error": "Failed to save check-in",
+      "mood": "Mood",
+      "energy": "Energy",
+      "sleep": "Sleep",
+      "water": "Water",
+      "moodTerrible": "Terrible",
+      "moodPoor": "Poor",
+      "moodNeutral": "Neutral",
+      "moodGood": "Good",
+      "moodExcellent": "Excellent"
+    },
+    "recommendations": {
+      "forYou": "For you",
+      "doThis": "Do this",
+      "dismiss": "Dismiss",
+      "training": "Training",
+      "nutrition": "Nutrition",
+      "recovery": "Recovery",
+      "habit": "Habit"
+    },
+    "insightCard": {
+      "insights": "Insights",
+      "viewInsights": "View insights"
+    },
     "plan": {
       "title": "Today's plan",
       "workoutComplete": "Workout complete",
