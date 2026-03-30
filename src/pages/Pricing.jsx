@@ -9,8 +9,8 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
-  Stethoscope,
-  Users,
+  // Stethoscope, // unused in public MVP — professional plans hidden
+  // Users,       // unused in public MVP — professional plans hidden
   X,
   Zap,
 } from 'lucide-react';
@@ -47,11 +47,13 @@ const ATHLETE_PLAN_META = [
   { id: 'athlete_performance', key: 'performance', icon: Star },
 ];
 
-const PROFESSIONAL_PLAN_META = [
-  { id: 'coach', key: 'coach', icon: Users },
-  { id: 'nutritionist', key: 'nutritionist', icon: Users },
-  { id: 'clinician', key: 'clinician', icon: Stethoscope },
-];
+// Professional plan meta — not rendered in public MVP (private beta).
+// Preserved for future reactivation.
+// const PROFESSIONAL_PLAN_META = [
+//   { id: 'coach', key: 'coach', icon: Users },
+//   { id: 'nutritionist', key: 'nutritionist', icon: Users },
+//   { id: 'clinician', key: 'clinician', icon: Stethoscope },
+// ];
 
 function formatPlanPrice(planId, translatedPrice, pricing, locale, billing = 'monthly') {
   if (planId === 'free') return translatedPrice;
@@ -279,41 +281,9 @@ export default function Pricing() {
     });
   }, [locale, pricing, billing, getTranslation]);
 
-  const professionalPlans = useMemo(() => {
-    const translations = getTranslation('pricing_page.plans');
-    if (!translations) return [];
-    return PROFESSIONAL_PLAN_META.map((meta) => {
-      const translated = translations[meta.key];
-      if (!translated) {
-        console.warn(`[Pricing] Missing translation for plan: ${meta.key}`);
-        return {
-          ...meta,
-          name: meta.key,
-          pitch: '',
-          note: '',
-          features: [],
-          cta: 'Subscribe',
-          trial: null,
-          period: '/month',
-          savings: null,
-          price: '$0',
-        };
-      }
-      const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
-      return {
-        ...meta,
-        name: translated.name,
-        pitch: translated.pitch,
-        note: translated.note,
-        features: translated.features,
-        cta: translated.cta,
-        trial: billing === 'monthly' ? translated.trial : null,
-        period: billing === 'yearly' ? '/year' : translated.period,
-        savings,
-        price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
-      };
-    });
-  }, [locale, pricing, billing, getTranslation]);
+  // Professional plans — not rendered in public MVP (private beta).
+  // Preserved for future reactivation.
+  // const professionalPlans = useMemo(() => { ... }, [locale, pricing, billing, getTranslation]);
 
   const handleSubscribe = async (planId) => {
     if (planId === 'free') {
@@ -595,17 +565,17 @@ export default function Pricing() {
             ))}
           </div>
 
-          {/* Professional CTA - Simplified */}
+          {/* Professional CTA — coming soon / private beta */}
           <div className="mt-12 rounded-2xl border border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.2)] px-6 py-6 text-center">
-            <p className="text-[14px] font-medium text-[hsl(var(--fg))]">
-              {ui.professionalLabel}?
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+              {ui.professionalLabel}
             </p>
             <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))]">
               {t('pricing_page.professionalDesc')}
             </p>
-            <Button asChild variant="ghost" className="mt-3 h-9 text-[13px]">
-              <Link to={ROUTES.help}>
-                Contact us for professional access
+            <Button asChild variant="outline" className="mt-3 h-9 text-[13px]">
+              <Link to="/waitlist">
+                {t('pricing_page.professionalCta') || 'Join the waitlist'}
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>

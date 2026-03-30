@@ -12,6 +12,7 @@ import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
 import { LEGACY_ROUTE_REDIRECTS, ROUTES, ROLE_HOME } from '@/lib/routes';
+import { shouldMountProRoutes } from '@/lib/privateBeta';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralTracking';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -235,12 +236,14 @@ const RequireAuthenticatedApp = () => {
     return <Navigate to={ROLE_HOME[user?.atlas_role] || ROUTES.today} replace />;
   }
 
-  // Admin Auto-Redirect (Web only)
-  const isAdmin = user?.atlas_role === 'admin';
-  const isAdminRoute = location.pathname.startsWith('/AdminPanel');
-  const skipAdmin = new URLSearchParams(location.search).get('skip_admin') === '1';
-  if (isAdmin && !isAdminRoute && !skipAdmin && !Capacitor.isNativePlatform()) {
-    return <Navigate to={ROUTES.admin} replace />;
+  // Admin Auto-Redirect (Web only) — only when pro routes are enabled
+  if (shouldMountProRoutes()) {
+    const isAdmin = user?.atlas_role === 'admin';
+    const isAdminRoute = location.pathname.startsWith('/AdminPanel');
+    const skipAdmin = new URLSearchParams(location.search).get('skip_admin') === '1';
+    if (isAdmin && !isAdminRoute && !skipAdmin && !Capacitor.isNativePlatform()) {
+      return <Navigate to={ROUTES.admin} replace />;
+    }
   }
 
   return <Outlet />;
@@ -380,18 +383,24 @@ const AppRoutes = () => (
           <Route path={ROUTES.social} element={<Social />} />
           <Route path={ROUTES.prescribedDiet} element={<MyPrescribedDiet />} />
           <Route path={ROUTES.prescribedWorkout} element={<MyPrescribedWorkout />} />
-          {/* Web-only: professional dashboards */}
-          <Route path={ROUTES.coachDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachDashboard /></RouteGuard></WebOnlyRoute>} />
-          <Route path={ROUTES.coachStudents} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachStudents /></RouteGuard></WebOnlyRoute>} />
-          <Route path="/coach/student/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachStudentProfile /></RouteGuard></WebOnlyRoute>} />
-          <Route path="/coach/prescribe-workout/:studentId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachPrescribeWorkout /></RouteGuard></WebOnlyRoute>} />
-          <Route path={ROUTES.nutritionistDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistDashboard /></RouteGuard></WebOnlyRoute>} />
-          <Route path={ROUTES.nutritionistClients} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistClients /></RouteGuard></WebOnlyRoute>} />
-          <Route path="/nutritionist/client/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistClientProfile /></RouteGuard></WebOnlyRoute>} />
-          <Route path="/nutritionist/prescribe-diet/:clientId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistPrescribeDiet /></RouteGuard></WebOnlyRoute>} />
-          <Route path={ROUTES.clinicianDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianDashboard /></RouteGuard></WebOnlyRoute>} />
-          <Route path={ROUTES.clinicianPatients} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianPatients /></RouteGuard></WebOnlyRoute>} />
-          <Route path="/clinician/patient/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard></WebOnlyRoute>} />
+          {/* Professional dashboards — gated behind private beta flag.
+              Routes are only mounted when VITE_ENABLE_PRO_ROUTES=true (internal/staging).
+              In public builds these routes simply don't exist, so users can't land here. */}
+          {shouldMountProRoutes() && (
+            <>
+              <Route path={ROUTES.coachDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachDashboard /></RouteGuard></WebOnlyRoute>} />
+              <Route path={ROUTES.coachStudents} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachStudents /></RouteGuard></WebOnlyRoute>} />
+              <Route path="/coach/student/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachStudentProfile /></RouteGuard></WebOnlyRoute>} />
+              <Route path="/coach/prescribe-workout/:studentId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['coach', 'admin']}><CoachPrescribeWorkout /></RouteGuard></WebOnlyRoute>} />
+              <Route path={ROUTES.nutritionistDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistDashboard /></RouteGuard></WebOnlyRoute>} />
+              <Route path={ROUTES.nutritionistClients} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistClients /></RouteGuard></WebOnlyRoute>} />
+              <Route path="/nutritionist/client/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistClientProfile /></RouteGuard></WebOnlyRoute>} />
+              <Route path="/nutritionist/prescribe-diet/:clientId" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['nutritionist', 'admin']}><NutritionistPrescribeDiet /></RouteGuard></WebOnlyRoute>} />
+              <Route path={ROUTES.clinicianDashboard} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianDashboard /></RouteGuard></WebOnlyRoute>} />
+              <Route path={ROUTES.clinicianPatients} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianPatients /></RouteGuard></WebOnlyRoute>} />
+              <Route path="/clinician/patient/:id" element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['clinician', 'admin']}><ClinicianPatientProfile /></RouteGuard></WebOnlyRoute>} />
+            </>
+          )}
 
           {/* Profile Extension */}
           <Route path="/profile/content" element={<UserContent />} />
@@ -408,21 +417,23 @@ const AppRoutes = () => (
         </Route>
       </Route>
 
-      {/* Admin panel — web only, nested under AdminLayout */}
-      <Route element={<RequireAuthenticatedApp />}>
-        <Route path={ROUTES.admin} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminLayout /></RouteGuard></WebOnlyRoute>}>
-          <Route index element={<AdminOverview />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="users/:userId" element={<AdminUserProfile />} />
-          <Route path="ai-system" element={<AdminAISystem />} />
-          <Route path="logs" element={<AdminLogs />} />
-          <Route path="subscriptions" element={<AdminSubscriptions />} />
-          <Route path="roles" element={<AdminRoles />} />
-          <Route path="invites" element={<AdminInvites />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="moderation" element={<ModerationConsole />} />
+      {/* Admin panel — gated behind private beta flag (same as professional routes) */}
+      {shouldMountProRoutes() && (
+        <Route element={<RequireAuthenticatedApp />}>
+          <Route path={ROUTES.admin} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminLayout /></RouteGuard></WebOnlyRoute>}>
+            <Route index element={<AdminOverview />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="users/:userId" element={<AdminUserProfile />} />
+            <Route path="ai-system" element={<AdminAISystem />} />
+            <Route path="logs" element={<AdminLogs />} />
+            <Route path="subscriptions" element={<AdminSubscriptions />} />
+            <Route path="roles" element={<AdminRoles />} />
+            <Route path="invites" element={<AdminInvites />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="moderation" element={<ModerationConsole />} />
+          </Route>
         </Route>
-      </Route>
+      )}
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>

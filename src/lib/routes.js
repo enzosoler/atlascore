@@ -49,12 +49,19 @@ export const ROUTES = {
   notifications: '/notifications',
 };
 
+/**
+ * Default home page per role.
+ * In the public MVP, professional routes are gated — all roles land on /Today
+ * unless VITE_ENABLE_PRO_ROUTES is enabled (internal/staging builds).
+ */
+const proRoutesEnabled = import.meta.env.VITE_ENABLE_PRO_ROUTES === 'true';
+
 export const ROLE_HOME = {
-  athlete: ROUTES.today,
-  coach: ROUTES.coachDashboard,
-  nutritionist: ROUTES.nutritionistDashboard,
-  clinician: ROUTES.clinicianDashboard,
-  admin: ROUTES.admin,
+  athlete:      ROUTES.today,
+  coach:        proRoutesEnabled ? ROUTES.coachDashboard        : ROUTES.today,
+  nutritionist: proRoutesEnabled ? ROUTES.nutritionistDashboard : ROUTES.today,
+  clinician:    proRoutesEnabled ? ROUTES.clinicianDashboard    : ROUTES.today,
+  admin:        proRoutesEnabled ? ROUTES.admin                 : ROUTES.today,
 };
 
 export const LEGACY_ROUTE_REDIRECTS = [

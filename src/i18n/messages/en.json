@@ -177,8 +177,8 @@
         ]
       },
       "coach": {
-        "title": "Coach & trainer",
-        "desc": "You manage multiple athletes. You need to track adherence, prescribe training, and see progress without relying on screenshots.",
+        "title": "Coach & trainer — coming soon",
+        "desc": "Coming soon. You manage multiple athletes. You need to track adherence, prescribe training, and see progress without relying on screenshots.",
         "features": [
           "Athlete dashboard with adherence",
           "Training + nutrition prescription",
@@ -187,8 +187,8 @@
         ]
       },
       "nutritionist": {
-        "title": "Nutritionist",
-        "desc": "You coach clients through nutrition. View meals, measurements, photos, and create meal plans manually or from structured templates.",
+        "title": "Nutritionist — coming soon",
+        "desc": "Coming soon. You coach clients through nutrition. View meals, measurements, photos, and create meal plans manually or from structured templates.",
         "features": [
           "Client dashboard",
           "Meal history & trends",
@@ -197,8 +197,8 @@
         ]
       },
       "clinician": {
-        "title": "Doctor & clinician",
-        "desc": "You prescribe protocols and need data to make decisions. Labs, measurements, and usage history all in one place.",
+        "title": "Doctor & clinician — coming soon",
+        "desc": "Coming soon. You prescribe protocols and need data to make decisions. Labs, measurements, and usage history all in one place.",
         "features": [
           "Complete lab history",
           "Protocol monitoring",
@@ -228,7 +228,7 @@
         },
         {
           "before": "Tracking alone",
-          "after": "Shared history with professionals"
+          "after": "Shared history with professionals (coming soon)"
         },
         {
           "before": "Pretty app",
@@ -308,11 +308,11 @@
       "items": [
         {
           "q": "Does atlas.core replace my coach or nutritionist?",
-          "a": "No. atlas.core organizes your data and makes working with professionals easier — it doesn't replace them. Actually, it works best with a coach or doctor on your team. You both see the same data. No screenshots needed."
+          "a": "No. atlas.core focuses on your personal data — workouts, nutrition, labs, measurements, and protocols. Professional collaboration (coaches, nutritionists, clinicians) is in private beta and coming soon."
         },
         {
           "q": "Can I use it with my coach, nutritionist, and doctor at once?",
-          "a": "Absolutely. atlas.core is built for this. Each professional sees only what you allow them to see. Everyone views your real history together."
+          "a": "Professional collaboration is coming soon in private beta. For now, atlas.core is built for individual athletes who want full control of their own data."
         },
         {
           "q": "What's included in the Free plan?",
@@ -374,8 +374,8 @@
     "heading": "Choose your plan",
     "subtitle": "Start free. Upgrade when you need richer insights, more data context, and real control.",
     "athlete": "For athletes & enthusiasts",
-    "professional": "For professionals",
-    "professionalDesc": "Separate subscriptions for coaches and clinicians. Professional access focused on client monitoring.",
+    "professional": "For professionals — coming soon",
+    "professionalDesc": "Professional plans for coaches, nutritionists, and clinicians are coming soon. Join the waitlist for early access.",
     "footer": "All paid plans include 7 free trial days · Cancel anytime · No cancellation fees",
     "footerPayment": "Payments processed securely via Stripe",
     "plans": {
@@ -3421,6 +3421,9 @@
   "nav": {
     "today": "Today",
     "train": "Train",
+    "eat": "Eat",
+    "charts": "Charts",
+    "you": "You",
     "nutrition": "Nutrition",
     "progress": "Progress",
     "measurements": "Measurements",

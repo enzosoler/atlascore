@@ -1,4 +1,5 @@
 import { ROUTES } from '@/lib/routes';
+import { isPrivateBetaRole, shouldMountProRoutes } from '@/lib/privateBeta';
 
 /**
  * Atlas Core — RBAC (Role-Based Access Control)
@@ -117,12 +118,9 @@ export const NAV_BY_ROLE = {
   athlete: [
     { path: ROUTES.today,         label: 'Today',        icon: 'Home' },
     { path: ROUTES.workouts,      label: 'Train',        icon: 'Dumbbell' },
-    { path: ROUTES.nutrition,     label: 'Nutrition',    icon: 'UtensilsCrossed' },
-    { path: ROUTES.progress,      label: 'Progress',     icon: 'BarChart3' },
-    { path: ROUTES.measurements,  label: 'Measurements', icon: 'Ruler' },
-    { path: ROUTES.protocols,     label: 'Protocols',    icon: 'FlaskConical' },
-    { path: ROUTES.labExams,      label: 'Labs',         icon: 'ClipboardList' },
-    { path: ROUTES.profile,       label: 'More',         icon: 'User' },
+    { path: ROUTES.nutrition,     label: 'Eat',          icon: 'UtensilsCrossed' },
+    { path: ROUTES.progress,      label: 'Charts',       icon: 'BarChart3' },
+    { path: ROUTES.profile,       label: 'You',          icon: 'User' },
   ],
   coach: [
     { path: ROUTES.today,              label: 'Today',          icon: 'Home' },
@@ -175,6 +173,7 @@ export const NAV_BY_ROLE = {
  */
 export const BOTTOM_PATHS_BY_ROLE = {
   athlete: [ROUTES.today, ROUTES.workouts, ROUTES.nutrition, ROUTES.progress, ROUTES.profile],
+  // Professional bottom navs — only reachable via private beta / internal roles
   coach: [ROUTES.today, ROUTES.coachDashboard, ROUTES.coachStudents, ROUTES.workouts, ROUTES.profile],
   nutritionist: [ROUTES.today, ROUTES.nutritionistDashboard, ROUTES.nutritionistClients, ROUTES.nutrition, ROUTES.profile],
   clinician: [ROUTES.today, ROUTES.clinicianDashboard, ROUTES.clinicianPatients, ROUTES.body, ROUTES.profile],
@@ -189,8 +188,14 @@ export const canAccess = (role, page) => {
   return allowed.includes(role);
 };
 
-/** Returns nav items for a given role */
-export const getNavForRole = (role) => NAV_BY_ROLE[role] || NAV_BY_ROLE.athlete;
+/** Returns nav items for a given role.
+ *  In public MVP builds, private-beta roles fall back to athlete nav. */
+export const getNavForRole = (role) => {
+  if (!shouldMountProRoutes() && isPrivateBetaRole(role)) {
+    return NAV_BY_ROLE.athlete;
+  }
+  return NAV_BY_ROLE[role] || NAV_BY_ROLE.athlete;
+};
 
 /** Hook-friendly helper — use inside components */
 export const useRBAC = (user) => {

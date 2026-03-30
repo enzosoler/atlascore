@@ -177,8 +177,8 @@
         ]
       },
       "coach": {
-        "title": "Treinador e coach",
-        "desc": "Você gerencia múltiplos atletas. Precisa acompanhar adesão, prescrever treinos e ver progresso sem depender de screenshots.",
+        "title": "Treinador e coach — em breve",
+        "desc": "Em breve. Você gerencia múltiplos atletas. Precisa acompanhar adesão, prescrever treinos e ver progresso sem depender de screenshots.",
         "features": [
           "Dashboard de atletas com adesão",
           "Prescrição de treino + nutrição",
@@ -187,8 +187,8 @@
         ]
       },
       "nutritionist": {
-        "title": "Nutricionista",
-        "desc": "Você acompanha clientes na nutrição. Visualiza refeições, medidas, fotos e cria planos alimentares manualmente ou a partir de templates estruturados.",
+        "title": "Nutricionista — em breve",
+        "desc": "Em breve. Você acompanha clientes na nutrição. Visualiza refeições, medidas, fotos e cria planos alimentares manualmente ou a partir de templates estruturados.",
         "features": [
           "Dashboard de cliente",
           "Histórico e tendências de refeições",
@@ -197,8 +197,8 @@
         ]
       },
       "clinician": {
-        "title": "Médico e clínico",
-        "desc": "Você prescreve protocolos e precisa de dados para tomar decisões. Exames, medidas e histórico de uso tudo em um só lugar.",
+        "title": "Médico e clínico — em breve",
+        "desc": "Em breve. Você prescreve protocolos e precisa de dados para tomar decisões. Exames, medidas e histórico de uso tudo em um só lugar.",
         "features": [
           "Histórico completo de exames",
           "Monitoramento de protocolos",
@@ -228,7 +228,7 @@
         },
         {
           "before": "Acompanhamento sozinho",
-          "after": "Histórico compartilhado com profissionais"
+          "after": "Histórico compartilhado com profissionais (em breve)"
         },
         {
           "before": "App bonito",
@@ -308,11 +308,11 @@
       "items": [
         {
           "q": "O atlas.core substitui meu treinador ou nutricionista?",
-          "a": "Não. atlas.core organiza seus dados e facilita trabalhar com profissionais — não os substitui. Na verdade, funciona melhor com um treinador ou médico no seu time. Vocês dois veem os mesmos dados. Sem screenshots necessários."
+          "a": "Não. atlas.core organiza seus dados — não substitui profissionais. A colaboração com treinadores, nutricionistas e médicos está em beta privado e chegando em breve. Quando disponível, vocês verão os mesmos dados. Sem screenshots necessários."
         },
         {
           "q": "Posso usar com meu treinador, nutricionista e médico ao mesmo tempo?",
-          "a": "Absolutamente. atlas.core foi construído para isso. Cada profissional vê apenas o que você permite. Todos veem seu histórico real juntos."
+          "a": "Em breve. A colaboração com profissionais está em beta privado. Quando lançada, cada profissional verá apenas o que você permitir e todos acompanharão seu histórico real juntos."
         },
         {
           "q": "O que está incluído no plano Grátis?",
@@ -374,8 +374,8 @@
     "heading": "Escolha seu plano",
     "subtitle": "Comece grátis. Evolua quando precisar de insights mais ricos, mais contexto de dados e controle real.",
     "athlete": "Para atletas e entusiastas",
-    "professional": "Para profissionais",
-    "professionalDesc": "Assinaturas separadas para treinadores e clínicos. Acesso profissional focado em monitoramento de clientes.",
+    "professional": "Para profissionais — em breve",
+    "professionalDesc": "Planos profissionais para treinadores, nutricionistas e clínicos estão chegando em breve. Entre na lista de espera para acesso antecipado.",
     "footer": "Todos os planos pagos incluem 7 dias de teste grátis · Cancele quando quiser · Sem taxas de cancelamento",
     "footerPayment": "Pagamentos processados com segurança via Stripe",
     "plans": {
@@ -3419,6 +3419,9 @@
   "nav": {
     "today": "Hoje",
     "train": "Treino",
+    "eat": "Comer",
+    "charts": "Gráficos",
+    "you": "Você",
     "nutrition": "Nutrição",
     "progress": "Progresso",
     "measurements": "Medidas",

@@ -162,14 +162,14 @@ export const COPY = {
       },
     },
     pros: {
-      label: 'For Professionals',
-      h2: 'Built for individuals.\nWorks with your team.',
-      sub: 'Atlas doesn\'t require a coach or nutritionist. But if you work with one, they can see your data and collaborate directly inside the app.',
+      label: 'For Professionals — Coming Soon',
+      h2: 'Built for athletes today.\nProfessional tools coming soon.',
+      sub: 'atlas.core is built for individual athletes. Professional collaboration — coaches seeing your data, nutritionists reviewing your meals — is in private beta and coming soon.',
       cards: [
-        { e: '🏃', t: 'Personal Trainers', d: 'See your clients\' workout logs, progress photos, and measurements in real-time. No more WhatsApp screenshots.' },
-        { e: '🥦', t: 'Nutritionists', d: 'Review actual food logs alongside body metrics. See whether the plan is translating into real results.' },
+        { e: '🏃', t: 'Personal Trainers', d: 'Coming soon — coaches will be able to see clients\' workout logs, progress photos, and measurements in real-time.' },
+        { e: '🥦', t: 'Nutritionists', d: 'Coming soon — nutritionists will be able to review food logs alongside body metrics and track real results.' },
       ],
-      note: 'Professional collaboration is optional. Atlas works perfectly without anyone else involved.',
+      note: 'Professional collaboration is in private beta. atlas.core works 100% as an individual athlete app today.',
     },
     closing: {
       h2a: 'Stop guessing.',
@@ -322,14 +322,14 @@ export const COPY = {
       },
     },
     pros: {
-      label: 'Para Profissionais',
-      h2: 'Feito para o atleta.\nIntegrado com IA e treinador.',
-      sub: 'O Atlas é autossuficiente com IA. Mas se você tem um treinador ou nutricionista, eles podem acessar sua telemetria e colaborar diretamente no app.',
+      label: 'Para Profissionais — Em Breve',
+      h2: 'Feito para atletas hoje.\nFerramentas profissionais em breve.',
+      sub: 'O Atlas é feito para atletas individuais. Colaboração profissional — treinadores vendo seus dados, nutricionistas revisando suas refeições — está em beta privado e chegando em breve.',
       cards: [
-        { e: '🏃', t: 'Treinadores', d: 'Acesse treinos gerados por IA, logs, fotos e medidas dos seus atletas em tempo real. Fim dos relatórios em planilhas.' },
-        { e: '🥦', t: 'Nutricionistas', d: 'Audite a adesão real à dieta cruzada com a variação de peso e treinos. Ajuste o plano baseado em dados, não em relatos.' },
+        { e: '🏃', t: 'Treinadores', d: 'Em breve — treinadores poderão acessar treinos, fotos e medidas dos seus atletas em tempo real.' },
+        { e: '🥦', t: 'Nutricionistas', d: 'Em breve — nutricionistas poderão auditar a adesão real à dieta cruzada com a variação de peso e treinos.' },
       ],
-      note: 'A conexão profissional é opcional. O Atlas entrega 100% do seu valor com IA para usuários individuais.',
+      note: 'A conexão profissional está em beta privado. O Atlas funciona 100% como app individual para atletas hoje.',
     },
     closing: {
       h2a: 'Pare de chutar.',

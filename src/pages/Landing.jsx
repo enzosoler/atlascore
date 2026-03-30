@@ -63,11 +63,12 @@ const ATHLETE_PLAN_META = [
   { id: 'athlete_performance', key: 'performance', icon: Star },
 ];
 
-const PROFESSIONAL_PLAN_META = [
-  { id: 'coach',        key: 'coach',        icon: Users },
-  { id: 'nutritionist', key: 'nutritionist', icon: Users },
-  { id: 'clinician',    key: 'clinician',    icon: Stethoscope },
-];
+// Professional plan meta — not rendered in public MVP (private beta).
+// const PROFESSIONAL_PLAN_META = [
+//   { id: 'coach',        key: 'coach',        icon: Users },
+//   { id: 'nutritionist', key: 'nutritionist', icon: Users },
+//   { id: 'clinician',    key: 'clinician',    icon: Stethoscope },
+// ];
 
 function formatPlanPrice(planId, translatedPrice, pricing, locale, billing = 'monthly') {
   if (planId === 'free') return translatedPrice;
@@ -408,40 +409,8 @@ export default function Landing() {
     });
   }, [locale, pricing, billing, getTranslation]);
 
-  const professionalPlans = useMemo(() => {
-    const translations = getTranslation('pricing_page.plans');
-    if (!translations) return [];
-    return PROFESSIONAL_PLAN_META.map((meta) => {
-      const translated = translations[meta.key];
-      if (!translated) {
-        return {
-          ...meta,
-          name: meta.key,
-          pitch: '',
-          note: '',
-          features: [],
-          cta: 'Subscribe',
-          trial: null,
-          period: '/month',
-          savings: null,
-          price: '$0',
-        };
-      }
-      const savings = billing === 'yearly' ? calcYearlySavings(meta.id, pricing) : null;
-      return {
-        ...meta,
-        name: translated.name,
-        pitch: translated.pitch,
-        note: translated.note,
-        features: translated.features,
-        cta: translated.cta,
-        trial: billing === 'monthly' ? translated.trial : null,
-        period: billing === 'yearly' ? '/year' : translated.period,
-        savings,
-        price: formatPlanPrice(meta.id, translated.price, pricing, locale, billing),
-      };
-    });
-  }, [locale, pricing, billing, getTranslation]);
+  // Professional plans — not rendered in public MVP (private beta).
+  // Preserved for future reactivation.
 
   return (
     <PublicSiteShell
@@ -752,22 +721,23 @@ export default function Landing() {
           </div>
         </motion.div>
 
-        {/* Professional plans */}
+        {/* Professional plans — coming soon banner (plans not publicly available yet) */}
         <motion.div {...fadeIn(0.12)} className="mb-6">
-          <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
-            <div className="pt-2">
-              <p className="atlas-overline">{locale === 'pt-BR' ? 'Profissional' : 'Professional'}</p>
-              <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                {locale === 'pt-BR' ? 'Planos para treinadores, nutricionistas e clínicos.' : 'Plans for coaches, nutritionists, and clinicians.'}
-              </p>
-            </div>
-            <div className="grid gap-4 lg:grid-cols-3">
-              {professionalPlans.map((plan, index) => (
-                <motion.div key={plan.id} {...fadeIn(index * 0.06)}>
-                  <PricingCard plan={plan} popularLabel={locale === 'pt-BR' ? 'Mais escolhido' : 'Most chosen'} />
-                </motion.div>
-              ))}
-            </div>
+          <div className="rounded-2xl border border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.2)] px-6 py-6 text-center">
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+              {locale === 'pt-BR' ? 'Planos profissionais — em breve' : 'Professional plans — coming soon'}
+            </p>
+            <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))]">
+              {locale === 'pt-BR'
+                ? 'Planos para treinadores, nutricionistas e clínicos estão em desenvolvimento. Entre na lista de espera para acesso antecipado.'
+                : 'Plans for coaches, nutritionists, and clinicians are in private beta. Join the waitlist for early access.'}
+            </p>
+            <Button asChild variant="outline" size="sm" className="mt-4">
+              <Link to="/waitlist">
+                {locale === 'pt-BR' ? 'Entrar na lista de espera' : 'Join the waitlist'}
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </div>
         </motion.div>
 

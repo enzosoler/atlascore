@@ -162,8 +162,8 @@
         ]
       },
       "coach": {
-        "title": "Entrenador y coach",
-        "desc": "Gestionas múltiples atletas. Necesitas seguir adherencia, prescribir entrenamientos y ver progreso sin depender de capturas de pantalla.",
+        "title": "Entrenador y coach — próximamente",
+        "desc": "Próximamente. Gestionas múltiples atletas. Necesitas seguir adherencia, prescribir entrenamientos y ver progreso sin depender de capturas de pantalla.",
         "features": [
           "Dashboard de atletas con adherencia",
           "Prescripción de entrenamiento + nutrición",
@@ -172,8 +172,8 @@
         ]
       },
       "nutritionist": {
-        "title": "Nutricionista",
-        "desc": "Acompañas clientes en nutrición. Visualizas comidas, medidas, fotos y creas planes alimentarios manualmente o desde templates estructurados.",
+        "title": "Nutricionista — próximamente",
+        "desc": "Próximamente. Acompañas clientes en nutrición. Visualizas comidas, medidas, fotos y creas planes alimentarios manualmente o desde templates estructurados.",
         "features": [
           "Dashboard de cliente",
           "Historial y tendencias de comidas",
@@ -182,8 +182,8 @@
         ]
       },
       "clinician": {
-        "title": "Médico y clínico",
-        "desc": "Prescribes protocolos y necesitas datos para tomar decisiones. Laboratorios, medidas e historial de uso todo en un solo lugar.",
+        "title": "Médico y clínico — próximamente",
+        "desc": "Próximamente. Prescribes protocolos y necesitas datos para tomar decisiones. Laboratorios, medidas e historial de uso todo en un solo lugar.",
         "features": [
           "Historial completo de laboratorios",
           "Monitoreo de protocolos",
@@ -213,7 +213,7 @@
         },
         {
           "before": "Seguimiento solo",
-          "after": "Historial compartido con profesionales"
+          "after": "Historial compartido con profesionales (próximamente)"
         },
         {
           "before": "App bonita",
@@ -293,11 +293,11 @@
       "items": [
         {
           "q": "¿atlas.core reemplaza a mi entrenador o nutricionista?",
-          "a": "No. atlas.core organiza tus datos y facilita el trabajo con profesionales — no los reemplaza. De hecho, funciona mejor con un entrenador o doctor en tu equipo. Ambos ven los mismos datos. Sin capturas de pantalla."
+          "a": "No. atlas.core organiza tus datos y facilita el trabajo con profesionales — no los reemplaza. La colaboración con profesionales está llegando próximamente (beta privada). Por ahora, atlas.core es tu sistema personal de seguimiento."
         },
         {
           "q": "¿Puedo usarlo con mi entrenador, nutricionista y doctor al mismo tiempo?",
-          "a": "Por supuesto. atlas.core está hecho para esto. Cada profesional ve solo lo que tú le permites. Todos ven tu historial real juntos."
+          "a": "Próximamente. La colaboración con profesionales está en beta privada. Cuando esté disponible, cada profesional verá solo lo que tú le permitas. Por ahora, atlas.core es tu sistema personal de datos."
         },
         {
           "q": "¿Qué incluye el plan Gratis?",
@@ -325,11 +325,11 @@
         },
         {
           "q": "¿La app crea entrenamientos y comidas automáticamente?",
-          "a": "Sí, en Pro y superiores. Dale tus datos (objetivos, peso, actividad, preferencias) y Atlas crea un punto de partida estructurado. Tú lo refinas, tu entrenador lo refina — todo basado en contexto real."
+          "a": "Sí, en Pro y superiores. Dale tus datos (objetivos, peso, actividad, preferencias) y Atlas crea un punto de partida estructurado. Tú lo refinas — todo basado en contexto real. Próximamente, tu entrenador también podrá refinarlo (beta privada)."
         },
         {
           "q": "¿Qué pasa si ya tengo un plan de mi entrenador?",
-          "a": "Perfecto. Cárgalo en atlas.core, márcalo como prescrito y sigue tu adherencia vs. el plan. Tu entrenador ve todo y ajusta cuando es necesario."
+          "a": "Perfecto. Cárgalo en atlas.core, márcalo como prescrito y sigue tu adherencia vs. el plan. Próximamente, tu entrenador podrá ver todo y ajustar cuando sea necesario (beta privada)."
         },
         {
           "q": "¿Cómo genera Atlas los insights para mí?",
@@ -359,8 +359,8 @@
     "heading": "Elige tu plan",
     "subtitle": "Empieza gratis. Mejora cuando necesites insights más ricos, más contexto de datos y control real.",
     "athlete": "Para atletas y entusiastas",
-    "professional": "Para profesionales",
-    "professionalDesc": "Suscripciones separadas para entrenadores y clínicos. Acceso profesional enfocado en monitoreo de clientes.",
+    "professional": "Para profesionales — próximamente",
+    "professionalDesc": "Planes profesionales para entrenadores, nutricionistas y clínicos están llegando pronto. Únete a la lista de espera para acceso anticipado.",
     "footer": "Todos los planes pagos incluyen 7 días de prueba gratis · Cancela cuando quieras · Sin cargos por cancelación",
     "footerPayment": "Pagos procesados de forma segura vía Stripe",
     "plans": {
