@@ -699,7 +699,10 @@
       "sleep": "Sleep",
       "water": "Water",
       "done": "Check-in completed",
-      "register": "Register"
+      "register": "Register",
+      "pendingTitle": "Daily check-in pending",
+      "pendingDescription": "Complete your check-in to keep your streak alive and make the analysis more accurate.",
+      "checkInNow": "Check in now"
     },
     "nutrition": {
       "label": "Nutrition",
@@ -1670,7 +1673,20 @@
       "dialog_edit_desc": "Enter item details: substance, dose, frequency, and timing.",
       "log_dose_eyebrow": "Log dose",
       "log_dose_title": "Log dose",
-      "log_dose_desc": "Record when you took this dose."
+      "log_dose_desc": "Record when you took this dose.",
+      "dose": {
+        "dueToday": "Due today",
+        "taken": "Taken",
+        "missedYesterday": "Missed yesterday",
+        "done": "Done",
+        "logging": "Logging...",
+        "logDose": "Log dose",
+        "nothingScheduled": "Nothing scheduled for today",
+        "nothingScheduledDesc": "Add supplements or medications to start tracking your daily routine.",
+        "ofCompleted": "{taken} of {total} completed",
+        "alreadyTakenToday": "Already taken today",
+        "more": "+{n} more"
+      }
     }
   },
   "body": {
@@ -3198,6 +3214,17 @@
       "progressiveOverload": "Progressive overload",
       "previousSet": "Based on previous set",
       "targetFromPlan": "Target from plan"
+    },
+    "guardSheet": {
+      "title": "Workout in progress",
+      "description": "Your session is still active and all sets are saved.",
+      "resume": "Resume Workout",
+      "end": "End Session"
+    },
+    "restTimer": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "next": "Next"
     }
   },
   "train": {

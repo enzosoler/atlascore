@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, SkipForward } from 'lucide-react';
+import { SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18nContext';
 
 export default function RestTimer({ duration = 90, onComplete }) {
+  const { t } = useI18n();
   const [remaining, setRemaining] = useState(duration);
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     if (!isActive || remaining <= 0) {
       if (remaining <= 0) {
-        // Play sound notification
         try {
           const audioContext = new (window.AudioContext || window.webkitAudioContext)();
           const oscillator = audioContext.createOscillator();
@@ -25,12 +26,11 @@ export default function RestTimer({ duration = 90, onComplete }) {
         } catch (e) {
           console.log('Audio notification skipped');
         }
-        
-        // Vibrate if available
+
         if (navigator.vibrate) {
           navigator.vibrate([100, 50, 100]);
         }
-        
+
         onComplete?.();
       }
       return;
@@ -54,10 +54,9 @@ export default function RestTimer({ duration = 90, onComplete }) {
   const progress = ((duration - remaining) / duration) * 100;
 
   return (
-    <div className="surface p-6 text-center space-y-6">
-      <p className="t-small text-muted-foreground">Rest</p>
-      
-      {/* Timer Display */}
+    <div className="atlas-card p-6 text-center space-y-6">
+      <p className="atlas-overline">{t('workoutExecution.rest')}</p>
+
       <div className="relative w-48 h-48 mx-auto">
         <svg className="w-full h-full -rotate-90">
           <circle
@@ -81,29 +80,26 @@ export default function RestTimer({ duration = 90, onComplete }) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div>
-            <p className="text-[48px] font-bold tabular-nums">
-              {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-            </p>
-          </div>
+          <p className="text-[48px] font-bold tabular-nums">
+            {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+          </p>
         </div>
       </div>
 
-      {/* Controls */}
       <div className="flex gap-2">
         <Button
           onClick={() => setIsActive(!isActive)}
           variant="outline"
           className="flex-1 h-10 rounded-lg"
         >
-          {isActive ? 'Pause' : 'Resume'}
+          {isActive ? t('workoutExecution.restTimer.pause') : t('workoutExecution.restTimer.resume')}
         </Button>
         <Button
           onClick={() => onComplete?.()}
           className="flex-1 h-10 rounded-lg bg-[hsl(var(--brand))] hover:bg-[hsl(var(--brand)/0.85)] text-white gap-2"
         >
           <SkipForward className="w-4 h-4" />
-          Next
+          {t('workoutExecution.restTimer.next')}
         </Button>
       </div>
     </div>

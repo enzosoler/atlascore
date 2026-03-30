@@ -1,9 +1,10 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18nContext';
 
 export default function CheckinPrompt({ checkin, missingToday, onStart }) {
-  // Support both old API (missingToday) and new API (checkin object)
+  const { t } = useI18n();
   const isMissing = typeof missingToday === 'boolean' ? missingToday : !checkin;
 
   if (!isMissing) return null;
@@ -13,9 +14,11 @@ export default function CheckinPrompt({ checkin, missingToday, onStart }) {
       <div className="flex items-start gap-3">
         <AlertCircle className="w-5 h-5 text-[hsl(var(--warn))] mt-0.5 shrink-0" strokeWidth={2} />
         <div className="flex-1">
-          <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Daily check-in pending</p>
+          <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+            {t('today.checkin.pendingTitle')}
+          </p>
           <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">
-            Complete your check-in to keep your streak alive and make the analysis more accurate.
+            {t('today.checkin.pendingDescription')}
           </p>
         </div>
       </div>
@@ -24,7 +27,7 @@ export default function CheckinPrompt({ checkin, missingToday, onStart }) {
           onClick={onStart}
           className="w-full h-9 rounded-lg bg-[hsl(var(--warn))] hover:bg-[hsl(var(--warn)/0.85)] text-white text-[13px] font-semibold"
         >
-          Check in now
+          {t('today.checkin.checkInNow')}
         </Button>
       )}
     </div>

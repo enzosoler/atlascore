@@ -699,7 +699,10 @@
       "sleep": "Sono",
       "water": "Água",
       "done": "Check-in completo",
-      "register": "Registrar"
+      "register": "Registrar",
+      "pendingTitle": "Check-in diário pendente",
+      "pendingDescription": "Complete o check-in para manter sua sequência e tornar a análise mais precisa.",
+      "checkInNow": "Fazer check-in"
     },
     "nutrition": {
       "label": "Nutrição",
@@ -1671,7 +1674,20 @@
       "dialog_edit_desc": "Insira os dados do item: substância, dose, frequência e horário.",
       "log_dose_eyebrow": "Registrar dose",
       "log_dose_title": "Registrar dose",
-      "log_dose_desc": "Registre quando você tomou esta dose."
+      "log_dose_desc": "Registre quando você tomou esta dose.",
+      "dose": {
+        "dueToday": "Pendente hoje",
+        "taken": "Tomado",
+        "missedYesterday": "Perdido ontem",
+        "done": "Feito",
+        "logging": "Registrando...",
+        "logDose": "Registrar dose",
+        "nothingScheduled": "Nada agendado para hoje",
+        "nothingScheduledDesc": "Adicione suplementos ou medicamentos para começar a acompanhar sua rotina diária.",
+        "ofCompleted": "{taken} de {total} concluído",
+        "alreadyTakenToday": "Já tomado hoje",
+        "more": "+{n} mais"
+      }
     }
   },
   "body": {
@@ -3199,6 +3215,17 @@
       "progressiveOverload": "Sobrecarga progressiva",
       "previousSet": "Baseado na série anterior",
       "targetFromPlan": "Meta do plano"
+    },
+    "guardSheet": {
+      "title": "Treino em andamento",
+      "description": "Sua sessão ainda está ativa e todas as séries estão salvas.",
+      "resume": "Retomar treino",
+      "end": "Encerrar sessão"
+    },
+    "restTimer": {
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "next": "Próximo"
     }
   },
   "train": {
