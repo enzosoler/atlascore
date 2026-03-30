@@ -9,12 +9,12 @@ function WorkoutPlanCard({ activeWorkoutPlan, todaySession, hasAIAccess, onGener
   const done = todaySession?.status === 'completed';
 
   return (
-    <div className={`rounded-[18px] border p-4 flex flex-col gap-3 ${
+    <div className={`rounded-[18px] p-4 flex flex-col gap-3 ${
       done
-        ? 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.05)]'
+        ? 'bg-[hsl(var(--ok)/0.05)]'
         : activeWorkoutPlan
-          ? 'border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand)/0.04)]'
-          : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.35)]'
+          ? 'bg-[hsl(var(--brand)/0.04)]'
+          : 'bg-[hsl(var(--fill)/0.4)]'
     }`}>
       <div className="flex items-center justify-between">
         <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center ${
@@ -94,7 +94,7 @@ function NutritionCard({ todayMeals, kcalTarget = 2000, macros }) {
   const logged = meals.length > 0;
 
   return (
-    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.35)] p-4 flex flex-col gap-3">
+    <div className="rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div className="w-8 h-8 rounded-[10px] bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))] flex items-center justify-center">
           <UtensilsCrossed className="w-4 h-4" strokeWidth={2} />

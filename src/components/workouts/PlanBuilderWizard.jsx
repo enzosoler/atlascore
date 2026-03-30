@@ -26,6 +26,7 @@ import { invokeLLMJson } from '@/lib/llm';
 import { deactivateAllWorkoutPlans, createWorkoutPlan } from '@/services/workoutPlanService';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18nContext';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // STEP 1: QUICK INTAKE - Comprehensive questionnaire
@@ -956,6 +957,7 @@ function ReviewStep({ generatedPlan, intakeData, onSave, onBack, onAdjust }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export default function PlanBuilderWizard({ open, onClose, userId, profileData }) {
+  const { t } = useI18n();
   const [step, setStep] = useState('intake'); // intake | generating | review
   const [answers, setAnswers] = useState({});
   const [generatedPlan, setGeneratedPlan] = useState(null);
@@ -1003,11 +1005,11 @@ export default function PlanBuilderWizard({ open, onClose, userId, profileData }
       queryClient.invalidateQueries({ queryKey: ['active-workout-plan', userId] });
       queryClient.invalidateQueries({ queryKey: ['today-workout-plan', userId] });
       
-      toast.success('Plano criado com sucesso!');
+      toast.success(t('planBuilder.planCreatedSuccess'));
       onClose();
     } catch (err) {
       console.error('Save error:', err);
-      toast.error('Erro ao salvar plano. Tente novamente.');
+      toast.error(t('planBuilder.planSaveError'));
       throw err;
     }
   };
@@ -1021,15 +1023,15 @@ export default function PlanBuilderWizard({ open, onClose, userId, profileData }
   };
 
   const stepTitles = {
-    intake: 'Vamos criar seu plano',
-    generating: 'Criando plano personalizado',
-    review: 'Revise seu plano',
+    intake: t('planBuilder.stepTitles.intake'),
+    generating: t('planBuilder.stepTitles.generating'),
+    review: t('planBuilder.stepTitles.review'),
   };
 
   const stepSubtitles = {
-    intake: 'Responda algumas perguntas para personalizar seu treino',
-    generating: 'Nossa IA está montando o plano ideal para você',
-    review: 'Verifique se tudo está certo antes de salvar',
+    intake: t('planBuilder.stepSubtitles.intake'),
+    generating: t('planBuilder.stepSubtitles.generating'),
+    review: t('planBuilder.stepSubtitles.review'),
   };
 
   return (

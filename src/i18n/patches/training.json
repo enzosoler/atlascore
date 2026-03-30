@@ -1,5 +1,86 @@
 {
   "en": {
+    "quickWorkout": {
+      "title": "Quick Workout",
+      "titleAI": "AI Workout",
+      "titleManual": "Manual",
+      "howToCreate": "How do you want to create your workout?",
+      "generateWithAI": "Generate with AI",
+      "generateAIDesc": "Pick muscle group, duration and location — AI builds the workout",
+      "addManually": "Add manually",
+      "manualDesc": "Type your exercises, sets, and reps yourself",
+      "workoutNameLabel": "Workout name",
+      "workoutNamePlaceholder": "e.g. Upper A, Leg Day, Push",
+      "exercisesLabel": "Exercises",
+      "exerciseNamePlaceholder": "Exercise name",
+      "setsPlaceholder": "Sets",
+      "repsPlaceholder": "Reps",
+      "addExercise": "Add exercise",
+      "colName": "Name",
+      "colSets": "Sets",
+      "colReps": "Reps",
+      "step1Title": "What do you want to train?",
+      "step1Subtitle": "Select your focus for today",
+      "step2Title": "How much time do you have?",
+      "step2Subtitle": "Include warmup and cooldown",
+      "step3Title": "Where are you training?",
+      "step3Subtitle": "This affects exercise selection",
+      "step4Title": "Review your workout",
+      "warmup": "Warmup",
+      "min": "min",
+      "back": "Back",
+      "next": "Next",
+      "generate": "Generate",
+      "retry": "Retry",
+      "generationFailed": "Generation failed",
+      "building": "Building your workout...",
+      "selectingExercises": "AI selecting optimal exercises",
+      "startWorkout": "Start Workout",
+      "muscles": {
+        "chest": "Chest",
+        "back": "Back",
+        "shoulders": "Shoulders",
+        "arms": "Arms",
+        "legs": "Legs",
+        "core": "Core",
+        "full_body": "Full Body"
+      },
+      "durationMin": "{minutes} min",
+      "locations": {
+        "gym": { "label": "Gym", "description": "Full equipment" },
+        "home": { "label": "Home", "description": "Minimal equipment" },
+        "anywhere": { "label": "Anywhere", "description": "No equipment" }
+      },
+      "errors": {
+        "invalidData": "Invalid workout data received",
+        "noExercises": "No exercises found in generated workout",
+        "emptyWorkout": "Workout contains no exercises",
+        "missingFields": "{count} exercise(s) missing required fields"
+      }
+    },
+    "planBuilder": {
+      "stepTitles": {
+        "intake": "Let's create your plan",
+        "generating": "Creating personalized plan",
+        "review": "Review your plan"
+      },
+      "stepSubtitles": {
+        "intake": "Answer a few questions to personalize your training",
+        "generating": "Our AI is building the ideal plan for you",
+        "review": "Check everything is correct before saving"
+      },
+      "planCreatedSuccess": "Plan created successfully!",
+      "planSaveError": "Error saving plan. Please try again."
+    },
+    "nutrition": {
+      "describeWithAI": "Describe with AI",
+      "whatDidYouEat": "What did you eat?",
+      "quickSuggestions": "Quick suggestions",
+      "searchPlaceholder": "E.g.: grilled chicken, brown rice, banana...",
+      "searchingDatabase": "Searching database...",
+      "recentFoods": "Recent foods",
+      "cancel": "Cancel"
+    },
     "workouts": {
       "plan_sources": {
         "self": "By you",
@@ -162,6 +243,87 @@
     }
   },
   "ptBR": {
+    "quickWorkout": {
+      "title": "Treino Rápido",
+      "titleAI": "Treino com IA",
+      "titleManual": "Manual",
+      "howToCreate": "Como você quer criar seu treino?",
+      "generateWithAI": "Gerar com IA",
+      "generateAIDesc": "Escolha grupo muscular, duração e local — a IA monta o treino",
+      "addManually": "Adicionar manualmente",
+      "manualDesc": "Digite seus exercícios, séries e repetições",
+      "workoutNameLabel": "Nome do treino",
+      "workoutNamePlaceholder": "Ex: Superior A, Dia de Perna, Push",
+      "exercisesLabel": "Exercícios",
+      "exerciseNamePlaceholder": "Nome do exercício",
+      "setsPlaceholder": "Séries",
+      "repsPlaceholder": "Reps",
+      "addExercise": "Adicionar exercício",
+      "colName": "Nome",
+      "colSets": "Séries",
+      "colReps": "Reps",
+      "step1Title": "O que você quer treinar?",
+      "step1Subtitle": "Selecione seu foco para hoje",
+      "step2Title": "Quanto tempo você tem?",
+      "step2Subtitle": "Inclua aquecimento e alongamento",
+      "step3Title": "Onde você vai treinar?",
+      "step3Subtitle": "Isso afeta a seleção de exercícios",
+      "step4Title": "Revise seu treino",
+      "warmup": "Aquecimento",
+      "min": "min",
+      "back": "Voltar",
+      "next": "Próximo",
+      "generate": "Gerar",
+      "retry": "Tentar novamente",
+      "generationFailed": "Falha na geração",
+      "building": "Montando seu treino...",
+      "selectingExercises": "IA selecionando exercícios ideais",
+      "startWorkout": "Iniciar Treino",
+      "muscles": {
+        "chest": "Peito",
+        "back": "Costas",
+        "shoulders": "Ombros",
+        "arms": "Braços",
+        "legs": "Pernas",
+        "core": "Core",
+        "full_body": "Corpo Inteiro"
+      },
+      "durationMin": "{minutes} min",
+      "locations": {
+        "gym": { "label": "Academia", "description": "Equipamento completo" },
+        "home": { "label": "Casa", "description": "Equipamento mínimo" },
+        "anywhere": { "label": "Qualquer lugar", "description": "Sem equipamento" }
+      },
+      "errors": {
+        "invalidData": "Dados de treino inválidos recebidos",
+        "noExercises": "Nenhum exercício encontrado no treino gerado",
+        "emptyWorkout": "Treino não contém exercícios",
+        "missingFields": "{count} exercício(s) com campos obrigatórios faltando"
+      }
+    },
+    "planBuilder": {
+      "stepTitles": {
+        "intake": "Vamos criar seu plano",
+        "generating": "Criando plano personalizado",
+        "review": "Revise seu plano"
+      },
+      "stepSubtitles": {
+        "intake": "Responda algumas perguntas para personalizar seu treino",
+        "generating": "Nossa IA está montando o plano ideal para você",
+        "review": "Verifique se tudo está certo antes de salvar"
+      },
+      "planCreatedSuccess": "Plano criado com sucesso!",
+      "planSaveError": "Erro ao salvar plano. Tente novamente."
+    },
+    "nutrition": {
+      "describeWithAI": "Descrever com IA",
+      "whatDidYouEat": "O que você comeu?",
+      "quickSuggestions": "Sugestões rápidas",
+      "searchPlaceholder": "Ex.: frango grelhado, arroz integral, banana...",
+      "searchingDatabase": "Buscando no banco de dados...",
+      "recentFoods": "Alimentos recentes",
+      "cancel": "Cancelar"
+    },
     "workouts": {
       "plan_sources": {
         "self": "Por você",
@@ -324,6 +486,87 @@
     }
   },
   "es": {
+    "quickWorkout": {
+      "title": "Entrenamiento Rápido",
+      "titleAI": "Entrenamiento con IA",
+      "titleManual": "Manual",
+      "howToCreate": "¿Cómo quieres crear tu entrenamiento?",
+      "generateWithAI": "Generar con IA",
+      "generateAIDesc": "Elige grupo muscular, duración y lugar — la IA construye el entrenamiento",
+      "addManually": "Agregar manualmente",
+      "manualDesc": "Escribe tus ejercicios, series y repeticiones",
+      "workoutNameLabel": "Nombre del entrenamiento",
+      "workoutNamePlaceholder": "Ej.: Tren Superior A, Día de Pierna",
+      "exercisesLabel": "Ejercicios",
+      "exerciseNamePlaceholder": "Nombre del ejercicio",
+      "setsPlaceholder": "Series",
+      "repsPlaceholder": "Reps",
+      "addExercise": "Agregar ejercicio",
+      "colName": "Nombre",
+      "colSets": "Series",
+      "colReps": "Reps",
+      "step1Title": "¿Qué quieres entrenar?",
+      "step1Subtitle": "Selecciona tu enfoque para hoy",
+      "step2Title": "¿Cuánto tiempo tienes?",
+      "step2Subtitle": "Incluye calentamiento y enfriamiento",
+      "step3Title": "¿Dónde vas a entrenar?",
+      "step3Subtitle": "Esto afecta la selección de ejercicios",
+      "step4Title": "Revisa tu entrenamiento",
+      "warmup": "Calentamiento",
+      "min": "min",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "generate": "Generar",
+      "retry": "Reintentar",
+      "generationFailed": "Generación fallida",
+      "building": "Construyendo tu entrenamiento...",
+      "selectingExercises": "IA seleccionando ejercicios óptimos",
+      "startWorkout": "Iniciar Entrenamiento",
+      "muscles": {
+        "chest": "Pecho",
+        "back": "Espalda",
+        "shoulders": "Hombros",
+        "arms": "Brazos",
+        "legs": "Piernas",
+        "core": "Core",
+        "full_body": "Cuerpo Completo"
+      },
+      "durationMin": "{minutes} min",
+      "locations": {
+        "gym": { "label": "Gimnasio", "description": "Equipo completo" },
+        "home": { "label": "Casa", "description": "Equipo mínimo" },
+        "anywhere": { "label": "Cualquier lugar", "description": "Sin equipo" }
+      },
+      "errors": {
+        "invalidData": "Datos de entrenamiento inválidos recibidos",
+        "noExercises": "No se encontraron ejercicios en el entrenamiento generado",
+        "emptyWorkout": "El entrenamiento no contiene ejercicios",
+        "missingFields": "{count} ejercicio(s) con campos obligatorios faltantes"
+      }
+    },
+    "planBuilder": {
+      "stepTitles": {
+        "intake": "Vamos a crear tu plan",
+        "generating": "Creando plan personalizado",
+        "review": "Revisa tu plan"
+      },
+      "stepSubtitles": {
+        "intake": "Responde algunas preguntas para personalizar tu entrenamiento",
+        "generating": "Nuestra IA está construyendo el plan ideal para ti",
+        "review": "Verifica que todo esté correcto antes de guardar"
+      },
+      "planCreatedSuccess": "¡Plan creado con éxito!",
+      "planSaveError": "Error al guardar el plan. Inténtalo de nuevo."
+    },
+    "nutrition": {
+      "describeWithAI": "Describir con IA",
+      "whatDidYouEat": "¿Qué comiste?",
+      "quickSuggestions": "Sugerencias rápidas",
+      "searchPlaceholder": "Ej.: pollo a la parrilla, arroz integral, plátano...",
+      "searchingDatabase": "Buscando en la base de datos...",
+      "recentFoods": "Alimentos recientes",
+      "cancel": "Cancelar"
+    },
     "workouts": {
       "plan_sources": {
         "self": "Por ti",

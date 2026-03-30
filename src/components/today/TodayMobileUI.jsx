@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18nContext';
 
 const surfaceClassName =
-  'rounded-[18px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))]';
+  'rounded-[18px] bg-[hsl(var(--card))] shadow-[var(--shadow-xs)]';
 const summaryCtaClassName =
   'h-11 w-full justify-center gap-2 rounded-[16px] px-4 text-[13px] font-semibold tracking-[-0.014em] shadow-[var(--shadow-xs)] [&_svg]:h-[15px] [&_svg]:w-[15px]';
 const summaryCtaBaseClassName = buttonVariants({ variant: 'default', size: 'default' });

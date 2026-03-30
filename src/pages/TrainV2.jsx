@@ -193,7 +193,7 @@ export default function TrainV2() {
 
         {/* AI insight */}
         {trainMessage && (
-          <div className="flex items-start gap-2.5 rounded-atlas-control border border-[hsl(var(--brand-ai)/0.15)] bg-[hsl(var(--brand-ai)/0.06)] px-3.5 py-3">
+          <div className="flex items-start gap-2.5 rounded-2xl bg-[hsl(var(--brand-ai)/0.05)] px-4 py-3.5">
             <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))] shrink-0 mt-0.5" strokeWidth={2} />
             <p className="text-caption1 font-medium text-[hsl(var(--fg))] leading-[1.5]">{trainMessage}</p>
           </div>
@@ -201,8 +201,8 @@ export default function TrainV2() {
 
         {/* Today's Workout Hero */}
         {daily.workoutDone ? (
-          <div className="rounded-atlas-card border border-[hsl(var(--ok)/0.25)] bg-[hsl(var(--ok)/0.06)] p-5">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="rounded-2xl bg-[hsl(var(--ok)/0.05)] p-5">
+            <div className="flex items-center gap-3">
               <CheckCircle2 className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
               <div>
                 <p className="text-body font-bold text-[hsl(var(--fg))]">{t('train.sessionComplete')}</p>
@@ -211,7 +211,7 @@ export default function TrainV2() {
             </div>
           </div>
         ) : hasPlan && exercises.length > 0 ? (
-          <div className="rounded-atlas-card border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-5">
+          <div className="rounded-2xl bg-[hsl(var(--card))] shadow-[var(--shadow-sm)] p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="atlas-overline">{daily.plan.todayDayLabel}</p>
@@ -234,16 +234,16 @@ export default function TrainV2() {
                 <p className="text-caption1 text-[hsl(var(--fg-3))] pl-7">{t('train.more', { count: exercises.length - 4 })}</p>
               )}
             </div>
-            <Button size="lg" className="w-full" onClick={() => handleStartDay(0)}>
+            <Button size="lg" className="w-full rounded-xl shadow-[0_4px_14px_hsl(var(--brand)/0.2)]" onClick={() => handleStartDay(0)}>
               <Play className="w-4 h-4 fill-current" /> {t('train.startWorkout')}
             </Button>
           </div>
         ) : (
-          <div className="rounded-atlas-card border border-dashed border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.2)] p-5 text-center">
+          <div className="rounded-2xl bg-[hsl(var(--fill)/0.4)] p-6 text-center">
             <Dumbbell className="w-8 h-8 text-[hsl(var(--fg-3))] mx-auto mb-3" strokeWidth={1.5} />
             <p className="text-callout font-semibold text-[hsl(var(--fg))]">{t('train.noPlanActive')}</p>
             <p className="text-caption1 text-[hsl(var(--fg-3))] mt-1">{t('train.noPlanDesc')}</p>
-            <Button className="mt-4" onClick={() => setShowPlanBuilder(true)}>
+            <Button className="mt-4 rounded-xl" onClick={() => setShowPlanBuilder(true)}>
               <Plus className="w-3.5 h-3.5" /> {t('train.createPlan')}
             </Button>
           </div>

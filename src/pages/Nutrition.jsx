@@ -688,10 +688,10 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
           </p>
         </div>
         <div className="grid shrink-0 grid-cols-2 gap-x-3 gap-y-2 text-right">
-          <LoggedMetric label="kcal" value={formatUnit(food.calories, '')} />
-          <LoggedMetric label="prot" value={formatUnit(food.protein, 'g')} tone="protein" />
-          <LoggedMetric label="carbs" value={formatUnit(food.carbs, 'g')} tone="carbs" />
-          <LoggedMetric label="fat" value={formatUnit(food.fat, 'g')} tone="fat" />
+          <LoggedMetric label="kcal" value={formatUnit(food.calories, '')} unit="" />
+          <LoggedMetric label="prot" value={formatUnit(food.protein, 'g')} unit="g" tone="protein" />
+          <LoggedMetric label="carbs" value={formatUnit(food.carbs, 'g')} unit="g" tone="carbs" />
+          <LoggedMetric label="fat" value={formatUnit(food.fat, 'g')} unit="g" tone="fat" />
         </div>
       </div>
     </button>
@@ -699,6 +699,7 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
 }
 
 function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
+  const { t } = useI18n();
   return (
     <Card className="px-5 py-5">
       <div className="flex items-start justify-between gap-4">
@@ -714,10 +715,10 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
           </p>
         </div>
         <div className="grid shrink-0 grid-cols-2 gap-x-3 gap-y-2 text-right">
-          <LoggedMetric label="kcal" value={formatUnit(meal.total_calories, '')} />
-          <LoggedMetric label="prot" value={formatUnit(meal.total_protein, 'g')} tone="protein" />
-          <LoggedMetric label="carbs" value={formatUnit(meal.total_carbs, 'g')} tone="carbs" />
-          <LoggedMetric label="fat" value={formatUnit(meal.total_fat, 'g')} tone="fat" />
+          <LoggedMetric label="kcal" value={formatUnit(meal.total_calories, '')} unit="" />
+          <LoggedMetric label="prot" value={formatUnit(meal.total_protein, 'g')} unit="g" tone="protein" />
+          <LoggedMetric label="carbs" value={formatUnit(meal.total_carbs, 'g')} unit="g" tone="carbs" />
+          <LoggedMetric label="fat" value={formatUnit(meal.total_fat, 'g')} unit="g" tone="fat" />
         </div>
       </div>
       {meal.notes ? (
@@ -733,7 +734,7 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
           className="gap-2"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Apagar
+          {t('common.delete')}
         </SecondaryButton>
         <PrimaryButton
           size="sm"
@@ -742,7 +743,7 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
           className="gap-2"
         >
           <Pencil className="h-3.5 w-3.5" />
-          Editar
+          {t('common.edit')}
         </PrimaryButton>
       </div>
     </Card>
@@ -971,7 +972,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             )}
           >
             <Sparkles className="h-4 w-4" />
-            Describe with AI
+            {t('pages.nutrition.describeWithAI')}
           </button>
           <button
             type="button"
@@ -1007,7 +1008,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             <div className="rounded-[18px] border-2 border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.04)] p-4">
               <p className="text-[13px] font-medium text-[hsl(var(--fg))] mb-2 flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" />
-                What did you eat?
+                {t('pages.nutrition.whatDidYouEat')}
               </p>
               <AIFoodInput 
                 onFoodsDetected={handleAIFoodsDetected} 
@@ -1019,7 +1020,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             </div>
 
             <div>
-              <p className="text-[12px] font-medium text-[hsl(var(--fg-3))] mb-2">Quick suggestions:</p>
+              <p className="text-[12px] font-medium text-[hsl(var(--fg-3))] mb-2">{t('pages.nutrition.quickSuggestions')}:</p>
               <div className="flex flex-wrap gap-2">
                 {QUICK_SUGGESTIONS.map((suggestion) => (
                   <button
@@ -1044,14 +1045,14 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="E.g.: grilled chicken, brown rice, banana..."
+                placeholder={t('pages.nutrition.searchPlaceholder')}
                 className={cn(INPUT_CLASS_NAME, 'pl-11')}
               />
             </div>
 
             {isSearching && (
               <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
-                <Loader2 className="h-4 w-4 animate-spin" /> Searching database…
+                <Loader2 className="h-4 w-4 animate-spin" /> {t('pages.nutrition.searchingDatabase')}
               </div>
             )}
 
@@ -1080,7 +1081,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
 
             {searchQuery.trim().length < 2 && recentFoods.length > 0 && (
               <div className="mt-4">
-                <p className="text-[12px] font-medium text-[hsl(var(--fg-3))] mb-2">Recent foods:</p>
+                <p className="text-[12px] font-medium text-[hsl(var(--fg-3))] mb-2">{t('pages.nutrition.recentFoods')}:</p>
                 <div className="flex flex-wrap gap-2">
                   {recentFoods.slice(0, 5).map((food) => (
                     <button
@@ -1185,7 +1186,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             disabled={isSaving}
             className="atlas-button atlas-button-ghost w-full justify-center text-[hsl(var(--fg-2))] sm:w-auto"
           >
-            Cancelar
+            {t('nutrition.cancel')}
           </button>
           <PrimaryButton
             type="submit"

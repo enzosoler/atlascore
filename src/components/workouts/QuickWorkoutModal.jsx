@@ -17,33 +17,36 @@ import {
 } from 'lucide-react';
 import { invokeLLMJson } from '@/lib/llm';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18nContext';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const MUSCLE_OPTIONS = [
-  { value: 'chest', label: 'Chest', icon: '💪' },
-  { value: 'back', label: 'Back', icon: '🔙' },
-  { value: 'shoulders', label: 'Shoulders', icon: '🎯' },
-  { value: 'arms', label: 'Arms', icon: '💪' },
-  { value: 'legs', label: 'Legs', icon: '🦵' },
-  { value: 'core', label: 'Core', icon: '🎯' },
-  { value: 'full_body', label: 'Full Body', icon: '⚡' },
+  { value: 'chest', icon: '💪' },
+  { value: 'back', icon: '🔙' },
+  { value: 'shoulders', icon: '🎯' },
+  { value: 'arms', icon: '💪' },
+  { value: 'legs', icon: '🦵' },
+  { value: 'core', icon: '🎯' },
+  { value: 'full_body', icon: '⚡' },
 ];
 
 const DURATION_OPTIONS = [
-  { value: 15, label: '15 min', description: 'Quick blast' },
-  { value: 30, label: '30 min', description: 'Standard' },
-  { value: 45, label: '45 min', description: 'Focused' },
-  { value: 60, label: '60 min', description: 'Complete' },
+  { value: 15 },
+  { value: 30 },
+  { value: 45 },
+  { value: 60 },
 ];
 
 const LOCATION_OPTIONS = [
-  { value: 'gym', label: 'Gym', icon: Dumbbell, description: 'Full equipment' },
-  { value: 'home', label: 'Home', icon: Home, description: 'Minimal equipment' },
-  { value: 'anywhere', label: 'Anywhere', icon: Zap, description: 'No equipment' },
+  { value: 'gym', icon: Dumbbell },
+  { value: 'home', icon: Home },
+  { value: 'anywhere', icon: Zap },
 ];
 
 const EMPTY_EXERCISE = () => ({ name: '', sets: '3', reps: '10', rest_seconds: 60 });
 
 export default function QuickWorkoutModal({ open, onClose, onStart }) {
+  const { t } = useI18n();
   // mode: null = picker, 'ai' = AI flow, 'manual' = manual form
   const [mode, setMode] = useState(null);
 
@@ -62,14 +65,14 @@ export default function QuickWorkoutModal({ open, onClose, onStart }) {
   const [manualExercises, setManualExercises] = useState([EMPTY_EXERCISE()]);
 
   const validateWorkout = (workout) => {
-    if (!workout || typeof workout !== 'object') return { isValid: false, error: 'Invalid workout data received' };
-    if (!workout.exercises || !Array.isArray(workout.exercises)) return { isValid: false, error: 'No exercises found in generated workout' };
-    if (workout.exercises.length === 0) return { isValid: false, error: 'Workout contains no exercises' };
+    if (!workout || typeof workout !== 'object') return { isValid: false, error: t('quickWorkout.errors.invalidData') };
+    if (!workout.exercises || !Array.isArray(workout.exercises)) return { isValid: false, error: t('quickWorkout.errors.noExercises') };
+    if (workout.exercises.length === 0) return { isValid: false, error: t('quickWorkout.errors.emptyWorkout') };
     const invalidExercises = workout.exercises.filter((ex) => {
       if (!ex || typeof ex !== 'object') return true;
       return ['name', 'sets', 'reps'].some((f) => !ex[f]);
     });
-    if (invalidExercises.length > 0) return { isValid: false, error: `${invalidExercises.length} exercise(s) missing required fields` };
+    if (invalidExercises.length > 0) return { isValid: false, error: t('quickWorkout.errors.missingFields', { count: invalidExercises.length }) };
     return { isValid: true, error: null };
   };
 
@@ -224,7 +227,12 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
     setManualExercises((prev) => prev.map((ex, i) => (i === idx ? { ...ex, [field]: value } : ex)));
   };
 
-  const headerLabel = mode === 'ai' ? 'AI Workout' : mode === 'manual' ? 'Manual' : 'Quick Workout';
+  const headerLabel = mode === 'ai' ? t('quickWorkout.titleAI') : mode === 'manual' ? t('quickWorkout.titleManual') : t('quickWorkout.title');
+
+  const getMuscleLabel = (value) => t(`quickWorkout.muscles.${value}`);
+  const getDurationLabel = (value) => t('quickWorkout.durationMin', { minutes: value });
+  const getLocationLabel = (value) => t(`quickWorkout.locations.${value}.label`);
+  const getLocationDesc = (value) => t(`quickWorkout.locations.${value}.description`);
 
   return (
     <MobileSheet open={open} onOpenChange={(v) => { if (!v) handleClose(); }} title="Quick Workout" description={headerLabel}>
@@ -240,7 +248,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-3"
               >
-                <p className="text-sm text-[hsl(var(--fg-2))]">How do you want to create your workout?</p>
+                <p className="text-sm text-[hsl(var(--fg-2))]">{t('quickWorkout.howToCreate')}</p>
 
                 <button
                   onClick={() => setMode('ai')}
@@ -250,8 +258,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     <Sparkles className="w-5 h-5 text-[hsl(var(--brand))]" />
                   </div>
                   <div>
-                    <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">Generate with AI</p>
-                    <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">Pick muscle group, duration and location — AI builds the workout</p>
+                    <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('quickWorkout.generateWithAI')}</p>
+                    <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">{t('quickWorkout.generateAIDesc')}</p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))] ml-auto shrink-0" />
                 </button>
@@ -264,8 +272,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     <PenLine className="w-5 h-5 text-[hsl(var(--fg-2))]" />
                   </div>
                   <div>
-                    <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">Add manually</p>
-                    <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">Type your exercises, sets, and reps yourself</p>
+                    <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('quickWorkout.addManually')}</p>
+                    <p className="text-xs text-[hsl(var(--fg-2))] mt-0.5">{t('quickWorkout.manualDesc')}</p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))] ml-auto shrink-0" />
                 </button>
@@ -284,13 +292,13 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                 {/* Workout name */}
                 <div>
                   <label className="text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider block mb-1.5">
-                    Workout name
+                    {t('quickWorkout.workoutNameLabel')}
                   </label>
                   <input
                     type="text"
                     value={manualName}
                     onChange={(e) => setManualName(e.target.value)}
-                    placeholder="e.g. Upper A, Leg Day, Push"
+                    placeholder={t('quickWorkout.workoutNamePlaceholder')}
                     className="w-full h-10 px-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none focus:border-[hsl(var(--brand))] transition-colors"
                   />
                 </div>
@@ -298,7 +306,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                 {/* Exercise list */}
                 <div>
                   <label className="text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider block mb-2">
-                    Exercises
+                    {t('quickWorkout.exercisesLabel')}
                   </label>
                   <div className="space-y-2">
                     {manualExercises.map((ex, idx) => (
@@ -310,14 +318,14 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                           type="text"
                           value={ex.name}
                           onChange={(e) => updateManualExercise(idx, 'name', e.target.value)}
-                          placeholder="Exercise name"
+                          placeholder={t('quickWorkout.exerciseNamePlaceholder')}
                           className="flex-1 h-9 px-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none focus:border-[hsl(var(--brand))] transition-colors min-w-0"
                         />
                         <input
                           type="number"
                           value={ex.sets}
                           onChange={(e) => updateManualExercise(idx, 'sets', e.target.value)}
-                          placeholder="Sets"
+                          placeholder={t('quickWorkout.setsPlaceholder')}
                           min="1"
                           className="w-14 h-9 px-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm text-[hsl(var(--fg))] text-center focus:outline-none focus:border-[hsl(var(--brand))] transition-colors"
                         />
@@ -325,7 +333,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                           type="text"
                           value={ex.reps}
                           onChange={(e) => updateManualExercise(idx, 'reps', e.target.value)}
-                          placeholder="Reps"
+                          placeholder={t('quickWorkout.repsPlaceholder')}
                           className="w-14 h-9 px-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm text-[hsl(var(--fg))] text-center focus:outline-none focus:border-[hsl(var(--brand))] transition-colors"
                         />
                         {manualExercises.length > 1 && (
@@ -345,16 +353,16 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     className="mt-2 w-full py-2.5 rounded-xl border border-dashed border-[hsl(var(--border-h))] text-xs font-medium text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors flex items-center justify-center gap-1.5"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    Add exercise
+                    {t('quickWorkout.addExercise')}
                   </button>
                 </div>
 
                 {/* Column labels */}
                 <div className="flex gap-2 items-center px-0.5">
                   <div className="w-5 shrink-0" />
-                  <p className="flex-1 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider">Name</p>
-                  <p className="w-14 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider text-center">Sets</p>
-                  <p className="w-14 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider text-center">Reps</p>
+                  <p className="flex-1 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider">{t('quickWorkout.colName')}</p>
+                  <p className="w-14 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider text-center">{t('quickWorkout.colSets')}</p>
+                  <p className="w-14 text-[10px] text-[hsl(var(--fg-3))] uppercase tracking-wider text-center">{t('quickWorkout.colReps')}</p>
                   {manualExercises.length > 1 && <div className="w-9 shrink-0" />}
                 </div>
               </motion.div>
@@ -368,8 +376,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     <Target className="w-5 h-5 text-[hsl(var(--brand))]" />
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">What do you want to train?</h3>
-                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">Select your focus for today</p>
+                    <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('quickWorkout.step1Title')}</h3>
+                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">{t('quickWorkout.step1Subtitle')}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -380,7 +388,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                       className={`p-4 rounded-xl border text-left transition-all ${muscle === opt.value ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.08)]' : 'border-[hsl(var(--border))] bg-[hsl(var(--card))] hover:border-[hsl(var(--brand)/0.4)]'}`}
                     >
                       <span className="text-2xl">{opt.icon}</span>
-                      <p className="text-sm font-medium text-[hsl(var(--fg))] mt-1">{opt.label}</p>
+                      <p className="text-sm font-medium text-[hsl(var(--fg))] mt-1">{getMuscleLabel(opt.value)}</p>
                     </button>
                   ))}
                 </div>
@@ -395,8 +403,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     <Timer className="w-5 h-5 text-[hsl(var(--brand))]" />
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">How much time do you have?</h3>
-                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">Include warmup and cooldown</p>
+                    <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('quickWorkout.step2Title')}</h3>
+                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">{t('quickWorkout.step2Subtitle')}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -410,9 +418,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${duration === opt.value ? 'border-[hsl(var(--brand))]' : 'border-[hsl(var(--border))]'}`}>
                           {duration === opt.value && <div className="w-2.5 h-2.5 rounded-full bg-[hsl(var(--brand))]" />}
                         </div>
-                        <span className="font-medium text-[hsl(var(--fg))]">{opt.label}</span>
+                        <span className="font-medium text-[hsl(var(--fg))]">{getDurationLabel(opt.value)}</span>
                       </div>
-                      <span className="text-xs text-[hsl(var(--fg-2))]">{opt.description}</span>
                     </button>
                   ))}
                 </div>
@@ -427,8 +434,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     <Home className="w-5 h-5 text-[hsl(var(--brand))]" />
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">Where are you training?</h3>
-                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">This affects exercise selection</p>
+                    <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('quickWorkout.step3Title')}</h3>
+                    <p className="text-xs text-[hsl(var(--fg-2))] mt-1">{t('quickWorkout.step3Subtitle')}</p>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -448,8 +455,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                             <Icon className="w-5 h-5 text-[hsl(var(--brand))]" />
                           </div>
                           <div>
-                            <span className="font-medium text-[hsl(var(--fg))] block">{opt.label}</span>
-                            <span className="text-xs text-[hsl(var(--fg-2))]">{opt.description}</span>
+                            <span className="font-medium text-[hsl(var(--fg))] block">{getLocationLabel(opt.value)}</span>
+                            <span className="text-xs text-[hsl(var(--fg-2))]">{getLocationDesc(opt.value)}</span>
                           </div>
                         </div>
                       </button>
@@ -461,12 +468,12 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     <div className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 text-[hsl(var(--err))] mt-0.5 shrink-0" />
                       <div>
-                        <p className="text-[12px] font-medium text-[hsl(var(--err))]">Generation failed</p>
+                        <p className="text-[12px] font-medium text-[hsl(var(--err))]">{t('quickWorkout.generationFailed')}</p>
                         <p className="text-[11px] text-[hsl(var(--err))] mt-0.5">{generationError}</p>
                       </div>
                     </div>
                     <button onClick={() => { setGenerationError(null); handleGenerate(); }} className="mt-2 w-full py-2 rounded-lg bg-[hsl(var(--brand))] text-white text-[12px] font-medium hover:opacity-90 transition-opacity">
-                      Retry
+                      {t('quickWorkout.retry')}
                     </button>
                   </div>
                 )}
@@ -482,19 +489,19 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                   </div>
                   <div>
                     <h3 className="text-[17px] font-bold text-[hsl(var(--fg))]">{generatedWorkout.name}</h3>
-                    <p className="text-xs text-[hsl(var(--fg-2))]">{generatedWorkout.duration_minutes} min · {generatedWorkout.focus}</p>
+                    <p className="text-xs text-[hsl(var(--fg-2))]">{generatedWorkout.duration_minutes} {t('quickWorkout.min')} · {generatedWorkout.focus}</p>
                   </div>
                 </div>
                 {generatedWorkout.warmup?.length > 0 && (
                   <div className="rounded-xl bg-[hsl(var(--fill)/0.5)] p-3">
-                    <p className="text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">Warmup</p>
+                    <p className="text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider mb-2">{t('quickWorkout.warmup')}</p>
                     <ul className="space-y-1">
                       {generatedWorkout.warmup.map((w, i) => <li key={i} className="text-sm text-[hsl(var(--fg))]">• {w}</li>)}
                     </ul>
                   </div>
                 )}
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">Exercises</p>
+                  <p className="text-xs font-semibold text-[hsl(var(--fg-2))] uppercase tracking-wider">{t('quickWorkout.exercisesLabel')}</p>
                   {generatedWorkout.exercises?.map((ex, i) => (
                     <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
                       <div className="flex items-center gap-3">
@@ -516,8 +523,8 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                     <Sparkles className="w-8 h-8 text-[hsl(var(--brand))]" />
                   </motion.div>
                 </div>
-                <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">Building your workout...</p>
-                <p className="text-sm text-[hsl(var(--fg-2))]">AI selecting optimal exercises</p>
+                <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('quickWorkout.building')}</p>
+                <p className="text-sm text-[hsl(var(--fg-2))]">{t('quickWorkout.selectingExercises')}</p>
               </motion.div>
             )}
 
@@ -535,7 +542,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
               }}
               className="text-sm text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] transition-colors"
             >
-              Back
+              {t('quickWorkout.back')}
             </button>
           )}
           {(mode === null || (mode === 'ai' && step === 4)) && <div />}
@@ -545,22 +552,22 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
 
           {mode === 'ai' && step === 1 && (
             <button onClick={() => setStep(2)} disabled={!muscle} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40">
-              Next <ArrowRight className="w-4 h-4" />
+              {t('quickWorkout.next')} <ArrowRight className="w-4 h-4" />
             </button>
           )}
           {mode === 'ai' && step === 2 && (
             <button onClick={() => setStep(3)} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-medium hover:opacity-90 transition-opacity">
-              Next <ArrowRight className="w-4 h-4" />
+              {t('quickWorkout.next')} <ArrowRight className="w-4 h-4" />
             </button>
           )}
           {mode === 'ai' && step === 3 && (
             <button onClick={handleGenerate} disabled={!location || generating} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40">
-              <Sparkles className="w-4 h-4" /> Generate
+              <Sparkles className="w-4 h-4" /> {t('quickWorkout.generate')}
             </button>
           )}
           {mode === 'ai' && step === 4 && (
             <button onClick={handleStartAI} disabled={!isValidWorkout || !generatedWorkout} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">
-              <Play className="w-4 h-4 fill-current" /> Start Workout
+              <Play className="w-4 h-4 fill-current" /> {t('quickWorkout.startWorkout')}
             </button>
           )}
 
@@ -570,7 +577,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
               disabled={!manualName.trim() || !manualExercises.some((e) => e.name.trim())}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[hsl(var(--brand))] text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Play className="w-4 h-4 fill-current" /> Start Workout
+              <Play className="w-4 h-4 fill-current" /> {t('quickWorkout.startWorkout')}
             </button>
           )}
         </MobileSheet.Footer>

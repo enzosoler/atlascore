@@ -80,18 +80,18 @@ function interpretWeather(temp, code, t) {
 function HeroCard({ text, focus, primaryAction, loading }) {
   if (loading) {
     return (
-      <div className="space-y-2">
-        <div className="h-4 w-40 rounded bg-[hsl(var(--fill)/0.6)] animate-pulse" />
-        <div className="h-3 w-56 rounded bg-[hsl(var(--fill)/0.4)] animate-pulse" />
+      <div className="space-y-2.5 rounded-2xl bg-[hsl(var(--card))] shadow-[var(--shadow-xs)] p-5">
+        <div className="h-4 w-44 rounded-lg bg-[hsl(var(--fill))] animate-pulse" />
+        <div className="h-3 w-60 rounded-lg bg-[hsl(var(--fill)/0.6)] animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <p className="text-callout font-medium text-[hsl(var(--fg-2))] leading-snug">{text}</p>
+    <div className="rounded-2xl bg-[hsl(var(--card))] shadow-[var(--shadow-xs)] p-5 space-y-3">
+      <p className="text-[15px] font-medium text-[hsl(var(--fg-2))] leading-relaxed">{text}</p>
       {primaryAction && (
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm" className="rounded-xl">
           <Link to={primaryAction.path}>
             {primaryAction.label}
             <ArrowRight className="w-3.5 h-3.5 ml-1" strokeWidth={2} />
@@ -106,33 +106,39 @@ function HeroCard({ text, focus, primaryAction, loading }) {
 
 function ActionTile({ icon: Icon, label, done = false, to, onClick }) {
   const content = (
-    <div className={`flex flex-col items-center justify-center gap-1.5 rounded-xl p-3.5 transition-colors active:scale-[0.97] ${
+    <div className={`flex flex-col items-center justify-center gap-2 rounded-2xl py-4 px-3 transition-all active:scale-[0.97] ${
       done
         ? 'bg-[hsl(var(--ok)/0.06)]'
-        : 'bg-[hsl(var(--fill)/0.5)]'
+        : 'bg-[hsl(var(--card))] shadow-[var(--shadow-xs)]'
     }`}>
       <Icon className={`w-5 h-5 ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-3))]'}`} strokeWidth={1.8} />
-      <span className={`text-[12px] font-medium ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`}>{label}</span>
+      <span className={`text-[11px] font-semibold ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`}>{label}</span>
     </div>
   );
 
-  if (onClick) return <button onClick={onClick} className="text-center">{content}</button>;
+  if (onClick) return <button onClick={onClick} className="text-center w-full">{content}</button>;
   return <Link to={to} className="text-center">{content}</Link>;
 }
 
 // ─── Plan Card ─────────────────────────────────────────────────────────────────
 
+const planIconColors = {
+  brand: 'bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]',
+  ok: 'bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]',
+  warn: 'bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]',
+};
+
 function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
   return (
-    <Link to={to} className="flex items-center gap-3.5 rounded-xl px-4 py-3.5 active:bg-[hsl(var(--fill)/0.4)] transition-colors">
-      <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-[hsl(var(--${color})/0.08)] text-[hsl(var(--${color}))]`}>
+    <Link to={to} className="flex items-center gap-3.5 rounded-2xl px-4 py-3.5 bg-[hsl(var(--card))] shadow-[var(--shadow-xs)] active:bg-[hsl(var(--fill)/0.4)] transition-colors">
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${planIconColors[color] || planIconColors.brand}`}>
         <Icon className="w-4 h-4" strokeWidth={1.8} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-[hsl(var(--fg))] tracking-[-0.01em]">{label}</p>
-        {sub && <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5">{sub}</p>}
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))] tracking-[-0.01em]">{label}</p>
+        {sub && <p className="text-[11px] text-[hsl(var(--fg-3))] mt-0.5">{sub}</p>}
       </div>
-      <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg-2))] shrink-0">{value}</p>
+      <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg-2))] shrink-0">{value}</p>
     </Link>
   );
 }
@@ -142,7 +148,7 @@ function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
 function RecCard({ rec, onDismiss }) {
   const t = useT();
   return (
-    <div className="flex items-start gap-3 py-2.5">
+    <div className="flex items-start gap-3 py-3 px-4 rounded-2xl bg-[hsl(var(--card))] shadow-[var(--shadow-xs)]">
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-medium text-[hsl(var(--fg))]">{rec.title}</p>
         {rec.reason && <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5 leading-relaxed">{rec.reason}</p>}
@@ -152,7 +158,7 @@ function RecCard({ rec, onDismiss }) {
           </Link>
         )}
       </div>
-      <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] shrink-0 pt-0.5">
+      <button onClick={() => onDismiss?.(rec)} className="text-[12px] py-1 px-2 text-[hsl(var(--fg-3))] shrink-0 rounded-lg hover:bg-[hsl(var(--fill))] transition-colors">
         {rec.dismissLabel || t('common.dismiss')}
       </button>
     </div>
@@ -284,8 +290,8 @@ function TodayContent() {
       </div>
 
       {/* Today Plan */}
-      <div className="space-y-1">
-        <p className="text-[12px] font-semibold uppercase tracking-wide text-[hsl(var(--fg-3))] px-0.5">{t('today.plan.title')}</p>
+      <div className="space-y-2">
+        <p className="atlas-overline px-0.5">{t('today.plan.title')}</p>
 
         <PlanCard
           icon={Dumbbell}
@@ -318,8 +324,8 @@ function TodayContent() {
 
       {/* Recommendations */}
       {Array.isArray(recs) && recs.length > 0 && (
-        <div className="space-y-1">
-          <p className="text-[12px] font-semibold uppercase tracking-wide text-[hsl(var(--fg-3))] px-0.5">{t('today.forYou')}</p>
+        <div className="space-y-2">
+          <p className="atlas-overline px-0.5">{t('today.forYou')}</p>
           {recs.map((rec, i) => (
             <RecCard key={rec.id || i} rec={rec} onDismiss={ai.dismissRec} />
           ))}
