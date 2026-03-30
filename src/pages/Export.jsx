@@ -119,6 +119,8 @@ function ExportContent() {
     const labExams = getArray(5, 'labExams');
     const progressPhotos = getArray(6, 'progressPhotos');
 
+    console.log('[Export] raw data:', { meals: meals.length, workouts: workouts.length, measurements: measurements.length, checkins: checkins.length, protocols: protocols.length, labExams: labExams.length, progressPhotos: progressPhotos.length });
+
     return {
       generated_at: new Date().toISOString(),
       period: { startDate, endDate },
@@ -127,12 +129,13 @@ function ExportContent() {
         name: user?.full_name || 'Athlete',
         email: user?.email || '',
       },
-      meals: meals.filter((item) => isWithinRange(item?.date, startDate, endDate)),
-      workouts: workouts.filter((item) => isWithinRange(item?.date, startDate, endDate)),
-      measurements: measurements.filter((item) => isWithinRange(item?.date, startDate, endDate)),
+      // Meals, workouts, measurements are already server-filtered by date range in queries above.
+      meals,
+      workouts,
+      measurements,
       checkins: checkins.filter((item) => isWithinRange(item?.date, startDate, endDate)),
       protocols: protocols.filter((item) =>
-        isWithinRange(item?.start_date || item?.created_date?.slice(0, 10), startDate, endDate)
+        isWithinRange(item?.start_date, startDate, endDate)
       ),
       labExams: labExams.filter((item) => isWithinRange(item?.exam_date, startDate, endDate)),
       progressPhotos: progressPhotos.filter((item) => isWithinRange(item?.date, startDate, endDate)),
