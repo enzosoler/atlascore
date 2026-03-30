@@ -52,7 +52,7 @@ const CURVE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getToday() {
-  return new Date().toISOString().split('T')[0];
+  return (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })();
 }
 
 function getProtocolStatus(protocol) {

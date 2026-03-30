@@ -28,7 +28,10 @@ export const formatDate = (date) => {
   return new Date(date + 'T12:00').toLocaleDateString(intlLoc, { month: '2-digit', day: '2-digit', year: 'numeric' });
 };
 
-export const getToday = () => new Date().toISOString().split('T')[0];
+export const getToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 export const getGreeting = (locale) => {
   const h = new Date().getHours();

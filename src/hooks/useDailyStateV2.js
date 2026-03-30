@@ -13,7 +13,10 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { AI_COACH_KEY } from '@/hooks/useAICoach';
 
-const todayISO = () => new Date().toISOString().split('T')[0];
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 export const DAILY_KEYS = {
   session:     (uid) => ['v2-session', uid],
@@ -117,7 +120,8 @@ export function useDailyStateV2() {
     queryFn: () => sq(async () => {
       const monday = new Date();
       monday.setDate(monday.getDate() - monday.getDay() + 1);
-      const { data } = await supabase.from('workout_logs').select('date, status').eq('user_id', uid).eq('status', 'completed').gte('date', monday.toISOString().split('T')[0]);
+      const mondayKey = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+      const { data } = await supabase.from('workout_logs').select('date, status').eq('user_id', uid).eq('status', 'completed').gte('date', mondayKey);
       return data || [];
     }),
     enabled: !!uid, staleTime: 60_000,

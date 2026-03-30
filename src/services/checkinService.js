@@ -15,21 +15,19 @@ function isMissingTableError(error) {
   return message.includes('schema cache') || message.includes('does not exist') || message.includes('not found');
 }
 
-function toDateKey(value) {
-  if (!value) {
-    return new Date().toISOString().split('T')[0];
-  }
+function localDateKey(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
-  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return value;
-  }
+function toDateKey(value) {
+  if (!value) return localDateKey();
+
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
 
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return new Date().toISOString().split('T')[0];
-  }
+  if (Number.isNaN(parsed.getTime())) return localDateKey();
 
-  return parsed.toISOString().split('T')[0];
+  return localDateKey(parsed);
 }
 
 function normalizeCheckin(entry) {

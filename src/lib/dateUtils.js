@@ -96,7 +96,9 @@ export function formatRelativeDate(date) {
  * Retorna a data atual no formato YYYY-MM-DD
  */
 export function getTodayKey() {
-  return new Date().toISOString().split('T')[0];
+  // Use local year/month/day — toISOString() gives UTC which is wrong for UTC- timezones
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 // ── helpers internos ──────────────────────────────────────

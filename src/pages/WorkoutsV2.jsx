@@ -79,7 +79,7 @@ function buildSessionFromPlan(plan, dayIndex) {
   const day = plan.days[dayIndex];
   return {
     name: day.label || day.name || `Dia ${dayIndex + 1}`,
-    date: new Date().toISOString().split('T')[0],
+    date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
     plan_id: plan.id,
     plan_day_index: dayIndex,
     status: 'in_progress',
@@ -128,7 +128,7 @@ function getTodayDayIndex(plan) {
 // Get session status based on recent workouts
 function getSessionStatus(dayIndex, recentSessions, plan) {
   // Check if there's a completed session for this specific day recently
-  const today = new Date().toISOString().split('T')[0];
+  const today = (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })();
   const lastSession = recentSessions[0];
   
   if (lastSession) {
@@ -418,7 +418,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
         })),
         active: true,
         created_by_type: 'user',
-        start_date: new Date().toISOString().split('T')[0],
+        start_date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
       });
       onCreated();
     } catch (err) {

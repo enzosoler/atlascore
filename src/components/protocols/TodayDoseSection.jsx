@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 // Helper to check if dose is due today based on frequency
 function isDueToday(protocol, logs = []) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })();
   const frequency = protocol.frequency?.toLowerCase() || '';
   
   // Daily protocols are always due
@@ -33,7 +33,7 @@ function isDueToday(protocol, logs = []) {
 
 // Check if dose was already taken today
 function wasTakenToday(protocol, logs = []) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })();
   return logs.some(log => 
     log.protocol_id === protocol.id && 
     (log.taken_at?.startsWith(today) || log.created_at?.startsWith(today))

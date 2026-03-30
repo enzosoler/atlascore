@@ -826,7 +826,7 @@ export default function Onboarding() {
       if (checkpointWeight) {
         const measurementPayload = {
           user_id: user.id,
-          date: new Date().toISOString().split('T')[0],
+          date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
           weight: checkpointWeight,
         };
         if (form.checkpoint_body_fat !== '') {

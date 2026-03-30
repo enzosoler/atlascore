@@ -175,7 +175,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
 
     onStart({
       name: generatedWorkout.name || 'Quick Workout',
-      date: new Date().toISOString().split('T')[0],
+      date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
       status: 'in_progress',
       exercises: exercises.map((ex) => ({
         name: ex.name,
@@ -201,7 +201,7 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
 
     onStart({
       name: manualName.trim(),
-      date: new Date().toISOString().split('T')[0],
+      date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
       status: 'in_progress',
       exercises: validExercises.map((ex) => ({
         name: ex.name.trim(),

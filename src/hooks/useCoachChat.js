@@ -174,12 +174,12 @@ async function dispatchAction(action, { activePlan, navigate }) {
     case 'log_weight': {
       await createMeasurement(userId, {
         weight: params.weight,
-        date: new Date().toISOString().split('T')[0],
+        date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
       });
       break;
     }
     case 'log_checkin': {
-      const today = new Date().toISOString().split('T')[0];
+      const today = (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })();
       const { error } = await supabase.from('daily_checkins').upsert({
         user_id: userId,
         date: today,

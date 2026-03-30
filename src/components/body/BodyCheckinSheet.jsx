@@ -37,7 +37,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
 
     setSaving(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })();
       const { error } = await supabase.from('measurements').upsert({
         user_id: user.id,
         date: today,
@@ -68,7 +68,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
       recovery: 'mood',
     };
     const field = fieldMap[subPanel];
-    const today = new Date().toISOString().split('T')[0];
+    const today = (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })();
 
     try {
       const { data: existing } = await supabase
