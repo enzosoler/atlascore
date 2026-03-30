@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
  */
 export function ChartCard({ children, className = '' }) {
   return (
-    <div className={`rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-4 ${className}`}>
+    <div className={`atlas-card p-4 ${className}`}>
       {children}
     </div>
   );

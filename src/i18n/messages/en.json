@@ -3193,6 +3193,15 @@
       "plan_save_error": "Could not save the plan."
     }
   },
+  "entitlements": {
+    "trialEnded": "Trial ended",
+    "featureAvailableOn": "{feature} remains available on the {plan} plan.",
+    "continueSubscription": "Continue subscription",
+    "featureTrialEnded": "{feature} trial ended",
+    "continueWith": "Continue with {plan} to keep using it.",
+    "upgradeToUnlock": "Upgrade to unlock this feature",
+    "viewPlans": "View plans"
+  },
   "shared": {
     "stablePage": {
       "loadingTitle": "Loading data",

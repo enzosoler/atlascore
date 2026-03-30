@@ -12,7 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Bell, Sparkles, Dumbbell, UtensilsCrossed, Scale, Heart,
+  Bell, Dumbbell, UtensilsCrossed, Scale, Heart,
   ArrowRight, Flame, Target, Pill,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -78,39 +78,26 @@ function interpretWeather(temp, code, t) {
 // ─── Hero Card ─────────────────────────────────────────────────────────────────
 
 function HeroCard({ text, focus, primaryAction, loading }) {
-  const t = useT();
-  const heroStyle = { background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' };
-
   if (loading) {
     return (
-      <div className="rounded-atlas-card border border-[hsl(var(--brand-ai)/0.18)] p-5 space-y-3 overflow-hidden" style={heroStyle}>
-        <div className="h-4 w-32 rounded-md bg-[hsl(var(--fill)/0.6)] animate-pulse" />
-        <div className="h-3 w-48 rounded-md bg-[hsl(var(--fill)/0.4)] animate-pulse" />
+      <div className="space-y-2">
+        <div className="h-4 w-40 rounded bg-[hsl(var(--fill)/0.6)] animate-pulse" />
+        <div className="h-3 w-56 rounded bg-[hsl(var(--fill)/0.4)] animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="rounded-atlas-card border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden" style={heroStyle}>
-      <div className="h-[2px] bg-gradient-to-r from-[hsl(var(--brand))] via-[hsl(var(--brand-ai))] to-transparent" />
-      <div className="p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          <span className="atlas-overline text-[hsl(var(--brand-ai))]">{t('today.aiCoach')}</span>
-          {focus && (
-            <span className="atlas-overline ml-auto text-[hsl(var(--fg-3))] bg-[hsl(var(--fill)/0.6)] px-2 py-0.5 rounded-full">{focus}</span>
-          )}
-        </div>
-        <p className="text-callout font-semibold text-[hsl(var(--fg))] leading-snug">{text}</p>
-        {primaryAction && (
-          <Button asChild className="mt-4 w-full">
-            <Link to={primaryAction.path}>
-              {primaryAction.label}
-              <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
-            </Link>
-          </Button>
-        )}
-      </div>
+    <div className="space-y-3">
+      <p className="text-callout font-medium text-[hsl(var(--fg-2))] leading-snug">{text}</p>
+      {primaryAction && (
+        <Button asChild variant="outline" size="sm">
+          <Link to={primaryAction.path}>
+            {primaryAction.label}
+            <ArrowRight className="w-3.5 h-3.5 ml-1" strokeWidth={2} />
+          </Link>
+        </Button>
+      )}
     </div>
   );
 }
@@ -119,13 +106,13 @@ function HeroCard({ text, focus, primaryAction, loading }) {
 
 function ActionTile({ icon: Icon, label, done = false, to, onClick }) {
   const content = (
-    <div className={`flex flex-col items-center justify-center gap-1.5 rounded-atlas-card border p-3 transition-colors active:scale-[0.97] ${
+    <div className={`flex flex-col items-center justify-center gap-1.5 rounded-xl p-3.5 transition-colors active:scale-[0.97] ${
       done
-        ? 'border-[hsl(var(--ok)/0.25)] bg-[hsl(var(--ok)/0.06)]'
-        : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)]'
+        ? 'bg-[hsl(var(--ok)/0.06)]'
+        : 'bg-[hsl(var(--fill)/0.5)]'
     }`}>
-      <Icon className={`w-5 h-5 ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`} strokeWidth={1.8} />
-      <span className={`text-caption1 font-semibold ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`}>{label}</span>
+      <Icon className={`w-5 h-5 ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-3))]'}`} strokeWidth={1.8} />
+      <span className={`text-[12px] font-medium ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`}>{label}</span>
     </div>
   );
 
@@ -137,15 +124,15 @@ function ActionTile({ icon: Icon, label, done = false, to, onClick }) {
 
 function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
   return (
-    <Link to={to} className="flex items-center gap-4 rounded-atlas-card border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-5 py-4 active:bg-[hsl(var(--fill)/0.4)] transition-colors">
-      <div className={`w-10 h-10 rounded-atlas-control flex items-center justify-center bg-[hsl(var(--${color})/0.1)] text-[hsl(var(--${color}))]`}>
-        <Icon className="w-4 h-4" strokeWidth={1.9} />
+    <Link to={to} className="flex items-center gap-3.5 rounded-xl px-4 py-3.5 active:bg-[hsl(var(--fill)/0.4)] transition-colors">
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-[hsl(var(--${color})/0.08)] text-[hsl(var(--${color}))]`}>
+        <Icon className="w-4 h-4" strokeWidth={1.8} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="atlas-overline">{label}</p>
-        {sub && <p className="text-caption1 text-[hsl(var(--fg-2))] mt-0.5">{sub}</p>}
+        <p className="text-[14px] font-semibold text-[hsl(var(--fg))] tracking-[-0.01em]">{label}</p>
+        {sub && <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5">{sub}</p>}
       </div>
-      <p className="kpi-sm tracking-[-0.04em] text-[hsl(var(--fg))] shrink-0">{value}</p>
+      <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg-2))] shrink-0">{value}</p>
     </Link>
   );
 }
@@ -155,20 +142,19 @@ function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
 function RecCard({ rec, onDismiss }) {
   const t = useT();
   return (
-    <div className="flex items-start gap-3 py-3">
-      <div className="w-1 h-1 rounded-full bg-[hsl(var(--brand-ai))] mt-2 shrink-0" />
+    <div className="flex items-start gap-3 py-2.5">
       <div className="flex-1 min-w-0">
-        <p className="text-footnote font-medium text-[hsl(var(--fg))]">{rec.title}</p>
-        {rec.reason && <p className="text-caption1 text-[hsl(var(--fg-3))] mt-0.5 leading-relaxed">{rec.reason}</p>}
+        <p className="text-[13px] font-medium text-[hsl(var(--fg))]">{rec.title}</p>
+        {rec.reason && <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5 leading-relaxed">{rec.reason}</p>}
         {rec.actionPath && (
-          <Link to={rec.actionPath} className="mt-2 flex items-center gap-1.5 text-caption1 font-semibold text-[hsl(var(--brand))]">
-            {rec.actionLabel || t('today.doThis')} <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
+          <Link to={rec.actionPath} className="mt-1.5 inline-flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--brand))]">
+            {rec.actionLabel || t('today.doThis')} <ArrowRight className="w-3 h-3" strokeWidth={2} />
           </Link>
         )}
       </div>
-      <Button variant="ghost" size="sm" onClick={() => onDismiss?.(rec)} className="text-caption1 text-[hsl(var(--fg-3))] shrink-0 h-auto px-1 py-0.5">
+      <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] shrink-0 pt-0.5">
         {rec.dismissLabel || t('common.dismiss')}
-      </Button>
+      </button>
     </div>
   );
 }
@@ -332,11 +318,8 @@ function TodayContent() {
 
       {/* Recommendations */}
       {Array.isArray(recs) && recs.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 px-0.5">
-            <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-            <p className="atlas-overline">{t('today.forYou')}</p>
-          </div>
+        <div className="space-y-1">
+          <p className="text-[12px] font-semibold uppercase tracking-wide text-[hsl(var(--fg-3))] px-0.5">{t('today.forYou')}</p>
           {recs.map((rec, i) => (
             <RecCard key={rec.id || i} rec={rec} onDismiss={ai.dismissRec} />
           ))}

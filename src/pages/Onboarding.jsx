@@ -13,16 +13,12 @@ import {
   ChevronLeft,
   Check,
   Loader2,
-  X,
   ArrowRight,
   Zap,
   UtensilsCrossed,
   Dumbbell,
   Scale,
   Compass,
-  Star,
-  ShieldCheck,
-  Crown,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
@@ -113,7 +109,7 @@ function GoalChip({ selected, onClick, emoji, label }) {
 
 function FieldLabel({ children }) {
   return (
-    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+    <label className="mb-1.5 block text-[13px] font-medium text-[hsl(var(--fg-2))]">
       {children}
     </label>
   );
@@ -790,9 +786,9 @@ export default function Onboarding() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
-                initial={{ x: 24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -24, opacity: 0 }}
+                initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
                 transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="atlas-card mb-4 rounded-[22px] p-6"
+                className="mb-5"
               >
                 {stepContent()}
               </motion.div>

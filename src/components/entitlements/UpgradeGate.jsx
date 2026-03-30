@@ -3,30 +3,13 @@ import { Link } from 'react-router-dom';
 import { Lock, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { ROUTES } from '@/lib/routes';
+import { useI18n } from '@/lib/i18nContext';
 
-/**
- * UpgradeGate — blocks premium features for free users
- * Also shows trial expired message if applicable
- * 
- * Usage:
- * <UpgradeGate feature="atlas_ai" plan="Pro">
- *   <YourComponent />
- * </UpgradeGate>
- */
 export default function UpgradeGate({ feature, plan = 'Pro', children, title, description }) {
+  const { t } = useI18n();
   const { can, isTrialExpired } = useSubscription();
 
-  if (can(feature)) {
-    return children;
-  }
-
-  const planNames = {
-    Pro: 'Pro Plan',
-    Performance: 'Performance Plan',
-    Coach: 'Coach Plan',
-    Nutrition: 'Nutrition Plan',
-    Clinical: 'Clinical Plan',
-  };
+  if (can(feature)) return children;
 
   const featureNames = {
     atlas_ai: 'Insights',
@@ -39,29 +22,25 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
     standard_exports: 'Report Export',
   };
 
-  const featureName = featureNames[feature] || 'This feature';
-  const planName = planNames[plan] || plan;
+  const featureName = featureNames[feature] || feature;
+  const planName = plan;
 
-  // Show trial expired message if trial is expired
   if (isTrialExpired) {
     return (
       <div className="rounded-2xl border border-[hsl(var(--err)/0.3)] bg-gradient-to-r from-[hsl(var(--err)/0.08)] to-[hsl(var(--err)/0.03)] p-6 text-center space-y-4">
         <div className="w-12 h-12 rounded-xl bg-[hsl(var(--err)/0.12)] flex items-center justify-center mx-auto">
           <AlertTriangle className="w-6 h-6 text-[hsl(var(--err))]" strokeWidth={2} />
         </div>
-        
         <div>
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))] mb-1">
-            {featureName} trial ended
+            {t('entitlements.featureTrialEnded', { feature: featureName })}
           </p>
           <p className="text-[13px] text-[hsl(var(--fg-2))]">
-            Continue with {planName} to keep using it.
+            {t('entitlements.continueWith', { plan: planName })}
           </p>
         </div>
-
-        <Link to={ROUTES.pricing}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[hsl(var(--err))] text-white text-[13px] font-semibold hover:bg-[hsl(var(--err)/0.88)] transition-colors">
-          Continue subscription <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+        <Link to={ROUTES.pricing} className="atlas-button atlas-button-danger inline-flex h-10 px-4 rounded-lg text-[13px] gap-2">
+          {t('entitlements.continueSubscription')} <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
         </Link>
       </div>
     );
@@ -72,19 +51,16 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
       <div className="w-12 h-12 rounded-xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto">
         <Lock className="w-6 h-6 text-[hsl(var(--brand))]" strokeWidth={2} />
       </div>
-      
       <div>
         <p className="text-[14px] font-semibold text-[hsl(var(--fg))] mb-1">
           {title || `${featureName} — ${planName}+`}
         </p>
         <p className="text-[13px] text-[hsl(var(--fg-2))]">
-          {description || 'Upgrade to unlock this feature'}
+          {description || t('entitlements.upgradeToUnlock')}
         </p>
       </div>
-
-      <Link to={ROUTES.pricing}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[hsl(var(--brand))] text-white text-[13px] font-semibold hover:bg-[hsl(var(--brand)/0.88)] transition-colors">
-        View plans <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
+      <Link to={ROUTES.pricing} className="atlas-button atlas-button-primary inline-flex h-10 px-4 rounded-lg text-[13px] gap-2">
+        {t('entitlements.viewPlans')} <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
       </Link>
     </div>
   );

@@ -3194,6 +3194,15 @@
       "plan_save_error": "Não foi possível salvar o plano."
     }
   },
+  "entitlements": {
+    "trialEnded": "Trial encerrado",
+    "featureAvailableOn": "{feature} continua disponível no plano {plan}.",
+    "continueSubscription": "Continuar assinatura",
+    "featureTrialEnded": "Trial de {feature} encerrado",
+    "continueWith": "Continue com {plan} para manter o acesso.",
+    "upgradeToUnlock": "Faça upgrade para desbloquear",
+    "viewPlans": "Ver planos"
+  },
   "shared": {
     "stablePage": {
       "loadingTitle": "Carregando dados",

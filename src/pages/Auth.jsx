@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import {
   ArrowRight,
   ArrowLeft,
-  Sparkles,
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/lib/AuthContext';
@@ -410,7 +409,7 @@ export default function Auth() {
           </div>
 
           {/* Card */}
-          <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.86)] rounded-2xl p-6 sm:p-8 shadow-sm">
+          <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] rounded-2xl p-6 sm:p-8">
             {/* Header */}
             <div className="text-center mb-6">
               <h1 className="text-xl font-semibold tracking-tight text-[hsl(var(--fg))]">
@@ -427,12 +426,6 @@ export default function Auth() {
                     ? ui.loginSubtitle
                     : ui.signupSubtitle}
               </p>
-              {!forgotPassword && (
-                <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-medium text-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.08)] px-2.5 py-1 rounded-full">
-                  <Sparkles className="h-3 w-3" />
-                  {ui.aiHint}
-                </div>
-              )}
             </div>
 
             {/* Forgot Password Form */}
