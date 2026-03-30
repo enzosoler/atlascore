@@ -93,33 +93,33 @@ function PricingCard({
 
   return (
     <article
-      className={`relative flex h-full flex-col rounded-[30px] border px-5 py-5 lg:px-6 lg:py-6 transition-all ${
+      className={`relative flex h-full flex-col rounded-[24px] px-5 py-5 lg:px-6 lg:py-6 transition-all ${
         isPro
-          ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--card))] shadow-[0_8px_30px_rgb(0,0,0,0.12)] scale-[1.02] z-10'
+          ? 'bg-[hsl(var(--card))] shadow-[var(--shadow-md)] ring-1 ring-[hsl(var(--brand)/0.25)] scale-[1.02] z-10'
           : isPerformance
-            ? 'border-[hsl(var(--brand)/0.24)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]'
-            : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.86)] shadow-[var(--shadow-xs)]'
+            ? 'bg-[hsl(var(--card))] shadow-[var(--shadow-sm)]'
+            : 'bg-[hsl(var(--fill)/0.5)] shadow-[var(--shadow-xs)]'
       }`}
     >
       {isPro ? (
-        <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand))] px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+        <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--brand))] px-3 py-1 text-[11px] font-semibold text-white">
           <Sparkles className="h-3 w-3" strokeWidth={2} />
           {labels.popular}
         </span>
       ) : plan.aiBadge ? (
-        <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.08)] px-3 py-1 text-[11px] font-medium text-[hsl(var(--brand))]">
+        <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--brand)/0.08)] px-3 py-1 text-[11px] font-medium text-[hsl(var(--brand))]">
           <Sparkles className="h-3 w-3" strokeWidth={2} />
           {labels.aiBadge}
         </span>
       ) : null}
 
       <div className="flex items-start gap-3">
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[20px] border shadow-[var(--shadow-xs)] ${
-          isPro 
-            ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]' 
-            : 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--brand))]'
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+          isPro
+            ? 'bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]'
+            : 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-2))]'
         }`}>
-          <Icon className="h-5 w-5" strokeWidth={1.9} />
+          <Icon className="h-5 w-5" strokeWidth={1.8} />
         </div>
 
         <div className="min-w-0 pt-1">
@@ -151,17 +151,17 @@ function PricingCard({
         ) : null}
       </div>
 
-      <div className="mt-6 flex-1 space-y-2.5">
+      <div className="mt-5 flex-1 space-y-2">
         {plan.features.map((feature) => (
-          <div key={feature} className="flex items-start gap-2 text-[13px] leading-5 text-[hsl(var(--fg))]">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.4} />
+          <div key={feature} className="flex items-start gap-2.5 text-[13px] leading-5 text-[hsl(var(--fg))]">
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--ok))]" strokeWidth={2.5} />
             <span>{feature}</span>
           </div>
         ))}
         {plan.missing?.map((feature) => (
-          <div key={feature} className="flex items-start gap-2 text-[12px] leading-5 text-[hsl(var(--fg-3))]">
-            <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2.1} />
-            <span className="line-through">{feature}</span>
+          <div key={feature} className="flex items-start gap-2.5 text-[12px] leading-5 text-[hsl(var(--fg-3))]">
+            <X className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-40" strokeWidth={2} />
+            <span className="line-through decoration-[hsl(var(--fg-3)/0.4)]">{feature}</span>
           </div>
         ))}
       </div>
@@ -170,9 +170,9 @@ function PricingCard({
         onClick={() => onSubscribe(plan.id)}
         disabled={loading === plan.id || (isFree && isCurrentPlan)}
         variant={isPro && !isCurrentPlan ? 'default' : 'outline'}
-        className={`mt-6 h-11 w-full ${
-          isCurrentPlan ? 'border-[hsl(var(--ok)/0.34)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]' : ''
-        } ${isPro && !isCurrentPlan ? 'bg-[hsl(var(--brand))] text-white hover:bg-[hsl(var(--brand)/0.9)]' : ''}`}
+        className={`mt-6 h-11 w-full rounded-xl ${
+          isCurrentPlan ? 'border-0 bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]' : ''
+        } ${isPro && !isCurrentPlan ? 'bg-[hsl(var(--brand))] text-white hover:bg-[hsl(var(--brand)/0.9)] border-0 shadow-[0_4px_14px_hsl(var(--brand)/0.25)]' : ''}`}
       >
         {loading === plan.id ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -435,11 +435,11 @@ export default function Pricing() {
               <RegionSelector onRegionChange={setRegion} />
 
               {/* Billing interval toggle */}
-              <div className="flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] p-1">
+              <div className="flex items-center gap-1 rounded-full bg-[hsl(var(--fill)/0.6)] p-1">
                 <button
                   type="button"
                   onClick={() => setBilling('monthly')}
-                  className={`flex-1 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                  className={`flex-1 rounded-full px-4 py-2 text-[13px] font-medium transition-all ${
                     billing === 'monthly'
                       ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-sm'
                       : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
@@ -450,7 +450,7 @@ export default function Pricing() {
                 <button
                   type="button"
                   onClick={() => setBilling('yearly')}
-                  className={`flex-1 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                  className={`flex-1 rounded-full px-4 py-2 text-[13px] font-medium transition-all ${
                     billing === 'yearly'
                       ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-sm'
                       : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
@@ -458,19 +458,16 @@ export default function Pricing() {
                 >
                   {ui.billingYearly}
                   {billing !== 'yearly' && (
-                    <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
-                      up to 31%
+                    <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.1)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
+                      {ui.savePrefix}31%
                     </span>
                   )}
                 </button>
               </div>
 
-              <div className="atlas-public-panel-muted p-4">
-                <p className="atlas-metric-label">{ui.compareTitle}</p>
-                <p className="mt-3 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                  {ui.compareCopy}
-                </p>
-              </div>
+              <p className="text-[12px] text-[hsl(var(--fg-3))] leading-relaxed">
+                {ui.compareCopy}
+              </p>
             </div>
           </div>
         </div>
@@ -479,51 +476,46 @@ export default function Pricing() {
       <section id="plans" className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
           {/* Comparison Snapshot */}
-          <div className="mb-10 overflow-hidden rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)]">
-            <div className="border-b border-[hsl(var(--border)/0.3)] bg-[hsl(var(--card)/0.5)] px-5 py-4 lg:px-6">
-              <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">{ui.compareTitle}</p>
+          <div className="mb-10 overflow-hidden rounded-2xl bg-[hsl(var(--fill)/0.4)]">
+            <div className="px-5 py-3.5 lg:px-6">
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{ui.compareTitle}</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-[hsl(var(--border)/0.3)]">
-                    <th className="px-5 py-3 text-[12px] font-medium text-[hsl(var(--fg-3))] lg:px-6">Feature</th>
-                    <th className="px-5 py-3 text-center text-[12px] font-medium text-[hsl(var(--fg-3))] lg:px-6">Free</th>
-                    <th className="px-5 py-3 text-center text-[12px] font-semibold text-[hsl(var(--brand))] lg:px-6">Pro</th>
-                    <th className="px-5 py-3 text-center text-[12px] font-medium text-[hsl(var(--fg-3))] lg:px-6">Performance</th>
+                  <tr>
+                    <th className="px-5 py-2.5 text-[11px] font-medium text-[hsl(var(--fg-3))] lg:px-6">{t('pricing_page.featureLabel') || 'Feature'}</th>
+                    <th className="px-5 py-2.5 text-center text-[11px] font-medium text-[hsl(var(--fg-3))] lg:px-6">{t('pricing_page.plans.free.name') || 'Free'}</th>
+                    <th className="px-5 py-2.5 text-center text-[11px] font-semibold text-[hsl(var(--brand))] lg:px-6">{t('pricing_page.plans.pro.name') || 'Pro'}</th>
+                    <th className="px-5 py-2.5 text-center text-[11px] font-medium text-[hsl(var(--fg-3))] lg:px-6">{t('pricing_page.plans.performance.name') || 'Performance'}</th>
                   </tr>
                 </thead>
                 <tbody className="text-[13px]">
-                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
-                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">Workout & nutrition tracking</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                  </tr>
-                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
-                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">AI insights & feedback</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                  </tr>
-                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
-                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">Training & meal plans</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                  </tr>
-                  <tr className="border-b border-[hsl(var(--border)/0.2)]">
-                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">Advanced analytics & reports</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-3))] lg:px-6">—</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">✓</td>
-                  </tr>
-                  <tr>
-                    <td className="px-5 py-3 text-[hsl(var(--fg-2))] lg:px-6">History</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--fg-2))] lg:px-6">30 days</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">Unlimited</td>
-                    <td className="px-5 py-3 text-center text-[hsl(var(--ok))] lg:px-6">Unlimited</td>
-                  </tr>
+                  {[
+                    { label: t('pricing_page.compare.tracking') || 'Workout & nutrition tracking', free: true, pro: true, perf: true },
+                    { label: t('pricing_page.compare.ai') || 'AI insights & feedback', free: false, pro: true, perf: true },
+                    { label: t('pricing_page.compare.plans') || 'Training & meal plans', free: false, pro: true, perf: true },
+                    { label: t('pricing_page.compare.analytics') || 'Advanced analytics & reports', free: false, pro: false, perf: true },
+                    { label: t('pricing_page.compare.history') || 'History', free: '30d', pro: '∞', perf: '∞' },
+                  ].map((row, i) => (
+                    <tr key={i} className={i % 2 === 0 ? 'bg-[hsl(var(--card)/0.4)]' : ''}>
+                      <td className="px-5 py-2.5 text-[hsl(var(--fg-2))] lg:px-6">{row.label}</td>
+                      {['free', 'pro', 'perf'].map((tier) => {
+                        const val = row[tier];
+                        return (
+                          <td key={tier} className="px-5 py-2.5 text-center lg:px-6">
+                            {val === true ? (
+                              <Check className="h-3.5 w-3.5 text-[hsl(var(--ok))] mx-auto" strokeWidth={2.5} />
+                            ) : val === false ? (
+                              <span className="text-[hsl(var(--fg-3))]">—</span>
+                            ) : (
+                              <span className={val === '∞' ? 'text-[hsl(var(--ok))] font-medium' : 'text-[hsl(var(--fg-2))]'}>{val}</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -566,14 +558,14 @@ export default function Pricing() {
           </div>
 
           {/* Professional CTA — coming soon / private beta */}
-          <div className="mt-12 rounded-2xl border border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.2)] px-6 py-6 text-center">
+          <div className="mt-12 rounded-2xl bg-[hsl(var(--fill)/0.4)] px-6 py-6 text-center">
             <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
               {ui.professionalLabel}
             </p>
-            <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))]">
+            <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
               {t('pricing_page.professionalDesc')}
             </p>
-            <Button asChild variant="outline" className="mt-3 h-9 text-[13px]">
+            <Button asChild variant="outline" className="mt-4 h-10 rounded-xl text-[13px]">
               <Link to="/waitlist">
                 {t('pricing_page.professionalCta') || 'Join the waitlist'}
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -581,31 +573,29 @@ export default function Pricing() {
             </Button>
           </div>
         </div>
-      </section>      <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
-        <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
-          <div className="flex flex-col items-center text-center">
-            <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+      </section>      <section className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-12">
+        <div className="flex flex-col items-center text-center space-y-5">
+          <div className="space-y-2">
+            <p className="text-[14px] font-medium text-[hsl(var(--fg))]">
               {t('pricing_page.footer')}
             </p>
-            <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
+            <p className="text-[12px] text-[hsl(var(--fg-3))]">
               {t('pricing_page.footerPayment')}
             </p>
-            
-            <div className="mt-8">
-              {!isAuthenticated ? (
-                <Button asChild size="lg">
-                  <Link to={`${ROUTES.auth}?mode=signup`}>
-                    {ui.signup}
-                    <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2} />
-                  </Link>
-                </Button>
-              ) : (
-                <Button asChild size="lg" variant="outline">
-                  <Link to={ROUTES.today}>{t('pricing_page.backToApp')}</Link>
-                </Button>
-              )}
-            </div>
           </div>
+
+          {!isAuthenticated ? (
+            <Button asChild size="lg" className="rounded-xl shadow-[0_4px_14px_hsl(var(--brand)/0.2)]">
+              <Link to={`${ROUTES.auth}?mode=signup`}>
+                {ui.signup}
+                <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2} />
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild size="lg" variant="outline" className="rounded-xl">
+              <Link to={ROUTES.today}>{t('pricing_page.backToApp')}</Link>
+            </Button>
+          )}
         </div>
       </section>
     </PublicSiteShell>

@@ -6,20 +6,20 @@
   :root {
     color-scheme: light;
 
-    /* Semantic theme tokens */
-    --bg-app: 204 20% 96%;
-    --bg-surface: 204 18% 94.5%;
-    --bg-surface-2: 204 16% 92.5%;
-    --bg-card-semantic: 0 0% 100%;
-    --bg-card-elevated: 204 24% 98.4%;
+    /* ── Premium palette — light ── */
+    --bg-app: 220 14% 97%;           /* #F6F7F9 */
+    --bg-surface: 210 14% 95%;       /* #F1F3F5 — surface-2 */
+    --bg-surface-2: 213 14% 93%;     /* #E9ECF0 — surface-3 */
+    --bg-card-semantic: 0 0% 100%;   /* #FFFFFF — surface-1 */
+    --bg-card-elevated: 220 20% 99%; /* slightly lifted white */
 
-    --text-primary: 216 33% 3%;
-    --text-secondary: 204 11% 41%;
-    --text-muted: 204 10% 47%;
-    --text-subtle: 204 8% 63%;
+    --text-primary: 216 29% 6%;      /* #0B0F14 */
+    --text-secondary: 214 10% 40%;   /* #5B6470 */
+    --text-muted: 215 10% 59%;       /* #8B94A1 */
+    --text-subtle: 215 8% 69%;       /* lighter tertiary */
 
-    --border-default: 204 14% 87%;
-    --border-strong: 204 14% 78%;
+    --border-default: 210 14% 90%;   /* #E2E6EA */
+    --border-strong: 212 12% 82%;
 
     --accent-primary: 230 65% 55%;
     --accent-primary-hover: 230 65% 48%;
@@ -33,15 +33,15 @@
     /* Legacy / compatibility aliases */
     --tint: var(--accent-primary);
     --tint-hover: var(--accent-primary-hover);
-    --tint-soft: 214 30% 97%;
+    --tint-soft: 220 16% 97%;
 
     --sys-bg: var(--bg-app);
     --sys-bg2: var(--bg-surface);
     --sys-bg3: var(--bg-surface-2);
     --card: var(--bg-card-semantic);
     --card-elevated: var(--bg-card-elevated);
-    --glass-bg: rgba(246, 249, 251, 0.88);
-    --glass-border: rgba(20, 24, 33, 0.1);
+    --glass-bg: rgba(246, 247, 249, 0.85);
+    --glass-border: rgba(11, 15, 20, 0.06);
 
     --label: var(--text-primary);
     --label-secondary: var(--text-secondary);
@@ -50,8 +50,8 @@
 
     --separator-opaque: var(--border-default);
     --separator-strong: var(--border-strong);
-    --fill: 204 18% 93.5%;
-    --fill-secondary: 204 16% 90.5%;
+    --fill: 210 14% 95%;
+    --fill-secondary: 213 14% 93%;
 
     --sys-green: var(--status-success);
     --sys-orange: var(--status-warning);
@@ -152,19 +152,20 @@
   [data-theme="dark"] {
     color-scheme: dark;
 
-    --bg-app: 180 27% 4%;
-    --bg-surface: 180 21% 8%;
-    --bg-surface-2: 180 18% 11%;
-    --bg-card-semantic: 180 21% 8%;
-    --bg-card-elevated: 180 18% 11%;
+    /* ── Premium palette — dark (OLED) ── */
+    --bg-app: 0 0% 0%;               /* #000000 — true black */
+    --bg-surface: 220 12% 5%;        /* #0B0C0E — surface-1 */
+    --bg-surface-2: 228 13% 8%;      /* #111216 — surface-2 */
+    --bg-card-semantic: 220 12% 5%;  /* #0B0C0E */
+    --bg-card-elevated: 228 13% 8%; /* #111216 */
 
-    --text-primary: 0 0% 100%;
-    --text-secondary: 180 8% 57%;
-    --text-muted: 180 8% 47%;
-    --text-subtle: 180 8% 35%;
+    --text-primary: 0 0% 100%;       /* #FFFFFF */
+    --text-secondary: 217 10% 67%;   /* #A1A8B3 */
+    --text-muted: 220 9% 46%;        /* #6B7280 */
+    --text-subtle: 218 8% 32%;
 
-    --border-default: 180 19% 15%;
-    --border-strong: 180 19% 20%;
+    --border-default: 220 10% 12%;   /* rgba(255,255,255,0.06) equivalent */
+    --border-strong: 220 10% 18%;
 
     --accent-primary: 230 65% 60%;
     --accent-primary-hover: 230 65% 52%;
@@ -179,8 +180,8 @@
     --sys-bg3: var(--bg-surface-2);
     --card: var(--bg-card-semantic);
     --card-elevated: var(--bg-card-elevated);
-    --glass-bg: rgba(8, 14, 14, 0.88);
-    --glass-border: rgba(30, 44, 44, 0.78);
+    --glass-bg: rgba(0, 0, 0, 0.82);
+    --glass-border: rgba(255, 255, 255, 0.06);
 
     --label: var(--text-primary);
     --label-secondary: var(--text-secondary);
@@ -189,8 +190,8 @@
 
     --separator-opaque: var(--border-default);
     --separator-strong: var(--border-strong);
-    --fill: 180 18% 11%;
-    --fill-secondary: 180 19% 15%;
+    --fill: 228 13% 8%;
+    --fill-secondary: 220 10% 12%;
 
     --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.16), 0 10px 28px rgba(0, 0, 0, 0.18);
     --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.22), 0 18px 46px rgba(0, 0, 0, 0.24);

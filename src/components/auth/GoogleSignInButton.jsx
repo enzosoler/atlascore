@@ -28,7 +28,7 @@ export function GoogleSignInButton({ redirectUrl, className = '' }) {
       onClick={handleGoogleSignIn}
       disabled={loading}
       className={cn(
-        'flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[hsl(var(--fg))] hover:bg-[hsl(var(--shell))] disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+        'flex items-center justify-center gap-2.5 px-4 py-2 rounded-xl bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg))] text-[14px] font-medium hover:bg-[hsl(var(--fill))] disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
         className
       )}
     >

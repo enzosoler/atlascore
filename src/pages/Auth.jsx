@@ -110,7 +110,7 @@ function AuthField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium text-[hsl(var(--fg))]">
+      <label htmlFor={id} className="text-[13px] font-medium text-[hsl(var(--fg-2))]">
         {label}
       </label>
       <Input
@@ -120,6 +120,7 @@ function AuthField({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        className="h-11 rounded-xl bg-[hsl(var(--fill)/0.5)] border-0 focus:bg-[hsl(var(--card))] focus:ring-1 focus:ring-[hsl(var(--brand)/0.3)] transition-all"
       />
     </div>
   );
@@ -402,24 +403,24 @@ export default function Auth() {
   const formContent = (
     <div className="w-full max-w-[380px]">
           {/* Logo */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-7">
             <Link to={ROUTES.home} className="flex items-center gap-2">
               <AtlasCoreLogoSVG className="h-7 w-auto" variant="mono" />
             </Link>
           </div>
 
           {/* Card */}
-          <div className="bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] rounded-2xl p-6 sm:p-8">
+          <div className="bg-[hsl(var(--card))] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)]">
             {/* Header */}
             <div className="text-center mb-6">
-              <h1 className="text-xl font-semibold tracking-tight text-[hsl(var(--fg))]">
+              <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
                 {forgotPassword
                   ? ui.recoveryTitle
                   : isLogin
                     ? ui.loginTitle
                     : ui.signupTitle}
               </h1>
-              <p className="mt-1.5 text-[13px] text-[hsl(var(--fg-2))]">
+              <p className="mt-2 text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">
                 {forgotPassword
                   ? ui.recoverySubtitle
                   : isLogin
@@ -442,7 +443,7 @@ export default function Auth() {
                 />
 
                 {errorMessage && (
-                  <div className="text-[12px] text-red-500 bg-red-500/10 px-3 py-2 rounded-lg">
+                  <div className="text-[13px] text-[hsl(var(--err))] bg-[hsl(var(--err)/0.08)] px-3.5 py-2.5 rounded-xl leading-snug">
                     {errorMessage}
                   </div>
                 )}
@@ -471,7 +472,7 @@ export default function Auth() {
                     setForgotPassword(false);
                     setErrorMessage('');
                   }}
-                  className="w-full flex items-center justify-center gap-1.5 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 py-2 text-[13px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   {ui.backToSignIn}
@@ -482,7 +483,7 @@ export default function Auth() {
             {/* Reset Sent State */}
             {forgotPassword && resetSent && (
               <div className="text-center space-y-4">
-                <div className="text-[13px] text-green-600 bg-green-600/10 px-4 py-3 rounded-lg">
+                <div className="text-[13px] text-[hsl(var(--ok))] bg-[hsl(var(--ok)/0.08)] px-4 py-3 rounded-xl leading-snug">
                   {ui.recoverySent}
                 </div>
                 <button
@@ -492,7 +493,7 @@ export default function Auth() {
                     setResetSent(false);
                     setErrorMessage('');
                   }}
-                  className="text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+                  className="py-2 text-[13px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
                 >
                   {ui.backToSignIn}
                 </button>
@@ -537,12 +538,12 @@ export default function Auth() {
 
                 {/* Error/Success Messages */}
                 {errorMessage && (
-                  <div className="text-[12px] text-red-500 bg-red-500/10 px-3 py-2 rounded-lg">
+                  <div className="text-[13px] text-[hsl(var(--err))] bg-[hsl(var(--err)/0.08)] px-3.5 py-2.5 rounded-xl leading-snug">
                     {errorMessage}
                   </div>
                 )}
                 {successMessage && (
-                  <div className="text-[12px] text-green-600 bg-green-600/10 px-3 py-2 rounded-lg">
+                  <div className="text-[13px] text-[hsl(var(--ok))] bg-[hsl(var(--ok)/0.08)] px-3.5 py-2.5 rounded-xl leading-snug">
                     {successMessage}
                   </div>
                 )}
@@ -590,12 +591,12 @@ export default function Auth() {
                 </Button>
 
                 {/* Divider */}
-                <div className="relative py-1">
+                <div className="relative py-2">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[hsl(var(--border)/0.5)]" />
+                    <div className="w-full h-px bg-[hsl(var(--fill-secondary))]" />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="px-2 bg-[hsl(var(--card))] text-[11px] text-[hsl(var(--fg-3))]">
+                    <span className="px-3 bg-[hsl(var(--card))] text-[11px] text-[hsl(var(--fg-3))]">
                       {ui.orDivider}
                     </span>
                   </div>
@@ -611,13 +612,13 @@ export default function Auth() {
 
             {/* Footer Links */}
             {!forgotPassword && (
-              <div className="mt-6 pt-5 border-t border-[hsl(var(--border)/0.5)] space-y-3">
+              <div className="mt-6 pt-5 space-y-3">
                 {/* Switch login/signup */}
                 <p className="text-center text-[13px] text-[hsl(var(--fg-2))]">
                   {isLogin ? ui.noAccount : ui.hasAccount}{' '}
                   <Link
                     to={isLogin ? signupHref : loginHref}
-                    className="font-medium text-[hsl(var(--brand))] hover:underline underline-offset-2"
+                    className="font-semibold text-[hsl(var(--brand))] hover:underline underline-offset-2"
                   >
                     {isLogin ? ui.createAccount : ui.signInLink}
                   </Link>
@@ -632,7 +633,7 @@ export default function Auth() {
                       setErrorMessage('');
                       setSuccessMessage('');
                     }}
-                    className="w-full text-center text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+                    className="w-full text-center text-[13px] py-1 text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
                   >
                     {ui.forgotPassword}
                   </button>
@@ -658,7 +659,7 @@ export default function Auth() {
   if (IS_NATIVE) {
     return (
       <div className="mobile-screen bg-[hsl(var(--bg))]">
-        <div className="safe-scroll flex-1 flex flex-col items-center justify-center px-4 py-10">
+        <div className="safe-scroll flex-1 flex flex-col items-center justify-center px-5 py-10">
           {formContent}
         </div>
       </div>

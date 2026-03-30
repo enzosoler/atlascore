@@ -55,9 +55,9 @@ const INITIAL_FORM = {
 
 function Logo() {
   return (
-    <div className="flex items-center justify-center gap-2.5 mb-8">
-      <AtlasCoreLogoSVG width={48} height={24} className="shrink-0" />
-      <span className="text-[17px] font-bold tracking-tight">
+    <div className="flex items-center justify-center gap-2 mb-6">
+      <AtlasCoreLogoSVG width={44} height={22} className="shrink-0" />
+      <span className="text-[15px] font-bold tracking-[-0.02em]">
         <span className="text-[hsl(var(--accent-primary))]">atlas</span>
         <span className="text-[hsl(var(--fg))]">.core</span>
       </span>
@@ -67,18 +67,21 @@ function Logo() {
 
 function StepDots({ step, total }) {
   return (
-    <div className="mb-6 flex items-center justify-center gap-2">
+    <div className="mb-5 flex items-center justify-center gap-1.5">
       {Array.from({ length: total }).map((_, i) => (
-        <div
+        <motion.div
           key={i}
+          layout
           className={cn(
-            'h-1.5 rounded-full transition-all duration-300',
+            'h-[3px] rounded-full',
             i === step
-              ? 'w-6 bg-[hsl(var(--brand))]'
+              ? 'bg-[hsl(var(--brand))]'
               : i < step
-                ? 'w-1.5 bg-[hsl(var(--brand)/0.4)]'
-                : 'w-1.5 bg-[hsl(var(--border-h))]'
+                ? 'bg-[hsl(var(--brand)/0.35)]'
+                : 'bg-[hsl(var(--fill-secondary))]'
           )}
+          animate={{ width: i === step ? 24 : 6 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         />
       ))}
     </div>
@@ -90,16 +93,16 @@ function GoalChip({ selected, onClick, emoji, label }) {
     <button
       onClick={onClick}
       className={cn(
-        'flex flex-col items-center gap-2 p-3.5 rounded-xl border transition-all text-center',
+        'flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all text-center min-h-[76px]',
         selected
-          ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.06)]'
-          : 'border-[hsl(var(--border)/0.5)] hover:border-[hsl(var(--border))]'
+          ? 'bg-[hsl(var(--brand)/0.08)] ring-1 ring-[hsl(var(--brand)/0.4)] shadow-[0_0_0_1px_hsl(var(--brand)/0.1)]'
+          : 'bg-[hsl(var(--fill)/0.6)] hover:bg-[hsl(var(--fill))]'
       )}
     >
-      <span className="text-[20px] leading-none">{emoji}</span>
+      <span className="text-[22px] leading-none">{emoji}</span>
       <span className={cn(
-        'text-[12px] font-semibold leading-tight',
-        selected ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-3))]'
+        'text-[11px] font-semibold leading-tight',
+        selected ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-2))]'
       )}>
         {label}
       </span>
@@ -119,36 +122,30 @@ function FieldLabel({ children }) {
 
 function StepWelcome({ t }) {
   return (
-    <div className="text-center space-y-5 py-4">
-      <div>
-        <h2 className="text-[24px] font-bold tracking-tight mb-2">
+    <div className="text-center space-y-6 py-2">
+      <div className="space-y-3">
+        <h2 className="text-[26px] font-bold tracking-[-0.03em]">
           {t('onboarding.page.welcomeTitle')}{' '}
           <span className="text-[hsl(var(--accent-primary))]">atlas</span>
           <span className="text-[hsl(var(--fg))]">.core</span>
         </h2>
-        <p className="text-[15px] text-[hsl(var(--fg-2))] leading-relaxed max-w-[280px] mx-auto">
+        <p className="text-[15px] text-[hsl(var(--fg-2))] leading-relaxed max-w-[300px] mx-auto">
           {t('onboarding.page.welcomeSubtitle')}
         </p>
       </div>
-      <div className="space-y-3 text-left pt-2">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[hsl(var(--brand)/0.08)] flex items-center justify-center shrink-0">
-            <span className="text-[12px] font-bold text-[hsl(var(--brand))]">1</span>
+      <div className="space-y-2 text-left">
+        {[
+          { num: '1', key: 'step01Title' },
+          { num: '2', key: 'step02Title' },
+          { num: '3', key: 'step03Title' },
+        ].map(({ num, key }) => (
+          <div key={num} className="flex items-center gap-3.5 p-3 rounded-xl bg-[hsl(var(--fill)/0.5)]">
+            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--brand)/0.1)] flex items-center justify-center shrink-0">
+              <span className="text-[11px] font-bold text-[hsl(var(--brand))]">{num}</span>
+            </div>
+            <p className="text-[13px] text-[hsl(var(--fg))] font-medium leading-snug">{t(`onboarding.page.${key}`)}</p>
           </div>
-          <p className="text-[14px] text-[hsl(var(--fg))] font-medium">{t('onboarding.page.step01Title')}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[hsl(var(--brand)/0.08)] flex items-center justify-center shrink-0">
-            <span className="text-[12px] font-bold text-[hsl(var(--brand))]">2</span>
-          </div>
-          <p className="text-[14px] text-[hsl(var(--fg))] font-medium">{t('onboarding.page.step02Title')}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[hsl(var(--brand)/0.08)] flex items-center justify-center shrink-0">
-            <span className="text-[12px] font-bold text-[hsl(var(--brand))]">3</span>
-          </div>
-          <p className="text-[14px] text-[hsl(var(--fg))] font-medium">{t('onboarding.page.step03Title')}</p>
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -174,7 +171,7 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
         ))}
       </div>
 
-      <div className="border-t border-[hsl(var(--border-h))] pt-4 space-y-3">
+      <div className="pt-2 space-y-3">
         <p className="atlas-overline">{t('onboarding.page.basicProfile')}</p>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -260,7 +257,7 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
       </div>
 
       {/* ── Remarketing data collection (transcript 2 playbook) ── */}
-      <div className="border-t border-[hsl(var(--border-h))] pt-4 space-y-2.5">
+      <div className="pt-2 space-y-2.5">
         <p className="atlas-overline">
           {t('onboarding.page.hearAboutUs')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal">{t('onboarding.page.optional')}</span>
         </p>
@@ -337,7 +334,7 @@ function StepFirstCheckpoint({ form, set, t }) {
         </div>
       </div>
 
-      <div className="rounded-xl bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.15)] px-4 py-3">
+      <div className="rounded-xl bg-[hsl(var(--brand)/0.04)] px-4 py-3">
         <p className="text-[12px] text-[hsl(var(--fg-2))] leading-5" dangerouslySetInnerHTML={{ __html: t('onboarding.page.checkpointInfo') }} />
       </div>
     </div>
@@ -348,23 +345,28 @@ function PathCard({ selected, onClick, icon: Icon, title, desc, items }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-2xl border-2 transition-all space-y-3
-        ${selected
-          ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.06)]'
-          : 'border-[hsl(var(--border))] hover:border-[hsl(var(--border-h))] hover:bg-[hsl(var(--card-hi))]'
-        }`}
+      className={cn(
+        'w-full text-left p-4 rounded-2xl transition-all space-y-3',
+        selected
+          ? 'bg-[hsl(var(--brand)/0.06)] ring-1 ring-[hsl(var(--brand)/0.3)]'
+          : 'bg-[hsl(var(--fill)/0.5)] hover:bg-[hsl(var(--fill))]'
+      )}
     >
       <div className="flex items-start gap-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0
-          ${selected ? 'bg-[hsl(var(--brand)/0.15)]' : 'bg-[hsl(var(--shell))]'}`}>
-          <Icon className={`w-4 h-4 ${selected ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--fg-2))]'}`} strokeWidth={2} />
+        <div className={cn(
+          'w-9 h-9 rounded-xl flex items-center justify-center shrink-0',
+          selected ? 'bg-[hsl(var(--brand)/0.12)]' : 'bg-[hsl(var(--card))]'
+        )}>
+          <Icon className={cn('w-4 h-4', selected ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--fg-2))]')} strokeWidth={2} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))] leading-snug">{title}</p>
-          <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5 leading-4">{desc}</p>
+          <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5 leading-relaxed">{desc}</p>
         </div>
-        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all
-          ${selected ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand))]' : 'border-[hsl(var(--border))]'}`}>
+        <div className={cn(
+          'w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all',
+          selected ? 'bg-[hsl(var(--brand))]' : 'border border-[hsl(var(--border))]'
+        )}>
           {selected && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
         </div>
       </div>
@@ -465,7 +467,7 @@ function PaywallPrimingScreen({ onContinue, t }) {
       </div>
 
       {/* Annual plan highlight */}
-      <div className="border-t border-[hsl(var(--border-h))] pt-4">
+      <div className="pt-4">
         <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('onboarding.page.paywall.annualTitle')}</p>
         <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{t('onboarding.page.paywall.annualDesc')}</p>
       </div>
@@ -783,22 +785,23 @@ export default function Onboarding() {
             <Logo />
             <StepDots step={step} total={TOTAL_STEPS} />
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={step}
-                initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
-                transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="mb-5"
-              >
-                {stepContent()}
-              </motion.div>
-            </AnimatePresence>
+            <div className="atlas-card rounded-[22px] p-6 mb-5">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  initial={{ x: 16, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -16, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {stepContent()}
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
             <div className="flex gap-2.5">
               {step > 0 && (
                 <button
                   onClick={() => setStep((s) => s - 1)}
-                  className="atlas-button atlas-button-secondary h-11 rounded-[12px] px-4"
+                  className="flex items-center justify-center w-11 h-11 rounded-xl bg-[hsl(var(--fill)/0.8)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))] transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" strokeWidth={2} />
                 </button>
@@ -808,7 +811,7 @@ export default function Onboarding() {
                 <button
                   onClick={() => setStep((s) => s + 1)}
                   disabled={!canContinue()}
-                  className="atlas-button atlas-button-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1"
+                  className="atlas-button atlas-button-primary flex-1 h-11 rounded-xl text-[14px] gap-1"
                 >
                   {t('onboarding.page.continue')} <ChevronRight className="w-4 h-4" strokeWidth={2} />
                 </button>
@@ -816,7 +819,7 @@ export default function Onboarding() {
                 <button
                   onClick={handleFinish}
                   disabled={saving || !canContinue()}
-                  className="atlas-button atlas-button-primary flex-1 h-11 rounded-[12px] text-[14px] gap-1.5"
+                  className="atlas-button atlas-button-primary flex-1 h-11 rounded-xl text-[14px] gap-1.5"
                 >
                   {saving
                     ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -827,7 +830,7 @@ export default function Onboarding() {
             </div>
 
             {step === 0 && (
-              <p className="text-center text-[11px] text-[hsl(var(--fg-2))] mt-4">
+              <p className="text-center text-[11px] text-[hsl(var(--fg-3))] mt-4">
                 {t('onboarding.page.termsNotice')}{' '}
                 <span className="underline cursor-pointer">{t('onboarding.page.termsLink')}</span>.
               </p>
