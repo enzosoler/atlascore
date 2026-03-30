@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { ROUTES } from '@/lib/routes';
+import { useI18n } from '@/lib/i18nContext';
 
 function MacroBar({ label, value, max, color }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
@@ -20,11 +20,13 @@ function MacroBar({ label, value, max, color }) {
 }
 
 export default function TodayNutrition({ meals, profile }) {
-  const t = (meals || []).reduce((a, m) => ({
-    cal: a.cal + (m.total_calories || 0),
-    pro: a.pro + (m.total_protein || 0),
-    carb: a.carb + (m.total_carbs || 0),
-    fat: a.fat + (m.total_fat || 0),
+  const { t } = useI18n();
+
+  const totals = (meals || []).reduce((acc, m) => ({
+    cal: acc.cal + (m.total_calories || 0),
+    pro: acc.pro + (m.total_protein || 0),
+    carb: acc.carb + (m.total_carbs || 0),
+    fat: acc.fat + (m.total_fat || 0),
   }), { cal: 0, pro: 0, carb: 0, fat: 0 });
 
   const targets = {
@@ -34,27 +36,27 @@ export default function TodayNutrition({ meals, profile }) {
     fat: profile?.fat_target || 70,
   };
 
-  const calPct = Math.min((t.cal / targets.cal) * 100, 100);
+  const calPct = Math.min((totals.cal / targets.cal) * 100, 100);
 
   return (
-    <Link to={ROUTES.nutrition} className="block p-5 rounded-2xl bg-card border border-border hover:border-border/80 transition-colors">
+    <Link to={ROUTES.nutrition} className="atlas-card block p-5 hover:border-[hsl(var(--border-strong))] transition-colors">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Nutrition</p>
+        <p className="atlas-overline">{t('today.nutrition.label')}</p>
         <ChevronRight className="w-4 h-4 text-muted-foreground/50" strokeWidth={2} />
       </div>
       <div className="mb-4">
         <div className="flex items-baseline gap-1 mb-1.5">
-          <span className="text-2xl font-bold">{Math.round(t.cal)}</span>
-          <span className="text-[13px] text-muted-foreground">/ {targets.cal} kcal</span>
+          <span className="text-2xl font-bold">{Math.round(totals.cal)}</span>
+          <span className="text-[13px] text-muted-foreground">/ {targets.cal} {t('today.nutrition.calories')}</span>
         </div>
         <div className="h-2 rounded-full bg-secondary overflow-hidden">
           <div className="h-full rounded-full bg-[hsl(var(--primary))] transition-all duration-700" style={{ width: `${calPct}%` }} />
         </div>
       </div>
       <div className="space-y-2">
-        <MacroBar label="Protein" value={t.pro} max={targets.pro} color="#3b82f6" />
-        <MacroBar label="Carbs" value={t.carb} max={targets.carb} color="#a78bfa" />
-        <MacroBar label="Fat" value={t.fat} max={targets.fat} color="#f59e0b" />
+        <MacroBar label={t('today.nutrition.protein')} value={totals.pro} max={targets.pro} color="hsl(var(--accent-primary))" />
+        <MacroBar label={t('today.nutrition.carbs')} value={totals.carb} max={targets.carb} color="hsl(var(--accent-secondary))" />
+        <MacroBar label={t('today.nutrition.fat')} value={totals.fat} max={targets.fat} color="hsl(var(--status-warning))" />
       </div>
     </Link>
   );

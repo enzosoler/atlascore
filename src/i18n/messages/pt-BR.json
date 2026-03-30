@@ -740,6 +740,91 @@
       "weight": "Peso",
       "checkin": "Check-in"
     },
+    "quickActions": {
+      "workoutDone": "Treino concluído",
+      "quickWorkout": "Treino rápido",
+      "logMore": "Registrar mais",
+      "logMeal": "Registrar refeição",
+      "weightLogged": "Peso registrado",
+      "logWeight": "Registrar peso",
+      "checkIn": "Check-in"
+    },
+    "adherenceScore": {
+      "label": "Adesão",
+      "excellent": "Excelente",
+      "good": "Bom",
+      "needsFocus": "Precisa de foco",
+      "keepItUp": "Continue assim.",
+      "roomToImprove": "Há espaço para melhorar.",
+      "focusOnPending": "Foque nos itens pendentes."
+    },
+    "progressSnapshot": {
+      "label": "Progresso",
+      "thisWeek": "Esta semana",
+      "sessions": "sessões",
+      "weight": "Peso",
+      "notLogged": "Não registrado",
+      "noSessions": "Sem sessões",
+      "activeToday": "Ativo hoje",
+      "sinceLastSession": "Desde a última sessão"
+    },
+    "readiness": {
+      "sleep": "Sono",
+      "energy": "Energia",
+      "recovery": "Recuperação",
+      "water": "Água",
+      "setFor": "Defina seu {signal} de hoje",
+      "save": "Salvar"
+    },
+    "weeklySummary": {
+      "label": "Esta semana",
+      "average": "Média",
+      "checkins": "Check-ins",
+      "workouts": "Treinos",
+      "days": {
+        "sun": "Dom",
+        "mon": "Seg",
+        "tue": "Ter",
+        "wed": "Qua",
+        "thu": "Qui",
+        "fri": "Sex",
+        "sat": "Sáb"
+      }
+    },
+    "planSection": {
+      "label": "Plano de hoje",
+      "workoutLabel": "Treino",
+      "nutritionLabel": "Nutrição",
+      "sessionDone": "Sessão concluída",
+      "todaysPlan": "Plano de hoje",
+      "noPlanActive": "Sem plano ativo",
+      "summary": "Resumo",
+      "start": "Iniciar",
+      "generate": "Gerar",
+      "createPlan": "Criar plano",
+      "notLoggedYet": "Não registrado",
+      "remaining": "{n} restante",
+      "goal": "Meta: {n}",
+      "addMeal": "Adicionar refeição",
+      "logFirstMeal": "Registrar primeira refeição",
+      "alertFix": "Corrigir"
+    },
+    "dashboardCards": {
+      "todaysWorkout": "Treino de Hoje",
+      "todaysNutrition": "Nutrição de Hoje",
+      "fromLastSession": "da última sessão",
+      "calories": "Calorias",
+      "target": "Meta: {n}",
+      "percentOfGoal": "{n}% da meta",
+      "over": "(acima)",
+      "sevenDayAverage": "Média de 7 dias",
+      "averageProtein": "Proteína média:",
+      "daysBelowTarget": "{n} dia abaixo da meta",
+      "daysBelowTargetPlural": "{n} dias abaixo da meta",
+      "protein": "Proteína",
+      "carbs": "Carbos",
+      "fat": "Gordura"
+    },
     "plan": {
       "title": "Plano de hoje",
       "workoutComplete": "Treino concluído",
@@ -3178,7 +3263,35 @@
     "toastUpdated": "Plano atualizado",
     "toastSaveFailed": "Falha ao salvar. Tente novamente."
   },
+  "nav": {
+    "today": "Hoje",
+    "train": "Treino",
+    "nutrition": "Nutrição",
+    "progress": "Progresso",
+    "measurements": "Medidas",
+    "protocols": "Protocolos",
+    "labs": "Exames",
+    "more": "Mais",
+    "profile": "Perfil",
+    "dashboard": "Painel",
+    "athletes": "Atletas",
+    "clients": "Clientes",
+    "patients": "Pacientes",
+    "body": "Corpo",
+    "health": "Saúde",
+    "social": "Social",
+    "export": "Exportar",
+    "admin": "Admin",
+    "coach": "Coach",
+    "clinician": "Clínico",
+    "nutritionpro": "Nutrição Pro",
+    "home": "Início",
+    "plans": "Planos",
+    "photos": "Fotos"
+  },
   "layout": {
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
     "collapse": "Recolher",
     "language": {
       "english": "English",

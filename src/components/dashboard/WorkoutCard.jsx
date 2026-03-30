@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Dumbbell, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Dumbbell, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatWeight, formatWeightDiff, isImperial } from '@/lib/units';
+import { formatWeightDiff } from '@/lib/units';
+import { useI18n } from '@/lib/i18nContext';
 
 /**
  * Today's Workout Card
@@ -21,6 +22,8 @@ export function TodayWorkoutCard({
   tone = 'teal',
   loading = false,
 }) {
+  const { t } = useI18n();
+
   const toneStyles = {
     teal: {
       border: 'border-[hsl(var(--accent-secondary)/0.3)]',
@@ -72,7 +75,7 @@ export function TodayWorkoutCard({
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <p className="atlas-overline">TODAY&apos;S WORKOUT</p>
+          <p className="atlas-overline">{t('today.dashboardCards.todaysWorkout')}</p>
         </div>
         <div
           className={cn(
@@ -108,7 +111,7 @@ export function TodayWorkoutCard({
               <span className={cn('font-medium', weightDiff > 0 ? 'text-[hsl(var(--ok))]' : '')}>
                 {weightDiff > 0 ? '↑' : '↓'} {formatWeightDiff(Math.abs(weightDiff), { unit_system: 'metric' })}
               </span>
-              <span className="text-[hsl(var(--fg-3))]"> from last session</span>
+              <span className="text-[hsl(var(--fg-3))]"> {t('today.dashboardCards.fromLastSession')}</span>
             </p>
           )}
         </div>

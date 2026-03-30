@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { UtensilsCrossed, TrendingDown } from 'lucide-react';
+import { UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18nContext';
 
 /**
  * Today's Nutrition Card
@@ -13,10 +14,12 @@ export function TodayNutritionCard({
   calorieTarget,
   macros = { protein: 0, carbs: 0, fat: 0 },
   macroTargets = { protein: 0, carbs: 0, fat: 0 },
-  averageStats = null, // { protein: 168, daysBelowTarget: 3, daysTracked: 7 }
+  averageStats = null,
   tone = 'teal',
   loading = false,
 }) {
+  const { t } = useI18n();
+
   const toneStyles = {
     teal: {
       border: 'border-[hsl(var(--accent-secondary)/0.3)]',
@@ -47,19 +50,19 @@ export function TodayNutritionCard({
 
   const macroData = [
     {
-      label: 'Protein',
+      label: t('today.dashboardCards.protein'),
       value: macros.protein || 0,
       target: macroTargets.protein || 0,
       percentage: macroTargets.protein > 0 ? Math.min(100, Math.round((macros.protein / macroTargets.protein) * 100)) : 0,
     },
     {
-      label: 'Carbs',
+      label: t('today.dashboardCards.carbs'),
       value: macros.carbs || 0,
       target: macroTargets.carbs || 0,
       percentage: macroTargets.carbs > 0 ? Math.min(100, Math.round((macros.carbs / macroTargets.carbs) * 100)) : 0,
     },
     {
-      label: 'Fat',
+      label: t('today.dashboardCards.fat'),
       value: macros.fat || 0,
       target: macroTargets.fat || 0,
       percentage: macroTargets.fat > 0 ? Math.min(100, Math.round((macros.fat / macroTargets.fat) * 100)) : 0,
@@ -88,7 +91,7 @@ export function TodayNutritionCard({
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <p className="atlas-overline">TODAY&apos;S NUTRITION</p>
+          <p className="atlas-overline">{t('today.dashboardCards.todaysNutrition')}</p>
         </div>
         <div
           className={cn(
@@ -103,7 +106,7 @@ export function TodayNutritionCard({
       {/* Calories */}
       <div className="mb-5">
         <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))] mb-1">
-          CALORIES
+          {t('today.dashboardCards.calories')}
         </p>
         <div className="flex items-baseline gap-2">
           <span className="text-[42px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
@@ -112,9 +115,9 @@ export function TodayNutritionCard({
         </div>
         {calorieTarget > 0 && (
           <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1">
-            Target: {calorieTarget.toLocaleString()} · {caloriePercentage}% of goal
+            {t('today.dashboardCards.target', { n: calorieTarget.toLocaleString() })} · {t('today.dashboardCards.percentOfGoal', { n: caloriePercentage })}
             {caloriePercentage > 100 && (
-              <span className="ml-1 text-[hsl(var(--warn))]">(over)</span>
+              <span className="ml-1 text-[hsl(var(--warn))]">{t('today.dashboardCards.over')}</span>
             )}
           </p>
         )}
@@ -144,13 +147,15 @@ export function TodayNutritionCard({
       {averageStats && (
         <div className="rounded-[16px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.4)] px-4 py-3">
           <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] mb-1">
-            7-day average
+            {t('today.dashboardCards.sevenDayAverage')}
           </p>
           <p className="text-[13px] font-medium text-[hsl(var(--fg))]">
-            Average protein: <span className="font-semibold">{averageStats.protein}g</span>
+            {t('today.dashboardCards.averageProtein')} <span className="font-semibold">{averageStats.protein}g</span>
             {averageStats.daysBelowTarget > 0 && (
               <span className="text-[hsl(var(--fg-2))]">
-                {' '}· {averageStats.daysBelowTarget} day{averageStats.daysBelowTarget !== 1 ? 's' : ''} below target
+                {' '}· {averageStats.daysBelowTarget === 1
+                  ? t('today.dashboardCards.daysBelowTarget', { n: averageStats.daysBelowTarget })
+                  : t('today.dashboardCards.daysBelowTargetPlural', { n: averageStats.daysBelowTarget })}
               </span>
             )}
           </p>

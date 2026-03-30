@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { Moon, Zap, TrendingUp, Droplets } from 'lucide-react';
 import MobileSheet from '@/components/shared/MobileSheet';
-
-const SIGNALS = [
-  { key: 'sleep',    icon: Moon,       label: 'Sleep',    unit: 'hrs',  min: 0, max: 14, step: 0.5, defaultVal: 7 },
-  { key: 'energy',   icon: Zap,        label: 'Energy',   unit: '/10',  min: 1, max: 10, step: 1,   defaultVal: 5 },
-  { key: 'recovery', icon: TrendingUp, label: 'Recovery', unit: '/10',  min: 1, max: 10, step: 1,   defaultVal: 5 },
-  { key: 'water',    icon: Droplets,   label: 'Water',    unit: 'L',    min: 0, max: 6,  step: 0.25, defaultVal: 2 },
-];
+import { useI18n } from '@/lib/i18nContext';
+import { cn } from '@/lib/utils';
 
 const STATUS_STYLES = {
   good:    'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--ok)/0.07)] text-[hsl(var(--ok))]',
@@ -24,8 +19,16 @@ const ICON_STATUS = {
 };
 
 export function ReadinessRow({ signals = {}, onSignalSave }) {
+  const { t } = useI18n();
   const [activeKey, setActiveKey] = useState(null);
   const [inputValue, setInputValue] = useState(0);
+
+  const SIGNALS = [
+    { key: 'sleep',    icon: Moon,       label: t('today.readiness.sleep'),    unit: 'hrs',  min: 0, max: 14, step: 0.5,  defaultVal: 7 },
+    { key: 'energy',   icon: Zap,        label: t('today.readiness.energy'),   unit: '/10',  min: 1, max: 10, step: 1,    defaultVal: 5 },
+    { key: 'recovery', icon: TrendingUp, label: t('today.readiness.recovery'), unit: '/10',  min: 1, max: 10, step: 1,    defaultVal: 5 },
+    { key: 'water',    icon: Droplets,   label: t('today.readiness.water'),    unit: 'L',    min: 0, max: 6,  step: 0.25, defaultVal: 2 },
+  ];
 
   const activeSignal = SIGNALS.find((s) => s.key === activeKey);
 
@@ -55,14 +58,17 @@ export function ReadinessRow({ signals = {}, onSignalSave }) {
             <button
               key={key}
               onClick={() => openSheet(key)}
-              className={`flex-1 min-w-[70px] flex flex-col items-center gap-1.5 py-3 px-2 rounded-[15px] border transition-all active:scale-95 ${STATUS_STYLES[status]}`}
+              className={cn(
+                'flex-1 min-w-[70px] flex flex-col items-center gap-1.5 py-3 px-2 rounded-[15px] border transition-all active:scale-95',
+                STATUS_STYLES[status]
+              )}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${ICON_STATUS[status]}`} strokeWidth={2} />
+              <Icon className={cn('w-4 h-4 shrink-0', ICON_STATUS[status])} strokeWidth={2} />
               <span className="text-[11px] font-semibold leading-none text-[hsl(var(--fg-2))]">
                 {label}
               </span>
               {value ? (
-                <span className={`text-[10px] font-bold leading-none ${ICON_STATUS[status]}`}>
+                <span className={cn('text-[10px] font-bold leading-none', ICON_STATUS[status])}>
                   {value}
                 </span>
               ) : (
@@ -75,12 +81,11 @@ export function ReadinessRow({ signals = {}, onSignalSave }) {
         })}
       </div>
 
-      {/* Per-signal input sheet */}
       <MobileSheet
         open={!!activeKey}
         onOpenChange={(o) => { if (!o) setActiveKey(null); }}
         title={activeSignal?.label}
-        description={`Set your ${activeSignal?.label?.toLowerCase()} for today`}
+        description={activeSignal ? t('today.readiness.setFor', { signal: activeSignal.label.toLowerCase() }) : undefined}
       >
         <MobileSheet.Body className="flex flex-col items-center gap-6 py-6">
           {activeSignal && (
@@ -112,7 +117,7 @@ export function ReadinessRow({ signals = {}, onSignalSave }) {
             onClick={handleSave}
             className="atlas-button atlas-button-primary w-full"
           >
-            Save
+            {t('today.readiness.save')}
           </button>
         </MobileSheet.Footer>
       </MobileSheet>

@@ -1,6 +1,9 @@
 import React from 'react';
+import { useI18n } from '@/lib/i18nContext';
 
 export default function AdherenceScore({ meals, workouts, checkin }) {
+  const { t } = useI18n();
+
   let points = 0, max = 0;
 
   const mealCount = (meals || []).length;
@@ -14,16 +17,27 @@ export default function AdherenceScore({ meals, workouts, checkin }) {
   const circumference = 2 * Math.PI * 34;
   const offset = circumference - (score / 100) * circumference;
 
-  const label = score >= 80 ? 'Excellent' : score >= 50 ? 'Good' : 'Needs focus';
+  const label = score >= 80
+    ? t('today.adherenceScore.excellent')
+    : score >= 50
+      ? t('today.adherenceScore.good')
+      : t('today.adherenceScore.needsFocus');
+
+  const description = score >= 80
+    ? t('today.adherenceScore.keepItUp')
+    : score >= 50
+      ? t('today.adherenceScore.roomToImprove')
+      : t('today.adherenceScore.focusOnPending');
 
   return (
-    <div className="p-5 rounded-2xl bg-card border border-border">
-      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">Adherence</p>
+    <div className="atlas-card p-5">
+      <p className="atlas-overline mb-4">{t('today.adherenceScore.label')}</p>
       <div className="flex items-center gap-4">
         <div className="relative w-[84px] h-[84px] shrink-0">
           <svg width="84" height="84" className="-rotate-90">
             <circle cx="42" cy="42" r="34" fill="none" stroke="hsl(var(--secondary))" strokeWidth="5" />
-            <circle cx="42" cy="42" r="34" fill="none"
+            <circle
+              cx="42" cy="42" r="34" fill="none"
               stroke="hsl(var(--primary))" strokeWidth="5"
               strokeLinecap="round"
               strokeDasharray={circumference}
@@ -38,9 +52,7 @@ export default function AdherenceScore({ meals, workouts, checkin }) {
         </div>
         <div>
           <p className="text-base font-semibold">{label}</p>
-          <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">
-            {score >= 80 ? 'Keep it up.' : score >= 50 ? 'Room to improve.' : 'Focus on pending items.'}
-          </p>
+          <p className="text-[12px] text-muted-foreground mt-1 leading-relaxed">{description}</p>
         </div>
       </div>
     </div>

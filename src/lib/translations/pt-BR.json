@@ -613,7 +613,19 @@
     "focus": "Foco",
     "continue": "Continue assim.",
     "completePending": "Complete as tarefas pendentes.",
-    "professionals": "Profissionais vinculados"
+    "professionals": "Profissionais vinculados",
+    "aiCoach": {
+      "label": "Atlas Coach"
+    },
+    "quickActions": {
+      "workoutDone": "Treino concluído",
+      "quickWorkout": "Treino rápido",
+      "logMore": "Registrar mais",
+      "logMeal": "Registrar refeição",
+      "weightLogged": "Peso registrado",
+      "logWeight": "Registrar peso",
+      "checkIn": "Check-in"
+    }
   },
   "settings": {
     "title": "Configurações",
@@ -1114,5 +1126,58 @@
       "loading": "Aguarde enquanto seus protocolos são carregados.",
       "loading_partial": "Dados não carregaram completamente, mas você ainda pode adicionar novos itens."
     }
+  },
+  "nav": {
+    "today": "Hoje",
+    "train": "Treino",
+    "nutrition": "Nutrição",
+    "progress": "Progresso",
+    "measurements": "Medidas",
+    "protocols": "Protocolos",
+    "labs": "Exames",
+    "more": "Mais",
+    "profile": "Perfil",
+    "dashboard": "Painel",
+    "athletes": "Atletas",
+    "clients": "Clientes",
+    "patients": "Pacientes",
+    "body": "Corpo",
+    "health": "Saúde",
+    "social": "Social",
+    "export": "Exportar",
+    "admin": "Admin",
+    "coach": "Coach",
+    "clinician": "Clínico",
+    "nutritionpro": "Nutrição Pro",
+    "home": "Início",
+    "plans": "Planos",
+    "photos": "Fotos"
+  },
+  "layout": {
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "collapse": "Recolher",
+    "language": {
+      "switchToEn": "Mudar para inglês",
+      "switchToPt": "Mudar para português",
+      "english": "Inglês",
+      "portuguese": "Português"
+    },
+    "refresh": {
+      "refreshing": "Atualizando…",
+      "releaseToRefresh": "Solte para atualizar",
+      "pullToRefresh": "Puxe para atualizar"
+    },
+    "mobileTab": {
+      "train": "Treino",
+      "more": "Mais"
+    }
+  },
+  "account": {
+    "roleAthlete": "Atleta",
+    "roleCoach": "Coach",
+    "roleNutritionist": "Nutricionista",
+    "roleClinician": "Clínico",
+    "roleAdmin": "Admin"
   }
 }

@@ -748,6 +748,91 @@
       "weight": "Weight",
       "checkin": "Check in"
     },
+    "quickActions": {
+      "workoutDone": "Workout done",
+      "quickWorkout": "Quick workout",
+      "logMore": "Log more",
+      "logMeal": "Log meal",
+      "weightLogged": "Weight logged",
+      "logWeight": "Log weight",
+      "checkIn": "Check in"
+    },
+    "adherenceScore": {
+      "label": "Adherence",
+      "excellent": "Excellent",
+      "good": "Good",
+      "needsFocus": "Needs focus",
+      "keepItUp": "Keep it up.",
+      "roomToImprove": "Room to improve.",
+      "focusOnPending": "Focus on pending items."
+    },
+    "progressSnapshot": {
+      "label": "Progress",
+      "thisWeek": "This week",
+      "sessions": "sessions",
+      "weight": "Weight",
+      "notLogged": "Not logged",
+      "noSessions": "No sessions",
+      "activeToday": "Active today",
+      "sinceLastSession": "Since last session"
+    },
+    "readiness": {
+      "sleep": "Sleep",
+      "energy": "Energy",
+      "recovery": "Recovery",
+      "water": "Water",
+      "setFor": "Set your {signal} for today",
+      "save": "Save"
+    },
+    "weeklySummary": {
+      "label": "This week",
+      "average": "Average",
+      "checkins": "Check-ins",
+      "workouts": "Workouts",
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    },
+    "planSection": {
+      "label": "Today's plan",
+      "workoutLabel": "Workout",
+      "nutritionLabel": "Nutrition",
+      "sessionDone": "Session done",
+      "todaysPlan": "Today's plan",
+      "noPlanActive": "No plan active",
+      "summary": "Summary",
+      "start": "Start",
+      "generate": "Generate",
+      "createPlan": "Create plan",
+      "notLoggedYet": "Not logged yet",
+      "remaining": "{n} remaining",
+      "goal": "Goal: {n}",
+      "addMeal": "Add meal",
+      "logFirstMeal": "Log first meal",
+      "alertFix": "Fix"
+    },
+    "dashboardCards": {
+      "todaysWorkout": "Today's Workout",
+      "todaysNutrition": "Today's Nutrition",
+      "fromLastSession": "from last session",
+      "calories": "Calories",
+      "target": "Target: {n}",
+      "percentOfGoal": "{n}% of goal",
+      "over": "(over)",
+      "sevenDayAverage": "7-day average",
+      "averageProtein": "Average protein:",
+      "daysBelowTarget": "{n} day below target",
+      "daysBelowTargetPlural": "{n} days below target",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat"
+    },
     "plan": {
       "title": "Today's plan",
       "workoutComplete": "Workout complete",
@@ -3180,7 +3265,35 @@
     "toastUpdated": "Plan updated",
     "toastSaveFailed": "Failed to save. Try again."
   },
+  "nav": {
+    "today": "Today",
+    "train": "Train",
+    "nutrition": "Nutrition",
+    "progress": "Progress",
+    "measurements": "Measurements",
+    "protocols": "Protocols",
+    "labs": "Labs",
+    "more": "More",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "athletes": "Athletes",
+    "clients": "Clients",
+    "patients": "Patients",
+    "body": "Body",
+    "health": "Health",
+    "social": "Social",
+    "export": "Export",
+    "admin": "Admin",
+    "coach": "Coach",
+    "clinician": "Clinician",
+    "nutritionpro": "Nutrition Pro",
+    "home": "Home",
+    "plans": "Plans",
+    "photos": "Photos"
+  },
   "layout": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "collapse": "Collapse",
     "language": {
       "english": "English",

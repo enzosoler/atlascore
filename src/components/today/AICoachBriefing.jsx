@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, ArrowRight, RefreshCw } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
+import { useI18n } from '@/lib/i18nContext';
 
 /**
  * AICoachBriefing — the dominant above-the-fold card.
@@ -14,6 +15,8 @@ export function AICoachBriefing({
   secondaryAction, // { label, path } | null
   loading,
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="rounded-[22px] overflow-hidden border border-[hsl(var(--brand)/0.24)] bg-[radial-gradient(ellipse_at_top_left,hsl(var(--brand)/0.13),transparent_52%),linear-gradient(160deg,hsl(217_100%_12%/0.0)_0%,hsl(var(--card))_100%)] shadow-[0_2px_24px_hsl(var(--brand)/0.08)]">
       {/* Top stripe — accent line */}
@@ -27,7 +30,7 @@ export function AICoachBriefing({
               <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand))]" strokeWidth={2} />
             </div>
             <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--brand))]">
-              Atlas Coach
+              {t('today.aiCoach')}
             </span>
           </div>
           {focus && (

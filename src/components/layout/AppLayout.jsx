@@ -76,11 +76,6 @@ const BOTTOM_PATHS_BY_ROLE = {
   admin: [ROUTES.today, ROUTES.admin, ROUTES.social, ROUTES.profile],
 };
 
-const MOBILE_TAB_LABEL_OVERRIDES = {
-  [ROUTES.workouts]: 'Train',
-  [ROUTES.profile]: 'More',
-};
-
 const MOBILE_TAB_HISTORY_KEY = 'atlas_mobile_tab_history_v1';
 const PULL_MAX_DISTANCE = 104;
 const PULL_REFRESH_THRESHOLD = 72;
@@ -233,35 +228,11 @@ export default function AppLayout() {
   const { role, nav: rawNav } = useRBAC(user);
 
   // ── Translate nav labels ────────────────────────────────────────
-  const { locale: rawLocale, t } = useI18n();
-  const locale = rawLocale || 'en';
-  const isPt = locale === 'pt-BR';
-
-  const NAV_LABELS_PT = {
-    Today: 'Hoje',
-    Nutrition: 'Nutrição',
-    Train: 'Treino',
-    Body: 'Corpo',
-    Measurements: 'Medidas',
-    Plans: 'Planos',
-    Progress: 'Progresso',
-    Photos: 'Fotos',
-    Health: 'Saúde',
-    More: 'Mais',
-    Profile: 'Perfil',
-    Home: 'Início',
-    Dashboard: 'Painel',
-    Athletes: 'Atletas',
-    Clients: 'Clientes',
-    Patients: 'Pacientes',
-    Social: 'Social',
-    Export: 'Exportar',
-    Admin: 'Admin',
-  };
+  const { t } = useI18n();
 
   const nav = rawNav.map((item) => ({
     ...item,
-    label: isPt ? (NAV_LABELS_PT[item.label] || item.label) : item.label,
+    label: t(`nav.${item.label.toLowerCase().replace(/\s+/g, '')}`) || item.label,
   }));
 
   const bottomPaths = BOTTOM_PATHS_BY_ROLE[role] || BOTTOM_PATHS_BY_ROLE.athlete;
@@ -525,7 +496,7 @@ export default function AppLayout() {
           <button
             onClick={() => setMobileOpen((value) => !value)}
             className="flex h-10 w-10 items-center justify-center rounded-[18px] text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill))]"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? t('layout.closeMenu') : t('layout.openMenu')}
           >
             <AnimatePresence mode="sync" initial={false}>
               <motion.div
@@ -645,9 +616,7 @@ export default function AppLayout() {
             key: path,
             to: getBottomTabTarget(path),
             onClick: (event) => handleBottomTabPress(event, path),
-            label: MOBILE_TAB_LABEL_OVERRIDES[path]
-              ? t(`layout.mobileTab.${MOBILE_TAB_LABEL_OVERRIDES[path].toLowerCase()}`)
-              : label,
+            label,
             icon: ICON_MAP[icon] || Home,
             active: currentTabRoot === path,
           })),

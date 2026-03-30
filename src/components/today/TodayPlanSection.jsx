@@ -2,8 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Dumbbell, UtensilsCrossed, ArrowRight, CheckCircle2, Sparkles, Zap } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
+import { useI18n } from '@/lib/i18nContext';
 
 function WorkoutPlanCard({ activeWorkoutPlan, todaySession, hasAIAccess, onGenerateWorkout }) {
+  const { t } = useI18n();
   const done = todaySession?.status === 'completed';
 
   return (
@@ -14,7 +16,6 @@ function WorkoutPlanCard({ activeWorkoutPlan, todaySession, hasAIAccess, onGener
           ? 'border-[hsl(var(--brand)/0.22)] bg-[hsl(var(--brand)/0.04)]'
           : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.35)]'
     }`}>
-      {/* Icon + label */}
       <div className="flex items-center justify-between">
         <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center ${
           done
@@ -28,19 +29,16 @@ function WorkoutPlanCard({ activeWorkoutPlan, todaySession, hasAIAccess, onGener
             : <Dumbbell className="w-4 h-4" strokeWidth={2} />
           }
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
-          Workout
-        </span>
+        <span className="atlas-overline">{t('today.planSection.workoutLabel')}</span>
       </div>
 
-      {/* Content */}
       <div className="flex-1">
         <p className="text-[13px] font-semibold text-[hsl(var(--fg))] leading-tight">
           {done
-            ? todaySession.name || 'Session done'
+            ? todaySession.name || t('today.planSection.sessionDone')
             : activeWorkoutPlan
-              ? activeWorkoutPlan.name || 'Today\'s plan'
-              : 'No plan active'}
+              ? activeWorkoutPlan.name || t('today.planSection.todaysPlan')
+              : t('today.planSection.noPlanActive')}
         </p>
         {done && (
           <p className="text-[11px] text-[hsl(var(--ok))] font-medium mt-0.5">
@@ -49,35 +47,34 @@ function WorkoutPlanCard({ activeWorkoutPlan, todaySession, hasAIAccess, onGener
         )}
       </div>
 
-      {/* Action */}
       <div>
         {done ? (
           <Link
             to={ROUTES.workouts}
             className="text-[12px] font-semibold text-[hsl(var(--fg-2))] flex items-center gap-1 hover:text-[hsl(var(--fg))] transition-colors"
           >
-            Summary <ArrowRight className="w-3 h-3" />
+            {t('today.planSection.summary')} <ArrowRight className="w-3 h-3" />
           </Link>
         ) : activeWorkoutPlan ? (
           <Link
             to={ROUTES.workouts}
             className="flex items-center justify-center gap-1.5 w-full h-8 rounded-[10px] bg-[hsl(var(--brand))] text-white text-[12px] font-semibold"
           >
-            <Zap className="w-3 h-3" strokeWidth={2.5} /> Start
+            <Zap className="w-3 h-3" strokeWidth={2.5} /> {t('today.planSection.start')}
           </Link>
         ) : hasAIAccess ? (
           <button
             onClick={onGenerateWorkout}
             className="flex items-center gap-1.5 text-[12px] font-semibold text-[hsl(var(--brand))] hover:opacity-70 transition-opacity"
           >
-            <Sparkles className="w-3 h-3" /> Generate
+            <Sparkles className="w-3 h-3" /> {t('today.planSection.generate')}
           </button>
         ) : (
           <Link
             to={ROUTES.workouts}
             className="text-[12px] font-semibold text-[hsl(var(--brand))] hover:opacity-70 transition-opacity"
           >
-            Create plan
+            {t('today.planSection.createPlan')}
           </Link>
         )}
       </div>
@@ -86,6 +83,7 @@ function WorkoutPlanCard({ activeWorkoutPlan, todaySession, hasAIAccess, onGener
 }
 
 function NutritionCard({ todayMeals, kcalTarget = 2000, macros }) {
+  const { t } = useI18n();
   const meals = Array.isArray(todayMeals) ? todayMeals : [];
   const totalKcal = meals.reduce((s, m) => s + (m.calories || m.total_calories || 0), 0);
   const totalProtein = meals.reduce((s, m) => s + (m.protein_g || m.total_protein || 0), 0);
@@ -97,31 +95,30 @@ function NutritionCard({ todayMeals, kcalTarget = 2000, macros }) {
 
   return (
     <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.35)] p-4 flex flex-col gap-3">
-      {/* Icon + label */}
       <div className="flex items-center justify-between">
         <div className="w-8 h-8 rounded-[10px] bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))] flex items-center justify-center">
           <UtensilsCrossed className="w-4 h-4" strokeWidth={2} />
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
-          Nutrition
-        </span>
+        <span className="atlas-overline">{t('today.planSection.nutritionLabel')}</span>
       </div>
 
-      {/* Content */}
       <div className="flex-1">
         <p className="text-[13px] font-semibold text-[hsl(var(--fg))] leading-tight">
-          {logged ? `${Math.round(totalKcal)} kcal` : 'Not logged yet'}
+          {logged ? `${Math.round(totalKcal)} kcal` : t('today.planSection.notLoggedYet')}
         </p>
         <p className="text-[11px] text-[hsl(var(--fg-3))] mt-0.5">
-          {logged ? `${Math.round(kcalRemaining)} remaining` : `Goal: ${kcalTarget}`}
+          {logged
+            ? t('today.planSection.remaining', { n: Math.round(kcalRemaining) })
+            : t('today.planSection.goal', { n: kcalTarget })}
         </p>
       </div>
 
-      {/* Mini progress bars */}
       {logged && (
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-[hsl(var(--fg-3))] w-8 shrink-0">kcal</span>
+            <span className="text-[10px] text-[hsl(var(--fg-3))] w-8 shrink-0">
+              {t('today.nutrition.calories')}
+            </span>
             <div className="flex-1 h-1.5 rounded-full bg-[hsl(var(--fill))] overflow-hidden">
               <div
                 className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-500"
@@ -130,10 +127,12 @@ function NutritionCard({ todayMeals, kcalTarget = 2000, macros }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-[hsl(var(--fg-3))] w-8 shrink-0">prot</span>
+            <span className="text-[10px] text-[hsl(var(--fg-3))] w-8 shrink-0">
+              {t('today.nutrition.protein')}
+            </span>
             <div className="flex-1 h-1.5 rounded-full bg-[hsl(var(--fill))] overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#4F8CFF] transition-all duration-500"
+                className="h-full rounded-full bg-[hsl(var(--accent-primary))] transition-all duration-500"
                 style={{ width: `${proteinPct}%` }}
               />
             </div>
@@ -141,13 +140,13 @@ function NutritionCard({ todayMeals, kcalTarget = 2000, macros }) {
         </div>
       )}
 
-      {/* Action */}
       <div>
         <Link
           to={ROUTES.nutrition}
           className="text-[12px] font-semibold text-[hsl(var(--brand))] flex items-center gap-1 hover:opacity-70 transition-opacity"
         >
-          {logged ? 'Add meal' : 'Log first meal'} <ArrowRight className="w-3 h-3" />
+          {logged ? t('today.planSection.addMeal') : t('today.planSection.logFirstMeal')}
+          <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
     </div>
@@ -163,11 +162,11 @@ export function TodayPlanSection({
   hasAIAccess,
   onGenerateWorkout,
 }) {
+  const { t } = useI18n();
+
   return (
     <section className="space-y-2.5">
-      <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] px-0.5">
-        Today's plan
-      </p>
+      <p className="atlas-overline px-0.5">{t('today.planSection.label')}</p>
       <div className="grid grid-cols-2 gap-2.5">
         <WorkoutPlanCard
           activeWorkoutPlan={activeWorkoutPlan}

@@ -676,7 +676,19 @@
     "focus": "Focus",
     "continue": "Keep it up.",
     "completePending": "Complete pending tasks.",
-    "professionals": "Linked professionals"
+    "professionals": "Linked professionals",
+    "aiCoach": {
+      "label": "Atlas Coach"
+    },
+    "quickActions": {
+      "workoutDone": "Workout done",
+      "quickWorkout": "Quick workout",
+      "logMore": "Log more",
+      "logMeal": "Log meal",
+      "weightLogged": "Weight logged",
+      "logWeight": "Log weight",
+      "checkIn": "Check in"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -1179,5 +1191,58 @@
       "loading": "Wait while your protocols are loaded.",
       "loading_partial": "Data didn't load completely, but you can still add new items."
     }
+  },
+  "nav": {
+    "today": "Today",
+    "train": "Train",
+    "nutrition": "Nutrition",
+    "progress": "Progress",
+    "measurements": "Measurements",
+    "protocols": "Protocols",
+    "labs": "Labs",
+    "more": "More",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "athletes": "Athletes",
+    "clients": "Clients",
+    "patients": "Patients",
+    "body": "Body",
+    "health": "Health",
+    "social": "Social",
+    "export": "Export",
+    "admin": "Admin",
+    "coach": "Coach",
+    "clinician": "Clinician",
+    "nutritionpro": "Nutrition Pro",
+    "home": "Home",
+    "plans": "Plans",
+    "photos": "Photos"
+  },
+  "layout": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "collapse": "Collapse",
+    "language": {
+      "switchToEn": "Switch to English",
+      "switchToPt": "Switch to Portuguese",
+      "english": "English",
+      "portuguese": "Portuguese"
+    },
+    "refresh": {
+      "refreshing": "Refreshing…",
+      "releaseToRefresh": "Release to refresh",
+      "pullToRefresh": "Pull to refresh"
+    },
+    "mobileTab": {
+      "train": "Train",
+      "more": "More"
+    }
+  },
+  "account": {
+    "roleAthlete": "Athlete",
+    "roleCoach": "Coach",
+    "roleNutritionist": "Nutritionist",
+    "roleClinician": "Clinician",
+    "roleAdmin": "Admin"
   }
 }

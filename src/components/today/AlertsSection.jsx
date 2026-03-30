@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { AlertCircle, ArrowRight } from 'lucide-react';
+import { useI18n } from '@/lib/i18nContext';
 
 /**
  * AlertsSection — only renders when there is actionable friction.
@@ -8,6 +9,8 @@ import { AlertCircle, ArrowRight } from 'lucide-react';
  * Section is hidden entirely when alerts array is empty.
  */
 export function AlertsSection({ alerts }) {
+  const { t } = useI18n();
+
   if (!alerts?.length) return null;
 
   return (
@@ -38,7 +41,7 @@ export function AlertsSection({ alerts }) {
                 to={alert.path}
                 className="shrink-0 flex items-center gap-1 text-[12px] font-semibold text-[hsl(var(--warn))] hover:opacity-70 transition-opacity"
               >
-                {alert.cta || 'Fix'} <ArrowRight className="w-3 h-3" />
+                {alert.cta || t('today.planSection.alertFix')} <ArrowRight className="w-3 h-3" />
               </Link>
             )}
           </div>
