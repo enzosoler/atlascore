@@ -72,27 +72,28 @@ export class SafePageBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error(`[SafePageBoundary:${this.props.title || 'Page'}]`, error, errorInfo);
-    // Log para debug - mostra no console do navegador
     window.__lastPageError = { error: error?.toString?.(), stack: error?.stack, componentStack: errorInfo?.componentStack };
   }
 
   render() {
     if (this.state.hasError) {
       const title = this.props.title || 'Page';
+      // Use static context for i18n in class component
+      const t = window.__i18n?.t || ((k, fallback) => fallback || k);
 
       return (
-        <PageShell title={title} subtitle="We couldn't load this section." maxWidth={this.props.maxWidth || 'max-w-5xl'}>
-          <SectionCard title="Try again">
+        <PageShell title={title} subtitle={t('shared.stablePage.errorSectionSubtitle', "We couldn't load this section.")} maxWidth={this.props.maxWidth || 'max-w-5xl'}>
+          <SectionCard title={t('shared.stablePage.tryAgain', 'Try again')}>
             <EmptyState
-              title="We couldn't load this section"
-              description="Please try again. If the problem continues, go back and try a different route."
+              title={t('shared.stablePage.errorSectionTitle', "We couldn't load this section")}
+              description={t('shared.stablePage.errorSectionDesc', 'Please try again. If the problem continues, go back and try a different route.')}
               action={
                 <div className="flex flex-wrap justify-center gap-3">
                   <button type="button" onClick={() => window.location.reload()} className="atlas-button atlas-button-primary gap-2">
-                    Try again
+                    {t('shared.stablePage.tryAgainButton', 'Try again')}
                   </button>
                   <button type="button" onClick={() => window.history.back()} className="atlas-button atlas-button-secondary gap-2">
-                    Go back
+                    {t('shared.stablePage.goBackButton', 'Go back')}
                   </button>
                 </div>
               }
