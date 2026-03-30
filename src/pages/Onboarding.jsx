@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/lib/supabaseClient';
+import { saveLocalProfile } from '@/lib/profileUtils';
+import { getTodayKey } from '@/lib/dateUtils';
 import { useNavigate } from 'react-router-dom';
 import { ROLE_HOME, ROUTES } from '@/lib/routes';
 import { Input } from '@/components/ui/input';
@@ -785,40 +787,41 @@ export default function Onboarding() {
   const isLastStep = step === TOTAL_STEPS - 1;
 
   const saveAndFinish = async () => {
-    if (!isAuthenticated || !user) { navigate(ROUTES.home, { replace: true }); return; }
+    if (!isAuthenticated || !user) { navigate(ROUTES.home, { replace: true }); return false; }
     setSaving(true);
     try {
-      const payload = { onboarding_completed: true };
+      // CRITICAL: write onboarding_completed as a direct column.
+      // Do NOT include profile fields (calories_target, etc.) here — they live in
+      // profile_data JSONB and would cause the entire upsert to fail silently.
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, onboarding_completed: true, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+      if (profileError) throw profileError;
 
-      // Numeric fields — note: form uses 'height' but DB column is 'height_cm'
-      if (form.age !== '') payload.age = Number(form.age);
-      if (form.height !== '') payload.height_cm = Number(form.height);
-      if (form.current_weight !== '') payload.current_weight = Number(form.current_weight);
-      if (form.target_weight !== '') payload.target_weight = Number(form.target_weight);
-
-      if (form.sex) payload.sex = form.sex;
-      if (form.activity_level) payload.activity_level = form.activity_level;
-      if (form.health_goals.length) payload.health_goals = form.health_goals;
-
-      // Auto-calculate macro targets based on weight + goals
+      // Write form data into profile_data via the canonical profileUtils pattern.
       const w = Number(form.current_weight) || 80;
       const isDeficit = form.health_goals.includes('fat_loss');
       const multiplier = isDeficit ? 28 : form.health_goals.includes('muscle_gain') ? 35 : 30;
-      payload.calories_target = Math.round(w * multiplier);
-      payload.protein_target = Math.round(w * 2.2);
-      payload.carbs_target = Math.round((payload.calories_target * 0.4) / 4);
-      payload.fat_target = Math.round((payload.calories_target * 0.25) / 9);
-      payload.water_target = parseFloat((w * 0.035).toFixed(1));
-
-      await supabase
-        .from('profiles')
-        .upsert({ ...payload, id: user.id, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+      const caloriesTarget = Math.round(w * multiplier);
+      const profileDataPayload = {
+        ...(form.age !== ''            && { age: Number(form.age) }),
+        ...(form.height !== ''         && { height: Number(form.height) }),
+        ...(form.current_weight !== '' && { current_weight: Number(form.current_weight) }),
+        ...(form.target_weight !== ''  && { target_weight: Number(form.target_weight) }),
+        ...(form.sex                   && { sex: form.sex }),
+        ...(form.activity_level        && { activity_level: form.activity_level }),
+        ...(form.health_goals.length   && { health_goals: form.health_goals }),
+        calories_target: caloriesTarget,
+        protein_target:  Math.round(w * 2.2),
+        carbs_target:    Math.round((caloriesTarget * 0.4) / 4),
+        fat_target:      Math.round((caloriesTarget * 0.25) / 9),
+        water_target:    parseFloat((w * 0.035).toFixed(1)),
+      };
+      await saveLocalProfile(user, null, profileDataPayload);
 
       // Store remarketing data in user metadata (no schema change needed)
       if (form.hear_about_us) {
-        await supabase.auth.updateUser({
-          data: { hear_about_us: form.hear_about_us },
-        });
+        await supabase.auth.updateUser({ data: { hear_about_us: form.hear_about_us } });
       }
 
       // Insert first measurement checkpoint
@@ -826,23 +829,20 @@ export default function Onboarding() {
       if (checkpointWeight) {
         const measurementPayload = {
           user_id: user.id,
-          date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
+          date: getTodayKey(),
           weight: checkpointWeight,
         };
-        if (form.checkpoint_body_fat !== '') {
-          measurementPayload.body_fat = Number(form.checkpoint_body_fat);
-        }
-        if (form.checkpoint_waist !== '') {
-          measurementPayload.waist = Number(form.checkpoint_waist);
-        }
+        if (form.checkpoint_body_fat !== '') measurementPayload.body_fat = Number(form.checkpoint_body_fat);
+        if (form.checkpoint_waist !== '')    measurementPayload.waist = Number(form.checkpoint_waist);
         await supabase.from('measurements').insert(measurementPayload);
       }
 
-      // Set local fallback to prevent race condition loop
+      // Same-device race condition guard — only set after confirmed DB write above
       localStorage.setItem(`onboarding_done_${user.id}`, 'true');
-
+      return true;
     } catch (err) {
-      console.error('Onboarding save error:', err);
+      console.error('[Onboarding] Save failed:', err);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -850,7 +850,8 @@ export default function Onboarding() {
 
   // Step 3 finish → save → show paywall priming
   const handleFinish = async () => {
-    await saveAndFinish();
+    const saved = await saveAndFinish();
+    if (!saved) return; // DB write failed — user stays on step, button re-enables to retry
     setShowPaywallPriming(true);
   };
 
