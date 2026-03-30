@@ -79,11 +79,11 @@ function interpretWeather(temp, code, t) {
 
 function HeroCard({ text, focus, primaryAction, loading }) {
   const t = useT();
+  const heroStyle = { background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' };
 
   if (loading) {
     return (
-      <div className="rounded-[20px] border border-[hsl(var(--brand-ai)/0.18)] p-5 space-y-3 overflow-hidden"
-           style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
+      <div className="rounded-atlas-card border border-[hsl(var(--brand-ai)/0.18)] p-5 space-y-3 overflow-hidden" style={heroStyle}>
         <div className="h-4 w-32 rounded-md bg-[hsl(var(--fill)/0.6)] animate-pulse" />
         <div className="h-3 w-48 rounded-md bg-[hsl(var(--fill)/0.4)] animate-pulse" />
       </div>
@@ -91,26 +91,24 @@ function HeroCard({ text, focus, primaryAction, loading }) {
   }
 
   return (
-    <div className="rounded-[20px] border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden"
-         style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
+    <div className="rounded-atlas-card border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden" style={heroStyle}>
       <div className="h-[2px] bg-gradient-to-r from-[hsl(var(--brand))] via-[hsl(var(--brand-ai))] to-transparent" />
       <div className="p-5">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--brand-ai))]">{t('today.aiCoach')}</span>
+          <span className="atlas-overline text-[hsl(var(--brand-ai))]">{t('today.aiCoach')}</span>
           {focus && (
-            <span className="ml-auto text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] bg-[hsl(var(--fill)/0.6)] px-2 py-0.5 rounded-full">{focus}</span>
+            <span className="atlas-overline ml-auto text-[hsl(var(--fg-3))] bg-[hsl(var(--fill)/0.6)] px-2 py-0.5 rounded-full">{focus}</span>
           )}
         </div>
-        <p className="text-[15px] font-semibold text-[hsl(var(--fg))] leading-snug">{text}</p>
+        <p className="text-callout font-semibold text-[hsl(var(--fg))] leading-snug">{text}</p>
         {primaryAction && (
-          <Link
-            to={primaryAction.path}
-            className="mt-4 flex items-center justify-center gap-2 h-11 w-full rounded-[13px] bg-[hsl(var(--brand))] text-white text-[14px] font-semibold transition-opacity hover:opacity-90 active:opacity-75"
-          >
-            {primaryAction.label}
-            <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
-          </Link>
+          <Button asChild className="mt-4 w-full">
+            <Link to={primaryAction.path}>
+              {primaryAction.label}
+              <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
+            </Link>
+          </Button>
         )}
       </div>
     </div>
@@ -121,13 +119,13 @@ function HeroCard({ text, focus, primaryAction, loading }) {
 
 function ActionTile({ icon: Icon, label, done = false, to, onClick }) {
   const content = (
-    <div className={`flex flex-col items-center justify-center gap-1.5 rounded-[20px] border p-3 transition-colors active:scale-[0.97] ${
+    <div className={`flex flex-col items-center justify-center gap-1.5 rounded-atlas-card border p-3 transition-colors active:scale-[0.97] ${
       done
         ? 'border-[hsl(var(--ok)/0.25)] bg-[hsl(var(--ok)/0.06)]'
         : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)]'
     }`}>
       <Icon className={`w-5 h-5 ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`} strokeWidth={1.8} />
-      <span className={`text-[11px] font-semibold ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`}>{label}</span>
+      <span className={`text-caption1 font-semibold ${done ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}`}>{label}</span>
     </div>
   );
 
@@ -139,15 +137,15 @@ function ActionTile({ icon: Icon, label, done = false, to, onClick }) {
 
 function PlanCard({ icon: Icon, label, value, sub, to, color = 'brand' }) {
   return (
-    <Link to={to} className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-5 py-4 active:bg-[hsl(var(--fill)/0.4)] transition-colors">
-      <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center bg-[hsl(var(--${color})/0.1)] text-[hsl(var(--${color}))]`}>
+    <Link to={to} className="flex items-center gap-4 rounded-atlas-card border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-5 py-4 active:bg-[hsl(var(--fill)/0.4)] transition-colors">
+      <div className={`w-10 h-10 rounded-atlas-control flex items-center justify-center bg-[hsl(var(--${color})/0.1)] text-[hsl(var(--${color}))]`}>
         <Icon className="w-4 h-4" strokeWidth={1.9} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</p>
-        {sub && <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{sub}</p>}
+        <p className="atlas-overline">{label}</p>
+        {sub && <p className="text-caption1 text-[hsl(var(--fg-2))] mt-0.5">{sub}</p>}
       </div>
-      <p className="text-[1.75rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] shrink-0">{value}</p>
+      <p className="kpi-sm tracking-[-0.04em] text-[hsl(var(--fg))] shrink-0">{value}</p>
     </Link>
   );
 }
@@ -160,15 +158,17 @@ function RecCard({ rec, onDismiss }) {
     <div className="flex items-start gap-3 py-3">
       <div className="w-1 h-1 rounded-full bg-[hsl(var(--brand-ai))] mt-2 shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-medium text-[hsl(var(--fg))]">{rec.title}</p>
-        {rec.reason && <p className="text-[12px] text-[hsl(var(--fg-3))] mt-0.5 leading-relaxed">{rec.reason}</p>}
+        <p className="text-footnote font-medium text-[hsl(var(--fg))]">{rec.title}</p>
+        {rec.reason && <p className="text-caption1 text-[hsl(var(--fg-3))] mt-0.5 leading-relaxed">{rec.reason}</p>}
         {rec.actionPath && (
-          <Link to={rec.actionPath} className="mt-2 flex items-center gap-1.5 text-[12px] font-semibold text-[hsl(var(--brand))]">
+          <Link to={rec.actionPath} className="mt-2 flex items-center gap-1.5 text-caption1 font-semibold text-[hsl(var(--brand))]">
             {rec.actionLabel || t('today.doThis')} <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
           </Link>
         )}
       </div>
-      <button onClick={() => onDismiss?.(rec)} className="text-[11px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] shrink-0 px-1">{rec.dismissLabel || t('common.dismiss')}</button>
+      <Button variant="ghost" size="sm" onClick={() => onDismiss?.(rec)} className="text-caption1 text-[hsl(var(--fg-3))] shrink-0 h-auto px-1 py-0.5">
+        {rec.dismissLabel || t('common.dismiss')}
+      </Button>
     </div>
   );
 }
@@ -247,27 +247,29 @@ function TodayContent() {
       <header className="pt-1">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[13px] font-medium text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
-            <h1 className="text-[24px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-tight mt-0.5">
+            <p className="text-footnote text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
+            <h1 className="text-title2 text-[hsl(var(--fg))] leading-tight mt-0.5">
               {getGreeting(daily.preferredName, t)}
             </h1>
             {weather?.comment && (
-              <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">{weather.comment}</p>
+              <p className="text-caption1 text-[hsl(var(--fg-3))] mt-1">{weather.comment}</p>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0 mt-1">
             {weather && (
               <div className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--fill)/0.8)] border border-[hsl(var(--border)/0.5)] px-2.5 py-1">
-                <span className="text-[15px] leading-none">{weather.icon}</span>
-                <span className="text-[12px] font-semibold text-[hsl(var(--fg-2))]">{weather.temp}°</span>
+                <span className="text-callout leading-none">{weather.icon}</span>
+                <span className="text-caption1 font-semibold text-[hsl(var(--fg-2))]">{weather.temp}°</span>
               </div>
             )}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigate(ROUTES.notifications)}
-              className="w-9 h-9 flex items-center justify-center rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]"
+              className="w-9 h-9 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))]"
             >
               <Bell className="w-4 h-4" strokeWidth={2} />
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -297,7 +299,7 @@ function TodayContent() {
 
       {/* Today Plan */}
       <div className="space-y-2.5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))] px-0.5">{t('today.plan.title')}</p>
+        <p className="atlas-overline px-0.5">{t('today.plan.title')}</p>
 
         <PlanCard
           icon={Dumbbell}
@@ -333,7 +335,7 @@ function TodayContent() {
         <div className="space-y-2">
           <div className="flex items-center gap-2 px-0.5">
             <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('today.forYou')}</p>
+            <p className="atlas-overline">{t('today.forYou')}</p>
           </div>
           {recs.map((rec, i) => (
             <RecCard key={rec.id || i} rec={rec} onDismiss={ai.dismissRec} />
