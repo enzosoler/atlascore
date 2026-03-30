@@ -839,6 +839,7 @@ export default function Onboarding() {
 
       // Same-device race condition guard — only set after confirmed DB write above
       localStorage.setItem(`onboarding_done_${user.id}`, 'true');
+      console.log('[Onboarding] save confirmed — DB + localStorage + profile_data written');
       return true;
     } catch (err) {
       console.error('[Onboarding] Save failed:', err);
@@ -871,7 +872,9 @@ export default function Onboarding() {
     // Attempt a session refresh so AuthContext picks up onboarding_completed = true.
     // If it fails (slow network, timeout), navigate anyway — the guard's
     // localStorage fallback will let us through without touching authState.
+    console.log('[Onboarding] handleSuccessDone — revalidating session');
     try { await revalidateSession(); } catch { /* non-fatal */ }
+    console.log('[Onboarding] navigating to app');
     navigate(ROLE_HOME[user?.atlas_role] || ROUTES.today, { replace: true });
   };
 

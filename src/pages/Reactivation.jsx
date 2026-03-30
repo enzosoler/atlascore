@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Zap, TrendingUp, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
 
 const HIGHLIGHTS = [
   { icon: Zap, title: 'New Workout Builder', desc: 'Create custom routines faster' },
@@ -47,7 +48,7 @@ export default function Reactivation() {
           </Button>
 
           <button 
-            onClick={() => navigate('/onboarding')}
+            onClick={() => navigate(ROUTES.onboarding)}
             className="text-sm text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]"
           >
             Restart Onboarding

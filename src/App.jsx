@@ -223,6 +223,8 @@ const RequireAuthenticatedApp = () => {
   const localOnboardingDone = localStorage.getItem(`onboarding_done_${user?.id}`) === 'true';
   const isActuallyOnboarded = user?.onboarding_completed === true || localOnboardingDone;
 
+  console.log('[AuthGuard]', { path: location.pathname, dbOnboarded: user?.onboarding_completed, localOnboarded: localOnboardingDone, result: isActuallyOnboarded });
+
   if (!isActuallyOnboarded && !isOnboardingRoute) {
     console.log('[AuthGuard] Redirecting to onboarding:', { userId: user?.id, route: location.pathname });
     return <Navigate to={ROUTES.onboarding} replace />;
