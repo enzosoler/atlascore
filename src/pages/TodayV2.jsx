@@ -14,6 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell, Dumbbell, UtensilsCrossed, Scale, Heart,
   ArrowRight, Flame, Pill,
+  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
@@ -131,6 +132,96 @@ function interpretWeather(temp, code, t) {
   // If no weather data or translation issues, return neutral message
   const neutralComment = neutralMessages[Math.floor(Math.random() * neutralMessages.length)];
   return { temp, icon, comment: neutralComment };
+}
+
+// ─── Dynamic Hero Component ─────────────────────────────────────────────────────────
+
+function DynamicHero({ weather, greeting, locale }) {
+  const hour = new Date().getHours();
+  
+  // Time of day definitions
+  const isMorning = hour >= 5 && hour < 12;
+  const isAfternoon = hour >= 12 && hour < 17;
+  const isEvening = hour >= 17 && hour < 21;
+  const isNight = hour >= 21 || hour < 5;
+  
+  const timeOfDay = isMorning ? 'morning' : isAfternoon ? 'afternoon' : isEvening ? 'evening' : 'night';
+  
+  // Weather condition from API
+  const weatherCondition = weather?.condition || 'clear';
+  
+  // Dynamic gradient backgrounds based on time + weather
+  const gradientVariants = {
+    // Morning variants
+    'morning-clear': 'from-orange-100 via-yellow-50 to-blue-100',
+    'morning-cloudy': 'from-gray-100 via-slate-50 to-blue-50',
+    'morning-rainy': 'from-gray-200 via-slate-100 to-blue-100',
+    'morning-stormy': 'from-gray-300 via-slate-200 to-gray-100',
+    
+    // Afternoon variants  
+    'afternoon-clear': 'from-blue-100 via-cyan-50 to-yellow-50',
+    'afternoon-cloudy': 'from-gray-100 via-slate-50 to-blue-50',
+    'afternoon-rainy': 'from-gray-200 via-slate-100 to-blue-100',
+    'afternoon-stormy': 'from-gray-300 via-slate-200 to-gray-100',
+    
+    // Evening variants
+    'evening-clear': 'from-orange-200 via-pink-100 to-purple-100',
+    'evening-cloudy': 'from-gray-200 via-slate-100 to-purple-50',
+    'evening-rainy': 'from-gray-300 via-slate-200 to-blue-100',
+    'evening-stormy': 'from-gray-400 via-slate-300 to-gray-200',
+    
+    // Night variants
+    'night-clear': 'from-slate-900 via-blue-900 to-slate-800',
+    'night-cloudy': 'from-slate-800 via-gray-800 to-slate-700',
+    'night-rainy': 'from-slate-900 via-blue-800 to-gray-800',
+    'night-stormy': 'from-gray-900 via-slate-900 to-black',
+  };
+  
+  const gradientKey = `${timeOfDay}-${weatherCondition}`;
+  const backgroundGradient = gradientVariants[gradientKey] || gradientVariants['morning-clear'];
+  
+  // Text color based on time
+  const isDarkTime = isNight || (isEvening && weatherCondition !== 'clear');
+  const textColor = isDarkTime ? 'text-white' : 'text-gray-900';
+  const subTextColor = isDarkTime ? 'text-gray-200' : 'text-gray-600';
+  
+  return (
+    <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${backgroundGradient} transition-all duration-1000`}>
+      {/* Subtle noise overlay for depth */}
+      <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsdGVyVW5pdHM9InVzZXJTcGFjZU25vdGhpbmciIgLz48ZmVUcmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWx0ZXI9InVybCgjZmZmZmZmYiIC8+PC9mZT48L2ZpbHRlcj48L3N2Zz4=')]" />
+      
+      {/* Dark overlay for text readability */}
+      <div className={`absolute inset-0 ${isDarkTime ? 'bg-black/20' : 'bg-white/10'}`} />
+      
+      {/* Content */}
+      <div className="relative z-10 p-8 text-center">
+        <div className="max-w-md mx-auto">
+          {/* Greeting */}
+          <h1 className={`text-3xl font-bold mb-2 ${textColor} leading-tight`}>
+            {greeting}
+          </h1>
+          
+          {/* Weather info */}
+          {weather && (
+            <div className={`flex items-center justify-center gap-3 mb-4 ${subTextColor}`}>
+              <span className="text-2xl">{weather.icon}</span>
+              <div className="text-left">
+                <p className="text-sm font-medium capitalize">{weather.condition}</p>
+                <p className="text-lg font-semibold">{weather.temp}°</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Weather comment */}
+          {weather?.comment && (
+            <p className={`text-sm ${subTextColor} italic max-w-sm mx-auto`}>
+              {weather.comment}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Hero Card ─────────────────────────────────────────────────────────────────
@@ -293,48 +384,79 @@ function TodayContent() {
   return (
     <TodayScreen>
 
-      {/* Header */}
-      <header className="pt-1">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-footnote text-[hsl(var(--fg-3))]">{getDateLabel(locale)}</p>
-            <h1 className="text-title2 text-[hsl(var(--fg))] leading-tight mt-0.5">
-              {getGreeting(daily.preferredName, t)}
-            </h1>
-            {weather?.comment && (
-              <p className="text-caption1 text-[hsl(var(--fg-3))] mt-1">{weather.comment}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-2 shrink-0 mt-1">
-            {weather && (
-              <div className="flex items-center gap-1 text-[hsl(var(--fg-3))]">
-                <span className="text-[14px] leading-none">{weather.icon}</span>
-                <span className="text-[13px] font-medium">{weather.temp}°</span>
+      {/* Dynamic Hero - Priority 1 */}
+      <div className="mb-6">
+        <DynamicHero 
+          weather={weather} 
+          greeting={getGreeting(daily.preferredName, t)}
+          locale={locale}
+        />
+      </div>
+
+      {/* ONE Primary Next Action - Priority 2 */}
+      {briefing.primaryAction && (
+        <div className="mb-6">
+          <ActionLink 
+            to={briefing.primaryAction.path}
+            content={
+              <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--brand))] text-white px-6 py-4 shadow-lg">
+                <Dumbbell className="w-5 h-5" />
+                <span className="text-[16px] font-semibold">{briefing.primaryAction.label}</span>
+                <ArrowRight className="w-4 h-4" />
               </div>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(ROUTES.notifications)}
-              className="w-8 h-8 rounded-full text-[hsl(var(--fg-3))]"
-            >
-              <Bell className="w-4 h-4" strokeWidth={1.8} />
-            </Button>
+            }
+          />
+        </div>
+      )}
+
+      {/* Coach Input - Priority 3 */}
+      <div className="mb-6">
+        <CoachChatTrigger />
+      </div>
+
+      {/* Quick Actions (4) - Priority 4 */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <ActionLink
+          to={ROUTES.workouts}
+          content={
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+              <Dumbbell className="w-5 h-5 text-[hsl(var(--brand))]" />
+              <div>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Workout</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.workoutDone ? 'Completed' : 'Start today'}</p>
+              </div>
+            </div>
+          }
+        />
+        <ActionLink
+          to={ROUTES.nutrition}
+          content={
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+              <UtensilsCrossed className="w-5 h-5 text-[hsl(var(--brand-ai))]" />
+              <div>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Nutrition</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.nutritionLogged ? 'Track meals' : 'Log first meal'}</p>
+              </div>
+            </div>
+          }
+        />
+      </div>
+
+      {/* Recommendations - Only if compelling */}
+      {recs.length > 0 && (
+        <div className="mb-6">
+          <p className="text-[13px] font-medium text-[hsl(var(--fg-3))] mb-3">Recommendations</p>
+          <div className="space-y-3">
+            {recs.map((rec) => (
+              <RecCard key={rec.id} rec={rec} />
+            ))}
           </div>
         </div>
-      </header>
+      )}
 
-      {/* AI Hero */}
-      <HeroCard
-        text={briefing.text}
-        focus={briefing.focus}
-        primaryAction={briefing.primaryAction}
-        loading={daily.isLoading}
-      />
-
-      {/* AI Coach Chat Trigger */}
-      <CoachChatTrigger
-        pageContext="today"
+      {/* Coach Chat Sheet */}
+      <CoachChatSheet isOpen={chatOpen} onOpenChange={setChatOpen} />
+      <BodyCheckinSheet isOpen={checkinOpen} onOpenChange={setCheckinOpen} />
         onOpen={() => setChatOpen(true)}
         onSuggestion={(text) => { setChatOpen(true); chat.sendMessage(text, 'today'); }}
       />

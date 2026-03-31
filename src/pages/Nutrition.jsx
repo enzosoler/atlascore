@@ -1923,14 +1923,14 @@ export default function NutritionPage() {
                 
                 <h2 className="text-[28px] font-bold text-[hsl(var(--fg))] mb-3 leading-tight">
                   {selectedDate === TODAY 
-                    ? t('nutrition.empty.actionTitle') 
-                    : t('nutrition.empty.actionTitleHistory')}
+                    ? 'Start your nutrition today' 
+                    : 'Log meals for this day'}
                 </h2>
                 
                 <p className="text-[17px] text-[hsl(var(--fg-2))] mb-8 leading-relaxed max-w-[320px] mx-auto">
                   {selectedDate === TODAY
-                    ? t('nutrition.empty.actionSubtitle')
-                    : t('nutrition.empty.actionSubtitleHistory')}
+                    ? 'Track your first meal to start monitoring calories and macros'
+                    : 'Add meals to complete this day\'s nutrition log'}
                 </p>
                 
                 <button
@@ -1938,18 +1938,18 @@ export default function NutritionPage() {
                   className="group relative inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] text-white px-8 py-4 text-[16px] font-semibold hover:from-[hsl(var(--brand)/0.95)] hover:to-[hsl(var(--brand-ai)/0.95)] transition-all duration-300 shadow-[0_8px_24px_hsl(var(--brand)/0.4)] hover:shadow-[0_12px_32px_hsl(var(--brand)/0.5)] hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Plus className="w-5 h-5" />
-                  <span>{t('nutrition.empty.primaryAction')}</span>
+                  <span>Log First Meal</span>
                   <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
                 
                 {/* Quick meal triggers */}
                 <div className="mt-8 flex items-center justify-center gap-2">
-                  <span className="text-[13px] text-[hsl(var(--fg-3))]">{t('nutrition.empty.quickAdd')}:</span>
+                  <span className="text-[13px] text-[hsl(var(--fg-3))">Quick add:</span>
                   <div className="flex gap-2">
                     {[
-                      { type: 'breakfast', icon: Sunrise, label: t('nutrition.empty.breakfast') },
-                      { type: 'lunch', icon: Sun, label: t('nutrition.empty.lunch') },
-                      { type: 'dinner', icon: Moon, label: t('nutrition.empty.dinner') },
+                      { type: 'breakfast', icon: Sunrise, label: 'Breakfast' },
+                      { type: 'lunch', icon: Sun, label: 'Lunch' },
+                      { type: 'dinner', icon: Moon, label: 'Dinner' },
                     ].map(({ type, icon: Icon, label }) => (
                       <button
                         key={type}
@@ -1973,14 +1973,14 @@ export default function NutritionPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-[16px] font-semibold text-[hsl(var(--fg))] mb-1">
-                    {t('nutrition.nextAction.title')}
+                    Next Action
                   </h3>
                   <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">
                     {profile.calories_target > 0 && dailyTotals.calories < profile.calories_target * 0.8
-                      ? t('nutrition.nextAction.fuelUp', { remaining: getRemainingValue(profile.calories_target, dailyTotals.calories) })
+                      ? `Fuel up with ${getRemainingValue(profile.calories_target, dailyTotals.calories)} more calories`
                       : dailyTotals.protein < (profile.protein_target || 150) * 0.7
-                      ? t('nutrition.nextAction.moreProtein', { remaining: getRemainingValue(profile.protein_target, dailyTotals.protein) })
-                      : t('nutrition.nextAction.keepGoing')}
+                      ? `Add ${getRemainingValue(profile.protein_target, dailyTotals.protein)}g more protein`
+                      : 'Great progress! Keep logging meals'}
                   </p>
                 </div>
                 <button
@@ -1988,7 +1988,7 @@ export default function NutritionPage() {
                   className="shrink-0 rounded-xl bg-[hsl(var(--ok))] text-white px-4 py-2 text-[14px] font-semibold hover:bg-[hsl(var(--ok)/0.9)] transition-colors shadow-[0_4px_12px_hsl(var(--ok)/0.3)]"
                 >
                   <Plus className="w-4 h-4 inline mr-1" />
-                  {t('nutrition.nextAction.addMeal')}
+                  Add Meal
                 </button>
               </div>
             </div>
@@ -1998,16 +1998,16 @@ export default function NutritionPage() {
           {isLoadingMeals ? (
             <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              {t('nutrition.loading_meals')}
+              Loading meals...
             </div>
           ) : sortedMeals.length > 0 ? (
             <div className="space-y-4">
               {/* Timeline Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-[17px] font-semibold text-[hsl(var(--fg))]">{t('nutrition.timeline.title')}</h3>
+                  <h3 className="text-[17px] font-semibold text-[hsl(var(--fg))]">Today's Meals</h3>
                   <p className="text-[13px] text-[hsl(var(--fg-3))] mt-1">
-                    {sortedMeals.length} {t('nutrition.timeline.mealsLogged')} · {Math.round(dailyTotals.calories)} {t('nutrition.timeline.calories')}
+                    {sortedMeals.length} meals logged · {Math.round(dailyTotals.calories)} calories
                   </p>
                 </div>
                 {selectedDate === TODAY && (
@@ -2016,7 +2016,7 @@ export default function NutritionPage() {
                     className="shrink-0 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill))] hover:border-[hsl(var(--brand)/0.3)]"
                   >
                     <Plus className="w-4 h-4 inline mr-1" />
-                    {t('nutrition.timeline.addMeal')}
+                    Add Meal
                   </button>
                 )}
               </div>
@@ -2059,7 +2059,7 @@ export default function NutritionPage() {
                                   </h4>
                                   {selectedDate === TODAY && !isPast && (
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
-                                      {t('nutrition.timeline.current')}
+                                      Current
                                     </span>
                                   )}
                                 </div>
@@ -2069,11 +2069,11 @@ export default function NutritionPage() {
                                 <div className="flex items-center gap-4 text-[12px] text-[hsl(var(--fg-3))]">
                                   <span className="flex items-center gap-1">
                                     <Flame className="w-3 h-3" />
-                                    {meal.total_calories} {t('nutrition.timeline.kcal')}
+                                    {meal.total_calories} kcal
                                   </span>
                                   <span className="flex items-center gap-1">
                                     <Zap className="w-3 h-3" />
-                                    {meal.total_protein}g {t('nutrition.timeline.protein')}
+                                    {meal.total_protein}g protein
                                   </span>
                                 </div>
                               </div>
@@ -2106,14 +2106,14 @@ export default function NutritionPage() {
           {/* Simple Macro Summary - Only when meals exist */}
           {sortedMeals.length > 0 && profile.calories_target > 0 && (
             <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-5">
-              <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))] mb-4">{t('nutrition.progress.title')}</h3>
+              <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))] mb-4">Daily Progress</h3>
               
               <div className="space-y-4">
                 {/* Calories */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Flame className="w-4 h-4 text-[hsl(var(--fg-3))]" />
-                    <span className="text-[13px] text-[hsl(var(--fg))]">{t('nutrition.calories_label')}</span>
+                    <span className="text-[13px] text-[hsl(var(--fg))]">Calories</span>
                   </div>
                   <div className="text-right">
                     <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.calories)}</span>
@@ -2133,7 +2133,7 @@ export default function NutritionPage() {
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-2">
                       <Zap className="w-4 h-4 text-[hsl(var(--brand-ai))]" />
-                      <span className="text-[13px] text-[hsl(var(--fg))]">{t('nutrition.protein_label')}</span>
+                      <span className="text-[13px] text-[hsl(var(--fg))]">Protein</span>
                     </div>
                     <div className="text-right">
                       <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.protein)}g</span>
