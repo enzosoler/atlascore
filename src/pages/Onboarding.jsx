@@ -24,6 +24,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import { cn } from '@/lib/utils';
+import { tapLight, tapMedium } from '@/lib/haptics';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -66,24 +67,17 @@ function Logo() {
 }
 
 function StepDots({ step, total }) {
+  const pct = ((step + 1) / total) * 100;
   return (
-    <div className="mb-5 flex items-center justify-center gap-1.5">
-      {Array.from({ length: total }).map((_, i) => (
+    <div className="mb-5">
+      <div className="h-[3px] w-full rounded-full bg-[hsl(var(--border))] overflow-hidden">
         <motion.div
-          key={i}
-          layout
-          className={cn(
-            'h-[3px] rounded-full',
-            i === step
-              ? 'bg-[hsl(var(--brand))]'
-              : i < step
-                ? 'bg-[hsl(var(--brand)/0.35)]'
-                : 'bg-[hsl(var(--fill-secondary))]'
-          )}
-          animate={{ width: i === step ? 24 : 6 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="h-full rounded-full bg-[hsl(var(--brand))]"
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
         />
-      ))}
+      </div>
     </div>
   );
 }
@@ -91,12 +85,12 @@ function StepDots({ step, total }) {
 function GoalChip({ selected, onClick, emoji, label }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => { tapLight(); onClick(); }}
       className={cn(
-        'flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all text-center min-h-[76px]',
+        'flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all text-center min-h-[76px] active:scale-[0.95]',
         selected
-          ? 'bg-[hsl(var(--brand)/0.08)] ring-1 ring-[hsl(var(--brand)/0.4)] shadow-[0_0_0_1px_hsl(var(--brand)/0.1)]'
-          : 'bg-[hsl(var(--fill)/0.6)] hover:bg-[hsl(var(--fill))]'
+          ? 'bg-[hsl(var(--brand)/0.12)] border border-[hsl(var(--brand))] text-[hsl(var(--brand))]'
+          : 'bg-[hsl(var(--card))] border border-[hsl(var(--border))]'
       )}
     >
       <span className="text-[22px] leading-none">{emoji}</span>
@@ -344,12 +338,12 @@ function StepFirstCheckpoint({ form, set, t }) {
 function PathCard({ selected, onClick, icon: Icon, title, desc, items }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => { tapLight(); onClick(); }}
       className={cn(
-        'w-full text-left p-4 rounded-2xl transition-all space-y-3',
+        'w-full text-left p-4 rounded-2xl transition-all space-y-3 active:scale-[0.98]',
         selected
-          ? 'bg-[hsl(var(--brand)/0.06)] ring-1 ring-[hsl(var(--brand)/0.3)]'
-          : 'bg-[hsl(var(--fill)/0.5)] hover:bg-[hsl(var(--fill))]'
+          ? 'bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand))]'
+          : 'bg-[hsl(var(--card))] border border-[hsl(var(--border))]'
       )}
     >
       <div className="flex items-start gap-3">

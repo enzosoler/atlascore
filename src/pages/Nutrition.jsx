@@ -50,6 +50,7 @@ import NutritionQuickActions from '@/components/nutrition/NutritionQuickActions'
 import MealTimeline from '@/components/nutrition/MealTimeline';
 import MacroProgressBar from '@/components/nutrition/MacroProgressBar';
 import AINutritionSuggestions from '@/components/nutrition/AINutritionSuggestions';
+import QuickLogSheet from '@/components/nutrition/QuickLogSheet';
 import { useAICoach } from '@/hooks/useAICoach';
 
 const FIELD_LABEL_CLASS =
@@ -1450,6 +1451,7 @@ export default function NutritionPage() {
   const [isSavingTargets, setIsSavingTargets] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [quickAddType, setQuickAddType] = useState(null);
+  const [quickLogOpen, setQuickLogOpen] = useState(false);
 
   useEffect(() => {
     if (!isFormOpen && !pendingFood) {
@@ -1896,7 +1898,7 @@ export default function NutritionPage() {
       subtitle="Daily nutrition tracking and guidance"
       fallbackDescription="Nutrition loaded in safe mode."
     >
-      <div className="min-h-full bg-[hsl(var(--bg))]">
+      <div className="min-h-full bg-[hsl(var(--bg))] atlas-page-enter">
         <div className="mx-auto max-w-lg px-4 pt-5 space-y-4">
 
           {/* Header + Date Navigation */}
@@ -2256,6 +2258,34 @@ export default function NutritionPage() {
           })()}
         </DialogContent>
       </Dialog>
+
+      {/* Quick Log Sheet */}
+      <QuickLogSheet
+        open={quickLogOpen}
+        onOpenChange={setQuickLogOpen}
+        onLogRecent={async (food) => {
+          // Log recent food with default quantity
+          // This delegates to the existing save flow
+          handleQuickAdd(food.meal_type || 'lunch');
+        }}
+        onAISubmit={async (text) => {
+          // Delegate to existing AI food input flow
+          handleAddMeal();
+        }}
+        onOpenBarcode={() => handleAddMeal()}
+        onOpenSearch={() => handleAddMeal()}
+      />
+
+      {/* Quick Log FAB — always visible above tab bar */}
+      <div className="fixed bottom-[calc(58px+env(safe-area-inset-bottom,0px)+12px)] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+        <button
+          onClick={() => setQuickLogOpen(true)}
+          className="pointer-events-auto flex items-center gap-2 px-5 py-3 rounded-full bg-[hsl(var(--brand))] text-white font-semibold text-[14px] tracking-[-0.01em] shadow-[0_4px_20px_rgba(0,0,0,0.25)] active:scale-[0.96] transition-transform duration-100"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
+          Quick Log
+        </button>
+      </div>
     </SafePageBoundary>
   );
 }

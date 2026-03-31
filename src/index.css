@@ -167,9 +167,9 @@
     --border-default: 220 10% 12%;   /* rgba(255,255,255,0.06) equivalent */
     --border-strong: 220 10% 18%;
 
-    --accent-primary: 230 65% 60%;
-    --accent-primary-hover: 230 65% 52%;
-    --accent-secondary: 255 55% 63%;
+    --accent-primary: 230 78% 60%;
+    --accent-primary-hover: 230 78% 52%;
+    --accent-secondary: 255 60% 63%;
 
     --status-success: 150 40% 49%;
     --status-danger: 0 68% 62%;
@@ -330,6 +330,104 @@
   [role="link"],
   label {
     touch-action: manipulation;
+  }
+
+  /* ── Global button press state ── */
+  button:not(:disabled):active,
+  [role="button"]:not(:disabled):active {
+    transform: scale(0.97);
+    transition: transform 60ms ease-out;
+  }
+
+  /* ── Tappable card press state ── */
+  .atlas-tappable:active {
+    transform: scale(0.985);
+    transition: transform 80ms ease-out;
+  }
+
+  /* ── Page enter/exit transitions ── */
+  .atlas-page-enter {
+    animation: atlasPageIn 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+
+  @keyframes atlasPageIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Skeleton shimmer ── */
+  .atlas-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--card)) 25%,
+      hsl(var(--shell)) 50%,
+      hsl(var(--card)) 75%
+    );
+    background-size: 200% 100%;
+    animation: atlasShimmer 1.4s ease-in-out infinite;
+  }
+
+  @keyframes atlasShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Odometer digit flip ── */
+  .atlas-odometer-flip {
+    display: inline-block;
+    animation: atlasOdoFlip 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  @keyframes atlasOdoFlip {
+    0%   { transform: translateY(100%); opacity: 0; }
+    60%  { transform: translateY(-8%); opacity: 1; }
+    100% { transform: translateY(0); }
+  }
+
+  /* ── Checkmark SVG draw ── */
+  .atlas-checkmark-draw {
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: atlasDrawCheck 400ms ease-out forwards;
+  }
+
+  @keyframes atlasDrawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ── Streak pulse ring ── */
+  .atlas-streak-pulse {
+    animation: atlasPulseRing 600ms ease-out;
+  }
+
+  @keyframes atlasPulseRing {
+    0%   { box-shadow: 0 0 0 0 hsl(var(--brand) / 0.4); }
+    100% { box-shadow: 0 0 0 12px hsl(var(--brand) / 0); }
+  }
+
+  /* ── Sheet slide-up ── */
+  .atlas-sheet-enter {
+    animation: atlasSheetUp 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  @keyframes atlasSheetUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .atlas-sheet-exit {
+    animation: atlasSheetDown 240ms cubic-bezier(0.32, 0, 0.67, 0) both;
+  }
+
+  @keyframes atlasSheetDown {
+    from { transform: translateY(0); }
+    to   { transform: translateY(100%); }
   }
 }
 
@@ -1339,4 +1437,9 @@
   border: 1px solid hsl(var(--border)) !important;
   color: hsl(var(--fg-2)) !important;
   border-radius: 6px !important;
+}
+
+/* Hide toast icons — color border is sufficient */
+.atlas-sonner-icon {
+  display: none !important;
 }

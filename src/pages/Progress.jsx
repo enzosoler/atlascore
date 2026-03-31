@@ -551,7 +551,7 @@ function ProgressContent() {
   const hasAnyData = weightData.length > 0 || workoutLogs.length > 0 || foodLogs.length > 0 || photos.length > 0;
   
   return (
-    <div className="min-h-full bg-[hsl(var(--bg))]">
+    <div className="min-h-full bg-[hsl(var(--bg))] atlas-page-enter">
       <div className="mx-auto max-w-lg px-4 pt-6 pb-8 space-y-6">
 
         {/* Header */}

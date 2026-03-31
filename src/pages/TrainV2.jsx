@@ -501,7 +501,7 @@ export default function TrainV2() {
   // ── List mode ──────────────────────────────────────────────────────────────
   return (
     <AppContainer>
-      <div className="space-y-5">
+      <div className="space-y-5 atlas-page-enter">
 
         {/* Header */}
         <div>

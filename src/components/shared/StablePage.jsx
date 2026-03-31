@@ -185,17 +185,17 @@ export function MetricCard({ label, value, hint, icon: Icon }) {
 
 export function EmptyState({ title, description, action, icon: Icon }) {
   return (
-    <div className="atlas-empty px-6 py-10 lg:px-8">
+    <div className="rounded-[18px] border-[1.5px] border-dashed border-[hsl(var(--border))] px-6 py-10 text-center lg:px-8">
       {Icon ? (
-        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[22px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-          <Icon className="h-5 w-5" strokeWidth={1.85} />
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[16px] mx-auto text-[hsl(var(--fg-3))]">
+          <Icon className="h-8 w-8" strokeWidth={1.5} />
         </div>
       ) : null}
-      <p className="text-[1.125rem] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+      <p className="text-[16px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
         {title}
       </p>
-      {description ? <p className="atlas-copy mt-2 max-w-xl">{description}</p> : null}
-      {action ? <div className="mt-6 flex justify-center">{action}</div> : null}
+      {description ? <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1.5 max-w-xs mx-auto">{description}</p> : null}
+      {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
     </div>
   );
 }

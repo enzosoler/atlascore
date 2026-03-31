@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { getDailyCheckin, upsertDailyCheckin } from '@/services/checkinService';
 import { getToday } from '@/lib/atlas-theme';
 import { toast } from 'sonner';
+import { celebrateHeavy, tick, notifyError } from '@/lib/haptics';
 
 // Gate opens at or after 10:00 local time.
 function isPast10am() {
@@ -84,7 +85,10 @@ export default function DailyCheckinGate() {
   const [saving, setSaving] = useState(false);
 
   const setValue = useCallback((key, value) => {
-    setVals((prev) => ({ ...prev, [key]: value }));
+    setVals((prev) => {
+      if (Number.isInteger(value) && prev[key] !== value) tick();
+      return { ...prev, [key]: value };
+    });
   }, []);
 
   const handleSave = async () => {
@@ -93,8 +97,10 @@ export default function DailyCheckinGate() {
     try {
       await upsertDailyCheckin(user.id, { date: today, ...vals });
       queryClient.invalidateQueries({ queryKey: ['daily-checkin'] });
+      celebrateHeavy();
       toast.success('Check-in saved!');
     } catch (err) {
+      notifyError();
       toast.error('Could not save check-in. Try again.');
       console.error('[DailyCheckinGate]', err);
     } finally {

@@ -7,7 +7,7 @@ const CARD_CLASS_NAME = 'atlas-card';
 export function AppContainer({ children, className = '', maxWidth = 'max-w-5xl' }) {
   return (
     <div
-      className="min-h-full bg-[hsl(var(--bg))] text-[hsl(var(--fg))]"
+      className="min-h-full bg-[hsl(var(--bg))] text-[hsl(var(--fg))] atlas-page-enter"
     >
       <div
         className={cn(
@@ -152,10 +152,10 @@ export function TabBar({ items, className = '' }) {
           const Icon = item.icon;
           const key = item.key || item.to || item.label;
           const classes = cn(
-            'flex min-h-[58px] flex-1 min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 text-center text-[11.5px] font-semibold tracking-[-0.014em] leading-none transition-[background-color,color,box-shadow] duration-150',
+            'flex min-h-[58px] flex-1 min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 text-center text-[11.5px] font-semibold tracking-[-0.014em] leading-none transition-[color] duration-150',
             item.active
-              ? 'border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
-              : 'text-[hsl(var(--fg-2))]'
+              ? 'text-[hsl(var(--brand))]'
+              : 'text-[hsl(var(--fg-3))]'
           );
 
           if (item.to) {
@@ -164,10 +164,10 @@ export function TabBar({ items, className = '' }) {
                 {Icon ? (
                   <div
                     className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-[14px] transition-[background-color,box-shadow] duration-150',
+                      'flex h-9 w-9 items-center justify-center rounded-[14px] transition-colors duration-150',
                       item.active
-                        ? 'bg-[hsl(var(--brand)/0.14)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.12)]'
-                        : 'bg-transparent'
+                        ? 'text-[hsl(var(--brand))]'
+                        : 'text-inherit'
                     )}
                   >
                     <Icon className="h-[22px] w-[22px] shrink-0" strokeWidth={item.active ? 2.35 : 2.1} />

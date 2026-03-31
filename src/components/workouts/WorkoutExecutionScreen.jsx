@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ArrowRight, Clock, Play, Plus, Trophy, X } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
 import { Input } from '@/components/ui/input';
+import { tapMedium, celebrateHeavy } from '@/lib/haptics';
 import { Button } from '@/components/ui/button';
 import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
@@ -393,6 +394,7 @@ export default function WorkoutExecutionScreen({
 
     if (hasData) {
       setCompletedSets(nextCompletedSets);
+      tapMedium();
       if (livePR) {
         setPrFlash(exerciseIdx);
         setTimeout(() => setPrFlash(null), 3000);
@@ -420,6 +422,7 @@ export default function WorkoutExecutionScreen({
   };
 
   const handleFinish = () => {
+    celebrateHeavy();
     clearSession();
     window.dispatchEvent(new Event('atlas:session:change'));
     const payload = buildCompletedPayload();

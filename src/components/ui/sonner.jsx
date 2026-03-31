@@ -7,13 +7,13 @@ const Toaster = ({ ...props }) => {
   return (
     <Sonner
       theme={theme}
-      position="bottom-center"
+      position="top-center"
       richColors={false}
       expand={false}
       visibleToasts={3}
-      offset="max(16px, env(safe-area-inset-bottom, 16px))"
+      offset="max(16px, env(safe-area-inset-top, 16px))"
       toastOptions={{
-        duration: 4000,
+        duration: 3000,
         classNames: {
           toast: 'atlas-sonner-toast',
           title: 'atlas-sonner-title',

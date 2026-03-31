@@ -120,7 +120,7 @@ function AuthField({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="h-11 rounded-xl bg-[hsl(var(--fill)/0.5)] border-0 focus:bg-[hsl(var(--card))] focus:ring-1 focus:ring-[hsl(var(--brand)/0.3)] transition-all"
+        className="h-11 rounded-xl bg-[hsl(var(--fill)/0.5)] border border-transparent focus:bg-[hsl(var(--card))] focus:border-[hsl(var(--brand))] focus:ring-0 transition-all duration-100"
       />
     </div>
   );
@@ -410,7 +410,7 @@ export default function Auth() {
           </div>
 
           {/* Card */}
-          <div className="bg-[hsl(var(--card))] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)]">
+          <div className="bg-[hsl(var(--card))] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)] dark:shadow-none dark:border dark:border-[hsl(var(--border))]">
             {/* Header */}
             <div className="text-center mb-6">
               <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
