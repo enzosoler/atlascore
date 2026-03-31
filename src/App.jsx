@@ -233,8 +233,7 @@ const RequireAuthenticatedApp = () => {
   
   const isActuallyOnboarded = dbOnboarded; // Database is source of truth
 
-  console.log('[AuthGuard]', { path: location.pathname, dbOnboarded, localOnboarded, result: isActuallyOnboarded });
-
+  console.log('[AuthGuard]', { path: location.pathname, dbOnboarded, localOnboardingDone, result: isActuallyOnboarded });
   if (!isActuallyOnboarded && !isOnboardingRoute) {
     console.log('[AuthGuard] Redirecting to onboarding:', { userId: user?.id, route: location.pathname });
     return <Navigate to={ROUTES.onboarding} replace />;
