@@ -94,36 +94,32 @@ function ExportContent() {
     // daily_checkins.date is DATE. protocols.start_date is DATE.
     // lab_exams.exam_date is DATE. progress_photos.date is DATE.
     const datasets = [
-      ['meals', async () => { const { data } = await supabase.from('food_logs').select('*').eq('user_id', user.id).gte('date', `${startDate}T00:00:00`).lte('date', `${endDate}T23:59:59`).order('date', { ascending: false }).limit(500); return data || []; }],
-      ['workouts', async () => { const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).gte('completed_at', `${startDate}T00:00:00`).lte('completed_at', `${endDate}T23:59:59`).order('completed_at', { ascending: false }).limit(300); return data || []; }],
-      ['measurements', async () => { const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(300); return data || []; }],
-      ['checkins', async () => { const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(300); return data || []; }],
+      ['meals', async () => { const { data } = await supabase.from('food_logs').select('*').eq('user_id', user.id).gte('date', `${startDate}T00:00:00`).lte('date', `${endDate}T23:59:59`).order('date', { ascending: true }).limit(1000); return data || []; }],
+      ['workouts', async () => { const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).gte('completed_at', `${startDate}T00:00:00`).lte('completed_at', `${endDate}T23:59:59`).order('completed_at', { ascending: true }).limit(300); return data || []; }],
+      ['measurements', async () => { const { data } = await supabase.from('measurements').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: true }).limit(300); return data || []; }],
+      ['checkins', async () => { const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: true }).limit(300); return data || []; }],
       ['protocols', async () => { const { data } = await supabase.from('protocols').select('*').eq('user_id', user.id).order('start_date', { ascending: false }).limit(100); return data || []; }],
       ['labExams', async () => { const { data } = await supabase.from('lab_exams').select('*').eq('user_id', user.id).order('exam_date', { ascending: false }).limit(100); return data || []; }],
-      ['progressPhotos', async () => { const { data } = await supabase.from('progress_photos').select('*').eq('user_id', user.id).gte('date', startDate).lte('date', endDate).order('date', { ascending: false }).limit(100); return data || []; }],
+      ['profile', async () => { const { data } = await supabase.from('profiles').select('profile_data').eq('id', user.id).single(); return data || {}; }],
     ];
 
     const results = await Promise.allSettled(datasets.map(([, request]) => request()));
     const warnings = [];
 
-    const getArray = (index, label) => {
+    const getVal = (index, label) => {
       const result = results[index];
-      if (result?.status === 'fulfilled') {
-        return toArray(result.value);
-      }
+      if (result?.status === 'fulfilled') return result.value;
       warnings.push(label);
-      return [];
+      return null;
     };
 
-    const meals = getArray(0, 'meals');
-    const workouts = getArray(1, 'workouts');
-    const measurements = getArray(2, 'measurements');
-    const checkins = getArray(3, 'checkins');
-    const protocols = getArray(4, 'protocols');
-    const labExams = getArray(5, 'labExams');
-    const progressPhotos = getArray(6, 'progressPhotos');
-
-    console.log('[Export] raw data:', { meals: meals.length, workouts: workouts.length, measurements: measurements.length, checkins: checkins.length, protocols: protocols.length, labExams: labExams.length, progressPhotos: progressPhotos.length });
+    const meals = toArray(getVal(0, 'meals'));
+    const workouts = toArray(getVal(1, 'workouts'));
+    const measurements = toArray(getVal(2, 'measurements'));
+    const checkins = toArray(getVal(3, 'checkins'));
+    const protocols = toArray(getVal(4, 'protocols'));
+    const labExams = toArray(getVal(5, 'labExams'));
+    const profile = getVal(6, 'profile');
 
     return {
       generated_at: new Date().toISOString(),
@@ -132,17 +128,14 @@ function ExportContent() {
       user: {
         name: user?.full_name || 'Athlete',
         email: user?.email || '',
+        targets: profile?.profile_data?.targets || {},
       },
-      // Meals, workouts, measurements are already server-filtered by date range in queries above.
       meals,
       workouts,
       measurements,
       checkins: checkins.filter((item) => isWithinRange(item?.date, startDate, endDate)),
-      protocols: protocols.filter((item) =>
-        isWithinRange(item?.start_date, startDate, endDate)
-      ),
+      protocols: protocols.filter((item) => isWithinRange(item?.start_date, startDate, endDate)),
       labExams: labExams.filter((item) => isWithinRange(item?.exam_date, startDate, endDate)),
-      progressPhotos: progressPhotos.filter((item) => isWithinRange(item?.date, startDate, endDate)),
     };
   };
 
@@ -207,104 +200,158 @@ function ExportContent() {
     try {
       const payload = await collectData();
       const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      let yPosition = 15;
-      const margin = 10;
-      const lineHeight = 5;
-      const sectionGap = 8;
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let y = margin;
 
-      // Header
-      doc.setFontSize(20);
-      doc.setFont(undefined, 'bold');
-      doc.text('atlas.core - Data Report', margin, yPosition);
-      yPosition += 8;
+      // Brand Colors
+      const brandPrimary = [10, 10, 10]; // Near black
+      const colorRed = [220, 38, 38];
+      const colorYellow = [217, 119, 6];
+      const colorGreen = [22, 163, 74];
+      const colorMuted = [107, 114, 128];
 
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-      doc.text(`Athlete: ${payload.user.name}`, margin, yPosition);
-      yPosition += 5;
-      doc.text(`Period: ${payload.period.startDate} to ${payload.period.endDate}`, margin, yPosition);
-      yPosition += 5;
-      doc.text(`Generated on: ${new Date().toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')}`, margin, yPosition);
-      yPosition += sectionGap;
-
-      const addSection = (title, items) => {
-        if (yPosition > pageHeight - 20) {
+      const checkPage = (needed = 15) => {
+        if (y + needed > pageH - 20) {
           doc.addPage();
-          yPosition = 15;
+          y = margin;
+          return true;
         }
-
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text(title, margin, yPosition);
-        yPosition += 6;
-
-        if (items.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont(undefined, 'italic');
-          doc.text('No records in this period', margin, yPosition);
-          yPosition += 5;
-        } else {
-          doc.setFontSize(9);
-          doc.setFont(undefined, 'normal');
-          items.forEach((item) => {
-            if (yPosition > pageHeight - 15) {
-              doc.addPage();
-              yPosition = 15;
-            }
-            doc.text(item, margin, yPosition);
-            yPosition += lineHeight;
-          });
-        }
-        yPosition += sectionGap;
+        return false;
       };
 
-      // Workouts section — workouts table: name, status, completed_at, duration_minutes
-      const workoutItems = payload.workouts.map(
-        (w) => `${(w.completed_at || '').split('T')[0]} - ${w.name || 'Workout'} (${w.status || '?'}, ${w.duration_minutes ? `${w.duration_minutes} min` : 'N/A'})`
-      );
-      addSection('Workouts', workoutItems);
+      // Header Bar
+      doc.setFillColor(...brandPrimary);
+      doc.rect(0, 0, pageW, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(24);
+      doc.text('atlas.core', margin, 22);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Performance Data Report', margin, 32);
+      doc.text(`${payload.period.startDate} to ${payload.period.endDate}`, pageW - margin, 32, { align: 'right' });
 
-      // Meals/Nutrition section — food_logs table uses calories, protein, description
-      const mealItems = payload.meals.map(
-        (m) => `${(m.date || '').split('T')[0]} - ${m.description || m.food_name || 'Meal'} (${m.calories || m.total_calories || 0} cal, ${m.protein || m.protein_g || m.total_protein || 0}g protein)`
-      );
-      addSection('Meals and Nutrition', mealItems);
+      y = 55;
 
-      // Measurements section
-      const measurementItems = payload.measurements.map(
-        (m) => `${m.date} - Weight: ${m.weight || 'N/A'} kg`
-      );
-      addSection('Measurements', measurementItems);
+      // User Info
+      doc.setTextColor(...brandPrimary);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(payload.user.name, margin, y);
+      y += 6;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...colorMuted);
+      doc.text(payload.user.email, margin, y);
+      y += 15;
 
-      // Protocols section — protocols table uses substance_name, name, active, start_date
-      const protocolItems = payload.protocols.map(
-        (p) => `${p.start_date || '?'} - ${p.substance_name || p.name || 'Protocol'} (${p.active ? 'active' : 'inactive'})`
-      );
-      addSection('Protocols', protocolItems);
+      // --- Nutrition Section ---
+      doc.setTextColor(...brandPrimary);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Daily Nutrition Totals', margin, y);
+      y += 10;
 
-      // Lab exams section — lab_exams table uses exam_date, exam_type/name
-      const examItems = payload.labExams.map(
-        (e) => `${e.exam_date || '?'} - ${e.exam_type || e.name || 'Exam'}`
-      );
-      addSection('Lab Exams', examItems);
+      const mealsByDay = {};
+      payload.meals.forEach(m => {
+        const d = (m.date || '').split('T')[0];
+        if (!mealsByDay[d]) mealsByDay[d] = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+        mealsByDay[d].kcal += (Number(m.calories) || Number(m.total_calories) || 0);
+        mealsByDay[d].protein += (Number(m.protein) || Number(m.protein_g) || Number(m.total_protein) || 0);
+        mealsByDay[d].carbs += (Number(m.carbs) || Number(m.carbs_g) || Number(m.total_carbs) || 0);
+        mealsByDay[d].fat += (Number(m.fat) || Number(m.fat_g) || Number(m.total_fat) || 0);
+      });
 
-      // Footer
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'italic');
-      doc.text(
-        `Document generated by atlas.core on ${new Date().toLocaleString(locale === 'pt-BR' ? 'pt-BR' : 'en-US')}`,
-        margin,
-        pageHeight - 8
-      );
+      const targets = payload.user.targets;
+      const targetKcal = Number(targets.calories) || 0;
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...colorMuted);
+      doc.text('Date', margin, y);
+      doc.text('Calories', margin + 40, y);
+      doc.text('P / C / F', margin + 80, y);
+      doc.text('Status', margin + 130, y);
+      y += 4;
+      doc.setDrawColor(230, 230, 230);
+      doc.line(margin, y, pageW - margin, y);
+      y += 8;
+
+      Object.entries(mealsByDay).sort().forEach(([date, data]) => {
+        checkPage(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...brandPrimary);
+        doc.text(date, margin, y);
+        doc.text(`${Math.round(data.kcal)} kcal`, margin + 40, y);
+        doc.text(`${Math.round(data.protein)}g / ${Math.round(data.carbs)}g / ${Math.round(data.fat)}g`, margin + 80, y);
+
+        if (targetKcal > 0) {
+          let status = 'On target';
+          let statusColor = colorGreen;
+          const diff = data.kcal - targetKcal;
+          
+          if (diff > targetKcal * 0.1) {
+            status = 'Over';
+            statusColor = colorRed;
+          } else if (diff < -targetKcal * 0.15) {
+            status = 'Under';
+            statusColor = colorYellow;
+          }
+
+          doc.setTextColor(...statusColor);
+          doc.setFont('helvetica', 'bold');
+          doc.text(status, margin + 130, y);
+        }
+        y += 7;
+      });
+
+      y += 12;
+
+      // --- Workouts Section ---
+      checkPage(25);
+      doc.setTextColor(...brandPrimary);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Workout Logs', margin, y);
+      y += 10;
+
+      if (payload.workouts.length === 0) {
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(10);
+        doc.setTextColor(...colorMuted);
+        doc.text('No workouts recorded in this period.', margin, y);
+        y += 10;
+      } else {
+        payload.workouts.forEach(w => {
+          checkPage(8);
+          const date = (w.completed_at || '').split('T')[0];
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...brandPrimary);
+          doc.text(`${date} - ${w.name || 'Workout'}`, margin, y);
+          
+          doc.setTextColor(...colorGreen);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Completed ✓', pageW - margin, y, { align: 'right' });
+          y += 7;
+        });
+      }
+
+      // Final Footer
+      const totalPages = doc.internal.pages.length - 1;
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(...colorMuted);
+        doc.text(`Generated by atlas.core - Page ${i} of ${totalPages}`, margin, pageH - 10);
+        doc.text(new Date().toLocaleString(), pageW - margin, pageH - 10, { align: 'right' });
+      }
 
       doc.save(`${fileBase}.pdf`);
-      setNotice(
-        payload.warnings.length > 0
-          ? `PDF export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
-          : 'PDF export finished.'
-      );
+      setNotice('PDF report generated successfully.');
     } catch (error) {
       console.error(error);
       setNotice('Could not generate the PDF file.');
