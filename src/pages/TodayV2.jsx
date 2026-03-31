@@ -155,73 +155,83 @@ function DynamicHero({ weather, greeting, locale }) {
     return 'night';
   };
   
-  // Gradient definitions
-  const getBackgroundStyle = (timeOfDay, weatherCondition) => {
+  // Atmospheric background system
+  const getAtmosphericBackground = (timeOfDay, weatherCondition) => {
     const isLight = timeOfDay !== 'night';
     
-    const gradients = {
+    const backgrounds = {
       morning: {
         sunny: {
-          base: 'linear-gradient(180deg, #DDF3FF 0%, #FFF3D6 100%)',
-          radial: 'radial-gradient(circle at 20% 20%, rgba(255, 220, 120, 0.5), transparent 60%)'
+          base: 'linear-gradient(135deg, #FFE5B4 0%, #FFDAB9 25%, #FFA07A 50%, #FF8C69 75%, #FF7F50 100%)',
+          radial: 'radial-gradient(ellipse at 30% 20%, rgba(255, 220, 120, 0.6), rgba(255, 180, 100, 0.4), transparent 70%)',
+          overlay: 'linear-gradient(180deg, rgba(255, 245, 220, 0.2), rgba(255, 220, 180, 0.3))'
         },
         cloudy: {
-          base: 'linear-gradient(180deg, #D6E2EA 0%, #EDEFF2 100%)',
-          radial: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3), transparent 60%)'
+          base: 'linear-gradient(135deg, #E8E8E8 0%, #D3D3D3 25%, #C0C0C0 50%, #B8B8B8 75%, #A9A9A9 100%)',
+          radial: 'radial-gradient(ellipse at 40% 30%, rgba(255, 255, 255, 0.4), rgba(200, 200, 200, 0.3), transparent 60%)',
+          overlay: 'linear-gradient(180deg, rgba(220, 220, 220, 0.3), rgba(180, 180, 180, 0.2))'
         },
         rain: {
-          base: 'linear-gradient(180deg, #2F3E4D 0%, #4A5C6A 100%)',
-          radial: 'radial-gradient(circle at 50% 0%, rgba(120,160,200,0.25), transparent 60%)'
+          base: 'linear-gradient(135deg, #708090 0%, #696969 25%, #5F6A72 50%, #4A5568 75%, #2D3748 100%)',
+          radial: 'radial-gradient(ellipse at 50% 10%, rgba(120, 160, 200, 0.3), rgba(80, 120, 160, 0.2), transparent 50%)',
+          overlay: 'linear-gradient(180deg, rgba(100, 120, 140, 0.4), rgba(60, 80, 100, 0.3))'
         }
       },
       afternoon: {
         sunny: {
-          base: 'linear-gradient(180deg, #CFE9FF 0%, #FFE8C7 100%)',
-          radial: 'radial-gradient(circle at 30% 10%, rgba(255, 200, 100, 0.4), transparent 60%)'
+          base: 'linear-gradient(135deg, #87CEEB 0%, #87CEFA 25%, #4682B4 50%, #1E90FF 75%, #00BFFF 100%)',
+          radial: 'radial-gradient(ellipse at 60% 15%, rgba(255, 230, 150, 0.5), rgba(255, 200, 100, 0.3), transparent 60%)',
+          overlay: 'linear-gradient(180deg, rgba(135, 206, 235, 0.2), rgba(30, 144, 255, 0.3))'
         },
         cloudy: {
-          base: 'linear-gradient(180deg, #D6E2EA 0%, #EDEFF2 100%)',
-          radial: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3), transparent 60%)'
+          base: 'linear-gradient(135deg, #B0C4DE 0%, #778899 25%, #6B8E23 50%, #556B2F 75%, #2F4F4F 100%)',
+          radial: 'radial-gradient(ellipse at 45% 25%, rgba(255, 255, 255, 0.3), rgba(200, 200, 200, 0.2), transparent 50%)',
+          overlay: 'linear-gradient(180deg, rgba(176, 196, 222, 0.3), rgba(47, 79, 79, 0.2))'
         },
         rain: {
-          base: 'linear-gradient(180deg, #2F3E4D 0%, #4A5C6A 100%)',
-          radial: 'radial-gradient(circle at 50% 0%, rgba(120,160,200,0.25), transparent 60%)'
+          base: 'linear-gradient(135deg, #6495ED 0%, #4682B4 25%, #4169E1 50%, #191970 75%, #000080 100%)',
+          radial: 'radial-gradient(ellipse at 55% 5%, rgba(100, 149, 237, 0.3), rgba(70, 130, 180, 0.2), transparent 50%)',
+          overlay: 'linear-gradient(180deg, rgba(100, 149, 237, 0.4), rgba(25, 25, 112, 0.3))'
         }
       },
       night: {
         sunny: {
-          base: 'linear-gradient(180deg, #0B1A2B 0%, #1C2E44 100%)',
-          radial: 'radial-gradient(circle at 80% 20%, rgba(120,160,255,0.25), transparent 60%)'
+          base: 'linear-gradient(135deg, #191970 0%, #000080 25%, #0F0F2E 50%, #0A0A1F 75%, #050515 100%)',
+          radial: 'radial-gradient(ellipse at 80% 20%, rgba(120, 160, 255, 0.3), rgba(70, 130, 200, 0.2), transparent 50%)',
+          overlay: 'linear-gradient(180deg, rgba(25, 25, 112, 0.4), rgba(5, 5, 21, 0.3))'
         },
         cloudy: {
-          base: 'linear-gradient(180deg, #0B1A2B 0%, #1C2E44 100%)',
-          radial: 'radial-gradient(circle at 80% 20%, rgba(120,160,255,0.25), transparent 60%)'
+          base: 'linear-gradient(135deg, #2F4F4F 0%, #1C1C1C 25%, #141414 50%, #0D0D0D 75%, #080808 100%)',
+          radial: 'radial-gradient(ellipse at 70% 25%, rgba(100, 100, 120, 0.2), rgba(60, 60, 80, 0.1), transparent 40%)',
+          overlay: 'linear-gradient(180deg, rgba(47, 79, 79, 0.5), rgba(8, 8, 8, 0.4))'
         },
         rain: {
-          base: 'linear-gradient(180deg, #0B1A2B 0%, #1C2E44 100%)',
-          radial: 'radial-gradient(circle at 80% 20%, rgba(120,160,255,0.25), transparent 60%)'
+          base: 'linear-gradient(135deg, #1E1E1E 0%, #0F0F0F 25%, #0A0A0A 50%, #050505 75%, #000000 100%)',
+          radial: 'radial-gradient(ellipse at 60% 15%, rgba(80, 100, 120, 0.2), rgba(40, 60, 80, 0.1), transparent 40%)',
+          overlay: 'linear-gradient(180deg, rgba(30, 30, 30, 0.6), rgba(0, 0, 0, 0.5))'
         }
       }
     };
     
-    const variant = gradients[timeOfDay]?.[weatherCondition] || gradients[timeOfDay].sunny;
+    const variant = backgrounds[timeOfDay]?.[weatherCondition] || backgrounds[timeOfDay].sunny;
     return {
       base: variant.base,
       radial: variant.radial,
+      overlay: variant.overlay,
       isLight
     };
   };
   
-  // Subtext mapping
-  const getSubtext = (timeOfDay, weatherCondition) => {
+  // Natural contextual lines
+  const getContextualLine = (timeOfDay, weatherCondition) => {
     const messages = {
-      sunny: "Clear conditions. Good time to execute.",
-      cloudy: "Stable conditions. Stay consistent.",
-      rain: "Indoor focus. Control your inputs.",
+      sunny: "Perfect window to train.",
+      cloudy: "Steady conditions. Keep momentum.",
+      rain: "Rain outside. Stay consistent.",
       night: "Wind down or finish strong."
     };
     
-    return messages[weatherCondition] || "Stay consistent today.";
+    return messages[weatherCondition] || "Keep momentum today.";
   };
   
   // Safe defaults
@@ -229,26 +239,24 @@ function DynamicHero({ weather, greeting, locale }) {
   const safeGreeting = greeting || 'Welcome';
   const timeOfDay = getTimeOfDay(hour);
   const weatherCondition = safeWeather?.condition || 'sunny';
-  const backgroundStyle = getBackgroundStyle(timeOfDay, weatherCondition);
-  const subtext = safeWeather ? getSubtext(timeOfDay, weatherCondition) : "Stay consistent today.";
+  const backgroundStyle = getAtmosphericBackground(timeOfDay, weatherCondition);
+  const contextualLine = safeWeather ? getContextualLine(timeOfDay, weatherCondition) : "Keep momentum today.";
   
   try {
     return (
       <div 
         style={{
           width: '100%',
-          height: '220px',
+          height: '280px',
           borderRadius: '24px',
-          padding: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
+          padding: '24px',
           position: 'relative',
           overflow: 'hidden',
-          background: backgroundStyle.base
+          background: backgroundStyle.base,
+          backdropFilter: 'blur(2px)'
         }}
       >
-        {/* Light source overlay */}
+        {/* Multi-layer atmospheric effects */}
         <div 
           style={{
             position: 'absolute',
@@ -256,7 +264,33 @@ function DynamicHero({ weather, greeting, locale }) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: backgroundStyle.radial
+            background: backgroundStyle.radial,
+            mixBlendMode: 'soft-light'
+          }}
+        />
+        
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: backgroundStyle.overlay,
+            mixBlendMode: 'overlay'
+          }}
+        />
+        
+        {/* Subtle noise overlay for depth */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `url('data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="a"><feTurbulence baseFrequency="0.8" numOctaves="4"/></filter><rect width="200" height="200" filter="url(#a)" opacity="0.05"/></svg>')}`,
+            mixBlendMode: 'multiply'
           }}
         />
         
@@ -268,72 +302,115 @@ function DynamicHero({ weather, greeting, locale }) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: backgroundStyle.isLight ? 'rgba(11, 18, 32, 0.1)' : 'rgba(0, 0, 0, 0.3)'
+            background: backgroundStyle.isLight ? 'rgba(11, 18, 32, 0.15)' : 'rgba(0, 0, 0, 0.4)'
           }}
         />
         
-        {/* Content */}
+        {/* Content layout */}
         <div 
           style={{
             position: 'relative',
             zIndex: 10,
+            height: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            height: '100%'
+            flexDirection: 'column'
           }}
         >
-          {/* Date */}
+          {/* Top left: Location + Time context */}
           <div 
             style={{
-              fontSize: '12px',
-              opacity: 0.6,
-              color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF'
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '2px'
             }}
           >
-            {getDateLabel(locale)}
+            <div 
+              style={{
+                fontSize: '13px',
+                fontWeight: 500,
+                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                opacity: 0.8
+              }}
+            >
+              {getDateLabel(locale)}
+            </div>
+            <div 
+              style={{
+                fontSize: '11px',
+                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                opacity: 0.6,
+                textTransform: 'capitalize'
+              }}
+            >
+              {timeOfDay}
+            </div>
           </div>
           
-          {/* Greeting */}
+          {/* Main: Large greeting */}
           <div 
             style={{
-              fontSize: '24px',
-              fontWeight: 600,
-              lineHeight: 1.2,
-              color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
-              textAlign: 'center'
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            {safeGreeting}
+            <div 
+              style={{
+                fontSize: '32px',
+                fontWeight: 600,
+                lineHeight: 1.1,
+                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                textAlign: 'center'
+              }}
+            >
+              {safeGreeting}
+            </div>
           </div>
           
-          {/* Weather row */}
+          {/* Secondary: Weather row */}
           {safeWeather && (
             <div 
               style={{
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '8px',
-                fontSize: '16px',
-                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF'
+                marginBottom: '8px'
               }}
             >
-              <span style={{ fontSize: '20px' }}>{safeWeather.icon}</span>
-              <span style={{ fontSize: '16px' }}>{safeWeather.temp}°</span>
+              <span 
+                style={{
+                  fontSize: '24px',
+                  color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                  opacity: 0.9
+                }}
+              >
+                {safeWeather.icon}
+              </span>
+              <span 
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 500,
+                  color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                  opacity: 0.9
+                }}
+              >
+                {safeWeather.temp}°
+              </span>
             </div>
           )}
           
-          {/* Subtext */}
+          {/* Bottom: One contextual line */}
           <div 
             style={{
               fontSize: '14px',
-              opacity: 0.7,
               color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
-              textAlign: 'center',
-              maxWidth: '1px'
+              opacity: 0.7,
+              textAlign: 'center'
             }}
           >
-            {subtext}
+            {contextualLine}
           </div>
         </div>
       </div>
@@ -345,13 +422,13 @@ function DynamicHero({ weather, greeting, locale }) {
       <div 
         style={{
           width: '100%',
-          height: '220px',
+          height: '280px',
           borderRadius: '24px',
-          padding: '20px',
-          background: 'linear-gradient(180deg, #CFE9FF 0%, #FFE8C7 100%)'
+          padding: '24px',
+          background: 'linear-gradient(135deg, #87CEEB 0%, #4682B4 100%)'
         }}
       >
-        <div style={{ fontSize: '24px', fontWeight: 600, color: '#0B1220' }}>
+        <div style={{ fontSize: '32px', fontWeight: 600, color: '#0B1220', textAlign: 'center' }}>
           {safeGreeting}
         </div>
       </div>
@@ -569,18 +646,12 @@ function TodayContent() {
         {/* ONE Primary Next Action - Priority 2 */}
         {briefing.primaryAction && (
           <div className="mb-8">
-            <Link to={briefing.primaryAction.path} className="block">
-              <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-dark))] text-white px-8 py-5 shadow-xl transform transition-all duration-200 hover:scale-105 active:scale-95">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                    <Dumbbell className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-[18px] font-bold leading-tight">{briefing.primaryAction.label}</p>
-                    <p className="text-[13px] opacity-90 mt-1">{kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}</p>
-                  </div>
+            <Link to={briefing.primaryAction.path} className="block w-full">
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-dark))] text-white px-6 py-6 shadow-xl transform transition-all duration-200 hover:scale-105 active:scale-95">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <div className="text-[20px] font-bold leading-tight">{briefing.primaryAction.label}</div>
+                  <div className="text-[14px] opacity-90">{kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}</div>
                 </div>
-                <ArrowRight className="w-5 h-5" />
               </div>
             </Link>
           </div>
