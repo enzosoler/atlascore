@@ -75,28 +75,32 @@ function PrimaryAction({ action, briefingText, kcalRemaining }) {
   
   return (
     <Link to={action.path} className="group block">
-      <div className="relative overflow-hidden rounded-[24px] bg-[hsl(var(--fg))] p-6 shadow-lg transition-all duration-300 active:scale-[0.98] active:brightness-95">
-        {/* Subtle decorative glow */}
-        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+      <div className="relative overflow-hidden rounded-[24px] bg-zinc-900 p-6 shadow-lg transition-all duration-300 active:scale-[0.98] active:brightness-90">
+        {/* Subtle decorative glow - brand colored */}
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.15)] blur-3xl" />
+        <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-[hsl(var(--brand-ai)/0.1)] blur-3xl" />
         
         <div className="relative z-10 flex flex-col gap-4">
-          <div className="space-y-1">
-            <p className="text-[13px] font-semibold uppercase tracking-wider text-white/60">
-              {action.label}
-            </p>
-            <h2 className="text-xl font-bold leading-tight text-white">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand))]" />
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/50">
+                {action.label}
+              </p>
+            </div>
+            <h2 className="text-[20px] font-bold leading-[1.2] tracking-tight text-white">
               {briefingText}
             </h2>
           </div>
           
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10">
-              <span className="text-[12px] font-bold text-white">
-                {kcalRemaining > 0 ? `${kcalRemaining} kcal` : 'Target met'}
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-md">
+              <span className="text-[12px] font-bold text-white/90">
+                {kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}
               </span>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[hsl(var(--fg))] shadow-sm transition-transform group-hover:translate-x-1">
-              <ArrowRight className="h-5 w-5" strokeWidth={2.5} />
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-zinc-900 shadow-xl transition-transform group-hover:translate-x-1">
+              <ArrowRight className="h-5 w-5" strokeWidth={3} />
             </div>
           </div>
         </div>

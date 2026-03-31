@@ -43,7 +43,7 @@ function getAdherenceTone(score) {
 export function TodayScreen({ children }) {
   return (
     <div className="min-h-full bg-transparent text-[hsl(var(--fg))]">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 px-4 pb-12 pt-5 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:gap-9 lg:px-8 lg:pb-16 lg:pt-9">
+      <div className="mx-auto flex w-full max-w-[640px] flex-col gap-8 px-4 pb-12 pt-5 sm:px-6 sm:pb-14 sm:pt-6 lg:pb-16 lg:pt-9">
         {children}
       </div>
     </div>
