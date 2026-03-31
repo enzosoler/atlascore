@@ -147,209 +147,193 @@ function DynamicHero({ weather, greeting, locale }) {
   const t = useT();
   const hour = new Date().getHours();
   
-  console.log('DynamicHero props:', { weather, greeting, locale });
-  
-  // Get scenic background variant
-  const getScenicBackground = (hour, weatherCondition) => {
-    const timeOfDay = getTimeOfDay(hour);
-    
-    // Scenic atmospheric backgrounds with rich layers
-    const backgrounds = {
-      morning: {
-        clear: {
-          base: 'bg-gradient-to-br from-sky-200 via-blue-100 to-amber-50',
-          light: 'radial-gradient-circle from-amber-300/40 via-orange-200/20 to-transparent',
-          overlay: 'bg-gradient-to-t from-yellow-100/10 via-transparent to-transparent'
-        },
-        cloudy: {
-          base: 'bg-gradient-to-br from-gray-100 via-slate-100 to-blue-50',
-          light: 'radial-gradient-circle from-white/30 via-gray-200/20 to-transparent',
-          overlay: 'bg-gradient-to-t from-blue-50/10 via-transparent to-transparent'
-        },
-        rainy: {
-          base: 'bg-gradient-to-br from-slate-200 via-gray-150 to-blue-100',
-          light: 'radial-gradient-circle from-gray-300/40 via-blue-200/20 to-transparent',
-          overlay: 'bg-gradient-to-t from-slate-100/20 via-transparent to-transparent'
-        }
-      },
-      afternoon: {
-        clear: {
-          base: 'bg-gradient-to-br from-blue-100 via-cyan-50 to-white',
-          light: 'radial-gradient-circle from-yellow-200/50 via-white/30 to-transparent',
-          overlay: 'bg-gradient-to-b from-white/10 via-transparent to-transparent'
-        },
-        cloudy: {
-          base: 'bg-gradient-to-br from-gray-50 via-slate-50 to-neutral-50',
-          light: 'radial-gradient-circle from-white/40 via-gray-200/20 to-transparent',
-          overlay: 'bg-gradient-to-b from-neutral-50/10 via-transparent to-transparent'
-        },
-        rainy: {
-          base: 'bg-gradient-to-br from-gray-100 via-slate-100 to-blue-50',
-          light: 'radial-gradient-circle from-gray-300/40 via-blue-200/20 to-transparent',
-          overlay: 'bg-gradient-to-b from-blue-50/20 via-transparent to-transparent'
-        }
-      },
-      evening: {
-        clear: {
-          base: 'bg-gradient-to-br from-orange-100 via-pink-50 to-purple-50',
-          light: 'radial-gradient-circle from-orange-300/60 via-pink-200/30 to-transparent',
-          overlay: 'bg-gradient-to-t from-purple-50/10 via-transparent to-transparent'
-        },
-        cloudy: {
-          base: 'bg-gradient-to-br from-slate-100 via-gray-100 to-purple-50',
-          light: 'radial-gradient-circle from-purple-200/40 via-gray-200/20 to-transparent',
-          overlay: 'bg-gradient-to-b from-purple-50/10 via-transparent to-transparent'
-        },
-        rainy: {
-          base: 'bg-gradient-to-br from-slate-200 via-gray-150 to-blue-100',
-          light: 'radial-gradient-circle from-gray-400/40 via-blue-200/20 to-transparent',
-          overlay: 'bg-gradient-to-b from-blue-100/20 via-transparent to-transparent'
-        }
-      },
-      night: {
-        clear: {
-          base: 'bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950',
-          light: 'radial-gradient-circle from-blue-400/30 via-indigo-300/20 to-transparent',
-          overlay: 'bg-gradient-to-t from-indigo-400/10 via-transparent to-transparent'
-        },
-        cloudy: {
-          base: 'bg-gradient-to-br from-slate-800 via-gray-700 to-slate-600',
-          light: 'radial-gradient-circle from-gray-400/40 via-slate-300/20 to-transparent',
-          overlay: 'bg-gradient-to-b from-slate-600/10 via-transparent to-transparent'
-        },
-        rainy: {
-          base: 'bg-gradient-to-br from-slate-900 via-gray-800 to-blue-900',
-          light: 'radial-gradient-circle from-gray-500/40 via-blue-200/20 to-transparent',
-          overlay: 'bg-gradient-to-b from-blue-900/20 via-transparent to-transparent'
-        }
-      }
-    };
-    
-    const variant = backgrounds[timeOfDay]?.[weatherCondition] || backgrounds[timeOfDay].clear;
-    return variant;
+  // Time detection
+  const getTimeOfDay = (hour) => {
+    if (hour >= 5 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
   };
   
-  // Contextual supporting copy based on time and conditions
-  const getSupportingCopy = (hour, weather) => {
-    const timeOfDay = getTimeOfDay(hour);
+  // Gradient definitions
+  const getBackgroundStyle = (timeOfDay, weatherCondition) => {
+    const isLight = timeOfDay !== 'night';
     
-    if (!weather) {
-      const fallbackCopy = {
-        morning: t('today.hero.morning.focus'),
-        afternoon: t('today.hero.afternoon.energy'),
-        evening: t('today.hero.evening.consistency'),
-        night: t('today.hero.night.recovery')
-      };
-      return fallbackCopy[timeOfDay];
-    }
-    
-    // Weather-aware contextual copy
-    const contextualCopy = {
+    const gradients = {
       morning: {
-        clear: t('today.hero.morning.clear'),
-        cloudy: t('today.hero.morning.overcast'),
-        rainy: t('today.hero.morning.rainy')
+        sunny: {
+          base: 'linear-gradient(180deg, #DDF3FF 0%, #FFF3D6 100%)',
+          radial: 'radial-gradient(circle at 20% 20%, rgba(255, 220, 120, 0.5), transparent 60%)'
+        },
+        cloudy: {
+          base: 'linear-gradient(180deg, #D6E2EA 0%, #EDEFF2 100%)',
+          radial: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3), transparent 60%)'
+        },
+        rain: {
+          base: 'linear-gradient(180deg, #2F3E4D 0%, #4A5C6A 100%)',
+          radial: 'radial-gradient(circle at 50% 0%, rgba(120,160,200,0.25), transparent 60%)'
+        }
       },
       afternoon: {
-        clear: t('today.hero.afternoon.peak'),
-        cloudy: t('today.hero.afternoon.soft'),
-        rainy: t('today.hero.afternoon.cozy')
-      },
-      evening: {
-        clear: t('today.hero.evening.warm'),
-        cloudy: t('today.hero.evening.gentle'),
-        rainy: t('today.hero.evening.cozy')
+        sunny: {
+          base: 'linear-gradient(180deg, #CFE9FF 0%, #FFE8C7 100%)',
+          radial: 'radial-gradient(circle at 30% 10%, rgba(255, 200, 100, 0.4), transparent 60%)'
+        },
+        cloudy: {
+          base: 'linear-gradient(180deg, #D6E2EA 0%, #EDEFF2 100%)',
+          radial: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3), transparent 60%)'
+        },
+        rain: {
+          base: 'linear-gradient(180deg, #2F3E4D 0%, #4A5C6A 100%)',
+          radial: 'radial-gradient(circle at 50% 0%, rgba(120,160,200,0.25), transparent 60%)'
+        }
       },
       night: {
-        clear: t('today.hero.night.clear'),
-        cloudy: t('today.hero.night.calm'),
-        rainy: t('today.hero.night.restful')
+        sunny: {
+          base: 'linear-gradient(180deg, #0B1A2B 0%, #1C2E44 100%)',
+          radial: 'radial-gradient(circle at 80% 20%, rgba(120,160,255,0.25), transparent 60%)'
+        },
+        cloudy: {
+          base: 'linear-gradient(180deg, #0B1A2B 0%, #1C2E44 100%)',
+          radial: 'radial-gradient(circle at 80% 20%, rgba(120,160,255,0.25), transparent 60%)'
+        },
+        rain: {
+          base: 'linear-gradient(180deg, #0B1A2B 0%, #1C2E44 100%)',
+          radial: 'radial-gradient(circle at 80% 20%, rgba(120,160,255,0.25), transparent 60%)'
+        }
       }
     };
     
-    return contextualCopy[timeOfDay]?.[weather.condition] || t('today.hero.default.consistency');
+    const variant = gradients[timeOfDay]?.[weatherCondition] || gradients[timeOfDay].sunny;
+    return {
+      base: variant.base,
+      radial: variant.radial,
+      isLight
+    };
+  };
+  
+  // Subtext mapping
+  const getSubtext = (timeOfDay, weatherCondition) => {
+    const messages = {
+      sunny: "Clear conditions. Good time to execute.",
+      cloudy: "Stable conditions. Stay consistent.",
+      rain: "Indoor focus. Control your inputs.",
+      night: "Wind down or finish strong."
+    };
+    
+    return messages[weatherCondition] || "Stay consistent today.";
   };
   
   // Safe defaults
-  const safeWeather = weather || { temp: 20, condition: 'clear', icon: '☀️' };
-  const safeGreeting = greeting || t('today.greeting.default');
+  const safeWeather = weather || null;
+  const safeGreeting = greeting || 'Welcome';
   const timeOfDay = getTimeOfDay(hour);
-  const weatherCondition = safeWeather.condition || 'clear';
+  const weatherCondition = safeWeather?.condition || 'sunny';
+  const backgroundStyle = getBackgroundStyle(timeOfDay, weatherCondition);
+  const subtext = safeWeather ? getSubtext(timeOfDay, weatherCondition) : "Stay consistent today.";
   
-  console.log('DynamicHero config:', { timeOfDay, weatherCondition, hour });
-  
-  // Get scenic background
-  const scenicBg = getScenicBackground(hour, weatherCondition);
-  const supportingCopy = getSupportingCopy(hour, safeWeather);
-  
-  console.log('DynamicHero scenic:', { scenicBg, supportingCopy });
-  
-  // Time-based text colors for readability
-  const textColors = {
-    morning: 'text-slate-800',
-    afternoon: 'text-slate-700', 
-    evening: 'text-slate-700',
-    night: 'text-slate-100'
-  };
-  
-  const subTextColors = {
-    morning: 'text-slate-600',
-    afternoon: 'text-slate-500',
-    evening: 'text-slate-500', 
-    night: 'text-slate-300'
-  };
-  
-  const textColor = textColors[timeOfDay];
-  const subTextColor = subTextColors[timeOfDay];
-  const isDarkTime = timeOfDay === 'night';
-
   try {
     return (
-      <div className="relative overflow-hidden rounded-3xl min-h-[280px]">
-        {/* Scenic layered background */}
-        <div className={`absolute inset-0 ${scenicBg.base} transition-all duration-1000`}>
-          {/* Radial light source */}
-          <div className={`absolute inset-0 ${scenicBg.light} opacity-60`} />
-          
-          {/* Soft gradient overlay */}
-          <div className={`absolute inset-0 ${scenicBg.overlay} opacity-40`} />
-          
-          {/* Subtle noise for depth */}
-          <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsdGVyVW5pdGhpbmciICAvPjwvZmlsdGVyPjwvc3ZnPjwvc3ZnPj0=')]" />
-          
-          {/* Dark overlay for text readability */}
-          <div className={`absolute inset-0 ${isDarkTime ? 'bg-black/30' : 'bg-white/20'}`} />
-        </div>
-
-        {/* Content with generous spacing */}
-        <div className="relative z-10 p-8 text-center">
-          {/* Date line */}
-          <p className={`text-xs font-medium uppercase tracking-wider ${subTextColor} mb-2`}>
+      <div 
+        style={{
+          width: '100%',
+          height: '220px',
+          borderRadius: '24px',
+          padding: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          position: 'relative',
+          overflow: 'hidden',
+          background: backgroundStyle.base
+        }}
+      >
+        {/* Light source overlay */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: backgroundStyle.radial
+          }}
+        />
+        
+        {/* Readability overlay */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: backgroundStyle.isLight ? 'rgba(11, 18, 32, 0.1)' : 'rgba(0, 0, 0, 0.3)'
+          }}
+        />
+        
+        {/* Content */}
+        <div 
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            height: '100%'
+          }}
+        >
+          {/* Date */}
+          <div 
+            style={{
+              fontSize: '12px',
+              opacity: 0.6,
+              color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF'
+            }}
+          >
             {getDateLabel(locale)}
-          </p>
+          </div>
           
-          {/* Main content container */}
-          <div className="max-w-md mx-auto">
-            {/* Large greeting headline */}
-            <h1 className={`text-4xl font-bold mb-3 leading-tight ${textColor}`}>
-              {safeGreeting}
-            </h1>
-            
-            {/* Supporting sentence */}
-            <p className={`text-lg font-medium mb-6 leading-relaxed ${subTextColor}`}>
-              {supportingCopy}
-            </p>
-            
-            {/* Weather info with clear visual hierarchy */}
-            {safeWeather && (
-              <div className="flex items-center justify-center gap-4">
-                <span className="text-3xl">{safeWeather.icon}</span>
-                <div className="text-left">
-                  <p className={`text-sm font-medium capitalize ${textColor}`}>{safeWeather.condition}</p>
-                  <p className={`text-2xl font-semibold ${textColor}`}>{safeWeather.temp}°</p>
-                </div>
-              </div>
-            )}
+          {/* Greeting */}
+          <div 
+            style={{
+              fontSize: '24px',
+              fontWeight: 600,
+              lineHeight: 1.2,
+              color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+              textAlign: 'center'
+            }}
+          >
+            {safeGreeting}
+          </div>
+          
+          {/* Weather row */}
+          {safeWeather && (
+            <div 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '16px',
+                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF'
+              }}
+            >
+              <span style={{ fontSize: '20px' }}>{safeWeather.icon}</span>
+              <span style={{ fontSize: '16px' }}>{safeWeather.temp}°</span>
+            </div>
+          )}
+          
+          {/* Subtext */}
+          <div 
+            style={{
+              fontSize: '14px',
+              opacity: 0.7,
+              color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+              textAlign: 'center',
+              maxWidth: '1px'
+            }}
+          >
+            {subtext}
           </div>
         </div>
       </div>
@@ -358,9 +342,18 @@ function DynamicHero({ weather, greeting, locale }) {
     console.error('DynamicHero error:', error);
     // Fallback hero
     return (
-      <div className="relative overflow-hidden rounded-3xl min-h-[280px] bg-gradient-to-br from-blue-100 to-purple-100 p-8 text-center">
-        <p className="text-3xl font-bold text-gray-900 mb-2">{safeGreeting}</p>
-        <p className="text-lg text-gray-700">{t('today.hero.default.consistency')}</p>
+      <div 
+        style={{
+          width: '100%',
+          height: '220px',
+          borderRadius: '24px',
+          padding: '20px',
+          background: 'linear-gradient(180deg, #CFE9FF 0%, #FFE8C7 100%)'
+        }}
+      >
+        <div style={{ fontSize: '24px', fontWeight: 600, color: '#0B1220' }}>
+          {safeGreeting}
+        </div>
       </div>
     );
   }
