@@ -43,6 +43,7 @@ import { LanguageToggle } from '@/components/public/PublicSiteShell';
 import { useI18n } from '@/lib/i18nContext';
 import { getPrimaryScrollTop, resetPrimaryScroll, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
 import { useViewportHeight } from '@/hooks/use-viewport-height';
+import DailyCheckinGate from '@/components/app/DailyCheckinGate';
 
 const ICON_MAP = {
   Home,
@@ -699,6 +700,9 @@ export default function AppLayout() {
 
         <SupportWidget />
       </main>
+
+      {/* Daily check-in gate — blocks the UI after 10 am until filled */}
+      <DailyCheckinGate />
     </div>
   );
 }
