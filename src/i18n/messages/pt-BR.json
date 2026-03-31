@@ -2840,13 +2840,13 @@
       "couldNotUpdateStatus": "Não foi possível atualizar o status."
     },
     "chat": {
-      "title": "Coach",
+      "title": "Coach IA",
       "done": "Feito",
       "confirm": "Confirmar",
       "dismiss": "Dispensar",
-      "emptyTitle": "Me pergunte qualquer coisa",
-      "emptyDesc": "Treino, nutrição, recuperação — conheço seus dados.",
-      "placeholder": "Mensagem para seu coach...",
+      "emptyTitle": "Comece sua jornada de coaching",
+      "emptyDesc": "Receba orientação personalizada para treino, nutrição e recuperação.",
+      "placeholder": "Pergunte ao seu coach qualquer coisa...",
       "triggerBar": "Pergunte ao seu coach...",
       "suggestions": {
         "today": {
@@ -2857,15 +2857,17 @@
         "training": {
           "swap": "Trocar um exercício",
           "explain": "Explicar o treino de hoje",
-          "shorter": "Fazer mais curto"
+          "shorter": "Tornar mais curto"
         },
         "nutrition": {
+          "adjust": "Ajustar meus macros",
+          "suggest": "Sugerir uma refeição",
           "logMeal": "Registrar refeição",
           "highProtein": "Sugerir refeição rica em proteína",
           "calories": "Ajustar minhas calorias"
         },
         "progress": {
-          "stalled": "Por que meu peso estacionou?",
+          "stalled": "Por que meu peso estagnou?",
           "trends": "Resumir minhas tendências",
           "deficit": "Estou em déficit?"
         }

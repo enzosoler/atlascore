@@ -1640,16 +1640,14 @@
       "weight_stable": "El peso es estable — ideal para fases de mantenimiento.",
       "weight_trending_down": "Peso bajando {n}kg — monitorea energía y recuperación.",
       "weight_trending_up": "Peso subiendo {n}kg — verifica si esto se alinea con tu objetivo.",
-      "body_fat_dropping": "La grasa corporal está bajando — ¡excelente progreso en pérdida de grasa!",
+      "body_fat_dropping": "La grasa corporal está bajando — tu entrenamiento y nutrición están funcionando.",
       "body_fat_increasing": "La grasa corporal aumentó. Considera ajustar cardio o nutrición.",
       "body_fat_steady": "La grasa corporal se mantiene estable.",
       "bmi_underweight": "El IMC indica bajo peso. Enfócate en nutrición para ganar músculo.",
       "bmi_elevated": "El IMC está elevado. Los hábitos consistentes moverán la aguja.",
       "bmi_healthy": "IMC en rango saludable. ¡Sigue ganando fuerza!",
       "great_consistency": "Gran consistencia — ¡{n} puntos de control registrados!",
-      "log_weekly": "Registra puntos de control semanales para un análisis de tendencia más preciso.",
-      "body_fat_dropping": "Grasa corporal bajando — tu entrenamiento y nutrición están funcionando.",
-      "body_fat_increasing": "Grasa corporal aumentando — considera revisar tu ingesta calórica."
+      "log_weekly": "Registra puntos de control semanales para un análisis de tendencia más preciso."
     },
     "next_action": {
       "log_first_checkpoint": "Registra tu primer checkpoint corporal",
@@ -2634,13 +2632,13 @@
       "couldNotUpdateStatus": "No se pudo actualizar el estado."
     },
     "chat": {
-      "title": "Coach",
-      "done": "Listo",
+      "title": "Coach IA",
+      "done": "Hecho",
       "confirm": "Confirmar",
       "dismiss": "Descartar",
-      "emptyTitle": "Pregúntame lo que quieras",
-      "emptyDesc": "Entrenamiento, nutrición, recuperación — conozco tus datos.",
-      "placeholder": "Mensaje a tu coach...",
+      "emptyTitle": "Comienza tu viaje de coaching",
+      "emptyDesc": "Recibe orientación personalizada para entrenamiento, nutrición y recuperación.",
+      "placeholder": "Pregúntale a tu coach cualquier cosa...",
       "triggerBar": "Pregunta a tu coach...",
       "suggestions": {
         "today": {
@@ -2654,12 +2652,14 @@
           "shorter": "Hacerlo más corto"
         },
         "nutrition": {
+          "adjust": "Ajustar mis macros",
+          "suggest": "Sugerir una comida",
           "logMeal": "Registrar comida",
           "highProtein": "Sugerir comida alta en proteína",
           "calories": "Ajustar mis calorías"
         },
         "progress": {
-          "stalled": "¿Por qué se estancó mi peso?",
+          "stalled": "¿Por qué mi peso se estancó?",
           "trends": "Resumir mis tendencias",
           "deficit": "¿Estoy en déficit?"
         }

@@ -143,318 +143,47 @@ function interpretWeather(temp, code, t) {
 
 // ─── Dynamic Hero Component ─────────────────────────────────────────────────────────
 
-function DynamicHero({ weather, greeting, locale }) {
+// ─── Simple Header Component ─────────────────────────────────────────────────────────
+
+function SimpleHeader({ weather, greeting, locale }) {
   const t = useT();
-  const hour = new Date().getHours();
-  
-  // Time detection
-  const getTimeOfDay = (hour) => {
-    if (hour >= 5 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 17) return 'afternoon';
-    if (hour >= 17 && hour < 21) return 'evening';
-    return 'night';
-  };
-  
-  // Full-width background system (no card behavior)
-  const getBackgroundSystem = (timeOfDay, weatherCondition) => {
-    const isLight = timeOfDay !== 'night';
-    
-    const backgrounds = {
-      morning: {
-        sunny: {
-          base: 'linear-gradient(180deg, #FFE5CC 0%, #FFD4A3 20%, #FFC299 40%, #FFB380 60%, #FFA366 80%, #FF944D 100%)',
-          secondary: 'linear-gradient(135deg, rgba(255, 220, 180, 0.3), rgba(255, 180, 120, 0.2))',
-          radial: 'radial-gradient(ellipse at 25% 15%, rgba(255, 200, 150, 0.6), rgba(255, 160, 100, 0.3), transparent 70%)'
-        },
-        cloudy: {
-          base: 'linear-gradient(180deg, #F5E6D3 0%, #E8D5C4 20%, #DBC4B5 40%, #CEB3A6 60%, #C1A297 80%, #B49188 100%)',
-          secondary: 'linear-gradient(135deg, rgba(230, 210, 190, 0.4), rgba(200, 180, 160, 0.3))',
-          radial: 'radial-gradient(ellipse at 30% 20%, rgba(255, 245, 230, 0.5), rgba(230, 210, 190, 0.3), transparent 60%)'
-        },
-        rain: {
-          base: 'linear-gradient(180deg, #E8DCD0 0%, #D4C4B8 20%, #C0B0A0 40%, #AC9C88 60%, #988870 80%, #847458 100%)',
-          secondary: 'linear-gradient(135deg, rgba(180, 160, 140, 0.4), rgba(140, 120, 100, 0.3))',
-          radial: 'radial-gradient(ellipse at 40% 10%, rgba(200, 180, 160, 0.4), rgba(160, 140, 120, 0.2), transparent 50%)'
-        }
-      },
-      afternoon: {
-        sunny: {
-          base: 'linear-gradient(180deg, #E6F3FF 0%, #D4EBFF 20%, #C2E3FF 40%, #B0DBFF 60%, #9ED3FF 80%, #8CCBFF 100%)',
-          secondary: 'linear-gradient(135deg, rgba(200, 220, 240, 0.3), rgba(150, 200, 230, 0.2))',
-          radial: 'radial-gradient(ellipse at 35% 10%, rgba(255, 245, 220, 0.4), rgba(255, 230, 180, 0.2), transparent 60%)'
-        },
-        cloudy: {
-          base: 'linear-gradient(180deg, #F0F4F8 0%, #E4E8ED 20%, #D8DCE2 40%, #CCD0D7 60%, #C0C4CC 80%, #B4B8C1 100%)',
-          secondary: 'linear-gradient(135deg, rgba(220, 225, 230, 0.3), rgba(180, 185, 190, 0.2))',
-          radial: 'radial-gradient(ellipse at 40% 15%, rgba(255, 250, 245, 0.4), rgba(240, 235, 230, 0.2), transparent 50%)'
-        },
-        rain: {
-          base: 'linear-gradient(180deg, #DDE4EA 0%, #C8D0D8 20%, #B3BCC6 40%, #9EA8B4 60%, #8994A2 80%, #748090 100%)',
-          secondary: 'linear-gradient(135deg, rgba(160, 170, 180, 0.4), rgba(120, 130, 140, 0.3))',
-          radial: 'radial-gradient(ellipse at 45% 5%, rgba(200, 210, 220, 0.3), rgba(160, 170, 180, 0.2), transparent 50%)'
-        }
-      },
-      evening: {
-        sunny: {
-          base: 'linear-gradient(180deg, #FFE5F1 0%, #FFD3E8 20%, #FFC1DF 40%, #FFAFD6 60%, #FF9DCD 80%, #FF8BC4 100%)',
-          secondary: 'linear-gradient(135deg, rgba(255, 200, 220, 0.3), rgba(255, 150, 180, 0.2))',
-          radial: 'radial-gradient(ellipse at 75% 25%, rgba(255, 180, 200, 0.5), rgba(255, 140, 160, 0.3), transparent 60%)'
-        },
-        cloudy: {
-          base: 'linear-gradient(180deg, #F0E5EA 0%, #E0D2D8 20%, #D0BFC6 40%, #C0ACB4 60%, #B09AA2 80%, #A08890 100%)',
-          secondary: 'linear-gradient(135deg, rgba(220, 200, 210, 0.4), rgba(180, 160, 170, 0.3))',
-          radial: 'radial-gradient(ellipse at 70% 20%, rgba(240, 220, 230, 0.4), rgba(220, 200, 210, 0.2), transparent 50%)'
-        },
-        rain: {
-          base: 'linear-gradient(180deg, #E5DCE0 0%, #D0C4CA 20%, #BBACB4 40%, #A6949E 60%, #917C88 80%, #7C6472 100%)',
-          secondary: 'linear-gradient(135deg, rgba(180, 160, 170, 0.4), rgba(140, 120, 130, 0.3))',
-          radial: 'radial-gradient(ellipse at 65% 15%, rgba(220, 200, 210, 0.3), rgba(180, 160, 170, 0.2), transparent 50%)'
-        }
-      },
-      night: {
-        sunny: {
-          base: 'linear-gradient(180deg, #1A1F3A 0%, #161D36 20%, #121B32 40%, #0E192E 60%, #0A172A 80%, #061526 100%)',
-          secondary: 'linear-gradient(135deg, rgba(60, 80, 120, 0.3), rgba(40, 60, 100, 0.2))',
-          radial: 'radial-gradient(ellipse at 85% 20%, rgba(100, 140, 200, 0.4), rgba(60, 100, 160, 0.2), transparent 50%)'
-        },
-        cloudy: {
-          base: 'linear-gradient(180deg, #1F1F2E 0%, #1A1A28 20%, #151522 40%, #10101C 60%, #0B0B16 80%, #060610 100%)',
-          secondary: 'linear-gradient(135deg, rgba(60, 60, 80, 0.3), rgba(40, 40, 60, 0.2))',
-          radial: 'radial-gradient(ellipse at 75% 25%, rgba(80, 80, 100, 0.3), rgba(60, 60, 80, 0.2), transparent 40%)'
-        },
-        rain: {
-          base: 'linear-gradient(180deg, #1A1A24 0%, #14141E 20%, #0E0E18 40%, #080812 60%, #02020C 80%, #000006 100%)',
-          secondary: 'linear-gradient(135deg, rgba(40, 40, 50, 0.4), rgba(20, 20, 30, 0.3))',
-          radial: 'radial-gradient(ellipse at 70% 15%, rgba(60, 60, 70, 0.3), rgba(40, 40, 50, 0.2), transparent 40%)'
-        }
-      }
-    };
-    
-    const variant = backgrounds[timeOfDay]?.[weatherCondition] || backgrounds[timeOfDay].sunny;
-    return {
-      base: variant.base,
-      secondary: variant.secondary,
-      radial: variant.radial,
-      isLight
-    };
-  };
-  
-  // Natural contextual lines
-  const getContextualLine = (timeOfDay, weatherCondition) => {
-    const messages = {
-      sunny: "Perfect window to train.",
-      cloudy: "Steady conditions. Keep momentum.",
-      rain: "Rain outside. Stay consistent.",
-      night: "Wind down or finish strong."
-    };
-    
-    return messages[weatherCondition] || "Keep momentum today.";
-  };
   
   // Safe defaults
   const safeWeather = weather || null;
-  const safeGreeting = greeting || 'Welcome';
-  const timeOfDay = getTimeOfDay(hour);
-  const weatherCondition = safeWeather?.condition || 'sunny';
-  const backgroundSystem = getBackgroundSystem(timeOfDay, weatherCondition);
-  const contextualLine = safeWeather ? getContextualLine(timeOfDay, weatherCondition) : "Keep momentum today.";
+  const safeGreeting = greeting || t('today.greeting.default');
   
   try {
     return (
-      <div 
-        style={{
-          width: '100%',
-          height: '320px',
-          position: 'relative',
-          overflow: 'hidden',
-          background: backgroundSystem.base,
-          marginLeft: '-24px',
-          marginRight: '-24px',
-          marginTop: '-24px'
-        }}
-      >
-        {/* Multi-layer atmospheric system */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: backgroundSystem.secondary,
-            mixBlendMode: 'soft-light'
-          }}
-        />
+      <div className="mb-6">
+        {/* Greeting line */}
+        <div className="text-2xl font-semibold text-[hsl(var(--fg))] mb-2">
+          {safeGreeting}
+        </div>
         
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: backgroundSystem.radial,
-            mixBlendMode: 'overlay'
-          }}
-        />
-        
-        {/* Subtle noise overlay */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: `url('data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="a"><feTurbulence baseFrequency="0.6" numOctaves="3"/></filter><rect width="200" height="200" filter="url(#a)" opacity="0.03"/></svg>')}`,
-            mixBlendMode: 'multiply'
-          }}
-        />
-        
-        {/* Readability overlay */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: backgroundSystem.isLight ? 'rgba(11, 18, 32, 0.08)' : 'rgba(0, 0, 0, 0.3)'
-          }}
-        />
-        
-        {/* Content */}
-        <div 
-          style={{
-            position: 'relative',
-            zIndex: 10,
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '32px 24px 24px 24px'
-          }}
-        >
-          {/* Top: Date + time context */}
-          <div 
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px'
-            }}
-          >
-            <div 
-              style={{
-                fontSize: '13px',
-                fontWeight: 500,
-                color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
-                opacity: 0.7
-              }}
-            >
-              {getDateLabel(locale)}
-            </div>
-            <div 
-              style={{
-                fontSize: '11px',
-                color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
-                opacity: 0.5,
-                textTransform: 'capitalize'
-              }}
-            >
-              {timeOfDay}
-            </div>
+        {/* Date and weather row */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-[hsl(var(--fg-2))]">
+            {getDateLabel(locale)}
           </div>
           
-          {/* Center: Large greeting */}
-          <div 
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <div 
-              style={{
-                fontSize: '36px',
-                fontWeight: 600,
-                lineHeight: 1.1,
-                color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
-                textAlign: 'center'
-              }}
-            >
-              {safeGreeting}
-            </div>
-          </div>
-          
-          {/* Below: Weather row */}
           {safeWeather && (
-            <div 
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '12px',
-                marginBottom: '12px'
-              }}
-            >
-              <span 
-                style={{
-                  fontSize: '28px',
-                  color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
-                  opacity: 0.9
-                }}
-              >
-                {safeWeather.icon}
-              </span>
-              <span 
-                style={{
-                  fontSize: '20px',
-                  fontWeight: 500,
-                  color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
-                  opacity: 0.9
-                }}
-              >
-                {safeWeather.temp}°
-              </span>
+            <div className="flex items-center gap-2 text-sm text-[hsl(var(--fg-2))]">
+              <span className="text-base">{safeWeather.icon}</span>
+              <span>{safeWeather.temp}°</span>
             </div>
           )}
-          
-          {/* Bottom: One contextual line */}
-          <div 
-            style={{
-              fontSize: '15px',
-              color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
-              opacity: 0.8,
-              textAlign: 'center'
-            }}
-          >
-            {contextualLine}
-          </div>
         </div>
       </div>
     );
   } catch (error) {
-    console.error('DynamicHero error:', error);
-    // Fallback hero
+    console.error('SimpleHeader error:', error);
     return (
-      <div 
-        style={{
-          width: '100%',
-          height: '320px',
-          marginLeft: '-24px',
-          marginRight: '-24px',
-          marginTop: '-24px',
-          background: 'linear-gradient(180deg, #E6F3FF 0%, #8CCBFF 100%)'
-        }}
-      >
-        <div style={{ 
-          fontSize: '36px', 
-          fontWeight: 600, 
-          color: '#0B1220', 
-          textAlign: 'center',
-          padding: '120px 24px 24px'
-        }}>
+      <div className="mb-6">
+        <div className="text-2xl font-semibold text-[hsl(var(--fg))] mb-2">
           {safeGreeting}
+        </div>
+        <div className="text-sm text-[hsl(var(--fg-2))]">
+          {getDateLabel(locale)}
         </div>
       </div>
     );
@@ -659,9 +388,9 @@ function TodayContent() {
           </div>
         )}
 
-        {/* Dynamic Hero - Priority 1 */}
+        {/* Simple Header */}
         <div className="mb-6">
-          <DynamicHero 
+          <SimpleHeader 
             weather={weather} 
             greeting={getGreeting(safeDaily.preferredName, t)}
             locale={locale}
@@ -671,11 +400,15 @@ function TodayContent() {
         {/* ONE Primary Next Action - Priority 2 */}
         {briefing.primaryAction && (
           <div className="mb-8">
-            <Link to={briefing.primaryAction.path} className="block w-full">
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-black text-white px-6 py-6 transform transition-all duration-200 hover:scale-105 active:scale-95">
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <div className="text-[20px] font-bold leading-tight">{briefing.primaryAction.label}</div>
-                  <div className="text-[14px] opacity-90">{kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}</div>
+            <Link to={briefing.primaryAction.path} className="block">
+              <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border))] p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:bg-[hsl(var(--fill))] active:scale-[0.98]">
+                <div className="flex flex-col items-center text-center">
+                  <div className="text-xl font-semibold text-[hsl(var(--fg))] mb-2">
+                    {briefing.primaryAction.label}
+                  </div>
+                  <div className="text-sm text-[hsl(var(--fg-2))]">
+                    {kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}
+                  </div>
                 </div>
               </div>
             </Link>

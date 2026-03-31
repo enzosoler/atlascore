@@ -2839,13 +2839,13 @@
       "couldNotUpdateStatus": "Could not update the status."
     },
     "chat": {
-      "title": "Coach",
+      "title": "AI Coach",
       "done": "Done",
       "confirm": "Confirm",
       "dismiss": "Dismiss",
-      "emptyTitle": "Ask me anything",
-      "emptyDesc": "Training, nutrition, recovery — I know your data.",
-      "placeholder": "Message your coach...",
+      "emptyTitle": "Start your coaching journey",
+      "emptyDesc": "Get personalized guidance for training, nutrition, and recovery.",
+      "placeholder": "Ask your coach anything...",
       "triggerBar": "Ask your coach...",
       "suggestions": {
         "today": {
@@ -2859,6 +2859,8 @@
           "shorter": "Make it shorter"
         },
         "nutrition": {
+          "adjust": "Adjust my macros",
+          "suggest": "Suggest a meal",
           "logMeal": "Log a meal",
           "highProtein": "Suggest a high-protein meal",
           "calories": "Adjust my calories"

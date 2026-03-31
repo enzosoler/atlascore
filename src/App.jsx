@@ -219,12 +219,21 @@ const RequireAuthenticatedApp = () => {
   }
 
   // Onboarding Guard: Single source of truth is profiles.onboarding_completed.
-  // We use a local fallback to handle the immediate transition after save.
+  // We sync local storage to match DB state to prevent inconsistencies.
   const isOnboardingRoute = location.pathname === ROUTES.onboarding;
+  const dbOnboarded = user?.onboarding_completed === true;
   const localOnboardingDone = localStorage.getItem(`onboarding_done_${user?.id}`) === 'true';
-  const isActuallyOnboarded = user?.onboarding_completed === true || localOnboardingDone;
+  
+  // Sync local storage with database state
+  if (dbOnboarded && !localOnboardingDone && user?.id) {
+    localStorage.setItem(`onboarding_done_${user.id}`, 'true');
+  } else if (!dbOnboarded && localOnboardingDone && user?.id) {
+    localStorage.removeItem(`onboarding_done_${user.id}`);
+  }
+  
+  const isActuallyOnboarded = dbOnboarded; // Database is source of truth
 
-  console.log('[AuthGuard]', { path: location.pathname, dbOnboarded: user?.onboarding_completed, localOnboarded: localOnboardingDone, result: isActuallyOnboarded });
+  console.log('[AuthGuard]', { path: location.pathname, dbOnboarded, localOnboarded, result: isActuallyOnboarded });
 
   if (!isActuallyOnboarded && !isOnboardingRoute) {
     console.log('[AuthGuard] Redirecting to onboarding:', { userId: user?.id, route: location.pathname });
