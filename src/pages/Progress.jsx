@@ -11,7 +11,7 @@ import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip, ReferenceLine,
 } from 'recharts';
-import { format, subDays, parseISO, isValid } from 'date-fns';
+import { format, subDays, parseISO, isValid, startOfWeek, isSameDay } from 'date-fns';
 import {
   TrendingDown, TrendingUp, Minus, ArrowRight,
   Camera, Sparkles, FlaskConical, Plus, Target,
@@ -44,6 +44,12 @@ function safeDate(v) {
   if (!v) return null;
   const d = typeof v === 'string' ? parseISO(v) : new Date(v);
   return isValid(d) ? d : null;
+}
+
+function formatDateKey(date) {
+  const d = safeDate(date);
+  if (!d) return '';
+  return format(d, 'yyyy-MM-dd');
 }
 
 function dateLabel(dateStr, days) {
@@ -347,12 +353,19 @@ function TrendLineChart({ data, dataKey, gradientId, color, days, unit, showRegr
 
 function TargetBarChart({ data, dataKey, targetValue, color, days, unit, emptyLabel, emptyCta, noDataLabel = 'No data' }) {
   if (!data || !data.some((d) => d[dataKey] != null)) return <EmptyChart label={emptyLabel} cta={emptyCta} to={ROUTES.nutrition} />;
+  
+  // Ensure the chart doesn't look "full" if values are tiny and target is 0
+  const maxValue = Math.max(...data.map(d => d[dataKey] || 0));
+  const defaultTarget = unit === 'g' ? 120 : unit === 'kcal' ? 2000 : 0;
+  const effectiveTarget = targetValue > 0 ? targetValue : defaultTarget;
+  const domainMax = Math.max(maxValue * 1.1, effectiveTarget * 1.05);
+
   return (
     <ResponsiveContainer width="100%" height={110}>
       <BarChart data={data} margin={{ top: 4, right: 4, left: -28, bottom: 0 }} barCategoryGap="25%">
         <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} interval={days <= 7 ? 0 : days <= 28 ? 3 : 6} />
-        <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} width={36} tickCount={3} />
-        <Tooltip content={<Tip unit={unit} fmt={(v) => v != null ? `${Math.round(v)} ${unit}` : noDataLabel} />} />
+        <YAxis domain={[0, domainMax]} tick={{ fontSize: 10, fill: 'hsl(var(--fg-3))' }} tickLine={false} axisLine={false} width={36} tickCount={3} />
+        <Tooltip cursor={{ fill: 'hsl(var(--fill)/0.4)' }} content={<Tip unit={unit} fmt={(v) => v != null ? `${Math.round(v)} ${unit}` : noDataLabel} />} />
         {targetValue > 0 && <ReferenceLine y={targetValue} stroke="hsl(var(--brand))" strokeDasharray="4 3" strokeOpacity={0.5} strokeWidth={1.5} />}
         <Bar dataKey={dataKey} fill={color} fillOpacity={0.75} radius={[3, 3, 0, 0]} />
       </BarChart>
@@ -450,11 +463,14 @@ function ProgressContent() {
   // ── Calorie data ────────────────────────────────────────────────────────────
   const calorieData = useMemo(() => {
     const byDay = {};
-    for (const l of foodLogs) { const k = l.date?.split('T')[0]; if (k) byDay[k] = (byDay[k] ?? 0) + (l.calories ?? 0); }
+    for (const l of foodLogs) {
+      const k = formatDateKey(l.date);
+      if (k) byDay[k] = (byDay[k] ?? 0) + (l.calories ?? 0);
+    }
     const result = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = subDays(new Date(), i);
-      const k = d.toISOString().split('T')[0];
+      const k = formatDateKey(d);
       result.push({ date: k, label: dateLabel(k, days), calories: byDay[k] ?? null });
     }
     return result;
@@ -463,11 +479,14 @@ function ProgressContent() {
   // ── Protein data ────────────────────────────────────────────────────────────
   const proteinData = useMemo(() => {
     const byDay = {};
-    for (const l of foodLogs) { const k = l.date?.split('T')[0]; if (k) byDay[k] = (byDay[k] ?? 0) + (l.protein ?? 0); }
+    for (const l of foodLogs) {
+      const k = formatDateKey(l.date);
+      if (k) byDay[k] = (byDay[k] ?? 0) + (l.protein ?? 0);
+    }
     const result = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = subDays(new Date(), i);
-      const k = d.toISOString().split('T')[0];
+      const k = formatDateKey(d);
       result.push({ date: k, label: dateLabel(k, days), protein: byDay[k] ?? null });
     }
     return result;
@@ -476,20 +495,28 @@ function ProgressContent() {
   // ── Workout trend (weekly count) ────────────────────────────────────────────
   const workoutWeekData = useMemo(() => {
     const byWeek = {};
+    // Group all workouts into weeks (Monday start)
     for (const l of workoutLogs) {
       const d = safeDate(l.date);
       if (!d) continue;
-      const weekStart = new Date(d); weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-      const k = weekStart.toISOString().split('T')[0];
+      const ws = startOfWeek(d, { weekStartsOn: 1 });
+      const k = formatDateKey(ws);
       byWeek[k] = (byWeek[k] ?? 0) + 1;
     }
-    return Object.entries(byWeek).sort().map(([k, v]) => ({ label: dateLabel(k, days), count: v }));
-  }, [workoutLogs, days]);
+    // Convert to sorted array
+    return Object.entries(byWeek)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([k, v]) => ({ 
+        label: format(parseISO(k), 'MMM d'), 
+        date: k, 
+        count: v 
+      }));
+  }, [workoutLogs]);
 
   // ── Adherence ───────────────────────────────────────────────────────────────
   const adherence = useMemo(() => {
-    const foodDays = new Set(foodLogs.map((l) => l.date?.split('T')[0]).filter(Boolean));
-    const wkDays = new Set(workoutLogs.map((l) => l.date?.split('T')[0]).filter(Boolean));
+    const foodDays = new Set(foodLogs.map((l) => formatDateKey(l.date)).filter(Boolean));
+    const wkDays = new Set(workoutLogs.map((l) => formatDateKey(l.date)).filter(Boolean));
     return {
       nutrition: Math.round((foodDays.size / days) * 100),
       training: Math.round((wkDays.size / days) * 100),
