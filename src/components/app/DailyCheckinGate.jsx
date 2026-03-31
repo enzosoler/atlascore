@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Moon, Zap, Droplets, Smile } from 'lucide-react';
+import { Moon, Zap, Smile } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
@@ -45,22 +45,12 @@ const ROWS = [
     step: 1,
     format: (v) => ['', 'Terrible', 'Poor', 'Neutral', 'Good', 'Excellent'][v],
   },
-  {
-    key: 'hydration_liters',
-    label: 'Water',
-    icon: Droplets,
-    min: 0,
-    max: 5,
-    step: 0.25,
-    format: (v) => `${v.toFixed(1)} L`,
-  },
 ];
 
 const DEFAULT_VALS = {
   sleep_hours: 7,
   energy: 3,
   mood: 3,
-  hydration_liters: 0,
 };
 
 export default function DailyCheckinGate() {
