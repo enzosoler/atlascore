@@ -75,31 +75,31 @@ function PrimaryAction({ action, briefingText, kcalRemaining }) {
   
   return (
     <Link to={action.path} className="group block">
-      <div className="relative overflow-hidden rounded-[24px] bg-zinc-900 p-6 shadow-lg transition-all duration-300 active:scale-[0.98] active:brightness-90">
+      <div className="relative overflow-hidden rounded-[24px] bg-zinc-950 dark:bg-white p-6 shadow-2xl transition-all duration-300 active:scale-[0.98] active:brightness-90">
         {/* Subtle decorative glow - brand colored */}
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.15)] blur-3xl" />
-        <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-[hsl(var(--brand-ai)/0.1)] blur-3xl" />
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[hsl(var(--brand)/0.15)] dark:bg-[hsl(var(--brand)/0.08)] blur-3xl" />
+        <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-[hsl(var(--brand-ai)/0.1)] dark:bg-[hsl(var(--brand-ai)/0.05)] blur-3xl" />
         
         <div className="relative z-10 flex flex-col gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="flex h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand))]" />
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/50">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/50 dark:text-zinc-950/50">
                 {action.label}
               </p>
             </div>
-            <h2 className="text-[20px] font-bold leading-[1.2] tracking-tight text-white">
+            <h2 className="text-[21px] font-bold leading-[1.15] tracking-tight text-white dark:text-zinc-950">
               {briefingText}
             </h2>
           </div>
           
           <div className="flex items-center justify-between mt-1">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-md">
-              <span className="text-[12px] font-bold text-white/90">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 dark:bg-zinc-950/5 border border-white/10 dark:border-zinc-950/10 backdrop-blur-md">
+              <span className="text-[12px] font-bold text-white/90 dark:text-zinc-950/90">
                 {kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}
               </span>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-zinc-900 shadow-xl transition-transform group-hover:translate-x-1">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xl transition-transform group-hover:translate-x-1">
               <ArrowRight className="h-5 w-5" strokeWidth={3} />
             </div>
           </div>
