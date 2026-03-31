@@ -1,89 +1,140 @@
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabaseClient';
-import { getAdminMetrics } from '@/lib/adminService';
-import { Users, CreditCard, Brain, AlertTriangle, MessageCircle, Dumbbell, Activity } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { ROUTES } from '@/lib/routes';
+import {
+  Users, CreditCard, UserPlus, Brain, AlertTriangle,
+  MessageCircle, Clock, Activity, TrendingUp, CheckCircle,
+} from 'lucide-react';
+import AdminSparkline from '@/components/admin/AdminSparkline';
+import {
+  getEnhancedAdminMetrics, fetchRecentSignups,
+  fetchRecentErrors, fetchSignupSparkline,
+} from '@/lib/adminService';
 
-const ADMIN = ROUTES.admin;
-
-function Metric({ icon: Icon, label, value, sub, color = 'text-[hsl(var(--brand))]', to }) {
-  const inner = (
-    <div className="atlas-card px-5 py-4 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]">
-      <div className="flex items-center gap-2">
-        <div className={`flex h-8 w-8 items-center justify-center rounded-[12px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] ${color}`}>
-          <Icon className="h-4 w-4" strokeWidth={1.9} />
-        </div>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</span>
-      </div>
-      <p className="mt-3 text-[1.4rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">{value ?? '—'}</p>
-      {sub && <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">{sub}</p>}
-    </div>
-  );
-  return to ? <Link to={to}>{inner}</Link> : inner;
+function relTime(d) {
+  if (!d) return '—';
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
+const KPI_CARDS = [
+  { key: 'signupsToday', label: 'Signups Today', icon: UserPlus, spark: true },
+  { key: 'totalUsers', label: 'Total Users', icon: Users, sub: (m) => `+${m.signupsLast7Days} this week` },
+  { key: 'activeSubscriptions', label: 'Active Subs', icon: CreditCard, sub: (m) => `${m.trialingSubscriptions} trialing` },
+  { key: 'onboardingRate', label: 'Onboarding Rate', icon: CheckCircle, suffix: '%', sub: (m) => `${m.onboardingCompleted} completed` },
+  { key: 'trialToPaidRate', label: 'Trial → Paid', icon: TrendingUp, suffix: '%' },
+  { key: 'aiMessagesToday', label: 'AI Messages Today', icon: Brain },
+  { key: 'errorsToday', label: 'Errors Today', icon: AlertTriangle, alert: (m) => m.errorsToday > 10 },
+  { key: 'pendingSupportRequests', label: 'Support Requests', icon: MessageCircle },
+  { key: 'trialsExpiringIn7Days', label: 'Trials Expiring 7d', icon: Clock },
+  { key: 'system', label: 'System Status', icon: Activity, value: () => 'Operational', ok: true },
+];
+
 export default function AdminOverview() {
-  const { data: metrics } = useQuery({ queryKey: ['admin-metrics'], queryFn: getAdminMetrics, staleTime: 30_000 });
+  const navigate = useNavigate();
 
-  const todayISO = new Date().toISOString().split('T')[0];
-
-  const { data: todayWorkouts } = useQuery({
-    queryKey: ['admin-today-workouts'],
-    queryFn: async () => {
-      const { count } = await supabase.from('workouts').select('*', { count: 'exact', head: true }).eq('status', 'completed').gte('completed_at', `${todayISO}T00:00:00`);
-      return count || 0;
-    },
+  const { data: metrics } = useQuery({
+    queryKey: ['enhanced-admin-metrics'],
+    queryFn: getEnhancedAdminMetrics,
     staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 
-  const { data: errorCount } = useQuery({
-    queryKey: ['admin-today-errors'],
-    queryFn: async () => {
-      const { count } = await supabase.from('error_logs').select('*', { count: 'exact', head: true }).gte('created_at', `${todayISO}T00:00:00`);
-      return count || 0;
-    },
-    staleTime: 30_000,
-  });
-
-  const { data: supportCount } = useQuery({
-    queryKey: ['admin-pending-support'],
-    queryFn: async () => {
-      const { count } = await supabase.from('support_requests').select('*', { count: 'exact', head: true });
-      return count || 0;
-    },
+  const { data: sparkline } = useQuery({
+    queryKey: ['admin-sparkline'],
+    queryFn: () => fetchSignupSparkline(7),
     staleTime: 60_000,
   });
 
-  const { data: aiRecsToday } = useQuery({
-    queryKey: ['admin-ai-recs-today'],
-    queryFn: async () => {
-      const { count } = await supabase.from('ai_recommendations').select('*', { count: 'exact', head: true }).gte('created_at', `${todayISO}T00:00:00`);
-      return count || 0;
-    },
+  const { data: recentSignups } = useQuery({
+    queryKey: ['admin-recent-signups'],
+    queryFn: () => fetchRecentSignups(5),
+    staleTime: 30_000,
+  });
+
+  const { data: recentErrors } = useQuery({
+    queryKey: ['admin-recent-errors'],
+    queryFn: () => fetchRecentErrors(5),
     staleTime: 30_000,
   });
 
   const m = metrics || {};
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="atlas-display-title text-[1.4rem]">Overview</h1>
-        <p className="atlas-copy mt-1">System health at a glance</p>
+        <h1 className="text-lg font-semibold text-[hsl(var(--fg))]">Overview</h1>
+        <p className="text-[13px] text-[hsl(var(--fg-3))]">Platform health at a glance</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Metric icon={Users} label="Total Users" value={m.totalUsers} sub={m.newUsersLast7Days ? `+${m.newUsersLast7Days} this week` : null} to={`${ADMIN}/users`} />
-        <Metric icon={CreditCard} label="Active Subs" value={m.activeSubscriptions} sub={m.trialingSubscriptions ? `${m.trialingSubscriptions} trialing` : null} color="text-[hsl(var(--ok))]" to={`${ADMIN}/subscriptions`} />
-        <Metric icon={Dumbbell} label="Workouts Today" value={todayWorkouts} color="text-[hsl(var(--brand-ai))]" />
-        <Metric icon={Brain} label="AI Recs Today" value={aiRecsToday} color="text-[hsl(var(--brand))]" to={`${ADMIN}/ai-system`} />
+      {/* KPI Grid */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        {KPI_CARDS.map((card) => {
+          const val = card.value ? card.value(m) : (m[card.key] ?? '—');
+          const isAlert = card.alert?.(m);
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.key}
+              className={`rounded-[14px] border bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-xs)] transition ${
+                isAlert
+                  ? 'border-[hsl(var(--err)/0.5)]'
+                  : card.ok
+                  ? 'border-[hsl(var(--ok)/0.3)]'
+                  : 'border-[hsl(var(--border)/0.6)]'
+              }`}
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <Icon className={`h-4 w-4 ${isAlert ? 'text-[hsl(var(--err))]' : card.ok ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-3))]'}`} />
+                {card.spark && sparkline && <AdminSparkline data={sparkline} color="hsl(var(--brand))" />}
+              </div>
+              <p className={`text-xl font-bold ${isAlert ? 'text-[hsl(var(--err))]' : card.ok ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]'}`}>
+                {val}{card.suffix || ''}
+              </p>
+              <p className="mt-0.5 text-[11px] text-[hsl(var(--fg-3))]">{card.label}</p>
+              {card.sub && <p className="mt-1 text-[11px] text-[hsl(var(--fg-3))]">{card.sub(m)}</p>}
+            </div>
+          );
+        })}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Metric icon={AlertTriangle} label="Errors Today" value={errorCount} color={errorCount > 10 ? 'text-[hsl(var(--err))]' : 'text-[hsl(var(--warn))]'} to={`${ADMIN}/logs`} />
-        <Metric icon={MessageCircle} label="Support" value={supportCount} color="text-[hsl(var(--brand-ai))]" to={`${ADMIN}/logs`} />
-        <Metric icon={Activity} label="System" value="Operational" color="text-[hsl(var(--ok))]" />
+      {/* Recent Activity */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-[18px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card))] p-5 shadow-[var(--shadow-xs)]">
+          <h2 className="mb-3 text-[13px] font-semibold text-[hsl(var(--fg))]">Recent Signups</h2>
+          {(recentSignups || []).map((u) => (
+            <button
+              key={u.id}
+              type="button"
+              onClick={() => navigate(`/AdminPanel/users/${u.id}`)}
+              className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-[hsl(var(--fill)/0.5)]"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[11px] font-bold text-[hsl(var(--brand))]">
+                {(u.full_name || u.email || '?')[0]?.toUpperCase()}
+              </div>
+              <div className="flex-1 truncate">
+                <p className="truncate text-[13px] font-medium text-[hsl(var(--fg))]">{u.full_name || u.email}</p>
+                <p className="truncate text-[11px] text-[hsl(var(--fg-3))]">{u.email}</p>
+              </div>
+              <span className="shrink-0 text-[11px] text-[hsl(var(--fg-3))]">{relTime(u.created_at)}</span>
+            </button>
+          ))}
+          {(!recentSignups || recentSignups.length === 0) && <p className="text-[13px] text-[hsl(var(--fg-3))]">No recent signups.</p>}
+        </div>
+
+        <div className="rounded-[18px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card))] p-5 shadow-[var(--shadow-xs)]">
+          <h2 className="mb-3 text-[13px] font-semibold text-[hsl(var(--fg))]">Recent Errors</h2>
+          {(recentErrors || []).map((e) => (
+            <div key={e.id} className="border-b border-[hsl(var(--border)/0.2)] py-2.5">
+              <p className="truncate text-[13px] text-[hsl(var(--fg))]">{e.message || 'Error'}</p>
+              <p className="text-[11px] text-[hsl(var(--fg-3))]">{e.component || e.route || '—'} · {relTime(e.created_at)}</p>
+            </div>
+          ))}
+          {(!recentErrors || recentErrors.length === 0) && <p className="text-[13px] text-[hsl(var(--fg-3))]">No recent errors.</p>}
+        </div>
       </div>
     </div>
   );

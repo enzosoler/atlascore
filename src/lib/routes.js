@@ -47,6 +47,8 @@ export const ROUTES = {
   storyLanding: '/start',
   shareTarget: '/share-target',
   notifications: '/notifications',
+  adminAnalytics: '/AdminPanel/analytics',
+  adminViewAs: '/AdminPanel/view-as',
 };
 
 /**

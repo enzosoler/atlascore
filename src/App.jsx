@@ -54,6 +54,8 @@ const AdminRoles = lazy(() => import('@/pages/admin/AdminRoles'));
 const AdminInvites = lazy(() => import('@/pages/admin/AdminInvites'));
 const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
 const ModerationConsole = lazy(() => import('@/pages/admin/ModerationConsole'));
+const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
+const AdminImpersonation = lazy(() => import('@/pages/admin/AdminImpersonation'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const MyDiet = lazy(() => import('@/pages/MyDiet'));
@@ -438,8 +440,10 @@ const AppRoutes = () => (
             <Route path="roles" element={<AdminRoles />} />
             <Route path="invites" element={<AdminInvites />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="moderation" element={<ModerationConsole />} />
           </Route>
+          <Route path={`${ROUTES.admin}/view-as/:userId`} element={<WebOnlyRoute fallback="/Today"><RouteGuard roles={['admin']}><AdminImpersonation /></RouteGuard></WebOnlyRoute>} />
         </Route>
       )}
 

@@ -4,25 +4,29 @@ import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import {
   LayoutDashboard, Users, CreditCard, Shield, FileText, Settings,
-  LogOut, Menu, Brain, Mail, ArrowLeft, X,
+  LogOut, Menu, Brain, Mail, ArrowLeft, X, BarChart2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
 
 const ADMIN = ROUTES.admin;
 
-const primaryNav = [
+const coreNav = [
   { path: ADMIN,                     label: 'Overview',      icon: LayoutDashboard, end: true },
   { path: `${ADMIN}/users`,         label: 'Users',         icon: Users },
+  { path: `${ADMIN}/analytics`,     label: 'Analytics',     icon: BarChart2 },
   { path: `${ADMIN}/ai-system`,     label: 'AI System',     icon: Brain },
+];
+
+const opsNav = [
   { path: `${ADMIN}/logs`,          label: 'Logs & Errors', icon: FileText },
   { path: `${ADMIN}/subscriptions`, label: 'Subscriptions', icon: CreditCard },
 ];
 
-const secondaryNav = [
+const settingsNav = [
   { path: `${ADMIN}/roles`,    label: 'Roles',    icon: Shield },
   { path: `${ADMIN}/invites`,  label: 'Invites',  icon: Mail },
-  { path: `${ADMIN}/settings`, label: 'Settings', icon: Settings },
+  { path: `${ADMIN}/settings`, label: 'Config',   icon: Settings },
 ];
 
 export default function AdminLayout() {
@@ -114,10 +118,13 @@ function SidebarContent({ user, onNav }) {
 
       <nav className="flex-1 space-y-1 p-3">
         <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Core</p>
-        {primaryNav.map((item) => <NavItem key={item.path} item={item} onClick={onNav} />)}
+        {coreNav.map((item) => <NavItem key={item.path} item={item} onClick={onNav} />)}
         <div className="my-3 border-t border-[hsl(var(--border)/0.4)]" />
-        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">System</p>
-        {secondaryNav.map((item) => <NavItem key={item.path} item={item} onClick={onNav} />)}
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Operations</p>
+        {opsNav.map((item) => <NavItem key={item.path} item={item} onClick={onNav} />)}
+        <div className="my-3 border-t border-[hsl(var(--border)/0.4)]" />
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Settings</p>
+        {settingsNav.map((item) => <NavItem key={item.path} item={item} onClick={onNav} />)}
       </nav>
 
       <div className="border-t border-[hsl(var(--border)/0.5)] px-5 py-3">
