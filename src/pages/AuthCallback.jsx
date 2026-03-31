@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES, ROLE_HOME } from '@/lib/routes';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { useI18n } from '@/lib/i18nContext';
 
@@ -10,10 +10,12 @@ async function resolvePostAuthRoute(userId) {
   try {
     const { data } = await supabase
       .from('profiles')
-      .select('onboarding_completed')
+      .select('onboarding_completed, role')
       .eq('id', userId)
       .maybeSingle();
-    if (data?.onboarding_completed) return ROUTES.today;
+    if (data?.onboarding_completed) {
+      return ROLE_HOME[data.role] || ROUTES.today;
+    }
   } catch {
     // On error, default to onboarding — safe fallback
   }
