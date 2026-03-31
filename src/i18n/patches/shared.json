@@ -99,19 +99,27 @@
         "hero": {
           "morning": {
             "focus": "Perfect time to move",
-            "perfect": "Perfect conditions for training"
+            "clear": "A clear start for focused work",
+            "overcast": "Soft light for steady progress",
+            "rainy": "Great conditions to stay consistent"
           },
           "afternoon": {
             "energy": "Strong energy window",
-            "strong": "Peak performance time"
+            "peak": "Peak performance time",
+            "soft": "Gentle conditions for focused work",
+            "cozy": "Perfect weather for indoor training"
           },
           "evening": {
             "consistency": "Stay consistent today",
-            "clear": "Clear evening for recovery"
+            "warm": "Warm evening for recovery",
+            "gentle": "Calm conditions for reflection",
+            "cozy": "Comfortable evening for rest"
           },
           "night": {
             "recovery": "Focus on recovery",
-            "clear": "Clear night, rest well"
+            "clear": "Clear night, rest well",
+            "calm": "Quiet conditions for quality sleep",
+            "restful": "Peaceful night for restoration"
           },
           "default": {
             "consistency": "Focus on execution"
