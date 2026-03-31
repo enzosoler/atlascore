@@ -40,7 +40,7 @@ function getDateLabel(locale) {
 
 function getFirstName(fullName) {
   if (!fullName) return '';
-  const [first] = String(fullName).split(/[\s@._-]+/).filter(Boolean);
+  const [first] = String(fullName).split(/[\s@._-]+/).filter(Boolean) || [];
   if (!first) return '';
   const clean = first.replace(/\d+$/u, '') || first;
   return `${clean.charAt(0).toLocaleUpperCase()}${clean.slice(1)}`;
@@ -396,38 +396,47 @@ function TodayContent() {
 
   const chat = useCoachChat({
     userId: user?.id,
-    invalidateAfterAction: daily.invalidateAfterAction,
-    activePlan: daily.activePlan,
+    invalidateAfterAction: daily?.invalidateAfterAction,
+    activePlan: daily?.activePlan,
   });
 
+  // Defensive defaults for all data
+  const safeDaily = daily || {};
+  const safePlan = safeDaily?.plan || {};
+  const safeNutrition = safeDaily?.nutrition || {};
+  const safeProtocols = safeDaily?.protocols || {};
+  const safeAi = ai || {};
+  const safeChat = chat || {};
+  
   // Briefing: AI when available, rules-based fallback
-  const kcalRemaining = Math.max(0, (daily.nutrition.caloriesTarget || 2000) - daily.nutrition.caloriesConsumed);
-  const briefing = ai.briefing
-    ? { text: ai.briefing.body || ai.briefing.title, focus: ai.briefing.focus, primaryAction: null, secondaryAction: null }
+  const kcalRemaining = Math.max(0, (safeNutrition.caloriesTarget || 2000) - (safeNutrition.caloriesConsumed || 0));
+  const briefing = safeAi.briefing
+    ? { text: safeAi.briefing.body || safeAi.briefing.title, focus: safeAi.briefing.focus, primaryAction: null, secondaryAction: null }
     : buildBriefing({
-        workoutDone: daily.workoutDone,
-        nutritionLogged: daily.nutritionLogged,
-        hasActivePlan: daily.plan.id != null,
-        planName: daily.plan.name,
-        preferredName: daily.preferredName,
+        workoutDone: safeDaily.workoutDone,
+        nutritionLogged: safeDaily.nutritionLogged,
+        hasActivePlan: safePlan.id != null,
+        planName: safePlan.name,
+        preferredName: safeDaily.preferredName,
         kcalRemaining,
         t,
       });
 
   // Recommendations: AI when available, rules-based fallback (max 2)
-  const recs = (ai.recommendations?.length > 0)
-    ? ai.recommendations.slice(0, 2)
-    : buildRecommendations({
-        workoutDone: daily.workoutDone,
-        hasActivePlan: daily.plan.id != null,
-        proteinConsumed: daily.nutrition.proteinConsumed,
-        proteinTarget: daily.nutrition.proteinTarget,
-        weightLogged: daily.weightLogged,
-        hasPhotos: false,
-        t,
-      });
+  const aiRecs = safeAi.recommendations || [];
+  const fallbackRecs = buildRecommendations({
+    workoutDone: safeDaily.workoutDone,
+    hasActivePlan: safePlan.id != null,
+    proteinConsumed: safeNutrition.proteinConsumed || 0,
+    proteinTarget: safeNutrition.proteinTarget || 0,
+    weightLogged: safeDaily.weightLogged,
+    hasPhotos: false,
+    t,
+  }) || [];
+  
+  const recs = Array.isArray(aiRecs) && aiRecs.length > 0 ? aiRecs.slice(0, 2) : (Array.isArray(fallbackRecs) ? fallbackRecs : []);
 
-  console.log('TodayContent state:', { daily, weather, hasError, briefing, recs });
+  console.log('TodayContent state:', { safeDaily, weather, hasError, briefing, recs });
 
   try {
     return (
@@ -443,7 +452,7 @@ function TodayContent() {
         <div className="mb-6">
           <DynamicHero 
             weather={weather} 
-            greeting={getGreeting(daily.preferredName, t)}
+            greeting={getGreeting(safeDaily.preferredName, t)}
             locale={locale}
           />
         </div>
@@ -473,7 +482,7 @@ function TodayContent() {
               <Dumbbell className="w-5 h-5 text-[hsl(var(--brand))]" />
               <div>
                 <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Workout</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.workoutDone ? 'Completed' : 'Start today'}</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.workoutDone ? 'Completed' : 'Start today'}</p>
               </div>
             </div>
           </Link>
@@ -482,7 +491,7 @@ function TodayContent() {
               <UtensilsCrossed className="w-5 h-5 text-[hsl(var(--brand-ai))]" />
               <div>
                 <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Nutrition</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.nutritionLogged ? 'Track meals' : 'Log first meal'}</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.nutritionLogged ? 'Track meals' : 'Log first meal'}</p>
               </div>
             </div>
           </Link>
@@ -491,7 +500,7 @@ function TodayContent() {
               <Scale className="w-5 h-5 text-[hsl(var(--ok))]" />
               <div>
                 <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Body</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.weightLogged ? 'Logged' : 'Check in'}</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.weightLogged ? 'Logged' : 'Check in'}</p>
               </div>
             </div>
           </Link>
@@ -507,25 +516,26 @@ function TodayContent() {
         </div>
 
         {/* Today's Plan - Priority 5 */}
-        {daily.plan.id && (
+        {safePlan.id && (
           <div className="mb-6">
             <PlanCard
               icon={Dumbbell}
-              label={daily.plan.name || 'Today\'s workout'}
-              value={daily.workoutDone ? 'Done' : 'Start'}
-              sub={daily.plan.todayExercises?.length ? `${daily.plan.todayExercises.length} exercises` : null}
+              label={safePlan.name || 'Today\'s workout'}
+              value={safeDaily.workoutDone ? 'Done' : 'Start'}
+              sub={safePlan.todayExercises?.length ? `${safePlan.todayExercises.length} exercises` : null}
               to={ROUTES.workouts}
-              color={daily.workoutDone ? 'ok' : 'brand'}
+              color={safeDaily.workoutDone ? 'ok' : 'brand'}
             />
           </div>
         )}
+
         {/* Recommendations - Only if compelling */}
-        {recs.length > 0 && (
+        {Array.isArray(recs) && recs.length > 0 && (
           <div className="mb-6">
             <p className="text-[13px] font-medium text-[hsl(var(--fg-3))] mb-3">Recommendations</p>
             <div className="space-y-3">
               {recs.map((rec) => (
-                <RecCard key={rec.id} rec={rec} onDismiss={() => {}} />
+                <RecCard key={rec.id || Math.random()} rec={rec} onDismiss={() => {}} />
               ))}
             </div>
           </div>
