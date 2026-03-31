@@ -1898,74 +1898,134 @@ export default function NutritionPage() {
       <div className="min-h-full bg-[hsl(var(--bg))]">
         <div className="mx-auto max-w-lg px-4 pt-5 space-y-4">
 
-        {/* Header + Date */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
-            {t('pages.nutrition.title')}
-          </h1>
-          <DateStepper date={selectedDate} onChange={handleDateChange} />
-        </div>
-
-        {notice && <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>}
-
-        {/* 1 — Stats Header */}
-        <NutritionStatsHeader 
-          dailyTotals={dailyTotals} 
-          profile={profile} 
-          sortedMeals={sortedMeals}
-          loggingStreak={loggingStreak}
-          t={t}
-        />
-
-        {/* 2 — Complete Celebration (if targets reached) */}
-        <NutritionCompleteCard 
-          dailyTotals={dailyTotals} 
-          profile={profile}
-          t={t}
-        />
-
-        {/* 3 — Next Meal Suggestion */}
-        <NextMealSuggestion 
-          dailyTotals={dailyTotals}
-          profile={profile}
-          sortedMeals={sortedMeals}
-          onAddMeal={handleAddMeal}
-          t={t}
-        />
-
-        {/* 4 — Meal Timeline or Empty State */}
-        {isLoadingMeals ? (
-          <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Loading meals...
+          {/* Header + Date Navigation */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {t('pages.nutrition.title')}
+            </h1>
+            <DateStepper date={selectedDate} onChange={handleDateChange} />
           </div>
-        ) : sortedMeals.length > 0 ? (
-          <MealTimeline
-            meals={sortedMeals}
-            onEdit={handleEditMeal}
-            onDelete={handleDeleteMeal}
-            onAddMeal={handleAddMeal}
-          />
-        ) : (
-          <NutritionEmptyState
-            onAddMeal={handleAddMeal}
-            onQuickAdd={handleQuickAdd}
-            hasTargets={profile.calories_target > 0}
-            t={t}
-          />
-        )}
 
-        {/* 5 — Macro Progress (if has meals) */}
-        {sortedMeals.length > 0 && (
-          <MacroProgressBar dailyTotals={dailyTotals} profile={profile} />
-        )}
+          {notice && <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>}
 
-        {/* 6 — AI Suggestions */}
-        <AINutritionSuggestions
-          dailyTotals={dailyTotals}
-          profile={profile}
-          mealCount={sortedMeals.length}
-        />
+          {/* Daily Macro Summary */}
+          <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[17px] font-semibold text-[hsl(var(--fg))]">{t('nutrition.daily_log_title')}</h2>
+              {selectedDate === TODAY && (
+                <div className="flex items-center gap-1 text-[hsl(var(--brand))]">
+                  <span className="text-[13px] font-medium">{loggingStreak}</span>
+                  <span className="text-[11px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.days')}</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <p className="text-[24px] font-bold text-[hsl(var(--fg))]">{Math.round(dailyTotals.calories)}</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">{t('nutrition.calories_label')}</p>
+                {profile.calories_target > 0 && (
+                  <p className="text-[10px] text-[hsl(var(--fg-3))] mt-1">
+                    {getRemainingValue(profile.calories_target, dailyTotals.calories)} {t('nutrition.remaining')}
+                  </p>
+                )}
+              </div>
+              <div className="text-center">
+                <p className="text-[24px] font-bold text-[hsl(var(--brand))]">{Math.round(dailyTotals.protein)}g</p>
+                <p className="text-[11px] text-[hsl(var(--fg-3))]">{t('nutrition.protein_label')}</p>
+                {profile.protein_target > 0 && (
+                  <p className="text-[10px] text-[hsl(var(--fg-3))] mt-1">
+                    {getRemainingValue(profile.protein_target, dailyTotals.protein)}g {t('nutrition.remaining')}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {profile.calories_target > 0 && (
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between text-[12px] text-[hsl(var(--fg-3))]">
+                  <span>{t('nutrition.progress')}</span>
+                  <span>{Math.round(getProgressPercent(dailyTotals.calories, profile.calories_target))}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
+                  <div 
+                    className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-500"
+                    style={{ width: `${Math.min(getProgressPercent(dailyTotals.calories, profile.calories_target), 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Meals Timeline or Strong Empty State */}
+          {isLoadingMeals ? (
+            <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t('nutrition.loading_meals')}
+            </div>
+          ) : sortedMeals.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('nutrition.daily_log_title')}</h3>
+                <span className="text-[12px] text-[hsl(var(--fg-3))]">{sortedMeals.length} {t('nutrition.stats.meals')}</span>
+              </div>
+              <MealTimeline
+                meals={sortedMeals}
+                onEdit={handleEditMeal}
+                onDelete={handleDeleteMeal}
+                onAddMeal={handleAddMeal}
+              />
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-gradient-to-b from-[hsl(var(--fill)/0.5)] to-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-6 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
+                <UtensilsCrossed className="w-8 h-8 text-[hsl(var(--brand))]" strokeWidth={1.5} />
+              </div>
+              <p className="text-title3 font-bold text-[hsl(var(--fg))] mb-2">{t('nutrition.empty.title')}</p>
+              <p className="text-body text-[hsl(var(--fg-2))] mb-5 max-w-[280px] mx-auto">{t('nutrition.empty.desc')}</p>
+              
+              {!profile.calories_target && (
+                <p className="text-caption1 text-[hsl(var(--brand))] mb-4">{t('nutrition.empty.setTargetsFirst')}</p>
+              )}
+              
+              <button
+                onClick={handleAddMeal}
+                className="w-full rounded-xl bg-[hsl(var(--brand))] text-white py-3 text-[14px] font-semibold hover:bg-[hsl(var(--brand)/0.9)] transition-colors shadow-[0_4px_14px_hsl(var(--brand)/0.3)]"
+              >
+                <Plus className="w-4 h-4 inline mr-2" />
+                {t('nutrition.empty.cta')}
+              </button>
+            </div>
+          )}
+
+          {/* Clear Primary CTA */}
+          {sortedMeals.length === 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { type: 'breakfast', icon: Sunrise, label: t('nutrition.empty.breakfast') },
+                { type: 'lunch', icon: Sun, label: t('nutrition.empty.lunch') },
+                { type: 'dinner', icon: Moon, label: t('nutrition.empty.dinner') },
+              ].map(({ type, icon: Icon, label }) => (
+                <button
+                  key={type}
+                  onClick={() => handleQuickAdd(type)}
+                  className="flex flex-col items-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] p-3 transition-all hover:bg-[hsl(var(--fill)/0.6)] hover:border-[hsl(var(--brand)/0.3)]"
+                >
+                  <Icon className="w-5 h-5 text-[hsl(var(--brand))]" strokeWidth={1.8} />
+                  <span className="text-[11px] font-medium text-[hsl(var(--fg))]">{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Always-visible Add Meal Button */}
+          <button
+            onClick={handleAddMeal}
+            className="w-full rounded-xl bg-[hsl(var(--brand))] text-white py-3 text-[14px] font-semibold hover:bg-[hsl(var(--brand)/0.9)] transition-colors shadow-[0_4px_14px_hsl(var(--brand)/0.3)]"
+          >
+            <Plus className="w-4 h-4 inline mr-2" />
+            {t('nutrition.add_meal')}
+          </button>
 
         </div>
       </div>
@@ -1974,6 +2034,7 @@ export default function NutritionPage() {
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         dialogClassName="max-w-xl p-0 max-h-[90vh]"
+        drawerClassName="max-w-xl p-0 max-h-[90vh]"
         dialogProps={{ onOpenAutoFocus: (e) => e.preventDefault() }}
       >
         <div className="flex-1 min-h-0 overflow-y-auto">
@@ -2000,7 +2061,7 @@ export default function NutritionPage() {
       </ResponsiveModal>
 
       <Dialog open={!!pendingFood} onOpenChange={(open) => { if (!open) setPendingFood(null); }}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           {pendingFood && (() => {
             const amount = parseFloat(pendingFoodAmount) || 0;
             const ratio = amount / 100;

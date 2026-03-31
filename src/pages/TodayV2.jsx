@@ -63,16 +63,37 @@ function interpretWeather(temp, code, t) {
   else if (code <= 77)  { icon = '❄️'; condition = 'snowy'; }
   else if (code <= 82)  { icon = '🌦️'; condition = 'showers'; }
   else                  { icon = '⛈️'; condition = 'stormy'; }
-  const comments = {
-    clear:   temp > 28 ? t('today.weather.hot') : temp < 10 ? t('today.weather.cold') : t('today.weather.clear'),
-    cloudy:  t('today.weather.cloudy'),
-    foggy:   t('today.weather.foggy'),
-    rainy:   t('today.weather.rainy'),
-    snowy:   t('today.weather.snowy'),
-    showers: t('today.weather.showers'),
-    stormy:  t('today.weather.stormy'),
+  
+  // Use fallback translations if i18n keys are missing
+  const fallbackComments = {
+    clear:   temp > 28 ? 'Hot day' : temp < 10 ? 'Cold day' : 'Clear day',
+    cloudy:  'Overcast',
+    foggy:   'Foggy',
+    rainy:   'Rainy',
+    snowy:   'Snowy',
+    showers: 'Showers',
+    stormy:  'Stormy',
   };
-  return { temp, icon, comment: comments[condition] ?? null };
+  
+  const comments = {
+    clear:   temp > 28 ? (t?.('today.weather.hot') ?? 'Hot day') : temp < 10 ? (t?.('today.weather.cold') ?? 'Cold day') : (t?.('today.weather.clear') ?? 'Clear day'),
+    cloudy:  (t?.('today.weather.cloudy') ?? 'Overcast'),
+    foggy:   (t?.('today.weather.foggy') ?? 'Foggy'),
+    rainy:   (t?.('today.weather.rainy') ?? 'Rainy'),
+    snowy:   (t?.('today.weather.snowy') ?? 'Snowy'),
+    showers: (t?.('today.weather.showers') ?? 'Showers'),
+    stormy:  (t?.('today.weather.stormy') ?? 'Stormy'),
+  };
+  
+  const comment = comments[condition];
+  
+  // Only return weather comment if we actually have weather data
+  // Don't show fake weather descriptions
+  if (!comment || comment === fallbackComments[condition]) {
+    return { temp, icon, comment: null };
+  }
+  
+  return { temp, icon, comment };
 }
 
 // ─── Hero Card ─────────────────────────────────────────────────────────────────
