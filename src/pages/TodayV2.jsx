@@ -137,6 +137,12 @@ function interpretWeather(temp, code, t) {
 // ─── Dynamic Hero Component ─────────────────────────────────────────────────────────
 
 function DynamicHero({ weather, greeting, locale }) {
+  console.log('DynamicHero props:', { weather, greeting, locale });
+  
+  // Safe defaults for all data
+  const safeWeather = weather || { temp: 20, condition: 'clear', icon: '☀️', comment: 'Clear day' };
+  const safeGreeting = greeting || 'Welcome';
+  
   const hour = new Date().getHours();
   
   // Time of day definitions
@@ -147,8 +153,10 @@ function DynamicHero({ weather, greeting, locale }) {
   
   const timeOfDay = isMorning ? 'morning' : isAfternoon ? 'afternoon' : isEvening ? 'evening' : 'night';
   
-  // Weather condition from API
-  const weatherCondition = weather?.condition || 'clear';
+  // Weather condition from API with fallback
+  const weatherCondition = safeWeather.condition || 'clear';
+  
+  console.log('DynamicHero config:', { timeOfDay, weatherCondition, hour });
   
   // Dynamic gradient backgrounds based on time + weather
   const gradientVariants = {
@@ -180,48 +188,66 @@ function DynamicHero({ weather, greeting, locale }) {
   const gradientKey = `${timeOfDay}-${weatherCondition}`;
   const backgroundGradient = gradientVariants[gradientKey] || gradientVariants['morning-clear'];
   
+  console.log('DynamicHero gradient:', { gradientKey, backgroundGradient });
+  
   // Text color based on time
   const isDarkTime = isNight || (isEvening && weatherCondition !== 'clear');
   const textColor = isDarkTime ? 'text-white' : 'text-gray-900';
   const subTextColor = isDarkTime ? 'text-gray-200' : 'text-gray-600';
   
-  return (
-    <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${backgroundGradient} transition-all duration-1000`}>
-      {/* Subtle noise overlay for depth */}
-      <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsdGVyVW5pdHM9InVzZXJTcGFjZU25vdGhpbmciIgLz48ZmVUcmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWx0ZXI9InVybCgjZmZmZmZmYiIC8+PC9mZT48L2ZpbHRlcj48L3N2Zz4=')]" />
-      
-      {/* Dark overlay for text readability */}
-      <div className={`absolute inset-0 ${isDarkTime ? 'bg-black/20' : 'bg-white/10'}`} />
-      
-      {/* Content */}
-      <div className="relative z-10 p-8 text-center">
-        <div className="max-w-md mx-auto">
-          {/* Greeting */}
-          <h1 className={`text-3xl font-bold mb-2 ${textColor} leading-tight`}>
-            {greeting}
-          </h1>
-          
-          {/* Weather info */}
-          {weather && (
-            <div className={`flex items-center justify-center gap-3 mb-4 ${subTextColor}`}>
-              <span className="text-2xl">{weather.icon}</span>
-              <div className="text-left">
-                <p className="text-sm font-medium capitalize">{weather.condition}</p>
-                <p className="text-lg font-semibold">{weather.temp}°</p>
+  try {
+    return (
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${backgroundGradient} transition-all duration-1000`}>
+        {/* Subtle noise overlay for depth */}
+        <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsdGVyVW5pdHM9InVzZXJTcGFjZU5vdGhpbmciIgLz48ZmVUcmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWx0ZXI9InVybCgjZmZmZmZmYiIC8+PC9mZT48L2ZpbHRlcj48L3N2Zz4=')]" />
+        
+        {/* Dark overlay for text readability */}
+        <div className={`absolute inset-0 ${isDarkTime ? 'bg-black/20' : 'bg-white/10'}`} />
+        
+        {/* Content */}
+        <div className="relative z-10 p-8 text-center">
+          <div className="max-w-md mx-auto">
+            {/* Greeting */}
+            <h1 className={`text-3xl font-bold mb-2 ${textColor} leading-tight`}>
+              {safeGreeting}
+            </h1>
+            
+            {/* Weather info */}
+            {safeWeather && (
+              <div className={`flex items-center justify-center gap-3 mb-4 ${subTextColor}`}>
+                <span className="text-2xl">{safeWeather.icon}</span>
+                <div className="text-left">
+                  <p className="text-sm font-medium capitalize">{safeWeather.condition}</p>
+                  <p className="text-lg font-semibold">{safeWeather.temp}°</p>
+                </div>
               </div>
-            </div>
-          )}
-          
-          {/* Weather comment */}
-          {weather?.comment && (
-            <p className={`text-sm ${subTextColor} italic max-w-sm mx-auto`}>
-              {weather.comment}
-            </p>
-          )}
+            )}
+            
+            {/* Weather comment */}
+            {safeWeather?.comment && (
+              <p className={`text-sm ${subTextColor} italic max-w-sm mx-auto`}>
+                {safeWeather.comment}
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } catch (error) {
+    console.error('DynamicHero error:', error);
+    // Fallback hero
+    return (
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-purple-100 p-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{safeGreeting}</h1>
+        {safeWeather && (
+          <div className="flex items-center justify-center gap-3 text-gray-600">
+            <span className="text-2xl">{safeWeather.icon}</span>
+            <span className="text-lg font-semibold">{safeWeather.temp}°</span>
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
 // ─── Hero Card ─────────────────────────────────────────────────────────────────
@@ -317,6 +343,8 @@ function RecCard({ rec, onDismiss }) {
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
 function TodayContent() {
+  console.log('TodayContent starting...');
+  
   const { user } = useAuth();
   const { locale } = useI18n();
   const t = useT();
@@ -324,23 +352,41 @@ function TodayContent() {
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [weather, setWeather] = useState(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (!navigator?.geolocation) return;
+    console.log('Weather effect starting...');
+    if (!navigator?.geolocation) {
+      console.log('Geolocation not available');
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         try {
+          console.log('Weather API call:', { lat: coords.latitude, lon: coords.longitude });
           const res = await fetch(
             `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude.toFixed(4)}&longitude=${coords.longitude.toFixed(4)}&current=temperature_2m,weather_code`
           );
-          if (!res.ok) return;
+          if (!res.ok) {
+            console.log('Weather API failed:', res.status);
+            return;
+          }
           const json = await res.json();
+          console.log('Weather API response:', json);
           const temp = Math.round(json.current?.temperature_2m ?? 0);
           const code = json.current?.weather_code ?? 0;
-          setWeather(interpretWeather(temp, code, t));
-        } catch {}
+          const weatherData = interpretWeather(temp, code, t);
+          console.log('Weather data processed:', weatherData);
+          setWeather(weatherData);
+        } catch (error) {
+          console.error('Weather fetch error:', error);
+          setHasError(true);
+        }
       },
-      () => {},
+      (error) => {
+        console.error('Geolocation error:', error);
+        setHasError(true);
+      },
       { timeout: 6000, maximumAge: 600000 }
     );
   }, []);
@@ -381,44 +427,48 @@ function TodayContent() {
         t,
       });
 
-  return (
-    <TodayScreen>
+  console.log('TodayContent state:', { daily, weather, hasError, briefing, recs });
 
-      {/* Dynamic Hero - Priority 1 */}
-      <div className="mb-6">
-        <DynamicHero 
-          weather={weather} 
-          greeting={getGreeting(daily.preferredName, t)}
-          locale={locale}
-        />
-      </div>
+  try {
+    return (
+      <TodayScreen>
+        {/* Error Fallback */}
+        {hasError && (
+          <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200">
+            <p className="text-red-800">Something went wrong. Please refresh the page.</p>
+          </div>
+        )}
 
-      {/* ONE Primary Next Action - Priority 2 */}
-      {briefing.primaryAction && (
+        {/* Dynamic Hero - Priority 1 */}
         <div className="mb-6">
-          <ActionLink 
-            to={briefing.primaryAction.path}
-            content={
+          <DynamicHero 
+            weather={weather} 
+            greeting={getGreeting(daily.preferredName, t)}
+            locale={locale}
+          />
+        </div>
+
+        {/* ONE Primary Next Action - Priority 2 */}
+        {briefing.primaryAction && (
+          <div className="mb-6">
+            <Link to={briefing.primaryAction.path} className="block">
               <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--brand))] text-white px-6 py-4 shadow-lg">
                 <Dumbbell className="w-5 h-5" />
                 <span className="text-[16px] font-semibold">{briefing.primaryAction.label}</span>
                 <ArrowRight className="w-4 h-4" />
               </div>
-            }
-          />
+            </Link>
+          </div>
+        )}
+
+        {/* Coach Input - Priority 3 */}
+        <div className="mb-6">
+          <CoachChatTrigger />
         </div>
-      )}
 
-      {/* Coach Input - Priority 3 */}
-      <div className="mb-6">
-        <CoachChatTrigger />
-      </div>
-
-      {/* Quick Actions (4) - Priority 4 */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <ActionLink
-          to={ROUTES.workouts}
-          content={
+        {/* Quick Actions (4) - Priority 4 */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Link to={ROUTES.workouts} className="block">
             <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
               <Dumbbell className="w-5 h-5 text-[hsl(var(--brand))]" />
               <div>
@@ -426,11 +476,8 @@ function TodayContent() {
                 <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.workoutDone ? 'Completed' : 'Start today'}</p>
               </div>
             </div>
-          }
-        />
-        <ActionLink
-          to={ROUTES.nutrition}
-          content={
+          </Link>
+          <Link to={ROUTES.nutrition} className="block">
             <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
               <UtensilsCrossed className="w-5 h-5 text-[hsl(var(--brand-ai))]" />
               <div>
@@ -438,98 +485,68 @@ function TodayContent() {
                 <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.nutritionLogged ? 'Track meals' : 'Log first meal'}</p>
               </div>
             </div>
-          }
-        />
-      </div>
+          </Link>
+          <Link to={ROUTES.body} className="block">
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+              <Scale className="w-5 h-5 text-[hsl(var(--ok))]" />
+              <div>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Body</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{daily.weightLogged ? 'Logged' : 'Check in'}</p>
+              </div>
+            </div>
+          </Link>
+          <Link to={ROUTES.goals} className="block">
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+              <Target className="w-5 h-5 text-[hsl(var(--warn))]" />
+              <div>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Goals</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">Review progress</p>
+              </div>
+            </div>
+          </Link>
+        </div>
 
-      {/* Recommendations - Only if compelling */}
-      {recs.length > 0 && (
-        <div className="mb-6">
-          <p className="text-[13px] font-medium text-[hsl(var(--fg-3))] mb-3">Recommendations</p>
-          <div className="space-y-3">
-            {recs.map((rec) => (
-              <RecCard key={rec.id} rec={rec} />
-            ))}
+        {/* Today's Plan - Priority 5 */}
+        {daily.plan.id && (
+          <div className="mb-6">
+            <PlanCard
+              icon={Dumbbell}
+              label={daily.plan.name || 'Today\'s workout'}
+              value={daily.workoutDone ? 'Done' : 'Start'}
+              sub={daily.plan.todayExercises?.length ? `${daily.plan.todayExercises.length} exercises` : null}
+              to={ROUTES.workouts}
+              color={daily.workoutDone ? 'ok' : 'brand'}
+            />
           </div>
-        </div>
-      )}
-
-      {/* Coach Chat Sheet */}
-      <CoachChatSheet isOpen={chatOpen} onOpenChange={setChatOpen} />
-      <BodyCheckinSheet isOpen={checkinOpen} onOpenChange={setCheckinOpen} />
-        onOpen={() => setChatOpen(true)}
-        onSuggestion={(text) => { setChatOpen(true); chat.sendMessage(text, 'today'); }}
-      />
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <ActionTile icon={Dumbbell} label={daily.workoutDone ? t('today.actions.done') : t('today.actions.train')} done={daily.workoutDone} to={ROUTES.workouts} />
-        <ActionTile icon={UtensilsCrossed} label={daily.nutritionLogged ? t('today.actions.logged') : t('today.actions.eat')} done={daily.nutritionLogged} to={ROUTES.nutrition} />
-        <ActionTile icon={Scale} label={daily.weightLogged ? t('today.actions.logged') : t('today.actions.weight')} done={daily.weightLogged} onClick={() => setCheckinOpen(true)} />
-        <ActionTile icon={Heart} label={t('today.actions.checkin')} onClick={() => setCheckinOpen(true)} />
-      </div>
-
-      {/* Today Plan */}
-      <div className="space-y-2">
-        <p className="atlas-overline px-0.5">{t('today.plan.title')}</p>
-
-        <PlanCard
-          icon={Dumbbell}
-          label={daily.workoutDone ? t('today.plan.workoutComplete') : (daily.plan.name || t('today.plan.noPlan'))}
-          value={daily.workoutDone ? '✓' : (daily.plan.todayExercises.length > 0 ? `${daily.plan.todayExercises.length} ${t('today.plan.ex')}` : '—')}
-          sub={daily.workoutDone ? daily.workout.sessionName : (daily.plan.todayDayLabel || t('today.plan.day', { n: daily.plan.todayDayIndex + 1 }))}
-          to={ROUTES.workouts}
-          color={daily.workoutDone ? 'ok' : 'brand'}
-        />
-
-        <PlanCard
-          icon={Flame}
-          label={t('today.plan.nutrition')}
-          value={daily.nutrition.caloriesTarget > 0 ? `${Math.round(kcalRemaining)} ${t('today.plan.left')}` : '—'}
-          sub={`${daily.nutrition.mealsLogged} ${t('today.plan.meals')} · ${Math.round(daily.nutrition.proteinConsumed)}g ${t('today.plan.protein')}`}
-          to={ROUTES.nutrition}
-        />
-
-        {daily.protocols.dueToday > 0 && (
-          <PlanCard
-            icon={Pill}
-            label={t('today.plan.protocols')}
-            value={`${daily.protocols.completedToday}/${daily.protocols.dueToday}`}
-            sub={daily.protocols.pending > 0 ? `${daily.protocols.pending} ${t('today.plan.pending')}` : t('today.plan.allDone')}
-            to={ROUTES.protocols}
-            color={daily.protocols.pending > 0 ? 'warn' : 'ok'}
-          />
         )}
-      </div>
+        {/* Recommendations - Only if compelling */}
+        {recs.length > 0 && (
+          <div className="mb-6">
+            <p className="text-[13px] font-medium text-[hsl(var(--fg-3))] mb-3">Recommendations</p>
+            <div className="space-y-3">
+              {recs.map((rec) => (
+                <RecCard key={rec.id} rec={rec} onDismiss={() => {}} />
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* Recommendations */}
-      {Array.isArray(recs) && recs.length > 0 && (
-        <div className="space-y-2">
-          <p className="atlas-overline px-0.5">{t('today.forYou')}</p>
-          {recs.map((rec, i) => (
-            <RecCard key={rec.id || i} rec={rec} onDismiss={ai.dismissRec} />
-          ))}
+        {/* Coach Chat Sheet */}
+        <CoachChatSheet open={chatOpen} onOpenChange={setChatOpen} />
+        <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
+      </TodayScreen>
+    );
+  } catch (error) {
+    console.error('TodayContent error:', error);
+    setHasError(true);
+    return (
+      <TodayScreen>
+        <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200">
+          <p className="text-red-800">Something went wrong. Please refresh the page.</p>
         </div>
-      )}
-
-      {/* Body Check-in Sheet */}
-      <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
-
-      {/* AI Coach Chat Sheet */}
-      <CoachChatSheet
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        messages={chat.messages}
-        isTyping={chat.isTyping}
-        actionStates={chat.actionStates}
-        onSendMessage={chat.sendMessage}
-        onConfirmAction={chat.executeAction}
-        onDismissAction={chat.dismissAction}
-        pageContext="today"
-      />
-
-    </TodayScreen>
-  );
+      </TodayScreen>
+    );
+  }
 }
 
 export default function TodayV2() {
