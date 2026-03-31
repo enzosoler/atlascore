@@ -64,36 +64,73 @@ function interpretWeather(temp, code, t) {
   else if (code <= 82)  { icon = '🌦️'; condition = 'showers'; }
   else                  { icon = '⛈️'; condition = 'stormy'; }
   
-  // Use fallback translations if i18n keys are missing
-  const fallbackComments = {
-    clear:   temp > 28 ? 'Hot day' : temp < 10 ? 'Cold day' : 'Clear day',
-    cloudy:  'Overcast',
-    foggy:   'Foggy',
-    rainy:   'Rainy',
-    snowy:   'Snowy',
-    showers: 'Showers',
-    stormy:  'Stormy',
+  // Smart contextual comments based on actual weather + time of day + user intent
+  const hour = new Date().getHours();
+  const isMorning = hour >= 5 && hour < 12;
+  const isAfternoon = hour >= 12 && hour < 17;
+  const isEvening = hour >= 17 && hour < 21;
+  
+  // Contextual weather messages that are safe and motivating
+  const contextualComments = {
+    clear: {
+      morning: temp > 20 ? 'Great morning for outdoor training' : 'Cool start, perfect for focus',
+      afternoon: temp > 25 ? 'Hot afternoon, stay hydrated' : 'Perfect conditions for activity',
+      evening: temp > 18 ? 'Pleasant evening for recovery' : 'Cool evening, ideal for rest',
+    },
+    cloudy: {
+      morning: 'Overcast morning, great for consistent work',
+      afternoon: 'Comfortable conditions, no distractions',
+      evening: 'Calm evening, perfect for planning',
+    },
+    foggy: {
+      morning: 'Foggy start, stay focused on goals',
+      afternoon: 'Limited visibility, time for indoor work',
+      evening: 'Mysterious evening, reflect on progress',
+    },
+    rainy: {
+      morning: 'Rainy morning, perfect for indoor training',
+      afternoon: 'Rainy afternoon, ideal for recovery work',
+      evening: 'Cozy evening, great for meal prep',
+    },
+    snowy: {
+      morning: 'Snowy morning, extra energy for warming up',
+      afternoon: 'Winter conditions, conserve energy wisely',
+      evening: 'Cold evening, focus on nutrition',
+    },
+    showers: {
+      morning: 'Intermittent showers, flexible training day',
+      afternoon: 'Showers passing, time for quick sessions',
+      evening: 'Wet evening, prioritize recovery',
+    },
+    stormy: {
+      morning: 'Stormy morning, safety first today',
+      afternoon: 'Rough weather, perfect for rest and planning',
+      evening: 'Stormy evening, stay safe and recover',
+    },
   };
   
-  const comments = {
-    clear:   temp > 28 ? (t?.('today.weather.hot') ?? 'Hot day') : temp < 10 ? (t?.('today.weather.cold') ?? 'Cold day') : (t?.('today.weather.clear') ?? 'Clear day'),
-    cloudy:  (t?.('today.weather.cloudy') ?? 'Overcast'),
-    foggy:   (t?.('today.weather.foggy') ?? 'Foggy'),
-    rainy:   (t?.('today.weather.rainy') ?? 'Rainy'),
-    snowy:   (t?.('today.weather.snowy') ?? 'Snowy'),
-    showers: (t?.('today.weather.showers') ?? 'Showers'),
-    stormy:  (t?.('today.weather.stormy') ?? 'Stormy'),
-  };
+  // Neutral fallback messages when weather is unavailable
+  const neutralMessages = [
+    'Focus on consistency today',
+    'Every day is progress',
+    'Stay committed to your goals',
+    'Building momentum daily',
+    'Execution over everything',
+    'Progress is a habit',
+  ];
   
-  const comment = comments[condition];
+  // Get contextual comment if weather data exists
+  const timeOfDay = isMorning ? 'morning' : isAfternoon ? 'afternoon' : isEvening ? 'evening' : 'morning';
+  const weatherComment = contextualComments[condition]?.[timeOfDay];
   
-  // Only return weather comment if we actually have weather data
-  // Don't show fake weather descriptions
-  if (!comment || comment === fallbackComments[condition]) {
-    return { temp, icon, comment: null };
+  // Return weather data with smart comment or neutral fallback
+  if (weatherComment && t) {
+    return { temp, icon, comment: weatherComment };
   }
   
-  return { temp, icon, comment };
+  // If no weather data or translation issues, return neutral message
+  const neutralComment = neutralMessages[Math.floor(Math.random() * neutralMessages.length)];
+  return { temp, icon, comment: neutralComment };
 }
 
 // ─── Hero Card ─────────────────────────────────────────────────────────────────

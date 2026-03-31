@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Clock,
   ArrowRight,
+  Flame,
 } from 'lucide-react';
 import {
   ActionRow,
@@ -1908,124 +1909,241 @@ export default function NutritionPage() {
 
           {notice && <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>}
 
-          {/* Daily Macro Summary */}
-          <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[17px] font-semibold text-[hsl(var(--fg))]">{t('nutrition.daily_log_title')}</h2>
-              {selectedDate === TODAY && (
-                <div className="flex items-center gap-1 text-[hsl(var(--brand))]">
-                  <span className="text-[13px] font-medium">{loggingStreak}</span>
-                  <span className="text-[11px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.days')}</span>
+          {/* ACTION-FIRST: Dominant CTA Block */}
+          {sortedMeals.length === 0 ? (
+            <div className="relative rounded-3xl bg-gradient-to-br from-[hsl(var(--brand)/0.12)] via-[hsl(var(--brand-ai)/0.08)] to-[hsl(var(--card))] border border-[hsl(var(--brand)/0.25)] p-8 text-center overflow-hidden">
+              {/* Background accent */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[hsl(var(--brand)/0.1)] rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-[hsl(var(--brand-ai)/0.1)] rounded-full blur-2xl" />
+              
+              <div className="relative z-10">
+                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[hsl(var(--brand)/0.3)]">
+                  <UtensilsCrossed className="w-10 h-10 text-white" strokeWidth={1.5} />
                 </div>
-              )}
+                
+                <h2 className="text-[28px] font-bold text-[hsl(var(--fg))] mb-3 leading-tight">
+                  {selectedDate === TODAY 
+                    ? t('nutrition.empty.actionTitle') 
+                    : t('nutrition.empty.actionTitleHistory')}
+                </h2>
+                
+                <p className="text-[17px] text-[hsl(var(--fg-2))] mb-8 leading-relaxed max-w-[320px] mx-auto">
+                  {selectedDate === TODAY
+                    ? t('nutrition.empty.actionSubtitle')
+                    : t('nutrition.empty.actionSubtitleHistory')}
+                </p>
+                
+                <button
+                  onClick={handleAddMeal}
+                  className="group relative inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] text-white px-8 py-4 text-[16px] font-semibold hover:from-[hsl(var(--brand)/0.95)] hover:to-[hsl(var(--brand-ai)/0.95)] transition-all duration-300 shadow-[0_8px_24px_hsl(var(--brand)/0.4)] hover:shadow-[0_12px_32px_hsl(var(--brand)/0.5)] hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>{t('nutrition.empty.primaryAction')}</span>
+                  <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </button>
+                
+                {/* Quick meal triggers */}
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  <span className="text-[13px] text-[hsl(var(--fg-3))]">{t('nutrition.empty.quickAdd')}:</span>
+                  <div className="flex gap-2">
+                    {[
+                      { type: 'breakfast', icon: Sunrise, label: t('nutrition.empty.breakfast') },
+                      { type: 'lunch', icon: Sun, label: t('nutrition.empty.lunch') },
+                      { type: 'dinner', icon: Moon, label: t('nutrition.empty.dinner') },
+                    ].map(({ type, icon: Icon, label }) => (
+                      <button
+                        key={type}
+                        onClick={() => handleQuickAdd(type)}
+                        className="flex items-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))/0.8] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--card))] hover:border-[hsl(var(--brand)/0.3)] hover:text-[hsl(var(--brand))]"
+                      >
+                        <Icon className="w-4 h-4" strokeWidth={1.8} />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <p className="text-[24px] font-bold text-[hsl(var(--fg))]">{Math.round(dailyTotals.calories)}</p>
-                <p className="text-[11px] text-[hsl(var(--fg-3))]">{t('nutrition.calories_label')}</p>
-                {profile.calories_target > 0 && (
-                  <p className="text-[10px] text-[hsl(var(--fg-3))] mt-1">
-                    {getRemainingValue(profile.calories_target, dailyTotals.calories)} {t('nutrition.remaining')}
+          ) : (
+            /* When meals exist: Show next action guidance */
+            <div className="rounded-2xl bg-gradient-to-r from-[hsl(var(--ok)/0.08)] to-[hsl(var(--ok)/0.04)] border border-[hsl(var(--ok)/0.2)] p-5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--ok)/0.15)] flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-[16px] font-semibold text-[hsl(var(--fg))] mb-1">
+                    {t('nutrition.nextAction.title')}
+                  </h3>
+                  <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">
+                    {profile.calories_target > 0 && dailyTotals.calories < profile.calories_target * 0.8
+                      ? t('nutrition.nextAction.fuelUp', { remaining: getRemainingValue(profile.calories_target, dailyTotals.calories) })
+                      : dailyTotals.protein < (profile.protein_target || 150) * 0.7
+                      ? t('nutrition.nextAction.moreProtein', { remaining: getRemainingValue(profile.protein_target, dailyTotals.protein) })
+                      : t('nutrition.nextAction.keepGoing')}
                   </p>
-                )}
-              </div>
-              <div className="text-center">
-                <p className="text-[24px] font-bold text-[hsl(var(--brand))]">{Math.round(dailyTotals.protein)}g</p>
-                <p className="text-[11px] text-[hsl(var(--fg-3))]">{t('nutrition.protein_label')}</p>
-                {profile.protein_target > 0 && (
-                  <p className="text-[10px] text-[hsl(var(--fg-3))] mt-1">
-                    {getRemainingValue(profile.protein_target, dailyTotals.protein)}g {t('nutrition.remaining')}
-                  </p>
-                )}
+                </div>
+                <button
+                  onClick={handleAddMeal}
+                  className="shrink-0 rounded-xl bg-[hsl(var(--ok))] text-white px-4 py-2 text-[14px] font-semibold hover:bg-[hsl(var(--ok)/0.9)] transition-colors shadow-[0_4px_12px_hsl(var(--ok)/0.3)]"
+                >
+                  <Plus className="w-4 h-4 inline mr-1" />
+                  {t('nutrition.nextAction.addMeal')}
+                </button>
               </div>
             </div>
-            
-            {profile.calories_target > 0 && (
-              <div className="mt-4 space-y-2">
-                <div className="flex justify-between text-[12px] text-[hsl(var(--fg-3))]">
-                  <span>{t('nutrition.progress')}</span>
-                  <span>{Math.round(getProgressPercent(dailyTotals.calories, profile.calories_target))}%</span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
-                  <div 
-                    className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-500"
-                    style={{ width: `${Math.min(getProgressPercent(dailyTotals.calories, profile.calories_target), 100)}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          )}
 
-          {/* Meals Timeline or Strong Empty State */}
+          {/* Meals Timeline - Progression of the Day */}
           {isLoadingMeals ? (
             <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
               <Loader2 className="h-4 w-4 animate-spin" />
               {t('nutrition.loading_meals')}
             </div>
           ) : sortedMeals.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Timeline Header */}
               <div className="flex items-center justify-between">
-                <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))]">{t('nutrition.daily_log_title')}</h3>
-                <span className="text-[12px] text-[hsl(var(--fg-3))]">{sortedMeals.length} {t('nutrition.stats.meals')}</span>
+                <div>
+                  <h3 className="text-[17px] font-semibold text-[hsl(var(--fg))]">{t('nutrition.timeline.title')}</h3>
+                  <p className="text-[13px] text-[hsl(var(--fg-3))] mt-1">
+                    {sortedMeals.length} {t('nutrition.timeline.mealsLogged')} · {Math.round(dailyTotals.calories)} {t('nutrition.timeline.calories')}
+                  </p>
+                </div>
+                {selectedDate === TODAY && (
+                  <button
+                    onClick={handleAddMeal}
+                    className="shrink-0 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill))] hover:border-[hsl(var(--brand)/0.3)]"
+                  >
+                    <Plus className="w-4 h-4 inline mr-1" />
+                    {t('nutrition.timeline.addMeal')}
+                  </button>
+                )}
               </div>
-              <MealTimeline
-                meals={sortedMeals}
-                onEdit={handleEditMeal}
-                onDelete={handleDeleteMeal}
-                onAddMeal={handleAddMeal}
-              />
+              
+              {/* Timeline Visual */}
+              <div className="relative">
+                {/* Progress Line */}
+                <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-[hsl(var(--brand))] via-[hsl(var(--brand-ai))] to-[hsl(var(--border)/0.3)]" />
+                
+                {/* Meal Items */}
+                <div className="space-y-6">
+                  {sortedMeals.map((meal, index) => {
+                    const mealConfig = MEAL_BUCKETS[meal.meal_type];
+                    const Icon = mealConfig?.icon || UtensilsCrossed;
+                    const isPast = index < sortedMeals.length - 1;
+                    
+                    return (
+                      <div key={meal.id} className="relative flex items-start gap-4">
+                        {/* Timeline Node */}
+                        <div className={`relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+                          isPast 
+                            ? 'bg-[hsl(var(--ok)/0.15)] border-2 border-[hsl(var(--ok)/0.3)]' 
+                            : 'bg-[hsl(var(--brand)/0.15)] border-2 border-[hsl(var(--brand)/0.3)]'
+                        }`}>
+                          <Icon className={`w-5 h-5 ${isPast ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={1.8} />
+                        </div>
+                        
+                        {/* Meal Card */}
+                        <div className="flex-1 min-w-0">
+                          <div className={`rounded-2xl border p-4 transition-all ${
+                            isPast 
+                              ? 'bg-[hsl(var(--ok)/0.05)] border-[hsl(var(--ok)/0.2)]' 
+                              : 'bg-[hsl(var(--card))] border-[hsl(var(--border)/0.5)] hover:border-[hsl(var(--brand)/0.3)]'
+                          }`}>
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h4 className="text-[15px] font-semibold text-[hsl(var(--fg))] truncate">
+                                    {mealConfig?.label || getMealTypeLabel(meal.meal_type)}
+                                  </h4>
+                                  {selectedDate === TODAY && !isPast && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
+                                      {t('nutrition.timeline.current')}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <p className="text-[13px] text-[hsl(var(--fg-2))] truncate mb-2">{meal.title}</p>
+                                
+                                <div className="flex items-center gap-4 text-[12px] text-[hsl(var(--fg-3))]">
+                                  <span className="flex items-center gap-1">
+                                    <Flame className="w-3 h-3" />
+                                    {meal.total_calories} {t('nutrition.timeline.kcal')}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Zap className="w-3 h-3" />
+                                    {meal.total_protein}g {t('nutrition.timeline.protein')}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-1 ml-2">
+                                <button
+                                  onClick={() => handleEditMeal(meal)}
+                                  className="rounded-lg p-2 text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))] transition-colors"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteMeal(meal)}
+                                  className="rounded-lg p-2 text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))] transition-colors"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="rounded-2xl bg-gradient-to-b from-[hsl(var(--fill)/0.5)] to-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-6 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto mb-4">
-                <UtensilsCrossed className="w-8 h-8 text-[hsl(var(--brand))]" strokeWidth={1.5} />
+          ) : null}
+
+          {/* Simple Macro Summary - Only when meals exist */}
+          {sortedMeals.length > 0 && profile.calories_target > 0 && (
+            <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-5">
+              <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))] mb-4">{t('nutrition.progress.title')}</h3>
+              
+              <div className="space-y-4">
+                {/* Calories */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-[hsl(var(--fg-3))]" />
+                    <span className="text-[13px] text-[hsl(var(--fg))]">{t('nutrition.calories_label')}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.calories)}</span>
+                    <span className="text-[13px] text-[hsl(var(--fg-3))] ml-1">/ {profile.calories_target}</span>
+                  </div>
+                </div>
+                
+                <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] transition-all duration-500"
+                    style={{ width: `${Math.min(getProgressPercent(dailyTotals.calories, profile.calories_target), 100)}%` }}
+                  />
+                </div>
+                
+                {/* Protein */}
+                {profile.protein_target > 0 && (
+                  <div className="flex items-center justify-between mt-3">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-[hsl(var(--brand-ai))]" />
+                      <span className="text-[13px] text-[hsl(var(--fg))]">{t('nutrition.protein_label')}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.protein)}g</span>
+                      <span className="text-[13px] text-[hsl(var(--fg-3))] ml-1">/ {profile.protein_target}g</span>
+                    </div>
+                  </div>
+                )}
               </div>
-              <p className="text-title3 font-bold text-[hsl(var(--fg))] mb-2">{t('nutrition.empty.title')}</p>
-              <p className="text-body text-[hsl(var(--fg-2))] mb-5 max-w-[280px] mx-auto">{t('nutrition.empty.desc')}</p>
-              
-              {!profile.calories_target && (
-                <p className="text-caption1 text-[hsl(var(--brand))] mb-4">{t('nutrition.empty.setTargetsFirst')}</p>
-              )}
-              
-              <button
-                onClick={handleAddMeal}
-                className="w-full rounded-xl bg-[hsl(var(--brand))] text-white py-3 text-[14px] font-semibold hover:bg-[hsl(var(--brand)/0.9)] transition-colors shadow-[0_4px_14px_hsl(var(--brand)/0.3)]"
-              >
-                <Plus className="w-4 h-4 inline mr-2" />
-                {t('nutrition.empty.cta')}
-              </button>
             </div>
           )}
-
-          {/* Clear Primary CTA */}
-          {sortedMeals.length === 0 && (
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { type: 'breakfast', icon: Sunrise, label: t('nutrition.empty.breakfast') },
-                { type: 'lunch', icon: Sun, label: t('nutrition.empty.lunch') },
-                { type: 'dinner', icon: Moon, label: t('nutrition.empty.dinner') },
-              ].map(({ type, icon: Icon, label }) => (
-                <button
-                  key={type}
-                  onClick={() => handleQuickAdd(type)}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] p-3 transition-all hover:bg-[hsl(var(--fill)/0.6)] hover:border-[hsl(var(--brand)/0.3)]"
-                >
-                  <Icon className="w-5 h-5 text-[hsl(var(--brand))]" strokeWidth={1.8} />
-                  <span className="text-[11px] font-medium text-[hsl(var(--fg))]">{label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Always-visible Add Meal Button */}
-          <button
-            onClick={handleAddMeal}
-            className="w-full rounded-xl bg-[hsl(var(--brand))] text-white py-3 text-[14px] font-semibold hover:bg-[hsl(var(--brand)/0.9)] transition-colors shadow-[0_4px_14px_hsl(var(--brand)/0.3)]"
-          >
-            <Plus className="w-4 h-4 inline mr-2" />
-            {t('nutrition.add_meal')}
-          </button>
 
         </div>
       </div>
