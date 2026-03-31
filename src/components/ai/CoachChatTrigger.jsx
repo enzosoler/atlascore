@@ -37,7 +37,7 @@ function getPageSuggestions(t) {
 export default function CoachChatTrigger({ pageContext = 'today', onOpen, onSuggestion }) {
   const t = useT();
   const allSuggestions = getPageSuggestions(t);
-  const suggestions = allSuggestions[pageContext] ?? allSuggestions.today;
+  const suggestions = (allSuggestions[pageContext] ?? allSuggestions.today) || [];
 
   return (
     <div className="space-y-2.5">
@@ -52,7 +52,7 @@ export default function CoachChatTrigger({ pageContext = 'today', onOpen, onSugg
 
       {/* Suggestion pills */}
       <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-none">
-        {suggestions.map((s, i) => (
+        {Array.isArray(suggestions) && suggestions.map((s, i) => (
           <button
             key={i}
             onClick={() => onSuggestion?.(s)}
