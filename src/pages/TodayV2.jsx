@@ -155,60 +155,77 @@ function DynamicHero({ weather, greeting, locale }) {
     return 'night';
   };
   
-  // Atmospheric background system
-  const getAtmosphericBackground = (timeOfDay, weatherCondition) => {
+  // Full-width background system (no card behavior)
+  const getBackgroundSystem = (timeOfDay, weatherCondition) => {
     const isLight = timeOfDay !== 'night';
     
     const backgrounds = {
       morning: {
         sunny: {
-          base: 'linear-gradient(135deg, #FFE5B4 0%, #FFDAB9 25%, #FFA07A 50%, #FF8C69 75%, #FF7F50 100%)',
-          radial: 'radial-gradient(ellipse at 30% 20%, rgba(255, 220, 120, 0.6), rgba(255, 180, 100, 0.4), transparent 70%)',
-          overlay: 'linear-gradient(180deg, rgba(255, 245, 220, 0.2), rgba(255, 220, 180, 0.3))'
+          base: 'linear-gradient(180deg, #FFE5CC 0%, #FFD4A3 20%, #FFC299 40%, #FFB380 60%, #FFA366 80%, #FF944D 100%)',
+          secondary: 'linear-gradient(135deg, rgba(255, 220, 180, 0.3), rgba(255, 180, 120, 0.2))',
+          radial: 'radial-gradient(ellipse at 25% 15%, rgba(255, 200, 150, 0.6), rgba(255, 160, 100, 0.3), transparent 70%)'
         },
         cloudy: {
-          base: 'linear-gradient(135deg, #E8E8E8 0%, #D3D3D3 25%, #C0C0C0 50%, #B8B8B8 75%, #A9A9A9 100%)',
-          radial: 'radial-gradient(ellipse at 40% 30%, rgba(255, 255, 255, 0.4), rgba(200, 200, 200, 0.3), transparent 60%)',
-          overlay: 'linear-gradient(180deg, rgba(220, 220, 220, 0.3), rgba(180, 180, 180, 0.2))'
+          base: 'linear-gradient(180deg, #F5E6D3 0%, #E8D5C4 20%, #DBC4B5 40%, #CEB3A6 60%, #C1A297 80%, #B49188 100%)',
+          secondary: 'linear-gradient(135deg, rgba(230, 210, 190, 0.4), rgba(200, 180, 160, 0.3))',
+          radial: 'radial-gradient(ellipse at 30% 20%, rgba(255, 245, 230, 0.5), rgba(230, 210, 190, 0.3), transparent 60%)'
         },
         rain: {
-          base: 'linear-gradient(135deg, #708090 0%, #696969 25%, #5F6A72 50%, #4A5568 75%, #2D3748 100%)',
-          radial: 'radial-gradient(ellipse at 50% 10%, rgba(120, 160, 200, 0.3), rgba(80, 120, 160, 0.2), transparent 50%)',
-          overlay: 'linear-gradient(180deg, rgba(100, 120, 140, 0.4), rgba(60, 80, 100, 0.3))'
+          base: 'linear-gradient(180deg, #E8DCD0 0%, #D4C4B8 20%, #C0B0A0 40%, #AC9C88 60%, #988870 80%, #847458 100%)',
+          secondary: 'linear-gradient(135deg, rgba(180, 160, 140, 0.4), rgba(140, 120, 100, 0.3))',
+          radial: 'radial-gradient(ellipse at 40% 10%, rgba(200, 180, 160, 0.4), rgba(160, 140, 120, 0.2), transparent 50%)'
         }
       },
       afternoon: {
         sunny: {
-          base: 'linear-gradient(135deg, #87CEEB 0%, #87CEFA 25%, #4682B4 50%, #1E90FF 75%, #00BFFF 100%)',
-          radial: 'radial-gradient(ellipse at 60% 15%, rgba(255, 230, 150, 0.5), rgba(255, 200, 100, 0.3), transparent 60%)',
-          overlay: 'linear-gradient(180deg, rgba(135, 206, 235, 0.2), rgba(30, 144, 255, 0.3))'
+          base: 'linear-gradient(180deg, #E6F3FF 0%, #D4EBFF 20%, #C2E3FF 40%, #B0DBFF 60%, #9ED3FF 80%, #8CCBFF 100%)',
+          secondary: 'linear-gradient(135deg, rgba(200, 220, 240, 0.3), rgba(150, 200, 230, 0.2))',
+          radial: 'radial-gradient(ellipse at 35% 10%, rgba(255, 245, 220, 0.4), rgba(255, 230, 180, 0.2), transparent 60%)'
         },
         cloudy: {
-          base: 'linear-gradient(135deg, #B0C4DE 0%, #778899 25%, #6B8E23 50%, #556B2F 75%, #2F4F4F 100%)',
-          radial: 'radial-gradient(ellipse at 45% 25%, rgba(255, 255, 255, 0.3), rgba(200, 200, 200, 0.2), transparent 50%)',
-          overlay: 'linear-gradient(180deg, rgba(176, 196, 222, 0.3), rgba(47, 79, 79, 0.2))'
+          base: 'linear-gradient(180deg, #F0F4F8 0%, #E4E8ED 20%, #D8DCE2 40%, #CCD0D7 60%, #C0C4CC 80%, #B4B8C1 100%)',
+          secondary: 'linear-gradient(135deg, rgba(220, 225, 230, 0.3), rgba(180, 185, 190, 0.2))',
+          radial: 'radial-gradient(ellipse at 40% 15%, rgba(255, 250, 245, 0.4), rgba(240, 235, 230, 0.2), transparent 50%)'
         },
         rain: {
-          base: 'linear-gradient(135deg, #6495ED 0%, #4682B4 25%, #4169E1 50%, #191970 75%, #000080 100%)',
-          radial: 'radial-gradient(ellipse at 55% 5%, rgba(100, 149, 237, 0.3), rgba(70, 130, 180, 0.2), transparent 50%)',
-          overlay: 'linear-gradient(180deg, rgba(100, 149, 237, 0.4), rgba(25, 25, 112, 0.3))'
+          base: 'linear-gradient(180deg, #DDE4EA 0%, #C8D0D8 20%, #B3BCC6 40%, #9EA8B4 60%, #8994A2 80%, #748090 100%)',
+          secondary: 'linear-gradient(135deg, rgba(160, 170, 180, 0.4), rgba(120, 130, 140, 0.3))',
+          radial: 'radial-gradient(ellipse at 45% 5%, rgba(200, 210, 220, 0.3), rgba(160, 170, 180, 0.2), transparent 50%)'
+        }
+      },
+      evening: {
+        sunny: {
+          base: 'linear-gradient(180deg, #FFE5F1 0%, #FFD3E8 20%, #FFC1DF 40%, #FFAFD6 60%, #FF9DCD 80%, #FF8BC4 100%)',
+          secondary: 'linear-gradient(135deg, rgba(255, 200, 220, 0.3), rgba(255, 150, 180, 0.2))',
+          radial: 'radial-gradient(ellipse at 75% 25%, rgba(255, 180, 200, 0.5), rgba(255, 140, 160, 0.3), transparent 60%)'
+        },
+        cloudy: {
+          base: 'linear-gradient(180deg, #F0E5EA 0%, #E0D2D8 20%, #D0BFC6 40%, #C0ACB4 60%, #B09AA2 80%, #A08890 100%)',
+          secondary: 'linear-gradient(135deg, rgba(220, 200, 210, 0.4), rgba(180, 160, 170, 0.3))',
+          radial: 'radial-gradient(ellipse at 70% 20%, rgba(240, 220, 230, 0.4), rgba(220, 200, 210, 0.2), transparent 50%)'
+        },
+        rain: {
+          base: 'linear-gradient(180deg, #E5DCE0 0%, #D0C4CA 20%, #BBACB4 40%, #A6949E 60%, #917C88 80%, #7C6472 100%)',
+          secondary: 'linear-gradient(135deg, rgba(180, 160, 170, 0.4), rgba(140, 120, 130, 0.3))',
+          radial: 'radial-gradient(ellipse at 65% 15%, rgba(220, 200, 210, 0.3), rgba(180, 160, 170, 0.2), transparent 50%)'
         }
       },
       night: {
         sunny: {
-          base: 'linear-gradient(135deg, #191970 0%, #000080 25%, #0F0F2E 50%, #0A0A1F 75%, #050515 100%)',
-          radial: 'radial-gradient(ellipse at 80% 20%, rgba(120, 160, 255, 0.3), rgba(70, 130, 200, 0.2), transparent 50%)',
-          overlay: 'linear-gradient(180deg, rgba(25, 25, 112, 0.4), rgba(5, 5, 21, 0.3))'
+          base: 'linear-gradient(180deg, #1A1F3A 0%, #161D36 20%, #121B32 40%, #0E192E 60%, #0A172A 80%, #061526 100%)',
+          secondary: 'linear-gradient(135deg, rgba(60, 80, 120, 0.3), rgba(40, 60, 100, 0.2))',
+          radial: 'radial-gradient(ellipse at 85% 20%, rgba(100, 140, 200, 0.4), rgba(60, 100, 160, 0.2), transparent 50%)'
         },
         cloudy: {
-          base: 'linear-gradient(135deg, #2F4F4F 0%, #1C1C1C 25%, #141414 50%, #0D0D0D 75%, #080808 100%)',
-          radial: 'radial-gradient(ellipse at 70% 25%, rgba(100, 100, 120, 0.2), rgba(60, 60, 80, 0.1), transparent 40%)',
-          overlay: 'linear-gradient(180deg, rgba(47, 79, 79, 0.5), rgba(8, 8, 8, 0.4))'
+          base: 'linear-gradient(180deg, #1F1F2E 0%, #1A1A28 20%, #151522 40%, #10101C 60%, #0B0B16 80%, #060610 100%)',
+          secondary: 'linear-gradient(135deg, rgba(60, 60, 80, 0.3), rgba(40, 40, 60, 0.2))',
+          radial: 'radial-gradient(ellipse at 75% 25%, rgba(80, 80, 100, 0.3), rgba(60, 60, 80, 0.2), transparent 40%)'
         },
         rain: {
-          base: 'linear-gradient(135deg, #1E1E1E 0%, #0F0F0F 25%, #0A0A0A 50%, #050505 75%, #000000 100%)',
-          radial: 'radial-gradient(ellipse at 60% 15%, rgba(80, 100, 120, 0.2), rgba(40, 60, 80, 0.1), transparent 40%)',
-          overlay: 'linear-gradient(180deg, rgba(30, 30, 30, 0.6), rgba(0, 0, 0, 0.5))'
+          base: 'linear-gradient(180deg, #1A1A24 0%, #14141E 20%, #0E0E18 40%, #080812 60%, #02020C 80%, #000006 100%)',
+          secondary: 'linear-gradient(135deg, rgba(40, 40, 50, 0.4), rgba(20, 20, 30, 0.3))',
+          radial: 'radial-gradient(ellipse at 70% 15%, rgba(60, 60, 70, 0.3), rgba(40, 40, 50, 0.2), transparent 40%)'
         }
       }
     };
@@ -216,8 +233,8 @@ function DynamicHero({ weather, greeting, locale }) {
     const variant = backgrounds[timeOfDay]?.[weatherCondition] || backgrounds[timeOfDay].sunny;
     return {
       base: variant.base,
+      secondary: variant.secondary,
       radial: variant.radial,
-      overlay: variant.overlay,
       isLight
     };
   };
@@ -239,7 +256,7 @@ function DynamicHero({ weather, greeting, locale }) {
   const safeGreeting = greeting || 'Welcome';
   const timeOfDay = getTimeOfDay(hour);
   const weatherCondition = safeWeather?.condition || 'sunny';
-  const backgroundStyle = getAtmosphericBackground(timeOfDay, weatherCondition);
+  const backgroundSystem = getBackgroundSystem(timeOfDay, weatherCondition);
   const contextualLine = safeWeather ? getContextualLine(timeOfDay, weatherCondition) : "Keep momentum today.";
   
   try {
@@ -247,16 +264,16 @@ function DynamicHero({ weather, greeting, locale }) {
       <div 
         style={{
           width: '100%',
-          height: '280px',
-          borderRadius: '24px',
-          padding: '24px',
+          height: '320px',
           position: 'relative',
           overflow: 'hidden',
-          background: backgroundStyle.base,
-          backdropFilter: 'blur(2px)'
+          background: backgroundSystem.base,
+          marginLeft: '-24px',
+          marginRight: '-24px',
+          marginTop: '-24px'
         }}
       >
-        {/* Multi-layer atmospheric effects */}
+        {/* Multi-layer atmospheric system */}
         <div 
           style={{
             position: 'absolute',
@@ -264,7 +281,7 @@ function DynamicHero({ weather, greeting, locale }) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: backgroundStyle.radial,
+            background: backgroundSystem.secondary,
             mixBlendMode: 'soft-light'
           }}
         />
@@ -276,12 +293,12 @@ function DynamicHero({ weather, greeting, locale }) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: backgroundStyle.overlay,
+            background: backgroundSystem.radial,
             mixBlendMode: 'overlay'
           }}
         />
         
-        {/* Subtle noise overlay for depth */}
+        {/* Subtle noise overlay */}
         <div 
           style={{
             position: 'absolute',
@@ -289,7 +306,7 @@ function DynamicHero({ weather, greeting, locale }) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: `url('data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="a"><feTurbulence baseFrequency="0.8" numOctaves="4"/></filter><rect width="200" height="200" filter="url(#a)" opacity="0.05"/></svg>')}`,
+            background: `url('data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="a"><feTurbulence baseFrequency="0.6" numOctaves="3"/></filter><rect width="200" height="200" filter="url(#a)" opacity="0.03"/></svg>')}`,
             mixBlendMode: 'multiply'
           }}
         />
@@ -302,34 +319,35 @@ function DynamicHero({ weather, greeting, locale }) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: backgroundStyle.isLight ? 'rgba(11, 18, 32, 0.15)' : 'rgba(0, 0, 0, 0.4)'
+            background: backgroundSystem.isLight ? 'rgba(11, 18, 32, 0.08)' : 'rgba(0, 0, 0, 0.3)'
           }}
         />
         
-        {/* Content layout */}
+        {/* Content */}
         <div 
           style={{
             position: 'relative',
             zIndex: 10,
             height: '100%',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            padding: '32px 24px 24px 24px'
           }}
         >
-          {/* Top left: Location + Time context */}
+          {/* Top: Date + time context */}
           <div 
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '2px'
+              gap: '4px'
             }}
           >
             <div 
               style={{
                 fontSize: '13px',
                 fontWeight: 500,
-                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
-                opacity: 0.8
+                color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
+                opacity: 0.7
               }}
             >
               {getDateLabel(locale)}
@@ -337,8 +355,8 @@ function DynamicHero({ weather, greeting, locale }) {
             <div 
               style={{
                 fontSize: '11px',
-                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
-                opacity: 0.6,
+                color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
+                opacity: 0.5,
                 textTransform: 'capitalize'
               }}
             >
@@ -346,7 +364,7 @@ function DynamicHero({ weather, greeting, locale }) {
             </div>
           </div>
           
-          {/* Main: Large greeting */}
+          {/* Center: Large greeting */}
           <div 
             style={{
               flex: 1,
@@ -357,10 +375,10 @@ function DynamicHero({ weather, greeting, locale }) {
           >
             <div 
               style={{
-                fontSize: '32px',
+                fontSize: '36px',
                 fontWeight: 600,
                 lineHeight: 1.1,
-                color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
                 textAlign: 'center'
               }}
             >
@@ -368,21 +386,21 @@ function DynamicHero({ weather, greeting, locale }) {
             </div>
           </div>
           
-          {/* Secondary: Weather row */}
+          {/* Below: Weather row */}
           {safeWeather && (
             <div 
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
-                marginBottom: '8px'
+                gap: '12px',
+                marginBottom: '12px'
               }}
             >
               <span 
                 style={{
-                  fontSize: '24px',
-                  color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                  fontSize: '28px',
+                  color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
                   opacity: 0.9
                 }}
               >
@@ -390,9 +408,9 @@ function DynamicHero({ weather, greeting, locale }) {
               </span>
               <span 
                 style={{
-                  fontSize: '18px',
+                  fontSize: '20px',
                   fontWeight: 500,
-                  color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
+                  color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
                   opacity: 0.9
                 }}
               >
@@ -404,9 +422,9 @@ function DynamicHero({ weather, greeting, locale }) {
           {/* Bottom: One contextual line */}
           <div 
             style={{
-              fontSize: '14px',
-              color: backgroundStyle.isLight ? '#0B1220' : '#FFFFFF',
-              opacity: 0.7,
+              fontSize: '15px',
+              color: backgroundSystem.isLight ? '#0B1220' : '#FFFFFF',
+              opacity: 0.8,
               textAlign: 'center'
             }}
           >
@@ -422,13 +440,20 @@ function DynamicHero({ weather, greeting, locale }) {
       <div 
         style={{
           width: '100%',
-          height: '280px',
-          borderRadius: '24px',
-          padding: '24px',
-          background: 'linear-gradient(135deg, #87CEEB 0%, #4682B4 100%)'
+          height: '320px',
+          marginLeft: '-24px',
+          marginRight: '-24px',
+          marginTop: '-24px',
+          background: 'linear-gradient(180deg, #E6F3FF 0%, #8CCBFF 100%)'
         }}
       >
-        <div style={{ fontSize: '32px', fontWeight: 600, color: '#0B1220', textAlign: 'center' }}>
+        <div style={{ 
+          fontSize: '36px', 
+          fontWeight: 600, 
+          color: '#0B1220', 
+          textAlign: 'center',
+          padding: '120px 24px 24px'
+        }}>
           {safeGreeting}
         </div>
       </div>
@@ -647,7 +672,7 @@ function TodayContent() {
         {briefing.primaryAction && (
           <div className="mb-8">
             <Link to={briefing.primaryAction.path} className="block w-full">
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-dark))] text-white px-6 py-6 shadow-xl transform transition-all duration-200 hover:scale-105 active:scale-95">
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-black text-white px-6 py-6 transform transition-all duration-200 hover:scale-105 active:scale-95">
                 <div className="flex flex-col items-center gap-2 text-center">
                   <div className="text-[20px] font-bold leading-tight">{briefing.primaryAction.label}</div>
                   <div className="text-[14px] opacity-90">{kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}</div>
