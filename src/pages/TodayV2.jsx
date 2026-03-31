@@ -31,6 +31,13 @@ import CoachChatSheet from '@/components/ai/CoachChatSheet';
 
 // ─── Date / greeting / weather helpers ─────────────────────────────────────────
 
+function getTimeOfDay(hour) {
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
+}
+
 function getDateLabel(locale) {
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es' : 'en-US';
   return new Intl.DateTimeFormat(intlLocale, {
@@ -137,97 +144,144 @@ function interpretWeather(temp, code, t) {
 // ─── Dynamic Hero Component ─────────────────────────────────────────────────────────
 
 function DynamicHero({ weather, greeting, locale }) {
-  console.log('DynamicHero props:', { weather, greeting, locale });
-  
-  // Safe defaults for all data
-  const safeWeather = weather || { temp: 20, condition: 'clear', icon: '☀️', comment: 'Clear day' };
-  const safeGreeting = greeting || 'Welcome';
-  
+  const t = useT();
   const hour = new Date().getHours();
   
-  // Time of day definitions
-  const isMorning = hour >= 5 && hour < 12;
-  const isAfternoon = hour >= 12 && hour < 17;
-  const isEvening = hour >= 17 && hour < 21;
-  const isNight = hour >= 21 || hour < 5;
+  console.log('DynamicHero props:', { weather, greeting, locale });
   
-  const timeOfDay = isMorning ? 'morning' : isAfternoon ? 'afternoon' : isEvening ? 'evening' : 'night';
-  
-  // Weather condition from API with fallback
+  // Time-based atmospheric gradients
+  const getAtmosphericGradient = (hour, weatherCondition) => {
+    const timeOfDay = getTimeOfDay(hour);
+    
+    const gradients = {
+      morning: {
+        clear: 'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100',
+        cloudy: 'bg-gradient-to-br from-gray-50 via-slate-50 to-blue-50',
+        rainy: 'bg-gradient-to-br from-slate-100 via-gray-100 to-blue-100',
+        default: 'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100'
+      },
+      afternoon: {
+        clear: 'bg-gradient-to-br from-blue-50 via-cyan-50 to-white',
+        cloudy: 'bg-gradient-to-br from-gray-50 via-slate-50 to-neutral-50',
+        rainy: 'bg-gradient-to-br from-gray-100 via-slate-100 to-blue-50',
+        default: 'bg-gradient-to-br from-blue-50 via-cyan-50 to-white'
+      },
+      evening: {
+        clear: 'bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100',
+        cloudy: 'bg-gradient-to-br from-slate-100 via-gray-100 to-purple-50',
+        rainy: 'bg-gradient-to-br from-gray-200 via-slate-200 to-blue-100',
+        default: 'bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100'
+      },
+      night: {
+        clear: 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800',
+        cloudy: 'bg-gradient-to-br from-slate-800 via-gray-800 to-slate-700',
+        rainy: 'bg-gradient-to-br from-slate-900 via-gray-900 to-blue-900',
+        default: 'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800'
+      }
+    };
+    
+    return gradients[timeOfDay]?.[weatherCondition] || gradients[timeOfDay].default;
+  };
+
+  // Contextual messages based on time and conditions
+  const getContextualMessage = (hour, weather) => {
+    const timeOfDay = getTimeOfDay(hour);
+    
+    if (!weather) {
+      const messages = {
+        morning: t('today.hero.morning.focus'),
+        afternoon: t('today.hero.afternoon.energy'),
+        evening: t('today.hero.evening.consistency'),
+        night: t('today.hero.night.recovery')
+      };
+      return messages[timeOfDay];
+    }
+    
+    // Weather-aware contextual messages
+    if (weather.condition === 'clear') {
+      const messages = {
+        morning: t('today.hero.morning.perfect'),
+        afternoon: t('today.hero.afternoon.strong'),
+        evening: t('today.hero.evening.clear'),
+        night: t('today.hero.night.clear')
+      };
+      return messages[timeOfDay];
+    }
+    
+    return t('today.hero.default.consistency');
+  };
+
+  // Safe defaults
+  const safeWeather = weather || { temp: 20, condition: 'clear', icon: '☀️' };
+  const safeGreeting = greeting || t('today.greeting.default');
+  const timeOfDay = getTimeOfDay(hour);
   const weatherCondition = safeWeather.condition || 'clear';
   
   console.log('DynamicHero config:', { timeOfDay, weatherCondition, hour });
   
-  // Dynamic gradient backgrounds based on time + weather
-  const gradientVariants = {
-    // Morning variants
-    'morning-clear': 'from-orange-100 via-yellow-50 to-blue-100',
-    'morning-cloudy': 'from-gray-100 via-slate-50 to-blue-50',
-    'morning-rainy': 'from-gray-200 via-slate-100 to-blue-100',
-    'morning-stormy': 'from-gray-300 via-slate-200 to-gray-100',
-    
-    // Afternoon variants  
-    'afternoon-clear': 'from-blue-100 via-cyan-50 to-yellow-50',
-    'afternoon-cloudy': 'from-gray-100 via-slate-50 to-blue-50',
-    'afternoon-rainy': 'from-gray-200 via-slate-100 to-blue-100',
-    'afternoon-stormy': 'from-gray-300 via-slate-200 to-gray-100',
-    
-    // Evening variants
-    'evening-clear': 'from-orange-200 via-pink-100 to-purple-100',
-    'evening-cloudy': 'from-gray-200 via-slate-100 to-purple-50',
-    'evening-rainy': 'from-gray-300 via-slate-200 to-blue-100',
-    'evening-stormy': 'from-gray-400 via-slate-300 to-gray-200',
-    
-    // Night variants
-    'night-clear': 'from-slate-900 via-blue-900 to-slate-800',
-    'night-cloudy': 'from-slate-800 via-gray-800 to-slate-700',
-    'night-rainy': 'from-slate-900 via-blue-800 to-gray-800',
-    'night-stormy': 'from-gray-900 via-slate-900 to-black',
+  const backgroundGradient = getAtmosphericGradient(hour, weatherCondition);
+  const contextualMessage = getContextualMessage(hour, safeWeather);
+  
+  console.log('DynamicHero gradient:', { backgroundGradient });
+  
+  // Time-based text colors
+  const textColors = {
+    morning: 'text-amber-900',
+    afternoon: 'text-blue-900', 
+    evening: 'text-purple-900',
+    night: 'text-slate-100'
   };
   
-  const gradientKey = `${timeOfDay}-${weatherCondition}`;
-  const backgroundGradient = gradientVariants[gradientKey] || gradientVariants['morning-clear'];
+  const subTextColors = {
+    morning: 'text-amber-700',
+    afternoon: 'text-blue-700',
+    evening: 'text-purple-700', 
+    night: 'text-slate-300'
+  };
   
-  console.log('DynamicHero gradient:', { gradientKey, backgroundGradient });
-  
-  // Text color based on time
-  const isDarkTime = isNight || (isEvening && weatherCondition !== 'clear');
-  const textColor = isDarkTime ? 'text-white' : 'text-gray-900';
-  const subTextColor = isDarkTime ? 'text-gray-200' : 'text-gray-600';
-  
+  const textColor = textColors[timeOfDay];
+  const subTextColor = subTextColors[timeOfDay];
+  const isDarkTime = timeOfDay === 'night';
+
   try {
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${backgroundGradient} transition-all duration-1000`}>
-        {/* Subtle noise overlay for depth */}
-        <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsdGVyVW5pdHM9InVzZXJTcGFjZU5vdGhpbmciIgLz48ZmVUcmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWx0ZXI9InVybCgjZmZmZmZmYiIC8+PC9mZT48L2ZpbHRlcj48L3N2Zz4=')]" />
+      <div className={`relative overflow-hidden rounded-3xl ${backgroundGradient} transition-all duration-1000`}>
+        {/* Atmospheric light source overlay */}
+        <div className={`absolute inset-0 opacity-20 ${
+          timeOfDay === 'morning' ? 'bg-radial-gradient from-amber-200 at-20%_20% to-transparent' :
+          timeOfDay === 'afternoon' ? 'bg-radial-gradient from-blue-100 at-50%_10% to-transparent' :
+          timeOfDay === 'evening' ? 'bg-radial-gradient from-purple-200 at-80%_20% to-transparent' :
+          'bg-radial-gradient from-indigo-400 at-30%_30% to-transparent'
+        }`} />
         
+        {/* Subtle noise overlay for depth */}
+        <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsdGVyVW5pdHM9InVzZXJTcGFjZU5vdGhpbmciICAvPjxmZVRyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbHRlcj0idXJsKCNmZmZmZmYpIiAvPjwvZmlsdGVyPjwvc3ZnPj0=')]" />
+
         {/* Dark overlay for text readability */}
         <div className={`absolute inset-0 ${isDarkTime ? 'bg-black/20' : 'bg-white/10'}`} />
-        
+
         {/* Content */}
         <div className="relative z-10 p-8 text-center">
           <div className="max-w-md mx-auto">
             {/* Greeting */}
-            <h1 className={`text-3xl font-bold mb-2 ${textColor} leading-tight`}>
+            <h1 className={`text-3xl font-bold mb-3 ${textColor} leading-tight`}>
               {safeGreeting}
             </h1>
-            
+
+            {/* Contextual message */}
+            <p className={`text-lg font-medium mb-4 ${subTextColor} leading-tight`}>
+              {contextualMessage}
+            </p>
+
             {/* Weather info */}
             {safeWeather && (
-              <div className={`flex items-center justify-center gap-3 mb-4 ${subTextColor}`}>
+              <div className={`flex items-center justify-center gap-3 ${subTextColor}`}>
                 <span className="text-2xl">{safeWeather.icon}</span>
                 <div className="text-left">
                   <p className="text-sm font-medium capitalize">{safeWeather.condition}</p>
                   <p className="text-lg font-semibold">{safeWeather.temp}°</p>
                 </div>
               </div>
-            )}
-            
-            {/* Weather comment */}
-            {safeWeather?.comment && (
-              <p className={`text-sm ${subTextColor} italic max-w-sm mx-auto`}>
-                {safeWeather.comment}
-              </p>
             )}
           </div>
         </div>
@@ -239,6 +293,7 @@ function DynamicHero({ weather, greeting, locale }) {
     return (
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-purple-100 p-8 text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{safeGreeting}</h1>
+        <p className="text-lg text-gray-700">{t('today.hero.default.consistency')}</p>
         {safeWeather && (
           <div className="flex items-center justify-center gap-3 text-gray-600">
             <span className="text-2xl">{safeWeather.icon}</span>
@@ -459,12 +514,19 @@ function TodayContent() {
 
         {/* ONE Primary Next Action - Priority 2 */}
         {briefing.primaryAction && (
-          <div className="mb-6">
+          <div className="mb-8">
             <Link to={briefing.primaryAction.path} className="block">
-              <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--brand))] text-white px-6 py-4 shadow-lg">
-                <Dumbbell className="w-5 h-5" />
-                <span className="text-[16px] font-semibold">{briefing.primaryAction.label}</span>
-                <ArrowRight className="w-4 h-4" />
+              <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-dark))] text-white px-8 py-5 shadow-xl transform transition-all duration-200 hover:scale-105 active:scale-95">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                    <Dumbbell className="w-6 h-6" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[18px] font-bold leading-tight">{briefing.primaryAction.label}</p>
+                    <p className="text-[13px] opacity-90 mt-1">{kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}</p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5" />
               </div>
             </Link>
           </div>
@@ -476,40 +538,40 @@ function TodayContent() {
         </div>
 
         {/* Quick Actions (4) - Priority 4 */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           <Link to={ROUTES.workouts} className="block">
-            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4 transition-all duration-200 hover:bg-[hsl(var(--fill))] hover:shadow-md active:scale-95">
               <Dumbbell className="w-5 h-5 text-[hsl(var(--brand))]" />
               <div>
-                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Workout</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.workoutDone ? 'Completed' : 'Start today'}</p>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Train</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.workoutDone ? 'Completed' : 'Start session'}</p>
               </div>
             </div>
           </Link>
           <Link to={ROUTES.nutrition} className="block">
-            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4 transition-all duration-200 hover:bg-[hsl(var(--fill))] hover:shadow-md active:scale-95">
               <UtensilsCrossed className="w-5 h-5 text-[hsl(var(--brand-ai))]" />
               <div>
-                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Nutrition</p>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Fuel</p>
                 <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.nutritionLogged ? 'Track meals' : 'Log first meal'}</p>
               </div>
             </div>
           </Link>
           <Link to={ROUTES.body} className="block">
-            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4 transition-all duration-200 hover:bg-[hsl(var(--fill))] hover:shadow-md active:scale-95">
               <Scale className="w-5 h-5 text-[hsl(var(--ok))]" />
               <div>
-                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Body</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.weightLogged ? 'Logged' : 'Check in'}</p>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Check-in</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">{safeDaily.weightLogged ? 'Logged' : 'Update metrics'}</p>
               </div>
             </div>
           </Link>
           <Link to={ROUTES.goals} className="block">
-            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4 transition-all duration-200 hover:bg-[hsl(var(--fill))] hover:shadow-md active:scale-95">
               <Target className="w-5 h-5 text-[hsl(var(--warn))]" />
               <div>
-                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Goals</p>
-                <p className="text-[12px] text-[hsl(var(--fg-3))]">Review progress</p>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Progress</p>
+                <p className="text-[12px] text-[hsl(var(--fg-3))]">Review trends</p>
               </div>
             </div>
           </Link>

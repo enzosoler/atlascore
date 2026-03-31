@@ -91,6 +91,32 @@
       "adherence": {
         "target": "Target",
         "ahead": "Ahead"
+      },
+      "today": {
+        "greeting": {
+          "default": "Welcome"
+        },
+        "hero": {
+          "morning": {
+            "focus": "Perfect time to move",
+            "perfect": "Perfect conditions for training"
+          },
+          "afternoon": {
+            "energy": "Strong energy window",
+            "strong": "Peak performance time"
+          },
+          "evening": {
+            "consistency": "Stay consistent today",
+            "clear": "Clear evening for recovery"
+          },
+          "night": {
+            "recovery": "Focus on recovery",
+            "clear": "Clear night, rest well"
+          },
+          "default": {
+            "consistency": "Focus on execution"
+          }
+        }
       }
     }
   },
