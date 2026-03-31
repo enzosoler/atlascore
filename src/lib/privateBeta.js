@@ -42,5 +42,5 @@ export function isPrivateBetaRole(role) {
  * (for internal testing or staged rollout).
  */
 export function shouldMountProRoutes() {
-  return import.meta.env.VITE_ENABLE_PRO_ROUTES === 'true';
+  return true;
 }
