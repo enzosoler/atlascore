@@ -200,158 +200,292 @@ function ExportContent() {
     try {
       const payload = await collectData();
       const doc = new jsPDF();
-      const pageW = doc.internal.pageSize.getWidth();
-      const pageH = doc.internal.pageSize.getHeight();
-      const margin = 15;
-      let y = margin;
+      const pageW = doc.internal.pageSize.getWidth();   // 210 mm (A4)
+      const pageH = doc.internal.pageSize.getHeight();  // 297 mm (A4)
+      const L = 16;        // left margin
+      const R = pageW - 16; // right edge
+      let y = 0;
 
-      // Brand Colors
-      const brandPrimary = [10, 10, 10]; // Near black
-      const colorRed = [220, 38, 38];
-      const colorYellow = [217, 119, 6];
-      const colorGreen = [22, 163, 74];
-      const colorMuted = [107, 114, 128];
+      // ── Brand palette (from /public/branding SVGs) ──────────────────────
+      const C_BG    = [5,   7,  10];   // #05070A  – near-black header bg
+      const C_CYAN  = [0,  220, 220];  // toned brand cyan (~#00DCDC)
+      const C_INK   = [18,  18,  22];  // very dark body text
+      const C_MUTED = [120, 120, 130]; // secondary/meta text
+      const C_LINE  = [220, 220, 225]; // subtle separator
+      const C_ROW   = [248, 248, 250]; // alternating row fill
+      const C_RED   = [200,  40,  40]; // over-target flag
+      const C_AMBER = [190, 120,  20]; // under-target flag
+      const C_GREEN = [30,  148,  75]; // on-target / completed
 
-      const checkPage = (needed = 15) => {
+      const checkPage = (needed = 14) => {
         if (y + needed > pageH - 20) {
           doc.addPage();
-          y = margin;
-          return true;
+          y = L;
         }
-        return false;
       };
 
-      // Header Bar
-      doc.setFillColor(...brandPrimary);
-      doc.rect(0, 0, pageW, 40, 'F');
-      
+      // ════════════════════════════════════════
+      //  HEADER  (dark bg + heartbeat icon)
+      // ════════════════════════════════════════
+      const HDR_H = 42;
+      doc.setFillColor(...C_BG);
+      doc.rect(0, 0, pageW, HDR_H, 'F');
+
+      // Cyan accent strip at very top (2 mm)
+      doc.setFillColor(...C_CYAN);
+      doc.rect(0, 0, pageW, 2, 'F');
+
+      // ── Heartbeat-to-arrow icon (drawn from brand SVG path data) ──
+      // Brand SVG viewBox 800x400; heartbeat occupies x:[150,550], y:[120,240]
+      // Scale to ~30 mm wide, placed at left margin, vertically centered in header
+      const IC_X = L;
+      const IC_Y = 14;    // top of icon area in mm
+      const SC   = 0.075; // 30mm / 400 SVG units
+      const tx = (sx) => IC_X + (sx - 150) * SC;
+      const ty = (sy) => IC_Y + (sy - 120) * SC;
+
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.75);
+      const hbPts = [[150,200],[250,200],[275,240],[325,120],[375,240],[400,200],[450,200],[550,140]];
+      for (let i = 0; i < hbPts.length - 1; i++) {
+        doc.line(tx(hbPts[i][0]), ty(hbPts[i][1]), tx(hbPts[i + 1][0]), ty(hbPts[i + 1][1]));
+      }
+      // Arrow tick: M530,140 H550 V160
+      doc.line(tx(530), ty(140), tx(550), ty(140));
+      doc.line(tx(550), ty(140), tx(550), ty(160));
+
+      // ── Brand logotype: "atlas" (cyan) + ".core" (white) ──
+      const BRAND_X = IC_X + (550 - 150) * SC + 5; // icon right edge + 5 mm gap = L + 35
+      doc.setFontSize(17);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...C_CYAN);
+      doc.text('atlas', BRAND_X, 22);
+      const atlasW = doc.getTextWidth('atlas');
       doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(24);
-      doc.text('atlas.core', margin, 22);
-      
-      doc.setFontSize(10);
+      doc.text('.core', BRAND_X + atlasW, 22);
+
+      // Subtitle row
+      doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
-      doc.text('Performance Data Report', margin, 32);
-      doc.text(`${payload.period.startDate} to ${payload.period.endDate}`, pageW - margin, 32, { align: 'right' });
+      doc.setTextColor(155, 158, 168);
+      doc.text('Performance Data Report', BRAND_X, 31);
+      doc.text(`${payload.period.startDate}  —  ${payload.period.endDate}`, R, 31, { align: 'right' });
 
-      y = 55;
+      y = HDR_H + 10;
 
-      // User Info
-      doc.setTextColor(...brandPrimary);
-      doc.setFontSize(16);
+      // ════════════════════════════════════════
+      //  ATHLETE INFO
+      // ════════════════════════════════════════
+      doc.setFontSize(15);
       doc.setFont('helvetica', 'bold');
-      doc.text(payload.user.name, margin, y);
+      doc.setTextColor(...C_INK);
+      doc.text(payload.user.name, L, y);
       y += 6;
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...colorMuted);
-      doc.text(payload.user.email, margin, y);
-      y += 15;
-
-      // --- Nutrition Section ---
-      doc.setTextColor(...brandPrimary);
-      doc.setFontSize(13);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Daily Nutrition Totals', margin, y);
-      y += 10;
-
-      const mealsByDay = {};
-      payload.meals.forEach(m => {
-        const d = (m.date || '').split('T')[0];
-        if (!mealsByDay[d]) mealsByDay[d] = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-        mealsByDay[d].kcal += (Number(m.calories) || Number(m.total_calories) || 0);
-        mealsByDay[d].protein += (Number(m.protein) || Number(m.protein_g) || Number(m.total_protein) || 0);
-        mealsByDay[d].carbs += (Number(m.carbs) || Number(m.carbs_g) || Number(m.total_carbs) || 0);
-        mealsByDay[d].fat += (Number(m.fat) || Number(m.fat_g) || Number(m.total_fat) || 0);
-      });
-
-      const targets = payload.user.targets;
-      const targetKcal = Number(targets.calories) || 0;
-
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...colorMuted);
-      doc.text('Date', margin, y);
-      doc.text('Calories', margin + 40, y);
-      doc.text('P / C / F', margin + 80, y);
-      doc.text('Status', margin + 130, y);
-      y += 4;
-      doc.setDrawColor(230, 230, 230);
-      doc.line(margin, y, pageW - margin, y);
-      y += 8;
-
-      Object.entries(mealsByDay).sort().forEach(([date, data]) => {
-        checkPage(8);
+      if (payload.user.email) {
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(...brandPrimary);
-        doc.text(date, margin, y);
-        doc.text(`${Math.round(data.kcal)} kcal`, margin + 40, y);
-        doc.text(`${Math.round(data.protein)}g / ${Math.round(data.carbs)}g / ${Math.round(data.fat)}g`, margin + 80, y);
-
-        if (targetKcal > 0) {
-          let status = 'On target';
-          let statusColor = colorGreen;
-          const diff = data.kcal - targetKcal;
-          
-          if (diff > targetKcal * 0.1) {
-            status = 'Over';
-            statusColor = colorRed;
-          } else if (diff < -targetKcal * 0.15) {
-            status = 'Under';
-            statusColor = colorYellow;
-          }
-
-          doc.setTextColor(...statusColor);
-          doc.setFont('helvetica', 'bold');
-          doc.text(status, margin + 130, y);
-        }
-        y += 7;
-      });
-
+        doc.setTextColor(...C_MUTED);
+        doc.text(payload.user.email, L, y);
+        y += 5;
+      }
       y += 12;
 
-      // --- Workouts Section ---
-      checkPage(25);
-      doc.setTextColor(...brandPrimary);
-      doc.setFontSize(13);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Workout Logs', margin, y);
-      y += 10;
+      // ════════════════════════════════════════
+      //  NUTRITION  —  daily summaries only
+      // ════════════════════════════════════════
+      checkPage(30);
 
-      if (payload.workouts.length === 0) {
+      // Section label + rule
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...C_CYAN);
+      doc.text('NUTRITION', L, y);
+      const nutLabelW = doc.getTextWidth('NUTRITION');
+      doc.setDrawColor(...C_LINE);
+      doc.setLineWidth(0.25);
+      doc.line(L + nutLabelW + 3, y - 1, R, y - 1);
+      y += 8;
+
+      // Column headers
+      const N_DATE   = L;
+      const N_KCAL   = L + 40;
+      const N_MACROS = L + 78;
+      const N_STATUS = L + 152;
+
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...C_MUTED);
+      doc.text('DATE',      N_DATE,   y);
+      doc.text('CALORIES',  N_KCAL,   y);
+      doc.text('P / C / F', N_MACROS, y);
+      doc.text('STATUS',    N_STATUS, y);
+      y += 2.5;
+      doc.setDrawColor(...C_LINE);
+      doc.setLineWidth(0.25);
+      doc.line(L, y, R, y);
+      y += 6;
+
+      // Aggregate meals by day
+      const mealsByDay = {};
+      payload.meals.forEach((m) => {
+        const d = (m.date || '').split('T')[0];
+        if (!mealsByDay[d]) mealsByDay[d] = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+        mealsByDay[d].kcal    += Number(m.calories)      || Number(m.total_calories) || 0;
+        mealsByDay[d].protein += Number(m.protein)       || Number(m.protein_g)      || Number(m.total_protein) || 0;
+        mealsByDay[d].carbs   += Number(m.carbs)         || Number(m.carbs_g)        || Number(m.total_carbs)   || 0;
+        mealsByDay[d].fat     += Number(m.fat)           || Number(m.fat_g)          || Number(m.total_fat)     || 0;
+      });
+
+      const targets    = payload.user.targets || {};
+      const targetKcal = Number(targets.calories) || Number(targets.kcal) || 0;
+
+      const sortedNutDays = Object.entries(mealsByDay).sort(([a], [b]) => a.localeCompare(b));
+
+      if (sortedNutDays.length === 0) {
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'italic');
-        doc.setFontSize(10);
-        doc.setTextColor(...colorMuted);
-        doc.text('No workouts recorded in this period.', margin, y);
+        doc.setTextColor(...C_MUTED);
+        doc.text('No nutrition data recorded in this period.', L, y);
         y += 10;
       } else {
-        payload.workouts.forEach(w => {
-          checkPage(8);
-          const date = (w.completed_at || '').split('T')[0];
+        sortedNutDays.forEach(([date, data], idx) => {
+          checkPage(9);
+          if (idx % 2 === 0) {
+            doc.setFillColor(...C_ROW);
+            doc.rect(L - 2, y - 5.5, R - L + 4, 8.5, 'F');
+          }
+          doc.setFontSize(9);
           doc.setFont('helvetica', 'normal');
-          doc.setTextColor(...brandPrimary);
-          doc.text(`${date} - ${w.name || 'Workout'}`, margin, y);
-          
-          doc.setTextColor(...colorGreen);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Completed ✓', pageW - margin, y, { align: 'right' });
-          y += 7;
+          doc.setTextColor(...C_INK);
+          doc.text(date, N_DATE, y);
+          doc.text(`${Math.round(data.kcal)} kcal`, N_KCAL, y);
+          doc.text(
+            `${Math.round(data.protein)}g / ${Math.round(data.carbs)}g / ${Math.round(data.fat)}g`,
+            N_MACROS, y
+          );
+
+          if (targetKcal > 0) {
+            const ratio = data.kcal / targetKcal;
+            let statusText;
+            let statusColor;
+            if (ratio > 1.1) {
+              statusText  = 'Over target';
+              statusColor = C_RED;
+            } else if (ratio < 0.85) {
+              statusText  = 'Under target';
+              statusColor = C_AMBER;
+            } else {
+              statusText  = 'On target';
+              statusColor = C_GREEN;
+            }
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...statusColor);
+            doc.text(statusText, N_STATUS, y);
+          }
+          y += 9;
         });
       }
 
-      // Final Footer
+      y += 14;
+
+      // ════════════════════════════════════════
+      //  WORKOUTS
+      // ════════════════════════════════════════
+      checkPage(30);
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...C_CYAN);
+      doc.text('WORKOUTS', L, y);
+      const wkoLabelW = doc.getTextWidth('WORKOUTS');
+      doc.setDrawColor(...C_LINE);
+      doc.setLineWidth(0.25);
+      doc.line(L + wkoLabelW + 3, y - 1, R, y - 1);
+      y += 8;
+
+      // Column headers
+      const W_DATE   = L;
+      const W_NAME   = L + 38;
+      const W_STATUS = R;
+
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...C_MUTED);
+      doc.text('DATE',     W_DATE,   y);
+      doc.text('TRAINING', W_NAME,   y);
+      doc.text('STATUS',   W_STATUS, y, { align: 'right' });
+      y += 2.5;
+      doc.setDrawColor(...C_LINE);
+      doc.setLineWidth(0.25);
+      doc.line(L, y, R, y);
+      y += 6;
+
+      if (payload.workouts.length === 0) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(...C_MUTED);
+        doc.text('No workouts recorded in this period.', L, y);
+        y += 10;
+      } else {
+        payload.workouts.forEach((w, idx) => {
+          checkPage(9);
+          if (idx % 2 === 0) {
+            doc.setFillColor(...C_ROW);
+            doc.rect(L - 2, y - 5.5, R - L + 4, 8.5, 'F');
+          }
+          const date = (w.completed_at || '').split('T')[0];
+          const name = w.name || 'Training Session';
+
+          // Truncate name to fit available column width
+          doc.setFontSize(9);
+          const maxNameW = W_STATUS - W_NAME - 32;
+          let displayName = name;
+          while (doc.getTextWidth(displayName) > maxNameW && displayName.length > 4) {
+            displayName = displayName.slice(0, -1);
+          }
+          if (displayName !== name) displayName += '...';
+
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...C_INK);
+          doc.text(date, W_DATE, y);
+          doc.text(displayName, W_NAME, y);
+
+          // Drawn check mark (avoids jsPDF Unicode rendering issues with helvetica)
+          const ckX = W_STATUS - 23;
+          const ckY = y;
+          doc.setDrawColor(...C_GREEN);
+          doc.setLineWidth(0.9);
+          doc.line(ckX,       ckY + 0.5, ckX + 1.5, ckY + 2.2);
+          doc.line(ckX + 1.5, ckY + 2.2, ckX + 4,   ckY - 0.8);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...C_GREEN);
+          doc.text('Completed', W_STATUS, y, { align: 'right' });
+          y += 9;
+        });
+      }
+
+      // ════════════════════════════════════════
+      //  FOOTER  (every page)
+      // ════════════════════════════════════════
       const totalPages = doc.internal.pages.length - 1;
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(...colorMuted);
-        doc.text(`Generated by atlas.core - Page ${i} of ${totalPages}`, margin, pageH - 10);
-        doc.text(new Date().toLocaleString(), pageW - margin, pageH - 10, { align: 'right' });
+        doc.setDrawColor(...C_LINE);
+        doc.setLineWidth(0.25);
+        doc.line(L, pageH - 14, R, pageH - 14);
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...C_MUTED);
+        doc.text(
+          `atlas.core  ·  Performance Data Report  ·  Page ${i} of ${totalPages}`,
+          L, pageH - 9
+        );
+        doc.text(new Date().toLocaleDateString(), R, pageH - 9, { align: 'right' });
       }
 
       doc.save(`${fileBase}.pdf`);
-      setNotice('PDF report generated successfully.');
+      setNotice('PDF report generated.');
     } catch (error) {
       console.error(error);
       setNotice('Could not generate the PDF file.');
