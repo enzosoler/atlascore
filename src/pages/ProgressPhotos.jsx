@@ -43,6 +43,7 @@ import {
   uploadProgressPhoto,
 } from '@/services/bodyProgressService';
 import { useI18n } from '@/lib/i18nContext';
+import PaywallTrigger from '@/components/entitlements/PaywallTrigger';
 
 // Standard poses for physique tracking
 const POSES = [
@@ -659,6 +660,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const [checkpointDates, setCheckpointDates] = useState([]);
   const [uploadingPose, setUploadingPose] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [showPhotoPaywall, setShowPhotoPaywall] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
   React.useEffect(() => {
@@ -705,6 +707,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
       qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
       qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
       setNotice({ tone: 'success', message: 'Photo saved successfully.' });
+      setShowPhotoPaywall(true);
     } catch (error) {
       setNotice({ tone: 'error', message: error?.message || 'Error uploading photo. Please try again.' });
     } finally {
@@ -842,6 +845,9 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
             </div>
           </Section>
           {allDates.length === 1 && <Section><VisualPreview /></Section>}
+          {showPhotoPaywall && (
+            <div className="px-1"><PaywallTrigger trigger="photo" show /></div>
+          )}
         </>
       )}
 

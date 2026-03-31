@@ -210,7 +210,7 @@ function ZoneCalories({ nutrition, firstName }) {
           </p>
           <p className="text-[15px] text-[hsl(var(--fg-2))] mt-1">kcal remaining</p>
           <p className="text-[13px] text-[hsl(var(--fg-3))] mt-0.5">
-            {caloriesConsumed} eaten · {caloriesTarget} target
+            {caloriesConsumed} eaten · {caloriesTarget} your target
           </p>
         </div>
 
@@ -274,7 +274,7 @@ function ZoneFallback({ nutrition, firstName }) {
 }
 
 /** Zone 2 — Proactive AI card */
-function ProactiveAICard({ message, onOpenChat, onDismiss }) {
+function ProactiveAICard({ message, onOpenChat, onDismiss, streak, firstName }) {
   if (!message) return null;
 
   return (
@@ -285,7 +285,7 @@ function ProactiveAICard({ message, onOpenChat, onDismiss }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--brand-ai))] mb-1.5">
-            Your coach
+            {streak > 14 && firstName ? `${firstName}'s coach` : 'Your coach'}
           </p>
           <p className="text-[14px] text-[hsl(var(--fg))] leading-[1.5]">{message}</p>
           {onOpenChat && (
@@ -477,6 +477,8 @@ function TodayContent() {
               message={proactiveMessage}
               onOpenChat={() => setChatOpen(true)}
               onDismiss={() => setAiDismissed(true)}
+              streak={streak}
+              firstName={firstName}
             />
           </div>
         )}

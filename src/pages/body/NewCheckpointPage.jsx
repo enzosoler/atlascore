@@ -16,7 +16,7 @@ const FIELDS = [
   { key: 'body_fat_percent', label: 'Body Fat',     unit: '%',  step: '0.1', placeholder: '0.0' },
   { key: 'muscle_mass',      label: 'Muscle Mass',  unit: 'kg', step: '0.1', placeholder: '0.0' },
   { key: 'waist',            label: 'Waist',        unit: 'cm', step: '0.5', placeholder: '0.0' },
-  { key: 'hip',              label: 'Hip',          unit: 'cm', step: '0.5', placeholder: '0.0' },
+  { key: 'hips',             label: 'Hip',          unit: 'cm', step: '0.5', placeholder: '0.0' },
   { key: 'chest',            label: 'Chest',        unit: 'cm', step: '0.5', placeholder: '0.0' },
 ];
 

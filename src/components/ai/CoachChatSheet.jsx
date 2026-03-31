@@ -15,6 +15,8 @@ import { Sparkles, Send, X, Check, Loader2, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { useT } from '@/lib/i18nContext';
+import { useSubscription } from '@/lib/SubscriptionContext';
+import PaywallTrigger from '@/components/entitlements/PaywallTrigger';
 
 // ─── Markdown components ───────────────────────────────────────────────────────
 
@@ -178,13 +180,18 @@ export default function CoachChatSheet({
   suggestions = [],
 }) {
   const t = useT();
+  const { can } = useSubscription();
   const [input, setInput] = useState('');
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
-  
+
   // Safe array defaults
   const safeMessages = Array.isArray(messages) ? messages : [];
   const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+
+  // Free user: gate after 1 user message per day
+  const userMsgCount = safeMessages.filter(m => m.role === 'user').length;
+  const isFreeGated = !can('atlas_ai') && userMsgCount >= 1;
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -277,6 +284,13 @@ export default function CoachChatSheet({
           ))}
 
           {isTyping && <TypingIndicator />}
+
+          {/* Free user gate after 1 message */}
+          {isFreeGated && (
+            <div className="mt-4">
+              <PaywallTrigger trigger="ai_coach" show />
+            </div>
+          )}
         </div>
 
         {/* Suggestion pills */}
@@ -295,13 +309,14 @@ export default function CoachChatSheet({
         )}
 
         {/* Input bar */}
-        <div className="shrink-0 flex items-end gap-2 border-t border-[hsl(var(--border)/0.5)] px-4 py-3">
+        <div className={cn('shrink-0 flex items-end gap-2 border-t border-[hsl(var(--border)/0.5)] px-4 py-3', isFreeGated && 'opacity-45 pointer-events-none')}>
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('coach.chat.placeholder')}
+            disabled={isFreeGated}
+            placeholder={isFreeGated ? 'Upgrade for more messages' : t('coach.chat.placeholder')}
             rows={1}
             className={cn(
               'flex-1 resize-none rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] px-3.5 py-2.5',

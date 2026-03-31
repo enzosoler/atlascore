@@ -4,6 +4,7 @@ import { ArrowRight, Clock, Play, Plus, Trophy, X } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
 import { Input } from '@/components/ui/input';
 import { tapMedium, celebrateHeavy } from '@/lib/haptics';
+import { PaywallSheet } from '@/components/entitlements/PaywallTrigger';
 import { Button } from '@/components/ui/button';
 import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
@@ -211,6 +212,7 @@ export default function WorkoutExecutionScreen({
     () => (initialSession?.exercises ?? workout.exercises ?? []).length === 0
   );
   const [isDone, setIsDone] = useState(false);
+  const [showWorkoutPaywall, setShowWorkoutPaywall] = useState(false);
   const [prFlash, setPrFlash] = useState(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   // Tick counter — increments twice/sec to drive re-renders for the live countdown
@@ -426,8 +428,10 @@ export default function WorkoutExecutionScreen({
     clearSession();
     window.dispatchEvent(new Event('atlas:session:change'));
     const payload = buildCompletedPayload();
-    toast.success(t('workoutExecution.toastCompleted') + ' 💪');
+    toast.success(t('workoutExecution.toastCompleted'));
     onComplete?.(payload);
+    // Show paywall after first workout (triggers once per session via sessionStorage)
+    setShowWorkoutPaywall(true);
   };
 
   const handleCancelWorkout = () => {
@@ -465,6 +469,11 @@ export default function WorkoutExecutionScreen({
         </div>
       </div>
     );
+  }
+
+  // ── Paywall after workout finish ──────────────────────────────────────────
+  if (showWorkoutPaywall) {
+    return <PaywallSheet trigger="workout" show onClose={() => setShowWorkoutPaywall(false)} />;
   }
 
   // ── Render: Completion Screen ─────────────────────────────────────────────
