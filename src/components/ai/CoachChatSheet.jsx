@@ -181,13 +181,17 @@ export default function CoachChatSheet({
   const [input, setInput] = useState('');
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
+  
+  // Safe array defaults
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isTyping]);
+  }, [safeMessages, isTyping]);
 
   // Focus input when opened
   useEffect(() => {
@@ -215,11 +219,11 @@ export default function CoachChatSheet({
   }
 
   // Show suggestions from the last assistant message, or default page suggestions
-  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+  const lastAssistant = [...safeMessages].reverse().find((m) => m.role === 'assistant');
   const visibleSuggestions =
-    (lastAssistant?.suggestions?.length > 0 ? lastAssistant.suggestions : suggestions).slice(0, 3);
+    (lastAssistant?.suggestions?.length > 0 ? lastAssistant.suggestions : safeSuggestions).slice(0, 3);
 
-  const isEmpty = messages.length === 0;
+  const isEmpty = safeMessages.length === 0;
 
   return createPortal(
     <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
@@ -262,7 +266,7 @@ export default function CoachChatSheet({
             </div>
           )}
 
-          {messages.map((msg) => (
+          {safeMessages.map((msg) => (
             <MessageBubble
               key={msg.id}
               message={msg}
