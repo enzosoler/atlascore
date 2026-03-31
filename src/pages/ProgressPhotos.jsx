@@ -707,7 +707,12 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
       qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
       qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
       setNotice({ tone: 'success', message: 'Photo saved successfully.' });
-      setShowPhotoPaywall(true);
+      try {
+        if (!localStorage.getItem('atlas_first_photo_done')) {
+          localStorage.setItem('atlas_first_photo_done', '1');
+          setShowPhotoPaywall(true);
+        }
+      } catch { /* quota */ }
     } catch (error) {
       setNotice({ tone: 'error', message: error?.message || 'Error uploading photo. Please try again.' });
     } finally {

@@ -430,8 +430,13 @@ export default function WorkoutExecutionScreen({
     const payload = buildCompletedPayload();
     toast.success(t('workoutExecution.toastCompleted'));
     onComplete?.(payload);
-    // Show paywall after first workout (triggers once per session via sessionStorage)
-    setShowWorkoutPaywall(true);
+    // Show paywall only if user hasn't seen it before (first workout ever)
+    try {
+      if (!localStorage.getItem('atlas_first_workout_done')) {
+        localStorage.setItem('atlas_first_workout_done', '1');
+        setShowWorkoutPaywall(true);
+      }
+    } catch { /* quota */ }
   };
 
   const handleCancelWorkout = () => {

@@ -1876,6 +1876,19 @@ export default function NutritionPage() {
     return count;
   }, [meals]);
 
+  // "Repeat yesterday's breakfast" — show if today has no breakfast logged
+  const yesterdayBreakfast = useMemo(() => {
+    if (selectedDate !== TODAY) return null;
+    const todayBreakfast = sortedMeals.find(m => m.meal_type === 'breakfast');
+    if (todayBreakfast) return null; // already logged
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const ydKey = yesterday.toISOString().slice(0, 10);
+    const ydBreakfastItems = meals.filter(m => m.date === ydKey && m.meal_type === 'breakfast');
+    if (ydBreakfastItems.length === 0) return null;
+    return ydBreakfastItems;
+  }, [meals, sortedMeals, selectedDate]);
+
   const getMacroInterpretation = (consumed, target, type) => {
     if (target === 0) return null;
     const pct = consumed / target;
@@ -2004,6 +2017,23 @@ export default function NutritionPage() {
             </div>
           ) : sortedMeals.length > 0 ? (
             <div className="space-y-4">
+              {/* Repeat yesterday's breakfast */}
+              {yesterdayBreakfast && (
+                <button
+                  onClick={() => {
+                    // Clone yesterday's breakfast items to today
+                    yesterdayBreakfast.forEach(item => {
+                      const clone = { ...item, date: TODAY, id: undefined, created_at: undefined };
+                      // Save via the existing saveMeal flow
+                      handleSaveMeal(clone);
+                    });
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2.5 rounded-[12px] bg-[hsl(var(--shell))] border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg-2))] active:scale-[0.98] transition-transform duration-100"
+                >
+                  <Sunrise className="w-4 h-4 text-[hsl(var(--brand))]" />
+                  Repeat yesterday&apos;s breakfast?
+                </button>
+              )}
               {/* Timeline Header */}
               <div className="flex items-center justify-between">
                 <div>

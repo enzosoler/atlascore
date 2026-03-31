@@ -252,6 +252,7 @@ serve(async (req) => {
     recentWorkoutRes,
     memoryRes,
     historyRes,
+    checkinRes,
   ] = await Promise.all([
     supabase.from('profiles')
       .select('full_name, profile_data')
@@ -293,6 +294,12 @@ serve(async (req) => {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(8),
+
+    supabase.from('daily_checkins')
+      .select('sleep_hours, energy, mood, date')
+      .eq('user_id', userId)
+      .eq('date', today)
+      .maybeSingle(),
   ]);
 
   // ── 6. Derive context ─────────────────────────────────────────────────────
@@ -348,6 +355,8 @@ serve(async (req) => {
       : null,
   };
 
+  const todayCheckin = checkinRes.data as any ?? null;
+
   const todayMetrics = {
     date:                today,
     page:                page_context,
@@ -358,6 +367,9 @@ serve(async (req) => {
     protein_target_g:    proteinTarget,
     workout_status:      workoutDone ? 'completed' : workoutStarted ? 'in_progress' : 'not_logged',
     workout_name:        workoutName,
+    checkin:             todayCheckin
+      ? { sleep_hours: todayCheckin.sleep_hours, energy: todayCheckin.energy, mood: todayCheckin.mood }
+      : null,
   };
 
   const adherenceSummary = {
@@ -445,6 +457,9 @@ serve(async (req) => {
 
   const updatedSummary = buildUpdatedSummary(conversationSummary, userMessage.trim(), assistantContent);
 
+  // ── Generate proactive insight for Today screen ────────────────────────────
+  const proactiveInsight = generateProactiveInsight(todayMetrics, adherenceSummary, todayCheckin);
+
   await supabase.from('coach_memory').upsert({
     user_id:              userId,
     athlete_profile:      athleteProfile,
@@ -453,6 +468,8 @@ serve(async (req) => {
       : {},
     adherence_summary:    adherenceSummary,
     conversation_summary: updatedSummary,
+    proactive_insight:    proactiveInsight,
+    proactive_insight_generated_at: new Date().toISOString(),
     updated_at:           new Date().toISOString(),
   }, { onConflict: 'user_id' });
 
@@ -497,6 +514,56 @@ serve(async (req) => {
 });
 
 // ─── Memory helper ────────────────────────────────────────────────────────────
+
+/**
+ * Generate a proactive insight for the Today screen based on current metrics.
+ * Rules: must reference a real data point, no generic praise, one sentence max.
+ */
+function generateProactiveInsight(
+  metrics: any,
+  adherence: any,
+  checkin: any,
+): string | null {
+  const {
+    calories_eaten = 0,
+    calories_target = 0,
+    protein_eaten_g = 0,
+    protein_target_g = 0,
+    workout_status,
+  } = metrics;
+  const calRemaining = Math.max(0, calories_target - calories_eaten);
+  const protRemaining = Math.max(0, protein_target_g - protein_eaten_g);
+  const trend = adherence?.last_7_days?.days_on_calorie_target ?? 0;
+
+  // Priority 1: Low energy from check-in
+  if (checkin?.energy && checkin.energy <= 2) {
+    return 'Low energy today — cut accessory volume, protect the main work.';
+  }
+
+  // Priority 2: Protein deficit
+  if (protein_target_g > 0 && protRemaining > 30 && calories_eaten > 0) {
+    return `${protRemaining}g short on protein. One serving of chicken or a shake fixes it.`;
+  }
+
+  // Priority 3: Missed training
+  if (workout_status === 'not_logged' && new Date().getHours() >= 14) {
+    return "You haven't trained today. The session is still there.";
+  }
+
+  // Priority 4: Calorie overshoot
+  if (calories_target > 0 && calories_eaten > calories_target * 1.15) {
+    const over = Math.round(calories_eaten - calories_target);
+    return `${over} kcal over target. Light dinner keeps you close.`;
+  }
+
+  // Priority 5: On track
+  if (workout_status === 'completed' && calRemaining < 300 && calRemaining >= 0) {
+    return "Everything's green today.";
+  }
+
+  // No insight beats a bad insight
+  return null;
+}
 
 function buildUpdatedSummary(
   existing: Record<string, unknown>,

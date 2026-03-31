@@ -13,6 +13,7 @@ import { useI18n } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
 import { getDailyCheckin, listDailyCheckins } from '@/services/checkinService';
+import { supabase } from '@/lib/supabaseClient';
 import { getToday } from '@/lib/atlas-theme';
 import { ROUTES } from '@/lib/routes';
 import CoachChatSheet from '@/components/ai/CoachChatSheet';
@@ -341,6 +342,22 @@ function TodayContent() {
     staleTime: 60_000,
   });
 
+  // Proactive insight from coach_memory
+  const { data: coachMemory } = useQuery({
+    queryKey: ['coach-memory-insight', uid],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('coach_memory')
+        .select('proactive_insight, proactive_insight_generated_at')
+        .eq('user_id', uid)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!uid,
+    staleTime: 120_000,
+    refetchOnWindowFocus: true,
+  });
+
   const safeDaily = daily || {};
   const safePlan = safeDaily.plan || {};
   const safeNutrition = safeDaily.nutrition || {};
@@ -395,8 +412,12 @@ function TodayContent() {
     return null;
   }, [todayCheckin]);
 
-  // ── Proactive AI message ──────────────────────────────────────────────────
-  const proactiveMessage = ai?.briefing?.message || null;
+  // ── Proactive AI message (from coach_memory, fallback to ai.briefing) ────
+  const insightAge = coachMemory?.proactive_insight_generated_at
+    ? Date.now() - new Date(coachMemory.proactive_insight_generated_at).getTime()
+    : Infinity;
+  const insightFresh = insightAge < 24 * 60 * 60 * 1000; // < 24h old
+  const proactiveMessage = (insightFresh && coachMemory?.proactive_insight) || ai?.briefing?.message || null;
   const showAICard = !aiDismissed && !!proactiveMessage;
 
   return (
