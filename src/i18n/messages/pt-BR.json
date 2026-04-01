@@ -1942,7 +1942,10 @@
     "photos": "Fotos",
     "eat": "Comer",
     "charts": "Gráficos",
-    "you": "Você"
+    "you": "Você",
+    "my plan": "Meu plano",
+    "my diet": "Minha dieta",
+    "insights": "Análises"
   },
   "layout": {
     "openMenu": "Abrir menu",

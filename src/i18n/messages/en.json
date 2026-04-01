@@ -1954,7 +1954,10 @@
     "photos": "Photos",
     "eat": "Eat",
     "charts": "Charts",
-    "you": "You"
+    "you": "You",
+    "my plan": "My Plan",
+    "my diet": "My Diet",
+    "insights": "Insights"
   },
   "layout": {
     "openMenu": "Open menu",
