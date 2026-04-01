@@ -179,11 +179,17 @@ export const notificationService = {
 
     // ── Register with APNs / FCM ────────────────────────────────────────────
     // This triggers 'registration' or 'registrationError' above.
-    try {
-      await PushNotifications.register();
-      log('register() called — waiting for token event');
-    } catch (err) {
-      warn('PushNotifications.register() threw:', err?.message);
+    // Skip on Android if google-services.json / Firebase is not configured —
+    // the native plugin crashes with "Default FirebaseApp is not initialized".
+    if (PLATFORM === 'android') {
+      log('Android detected — skipping PushNotifications.register() (no Firebase config)');
+    } else {
+      try {
+        await PushNotifications.register();
+        log('register() called — waiting for token event');
+      } catch (err) {
+        warn('PushNotifications.register() threw:', err?.message);
+      }
     }
 
     _initialised = true;
