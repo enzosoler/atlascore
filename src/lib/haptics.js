@@ -1,52 +1,70 @@
 /**
  * Haptic feedback utility — wraps @capacitor/haptics.
- * Silent no-op on web (non-native) environments.
+ * Lazy-loads the native module so it never breaks web/browser builds.
+ * Silent no-op on non-native environments.
  */
 
-import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
 
 const isNative = Capacitor.isNativePlatform();
 
+let _haptics = null;
+
+async function getHaptics() {
+  if (!isNative) return null;
+  if (!_haptics) {
+    try {
+      const mod = await import('@capacitor/haptics');
+      _haptics = mod.Haptics;
+    } catch {
+      _haptics = null;
+    }
+  }
+  return _haptics;
+}
+
 async function safe(fn) {
   if (!isNative) return;
-  try { await fn(); } catch { /* swallow — device may not support haptics */ }
+  try {
+    const H = await getHaptics();
+    if (H) await fn(H);
+  } catch { /* swallow */ }
 }
 
 /** Light tap — buttons, toggles, chips */
 export function tapLight() {
-  safe(() => Haptics.impact({ style: ImpactStyle.Light }));
+  safe((H) => H.impact({ style: 'LIGHT' }));
 }
 
 /** Medium tap — save, set logged, form submit */
 export function tapMedium() {
-  safe(() => Haptics.impact({ style: ImpactStyle.Medium }));
+  safe((H) => H.impact({ style: 'MEDIUM' }));
 }
 
 /** Heavy tap — check-in submit, streak milestone, destructive */
 export function tapHeavy() {
-  safe(() => Haptics.impact({ style: ImpactStyle.Heavy }));
+  safe((H) => H.impact({ style: 'HEAVY' }));
 }
 
 /** Slider integer tick */
 export function tick() {
-  safe(() => Haptics.impact({ style: ImpactStyle.Light }));
+  safe((H) => H.impact({ style: 'LIGHT' }));
 }
 
 /** Success notification — check-in, streak hit */
 export function notifySuccess() {
-  safe(() => Haptics.notification({ type: NotificationType.Success }));
+  safe((H) => H.notification({ type: 'SUCCESS' }));
 }
 
 /** Error notification — validation fail */
 export function notifyError() {
-  safe(() => Haptics.notification({ type: NotificationType.Error }));
+  safe((H) => H.notification({ type: 'ERROR' }));
 }
 
 /** Combined heavy + success — for big moments (check-in submit, streak milestone) */
 export function celebrateHeavy() {
-  safe(async () => {
-    await Haptics.impact({ style: ImpactStyle.Heavy });
-    await Haptics.notification({ type: NotificationType.Success });
+  safe(async (H) => {
+    await H.impact({ style: 'HEAVY' });
+    await H.notification({ type: 'SUCCESS' });
   });
 }
