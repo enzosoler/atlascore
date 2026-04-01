@@ -968,7 +968,7 @@ function InsightsContent() {
   const profile = useMemo(() => {
     const pd = profileRow?.profile_data;
     const fromPd = pd && typeof pd === 'object' ? pd : {};
-    const merged = { ...fromPd, ...(profileRow || {}) };
+    const merged = { ...(profileRow || {}), ...fromPd };
     delete merged.profile_data;
     return merged;
   }, [profileRow]);

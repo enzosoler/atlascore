@@ -146,8 +146,9 @@ export default function MyWorkout() {
     queryFn: async () => {
       if (!user?.id) return null;
       try {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        return data || null;
+        const { data } = await supabase.from('profiles').select('profile_data, full_name').eq('id', user.id).single();
+        const pd = data?.profile_data ?? {};
+        return { ...pd, full_name: data?.full_name };
       } catch {
         return null;
       }

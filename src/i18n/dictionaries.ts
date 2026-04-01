@@ -12,14 +12,44 @@ import ptBRMessages from './messages/pt-BR.json';
 import ptBROnboardingMessages from './messages/pt-BR-onboarding.json';
 import esMessages from './messages/es.json';
 
+// Patch files — orphaned translations that need merging
+import trainingPatch from './patches/training.json';
+import nutritionPatch from './patches/nutrition.json';
+import settingsPatch from './patches/settings.json';
+import insightsPatch from './patches/insights.json';
+import bodyPatch from './patches/body.json';
+import sharedPatch from './patches/shared.json';
+import professionalsPatch from './patches/professionals.json';
+import clinicianPatch from './patches/clinician.json';
+
 export type Dictionary = Record<string, any>;
 
 // Pre-merge onboarding overlays into their base locale so tour keys resolve
 // without a separate runtime import. en-onboarding.json was previously orphaned.
+// Merge all patch files per locale
+function mergePatches(base: Dictionary, patches: Array<Record<string, any>>, locale: string): Dictionary {
+  let result = base;
+  for (const patch of patches) {
+    const localeData = patch[locale] || patch[locale.split('-')[0]];
+    if (localeData && typeof localeData === 'object') {
+      result = deepMergeStatic(result, localeData as Dictionary);
+    }
+  }
+  return result;
+}
+
+const allPatches = [trainingPatch, nutritionPatch, settingsPatch, insightsPatch, bodyPatch, sharedPatch, professionalsPatch, clinicianPatch];
+
 const rawDicts: Record<string, Dictionary> = {
-  en: deepMergeStatic(enMessages as unknown as Dictionary, enOnboardingMessages as unknown as Dictionary),
-  'pt-BR': deepMergeStatic(ptBRMessages as unknown as Dictionary, ptBROnboardingMessages as unknown as Dictionary),
-  es: esMessages as unknown as Dictionary,
+  en: mergePatches(
+    deepMergeStatic(enMessages as unknown as Dictionary, enOnboardingMessages as unknown as Dictionary),
+    allPatches, 'en'
+  ),
+  'pt-BR': mergePatches(
+    deepMergeStatic(ptBRMessages as unknown as Dictionary, ptBROnboardingMessages as unknown as Dictionary),
+    allPatches, 'pt-BR'
+  ),
+  es: mergePatches(esMessages as unknown as Dictionary, allPatches, 'es'),
 };
 
 // Simple recursive merge used only at module init — before deepMerge is defined below.
