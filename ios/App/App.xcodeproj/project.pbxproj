@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F46DA356E18A42810F1160A /* WatchAppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D873C6FD731411E62D758D0 /* WatchAppState.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		38F7303FA6B0318BDC249F52 /* WatchConnectivityHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DBE81C81CE710D154FD1F7 /* WatchConnectivityHandler.swift */; };
+		451C561CBD78A80EE7AC52B8 /* StartWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDACFFF5DDA26AB2D6546BD /* StartWorkoutView.swift */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -15,43 +18,31 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
-
-		989E6406437E053D041C8BC5 /* AtlasCoreWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D4D87817A176FB0DA2176C0 /* AtlasCoreWidgets.swift */; };
-		CD0401E3F4647465FB3B6089 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33BF13DB96BE9E09764BAB62 /* Assets.xcassets */; };
-		93DF6B06A94DDC82FE40811B /* AtlasCoreWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 207CA68AD05BACF19CF35989 /* AtlasCoreWatchApp.swift */; };
-		74917DAA8B47EF08D5F53004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5880AAD7FCD0840BA46DD41E /* ContentView.swift */; };
-		2F46DA356E18A42810F1160A /* WatchAppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D873C6FD731411E62D758D0 /* WatchAppState.swift */; };
-		984A23EA7C540926E3627C6C /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D61E266CAA928C887B61D4 /* WatchConnectivityManager.swift */; };
-		77CDEBF38EFF82567468CCC2 /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3401DDBDE46DC4C92CBD9880 /* ActiveWorkoutView.swift */; };
-		C8B8C6DF885D4487D79637D5 /* QuickWeighInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3CE5EF82F2C59E5ADE4B6D1 /* QuickWeighInView.swift */; };
-		451C561CBD78A80EE7AC52B8 /* StartWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDACFFF5DDA26AB2D6546BD /* StartWorkoutView.swift */; };
 		55F4230F66B0F4FEB8C784E6 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CA32A2D9CE11AFA781E9F1 /* TodayView.swift */; };
-		D68D36E3E4E334CBF2BE24C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BFBC02226A1611F938F8262 /* Assets.xcassets */; };
+		74917DAA8B47EF08D5F53004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5880AAD7FCD0840BA46DD41E /* ContentView.swift */; };
+		77CDEBF38EFF82567468CCC2 /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3401DDBDE46DC4C92CBD9880 /* ActiveWorkoutView.swift */; };
+		93DF6B06A94DDC82FE40811B /* AtlasCoreWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 207CA68AD05BACF19CF35989 /* AtlasCoreWatchApp.swift */; };
+		984A23EA7C540926E3627C6C /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D61E266CAA928C887B61D4 /* WatchConnectivityManager.swift */; };
+		989E6406437E053D041C8BC5 /* AtlasCoreWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D4D87817A176FB0DA2176C0 /* AtlasCoreWidgets.swift */; };
 		A46C6FFC6FEE400556ED1E89 /* WidgetDataBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28225F808F00127FC19D5BBA /* WidgetDataBridge.swift */; };
-		38F7303FA6B0318BDC249F52 /* WatchConnectivityHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DBE81C81CE710D154FD1F7 /* WatchConnectivityHandler.swift */; };
-		F340A59CD0AE1D234BA05F27 /* AtlasCoreWidgetsExtension.appex in Embed Extensions */ = {isa = PBXBuildFile; fileRef = 424C06EE66736773610FE2C9 /* AtlasCoreWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		A89E6D5185C6B6AD0CF6E15A /* AtlasCoreWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA2EDD132C6D18AC65D80D14 /* AtlasCoreWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C8B8C6DF885D4487D79637D5 /* QuickWeighInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3CE5EF82F2C59E5ADE4B6D1 /* QuickWeighInView.swift */; };
+		CD0401E3F4647465FB3B6089 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33BF13DB96BE9E09764BAB62 /* Assets.xcassets */; };
+		D68D36E3E4E334CBF2BE24C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BFBC02226A1611F938F8262 /* Assets.xcassets */; };
+		E1B0A001EMBED0001WIDGETS /* AtlasCoreWidgetsExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 424C06EE66736773610FE2C9 /* AtlasCoreWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E1B0A002EMBED0002WATCHAP /* AtlasCoreWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA2EDD132C6D18AC65D80D14 /* AtlasCoreWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
-
-/* Begin PBXContainerItemProxy section */
-		1C09B5E5018C53EA84029066 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = DC9EFA1C62A67FE9089819C3;
-			remoteInfo = AtlasCoreWidgets;
-		};
-		193231A858A255F018B910DB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 93ECFAE2290E4FF00DFC8EAB;
-			remoteInfo = AtlasCoreWatch;
-		};
-/* End PBXContainerItemProxy section */
 /* Begin PBXFileReference section */
+		0EDACFFF5DDA26AB2D6546BD /* StartWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartWorkoutView.swift; sourceTree = "<group>"; };
+		207CA68AD05BACF19CF35989 /* AtlasCoreWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtlasCoreWatchApp.swift; sourceTree = "<group>"; };
+		28225F808F00127FC19D5BBA /* WidgetDataBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataBridge.swift; sourceTree = "<group>"; };
+		2D4D87817A176FB0DA2176C0 /* AtlasCoreWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtlasCoreWidgets.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		33BF13DB96BE9E09764BAB62 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3401DDBDE46DC4C92CBD9880 /* ActiveWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWorkoutView.swift; sourceTree = "<group>"; };
+		399D953A1BDBFA8C8C11E1A1 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		424C06EE66736773610FE2C9 /* AtlasCoreWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AtlasCoreWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B9523EAA5FEC929E9ACB078 /* AtlasCoreWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AtlasCoreWidgets.entitlements; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* atlas.core.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = atlas.core.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -60,57 +51,21 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
-		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
-
-		2D4D87817A176FB0DA2176C0 /* AtlasCoreWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtlasCoreWidgets.swift; sourceTree = "<group>"; };
-		4B9523EAA5FEC929E9ACB078 /* AtlasCoreWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AtlasCoreWidgets.entitlements; sourceTree = "<group>"; };
-		DDB573CF38E6EC59677843CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		33BF13DB96BE9E09764BAB62 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		424C06EE66736773610FE2C9 /* AtlasCoreWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AtlasCoreWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		207CA68AD05BACF19CF35989 /* AtlasCoreWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtlasCoreWatchApp.swift; sourceTree = "<group>"; };
 		5880AAD7FCD0840BA46DD41E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6D873C6FD731411E62D758D0 /* WatchAppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAppState.swift; sourceTree = "<group>"; };
-		C4D61E266CAA928C887B61D4 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
-		BFB8FB09F8AE2D458E2C44A8 /* AtlasCoreWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AtlasCoreWatch.entitlements; sourceTree = "<group>"; };
-		D9C30EE57418C3335598DF01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7BFBC02226A1611F938F8262 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		3401DDBDE46DC4C92CBD9880 /* ActiveWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWorkoutView.swift; sourceTree = "<group>"; };
-		E3CE5EF82F2C59E5ADE4B6D1 /* QuickWeighInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickWeighInView.swift; sourceTree = "<group>"; };
-		0EDACFFF5DDA26AB2D6546BD /* StartWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartWorkoutView.swift; sourceTree = "<group>"; };
-		F6CA32A2D9CE11AFA781E9F1 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
-		DA2EDD132C6D18AC65D80D14 /* AtlasCoreWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AtlasCoreWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		28225F808F00127FC19D5BBA /* WidgetDataBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataBridge.swift; sourceTree = "<group>"; };
+		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		96DBE81C81CE710D154FD1F7 /* WatchConnectivityHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityHandler.swift; sourceTree = "<group>"; };
-		399D953A1BDBFA8C8C11E1A1 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		BFB8FB09F8AE2D458E2C44A8 /* AtlasCoreWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AtlasCoreWatch.entitlements; sourceTree = "<group>"; };
+		C4D61E266CAA928C887B61D4 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
+		D9C30EE57418C3335598DF01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA2EDD132C6D18AC65D80D14 /* AtlasCoreWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AtlasCoreWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDB573CF38E6EC59677843CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E3CE5EF82F2C59E5ADE4B6D1 /* QuickWeighInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickWeighInView.swift; sourceTree = "<group>"; };
+		F6CA32A2D9CE11AFA781E9F1 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		504EC3011FED79650016851F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
-
-		CE3D98E8767AF2FB0A0D7CC2 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				989E6406437E053D041C8BC5 /* AtlasCoreWidgets.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7D1844FB11ED134B0BEEF84F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CD0401E3F4647465FB3B6089 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		48E6D29941725E957779151D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -118,26 +73,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		755C0D1A9BE37F8234157D4A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
+		504EC3011FED79650016851F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93DF6B06A94DDC82FE40811B /* AtlasCoreWatchApp.swift in Sources */,
-				74917DAA8B47EF08D5F53004 /* ContentView.swift in Sources */,
-				2F46DA356E18A42810F1160A /* WatchAppState.swift in Sources */,
-				984A23EA7C540926E3627C6C /* WatchConnectivityManager.swift in Sources */,
-				77CDEBF38EFF82567468CCC2 /* ActiveWorkoutView.swift in Sources */,
-				C8B8C6DF885D4487D79637D5 /* QuickWeighInView.swift in Sources */,
-				451C561CBD78A80EE7AC52B8 /* StartWorkoutView.swift in Sources */,
-				55F4230F66B0F4FEB8C784E6 /* TodayView.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E1B22255C64EB0C9FEB151B7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D68D36E3E4E334CBF2BE24C0 /* Assets.xcassets in Resources */,
+				4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,33 +88,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-
-/* Begin PBXCopyFilesBuildPhase section */		0748B6D97D0BFDD0526A0F87 /* Embed Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				F340A59CD0AE1D234BA05F27 /* AtlasCoreWidgetsExtension.appex in Embed Extensions */,
-			);
-			name = "Embed Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		38E3C85763DABEEB999D4EC4 /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				A89E6D5185C6B6AD0CF6E15A /* AtlasCoreWatch.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-
-/* End PBXCopyFilesBuildPhase section */
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		27BB69DC2796DDA500E000DF /* AtlasCoreWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				2D4D87817A176FB0DA2176C0 /* AtlasCoreWidgets.swift */,
+				4B9523EAA5FEC929E9ACB078 /* AtlasCoreWidgets.entitlements */,
+				DDB573CF38E6EC59677843CE /* Info.plist */,
+				33BF13DB96BE9E09764BAB62 /* Assets.xcassets */,
+			);
+			name = AtlasCoreWidgets;
+			path = ../AtlasCoreWidgets;
+			sourceTree = "<group>";
+		};
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
@@ -214,19 +142,6 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-
-		27BB69DC2796DDA500E000DF /* AtlasCoreWidgets */ = {
-			isa = PBXGroup;
-			children = (
-				2D4D87817A176FB0DA2176C0 /* AtlasCoreWidgets.swift */,
-				4B9523EAA5FEC929E9ACB078 /* AtlasCoreWidgets.entitlements */,
-				DDB573CF38E6EC59677843CE /* Info.plist */,
-				33BF13DB96BE9E09764BAB62 /* Assets.xcassets */,
-			);
-			name = AtlasCoreWidgets;
-			path = ../AtlasCoreWidgets;
-			sourceTree = "<group>";
-		};
 		669E7273AA83A887D257E601 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -256,6 +171,31 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E1B0A003EMBED0003EXTPHZ /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E1B0A001EMBED0001WIDGETS /* AtlasCoreWidgetsExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1B0A004EMBED0004WATCHZ /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				E1B0A002EMBED0002WATCHAP /* AtlasCoreWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		504EC3031FED79650016851F /* atlas.core */ = {
 			isa = PBXNativeTarget;
@@ -264,10 +204,14 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				E1B0A003EMBED0003EXTPHZ /* Embed App Extensions */,
+				E1B0A004EMBED0004WATCHZ /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E1B0A005DEPEND001WIDGDP /* PBXTargetDependency */,
+				E1B0A006DEPEND002WATCHD /* PBXTargetDependency */,
 			);
 			name = atlas.core;
 			packageProductDependencies = (
@@ -276,24 +220,6 @@
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* atlas.core.app */;
 			productType = "com.apple.product-type.application";
-		};
-
-		DC9EFA1C62A67FE9089819C3 /* AtlasCoreWidgets */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = ABC6FD550FF448FF44842E72 /* Build configuration list for PBXNativeTarget "AtlasCoreWidgets" */;
-			buildPhases = (
-				CE3D98E8767AF2FB0A0D7CC2 /* Sources */,
-				48E6D29941725E957779151D /* Frameworks */,
-				7D1844FB11ED134B0BEEF84F /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = AtlasCoreWidgets;
-			productName = AtlasCoreWidgets;
-			productReference = 424C06EE66736773610FE2C9 /* AtlasCoreWidgetsExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 		93ECFAE2290E4FF00DFC8EAB /* AtlasCoreWatch */ = {
 			isa = PBXNativeTarget;
@@ -312,7 +238,54 @@
 			productReference = DA2EDD132C6D18AC65D80D14 /* AtlasCoreWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DC9EFA1C62A67FE9089819C3 /* AtlasCoreWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABC6FD550FF448FF44842E72 /* Build configuration list for PBXNativeTarget "AtlasCoreWidgets" */;
+			buildPhases = (
+				CE3D98E8767AF2FB0A0D7CC2 /* Sources */,
+				48E6D29941725E957779151D /* Frameworks */,
+				7D1844FB11ED134B0BEEF84F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AtlasCoreWidgets;
+			productName = AtlasCoreWidgets;
+			productReference = 424C06EE66736773610FE2C9 /* AtlasCoreWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		E1B0A007PROXY001WIDGETS /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DC9EFA1C62A67FE9089819C3;
+			remoteInfo = AtlasCoreWidgets;
+		};
+		E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 93ECFAE2290E4FF00DFC8EAB;
+			remoteInfo = AtlasCoreWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		E1B0A005DEPEND001WIDGDP /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DC9EFA1C62A67FE9089819C3 /* AtlasCoreWidgets */;
+			targetProxy = E1B0A007PROXY001WIDGETS /* PBXContainerItemProxy */;
+		};
+		E1B0A006DEPEND002WATCHD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 93ECFAE2290E4FF00DFC8EAB /* AtlasCoreWatch */;
+			targetProxy = E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		504EC2FC1FED79650016851F /* Project object */ = {
@@ -327,11 +300,11 @@
 						LastSwiftMigration = 1100;
 						ProvisioningStyle = Automatic;
 					};
-					DC9EFA1C62A67FE9089819C3 = {
+					93ECFAE2290E4FF00DFC8EAB = {
 						CreatedOnToolsVersion = 15.0;
 						ProvisioningStyle = Automatic;
 					};
-					93ECFAE2290E4FF00DFC8EAB = {
+					DC9EFA1C62A67FE9089819C3 = {
 						CreatedOnToolsVersion = 15.0;
 						ProvisioningStyle = Automatic;
 					};
@@ -374,6 +347,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7D1844FB11ED134B0BEEF84F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD0401E3F4647465FB3B6089 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1B22255C64EB0C9FEB151B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D68D36E3E4E334CBF2BE24C0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -384,6 +373,29 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				A46C6FFC6FEE400556ED1E89 /* WidgetDataBridge.swift in Sources */,
 				38F7303FA6B0318BDC249F52 /* WatchConnectivityHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		755C0D1A9BE37F8234157D4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				93DF6B06A94DDC82FE40811B /* AtlasCoreWatchApp.swift in Sources */,
+				74917DAA8B47EF08D5F53004 /* ContentView.swift in Sources */,
+				2F46DA356E18A42810F1160A /* WatchAppState.swift in Sources */,
+				984A23EA7C540926E3627C6C /* WatchConnectivityManager.swift in Sources */,
+				77CDEBF38EFF82567468CCC2 /* ActiveWorkoutView.swift in Sources */,
+				C8B8C6DF885D4487D79637D5 /* QuickWeighInView.swift in Sources */,
+				451C561CBD78A80EE7AC52B8 /* StartWorkoutView.swift in Sources */,
+				55F4230F66B0F4FEB8C784E6 /* TodayView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE3D98E8767AF2FB0A0D7CC2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				989E6406437E053D041C8BC5 /* AtlasCoreWidgets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,20 +420,98 @@
 		};
 /* End PBXVariantGroup section */
 
-
-/* Begin PBXTargetDependency section */
-		62A9C41D680FEB8FBB0AD206 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DC9EFA1C62A67FE9089819C3 /* AtlasCoreWidgets */;
-			targetProxy = 1C09B5E5018C53EA84029066 /* PBXContainerItemProxy */;
-		};
-		D2289AD2EF9D58448DB99E65 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 93ECFAE2290E4FF00DFC8EAB /* AtlasCoreWatch */;
-			targetProxy = 193231A858A255F018B910DB /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 /* Begin XCBuildConfiguration section */
+		0D3C832B32E20FBBE7FA9C20 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ../AtlasCoreWidgets/AtlasCoreWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 545KQXEK7J;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ../AtlasCoreWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AtlasCoreWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.atlascore.app.widgets;
+				PRODUCT_NAME = AtlasCoreWidgetsExtension;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		372DE17437F79014CD627F9D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ../AtlasCoreWatch/AtlasCoreWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 545KQXEK7J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ../AtlasCoreWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = atlas.core;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.atlascore.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.atlascore.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		3E60AD336062BA0196CBDF5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ../AtlasCoreWidgets/AtlasCoreWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 545KQXEK7J;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ../AtlasCoreWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AtlasCoreWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.atlascore.app.widgets;
+				PRODUCT_NAME = AtlasCoreWidgetsExtension;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		504EC3141FED79650016851F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
@@ -591,65 +681,6 @@
 			};
 			name = Release;
 		};
-
-		3E60AD336062BA0196CBDF5C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = ../AtlasCoreWidgets/AtlasCoreWidgets.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 545KQXEK7J;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = ../AtlasCoreWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AtlasCoreWidgets;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.atlascore.app.widgets;
-				PRODUCT_NAME = AtlasCoreWidgetsExtension;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		0D3C832B32E20FBBE7FA9C20 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = ../AtlasCoreWidgets/AtlasCoreWidgets.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 545KQXEK7J;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = ../AtlasCoreWidgets/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AtlasCoreWidgets;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.atlascore.app.widgets;
-				PRODUCT_NAME = AtlasCoreWidgetsExtension;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		52B715C30CEEE447EA9B77A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -662,7 +693,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ../AtlasCoreWatch/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "atlas.core";
+				INFOPLIST_KEY_CFBundleDisplayName = atlas.core;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.atlascore.app;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -682,39 +713,6 @@
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
-		};
-		372DE17437F79014CD627F9D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = ../AtlasCoreWatch/AtlasCoreWatch.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 545KQXEK7J;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = ../AtlasCoreWatch/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "atlas.core";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.atlascore.app;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.atlascore.app.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "watchos watchsimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -737,7 +735,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-
 		ABC6FD550FF448FF44842E72 /* Build configuration list for PBXNativeTarget "AtlasCoreWidgets" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

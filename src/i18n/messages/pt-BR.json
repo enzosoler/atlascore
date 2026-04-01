@@ -1945,7 +1945,9 @@
     "you": "Você",
     "my plan": "Meu plano",
     "my diet": "Minha dieta",
-    "insights": "Análises"
+    "insights": "Análises",
+    "myplan": "Meu plano",
+    "mydiet": "Minha dieta"
   },
   "layout": {
     "openMenu": "Abrir menu",

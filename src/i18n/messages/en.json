@@ -1957,7 +1957,9 @@
     "you": "You",
     "my plan": "My Plan",
     "my diet": "My Diet",
-    "insights": "Insights"
+    "insights": "Insights",
+    "myplan": "My Plan",
+    "mydiet": "My Diet"
   },
   "layout": {
     "openMenu": "Open menu",
