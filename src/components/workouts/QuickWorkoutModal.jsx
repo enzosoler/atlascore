@@ -19,6 +19,7 @@ import { invokeLLMJson } from '@/lib/llm';
 import { toast } from 'sonner';
 import { useI18n } from '@/lib/i18nContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import ExerciseAutocomplete from '@/components/workouts/ExerciseAutocomplete';
 
 const MUSCLE_OPTIONS = [
   { value: 'chest', icon: '💪' },
@@ -314,12 +315,12 @@ Generate a ready-to-train workout with exercises, sets, reps, and rest times.`;
                         <span className="w-5 h-5 rounded-md bg-[hsl(var(--brand)/0.15)] flex items-center justify-center text-[10px] font-bold text-[hsl(var(--brand))] shrink-0">
                           {idx + 1}
                         </span>
-                        <input
-                          type="text"
+                        <ExerciseAutocomplete
                           value={ex.name}
-                          onChange={(e) => updateManualExercise(idx, 'name', e.target.value)}
+                          onChange={(val) => updateManualExercise(idx, 'name', val)}
                           placeholder={t('quickWorkout.exerciseNamePlaceholder')}
-                          className="flex-1 h-9 px-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none focus:border-[hsl(var(--brand))] transition-colors min-w-0"
+                          className="flex-1 min-w-0"
+                          inputClassName="w-full h-9 px-3 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-sm text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none focus:border-[hsl(var(--brand))] transition-colors"
                         />
                         <input
                           type="number"

@@ -46,6 +46,7 @@ export const ROUTES = {
   settings: '/Settings',
   storyLanding: '/start',
   shareTarget: '/share-target',
+  sharedWorkout: '/shared/workout/:token',
   notifications: '/notifications',
   adminAnalytics: '/AdminPanel/analytics',
   adminViewAs: '/AdminPanel/view-as',

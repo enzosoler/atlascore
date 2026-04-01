@@ -812,6 +812,8 @@
     "logged": "Registrado",
     "scale_weight": "Registrar peso",
     "view_trends": "Ver tendências",
+    "photos": "Fotos",
+    "capture": "Capturar",
     "subtitle_low_energy": "Energia baixa hoje — proteja o essencial.",
     "subtitle_high_energy": "Energia alta. Faça o dia contar.",
     "subtitle_rough_day": "Dia difícil. Um passo de cada vez.",
@@ -3396,7 +3398,8 @@
     "actions": {
       "create_manually": "Criar manualmente",
       "generate_plan": "Gerar plano",
-      "generate_new_plan": "Gerar novo plano"
+      "generate_new_plan": "Gerar novo plano",
+      "share": "Compartilhar"
     },
     "messages": {
       "loading": "Carregando...",
@@ -3796,5 +3799,45 @@
       "optionB": "Opção B",
       "optionC": "Opção C"
     }
+  },
+  "shareWorkout": {
+    "title": "Compartilhar Treino",
+    "subtitle": "Envie seu treino para um amigo ou compartilhe publicamente.",
+    "share_plan": "Compartilhar plano completo",
+    "share_plan_desc": "Exportar o programa de treino com todos os dias.",
+    "share_day": "Compartilhar um dia",
+    "exercises": "exercícios",
+    "generating": "Gerando link de compartilhamento...",
+    "plan_link": "Link do plano",
+    "day_link": "Link do treino",
+    "copy_link": "Copiar link",
+    "copied_btn": "Copiado!",
+    "share_btn": "Compartilhar",
+    "share_title": "Confira este treino",
+    "share_text": "Compartilhei um treino com você no atlas.core. Experimente!",
+    "copied": "Link copiado para a área de transferência",
+    "copy_failed": "Não foi possível copiar para a área de transferência",
+    "error": "Não foi possível gerar o link de compartilhamento. Tente novamente."
+  },
+  "sharedWorkout": {
+    "loading": "Carregando treino compartilhado...",
+    "session": "Sessão",
+    "exercise": "exercício",
+    "exercises": "exercícios",
+    "shared_plan": "Plano de treino compartilhado",
+    "shared_workout": "Treino compartilhado",
+    "untitled": "Treino sem título",
+    "shared_by": "Compartilhado por",
+    "objective": "Objetivo",
+    "frequency": "Frequência",
+    "import_btn": "Importar para meus treinos",
+    "login_to_import": "Entrar para importar",
+    "import_note": "Isso criará uma cópia nos seus planos de treino. O original permanece com o criador.",
+    "import_success": "Treino importado com sucesso!",
+    "import_error": "Não foi possível importar o treino. Tente novamente.",
+    "not_found_title": "Treino não encontrado",
+    "not_found_desc": "Este link de treino compartilhado pode ter expirado ou a URL pode estar incorreta.",
+    "go_home": "Ir para atlas.core",
+    "powered_by": "Desenvolvido por"
   }
 }

@@ -64,6 +64,22 @@
     "structured_notes": "Hormone reference. Personalize dosing cadence, monitoring, and contraindications to the individual protocol."
   },
   {
+    "canonical_name": "Durateston",
+    "aliases": [
+      "Sustanon",
+      "Sustanon 250",
+      "Susta"
+    ],
+    "category": "hormone",
+    "administration_routes": [
+      "intramuscular"
+    ],
+    "estimated_half_life_days": 7.5,
+    "default_unit": "mg",
+    "common_frequency_reference": "Every 2-4 weeks",
+    "structured_notes": "Testosterone blend (propionate 30 mg, phenylpropionate 60 mg, isocaproate 60 mg, decanoate 100 mg). Hormone reference. Personalize dosing cadence, monitoring, and contraindications to the individual protocol. | Blend de testosterona (propionato 30 mg, fenilpropionato 60 mg, isocaproato 60 mg, decanoato 100 mg). Referência hormonal. Personalize cadência de dose, monitoramento e contraindicações ao protocolo individual."
+  },
+  {
     "canonical_name": "Nandrolone Decanoate",
     "aliases": [
       "Deca",

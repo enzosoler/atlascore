@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Plus, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import ExerciseAutocomplete from '@/components/workouts/ExerciseAutocomplete';
 
 export default function QuickWorkoutCreate({ date, onClose }) {
   const { user } = useAuth();
@@ -82,16 +83,16 @@ export default function QuickWorkoutCreate({ date, onClose }) {
       <div className="space-y-2">
         {exercises.map((ex, idx) => (
           <div key={idx} className="flex gap-2 items-start">
-            <input
-              type="text"
+            <ExerciseAutocomplete
               value={ex.name}
-              onChange={e => {
+              onChange={(val) => {
                 const updated = [...exercises];
-                updated[idx].name = e.target.value;
+                updated[idx].name = val;
                 setExercises(updated);
               }}
               placeholder="Exercise"
-              className="atlas-input h-9 flex-1 rounded-lg text-base"
+              className="flex-1"
+              inputClassName="atlas-input h-9 w-full rounded-lg text-base"
             />
             <input
               type="number"

@@ -817,6 +817,8 @@
     "logged": "Logged",
     "scale_weight": "Scale weight",
     "view_trends": "View trends",
+    "photos": "Photos",
+    "capture": "Capture",
     "subtitle_low_energy": "Low energy today — protect the essentials.",
     "subtitle_high_energy": "High energy. Make today count.",
     "subtitle_rough_day": "Rough day. One step at a time.",
@@ -3408,7 +3410,8 @@
     "actions": {
       "create_manually": "Create manually",
       "generate_plan": "Generate plan",
-      "generate_new_plan": "Generate new plan"
+      "generate_new_plan": "Generate new plan",
+      "share": "Share"
     },
     "messages": {
       "loading": "Loading...",
@@ -3803,5 +3806,45 @@
       "optionB": "Option B",
       "optionC": "Option C"
     }
+  },
+  "shareWorkout": {
+    "title": "Share Workout",
+    "subtitle": "Send your workout to a friend or share it publicly.",
+    "share_plan": "Share entire plan",
+    "share_plan_desc": "Export the full multi-day workout program.",
+    "share_day": "Share a single day",
+    "exercises": "exercises",
+    "generating": "Generating share link...",
+    "plan_link": "Plan share link",
+    "day_link": "Workout share link",
+    "copy_link": "Copy link",
+    "copied_btn": "Copied!",
+    "share_btn": "Share",
+    "share_title": "Check out this workout",
+    "share_text": "I shared a workout with you on atlas.core. Try it out!",
+    "copied": "Link copied to clipboard",
+    "copy_failed": "Could not copy to clipboard",
+    "error": "Could not generate share link. Please try again."
+  },
+  "sharedWorkout": {
+    "loading": "Loading shared workout...",
+    "session": "Session",
+    "exercise": "exercise",
+    "exercises": "exercises",
+    "shared_plan": "Shared workout plan",
+    "shared_workout": "Shared workout",
+    "untitled": "Untitled workout",
+    "shared_by": "Shared by",
+    "objective": "Objective",
+    "frequency": "Frequency",
+    "import_btn": "Import to my workouts",
+    "login_to_import": "Sign in to import",
+    "import_note": "This will create a copy in your workout plans. The original stays with the creator.",
+    "import_success": "Workout imported successfully!",
+    "import_error": "Could not import the workout. Please try again.",
+    "not_found_title": "Workout not found",
+    "not_found_desc": "This shared workout link may have expired or the URL might be incorrect.",
+    "go_home": "Go to atlas.core",
+    "powered_by": "Powered by"
   }
 }

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Atlas.Core — Plano de Lançamento</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="-" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Atlas.Core — Plano de Lançamento</h1>
+</header>
+<h1
+id="atlas.core-plano-de-lançamento-budget-mínimo-solo-founder">Atlas.Core
+— Plano de Lançamento (Budget Mínimo, Solo Founder)</h1>
+<h2 id="contexto">Contexto</h2>
+<p>atlas.core está pronto para lançamento em 3 plataformas: <strong>Web
+App</strong>, <strong>App Store (iOS)</strong>, e <strong>Play Store
+(Android)</strong>. O fundador é solo, não vai gravar vídeos
+pessoalmente (pode usar UGC gerado por IA), e precisa alcançar
+<strong>$1.000/mês de lucro</strong> o mais rápido possível com o menor
+investimento inicial.</p>
+<p><strong>O que já existe:</strong> - App funcional (React + Capacitor)
+com iOS, Android e Web - Pricing: Free / Pro $9/mês ($79/ano) /
+Performance $19/mês ($159/ano) - 7-day free trial sem cartão - Preços
+regionais (BRL, USD, +15 países) - Sistema de referral (precisa ativar
+backend) - Landing page bilíngue (EN/PT-BR) - Stripe integrado - Paywall
+triggers em 4 momentos de alto engajamento - Blog com conteúdo fitness -
+Apple Health, Widgets, Apple Watch prontos</p>
+<p><strong>Custos fixos obrigatórios:</strong> | Item | Custo | |——|——-|
+| Apple Developer Account | $99/ano | | Google Play Console | $25
+(único) | | Domínio (useatlascore.com) | ~$12/ano | | Supabase (free
+tier → Pro se escalar) | $0–$25/mês | | Vercel (free tier) | $0 | |
+<strong>Total mínimo para lançar</strong> | <strong>~$136</strong> |</p>
+<hr />
+<h2 id="fase-0-pré-lançamento-semana-1-2-custo-0">Fase 0 —
+Pré-lançamento (Semana 1-2) — Custo: $0</h2>
+<h3 id="app-store-optimization-aso-prioridade-máxima">0.1 App Store
+Optimization (ASO) — PRIORIDADE MÁXIMA</h3>
+<p>ASO é o canal com maior ROI e custo zero. Pode gerar 2-5x mais
+installs orgânicos em 3 meses.</p>
+<p><strong>App Store (iOS):</strong> - <strong>Nome:</strong>
+<code>atlas.core — AI Fitness Tracker</code> -
+<strong>Subtitle:</strong>
+<code>Workouts, Nutrition &amp; Body AI</code> - <strong>Keywords (100
+chars):</strong>
+<code>workout,tracker,ai,fitness,nutrition,macro,calories,gym,training,bodybuilding,strength,meal,plan,diet</code>
+- <strong>Categoria:</strong> Health &amp; Fitness -
+<strong>Subcategoria:</strong> Fitness</p>
+<p><strong>Play Store (Android):</strong> - <strong>Título:</strong>
+<code>atlas.core: AI Workout &amp; Nutrition Tracker</code> -
+<strong>Short Description (80 chars):</strong>
+<code>AI-powered workouts, nutrition tracking, body metrics &amp; coaching in one app.</code>
+- <strong>Tags:</strong> workout tracker, ai fitness, nutrition tracker,
+macro counter, gym app, meal plan, body weight, strength training</p>
+<p><strong>Screenshots (ambas stores) — 6 telas, nesta ordem:</strong>
+1. Hero: “Train smarter with AI” + tela Today com streak 2. AI Workout
+gerado + exercícios listados 3. Nutrition tracking + macro bars 4.
+Progress charts + weight trend 5. Apple Watch + widgets (diferencial) 6.
+“Free — No credit card” + pricing</p>
+<p><strong>Ação:</strong> Criar screenshots usando Figma/Canva com
+mockups de iPhone 15 e Pixel 8. Estilo dark, premium, consistente com a
+marca.</p>
+<h3 id="preparar-presença-social-custo-0">0.2 Preparar presença social
+(custo: $0)</h3>
+<p>Criar contas antes de lançar: - <strong>Instagram:</strong> <span
+class="citation" data-cites="atlascore.app">@atlascore.app</span> -
+<strong>TikTok:</strong> <span class="citation"
+data-cites="atlascore">@atlascore</span> - <strong>Twitter/X:</strong>
+<span class="citation" data-cites="atlascoreapp">@atlascoreapp</span> -
+<strong>Reddit:</strong> u/atlascore (participar em r/fitness, r/loseit,
+r/bodybuilding, r/naturalbodybuilding, r/GettingShredded)</p>
+<p>Postar 5-7 teasers antes do launch: - “Building an AI fitness app
+solo. Here’s what it does.” - Screenshots do app em dark mode (premium
+feel) - Before/after do design (development journey)</p>
+<h3 id="preparar-assets-de-marketing">0.3 Preparar assets de
+marketing</h3>
+<ul>
+<li><strong>App Preview Video (15-30s):</strong> Usar IA (Runway, Kling,
+ou HeyGen) para criar um video walkthrough do app. Tela recording do app
+com transições + texto overlay + música. Não precisa de rosto
+humano.</li>
+<li><strong>UGC-style ads (3 variações):</strong> Usar HeyGen ou
+Synthesia para criar “pessoas” falando sobre o app. Custo: $0-$29/mês
+(free tiers existem).</li>
+</ul>
+<hr />
+<h2 id="fase-1-lançamento-soft-semana-3-4-custo-136">Fase 1 — Lançamento
+Soft (Semana 3-4) — Custo: $136</h2>
+<h3 id="publicar-nas-stores">1.1 Publicar nas stores</h3>
+<ul>
+<li>Submeter iOS à App Store review (~24-48h)</li>
+<li>Publicar Android na Play Store (~poucas horas)</li>
+<li>Web app já live em useatlascore.com</li>
+</ul>
+<h3 id="lançamento-reddit-custo-0-potencial-50-200-installs">1.2
+Lançamento Reddit (custo: $0, potencial: 50-200 installs)</h3>
+<p>Reddit é o melhor canal gratuito para apps técnicos. Postar em:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Subreddit</th>
+<th>Post style</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r/fitness</td>
+<td>“I built a free AI workout generator — feedback?”</td>
+</tr>
+<tr>
+<td>r/SideProject</td>
+<td>“Solo dev: built a full fitness platform with AI coaching”</td>
+</tr>
+<tr>
+<td>r/startups</td>
+<td>“Bootstrapped a fitness app to launch — lessons learned”</td>
+</tr>
+<tr>
+<td>r/bodybuilding</td>
+<td>“App that generates periodized training plans with AI”</td>
+</tr>
+<tr>
+<td>r/loseit</td>
+<td>“Built an app that makes calorie tracking take 3 seconds”</td>
+</tr>
+<tr>
+<td>r/naturalbodybuilding</td>
+<td>“Free AI workout plans + nutrition tracking”</td>
+</tr>
+<tr>
+<td>r/Entrepreneur</td>
+<td>“Solo founder launching a fitness SaaS — my strategy”</td>
+</tr>
+<tr>
+<td>r/indiehackers</td>
+<td>“From 0 to launch: building atlas.core solo”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Regras críticas:</strong> - Ser genuíno, não vender. Contar a
+história. - Responder TODOS os comentários. - Oferecer free Pro trial de
+30 dias para early adopters do Reddit. - Nunca ser spammy — 1 post por
+subreddit, espaçados em dias.</p>
+<h3 id="product-hunt-launch-custo-0-potencial-100-500-installs">1.3
+Product Hunt Launch (custo: $0, potencial: 100-500 installs)</h3>
+<ul>
+<li>Agendar para terça/quarta de manhã (PST)</li>
+<li>Tagline: “AI-powered fitness: workouts, nutrition &amp; body
+tracking in one app”</li>
+<li>Pedir upvotes de comunidades online</li>
+<li>Preparar GIF animado mostrando o app</li>
+</ul>
+<h3 id="hacker-news-show-hn-custo-0">1.4 Hacker News “Show HN” (custo:
+$0)</h3>
+<ul>
+<li>“Show HN: atlas.core — I built an AI fitness tracker as a solo
+founder”</li>
+<li>Foco no aspecto técnico (React, Capacitor, Supabase, AI)</li>
+<li>Potencial: 50-300 installs se pegar tração</li>
+</ul>
+<hr />
+<h2 id="fase-2-conteúdo-orgânico-semana-3-8-custo-0-29mês">Fase 2 —
+Conteúdo Orgânico (Semana 3-8) — Custo: $0-$29/mês</h2>
+<h3 id="tiktokreels-5-vídeos-por-semana">2.1 TikTok/Reels — 5 vídeos por
+semana</h3>
+<p><strong>TikTok tem 3.15% de engagement</strong> (o mais alto de
+qualquer plataforma). É o melhor canal gratuito para awareness.</p>
+<p><strong>Tipos de conteúdo que performam bem para fitness
+apps:</strong></p>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 29%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Formato</th>
+<th>Exemplo</th>
+<th>Dificuldade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Screen recording + voiceover IA</td>
+<td>“This app generates your entire workout with AI”</td>
+<td>Fácil</td>
+</tr>
+<tr>
+<td>Split screen (antes/depois do app)</td>
+<td>“How I track macros in 3 seconds”</td>
+<td>Fácil</td>
+</tr>
+<tr>
+<td>Trending audio + app demo</td>
+<td>Mostrar o app no ritmo da música</td>
+<td>Médio</td>
+</tr>
+<tr>
+<td>“POV” style</td>
+<td>“POV: you finally found the fitness app that does everything”</td>
+<td>Fácil</td>
+</tr>
+<tr>
+<td>Myth-busting</td>
+<td>“Stop using 5 apps for fitness. Here’s 1.”</td>
+<td>Fácil</td>
+</tr>
+<tr>
+<td>AI avatar UGC</td>
+<td>HeyGen avatar dizendo “I tried this app and…”</td>
+<td>Médio</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ferramentas gratuitas/baratas para criar sem
+aparecer:</strong> - <strong>CapCut</strong> (grátis) — edição de vídeo,
+text-to-speech, templates - <strong>HeyGen</strong> (free tier: 3
+vídeos/mês) — avatar IA falando sobre o app -
+<strong>ElevenLabs</strong> (free tier) — voiceover realista em
+inglês/português - <strong>Canva</strong> (grátis) — thumbnails,
+stories, carrosséis - <strong>Screen recording</strong> do próprio app —
+o conteúdo mais autêntico</p>
+<p><strong>Estratégia de posting:</strong> - TikTok: 1 vídeo/dia
+(5-7/semana) - Instagram Reels: repostar os mesmos vídeos do TikTok
+(3-5/semana) - YouTube Shorts: repostar os melhores (2-3/semana)</p>
+<h3 id="twitterx-build-in-public">2.2 Twitter/X — Build in public</h3>
+<ul>
+<li>Tweetar diariamente: métricas, decisões, milestones</li>
+<li>“Day 1: 0 users. Day 7: 47 users. Here’s what I learned.”</li>
+<li>Engajar com fitness Twitter e indie hackers</li>
+<li>Thread semanal: “This week building atlas.core: [insights]”</li>
+</ul>
+<h3 id="blog-seo-já-existe-ativar">2.3 Blog SEO (já existe, ativar)</h3>
+<ul>
+<li>Publicar 2 artigos/semana no blog existente</li>
+<li>Target keywords: “best AI workout app”, “free macro tracker”,
+“fitness app with AI”</li>
+<li>Cada artigo menciona atlas.core naturalmente</li>
+<li>Usar ChatGPT/Claude para escrever, revisar manualmente</li>
+</ul>
+<hr />
+<h2
+id="fase-3-micro-influencers-com-affiliate-semana-4-8-custo-0-upfront">Fase
+3 — Micro-influencers com Affiliate (Semana 4-8) — Custo: $0
+upfront</h2>
+<h3 id="estrutura-do-programa-de-affiliates">3.1 Estrutura do programa
+de affiliates</h3>
+<p><strong>Este é o canal com melhor unit economics para solo
+founder.</strong> Custo $0 até converter.</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Comissão</th>
+<th>Requisito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bronze</td>
+<td>20% recorrente</td>
+<td>Qualquer creator</td>
+</tr>
+<tr>
+<td>Silver</td>
+<td>25% recorrente</td>
+<td>5+ conversões/mês</td>
+</tr>
+<tr>
+<td>Gold</td>
+<td>30% recorrente</td>
+<td>10+ conversões/mês</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Como funciona:</strong> - Influencer recebe link único:
+<code>useatlascore.com/r/NOME</code> - Cada signup via link tracked -
+Quando user converte para Pro ($9/mês), influencer recebe 20-30%
+($1.80-$2.70/mês por user, recorrente) - Se user paga anual ($79),
+influencer recebe 20-30% ($15.80-$23.70 one-time)</p>
+<p><strong>Comissão média no mercado fitness: 15.9%.</strong> Oferecer
+20-30% é competitivo e atrativo.</p>
+<h3 id="quem-recrutar-50-100-micro-influencers">3.2 Quem recrutar
+(50-100 micro-influencers)</h3>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 41%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Onde encontrar</th>
+<th>O que oferecer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Personal trainers no TikTok (1K-10K followers)</td>
+<td>Buscar #personaltrainer #gymtok</td>
+<td>Free Performance lifetime + affiliate</td>
+</tr>
+<tr>
+<td>Fitness creators no Instagram (5K-50K)</td>
+<td>Buscar #fitnessmotivation</td>
+<td>Free Pro lifetime + affiliate</td>
+</tr>
+<tr>
+<td>Nutricionistas no YouTube (1K-20K)</td>
+<td>Buscar “macro tracking” “meal prep”</td>
+<td>Free Pro + affiliate</td>
+</tr>
+<tr>
+<td>CrossFit coaches</td>
+<td>r/crossfit, Instagram</td>
+<td>Free Pro + affiliate</td>
+</tr>
+<tr>
+<td>Bodybuilding naturais</td>
+<td>r/naturalbodybuilding, YouTube</td>
+<td>Free Pro + affiliate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Template de DM para recrutar:</strong></p>
+<blockquote>
+<p>Hey [nome]! Sou o criador do atlas.core, um app de fitness com IA que
+gera treinos, tracka macros e adapta tudo automaticamente. Tô montando
+um programa de embaixadores e achei que teu conteúdo combina muito. Te
+daria acesso lifetime gratuito ao plano completo + 20-30% de comissão
+recorrente em cada pessoa que assinar pelo teu link. Sem compromisso,
+sem custos. Interesse?</p>
+</blockquote>
+<h3 id="o-que-dar-aos-influencers">3.3 O que dar aos influencers</h3>
+<ul>
+<li><strong>Acesso gratuito lifetime</strong> (Performance tier)</li>
+<li><strong>Link de afiliado único</strong> com dashboard de
+métricas</li>
+<li><strong>Kit de conteúdo:</strong> 3 scripts prontos, 5 screenshots
+do app, 2 vídeos demo</li>
+<li><strong>Códigos de desconto personalizados:</strong> NOME10 (10% off
+anual)</li>
+</ul>
+<hr />
+<h2 id="fase-4-paid-ads-semana-6-12-custo-300-500mês">Fase 4 — Paid Ads
+(Semana 6-12) — Custo: $300-$500/mês</h2>
+<h3 id="quando-começar-ads">4.1 Quando começar ads</h3>
+<p><strong>NÃO começar com ads no dia 1.</strong> Primeiro: 1. ✅ ASO
+otimizado 2. ✅ 50+ reviews na App Store (pedir via in-app) 3. ✅
+Trial-to-paid conversion rate medido (target: 40%+) 4. ✅ Ao menos 100
+users orgânicos para criar lookalike audiences</p>
+<h3 id="meta-ads-facebook-instagram">4.2 Meta Ads (Facebook +
+Instagram)</h3>
+<p><strong>Budget:</strong> $10-$15/dia ($300-$450/mês)</p>
+<p><strong>3 criativos para testar:</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 31%" />
+<col style="width: 20%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Ad #</th>
+<th>Formato</th>
+<th>Copy</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Video UGC (IA)</td>
+<td>“I stopped using 5 fitness apps. This one does everything.”</td>
+<td>M/F 18-35, interest: gym, fitness, weight loss</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Carrossel</td>
+<td>4 screenshots: AI workout → nutrition → progress → Apple Watch</td>
+<td>M/F 22-40, interest: bodybuilding, CrossFit</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Video screen recording</td>
+<td>15s walkthrough do app com text overlay</td>
+<td>Lookalike dos users orgânicos</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CPA esperado:</strong> $20-$60 por trial signup
+<strong>Meta:</strong> Se conversion trial→paid = 40%, CPA efetivo por
+subscriber = $50-$150 <strong>Break-even:</strong> Subscriber de $9/mês
+→ break-even em 6-17 meses no monthly <strong>Melhor cenário:</strong>
+Anual ($79) → break-even imediato a CPA $50</p>
+<p><strong>Otimização:</strong> - Testar cada criativo por 3-4 dias com
+$5/dia - Matar os que não performam, escalar os que performam - Focar em
+conversão para trial (não install) - Pixel do Facebook no site para
+retargeting</p>
+<h3 id="tiktok-ads-opcional-se-budget-permitir">4.3 TikTok Ads
+(opcional, se budget permitir)</h3>
+<p><strong>Budget:</strong> $10/dia ($300/mês) - Spark Ads: impulsionar
+posts orgânicos que já tiveram bom engagement - Custo por install
+tipicamente mais barato que Meta - Melhor para awareness e topo de
+funil</p>
+<hr />
+<h2 id="fase-5-retenção-otimização-ongoing-custo-0">Fase 5 — Retenção
+&amp; Otimização (Ongoing) — Custo: $0</h2>
+<h3 id="converter-trial-paid-meta-40-60">5.1 Converter trial → paid
+(meta: 40-60%)</h3>
+<p><strong>Benchmark:</strong> Média do mercado = 39.9%. Top 10% =
+68.3%.</p>
+<p><strong>Ações in-app (já parcialmente implementadas):</strong> - ✅
+Paywall triggers em 4 momentos de pico (workout done, AI coach, photo,
+streak) - ✅ Trial banner com countdown - ⬜ <strong>Push notification
+no dia 5:</strong> “Your trial ends in 2 days. Keep your AI workouts.” -
+⬜ <strong>Push notification no dia 6:</strong> “Last day. Subscribe to
+keep your progress.” - ⬜ <strong>Email no dia 7:</strong> “Your trial
+expired. Here’s what you lose.” (implementar) - ⬜ <strong>Win-back
+email dia 14:</strong> “Come back. 20% off your first month.”
+(implementar)</p>
+<h3 id="reviews-na-app-store">5.2 Reviews na App Store</h3>
+<ul>
+<li>Pedir review in-app DEPOIS de momentos positivos:
+<ul>
+<li>Após completar 3º treino</li>
+<li>Após 7-day streak</li>
+<li>Após ver progresso de peso</li>
+</ul></li>
+<li><strong>Meta: 50 reviews</strong> nos primeiros 30 dias (necessário
+para ASO)</li>
+<li>Nunca pedir review na primeira sessão</li>
+</ul>
+<h3 id="ativar-sistema-de-referral">5.3 Ativar sistema de referral</h3>
+<ul>
+<li>O código já existe em <code>Referral.jsx</code> mas é
+placeholder</li>
+<li>Implementar backend: tracking de referral codes, atribuição de
+rewards</li>
+<li>Estrutura: 1 referral = 1 semana Pro, 3 = 1 mês, 5 = 3 meses</li>
+<li>Mostrar no perfil: “Share atlas.core, earn Pro time”</li>
+</ul>
+<hr />
+<h2 id="projeção-financeira-caminho-para-1.000mês">Projeção Financeira:
+Caminho para $1.000/mês</h2>
+<h3 id="cenário-conservador-4-6-meses">Cenário Conservador (4-6
+meses)</h3>
+<table>
+<thead>
+<tr>
+<th>Mês</th>
+<th>Users totais</th>
+<th>Trials</th>
+<th>Conversão</th>
+<th>Subs pagantes</th>
+<th>MRR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>200</td>
+<td>60</td>
+<td>30%</td>
+<td>18</td>
+<td>$162</td>
+</tr>
+<tr>
+<td>2</td>
+<td>500</td>
+<td>150</td>
+<td>35%</td>
+<td>53 + anuais</td>
+<td>$400</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1.000</td>
+<td>300</td>
+<td>38%</td>
+<td>114</td>
+<td>$700</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1.800</td>
+<td>540</td>
+<td>40%</td>
+<td>216</td>
+<td>$1.100</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3.000</td>
+<td>900</td>
+<td>42%</td>
+<td>378</td>
+<td>$1.800</td>
+</tr>
+<tr>
+<td>6</td>
+<td>5.000</td>
+<td>1.500</td>
+<td>45%</td>
+<td>675</td>
+<td>$3.200</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Premissas:</strong> - 30% dos users iniciam trial - Churn
+mensal: 8-12% - Mix: 60% monthly, 40% annual - ARPU efetivo: ~$7.50/mês
+(mix de plans)</p>
+<h3 id="cenário-se-1-tiktok-viralizar">Cenário se 1 TikTok
+viralizar</h3>
+<p>Um único TikTok com 100K+ views pode gerar 500-2.000 installs em 48h.
+Isso sozinho pode pular direto para o mês 3-4 da projeção.</p>
+<h3 id="budget-total-nos-primeiros-6-meses">Budget total nos primeiros 6
+meses</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Custo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apple Developer</td>
+<td>$99</td>
+</tr>
+<tr>
+<td>Google Play</td>
+<td>$25</td>
+</tr>
+<tr>
+<td>HeyGen (3 meses)</td>
+<td>$87</td>
+</tr>
+<tr>
+<td>Meta Ads (4 meses × $400)</td>
+<td>$1.600</td>
+</tr>
+<tr>
+<td>Domínio</td>
+<td>$12</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>~$1.823</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ROI esperado no mês 6:</strong> $3.200 MRR / $1.823
+investidos = <strong>1.75x retorno</strong> (e crescendo
+exponencialmente)</p>
+<hr />
+<h2 id="o-que-não-fazer">O que NÃO fazer</h2>
+<ol type="1">
+<li><strong>Não gastar em ads antes de ter 50+ users orgânicos</strong>
+— precisa de dados para otimizar</li>
+<li><strong>Não pagar influencers upfront</strong> — só affiliate
+(performance-based)</li>
+<li><strong>Não focar em downloads</strong> — focar em trial starts e
+conversão</li>
+<li><strong>Não tentar ser tudo para todos</strong> — nichar no início
+(bodybuilding natural? Perda de peso? Força?)</li>
+<li><strong>Não ignorar reviews</strong> — reviews são o fator #1 de
+conversão na App Store</li>
+<li><strong>Não postar conteúdo genérico</strong> — cada post precisa
+ter um hook nos primeiros 2 segundos</li>
+<li><strong>Não pagar por ferramentas caras</strong> — usar free tiers
+de tudo (CapCut, Canva, HeyGen, ElevenLabs)</li>
+</ol>
+<hr />
+<h2 id="decisão-estratégica-nicho-inicial">Decisão estratégica: Nicho
+inicial</h2>
+<p><strong>Recomendação: Começar com o nicho “AI workout + nutrition for
+gym bros”</strong></p>
+<p>Por quê: - Maior concentração de users no TikTok/Instagram - Maior
+willingness to pay ($9-$19/mês é normal) - Conteúdo mais fácil de criar
+(gym content performa muito bem) - Menor competição em “AI-powered” (a
+maioria dos apps é manual) - O app já tem os features certos (AI
+workouts, macro tracking, strength training focus)</p>
+<p>Expandir para outros nichos depois de validar o modelo.</p>
+<hr />
+<h2 id="prioridade-de-execução-ordenada-por-impactocusto">Prioridade de
+execução (ordenada por impacto/custo)</h2>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 18%" />
+<col style="width: 21%" />
+<col style="width: 27%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Ação</th>
+<th>Custo</th>
+<th>Impacto</th>
+<th>Quando</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ASO (keywords, screenshots, description)</td>
+<td>$0</td>
+<td>Alto</td>
+<td>Semana 1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Publicar iOS + Android + Web</td>
+<td>$124</td>
+<td>Obrigatório</td>
+<td>Semana 2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Posts Reddit + Product Hunt + HN</td>
+<td>$0</td>
+<td>Alto</td>
+<td>Semana 2-3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>TikTok/Reels (5/semana, screen recordings)</td>
+<td>$0</td>
+<td>Alto</td>
+<td>Semana 2+</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Recrutar 20 micro-influencers (affiliate)</td>
+<td>$0</td>
+<td>Alto</td>
+<td>Semana 3-4</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Twitter/X build in public</td>
+<td>$0</td>
+<td>Médio</td>
+<td>Semana 2+</td>
+</tr>
+<tr>
+<td>7</td>
+<td>AI UGC videos (HeyGen)</td>
+<td>$29/mês</td>
+<td>Médio</td>
+<td>Semana 4+</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Ativar referral system (backend)</td>
+<td>$0</td>
+<td>Médio</td>
+<td>Semana 4</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Push notifications de trial expiring</td>
+<td>$0</td>
+<td>Alto</td>
+<td>Semana 4</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Meta Ads ($10-15/dia)</td>
+<td>$300-$450/mês</td>
+<td>Alto</td>
+<td>Semana 6+</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Blog SEO (2 posts/semana)</td>
+<td>$0</td>
+<td>Médio-longo</td>
+<td>Semana 4+</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Analytics (Mixpanel/PostHog free tier)</td>
+<td>$0</td>
+<td>Crítico</td>
+<td>Semana 1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="implementação-técnica-necessária-antes-do-launch">Implementação
+técnica necessária antes do launch</h2>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 39%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Descrição</th>
+<th>Prioridade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⬜ Analytics</td>
+<td>Adicionar PostHog ou Mixpanel (free tier) para tracking de
+funil</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>⬜ Review prompt</td>
+<td>In-app prompt após 3º workout ou 7-day streak</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>⬜ Trial expiry push</td>
+<td>Push notifications no dia 5, 6, 7 do trial</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>⬜ Referral backend</td>
+<td>Tracking real de referral codes e reward assignment</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>⬜ Affiliate dashboard</td>
+<td>Página simples para influencers verem suas conversões</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>⬜ Stripe webhooks</td>
+<td>Payment failure recovery / dunning</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>⬜ Email automation</td>
+<td>Trial expiry + win-back emails via Resend ou SendGrid free</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>⬜ Deep links</td>
+<td><code>atlascore://</code> links funcionando para widgets e ads</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>⬜ Facebook Pixel</td>
+<td>Instalar no web app para retargeting</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="verificação-como-medir-sucesso">Verificação / Como medir
+sucesso</h2>
+<ul>
+<li><strong>Semana 2:</strong> App publicado nas 3 plataformas, 10+
+installs orgânicos</li>
+<li><strong>Semana 4:</strong> 100+ installs totais, 30+ trials
+iniciados, 5+ posts orgânicos com 1K+ impressions</li>
+<li><strong>Semana 8:</strong> 500+ installs, 50+ trials, 20+
+subscribers pagantes, 20+ reviews App Store</li>
+<li><strong>Mês 3:</strong> 1.000+ installs, $500+ MRR, trial conversion
+&gt;35%</li>
+<li><strong>Mês 5-6:</strong> $1.000+ MRR ← <strong>meta original
+atingida</strong></li>
+</ul>
+<p><strong>KPIs para monitorar semanalmente:</strong> 1. Installs por
+plataforma (iOS / Android / Web) 2. Trial start rate (% dos installs que
+iniciam trial) 3. Trial-to-paid conversion rate 4. MRR (Monthly
+Recurring Revenue) 5. Churn rate 6. CAC (Customer Acquisition Cost)
+quando começar ads 7. LTV (Lifetime Value) = ARPU / churn rate</p>
+</body>
+</html>

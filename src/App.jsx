@@ -174,6 +174,7 @@ const Waitlist = lazy(() => import('@/pages/Waitlist'));
 const Reactivation = lazy(() => import('@/pages/Reactivation'));
 const StoryLanding = lazy(() => import('@/pages/StoryLanding'));
 const ShareTarget = lazy(() => import('@/pages/ShareTarget'));
+const SharedWorkout = lazy(() => import('@/pages/SharedWorkout'));
 
 // ─── Shared Spinner ──────────────────────────────────────────────────────────
 const FullScreenSpinner = () => (
@@ -330,6 +331,7 @@ const AppRoutes = () => (
       {/* Viral loop */}
       <Route path="/start" element={<StoryLanding />} />
       <Route path="/share-target" element={<ShareTarget />} />
+      <Route path="/shared/workout/:token" element={<SharedWorkout />} />
 
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />

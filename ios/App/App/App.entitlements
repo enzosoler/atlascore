@@ -2,17 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>aps-environment</key>
-	<string>development</string>
 	<key>com.apple.developer.healthkit</key>
-	<true/>
-	<key>com.apple.developer.healthkit.access</key>
-	<array/>
-	<key>com.apple.developer.healthkit.background-delivery</key>
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
+		<string>group.CY-0D901D06-CB9F-11E6-B9BF-4725D42B7718.snapchat.picaboo</string>
 		<string>group.com.atlascore.app</string>
+		<string>group.com.rileytestut.AltStore.545KQXEK7J</string>
 	</array>
 </dict>
 </plist>

@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Dumbbell, UtensilsCrossed, Scale, Target,
+  Dumbbell, UtensilsCrossed, Scale, Target, Camera,
   ArrowRight, Sparkles, ChevronRight, X
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -517,6 +517,13 @@ function TodayContent() {
             label={t('today.progress')}
             status={t('today.view_trends')}
             colorClass="bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]"
+          />
+          <QuickAction
+            to={ROUTES.progressPhotos}
+            icon={Camera}
+            label={t('today.photos')}
+            status={t('today.capture')}
+            colorClass="bg-[hsl(var(--fg)/0.08)] text-[hsl(var(--fg))]"
           />
         </div>
       </section>

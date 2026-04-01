@@ -7,10 +7,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { invokeLLMJson } from '@/lib/llm';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
-import { ClipboardList, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus, User, Users } from 'lucide-react';
+import { ClipboardList, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus, User, Users, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { EmptyState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
+import ShareWorkoutModal from '@/components/workouts/ShareWorkoutModal';
 
 const CREATOR_LABELS = { ai: 'Generated', coach: 'Coach', user: 'You' };
 const CREATOR_BADGE = { ai: 'badge-neutral', coach: 'badge-blue', user: 'badge-neutral' };
@@ -136,6 +137,7 @@ export default function MyWorkout() {
   const qc = useQueryClient();
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   React.useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated) navigate(ROUTES.home, { replace: true });
@@ -272,6 +274,15 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
         subtitle={t('myWorkout.subtitle')}
         actions={(
           <div className="flex flex-wrap gap-2">
+            {plan && (
+              <SecondaryButton
+                onClick={() => setShareOpen(true)}
+                className="gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                {t('myWorkout.actions.share')}
+              </SecondaryButton>
+            )}
             <SecondaryButton
               onClick={() => navigate(ROUTES.manualWorkout)}
               className="gap-2"
@@ -380,6 +391,11 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
           )}
         </>
       )}
+      <ShareWorkoutModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        plan={plan}
+      />
     </AppContainer>
   );
 }
