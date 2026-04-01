@@ -255,7 +255,7 @@ serve(async (req) => {
     checkinRes,
   ] = await Promise.all([
     supabase.from('profiles')
-      .select('full_name, profile_data')
+      .select('full_name, profile_data, preferred_language, language')
       .eq('id', userId).single(),
 
     supabase.from('food_logs')
@@ -458,7 +458,8 @@ serve(async (req) => {
   const updatedSummary = buildUpdatedSummary(conversationSummary, userMessage.trim(), assistantContent);
 
   // ── Generate proactive insight for Today screen ────────────────────────────
-  const proactiveInsight = generateProactiveInsight(todayMetrics, adherenceSummary, todayCheckin);
+  const userLocale = profile?.preferred_language || profile?.language || 'en';
+  const proactiveInsight = generateProactiveInsight(todayMetrics, adherenceSummary, todayCheckin, userLocale);
 
   await supabase.from('coach_memory').upsert({
     user_id:              userId,
@@ -523,6 +524,7 @@ function generateProactiveInsight(
   metrics: any,
   adherence: any,
   checkin: any,
+  locale: string = 'en',
 ): string | null {
   const {
     calories_eaten = 0,
@@ -534,31 +536,42 @@ function generateProactiveInsight(
   const calRemaining = Math.max(0, calories_target - calories_eaten);
   const protRemaining = Math.max(0, protein_target_g - protein_eaten_g);
   const trend = adherence?.last_7_days?.days_on_calorie_target ?? 0;
+  const pt = locale.startsWith('pt');
 
   // Priority 1: Low energy from check-in
   if (checkin?.energy && checkin.energy <= 2) {
-    return 'Low energy today — cut accessory volume, protect the main work.';
+    return pt
+      ? 'Energia baixa hoje — corte acessórios, proteja o trabalho principal.'
+      : 'Low energy today — cut accessory volume, protect the main work.';
   }
 
   // Priority 2: Protein deficit
   if (protein_target_g > 0 && protRemaining > 30 && calories_eaten > 0) {
-    return `${protRemaining}g short on protein. One serving of chicken or a shake fixes it.`;
+    return pt
+      ? `Faltam ${protRemaining}g de proteína. Uma porção de frango ou um shake resolve.`
+      : `${protRemaining}g short on protein. One serving of chicken or a shake fixes it.`;
   }
 
   // Priority 3: Missed training
   if (workout_status === 'not_logged' && new Date().getHours() >= 14) {
-    return "You haven't trained today. The session is still there.";
+    return pt
+      ? 'Você ainda não treinou hoje. A sessão ainda está lá.'
+      : "You haven't trained today. The session is still there.";
   }
 
   // Priority 4: Calorie overshoot
   if (calories_target > 0 && calories_eaten > calories_target * 1.15) {
     const over = Math.round(calories_eaten - calories_target);
-    return `${over} kcal over target. Light dinner keeps you close.`;
+    return pt
+      ? `${over} kcal acima da meta. Um jantar leve mantém você no caminho.`
+      : `${over} kcal over target. Light dinner keeps you close.`;
   }
 
   // Priority 5: On track
   if (workout_status === 'completed' && calRemaining < 300 && calRemaining >= 0) {
-    return "Everything's green today.";
+    return pt
+      ? 'Tudo verde hoje.'
+      : "Everything's green today.";
   }
 
   // No insight beats a bad insight
