@@ -418,8 +418,12 @@ function ProgressContent() {
   const { data: profile } = useQuery({
     queryKey: ['progress-profile', user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from('profiles').select('calories_target, protein_target').eq('id', user.id).single();
-      return data;
+      const { data } = await supabase.from('profiles').select('profile_data').eq('id', user.id).single();
+      const pd = data?.profile_data ?? {};
+      return {
+        calories_target: pd.calories_target ?? pd.targets?.calories ?? 0,
+        protein_target: pd.protein_target ?? pd.targets?.protein ?? 0,
+      };
     },
     enabled: !!user?.id,
   });
