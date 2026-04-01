@@ -62,8 +62,16 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>atlas.core reads your health data to track progress, sync workouts, and personalize coaching recommendations.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>atlas.core saves your workouts, body measurements, and nutrition data to Apple Health so all your health data stays in one place.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>processing</string>
+	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:useatlascore.com</string>

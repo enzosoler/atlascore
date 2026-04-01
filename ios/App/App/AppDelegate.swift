@@ -7,7 +7,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Initialize Watch Connectivity for Apple Watch communication
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            if let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge {
+                WatchConnectivityHandler.shared.configure(bridge: bridge)
+            }
+        }
         return true
     }
 
