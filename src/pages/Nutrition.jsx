@@ -80,16 +80,24 @@ const MEAL_ORDER = [
   'evening_snack',
 ];
 
-const MEAL_BUCKETS = {
-  breakfast: { icon: Sunrise, label: 'Breakfast', time: 'Morning' },
-  morning_snack: { icon: Apple, label: 'Morning Snack', time: 'Late Morning' },
-  lunch: { icon: Sun, label: 'Lunch', time: 'Midday' },
-  afternoon_snack: { icon: Apple, label: 'Afternoon Snack', time: 'Afternoon' },
-  pre_workout: { icon: Zap, label: 'Pre-Workout', time: 'Before Training' },
-  post_workout: { icon: Zap, label: 'Post-Workout', time: 'After Training' },
-  dinner: { icon: Moon, label: 'Dinner', time: 'Evening' },
-  evening_snack: { icon: Apple, label: 'Evening Snack', time: 'Night' },
+const MEAL_BUCKET_KEYS = {
+  breakfast: { icon: Sunrise, labelKey: 'breakfast', time: 'Morning' },
+  morning_snack: { icon: Apple, labelKey: 'morning_snack', time: 'Late Morning' },
+  lunch: { icon: Sun, labelKey: 'lunch', time: 'Midday' },
+  afternoon_snack: { icon: Apple, labelKey: 'afternoon_snack', time: 'Afternoon' },
+  pre_workout: { icon: Zap, labelKey: 'pre_workout', time: 'Before Training' },
+  post_workout: { icon: Zap, labelKey: 'post_workout', time: 'After Training' },
+  dinner: { icon: Moon, labelKey: 'dinner', time: 'Evening' },
+  evening_snack: { icon: Apple, labelKey: 'evening_snack', time: 'Night' },
 };
+
+function getMealBuckets(t) {
+  const result = {};
+  for (const [key, val] of Object.entries(MEAL_BUCKET_KEYS)) {
+    result[key] = { ...val, label: t(`pages.nutrition.${val.labelKey}`) };
+  }
+  return result;
+}
 
 const QUICK_SUGGESTIONS = [
   { name: 'Chicken + rice', emoji: '🍗' },
@@ -119,7 +127,7 @@ function createLocalId(prefix) {
 }
 
 function getMealTypeLabel(mealType) {
-  return MEAL_TYPES[mealType]?.label || mealType || 'Meal';
+  return MEAL_TYPES[mealType]?.label || mealType || 'meal';
 }
 
 function getMealSortOrder(mealType) {
@@ -230,7 +238,7 @@ function getMealTypeFromDate(value) {
 
 function mapFoodLogToMeal(log) {
   const quantity = Number(log?.quantity || 1);
-  const foodName = log?.food_name || 'Food logged';
+  const foodName = log?.food_name || 'food_logged';
   return {
     id: log?.id ? `food-log-${log.id}` : createLocalId('food-log'),
     source: 'supabase',
@@ -253,7 +261,7 @@ function mapFoodLogToMeal(log) {
     total_protein: Number(log?.protein || 0),
     total_carbs: Number(log?.carbs || 0),
     total_fat: Number(log?.fat || 0),
-    notes: 'Food saved.',
+    notes: '',
   };
 }
 
@@ -701,7 +709,7 @@ function AIInsight({ meals, dailyTotals, profile }) {
   );
 }
 
-function InterpretedMacroTrack({ label, consumed, target, unit, tone = 'calories', interpretation, locale = 'en' }) {
+function InterpretedMacroTrack({ label, consumed, target, unit, tone = 'calories', interpretation, locale = 'en', t }) {
   const pct = getProgressPercent(consumed, target);
   const remaining = getRemainingValue(target, consumed);
 
@@ -722,10 +730,10 @@ function InterpretedMacroTrack({ label, consumed, target, unit, tone = 'calories
           )}
           <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
             {remaining > 0
-              ? `${remaining}${unit} remaining`
+              ? `${remaining}${unit} ${t('pages.nutrition.remaining')}`
               : consumed > target
-                ? `${Math.round(consumed - target)}${unit} over`
-                : 'Goal reached'}
+                ? `${Math.round(consumed - target)}${unit} ${t('pages.nutrition.over')}`
+                : t('pages.nutrition.goal_reached')}
           </p>
         </div>
         <div className="text-right shrink-0">
@@ -734,7 +742,7 @@ function InterpretedMacroTrack({ label, consumed, target, unit, tone = 'calories
             <span className="text-[13px] font-medium text-[hsl(var(--fg-2))]">/{target}{unit}</span>
           </p>
           <p className="text-[11px] font-medium text-[hsl(var(--fg-3))]">
-            {Math.round(pct)}% complete
+            {Math.round(pct)}{t('pages.nutrition.percent_complete')}
           </p>
         </div>
       </div>
@@ -774,7 +782,8 @@ function QuickAddButtons({ onQuickAdd }) {
 
 function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing }) {
   const { t } = useI18n();
-  const config = MEAL_BUCKETS[bucketKey];
+  const mealBuckets = getMealBuckets(t);
+  const config = mealBuckets[bucketKey];
   if (!config) return null;
 
   const bucketMeals = meals.filter(m => m.meal_type === bucketKey);
@@ -812,7 +821,7 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing })
         {hasMeals ? (
           <div className="text-right">
             <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{bucketTotals.calories} kcal</p>
-            <p className="text-[11px] text-[hsl(var(--fg-3))]">{bucketTotals.protein}g protein</p>
+            <p className="text-[11px] text-[hsl(var(--fg-3))]">{bucketTotals.protein}g {t('pages.nutrition.protein')}</p>
           </div>
         ) : (
           <button
@@ -1154,7 +1163,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
     <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
         <label className={FIELD_LABEL_CLASS}>
-          Meal date
+          {t('pages.nutrition.meal_date')}
           <input
             type="date"
             value={formatDateKey(date)}
@@ -1163,7 +1172,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
           />
         </label>
         <label className={FIELD_LABEL_CLASS}>
-          Meal type
+          {t('pages.nutrition.meal_type')}
           <select
             value={mealType}
             onChange={(e) => setMealType(e.target.value)}
@@ -1323,7 +1332,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
       {foods.length > 0 && (
         <div className="mt-5">
           <p className={FIELD_LABEL_CLASS}>
-            Added foods ({foods.length})
+            {t('pages.nutrition.added_foods').replace('{n}', foods.length)}
           </p>
           <div className="mt-2 space-y-2">
             {foods.map((food, idx) => (
@@ -1348,7 +1357,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                 </div>
                 {food._baseAmount && (
                   <div className="mt-2 flex items-center gap-2 pt-2 border-t border-[hsl(var(--border)/0.5)]">
-                    <label className="text-[11px] text-[hsl(var(--fg-3))] shrink-0">Portion</label>
+                    <label className="text-[11px] text-[hsl(var(--fg-3))] shrink-0">{t('pages.nutrition.portion')}</label>
                     <input
                       type="number"
                       min="1"
@@ -1389,10 +1398,10 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
         <div className="mt-5 flex flex-col items-center justify-center rounded-[18px] border border-dashed border-[hsl(var(--border-h))] py-8 text-center">
           <Sparkles className="h-8 w-8 text-[hsl(var(--brand))]" strokeWidth={1.5} />
           <p className="mt-3 text-[13px] font-medium text-[hsl(var(--fg-2))]">
-            Describe your meal with AI for instant logging
+            {t('pages.nutrition.describe_meal_ai')}
           </p>
           <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
-            Try: &quot;Chicken, rice, avocado&quot; or &quot;2 eggs and toast&quot;
+            {t('pages.nutrition.try_examples')}
           </p>
         </div>
       )}
@@ -1588,9 +1597,9 @@ export default function NutritionPage() {
       });
       setShowTargetsEditor(false);
       setTargetDraft(null);
-      setNotice({ tone: 'success', message: 'Nutrition targets updated.' });
+      setNotice({ tone: 'success', message: t('pages.nutrition.targets_updated') });
     } catch {
-      setNotice({ tone: 'error', message: 'Could not save targets. Try again.' });
+      setNotice({ tone: 'error', message: t('pages.nutrition.targets_save_error') });
     } finally {
       setIsSavingTargets(false);
     }
@@ -1629,7 +1638,7 @@ export default function NutritionPage() {
       } catch (error) {
         if (active) {
           setFoodResults(tacoResults);
-          setFoodSearchError(`Food search error: ${error.message}`);
+          setFoodSearchError(t('pages.nutrition.food_search_error').replace('{error}', error.message));
         }
       } finally {
         if (active) setIsSearchingFoods(false);
@@ -1666,7 +1675,7 @@ export default function NutritionPage() {
     } catch (error) {
       setNotice({
         tone: 'error',
-        message: error instanceof Error ? error.message : 'Could not load food details',
+        message: error instanceof Error ? error.message : t('pages.nutrition.could_not_load_details'),
       });
     } finally {
       setSavingFoodId(null);
@@ -1705,11 +1714,11 @@ export default function NutritionPage() {
       setFoodQuery('');
       setFoodResults([]);
       setFoodSearchError('');
-      setNotice({ tone: 'success', message: `${pendingFood.name} added successfully.` });
+      setNotice({ tone: 'success', message: t('pages.nutrition.added_successfully').replace('{name}', pendingFood.name) });
       addRecentFood(pendingFood);
       setPendingFood(null);
     } catch (error) {
-      setNotice({ tone: 'error', message: `Could not save ${pendingFood.name}. Try again.` });
+      setNotice({ tone: 'error', message: t('pages.nutrition.could_not_save').replace('{name}', pendingFood.name) });
     } finally {
       setSavingFoodId(null);
     }
@@ -1723,7 +1732,7 @@ export default function NutritionPage() {
 
     const foods = form.foods || [];
     if (foods.length === 0) {
-      setNotice({ tone: 'error', message: 'Add at least one food before saving.' });
+      setNotice({ tone: 'error', message: t('pages.nutrition.add_at_least_one') });
       return;
     }
 
@@ -1780,7 +1789,7 @@ export default function NutritionPage() {
     } catch (error) {
       console.error('Save meal error:', error);
       setIsSavingMeal(false);
-      setNotice({ tone: 'error', message: 'Error saving meal. Check your connection.' });
+      setNotice({ tone: 'error', message: t('pages.nutrition.error_saving_meal') });
       return;
     }
 
@@ -1796,8 +1805,8 @@ export default function NutritionPage() {
     setNotice({
       tone: 'success',
       message: editingMeal?.id
-        ? `${foods.length} food item(s) updated in ${mealLabel}.`
-        : `${foods.length} food item(s) added to ${mealLabel}.`,
+        ? t('pages.nutrition.foods_updated_in').replace('{n}', foods.length).replace('{meal}', mealLabel)
+        : t('pages.nutrition.foods_added_to').replace('{n}', foods.length).replace('{meal}', mealLabel),
     });
     // Cascade: invalidate AI coach so briefing/priorities update with new nutrition data
     ai.invalidateCoach();
@@ -1813,12 +1822,12 @@ export default function NutritionPage() {
           .eq('user_id', user.id);
         if (error) throw error;
       } catch (error) {
-        setNotice({ tone: 'error', message: `Could not remove ${meal.title}.` });
+        setNotice({ tone: 'error', message: t('pages.nutrition.could_not_remove').replace('{name}', meal.title) });
         return;
       }
     }
     setMeals((current) => current.filter((m) => m.id !== meal.id));
-    setNotice({ tone: 'success', message: `${meal.title} was removed.` });
+    setNotice({ tone: 'success', message: t('pages.nutrition.was_removed').replace('{name}', meal.title) });
   };
 
   const handleDateChange = (delta) => {
@@ -1908,8 +1917,8 @@ export default function NutritionPage() {
   return (
     <SafePageBoundary
       title={t('pages.nutrition.title')}
-      subtitle="Daily nutrition tracking and guidance"
-      fallbackDescription="Nutrition loaded in safe mode."
+      subtitle={t('pages.nutrition.daily_tracking_subtitle')}
+      fallbackDescription={t('pages.nutrition.safe_mode_fallback')}
     >
       <div className="min-h-full bg-[hsl(var(--bg))] atlas-page-enter">
         <div className="mx-auto max-w-lg px-4 pt-5 space-y-4">
@@ -1937,15 +1946,15 @@ export default function NutritionPage() {
                 </div>
                 
                 <h2 className="text-[28px] font-bold text-[hsl(var(--fg))] mb-3 leading-tight">
-                  {selectedDate === TODAY 
-                    ? 'Start your nutrition today' 
-                    : 'Log meals for this day'}
+                  {selectedDate === TODAY
+                    ? t('pages.nutrition.start_nutrition_today')
+                    : t('pages.nutrition.log_meals_for_day')}
                 </h2>
-                
+
                 <p className="text-[17px] text-[hsl(var(--fg-2))] mb-8 leading-relaxed max-w-[320px] mx-auto">
                   {selectedDate === TODAY
-                    ? 'Track your first meal to start monitoring calories and macros'
-                    : 'Add meals to complete this day\'s nutrition log'}
+                    ? t('pages.nutrition.track_first_meal')
+                    : t('pages.nutrition.add_meals_complete_log')}
                 </p>
                 
                 <button
@@ -1953,18 +1962,18 @@ export default function NutritionPage() {
                   className="group relative inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] text-white px-8 py-4 text-[16px] font-semibold hover:from-[hsl(var(--brand)/0.95)] hover:to-[hsl(var(--brand-ai)/0.95)] transition-all duration-300 shadow-[0_8px_24px_hsl(var(--brand)/0.4)] hover:shadow-[0_12px_32px_hsl(var(--brand)/0.5)] hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Plus className="w-5 h-5" />
-                  <span>Log First Meal</span>
+                  <span>{t('pages.nutrition.log_first_meal')}</span>
                   <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
                 
                 {/* Quick meal triggers */}
                 <div className="mt-8 flex items-center justify-center gap-2">
-                  <span className="text-[13px] text-[hsl(var(--fg-3))">Quick add:</span>
+                  <span className="text-[13px] text-[hsl(var(--fg-3))">{t('pages.nutrition.quick_add')}</span>
                   <div className="flex gap-2">
                     {[
-                      { type: 'breakfast', icon: Sunrise, label: 'Breakfast' },
-                      { type: 'lunch', icon: Sun, label: 'Lunch' },
-                      { type: 'dinner', icon: Moon, label: 'Dinner' },
+                      { type: 'breakfast', icon: Sunrise, label: t('pages.nutrition.breakfast') },
+                      { type: 'lunch', icon: Sun, label: t('pages.nutrition.lunch') },
+                      { type: 'dinner', icon: Moon, label: t('pages.nutrition.dinner') },
                     ].map(({ type, icon: Icon, label }) => (
                       <button
                         key={type}
@@ -1988,14 +1997,14 @@ export default function NutritionPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-[16px] font-semibold text-[hsl(var(--fg))] mb-1">
-                    Next Action
+                    {t('pages.nutrition.next_action')}
                   </h3>
                   <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">
                     {profile.calories_target > 0 && dailyTotals.calories < profile.calories_target * 0.8
-                      ? `Fuel up with ${getRemainingValue(profile.calories_target, dailyTotals.calories)} more calories`
+                      ? t('pages.nutrition.fuel_up').replace('{n}', getRemainingValue(profile.calories_target, dailyTotals.calories))
                       : dailyTotals.protein < (profile.protein_target || 150) * 0.7
-                      ? `Add ${getRemainingValue(profile.protein_target, dailyTotals.protein)}g more protein`
-                      : 'Great progress! Keep logging meals'}
+                      ? t('pages.nutrition.add_more_protein').replace('{n}', getRemainingValue(profile.protein_target, dailyTotals.protein))
+                      : t('pages.nutrition.great_progress')}
                   </p>
                 </div>
                 <button
@@ -2003,7 +2012,7 @@ export default function NutritionPage() {
                   className="shrink-0 rounded-xl bg-[hsl(var(--ok))] text-white px-4 py-2 text-[14px] font-semibold hover:bg-[hsl(var(--ok)/0.9)] transition-colors shadow-[0_4px_12px_hsl(var(--ok)/0.3)]"
                 >
                   <Plus className="w-4 h-4 inline mr-1" />
-                  Add Meal
+                  {t('pages.nutrition.add_meal_button')}
                 </button>
               </div>
             </div>
@@ -2013,7 +2022,7 @@ export default function NutritionPage() {
           {isLoadingMeals ? (
             <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading meals...
+              {t('pages.nutrition.loading_meals')}
             </div>
           ) : sortedMeals.length > 0 ? (
             <div className="space-y-4">
@@ -2031,15 +2040,15 @@ export default function NutritionPage() {
                   className="w-full flex items-center gap-2 px-4 py-2.5 rounded-[12px] bg-[hsl(var(--shell))] border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg-2))] active:scale-[0.98] transition-transform duration-100"
                 >
                   <Sunrise className="w-4 h-4 text-[hsl(var(--brand))]" />
-                  Repeat yesterday&apos;s breakfast?
+                  {t('pages.nutrition.repeat_yesterday_breakfast')}
                 </button>
               )}
               {/* Timeline Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-[17px] font-semibold text-[hsl(var(--fg))]">Today's Meals</h3>
+                  <h3 className="text-[17px] font-semibold text-[hsl(var(--fg))]">{t('pages.nutrition.todays_meals')}</h3>
                   <p className="text-[13px] text-[hsl(var(--fg-3))] mt-1">
-                    {sortedMeals.length} meals logged · {Math.round(dailyTotals.calories)} calories
+                    {t('pages.nutrition.meals_logged_count').replace('{n}', sortedMeals.length)} · {t('pages.nutrition.calories_count').replace('{n}', Math.round(dailyTotals.calories))}
                   </p>
                 </div>
                 {selectedDate === TODAY && (
@@ -2048,11 +2057,11 @@ export default function NutritionPage() {
                     className="shrink-0 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill))] hover:border-[hsl(var(--brand)/0.3)]"
                   >
                     <Plus className="w-4 h-4 inline mr-1" />
-                    Add Meal
+                    {t('pages.nutrition.add_meal_button')}
                   </button>
                 )}
               </div>
-              
+
               {/* Timeline Visual */}
               <div className="relative">
                 {/* Progress Line */}
@@ -2061,7 +2070,8 @@ export default function NutritionPage() {
                 {/* Meal Items */}
                 <div className="space-y-6">
                   {sortedMeals.map((meal, index) => {
-                    const mealConfig = MEAL_BUCKETS[meal.meal_type];
+                    const mealBucketsLocal = getMealBuckets(t);
+                    const mealConfig = mealBucketsLocal[meal.meal_type];
                     const Icon = mealConfig?.icon || UtensilsCrossed;
                     const isPast = index < sortedMeals.length - 1;
                     
@@ -2091,7 +2101,7 @@ export default function NutritionPage() {
                                   </h4>
                                   {selectedDate === TODAY && !isPast && (
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
-                                      Current
+                                      {t('pages.nutrition.current')}
                                     </span>
                                   )}
                                 </div>
@@ -2105,7 +2115,7 @@ export default function NutritionPage() {
                                   </span>
                                   <span className="flex items-center gap-1">
                                     <Zap className="w-3 h-3" />
-                                    {meal.total_protein}g protein
+                                    {meal.total_protein}g {t('pages.nutrition.protein')}
                                   </span>
                                 </div>
                               </div>
@@ -2138,14 +2148,14 @@ export default function NutritionPage() {
           {/* Simple Macro Summary - Only when meals exist */}
           {sortedMeals.length > 0 && profile.calories_target > 0 && (
             <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-5">
-              <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))] mb-4">Daily Progress</h3>
+              <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))] mb-4">{t('pages.nutrition.daily_progress')}</h3>
               
               <div className="space-y-4">
                 {/* Calories */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Flame className="w-4 h-4 text-[hsl(var(--fg-3))]" />
-                    <span className="text-[13px] text-[hsl(var(--fg))]">Calories</span>
+                    <span className="text-[13px] text-[hsl(var(--fg))]">{t('pages.nutrition.calories_label')}</span>
                   </div>
                   <div className="text-right">
                     <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.calories)}</span>
@@ -2165,7 +2175,7 @@ export default function NutritionPage() {
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-2">
                       <Zap className="w-4 h-4 text-[hsl(var(--brand-ai))]" />
-                      <span className="text-[13px] text-[hsl(var(--fg))]">Protein</span>
+                      <span className="text-[13px] text-[hsl(var(--fg))]">{t('pages.nutrition.protein_label')}</span>
                     </div>
                     <div className="text-right">
                       <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.protein)}g</span>
@@ -2191,7 +2201,7 @@ export default function NutritionPage() {
           <DialogPanelHeader
             eyebrow={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
             title={editingMeal ? t('pages.nutrition.edit_meal') : t('pages.nutrition.add_meal')}
-            description={editingMeal ? t('pages.nutrition.meal_subtitle') : 'Log what you ate — AI makes it instant'}
+            description={editingMeal ? t('pages.nutrition.meal_subtitle') : t('pages.nutrition.log_what_you_ate')}
           />
           <div className="p-6 pt-0">
             <MealForm
@@ -2224,14 +2234,14 @@ export default function NutritionPage() {
             return (
               <>
                 <DialogPanelHeader
-                  eyebrow="Portion"
+                  eyebrow={t('pages.nutrition.portion_eyebrow')}
                   title={pendingFood.name}
-                  description="Set the serving size to log."
+                  description={t('pages.nutrition.set_serving_size')}
                 />
                 <div className="px-6 pb-6 space-y-5">
                   <div>
                     <label className={FIELD_LABEL_CLASS}>
-                      Amount (g)
+                      {t('pages.nutrition.amount_g')}
                       <input
                         type="number"
                         min="1"
@@ -2266,7 +2276,7 @@ export default function NutritionPage() {
 
                   <ActionRow>
                     <SecondaryButton type="button" onClick={() => setPendingFood(null)}>
-                      Cancel
+                      {t('pages.nutrition.cancel')}
                     </SecondaryButton>
                     <PrimaryButton
                       type="button"
@@ -2279,7 +2289,7 @@ export default function NutritionPage() {
                       ) : (
                         <Plus className="h-4 w-4" />
                       )}
-                      Add to log
+                      {t('pages.nutrition.add_to_log')}
                     </PrimaryButton>
                   </ActionRow>
                 </div>
@@ -2314,7 +2324,7 @@ export default function NutritionPage() {
             className="pointer-events-auto flex items-center gap-2 px-5 py-3 rounded-full bg-[hsl(var(--brand))] text-white font-semibold text-[14px] tracking-[-0.01em] shadow-[0_4px_20px_rgba(0,0,0,0.25)] active:scale-[0.96] transition-transform duration-100"
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Quick Log
+            {t('pages.nutrition.quick_log')}
           </button>
         </div>
       )}

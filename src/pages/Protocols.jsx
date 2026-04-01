@@ -220,7 +220,7 @@ function ConcentrationChart({ protocols }) {
     return (
       <div className="flex items-center justify-center rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.4)] px-6 py-12 text-center">
         <p className="text-[14px] text-[hsl(var(--fg-2))]">
-          No active protocols available.
+          {t('pages.protocols.no_active_protocols')}
         </p>
       </div>
     );
@@ -229,7 +229,7 @@ function ConcentrationChart({ protocols }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center rounded-[28px] border border-[hsl(var(--border)/0.88)] bg-[hsl(var(--fill)/0.4)] px-6 py-12">
-        <p className="text-[14px] text-[hsl(var(--fg-2))]">Loading dose history...</p>
+        <p className="text-[14px] text-[hsl(var(--fg-2))]">{t('pages.protocols.loading_dose_history')}</p>
       </div>
     );
   }
@@ -337,6 +337,7 @@ function ConcentrationChart({ protocols }) {
 }
 
 function ProtocolConcentrationCard({ data, color, locale }) {
+  const { t } = useI18n();
   const { protocol, halfLife, series, hasLogs } = data;
 
   const VIEWBOX_WIDTH = 400;
@@ -355,7 +356,7 @@ function ProtocolConcentrationCard({ data, color, locale }) {
           </p>
         </div>
         <p className="mt-2 text-[12px] text-[hsl(var(--fg-2))]">
-          No doses logged yet. Log doses to see concentration curve.
+          {t('pages.protocols.no_doses_logged')}
         </p>
       </div>
     );
@@ -478,8 +479,8 @@ function ProtocolConcentrationCard({ data, color, locale }) {
       </svg>
 
       <div className="mt-2 flex items-center justify-between text-[11px] text-[hsl(var(--fg-2))]">
-        <span>Past 30 days</span>
-        <span>Next 14 days (projected)</span>
+        <span>{t('pages.protocols.past_30_days')}</span>
+        <span>{t('pages.protocols.next_14_days')}</span>
       </div>
     </div>
   );
@@ -570,10 +571,10 @@ function ProtocolsContent() {
       setIsFormOpen(false);
       setIsTemplateMode(true);
       setEditingProtocol(null);
-      setNotice({ tone: 'success', message: 'Saved successfully.' });
+      setNotice({ tone: 'success', message: t('pages.protocols.saved_successfully') });
     },
     onError: () => {
-      setNotice({ tone: 'warning', message: 'Failed to save. Please try again.' });
+      setNotice({ tone: 'warning', message: t('pages.protocols.failed_to_save') });
     },
   });
 
@@ -591,10 +592,10 @@ function ProtocolsContent() {
       setIsFormOpen(false);
       setIsTemplateMode(true);
       setEditingProtocol(null);
-      setNotice({ tone: 'success', message: 'Items added successfully.' });
+      setNotice({ tone: 'success', message: t('pages.protocols.items_added') });
     },
     onError: () => {
-      setNotice({ tone: 'warning', message: 'Failed to add items. Please try again.' });
+      setNotice({ tone: 'warning', message: t('pages.protocols.failed_to_add') });
     },
   });
 
@@ -606,7 +607,7 @@ function ProtocolsContent() {
       setNotice({ tone: 'success', message: variables.successMessage });
     },
     onError: () => {
-      setNotice({ tone: 'warning', message: 'Failed to update status.' });
+      setNotice({ tone: 'warning', message: t('pages.protocols.failed_to_update_status') });
     },
     onSettled: () => setPendingActionKey(''),
   });
@@ -616,10 +617,10 @@ function ProtocolsContent() {
     onMutate: ({ actionKey }) => setPendingActionKey(actionKey),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
-      setNotice({ tone: 'success', message: 'Item deleted.' });
+      setNotice({ tone: 'success', message: t('pages.protocols.item_deleted') });
     },
     onError: () => {
-      setNotice({ tone: 'warning', message: 'Failed to delete.' });
+      setNotice({ tone: 'warning', message: t('pages.protocols.failed_to_delete') });
     },
     onSettled: () => setPendingActionKey(''),
   });
@@ -639,10 +640,10 @@ function ProtocolsContent() {
       qc.invalidateQueries({ queryKey: LOGS_QUERY_KEY });
       setIsLogDoseOpen(false);
       setLoggingProtocol(null);
-      setNotice({ tone: 'success', message: 'Dose logged.' });
+      setNotice({ tone: 'success', message: t('pages.protocols.dose_logged') });
     },
     onError: () => {
-      setNotice({ tone: 'warning', message: 'Failed to log dose.' });
+      setNotice({ tone: 'warning', message: t('pages.protocols.failed_to_log_dose') });
     },
   });
 
@@ -708,9 +709,9 @@ function ProtocolsContent() {
     };
 
     const messages = {
-      active: 'Reactivated.',
-      paused: 'Paused.',
-      finished: 'Marked as finished.',
+      active: t('pages.protocols.status_reactivated'),
+      paused: t('pages.protocols.status_paused'),
+      finished: t('pages.protocols.status_finished'),
     };
 
     statusMutation.mutate({
@@ -723,8 +724,8 @@ function ProtocolsContent() {
 
   const handleDelete = (protocol) => {
     if (!protocol?.id) return;
-    const label = protocol?.substance_name || protocol?.name || 'this item';
-    if (!window.confirm(`Delete ${label}?`)) return;
+    const label = protocol?.substance_name || protocol?.name || t('pages.protocols.add_item');
+    if (!window.confirm(t('pages.protocols.confirm_delete', { label }))) return;
     deleteMutation.mutate({ id: protocol.id, actionKey: `${protocol.id}-delete` });
   };
 
@@ -777,15 +778,15 @@ function ProtocolsContent() {
 
       {isLoading && (
         <LoadingState
-          title="Loading your items"
-          description="Please wait while we load your supplements and medications."
+          title={t('pages.protocols.loading_items')}
+          description={t('pages.protocols.loading_items_desc')}
         />
       )}
 
       {!isLoading && hasLoadError && (
         <ErrorState
-          title="Unable to load data"
-          description="Some information may be unavailable, but you can still add new items."
+          title={t('pages.protocols.unable_to_load')}
+          description={t('pages.protocols.unable_to_load_desc')}
         />
       )}
 
@@ -948,9 +949,9 @@ function ProtocolsContent() {
                 accentClassName="from-[hsl(var(--brand)/0.18)] via-[hsl(var(--accent-secondary)/0.08)]"
               />
               <DialogHeader className="sr-only">
-                <DialogTitle>{editingProtocol ? 'Edit item' : 'Add item'}</DialogTitle>
+                <DialogTitle>{editingProtocol ? t('pages.protocols.edit_item') : t('pages.protocols.add_item')}</DialogTitle>
                 <DialogDescription>
-                  Enter the details for this supplement or medication.
+                  {t('pages.protocols.enter_details')}
                 </DialogDescription>
               </DialogHeader>
               <ProtocolForm
@@ -981,9 +982,9 @@ function ProtocolsContent() {
             accentClassName="from-[hsl(var(--ok)/0.18)] via-[hsl(var(--brand)/0.08)]"
           />
           <DialogHeader className="sr-only">
-            <DialogTitle>Log Dose</DialogTitle>
+            <DialogTitle>{t('pages.protocols.log_dose')}</DialogTitle>
             <DialogDescription>
-              Record a dose for this item.
+              {t('pages.protocols.record_dose')}
             </DialogDescription>
           </DialogHeader>
           <LogDoseForm

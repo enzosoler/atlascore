@@ -510,12 +510,36 @@
       "subtitle": "Isso define o foco do seu dashboard e insights semanais",
       "basics": "Info básica",
       "goals": [
-        {"id": "fat_loss", "emoji": "🔥", "label": "Perda de gordura"},
-        {"id": "muscle_gain", "emoji": "💪", "label": "Ganho de massa"},
-        {"id": "recomp", "emoji": "⚡", "label": "Recomp corporal"},
-        {"id": "performance", "emoji": "🏆", "label": "Performance"},
-        {"id": "health", "emoji": "❤️", "label": "Saúde geral"},
-        {"id": "longevity", "emoji": "🌱", "label": "Longevidade"}
+        {
+          "id": "fat_loss",
+          "emoji": "🔥",
+          "label": "Perda de gordura"
+        },
+        {
+          "id": "muscle_gain",
+          "emoji": "💪",
+          "label": "Ganho de massa"
+        },
+        {
+          "id": "recomp",
+          "emoji": "⚡",
+          "label": "Recomp corporal"
+        },
+        {
+          "id": "performance",
+          "emoji": "🏆",
+          "label": "Performance"
+        },
+        {
+          "id": "health",
+          "emoji": "❤️",
+          "label": "Saúde geral"
+        },
+        {
+          "id": "longevity",
+          "emoji": "🌱",
+          "label": "Longevidade"
+        }
       ],
       "fields": {
         "height": "Altura (cm)",
@@ -532,11 +556,31 @@
       "subtitle": "Calibra metas e personaliza planos",
       "activityLevel": "Nível de atividade",
       "activities": [
-        {"id": "sedentary", "label": "Sedentário", "desc": "Sem exercício regular"},
-        {"id": "light", "label": "Leve", "desc": "1–2× por semana"},
-        {"id": "moderate", "label": "Moderado", "desc": "3–4× por semana"},
-        {"id": "active", "label": "Ativo", "desc": "5–6× por semana"},
-        {"id": "very_active", "label": "Muito ativo", "desc": "2× por dia / atleta"}
+        {
+          "id": "sedentary",
+          "label": "Sedentário",
+          "desc": "Sem exercício regular"
+        },
+        {
+          "id": "light",
+          "label": "Leve",
+          "desc": "1–2× por semana"
+        },
+        {
+          "id": "moderate",
+          "label": "Moderado",
+          "desc": "3–4× por semana"
+        },
+        {
+          "id": "active",
+          "label": "Ativo",
+          "desc": "5–6× por semana"
+        },
+        {
+          "id": "very_active",
+          "label": "Muito ativo",
+          "desc": "2× por dia / atleta"
+        }
       ],
       "fields": {
         "workoutsPerWeek": "Treinos por semana",
@@ -561,12 +605,42 @@
       "subtitle": "Isso constrói seu dashboard inicial. Você pode ativar/desativar a qualquer hora.",
       "hint": "Selecione quantos quiser — mais contexto significa insights melhores",
       "options": [
-        {"id": "protocol", "emoji": "�", "label": "Planos", "desc": "Suplementos, doses e planos de saúde"},
-        {"id": "body", "emoji": "📏", "label": "Composição corporal", "desc": "Peso, medidas, fotos"},
-        {"id": "exams", "emoji": "🧬", "label": "Exames", "desc": "Hormônios, sangue, saúde"},
-        {"id": "nutrition", "emoji": "🥗", "label": "Nutrição", "desc": "Refeições e macros"},
-        {"id": "workouts", "emoji": "🏋️", "label": "Treinos", "desc": "Sessões e progresso"},
-        {"id": "symptoms", "emoji": "📊", "label": "Sintomas e humor", "desc": "Check-ins diários"}
+        {
+          "id": "protocol",
+          "emoji": "�",
+          "label": "Planos",
+          "desc": "Suplementos, doses e planos de saúde"
+        },
+        {
+          "id": "body",
+          "emoji": "📏",
+          "label": "Composição corporal",
+          "desc": "Peso, medidas, fotos"
+        },
+        {
+          "id": "exams",
+          "emoji": "🧬",
+          "label": "Exames",
+          "desc": "Hormônios, sangue, saúde"
+        },
+        {
+          "id": "nutrition",
+          "emoji": "🥗",
+          "label": "Nutrição",
+          "desc": "Refeições e macros"
+        },
+        {
+          "id": "workouts",
+          "emoji": "🏋️",
+          "label": "Treinos",
+          "desc": "Sessões e progresso"
+        },
+        {
+          "id": "symptoms",
+          "emoji": "📊",
+          "label": "Sintomas e humor",
+          "desc": "Check-ins diários"
+        }
       ]
     },
     "setup": {
@@ -581,24 +655,8 @@
   },
   "today": {
     "greeting": "Bom dia",
-    "checkin": {
-      "title": "Check-in de hoje",
-      "subtitle": "Como você está se sentindo?",
-      "mood": "Humor",
-      "energy": "Energia",
-      "sleep": "Sono",
-      "water": "Água",
-      "done": "Check-in completo",
-      "register": "Registrar"
-    },
-    "nutrition": {
-      "label": "Nutrição",
-      "calories": "kcal",
-      "protein": "P",
-      "carbs": "C",
-      "fat": "G",
-      "noMeals": "Nenhuma refeição registrada hoje"
-    },
+    "checkin": "Check-in",
+    "nutrition": "Nutrição",
     "workout": {
       "label": "Treino",
       "exercises": "exercícios",
@@ -625,7 +683,39 @@
       "weightLogged": "Peso registrado",
       "logWeight": "Registrar peso",
       "checkIn": "Check-in"
-    }
+    },
+    "this_week": "Esta semana",
+    "focus_areas": "Áreas de foco",
+    "coach_guidance": "Orientação do coach",
+    "your_coach": "Seu coach",
+    "coach_of": "Coach de {name}",
+    "continue_conversation": "Continuar conversa →",
+    "upcoming": "Próximos",
+    "start": "Iniciar",
+    "smart_recs": "Recomendações",
+    "kcal_remaining": "{n} kcal restantes",
+    "daily_target_met": "Meta diária atingida",
+    "training": "Treino",
+    "progress": "Progresso",
+    "completed": "Concluído",
+    "start_now": "Iniciar agora",
+    "tracked": "Registrado",
+    "log_fuel": "Registrar",
+    "logged": "Registrado",
+    "scale_weight": "Registrar peso",
+    "view_trends": "Ver tendências",
+    "subtitle_low_energy": "Energia baixa hoje — proteja o essencial.",
+    "subtitle_high_energy": "Energia alta. Faça o dia contar.",
+    "subtitle_rough_day": "Dia difícil. Um passo de cada vez.",
+    "subtitle_default": "Sistemas carregados. Execute.",
+    "streak_showed_up": "Você apareceu.",
+    "streak_one_week": "Uma semana. Consistente.",
+    "streak_two_weeks": "Duas semanas. O hábito está se formando.",
+    "streak_one_month": "Um mês. Agora é quem você é.",
+    "streak_reset": "Sequência reiniciada.",
+    "streak_start_again": "Comece de novo hoje.",
+    "first_workout": "Primeiro treino registrado — sua jornada começa hoje.",
+    "exercises": "exercícios"
   },
   "settings": {
     "title": "Configurações",
@@ -686,7 +776,9 @@
     "trainingGoal": "Objetivo de treino",
     "targetWeight": "Peso alvo (kg)",
     "bodyFatGoal": "Meta de gordura corporal (%)",
-    "macros": {"pending": "Macros pendentes"},
+    "macros": {
+      "pending": "Macros pendentes"
+    },
     "calories": "Calorias (kcal)",
     "protein": "Proteína (g)",
     "carbs": "Carboidratos (g)",
@@ -740,7 +832,9 @@
       "targetsTitle": "Metas de performance diárias",
       "targetsDesc": "Metas que tornam nutrição, treino e recuperação mais coerentes.",
       "trainingTitle": "Contexto de treino",
-      "trainingDesc": "Configuração de treino para geração de planos e insights personalizados."
+      "trainingDesc": "Configuração de treino para geração de planos e insights personalizados.",
+      "body": "Corpo",
+      "bodySubtitle": "Altura, peso, IMC e direção corporal."
     },
     "fields": {
       "phone": "Telefone / WhatsApp",
@@ -1032,7 +1126,68 @@
       "proteins": "Proteínas",
       "calories_and_macros": "Calorias e macronutrientes para referência rápida.",
       "meals_logged": "Refeições e alimentos registrados na data selecionada.",
-      "empty_state": "Adicione uma refeição para começar a monitorar sua nutrição."
+      "empty_state": "Adicione uma refeição para começar a monitorar sua nutrição.",
+      "next_action": "Próxima ação",
+      "add_meal_button": "Adicionar refeição",
+      "todays_meals": "Refeições de hoje",
+      "meals_logged_count": "{n} refeições registradas",
+      "calories_count": "{n} calorias",
+      "breakfast": "Café da manhã",
+      "morning_snack": "Lanche da manhã",
+      "lunch": "Almoço",
+      "afternoon_snack": "Lanche da tarde",
+      "pre_workout": "Pré-treino",
+      "post_workout": "Pós-treino",
+      "dinner": "Jantar",
+      "evening_snack": "Ceia",
+      "current": "Atual",
+      "protein": "proteína",
+      "remaining": "restantes",
+      "over": "acima",
+      "goal_reached": "Meta atingida",
+      "percent_complete": "% completo",
+      "fuel_up": "Consuma mais {n} calorias",
+      "food_logged": "Alimento registrado",
+      "food_saved": "Alimento salvo.",
+      "start_nutrition_today": "Comece sua nutrição hoje",
+      "log_meals_for_day": "Registrar refeições para este dia",
+      "track_first_meal": "Registre sua primeira refeição para monitorar calorias e macros",
+      "add_meals_complete_log": "Adicione refeições para completar o registro nutricional deste dia",
+      "log_first_meal": "Registrar primeira refeição",
+      "quick_add": "Adição rápida:",
+      "repeat_yesterday_breakfast": "Repetir café da manhã de ontem?",
+      "loading_meals": "Carregando refeições...",
+      "daily_progress": "Progresso diário",
+      "calories_label": "Calorias",
+      "protein_label": "Proteína",
+      "log_what_you_ate": "Registre o que comeu — a IA torna instantâneo",
+      "meal_date": "Data da refeição",
+      "added_foods": "Alimentos adicionados ({n})",
+      "portion": "Porção",
+      "describe_meal_ai": "Descreva sua refeição com IA para registro instantâneo",
+      "try_examples": "Tente: \"Frango, arroz, abacate\" ou \"2 ovos e torrada\"",
+      "portion_eyebrow": "Porção",
+      "set_serving_size": "Defina o tamanho da porção para registrar.",
+      "amount_g": "Quantidade (g)",
+      "cancel": "Cancelar",
+      "add_to_log": "Adicionar ao registro",
+      "quick_log": "Registro rápido",
+      "targets_updated": "Metas nutricionais atualizadas.",
+      "targets_save_error": "Não foi possível salvar as metas. Tente novamente.",
+      "added_successfully": "{name} adicionado com sucesso.",
+      "could_not_save": "Não foi possível salvar {name}. Tente novamente.",
+      "add_at_least_one": "Adicione pelo menos um alimento antes de salvar.",
+      "error_saving_meal": "Erro ao salvar refeição. Verifique sua conexão.",
+      "foods_updated_in": "{n} alimento(s) atualizado(s) em {meal}.",
+      "foods_added_to": "{n} alimento(s) adicionado(s) a {meal}.",
+      "could_not_remove": "Não foi possível remover {name}.",
+      "was_removed": "{name} foi removido.",
+      "food_search_error": "Erro na busca: {error}",
+      "could_not_load_details": "Não foi possível carregar detalhes do alimento",
+      "add_more_protein": "Adicione mais {n}g de proteína",
+      "great_progress": "Ótimo progresso! Continue registrando refeições",
+      "daily_tracking_subtitle": "Acompanhamento nutricional diário e orientações",
+      "safe_mode_fallback": "Nutrição carregada em modo seguro."
     },
     "measurements": {
       "title": "Medidas",
@@ -1124,7 +1279,48 @@
       "delete_error": "Não foi possível excluir o protocolo. Tente novamente.",
       "delete_success": "Protocolo excluído.",
       "loading": "Aguarde enquanto seus protocolos são carregados.",
-      "loading_partial": "Dados não carregaram completamente, mas você ainda pode adicionar novos itens."
+      "loading_partial": "Dados não carregaram completamente, mas você ainda pode adicionar novos itens.",
+      "loading_items": "Carregando seus itens",
+      "loading_items_desc": "Aguarde enquanto carregamos seus suplementos e medicações.",
+      "unable_to_load": "Não foi possível carregar",
+      "unable_to_load_desc": "Algumas informações podem estar indisponíveis, mas você ainda pode adicionar novos itens.",
+      "of_completed": "Concluído",
+      "log_dose": "Registrar dose",
+      "due_today": "Para hoje",
+      "weekly_schedule": "Cronograma semanal",
+      "mon": "Seg",
+      "tue": "Ter",
+      "wed": "Qua",
+      "thu": "Qui",
+      "fri": "Sex",
+      "sat": "Sáb",
+      "sun": "Dom",
+      "missed_doses": "Você perdeu {n} doses ontem",
+      "active": "ativo",
+      "protocol_timeline": "Linha do tempo",
+      "no_active_protocols": "Nenhum protocolo ativo disponível.",
+      "loading_dose_history": "Carregando histórico de doses...",
+      "no_doses_logged": "Nenhuma dose registrada. Registre doses para ver a curva de concentração.",
+      "days_active": "{n}d ativo",
+      "past_30_days": "Últimos 30 dias",
+      "next_14_days": "Próximos 14 dias (projetado)",
+      "saved_successfully": "Salvo com sucesso.",
+      "failed_to_save": "Falha ao salvar. Tente novamente.",
+      "items_added": "Itens adicionados com sucesso.",
+      "failed_to_add": "Falha ao adicionar itens. Tente novamente.",
+      "failed_to_update_status": "Falha ao atualizar status.",
+      "item_deleted": "Item excluído.",
+      "failed_to_delete": "Falha ao excluir.",
+      "dose_logged": "Dose registrada.",
+      "failed_to_log_dose": "Falha ao registrar dose.",
+      "status_reactivated": "Reativado.",
+      "status_paused": "Pausado.",
+      "status_finished": "Marcado como finalizado.",
+      "confirm_delete": "Excluir {label}?",
+      "edit_item": "Editar item",
+      "add_item": "Adicionar item",
+      "enter_details": "Insira os detalhes deste suplemento ou medicamento.",
+      "record_dose": "Registrar uma dose para este item."
     }
   },
   "nav": {
@@ -1179,5 +1375,24 @@
     "roleNutritionist": "Nutricionista",
     "roleClinician": "Clínico",
     "roleAdmin": "Admin"
+  },
+  "bodyProfile": {
+    "pageTitle": "Sua base corporal",
+    "pageSubtitle": "Altura, idade, metas de peso e composição corporal em um só lugar.",
+    "backToProfile": "Voltar ao perfil",
+    "baselineTitle": "Linha de base pessoal",
+    "baselineSubtitle": "Dados essenciais que dão contexto a toda a sua experiência.",
+    "weightTitle": "Metas de peso",
+    "weightSubtitle": "Peso atual e alvo para definir sua direção corporal.",
+    "setBothWeights": "Defina ambos os pesos para ver a direção.",
+    "maintainWeight": "Manter peso atual",
+    "gainWeight": "Ganhar {delta} kg",
+    "loseWeight": "Perder {delta} kg",
+    "bmiTitle": "Índice de Massa Corporal",
+    "yourBmi": "Seu IMC",
+    "saved": "Salvo",
+    "saving": "Salvando",
+    "saveChanges": "Salvar alterações",
+    "reset": "Redefinir"
   }
 }

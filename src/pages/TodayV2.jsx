@@ -110,13 +110,14 @@ function StreakPill({ streak, urgency }) {
 }
 
 function ChainDots({ checkinDates }) {
+  const t = useT();
   const weekDates = getWeekDates();
   const checkinSet = new Set(checkinDates);
   const todayStr = getToday();
 
   return (
     <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
-      <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] mb-3">This week</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] mb-3">{t('today.this_week')}</p>
       <div className="flex items-center justify-between gap-1 px-1">
         {weekDates.map((date, i) => {
           const isDone = checkinSet.has(date);
@@ -148,8 +149,9 @@ function ChainDots({ checkinDates }) {
 }
 
 function ProactiveAICard({ message, onOpenChat, onDismiss, streak, firstName }) {
+  const t = useT();
   if (!message) return null;
-  const coachLabel = streak > 14 && firstName ? `${firstName}'s coach` : 'Your coach';
+  const coachLabel = streak > 14 && firstName ? t('today.coach_of', { name: firstName }) : t('today.your_coach');
   return (
     <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--brand-ai)/0.25)] border-l-[3px] border-l-[hsl(var(--brand-ai))] p-4">
       <div className="flex items-start gap-3">
@@ -163,7 +165,7 @@ function ProactiveAICard({ message, onOpenChat, onDismiss, streak, firstName }) 
           <p className="text-[14px] text-[hsl(var(--fg))] leading-[1.5]">{message}</p>
           {onOpenChat && (
             <button onClick={onOpenChat} className="mt-2.5 text-[13px] font-semibold text-[hsl(var(--brand-ai))] active:opacity-70">
-              Continue conversation →
+              {t('today.continue_conversation')}
             </button>
           )}
         </div>
@@ -207,6 +209,7 @@ function Header({ weather, greeting, locale, streak, streakUrgency, adaptiveSubt
 }
 
 function PrimaryAction({ action, briefingText, kcalRemaining }) {
+  const t = useT();
   if (!action) return null;
 
   return (
@@ -231,7 +234,7 @@ function PrimaryAction({ action, briefingText, kcalRemaining }) {
           <div className="flex items-center justify-between mt-1">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 dark:bg-zinc-950/5 border border-white/10 dark:border-zinc-950/10 backdrop-blur-md">
               <span className="text-[12px] font-bold text-white/90 dark:text-zinc-950/90">
-                {kcalRemaining > 0 ? `${kcalRemaining} kcal remaining` : 'Daily target met'}
+                {kcalRemaining > 0 ? t('today.kcal_remaining', { n: kcalRemaining }) : t('today.daily_target_met')}
               </span>
             </div>
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xl transition-transform group-hover:translate-x-1">
@@ -385,11 +388,11 @@ function TodayContent() {
   // Adaptive subtitle
   const adaptiveSubtitle = useMemo(() => {
     if (!todayCheckin) return null;
-    if (todayCheckin.energy && todayCheckin.energy <= 2) return 'Low energy today — protect the essentials.';
-    if (todayCheckin.energy && todayCheckin.energy >= 4) return 'High energy. Make today count.';
-    if (todayCheckin.mood && todayCheckin.mood <= 2) return 'Rough day. One step at a time.';
+    if (todayCheckin.energy && todayCheckin.energy <= 2) return t('today.subtitle_low_energy');
+    if (todayCheckin.energy && todayCheckin.energy >= 4) return t('today.subtitle_high_energy');
+    if (todayCheckin.mood && todayCheckin.mood <= 2) return t('today.subtitle_rough_day');
     return null;
-  }, [todayCheckin]);
+  }, [todayCheckin, t]);
 
   // Proactive AI
   const insightAge = coachMemory?.proactive_insight_generated_at
@@ -424,10 +427,10 @@ function TodayContent() {
               <span className="text-2xl atlas-streak-pulse inline-block">🔥</span>
               <p className="text-[15px] font-bold text-[hsl(var(--fg))]">
                 <span className="atlas-odometer-flip">{streakMilestone}</span> days.{' '}
-                {streakMilestone === 3 && 'You showed up.'}
-                {streakMilestone === 7 && 'One week. Consistent.'}
-                {streakMilestone === 14 && 'Two weeks. The habit is forming.'}
-                {streakMilestone === 30 && 'One month. This is who you are now.'}
+                {streakMilestone === 3 && t('today.streak_showed_up')}
+                {streakMilestone === 7 && t('today.streak_one_week')}
+                {streakMilestone === 14 && t('today.streak_two_weeks')}
+                {streakMilestone === 30 && t('today.streak_one_month')}
               </p>
             </div>
             <button onClick={() => setStreakCelebrationDismissed(true)} className="text-[hsl(var(--fg-3))] p-1">
@@ -441,8 +444,8 @@ function TodayContent() {
       {streak === 0 && recentCheckins.length > 0 && !hasCheckin && (
         <div className="rounded-[18px] bg-[hsl(var(--err)/0.06)] border border-[hsl(var(--err)/0.15)] p-4">
           <p className="text-[14px] text-[hsl(var(--fg))]">
-            <span className="text-[hsl(var(--err))] font-semibold">Streak reset.</span>{' '}
-            Start again today.
+            <span className="text-[hsl(var(--err))] font-semibold">{t('today.streak_reset')}</span>{' '}
+            {t('today.streak_start_again')}
           </p>
         </div>
       )}
@@ -471,7 +474,7 @@ function TodayContent() {
       {/* 3. Coach Input (ORIGINAL — preserved) */}
       <section className="space-y-4">
         <div className="flex items-center justify-between px-0.5">
-          <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))]">Coach Guidance</h3>
+          <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))]">{t('today.coach_guidance')}</h3>
           <Sparkles className="h-4 w-4 text-[hsl(var(--brand-ai))]" />
         </div>
         <CoachChatTrigger
@@ -485,34 +488,34 @@ function TodayContent() {
 
       {/* 4. Quick Actions Grid (ORIGINAL — preserved) */}
       <section className="space-y-4">
-        <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">Focus Areas</h3>
+        <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.focus_areas')}</h3>
         <div className="grid grid-cols-2 gap-3.5">
           <QuickAction
             to={ROUTES.workouts}
             icon={Dumbbell}
-            label="Training"
-            status={safeDaily.workoutDone ? "Completed" : "Start now"}
+            label={t('today.training')}
+            status={safeDaily.workoutDone ? t('today.completed') : t('today.start_now')}
             colorClass="bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]"
           />
           <QuickAction
             to={ROUTES.nutrition}
             icon={UtensilsCrossed}
-            label="Nutrition"
-            status={safeDaily.nutritionLogged ? "Tracked" : "Log fuel"}
+            label={t('today.nutrition')}
+            status={safeDaily.nutritionLogged ? t('today.tracked') : t('today.log_fuel')}
             colorClass="bg-[hsl(var(--brand-ai)/0.08)] text-[hsl(var(--brand-ai))]"
           />
           <QuickAction
             to={ROUTES.body}
             icon={Scale}
-            label="Check-in"
-            status={safeDaily.weightLogged ? "Logged" : "Scale weight"}
+            label={t('today.checkin')}
+            status={safeDaily.weightLogged ? t('today.logged') : t('today.scale_weight')}
             colorClass="bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]"
           />
           <QuickAction
             to={ROUTES.goals}
             icon={Target}
-            label="Progress"
-            status="View trends"
+            label={t('today.progress')}
+            status={t('today.view_trends')}
             colorClass="bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]"
           />
         </div>
@@ -521,7 +524,7 @@ function TodayContent() {
       {/* 5. Today's Plan Summary (ORIGINAL — preserved) */}
       {safePlan.id && !safeDaily.workoutDone && (
         <section className="space-y-4">
-          <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">Upcoming</h3>
+          <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.upcoming')}</h3>
           <Link to={ROUTES.workouts} className="block">
             <div className="flex items-center gap-4 rounded-[20px] bg-[hsl(var(--fill)/0.3)] border border-[hsl(var(--border)/0.5)] p-4 active:bg-[hsl(var(--fill)/0.5)] transition-all">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm">
@@ -530,11 +533,11 @@ function TodayContent() {
               <div className="flex-1">
                 <p className="text-[15px] font-bold text-[hsl(var(--fg))]">{safePlan.name}</p>
                 <p className="text-[12px] font-medium text-[hsl(var(--fg-3))] mt-0.5">
-                  {safePlan.todayExercises?.length || 0} exercises
+                  {safePlan.todayExercises?.length || 0} {t('today.exercises')}
                 </p>
               </div>
               <div className="px-3 py-1.5 rounded-lg bg-[hsl(var(--fg))] text-white text-[12px] font-bold">
-                Start
+                {t('today.start')}
               </div>
             </div>
           </Link>
@@ -544,7 +547,7 @@ function TodayContent() {
       {/* 6. Recommendations (ORIGINAL — preserved) */}
       {recs.length > 0 && (
         <section className="space-y-4">
-          <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">Smart Recs</h3>
+          <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.smart_recs')}</h3>
           <div className="space-y-2.5">
             {recs.map((rec) => (
               <RecommendationCard key={rec.id} rec={rec} />
@@ -556,7 +559,7 @@ function TodayContent() {
       {/* NEW: First workout milestone */}
       {safeDaily.recentSessions?.length === 1 && safeDaily.workoutDone && (
         <div className="rounded-[18px] bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.15)] p-4">
-          <p className="text-[14px] text-[hsl(var(--fg))]">First workout logged — your journey starts today.</p>
+          <p className="text-[14px] text-[hsl(var(--fg))]">{t('today.first_workout')}</p>
         </div>
       )}
 
