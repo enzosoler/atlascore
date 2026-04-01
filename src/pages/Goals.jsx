@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -178,7 +178,10 @@ function MetabolicEstimator({ profileData, onApply, t }) {
     }));
   }, [profileData]);
 
-  const set = (key) => (e) => setInputs((prev) => ({ ...prev, [key]: e.target.value }));
+  const set = (key) => (e) => {
+    const val = typeof e === 'string' ? e : e?.target?.value ?? e;
+    setInputs((prev) => ({ ...prev, [key]: val }));
+  };
 
   const result = calculateMetabolicTargets(inputs);
 

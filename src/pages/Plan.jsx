@@ -102,11 +102,20 @@ function PlanContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('training_goal, calories_target, protein_target, carbs_target, fat_target, target_weight, current_weight')
+        .select('profile_data')
         .eq('id', user.id)
         .single();
       if (error && error.code !== 'PGRST116') throw error;
-      return data ?? {};
+      const pd = data?.profile_data ?? {};
+      return {
+        training_goal: pd.health_goals?.[0] ?? pd.training_goal ?? '',
+        calories_target: pd.calories_target ?? pd.targets?.calories ?? '',
+        protein_target: pd.protein_target ?? pd.targets?.protein ?? '',
+        carbs_target: pd.carbs_target ?? pd.targets?.carbs ?? '',
+        fat_target: pd.fat_target ?? pd.targets?.fat ?? '',
+        target_weight: pd.target_weight ?? '',
+        current_weight: pd.current_weight ?? '',
+      };
     },
     enabled: !!user?.id,
   });
@@ -150,17 +159,33 @@ function PlanContent() {
   // ── Save mutation ─────────────────────────────────────────────────────────────
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const updates = {
-        training_goal: goal || null,
+      // Read existing profile_data, merge, write back
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('profile_data')
+        .eq('id', user.id)
+        .single();
+      const pd = existing?.profile_data ?? {};
+      const merged = {
+        ...pd,
+        training_goal: goal || pd.training_goal || null,
+        health_goals: goal ? [goal] : pd.health_goals || [],
         calories_target: Number(calories) || null,
         protein_target: Number(protein) || null,
         carbs_target: Number(carbs) || null,
         fat_target: Number(fat) || null,
-        target_weight: targetWeight ? Number(targetWeight) : null,
+        target_weight: targetWeight ? Number(targetWeight) : pd.target_weight || null,
+        targets: {
+          ...(pd.targets || {}),
+          calories: Number(calories) || null,
+          protein: Number(protein) || null,
+          carbs: Number(carbs) || null,
+          fat: Number(fat) || null,
+        },
       };
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update({ profile_data: merged })
         .eq('id', user.id);
       if (error) throw error;
     },
