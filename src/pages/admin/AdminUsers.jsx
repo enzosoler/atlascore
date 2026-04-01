@@ -44,7 +44,8 @@ export default function AdminUsers() {
   });
 
   const users = useMemo(() => {
-    let list = query.length >= 2 ? (searchResults || []) : (rawUsers || []);
+    let list = query.length >= 2 ? (searchResults?.users || searchResults || []) : (rawUsers?.users || rawUsers || []);
+    if (!Array.isArray(list)) list = [];
     if (filter === 'suspended') list = list.filter((u) => u.is_suspended);
     else if (filter === 'active') list = list.filter((u) => !u.is_suspended);
     else if (filter === 'admin') list = list.filter((u) => u.role === 'admin');
@@ -153,7 +154,7 @@ export default function AdminUsers() {
           <p className="text-[12px] text-[hsl(var(--fg-3))]">Page {page}</p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-            <Button variant="outline" size="sm" disabled={(rawUsers || []).length < 50} onClick={() => setPage((p) => p + 1)}>Next</Button>
+            <Button variant="outline" size="sm" disabled={(rawUsers?.users || rawUsers || []).length < 50} onClick={() => setPage((p) => p + 1)}>Next</Button>
           </div>
         </div>
       )}
