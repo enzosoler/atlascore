@@ -2306,16 +2306,18 @@ export default function NutritionPage() {
         onOpenSearch={() => handleAddMeal()}
       />
 
-      {/* Quick Log FAB — always visible above tab bar */}
-      <div className="fixed bottom-[calc(58px+env(safe-area-inset-bottom,0px)+12px)] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-        <button
-          onClick={() => setQuickLogOpen(true)}
-          className="pointer-events-auto flex items-center gap-2 px-5 py-3 rounded-full bg-[hsl(var(--brand))] text-white font-semibold text-[14px] tracking-[-0.01em] shadow-[0_4px_20px_rgba(0,0,0,0.25)] active:scale-[0.96] transition-transform duration-100"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} />
-          Quick Log
-        </button>
-      </div>
+      {/* Quick Log FAB — visible only when meals exist (empty state already has CTAs) */}
+      {sortedMeals.length > 0 && (
+        <div className="fixed bottom-[calc(58px+env(safe-area-inset-bottom,0px)+12px)] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <button
+            onClick={() => setQuickLogOpen(true)}
+            className="pointer-events-auto flex items-center gap-2 px-5 py-3 rounded-full bg-[hsl(var(--brand))] text-white font-semibold text-[14px] tracking-[-0.01em] shadow-[0_4px_20px_rgba(0,0,0,0.25)] active:scale-[0.96] transition-transform duration-100"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
+            Quick Log
+          </button>
+        </div>
+      )}
     </SafePageBoundary>
   );
 }
