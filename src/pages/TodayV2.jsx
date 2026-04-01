@@ -195,41 +195,72 @@ function ZoneWorkout({ plan }) {
 /** Zone 1 — State C: calorie remaining hero */
 function ZoneCalories({ nutrition, firstName }) {
   const { caloriesTarget, caloriesConsumed, proteinTarget, proteinConsumed } = nutrition;
+  const hasTarget = caloriesTarget > 0;
   const remaining = Math.max(0, caloriesTarget - caloriesConsumed);
   const proteinRemaining = Math.max(0, proteinTarget - proteinConsumed);
-  const pctEaten = caloriesTarget > 0 ? Math.min(1, caloriesConsumed / caloriesTarget) : 0;
+  const pctEaten = hasTarget ? Math.min(1, caloriesConsumed / caloriesTarget) : 0;
 
   return (
     <Link to={ROUTES.nutrition} className="block h-full">
-      <div className="flex flex-col justify-between h-full rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border))] p-5 active:scale-[0.985] transition-transform duration-100">
+      <div className="flex flex-col justify-between h-full rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border))] p-6 active:scale-[0.985] transition-transform duration-100">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] mb-4">
             Nutrition
           </p>
-          <p className="text-[56px] font-bold tracking-[-0.04em] text-[hsl(var(--brand))] leading-none">
-            {remaining.toLocaleString()}
-          </p>
-          <p className="text-[15px] text-[hsl(var(--fg-2))] mt-1">kcal remaining</p>
-          <p className="text-[13px] text-[hsl(var(--fg-3))] mt-0.5">
-            {caloriesConsumed} eaten · {caloriesTarget} your target
-          </p>
+
+          {hasTarget ? (
+            <>
+              <p className="text-[56px] font-bold tracking-[-0.04em] text-[hsl(var(--brand))] leading-none">
+                {remaining.toLocaleString()}
+              </p>
+              <p className="text-[15px] text-[hsl(var(--fg-2))] mt-1">kcal remaining</p>
+              <p className="text-[13px] text-[hsl(var(--fg-3))] mt-0.5">
+                {caloriesConsumed} eaten · {caloriesTarget} your target
+              </p>
+            </>
+          ) : (
+            <>
+              {caloriesConsumed > 0 ? (
+                <>
+                  <p className="text-[56px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] leading-none">
+                    {caloriesConsumed.toLocaleString()}
+                  </p>
+                  <p className="text-[15px] text-[hsl(var(--fg-2))] mt-1">kcal eaten today</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[28px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))] leading-[1.2]">
+                    No meals logged yet.
+                  </p>
+                  <p className="text-[15px] text-[hsl(var(--fg-3))] mt-2">
+                    Start tracking to see your numbers.
+                  </p>
+                </>
+              )}
+              <p className="text-[12px] text-[hsl(var(--warn))] mt-3 font-medium">
+                Set your calorie target in Profile → Goals
+              </p>
+            </>
+          )}
         </div>
 
         {/* Macro quick stats */}
-        <div className="space-y-3">
-          <div className="h-1.5 w-full rounded-full bg-[hsl(var(--border))] overflow-hidden">
-            <div
-              className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-500"
-              style={{ width: `${pctEaten * 100}%` }}
-            />
-          </div>
+        <div className="space-y-3 mt-6">
+          {hasTarget && (
+            <div className="h-1.5 w-full rounded-full bg-[hsl(var(--border))] overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-500"
+                style={{ width: `${pctEaten * 100}%` }}
+              />
+            </div>
+          )}
           {proteinTarget > 0 && (
             <p className="text-[13px] text-[hsl(var(--fg-3))]">
               <span className="text-[hsl(var(--fg-2))] font-medium">{proteinRemaining}g protein</span> left today
             </p>
           )}
-          <div className="flex items-center justify-center gap-2 h-11 rounded-[12px] bg-[hsl(var(--brand))] text-white font-semibold text-[14px]">
-            Log meal
+          <div className="flex items-center justify-center gap-2 h-12 rounded-[12px] bg-[hsl(var(--brand))] text-white font-semibold text-[15px]">
+            {caloriesConsumed > 0 ? 'Log meal' : 'Log your first meal'}
           </div>
         </div>
       </div>
@@ -484,7 +515,7 @@ function TodayContent() {
         )}
 
         {/* ── Zone 1 — fills viewport ────────────────────────────────────── */}
-        <div className="min-h-[calc(100svh-160px)] mb-6">
+        <div className="min-h-[calc(100svh-160px)] sm:min-h-0 sm:h-auto mb-6">
           {zone1State === 'workout' && <ZoneWorkout plan={safePlan} />}
           {zone1State === 'calories' && <ZoneCalories nutrition={safeNutrition} firstName={firstName} />}
           {zone1State === 'ontrack' && <ZoneOnTrack streak={streak} firstName={firstName} />}
