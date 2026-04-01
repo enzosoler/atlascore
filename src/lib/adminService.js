@@ -492,6 +492,15 @@ export async function grantAccess(userId, tier = 'pro', reason = '', durationDay
   return data;
 }
 
+export async function deleteUser(userId) {
+  const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+    body: { userId },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 export async function revokeAccess(userId) {
   const { data, error } = await supabase
     .from('subscriptions')

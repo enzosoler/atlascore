@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 /* eslint-disable no-unused-vars */
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, RefreshCcw, MoreVertical, Eye, Crown, RotateCcw } from 'lucide-react';
+import { Search, RefreshCcw, MoreVertical, Eye, Crown, RotateCcw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  fetchAllUsers, searchUsers, grantAccess, resetOnboarding, logAdminAction,
+  fetchAllUsers, searchUsers, grantAccess, resetOnboarding, logAdminAction, deleteUser,
 } from '@/lib/adminService';
 
 function fmt(d) {
@@ -65,6 +65,11 @@ export default function AdminUsers() {
   const resetM = useMutation({
     mutationFn: (userId) => resetOnboarding(userId),
     onSuccess: () => { toast.success('Onboarding reset'); queryClient.invalidateQueries({ queryKey: ['admin-users'] }); setDialog(null); },
+  });
+  const deleteM = useMutation({
+    mutationFn: (userId) => deleteUser(userId),
+    onSuccess: () => { toast.success('User permanently deleted'); queryClient.invalidateQueries({ queryKey: ['admin-users'] }); setDialog(null); },
+    onError: (err) => toast.error(err.message || 'Failed to delete user'),
   });
 
   const handleImpersonate = useCallback((u) => {
@@ -143,6 +148,7 @@ export default function AdminUsers() {
                         <DropdownMenuItem onClick={() => handleImpersonate(u)}><Eye className="mr-2 h-3.5 w-3.5" /> Impersonate</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setDialog({ type: 'grant', userId: u.id, name: u.full_name || u.email })}><Crown className="mr-2 h-3.5 w-3.5" /> Grant Premium</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setDialog({ type: 'reset', userId: u.id, name: u.full_name || u.email })}><RotateCcw className="mr-2 h-3.5 w-3.5" /> Reset Onboarding</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDialog({ type: 'delete', userId: u.id, name: u.full_name || u.email })} className="text-[hsl(var(--err))] focus:text-[hsl(var(--err))]"><Trash2 className="mr-2 h-3.5 w-3.5" /> Delete User</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -222,6 +228,28 @@ export default function AdminUsers() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
             <Button onClick={() => resetM.mutate(dialog?.userId)} disabled={resetM.isPending}>{resetM.isPending ? 'Processing...' : 'Confirm'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={dialog?.type === 'delete'} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle className="text-[hsl(var(--err))]">Delete User Permanently</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-[14px] text-[hsl(var(--fg-2))]">This will <strong>permanently delete</strong> <strong>{dialog?.name}</strong> and all their data:</p>
+            <ul className="text-[13px] text-[hsl(var(--fg-3))] list-disc pl-5 space-y-1">
+              <li>Profile and account</li>
+              <li>Workouts, nutrition logs, measurements</li>
+              <li>Subscriptions and billing data</li>
+              <li>AI coach messages and memory</li>
+              <li>Progress photos and lab exams</li>
+            </ul>
+            <p className="text-[13px] font-medium text-[hsl(var(--err))]">This action cannot be undone. The user can create a new account afterward.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => deleteM.mutate(dialog?.userId)} disabled={deleteM.isPending}>
+              {deleteM.isPending ? 'Deleting...' : 'Delete permanently'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
