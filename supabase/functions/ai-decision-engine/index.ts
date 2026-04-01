@@ -59,7 +59,7 @@ function getCorsHeaders(req: Request) {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const MODEL = 'gpt-4.1-mini';
+const MODEL = 'gpt-5-mini';
 const ENGINE_VERSION = '1.0';
 const TTL_SECONDS = 4 * 60 * 60; // 4 hours
 
