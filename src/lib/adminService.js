@@ -456,9 +456,9 @@ export async function fetchBetaInvites() {
   return data || [];
 }
 
-export async function sendBetaInvite({ email, firstName = '', notes = '' }) {
+export async function sendBetaInvite({ email, firstName = '', notes = '', locale = 'en' }) {
   const { data, error } = await supabase.functions.invoke('send-beta-invite', {
-    body: { email, firstName, notes },
+    body: { email, firstName, notes, locale },
   });
 
   if (error) throw error;

@@ -33,6 +33,7 @@ function SendInviteModal({ onClose, onSent }) {
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [notes, setNotes] = useState('');
+  const [locale, setLocale] = useState('en');
   const [loading, setLoading] = useState(false);
 
   const handleSend = async (e) => {
@@ -40,7 +41,7 @@ function SendInviteModal({ onClose, onSent }) {
     if (!email.trim()) return;
     setLoading(true);
     try {
-      await sendBetaInvite({ email: email.trim(), firstName: firstName.trim(), notes: notes.trim() });
+      await sendBetaInvite({ email: email.trim(), firstName: firstName.trim(), notes: notes.trim(), locale });
       toast.success(`Invite sent to ${email.trim()}`);
       onSent?.();
       onClose?.();
@@ -102,6 +103,30 @@ function SendInviteModal({ onClose, onSent }) {
               disabled={loading}
               className="w-full px-3 py-2.5 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--bg))] text-[13px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary)/0.4)] disabled:opacity-50 resize-none"
             />
+          </div>
+
+          <div>
+            <label className="block mb-1.5 text-[12px] font-medium text-[hsl(var(--fg))]">Email language</label>
+            <div className="flex gap-2">
+              {[
+                { value: 'en', label: 'English' },
+                { value: 'pt-BR', label: 'Português' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setLocale(opt.value)}
+                  disabled={loading}
+                  className={`flex-1 h-9 rounded-xl border text-[13px] font-medium transition-colors ${
+                    locale === opt.value
+                      ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
+                      : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))]'
+                  } disabled:opacity-50`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-2 pt-1">

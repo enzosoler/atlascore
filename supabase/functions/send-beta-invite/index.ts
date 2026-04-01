@@ -3,11 +3,9 @@
  *
  * Auth: Service-role JWT (admin only — called from the admin panel)
  *
- * Body: { email: string, firstName?: string, notes?: string }
+ * Body: { email: string, firstName?: string, notes?: string, locale?: 'pt-BR' | 'en' }
  *
- * NOTE: Email sending is inlined (not imported from _shared/) to avoid
- * the Supabase Edge Runtime BOOT_ERROR caused by the logger+templates
- * module chain when combined with supabase-js.
+ * Uses the invite_beta template from _shared/templates.ts for localized emails.
  *
  * Deploy:
  *   supabase functions deploy send-beta-invite
@@ -15,6 +13,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { renderEmail } from '../_shared/templates.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -22,35 +21,28 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+type Locale = 'pt-BR' | 'en';
+
 async function sendInviteEmail(
   to: string,
   firstName: string,
   inviteUrl: string,
-  notes?: string
+  locale: Locale = 'en',
+  expiryDate?: string,
 ): Promise<void> {
   const resendApiKey = Deno.env.get('RESEND_API_KEY');
-  const fromEmail = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@useatlascore.com>';
-  const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
+  const fromEmail = Deno.env.get('FROM_EMAIL') || 'atlas.core <noreply@useatlascore.com>';
 
   if (!resendApiKey) {
     console.warn('send-beta-invite: RESEND_API_KEY not set, skipping email');
     return;
   }
 
-  const greeting = firstName ? `Hi ${firstName},` : 'Hi,';
-  const noteHtml = notes ? `<p style="font-style:italic;color:#888;">"${notes}"</p>` : '';
-
-  const html = `
-    <p>${greeting}</p>
-    <p>You've been invited to join <strong>Atlas Core</strong> as a beta user.</p>
-    ${noteHtml}
-    <p>Click the link below to accept your invitation and create your account:</p>
-    <p><a href="${inviteUrl}" style="display:inline-block;padding:10px 20px;background:#10b981;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Accept invitation</a></p>
-    <p>Or copy this link: <a href="${inviteUrl}">${inviteUrl}</a></p>
-    <p>This invite expires in 7 days.</p>
-    <p>– Atlas Core</p>
-    <p><small><a href="${appUrl}">${appUrl}</a></small></p>
-  `;
+  const { subject, html } = renderEmail('invite_beta', locale, {
+    first_name: firstName || (locale === 'pt-BR' ? 'convidado' : 'there'),
+    invite_url: inviteUrl,
+    invite_expiry_date: expiryDate || '7 days',
+  });
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -62,7 +54,7 @@ async function sendInviteEmail(
       body: JSON.stringify({
         from: fromEmail,
         to: [to.trim().toLowerCase()],
-        subject: "You're invited to Atlas Core beta",
+        subject,
         html,
       }),
     });
@@ -128,7 +120,7 @@ serve(async (req) => {
     });
   }
 
-  let body: { email: string; firstName?: string; notes?: string };
+  let body: { email: string; firstName?: string; notes?: string; locale?: Locale };
   try {
     body = await req.json();
   } catch {
@@ -138,7 +130,8 @@ serve(async (req) => {
     });
   }
 
-  const { email, firstName = '', notes = '' } = body;
+  const { email, firstName = '', notes = '', locale = 'en' } = body;
+  const resolvedLocale: Locale = locale === 'pt-BR' ? 'pt-BR' : 'en';
 
   if (!email || typeof email !== 'string' || !email.includes('@')) {
     return new Response(JSON.stringify({ error: 'Valid email is required' }), {
@@ -184,9 +177,16 @@ serve(async (req) => {
   const appUrl = Deno.env.get('APP_URL') || 'https://useatlascore.com';
   const inviteUrl = `${appUrl}/invite?token=${invite.token}`;
 
-  await sendInviteEmail(invite.email, firstName, inviteUrl, notes || undefined);
+  // Format expiry date for the email template
+  const expiryDate = invite.expires_at
+    ? new Date(invite.expires_at).toLocaleDateString(resolvedLocale === 'pt-BR' ? 'pt-BR' : 'en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      })
+    : '7 days';
 
-  console.log(`send-beta-invite: Invite created id=${invite.id} email=${invite.email}`);
+  await sendInviteEmail(invite.email, firstName, inviteUrl, resolvedLocale, expiryDate);
+
+  console.log(`send-beta-invite: Invite created id=${invite.id} email=${invite.email} locale=${resolvedLocale}`);
 
   return new Response(JSON.stringify({
     id: invite.id,
