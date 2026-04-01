@@ -37,6 +37,13 @@
     }
   },
   "android": {
+    "includePlugins": [
+      "@capacitor/app",
+      "@capacitor/browser",
+      "@capacitor/haptics",
+      "@capacitor/local-notifications",
+      "@capacitor/splash-screen"
+    ],
     "buildOptions": {
       "keystorePath": null,
       "keystorePassword": null,
