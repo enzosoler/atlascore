@@ -21,6 +21,7 @@ import { TodayScreen } from '@/components/today/TodayMobileUI';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
 import CoachChatTrigger from '@/components/ai/CoachChatTrigger';
 import CoachChatSheet from '@/components/ai/CoachChatSheet';
+import { useCoachChat } from '@/hooks/useCoachChat';
 import PaywallTrigger from '@/components/entitlements/PaywallTrigger';
 import { getDailyCheckin, listDailyCheckins } from '@/services/checkinService';
 import { getToday } from '@/lib/atlas-theme';
@@ -314,6 +315,10 @@ function TodayContent() {
 
   const daily = useDailyStateV2();
   const ai = useAICoach({ userId: uid });
+  const coach = useCoachChat({
+    invalidateAfterAction: daily?.invalidateAfterAction,
+    activePlan: daily?.activePlan,
+  });
 
   const safeDaily = daily || {};
   const safePlan = safeDaily?.plan || {};
@@ -469,7 +474,10 @@ function TodayContent() {
           <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))]">Coach Guidance</h3>
           <Sparkles className="h-4 w-4 text-[hsl(var(--brand-ai))]" />
         </div>
-        <CoachChatTrigger onOpen={() => setChatOpen(true)} />
+        <CoachChatTrigger
+          onOpen={() => setChatOpen(true)}
+          onSuggestion={(text) => { coach.sendMessage(text, 'today'); setChatOpen(true); }}
+        />
       </section>
 
       {/* NEW: 7-day chain dots */}
@@ -552,7 +560,17 @@ function TodayContent() {
         </div>
       )}
 
-      <CoachChatSheet open={chatOpen} onOpenChange={setChatOpen} />
+      <CoachChatSheet
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        messages={coach.messages}
+        isTyping={coach.isTyping}
+        actionStates={coach.actionStates}
+        onSendMessage={coach.sendMessage}
+        onConfirmAction={coach.executeAction}
+        onDismissAction={coach.dismissAction}
+        pageContext="today"
+      />
       <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
     </TodayScreen>
   );
