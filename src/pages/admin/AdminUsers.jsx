@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+/* eslint-disable no-unused-vars */
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, RefreshCcw, MoreVertical, Eye, Crown, RotateCcw } from 'lucide-react';
@@ -54,9 +55,12 @@ export default function AdminUsers() {
     return list;
   }, [rawUsers, searchResults, query, filter]);
 
+  const [grantDuration, setGrantDuration] = useState(null);
+  const [grantLocale, setGrantLocale] = useState('en');
+
   const grantM = useMutation({
-    mutationFn: (userId) => grantAccess(userId, 'premium', 'admin_grant'),
-    onSuccess: () => { toast.success('Premium granted'); queryClient.invalidateQueries({ queryKey: ['admin-users'] }); setDialog(null); },
+    mutationFn: ({ userId, duration, locale }) => grantAccess(userId, 'premium', 'admin_grant', duration, locale),
+    onSuccess: () => { toast.success('Premium granted + email sent'); queryClient.invalidateQueries({ queryKey: ['admin-users'] }); setDialog(null); },
   });
   const resetM = useMutation({
     mutationFn: (userId) => resetOnboarding(userId),
@@ -161,11 +165,53 @@ export default function AdminUsers() {
 
       <Dialog open={dialog?.type === 'grant'} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Grant Premium</DialogTitle></DialogHeader>
-          <p className="text-[14px] text-[hsl(var(--fg-2))]">Grant premium access to <strong>{dialog?.name}</strong>?</p>
+          <DialogHeader><DialogTitle>Grant Premium Access</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-[14px] text-[hsl(var(--fg-2))]">Grant premium access to <strong>{dialog?.name}</strong></p>
+
+            <div>
+              <label className="block mb-1.5 text-[12px] font-medium text-[hsl(var(--fg))]">Duration</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 7, label: '7 days' },
+                  { value: 30, label: '30 days' },
+                  { value: 90, label: '90 days' },
+                  { value: 365, label: '1 year' },
+                  { value: null, label: 'Unlimited' },
+                ].map((opt) => (
+                  <button key={String(opt.value)} type="button" onClick={() => setGrantDuration(opt.value)}
+                    className={`h-9 rounded-lg border text-[12px] font-medium transition-colors ${
+                      grantDuration === opt.value
+                        ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
+                        : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))]'
+                    }`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block mb-1.5 text-[12px] font-medium text-[hsl(var(--fg))]">Email language</label>
+              <div className="flex gap-2">
+                {[{ value: 'en', label: 'English' }, { value: 'pt-BR', label: 'Português' }].map((opt) => (
+                  <button key={opt.value} type="button" onClick={() => setGrantLocale(opt.value)}
+                    className={`flex-1 h-9 rounded-lg border text-[12px] font-medium transition-colors ${
+                      grantLocale === opt.value
+                        ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
+                        : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))]'
+                    }`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
-            <Button onClick={() => grantM.mutate(dialog?.userId)} disabled={grantM.isPending}>{grantM.isPending ? 'Processing...' : 'Confirm'}</Button>
+            <Button onClick={() => grantM.mutate({ userId: dialog?.userId, duration: grantDuration, locale: grantLocale })} disabled={grantM.isPending}>
+              {grantM.isPending ? 'Processing...' : 'Grant & notify'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
