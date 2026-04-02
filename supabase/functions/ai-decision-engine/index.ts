@@ -235,9 +235,11 @@ const OUTPUT_SCHEMA = {
 function buildSystemPrompt(ctx: EngineContext, locale: string = 'en'): string {
   const { profile, today, week, measurements, ai_state, recent_dismissed } = ctx;
 
-  const latestWeight = measurements[0]?.weight_kg ?? profile.current_weight;
-  const weightDelta = measurements.length >= 2
-    ? ((measurements[0]?.weight_kg ?? 0) - (measurements[1]?.weight_kg ?? 0)).toFixed(1)
+  // Filter to measurements that actually have weight data (skip body-fat-only entries)
+  const withWeight = measurements.filter((m) => m.weight_kg != null && m.weight_kg > 0);
+  const latestWeight = withWeight[0]?.weight_kg ?? profile.current_weight;
+  const weightDelta = withWeight.length >= 2
+    ? (withWeight[0].weight_kg - withWeight[1].weight_kg).toFixed(1)
     : null;
 
   const calorieTarget = profile.calories_target ?? 2000;
