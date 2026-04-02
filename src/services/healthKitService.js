@@ -45,10 +45,7 @@ const READ_TYPES = [
 const WRITE_TYPES = [
   'HKQuantityTypeIdentifierBodyMass',
   'HKQuantityTypeIdentifierBodyFatPercentage',
-  'HKQuantityTypeIdentifierDietaryEnergyConsumed',
-  'HKQuantityTypeIdentifierDietaryProtein',
-  'HKQuantityTypeIdentifierDietaryCarbohydrates',
-  'HKQuantityTypeIdentifierDietaryFatTotal',
+  'HKQuantityTypeIdentifierActiveEnergyBurned',
   'HKWorkoutTypeIdentifier',
 ];
 

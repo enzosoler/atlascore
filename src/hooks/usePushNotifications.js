@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Capacitor } from '@capacitor/core';
 import { notificationService } from '@/services/notificationService';
+import { scheduleReminders } from '@/services/reminderService';
 import { useAuth } from '@/lib/AuthContext';
 import { ROUTES } from '@/lib/routes';
 
@@ -71,6 +72,9 @@ export function usePushNotifications() {
       onForegroundPush,
       onTap,
     });
+
+    // Schedule local reminders (workout, meals, check-in, streak)
+    scheduleReminders().catch(() => {});
 
     // Cleanup runs when user changes (e.g. logout) or component unmounts.
     return () => {
