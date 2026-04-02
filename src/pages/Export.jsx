@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Calendar, Download, FileJson, FileSpreadsheet, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
@@ -153,14 +154,15 @@ function ExportContent() {
         JSON.stringify(payload, null, 2),
         'application/json;charset=utf-8'
       );
-      setNotice(
-        payload.warnings.length > 0
-          ? `JSON export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
-          : 'JSON export finished.'
-      );
+      const msg = payload.warnings.length > 0
+        ? `JSON export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
+        : 'JSON export finished.';
+      setNotice(msg);
+      toast.success(msg);
     } catch (error) {
       console.error(error);
       setNotice('Could not generate the JSON file.');
+      toast.error('Could not generate the JSON file.');
     } finally {
       setBusy(false);
     }
@@ -177,14 +179,15 @@ function ExportContent() {
       const payload = await collectData();
       const csvData = serializeCsvDataRows(payload.workouts, payload.meals);
       downloadFile(`${fileBase}.csv`, csvData, 'text/csv;charset=utf-8');
-      setNotice(
-        payload.warnings.length > 0
-          ? `CSV export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
-          : 'CSV export finished.'
-      );
+      const csvMsg = payload.warnings.length > 0
+        ? `CSV export finished with partial data. Failed datasets: ${payload.warnings.join(', ')}.`
+        : 'CSV export finished.';
+      setNotice(csvMsg);
+      toast.success(csvMsg);
     } catch (error) {
       console.error(error);
       setNotice('Could not generate the CSV file.');
+      toast.error('Could not generate the CSV file.');
     } finally {
       setBusy(false);
     }
@@ -486,9 +489,11 @@ function ExportContent() {
 
       doc.save(`${fileBase}.pdf`);
       setNotice('PDF report generated.');
+      toast.success('PDF report generated.');
     } catch (error) {
       console.error(error);
       setNotice('Could not generate the PDF file.');
+      toast.error('Could not generate the PDF file.');
     } finally {
       setBusy(false);
     }

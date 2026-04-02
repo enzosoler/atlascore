@@ -100,7 +100,7 @@ function WorkoutDayCard({ day }) {
       >
         <div>
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-            {day.name || day.day || t('myWorkout.day_card.session')}
+            {day.label || day.name || day.day || t('myWorkout.day_card.session')}
           </p>
           {day.focus && <p className="t-caption mt-0.5">{day.focus}</p>}
         </div>

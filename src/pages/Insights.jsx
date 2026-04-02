@@ -854,7 +854,7 @@ function InsightsContent() {
   const measurementsQuery = useQuery({
     queryKey: ['insights-measurements', user?.id],
     queryFn: () => listMeasurements(user.id, 500),
-    initialData: [],
+    placeholderData: [],
     enabled: !!user?.id,
     staleTime: 10 * 60 * 1000,
   });
@@ -873,7 +873,7 @@ function InsightsContent() {
       if (error) throw error;
       return data || [];
     },
-    initialData: [],
+    placeholderData: [],
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
@@ -892,7 +892,7 @@ function InsightsContent() {
       if (error) throw error;
       return data || [];
     },
-    initialData: [],
+    placeholderData: [],
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
@@ -903,7 +903,7 @@ function InsightsContent() {
       if (!user?.id) return [];
       return listDailyCheckins(user.id, { limit: 365 });
     },
-    initialData: [],
+    placeholderData: [],
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
@@ -922,7 +922,7 @@ function InsightsContent() {
       if (error) throw error;
       return data || [];
     },
-    initialData: [],
+    placeholderData: [],
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
@@ -941,7 +941,7 @@ function InsightsContent() {
       if (error) throw error;
       return data || [];
     },
-    initialData: [],
+    placeholderData: [],
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });

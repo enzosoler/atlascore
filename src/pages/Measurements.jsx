@@ -37,6 +37,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 import {
   MEASUREMENT_COMPOSITION_SECTION,
+  MEASUREMENT_FIELD_DEFINITIONS,
   MEASUREMENT_FIELD_MAP,
   MEASUREMENT_MANUAL_FIELD_SECTIONS,
   MEASUREMENT_SOURCE_OPTIONS,
@@ -94,6 +95,11 @@ const METRIC_LOOKUP = METRIC_OPTIONS.reduce((acc, m) => {
   acc[m.key] = m;
   return acc;
 }, {});
+
+// Fields shown in the History tab (all manually-inputtable fields)
+const HISTORY_DISPLAY_FIELDS = MEASUREMENT_FIELD_DEFINITIONS.filter(
+  (f) => f.allowManualInput && f.key !== 'age' && f.key !== 'height'
+);
 
 // Step definitions for the stepped form
 const FORM_STEPS = [
@@ -244,18 +250,6 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
     ? getDayDifference(previousMeasurement.date, measurement.date)
     : null;
 
-  const weight   = getMeasurementFieldValue(measurement, 'weight');
-  const prevWeight = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, 'weight') : null;
-  const weightDelta = weight !== null && prevWeight !== null ? weight - prevWeight : null;
-
-  const bodyFat = getMeasurementFieldValue(measurement, 'body_fat_percent');
-  const prevBodyFat = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, 'body_fat_percent') : null;
-  const bodyFatDelta = bodyFat !== null && prevBodyFat !== null ? bodyFat - prevBodyFat : null;
-
-  const waist = getMeasurementFieldValue(measurement, 'waist');
-  const prevWaist = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, 'waist') : null;
-  const waistDelta = waist !== null && prevWaist !== null ? waist - prevWaist : null;
-
   const formatDelta = (delta, unit, lowerIsBetter = false) => {
     if (delta === null) return null;
     const isGood = lowerIsBetter ? delta < 0 : delta > 0;
@@ -266,56 +260,79 @@ function HistoryRow({ measurement, previousMeasurement, onEdit, onDelete }) {
     );
   };
 
+  // Collect all filled fields for this measurement
+  const filledFields = HISTORY_DISPLAY_FIELDS
+    .map((field) => {
+      const value = getMeasurementFieldValue(measurement, field.key);
+      if (value === null) return null;
+      const prevValue = previousMeasurement ? getMeasurementFieldValue(previousMeasurement, field.key) : null;
+      const delta = value !== null && prevValue !== null ? value - prevValue : null;
+      return { field, value, delta };
+    })
+    .filter(Boolean);
+
+  const filledCount = filledFields.length;
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US';
+
   return (
-    <div className="flex items-center gap-3 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.82)] px-4 py-3 hover:bg-[hsl(var(--card))]">
-      <div className="min-w-[90px]">
-        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
-          {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'short' }, locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US')}
-        </p>
-        <p className="text-[11px] text-[hsl(var(--fg-3))]">
-          {daysSincePrevious
-            ? t('measurements.history.days_after').replace('{n}', daysSincePrevious)
-            : t('measurements.history.first')}
-        </p>
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.82)] px-4 py-3.5 hover:bg-[hsl(var(--card))] transition-colors">
+      {/* Header row: date + source + actions */}
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <div>
+          <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+            {formatMeasurementDate(measurement.date, { day: '2-digit', month: 'long', year: 'numeric' }, intlLocale)}
+          </p>
+          <p className="text-[11px] text-[hsl(var(--fg-3))]">
+            {daysSincePrevious
+              ? t('measurements.history.days_after').replace('{n}', daysSincePrevious)
+              : t('measurements.history.first')}
+            {filledCount > 0 && ` · ${filledCount} ${filledCount === 1 ? 'field' : 'fields'}`}
+          </p>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.8)] hover:text-[hsl(var(--fg))]"
+          >
+            <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
+          >
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.9} />
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-1 items-center gap-5 flex-wrap">
-        {weight !== null && (
-          <div className="text-center">
-            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{weight.toFixed(1)}kg</p>
-            {weightDelta !== null && <p className="text-[11px]">{formatDelta(weightDelta, 'kg', true)}</p>}
-          </div>
-        )}
-        {bodyFat !== null && (
-          <div className="text-center">
-            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{bodyFat.toFixed(1)}%</p>
-            {bodyFatDelta !== null && <p className="text-[11px]">{formatDelta(bodyFatDelta, '%', true)}</p>}
-          </div>
-        )}
-        {waist !== null && (
-          <div className="text-center">
-            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{waist.toFixed(1)}cm</p>
-            {waistDelta !== null && <p className="text-[11px]">{formatDelta(waistDelta, 'cm', true)}</p>}
-          </div>
-        )}
-      </div>
+      {/* All filled measurement fields in a grid */}
+      {filledFields.length > 0 ? (
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-2 pt-1 border-t border-[hsl(var(--border)/0.3)]">
+          {filledFields.map(({ field, value, delta }) => (
+            <div key={field.key}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] truncate">{field.label}</p>
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+                {toDisplayNumber(value, field.precision ?? 1)}
+                <span className="text-[11px] font-medium text-[hsl(var(--fg-3))] ml-0.5">{field.unit}</span>
+              </p>
+              {delta !== null && formatDelta(delta, field.unit, true)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[12px] text-[hsl(var(--fg-3))] pt-1 border-t border-[hsl(var(--border)/0.3)]">
+          {t('measurements.history.no_fields_recorded') || 'No measurement fields recorded'}
+        </p>
+      )}
 
-      <div className="flex items-center gap-1 shrink-0">
-        <button
-          type="button"
-          onClick={onEdit}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.8)] hover:text-[hsl(var(--fg))]"
-        >
-          <Pencil className="h-3.5 w-3.5" strokeWidth={1.9} />
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))]"
-        >
-          <Trash2 className="h-3.5 w-3.5" strokeWidth={1.9} />
-        </button>
-      </div>
+      {/* Notes preview */}
+      {measurement.notes && (
+        <p className="text-[12px] text-[hsl(var(--fg-2))] mt-2 line-clamp-2 italic">
+          {measurement.notes}
+        </p>
+      )}
     </div>
   );
 }
@@ -478,19 +495,26 @@ function MeasurementSteppedForm({ measurement, onCancel, onSubmit, isSaving, sub
 
             {/* Step: field section (core / upper / lower / composition) */}
             {currentStep.section && (
-              <div className="grid gap-3.5 sm:grid-cols-2">
-                {currentStep.section.fields.map((field) => (
-                  <MeasurementField
-                    key={field.key}
-                    label={field.label}
-                    unit={field.unit}
-                    type="text"
-                    inputMode="decimal"
-                    value={form[field.key]}
-                    onChange={(e) => updateField(field.key, e.target.value)}
-                    error={fieldErrors[field.key]}
-                  />
-                ))}
+              <div className="space-y-3.5">
+                {currentStep.section.description && (
+                  <p className="text-[12px] text-[hsl(var(--fg-2))] leading-relaxed -mt-1 mb-1">
+                    {currentStep.section.description}
+                  </p>
+                )}
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  {currentStep.section.fields.map((field) => (
+                    <MeasurementField
+                      key={field.key}
+                      label={field.label}
+                      unit={field.unit}
+                      type="text"
+                      inputMode="decimal"
+                      value={form[field.key]}
+                      onChange={(e) => updateField(field.key, e.target.value)}
+                      error={fieldErrors[field.key]}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
@@ -1075,35 +1099,49 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                     </div>
 
                     <div className="h-[280px] px-4 pb-4 pt-3 lg:px-6 lg:pb-5">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData}>
-                          <defs>
-                            <linearGradient id={`mfill-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%"  stopColor={selectedMetric.color} stopOpacity={0.22} />
-                              <stop offset="95%" stopColor={selectedMetric.color} stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid vertical={false} stroke="hsl(var(--border) / 0.75)" strokeDasharray="4 6" />
-                          <XAxis dataKey="date" axisLine={false} tickLine={false} tickMargin={10} fontSize={11} stroke="hsl(var(--fg-3))" />
-                          <YAxis axisLine={false} tickLine={false} tickMargin={10} width={38} fontSize={11} stroke="hsl(var(--fg-3))" tickFormatter={(v) => toDisplayNumber(v, selectedMetric.digits)} />
-                          <Tooltip
-                            cursor={{ stroke: 'hsl(var(--border) / 0.9)', strokeDasharray: '4 4' }}
-                            contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border) / 0.88)', borderRadius: '16px', boxShadow: 'var(--shadow-md)' }}
-                            labelStyle={{ color: 'hsl(var(--fg-2))', fontSize: 11, fontWeight: 600 }}
-                            formatter={(v) => [formatMetricValue(v, selectedMetric), selectedMetric.label]}
-                            labelFormatter={(label) => t('measurements.trend.checkpoint_tooltip').replace('{n}', label)}
-                          />
-                          <Area type="monotone" dataKey="value" stroke="transparent" fill={`url(#mfill-${metricKey})`} />
-                          <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke={selectedMetric.color}
-                            strokeWidth={2.5}
-                            dot={{ r: 3, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
-                            activeDot={{ r: 5, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                      {chartData.filter((d) => d.value !== null && d.value !== undefined).length < 2 ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center">
+                            <BarChart3 className="h-8 w-8 mx-auto text-[hsl(var(--fg-3))] mb-2" strokeWidth={1.4} />
+                            <p className="text-[13px] font-semibold text-[hsl(var(--fg-2))]">
+                              {t('measurements.trend.not_enough_data_for_chart') || 'Not enough data to chart'}
+                            </p>
+                            <p className="text-[12px] text-[hsl(var(--fg-3))] mt-1">
+                              {t('measurements.trend.need_two_checkpoints') || 'Log at least 2 checkpoints with this metric'}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData}>
+                            <defs>
+                              <linearGradient id={`mfill-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%"  stopColor={selectedMetric.color} stopOpacity={0.22} />
+                                <stop offset="95%" stopColor={selectedMetric.color} stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} stroke="hsl(var(--border) / 0.75)" strokeDasharray="4 6" />
+                            <XAxis dataKey="date" axisLine={false} tickLine={false} tickMargin={10} fontSize={11} stroke="hsl(var(--fg-3))" />
+                            <YAxis axisLine={false} tickLine={false} tickMargin={10} width={38} fontSize={11} stroke="hsl(var(--fg-3))" tickFormatter={(v) => toDisplayNumber(v, selectedMetric.digits)} />
+                            <Tooltip
+                              cursor={{ stroke: 'hsl(var(--border) / 0.9)', strokeDasharray: '4 4' }}
+                              contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border) / 0.88)', borderRadius: '16px', boxShadow: 'var(--shadow-md)' }}
+                              labelStyle={{ color: 'hsl(var(--fg-2))', fontSize: 11, fontWeight: 600 }}
+                              formatter={(v) => [formatMetricValue(v, selectedMetric), selectedMetric.label]}
+                              labelFormatter={(label) => t('measurements.trend.checkpoint_tooltip').replace('{n}', label)}
+                            />
+                            <Area type="monotone" dataKey="value" stroke="transparent" fill={`url(#mfill-${metricKey})`} />
+                            <Line
+                              type="monotone"
+                              dataKey="value"
+                              stroke={selectedMetric.color}
+                              strokeWidth={2.5}
+                              dot={{ r: 3, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
+                              activeDot={{ r: 5, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      )}
                     </div>
                   </div>
                 </>

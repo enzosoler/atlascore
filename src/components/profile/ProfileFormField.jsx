@@ -41,9 +41,10 @@ export function SelectField({ label, value, onChange, options, description }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="mt-3 w-full border-0 bg-transparent p-0 text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))] outline-none"
+        style={{ colorScheme: 'light dark' }}
       >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        {(options || []).map((opt) => (
+          <option key={opt.value} value={opt.value} className="bg-white text-black dark:bg-neutral-900 dark:text-white" style={{ background: '#fff', color: '#111' }}>{opt.label}</option>
         ))}
       </select>
       {description && (
