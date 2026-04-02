@@ -40,7 +40,7 @@ serve(async (req) => {
     const createdAt = record.created_at ?? new Date().toISOString();
 
     const resendKey = Deno.env.get('RESEND_API_KEY');
-    const notifyEmail = Deno.env.get('SUPPORT_NOTIFY_EMAIL') || 'enzo@useatlascore.com';
+    const notifyEmail = Deno.env.get('SUPPORT_NOTIFY_EMAIL') || 'support@useatlascore.com';
     const fromEmail = Deno.env.get('FROM_EMAIL') || 'Atlas Core <noreply@useatlascore.com>';
 
     if (!resendKey) {
