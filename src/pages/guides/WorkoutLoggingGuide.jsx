@@ -93,7 +93,7 @@ export default function WorkoutLoggingGuide() {
       </p>
       <ul>
         <li><strong>Sets:</strong> 4</li>
-        <li><strong>Reps:</strong> 8-12 (ou exato, ex: 10)</li>
+        <li><strong>Reps:</strong> 8-12 (or exact, e.g. 10)</li>
         <li><strong>Load:</strong> 100 kg</li>
         <li><strong>RPE:</strong> 8</li>
         <li><strong>Notes (optional):</strong> "Felt weak today", "Ready to increase the load"</li>
