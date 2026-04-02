@@ -16,7 +16,7 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MODEL = 'gpt-4.1-nano';
+const MODEL = 'gpt-4o-mini';
 
 // Rate limiting: max 20 calls per hour per user
 const MAX_CALLS_PER_HOUR = 20;

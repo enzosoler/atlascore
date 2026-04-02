@@ -493,21 +493,21 @@ function TodayContent() {
           <QuickAction
             to={ROUTES.workouts}
             icon={Dumbbell}
-            label={t('today.training')}
+            label={t('today.training.label')}
             status={safeDaily.workoutDone ? t('today.completed') : t('today.start_now')}
             colorClass="bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]"
           />
           <QuickAction
             to={ROUTES.nutrition}
             icon={UtensilsCrossed}
-            label={t('today.nutrition')}
+            label={t('today.nutrition.label')}
             status={safeDaily.nutritionLogged ? t('today.tracked') : t('today.log_fuel')}
             colorClass="bg-[hsl(var(--brand-ai)/0.08)] text-[hsl(var(--brand-ai))]"
           />
           <QuickAction
             to={ROUTES.body}
             icon={Scale}
-            label={t('today.checkin')}
+            label={t('today.checkin.title')}
             status={safeDaily.weightLogged ? t('today.logged') : t('today.scale_weight')}
             colorClass="bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]"
           />
