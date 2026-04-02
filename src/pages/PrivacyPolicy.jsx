@@ -171,8 +171,20 @@ export default function PrivacyPolicy() {
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Regional Rights</h3>
-            <p className="text-muted-foreground">
-              [JURISDICTION-SPECIFIC: Add GDPR, CCPA, or other regional rights as required by legal counsel]
+
+            <h4 className="mt-4 text-base font-medium">Brazil (LGPD)</h4>
+            <p>
+              Under the Lei Geral de Protecao de Dados (LGPD), you have the right to: confirm the existence of data processing; access your data; correct incomplete or inaccurate data; anonymize, block, or delete unnecessary data; request data portability; delete personal data processed with your consent; obtain information about public and private entities with whom we share data; and revoke consent at any time. To exercise these rights, contact privacy@atlascore.app.
+            </p>
+
+            <h4 className="mt-4 text-base font-medium">European Economic Area (GDPR)</h4>
+            <p>
+              If you are located in the EEA or UK, you have the right to: access your personal data; rectify inaccurate data; erase your data ("right to be forgotten"); restrict processing; data portability; object to processing based on legitimate interests; and not be subject to solely automated decision-making. You also have the right to lodge a complaint with your local data protection authority. Our legal basis for processing is your consent (for health data) and legitimate interest (for service operation).
+            </p>
+
+            <h4 className="mt-4 text-base font-medium">California (CCPA/CPRA)</h4>
+            <p>
+              California residents have the right to: know what personal information is collected and how it is used; request deletion of personal information; opt out of the sale or sharing of personal information (we do not sell your data); and not be discriminated against for exercising these rights. To submit a request, contact privacy@atlascore.app.
             </p>
           </section>
 
@@ -202,8 +214,8 @@ export default function PrivacyPolicy() {
 
           <section className="mt-12">
             <h2 className="text-2xl font-semibold">9. International Data Transfers</h2>
-            <p className="text-muted-foreground">
-              [JURISDICTION-SPECIFIC: Add details about data residency, cross-border transfers, and applicable legal mechanisms (SCCs, adequacy decisions, etc.) per legal counsel review.]
+            <p>
+              atlas.core is operated from Brazil. Your data may be processed in countries outside your country of residence, including the United States (where our infrastructure providers Supabase and Stripe operate). When we transfer data internationally, we rely on: Standard Contractual Clauses (SCCs) approved by the European Commission for EEA/UK transfers; adequacy decisions where available; and contractual data processing agreements with all service providers. All transfers are conducted with appropriate safeguards to ensure your data receives equivalent protection regardless of where it is processed.
             </p>
           </section>
 
@@ -221,8 +233,8 @@ export default function PrivacyPolicy() {
             </p>
             <div className="mt-4 space-y-2">
               <p><strong>Email:</strong> privacy@atlascore.app</p>
-              <p><strong>Address:</strong> [COMPANY ADDRESS]</p>
-              <p><strong>DPO Contact:</strong> [DPO EMAIL IF REQUIRED BY JURISDICTION]</p>
+              <p><strong>Address:</strong> Sao Paulo, SP, Brazil</p>
+              <p><strong>Data Protection Contact:</strong> privacy@atlascore.app</p>
             </div>
           </section>
         </div>

@@ -211,13 +211,13 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold">10. Governing Law & Dispute Resolution</h2>
 
             <h3 className="mt-6 text-lg font-medium">Governing Law</h3>
-            <p className="text-muted-foreground">
-              [JURISDICTION-SPECIFIC: Add governing law clause per legal counsel]
+            <p>
+              These Terms are governed by and construed in accordance with the laws of the Federative Republic of Brazil, without regard to conflict of law principles. For users outside Brazil, mandatory consumer protection laws of your country of residence may also apply to the extent they cannot be waived.
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Dispute Resolution</h3>
-            <p className="text-muted-foreground">
-              [JURISDICTION-SPECIFIC: Add arbitration clause, class action waiver, or litigation forum selection per legal counsel.]
+            <p>
+              Any disputes arising from these Terms shall first be submitted to good-faith negotiation for a period of 30 days. If unresolved, disputes shall be submitted to the courts of the city of Sao Paulo, State of Sao Paulo, Brazil, which shall have exclusive jurisdiction, except where mandatory local consumer protection laws require otherwise. You retain the right to bring claims in your local small claims court where applicable.
             </p>
 
             <h3 className="mt-6 text-lg font-medium">Informal Resolution</h3>
@@ -262,7 +262,7 @@ export default function TermsOfService() {
             </p>
             <div className="mt-4 space-y-2">
               <p><strong>Email:</strong> legal@atlascore.app</p>
-              <p><strong>Address:</strong> [COMPANY ADDRESS]</p>
+              <p><strong>Address:</strong> Sao Paulo, SP, Brazil</p>
             </div>
           </section>
         </div>
