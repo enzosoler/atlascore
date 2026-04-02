@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { getActiveDietPlans, createDietPlan, deactivateAllDietPlans } from '@/services/dietPlanService';
@@ -204,11 +205,21 @@ ${isFlexible
 
       clearTimeout(timeoutId);
 
-      if (res?.name) {
+      // Handle nested or flat response
+      const plan = res?.name ? res : res?.plan ? { ...res.plan, meals: res.meals || res.plan.meals } : null;
+      console.log('[MyDiet] LLM response:', res ? Object.keys(res) : 'null');
+
+      if (plan?.name || plan?.meals?.length) {
         // Deactivate previous plans
         try { await deactivateAllDietPlans(user.id); } catch { /* noop */ }
         await createDietPlan(user.id, {
-          ...res,
+          name: plan.name || 'AI Diet Plan',
+          objective: plan.objective || '',
+          total_calories: plan.total_calories || 0,
+          total_protein: plan.total_protein || 0,
+          total_carbs: plan.total_carbs || 0,
+          total_fat: plan.total_fat || 0,
+          meals: plan.meals || [],
           source: 'ai',
           created_by_type: 'ai',
           active: true,
@@ -219,8 +230,9 @@ ${isFlexible
         qc.invalidateQueries({ queryKey: ['diet-plans-active'] });
         toast.success(t('myDiet.plan_generated'));
       } else {
-        setGenError(t('myDiet.gen_error_structure'));
-        toast.error(t('myDiet.gen_error_toast'));
+        console.error('[MyDiet] Invalid plan structure:', JSON.stringify(res)?.slice(0, 300));
+        setGenError(t('myDiet.gen_error_structure') || 'The plan response did not contain a valid structure. Please try again.');
+        toast.error(t('myDiet.gen_error_toast') || 'Error generating. Please try again.');
       }
     } catch (err) {
       clearTimeout(timeoutId);
@@ -321,9 +333,9 @@ ${isFlexible
           )}
         </>
       )}
-      {/* Diet Setup Dialog */}
-      {showDietSetup && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={() => setShowDietSetup(false)}>
+      {/* Diet Setup Dialog — portal to escape scroll/transform containers */}
+      {showDietSetup && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/50" onClick={() => setShowDietSetup(false)}>
           <div className="w-full max-w-lg bg-[hsl(var(--card))] rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-[hsl(var(--card))] px-5 pt-5 pb-3 border-b border-[hsl(var(--border)/0.3)] flex items-center justify-between">
               <div>
@@ -401,7 +413,8 @@ ${isFlexible
               </PrimaryButton>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </AppContainer>
