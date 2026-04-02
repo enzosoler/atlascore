@@ -1,6 +1,35 @@
 -- Webhook: notify team on new support requests
 -- Calls the notify-support-request edge function on every INSERT
 
+-- Ensure pg_net extension is enabled
+CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+
+-- Create support_requests table if it doesn't exist
+CREATE TABLE IF NOT EXISTS public.support_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_email text,
+  type text NOT NULL DEFAULT 'contact',
+  message text NOT NULL,
+  status text NOT NULL DEFAULT 'open',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- RLS: users can insert their own requests, only service role can read all
+ALTER TABLE public.support_requests ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can insert support requests" ON public.support_requests;
+CREATE POLICY "Users can insert support requests"
+  ON public.support_requests FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Anon can insert support requests" ON public.support_requests;
+CREATE POLICY "Anon can insert support requests"
+  ON public.support_requests FOR INSERT
+  TO anon
+  WITH CHECK (user_id IS NULL);
+
 -- Create the trigger function that calls the edge function via pg_net
 CREATE OR REPLACE FUNCTION public.notify_support_request()
 RETURNS trigger
