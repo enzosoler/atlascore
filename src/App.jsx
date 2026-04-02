@@ -36,6 +36,8 @@ const Nutrition = lazy(() => import('@/pages/Nutrition'));
 const WorkoutsV2 = lazy(() => import('@/pages/TrainV2'));
 const Routines = lazy(() => import('@/pages/Routines'));
 const Protocols = lazy(() => import('@/pages/Protocols'));
+const ProtocolDetail = lazy(() => import('@/pages/ProtocolDetail'));
+const ProtocolFormPage = lazy(() => import('@/pages/ProtocolFormPage'));
 const Measurements = lazy(() => import('@/pages/Measurements'));
 const LabExams = lazy(() => import('@/pages/LabExams'));
 const Profile = lazy(() => import('@/pages/Profile'));
@@ -373,6 +375,9 @@ const AppRoutes = () => (
           <Route path={ROUTES.workouts} element={<WorkoutsV2 />} />
           <Route path={ROUTES.routines} element={<Routines />} />
           <Route path={ROUTES.protocols} element={<Protocols />} />
+          <Route path={ROUTES.protocolNew} element={<ProtocolFormPage />} />
+          <Route path={ROUTES.protocolEdit} element={<ProtocolFormPage />} />
+          <Route path={ROUTES.protocolDetail} element={<ProtocolDetail />} />
           <Route path={ROUTES.measurements} element={<Measurements />} />
           <Route path={ROUTES.labExams} element={<LabExams />} />
           <Route path={ROUTES.progressReview} element={<Insights />} />
