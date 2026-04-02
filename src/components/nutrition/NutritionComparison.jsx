@@ -82,7 +82,7 @@ export default function NutritionComparison({ profile, logged, prescribed }) {
           </div>
           {prescribed.target_calories && (
             <div className="text-[12px] text-muted-foreground space-y-1 pt-3 border-t border-border">
-              <p>Target: {prescribed.target_calories} kcal · P {prescribed.target_protein}g · C {prescribed.target_carbs}g · G {prescribed.target_fat}g</p>
+              <p>Target: {prescribed.target_calories} kcal · P {prescribed.target_protein}g · C {prescribed.target_carbs}g · F {prescribed.target_fat}g</p>
             </div>
           )}
         </div>

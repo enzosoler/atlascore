@@ -133,7 +133,7 @@ export default function ClientPdfExport({ link, measurements, meals, photos, exa
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(9);
             doc.setTextColor(...muted);
-            doc.text(`  • ${f.name} ${f.amount}${f.unit} — ${f.kcal || 0}kcal P:${f.protein || 0}g C:${f.carbs || 0}g G:${f.fat || 0}g`, margin, y);
+            doc.text(`  • ${f.name} ${f.amount}${f.unit} — ${f.kcal || 0}kcal P:${f.protein || 0}g C:${f.carbs || 0}g F:${f.fat || 0}g`, margin, y);
             y += 5;
           });
         });

@@ -403,6 +403,7 @@ export default function TrainV2() {
   const [initialSession, setInitialSession] = useState(null);
   const [showQuickWorkout, setShowQuickWorkout] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
+  const [previewDayIndex, setPreviewDayIndex] = useState(null);
 
   const daily = useDailyStateV2();
   const ai = useAICoach({ userId: user?.id });
@@ -451,7 +452,12 @@ export default function TrainV2() {
     }
   }, [searchParams, daily.activePlan, mode]);
 
+  const handlePreviewDay = (dayIndex) => {
+    setPreviewDayIndex(dayIndex);
+  };
+
   const handleStartDay = (dayIndex) => {
+    setPreviewDayIndex(null);
     setActiveSession(buildSessionFromPlan(daily.activePlan, dayIndex, t));
     setInitialSession(null);
     setMode('execution');
@@ -561,7 +567,7 @@ export default function TrainV2() {
           <WeeklyPlanSection 
             days={days}
             currentDayIndex={currentDayIndex}
-            onSelectDay={handleStartDay}
+            onSelectDay={handlePreviewDay}
             t={t}
           />
         )}
@@ -596,6 +602,36 @@ export default function TrainV2() {
           }}
         />
       )}
+
+      {/* Day Preview Dialog */}
+      {previewDayIndex !== null && daily.activePlan && (() => {
+        const dayData = daily.activePlan.days?.[previewDayIndex];
+        if (!dayData) return null;
+        return (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={() => setPreviewDayIndex(null)}>
+            <div className="w-full max-w-md bg-[hsl(var(--card))] rounded-t-2xl sm:rounded-2xl p-5 space-y-4 max-h-[70vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between">
+                <h3 className="text-[17px] font-bold text-[hsl(var(--fg))]">{dayData.name || t('train.dayN', { n: previewDayIndex + 1 })}</h3>
+                <button onClick={() => setPreviewDayIndex(null)} className="text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))]">&times;</button>
+              </div>
+              <div className="space-y-2">
+                {(dayData.exercises || []).map((ex, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-[hsl(var(--fill)/0.3)]">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded bg-[hsl(var(--fill))] flex items-center justify-center text-[10px] text-[hsl(var(--fg-3))]">{i + 1}</span>
+                      <span className="text-sm text-[hsl(var(--fg))]">{ex.name}</span>
+                    </div>
+                    <span className="text-xs text-[hsl(var(--fg-2))]">{ex.sets}&times;{ex.reps || ex.rep_range}</span>
+                  </div>
+                ))}
+              </div>
+              <Button className="w-full h-11 rounded-xl" onClick={() => handleStartDay(previewDayIndex)}>
+                <Play className="w-4 h-4 mr-2" /> {t('train.startWorkout')}
+              </Button>
+            </div>
+          </div>
+        );
+      })()}
 
     </AppContainer>
   );

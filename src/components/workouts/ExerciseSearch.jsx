@@ -10,7 +10,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter, Sparkles, Lightbulb, ChevronRight } from 'lucide-react';
+import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter, Lightbulb } from 'lucide-react';
 import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
 import {
   searchExercises,
@@ -168,10 +168,11 @@ function ManualEntry({ onAdd, onBack }) {
       </div>
       <button
         onClick={() => {
-          if (name.trim()) {
+          const clean = name.trim().replace(/[^a-zA-ZÀ-ÿ0-9\s\-'()]/g, '').trim();
+          if (clean && clean.length >= 2 && clean.length <= 80) {
             onAdd({
-              canonical_name_pt: name.trim(),
-              canonical_name_en: name.trim(),
+              canonical_name_pt: clean,
+              canonical_name_en: clean,
               primary_muscles: [],
               equipment: '',
               _manual: true,
@@ -179,7 +180,7 @@ function ManualEntry({ onAdd, onBack }) {
             setName('');
           }
         }}
-        disabled={!name.trim()}
+        disabled={!name.trim() || name.trim().length < 2 || name.trim().length > 80}
         className="btn btn-primary h-11 w-full rounded-[10px] text-[13px] gap-1.5 disabled:opacity-50"
       >
         <PenLine className="w-3.5 h-3.5" /> Add manually
@@ -475,21 +476,7 @@ export default function ExerciseSearch({ onSelect }) {
             </div>
           </div>
 
-          {/* AI Suggestion */}
-          <button
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-dashed border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.06)] hover:bg-[hsl(var(--brand)/0.1)] transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-[hsl(var(--brand))]" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-medium text-[hsl(var(--fg))]">Suggest exercises</p>
-                <p className="text-xs text-[hsl(var(--fg-2))]">AI picks based on your plan</p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-3))]" />
-          </button>
+          {/* AI Suggestion — disabled until implemented */}
 
           {/* Recents & Favorites */}
           {hasContext && (

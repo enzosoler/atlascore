@@ -175,7 +175,7 @@ export default function NutritionistClientProfile() {
                 meals.slice(0, 10).map((m) => (
                   <div key={m.id} className="surface p-3 text-[12px]">
                     <p className="font-semibold">{m.date}</p>
-                    <p className="text-[hsl(var(--fg-2))] mt-1">{m.total_calories} kcal • P:{m.total_protein}g C:{m.total_carbs}g G:{m.total_fat}g</p>
+                    <p className="text-[hsl(var(--fg-2))] mt-1">{m.total_calories} kcal • P:{m.total_protein}g C:{m.total_carbs}g F:{m.total_fat}g</p>
                   </div>
                 ))
               )}

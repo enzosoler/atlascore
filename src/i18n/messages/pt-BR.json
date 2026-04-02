@@ -1677,6 +1677,7 @@
       "foods_added_to": "{n} alimento(s) adicionado(s) a {meal}.",
       "could_not_remove": "Não foi possível remover {name}.",
       "was_removed": "{name} foi removido.",
+      "confirm_delete": "Excluir {name}?",
       "food_search_error": "Erro na busca: {error}",
       "could_not_load_details": "Não foi possível carregar detalhes do alimento",
       "add_more_protein": "Adicione mais {n}g de proteína",

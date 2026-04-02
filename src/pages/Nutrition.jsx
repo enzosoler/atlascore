@@ -1002,6 +1002,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
   const [searchError, setSearchError] = useState('');
   const [showCamera, setShowCamera] = useState(false);
   const [inputMode, setInputMode] = useState('ai'); // 'ai', 'search', 'camera'
+  const [aiPrefill, setAiPrefill] = useState('');
 
   const handleCameraFoodsDetected = (detectedFoods) => {
     const formatted = detectedFoods.map(f => {
@@ -1238,8 +1239,10 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                 <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" />
                 {t('pages.nutrition.whatDidYouEat')}
               </p>
-              <AIFoodInput 
-                onFoodsDetected={handleAIFoodsDetected} 
+              <AIFoodInput
+                onFoodsDetected={handleAIFoodsDetected}
+                prefillText={aiPrefill}
+                onPrefillConsumed={() => setAiPrefill('')}
                 onFallbackToSearch={(searchTerm) => {
                   setInputMode('search');
                   setSearchQuery(searchTerm);
@@ -1254,6 +1257,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                   <button
                     key={suggestion.name}
                     type="button"
+                    onClick={() => { setInputMode('ai'); setAiPrefill(suggestion.name); }}
                     className="flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--fg))] transition-all hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.05)]"
                   >
                     <span>{suggestion.emoji}</span>
@@ -1300,7 +1304,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                     <p className="font-semibold text-[hsl(var(--fg))]">{food.name}</p>
                     <p className="text-[12px] text-[hsl(var(--fg-2))]">
                       {Math.round(food.calories)} kcal · P {Math.round(food.protein)}g · C{' '}
-                      {Math.round(food.carbs)}g · G {Math.round(food.fat)}g
+                      {Math.round(food.carbs)}g · F {Math.round(food.fat)}g
                     </p>
                   </button>
                 ))}
@@ -1344,7 +1348,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[13px] font-semibold text-[hsl(var(--fg))]">{food.name}</p>
                     <p className="text-[12px] text-[hsl(var(--fg-2))]">
-                      {food.kcal} kcal · P {food.protein}g · C {food.carbs}g · G {food.fat}g
+                      {food.kcal} kcal · P {food.protein}g · C {food.carbs}g · F {food.fat}g
                     </p>
                   </div>
                   <button
@@ -1813,6 +1817,7 @@ export default function NutritionPage() {
   };
 
   const handleDeleteMeal = async (meal) => {
+    if (!window.confirm(t('pages.nutrition.confirm_delete').replace('{name}', meal.title))) return;
     if (meal.source_row_id) {
       try {
         const { error } = await supabase
@@ -1831,6 +1836,7 @@ export default function NutritionPage() {
   };
 
   const handleDateChange = (delta) => {
+    setNotice(null);
     setSelectedDate((current) => shiftDate(current, delta));
   };
 

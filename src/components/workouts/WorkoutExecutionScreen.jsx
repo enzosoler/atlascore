@@ -174,8 +174,13 @@ function FieldInput({ label, value, onChange, placeholder }) {
       <Input
         type="number"
         inputMode="decimal"
+        min="0"
+        max="999"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (v === '' || (Number(v) >= 0 && Number(v) <= 999)) onChange(v);
+        }}
         placeholder={placeholder}
         className="atlas-field h-14 rounded-[12px] border-0 text-center text-base font-medium"
       />
@@ -307,6 +312,14 @@ export default function WorkoutExecutionScreen({
     window.dispatchEvent(new Event('atlas:session:change'));
   }, [exercises, exerciseIdx, setIdx, completedSets, formData, resting, restStartedAt, restDuration, isDone]);
 
+  // ── Warn before leaving with an active workout ──────────────────────────
+  useEffect(() => {
+    if (isDone) return;
+    const handler = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDone]);
+
   // ── Payload builder ───────────────────────────────────────────────────────
   const buildCompletedPayload = () => {
     const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
@@ -388,6 +401,12 @@ export default function WorkoutExecutionScreen({
   };
 
   const handleSetComplete = () => {
+    // Validate weight/reps before saving
+    const w = Number(formData.weight);
+    const r = Number(formData.reps);
+    if (formData.weight && (isNaN(w) || w < 0 || w > 999)) return;
+    if (formData.reps && (isNaN(r) || r < 0 || r > 999)) return;
+
     // Build the updated completedSets synchronously so suggestion can read it
     const hasData = formData.weight || formData.reps || formData.rir;
     const nextCompletedSets = hasData

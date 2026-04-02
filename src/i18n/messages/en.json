@@ -1690,6 +1690,7 @@
       "foods_added_to": "{n} food item(s) added to {meal}.",
       "could_not_remove": "Could not remove {name}.",
       "was_removed": "{name} was removed.",
+      "confirm_delete": "Delete {name}?",
       "food_search_error": "Food search error: {error}",
       "could_not_load_details": "Could not load food details",
       "add_more_protein": "Add {n}g more protein",
