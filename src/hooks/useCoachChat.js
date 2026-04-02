@@ -11,6 +11,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
+import { useI18n } from '@/lib/i18nContext';
 import { updateWorkoutPlan } from '@/services/workoutPlanService';
 import { createMeasurement } from '@/services/bodyProgressService';
 
@@ -22,6 +23,7 @@ function nextId() {
 
 export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
   const navigate = useNavigate();
+  const { locale } = useI18n();
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   // Map of actionId -> 'pending' | 'loading' | 'done' | 'dismissed'
@@ -40,7 +42,7 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke('ai-coach-chat', {
-        body: { message: text.trim(), page_context: pageContext },
+        body: { message: text.trim(), page_context: pageContext, locale },
       });
 
       if (fnError) {
@@ -84,7 +86,7 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
     } finally {
       setIsTyping(false);
     }
-  }, [messages, isTyping, appendMessage]);
+  }, [messages, isTyping, appendMessage, locale]);
 
   const executeAction = useCallback(async (action, actionKey) => {
     setActionStates((prev) => ({ ...prev, [actionKey]: 'loading' }));

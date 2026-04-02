@@ -435,7 +435,7 @@
 @layer components {
   /* Typography */
   .text-large-title {
-    font-size: clamp(2.25rem, 1.4rem + 2vw, 3.25rem);
+    font-size: clamp(1.75rem, 1.1rem + 2vw, 3.25rem);
     font-weight: 700;
     letter-spacing: -0.05em;
     line-height: 1.04;
@@ -508,7 +508,7 @@
   }
 
   .t-headline {
-    font-size: clamp(2rem, 1.6rem + 1vw, 2.6rem);
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.6rem);
     font-weight: 700;
     letter-spacing: -0.045em;
     line-height: 1.08;
@@ -548,7 +548,7 @@
   .section-header {
     font-size: 0.6875rem;
     font-weight: 700;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: hsl(var(--label-tertiary));
   }
@@ -594,6 +594,7 @@
     border: 1px solid hsl(var(--separator-opaque) / 0.7);
     border-radius: var(--atlas-card-radius);
     box-shadow: var(--shadow-xs);
+    min-width: 0;
   }
 
   .atlas-card-muted {
@@ -749,13 +750,13 @@
     gap: 6px;
     font-size: 0.71875rem;
     font-weight: 700;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: hsl(var(--label-tertiary));
   }
 
   .atlas-display-title {
-    font-size: clamp(2.1rem, 1.7rem + 1.02vw, 3.05rem);
+    font-size: clamp(1.65rem, 1.2rem + 1.4vw, 3.05rem);
     font-weight: 700;
     letter-spacing: -0.05em;
     line-height: 1.02;
@@ -781,17 +782,21 @@
   .atlas-metric-label {
     font-size: 0.71875rem;
     font-weight: 700;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: hsl(var(--label-tertiary));
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .atlas-metric-value {
-    font-size: clamp(1.75rem, 1.4rem + 0.8vw, 2.5rem);
+    font-size: clamp(1.4rem, 1.1rem + 0.9vw, 2.5rem);
     font-weight: 700;
     letter-spacing: -0.048em;
     line-height: 1.05;
     color: hsl(var(--label));
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .atlas-metric-hint {
@@ -1289,7 +1294,7 @@
    Used in sticky-bottom-bar and any standalone screen that must clear the nav.
    ------------------------------------------------------------------ */
 :root {
-  --tab-bar-h: 94px;
+  --tab-bar-h: 72px;
   --header-h: 3.75rem;
   --sidebar-w: 16rem;
   --sidebar-collapsed-w: 4.5rem;
@@ -1301,6 +1306,12 @@
   --z-drawer-backdrop: 65;
   --z-drawer: 70;
   --z-modal: 70;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --tab-bar-h: 94px;
+  }
 }
 
 /* ── Standalone mobile screen (outside AppLayout) ────────────────────

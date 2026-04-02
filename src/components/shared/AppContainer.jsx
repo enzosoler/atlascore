@@ -11,7 +11,7 @@ export function AppContainer({ children, className = '', maxWidth = 'max-w-5xl' 
     >
       <div
         className={cn(
-          'mx-auto flex w-full flex-col gap-7 px-4 pb-12 pt-5 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:gap-9 lg:px-8 lg:pb-16 lg:pt-9',
+          'mx-auto flex w-full flex-col gap-5 px-3.5 pb-12 pt-4 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-6 lg:gap-9 lg:px-8 lg:pb-16 lg:pt-9',
           maxWidth,
           className
         )}
@@ -49,7 +49,7 @@ export function PageHeader({
   accentClassName = 'from-[hsl(var(--brand)/0.18)] via-[hsl(var(--brand-ai)/0.08)]',
 }) {
   return (
-    <Card className={cn('atlas-page-header relative overflow-hidden px-5 py-6 sm:px-6 sm:py-7 lg:px-7 lg:py-8', className)}>
+    <Card className={cn('atlas-page-header relative overflow-hidden px-4 py-5 sm:px-6 sm:py-7 lg:px-7 lg:py-8', className)}>
       <div
         className={cn(
           'pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b to-transparent',
@@ -61,7 +61,7 @@ export function PageHeader({
         <div className="space-y-4">
           {eyebrow ? <p className="atlas-overline">{eyebrow}</p> : null}
           <div className="space-y-3.5">
-            <h1 className="atlas-display-title text-[clamp(2.15rem,1.9rem+1vw,3rem)]">{title}</h1>
+            <h1 className="atlas-display-title">{title}</h1>
             {subtitle ? <p className="atlas-copy max-w-3xl">{subtitle}</p> : null}
           </div>
         </div>
@@ -108,14 +108,14 @@ export function Section({
 
 export function StatCard({ label, value, detail, icon: Icon, className = '' }) {
   return (
-    <Card className={cn('px-5 py-5 sm:px-6', className)}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="atlas-metric-label">{label}</p>
-          <p className="mt-3 break-words text-[1.15rem] font-semibold tracking-[-0.038em] text-[hsl(var(--fg))]">
+    <Card className={cn('px-4 py-4 sm:px-6 sm:py-5 overflow-hidden', className)}>
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="atlas-metric-label truncate">{label}</p>
+          <p className="mt-2 break-words text-[1rem] font-semibold tracking-[-0.038em] text-[hsl(var(--fg))] sm:mt-3 sm:text-[1.15rem]">
             {value}
           </p>
-          {detail ? <p className="mt-2.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p> : null}
+          {detail ? <p className="mt-2 text-[12px] leading-5 text-[hsl(var(--fg-2))] sm:mt-2.5 sm:text-[13px] sm:leading-6">{detail}</p> : null}
         </div>
 
         {Icon ? (
@@ -145,14 +145,14 @@ export function TabBar({ items, className = '' }) {
       )}
     >
       <div
-        className="mx-auto flex w-full max-w-[28rem] items-stretch gap-1 px-3 pt-2.5"
-        style={{ paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}
+        className="mx-auto flex w-full max-w-[28rem] items-stretch gap-0 px-1.5 pt-1.5 sm:gap-1 sm:px-3 sm:pt-2.5"
+        style={{ paddingBottom: 'max(6px, env(safe-area-inset-bottom))' }}
       >
         {items.map((item) => {
           const Icon = item.icon;
           const key = item.key || item.to || item.label;
           const classes = cn(
-            'flex min-h-[58px] flex-1 min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] px-2 py-2 text-center text-[11.5px] font-semibold tracking-[-0.014em] leading-none transition-[color] duration-150',
+            'flex min-h-[48px] flex-1 min-w-0 flex-col items-center justify-center gap-0.5 rounded-[14px] px-1 py-1.5 text-center text-[10px] font-semibold tracking-[-0.01em] leading-none transition-[color] duration-150 sm:min-h-[58px] sm:gap-1 sm:rounded-[18px] sm:px-2 sm:py-2 sm:text-[11.5px]',
             item.active
               ? 'text-[hsl(var(--brand))]'
               : 'text-[hsl(var(--fg-3))]'
@@ -164,16 +164,16 @@ export function TabBar({ items, className = '' }) {
                 {Icon ? (
                   <div
                     className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-[14px] transition-colors duration-150',
+                      'flex h-7 w-7 items-center justify-center rounded-[10px] transition-colors duration-150 sm:h-9 sm:w-9 sm:rounded-[14px]',
                       item.active
                         ? 'text-[hsl(var(--brand))]'
                         : 'text-inherit'
                     )}
                   >
-                    <Icon className="h-[22px] w-[22px] shrink-0" strokeWidth={item.active ? 2.35 : 2.1} />
+                    <Icon className="h-[20px] w-[20px] shrink-0 sm:h-[22px] sm:w-[22px]" strokeWidth={item.active ? 2.35 : 2.1} />
                   </div>
                 ) : null}
-                <span className={cn('max-w-[64px] truncate', item.active ? 'font-semibold text-[hsl(var(--fg))]' : '')}>
+                <span className={cn('max-w-full truncate', item.active ? 'font-semibold text-[hsl(var(--fg))]' : '')}>
                   {item.label}
                 </span>
               </Link>
@@ -185,16 +185,16 @@ export function TabBar({ items, className = '' }) {
               {Icon ? (
                 <div
                   className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-[14px] transition-[background-color,box-shadow] duration-150',
+                    'flex h-7 w-7 items-center justify-center rounded-[10px] transition-[background-color,box-shadow] duration-150 sm:h-9 sm:w-9 sm:rounded-[14px]',
                     item.active
                       ? 'bg-[hsl(var(--brand)/0.14)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)] ring-1 ring-inset ring-[hsl(var(--brand)/0.12)]'
                       : 'bg-transparent'
                   )}
                 >
-                  <Icon className="h-[22px] w-[22px] shrink-0" strokeWidth={item.active ? 2.35 : 2.1} />
+                  <Icon className="h-[20px] w-[20px] shrink-0 sm:h-[22px] sm:w-[22px]" strokeWidth={item.active ? 2.35 : 2.1} />
                 </div>
               ) : null}
-              <span className={cn('max-w-[64px] truncate', item.active ? 'font-semibold text-[hsl(var(--fg))]' : '')}>
+              <span className={cn('max-w-full truncate', item.active ? 'font-semibold text-[hsl(var(--fg))]' : '')}>
                 {item.label}
               </span>
             </button>

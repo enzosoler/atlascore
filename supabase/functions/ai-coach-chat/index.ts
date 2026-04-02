@@ -227,10 +227,10 @@ serve(async (req) => {
   // ── 4. Parse request ──────────────────────────────────────────────────────
 
   console.log('[ai-coach-chat] stage: parse request');
-  let body: { message?: string; page_context?: string };
+  let body: { message?: string; page_context?: string; locale?: string };
   try { body = await req.json(); } catch { return json({ error: 'Invalid JSON body' }, 400); }
 
-  const { message: userMessage, page_context = 'today' } = body;
+  const { message: userMessage, page_context = 'today', locale: requestLocale } = body;
   if (!userMessage?.trim()) return json({ error: 'message is required' }, 400);
 
   // ── 5. Load all context in parallel ──────────────────────────────────────
@@ -393,8 +393,21 @@ serve(async (req) => {
 
   // ── 8. Assemble prompt ────────────────────────────────────────────────────
 
+  // Resolve user locale: request body > profile > default 'en'
+  const userLocaleResolved = requestLocale || profile?.preferred_language || profile?.language || 'en';
+
+  // Build language instruction for non-English locales
+  const LANGUAGE_NAMES: Record<string, string> = {
+    'pt-BR': 'Brazilian Portuguese', 'pt': 'Portuguese',
+    'es': 'Spanish', 'fr': 'French', 'de': 'German', 'it': 'Italian',
+  };
+  const langMatch = LANGUAGE_NAMES[userLocaleResolved] ?? (userLocaleResolved.startsWith('pt') ? 'Portuguese' : null);
+  const languageInstruction = langMatch
+    ? `\n\nIMPORTANT: The user's language is ${langMatch}. You MUST respond entirely in ${langMatch}. Do not use English.`
+    : '';
+
   const promptMessages: Array<{ role: string; content: string }> = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: SYSTEM_PROMPT + languageInstruction },
     { role: 'system', content: FEW_SHOT },
     { role: 'system', content: `ATHLETE PROFILE\n${JSON.stringify(athleteProfile, null, 2)}` },
     { role: 'system', content: `ADHERENCE SUMMARY (last 7 days)\n${JSON.stringify(adherenceSummary, null, 2)}` },

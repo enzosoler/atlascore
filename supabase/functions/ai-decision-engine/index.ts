@@ -232,7 +232,7 @@ const OUTPUT_SCHEMA = {
 
 // ─── System Prompt ────────────────────────────────────────────────────────────
 
-function buildSystemPrompt(ctx: EngineContext): string {
+function buildSystemPrompt(ctx: EngineContext, locale: string = 'en'): string {
   const { profile, today, week, measurements, ai_state, recent_dismissed } = ctx;
 
   const latestWeight = measurements[0]?.weight_kg ?? profile.current_weight;
@@ -317,6 +317,16 @@ ${avoidLastRecs}
 - All text is for a mobile UI. Brevity is critical.
 - IDs must be short unique slugs (e.g., "rec_protein_dinner", "pri_log_dose").
 - Empty strings for optional fields that don't apply (adjustment, nextMeal, macroFocus, adherenceNote, etc.)
+${(() => {
+  const LANG_NAMES: Record<string, string> = {
+    'pt-BR': 'Brazilian Portuguese', 'pt': 'Portuguese',
+    'es': 'Spanish', 'fr': 'French', 'de': 'German', 'it': 'Italian',
+  };
+  const lang = LANG_NAMES[locale] ?? (locale.startsWith('pt') ? 'Portuguese' : null);
+  return lang
+    ? `\nIMPORTANT: The user's language is ${lang}. ALL user-facing text (briefing title/body/reason, priority titles/reasons, train message/adjustment, nutrition nextMeal/macroFocus, protocols message/adherenceNote, progress headline/interpretation/action, recommendation titles/reasons/actionLabels) MUST be written in ${lang}. Do not use English for any user-facing string.`
+    : '';
+})()}
 
 Respond ONLY with the JSON object matching the provided schema.`;
 }
@@ -464,7 +474,7 @@ serve(async (req) => {
     // Profile
     supabase
       .from('profiles')
-      .select('full_name, age, sex, current_weight, height_cm, training_goal, activity_level, food_preferences, protein_target, calories_target')
+      .select('full_name, age, sex, current_weight, height_cm, training_goal, activity_level, food_preferences, protein_target, calories_target, preferred_language, language')
       .eq('id', userId)
       .single(),
 
@@ -662,6 +672,10 @@ serve(async (req) => {
     dismissed_types: recentDismissed,
   };
 
+  // Resolve user locale from profile
+  const rawProfile = profileRes.data as any;
+  const userLocale: string = rawProfile?.preferred_language || rawProfile?.language || 'en';
+
   // ── 5. Call OpenAI ────────────────────────────────────────────────────────
 
   const openaiKey = Deno.env.get('OPENAI_API_KEY');
@@ -685,7 +699,7 @@ serve(async (req) => {
         temperature: 0.3,
         max_tokens: 1024,
         messages: [
-          { role: 'system', content: buildSystemPrompt(ctx) },
+          { role: 'system', content: buildSystemPrompt(ctx, userLocale) },
           { role: 'user', content: 'Generate my coaching output for today.' },
         ],
         response_format: { type: 'json_object' },

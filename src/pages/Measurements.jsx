@@ -103,8 +103,7 @@ const HISTORY_DISPLAY_FIELDS = MEASUREMENT_FIELD_DEFINITIONS.filter(
 
 // Step definitions for the stepped form
 const FORM_STEPS = [
-  { key: 'basics',      isBasics: true },
-  { key: 'core',        section: MEASUREMENT_MANUAL_FIELD_SECTIONS[0] },
+  { key: 'basics',      isBasics: true, section: MEASUREMENT_MANUAL_FIELD_SECTIONS[0] },
   { key: 'upper',       section: MEASUREMENT_MANUAL_FIELD_SECTIONS[1] },
   { key: 'lower',       section: MEASUREMENT_MANUAL_FIELD_SECTIONS[2] },
   { key: 'composition', section: MEASUREMENT_COMPOSITION_SECTION },
@@ -113,7 +112,6 @@ const FORM_STEPS = [
 
 const FORM_STEP_TITLE_KEYS = {
   basics:      'measurements.form.step_basics',
-  core:        'measurements.form.step_core',
   upper:       'measurements.form.step_upper',
   lower:       'measurements.form.step_lower',
   composition: 'measurements.form.step_composition',
