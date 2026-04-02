@@ -66,6 +66,7 @@ export default function SupportWidget() {
       <div className="fixed bottom-[calc(var(--tab-bar-h,94px)+env(safe-area-inset-bottom,0px)+8px)] right-4 lg:bottom-6 z-[55]">
         <button
           onClick={() => { setOpen(o => !o); reset(); }}
+          aria-label={open ? 'Close support' : 'Need help?'}
           className={`w-11 h-11 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center
             ${open
               ? 'bg-[hsl(var(--card))] border border-[hsl(var(--border-h))] text-[hsl(var(--fg-2))]'

@@ -106,9 +106,17 @@ function titleCase(str) {
   );
 }
 
-export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
+export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefillText, onPrefillConsumed }) {
   const { locale } = useI18n();
   const [text, setText] = useState('');
+
+  // Handle prefill from quick suggestions
+  React.useEffect(() => {
+    if (prefillText) {
+      setText(prefillText);
+      onPrefillConsumed?.();
+    }
+  }, [prefillText]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [showItems, setShowItems] = useState(false);
@@ -331,6 +339,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing || !text.trim()}
+            aria-label="Analyze with AI"
             className="absolute right-2 bottom-2 w-8 h-8 rounded-lg bg-[hsl(var(--brand))] text-white flex items-center justify-center hover:bg-[hsl(var(--brand)/0.9)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           >
             {isAnalyzing ? (

@@ -134,7 +134,7 @@ function PricingCard({
       </div>
 
       <div className="mt-6">
-        <div className="flex items-end gap-1">
+        <div className="flex items-end gap-1" role="text" aria-label={`${plan.price} ${plan.period || ''}`}>
           <span className="text-[2.35rem] font-semibold tracking-[-0.065em] text-[hsl(var(--fg))]">
             {plan.price}
           </span>
