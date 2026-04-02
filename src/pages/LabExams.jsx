@@ -568,18 +568,18 @@ const AnalysisPanel = ({ exam, onClose, onAskAI }) => {
 
 const UploadDialog = ({ isOpen, onClose, onUpload, isExtracting, error }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
-    <DialogContent className="sm:max-w-lg bg-[hsl(var(--bg))] border-[hsl(var(--separator))]">
+    <DialogContent className="sm:max-w-md bg-[hsl(var(--card))] border-[hsl(var(--border)/0.82)] rounded-2xl">
       <DialogHeader>
-        <DialogTitle className="text-xl text-[hsl(var(--fg))] flex items-center gap-2">
-          <Sparkles size={20} className="text-primary" />
+        <DialogTitle className="text-[17px] font-bold text-[hsl(var(--fg))] flex items-center gap-2">
+          <Sparkles size={18} className="text-[hsl(var(--brand))]" />
           AI Lab Analysis
         </DialogTitle>
-        <DialogDescription className="text-[hsl(var(--fg-2))]">
-          Upload your lab results and get instant AI-powered insights
+        <DialogDescription className="text-[13px] text-[hsl(var(--fg-2))]">
+          Upload your lab results for instant AI-powered insights
         </DialogDescription>
       </DialogHeader>
 
-      <div className="space-y-6 py-4">
+      <div className="space-y-4 pt-2">
         {/* Upload Area */}
         <div className="relative">
           <input
@@ -590,52 +590,44 @@ const UploadDialog = ({ isOpen, onClose, onUpload, isExtracting, error }) => (
             disabled={isExtracting}
           />
           <div className={cn(
-            'border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-all',
-            isExtracting 
-              ? 'border-primary/30 bg-primary/5' 
-              : 'border-[hsl(var(--separator))] hover:border-primary/30 hover:bg-primary/5'
+            'border border-dashed rounded-xl p-6 flex flex-col items-center justify-center transition-all',
+            isExtracting
+              ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.04)]'
+              : 'border-[hsl(var(--border))] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)]'
           )}>
             {isExtracting ? (
               <>
-                <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
-                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <div className="w-11 h-11 rounded-xl bg-[hsl(var(--brand)/0.12)] flex items-center justify-center mb-3">
+                  <Loader2 className="w-5 h-5 text-[hsl(var(--brand))] animate-spin" />
                 </div>
-                <p className="text-base font-medium text-[hsl(var(--fg))]">Analyzing your lab results...</p>
-                <p className="text-sm text-[hsl(var(--fg-2))] mt-1">Extracting markers with AI</p>
-                <div className="mt-4 w-48 h-1 bg-[hsl(var(--separator))] rounded-full overflow-hidden">
-                  <div className="h-full bg-primary animate-pulse rounded-full" style={{ width: '60%' }} />
-                </div>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Analyzing...</p>
+                <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">Extracting markers with AI</p>
               </>
             ) : (
               <>
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Upload size={28} className="text-primary" />
+                <div className="w-11 h-11 rounded-xl bg-[hsl(var(--brand)/0.08)] flex items-center justify-center mb-3">
+                  <Upload size={20} className="text-[hsl(var(--brand))]" />
                 </div>
-                <p className="text-base font-medium text-[hsl(var(--fg))]">Upload your lab results (PDF or image)</p>
-                <p className="text-sm text-[hsl(var(--fg-2))] mt-1">We automatically extract and analyze your markers</p>
-                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[hsl(var(--fill))] text-xs text-[hsl(var(--fg-2))]">
-                  <FileText size={12} />
-                  PDF, JPG, PNG up to 10MB
-                </div>
+                <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Upload lab results</p>
+                <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1">PDF, JPG, or PNG up to 10MB</p>
               </>
             )}
           </div>
         </div>
 
-        {/* Error message */}
         {error && (
-          <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          <div className="rounded-xl bg-[hsl(var(--err)/0.08)] border border-[hsl(var(--err)/0.2)] p-3 text-[12px] text-[hsl(var(--err))]">
             {error}
           </div>
         )}
 
-        {/* Manual Entry Option */}
+        {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-[hsl(var(--separator))]" />
+            <span className="w-full border-t border-[hsl(var(--border)/0.5)]" />
           </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-[hsl(var(--bg))] px-2 text-[hsl(var(--fg-3))]">Or enter manually</span>
+          <div className="relative flex justify-center text-[11px]">
+            <span className="bg-[hsl(var(--card))] px-3 text-[hsl(var(--fg-3))]">or</span>
           </div>
         </div>
 
