@@ -101,7 +101,8 @@ function validateFoodResult(result) {
 /** Capitalize each word: "frango frito" → "Frango Frito" */
 function titleCase(str) {
   if (!str) return str;
-  return str.replace(/\b\p{L}+/gu, (word) =>
+  // Replace underscores with spaces (AI sometimes returns snake_case names)
+  return str.replace(/_/g, ' ').replace(/\b\p{L}+/gu, (word) =>
     word.charAt(0).toUpperCase() + word.slice(1)
   );
 }

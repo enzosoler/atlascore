@@ -172,6 +172,8 @@ export function I18nProvider({ children }) {
   }, []);
 
   const switchLocale = useCallback((targetLocale) => {
+    if (!isValidLocale(targetLocale)) return null;
+
     // Persist the choice before navigating
     storeLocale(targetLocale);
 
@@ -179,7 +181,9 @@ export function I18nProvider({ children }) {
     const buildLocale = getBuildLocale();
     if (buildLocale) {
       // We're in a locale-specific build — need full page navigation
-      const newPath = buildPathWithLocale(location.pathname, targetLocale);
+      // Read pathname directly to avoid stale closure
+      const currentPath = window.location.pathname;
+      const newPath = buildPathWithLocale(currentPath, targetLocale);
       window.location.href = newPath;
       return newPath;
     }
@@ -188,7 +192,7 @@ export function I18nProvider({ children }) {
     // No need for full page navigation — the dictionary will reload
     setLocaleState(targetLocale);
     return null;
-  }, [location.pathname]);
+  }, []);
 
   const value = useMemo(() => ({
     locale,

@@ -51,7 +51,7 @@ Rules:
 
 Respond ONLY with valid JSON in this exact format:
 {
-  "food_name": "short name for the meal in the user's language",
+  "food_name": "short human-readable name in the user's language (natural text with spaces, never snake_case or camelCase)",
   "serving_description": "estimated portion description in the user's language",
   "calories": 0,
   "protein": 0.0,
@@ -455,6 +455,18 @@ serve(async (req) => {
     .eq('user_id', user.id);
 
   // ── 8. Store in cache ────────────────────────────────────────────────────
+
+  // Sanitize food_name: LLMs sometimes return snake_case or camelCase identifiers
+  if (aiResult.food_name && typeof aiResult.food_name === 'string') {
+    aiResult.food_name = aiResult.food_name.replace(/_/g, ' ');
+  }
+  if (Array.isArray(aiResult.items)) {
+    for (const item of aiResult.items) {
+      if (item.name && typeof item.name === 'string') {
+        item.name = item.name.replace(/_/g, ' ');
+      }
+    }
+  }
 
   const cacheEntry = {
     normalized_query: normalizedQuery,

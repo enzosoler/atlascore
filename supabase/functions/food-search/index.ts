@@ -121,8 +121,11 @@ function mapOpenFoodFactsProduct(product: any) {
   const nutrients = product?.nutriments || {};
   
   const getCalories = () => {
-    const kcal = nutrients['energy-kcal_100g'] || nutrients['energy_100g'] || 0;
-    return Math.round(kcal);
+    // Prefer kcal field; fall back to kJ and convert (1 kcal ≈ 4.184 kJ)
+    const kcal = nutrients['energy-kcal_100g'];
+    if (kcal) return Math.round(kcal);
+    const kj = nutrients['energy_100g'] || 0;
+    return Math.round(kj / 4.184);
   };
 
   const getProtein = () => {

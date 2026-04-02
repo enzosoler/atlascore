@@ -327,8 +327,8 @@ ${isFlexible
           <div className="w-full max-w-lg bg-[hsl(var(--card))] rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="sticky top-0 bg-[hsl(var(--card))] px-5 pt-5 pb-3 border-b border-[hsl(var(--border)/0.3)] flex items-center justify-between">
               <div>
-                <p className="text-[17px] font-bold text-[hsl(var(--fg))]">{t('myDiet.setup_title') || 'Diet preferences'}</p>
-                <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{t('myDiet.setup_subtitle') || 'Tell us how you like to eat'}</p>
+                <p className="text-[17px] font-bold text-[hsl(var(--fg))]">{t('myDiet.setup_title')}</p>
+                <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{t('myDiet.setup_subtitle')}</p>
               </div>
               <button onClick={() => setShowDietSetup(false)} className="text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] p-1"><X className="w-5 h-5" /></button>
             </div>
@@ -336,7 +336,7 @@ ${isFlexible
             <div className="px-5 py-4 space-y-5">
               {/* Dietary Approach */}
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.approach_label') || 'Dietary approach'}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.approach_label')}</p>
                 <div className="grid gap-2">
                   {DIET_APPROACHES.map(opt => (
                     <button
@@ -364,7 +364,7 @@ ${isFlexible
 
               {/* Meals per day */}
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.meals_per_day_label') || 'Meals per day'}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.meals_per_day_label')}</p>
                 <div className="flex gap-2">
                   {[3, 4, 5, 6].map(n => (
                     <button
@@ -384,11 +384,11 @@ ${isFlexible
 
               {/* Allergies / restrictions */}
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.allergies_label') || 'Allergies or restrictions'}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.allergies_label')}</p>
                 <input
                   value={allergies}
                   onChange={e => setAllergies(e.target.value)}
-                  placeholder={t('myDiet.allergies_placeholder') || 'E.g.: lactose intolerant, no shellfish, gluten-free...'}
+                  placeholder={t('myDiet.allergies_placeholder')}
                   className="atlas-field h-10 w-full rounded-xl border-0 px-4 text-[13px]"
                 />
               </div>
@@ -397,7 +397,7 @@ ${isFlexible
             <div className="px-5 pb-5 pt-2">
               <PrimaryButton onClick={generate} className="w-full h-12 gap-2 rounded-xl">
                 <Sparkles className="h-4 w-4" />
-                {t('myDiet.generate_plan') || 'Generate my plan'}
+                {t('myDiet.generate_plan')}
               </PrimaryButton>
             </div>
           </div>
