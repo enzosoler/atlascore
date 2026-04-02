@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { invokeLLMJson } from '@/lib/llm';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes';
-import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, ClipboardList, User, Users } from 'lucide-react';
+import { Sparkles, Loader2, UtensilsCrossed, ChevronDown, ChevronUp, ClipboardList, User, Users, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
@@ -16,6 +16,18 @@ import { useT } from '@/lib/i18nContext';
 
 const CREATOR_BADGE  = { ai: 'badge-neutral', coach: 'badge-blue', user: 'badge-neutral' };
 const CREATOR_ICONS  = { ai: ClipboardList, coach: Users, user: User };
+
+const DIET_APPROACHES = [
+  { value: 'flexible', label: 'Flexible dieting (IIFYM)', desc: 'Hit your macros — eat anything that fits' },
+  { value: 'balanced', label: 'Balanced / whole foods', desc: 'Structured meals with real, nutrient-dense foods' },
+  { value: 'vegan', label: 'Vegan', desc: '100% plant-based, no animal products' },
+  { value: 'vegetarian', label: 'Vegetarian', desc: 'No meat or fish, dairy and eggs OK' },
+  { value: 'pescatarian', label: 'Pescatarian', desc: 'No meat, but fish and seafood OK' },
+  { value: 'keto', label: 'Keto / Low-carb', desc: 'Very low carb, high fat' },
+  { value: 'paleo', label: 'Paleo', desc: 'Whole foods, no grains, dairy, or processed food' },
+  { value: 'mediterranean', label: 'Mediterranean', desc: 'Olive oil, fish, vegetables, whole grains' },
+  { value: 'carnivore', label: 'Carnivore', desc: 'Animal products only' },
+];
 
 function MacroChip({ label, value, unit, color }) {
   return (
@@ -75,6 +87,10 @@ export default function MyDiet() {
   const { can } = useSubscription();
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState(null);
+  const [showDietSetup, setShowDietSetup] = useState(false);
+  const [dietApproach, setDietApproach] = useState('balanced');
+  const [allergies, setAllergies] = useState('');
+  const [mealsPerDay, setMealsPerDay] = useState(5);
 
   useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated) navigate(ROUTES.home, { replace: true });
@@ -110,9 +126,20 @@ export default function MyDiet() {
 
   const plan = plans[0] || null;
 
+  const openDietSetup = () => {
+    setDietApproach(profile?.dietary_style || 'balanced');
+    setAllergies(profile?.allergies || '');
+    setMealsPerDay(profile?.meals_per_day || 5);
+    setShowDietSetup(true);
+  };
+
   const generate = async () => {
+    setShowDietSetup(false);
     setGenerating(true);
     setGenError(null);
+
+    const isFlexible = dietApproach === 'flexible';
+    const approachLabel = DIET_APPROACHES.find(a => a.value === dietApproach)?.label || dietApproach;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -125,9 +152,14 @@ export default function MyDiet() {
 - Target protein: ${profile?.protein_target || 160}g
 - Target carbs: ${profile?.carbs_target || 250}g
 - Target fat: ${profile?.fat_target || 70}g
-- Dietary style: ${profile?.dietary_style || 'balanced'}
+- Dietary approach: ${approachLabel}
+- Meals per day: ${mealsPerDay}
+${allergies ? `- Allergies / restrictions: ${allergies}` : ''}
 
-Create a plan with 5-6 meals distributed throughout the day, with real foods and quantities in grams/units.`,
+${isFlexible
+  ? `This user follows FLEXIBLE DIETING (IIFYM). Do NOT prescribe specific foods. Instead, for each meal provide macro targets (calories, protein, carbs, fat) and a few example food ideas they could use to hit those targets. The user will choose their own foods as long as they hit the macros.`
+  : `Create a structured plan with ${mealsPerDay} meals distributed throughout the day, using real foods and quantities in grams/units. All foods must be compatible with a ${approachLabel} diet.`
+}`,
         {
           type: 'object',
           properties: {
@@ -220,7 +252,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
         title={t('myDiet.title')}
         subtitle={t('myDiet.subtitle')}
         actions={can('ai_diet_generation') ? (
-          <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
+          <PrimaryButton onClick={openDietSetup} disabled={generating} className="gap-2">
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {plan ? t('myDiet.build_new_plan') : t('myDiet.build_plan')}
           </PrimaryButton>
@@ -240,7 +272,7 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
             title={t('myDiet.no_active_plan_title')}
             description={t('myDiet.no_active_plan_desc')}
             action={can('ai_diet_generation') ? (
-              <PrimaryButton onClick={generate} disabled={generating} className="gap-2">
+              <PrimaryButton onClick={openDietSetup} disabled={generating} className="gap-2">
                 {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 {t('myDiet.build_plan')}
               </PrimaryButton>
@@ -289,6 +321,89 @@ Create a plan with 5-6 meals distributed throughout the day, with real foods and
           )}
         </>
       )}
+      {/* Diet Setup Dialog */}
+      {showDietSetup && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={() => setShowDietSetup(false)}>
+          <div className="w-full max-w-lg bg-[hsl(var(--card))] rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-[hsl(var(--card))] px-5 pt-5 pb-3 border-b border-[hsl(var(--border)/0.3)] flex items-center justify-between">
+              <div>
+                <p className="text-[17px] font-bold text-[hsl(var(--fg))]">{t('myDiet.setup_title') || 'Diet preferences'}</p>
+                <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{t('myDiet.setup_subtitle') || 'Tell us how you like to eat'}</p>
+              </div>
+              <button onClick={() => setShowDietSetup(false)} className="text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] p-1"><X className="w-5 h-5" /></button>
+            </div>
+
+            <div className="px-5 py-4 space-y-5">
+              {/* Dietary Approach */}
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.approach_label') || 'Dietary approach'}</p>
+                <div className="grid gap-2">
+                  {DIET_APPROACHES.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setDietApproach(opt.value)}
+                      className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                        dietApproach === opt.value
+                          ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.06)]'
+                          : 'border-[hsl(var(--border)/0.5)] hover:border-[hsl(var(--border))]'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        dietApproach === opt.value ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand))]' : 'border-[hsl(var(--fg-3))]'
+                      }`}>
+                        {dietApproach === opt.value && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-medium text-[hsl(var(--fg))]">{opt.label}</p>
+                        <p className="text-[11px] text-[hsl(var(--fg-3))]">{opt.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Meals per day */}
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.meals_per_day_label') || 'Meals per day'}</p>
+                <div className="flex gap-2">
+                  {[3, 4, 5, 6].map(n => (
+                    <button
+                      key={n}
+                      onClick={() => setMealsPerDay(n)}
+                      className={`flex-1 h-10 rounded-xl border text-[13px] font-medium transition-all ${
+                        mealsPerDay === n
+                          ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]'
+                          : 'border-[hsl(var(--border)/0.5)] text-[hsl(var(--fg-2))] hover:border-[hsl(var(--border))]'
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Allergies / restrictions */}
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2">{t('myDiet.allergies_label') || 'Allergies or restrictions'}</p>
+                <input
+                  value={allergies}
+                  onChange={e => setAllergies(e.target.value)}
+                  placeholder={t('myDiet.allergies_placeholder') || 'E.g.: lactose intolerant, no shellfish, gluten-free...'}
+                  className="atlas-field h-10 w-full rounded-xl border-0 px-4 text-[13px]"
+                />
+              </div>
+            </div>
+
+            <div className="px-5 pb-5 pt-2">
+              <PrimaryButton onClick={generate} className="w-full h-12 gap-2 rounded-xl">
+                <Sparkles className="h-4 w-4" />
+                {t('myDiet.generate_plan') || 'Generate my plan'}
+              </PrimaryButton>
+            </div>
+          </div>
+        </div>
+      )}
+
     </AppContainer>
   );
 }
