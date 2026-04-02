@@ -36,6 +36,7 @@ import {
 } from '@/components/shared/StablePage';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import ImageCropper from '@/components/shared/ImageCropper';
 import {
   createProgressPhoto,
   deleteProgressPhoto,
@@ -662,6 +663,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const [notice, setNotice] = useState(null);
   const [showPhotoPaywall, setShowPhotoPaywall] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [cropState, setCropState] = useState(null); // { imageSrc, date, poseKey }
 
   React.useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated && embedded) navigate(ROUTES.home, { replace: true });
@@ -692,6 +694,19 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     });
     setShowNewModal(false);
   };
+
+  const handleFileSelected = useCallback((date, poseKey, file) => {
+    const reader = new FileReader();
+    reader.onload = () => setCropState({ imageSrc: reader.result, date, poseKey });
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleCropComplete = useCallback((croppedFile) => {
+    if (cropState) {
+      handleUpload(cropState.date, cropState.poseKey, croppedFile);
+    }
+    setCropState(null);
+  }, [cropState]);
 
   const handleUpload = useCallback(async (date, poseKey, file) => {
     if (!isAuthenticated || !user?.id) {
@@ -845,7 +860,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
           >
             <div className="space-y-4">
               {allDates.map((date, index) => (
-                <CheckpointCard key={date} date={date} photos={photosByDate(date)} onUpload={handleUpload} onDelete={handleDelete} uploadingPose={uploadingPose} isLatest={index === 0} />
+                <CheckpointCard key={date} date={date} photos={photosByDate(date)} onUpload={handleFileSelected} onDelete={handleDelete} uploadingPose={uploadingPose} isLatest={index === 0} />
               ))}
             </div>
           </Section>
@@ -862,5 +877,17 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     </>
   );
 
-  return embedded ? <div className="space-y-7">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>;
+  return (
+    <>
+      {embedded ? <div className="space-y-7">{pageBody}</div> : <AppContainer>{pageBody}</AppContainer>}
+      {cropState && (
+        <ImageCropper
+          imageSrc={cropState.imageSrc}
+          aspect={3 / 4}
+          onComplete={handleCropComplete}
+          onCancel={() => setCropState(null)}
+        />
+      )}
+    </>
+  );
 }
