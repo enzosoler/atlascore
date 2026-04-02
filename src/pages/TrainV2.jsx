@@ -84,8 +84,9 @@ function StatsHeader({ workoutHistory, daily, t }) {
       return d >= thisWeekStart;
     }).length;
     
-    // Calculate streak
-    let streak = 0;
+    // Use centralized streak from useDailyStateV2
+    const streak = daily.workoutStreak ?? 0;
+
     const sorted = [...workoutHistory].sort((a, b) => {
       const dateA = new Date(b.completed_at || b.date).getTime();
       const dateB = new Date(a.completed_at || a.date).getTime();
@@ -93,21 +94,7 @@ function StatsHeader({ workoutHistory, daily, t }) {
     });
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    let checkDate = new Date(today);
-    
-    for (const workout of sorted) {
-      const workoutDate = new Date(workout.completed_at || workout.date);
-      workoutDate.setHours(0, 0, 0, 0);
-      const diffDays = Math.floor((checkDate.getTime() - workoutDate.getTime()) / 86400000);
-      
-      if (diffDays === 0 || diffDays === 1) {
-        streak++;
-        checkDate = new Date(workoutDate);
-      } else {
-        break;
-      }
-    }
-    
+
     const lastWorkout = sorted[0];
     const daysSinceLast = lastWorkout 
       ? Math.floor((today.getTime() - new Date(lastWorkout.completed_at || lastWorkout.date).getTime()) / 86400000)

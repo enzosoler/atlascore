@@ -380,7 +380,7 @@ function TodayContent() {
   });
 
   const firstName = useMemo(() => getFirstName(safeDaily.preferredName), [safeDaily.preferredName]);
-  const streak = useMemo(() => calcStreak(recentCheckins), [recentCheckins]);
+  const streak = daily.workoutStreak ?? useMemo(() => calcStreak(recentCheckins), [recentCheckins]);
   const checkinDates = useMemo(() => recentCheckins.map(c => c.date), [recentCheckins]);
   const hasCheckin = !!todayCheckin;
   const streakUrgency = getStreakUrgency(hasCheckin);

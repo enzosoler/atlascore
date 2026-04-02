@@ -688,14 +688,7 @@ serve(async (req) => {
           { role: 'system', content: buildSystemPrompt(ctx) },
           { role: 'user', content: 'Generate my coaching output for today.' },
         ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'coaching_output',
-            strict: true,
-            schema: OUTPUT_SCHEMA,
-          },
-        },
+        response_format: { type: 'json_object' },
       }),
     });
 

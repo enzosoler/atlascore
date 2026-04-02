@@ -191,6 +191,28 @@ export function useDailyStateV2() {
   const nutritionLogged = nutrition.mealsLogged > 0;
   const weightLogged = rawWeight != null;
 
+  // Workout streak — consecutive days with a completed workout
+  const workoutStreak = useMemo(() => {
+    const sessions = Array.isArray(rawRecentSessions) ? rawRecentSessions : [];
+    if (!sessions.length) return 0;
+    const dates = new Set(sessions.map((s) => {
+      const d = new Date(s.completed_at || s.date);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }));
+    let streak = 0;
+    for (let i = 0; i < 60; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (dates.has(key)) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+    return streak;
+  }, [rawRecentSessions]);
+
   // ── Cascade invalidation ──────────────────────────────────────────────────
 
   const invalidateAfterAction = useCallback((scope = 'all') => {
@@ -224,6 +246,7 @@ export function useDailyStateV2() {
     activePlan: rawPlan ?? null,
     recentSessions: Array.isArray(rawRecentSessions) ? rawRecentSessions : [],
     weekWorkoutCount: Array.isArray(rawWeekWork) ? rawWeekWork.length : 0,
+    workoutStreak,
 
     // Booleans
     workoutDone,
