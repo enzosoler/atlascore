@@ -2531,11 +2531,11 @@
     "aiAnalysisNoData": "Ainda não há dados suficientes para análise por IA.",
     "aiAnalysisHasSomeData": "Análise por IA com base na sua atividade recente.",
     "deterministic": "Insights baseados em dados",
-    "stageEmpty": "Sem dados ainda",
-    "stageStarting": "Começando",
-    "stageBuilding": "Construindo histórico",
+    "stageEmpty": "Sem dados",
+    "stageStarting": "Iniciando",
+    "stageBuilding": "Construindo",
     "stageGrowing": "Crescendo",
-    "stageFull": "Visão completa",
+    "stageFull": "Completo",
     "directionOnTrack": "No caminho certo",
     "directionStable": "Estável",
     "directionNeedsAttention": "Precisa de atenção",
@@ -2550,7 +2550,7 @@
     "exampleBadge": "Exemplo",
     "pageTitle": "Insights",
     "pageSubtitle": "Uma leitura focada do seu histórico recente, sem gráficos ruidosos ou bloqueios artificiais.",
-    "categoryTraining": "Treinamento",
+    "categoryTraining": "Treino",
     "categoryNutrition": "Nutrição",
     "categoryBody": "Corpo",
     "categoryConsistency": "Consistência",
@@ -2574,9 +2574,23 @@
     "categoriesPreviewSubtitle": "Uma prévia do que cada seção analisará para você",
     "whenWillInsightsAppear": "Quando os insights aparecerão?",
     "insightsTimeline": "Insights básicos aparecem após 1-2 dias de registro. Insights significativos e tendências são desbloqueados após 3-5 dias de dados consistentes.",
-    "unlockStepWorkout": "Registre um treino",
-    "unlockStepMeals": "Registre refeições",
-    "unlockStepMeasurement": "Adicione medição"
+    "unlockStepWorkout": "Registre seu primeiro treino",
+    "unlockStepMeals": "Registre pelo menos 2 refeições",
+    "unlockStepMeasurement": "Registre uma medida",
+    "quickActionWorkoutLabel": "Registrar treino",
+    "quickActionWorkoutDesc": "Registre sua sessão de treino",
+    "quickActionMealLabel": "Registrar refeição",
+    "quickActionMealDesc": "Acompanhe sua nutrição",
+    "quickActionMeasurementLabel": "Registrar medida",
+    "quickActionMeasurementDesc": "Registre medidas corporais",
+    "categoryProgress": "Progresso",
+    "categoryRecovery": "Recuperação",
+    "categoryNextAction": "Próxima ação",
+    "insightLevel0": "Sem dados ainda",
+    "insightLevel25": "Começando",
+    "insightLevel50": "Ganhando ritmo",
+    "insightLevel75": "Crescendo forte",
+    "insightLevel100": "Insights completos"
   },
   "blockReview": {
     "title": "Revisão do Bloco",
@@ -3844,5 +3858,13 @@
     "not_found_desc": "Este link de treino compartilhado pode ter expirado ou a URL pode estar incorreta.",
     "go_home": "Ir para atlas.core",
     "powered_by": "Desenvolvido por"
+  },
+  "protocols": {
+    "protocols": {
+      "dose": {
+        "nothingScheduled": "Nada agendado",
+        "nothingScheduledDesc": "Nenhuma dose agendada para hoje."
+      }
+    }
   }
 }

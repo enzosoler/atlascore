@@ -2543,11 +2543,11 @@
     "aiAnalysisNoData": "Not enough data for AI analysis yet.",
     "aiAnalysisHasSomeData": "AI analysis based on your recent activity.",
     "deterministic": "Data-based insights",
-    "stageEmpty": "No data yet",
-    "stageStarting": "Getting started",
-    "stageBuilding": "Building history",
+    "stageEmpty": "No data",
+    "stageStarting": "Starting",
+    "stageBuilding": "Building",
     "stageGrowing": "Growing",
-    "stageFull": "Full picture",
+    "stageFull": "Full",
     "directionOnTrack": "On track",
     "directionStable": "Stable",
     "directionNeedsAttention": "Needs attention",
@@ -2586,9 +2586,23 @@
     "categoriesPreviewSubtitle": "A preview of what each section will analyze for you",
     "whenWillInsightsAppear": "When will insights appear?",
     "insightsTimeline": "Basic insights appear after 1-2 days of logging. Meaningful insights and trends unlock after 3-5 days of consistent data.",
-    "unlockStepWorkout": "Log a workout",
-    "unlockStepMeals": "Log meals",
-    "unlockStepMeasurement": "Add measurement"
+    "unlockStepWorkout": "Log your first workout",
+    "unlockStepMeals": "Log at least 2 meals",
+    "unlockStepMeasurement": "Record a measurement",
+    "quickActionWorkoutLabel": "Log Workout",
+    "quickActionWorkoutDesc": "Record your training session",
+    "quickActionMealLabel": "Log Meal",
+    "quickActionMealDesc": "Track your nutrition",
+    "quickActionMeasurementLabel": "Log Measurement",
+    "quickActionMeasurementDesc": "Record body measurements",
+    "categoryProgress": "Progress",
+    "categoryRecovery": "Recovery",
+    "categoryNextAction": "Next Action",
+    "insightLevel0": "No data yet",
+    "insightLevel25": "Getting started",
+    "insightLevel50": "Building momentum",
+    "insightLevel75": "Growing strong",
+    "insightLevel100": "Full insights"
   },
   "blockReview": {
     "title": "Block Review",
@@ -3851,5 +3865,13 @@
     "not_found_desc": "This shared workout link may have expired or the URL might be incorrect.",
     "go_home": "Go to atlas.core",
     "powered_by": "Powered by"
+  },
+  "protocols": {
+    "protocols": {
+      "dose": {
+        "nothingScheduled": "Nothing scheduled",
+        "nothingScheduledDesc": "No doses are scheduled for today."
+      }
+    }
   }
 }

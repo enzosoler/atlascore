@@ -590,7 +590,7 @@ function AICoachingMessage({ hasSomeData }) {
 }
 
 // Insight Level indicator
-function InsightLevelIndicator({ level, labelKey, stage }) {
+function InsightLevelIndicator({ level, label, labelKey, stage }) {
   const t = useT();
 
   const stageLabels = {
@@ -740,7 +740,7 @@ function InsightsEmptyState({ workouts, meals, measurements, checkins }) {
         <div className="mt-5">
           <InsightLevelIndicator
             level={insightLevel.level}
-            label={insightLevel.label}
+            label={t(insightLevel.labelKey)}
             stage={insightLevel.stage}
           />
         </div>

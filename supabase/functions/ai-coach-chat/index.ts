@@ -50,7 +50,7 @@ function getCorsHeaders(req: Request) {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const MODEL = 'gpt-5-mini';
+const MODEL = 'gpt-4o-mini';
 
 // ─── System prompt: rigid coach identity ──────────────────────────────────────
 
