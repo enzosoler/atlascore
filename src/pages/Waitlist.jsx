@@ -51,7 +51,7 @@ export default function Waitlist() {
                   <Clock className="w-4 h-4 text-[hsl(var(--accent-primary))]" />
                   <span className="font-medium">Expected Launch</span>
                 </div>
-                <p className="text-sm text-[hsl(var(--fg-2))]">Q2 2024 - Join 2,847 others on the waitlist</p>
+                <p className="text-sm text-[hsl(var(--fg-2))]">Coming soon — Join the waitlist for early access</p>
               </div>
 
               <div className="space-y-3">

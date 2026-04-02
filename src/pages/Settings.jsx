@@ -149,7 +149,12 @@ function SettingsContent() {
     ? t('settings.plan.trial')
     : subscription?.status === 'past_due'
     ? t('settings.plan.pastDue')
-    : t('settings.plan.free');
+    : '';
+
+  // If no active subscription, show "Free" as the plan name instead of a contradictory combo
+  const displayPlanName = (!subscription?.status || !['active', 'trialing', 'past_due'].includes(subscription.status))
+    ? t('settings.plan.free')
+    : planName;
 
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es' : 'en-US';
   const lastUpdated = new Date().toLocaleDateString(intlLocale, {
@@ -195,7 +200,7 @@ function SettingsContent() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                  {planName} {t('settings.plan.planLabel')}
+                  {displayPlanName} {t('settings.plan.planLabel')}
                 </p>
                 <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
                   {planStatus}
@@ -281,7 +286,7 @@ function SettingsContent() {
             icon={Shield}
             label={t('settings.data.privacyLabel')}
             description={t('settings.data.privacyDesc')}
-            href={ROUTES.export}
+            href="/privacy"
           />
         </div>
       </SectionCard>

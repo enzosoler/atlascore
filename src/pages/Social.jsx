@@ -332,7 +332,7 @@ function SocialContent() {
       title: 'Workouts this week',
       subtitle: 'Completed sessions',
       value: completedWorkouts,
-      unit: 'workouts',
+      unit: completedWorkouts === 1 ? 'workout' : 'workouts',
       detail: 'This week',
       icon: Dumbbell,
       gradient: 'linear-gradient(135deg, #FFF7ED 0%, #FED7AA 100%)',

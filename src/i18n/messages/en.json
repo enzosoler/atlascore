@@ -376,6 +376,7 @@
     "athlete": "For athletes & enthusiasts",
     "professional": "For professionals — coming soon",
     "professionalDesc": "Professional plans for coaches, nutritionists, and clinicians are coming soon. Join the waitlist for early access.",
+    "professionalCta": "Join the waitlist",
     "footer": "All paid plans include 7 free trial days · Cancel anytime · No cancellation fees",
     "footerPayment": "Payments processed securely via Stripe",
     "plans": {
