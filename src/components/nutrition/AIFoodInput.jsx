@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Sparkles, Loader2, Check, AlertCircle, X, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
+import { useI18n } from '@/lib/i18nContext';
 import { toast } from 'sonner';
 
 /**
@@ -106,6 +107,7 @@ function titleCase(str) {
 }
 
 export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
+  const { locale } = useI18n();
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
@@ -130,8 +132,9 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch }) {
     setValidation(null);
 
     try {
+      const langName = locale?.startsWith('pt') ? 'Portuguese' : locale?.startsWith('es') ? 'Spanish' : 'English';
       const { data, error: fnError } = await supabase.functions.invoke('log-food-text', {
-        body: { query: normalizedText, originalQuery: rawText },
+        body: { query: normalizedText, originalQuery: rawText, language: langName },
       });
 
       if (fnError) {

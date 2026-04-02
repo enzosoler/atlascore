@@ -57,32 +57,39 @@ export default function RestTimer({ duration = 90, onComplete }) {
     <div className="atlas-card p-6 text-center space-y-6">
       <p className="atlas-overline">{t('workoutExecution.rest')}</p>
 
-      <div className="relative w-48 h-48 mx-auto">
-        <svg className="w-full h-full -rotate-90">
+      <div className="relative w-56 h-56 mx-auto">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 224 224">
           <circle
-            cx="96"
-            cy="96"
-            r="88"
+            cx="112"
+            cy="112"
+            r="100"
             fill="none"
             stroke="hsl(var(--shell))"
-            strokeWidth="8"
+            strokeWidth="6"
           />
           <circle
-            cx="96"
-            cy="96"
-            r="88"
+            cx="112"
+            cy="112"
+            r="100"
             fill="none"
             stroke="hsl(var(--brand))"
-            strokeWidth="8"
-            strokeDasharray={`${(progress / 100) * 553} 553`}
+            strokeWidth="6"
+            strokeDasharray={`${(progress / 100) * 628.3} 628.3`}
             strokeLinecap="round"
             className="transition-all duration-1000"
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-[48px] font-bold tabular-nums">
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <p className="text-[42px] font-bold tabular-nums leading-none text-[hsl(var(--fg))]">
             {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
           </p>
+          <button
+            type="button"
+            onClick={() => setRemaining(r => r + 30)}
+            className="mt-2 px-3 py-1 rounded-full text-[12px] font-semibold text-[hsl(var(--fg-2))] bg-[hsl(var(--fill)/0.6)] hover:bg-[hsl(var(--fill))] transition-colors"
+          >
+            +30s
+          </button>
         </div>
       </div>
 

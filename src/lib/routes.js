@@ -21,6 +21,7 @@ export const ROUTES = {
   goals: '/goals',
   bodyProfile: '/body-profile',
   account: '/account',
+  profileEdit: '/profile/edit',
   export: '/Export',
   admin: '/AdminPanel',
   myDiet: '/my-diet',

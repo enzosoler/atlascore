@@ -29,7 +29,9 @@ export async function invokeLLM(prompt, opts = {}) {
       return null;
     }
 
-    // Edge function returns { text: "..." } or { data: "..." }
+    // Edge function returns { text: "...", data: <parsed> }
+    // Prefer parsed data object when available, fall back to raw text
+    if (data?.data && typeof data.data === 'object') return data.data;
     return data?.text ?? data?.data ?? data ?? null;
   } catch (err) {
     console.warn('[llm] invokeLLM failed:', err.message);
@@ -45,7 +47,7 @@ export async function invokeLLM(prompt, opts = {}) {
  * @returns {Promise<object|null>}
  */
 export async function invokeLLMJson(prompt, schema) {
-  const raw = await invokeLLM(prompt, { schema, maxTokens: 1024 });
+  const raw = await invokeLLM(prompt, { schema, maxTokens: 4096 });
   if (!raw) return null;
   if (typeof raw === 'object') return raw;
   try {

@@ -41,6 +41,7 @@ const LabExams = lazy(() => import('@/pages/LabExams'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const Goals = lazy(() => import('@/pages/Goals'));
 const BodyProfile = lazy(() => import('@/pages/BodyProfile'));
+const ProfileEdit = lazy(() => import('@/pages/ProfileEdit'));
 const Account = lazy(() => import('@/pages/Account'));
 const Export = lazy(() => import('@/pages/Export'));
 const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
@@ -383,6 +384,7 @@ const AppRoutes = () => (
           <Route path={ROUTES.body} element={<Body />} />
           <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
           <Route path={ROUTES.profile} element={<Profile />} />
+          <Route path={ROUTES.profileEdit} element={<ProfileEdit />} />
           <Route path={ROUTES.goals} element={<Goals />} />
           <Route path={ROUTES.bodyProfile} element={<BodyProfile />} />
           <Route path={ROUTES.account} element={<Account />} />

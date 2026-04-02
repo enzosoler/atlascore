@@ -130,7 +130,12 @@ export function useDailyStateV2() {
   // ── Derived sections ──────────────────────────────────────────────────────
 
   const profileData = rawProfile?.profile_data ?? {};
-  const targets = profileData?.targets ?? {};
+  const targets = profileData?.targets ?? {
+    calories: profileData.calories_target,
+    protein: profileData.protein_target,
+    carbs: profileData.carbs_target,
+    fat: profileData.fat_target,
+  };
 
   const workout = useMemo(() => ({
     planned: !!rawSession,

@@ -97,7 +97,7 @@ function MoreContent() {
       <div className="mx-auto max-w-lg px-4 pt-6 pb-6 space-y-5">
 
         {/* Identity */}
-        <div className="px-1 py-2">
+        <Link to={ROUTES.profileEdit} className="block px-1 py-2 rounded-2xl transition-colors active:bg-[hsl(var(--fill)/0.5)]">
           <div className="flex items-center gap-3.5">
             <div className="w-14 h-14 rounded-full bg-[hsl(var(--brand))] flex items-center justify-center text-white font-bold text-[18px] tracking-[-0.02em]">
               {(displayName?.[0] || 'A').toUpperCase()}
@@ -108,8 +108,9 @@ function MoreContent() {
               </p>
               <p className="text-[13px] text-[hsl(var(--fg-3))] truncate">{email}</p>
             </div>
+            <ChevronRight className="w-4 h-4 text-[hsl(var(--fg-3)/0.5)] shrink-0" strokeWidth={1.5} />
           </div>
-        </div>
+        </Link>
 
         {/* Your Plan */}
         <MenuSection title={t('profile.more.sectionYourPlan')}>

@@ -1660,6 +1660,7 @@
       "track_first_meal": "Track your first meal to start monitoring calories and macros",
       "add_meals_complete_log": "Add meals to complete this day's nutrition log",
       "log_first_meal": "Log First Meal",
+      "searchPlaceholder": "Search foods, brands, or meals...",
       "quick_add": "Quick add:",
       "repeat_yesterday_breakfast": "Repeat yesterday's breakfast?",
       "loading_meals": "Loading meals...",

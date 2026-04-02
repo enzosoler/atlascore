@@ -46,7 +46,7 @@ Rules:
 - If the user mentions a preparation method (e.g., "com manteiga no preparo"), factor that into the macros.
 - If no portion is specified, assume a typical single adult serving.
 - Be conservative with estimates — it's better to slightly underestimate than wildly overestimate.
-- Always respond in the SAME LANGUAGE as the user's input.
+- Always respond in the language specified in the "response_language" field of the request. If not specified, respond in the same language as the user's input.
 - For unit_weight_g: estimate the weight in grams of ONE standard unit of this food (e.g., 1 pão francês ≈ 60g, 1 banana ≈ 120g, 1 fatia de queijo ≈ 30g, 1 colher de sopa de azeite ≈ 15g)
 
 Respond ONLY with valid JSON in this exact format:
@@ -160,7 +160,7 @@ serve(async (req) => {
 
   // ── 2. Parse request ─────────────────────────────────────────────────────
 
-  let body: { query?: string };
+  let body: { query?: string; language?: string };
   try {
     body = await req.json();
   } catch {
@@ -168,6 +168,7 @@ serve(async (req) => {
   }
 
   const rawQuery = String(body.query || '').trim();
+  const responseLang = body.language || '';
   if (rawQuery.length < 3) {
     return json({ error: 'Query too short (minimum 3 characters)' }, 400);
   }
@@ -357,7 +358,7 @@ serve(async (req) => {
         max_tokens: 1024,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: rawQuery },
+          { role: 'user', content: responseLang ? `[Response language: ${responseLang}]\n${rawQuery}` : rawQuery },
         ],
         response_format: { type: 'json_object' },
       }),

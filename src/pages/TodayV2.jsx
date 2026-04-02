@@ -326,7 +326,7 @@ function TodayContent() {
   const safeDaily = daily || {};
   const safePlan = safeDaily?.plan || {};
   const safeNutrition = safeDaily?.nutrition || {};
-  const kcalRemaining = Math.max(0, (safeNutrition.caloriesTarget || 2000) - (safeNutrition.caloriesConsumed || 0));
+  const kcalRemaining = Math.max(0, (safeNutrition.caloriesTarget || 0) - (safeNutrition.caloriesConsumed || 0));
 
   const briefing = buildBriefing({
     workoutDone: safeDaily.workoutDone,
@@ -493,7 +493,7 @@ function TodayContent() {
           <QuickAction
             to={ROUTES.workouts}
             icon={Dumbbell}
-            label={t('today.training.label')}
+            label={t('today.workout.label')}
             status={safeDaily.workoutDone ? t('today.completed') : t('today.start_now')}
             colorClass="bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]"
           />

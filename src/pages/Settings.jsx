@@ -165,19 +165,21 @@ function SettingsContent() {
         subtitle={t('settings.account.planSubtitle')}
       >
         <div className="space-y-3">
-          <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-              <User className="h-5 w-5" strokeWidth={1.9} />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+                <User className="h-5 w-5" strokeWidth={1.9} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))] truncate">
+                  {user?.name || user?.email?.split('@')[0] || 'User'}
+                </p>
+                <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))] truncate">{user?.email || '—'}</p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                {user?.name || user?.email?.split('@')[0] || 'User'}
-              </p>
-              <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">{user?.email || '—'}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[12px] text-[hsl(var(--fg-3))]">{t('settings.account.updated')} {lastUpdated}</span>
-              <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <div className="flex items-center gap-3 pl-16 sm:pl-0">
+              <span className="text-[12px] text-[hsl(var(--fg-3))] shrink-0">{t('settings.account.updated')} {lastUpdated}</span>
+              <Button asChild variant="outline" size="sm" className="gap-1.5 shrink-0">
                 <Link to={ROUTES.profile}>
                   {t('settings.account.editProfile')}
                   <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
@@ -186,18 +188,20 @@ function SettingsContent() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-              <CreditCard className="h-5 w-5" strokeWidth={1.9} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                {planName} {t('settings.plan.planLabel')}
-              </p>
-              <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
-                {planStatus}
-                {subscription?.expires_at && ` • ${t('settings.plan.renews')} ${new Date(subscription.expires_at).toLocaleDateString()}`}
-              </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
+                <CreditCard className="h-5 w-5" strokeWidth={1.9} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
+                  {planName} {t('settings.plan.planLabel')}
+                </p>
+                <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
+                  {planStatus}
+                  {subscription?.expires_at && ` • ${t('settings.plan.renews')} ${new Date(subscription.expires_at).toLocaleDateString()}`}
+                </p>
+              </div>
             </div>
             {subscription && ['active', 'trialing', 'past_due'].includes(subscription.status) && (
               <Button
@@ -205,7 +209,7 @@ function SettingsContent() {
                 size="sm"
                 onClick={() => openCustomerPortal(user?.id, user?.email)}
                 disabled={portalLoading}
-                className="gap-1.5"
+                className="gap-1.5 shrink-0 ml-16 sm:ml-0"
               >
                 {portalLoading ? t('settings.plan.loading') : t('settings.plan.manage')}
                 <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />

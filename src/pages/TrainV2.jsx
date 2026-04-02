@@ -353,7 +353,7 @@ function TodayWorkoutHero({ plan, exercises, onStart, t }) {
             </div>
           ))}
           {exercises.length > 4 && (
-            <p className="text-caption1 text-[hsl(var(--fg-3))] pl-9">+{exercises.length - 4} {t('train.more')}</p>
+            <p className="text-caption1 text-[hsl(var(--fg-3))] pl-9">+{exercises.length - 4} more</p>
           )}
         </div>
         

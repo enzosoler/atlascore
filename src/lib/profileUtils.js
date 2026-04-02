@@ -7,10 +7,18 @@ import { supabase } from '@/lib/supabaseClient';
 export const EMPTY_FORM = {
   phone: '',
   age: '',
+  date_of_birth: '',
   height: '',
   current_weight: '',
   target_weight: '',
+  body_fat_pct: '',
   training_goal: '',
+  fitness_level: '',
+  activity_level: '',
+  equipment_access: '',
+  injuries_notes: '',
+  units_system: 'metric',
+  timezone: '',
   calories_target: '',
   protein_target: '',
   carbs_target: '',
@@ -23,6 +31,7 @@ export const NUMERIC_FIELDS = [
   'height',
   'current_weight',
   'target_weight',
+  'body_fat_pct',
   'calories_target',
   'protein_target',
   'carbs_target',
@@ -129,6 +138,18 @@ export async function saveLocalProfile(user, currentProfileId, payload) {
 // ---------------------------------------------------------------------------
 // Pure helpers
 // ---------------------------------------------------------------------------
+
+export function computeAgeFromDOB(dob) {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  if (isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age > 0 ? age : null;
+}
 
 export function hasValue(value) {
   return value !== '' && value != null;

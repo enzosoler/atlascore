@@ -1036,7 +1036,7 @@ export default function PlanBuilderWizard({ open, onClose, userId, profileData }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-[hsl(var(--card))] border-[hsl(var(--border))] rounded-2xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="sm:max-w-lg bg-[hsl(var(--card))] border-[hsl(var(--border))] rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -1059,7 +1059,7 @@ export default function PlanBuilderWizard({ open, onClose, userId, profileData }
           <p className="text-sm text-[hsl(var(--fg-2))] mt-1">{stepSubtitles[step]}</p>
         </DialogHeader>
 
-        <div className="py-2">
+        <div className="py-2 pb-6">
           {step === 'intake' && (
             <IntakeStep
               answers={answers}

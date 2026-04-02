@@ -1,0 +1,40 @@
+atlas.core is a complete AI-powered fitness platform — workouts, nutrition, body tracking, and coaching in one app. Built for anyone serious about results.
+
+TRAINING
+• AI-generated and manual workout plans
+• 80+ exercise library with autocomplete
+• Track sets, reps, weight, and rest times
+• Periodized programming for strength, hypertrophy & endurance
+• Full workout history and volume analytics
+
+NUTRITION
+• Log meals in seconds with AI food recognition
+• Macro and calorie tracking with daily targets
+• Custom macro splits based on your goals
+• Barcode scanner for packaged foods
+
+BODY TRACKING
+• Track weight, body fat, measurements & progress photos
+• Visual progress charts over time
+• AI-powered body composition insights
+
+COACHING
+• AI coach that adapts to your training and goals
+• Smart recommendations based on your data
+• Recovery and readiness tracking
+
+INTEGRATIONS
+• Apple Health sync
+• Apple Watch app
+• Home screen widgets
+• Works on iOS, Android & Web
+
+PRICING
+• Free plan with core features
+• Pro: $9/month ($79/year) — full nutrition + advanced training
+• Performance: $19/month ($159/year) — AI coaching + body analytics
+• 7-day free trial, no credit card required
+
+Built by a solo developer who actually lifts. No bloat, no ads, no BS — just the tools you need to get stronger.
+
+Download atlas.core and start training smarter today.

@@ -464,7 +464,7 @@ export default function AppLayout() {
               className={collapsed ? '' : 'w-full justify-start'}
             />
             <button
-              onClick={() => logout()}
+              onClick={() => { if (window.confirm(t('settings.signout.confirm') || 'Sign out of atlas.core?')) logout(); }}
               className={getDesktopNavItemClass(false, collapsed, true)}
             >
               <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
@@ -601,7 +601,7 @@ export default function AppLayout() {
                   <Settings className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
                   <span>{t('settings.title')}</span>
                 </Link>
-                <button onClick={() => logout()} className={getMobileNavItemClass(false, true)}>
+                <button onClick={() => { if (window.confirm(t('settings.signout.confirm') || 'Sign out of atlas.core?')) logout(); }} className={getMobileNavItemClass(false, true)}>
                   <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.95} />
                   <span>{t('settings.signout.label')}</span>
                 </button>

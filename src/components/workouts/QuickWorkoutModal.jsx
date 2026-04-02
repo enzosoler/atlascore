@@ -47,7 +47,7 @@ const LOCATION_OPTIONS = [
 const EMPTY_EXERCISE = () => ({ name: '', sets: '3', reps: '10', rest_seconds: 60 });
 
 export default function QuickWorkoutModal({ open, onClose, onStart }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   // mode: null = picker, 'ai' = AI flow, 'manual' = manual form
   const [mode, setMode] = useState(null);
 
@@ -98,7 +98,10 @@ export default function QuickWorkoutModal({ open, onClose, onStart }) {
     setIsValidWorkout(false);
 
     try {
+      const uiLang = locale?.startsWith('pt') ? 'Brazilian Portuguese' : locale?.startsWith('es') ? 'Spanish' : 'English';
       const prompt = `You are an expert fitness coach. Create a focused, effective workout based on the user's constraints.
+
+IMPORTANT: ALL text (workout name, exercise names, notes) MUST be in ${uiLang}.
 
 Rules:
 1. Select exercises appropriate for the location (gym equipment vs home vs bodyweight)
