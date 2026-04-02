@@ -260,14 +260,22 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
     // Se tem items, tenta extrair unit_weight_g do primeiro item como referência
     const firstItem = result.items?.[0];
     
+    // Recalculate totals from items if available (AI totals can be wrong)
+    const items = result.items || [];
+    const hasItems = items.length > 0;
+    const sumCal = hasItems ? items.reduce((s, i) => s + (i.calories || 0), 0) : (result.calories || 0);
+    const sumP = hasItems ? items.reduce((s, i) => s + (i.protein || 0), 0) : (result.protein || 0);
+    const sumC = hasItems ? items.reduce((s, i) => s + (i.carbs || 0), 0) : (result.carbs || 0);
+    const sumF = hasItems ? items.reduce((s, i) => s + (i.fat || 0), 0) : (result.fat || 0);
+
     const foods = [{
       name: titleCase(result.food_name),
       serving_description: result.serving_description,
       estimatedAmount: result.serving_description,
-      calories: result.calories || 0,
-      protein: result.protein || 0,
-      carbs: result.carbs || 0,
-      fat: result.fat || 0,
+      calories: Math.round(sumCal),
+      protein: Math.round(sumP * 10) / 10,
+      carbs: Math.round(sumC * 10) / 10,
+      fat: Math.round(sumF * 10) / 10,
       fiber: result.fiber || 0,
       confidence: result.confidence,
       // Dados de conversão de unidades da IA (do primeiro item se disponível)
@@ -425,10 +433,10 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
 
         {/* Macro summary */}
         <div className="flex gap-3 text-[12px] mt-2 pt-2 border-t border-[hsl(var(--border)/0.5)]">
-          <span className="font-semibold text-[hsl(var(--fg))]">{Math.round(result.calories)} kcal</span>
-          <span className="text-[hsl(var(--fg-2))]">P <b className="text-[hsl(var(--fg))]">{result.protein}g</b></span>
-          <span className="text-[hsl(var(--fg-2))]">C <b className="text-[hsl(var(--fg))]">{result.carbs}g</b></span>
-          <span className="text-[hsl(var(--fg-2))]">F <b className="text-[hsl(var(--fg))]">{result.fat}g</b></span>
+          <span className="font-semibold text-[hsl(var(--fg))]">{Math.round(result.items?.length ? result.items.reduce((s, i) => s + (i.calories || 0), 0) : result.calories)} kcal</span>
+          <span className="text-[hsl(var(--fg-2))]">P <b className="text-[hsl(var(--fg))]">{Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.protein || 0), 0) : result.protein) * 10) / 10}g</b></span>
+          <span className="text-[hsl(var(--fg-2))]">C <b className="text-[hsl(var(--fg))]">{Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.carbs || 0), 0) : result.carbs) * 10) / 10}g</b></span>
+          <span className="text-[hsl(var(--fg-2))]">F <b className="text-[hsl(var(--fg))]">{Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.fat || 0), 0) : result.fat) * 10) / 10}g</b></span>
           {result.fiber > 0 && (
             <span className="text-[hsl(var(--fg-2))]">Fib <b className="text-[hsl(var(--fg))]">{result.fiber}g</b></span>
           )}

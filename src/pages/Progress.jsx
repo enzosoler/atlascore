@@ -147,6 +147,7 @@ function NextActionCard({ weightData, workoutLogs, foodLogs, photos, t }) {
       subtitle: t('progress.action.logWeightDesc'),
       icon: Scale,
       cta: t('progress.action.addNow'),
+      to: ROUTES.measurements,
     };
     priority = 'high';
   } else if (!hasPhotos) {
@@ -155,6 +156,7 @@ function NextActionCard({ weightData, workoutLogs, foodLogs, photos, t }) {
       subtitle: t('progress.action.takePhotoDesc'),
       icon: Camera,
       cta: t('progress.action.addPhoto'),
+      to: ROUTES.progressPhotos,
     };
     priority = 'medium';
   } else if (!hasWorkouts) {
@@ -217,15 +219,9 @@ function NextActionCard({ weightData, workoutLogs, foodLogs, photos, t }) {
             <p className="text-caption1 text-[hsl(var(--fg-3))]">{action.subtitle}</p>
           </div>
         </div>
-        {isViewAll ? (
-          <Link to={ROUTES.measurements} className={buttonClass}>
-            {action.cta}
-          </Link>
-        ) : (
-          <Link to={ROUTES.measurements} className={buttonClass}>
-            {action.cta}
-          </Link>
-        )}
+        <Link to={action.to || ROUTES.measurements} className={buttonClass}>
+          {action.cta}
+        </Link>
       </div>
     </div>
   );

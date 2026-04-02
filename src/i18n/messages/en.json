@@ -1204,6 +1204,12 @@
       "subtitle": "Active session control",
       "signOutDesc": "End your current session across all devices",
       "activeNow": "Active now"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Manage your reminders and alerts",
+      "reminderLabel": "Reminder settings",
+      "reminderDesc": "Workout, meals, weigh-in, and streak reminders"
     }
   },
   "profile": {
@@ -2862,7 +2868,14 @@
     "gen_error_plan": "Error generating plan.",
     "creator_generated": "Generated",
     "creator_coach": "Coach",
-    "creator_you": "You"
+    "creator_you": "You",
+    "setup_title": "Diet preferences",
+    "setup_subtitle": "Tell us how you like to eat",
+    "approach_label": "Dietary approach",
+    "meals_per_day_label": "Meals per day",
+    "allergies_label": "Allergies or restrictions",
+    "allergies_placeholder": "E.g.: lactose intolerant, no shellfish, gluten-free...",
+    "generate_plan": "Generate my plan"
   },
   "diary": {
     "title": "Diary",

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Bell,
   Moon,
   Sun,
   User,
@@ -129,7 +130,7 @@ function LanguageOption({ label, value, currentLocale, onSelect }) {
 function SettingsContent() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { t, locale, setLocale } = useI18n();
+  const { t, locale, setLocale, switchLocale } = useI18n();
   const { openCustomerPortal, loading: portalLoading } = useCustomerPortal();
   const { subscription } = useSubscription();
 
@@ -177,7 +178,7 @@ function SettingsContent() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))] truncate">
-                  {user?.name || user?.email?.split('@')[0] || 'User'}
+                  {user?.full_name || user?.name || user?.email?.split('@')[0] || 'User'}
                 </p>
                 <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))] truncate">{user?.email || '—'}</p>
               </div>
@@ -264,10 +265,20 @@ function SettingsContent() {
               label={localeLabels[loc]}
               value={loc}
               currentLocale={locale}
-              onSelect={setLocale}
+              onSelect={switchLocale}
             />
           ))}
         </div>
+      </SectionCard>
+
+      {/* Notifications */}
+      <SectionCard title={t('settings.notifications.title')} subtitle={t('settings.notifications.subtitle')}>
+        <ControlRow
+          icon={Bell}
+          label={t('settings.notifications.reminderLabel')}
+          description={t('settings.notifications.reminderDesc')}
+          href={ROUTES.notificationSettings}
+        />
       </SectionCard>
 
       {/* Data & Control */}
@@ -286,7 +297,7 @@ function SettingsContent() {
             icon={Shield}
             label={t('settings.data.privacyLabel')}
             description={t('settings.data.privacyDesc')}
-            href="/privacy"
+            href="/settings/privacy"
           />
         </div>
       </SectionCard>

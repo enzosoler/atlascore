@@ -226,11 +226,16 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
 
       clearTimeout(timeoutId);
 
-      if (res?.name) {
+      // Handle nested response (AI may return { plan: {...}, days: [...] } or flat { name, days })
+      const plan = res?.name ? res : res?.plan ? { ...res.plan, days: res.days || res.plan.days } : null;
+      if (plan?.name || plan?.days?.length) {
         // Deactivate previous plans
         try { await deactivateAllWorkoutPlans(user.id); } catch { /* noop */ }
         await createWorkoutPlan(user.id, {
-          ...res,
+          name: plan.name || 'AI Workout Plan',
+          objective: plan.objective || '',
+          frequency: plan.frequency || plan.days?.length || 4,
+          days: plan.days || [],
           source: 'ai',
           created_by_type: 'ai',
           active: true,

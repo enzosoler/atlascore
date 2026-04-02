@@ -49,6 +49,7 @@ export const ROUTES = {
   shareTarget: '/share-target',
   sharedWorkout: '/shared/workout/:token',
   notifications: '/notifications',
+  notificationSettings: '/notification-settings',
   adminAnalytics: '/AdminPanel/analytics',
   adminViewAs: '/AdminPanel/view-as',
 };

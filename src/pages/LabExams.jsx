@@ -631,7 +631,7 @@ const UploadDialog = ({ isOpen, onClose, onUpload, isExtracting, error }) => (
           </div>
         </div>
 
-        <SecondaryButton className="w-full" disabled={isExtracting}>
+        <SecondaryButton className="w-full" disabled={isExtracting} onClick={() => { setIsUploadDialogOpen(false); toast.info('Manual marker entry coming soon.'); }}>
           <Plus size={16} className="mr-2" />
           Enter markers manually
         </SecondaryButton>

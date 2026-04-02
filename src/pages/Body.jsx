@@ -203,11 +203,13 @@ function BodySummary({ measurements }) {
 
   const filtered = measurements.filter((m) => new Date(m.date) >= startDate);
 
-  const latest = filtered[0];
+  // Use full array for latest values (so header never shows "—" when data exists)
+  const allLatest = measurements[0];
+  const latest = filtered[0] || allLatest;
   const oldest = filtered[filtered.length - 1];
-  const latestWeight = getMeasurementFieldValue(latest, 'weight');
+  const latestWeight = getMeasurementFieldValue(latest, 'weight') ?? getMeasurementFieldValue(allLatest, 'weight');
   const oldestWeight = getMeasurementFieldValue(oldest, 'weight');
-  const latestBodyFat = getMeasurementFieldValue(latest, 'body_fat_percent');
+  const latestBodyFat = getMeasurementFieldValue(latest, 'body_fat_percent') ?? getMeasurementFieldValue(allLatest, 'body_fat_percent');
   const oldestBodyFat = getMeasurementFieldValue(oldest, 'body_fat_percent');
 
   const weightChange = latestWeight != null && oldestWeight != null ? latestWeight - oldestWeight : 0;

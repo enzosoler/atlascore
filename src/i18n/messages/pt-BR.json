@@ -1190,6 +1190,12 @@
       "subtitle": "Controle de sessão ativa",
       "signOutDesc": "Encerre sua sessão atual em todos os dispositivos",
       "activeNow": "Ativa agora"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "subtitle": "Gerencie seus lembretes e alertas",
+      "reminderLabel": "Configurações de lembretes",
+      "reminderDesc": "Lembretes de treino, refeições, pesagem e sequência"
     }
   },
   "profile": {
@@ -2847,7 +2853,14 @@
     "gen_error_plan": "Erro ao gerar plano.",
     "creator_generated": "Gerado",
     "creator_coach": "Coach",
-    "creator_you": "Você"
+    "creator_you": "Você",
+    "setup_title": "Preferências alimentares",
+    "setup_subtitle": "Nos conte como você gosta de comer",
+    "approach_label": "Abordagem alimentar",
+    "meals_per_day_label": "Refeições por dia",
+    "allergies_label": "Alergias ou restrições",
+    "allergies_placeholder": "Ex: intolerante a lactose, sem frutos do mar, sem glúten...",
+    "generate_plan": "Gerar meu plano"
   },
   "diary": {
     "title": "Diário",
