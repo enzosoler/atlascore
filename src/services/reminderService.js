@@ -1,132 +1,145 @@
 /**
- * Atlas Core — Reminder Service
+ * Atlas Core — Smart Reminder Service
  *
- * Schedules recurring local notifications for workout reminders,
- * meal logging nudges, and check-in prompts.
+ * Schedules context-aware local notifications. Not generic spam.
+ * Fires only when relevant based on actual user state.
+ *
+ * Philosophy: a coach that intervenes only when necessary,
+ * always at the right moment. Max 2-4 per day.
  *
  * Notification IDs:
- *   1000-1006  = workout reminders (one per weekday)
- *   2000       = meal logging nudge
- *   3000       = daily check-in
- *   4000       = streak keeper
+ *   1001 = morning check-in
+ *   2001 = evening closure
+ *   3001 = streak warning
+ *   4001 = nutrition alert (dynamic)
  */
 
 import { notificationService } from './notificationService';
 
-const STORAGE_KEY = 'atlas_reminders_config';
+const STORAGE_KEY = 'atlas_reminder_prefs';
 
-/** Default reminder config */
-const DEFAULT_CONFIG = {
-  workoutEnabled: true,
-  workoutTime: '08:00',       // HH:mm
-  workoutDays: [1, 2, 3, 4, 5], // Mon-Fri
-
-  mealEnabled: true,
-  mealTime: '12:30',
-
-  checkinEnabled: true,
-  checkinTime: '21:00',
-
-  streakEnabled: true,
-  streakTime: '20:00',
+const DEFAULT_PREFS = {
+  morningTime: '07:30',
+  eveningTime: '20:30',
+  enabled: true,
 };
 
-/** Load saved config or defaults */
-export function loadReminderConfig() {
+export function loadPrefs() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+    return saved ? { ...DEFAULT_PREFS, ...JSON.parse(saved) } : { ...DEFAULT_PREFS };
   } catch {
-    return { ...DEFAULT_CONFIG };
+    return { ...DEFAULT_PREFS };
   }
 }
 
-/** Save config and reschedule */
-export function saveReminderConfig(config) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+export function savePrefs(prefs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
 }
 
-/** Parse "HH:mm" into next occurrence Date */
-function nextOccurrence(timeStr, targetDay = null) {
+function nextTime(timeStr) {
   const [h, m] = timeStr.split(':').map(Number);
-  const now = new Date();
-  const target = new Date();
-  target.setHours(h, m, 0, 0);
-
-  if (targetDay !== null) {
-    // Find next occurrence of targetDay (0=Sun, 1=Mon, ...)
-    const currentDay = now.getDay();
-    let daysAhead = targetDay - currentDay;
-    if (daysAhead < 0) daysAhead += 7;
-    if (daysAhead === 0 && target <= now) daysAhead = 7;
-    target.setDate(target.getDate() + daysAhead);
-  } else {
-    // Next occurrence of this time (today or tomorrow)
-    if (target <= now) target.setDate(target.getDate() + 1);
-  }
-
-  return target;
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  if (d <= new Date()) d.setDate(d.getDate() + 1);
+  return d;
 }
 
 /**
- * Schedule all reminders based on current config.
- * Call once at app launch and whenever config changes.
+ * Cancel all atlas reminders.
  */
-export async function scheduleReminders(t) {
-  const config = loadReminderConfig();
-
-  // Cancel all existing reminders first
-  for (let id = 1000; id <= 1006; id++) {
+async function cancelAll() {
+  for (const id of [1001, 2001, 3001, 4001]) {
     await notificationService.cancelLocal(id);
   }
-  await notificationService.cancelLocal(2000);
-  await notificationService.cancelLocal(3000);
-  await notificationService.cancelLocal(4000);
+}
 
-  // Workout reminders — one per training day
-  if (config.workoutEnabled) {
-    for (const day of config.workoutDays) {
-      const at = nextOccurrence(config.workoutTime, day);
+/**
+ * Schedule the daily notification loop.
+ * Called once on app launch + after each meaningful action.
+ *
+ * @param {object} state - Current user state from useDailyStateV2
+ * @param {object} state.daily - Today's data
+ */
+export async function scheduleSmartReminders(state = {}) {
+  const prefs = loadPrefs();
+  if (!prefs.enabled) { await cancelAll(); return; }
+
+  await cancelAll();
+
+  const daily = state.daily || {};
+  const now = new Date();
+  const hour = now.getHours();
+
+  // ── 1. Morning — Identity + Intent ──────────────────────────────────────
+  // "Log your day." / "New day. Stay inside target."
+  // Only schedule if it's before morning time
+  if (hour < parseInt(prefs.morningTime)) {
+    await notificationService.scheduleLocal({
+      id: 1001,
+      title: 'Log your weight.',
+      body: 'New day. Stay inside target.',
+      scheduleAt: nextTime(prefs.morningTime),
+      extra: { route: '/Today' },
+    });
+  }
+
+  // ── 2. Evening — Closure Trigger ────────────────────────────────────────
+  // Highest ROI notification. "Finish your day."
+  // Only if user hasn't completed their check-in yet
+  if (hour < parseInt(prefs.eveningTime) && !daily.checkinDone) {
+    await notificationService.scheduleLocal({
+      id: 2001,
+      title: 'Finish your day.',
+      body: 'Log meals and check in before closing.',
+      scheduleAt: nextTime(prefs.eveningTime),
+      extra: { route: '/Today' },
+    });
+  }
+
+  // ── 3. Streak Warning ──────────────────────────────────────────────────
+  // Only if user has a streak > 1 and hasn't checked in today
+  // Fire at 9pm
+  const hasStreak = (daily.checkInStreak || 0) > 1;
+  if (hour < 21 && hasStreak && !daily.checkinDone) {
+    const at = new Date();
+    at.setHours(21, 0, 0, 0);
+    if (at > now) {
       await notificationService.scheduleLocal({
-        id: 1000 + day,
-        title: t?.('notifications.workout_title') || 'Time to train',
-        body: t?.('notifications.workout_body') || 'Your workout is waiting. Let\'s go!',
+        id: 3001,
+        title: "Don't break the streak.",
+        body: `${daily.checkInStreak} days. You're one action away.`,
         scheduleAt: at,
-        extra: { route: '/Workouts' },
+        extra: { route: '/Today' },
       });
     }
   }
 
-  // Meal logging nudge
-  if (config.mealEnabled) {
-    await notificationService.scheduleLocal({
-      id: 2000,
-      title: t?.('notifications.meal_title') || 'Log your meal',
-      body: t?.('notifications.meal_body') || 'Don\'t forget to track what you ate.',
-      scheduleAt: nextOccurrence(config.mealTime),
-      extra: { route: '/Nutrition' },
-    });
-  }
+  // ── 4. Dynamic Nutrition Alert ──────────────────────────────────────────
+  // Only fire if user is significantly behind on protein or calories by 2pm
+  if (hour >= 12 && hour < 15) {
+    const target = daily.caloriesTarget || 0;
+    const consumed = daily.caloriesConsumed || 0;
+    const proteinTarget = daily.proteinTarget || 0;
+    const proteinConsumed = daily.proteinConsumed || 0;
 
-  // Daily check-in
-  if (config.checkinEnabled) {
-    await notificationService.scheduleLocal({
-      id: 3000,
-      title: t?.('notifications.checkin_title') || 'Daily check-in',
-      body: t?.('notifications.checkin_body') || 'How was your day? Log energy, mood, and sleep.',
-      scheduleAt: nextOccurrence(config.checkinTime),
-      extra: { route: '/Today' },
-    });
-  }
-
-  // Streak keeper
-  if (config.streakEnabled) {
-    await notificationService.scheduleLocal({
-      id: 4000,
-      title: t?.('notifications.streak_title') || 'Keep your streak alive',
-      body: t?.('notifications.streak_body') || 'You haven\'t checked in today. Don\'t break the chain!',
-      scheduleAt: nextOccurrence(config.streakTime),
-      extra: { route: '/Today' },
-    });
+    if (target > 0 && consumed < target * 0.3) {
+      // Less than 30% of calories by afternoon
+      await notificationService.scheduleLocal({
+        id: 4001,
+        title: 'Calories critically low.',
+        body: `${Math.round(target - consumed)} kcal remaining.`,
+        scheduleAt: new Date(now.getTime() + 60000), // 1 min from now
+        extra: { route: '/Nutrition' },
+      });
+    } else if (proteinTarget > 0 && proteinConsumed < proteinTarget * 0.3) {
+      await notificationService.scheduleLocal({
+        id: 4001,
+        title: 'Protein is low.',
+        body: `${Math.round(proteinTarget - proteinConsumed)}g remaining today.`,
+        scheduleAt: new Date(now.getTime() + 60000),
+        extra: { route: '/Nutrition' },
+      });
+    }
   }
 }
