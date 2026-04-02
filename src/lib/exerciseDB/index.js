@@ -61,6 +61,38 @@ const STATIC_EXERCISE_CATALOG = Object.entries(EXERCISE_TRANSLATIONS)
   })
   .filter(Boolean);
 
+// ─── Media lookup by name ────────────────────────────────────────────────────
+
+/** Pre-build a name→media map for fast lookups (covers EN + PT + aliases) */
+const _mediaIndex = (() => {
+  const idx = {};
+  for (const ex of STATIC_EXERCISE_CATALOG) {
+    const gifUrl = ex.media?.gif_url;
+    if (!gifUrl) continue;
+    const names = [
+      ex.canonical_name_en,
+      ex.canonical_name_pt,
+      ...(ex.aliases_en || []),
+      ...(ex.aliases_pt || []),
+    ];
+    for (const n of names) {
+      if (n) idx[normalizeStr(n)] = gifUrl;
+    }
+  }
+  return idx;
+})();
+
+/**
+ * Look up the ExerciseDB GIF URL for an exercise by name.
+ * Matches against EN names, PT names, and all aliases.
+ * @param {string} name
+ * @returns {{ gif_url: string|null }}
+ */
+export function lookupExerciseMedia(name) {
+  if (!name) return { gif_url: null };
+  return { gif_url: _mediaIndex[normalizeStr(name)] || null };
+}
+
 // ─── Local search utility ─────────────────────────────────────────────────────
 
 /**

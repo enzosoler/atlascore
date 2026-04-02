@@ -8,6 +8,7 @@ import { PaywallSheet } from '@/components/entitlements/PaywallTrigger';
 import { Button } from '@/components/ui/button';
 import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
+import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
 import { toast } from 'sonner';
 import { getLastSession, checkSetIsPR } from '@/services/workoutHistoryService';
 import { saveSession, clearSession } from '@/lib/workoutSession';
@@ -702,8 +703,8 @@ export default function WorkoutExecutionScreen({
               {exercise.name}
             </h1>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
-            <Play className="h-5 w-5 fill-current" />
+          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+            <ExerciseMedia exercise={exercise} size="sm" showFallback={true} />
           </div>
         </div>
 

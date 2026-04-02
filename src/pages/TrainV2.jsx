@@ -39,6 +39,7 @@ import {
 } from '@/services/workoutPlanService';
 import { saveCompletedWorkout } from '@/services/workoutService';
 import { loadSession, clearSession, hasSession } from '@/lib/workoutSession';
+import { lookupExerciseMedia } from '@/lib/exerciseDB';
 
 // ─── Build session from plan day ───────────────────────────────────────────────
 
@@ -51,16 +52,20 @@ function buildSessionFromPlan(plan, dayIndex, t) {
     name: day.name || plan.name || t('train.dayN', { n: dayIndex + 1 }),
     plan_id: plan.id,
     day_index: dayIndex,
-    exercises: Array.isArray(day.exercises) ? day.exercises.map((ex) => ({
-      name: ex.name || t('train.exercise'),
-      primary_muscles: ex.primary_muscles || ex.muscle_group ? [ex.muscle_group] : [],
-      rest_seconds: ex.rest_seconds || 60,
-      target_sets: ex.sets || 3,
-      target_reps: String(ex.reps || '10'),
-      sets: Array.from({ length: ex.sets || 3 }, (_, i) => ({
-        set_number: i + 1, target_reps: String(ex.reps || '10'), target_weight: null,
-      })),
-    })) : [],
+    exercises: Array.isArray(day.exercises) ? day.exercises.map((ex) => {
+      const media = lookupExerciseMedia(ex.name);
+      return {
+        name: ex.name || t('train.exercise'),
+        primary_muscles: ex.primary_muscles || ex.muscle_group ? [ex.muscle_group] : [],
+        rest_seconds: ex.rest_seconds || 60,
+        target_sets: ex.sets || 3,
+        target_reps: String(ex.reps || '10'),
+        media: { gif_url: media.gif_url, image_url: null },
+        sets: Array.from({ length: ex.sets || 3 }, (_, i) => ({
+          set_number: i + 1, target_reps: String(ex.reps || '10'), target_weight: null,
+        })),
+      };
+    }) : [],
   };
 }
 

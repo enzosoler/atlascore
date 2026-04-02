@@ -50,6 +50,7 @@ import {
   fetchRecentWorkoutHistory,
   computePersonalRecords,
 } from '@/services/workoutHistoryService';
+import { lookupExerciseMedia } from '@/lib/exerciseDB';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ function planExToExecution(ex) {
     target_sets: setCount,
     target_reps: ex.reps || '',
     target_weight: ex.load ?? ex.target_weight ?? null,
-    media_gif_url: ex.media_gif_url || null,
+    media_gif_url: ex.media_gif_url || lookupExerciseMedia(ex.name).gif_url,
     sets: setsArr,
   };
 }
