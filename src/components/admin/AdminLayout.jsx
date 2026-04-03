@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import {
   LayoutDashboard, Users, CreditCard, Shield, FileText, Settings,
-  LogOut, Menu, Brain, Mail, ArrowLeft, X, BarChart2,
+  LogOut, Menu, Brain, Mail, ArrowLeft, X, BarChart2, ClipboardList,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/routes';
@@ -19,6 +19,7 @@ const coreNav = [
 ];
 
 const opsNav = [
+  { path: `${ADMIN}/waitlist`,      label: 'Waitlist',      icon: ClipboardList },
   { path: `${ADMIN}/logs`,          label: 'Logs & Errors', icon: FileText },
   { path: `${ADMIN}/subscriptions`, label: 'Subscriptions', icon: CreditCard },
 ];
