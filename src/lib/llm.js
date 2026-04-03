@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabaseClient';
  * @param {{ schema?: object, maxTokens?: number }} [opts]
  * @returns {Promise<string|null>} The text response, or null on failure
  */
-export async function invokeLLM(prompt, opts = {}) {
+export async function invokeLLM(prompt, opts = {}, _retried = false) {
   try {
     const { data, error } = await supabase.functions.invoke('invoke-llm', {
       body: {
@@ -25,10 +25,28 @@ export async function invokeLLM(prompt, opts = {}) {
     });
 
     if (error) {
-      console.error('[llm] edge function error:', error.message, error);
-      // Surface the error so callers can show useful messages
-      const errMsg = error.message || 'Edge function error';
-      if (opts.throwOnError) throw new Error(errMsg);
+      // Extract actual error from response body if available
+      let detail = error.message || 'Edge function error';
+      try {
+        const ctx = error.context;
+        if (ctx?.json) {
+          const body = await ctx.json();
+          detail = body?.error || detail;
+        }
+      } catch { /* ignore parse errors */ }
+
+      console.error('[llm] edge function error:', detail, error);
+
+      // If 401, try refreshing the session once and retry
+      if (!_retried && detail.includes('Unauthorized')) {
+        console.log('[llm] refreshing session and retrying...');
+        const { error: refreshErr } = await supabase.auth.refreshSession();
+        if (!refreshErr) {
+          return invokeLLM(prompt, opts, true);
+        }
+      }
+
+      if (opts.throwOnError) throw new Error(detail);
       return null;
     }
 
