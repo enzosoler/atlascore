@@ -86,7 +86,7 @@ export function buildBriefing({ workoutDone, nutritionLogged, hasActivePlan, pla
  * Priority: critical adherence > missed daily action > nutrition correction > protocol > positive reinforcement.
  * @returns {Array<{id,type,title,reason,actionLabel,actionPath}>}
  */
-export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsumed, proteinTarget, weightLogged, hasPhotos, protocolsDue = 0, protocolsComplete = 0, caloriesConsumed = 0, caloriesTarget = 0, weekWorkoutCount = 0, t }) {
+export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsumed, proteinTarget, weightLogged, hasPhotos, protocolsDue = 0, protocolsComplete = 0, caloriesConsumed = 0, caloriesTarget = 0, weekWorkoutCount = 0, energy = null, mood = null, t }) {
   const _ = t || ((key) => key.split('.').pop());
   const hour = new Date().getHours();
   const recs = [];
@@ -141,7 +141,31 @@ export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsum
     });
   }
 
-  // 5. Weight not logged
+  // 5. Low energy — suggest lighter session or recovery
+  if (energy != null && energy <= 2) {
+    recs.push({
+      id: 'rec-low-energy',
+      type: 'wellness',
+      title: _('today.recs.lowEnergyTitle'),
+      reason: _('today.recs.lowEnergyReason'),
+      actionLabel: _('today.recs.lowEnergyAction'),
+      actionPath: ROUTES.body,
+    });
+  }
+
+  // 6. Low mood + no workout — suggest light movement
+  if (mood != null && mood <= 2 && !workoutDone) {
+    recs.push({
+      id: 'rec-low-mood',
+      type: 'wellness',
+      title: _('today.recs.lowMoodTitle'),
+      reason: _('today.recs.lowMoodReason'),
+      actionLabel: _('today.recs.lowMoodAction'),
+      actionPath: ROUTES.workouts,
+    });
+  }
+
+  // 7. Weight not logged
   if (!weightLogged) {
     recs.push({
       id: 'rec-weight',
@@ -154,4 +178,59 @@ export function buildRecommendations({ workoutDone, hasActivePlan, proteinConsum
   }
 
   return recs.slice(0, 3);
+}
+
+/**
+ * Build a single contextual narrative sentence based on the user's daily state.
+ * @returns {string}
+ */
+export function buildDailyNarrative({ workoutDone, nutritionLogged, weightLogged, protocolsDue = 0, protocolsComplete = 0, kcalRemaining = 0, hasActivePlan, t }) {
+  const _ = t || ((key) => key.split('.').pop());
+  const hour = new Date().getHours();
+
+  const areas = [
+    { key: 'workout', done: !!workoutDone },
+    { key: 'nutrition', done: !!nutritionLogged },
+    { key: 'weight', done: !!weightLogged },
+  ];
+  if (protocolsDue > 0) {
+    areas.push({ key: 'protocols', done: protocolsComplete >= protocolsDue });
+  }
+
+  const completed = areas.filter((a) => a.done).length;
+  const total = areas.length;
+  const isMorning = hour < 12;
+  const isMidDay = hour >= 12 && hour < 17;
+  const remaining = areas.find((a) => !a.done);
+
+  // All done
+  if (completed === total) {
+    return _('today.narrative.allDone');
+  }
+
+  // Morning, nothing logged
+  if (isMorning && completed === 0) {
+    const focus = !hasActivePlan ? _('today.narrative.focusPlanning') : _('today.narrative.focusTraining');
+    return _('today.narrative.morningEmpty', { focus });
+  }
+
+  // Midday, workout done — shift to nutrition
+  if (isMidDay && workoutDone && kcalRemaining > 0) {
+    return _('today.narrative.middayWorkoutDone', { kcal: Math.round(kcalRemaining) });
+  }
+
+  // Evening, mostly on track (1 remaining)
+  if (hour >= 17 && completed >= total - 1 && remaining) {
+    return _('today.narrative.eveningAlmost', { area: _(`today.status.area_${remaining.key}`) });
+  }
+
+  // Behind pace
+  if ((isMidDay || hour >= 17) && completed < total - 1) {
+    // Pick most impactful missing action
+    const impactful = areas.find((a) => !a.done);
+    return _('today.narrative.behindPace', { action: _(`today.status.area_${impactful?.key}`) });
+  }
+
+  // Fallback — morning/early with some progress
+  return _('today.narrative.keepGoing');
 }

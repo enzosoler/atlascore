@@ -9,6 +9,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "close": "Close",
+    "undo": "Undo",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -1162,7 +1163,23 @@
       "caloriesOverAction": "Review nutrition",
       "protocolsTitle": "{count} protocols pending",
       "protocolsReason": "Consistency with your protocols drives long-term results.",
-      "protocolsAction": "Log protocols"
+      "protocolsAction": "Log protocols",
+      "lowEnergyTitle": "Energy is low today",
+      "lowEnergyReason": "Energy is low — consider a lighter session or prioritize rest today.",
+      "lowEnergyAction": "Log check-in",
+      "lowMoodTitle": "Move to shift your mood",
+      "lowMoodReason": "Mood is low. Even 15 minutes of movement helps.",
+      "lowMoodAction": "Start light workout"
+    },
+    "narrative": {
+      "allDone": "All focus areas complete. Recovery is the priority now.",
+      "morningEmpty": "Full day ahead. Start with {focus} to build momentum.",
+      "focusTraining": "training",
+      "focusPlanning": "building a plan",
+      "middayWorkoutDone": "Training complete. Focus shifts to nutrition — {kcal} kcal remaining.",
+      "eveningAlmost": "Strong day. Finish with {area} to close it out.",
+      "behindPace": "Behind today's targets. {action} is the highest leverage move right now.",
+      "keepGoing": "Good start. Keep the momentum going."
     },
     "status": {
       "onTrack": "On Track",
@@ -1762,6 +1779,7 @@
       "foods_added_to": "{n} food item(s) added to {meal}.",
       "could_not_remove": "Could not remove {name}.",
       "was_removed": "{name} was removed.",
+      "meal_removed": "Meal removed",
       "confirm_delete": "Delete {name}?",
       "food_search_error": "Food search error: {error}",
       "could_not_load_details": "Could not load food details",
@@ -1940,6 +1958,7 @@
       "status_paused": "Paused.",
       "status_finished": "Marked as finished.",
       "confirm_delete": "Delete {label}?",
+      "confirm_delete_permanent": "Delete {label}? This cannot be undone.",
       "edit_item": "Edit item",
       "add_item": "Add item",
       "enter_details": "Enter the details for this supplement or medication.",
@@ -2179,6 +2198,11 @@
       "weight_trending_up": "Weight trending up {n}kg — check if this aligns with your goal.",
       "body_fat_dropping": "Body fat dropping — your training and nutrition are working.",
       "body_fat_increasing": "Body fat increasing — consider reviewing calorie intake."
+    },
+    "trend_badge": {
+      "stable": "Stable",
+      "losing": "Losing {rate} kg/week",
+      "gaining": "Gaining {rate} kg/week"
     },
     "next_action": {
       "log_first_checkpoint": "Log your first body checkpoint",
@@ -2461,6 +2485,11 @@
     "fallback_training_solid": "Training adherence is solid at {pct}%.",
     "fallback_training_low": "Training adherence dropped to {pct}%.",
     "rate_stable": "Stable",
+    "trend_badge": {
+      "stable": "Stable",
+      "losing": "Losing {rate} kg/week",
+      "gaining": "Gaining {rate} kg/week"
+    },
     "target_label": "Target: {value} {unit}",
     "stats": {
       "measurements": "Measurements",

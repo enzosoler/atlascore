@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { listMeasurements, listProgressPhotos } from '@/services/bodyProgressService';
 import { getMeasurementFieldValue } from '@/lib/measurementModel';
-import { format, subDays } from 'date-fns';
+import { format, subDays, differenceInDays } from 'date-fns';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import Progress from './Progress';
 import Measurements from './Measurements';
@@ -17,9 +17,48 @@ import { ROUTES } from '@/lib/routes';
 
 const TAB_IDS = ['overview', 'measurements', 'photos'];
 
+// ── Weekly trend badge ──────────────────────────────────────────────────────
+
+function WeeklyTrendBadge({ data, dataKey }) {
+  const t = useT();
+  if (!data || data.length < 2) return null;
+
+  const now = new Date();
+  const twoWeeksAgo = subDays(now, 14);
+  const recent = data.filter((p) => new Date(p.date) >= twoWeeksAgo);
+  if (recent.length < 2) return null;
+
+  const first = recent[0][dataKey];
+  const last = recent[recent.length - 1][dataKey];
+  const daySpan = differenceInDays(new Date(recent[recent.length - 1].date), new Date(recent[0].date)) || 1;
+  const weeklyRate = ((last - first) / daySpan) * 7;
+
+  if (Math.abs(weeklyRate) < 0.05) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--fill)/0.8)] px-2.5 py-1 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
+        {'\u2192'} {t('body.trend_badge.stable')}
+      </span>
+    );
+  }
+
+  const down = weeklyRate < 0;
+  const text = down
+    ? t('body.trend_badge.losing').replace('{rate}', Math.abs(weeklyRate).toFixed(1))
+    : t('body.trend_badge.gaining').replace('{rate}', weeklyRate.toFixed(1));
+  const cls = down
+    ? 'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]'
+    : 'bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]';
+
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold ${cls}`}>
+      {down ? '\u2193' : '\u2191'} {text}
+    </span>
+  );
+}
+
 // ── Trend chart ─────────────────────────────────────────────────────────────
 
-function TrendChart({ data, dataKey, color, unit, label }) {
+function TrendChart({ data, dataKey, color, unit, label, badge }) {
   const t = useT();
   if (!data || data.length < 2) {
     return (
@@ -32,7 +71,10 @@ function TrendChart({ data, dataKey, color, unit, label }) {
 
   return (
     <Card className="px-5 py-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))] mb-4">{label}</p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">{label}</p>
+        {badge}
+      </div>
       <div className="h-[180px] -mx-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
@@ -347,7 +389,7 @@ export default function Body() {
       {/* Trend charts */}
       <Section title={t('body.trends.section_title')}>
         <div className="grid gap-3 md:grid-cols-2">
-          <TrendChart data={weightData} dataKey="weight" color="hsl(var(--brand))" unit=" kg" label={t('body.trends.weight_label')} />
+          <TrendChart data={weightData} dataKey="weight" color="hsl(var(--brand))" unit=" kg" label={t('body.trends.weight_label')} badge={<WeeklyTrendBadge data={weightData} dataKey="weight" />} />
           <TrendChart data={bodyFatData} dataKey="bodyFat" color="hsl(var(--warn))" unit="%" label={t('body.trends.body_fat_label')} />
         </div>
       </Section>

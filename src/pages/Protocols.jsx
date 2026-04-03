@@ -733,7 +733,7 @@ function ProtocolsContent() {
   const handleDelete = (protocol) => {
     if (!protocol?.id) return;
     const label = protocol?.substance_name || protocol?.name || t('pages.protocols.add_item');
-    if (!window.confirm(t('pages.protocols.confirm_delete', { label }))) return;
+    if (!window.confirm(t('pages.protocols.confirm_delete_permanent', { label }))) return;
     deleteMutation.mutate({ id: protocol.id, actionKey: `${protocol.id}-delete` });
   };
 

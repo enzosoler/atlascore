@@ -15,7 +15,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
-import { buildBriefing, buildRecommendations, buildDailyStatus } from '@/lib/rulesEngine';
+import { buildBriefing, buildRecommendations, buildDailyStatus, buildDailyNarrative } from '@/lib/rulesEngine';
 import { ROUTES } from '@/lib/routes';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
@@ -405,6 +405,15 @@ function WeeklyProgress({ weekWorkoutCount, planFrequency, t }) {
   );
 }
 
+function DailyNarrative({ narrative }) {
+  if (!narrative) return null;
+  return (
+    <p className="text-[13px] text-[hsl(var(--fg-2))] leading-[1.5] px-0.5 -mt-1">
+      {narrative}
+    </p>
+  );
+}
+
 // ─── Main Content ─────────────────────────────────────────────────────────────
 
 function TodayContent() {
@@ -454,6 +463,37 @@ function TodayContent() {
   const safeNutrition = safeDaily?.nutrition || {};
   const kcalRemaining = Math.max(0, (safeNutrition.caloriesTarget || 0) - (safeNutrition.caloriesConsumed || 0));
 
+  // ── Check-in data (moved up so recommendations can use energy/mood) ──
+  const { data: todayCheckin } = useQuery({
+    queryKey: ['daily-checkin', uid, today],
+    queryFn: () => getDailyCheckin(uid, today),
+    enabled: !!uid,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+  });
+
+  const { data: recentCheckins = [] } = useQuery({
+    queryKey: ['daily-checkins-streak', uid],
+    queryFn: () => listDailyCheckins(uid, { limit: 35 }),
+    enabled: !!uid,
+    staleTime: 60_000,
+  });
+
+  const { data: coachMemory } = useQuery({
+    queryKey: ['coach-memory-insight', uid],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('coach_memory')
+        .select('proactive_insight, proactive_insight_generated_at')
+        .eq('user_id', uid)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!uid,
+    staleTime: 120_000,
+    refetchOnWindowFocus: true,
+  });
+
   // ── AI-first briefing — use AI engine when available, rules as fallback ──
   const rulesBriefing = buildBriefing({
     workoutDone: safeDaily.workoutDone,
@@ -490,6 +530,8 @@ function TodayContent() {
     caloriesConsumed: safeNutrition.caloriesConsumed || 0,
     caloriesTarget: safeNutrition.caloriesTarget || 0,
     weekWorkoutCount: safeDaily.weekWorkoutCount || 0,
+    energy: todayCheckin?.energy ?? null,
+    mood: todayCheckin?.mood ?? null,
     t,
   }) || [];
 
@@ -510,35 +552,16 @@ function TodayContent() {
     t,
   });
 
-  // ── New: streak + check-in data ─────────────────────────────────────────
-  const { data: todayCheckin } = useQuery({
-    queryKey: ['daily-checkin', uid, today],
-    queryFn: () => getDailyCheckin(uid, today),
-    enabled: !!uid,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
-  });
-
-  const { data: recentCheckins = [] } = useQuery({
-    queryKey: ['daily-checkins-streak', uid],
-    queryFn: () => listDailyCheckins(uid, { limit: 35 }),
-    enabled: !!uid,
-    staleTime: 60_000,
-  });
-
-  const { data: coachMemory } = useQuery({
-    queryKey: ['coach-memory-insight', uid],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('coach_memory')
-        .select('proactive_insight, proactive_insight_generated_at')
-        .eq('user_id', uid)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!uid,
-    staleTime: 120_000,
-    refetchOnWindowFocus: true,
+  // ── Daily narrative — contextual sentence ──
+  const dailyNarrative = buildDailyNarrative({
+    workoutDone: safeDaily.workoutDone,
+    nutritionLogged: safeDaily.nutritionLogged,
+    weightLogged: safeDaily.weightLogged,
+    protocolsDue: safeDaily.protocols?.dueToday || 0,
+    protocolsComplete: safeDaily.protocols?.completedToday || 0,
+    kcalRemaining,
+    hasActivePlan: safePlan.id != null,
+    t,
   });
 
   const firstName = useMemo(() => getFirstName(safeDaily.preferredName), [safeDaily.preferredName]);
@@ -588,6 +611,9 @@ function TodayContent() {
         completedCount={dailyStatus.completedCount}
         totalCount={dailyStatus.totalCount}
       />
+
+      {/* 1b2. Daily Narrative — contextual interpretation */}
+      <DailyNarrative narrative={dailyNarrative} />
 
       {/* 1c. Trial countdown — only shows during active trial */}
       {subscription?.status === 'trialing' && trialDaysRemaining > 0 && (

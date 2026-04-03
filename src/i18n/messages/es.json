@@ -9,6 +9,7 @@
     "edit": "Editar",
     "delete": "Eliminar",
     "close": "Cerrar",
+    "undo": "Deshacer",
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito",
@@ -937,7 +938,23 @@
       "caloriesOverAction": "Revisar nutrición",
       "protocolsTitle": "{count} protocolos pendientes",
       "protocolsReason": "La consistencia con tus protocolos impulsa resultados a largo plazo.",
-      "protocolsAction": "Registrar protocolos"
+      "protocolsAction": "Registrar protocolos",
+      "lowEnergyTitle": "Energía baja hoy",
+      "lowEnergyReason": "Energía baja — considera una sesión más ligera o prioriza el descanso.",
+      "lowEnergyAction": "Registrar check-in",
+      "lowMoodTitle": "Muévete para mejorar tu ánimo",
+      "lowMoodReason": "Ánimo bajo. Incluso 15 minutos de movimiento ayudan.",
+      "lowMoodAction": "Entrenamiento ligero"
+    },
+    "narrative": {
+      "allDone": "Todas las áreas completas. La recuperación es la prioridad ahora.",
+      "morningEmpty": "Día completo por delante. Empieza con {focus} para ganar impulso.",
+      "focusTraining": "entrenamiento",
+      "focusPlanning": "armar un plan",
+      "middayWorkoutDone": "Entrenamiento completo. El foco cambia a nutrición — {kcal} kcal restantes.",
+      "eveningAlmost": "Gran día. Termina con {area} para cerrarlo.",
+      "behindPace": "Atrás de las metas de hoy. {action} es el paso de mayor impacto ahora.",
+      "keepGoing": "Buen comienzo. Mantén el ritmo."
     },
     "status": {
       "onTrack": "En Camino",
@@ -1526,7 +1543,11 @@
       "interp_below_expected": "Por debajo de lo esperado para esta hora del día",
       "interp_goal_almost": "¡Meta casi alcanzada!",
       "nothing_logged_yesterday": "Nada registrado ayer.",
-      "meals_copied": "¡Comidas de ayer copiadas!"
+      "meals_copied": "¡Comidas de ayer copiadas!",
+      "meal_removed": "Comida eliminada",
+      "could_not_remove": "No se pudo eliminar {name}.",
+      "was_removed": "{name} fue eliminado.",
+      "confirm_delete": "¿Eliminar {name}?"
     },
     "measurements": {
       "title": "Medidas",
@@ -1617,6 +1638,8 @@
       "status_error": "No se pudo actualizar el estado. Inténtalo de nuevo.",
       "delete_error": "No se pudo eliminar el protocolo. Inténtalo de nuevo.",
       "delete_success": "Protocolo eliminado.",
+      "confirm_delete": "¿Eliminar {label}?",
+      "confirm_delete_permanent": "¿Eliminar {label}? Esta acción no se puede deshacer.",
       "loading": "Espera mientras se cargan tus protocolos.",
       "loading_partial": "Los datos no cargaron completamente, pero aún puedes agregar nuevos elementos.",
       "eyebrow": "Suplementos y Medicación",
@@ -1719,6 +1742,11 @@
       "bmi_healthy": "IMC en rango saludable. ¡Sigue ganando fuerza!",
       "great_consistency": "Gran consistencia — ¡{n} puntos de control registrados!",
       "log_weekly": "Registra puntos de control semanales para un análisis de tendencia más preciso."
+    },
+    "trend_badge": {
+      "stable": "Estable",
+      "losing": "Perdiendo {rate} kg/semana",
+      "gaining": "Ganando {rate} kg/semana"
     },
     "next_action": {
       "log_first_checkpoint": "Registra tu primer checkpoint corporal",
@@ -2001,6 +2029,11 @@
     "fallback_training_solid": "La adherencia al entrenamiento es sólida al {pct}%.",
     "fallback_training_low": "La adherencia al entrenamiento bajó al {pct}%.",
     "rate_stable": "Estable",
+    "trend_badge": {
+      "stable": "Estable",
+      "losing": "Perdiendo {rate} kg/semana",
+      "gaining": "Ganando {rate} kg/semana"
+    },
     "target_label": "Objetivo: {value} {unit}",
     "stats": {
       "measurements": "Mediciones",

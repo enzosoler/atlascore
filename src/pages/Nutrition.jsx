@@ -40,6 +40,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { MEAL_TYPES, getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
+import { trackProductEvent } from '@/lib/productEvents';
 import { cn } from '@/lib/utils';
 import { searchFoods, getFoodDetails } from '@/services/foodSearchService';
 import { searchTaco } from '@/services/tacoService';
@@ -52,6 +53,7 @@ import MacroProgressBar from '@/components/nutrition/MacroProgressBar';
 import AINutritionSuggestions from '@/components/nutrition/AINutritionSuggestions';
 import QuickLogSheet from '@/components/nutrition/QuickLogSheet';
 import { useAICoach } from '@/hooks/useAICoach';
+import { toast } from 'sonner';
 
 const FIELD_LABEL_CLASS =
   'block text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]';
@@ -1721,6 +1723,7 @@ export default function NutritionPage() {
       setNotice({ tone: 'success', message: t('pages.nutrition.added_successfully').replace('{name}', pendingFood.name) });
       addRecentFood(pendingFood);
       setPendingFood(null);
+      trackProductEvent(user?.id, 'meal_logged');
     } catch (error) {
       setNotice({ tone: 'error', message: t('pages.nutrition.could_not_save').replace('{name}', pendingFood.name) });
     } finally {
@@ -1812,27 +1815,48 @@ export default function NutritionPage() {
         ? t('pages.nutrition.foods_updated_in').replace('{n}', foods.length).replace('{meal}', mealLabel)
         : t('pages.nutrition.foods_added_to').replace('{n}', foods.length).replace('{meal}', mealLabel),
     });
+    trackProductEvent(user?.id, 'meal_logged');
     // Cascade: invalidate AI coach so briefing/priorities update with new nutrition data
     ai.invalidateCoach();
   };
 
-  const handleDeleteMeal = async (meal) => {
-    if (!window.confirm(t('pages.nutrition.confirm_delete').replace('{name}', meal.title))) return;
-    if (meal.source_row_id) {
+  const handleDeleteMeal = (meal) => {
+    // Optimistically remove from UI, then delete from DB after undo window
+    const removedMeal = meal;
+    setMeals((current) => current.filter((m) => m.id !== removedMeal.id));
+
+    let settled = false;
+
+    const commitDelete = async () => {
+      if (settled) return;
+      settled = true;
+      if (!removedMeal.source_row_id) return;
       try {
         const { error } = await supabase
           .from('food_logs')
           .delete()
-          .eq('id', meal.source_row_id)
+          .eq('id', removedMeal.source_row_id)
           .eq('user_id', user.id);
         if (error) throw error;
-      } catch (error) {
-        setNotice({ tone: 'error', message: t('pages.nutrition.could_not_remove').replace('{name}', meal.title) });
-        return;
+      } catch {
+        // Re-insert on failure
+        setMeals((current) => [...current, removedMeal]);
+        setNotice({ tone: 'error', message: t('pages.nutrition.could_not_remove').replace('{name}', removedMeal.title) });
       }
-    }
-    setMeals((current) => current.filter((m) => m.id !== meal.id));
-    setNotice({ tone: 'success', message: t('pages.nutrition.was_removed').replace('{name}', meal.title) });
+    };
+
+    toast(t('pages.nutrition.meal_removed'), {
+      action: {
+        label: t('common.undo'),
+        onClick: () => {
+          settled = true;
+          setMeals((current) => [...current, removedMeal]);
+        },
+      },
+      duration: 5000,
+      onAutoClose: commitDelete,
+      onDismiss: commitDelete,
+    });
   };
 
   const handleDateChange = (delta) => {

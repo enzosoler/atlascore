@@ -21,6 +21,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
+import { trackProductEvent } from '@/lib/productEvents';
 import { useDailyStateV2, DAILY_KEYS } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
@@ -419,6 +420,7 @@ export default function TrainV2() {
       setMode('list');
       setActiveSession(null);
       setInitialSession(null);
+      trackProductEvent(user?.id, 'workout_completed');
     },
     onError: () => toast.error(t('train.toastSaveFailed')),
   });

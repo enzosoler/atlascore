@@ -299,6 +299,44 @@ function RateBadge({ slope, unit = 'kg/wk' }) {
   );
 }
 
+// ─── Weight trend badge (2-week weekly rate) ─────────────────────────────────
+
+function WeightTrendBadge({ weightData, t }) {
+  const badge = useMemo(() => {
+    if (!weightData || weightData.length < 2) return null;
+    const now = Date.now();
+    const twoWeeksAgo = now - 14 * 86400000;
+    const recent = weightData.filter((p) => p.ts >= twoWeeksAgo);
+    if (recent.length < 2) return null;
+    const base = recent[0].ts;
+    const pts = recent.map((p) => ({ x: (p.ts - base) / 86400000, y: p.value }));
+    const slope = linearRegression(pts).slope;
+    const weeklyRate = slope * 7;
+    if (Math.abs(weeklyRate) < 0.05) {
+      return { direction: 'stable', text: t('progress.trend_badge.stable'), rate: 0 };
+    }
+    if (weeklyRate < 0) {
+      return { direction: 'down', text: t('progress.trend_badge.losing').replace('{rate}', Math.abs(weeklyRate).toFixed(1)), rate: weeklyRate };
+    }
+    return { direction: 'up', text: t('progress.trend_badge.gaining').replace('{rate}', weeklyRate.toFixed(1)), rate: weeklyRate };
+  }, [weightData, t]);
+
+  if (!badge) return null;
+
+  const styles = {
+    stable: 'bg-[hsl(var(--fill)/0.8)] text-[hsl(var(--fg-2))]',
+    down:   'bg-[hsl(var(--ok)/0.12)] text-[hsl(var(--ok))]',
+    up:     'bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]',
+  };
+  const arrows = { stable: '\u2192', down: '\u2193', up: '\u2191' };
+
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold ${styles[badge.direction]}`}>
+      {arrows[badge.direction]} {badge.text}
+    </span>
+  );
+}
+
 // ─── Range tabs ────────────────────────────────────────────────────────────────
 
 function RangeTabs({ selected, onChange }) {
@@ -597,7 +635,7 @@ function ProgressContent() {
         {/* 5 — Weight Trend (only if has data) */}
         {weightData.length > 0 && (
           <ChartCard className="py-5">
-            <ChartHeader label={t('progress.chart_weight')} value={weightData.at(-1)?.value ?? null} unit="kg" badge={null} sublabel={null}
+            <ChartHeader label={t('progress.chart_weight')} value={weightData.at(-1)?.value ?? null} unit="kg" badge={<WeightTrendBadge weightData={weightData} t={t} />} sublabel={null}
             />
             <div className="mt-4">
               <TrendLineChart data={weightData} dataKey="value" gradientId="wg" color="hsl(var(--brand))" days={days} unit="kg" showRegression={true} emptyLabel={t('progress.need_data_points')} emptyCta={t('progress.log_measurement')} />

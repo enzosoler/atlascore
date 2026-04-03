@@ -9,6 +9,7 @@
     "edit": "Editar",
     "delete": "Excluir",
     "close": "Fechar",
+    "undo": "Desfazer",
     "loading": "Carregando...",
     "error": "Erro",
     "success": "Sucesso",
@@ -1149,7 +1150,23 @@
       "caloriesOverAction": "Revisar nutrição",
       "protocolsTitle": "{count} protocolos pendentes",
       "protocolsReason": "Consistência nos protocolos gera resultados a longo prazo.",
-      "protocolsAction": "Registrar protocolos"
+      "protocolsAction": "Registrar protocolos",
+      "lowEnergyTitle": "Energia baixa hoje",
+      "lowEnergyReason": "Energia baixa — considere um treino mais leve ou priorize o descanso.",
+      "lowEnergyAction": "Registrar check-in",
+      "lowMoodTitle": "Movimente-se para melhorar o humor",
+      "lowMoodReason": "Humor baixo. Mesmo 15 minutos de movimento ajudam.",
+      "lowMoodAction": "Treino leve"
+    },
+    "narrative": {
+      "allDone": "Todas as áreas completas. Agora a prioridade é a recuperação.",
+      "morningEmpty": "Dia inteiro pela frente. Comece com {focus} para ganhar impulso.",
+      "focusTraining": "treino",
+      "focusPlanning": "montar um plano",
+      "middayWorkoutDone": "Treino concluído. Foco muda para nutrição — {kcal} kcal restantes.",
+      "eveningAlmost": "Dia forte. Finalize com {area} para fechar bem.",
+      "behindPace": "Atrás das metas de hoje. {action} é o passo de maior impacto agora.",
+      "keepGoing": "Bom começo. Mantenha o ritmo."
     },
     "status": {
       "onTrack": "No Caminho",
@@ -1748,6 +1765,7 @@
       "foods_added_to": "{n} alimento(s) adicionado(s) a {meal}.",
       "could_not_remove": "Não foi possível remover {name}.",
       "was_removed": "{name} foi removido.",
+      "meal_removed": "Refeição removida",
       "confirm_delete": "Excluir {name}?",
       "food_search_error": "Erro na busca: {error}",
       "could_not_load_details": "Não foi possível carregar detalhes do alimento",
@@ -1926,6 +1944,7 @@
       "status_paused": "Pausado.",
       "status_finished": "Marcado como finalizado.",
       "confirm_delete": "Excluir {label}?",
+      "confirm_delete_permanent": "Excluir {label}? Essa ação não pode ser desfeita.",
       "edit_item": "Editar item",
       "add_item": "Adicionar item",
       "enter_details": "Insira os detalhes deste suplemento ou medicamento.",
@@ -2165,6 +2184,11 @@
       "weight_trending_up": "Peso em alta de {n}kg — verifique se está alinhado com seu objetivo.",
       "body_fat_dropping": "Gordura corporal caindo — seu treino e nutrição estão funcionando.",
       "body_fat_increasing": "Gordura corporal aumentando — considere revisar a ingestão calórica."
+    },
+    "trend_badge": {
+      "stable": "Estável",
+      "losing": "Perdendo {rate} kg/semana",
+      "gaining": "Ganhando {rate} kg/semana"
     },
     "next_action": {
       "log_first_checkpoint": "Registre seu primeiro checkpoint corporal",
@@ -2447,6 +2471,11 @@
     "fallback_training_solid": "Aderência ao treino está sólida em {pct}%.",
     "fallback_training_low": "Aderência ao treino caiu para {pct}%.",
     "rate_stable": "Estável",
+    "trend_badge": {
+      "stable": "Estável",
+      "losing": "Perdendo {rate} kg/semana",
+      "gaining": "Ganhando {rate} kg/semana"
+    },
     "target_label": "Meta: {value} {unit}",
     "stats": {
       "measurements": "Medições",

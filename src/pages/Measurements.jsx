@@ -59,6 +59,7 @@ import {
   listMeasurements,
   updateMeasurement,
 } from '@/services/bodyProgressService';
+import { trackProductEvent } from '@/lib/productEvents';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -672,6 +673,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       setIsFormOpen(false);
       setEditingMeasurement(null);
       setNotice({ tone: 'success', message: t('measurements.mutation.created') });
+      trackProductEvent(user?.id, 'weight_logged');
     },
     onError: (error) =>
       setNotice({
