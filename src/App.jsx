@@ -18,6 +18,7 @@ import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralT
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/lib/supabaseClient';
+import { initRevenueCat, identifyUser, logOutRevenueCat } from '@/lib/revenueCat';
 import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { SplashScreen as CapSplash } from '@capacitor/splash-screen';
@@ -524,7 +525,15 @@ const AuthenticatedApp = () => {
 
   React.useEffect(() => {
     captureReferralParams();
+    initRevenueCat();
   }, []);
+
+  // Sync RevenueCat identity with Supabase user
+  React.useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      identifyUser(user.id);
+    }
+  }, [isAuthenticated, user?.id]);
 
   useReferralTracking(user);
   usePushNotifications();

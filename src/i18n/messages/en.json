@@ -1219,6 +1219,30 @@
       "errorFailed": "Could not log meal. Try again."
     }
   },
+  "restore": {
+    "title": "Restore Purchases",
+    "heading": "Restore Your Purchases",
+    "description": "If you previously purchased atlas.core Pro, tap below to restore your access.",
+    "button": "Restore Purchases",
+    "restoring": "Restoring...",
+    "success": "Purchases restored successfully!",
+    "noPurchases": "No previous purchases found.",
+    "error": "Failed to restore purchases. Please try again.",
+    "restoredTitle": "Purchases Restored",
+    "restoredDesc": "Your Pro access has been restored.",
+    "helpTitle": "Having trouble?",
+    "helpDesc": "Make sure you're signed in with the same Apple ID or Google account used for the original purchase."
+  },
+  "billing": {
+    "title": "Billing",
+    "manageNative": "Manage your subscription, cancel, or change plans.",
+    "manageWeb": "Manage your subscription, update payment methods, and view invoices in the Stripe billing portal.",
+    "opening": "Opening...",
+    "manageSubscription": "Manage Subscription",
+    "openPortal": "Open Billing Portal",
+    "freePlan": "You are on the free plan. Upgrade to access full billing management.",
+    "viewPlans": "View Plans"
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Personalize your atlas.core experience.",

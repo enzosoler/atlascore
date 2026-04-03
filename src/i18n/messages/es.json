@@ -994,6 +994,30 @@
       "errorFailed": "No se pudo registrar. Intenta de nuevo."
     }
   },
+  "restore": {
+    "title": "Restaurar Compras",
+    "heading": "Restaura Tus Compras",
+    "description": "Si compraste atlas.core Pro anteriormente, toca abajo para restaurar tu acceso.",
+    "button": "Restaurar Compras",
+    "restoring": "Restaurando...",
+    "success": "¡Compras restauradas exitosamente!",
+    "noPurchases": "No se encontraron compras anteriores.",
+    "error": "Error al restaurar compras. Inténtalo de nuevo.",
+    "restoredTitle": "Compras Restauradas",
+    "restoredDesc": "Tu acceso Pro ha sido restaurado.",
+    "helpTitle": "¿Tienes problemas?",
+    "helpDesc": "Asegúrate de estar conectado con el mismo Apple ID o cuenta de Google usada en la compra original."
+  },
+  "billing": {
+    "title": "Facturación",
+    "manageNative": "Administra tu suscripción, cancela o cambia de plan.",
+    "manageWeb": "Administra tu suscripción, actualiza métodos de pago y ve facturas en el portal de Stripe.",
+    "opening": "Abriendo...",
+    "manageSubscription": "Administrar Suscripción",
+    "openPortal": "Abrir Portal de Facturación",
+    "freePlan": "Estás en el plan gratuito. Actualiza para acceder a la gestión completa.",
+    "viewPlans": "Ver Planes"
+  },
   "settings": {
     "title": "Configuración",
     "subtitle": "Personaliza tu experiencia en atlas.core.",
