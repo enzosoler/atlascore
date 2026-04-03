@@ -12,17 +12,18 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
   if (can(feature)) return children;
 
   const featureNames = {
-    atlas_ai: 'Insights',
-    lab_exams: 'Lab Exams',
-    progress_photos: 'Progress Photos',
-    ai_diet_generation: 'Meal plan builder',
-    ai_workout_generation: 'Workout plan builder',
-    advanced_protocol_tracking: 'Advanced Protocol Tracking',
-    premium_exports: 'Premium Export',
-    standard_exports: 'Report Export',
+    atlas_ai: t('entitlements.featureNames.atlas_ai') || 'Insights',
+    lab_exams: t('entitlements.featureNames.lab_exams') || 'Lab Exams',
+    progress_photos: t('entitlements.featureNames.progress_photos') || 'Progress Photos',
+    ai_diet_generation: t('entitlements.featureNames.ai_diet_generation') || 'Meal plan builder',
+    ai_workout_generation: t('entitlements.featureNames.ai_workout_generation') || 'Workout plan builder',
+    advanced_protocol_tracking: t('entitlements.featureNames.advanced_protocol_tracking') || 'Advanced Protocol Tracking',
+    premium_exports: t('entitlements.featureNames.premium_exports') || 'Premium Export',
+    standard_exports: t('entitlements.featureNames.standard_exports') || 'Report Export',
   };
 
   const featureName = featureNames[feature] || feature;
+  const featureBenefit = t(`entitlements.featureBenefits.${feature}`) || null;
   const planName = plan;
 
   if (isTrialExpired) {
@@ -56,7 +57,7 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
           {title || `${featureName} — ${planName}+`}
         </p>
         <p className="text-[13px] text-[hsl(var(--fg-2))]">
-          {description || t('entitlements.upgradeToUnlock')}
+          {description || featureBenefit || t('entitlements.upgradeToUnlock')}
         </p>
       </div>
       <Link to={ROUTES.pricing} className="atlas-button atlas-button-primary inline-flex h-10 px-4 rounded-lg text-[13px] gap-2">

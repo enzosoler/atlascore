@@ -42,7 +42,7 @@ function ThemeOption({ icon: Icon, label, description, value, currentTheme, onSe
           : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)] hover:text-[hsl(var(--fg))]',
       ].join(' ')}
     >
-      <Icon className="h-5 w-5" strokeWidth={1.9} />
+      <Icon className="h-5 w-5" strokeWidth={2} />
       <span className="text-[14px] font-semibold tracking-[-0.016em]">{label}</span>
       {description && (
         <span className="text-[12px] leading-4 opacity-80">{description}</span>
@@ -71,7 +71,7 @@ function ControlRow({ icon: Icon, label, description, href, onClick, meta, destr
             : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
         ].join(' ')}
       >
-        <Icon className="h-4 w-4" strokeWidth={1.9} />
+        <Icon className="h-4 w-4" strokeWidth={2} />
       </div>
       <div className="min-w-0 flex-1">
         <p
@@ -171,10 +171,10 @@ function SettingsContent() {
         subtitle={t('settings.account.planSubtitle')}
       >
         <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
             <div className="flex items-center gap-4 min-w-0 flex-1">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-                <User className="h-5 w-5" strokeWidth={1.9} />
+                <User className="h-5 w-5" strokeWidth={2} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))] truncate">
@@ -194,10 +194,10 @@ function SettingsContent() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
             <div className="flex items-center gap-4 min-w-0 flex-1">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-                <CreditCard className="h-5 w-5" strokeWidth={1.9} />
+                <CreditCard className="h-5 w-5" strokeWidth={2} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
@@ -317,7 +317,7 @@ function SettingsContent() {
           <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">
-                <Clock className="h-4 w-4" strokeWidth={1.9} />
+                <Clock className="h-4 w-4" strokeWidth={2} />
               </div>
               <div className="min-w-0">
                 <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">

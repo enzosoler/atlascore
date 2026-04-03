@@ -387,6 +387,14 @@
     "professionalCta": "Join the waitlist",
     "footer": "All paid plans include 7 free trial days · Cancel anytime · No cancellation fees",
     "footerPayment": "Payments processed securely via Stripe",
+    "featureLabel": "Feature",
+    "compare": {
+      "tracking": "Log workouts, meals, and body metrics",
+      "ai": "Get AI-driven feedback to improve faster",
+      "plans": "Follow structured training and meal plans",
+      "analytics": "Spot trends with advanced charts and reports",
+      "history": "History depth"
+    },
     "errors": {
       "authError": "Authentication error. Please log in again.",
       "sessionExpired": "Session expired. Please log in again.",
@@ -401,50 +409,50 @@
       "free": {
         "name": "Free",
         "price": "Free",
-        "pitch": "Start tracking.",
+        "pitch": "Log workouts, meals, and body metrics for free.",
         "cta": "Free plan",
         "ctaSignup": "Create account",
-        "tagline": "Perfect for starting out",
+        "tagline": "Build the habit — everything you need to start tracking consistently",
         "features": [
-          "Daily dashboard",
-          "Workout + nutrition logging",
-          "Measurement tracking",
-          "Basic protocols",
-          "Profile & settings",
-          "30-day history",
-          "Weekly insights",
-          "Social sharing cards"
+          "See today's training, nutrition, and body data in one view",
+          "Log workouts and meals in seconds",
+          "Track weight, body fat, and measurements over time",
+          "Manage basic supplement and medication schedules",
+          "Customize your profile and preferences",
+          "Review your last 30 days of progress",
+          "Get a weekly snapshot of what's improving",
+          "Share progress cards on social media"
         ],
         "missing": [
-          "Structured workout/meal tools",
-          "Complete lab tracking",
-          "Progress photos",
-          "Advanced analytics",
-          "PDF/CSV exports"
+          "AI-generated workout and meal plans",
+          "Full lab panel tracking with trends",
+          "Visual progress photo comparisons",
+          "Charts and reports that reveal patterns",
+          "Export data as PDF or CSV"
         ]
       },
       "pro": {
         "name": "Pro",
         "price": "$14.99",
         "period": "/month",
-        "pitch": "Everything you need daily.",
+        "pitch": "AI coaching, smart plans, and deeper insights to optimize faster.",
         "trial": "7 free trial days",
         "popular": "Most popular",
         "aiBadge": "AI-powered insights",
-        "tagline": "Most users upgrade to understand their progress and stay consistent",
+        "tagline": "Most users upgrade to understand what's working, fix what's not, and stay consistent",
         "cta": "Subscribe to Pro",
         "features": [
           "Everything in Free",
-          "Meal plan tools",
-          "Workout plan tools",
-          "Meal plans & training plans",
-          "Complete lab tracking",
-          "Unlimited progress photos",
-          "1-year history",
-          "Advanced analytics",
-          "Progress insights",
-          "PDF & CSV exports",
-          "Stock alerts"
+          "Generate personalized meal plans with AI",
+          "Generate structured workout programs with AI",
+          "Follow meal and training plans built for your goals",
+          "Track lab results and spot health trends over time",
+          "Compare unlimited progress photos side by side",
+          "Access a full year of training and nutrition history",
+          "Visualize performance trends with advanced charts",
+          "Receive AI-driven progress insights each week",
+          "Export your data as PDF and CSV reports",
+          "Get alerts before supplements run out"
         ],
         "missing": []
       },
@@ -452,21 +460,21 @@
         "name": "Performance",
         "price": "$29.99",
         "period": "/month",
-        "pitch": "Complete control hub.",
+        "pitch": "Advanced analytics, protocol tracking, and full control over every variable.",
         "trial": "7 free trial days",
         "aiBadge": "AI-powered insights",
-        "tagline": "For users who want full control, advanced tracking, and deeper insights",
+        "tagline": "For athletes who track every variable and want nothing left to guesswork",
         "cta": "Subscribe to Performance",
         "features": [
           "Everything in Pro",
-          "Intelligent protocol tracking",
-          "Half-life curves & next dose",
-          "Advanced stock management",
-          "Premium reports",
-          "Deep dashboards",
-          "Summary insights",
-          "Complete exports",
-          "Unlimited history"
+          "Monitor protocols with dose timing and compliance tracking",
+          "See half-life curves and know exactly when to dose next",
+          "Manage inventory so you never miss a cycle day",
+          "Generate premium reports for clinicians or coaches",
+          "Dive into dashboards that surface hidden patterns",
+          "Get AI summaries connecting training, nutrition, and labs",
+          "Export any data set in any format",
+          "Keep your full history forever — no 1-year cap"
         ],
         "missing": []
       },
@@ -2063,6 +2071,13 @@
     "planPremium": "Premium",
     "upgradeCta": "Upgrade to Pro",
     "manageBilling": "Manage Billing",
+    "statusTrialing": "Trialing",
+    "statusExpired": "Expired",
+    "trialEnds": "Trial ends {date}",
+    "daysRemaining": "{n} days remaining",
+    "renewsOn": "Renews on {date}",
+    "expiredNotice": "Your plan expired on {date}",
+    "featuresTitle": "Plan Features",
     "settingsTitle": "Settings",
     "settingsLink": "App Settings",
     "settingsSubtitle": "Preferences, theme, and notifications.",
@@ -3567,7 +3582,27 @@
     "featureTrialEnded": "{feature} trial ended",
     "continueWith": "Continue with {plan} to keep using it.",
     "upgradeToUnlock": "Upgrade to unlock this feature",
-    "viewPlans": "View plans"
+    "viewPlans": "View plans",
+    "featureNames": {
+      "atlas_ai": "AI Insights",
+      "lab_exams": "Lab Exams",
+      "progress_photos": "Progress Photos",
+      "ai_diet_generation": "Meal Plan Builder",
+      "ai_workout_generation": "Workout Plan Builder",
+      "advanced_protocol_tracking": "Protocol Tracking",
+      "premium_exports": "Premium Export",
+      "standard_exports": "Report Export"
+    },
+    "featureBenefits": {
+      "atlas_ai": "Get AI-driven insights that tell you what's working and what to change",
+      "lab_exams": "Track lab panels over time and spot health trends early",
+      "progress_photos": "Compare progress photos side by side to see real change",
+      "ai_diet_generation": "Generate a personalized meal plan tailored to your goals",
+      "ai_workout_generation": "Build a structured workout program designed for your level",
+      "advanced_protocol_tracking": "Monitor every dose, timing, and compliance metric in detail",
+      "premium_exports": "Export premium reports to share with coaches or clinicians",
+      "standard_exports": "Export your training and nutrition data as PDF or CSV"
+    }
   },
   "shared": {
     "stablePage": {

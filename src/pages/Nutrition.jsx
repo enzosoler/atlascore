@@ -285,17 +285,17 @@ function NutritionStatsHeader({ dailyTotals, profile, sortedMeals, loggingStreak
   
   return (
     <div className="grid grid-cols-3 gap-3">
-      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+      <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
         <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('nutrition.stats.streak')}</p>
         <p className="text-[22px] font-bold text-[hsl(var(--brand))] mt-1">{loggingStreak}</p>
         <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.days')}</p>
       </div>
-      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+      <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
         <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('nutrition.stats.meals')}</p>
         <p className="text-[22px] font-bold text-[hsl(var(--fg))] mt-1">{mealsToday}</p>
         <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.logged')}</p>
       </div>
-      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+      <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
         <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('nutrition.stats.remaining')}</p>
         <p className="text-[22px] font-bold text-[hsl(var(--ok))] mt-1">{caloriesRemaining}</p>
         <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('nutrition.stats.kcal')}</p>
@@ -476,7 +476,7 @@ function NutritionEmptyState({ onAddMeal, onQuickAdd, hasTargets, t }) {
             onClick={() => onQuickAdd(type)}
             className="flex flex-col items-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] p-3 transition-all hover:bg-[hsl(var(--fill)/0.6)] hover:border-[hsl(var(--brand)/0.3)]"
           >
-            <Icon className={cn("w-5 h-5", color)} strokeWidth={1.8} />
+            <Icon className={cn("w-5 h-5", color)} strokeWidth={2} />
             <span className="text-[11px] font-medium text-[hsl(var(--fg))]">{label}</span>
           </button>
         ))}
@@ -549,7 +549,7 @@ function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
   };
 
   return (
-    <div className={cn('rounded-[20px] border px-5 py-5', toneClasses[config.tone])}>
+    <div className={cn('rounded-[18px] border px-5 py-5', toneClasses[config.tone])}>
       <div className="flex items-start gap-4">
         <div className={cn(
           'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
@@ -557,7 +557,7 @@ function StatusHeader({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
           config.tone === 'warn' && 'bg-[hsl(var(--warn)/0.15)] text-[hsl(var(--warn))]',
           config.tone === 'success' && 'bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success))]',
         )}>
-          <Icon className="h-6 w-6" strokeWidth={1.8} />
+          <Icon className="h-6 w-6" strokeWidth={2} />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
@@ -633,7 +633,7 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
   if (!action) return null;
 
   return (
-    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-4 py-4">
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-4 py-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className={cn(
@@ -642,7 +642,7 @@ function NextAction({ dailyTotals, profile, sortedMeals, onAddMeal, t }) {
             action.priority === 'medium' && 'bg-[hsl(var(--warn)/0.1)] text-[hsl(var(--warn))]',
             action.priority === 'low' && 'bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]',
           )}>
-            <ArrowRight className="h-5 w-5" strokeWidth={1.8} />
+            <ArrowRight className="h-5 w-5" strokeWidth={2} />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
@@ -770,9 +770,9 @@ function QuickAddButtons({ onQuickAdd }) {
         <button
           key={type}
           onClick={() => onQuickAdd(type)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-3 py-3 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill)/0.6)] hover:border-[hsl(var(--brand)/0.3)]"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-3 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill)/0.6)] hover:border-[hsl(var(--brand)/0.3)]"
         >
-          <Icon className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
+          <Icon className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
           {label}
         </button>
       ))}
@@ -802,7 +802,7 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing })
     <div className={cn(
       'rounded-[18px] border overflow-hidden transition-all',
       hasMeals
-        ? 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))]'
+        ? 'border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))]'
         : 'border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)]'
     )}>
       <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border)/0.5)]">
@@ -811,7 +811,7 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing })
             'flex h-8 w-8 items-center justify-center rounded-lg',
             hasMeals ? 'bg-[hsl(var(--brand)/0.15)] text-[hsl(var(--brand))]' : 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))]'
           )}>
-            <Icon className="h-4 w-4" strokeWidth={1.8} />
+            <Icon className="h-4 w-4" strokeWidth={2} />
           </div>
           <div>
             <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">{config.label}</p>
@@ -902,7 +902,7 @@ function FoodSearchResult({ food, onSelect, isSaving = false }) {
       type="button"
       onClick={() => onSelect(food)}
       disabled={isSaving}
-      className="w-full rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.46)] px-4 py-4 text-left transition-colors hover:bg-[hsl(var(--fill)/0.72)] disabled:cursor-wait disabled:opacity-70"
+      className="w-full rounded-[18px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.46)] px-4 py-4 text-left transition-colors hover:bg-[hsl(var(--fill)/0.72)] disabled:cursor-wait disabled:opacity-70"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -933,7 +933,7 @@ function MealCard({ meal, onEdit, onDelete, isProcessing = false }) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <UtensilsCrossed className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
+            <UtensilsCrossed className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
             <p className="text-sm font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
               {meal.title}
             </p>
@@ -1258,7 +1258,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                     key={suggestion.name}
                     type="button"
                     onClick={() => { setInputMode('ai'); setAiPrefill(suggestion.name); }}
-                    className="flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--fg))] transition-all hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.05)]"
+                    className="flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--fg))] transition-all hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.05)]"
                   >
                     <span>{suggestion.emoji}</span>
                     {suggestion.name}
@@ -1293,7 +1293,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             )}
 
             {!isSearching && searchResults.length > 0 && (
-              <div className="max-h-56 overflow-y-auto rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]">
+              <div className="max-h-56 overflow-y-auto rounded-[18px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] shadow-[var(--shadow-md)]">
                 {searchResults.map((food) => (
                   <button
                     key={food.id}
@@ -1320,7 +1320,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
                       key={food.id}
                       type="button"
                       onClick={() => addFood(food)}
-                      className="flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill)/0.6)]"
+                      className="flex items-center gap-1.5 rounded-full border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill)/0.6)]"
                     >
                       <Clock className="h-3 w-3 text-[hsl(var(--fg-3))]" />
                       {food.name}
@@ -1342,7 +1342,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             {foods.map((food, idx) => (
               <div
                 key={idx}
-                className="rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.46)] px-4 py-2.5"
+                className="rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.46)] px-4 py-2.5"
               >
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
@@ -1377,7 +1377,7 @@ function MealForm({ onSave, onCancel, isSaving = false, meal, selectedDate, rece
             ))}
           </div>
 
-          <div className="mt-3 grid grid-cols-4 gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
+          <div className="mt-3 grid grid-cols-4 gap-3 rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
             {[
               { label: 'kcal', value: Math.round(totals.kcal), tone: 'calories' },
               { label: 'Prot', value: `${Math.round(totals.protein)}g`, tone: 'protein' },
@@ -1986,7 +1986,7 @@ export default function NutritionPage() {
                         onClick={() => handleQuickAdd(type)}
                         className="flex items-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))/0.8] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--card))] hover:border-[hsl(var(--brand)/0.3)] hover:text-[hsl(var(--brand))]"
                       >
-                        <Icon className="w-4 h-4" strokeWidth={1.8} />
+                        <Icon className="w-4 h-4" strokeWidth={2} />
                         <span>{label}</span>
                       </button>
                     ))}
@@ -2089,7 +2089,7 @@ export default function NutritionPage() {
                             ? 'bg-[hsl(var(--ok)/0.15)] border-2 border-[hsl(var(--ok)/0.3)]' 
                             : 'bg-[hsl(var(--brand)/0.15)] border-2 border-[hsl(var(--brand)/0.3)]'
                         }`}>
-                          <Icon className={`w-5 h-5 ${isPast ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={1.8} />
+                          <Icon className={`w-5 h-5 ${isPast ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={2} />
                         </div>
                         
                         {/* Meal Card */}
@@ -2262,7 +2262,7 @@ export default function NutritionPage() {
                   </div>
 
                   {amount > 0 && (
-                    <div className="grid grid-cols-4 gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
+                    <div className="grid grid-cols-4 gap-3 rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
                       {[
                         { label: 'kcal', value: scaled.calories, tone: 'calories' },
                         { label: 'Prot', value: `${scaled.protein}g`, tone: 'protein' },

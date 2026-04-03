@@ -718,7 +718,7 @@ function TodayContent() {
         <section className="space-y-4">
           <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.upcoming')}</h3>
           <Link to={ROUTES.workouts} className="block">
-            <div className="flex items-center gap-4 rounded-[20px] bg-[hsl(var(--fill)/0.3)] border border-[hsl(var(--border)/0.5)] p-4 active:bg-[hsl(var(--fill)/0.5)] transition-all">
+            <div className="flex items-center gap-4 rounded-[18px] bg-[hsl(var(--fill)/0.3)] border border-[hsl(var(--border)/0.5)] p-4 active:bg-[hsl(var(--fill)/0.5)] transition-all">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm">
                 <Dumbbell className="h-6 w-6 text-[hsl(var(--fg))]" />
               </div>

@@ -181,7 +181,7 @@ function NextAction({ measurements }) {
       <Card className="px-5 py-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] active:scale-[0.98]">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]">
-            <Target className="h-4 w-4" strokeWidth={1.9} />
+            <Target className="h-4 w-4" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-semibold tracking-[-0.016em] text-[hsl(var(--fg))]">{action}</p>
@@ -365,7 +365,7 @@ export default function Body() {
             const Icon = tab.icon;
             return (
               <FilterChip key={tab.id} active={activeTab === tab.id} onClick={() => handleTab(tab.id)} className="gap-2">
-                <Icon className="h-4 w-4" strokeWidth={1.9} />
+                <Icon className="h-4 w-4" strokeWidth={2} />
                 {tab.label}
               </FilterChip>
             );

@@ -93,12 +93,12 @@ function ProgressStatsHeader({ measurements, workoutLogs, foodLogs, photos, days
   
   return (
     <div className="grid grid-cols-2 gap-3">
-      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+      <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
         <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('progress.stats.measurements')}</p>
         <p className="text-[22px] font-bold text-[hsl(var(--brand))] mt-1">{stats.measurementCount}</p>
         <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('progress.stats.logged')}</p>
       </div>
-      <div className="rounded-[16px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
+      <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-3 text-center">
         <p className="text-[11px] font-medium text-[hsl(var(--fg-3))] uppercase tracking-wide">{t('progress.stats.workouts')}</p>
         <p className="text-[22px] font-bold text-[hsl(var(--ok))] mt-1">{stats.workoutCount}</p>
         <p className="text-[10px] text-[hsl(var(--fg-3))]">{t('progress.stats.sessions')}</p>
@@ -698,7 +698,7 @@ function ProgressContent() {
 
         {/* 12 — AI Interpretation */}
         {insights.length > 0 && (
-          <div className="rounded-[20px] border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden"
+          <div className="rounded-[18px] border border-[hsl(var(--brand-ai)/0.18)] overflow-hidden"
                style={{ background: 'radial-gradient(ellipse at top right, hsl(var(--brand-ai) / 0.07) 0%, transparent 55%), hsl(var(--card))' }}>
             <div className="h-[2px] bg-gradient-to-r from-[hsl(var(--brand-ai)/0.7)] via-[hsl(var(--brand-ai)/0.3)] to-transparent" />
             <div className="px-5 py-5 space-y-3">
@@ -719,11 +719,11 @@ function ProgressContent() {
         {/* 13 — Quick links */}
         <div className="flex gap-3">
           <Link to={ROUTES.labExams}
-            className="flex-1 flex items-center justify-center gap-2 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] py-3 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
+            className="flex-1 flex items-center justify-center gap-2 rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.4)] py-3 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
             <FlaskConical className="w-3.5 h-3.5" /> {t('progress.lab_results_link')} <ArrowRight className="w-3 h-3" />
           </Link>
           <Link to={ROUTES.progressPhotos}
-            className="flex-1 flex items-center justify-center gap-2 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.4)] py-3 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
+            className="flex-1 flex items-center justify-center gap-2 rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.4)] py-3 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
             <Camera className="w-3.5 h-3.5" /> {t('progress.photos_link')} <ArrowRight className="w-3 h-3" />
           </Link>
         </div>

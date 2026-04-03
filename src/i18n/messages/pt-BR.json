@@ -386,6 +386,14 @@
     "professionalDesc": "Planos profissionais para treinadores, nutricionistas e clínicos estão chegando em breve. Entre na lista de espera para acesso antecipado.",
     "footer": "Todos os planos pagos incluem 7 dias de teste grátis · Cancele quando quiser · Sem taxas de cancelamento",
     "footerPayment": "Pagamentos processados com segurança via Stripe",
+    "featureLabel": "Recurso",
+    "compare": {
+      "tracking": "Registre treinos, refeições e métricas corporais",
+      "ai": "Receba feedback com IA para evoluir mais rápido",
+      "plans": "Siga planos estruturados de treino e alimentação",
+      "analytics": "Identifique tendências com gráficos e relatórios avançados",
+      "history": "Profundidade do histórico"
+    },
     "errors": {
       "authError": "Erro de autenticação. Faça login novamente.",
       "sessionExpired": "Sessão expirada. Faça login novamente.",
@@ -400,47 +408,48 @@
       "free": {
         "name": "Grátis",
         "price": "Grátis",
-        "pitch": "Comece a registrar.",
+        "pitch": "Registre treinos, refeições e métricas corporais de graça.",
         "cta": "Plano grátis",
         "ctaSignup": "Criar conta",
+        "tagline": "Crie o hábito — tudo que você precisa para começar a registrar com consistência",
         "features": [
-          "Dashboard diário",
-          "Registro de treino + nutrição",
-          "Acompanhamento de medidas",
-          "Protocolos básicos",
-          "Perfil e configurações",
-          "30 dias de histórico",
-          "Insights semanais",
-          "Cards de compartilhamento social"
+          "Veja treino, nutrição e dados corporais do dia em uma só tela",
+          "Registre treinos e refeições em segundos",
+          "Acompanhe peso, gordura corporal e medidas ao longo do tempo",
+          "Gerencie horários básicos de suplementos e medicamentos",
+          "Personalize seu perfil e preferências",
+          "Revise seus últimos 30 dias de progresso",
+          "Receba um resumo semanal do que está melhorando",
+          "Compartilhe cards de progresso nas redes sociais"
         ],
         "missing": [
-          "Ferramentas de plano estruturado",
-          "Acompanhamento completo de exames",
-          "Fotos de progresso",
-          "Análises avançadas",
-          "Exportações PDF/CSV"
+          "Planos de treino e alimentação gerados por IA",
+          "Acompanhamento completo de exames com tendências",
+          "Comparação visual de fotos de progresso",
+          "Gráficos e relatórios que revelam padrões",
+          "Exportar dados em PDF ou CSV"
         ]
       },
       "pro": {
         "name": "Pro",
         "price": "R$ 29,90",
         "period": "/mês",
-        "pitch": "Tudo que você precisa no dia a dia.",
+        "pitch": "Coaching com IA, planos inteligentes e insights mais profundos para otimizar mais rápido.",
         "trial": "7 dias de teste grátis",
         "popular": "Mais popular",
         "cta": "Assinar Pro",
         "features": [
           "Tudo do Grátis",
-          "Ferramentas de plano alimentar",
-          "Ferramentas de plano de treino",
-          "Planos alimentares e de treino",
-          "Acompanhamento completo de exames",
-          "Fotos de progresso ilimitadas",
-          "1 ano de histórico",
-          "Análises avançadas",
-          "Insights de progresso",
-          "Exportações PDF e CSV",
-          "Alertas de estoque"
+          "Gere planos alimentares personalizados com IA",
+          "Gere programas de treino estruturados com IA",
+          "Siga planos de refeição e treino criados para seus objetivos",
+          "Acompanhe resultados de exames e identifique tendências de saúde",
+          "Compare fotos de progresso ilimitadas lado a lado",
+          "Acesse um ano completo de histórico de treino e nutrição",
+          "Visualize tendências de performance com gráficos avançados",
+          "Receba insights de progresso com IA toda semana",
+          "Exporte seus dados em relatórios PDF e CSV",
+          "Receba alertas antes dos suplementos acabarem"
         ],
         "missing": []
       },
@@ -448,19 +457,19 @@
         "name": "Performance",
         "price": "R$ 59,90",
         "period": "/mês",
-        "pitch": "Hub de controle completo.",
+        "pitch": "Análises avançadas, acompanhamento de protocolos e controle total sobre cada variável.",
         "trial": "7 dias de teste grátis",
         "cta": "Assinar Performance",
         "features": [
           "Tudo do Pro",
-          "Acompanhamento inteligente de protocolos",
-          "Curvas de meia-vida e próxima dose",
-          "Gerenciamento avançado de estoque",
-          "Relatórios premium",
-          "Dashboards profundos",
-          "Insights resumidos",
-          "Exportações completas",
-          "Histórico ilimitado"
+          "Monitore protocolos com horários de dose e adesão",
+          "Veja curvas de meia-vida e saiba exatamente quando tomar a próxima dose",
+          "Gerencie estoque para nunca perder um dia de ciclo",
+          "Gere relatórios premium para médicos ou treinadores",
+          "Explore dashboards que revelam padrões ocultos",
+          "Receba resumos com IA conectando treino, nutrição e exames",
+          "Exporte qualquer conjunto de dados em qualquer formato",
+          "Mantenha seu histórico completo para sempre — sem limite de 1 ano"
         ],
         "missing": []
       },
@@ -2048,6 +2057,13 @@
     "planPremium": "Premium",
     "upgradeCta": "Fazer upgrade para Pro",
     "manageBilling": "Gerenciar Cobrança",
+    "statusTrialing": "Período de teste",
+    "statusExpired": "Expirado",
+    "trialEnds": "Teste termina em {date}",
+    "daysRemaining": "{n} dias restantes",
+    "renewsOn": "Renova em {date}",
+    "expiredNotice": "Seu plano expirou em {date}",
+    "featuresTitle": "Recursos do Plano",
     "settingsTitle": "Configurações",
     "settingsLink": "Configurações do App",
     "settingsSubtitle": "Preferências, tema e notificações.",
@@ -3552,7 +3568,27 @@
     "featureTrialEnded": "Trial de {feature} encerrado",
     "continueWith": "Continue com {plan} para manter o acesso.",
     "upgradeToUnlock": "Faça upgrade para desbloquear",
-    "viewPlans": "Ver planos"
+    "viewPlans": "Ver planos",
+    "featureNames": {
+      "atlas_ai": "Insights com IA",
+      "lab_exams": "Exames Laboratoriais",
+      "progress_photos": "Fotos de Progresso",
+      "ai_diet_generation": "Gerador de Plano Alimentar",
+      "ai_workout_generation": "Gerador de Plano de Treino",
+      "advanced_protocol_tracking": "Acompanhamento de Protocolos",
+      "premium_exports": "Exportação Premium",
+      "standard_exports": "Exportação de Relatórios"
+    },
+    "featureBenefits": {
+      "atlas_ai": "Receba insights com IA que mostram o que está funcionando e o que ajustar",
+      "lab_exams": "Acompanhe exames ao longo do tempo e identifique tendências de saúde cedo",
+      "progress_photos": "Compare fotos de progresso lado a lado para ver a evolução real",
+      "ai_diet_generation": "Gere um plano alimentar personalizado para seus objetivos",
+      "ai_workout_generation": "Monte um programa de treino estruturado para o seu nível",
+      "advanced_protocol_tracking": "Monitore cada dose, horário e métrica de adesão em detalhe",
+      "premium_exports": "Exporte relatórios premium para compartilhar com treinadores ou médicos",
+      "standard_exports": "Exporte seus dados de treino e nutrição em PDF ou CSV"
+    }
   },
   "shared": {
     "stablePage": {
