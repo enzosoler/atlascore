@@ -303,7 +303,7 @@ export default function Pricing() {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
-        toast.error('Erro de autenticação. Faça login novamente.');
+        toast.error(t('pricing_page.errors.authError'));
         return;
       }
 
@@ -311,7 +311,7 @@ export default function Pricing() {
       const accessToken = session?.access_token;
 
       if (!accessToken) {
-        toast.error('Sessão expirada. Faça login novamente.');
+        toast.error(t('pricing_page.errors.sessionExpired'));
         return;
       }
 
@@ -339,11 +339,11 @@ export default function Pricing() {
       if (!response.ok) {
         const errorText = await response.text();
         if (response.status === 401) {
-          toast.error('Sessão inválida. Faça login novamente.');
+          toast.error(t('pricing_page.errors.invalidSession'));
         } else if (response.status === 403) {
-          toast.error('Acesso negado. Verifique suas permissões.');
+          toast.error(t('pricing_page.errors.accessDenied'));
         } else {
-          toast.error(`Erro ${response.status}: ${errorText || 'Falha no checkout'}`);
+          toast.error(`${t('pricing_page.errors.error')} ${response.status}: ${errorText || t('pricing_page.errors.checkoutFailed')}`);
         }
         return;
       }
@@ -355,11 +355,11 @@ export default function Pricing() {
       } else if (data?.error) {
         toast.error(data.error);
       } else {
-        toast.error('Resposta inesperada do servidor');
+        toast.error(t('pricing_page.errors.unexpectedResponse'));
       }
 
     } catch (error) {
-      toast.error('Falha na conexão. Tente novamente.');
+      toast.error(t('pricing_page.errors.connectionFailed'));
     } finally {
       setLoading(null);
     }

@@ -242,6 +242,14 @@
       "subtitle": "No credit card. No commitment. 7 free days on paid plans. Cancel anytime.",
       "popular": "Popular",
       "period": "/month",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "saveBadge": "up to 31%",
+      "athleteLabel": "Athlete",
+      "mostChosen": "Most chosen",
+      "professionalTitle": "Professional plans — coming soon",
+      "professionalDesc": "Plans for coaches, nutritionists, and clinicians are in private beta. Join the waitlist for early access.",
+      "joinWaitlist": "Join the waitlist",
       "plans": [
         {
           "id": "free",
@@ -379,6 +387,16 @@
     "professionalCta": "Join the waitlist",
     "footer": "All paid plans include 7 free trial days · Cancel anytime · No cancellation fees",
     "footerPayment": "Payments processed securely via Stripe",
+    "errors": {
+      "authError": "Authentication error. Please log in again.",
+      "sessionExpired": "Session expired. Please log in again.",
+      "invalidSession": "Invalid session. Please log in again.",
+      "accessDenied": "Access denied. Check your permissions.",
+      "checkoutFailed": "Checkout failed",
+      "error": "Error",
+      "unexpectedResponse": "Unexpected server response",
+      "connectionFailed": "Connection failed. Please try again."
+    },
     "plans": {
       "free": {
         "name": "Free",
@@ -1111,7 +1129,9 @@
       "actionLogMeal": "Log a meal",
       "actionStartWorkout": "Start workout",
       "actionLogMealShort": "Log meal",
-      "actionCreatePlan": "Create plan"
+      "actionCreatePlan": "Create plan",
+      "eveningNutrition": "Nutrition window closing — finish strong tonight.",
+      "eveningWorkout": "Evening is here — train now or prioritize recovery."
     },
     "recs": {
       "proteinTitle": "Protein window closing",
@@ -1122,7 +1142,37 @@
       "noPlanAction": "Build plan",
       "weightTitle": "Log your weight",
       "weightReason": "Weekly weigh-ins catch trends early.",
-      "weightAction": "Log weight"
+      "weightAction": "Log weight",
+      "caloriesOverTitle": "Calories over target",
+      "caloriesOverReason": "{over} kcal over. Keep the rest of the day light.",
+      "caloriesOverAction": "Review nutrition",
+      "protocolsTitle": "{count} protocols pending",
+      "protocolsReason": "Consistency with your protocols drives long-term results.",
+      "protocolsAction": "Log protocols"
+    },
+    "status": {
+      "onTrack": "On Track",
+      "gettingStarted": "Getting Started",
+      "caution": "Caution",
+      "needsAttention": "Needs Attention",
+      "allComplete": "All focus areas complete. Exceptional day.",
+      "almost": "Almost there — {area} is the last piece.",
+      "dayAhead": "Full day ahead. One action at a time.",
+      "keepGoing": "{remaining} areas remaining. Keep going.",
+      "behindPace": "{remaining} areas still need attention.",
+      "area_workout": "training",
+      "area_nutrition": "nutrition",
+      "area_weight": "weight check-in",
+      "area_protocols": "protocols"
+    },
+    "protocols": {
+      "title": "Protocols"
+    },
+    "weeklyWorkouts": "this week",
+    "trial": {
+      "daysLeft": "{count} days left in your Pro trial",
+      "seePlans": "See plans",
+      "subtitle": "Unlock AI coaching, smart plans, and unlimited insights."
     }
   },
   "settings": {
@@ -3890,6 +3940,24 @@
       "dose": {
         "nothingScheduled": "Nothing scheduled",
         "nothingScheduledDesc": "No doses are scheduled for today."
+      }
+    }
+  },
+  "paywall": {
+    "seePlans": "See plans",
+    "maybeLater": "Maybe later",
+    "triggers": {
+      "ai_coach": {
+        "headline": "Your coach can go deeper with Premium."
+      },
+      "workout": {
+        "headline": "Track your progress long-term."
+      },
+      "photo": {
+        "headline": "Compare progress side by side — Pro feature."
+      },
+      "streak": {
+        "headline": "Protect your streak with Premium."
       }
     }
   }

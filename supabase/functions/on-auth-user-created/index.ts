@@ -180,13 +180,13 @@ async function handleRequest(req: Request): Promise<Response> {
     console.error('on-auth-user-created: profile upsert error:', profileError);
   }
 
-  // 2. Create trial subscription
+  // 2. Create trial subscription — Pro tier so users experience premium features
   const trialStartsAt = new Date();
   const trialEndsAt = new Date(trialStartsAt.getTime() + 7 * 24 * 60 * 60 * 1000);
 
   const { error: subError } = await admin.from('subscriptions').insert({
     user_id: userId,
-    tier: 'free',
+    tier: 'pro',
     status: 'trialing',
     trial_starts_at: trialStartsAt.toISOString(),
     trial_ends_at: trialEndsAt.toISOString(),

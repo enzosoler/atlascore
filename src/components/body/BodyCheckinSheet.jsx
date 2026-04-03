@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/lib/i18nContext';
 import { AI_COACH_KEY } from '@/hooks/useAICoach';
 import { DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
+import { DAILY_KEYS } from '@/hooks/useDailyStateV2';
 import { ROUTES } from '@/lib/routes';
 
 /**
@@ -48,6 +49,7 @@ export default function BodyCheckinSheet({ open, onOpenChange }) {
       toast.success(t('body.checkin.weightLogged', { val }));
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayWeight(user.id) });
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.lastWeight(user.id) });
+      queryClient.invalidateQueries({ queryKey: DAILY_KEYS.weight(user.id) });
       queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setWeight('');
       onOpenChange(false);

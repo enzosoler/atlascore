@@ -15,7 +15,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
-import { buildBriefing, buildRecommendations } from '@/lib/rulesEngine';
+import { buildBriefing, buildRecommendations, buildDailyStatus } from '@/lib/rulesEngine';
 import { ROUTES } from '@/lib/routes';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
@@ -23,6 +23,7 @@ import CoachChatTrigger from '@/components/ai/CoachChatTrigger';
 import CoachChatSheet from '@/components/ai/CoachChatSheet';
 import { useCoachChat } from '@/hooks/useCoachChat';
 import PaywallTrigger from '@/components/entitlements/PaywallTrigger';
+import { useSubscription } from '@/lib/SubscriptionContext';
 import { getDailyCheckin, listDailyCheckins } from '@/services/checkinService';
 import { getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
@@ -280,6 +281,130 @@ function RecommendationCard({ rec }) {
   );
 }
 
+// ─── Trial Countdown ──────────────────────────────────────────────────────────
+
+function TrialCountdown({ daysRemaining }) {
+  const t = useT();
+  if (!daysRemaining || daysRemaining <= 0) return null;
+
+  const isUrgent = daysRemaining <= 2;
+
+  return (
+    <Link to={ROUTES.pricing} className="block">
+      <div className={cn(
+        'rounded-[18px] border p-4 transition-all active:scale-[0.98]',
+        isUrgent
+          ? 'bg-[hsl(var(--warn)/0.08)] border-[hsl(var(--warn)/0.2)]'
+          : 'bg-[hsl(var(--brand)/0.06)] border-[hsl(var(--brand)/0.15)]'
+      )}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className={cn('h-4 w-4', isUrgent ? 'text-[hsl(var(--warn))]' : 'text-[hsl(var(--brand))]')} strokeWidth={2} />
+            <span className="text-[14px] font-bold text-[hsl(var(--fg))]">
+              {t('today.trial.daysLeft', { count: daysRemaining })}
+            </span>
+          </div>
+          <span className={cn(
+            'text-[12px] font-semibold px-3 py-1 rounded-full',
+            isUrgent
+              ? 'bg-[hsl(var(--warn)/0.15)] text-[hsl(var(--warn))]'
+              : 'bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]'
+          )}>
+            {t('today.trial.seePlans')}
+          </span>
+        </div>
+        <p className="text-[12px] text-[hsl(var(--fg-2))] mt-1 ml-[26px]">
+          {t('today.trial.subtitle')}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+// ─── Daily Status ─────────────────────────────────────────────────────────────
+
+function DailyStatus({ status, message, completedCount, totalCount }) {
+  const t = useT();
+  if (!status) return null;
+
+  const statusConfig = {
+    'on-track':        { bg: 'bg-[hsl(var(--ok)/0.08)]', border: 'border-[hsl(var(--ok)/0.2)]', dot: 'bg-[hsl(var(--ok))]', label: t('today.status.onTrack') },
+    'neutral':         { bg: 'bg-[hsl(var(--fill)/0.5)]', border: 'border-[hsl(var(--border)/0.5)]', dot: 'bg-[hsl(var(--fg-3))]', label: t('today.status.gettingStarted') },
+    'caution':         { bg: 'bg-[hsl(var(--warn)/0.08)]', border: 'border-[hsl(var(--warn)/0.2)]', dot: 'bg-[hsl(var(--warn))]', label: t('today.status.caution') },
+    'needs-attention': { bg: 'bg-[hsl(var(--err)/0.08)]', border: 'border-[hsl(var(--err)/0.2)]', dot: 'bg-[hsl(var(--err))]', label: t('today.status.needsAttention') },
+  };
+
+  const cfg = statusConfig[status] || statusConfig['neutral'];
+
+  return (
+    <div className={cn('rounded-[18px] border p-4', cfg.bg, cfg.border)}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className={cn('h-2 w-2 rounded-full', cfg.dot)} />
+          <span className="text-[14px] font-bold text-[hsl(var(--fg))]">{cfg.label}</span>
+        </div>
+        <span className="text-[12px] font-semibold text-[hsl(var(--fg-3))]">
+          {completedCount}/{totalCount}
+        </span>
+      </div>
+      <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1.5 ml-[18px]">{message}</p>
+    </div>
+  );
+}
+
+function ProtocolsSummary({ protocols }) {
+  const t = useT();
+  if (!protocols || protocols.dueToday === 0) return null;
+
+  return (
+    <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">
+          {t('today.protocols.title')}
+        </p>
+        <span className="text-[11px] font-semibold text-[hsl(var(--fg-3))]">
+          {protocols.completedToday}/{protocols.dueToday}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {protocols.activeCompounds.map((name, i) => {
+          const isDone = i < protocols.completedToday;
+          return (
+            <Link key={name + i} to={ROUTES.protocols} className={cn(
+              'px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors',
+              isDone
+                ? 'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
+                : 'bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-3))]'
+            )}>
+              {isDone ? '✓' : '○'} {name}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WeeklyProgress({ weekWorkoutCount, planFrequency, t }) {
+  if (!planFrequency && weekWorkoutCount === 0) return null;
+  const target = planFrequency || 4;
+  const pct = Math.min(100, Math.round((weekWorkoutCount / target) * 100));
+
+  return (
+    <div className="flex items-center gap-3 px-1">
+      <div className="flex-1 h-1.5 rounded-full bg-[hsl(var(--fill))]">
+        <div
+          className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-[11px] font-semibold text-[hsl(var(--fg-3))] whitespace-nowrap">
+        {weekWorkoutCount}/{target} {t('today.weeklyWorkouts')}
+      </span>
+    </div>
+  );
+}
+
 // ─── Main Content ─────────────────────────────────────────────────────────────
 
 function TodayContent() {
@@ -292,6 +417,7 @@ function TodayContent() {
   const [aiDismissed, setAiDismissed] = useState(false);
   const [streakCelebrationDismissed, setStreakCelebrationDismissed] = useState(false);
 
+  const { trialDaysRemaining, subscription } = useSubscription();
   const today = getToday();
   const uid = user?.id;
 
@@ -328,7 +454,8 @@ function TodayContent() {
   const safeNutrition = safeDaily?.nutrition || {};
   const kcalRemaining = Math.max(0, (safeNutrition.caloriesTarget || 0) - (safeNutrition.caloriesConsumed || 0));
 
-  const briefing = buildBriefing({
+  // ── AI-first briefing — use AI engine when available, rules as fallback ──
+  const rulesBriefing = buildBriefing({
     workoutDone: safeDaily.workoutDone,
     nutritionLogged: safeDaily.nutritionLogged,
     hasActivePlan: safePlan.id != null,
@@ -338,15 +465,50 @@ function TodayContent() {
     t,
   });
 
-  const recs = buildRecommendations({
+  const briefing = useMemo(() => {
+    if (ai.hasData && ai.briefing) {
+      return {
+        text: ai.briefing.message || ai.briefing.text || rulesBriefing.text,
+        focus: ai.briefing.focus || rulesBriefing.focus,
+        primaryAction: rulesBriefing.primaryAction,
+        secondaryAction: rulesBriefing.secondaryAction,
+      };
+    }
+    return rulesBriefing;
+  }, [ai.hasData, ai.briefing, rulesBriefing]);
+
+  // ── AI-first recommendations ──
+  const rulesRecs = buildRecommendations({
     workoutDone: safeDaily.workoutDone,
     hasActivePlan: safePlan.id != null,
     proteinConsumed: safeNutrition.proteinConsumed || 0,
     proteinTarget: safeNutrition.proteinTarget || 0,
     weightLogged: safeDaily.weightLogged,
     hasPhotos: false,
+    protocolsDue: safeDaily.protocols?.dueToday || 0,
+    protocolsComplete: safeDaily.protocols?.completedToday || 0,
+    caloriesConsumed: safeNutrition.caloriesConsumed || 0,
+    caloriesTarget: safeNutrition.caloriesTarget || 0,
+    weekWorkoutCount: safeDaily.weekWorkoutCount || 0,
     t,
   }) || [];
+
+  const recs = useMemo(() => {
+    if (ai.hasData && ai.recommendations?.length > 0) {
+      return ai.recommendations.slice(0, 3);
+    }
+    return rulesRecs;
+  }, [ai.hasData, ai.recommendations, rulesRecs]);
+
+  // ── Daily status (on-track / caution / needs-attention) ──
+  const dailyStatus = buildDailyStatus({
+    workoutDone: safeDaily.workoutDone,
+    nutritionLogged: safeDaily.nutritionLogged,
+    weightLogged: safeDaily.weightLogged,
+    protocolsDue: safeDaily.protocols?.dueToday || 0,
+    protocolsComplete: safeDaily.protocols?.completedToday || 0,
+    t,
+  });
 
   // ── New: streak + check-in data ─────────────────────────────────────────
   const { data: todayCheckin } = useQuery({
@@ -419,6 +581,19 @@ function TodayContent() {
         adaptiveSubtitle={adaptiveSubtitle}
       />
 
+      {/* 1b. Daily Status — on-track / caution / needs-attention */}
+      <DailyStatus
+        status={dailyStatus.status}
+        message={dailyStatus.message}
+        completedCount={dailyStatus.completedCount}
+        totalCount={dailyStatus.totalCount}
+      />
+
+      {/* 1c. Trial countdown — only shows during active trial */}
+      {subscription?.status === 'trialing' && trialDaysRemaining > 0 && (
+        <TrialCountdown daysRemaining={trialDaysRemaining} />
+      )}
+
       {/* NEW: Streak milestone celebration */}
       {showMilestone && (
         <div className="rounded-[18px] bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.2)] p-4">
@@ -485,6 +660,16 @@ function TodayContent() {
 
       {/* NEW: 7-day chain dots */}
       <ChainDots checkinDates={checkinDates} />
+
+      {/* 3b. Protocol Summary — supplement/medication compliance */}
+      <ProtocolsSummary protocols={safeDaily.protocols} />
+
+      {/* 3c. Weekly workout progress */}
+      <WeeklyProgress
+        weekWorkoutCount={safeDaily.weekWorkoutCount || 0}
+        planFrequency={safePlan.frequency}
+        t={t}
+      />
 
       {/* 4. Quick Actions Grid (ORIGINAL — preserved) */}
       <section className="space-y-4">

@@ -14,26 +14,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Crown, X } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
+import { useI18n } from '@/lib/i18nContext';
 import { ROUTES } from '@/lib/routes';
 
-const TRIGGER_COPY = {
-  ai_coach: {
-    headline: 'Your coach can go deeper with Premium.',
-    cta: 'See plans',
-  },
-  workout: {
-    headline: 'Track your progress long-term.',
-    cta: 'See plans',
-  },
-  photo: {
-    headline: 'Compare progress side by side — Pro feature.',
-    cta: 'See plans',
-  },
-  streak: {
-    headline: 'Protect your streak with Premium.',
-    cta: 'See plans',
-  },
-};
+const TRIGGER_KEYS = ['ai_coach', 'workout', 'photo', 'streak'];
 
 function sessionKey(trigger) {
   return `atlas_paywall_${trigger}_dismissed`;
@@ -46,6 +30,7 @@ function sessionKey(trigger) {
  */
 export default function PaywallTrigger({ trigger, show }) {
   const { can } = useSubscription();
+  const { t } = useI18n();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -58,7 +43,7 @@ export default function PaywallTrigger({ trigger, show }) {
   if (can('atlas_ai')) return null;
   if (!show || dismissed) return null;
 
-  const copy = TRIGGER_COPY[trigger] || TRIGGER_COPY.workout;
+  const key = TRIGGER_KEYS.includes(trigger) ? trigger : 'workout';
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -71,13 +56,13 @@ export default function PaywallTrigger({ trigger, show }) {
         <Crown className="w-5 h-5 text-[#F59E0B] shrink-0 mt-0.5" strokeWidth={2} />
         <div className="flex-1 min-w-0">
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))] leading-[1.4]">
-            {copy.headline}
+            {t(`paywall.triggers.${key}.headline`)}
           </p>
           <Link
             to={ROUTES.pricing}
             className="inline-flex items-center gap-1.5 mt-2.5 text-[13px] font-semibold text-[hsl(var(--brand))] active:opacity-70"
           >
-            {copy.cta}
+            {t('paywall.seePlans')}
             <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
           </Link>
         </div>
@@ -97,6 +82,7 @@ export default function PaywallTrigger({ trigger, show }) {
  */
 export function PaywallSheet({ trigger, show, onClose }) {
   const { can } = useSubscription();
+  const { t } = useI18n();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -107,7 +93,7 @@ export function PaywallSheet({ trigger, show, onClose }) {
 
   if (can('atlas_ai') || !show || dismissed) return null;
 
-  const copy = TRIGGER_COPY[trigger] || TRIGGER_COPY.workout;
+  const key = TRIGGER_KEYS.includes(trigger) ? trigger : 'workout';
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -121,21 +107,21 @@ export function PaywallSheet({ trigger, show, onClose }) {
         <div className="p-6 text-center space-y-4">
           <Crown className="w-10 h-10 text-[#F59E0B] mx-auto" strokeWidth={1.5} />
           <p className="text-[18px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))]">
-            {copy.headline}
+            {t(`paywall.triggers.${key}.headline`)}
           </p>
           <Link
             to={ROUTES.pricing}
             onClick={handleDismiss}
             className="flex items-center justify-center gap-2 h-12 rounded-[12px] bg-[hsl(var(--brand))] text-white font-semibold text-[15px] w-full"
           >
-            {copy.cta}
+            {t('paywall.seePlans')}
             <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
           </Link>
           <button
             onClick={handleDismiss}
             className="text-[13px] text-[hsl(var(--fg-3))] active:opacity-70"
           >
-            Maybe later
+            {t('paywall.maybeLater')}
           </button>
         </div>
       </div>

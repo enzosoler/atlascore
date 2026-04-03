@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { DAILY_KEYS } from '@/hooks/useDailyStateV2';
+import { AI_COACH_KEY } from '@/hooks/useAICoach';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BarChart3,
@@ -659,6 +661,8 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
     queryClient.invalidateQueries({ queryKey: ['measurements', user?.id] });
     queryClient.invalidateQueries({ queryKey: ['measurements-progress', user?.id] });
     queryClient.invalidateQueries({ queryKey: ['today-measurements-recent', user?.id] });
+    queryClient.invalidateQueries({ queryKey: DAILY_KEYS.weight(user?.id) });
+    queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, user?.id] });
   };
 
   const createMutation = useMutation({

@@ -172,6 +172,8 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
             <FieldLabel>{t('onboarding.page.heightLabel')}</FieldLabel>
             <Input
               type="number"
+              min="50"
+              max="280"
               value={form.height}
               onChange={(e) => set('height', e.target.value)}
               placeholder="175"
@@ -183,6 +185,8 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
             <Input
               type="number"
               step="0.1"
+              min="20"
+              max="500"
               value={form.current_weight}
               onChange={(e) => {
                 set('current_weight', e.target.value);
@@ -210,6 +214,8 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
             <FieldLabel>{t('onboarding.page.ageLabel')}</FieldLabel>
             <Input
               type="number"
+              min="1"
+              max="120"
               value={form.age}
               onChange={(e) => set('age', e.target.value)}
               placeholder="30"
@@ -226,6 +232,8 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
             <Input
               type="number"
               step="0.1"
+              min="20"
+              max="500"
               value={form.target_weight}
               onChange={(e) => set('target_weight', e.target.value)}
               placeholder="75"
@@ -291,6 +299,8 @@ function StepFirstCheckpoint({ form, set, t }) {
           <Input
             type="number"
             step="0.1"
+            min="20"
+            max="500"
             value={form.checkpoint_weight}
             onChange={(e) => set('checkpoint_weight', e.target.value)}
             placeholder="80"
@@ -306,6 +316,8 @@ function StepFirstCheckpoint({ form, set, t }) {
             <Input
               type="number"
               step="0.1"
+              min="1"
+              max="70"
               value={form.checkpoint_body_fat}
               onChange={(e) => set('checkpoint_body_fat', e.target.value)}
               placeholder="18"
@@ -319,6 +331,8 @@ function StepFirstCheckpoint({ form, set, t }) {
             <Input
               type="number"
               step="0.1"
+              min="30"
+              max="200"
               value={form.checkpoint_waist}
               onChange={(e) => set('checkpoint_waist', e.target.value)}
               placeholder="80"

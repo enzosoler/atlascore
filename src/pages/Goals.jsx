@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { DAILY_KEYS } from '@/hooks/useDailyStateV2';
+import { AI_COACH_KEY } from '@/hooks/useAICoach';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -396,6 +398,8 @@ function GoalsContent() {
     mutationFn: (payload) => saveLocalProfile(user, profileData?.id, payload),
     onSuccess: (result) => {
       qc.setQueryData(profileQueryKey, result);
+      qc.invalidateQueries({ queryKey: DAILY_KEYS.profile(user.id) });
+      qc.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     },

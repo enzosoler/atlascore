@@ -242,6 +242,14 @@
       "subtitle": "Sem cartão de crédito. Sem compromisso. 7 dias grátis nos planos pagos. Cancele quando quiser.",
       "popular": "Popular",
       "period": "/mês",
+      "monthly": "Mensal",
+      "yearly": "Anual",
+      "saveBadge": "até 31%",
+      "athleteLabel": "Atleta",
+      "mostChosen": "Mais escolhido",
+      "professionalTitle": "Planos profissionais — em breve",
+      "professionalDesc": "Planos para treinadores, nutricionistas e clínicos estão em desenvolvimento. Entre na lista de espera para acesso antecipado.",
+      "joinWaitlist": "Entrar na lista de espera",
       "plans": [
         {
           "id": "free",
@@ -378,6 +386,16 @@
     "professionalDesc": "Planos profissionais para treinadores, nutricionistas e clínicos estão chegando em breve. Entre na lista de espera para acesso antecipado.",
     "footer": "Todos os planos pagos incluem 7 dias de teste grátis · Cancele quando quiser · Sem taxas de cancelamento",
     "footerPayment": "Pagamentos processados com segurança via Stripe",
+    "errors": {
+      "authError": "Erro de autenticação. Faça login novamente.",
+      "sessionExpired": "Sessão expirada. Faça login novamente.",
+      "invalidSession": "Sessão inválida. Faça login novamente.",
+      "accessDenied": "Acesso negado. Verifique suas permissões.",
+      "checkoutFailed": "Falha no checkout",
+      "error": "Erro",
+      "unexpectedResponse": "Resposta inesperada do servidor",
+      "connectionFailed": "Falha na conexão. Tente novamente."
+    },
     "plans": {
       "free": {
         "name": "Grátis",
@@ -1097,7 +1115,9 @@
       "actionLogMeal": "Registrar refeição",
       "actionStartWorkout": "Iniciar treino",
       "actionLogMealShort": "Registrar refeição",
-      "actionCreatePlan": "Criar plano"
+      "actionCreatePlan": "Criar plano",
+      "eveningNutrition": "Janela de nutrição fechando — finalize forte hoje.",
+      "eveningWorkout": "Anoiteceu — treine agora ou priorize a recuperação."
     },
     "recs": {
       "proteinTitle": "Janela de proteína fechando",
@@ -1108,7 +1128,37 @@
       "noPlanAction": "Montar plano",
       "weightTitle": "Registre seu peso",
       "weightReason": "Pesagens semanais identificam tendências cedo.",
-      "weightAction": "Registrar peso"
+      "weightAction": "Registrar peso",
+      "caloriesOverTitle": "Calorias acima da meta",
+      "caloriesOverReason": "{over} kcal acima. Mantenha o restante do dia leve.",
+      "caloriesOverAction": "Revisar nutrição",
+      "protocolsTitle": "{count} protocolos pendentes",
+      "protocolsReason": "Consistência nos protocolos gera resultados a longo prazo.",
+      "protocolsAction": "Registrar protocolos"
+    },
+    "status": {
+      "onTrack": "No Caminho",
+      "gettingStarted": "Começando",
+      "caution": "Atenção",
+      "needsAttention": "Precisa de Atenção",
+      "allComplete": "Todas as áreas completas. Dia excepcional.",
+      "almost": "Quase lá — {area} é a última peça.",
+      "dayAhead": "Dia inteiro pela frente. Uma ação de cada vez.",
+      "keepGoing": "{remaining} áreas restantes. Continue.",
+      "behindPace": "{remaining} áreas ainda precisam de atenção.",
+      "area_workout": "treino",
+      "area_nutrition": "nutrição",
+      "area_weight": "peso",
+      "area_protocols": "protocolos"
+    },
+    "protocols": {
+      "title": "Protocolos"
+    },
+    "weeklyWorkouts": "esta semana",
+    "trial": {
+      "daysLeft": "{count} dias restantes no seu trial Pro",
+      "seePlans": "Ver planos",
+      "subtitle": "Desbloqueie coaching IA, planos inteligentes e insights ilimitados."
     }
   },
   "settings": {
@@ -3880,6 +3930,24 @@
       "dose": {
         "nothingScheduled": "Nada agendado",
         "nothingScheduledDesc": "Nenhuma dose agendada para hoje."
+      }
+    }
+  },
+  "paywall": {
+    "seePlans": "Ver planos",
+    "maybeLater": "Talvez depois",
+    "triggers": {
+      "ai_coach": {
+        "headline": "Seu coach pode ir mais fundo com o Premium."
+      },
+      "workout": {
+        "headline": "Acompanhe seu progresso a longo prazo."
+      },
+      "photo": {
+        "headline": "Compare seu progresso lado a lado — recurso Pro."
+      },
+      "streak": {
+        "headline": "Proteja sua sequência com o Premium."
       }
     }
   }

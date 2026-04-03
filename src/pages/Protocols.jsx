@@ -3,6 +3,8 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import { Activity, Clock, Plus, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
+import { DAILY_KEYS } from '@/hooks/useDailyStateV2';
+import { AI_COACH_KEY } from '@/hooks/useAICoach';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import {
@@ -568,6 +570,8 @@ function ProtocolsContent() {
         : createProtocol({ ...payload, user_id: user.id }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
+      qc.invalidateQueries({ queryKey: DAILY_KEYS.protocols(user.id) });
+      qc.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setIsFormOpen(false);
       setIsTemplateMode(true);
       setEditingProtocol(null);
@@ -617,6 +621,8 @@ function ProtocolsContent() {
     onMutate: ({ actionKey }) => setPendingActionKey(actionKey),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
+      qc.invalidateQueries({ queryKey: DAILY_KEYS.protocols(user.id) });
+      qc.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setNotice({ tone: 'success', message: t('pages.protocols.item_deleted') });
     },
     onError: () => {
@@ -638,6 +644,8 @@ function ProtocolsContent() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: PROTOCOLS_QUERY_KEY });
       qc.invalidateQueries({ queryKey: LOGS_QUERY_KEY });
+      qc.invalidateQueries({ queryKey: DAILY_KEYS.protocolLogs(user.id) });
+      qc.invalidateQueries({ queryKey: [AI_COACH_KEY, user.id] });
       setIsLogDoseOpen(false);
       setLoggingProtocol(null);
       setNotice({ tone: 'success', message: t('pages.protocols.dose_logged') });
