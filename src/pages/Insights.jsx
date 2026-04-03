@@ -282,6 +282,68 @@ function SummaryItem({ item }) {
   );
 }
 
+function RecompositionHero({ items }) {
+  const fatItem = items.find((i) => i.key === 'fatmass_since');
+  const leanItem = items.find((i) => i.key === 'leanmass_since');
+  const weightItem = items.find((i) => i.key === 'weight_since');
+  const bfItem = items.find((i) => i.key === 'bodyfat_since');
+
+  // Only show if we have at least fat or lean mass data
+  if (!fatItem && !leanItem) return null;
+
+  const stats = [
+    fatItem && { label: 'Fat lost', value: fatItem.value, accent: 'var(--sys-red)' },
+    leanItem && { label: 'Lean mass gained', value: leanItem.value, accent: 'var(--sys-green)' },
+    weightItem && { label: 'Net weight', value: weightItem.value, accent: 'var(--accent-primary)' },
+    bfItem && { label: 'Body fat', value: bfItem.value, accent: 'var(--sys-orange)' },
+  ].filter(Boolean);
+
+  return (
+    <section className="relative mb-4 overflow-hidden rounded-[var(--atlas-sheet-radius)] border border-[hsl(var(--border)/0.5)]">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,hsl(var(--card))_0%,hsl(var(--fill)/0.6)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_20%,hsl(var(--sys-green)/0.08),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_20%_80%,hsl(var(--sys-red)/0.06),transparent_60%)]" />
+
+      <div className="relative px-6 py-8 lg:px-8 lg:py-10">
+        {/* Overline */}
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+          Body recomposition
+        </p>
+
+        {/* Headline */}
+        <h2 className="mt-3 text-[clamp(1.5rem,1rem+1.4vw,2.4rem)] font-bold leading-[1.1] tracking-[-0.04em] text-[hsl(var(--fg))]">
+          {fatItem && leanItem
+            ? "You're losing fat and building muscle."
+            : fatItem
+              ? 'Fat is coming off.'
+              : 'Lean mass is going up.'}
+        </h2>
+        <p className="mt-2 max-w-lg text-[14px] leading-[1.6] text-[hsl(var(--fg-2))]">
+          Since your first checkpoint. This is real change — derived from your weight and body fat data.
+        </p>
+
+        {/* Big numbers */}
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {stats.map((stat) => (
+            <div key={stat.label}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
+                {stat.label}
+              </p>
+              <p
+                className="mt-1 text-[clamp(1.6rem,1.2rem+1vw,2.2rem)] font-extrabold tracking-[-0.05em]"
+                style={{ color: `hsl(${stat.accent})` }}
+              >
+                {stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SummaryPanel({ title, subtitle, icon: Icon, items, emptyText, className = '' }) {
   const t = useT();
   return (
@@ -1091,6 +1153,8 @@ function InsightsContent() {
               items={consistencyItems}
             />
           </TodaySection>
+
+          <RecompositionHero items={mvp?.summary?.sinceStart || []} />
 
           <section className="grid gap-4 md:grid-cols-2">
             <SummaryPanel
