@@ -13,12 +13,15 @@ import {
   // Users,       // unused in public MVP — professional plans hidden
   X,
   Zap,
+  Tag,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useI18n } from '@/lib/i18nContext';
 import { supabase } from '@/lib/supabaseClient';
+import { getCreatorStatus } from '@/lib/affiliate/applyCreatorCode';
+import CreatorCodeModal from '@/components/affiliate/CreatorCodeModal';
 import RegionSelector from '@/components/pricing/RegionSelector';
 import PublicSiteShell, {
   PublicSectionHeader,
@@ -193,6 +196,8 @@ export default function Pricing() {
   const [loading, setLoading] = useState(null);
   const [region, setRegion] = useState('US');
   const [billing, setBilling] = useState('monthly');
+  const [creatorModalOpen, setCreatorModalOpen] = useState(false);
+  const [creatorStatus, setCreatorStatus] = useState({ code: null, locked: false });
   const { user, isAuthenticated } = useAuth();
   const { subscription } = useSubscription();
   const { t, locale, getTranslation } = useI18n();
@@ -369,6 +374,13 @@ export default function Pricing() {
   useEffect(() => {
     trackProductEvent(user?.id, 'pricing_page_viewed', { authenticated: isAuthenticated });
   }, []);
+
+  // Fetch creator code status for authenticated users
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      getCreatorStatus(user.id).then(setCreatorStatus).catch(() => {});
+    }
+  }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
     const pendingPlan = sessionStorage.getItem('pending_plan');
@@ -561,6 +573,33 @@ export default function Pricing() {
               </motion.div>
             ))}
           </div>
+
+          {/* Creator code link */}
+          {isAuthenticated && (
+            <div className="mt-6 flex justify-center">
+              {creatorStatus.code ? (
+                <span className="inline-flex items-center gap-1.5 text-[13px] text-[hsl(var(--fg-2))]">
+                  <Check className="h-3.5 w-3.5 text-[hsl(var(--ok))]" strokeWidth={2.5} />
+                  {t('affiliate.creator')}: {creatorStatus.code}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setCreatorModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--brand))] hover:underline"
+                >
+                  <Tag className="h-3.5 w-3.5" strokeWidth={2} />
+                  {t('affiliate.haveCode')}
+                </button>
+              )}
+            </div>
+          )}
+
+          <CreatorCodeModal
+            open={creatorModalOpen}
+            onOpenChange={setCreatorModalOpen}
+            onApplied={(result) => setCreatorStatus({ code: result.code, locked: false })}
+          />
 
           {/* Professional CTA — coming soon / private beta */}
           <div className="mt-12 rounded-2xl bg-[hsl(var(--fill)/0.4)] px-6 py-6 text-center">

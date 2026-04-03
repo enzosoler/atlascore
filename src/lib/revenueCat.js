@@ -93,17 +93,33 @@ export async function checkEntitlement() {
 
 /**
  * Get available offerings (products/packages).
- * @returns {object|null} Current offering with available packages
+ * @param {{ currentOnly?: boolean }} options — Pass { currentOnly: true } for just the current offering
+ * @returns {object|null} Full offerings object, or current offering if currentOnly is true
  */
-export async function getOfferings() {
+export async function getOfferings({ currentOnly = false } = {}) {
   if (!Capacitor.isNativePlatform()) return null;
 
   try {
     const { offerings } = await Purchases.getOfferings();
-    return offerings?.current || null;
+    if (!offerings) return null;
+    return currentOnly ? offerings.current || null : offerings;
   } catch (err) {
     console.error('[RevenueCat] getOfferings failed:', err);
     return null;
+  }
+}
+
+/**
+ * Set custom attributes on the RevenueCat subscriber.
+ * Useful for attaching metadata like creator codes, referral info, etc.
+ * @param {Record<string, string>} attrs — Key-value pairs to set
+ */
+export async function setRevenueCatAttributes(attrs) {
+  if (!Capacitor.isNativePlatform() || !attrs) return;
+  try {
+    await Purchases.setAttributes(attrs);
+  } catch (err) {
+    console.error('[RevenueCat] setAttributes failed:', err);
   }
 }
 

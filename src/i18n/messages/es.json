@@ -3586,5 +3586,16 @@
       "progress_photos": "Fotos de progreso ilimitadas con comparacion lado a lado",
       "advanced_analytics": "Analisis avanzados y seguimiento de tendencias"
     }
+  },
+  "affiliate": {
+    "haveCode": "Tienes un codigo de creador?",
+    "enterCode": "Ingresa el codigo de creador",
+    "apply": "Aplicar",
+    "applying": "Aplicando...",
+    "applied": "Codigo de creador aplicado!",
+    "creator": "Creador",
+    "invalidCode": "Codigo invalido o inactivo.",
+    "creatorLocked": "El codigo de creador ya no se puede cambiar.",
+    "codePlaceholder": "Ingresa el codigo"
   }
 }

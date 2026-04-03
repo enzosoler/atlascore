@@ -4091,5 +4091,16 @@
       "progress_photos": "Unlimited progress photos with side-by-side comparison",
       "advanced_analytics": "Advanced analytics and trend tracking"
     }
+  },
+  "affiliate": {
+    "haveCode": "Have a creator code?",
+    "enterCode": "Enter creator code",
+    "apply": "Apply",
+    "applying": "Applying...",
+    "applied": "Creator code applied!",
+    "creator": "Creator",
+    "invalidCode": "Invalid or inactive code.",
+    "creatorLocked": "Creator code can no longer be changed.",
+    "codePlaceholder": "Enter code"
   }
 }
