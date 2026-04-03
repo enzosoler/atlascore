@@ -4040,5 +4040,23 @@
         "headline": "Proteja sua sequência com o Premium."
       }
     }
+  },
+  "reactivation": {
+    "title": "Guardamos seu lugar",
+    "subtitle": "Seu teste acabou, mas seus dados ainda estao aqui. Continue de onde parou — dessa vez, com um desconto.",
+    "offerBadge": "Oferta limitada",
+    "offerHeadline": "50% de desconto no primeiro ano",
+    "offerDetail": "Acesso completo a todos os recursos Pro pela metade do preco. Sem compromisso — cancele quando quiser.",
+    "missingTitle": "O que voce esta perdendo",
+    "ctaPrimary": "Reativar com 50% off",
+    "ctaSecondary": "Continuar no plano gratuito",
+    "features": {
+      "ai_food_photo": "Tire uma foto e deixe a IA registrar suas refeicoes",
+      "atlas_ai": "Insights com IA que mostram o que funciona e o que ajustar",
+      "ai_workout_generation": "Planos de treino estruturados para seu nivel",
+      "ai_diet_generation": "Planos alimentares personalizados para seus objetivos",
+      "progress_photos": "Fotos de progresso ilimitadas com comparacao lado a lado",
+      "advanced_analytics": "Analises avancadas e acompanhamento de tendencias"
+    }
   }
 }

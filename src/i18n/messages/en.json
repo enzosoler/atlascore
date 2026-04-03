@@ -4049,5 +4049,23 @@
         "headline": "Protect your streak with Premium."
       }
     }
+  },
+  "reactivation": {
+    "title": "We saved your spot",
+    "subtitle": "Your trial ended, but your data is still here. Pick up where you left off — and this time, with a deal.",
+    "offerBadge": "Limited offer",
+    "offerHeadline": "50% off your first year",
+    "offerDetail": "Get full access to every Pro feature at half price. No commitment — cancel anytime.",
+    "missingTitle": "What you're missing",
+    "ctaPrimary": "Reactivate with 50% off",
+    "ctaSecondary": "Continue on free plan",
+    "features": {
+      "ai_food_photo": "Snap a photo and let AI log your meals",
+      "atlas_ai": "AI insights that show what's working and what to adjust",
+      "ai_workout_generation": "Structured workout plans built for your level",
+      "ai_diet_generation": "Personalized meal plans matched to your goals",
+      "progress_photos": "Unlimited progress photos with side-by-side comparison",
+      "advanced_analytics": "Advanced analytics and trend tracking"
+    }
   }
 }

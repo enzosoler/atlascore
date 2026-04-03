@@ -92,6 +92,20 @@
         "target": "Target",
         "ahead": "Ahead"
       },
+      "referral": {
+        "title": "Invite Friends",
+        "heading": "Share atlas.core",
+        "subtitle": "Invite friends and track how many people join through your link.",
+        "yourLink": "Your referral link",
+        "copied": "Copied!",
+        "copyLink": "Copy link",
+        "shareButton": "Share with Friends",
+        "progressLabel": "Your Progress",
+        "referralCount": "{count} referral",
+        "referralCountPlural": "{count} referrals",
+        "noReferrals": "Share your link to start tracking referrals.",
+        "shareText": "Track training, nutrition, and labs in one place. Join me on atlas.core!"
+      },
       "today": {
         "greeting": {
           "default": "Welcome"
@@ -220,6 +234,20 @@
       "adherence": {
         "target": "Meta",
         "ahead": "Adiantado"
+      },
+      "referral": {
+        "title": "Convidar Amigos",
+        "heading": "Compartilhe o atlas.core",
+        "subtitle": "Convide amigos e acompanhe quantas pessoas entram pelo seu link.",
+        "yourLink": "Seu link de convite",
+        "copied": "Copiado!",
+        "copyLink": "Copiar link",
+        "shareButton": "Compartilhar com Amigos",
+        "progressLabel": "Seu Progresso",
+        "referralCount": "{count} convite",
+        "referralCountPlural": "{count} convites",
+        "noReferrals": "Compartilhe seu link para começar a rastrear convites.",
+        "shareText": "Acompanhe treino, nutrição e exames em um só lugar. Junte-se a mim no atlas.core!"
       }
     }
   },
@@ -315,6 +343,20 @@
       "adherence": {
         "target": "Meta",
         "ahead": "Adelantado"
+      },
+      "referral": {
+        "title": "Invitar Amigos",
+        "heading": "Comparte atlas.core",
+        "subtitle": "Invita amigos y rastrea cuantas personas se unen con tu link.",
+        "yourLink": "Tu link de invitacion",
+        "copied": "Copiado!",
+        "copyLink": "Copiar link",
+        "shareButton": "Compartir con Amigos",
+        "progressLabel": "Tu Progreso",
+        "referralCount": "{count} invitacion",
+        "referralCountPlural": "{count} invitaciones",
+        "noReferrals": "Comparte tu link para empezar a rastrear invitaciones.",
+        "shareText": "Rastrea entrenamiento, nutricion y examenes en un solo lugar. Unete a mi en atlas.core!"
       }
     }
   }

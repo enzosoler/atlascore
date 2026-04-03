@@ -2,15 +2,17 @@
  * useReferralTracking
  *
  * Captures referral attribution data from URL query parameters when a new user
- * lands on the app via a shared Instagram Story card link.
+ * lands on the app via a shared link.
  *
- * Expected URL pattern:
- *   https://useatlascore.com/?ref=story&card=nutrition
+ * Supported URL patterns:
+ *   https://useatlascore.com/?ref=story&card=nutrition   (marketing attribution)
+ *   https://useatlascore.com/?ref=a1b2c3d4              (user referral — short ID)
  *
  * The hook:
  *   1. Reads `ref` and `card` from the URL on mount
  *   2. Persists them in sessionStorage so they survive the auth redirect
  *   3. After authentication, writes the attribution to user_metadata via Supabase
+ *   4. If `ref` looks like a user short-id, inserts a row into the `referrals` table
  *
  * This data feeds into the "hear_about_us" remarketing pipeline already set up
  * in the Onboarding flow and can be used for cohort analysis.
@@ -20,6 +22,9 @@ import { useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 const STORAGE_KEY = 'atlas_referral';
+
+// Known marketing sources — anything else is treated as a user referral code
+const MARKETING_SOURCES = new Set(['story', 'instagram', 'twitter', 'tiktok', 'youtube', 'google', 'email', 'blog']);
 
 /**
  * Capture referral params from the current URL and persist to sessionStorage.
@@ -69,6 +74,40 @@ export function clearStoredReferral() {
 }
 
 /**
+ * Resolve a short referral code (first 8 chars of UUID) to a full user UUID.
+ * Returns null if no match is found.
+ */
+async function resolveReferrerByShortId(shortId) {
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .ilike('id', `${shortId}%`)
+      .limit(1)
+      .maybeSingle();
+    return data?.id || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Record a user-to-user referral in the referrals table.
+ * Silently ignores duplicates (unique constraint).
+ */
+async function recordReferral(referrerId, referredId) {
+  try {
+    await supabase.from('referrals').insert({
+      referrer_id: referrerId,
+      referred_id: referredId,
+    });
+  } catch (err) {
+    // Duplicate or constraint violation — safe to ignore
+    console.warn('Failed to record referral:', err?.message);
+  }
+}
+
+/**
  * Hook: call in an authenticated context to flush referral data to user_metadata.
  * This writes once and clears the sessionStorage entry.
  */
@@ -78,6 +117,8 @@ export function useReferralTracking(user) {
 
     const referral = getStoredReferral();
     if (!referral) return;
+
+    const isUserReferral = referral.ref && !MARKETING_SOURCES.has(referral.ref.toLowerCase());
 
     // Write attribution to user metadata (non-blocking)
     supabase.auth
@@ -90,7 +131,14 @@ export function useReferralTracking(user) {
           hear_about_us: referral.ref === 'story' ? 'instagram' : referral.ref,
         },
       })
-      .then(() => {
+      .then(async () => {
+        // If ref looks like a user short-id, record the referral relationship
+        if (isUserReferral) {
+          const referrerId = await resolveReferrerByShortId(referral.ref);
+          if (referrerId && referrerId !== user.id) {
+            await recordReferral(referrerId, user.id);
+          }
+        }
         clearStoredReferral();
       })
       .catch((err) => {

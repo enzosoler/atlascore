@@ -3544,5 +3544,23 @@
       "premium_exports": "Exporta reportes premium para compartir con entrenadores o médicos",
       "standard_exports": "Exporta tus datos de entrenamiento y nutrición en PDF o CSV"
     }
+  },
+  "reactivation": {
+    "title": "Guardamos tu lugar",
+    "subtitle": "Tu prueba termino, pero tus datos siguen aqui. Retoma donde lo dejaste — esta vez, con un descuento.",
+    "offerBadge": "Oferta limitada",
+    "offerHeadline": "50% de descuento en tu primer ano",
+    "offerDetail": "Acceso completo a todas las funciones Pro a mitad de precio. Sin compromiso — cancela cuando quieras.",
+    "missingTitle": "Lo que te estas perdiendo",
+    "ctaPrimary": "Reactivar con 50% off",
+    "ctaSecondary": "Continuar en plan gratuito",
+    "features": {
+      "ai_food_photo": "Toma una foto y deja que la IA registre tus comidas",
+      "atlas_ai": "Insights con IA que muestran que funciona y que ajustar",
+      "ai_workout_generation": "Planes de entrenamiento estructurados para tu nivel",
+      "ai_diet_generation": "Planes alimentarios personalizados para tus objetivos",
+      "progress_photos": "Fotos de progreso ilimitadas con comparacion lado a lado",
+      "advanced_analytics": "Analisis avanzados y seguimiento de tendencias"
+    }
   }
 }
