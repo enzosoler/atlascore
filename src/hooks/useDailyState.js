@@ -20,6 +20,14 @@ const todayISO = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+/** Returns the local UTC offset as ±HH:MM (e.g. "+03:00" or "-05:00") */
+const tzOffset = () => {
+  const off = new Date().getTimezoneOffset();
+  const sign = off <= 0 ? '+' : '-';
+  const abs = Math.abs(off);
+  return `${sign}${String(Math.floor(abs / 60)).padStart(2, '0')}:${String(abs % 60).padStart(2, '0')}`;
+};
+
 export const DAILY_QUERY_KEYS = {
   todaySession:   (uid) => ['daily-today-session', uid],
   todayMeals:     (uid) => ['daily-today-meals', uid],
@@ -35,6 +43,7 @@ export function useDailyState() {
   const { user } = useAuth();
   const uid = user?.id;
   const today = todayISO();
+  const tz = tzOffset();
   const queryClient = useQueryClient();
 
   // ── Workout (non-throwing) ──────────────────────────────────────────────────
@@ -42,7 +51,7 @@ export function useDailyState() {
     queryKey: DAILY_QUERY_KEYS.todaySession(uid),
     queryFn: async () => {
       try {
-        const { data } = await supabase.from('workouts').select('*').eq('user_id', uid).gte('completed_at', `${today}T00:00:00`).lte('completed_at', `${today}T23:59:59`).order('completed_at', { ascending: false }).limit(1).maybeSingle();
+        const { data } = await supabase.from('workouts').select('*').eq('user_id', uid).gte('completed_at', `${today}T00:00:00${tz}`).lte('completed_at', `${today}T23:59:59${tz}`).order('completed_at', { ascending: false }).limit(1).maybeSingle();
         return data ?? null;
       } catch { return null; }
     },
@@ -55,7 +64,7 @@ export function useDailyState() {
     queryKey: DAILY_QUERY_KEYS.todayMeals(uid),
     queryFn: async () => {
       try {
-        const { data } = await supabase.from('food_logs').select('*').eq('user_id', uid).gte('date', `${today}T00:00:00`).lte('date', `${today}T23:59:59`);
+        const { data } = await supabase.from('food_logs').select('*').eq('user_id', uid).gte('date', `${today}T00:00:00${tz}`).lte('date', `${today}T23:59:59${tz}`);
         return data || [];
       } catch { return []; }
     },
@@ -118,8 +127,8 @@ export function useDailyState() {
         const { data } = await supabase
           .from('protocol_logs')
           .select('protocol_id, taken_at')
-          .gte('taken_at', `${today}T00:00:00`)
-          .lte('taken_at', `${today}T23:59:59`)
+          .gte('taken_at', `${today}T00:00:00${tz}`)
+          .lte('taken_at', `${today}T23:59:59${tz}`)
           .limit(50);
         return data || [];
       } catch { return []; }

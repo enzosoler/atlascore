@@ -18,6 +18,14 @@ const todayISO = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+/** Returns the local UTC offset as ±HH:MM (e.g. "+03:00" or "-05:00") */
+const tzOffset = () => {
+  const off = new Date().getTimezoneOffset(); // minutes, positive = behind UTC
+  const sign = off <= 0 ? '+' : '-';
+  const abs = Math.abs(off);
+  return `${sign}${String(Math.floor(abs / 60)).padStart(2, '0')}:${String(abs % 60).padStart(2, '0')}`;
+};
+
 export const DAILY_KEYS = {
   session:     (uid) => ['v2-session', uid],
   meals:       (uid) => ['v2-meals', uid],
@@ -39,6 +47,7 @@ export function useDailyStateV2() {
   const { user } = useAuth();
   const uid = user?.id;
   const today = todayISO();
+  const tz = tzOffset();
   const qc = useQueryClient();
 
   // ── Queries (all non-throwing) ────────────────────────────────────────────
@@ -46,7 +55,7 @@ export function useDailyStateV2() {
   const { data: rawSession, isLoading: l1 } = useQuery({
     queryKey: DAILY_KEYS.session(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('workouts').select('*').eq('user_id', uid).gte('completed_at', `${today}T00:00:00`).lte('completed_at', `${today}T23:59:59`).order('completed_at', { ascending: false }).limit(1).maybeSingle();
+      const { data } = await supabase.from('workouts').select('*').eq('user_id', uid).gte('completed_at', `${today}T00:00:00${tz}`).lte('completed_at', `${today}T23:59:59${tz}`).order('completed_at', { ascending: false }).limit(1).maybeSingle();
       return data;
     }),
     enabled: !!uid, staleTime: 30_000,
@@ -55,7 +64,7 @@ export function useDailyStateV2() {
   const { data: rawMeals = [], isLoading: l2 } = useQuery({
     queryKey: DAILY_KEYS.meals(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('food_logs').select('*').eq('user_id', uid).gte('date', `${today}T00:00:00`).lte('date', `${today}T23:59:59`);
+      const { data } = await supabase.from('food_logs').select('*').eq('user_id', uid).gte('date', `${today}T00:00:00${tz}`).lte('date', `${today}T23:59:59${tz}`);
       return data || [];
     }),
     enabled: !!uid, staleTime: 30_000,
@@ -82,7 +91,7 @@ export function useDailyStateV2() {
   const { data: rawProtocolLogs = [] } = useQuery({
     queryKey: DAILY_KEYS.protocolLogs(uid),
     queryFn: () => sq(async () => {
-      const { data } = await supabase.from('protocol_logs').select('protocol_id, taken_at').eq('user_id', uid).gte('taken_at', `${today}T00:00:00`).lte('taken_at', `${today}T23:59:59`).limit(50);
+      const { data } = await supabase.from('protocol_logs').select('protocol_id, taken_at').eq('user_id', uid).gte('taken_at', `${today}T00:00:00${tz}`).lte('taken_at', `${today}T23:59:59${tz}`).limit(50);
       return data || [];
     }),
     enabled: !!uid, staleTime: 30_000,
@@ -121,7 +130,7 @@ export function useDailyStateV2() {
       const monday = new Date();
       monday.setDate(monday.getDate() - monday.getDay() + 1);
       const mondayKey = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
-      const { data } = await supabase.from('workouts').select('completed_at, status').eq('user_id', uid).eq('status', 'completed').gte('completed_at', `${mondayKey}T00:00:00`);
+      const { data } = await supabase.from('workouts').select('completed_at, status').eq('user_id', uid).eq('status', 'completed').gte('completed_at', `${mondayKey}T00:00:00${tz}`);
       return data || [];
     }),
     enabled: !!uid, staleTime: 60_000,

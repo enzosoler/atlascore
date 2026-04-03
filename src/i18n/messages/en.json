@@ -74,6 +74,12 @@
       "noSession": "No session found. Please try signing in again.",
       "genericError": "Authentication failed. Please try again.",
       "backToSignIn": "Back to sign in"
+    },
+    "profileError": {
+      "title": "Something went wrong",
+      "message": "We couldn't load your profile. Check your connection and try again.",
+      "tryAgain": "Try Again",
+      "signOut": "Sign Out"
     }
   },
   "landing": {

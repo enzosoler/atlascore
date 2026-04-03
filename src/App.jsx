@@ -9,7 +9,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { DailyStoreProvider } from '@/store/dailyStore';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
-import { I18nProvider } from '@/lib/i18nContext';
+import { I18nProvider, useT } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
 import { LEGACY_ROUTE_REDIRECTS, ROUTES, ROLE_HOME } from '@/lib/routes';
 import { shouldMountProRoutes } from '@/lib/privateBeta';
@@ -210,6 +210,58 @@ const MissingConfigScreen = () => (
   </div>
 );
 
+const ProfileFetchErrorScreen = () => {
+  const { revalidateSession, logout } = useAuth();
+  const [retrying, setRetrying] = React.useState(false);
+
+  const t = useT();
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    try {
+      await revalidateSession();
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top,hsl(var(--accent-primary)/0.08),transparent_30%),linear-gradient(180deg,hsl(var(--sys-bg))_0%,hsl(var(--sys-bg2))_100%)] px-4 py-12">
+      <div className="w-full max-w-md rounded-[28px] border border-[hsl(var(--border)/0.9)] bg-[linear-gradient(180deg,hsl(var(--card-elevated))_0%,hsl(var(--card))_100%)] p-8 shadow-[var(--shadow-md)]">
+        <div className="text-center">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-[hsl(var(--warn)/0.18)] bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]">
+            <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h1 className="mt-4 mb-2 text-2xl font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">{t('auth.profileError.title')}</h1>
+          <p className="mb-6 text-[15px] text-[hsl(var(--fg-2))]">{t('auth.profileError.message')}</p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleRetry}
+              disabled={retrying}
+              className="w-full rounded-[14px] bg-[hsl(var(--primary))] px-5 py-3 text-[15px] font-semibold text-[hsl(var(--primary-fg))] transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {retrying ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  {t('auth.profileError.tryAgain')}
+                </span>
+              ) : t('auth.profileError.tryAgain')}
+            </button>
+            <button
+              onClick={logout}
+              className="w-full rounded-[14px] border border-[hsl(var(--border))] bg-transparent px-5 py-3 text-[15px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--fill)/0.5)]"
+            >
+              {t('auth.profileError.signOut')}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const RequireAuthenticatedApp = () => {
   const { authError, isAuthenticated, authState, user } = useAuth();
   const location = useLocation();
@@ -220,7 +272,9 @@ const RequireAuthenticatedApp = () => {
 
   if (authError?.type === 'user_not_registered') return <UserNotRegisteredError />;
   if (authError?.type === 'missing_config') return <MissingConfigScreen />;
-  
+
+  if (authState === 'error') return <ProfileFetchErrorScreen />;
+
   if (!isAuthenticated) {
     const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;

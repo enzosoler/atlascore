@@ -59,7 +59,13 @@
       "cancel": "Cancela cuando quieras"
     },
     "backHome": "← Volver al inicio",
-    "footer": "© 2026 atlas.core. Todos los derechos reservados."
+    "footer": "© 2026 atlas.core. Todos los derechos reservados.",
+    "profileError": {
+      "title": "Algo salió mal",
+      "message": "No pudimos cargar tu perfil. Verifica tu conexión e intenta de nuevo.",
+      "tryAgain": "Intentar de Nuevo",
+      "signOut": "Cerrar Sesión"
+    }
   },
   "landing": {
     "nav": {

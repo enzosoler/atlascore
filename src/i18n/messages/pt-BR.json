@@ -74,6 +74,12 @@
       "noSession": "Sessão não encontrada. Tente fazer login novamente.",
       "genericError": "Falha na autenticação. Tente novamente.",
       "backToSignIn": "Voltar ao login"
+    },
+    "profileError": {
+      "title": "Algo deu errado",
+      "message": "Não foi possível carregar seu perfil. Verifique sua conexão e tente novamente.",
+      "tryAgain": "Tentar Novamente",
+      "signOut": "Sair"
     }
   },
   "landing": {
