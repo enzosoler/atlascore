@@ -34,7 +34,7 @@ export default function Waitlist() {
     if (!form.email.trim()) return;
     setLoading(true);
     try {
-      await supabase.from('waitlist').insert([{
+      const { error } = await supabase.from('waitlist').insert([{
         name: form.name || null,
         email: form.email,
         primary_goal: form.goal || null,
@@ -42,6 +42,9 @@ export default function Waitlist() {
         current_tools: form.currentTools || null,
         interest_type: form.interest || null,
       }]);
+      if (error && !error.message?.includes('duplicate')) {
+        console.error('Waitlist insert error:', error);
+      }
     } catch {
       // silently succeed
     }

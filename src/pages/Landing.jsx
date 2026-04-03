@@ -66,7 +66,7 @@ function EarlyAccessForm({ copy, compact = false }) {
     if (!form.email.trim()) return;
     setLoading(true);
     try {
-      await supabase.from('waitlist').insert([{
+      const { error } = await supabase.from('waitlist').insert([{
         name: form.name || null,
         email: form.email,
         primary_goal: form.goal || null,
@@ -74,8 +74,12 @@ function EarlyAccessForm({ copy, compact = false }) {
         current_tools: form.currentTools || null,
         interest_type: form.interest || null,
       }]);
+      // Duplicate email (unique constraint) — still show success
+      if (error && !error.message?.includes('duplicate')) {
+        console.error('Waitlist insert error:', error);
+      }
     } catch {
-      // silently succeed even if table doesn't exist yet
+      // silently succeed
     }
     setLoading(false);
     setSubmitted(true);
