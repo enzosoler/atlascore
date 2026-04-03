@@ -19,6 +19,7 @@ import { buildBriefing, buildRecommendations, buildDailyStatus, buildDailyNarrat
 import { ROUTES } from '@/lib/routes';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
+import QuickMealSheet from '@/components/nutrition/QuickMealSheet';
 import CoachChatTrigger from '@/components/ai/CoachChatTrigger';
 import CoachChatSheet from '@/components/ai/CoachChatSheet';
 import { useCoachChat } from '@/hooks/useCoachChat';
@@ -248,18 +249,41 @@ function PrimaryAction({ action, briefingText, kcalRemaining }) {
   );
 }
 
-function QuickAction({ to, icon: Icon, label, status, colorClass }) {
-  return (
-    <Link to={to} className="group block">
-      <div className="flex h-full flex-col justify-between rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4 shadow-sm transition-all duration-200 active:bg-[hsl(var(--fill)/0.5)] active:scale-[0.96]">
+function QuickAction({ to, onClick, icon: Icon, label, status, colorClass, onQuickAdd }) {
+  const inner = (
+    <div className="flex h-full flex-col justify-between rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4 shadow-sm transition-all duration-200 active:bg-[hsl(var(--fill)/0.5)] active:scale-[0.96]">
+      <div className="flex items-start justify-between">
         <div className={cn("mb-3 flex h-10 w-10 items-center justify-center rounded-xl", colorClass)}>
           <Icon className="h-5 w-5" strokeWidth={2} />
         </div>
-        <div className="space-y-0.5">
-          <p className="text-[14px] font-bold text-[hsl(var(--fg))]">{label}</p>
-          <p className="text-[11px] font-medium text-[hsl(var(--fg-3))]">{status}</p>
-        </div>
+        {onQuickAdd && (
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickAdd(); }}
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))] active:scale-90 transition-transform"
+            aria-label="Quick add"
+          >
+            <span className="text-[16px] font-bold leading-none">+</span>
+          </button>
+        )}
       </div>
+      <div className="space-y-0.5">
+        <p className="text-[14px] font-bold text-[hsl(var(--fg))]">{label}</p>
+        <p className="text-[11px] font-medium text-[hsl(var(--fg-3))]">{status}</p>
+      </div>
+    </div>
+  );
+
+  if (onClick) {
+    return (
+      <button onClick={onClick} className="group block text-left w-full">
+        {inner}
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} className="group block">
+      {inner}
     </Link>
   );
 }
@@ -422,6 +446,7 @@ function TodayContent() {
   const t = useT();
   const [weather, setWeather] = useState(null);
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [quickMealOpen, setQuickMealOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [aiDismissed, setAiDismissed] = useState(false);
   const [streakCelebrationDismissed, setStreakCelebrationDismissed] = useState(false);
@@ -714,9 +739,10 @@ function TodayContent() {
             label={t('today.nutrition.label')}
             status={safeDaily.nutritionLogged ? t('today.tracked') : t('today.log_fuel')}
             colorClass="bg-[hsl(var(--brand-ai)/0.08)] text-[hsl(var(--brand-ai))]"
+            onQuickAdd={() => setQuickMealOpen(true)}
           />
           <QuickAction
-            to={ROUTES.body}
+            onClick={() => setCheckinOpen(true)}
             icon={Scale}
             label={t('today.checkin.title')}
             status={safeDaily.weightLogged ? t('today.logged') : t('today.scale_weight')}
@@ -793,6 +819,7 @@ function TodayContent() {
         pageContext="today"
       />
       <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
+      <QuickMealSheet open={quickMealOpen} onOpenChange={setQuickMealOpen} />
     </TodayScreen>
   );
 }

@@ -44,6 +44,8 @@ import { useI18n } from '@/lib/i18nContext';
 import { getPrimaryScrollTop, resetPrimaryScroll, usePrimaryRouteScrollReset } from '@/components/layout/usePrimaryRouteScrollReset';
 import { useViewportHeight } from '@/hooks/use-viewport-height';
 import DailyCheckinGate from '@/components/app/DailyCheckinGate';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useSessionExpiry } from '@/hooks/useSessionExpiry';
 
 const ICON_MAP = {
   Home,
@@ -250,6 +252,9 @@ export default function AppLayout() {
 
   useViewportHeight();
   usePrimaryRouteScrollReset(mainRef);
+
+  const { isOnline } = useOnlineStatus();
+  useSessionExpiry();
 
   // Lock body scroll so the app shell is the only scroll container.
   // Scoped to AppLayout so public pages (Landing, Auth) are unaffected.
@@ -637,6 +642,14 @@ export default function AppLayout() {
         style={{ paddingTop: 'calc(3.75rem + env(safe-area-inset-top, 0px))' }}
       >
         <TrialBanner />
+
+        {/* ── Offline banner ── */}
+        {!isOnline && (
+          <div className="sticky top-0 z-50 flex items-center justify-center gap-2 bg-[hsl(var(--warn)/0.12)] px-4 py-2.5 text-center text-[13px] font-medium text-[hsl(var(--warn-fg,var(--fg)))]">
+            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-[hsl(var(--warn))]" />
+            {t('status.offline')}
+          </div>
+        )}
 
         {/* ── Pull-to-refresh indicator ── */}
         <motion.div

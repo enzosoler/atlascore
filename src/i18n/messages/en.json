@@ -1204,6 +1204,19 @@
       "daysLeft": "{count} days left in your Pro trial",
       "seePlans": "See plans",
       "subtitle": "Unlock AI coaching, smart plans, and unlimited insights."
+    },
+    "quickMeal": {
+      "title": "Quick Meal Log",
+      "description": "Log a meal with calories and protein.",
+      "nameLabel": "What did you eat?",
+      "namePlaceholder": "e.g. Chicken and rice",
+      "caloriesLabel": "Calories",
+      "proteinLabel": "Protein",
+      "logButton": "Log Meal",
+      "success": "{name} logged.",
+      "errorName": "Enter a meal description.",
+      "errorCalories": "Enter a valid calorie amount.",
+      "errorFailed": "Could not log meal. Try again."
     }
   },
   "settings": {
@@ -2074,6 +2087,12 @@
       "train": "Train",
       "more": "More"
     }
+  },
+  "status": {
+    "offline": "You're offline. Changes will sync when you reconnect.",
+    "backOnline": "Back online",
+    "sessionExpiresSoon": "Your session expires soon",
+    "sessionRefresh": "Refresh"
   },
   "account": {
     "roleAthlete": "Athlete",

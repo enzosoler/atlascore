@@ -1191,6 +1191,19 @@
       "daysLeft": "{count} dias restantes no seu trial Pro",
       "seePlans": "Ver planos",
       "subtitle": "Desbloqueie coaching IA, planos inteligentes e insights ilimitados."
+    },
+    "quickMeal": {
+      "title": "Registro Rápido",
+      "description": "Registre uma refeição com calorias e proteína.",
+      "nameLabel": "O que você comeu?",
+      "namePlaceholder": "Ex: Frango com arroz",
+      "caloriesLabel": "Calorias",
+      "proteinLabel": "Proteína",
+      "logButton": "Registrar",
+      "success": "{name} registrado.",
+      "errorName": "Descreva a refeição.",
+      "errorCalories": "Insira um valor válido de calorias.",
+      "errorFailed": "Não foi possível registrar. Tente novamente."
     }
   },
   "settings": {
@@ -2060,6 +2073,12 @@
       "train": "Treinar",
       "more": "Mais"
     }
+  },
+  "status": {
+    "offline": "Você está offline. As alterações serão sincronizadas ao reconectar.",
+    "backOnline": "De volta online",
+    "sessionExpiresSoon": "Sua sessão expira em breve",
+    "sessionRefresh": "Atualizar"
   },
   "account": {
     "roleAthlete": "Atleta",
