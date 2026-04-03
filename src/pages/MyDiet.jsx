@@ -208,7 +208,7 @@ IMPORTANT: Your response must be a JSON object with these exact top-level keys: 
       clearTimeout(timeoutId);
 
       if (!res) {
-        setGenError(t('myDiet.gen_connect_error'));
+        setGenError(t('myDiet.gen_connect_error') + ' (LLM returned empty response)');
         toast.error(t('myDiet.gen_error_plan'));
         return;
       }
@@ -261,8 +261,10 @@ IMPORTANT: Your response must be a JSON object with these exact top-level keys: 
         setGenError(t('myDiet.gen_timeout'));
         toast.error(t('myDiet.gen_timeout_toast'));
       } else {
-        setGenError(t('myDiet.gen_connect_error'));
-        toast.error(t('myDiet.gen_error_plan'));
+        const detail = err.message || '';
+        console.error('[MyDiet] generation error:', err);
+        setGenError(`${t('myDiet.gen_connect_error')}${detail ? ` (${detail})` : ''}`);
+        toast.error(detail || t('myDiet.gen_error_plan'));
       }
     } finally {
       setGenerating(false);

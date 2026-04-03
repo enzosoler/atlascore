@@ -25,7 +25,17 @@ export async function invokeLLM(prompt, opts = {}) {
     });
 
     if (error) {
-      console.warn('[llm] edge function error:', error.message);
+      console.error('[llm] edge function error:', error.message, error);
+      // Surface the error so callers can show useful messages
+      const errMsg = error.message || 'Edge function error';
+      if (opts.throwOnError) throw new Error(errMsg);
+      return null;
+    }
+
+    // Edge function may return an error payload
+    if (data?.error) {
+      console.error('[llm] service error:', data.error, data.code);
+      if (opts.throwOnError) throw new Error(data.error);
       return null;
     }
 
@@ -34,7 +44,8 @@ export async function invokeLLM(prompt, opts = {}) {
     if (data?.data && typeof data.data === 'object') return data.data;
     return data?.text ?? data?.data ?? data ?? null;
   } catch (err) {
-    console.warn('[llm] invokeLLM failed:', err.message);
+    console.error('[llm] invokeLLM failed:', err.message);
+    if (opts.throwOnError) throw err;
     return null;
   }
 }
@@ -46,8 +57,8 @@ export async function invokeLLM(prompt, opts = {}) {
  * @param {object} schema - JSON schema for the response
  * @returns {Promise<object|null>}
  */
-export async function invokeLLMJson(prompt, schema) {
-  const raw = await invokeLLM(prompt, { schema, maxTokens: 4096 });
+export async function invokeLLMJson(prompt, schema, opts = {}) {
+  const raw = await invokeLLM(prompt, { schema, maxTokens: 4096, throwOnError: true });
   if (!raw) return null;
   if (typeof raw === 'object') return raw;
   try {
@@ -55,7 +66,7 @@ export async function invokeLLMJson(prompt, schema) {
     const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
     return JSON.parse(match ? match[1] : raw);
   } catch {
-    console.warn('[llm] failed to parse JSON response');
+    console.warn('[llm] failed to parse JSON response:', typeof raw === 'string' ? raw.slice(0, 200) : raw);
     return null;
   }
 }
