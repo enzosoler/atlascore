@@ -134,6 +134,14 @@ function normalizeMeasurement(entry = {}) {
   const bmr = toNumber(entry.bmr);
   const tdee = toNumber(entry.tdee);
 
+  // Derive lean_mass and fat_mass if not stored but calculable
+  let fatMass = toNumber(entry.fat_mass);
+  let leanMass = toNumber(entry.lean_mass);
+  if (weight !== null && weight > 0 && bodyFatPercent !== null) {
+    if (fatMass === null) fatMass = Math.round((weight * bodyFatPercent / 100) * 100) / 100;
+    if (leanMass === null) leanMass = Math.round((weight * (1 - bodyFatPercent / 100)) * 100) / 100;
+  }
+
   return {
     ...entry,
     date,
@@ -145,6 +153,8 @@ function normalizeMeasurement(entry = {}) {
     height,
     bmr,
     tdee,
+    fat_mass: fatMass,
+    lean_mass: leanMass,
   };
 }
 
@@ -1150,6 +1160,8 @@ function buildSummaryCards({
     measurements.filter((item) => item.body_fat_percent !== null),
     'body_fat_percent'
   );
+  const sinceStartLeanMass = getMeasurementChange(measurements.filter((item) => item.lean_mass !== null), 'lean_mass');
+  const sinceStartFatMass = getMeasurementChange(measurements.filter((item) => item.fat_mass !== null), 'fat_mass');
 
   const currentCheckinScore = thisWeekCheckins.length ? clamp((thisWeekCheckins.length / 7) * 100, 0, 100) : null;
   const mealLoggingScore = thisWeekMeals.length ? clamp((proteinLoggedDays.length / 7) * 100, 0, 100) : null;
@@ -1295,6 +1307,24 @@ function buildSummaryCards({
             : 'neutral',
       key: 'bodyfat_since',
     },
+    sinceStartFatMass
+      ? {
+          label: 'Fat lost',
+          value: formatSigned(sinceStartFatMass.delta, 1, ' kg'),
+          detail: 'since first record',
+          tone: sinceStartFatMass.delta < 0 ? 'positive' : sinceStartFatMass.delta > 0 ? 'attention' : 'neutral',
+          key: 'fatmass_since',
+        }
+      : null,
+    sinceStartLeanMass
+      ? {
+          label: 'Lean mass',
+          value: formatSigned(sinceStartLeanMass.delta, 1, ' kg'),
+          detail: 'since first record',
+          tone: sinceStartLeanMass.delta > 0 ? 'positive' : sinceStartLeanMass.delta < 0 ? 'attention' : 'neutral',
+          key: 'leanmass_since',
+        }
+      : null,
     {
       label: 'Workouts',
       value: `${countCompletedWorkouts(workouts, measurements[0]?.date || previousWeek.start || todayKey, todayKey)}`,
@@ -1365,7 +1395,7 @@ function buildSummaryCards({
     consistencyLabel: getConsistencyLabel(consistencyScore),
     consistencyComponents,
     thisWeek: thisWeekItems,
-    sinceStart: sinceStartItems,
+    sinceStart: sinceStartItems.filter(Boolean),
     trends: trendItems,
     summaryWindow: thisWeek,
   };
