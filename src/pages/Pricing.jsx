@@ -27,6 +27,7 @@ import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
 import { getRegionPricing } from '@/lib/regionalPricing';
 import { ROUTES } from '@/lib/routes';
+import { trackProductEvent } from '@/lib/productEvents';
 
 const fade = {
   hidden: { opacity: 0, y: 18 },
@@ -364,6 +365,10 @@ export default function Pricing() {
       setLoading(null);
     }
   };
+
+  useEffect(() => {
+    trackProductEvent(user?.id, 'pricing_page_viewed', { authenticated: isAuthenticated });
+  }, []);
 
   useEffect(() => {
     const pendingPlan = sessionStorage.getItem('pending_plan');

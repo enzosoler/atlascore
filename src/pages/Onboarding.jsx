@@ -25,6 +25,7 @@ import { useI18n } from '@/lib/i18nContext';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import { cn } from '@/lib/utils';
 import { tapLight, tapMedium } from '@/lib/haptics';
+import { trackProductEvent } from '@/lib/productEvents';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -33,7 +34,7 @@ const GOAL_EMOJIS = { fat_loss: '🔥', muscle_gain: '💪', recomp: '⚡', perf
 const ACTIVITY_LEVEL_IDS = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
 const HEAR_ABOUT_US_IDS = ['instagram', 'youtube', 'google', 'indication', 'coach', 'other'];
 
-const TOTAL_STEPS = 4; // 0=welcome, 1=profile+goals, 2=first checkpoint, 3=path choice
+const TOTAL_STEPS = 2; // 0=profile+goals+checkpoint(merged), 1=path choice
 
 const INITIAL_FORM = {
   sex: 'male',
@@ -44,11 +45,11 @@ const INITIAL_FORM = {
   health_goals: [],
   activity_level: 'moderate',
   hear_about_us: '',          // remarketing data
-  // Step 2 — first checkpoint
+  // Checkpoint measurements (inline in step 0)
   checkpoint_weight: '',
   checkpoint_body_fat: '',
   checkpoint_waist: '',
-  // Step 3 — path
+  // Step 1 — path
   chosen_path: '', // 'fresh' | 'own'
 };
 
@@ -114,40 +115,21 @@ function FieldLabel({ children }) {
 
 // ─── Step screens ─────────────────────────────────────────────────────────────
 
-function StepWelcome({ t }) {
+function StepProfileAndGoals({ form, set, toggle, t }) {
   return (
-    <div className="text-center space-y-6 py-2">
-      <div className="space-y-3">
-        <h2 className="text-[26px] font-bold tracking-[-0.03em]">
+    <div className="space-y-5">
+      {/* Welcome header (replaces separate welcome screen) */}
+      <div className="text-center space-y-1 pb-1">
+        <h2 className="text-[22px] font-bold tracking-[-0.02em]">
           {t('onboarding.page.welcomeTitle')}{' '}
           <span className="text-[hsl(var(--accent-primary))]">atlas</span>
           <span className="text-[hsl(var(--fg))]">.core</span>
         </h2>
-        <p className="text-[15px] text-[hsl(var(--fg-2))] leading-relaxed max-w-[300px] mx-auto">
+        <p className="text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
           {t('onboarding.page.welcomeSubtitle')}
         </p>
       </div>
-      <div className="space-y-2 text-left">
-        {[
-          { num: '1', key: 'step01Title' },
-          { num: '2', key: 'step02Title' },
-          { num: '3', key: 'step03Title' },
-        ].map(({ num, key }) => (
-          <div key={num} className="flex items-center gap-3.5 p-3 rounded-xl bg-[hsl(var(--fill)/0.5)]">
-            <div className="w-7 h-7 rounded-lg bg-[hsl(var(--brand)/0.1)] flex items-center justify-center shrink-0">
-              <span className="text-[11px] font-bold text-[hsl(var(--brand))]">{num}</span>
-            </div>
-            <p className="text-[13px] text-[hsl(var(--fg))] font-medium leading-snug">{t(`onboarding.page.${key}`)}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
-function StepProfileAndGoals({ form, set, toggle, t }) {
-  return (
-    <div className="space-y-5">
       <div>
         <h2 className="text-[18px] font-bold mb-1">{t('onboarding.page.goalTitle')}</h2>
         <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('onboarding.page.goalSubtitle')}</p>
@@ -258,7 +240,46 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
         </div>
       </div>
 
-      {/* ── Remarketing data collection (transcript 2 playbook) ── */}
+      {/* ── Starting measurements (optional, merged from old checkpoint step) ── */}
+      <div className="pt-2 space-y-3">
+        <p className="atlas-overline">
+          {t('onboarding.page.startingMeasurements')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal">{t('onboarding.page.optional')}</span>
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <FieldLabel>
+              {t('onboarding.page.checkpointBodyFatLabel')}
+            </FieldLabel>
+            <Input
+              type="number"
+              step="0.1"
+              min="1"
+              max="70"
+              value={form.checkpoint_body_fat}
+              onChange={(e) => set('checkpoint_body_fat', e.target.value)}
+              placeholder="18"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
+            />
+          </div>
+          <div>
+            <FieldLabel>
+              {t('onboarding.page.checkpointWaistLabel')}
+            </FieldLabel>
+            <Input
+              type="number"
+              step="0.1"
+              min="30"
+              max="200"
+              value={form.checkpoint_waist}
+              onChange={(e) => set('checkpoint_waist', e.target.value)}
+              placeholder="80"
+              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Remarketing — "hear about us" is the last field (not a blocker) ── */}
       <div className="pt-2 space-y-2.5">
         <p className="atlas-overline">
           {t('onboarding.page.hearAboutUs')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal">{t('onboarding.page.optional')}</span>
@@ -278,72 +299,6 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
             );
           })}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function StepFirstCheckpoint({ form, set, t }) {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-[18px] font-bold mb-1">{t('onboarding.page.checkpointTitle')}</h2>
-        <p className="text-[12px] text-[hsl(var(--fg-2))] leading-relaxed">
-          {t('onboarding.page.checkpointSubtitle')}
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        <div>
-          <FieldLabel>{t('onboarding.page.checkpointWeightLabel')}</FieldLabel>
-          <Input
-            type="number"
-            step="0.1"
-            min="20"
-            max="500"
-            value={form.checkpoint_weight}
-            onChange={(e) => set('checkpoint_weight', e.target.value)}
-            placeholder="80"
-            className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <FieldLabel>
-              {t('onboarding.page.checkpointBodyFatLabel')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal text-[hsl(var(--fg-3))]">{t('onboarding.page.optional')}</span>
-            </FieldLabel>
-            <Input
-              type="number"
-              step="0.1"
-              min="1"
-              max="70"
-              value={form.checkpoint_body_fat}
-              onChange={(e) => set('checkpoint_body_fat', e.target.value)}
-              placeholder="18"
-              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
-            />
-          </div>
-          <div>
-            <FieldLabel>
-              {t('onboarding.page.checkpointWaistLabel')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal text-[hsl(var(--fg-3))]">{t('onboarding.page.optional')}</span>
-            </FieldLabel>
-            <Input
-              type="number"
-              step="0.1"
-              min="30"
-              max="200"
-              value={form.checkpoint_waist}
-              onChange={(e) => set('checkpoint_waist', e.target.value)}
-              placeholder="80"
-              className="atlas-field h-11 rounded-[12px] border-0 px-4 text-base"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-xl bg-[hsl(var(--brand)/0.04)] px-4 py-3">
-        <p className="text-[12px] text-[hsl(var(--fg-2))] leading-5" dangerouslySetInnerHTML={{ __html: t('onboarding.page.checkpointInfo') }} />
       </div>
     </div>
   );
@@ -447,7 +402,7 @@ function PaywallPrimingScreen({ onContinue, t }) {
         <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">{t('onboarding.page.paywall.subtitle')}</p>
       </div>
 
-      {/* Trial timeline — clean, no emojis */}
+      {/* Trial timeline */}
       <div className="space-y-0">
         {[
           { day: t('onboarding.page.paywall.todayLabel'), title: t('onboarding.page.paywall.todayTitle'), desc: t('onboarding.page.paywall.todayDesc'), active: true },
@@ -474,8 +429,14 @@ function PaywallPrimingScreen({ onContinue, t }) {
         ))}
       </div>
 
+      {/* Social proof */}
+      <div className="rounded-[18px] bg-[hsl(var(--fill)/0.5)] border border-[hsl(var(--border)/0.5)] p-4 space-y-2">
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('onboarding.page.paywall.socialProof')}</p>
+        <p className="text-[12px] text-[hsl(var(--fg-2))] italic leading-relaxed">{t('onboarding.page.paywall.testimonial')}</p>
+      </div>
+
       {/* Annual plan highlight */}
-      <div className="pt-4">
+      <div className="pt-2">
         <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('onboarding.page.paywall.annualTitle')}</p>
         <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{t('onboarding.page.paywall.annualDesc')}</p>
       </div>
@@ -642,10 +603,8 @@ export default function Onboarding() {
     }));
 
   const canContinue = () => {
-    if (step === 0) return true;
-    if (step === 1) return form.health_goals.length > 0 && form.height && form.current_weight && form.age;
-    if (step === 2) return !!form.checkpoint_weight;
-    if (step === 3) return !!form.chosen_path;
+    if (step === 0) return form.health_goals.length > 0 && form.height && form.current_weight && form.age;
+    if (step === 1) return !!form.chosen_path;
     return true;
   };
 
@@ -705,6 +664,13 @@ export default function Onboarding() {
       // Same-device race condition guard — only set after confirmed DB write above
       localStorage.setItem(`onboarding_done_${user.id}`, 'true');
       console.log('[Onboarding] save confirmed — DB + localStorage + profile_data written');
+
+      // Fire-and-forget activation event
+      trackProductEvent(user.id, 'onboarding_completed', {
+        goals: form.health_goals,
+        path: form.chosen_path,
+        hear_about_us: form.hear_about_us || null,
+      });
       return true;
     } catch (err) {
       console.error('[Onboarding] Save failed:', err);
@@ -714,7 +680,7 @@ export default function Onboarding() {
     }
   };
 
-  // Step 3 finish → save → show paywall priming
+  // Last step finish → save → show paywall priming
   const handleFinish = async () => {
     const saved = await saveAndFinish();
     if (!saved) return; // DB write failed — user stays on step, button re-enables to retry
@@ -745,10 +711,8 @@ export default function Onboarding() {
 
   const stepContent = () => {
     switch (step) {
-      case 0: return <StepWelcome t={t} />;
-      case 1: return <StepProfileAndGoals form={form} set={set} toggle={toggle} t={t} />;
-      case 2: return <StepFirstCheckpoint form={form} set={set} t={t} />;
-      case 3: return <StepPathChoice form={form} set={set} t={t} />;
+      case 0: return <StepProfileAndGoals form={form} set={set} toggle={toggle} t={t} />;
+      case 1: return <StepPathChoice form={form} set={set} t={t} />;
       default: return null;
     }
   };

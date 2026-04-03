@@ -15,7 +15,9 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Crown, X } from 'lucide-react';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useI18n } from '@/lib/i18nContext';
+import { useAuth } from '@/lib/AuthContext';
 import { ROUTES } from '@/lib/routes';
+import { trackProductEvent } from '@/lib/productEvents';
 
 const TRIGGER_KEYS = ['ai_coach', 'workout', 'photo', 'streak'];
 
@@ -31,13 +33,23 @@ function sessionKey(trigger) {
 export default function PaywallTrigger({ trigger, show }) {
   const { can } = useSubscription();
   const { t } = useI18n();
+  const { user } = useAuth();
   const [dismissed, setDismissed] = useState(false);
+  const [tracked, setTracked] = useState(false);
 
   useEffect(() => {
     if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(sessionKey(trigger))) {
       setDismissed(true);
     }
   }, [trigger]);
+
+  // Track paywall_shown once when the card becomes visible
+  useEffect(() => {
+    if (show && !dismissed && !tracked && user?.id) {
+      setTracked(true);
+      trackProductEvent(user.id, 'paywall_shown', { trigger, variant: 'inline' });
+    }
+  }, [show, dismissed, tracked, trigger, user?.id]);
 
   // Already subscribed — never show
   if (can('atlas_ai')) return null;
@@ -48,6 +60,7 @@ export default function PaywallTrigger({ trigger, show }) {
   const handleDismiss = () => {
     setDismissed(true);
     try { sessionStorage.setItem(sessionKey(trigger), '1'); } catch { /* quota */ }
+    trackProductEvent(user?.id, 'paywall_dismissed', { trigger, variant: 'inline' });
   };
 
   return (
@@ -83,13 +96,23 @@ export default function PaywallTrigger({ trigger, show }) {
 export function PaywallSheet({ trigger, show, onClose }) {
   const { can } = useSubscription();
   const { t } = useI18n();
+  const { user } = useAuth();
   const [dismissed, setDismissed] = useState(false);
+  const [tracked, setTracked] = useState(false);
 
   useEffect(() => {
     if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(sessionKey(trigger))) {
       setDismissed(true);
     }
   }, [trigger]);
+
+  // Track paywall_shown once when the sheet becomes visible
+  useEffect(() => {
+    if (show && !dismissed && !tracked && user?.id) {
+      setTracked(true);
+      trackProductEvent(user.id, 'paywall_shown', { trigger, variant: 'sheet' });
+    }
+  }, [show, dismissed, tracked, trigger, user?.id]);
 
   if (can('atlas_ai') || !show || dismissed) return null;
 
@@ -98,6 +121,7 @@ export function PaywallSheet({ trigger, show, onClose }) {
   const handleDismiss = () => {
     setDismissed(true);
     try { sessionStorage.setItem(sessionKey(trigger), '1'); } catch { /* quota */ }
+    trackProductEvent(user?.id, 'paywall_dismissed', { trigger, variant: 'sheet' });
     onClose?.();
   };
 
