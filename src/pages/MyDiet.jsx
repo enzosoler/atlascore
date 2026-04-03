@@ -143,13 +143,13 @@ export default function MyDiet() {
     const approachLabel = DIET_APPROACHES.find(a => a.value === dietApproach)?.label || dietApproach;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
     try {
       const res = await invokeLLMJson(
-        `Create a detailed diet plan in English for a user with the following profile:
+        `Create a detailed diet plan for a user with the following profile:
 - Goal: ${profile?.training_goal || 'general health'}
-- Target calories: ${profile?.calories_target || 0} kcal
+- Target calories: ${profile?.calories_target || 2000} kcal
 - Target protein: ${profile?.protein_target || 160}g
 - Target carbs: ${profile?.carbs_target || 250}g
 - Target fat: ${profile?.fat_target || 70}g
@@ -158,9 +158,11 @@ export default function MyDiet() {
 ${allergies ? `- Allergies / restrictions: ${allergies}` : ''}
 
 ${isFlexible
-  ? `This user follows FLEXIBLE DIETING (IIFYM). Do NOT prescribe specific foods. Instead, for each meal provide macro targets (calories, protein, carbs, fat) and a few example food ideas they could use to hit those targets. The user will choose their own foods as long as they hit the macros.`
+  ? `This user follows FLEXIBLE DIETING (IIFYM). Do NOT prescribe specific foods. Instead, for each meal provide macro targets (calories, protein, carbs, fat) and a few example food ideas they could use to hit those targets.`
   : `Create a structured plan with ${mealsPerDay} meals distributed throughout the day, using real foods and quantities in grams/units. All foods must be compatible with a ${approachLabel} diet.`
-}`,
+}
+
+IMPORTANT: Your response must be a JSON object with these exact top-level keys: "name" (string), "objective" (string), "total_calories" (number), "total_protein" (number), "total_carbs" (number), "total_fat" (number), "meals" (array of meal objects). Each meal must have: "name", "time", "total_calories", "total_protein", "total_carbs", "total_fat", "foods" (array with "name", "amount", "unit", "kcal", "protein", "carbs", "fat").`,
         {
           type: 'object',
           properties: {
@@ -205,11 +207,30 @@ ${isFlexible
 
       clearTimeout(timeoutId);
 
-      // Handle nested or flat response
-      const plan = res?.name ? res : res?.plan ? { ...res.plan, meals: res.meals || res.plan.meals } : null;
-      console.log('[MyDiet] LLM response:', res ? Object.keys(res) : 'null');
+      if (!res) {
+        setGenError(t('myDiet.gen_connect_error'));
+        toast.error(t('myDiet.gen_error_plan'));
+        return;
+      }
 
-      if (plan?.name || plan?.meals?.length) {
+      // Handle many possible LLM response shapes
+      console.log('[MyDiet] LLM response:', JSON.stringify(res).slice(0, 500));
+      let plan = null;
+      if (res) {
+        if (res.meals && Array.isArray(res.meals)) {
+          plan = res;
+        } else if (res.plan && typeof res.plan === 'object') {
+          plan = { ...res.plan, meals: res.plan.meals || res.meals || [] };
+        } else if (res.diet_plan && typeof res.diet_plan === 'object') {
+          plan = { ...res.diet_plan, meals: res.diet_plan.meals || [] };
+        } else if (res.result && typeof res.result === 'object') {
+          plan = res.result;
+        }
+        // Ensure meals is always an array
+        if (plan && !Array.isArray(plan.meals)) plan.meals = [];
+      }
+
+      if (plan && (plan.name || plan.meals.length > 0)) {
         // Deactivate previous plans
         try { await deactivateAllDietPlans(user.id); } catch { /* noop */ }
         await createDietPlan(user.id, {
