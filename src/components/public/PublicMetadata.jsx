@@ -4,7 +4,7 @@ const DEFAULT_TITLE = 'atlas.core';
 const DEFAULT_DESCRIPTION =
   'atlas.core is the performance operating system for training, nutrition, measurements, and real-world progress.';
 const DEFAULT_ROBOTS = 'index,follow';
-const DEFAULT_OG_IMAGE = '/branding/dark/icon-512.png';
+const DEFAULT_OG_IMAGE = '/branding/og-image.png';
 
 function upsertMeta({ name, property, content }) {
   if (!content) return;
