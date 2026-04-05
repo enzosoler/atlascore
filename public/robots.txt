@@ -22,4 +22,4 @@ Disallow: /clinician
 
 # Sitemap
 # TODO: Replace with production domain before launch
-Sitemap: https://atlascore.app/sitemap.xml
+Sitemap: https://useatlascore.com/sitemap.xml
