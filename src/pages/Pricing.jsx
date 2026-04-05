@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { getRegionPricing } from '@/lib/regionalPricing';
 import { ROUTES } from '@/lib/routes';
 import { trackProductEvent } from '@/lib/productEvents';
+import { trackCheckoutStarted, track } from '@/lib/analytics';
 
 const fade = {
   hidden: { opacity: 0, y: 18 },
@@ -357,6 +358,7 @@ export default function Pricing() {
       const data = await response.json();
 
       if (data?.success && data?.url) {
+        trackCheckoutStarted({ plan: planId, region, billing });
         window.location.href = data.url;
       } else if (data?.error) {
         toast.error(data.error);
@@ -373,6 +375,7 @@ export default function Pricing() {
 
   useEffect(() => {
     trackProductEvent(user?.id, 'pricing_page_viewed', { authenticated: isAuthenticated });
+    track('pricing_page_viewed', { authenticated: isAuthenticated });
   }, []);
 
   // Fetch creator code status for authenticated users

@@ -20,6 +20,10 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>atlas.core reads your heart rate and activity data during workouts.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>atlas.core saves your workouts and weight to Apple Health.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -29,9 +33,5 @@
 	<true/>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>com.atlascore.app</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>atlas.core reads your heart rate and activity data during workouts.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>atlas.core saves your workouts and weight to Apple Health.</string>
 </dict>
 </plist>

@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Dumbbell, UtensilsCrossed, Scale, Target, Camera,
   ArrowRight, Sparkles, ChevronRight, X
@@ -29,6 +29,7 @@ import { getDailyCheckin, listDailyCheckins } from '@/services/checkinService';
 import { getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
+import { trackPurchaseCompleted } from '@/lib/analytics';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -444,6 +445,7 @@ function TodayContent() {
   const { user } = useAuth();
   const { locale } = useI18n();
   const t = useT();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [weather, setWeather] = useState(null);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [quickMealOpen, setQuickMealOpen] = useState(false);
@@ -452,6 +454,15 @@ function TodayContent() {
   const [streakCelebrationDismissed, setStreakCelebrationDismissed] = useState(false);
 
   const { trialDaysRemaining, subscription } = useSubscription();
+
+  // Track successful Stripe checkout redirect
+  useEffect(() => {
+    if (searchParams.get('subscribed') === '1') {
+      trackPurchaseCompleted({ source: 'stripe_redirect' });
+      searchParams.delete('subscribed');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, []);
   const today = getToday();
   const uid = user?.id;
 

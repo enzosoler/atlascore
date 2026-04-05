@@ -4,6 +4,7 @@ const DEFAULT_TITLE = 'atlas.core';
 const DEFAULT_DESCRIPTION =
   'atlas.core is the performance operating system for training, nutrition, measurements, and real-world progress.';
 const DEFAULT_ROBOTS = 'index,follow';
+const DEFAULT_OG_IMAGE = '/branding/dark/icon-512.png';
 
 function upsertMeta({ name, property, content }) {
   if (!content) return;
@@ -56,9 +57,11 @@ export default function PublicMetadata({
   robots = DEFAULT_ROBOTS,
   type = 'website',
   publishedTime,
+  ogImage,
 }) {
   React.useEffect(() => {
     const canonicalUrl = buildCanonicalUrl(canonicalPath);
+    const imageUrl = ogImage || DEFAULT_OG_IMAGE;
 
     document.title = title;
     upsertMeta({ name: 'description', content: description });
@@ -68,9 +71,11 @@ export default function PublicMetadata({
     upsertMeta({ property: 'og:title', content: title });
     upsertMeta({ property: 'og:description', content: description });
     upsertMeta({ property: 'og:url', content: canonicalUrl });
+    upsertMeta({ property: 'og:image', content: imageUrl });
     upsertMeta({ name: 'twitter:card', content: 'summary_large_image' });
     upsertMeta({ name: 'twitter:title', content: title });
     upsertMeta({ name: 'twitter:description', content: description });
+    upsertMeta({ name: 'twitter:image', content: imageUrl });
     upsertCanonical(canonicalUrl);
 
     if (publishedTime) {

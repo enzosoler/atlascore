@@ -18,6 +18,7 @@ import { useI18n } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { ROUTES } from '@/lib/routes';
 import { trackProductEvent } from '@/lib/productEvents';
+import { trackPaywallViewed } from '@/lib/analytics';
 
 const TRIGGER_KEYS = ['ai_coach', 'workout', 'photo', 'streak'];
 
@@ -48,6 +49,7 @@ export default function PaywallTrigger({ trigger, show }) {
     if (show && !dismissed && !tracked && user?.id) {
       setTracked(true);
       trackProductEvent(user.id, 'paywall_shown', { trigger, variant: 'inline' });
+      trackPaywallViewed({ trigger, variant: 'inline' });
     }
   }, [show, dismissed, tracked, trigger, user?.id]);
 
@@ -111,6 +113,7 @@ export function PaywallSheet({ trigger, show, onClose }) {
     if (show && !dismissed && !tracked && user?.id) {
       setTracked(true);
       trackProductEvent(user.id, 'paywall_shown', { trigger, variant: 'sheet' });
+      trackPaywallViewed({ trigger, variant: 'sheet' });
     }
   }, [show, dismissed, tracked, trigger, user?.id]);
 

@@ -15,6 +15,7 @@ import { LEGACY_ROUTE_REDIRECTS, ROUTES, ROLE_HOME } from '@/lib/routes';
 import { shouldMountProRoutes } from '@/lib/privateBeta';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { useReferralTracking, captureReferralParams } from '@/hooks/useReferralTracking';
+import { initAnalytics, trackPageView, identifyUser as identifyAnalyticsUser, resetAnalyticsUser } from '@/lib/analytics';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/lib/supabaseClient';
@@ -28,6 +29,14 @@ import RouteGuard from '@/components/rbac/RouteGuard';
 import { WebOnlyRoute } from '@/components/routing/WebOnlyRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+
+// ─── Analytics: track page views on every route change ───────────────────────
+function usePageViewTracking() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+}
 
 // ─── Lazy Pages ──────────────────────────────────────────────────────────────
 const Landing = lazy(() => import('@/pages/Landing.jsx'));
@@ -530,6 +539,17 @@ const AuthenticatedApp = () => {
     initRevenueCat();
   }, []);
 
+  // Analytics identity sync
+  React.useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      identifyAnalyticsUser(user.id, {
+        email: user.email,
+        plan: user.subscription_tier,
+        role: user.atlas_role,
+      });
+    }
+  }, [isAuthenticated, user?.id, user?.subscription_tier]);
+
   // Sync RevenueCat identity with Supabase user
   React.useEffect(() => {
     if (isAuthenticated && user?.id) {
@@ -539,6 +559,7 @@ const AuthenticatedApp = () => {
 
   useReferralTracking(user);
   usePushNotifications();
+  usePageViewTracking();
 
   // Hide native splash as soon as auth resolves — fires regardless of which route is active.
   // Previously this was in RequireAuthenticatedApp, which is only mounted on authenticated
@@ -563,6 +584,11 @@ function App() {
   // can still trigger a reload (avoids permanent loop suppression).
   React.useEffect(() => {
     sessionStorage.removeItem('atlas_chunk_reload');
+  }, []);
+
+  // Initialize all analytics providers (PostHog, Meta Pixel, GA4) once at boot.
+  React.useEffect(() => {
+    initAnalytics();
   }, []);
 
   // Handle deep link callbacks for native OAuth (atlascore://auth/callback)

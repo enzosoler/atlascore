@@ -26,6 +26,7 @@ import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import { cn } from '@/lib/utils';
 import { tapLight, tapMedium } from '@/lib/haptics';
 import { trackProductEvent } from '@/lib/productEvents';
+import { trackOnboardingCompleted } from '@/lib/analytics';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -666,6 +667,10 @@ export default function Onboarding() {
       console.log('[Onboarding] save confirmed — DB + localStorage + profile_data written');
 
       // Fire-and-forget activation event
+      trackOnboardingCompleted({
+        goals: form.health_goals,
+        path: form.chosen_path,
+      });
       trackProductEvent(user.id, 'onboarding_completed', {
         goals: form.health_goals,
         path: form.chosen_path,

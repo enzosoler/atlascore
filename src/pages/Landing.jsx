@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { COPY } from '@/config/landingCopy';
 import { supabase } from '@/lib/supabaseClient';
+import { trackLandingPageView, trackCtaClick, trackWaitlistSignup } from '@/lib/analytics';
 
 /* ─────────────────────────────────────────
    ANIMATION HELPERS
@@ -83,6 +84,7 @@ function EarlyAccessForm({ copy, compact = false }) {
     }
     setLoading(false);
     setSubmitted(true);
+    trackWaitlistSignup({ goal: form.goal || undefined });
   };
 
   if (submitted) {
@@ -235,7 +237,10 @@ export default function Landing() {
   const c = COPY[locale === 'pt-BR' ? 'pt-BR' : 'en-US'];
   const formRef = useRef(null);
 
+  useEffect(() => { trackLandingPageView(); }, []);
+
   const scrollToForm = () => {
+    trackCtaClick({ location: 'landing_hero' });
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
@@ -348,7 +353,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══ WHY DIFFERENT — Value pillars ════════ */}
+{/* ══ WHY DIFFERENT — Value pillars ════════ */}
       <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-8 lg:px-8 lg:py-10">
           <motion.div {...fadeIn(0)} className="mb-8">
@@ -403,7 +408,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══ OUTCOMES ═════════════════════════════ */}
+{/* ══ OUTCOMES ═════════════════════════════ */}
       <section className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-8 lg:px-8 lg:py-10">
           <motion.div {...fadeIn(0)} className="mb-6">

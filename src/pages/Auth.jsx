@@ -12,6 +12,7 @@ import { email as emailService } from '@/lib/emailService';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { trackSignupCompleted } from '@/lib/analytics';
 import { Capacitor } from '@capacitor/core';
 
 const IS_NATIVE = Capacitor.isNativePlatform();
@@ -336,6 +337,7 @@ export default function Auth() {
 
       const result = await signUp(normalizedEmail, password, { full_name: fullName });
       if (!result) return;
+      trackSignupCompleted({ method: 'email' });
       
       const needsEmailConfirmation = result?.needsEmailConfirmation;
 

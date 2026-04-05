@@ -1,0 +1,25 @@
+# atlas.core — robots.txt
+User-agent: *
+Allow: /
+
+# Block internal/authenticated app routes from crawlers
+Disallow: /Today
+Disallow: /Nutrition
+Disallow: /Train
+Disallow: /Profile
+Disallow: /Settings
+Disallow: /AdminPanel
+Disallow: /onboarding
+Disallow: /auth
+Disallow: /billing
+Disallow: /upgrade
+Disallow: /checkout
+Disallow: /export
+Disallow: /account
+Disallow: /coach
+Disallow: /nutritionist
+Disallow: /clinician
+
+# Sitemap
+# TODO: Replace with production domain before launch
+Sitemap: https://atlascore.app/sitemap.xml

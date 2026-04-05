@@ -32,6 +32,48 @@
 		E1B0A002EMBED0002WATCHAP /* AtlasCoreWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DA2EDD132C6D18AC65D80D14 /* AtlasCoreWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E1B0A007PROXY001WIDGETS /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DC9EFA1C62A67FE9089819C3;
+			remoteInfo = AtlasCoreWidgets;
+		};
+		E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 93ECFAE2290E4FF00DFC8EAB;
+			remoteInfo = AtlasCoreWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E1B0A003EMBED0003EXTPHZ /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E1B0A001EMBED0001WIDGETS /* AtlasCoreWidgetsExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1B0A004EMBED0004WATCHZ /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				E1B0A002EMBED0002WATCHAP /* AtlasCoreWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0EDACFFF5DDA26AB2D6546BD /* StartWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartWorkoutView.swift; sourceTree = "<group>"; };
 		207CA68AD05BACF19CF35989 /* AtlasCoreWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtlasCoreWatchApp.swift; sourceTree = "<group>"; };
@@ -171,31 +213,6 @@
 		};
 /* End PBXGroup section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		E1B0A003EMBED0003EXTPHZ /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				E1B0A001EMBED0001WIDGETS /* AtlasCoreWidgetsExtension.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E1B0A004EMBED0004WATCHZ /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				E1B0A002EMBED0002WATCHAP /* AtlasCoreWatch.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXNativeTarget section */
 		504EC3031FED79650016851F /* atlas.core */ = {
 			isa = PBXNativeTarget;
@@ -256,36 +273,6 @@
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
-
-/* Begin PBXContainerItemProxy section */
-		E1B0A007PROXY001WIDGETS /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = DC9EFA1C62A67FE9089819C3;
-			remoteInfo = AtlasCoreWidgets;
-		};
-		E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 93ECFAE2290E4FF00DFC8EAB;
-			remoteInfo = AtlasCoreWatch;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXTargetDependency section */
-		E1B0A005DEPEND001WIDGDP /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DC9EFA1C62A67FE9089819C3 /* AtlasCoreWidgets */;
-			targetProxy = E1B0A007PROXY001WIDGETS /* PBXContainerItemProxy */;
-		};
-		E1B0A006DEPEND002WATCHD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 93ECFAE2290E4FF00DFC8EAB /* AtlasCoreWatch */;
-			targetProxy = E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		504EC2FC1FED79650016851F /* Project object */ = {
@@ -400,6 +387,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E1B0A005DEPEND001WIDGDP /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DC9EFA1C62A67FE9089819C3 /* AtlasCoreWidgets */;
+			targetProxy = E1B0A007PROXY001WIDGETS /* PBXContainerItemProxy */;
+		};
+		E1B0A006DEPEND002WATCHD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 93ECFAE2290E4FF00DFC8EAB /* AtlasCoreWatch */;
+			targetProxy = E1B0A008PROXY002WATCHAP /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
