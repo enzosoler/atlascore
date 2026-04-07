@@ -864,17 +864,19 @@ export async function fetchSignupSparkline(days = 7) {
 // ─────────────────────────────────────────────────────────────
 
 export async function fetchFunnelData(dateRangeStart) {
-  const [profilesRes, onboardedRes, workoutsRes, trialsRes, paidRes] = await Promise.all([
+  const [profilesRes, onboardedRes, workoutsRes, grantedRes, trialsRes, paidRes] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', dateRangeStart),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('onboarding_completed', true).gte('created_at', dateRangeStart),
     supabase.from('workouts').select('user_id').eq('status', 'completed').gte('completed_at', dateRangeStart),
-    supabase.from('subscriptions').select('id', { count: 'exact', head: true }).in('status', ['trialing','active','granted','canceled','expired','past_due']).gte('created_at', dateRangeStart),
-    supabase.from('subscriptions').select('id', { count: 'exact', head: true }).in('status', ['active','granted']).gte('created_at', dateRangeStart),
+    supabase.from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'granted').gte('created_at', dateRangeStart),
+    supabase.from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'trialing').gte('created_at', dateRangeStart),
+    supabase.from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active').gte('created_at', dateRangeStart),
   ]);
 
   const registered = profilesRes.count ?? 0;
   const onboardingCompleted = onboardedRes.count ?? 0;
   const firstWorkout = new Set((workoutsRes.data || []).map((r) => r.user_id)).size;
+  const granted = grantedRes.count ?? 0;
   const trial = trialsRes.count ?? 0;
   const paid = paidRes.count ?? 0;
 
@@ -883,8 +885,9 @@ export async function fetchFunnelData(dateRangeStart) {
     { step: 2, label: 'Onboarding Started', count: registered },
     { step: 3, label: 'Onboarding Completed', count: onboardingCompleted },
     { step: 4, label: 'First Workout', count: firstWorkout },
-    { step: 5, label: 'Trial', count: trial },
-    { step: 6, label: 'Paid', count: paid },
+    { step: 5, label: 'Beta Access (Granted)', count: granted },
+    { step: 6, label: 'Trial', count: trial },
+    { step: 7, label: 'Paid', count: paid },
   ];
 
   return steps.map((s, i) => {
