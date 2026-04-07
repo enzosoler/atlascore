@@ -11,7 +11,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
 
-const RC_API_KEY = 'test_eUpgJJJECiePlZCDfqjzTqmdSsp';
+const RC_API_KEY = 'appl_GANHAhnNxGacwbbkWZtCxlORwZp';
 const ENTITLEMENT_ID = 'atlas.core Pro';
 
 /**

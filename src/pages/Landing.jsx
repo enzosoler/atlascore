@@ -252,9 +252,17 @@ export default function Landing() {
         { href: ROUTES.blog, label: c.nav.blog },
       ]}
       actions={
-        <Button size="sm" onClick={scrollToForm}>
-          {c.hero.cta1}
-        </Button>
+        <>
+          <Link
+            to={`${ROUTES.auth}?mode=login`}
+            className="text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+          >
+            {c.nav.login}
+          </Link>
+          <Button size="sm" onClick={scrollToForm}>
+            {c.hero.cta1}
+          </Button>
+        </>
       }
     >
       <PublicMetadata
