@@ -193,7 +193,7 @@ export default function AdminImpersonation() {
               {(photosQ.data || []).map((p) => (
                 <button key={p.id} type="button" onClick={() => setLightbox(p)}
                   className="group relative aspect-square overflow-hidden rounded-[12px] border border-[hsl(var(--border)/0.6)]">
-                  <img src={p.url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                  <img src={p.photo_url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 px-2 py-1.5">
                     <p className="text-[10px] text-white/80">{fmt(p.created_at)}</p>
                     {p.weight && <p className="text-[10px] font-medium text-white">{p.weight} kg</p>}
@@ -257,7 +257,7 @@ export default function AdminImpersonation() {
         <DialogContent className="max-w-2xl">
           {lightbox && (
             <>
-              <img src={lightbox.url} alt="" className="w-full rounded-lg" />
+              <img src={lightbox.photo_url} alt="" className="w-full rounded-lg" />
               <div className="mt-3 flex items-center justify-between text-[13px]">
                 <span className="text-[hsl(var(--fg-3))]">{fmt(lightbox.created_at)}</span>
                 {lightbox.weight && <Badge variant="outline">{lightbox.weight} kg</Badge>}

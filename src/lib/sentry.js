@@ -65,6 +65,8 @@ export async function captureException(error, context) {
       stack,
       context: context ? JSON.parse(JSON.stringify(context)) : null,
       url: typeof window !== 'undefined' ? window.location.href : null,
+      component: context?.component || null,
+      route: typeof window !== 'undefined' ? window.location.pathname : null,
     });
   } catch {
     // Never let error logging itself crash the app

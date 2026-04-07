@@ -111,7 +111,7 @@ function UserAIStates() {
   const { data: states = [], isLoading } = useQuery({
     queryKey: ['admin-user-ai-states'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('user_ai_state').select('*').order('updated_at', { ascending: false }).limit(50);
+      const { data, error } = await supabase.from('user_ai_state').select('*').order('last_updated_at', { ascending: false }).limit(50);
       if (error) throw error;
       return data || [];
     },

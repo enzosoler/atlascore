@@ -645,7 +645,7 @@ export async function fetchUserMeasurements(userId) {
 export async function fetchUserPhotos(userId) {
   const { data, error } = await supabase
     .from('progress_photos')
-    .select('id, url, created_at, notes, weight')
+    .select('id, photo_url, date, category, created_at, notes')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) throw error;
