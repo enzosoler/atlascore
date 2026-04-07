@@ -4102,5 +4102,63 @@
     "invalidCode": "Invalid or inactive code.",
     "creatorLocked": "Creator code can no longer be changed.",
     "codePlaceholder": "Enter code"
+  },
+  "welcome": {
+    "skip": "Skip",
+    "continue": "Continue",
+    "getStarted": "Get started",
+    "slides": {
+      "s1": {
+        "title": "Run your body\nlike a system.",
+        "body": "atlas.core connects your nutrition, training, recovery, and health data into one clear picture."
+      },
+      "s2": {
+        "title": "Everything\nin one place.",
+        "body": "Meals, workouts, labs, hormones, protocols, measurements — tracked and connected."
+      },
+      "s3": {
+        "title": "AI that guides,\nnot just logs.",
+        "body": "Get context-aware recommendations based on your real data, not generic templates."
+      },
+      "s4": {
+        "title": "Know what to do\nevery day.",
+        "body": "One dashboard. Clear priorities. No guessing."
+      }
+    }
+  },
+  "demo": {
+    "badge": "Preview",
+    "greeting": "Here's what your day could look like.",
+    "createAccount": "Create free account",
+    "signIn": "Sign in",
+    "readiness": "Readiness",
+    "recovery": "Recovery",
+    "adherence": "Adherence",
+    "metabolic": "Metabolic",
+    "todayRec": "Today's recommendation",
+    "trainingAdj": "Training adjustment",
+    "nutritionDir": "Nutrition direction",
+    "protocolReminder": "Protocol reminder",
+    "trajectory": "Trajectory",
+    "recTitle": "Prioritize protein at breakfast",
+    "recBody": "Your last 5 days averaged 18g protein before noon. Shifting 30g to breakfast improves satiety and lean mass retention.",
+    "trainingTitle": "Lower volume today",
+    "trainingBody": "HRV dropped 12% from baseline. Consider reducing working sets by 20% and skipping the second accessory block.",
+    "nutritionTitle": "Slight calorie increase",
+    "nutritionBody": "Adherence has been strong for 10 days. A 150 kcal bump on training days supports recovery without stalling progress.",
+    "protocolTitle": "Creatine — day 12 of 30",
+    "protocolBody": "Take 5g with your post-workout meal. Next blood panel in 18 days.",
+    "trajectoryTitle": "On track",
+    "trajectoryBody": "Body weight trend is −0.3 kg/week, aligned with your recomp target. Strength metrics stable.",
+    "unlockTitle": "Your data, your system",
+    "unlockBody": "Create a free account to start tracking and get personalized guidance.",
+    "startTracking": "Start tracking →"
+  },
+  "authGate": {
+    "title": "Create your account",
+    "subtitle": "Save your progress, get personalized recommendations, and sync across devices.",
+    "action": "This requires an account",
+    "continueAs": "Continue as guest",
+    "or": "or"
   }
 }

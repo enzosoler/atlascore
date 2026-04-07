@@ -4093,5 +4093,63 @@
     "invalidCode": "Codigo invalido ou inativo.",
     "creatorLocked": "O codigo do criador nao pode mais ser alterado.",
     "codePlaceholder": "Insira o codigo"
+  },
+  "welcome": {
+    "skip": "Pular",
+    "continue": "Continuar",
+    "getStarted": "Começar",
+    "slides": {
+      "s1": {
+        "title": "Gerencie seu corpo\ncomo um sistema.",
+        "body": "atlas.core conecta sua nutrição, treino, recuperação e saúde em uma visão clara."
+      },
+      "s2": {
+        "title": "Tudo em\num só lugar.",
+        "body": "Refeições, treinos, exames, hormônios, protocolos, medidas — rastreados e conectados."
+      },
+      "s3": {
+        "title": "IA que orienta,\nnão apenas registra.",
+        "body": "Recomendações baseadas nos seus dados reais, não em templates genéricos."
+      },
+      "s4": {
+        "title": "Saiba o que fazer\ntodos os dias.",
+        "body": "Um painel. Prioridades claras. Sem adivinhação."
+      }
+    }
+  },
+  "demo": {
+    "badge": "Prévia",
+    "greeting": "Veja como seu dia poderia ser.",
+    "createAccount": "Criar conta grátis",
+    "signIn": "Entrar",
+    "readiness": "Prontidão",
+    "recovery": "Recuperação",
+    "adherence": "Aderência",
+    "metabolic": "Metabólico",
+    "todayRec": "Recomendação de hoje",
+    "trainingAdj": "Ajuste de treino",
+    "nutritionDir": "Direção nutricional",
+    "protocolReminder": "Lembrete de protocolo",
+    "trajectory": "Trajetória",
+    "recTitle": "Priorize proteína no café da manhã",
+    "recBody": "Seus últimos 5 dias tiveram média de 18g de proteína antes do meio-dia. Mover 30g para o café melhora saciedade e retenção de massa magra.",
+    "trainingTitle": "Menos volume hoje",
+    "trainingBody": "HRV caiu 12% da linha de base. Considere reduzir séries em 20% e pular o segundo bloco acessório.",
+    "nutritionTitle": "Leve aumento calórico",
+    "nutritionBody": "Aderência forte por 10 dias. Um aumento de 150 kcal em dias de treino apoia a recuperação sem estagnar o progresso.",
+    "protocolTitle": "Creatina — dia 12 de 30",
+    "protocolBody": "Tome 5g com sua refeição pós-treino. Próximo exame de sangue em 18 dias.",
+    "trajectoryTitle": "No caminho certo",
+    "trajectoryBody": "Tendência de peso corporal é −0,3 kg/semana, alinhada com seu objetivo de recomposição. Métricas de força estáveis.",
+    "unlockTitle": "Seus dados, seu sistema",
+    "unlockBody": "Crie uma conta gratuita para começar a rastrear e receber orientações personalizadas.",
+    "startTracking": "Começar a rastrear →"
+  },
+  "authGate": {
+    "title": "Crie sua conta",
+    "subtitle": "Salve seu progresso, receba recomendações personalizadas e sincronize entre dispositivos.",
+    "action": "Isso requer uma conta",
+    "continueAs": "Continuar como visitante",
+    "or": "ou"
   }
 }

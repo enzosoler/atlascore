@@ -221,3 +221,33 @@ export function trackAppDownloadClicked(props = {}) {
 export function trackReferralLinkClicked(props = {}) {
   track('referral_link_clicked', props);
 }
+
+// ─── Welcome / Demo funnel events ───────────────────────────────────────────
+
+export function trackAppOpened(props = {}) {
+  track('app_opened', props);
+}
+
+export function trackOnboardingStarted(props = {}) {
+  track('onboarding_started', props);
+}
+
+export function trackOnboardingSkipped(props = {}) {
+  track('onboarding_skipped', props);
+}
+
+export function trackDemoHomeViewed(props = {}) {
+  track('demo_home_viewed', props);
+}
+
+export function trackDemoCardTapped(props = {}) {
+  track('demo_card_tapped', props);
+}
+
+export function trackAuthGateShown(props = {}) {
+  track('auth_gate_shown', props);
+}
+
+export function trackProtectedActionAttempted(props = {}) {
+  track('protected_action_attempted', props);
+}

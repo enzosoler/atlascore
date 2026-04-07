@@ -29,6 +29,8 @@ import RouteGuard from '@/components/rbac/RouteGuard';
 import { WebOnlyRoute } from '@/components/routing/WebOnlyRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { AuthGateProvider } from '@/hooks/useAuthGate';
+import { hasSeenWelcome } from '@/pages/WelcomeOnboarding';
 
 // ─── Analytics: track page views on every route change ───────────────────────
 function usePageViewTracking() {
@@ -40,6 +42,8 @@ function usePageViewTracking() {
 
 // ─── Lazy Pages ──────────────────────────────────────────────────────────────
 const Landing = lazy(() => import('@/pages/Landing.jsx'));
+const WelcomeOnboarding = lazy(() => import('@/pages/WelcomeOnboarding'));
+const DemoHome = lazy(() => import('@/pages/DemoHome'));
 const Onboarding = lazy(() => import('@/pages/Onboarding'));
 const Today = lazy(() => import('@/pages/TodayV2'));
 const Nutrition = lazy(() => import('@/pages/Nutrition'));
@@ -287,6 +291,11 @@ const RequireAuthenticatedApp = () => {
   if (authState === 'error') return <ProfileFetchErrorScreen />;
 
   if (!isAuthenticated) {
+    // On native: route to welcome onboarding or demo home (never force auth)
+    // On web: keep existing redirect to auth for deep-linked protected routes
+    if (Capacitor.isNativePlatform()) {
+      return <Navigate to={hasSeenWelcome() ? ROUTES.demoHome : ROUTES.welcome} replace />;
+    }
     const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
   }
@@ -339,6 +348,10 @@ const AppRoutes = () => (
       <Route path={`${ROUTES.blog}/:slug`} element={<WebOnlyRoute fallback="/Today"><BlogPost /></WebOnlyRoute>} />
       <Route path={ROUTES.pricing} element={<WebOnlyRoute fallback="/upgrade"><Pricing /></WebOnlyRoute>} />
       <Route path={ROUTES.help} element={<WebOnlyRoute fallback="/Today"><HelpCenter /></WebOnlyRoute>} />
+      {/* Welcome & Demo (unauthenticated value-preview) */}
+      <Route path={ROUTES.welcome} element={<WelcomeOnboarding />} />
+      <Route path={ROUTES.demoHome} element={<DemoHome />} />
+
       {/* Shared auth */}
       <Route path={ROUTES.auth} element={<Auth />} />
       <Route path={ROUTES.signup} element={<Auth />} />
@@ -572,10 +585,10 @@ const AuthenticatedApp = () => {
   }, [authState]);
 
   return (
-    <>
+    <AuthGateProvider>
       <AppRoutes />
       {isAuthenticated && user?.onboarding_completed && <OnboardingTour />}
-    </>
+    </AuthGateProvider>
   );
 };
 
