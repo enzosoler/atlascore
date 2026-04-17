@@ -24,7 +24,7 @@ export default function TrialStart() {
             </div>
             <h1 className="text-3xl font-bold mb-2">Start Your Free Trial</h1>
             <p className="text-[hsl(var(--fg-2))]">
-              7 days of Premium access, completely free
+              3 days of full access, completely free
             </p>
           </div>
 
@@ -42,7 +42,7 @@ export default function TrialStart() {
           <div className="flex items-center gap-3 p-4 rounded-xl bg-[hsl(var(--fill))] mb-6">
             <Calendar className="w-5 h-5 text-[hsl(var(--accent-primary))]" />
             <div className="text-sm">
-              <p className="font-medium">Trial ends {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+              <p className="font-medium">Trial ends {new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
               <p className="text-[hsl(var(--fg-2))]">We'll remind you 2 days before</p>
             </div>
           </div>
@@ -50,8 +50,8 @@ export default function TrialStart() {
           <div className="flex items-center gap-3 p-4 rounded-xl bg-[hsl(var(--fill))] mb-8">
             <Bell className="w-5 h-5 text-[hsl(var(--accent-primary))]" />
             <div className="text-sm">
-              <p className="font-medium">$9.99/month after trial</p>
-              <p className="text-[hsl(var(--fg-2))]">Or $79.99/year (save 33%)</p>
+              <p className="font-medium">$6.99/week after trial</p>
+              <p className="text-[hsl(var(--fg-2))]">Or $79.99/year (save 78%)</p>
             </div>
           </div>
 
@@ -62,7 +62,7 @@ export default function TrialStart() {
 
           <p className="text-center mt-4 text-xs text-[hsl(var(--fg-3))]">
             By starting your trial, you agree to our Terms and Privacy Policy.
-            You can cancel anytime before {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}.
+            You can cancel anytime before {new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString()}.
           </p>
         </motion.div>
       </div>
