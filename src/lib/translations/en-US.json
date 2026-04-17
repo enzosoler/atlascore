@@ -1383,5 +1383,227 @@
     "saving": "Saving",
     "saveChanges": "Save changes",
     "reset": "Reset"
+  },
+  "onboardingV2": {
+    "hook": {
+      "title": "The scale lies. Your mirror lies. Your last app had no idea what was working.",
+      "subtitle": "Atlas tracks what actually matters — and adjusts every week so you stop guessing.",
+      "cta": "Show me how",
+      "secondary": "I already have an account",
+      "trustBadge": "Free 7-day trial • No credit card required"
+    },
+    "quiz": {
+      "primaryGoal": {
+        "title": "What are you actually trying to do?",
+        "subtitle": "Pick everything that applies. We build around all of them."
+      },
+      "primaryGoal_fat_loss": "Lose fat",
+      "primaryGoal_muscle_gain": "Build muscle",
+      "primaryGoal_recomp": "Recomp — lose fat & gain muscle",
+      "primaryGoal_energy_health": "More energy & better health markers",
+      "primaryGoal_event_prep": "Prep for a specific event or date",
+      "targetWeight": {
+        "title": "What weight do you want to hit?",
+        "subtitle": "Rough number is fine. We'll refine this once we see your body composition data."
+      },
+      "timeline": {
+        "title": "When do you want to get there?",
+        "subtitle": "We'll tell you if this is realistic — no sugarcoating."
+      },
+      "timeline_6w": "6 weeks — aggressive but doable",
+      "timeline_3m": "3 months — the sweet spot for most people",
+      "timeline_6m": "6 months — sustainable pace, big transformation",
+      "timeline_specific_date": "I have a specific date",
+      "bodyStats": {
+        "title": "The basics",
+        "subtitle": "We use these to calculate your metabolism. Nothing leaves your device without your permission."
+      },
+      "activityBaseline": {
+        "title": "How active are you outside of training?",
+        "subtitle": "Think about a typical weekday — not your best week."
+      },
+      "activityBaseline_barely": "Desk job, barely move",
+      "activityBaseline_light": "Some walking, mostly sedentary",
+      "activityBaseline_moderate": "On my feet a fair amount",
+      "activityBaseline_high": "Physical job or very active lifestyle",
+      "activityBaseline_athlete": "Training 5+ times a week already",
+      "pastAttempts": {
+        "title": "What have you already tried that didn't stick?",
+        "subtitle": "No judgment. We just need to know what to do differently."
+      },
+      "pastAttempts_calorie_tracker": "Calorie tracking app",
+      "pastAttempts_strict_diet": "Strict diet or meal plan",
+      "pastAttempts_personal_trainer": "Personal trainer",
+      "pastAttempts_fitness_app": "Another fitness app",
+      "pastAttempts_eating_clean": "\"Eating clean\" without tracking",
+      "pastAttempts_first_attempt": "This is my first real attempt",
+      "biggestBlocker": {
+        "title": "What usually kills your momentum?",
+        "subtitle": "Pick the one that hits hardest."
+      },
+      "biggestBlocker_no_time": "I don't have time to track everything",
+      "biggestBlocker_lose_motivation": "I lose motivation after 2–3 weeks",
+      "biggestBlocker_weekends": "Weekends destroy my progress",
+      "biggestBlocker_dont_know_working": "I never know if what I'm doing is working",
+      "biggestBlocker_chaotic_schedule": "My schedule is too chaotic",
+      "biggestBlocker_plateau": "I hit a plateau and quit",
+      "eatingPatterns": {
+        "title": "How do you actually eat on a normal day?",
+        "subtitle": "Be honest — we're building around your life, not a textbook."
+      },
+      "eatingPatterns_three_meals": "3 meals, pretty consistent",
+      "eatingPatterns_skipper": "I skip meals — usually breakfast",
+      "eatingPatterns_grazer": "I graze all day, no real structure",
+      "eatingPatterns_evening_eater": "Small during the day, big at night",
+      "eatingPatterns_chaotic": "Completely different every day",
+      "trainingPrefs": {
+        "title": "Where do you train?",
+        "subtitle": "This determines your exercise library."
+      },
+      "trainingPrefs_full_gym": "Full gym with everything",
+      "trainingPrefs_home_barbell": "Home gym — barbell & rack",
+      "trainingPrefs_home_dumbbells": "Home — dumbbells only",
+      "trainingPrefs_bodyweight": "Bodyweight only",
+      "trainingPrefs_no_training": "I'm not training right now",
+      "currentBody": {
+        "title": "Which silhouette looks closest to you right now?",
+        "subtitle": "Doesn't need to be exact. This helps us set realistic visual milestones."
+      },
+      "desiredBody": {
+        "title": "Which one is closer to where you want to be?",
+        "subtitle": "We use this to shape your training and nutrition targets."
+      },
+      "whatWouldChange": {
+        "title": "If you actually hit this goal — what changes?",
+        "subtitle": "Pick what matters to you. We'll come back to these."
+      },
+      "whatWouldChange_clothes_fit": "My clothes fit the way I want",
+      "whatWouldChange_more_energy": "I have energy through the whole day",
+      "whatWouldChange_confidence": "I'm not avoiding mirrors anymore",
+      "whatWouldChange_better_labs": "My bloodwork and health markers improve",
+      "whatWouldChange_stronger_lifts": "I'm actually strong, not just lean",
+      "whatWouldChange_feel_like_myself": "I feel like myself again",
+      "trackingHistory": {
+        "title": "Have you tracked calories or macros before?",
+        "subtitle": "This changes how we onboard you into the tracker."
+      },
+      "trackingHistory_a_lot": "Yes — I've done it seriously",
+      "trackingHistory_some": "A bit, but never consistently",
+      "trackingHistory_none": "Never",
+      "connectedApps": {
+        "title": "Want to connect anything you already use?",
+        "subtitle": "We pull in your data so you start with context, not a blank slate."
+      },
+      "connectedApps_apple_health": "Apple Health",
+      "connectedApps_apple_watch": "Apple Watch",
+      "connectedApps_garmin": "Garmin",
+      "connectedApps_mfp_import": "Import from MyFitnessPal",
+      "connectedApps_skip": "Skip — I'll set this up later",
+      "notifications": {
+        "title": "Can we nudge you when it matters?",
+        "subtitle": "One check-in in the morning, one at night. No spam. You can turn these off anytime."
+      },
+      "notifications_yes": "Yes — keep me accountable",
+      "notifications_maybe_later": "Maybe later"
+    },
+    "interstitial": {
+      "social": {
+        "title": "You're in good company.",
+        "subtitle": "Over 12,000 people have used Atlas to hit a goal they actually cared about."
+      },
+      "stats": {
+        "title": "Over 12,000 people have built their plan here.",
+        "subtitle": "The average Atlas user sees measurable change in 11 days."
+      },
+      "building": {
+        "title": "Building your plan...",
+        "subtitle": "Crunching your numbers against 12,000+ real results."
+      },
+      "keepGoing": "Keep going"
+    },
+    "building": {
+      "msg1": "Analyzing your metabolism...",
+      "msg2": "Comparing against similar profiles...",
+      "msg3": "Calculating your optimal deficit...",
+      "msg4": "Mapping your training split...",
+      "msg5": "Setting weekly milestones...",
+      "msg6": "Generating your first week...",
+      "defaultMsg1": "Analyzing your baseline...",
+      "defaultMsg2": "Matching against similar profiles...",
+      "defaultMsg3": "Calibrating your plan...",
+      "defaultMsg4": "Almost ready..."
+    },
+    "projection": {
+      "title": "Here's what we found",
+      "weightTitle": "Your weight projection",
+      "headline": "You can be at {target}kg by {date}.",
+      "moreInfo": "We need a bit more info to show your projection.",
+      "aggressive": "That's aggressive. We recommend extending to {weeks} weeks for sustainable results.",
+      "subtext": "That's {weeks} weeks from today. Not a miracle — just a plan that matches your body.",
+      "targetDate": "Target date",
+      "weeklyPace": "Weekly pace",
+      "dailyTarget": "Daily target",
+      "withAtlas": "With Atlas",
+      "noChange": "No change",
+      "continue": "Continue"
+    },
+    "socialProof": {
+      "title": "People like you are already doing this.",
+      "subtitle": "Real results from people with similar goals.",
+      "cta": "I'm ready",
+      "testimonials": {
+        "marco": {
+          "goal": "Fat loss",
+          "quote": "I lost 9 kg in 10 weeks. The weekly adjustments meant I never stalled — first time that's happened.",
+          "metric": "-9 kg in 10 weeks"
+        },
+        "sarah": {
+          "goal": "Recomp",
+          "quote": "I've used every app. Atlas is the only one that changed what I was doing based on what was actually happening.",
+          "metric": "-6 kg fat, +2 kg muscle"
+        },
+        "james": {
+          "goal": "Energy & health",
+          "quote": "My bloodwork improved in 8 weeks. My doctor asked what I changed. I just said \"I stopped guessing.\"",
+          "metric": "Bloodwork normalized in 8 weeks"
+        }
+      }
+    },
+    "commitment": {
+      "title": "Before we start — one promise.",
+      "body": "Everything about your plan is designed around this: 3 sessions a week, honest food logging, and a weekly weigh-in. Not perfect. Just consistent.",
+      "prompt": "Do you promise yourself you'll try that for the next 8 weeks?",
+      "primaryCta": "I'm in",
+      "secondaryCta": "I'll decide as I go"
+    },
+    "trial": {
+      "title": "How the 7-day free trial works.",
+      "subtitle": "No surprises. No tricks.",
+      "today": "Today",
+      "todayText": "Full access. No card required to start.",
+      "day5": "Day 5",
+      "day5Text": "We'll remind you the trial ends in 2 days.",
+      "day7": "Day 7",
+      "day7Text": "If you're seeing results, it rolls into your plan. If not, cancel in one tap.",
+      "cta": "See my plan options"
+    },
+    "paywall": {
+      "title": "Pick the plan that fits your goal."
+    },
+    "account": {
+      "title": "Save your plan.",
+      "subtitle": "So you don't lose it if you switch phones.",
+      "continueApple": "Continue with Apple",
+      "continueGoogle": "Continue with Google",
+      "useEmail": "Use email",
+      "createAccount": "Create account",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password (6+ characters)",
+      "checkEmail": "Check your email to confirm your account, then come back.",
+      "signupFailed": "Signup failed. Try a different email.",
+      "googleFailed": "Google sign-in failed.",
+      "appleFailed": "Apple sign-in failed.",
+      "persistFailed": "Account created but setup failed. Please try logging in."
+    }
   }
 }

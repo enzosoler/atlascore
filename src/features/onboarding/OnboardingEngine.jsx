@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
 import { useOnboarding } from './OnboardingContext';
+import { useT } from '@/lib/i18nContext';
 
 // Custom screen components
 import SplashScreen from './screens/SplashScreen';
@@ -14,6 +15,8 @@ import CommitmentScreen from './screens/CommitmentScreen';
 import TrialExplainerScreen from './screens/TrialExplainerScreen';
 import PaywallScreen from './screens/PaywallScreen';
 import AccountCreationScreen from './screens/AccountCreationScreen';
+import ConnectedAppsScreen from './screens/ConnectedAppsScreen';
+import NotificationsScreen from './screens/NotificationsScreen';
 
 /* ------------------------------------------------------------------ */
 /*  Animation variants                                                */
@@ -44,7 +47,11 @@ const slideTransition = {
 /* ------------------------------------------------------------------ */
 
 function SingleSelectScreen({ screen, answers, setAnswer, goNext }) {
+  const t = useT();
   const selected = answers[screen.fieldKey];
+
+  const title = (screen.titleKey && t(screen.titleKey)) || screen.title;
+  const subtitle = (screen.subtitleKey && t(screen.subtitleKey)) || screen.subtitle;
 
   const handleTap = (value) => {
     setAnswer(screen.fieldKey, value);
@@ -56,18 +63,19 @@ function SingleSelectScreen({ screen, answers, setAnswer, goNext }) {
   return (
     <div className="flex flex-1 flex-col px-5 pt-4">
       <h1 className="mb-2 text-[26px] font-bold leading-tight text-[hsl(var(--fg))]">
-        {screen.title}
+        {title}
       </h1>
-      {screen.subtitle && (
+      {subtitle && (
         <p className="mb-6 text-[15px] leading-snug text-[hsl(var(--fg-2))]">
-          {screen.subtitle}
+          {subtitle}
         </p>
       )}
 
       <div className="flex flex-col gap-3">
         {screen.options?.map((opt) => {
           const value = typeof opt === 'string' ? opt : opt.value;
-          const label = typeof opt === 'string' ? opt : opt.label;
+          const labelKey = typeof opt === 'object' ? opt.labelKey : null;
+          const label = (labelKey && t(labelKey)) || (typeof opt === 'string' ? opt : opt.label);
           const emoji = typeof opt === 'object' ? opt.emoji : null;
           const isSelected = selected === value;
 
@@ -106,23 +114,28 @@ function SingleSelectScreen({ screen, answers, setAnswer, goNext }) {
 }
 
 function MultiSelectScreen({ screen, answers, toggleAnswer }) {
+  const t = useT();
   const selected = answers[screen.fieldKey] ?? [];
+
+  const title = (screen.titleKey && t(screen.titleKey)) || screen.title;
+  const subtitle = (screen.subtitleKey && t(screen.subtitleKey)) || screen.subtitle;
 
   return (
     <div className="flex flex-1 flex-col px-5 pt-4">
       <h1 className="mb-2 text-[26px] font-bold leading-tight text-[hsl(var(--fg))]">
-        {screen.title}
+        {title}
       </h1>
-      {screen.subtitle && (
+      {subtitle && (
         <p className="mb-6 text-[15px] leading-snug text-[hsl(var(--fg-2))]">
-          {screen.subtitle}
+          {subtitle}
         </p>
       )}
 
       <div className="flex flex-wrap gap-3">
         {screen.options?.map((opt) => {
           const value = typeof opt === 'string' ? opt : opt.value;
-          const label = typeof opt === 'string' ? opt : opt.label;
+          const labelKey = typeof opt === 'object' ? opt.labelKey : null;
+          const label = (labelKey && t(labelKey)) || (typeof opt === 'string' ? opt : opt.label);
           const emoji = typeof opt === 'object' ? opt.emoji : null;
           const isSelected = selected.includes(value);
 
@@ -161,8 +174,12 @@ function MultiSelectScreen({ screen, answers, toggleAnswer }) {
 }
 
 function NumericInputScreen({ screen, answers, setAnswer }) {
+  const t = useT();
   const value = answers[screen.fieldKey] ?? '';
   const inputRef = useRef(null);
+
+  const title = (screen.titleKey && t(screen.titleKey)) || screen.title;
+  const subtitle = (screen.subtitleKey && t(screen.subtitleKey)) || screen.subtitle;
 
   useEffect(() => {
     // focus input on mount
@@ -179,11 +196,11 @@ function NumericInputScreen({ screen, answers, setAnswer }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-5">
       <h1 className="mb-2 text-center text-[26px] font-bold leading-tight text-[hsl(var(--fg))]">
-        {screen.title}
+        {title}
       </h1>
-      {screen.subtitle && (
+      {subtitle && (
         <p className="mb-8 text-center text-[15px] leading-snug text-[hsl(var(--fg-2))] max-w-[320px]">
-          {screen.subtitle}
+          {subtitle}
         </p>
       )}
 
@@ -346,6 +363,12 @@ function ScreenRenderer({ screen, answers, setAnswer, toggleAnswer, goNext }) {
     case 'account-creation':
       return <AccountCreationScreen />;
 
+    case 'connected-apps':
+      return <ConnectedAppsScreen />;
+
+    case 'notifications':
+      return <NotificationsScreen />;
+
     default:
       return <PlaceholderScreen screen={screen} />;
   }
@@ -359,6 +382,8 @@ const HIDE_CONTINUE_TYPES = new Set([
   'splash',
   'building',
   'interstitial',
+  'connected-apps',
+  'notifications',
 ]);
 
 function shouldShowContinue(screen) {

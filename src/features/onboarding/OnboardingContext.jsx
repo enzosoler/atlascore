@@ -98,6 +98,8 @@ const ALWAYS_ADVANCEABLE = new Set([
   'trial-explainer',
   'paywall',
   'account-creation',
+  'connected-apps',
+  'notifications',
 ]);
 
 function computeCanAdvance(screen, answers) {
