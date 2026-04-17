@@ -10,14 +10,14 @@ import {
   CreditCard,
   ChevronRight,
   Trash2,
-  RefreshCw,
-  Settings,
+  RotateCcw,
+  Loader2,
 } from 'lucide-react';
-import StartFreshModal from '@/components/system/StartFreshModal';
-import NutritionModeSelector from '@/components/nutrition/NutritionModeSelector';
+import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
+import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import {
   AppContainer,
@@ -27,6 +27,14 @@ import {
 import {
   SafePageBoundary,
 } from '@/components/shared/StablePage';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 // ---------------------------------------------------------------------------
@@ -80,6 +88,84 @@ function SettingsLink({ to, icon: Icon, title, subtitle, danger }) {
         <ChevronRight className={`h-4 w-4 shrink-0 ${danger ? 'text-[hsl(var(--err)/0.6)]' : 'text-[hsl(var(--fg-3))]'}`} />
       </div>
     </Link>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Reset Data Section
+// ---------------------------------------------------------------------------
+
+function ResetDataSection({ logout }) {
+  const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const canConfirm = confirmText.trim().toUpperCase() === 'RESET';
+
+  async function handleReset() {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-user-data', { body: {} });
+      if (error) { toast.error(`Reset failed: ${error?.message ?? JSON.stringify(error)}`); return; }
+      if (data?.error) { toast.error(`Reset failed: ${data.error}`); return; }
+      toast.success('Data reset complete');
+      setOpen(false);
+      setTimeout(() => logout?.(), 500);
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <button type="button" onClick={() => { setOpen(true); setConfirmText(''); }} className="block w-full text-left">
+        <div className="flex items-center gap-4 rounded-[16px] border px-4 py-4 transition-all duration-200 hover:bg-[hsl(var(--card))] border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] hover:border-[hsl(var(--err)/0.5)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]">
+            <RotateCcw className="h-4 w-4" strokeWidth={1.9} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--err))]">Reset all my data</p>
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">Wipe tracking data and start fresh</p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-[hsl(var(--err)/0.6)]" />
+        </div>
+      </button>
+
+      <Dialog open={open} onOpenChange={(v) => { if (!loading) setOpen(v); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[hsl(var(--err))]">Reset all my data</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <p className="mb-1.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--err)/0.8)]">Will be deleted</p>
+              <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">Your workouts, meals, measurements, check-ins, coach conversations, progress photos, and workout plans.</p>
+            </div>
+            <div>
+              <p className="mb-1.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--ok)/0.8)]">Will be kept</p>
+              <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">Your account, email, subscription, and basic profile.</p>
+            </div>
+            <div>
+              <label htmlFor="reset-confirm" className="mb-1.5 block text-[13px] font-medium text-[hsl(var(--fg-2))]">
+                Type <span className="font-bold text-[hsl(var(--err))]">RESET</span> to confirm
+              </label>
+              <input id="reset-confirm" type="text" autoComplete="off" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} disabled={loading}
+                className="w-full rounded-[12px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--err)/0.5)] focus:outline-none" placeholder="RESET" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancel</Button>
+            <Button variant="destructive" onClick={handleReset} disabled={!canConfirm || loading} className="gap-2">
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading ? 'Resetting...' : 'Reset my data'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -272,6 +358,7 @@ function AccountContent({ showResetModal, setShowResetModal, showNutritionModal,
           {t('account.dangerZone')}
         </h3>
         <div className="space-y-3">
+          <ResetDataSection logout={logout} />
           <SettingsLink
             to="/settings/delete-account"
             icon={Trash2}
