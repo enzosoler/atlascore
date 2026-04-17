@@ -241,7 +241,7 @@ export default function PaywallScreen() {
   const ctaLabel = isNative
     ? (purchasing ? 'Processing...' : 'Start 3-day free trial')
     : 'Continue to account setup';
-  const plans = [
+  const billingPlans = [
     {
       key: 'annual',
       title: 'Annual',
@@ -305,7 +305,7 @@ export default function PaywallScreen() {
           </div>
 
           <div className="mt-5 flex flex-col gap-3">
-            {plans.map((plan) => {
+            {billingPlans.map((plan) => {
               const isSelected = selected === plan.key;
 
               return (
