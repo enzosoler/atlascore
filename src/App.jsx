@@ -28,6 +28,7 @@ import AppBootstrap from '@/components/app/AppBootstrap';
 import RouteGuard from '@/components/rbac/RouteGuard';
 import { WebOnlyRoute } from '@/components/routing/WebOnlyRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import EntitlementGate from '@/components/EntitlementGate';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { AuthGateProvider } from '@/hooks/useAuthGate';
 import { hasSeenWelcome } from '@/pages/WelcomeOnboarding';
@@ -457,25 +458,34 @@ const AppRoutes = () => (
         <Route path={ROUTES.bodyCheckpointNew} element={<NewCheckpointPage />} />
 
         <Route element={<AppLayout />}>
-          <Route path={ROUTES.today} element={<Today />} />
-          <Route path={ROUTES.nutrition} element={<Nutrition />} />
-          <Route path={ROUTES.workouts} element={<WorkoutsV2 />} />
-          <Route path={ROUTES.routines} element={<Routines />} />
-          <Route path={ROUTES.protocols} element={<Protocols />} />
-          <Route path={ROUTES.protocolNew} element={<ProtocolFormPage />} />
-          <Route path={ROUTES.protocolEdit} element={<ProtocolFormPage />} />
-          <Route path={ROUTES.protocolDetail} element={<ProtocolDetail />} />
-          <Route path={ROUTES.measurements} element={<Measurements />} />
-          <Route path={ROUTES.labExams} element={<LabExams />} />
-          <Route path={ROUTES.progressReview} element={<Insights />} />
-          <Route path={ROUTES.insights} element={<Insights />} />
-          <Route path={ROUTES.blockReview} element={<BlockReview />} />
-          <Route path={ROUTES.exercises} element={<Exercises />} />
-          <Route path="/exercise/:id" element={<ExerciseDetail />} />
-          <Route path={ROUTES.progress} element={<Progress />} />
-          <Route path={ROUTES.plan} element={<Plan />} />
-          <Route path={ROUTES.body} element={<Body />} />
-          <Route path={ROUTES.progressPhotos} element={<ProgressPhotos />} />
+          {/* Premium content — hard-gated behind EntitlementGate */}
+          <Route path={ROUTES.today} element={<EntitlementGate><Today /></EntitlementGate>} />
+          <Route path={ROUTES.nutrition} element={<EntitlementGate><Nutrition /></EntitlementGate>} />
+          <Route path={ROUTES.workouts} element={<EntitlementGate><WorkoutsV2 /></EntitlementGate>} />
+          <Route path={ROUTES.routines} element={<EntitlementGate><Routines /></EntitlementGate>} />
+          <Route path={ROUTES.protocols} element={<EntitlementGate><Protocols /></EntitlementGate>} />
+          <Route path={ROUTES.protocolNew} element={<EntitlementGate><ProtocolFormPage /></EntitlementGate>} />
+          <Route path={ROUTES.protocolEdit} element={<EntitlementGate><ProtocolFormPage /></EntitlementGate>} />
+          <Route path={ROUTES.protocolDetail} element={<EntitlementGate><ProtocolDetail /></EntitlementGate>} />
+          <Route path={ROUTES.measurements} element={<EntitlementGate><Measurements /></EntitlementGate>} />
+          <Route path={ROUTES.labExams} element={<EntitlementGate><LabExams /></EntitlementGate>} />
+          <Route path={ROUTES.progressReview} element={<EntitlementGate><Insights /></EntitlementGate>} />
+          <Route path={ROUTES.insights} element={<EntitlementGate><Insights /></EntitlementGate>} />
+          <Route path={ROUTES.blockReview} element={<EntitlementGate><BlockReview /></EntitlementGate>} />
+          <Route path={ROUTES.exercises} element={<EntitlementGate><Exercises /></EntitlementGate>} />
+          <Route path="/exercise/:id" element={<EntitlementGate><ExerciseDetail /></EntitlementGate>} />
+          <Route path={ROUTES.progress} element={<EntitlementGate><Progress /></EntitlementGate>} />
+          <Route path={ROUTES.plan} element={<EntitlementGate><Plan /></EntitlementGate>} />
+          <Route path={ROUTES.body} element={<EntitlementGate><Body /></EntitlementGate>} />
+          <Route path={ROUTES.progressPhotos} element={<EntitlementGate><ProgressPhotos /></EntitlementGate>} />
+          <Route path={ROUTES.myDiet} element={<EntitlementGate><MyDiet /></EntitlementGate>} />
+          <Route path={ROUTES.myWorkout} element={<EntitlementGate><MyWorkout /></EntitlementGate>} />
+          <Route path={ROUTES.manualWorkout} element={<EntitlementGate><ManualWorkoutPlan /></EntitlementGate>} />
+          <Route path={ROUTES.diary} element={<EntitlementGate><Diary /></EntitlementGate>} />
+          <Route path={ROUTES.prescribedDiet} element={<EntitlementGate><MyPrescribedDiet /></EntitlementGate>} />
+          <Route path={ROUTES.prescribedWorkout} element={<EntitlementGate><MyPrescribedWorkout /></EntitlementGate>} />
+
+          {/* Accessible without subscription — profile, settings, account, social */}
           <Route path={ROUTES.profile} element={<Profile />} />
           <Route path={ROUTES.profileEdit} element={<ProfileEdit />} />
           <Route path={ROUTES.goals} element={<Goals />} />
@@ -484,13 +494,7 @@ const AppRoutes = () => (
           <Route path={ROUTES.settings} element={<Settings />} />
           <Route path={ROUTES.notificationSettings} element={<NotificationSettings />} />
           <Route path={ROUTES.export} element={<Export />} />
-          <Route path={ROUTES.myDiet} element={<MyDiet />} />
-          <Route path={ROUTES.myWorkout} element={<MyWorkout />} />
-          <Route path={ROUTES.manualWorkout} element={<ManualWorkoutPlan />} />
-          <Route path={ROUTES.diary} element={<Diary />} />
           <Route path={ROUTES.social} element={<Social />} />
-          <Route path={ROUTES.prescribedDiet} element={<MyPrescribedDiet />} />
-          <Route path={ROUTES.prescribedWorkout} element={<MyPrescribedWorkout />} />
           {/* Professional dashboards — gated behind private beta flag.
               Routes are only mounted when VITE_ENABLE_PRO_ROUTES=true (internal/staging).
               In public builds these routes simply don't exist, so users can't land here. */}

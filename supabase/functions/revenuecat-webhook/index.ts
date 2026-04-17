@@ -189,6 +189,8 @@ serve(async (req) => {
   // ── Process event ────────────────────────────────────────────────────────
   try {
     // 1. Entitlement sync — grant or revoke access in `subscriptions`.
+    //    Also mirror state into profile_data.pro_entitlement for fast
+    //    client-side checks (avoids joining subscriptions on every load).
     if (GRANTING_EVENTS.has(eventType)) {
       await grantSubscription(supabaseAdmin, appUserId, {
         productId,
@@ -197,15 +199,19 @@ serve(async (req) => {
         purchasedAtMs,
         expirationAtMs,
       });
+      await updateProEntitlementGrant(supabaseAdmin, appUserId, productId, expirationAtMs);
     } else if (eventType === 'CANCELLATION') {
       // CANCELLATION in RevenueCat means the user turned off auto-renew.
       // They KEEP access until expiration. Flag cancel_at_period_end but
       // don't change status — commissions stay intact (reversal only on REFUND).
       await markCancelAtPeriodEnd(supabaseAdmin, appUserId);
+      await updateProEntitlementCancellation(supabaseAdmin, appUserId);
     } else if (eventType === 'BILLING_ISSUE') {
       await setSubscriptionStatus(supabaseAdmin, appUserId, 'past_due');
+      await updateProEntitlementBillingIssue(supabaseAdmin, appUserId);
     } else if (REVOKING_EVENTS.has(eventType)) {
       await revokeSubscription(supabaseAdmin, appUserId, eventType);
+      await updateProEntitlementRevoke(supabaseAdmin, appUserId);
     }
 
     // 2. Commission accounting — unchanged business logic, but decoupled.
@@ -355,6 +361,166 @@ async function revokeSubscription(
     throw error;
   }
   console.log(`revenuecat-webhook: Subscription revoked user=${userId} reason=${reason} status=${status}`);
+}
+
+// ── Profile pro_entitlement sync ──────────────────────────────────────────
+// Mirrors subscription state into profile_data.pro_entitlement for fast
+// client-side entitlement checks (avoids a join on every page load).
+
+async function updateProEntitlementGrant(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  productId: string | undefined,
+  expirationAtMs: number | undefined,
+): Promise<void> {
+  if (!userId) return;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('profile_data')
+    .eq('id', userId)
+    .single();
+
+  const currentData = (profile?.profile_data as Record<string, unknown>) || {};
+  const expiresAt = expirationAtMs ? new Date(expirationAtMs).toISOString() : null;
+
+  const updatedData = {
+    ...currentData,
+    pro_entitlement: {
+      active: true,
+      tier: 'pro',
+      product_id: productId ?? null,
+      expires_at: expiresAt,
+      will_renew: true,
+      updated_at: new Date().toISOString(),
+      source: 'revenuecat',
+      // Preserve grandfathered flag if it exists
+      ...((currentData.pro_entitlement as Record<string, unknown>)?.grandfathered
+        ? { grandfathered: true }
+        : {}),
+    },
+  };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ profile_data: updatedData })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('revenuecat-webhook: Failed to update pro_entitlement (grant):', error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: pro_entitlement granted on profile user=${userId}`);
+}
+
+async function updateProEntitlementRevoke(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<void> {
+  if (!userId) return;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('profile_data')
+    .eq('id', userId)
+    .single();
+
+  const currentData = (profile?.profile_data as Record<string, unknown>) || {};
+  const currentEntitlement = (currentData.pro_entitlement as Record<string, unknown>) || {};
+
+  const updatedData = {
+    ...currentData,
+    pro_entitlement: {
+      ...currentEntitlement,
+      active: false,
+      updated_at: new Date().toISOString(),
+      // Preserve grandfathered — if they're grandfathered, they keep access regardless
+    },
+  };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ profile_data: updatedData })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('revenuecat-webhook: Failed to update pro_entitlement (revoke):', error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: pro_entitlement revoked on profile user=${userId}`);
+}
+
+async function updateProEntitlementCancellation(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<void> {
+  if (!userId) return;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('profile_data')
+    .eq('id', userId)
+    .single();
+
+  const currentData = (profile?.profile_data as Record<string, unknown>) || {};
+  const currentEntitlement = (currentData.pro_entitlement as Record<string, unknown>) || {};
+
+  const updatedData = {
+    ...currentData,
+    pro_entitlement: {
+      ...currentEntitlement,
+      will_renew: false,
+      // active stays true — access continues until period end
+      updated_at: new Date().toISOString(),
+    },
+  };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ profile_data: updatedData })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('revenuecat-webhook: Failed to update pro_entitlement (cancellation):', error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: pro_entitlement will_renew=false on profile user=${userId}`);
+}
+
+async function updateProEntitlementBillingIssue(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<void> {
+  if (!userId) return;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('profile_data')
+    .eq('id', userId)
+    .single();
+
+  const currentData = (profile?.profile_data as Record<string, unknown>) || {};
+  const currentEntitlement = (currentData.pro_entitlement as Record<string, unknown>) || {};
+
+  const updatedData = {
+    ...currentData,
+    pro_entitlement: {
+      ...currentEntitlement,
+      billing_issue: true,
+      updated_at: new Date().toISOString(),
+    },
+  };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ profile_data: updatedData })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('revenuecat-webhook: Failed to update pro_entitlement (billing_issue):', error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: pro_entitlement billing_issue=true on profile user=${userId}`);
 }
 
 // ── Affiliate commissions (unchanged business logic) ──────────────────────

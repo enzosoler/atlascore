@@ -1,20 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Link2, ExternalLink, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Capacitor } from '@capacitor/core';
+import { ArrowLeft, Link2, Check } from 'lucide-react';
 
 const INTEGRATIONS = [
-  { id: 'health', name: 'Apple Health', status: 'connected', icon: '🍎' },
-  { id: 'fitbit', name: 'Fitbit', status: 'available', icon: '⌚' },
-  { id: 'garmin', name: 'Garmin', status: 'available', icon: '📍' },
-  { id: 'myfitnesspal', name: 'MyFitnessPal', status: 'connected', icon: '🥗' },
-  { id: 'strava', name: 'Strava', status: 'available', icon: '🏃' },
+  { id: 'health', name: 'Apple Health', status: 'connected', icon: '🍎', platform: 'ios' },
+  { id: 'garmin', name: 'Garmin', status: 'coming_soon', icon: '📍' },
+  { id: 'strava', name: 'Strava', status: 'coming_soon', icon: '🏃' },
+  { id: 'fitbit', name: 'Fitbit', status: 'coming_soon', icon: '⌚' },
   { id: 'whoop', name: 'WHOOP', status: 'coming_soon', icon: '💜' },
+  { id: 'myfitnesspal', name: 'MyFitnessPal', status: 'coming_soon', icon: '🥗' },
 ];
 
 export default function Integrations() {
   const navigate = useNavigate();
+  const isNative = Capacitor.isNativePlatform();
+  const platform = Capacitor.getPlatform(); // 'ios' | 'android' | 'web'
+  const isAndroid = isNative && platform === 'android';
+
+  // On Android, hide Apple Health (iOS-only)
+  const visibleIntegrations = INTEGRATIONS.filter(
+    (i) => !(isAndroid && i.platform === 'ios')
+  );
 
   return (
     <div className="min-h-screen bg-[hsl(var(--bg))]">
@@ -37,8 +45,14 @@ export default function Integrations() {
             </p>
           </div>
 
+          {isAndroid && (
+            <div className="p-3 rounded-lg bg-[hsl(var(--fill))] mb-4 text-sm text-[hsl(var(--fg-2))]">
+              Health Connect integration coming soon
+            </div>
+          )}
+
           <div className="space-y-2">
-            {INTEGRATIONS.map((integration) => (
+            {visibleIntegrations.map((integration) => (
               <div
                 key={integration.id}
                 className="p-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] flex items-center gap-3"
@@ -48,7 +62,6 @@ export default function Integrations() {
                   <p className="font-medium">{integration.name}</p>
                   <p className="text-xs text-[hsl(var(--fg-2))]">
                     {integration.status === 'connected' && 'Connected'}
-                    {integration.status === 'available' && 'Available to connect'}
                     {integration.status === 'coming_soon' && 'Coming soon'}
                   </p>
                 </div>
@@ -57,14 +70,9 @@ export default function Integrations() {
                     <Check className="w-4 h-4" />
                     <span>Active</span>
                   </div>
-                ) : integration.status === 'available' ? (
-                  <Button size="sm" variant="outline">
-                    Connect
-                    <ExternalLink className="w-3 h-3 ml-1" />
-                  </Button>
                 ) : (
                   <span className="text-xs px-2 py-1 rounded-full bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))]">
-                    Soon
+                    Coming 2026
                   </span>
                 )}
               </div>

@@ -1,77 +1,185 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Capacitor } from '@capacitor/core';
-import { presentPaywall } from '@/lib/revenueCat';
+import { getOfferings, purchasePackage, restorePurchases } from '@/lib/revenueCat';
 import { useOnboarding } from '../OnboardingContext';
 
-/**
- * PaywallScreen — native or web paywall.
- *
- * Native (iOS/Android): presents the RevenueCat native paywall.
- * Web: shows a custom plan selection card with annual/monthly options.
- *
- * Selected plan and billing cycle are stored in onboarding answers
- * so the account creation step can reference them later.
- */
-
 /* ------------------------------------------------------------------ */
-/*  Plan data                                                         */
+/*  Fallback prices (shown on web or when store fetch fails)          */
 /* ------------------------------------------------------------------ */
 
-const PLANS = {
-  performance_annual: {
-    id: 'performance_annual',
-    name: 'Performance',
-    price: '$159/year',
-    perMonth: '$13/mo billed annually',
-    savings: 'Save $69',
-    badge: 'Most popular',
-    billing: 'annual',
-  },
-  pro_annual: {
-    id: 'pro_annual',
-    name: 'Pro',
-    price: '$79/year',
-    perMonth: '$6.58/mo billed annually',
-    savings: null,
-    badge: null,
-    billing: 'annual',
-  },
+const FALLBACK_PRICES = {
+  weekly: { label: '$6.99/week', raw: 6.99 },
+  monthly: { label: '$12.99/month', raw: 12.99 },
+  annual: { label: '$79.99/year', raw: 79.99 },
 };
 
-const MONTHLY_OPTIONS = [
-  { id: 'performance_monthly', label: 'Performance $19/mo', billing: 'monthly' },
-  { id: 'pro_monthly', label: 'Pro $9/mo', billing: 'monthly' },
-];
+const BILLING_META = {
+  weekly: { period: 'week', identifier: '$rc_weekly' },
+  monthly: { period: 'month', identifier: '$rc_monthly' },
+  annual: { period: 'year', identifier: '$rc_annual' },
+};
 
 /* ------------------------------------------------------------------ */
-/*  Native paywall                                                    */
+/*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
-function NativePaywall({ goNext }) {
-  const [presenting, setPresenting] = useState(false);
+function computeSavings(annualPrice, weeklyPrice) {
+  if (!weeklyPrice || weeklyPrice <= 0) return null;
+  const weeklyAnnual = weeklyPrice * 52;
+  const pct = Math.round((1 - annualPrice / weeklyAnnual) * 100);
+  return pct > 0 ? pct : null;
+}
 
+/* ------------------------------------------------------------------ */
+/*  PaywallScreen                                                     */
+/* ------------------------------------------------------------------ */
+
+export default function PaywallScreen() {
+  const { goNext, setAnswer } = useOnboarding();
+  const isNative = Capacitor.isNativePlatform();
+
+  const [selected, setSelected] = useState('weekly');
+  const [packages, setPackages] = useState(null); // RevenueCat package objects keyed by billing
+  const [prices, setPrices] = useState(FALLBACK_PRICES);
+  const [loading, setLoading] = useState(isNative);
+  const [purchasing, setPurchasing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [error, setError] = useState(null);
+
+  /* ---------- Fetch offerings on native ---------- */
   useEffect(() => {
+    if (!isNative) return;
+
     let cancelled = false;
 
-    async function show() {
-      setPresenting(true);
+    async function fetchOfferings() {
       try {
-        await presentPaywall();
-      } catch {
-        // user cancelled or error — non-fatal
-      }
-      if (!cancelled) {
-        setPresenting(false);
-        goNext();
+        const offering = await getOfferings({ currentOnly: true });
+
+        if (cancelled) return;
+
+        if (offering && offering.availablePackages) {
+          const pkgMap = {};
+          const priceMap = { ...FALLBACK_PRICES };
+
+          for (const pkg of offering.availablePackages) {
+            const id = pkg.identifier; // e.g. '$rc_weekly'
+            if (id === '$rc_weekly') {
+              pkgMap.weekly = pkg;
+              priceMap.weekly = {
+                label: `${pkg.product.priceString}/${BILLING_META.weekly.period}`,
+                raw: pkg.product.price,
+              };
+            } else if (id === '$rc_monthly') {
+              pkgMap.monthly = pkg;
+              priceMap.monthly = {
+                label: `${pkg.product.priceString}/${BILLING_META.monthly.period}`,
+                raw: pkg.product.price,
+              };
+            } else if (id === '$rc_annual') {
+              pkgMap.annual = pkg;
+              priceMap.annual = {
+                label: `${pkg.product.priceString}/${BILLING_META.annual.period}`,
+                raw: pkg.product.price,
+              };
+            }
+          }
+
+          setPackages(pkgMap);
+          setPrices(priceMap);
+        }
+      } catch (err) {
+        console.error('[Paywall] Failed to load offerings:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
-    show();
+    fetchOfferings();
     return () => { cancelled = true; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isNative]);
 
-  if (presenting) {
+  /* ---------- Persist selection into onboarding context ---------- */
+  useEffect(() => {
+    const packageId = packages?.[selected]?.identifier ?? BILLING_META[selected].identifier;
+    setAnswer('selected_plan', packageId);
+    setAnswer('selected_billing', selected);
+  }, [selected, packages]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ---------- Dynamic savings badge ---------- */
+  const annualSavingsPct = useMemo(
+    () => computeSavings(prices.annual.raw, prices.weekly.raw),
+    [prices],
+  );
+
+  /* ---------- Plan cards ---------- */
+  const plans = [
+    {
+      key: 'weekly',
+      title: 'Weekly',
+      price: prices.weekly.label,
+      badge: 'MOST POPULAR',
+    },
+    {
+      key: 'monthly',
+      title: 'Monthly',
+      price: prices.monthly.label,
+      badge: null,
+    },
+    {
+      key: 'annual',
+      title: 'Annual',
+      price: prices.annual.label,
+      badge: annualSavingsPct ? `SAVE ${annualSavingsPct}%` : null,
+    },
+  ];
+
+  /* ---------- Handlers ---------- */
+  async function handleContinue() {
+    if (isNative && packages?.[selected]) {
+      setPurchasing(true);
+      setError(null);
+      try {
+        const result = await purchasePackage(packages[selected]);
+        if (result.success) {
+          goNext();
+          return;
+        }
+        if (result.error) {
+          setError(result.error);
+        }
+      } catch (err) {
+        setError('Something went wrong. Please try again.');
+        console.error('[Paywall] Purchase failed:', err);
+      } finally {
+        setPurchasing(false);
+      }
+    } else {
+      // Web: just advance — Stripe checkout happens after account creation
+      goNext();
+    }
+  }
+
+  async function handleRestore() {
+    setRestoring(true);
+    setError(null);
+    try {
+      const result = await restorePurchases();
+      if (result.isActive) {
+        goNext();
+        return;
+      }
+      setError('No active subscription found.');
+    } catch {
+      setError('Could not restore purchases. Please try again.');
+    } finally {
+      setRestoring(false);
+    }
+  }
+
+  /* ---------- Loading state ---------- */
+  if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <p className="text-[14px] text-[hsl(var(--fg-2))]">Loading plans...</p>
@@ -79,28 +187,12 @@ function NativePaywall({ goNext }) {
     );
   }
 
-  return null;
-}
+  /* ---------- Disclosure text ---------- */
+  const selectedPrice = prices[selected];
+  const selectedPeriod = BILLING_META[selected].period;
+  const disclosure = `3 days free, then ${selectedPrice.label.split('/')[0]}/${selectedPeriod}. Subscription auto-renews unless canceled 24h before the current period ends.`;
 
-/* ------------------------------------------------------------------ */
-/*  Web paywall                                                       */
-/* ------------------------------------------------------------------ */
-
-function WebPaywall({ goNext, setAnswer }) {
-  const [selected, setSelected] = useState('performance_annual');
-
-  const handleSelect = (planId, billing) => {
-    setSelected(planId);
-    setAnswer('selected_plan', planId);
-    setAnswer('selected_billing', billing);
-  };
-
-  // Default selection on mount
-  useEffect(() => {
-    setAnswer('selected_plan', 'performance_annual');
-    setAnswer('selected_billing', 'annual');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  /* ---------- Render ---------- */
   return (
     <div className="flex flex-1 flex-col px-5 pt-4">
       <motion.div
@@ -111,25 +203,25 @@ function WebPaywall({ goNext, setAnswer }) {
       >
         {/* Headline */}
         <h1 className="mb-1 text-center text-[26px] font-bold leading-tight text-[hsl(var(--fg))]">
-          Pick the plan that fits your goal.
+          Unlock your full potential.
         </h1>
         <p className="mb-6 text-center text-[14px] text-[hsl(var(--fg-2))]">
-          Free for 7 days. Cancel anytime.
+          Start your 3-day free trial. Cancel anytime.
         </p>
 
-        {/* Annual plan cards */}
+        {/* Plan cards */}
         <div className="flex flex-col gap-3">
-          {Object.values(PLANS).map((plan) => {
-            const isSelected = selected === plan.id;
+          {plans.map((plan) => {
+            const isSelected = selected === plan.key;
 
             return (
               <button
-                key={plan.id}
+                key={plan.key}
                 type="button"
-                onClick={() => handleSelect(plan.id, plan.billing)}
+                onClick={() => setSelected(plan.key)}
                 className={`relative rounded-[16px] border p-4 text-left transition-colors ${
                   isSelected
-                    ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.06)]'
+                    ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.08)]'
                     : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)]'
                 }`}
               >
@@ -141,72 +233,54 @@ function WebPaywall({ goNext, setAnswer }) {
                 )}
 
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex items-center gap-3">
+                    {/* Radio indicator */}
+                    <div
+                      className={`h-5 w-5 shrink-0 rounded-full border-2 transition-colors ${
+                        isSelected
+                          ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand))]'
+                          : 'border-[hsl(var(--border))]'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="mt-[3px] ml-[3px] h-[10px] w-[10px] rounded-full bg-white" />
+                      )}
+                    </div>
                     <p className="text-[16px] font-semibold text-[hsl(var(--fg))]">
-                      {plan.name}
-                    </p>
-                    <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
-                      {plan.perMonth}
+                      {plan.title}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[16px] font-bold text-[hsl(var(--fg))]">
-                      {plan.price}
-                    </p>
-                    {plan.savings && (
-                      <p className="text-[12px] font-semibold text-[hsl(var(--brand))]">
-                        {plan.savings}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Radio indicator */}
-                <div
-                  className={`absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 transition-colors ${
-                    isSelected
-                      ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand))]'
-                      : 'border-[hsl(var(--border))]'
-                  }`}
-                >
-                  {isSelected && (
-                    <div className="absolute inset-[3px] rounded-full bg-white" />
-                  )}
+                  <p className="text-[16px] font-bold text-[hsl(var(--fg))]">
+                    {plan.price}
+                  </p>
                 </div>
               </button>
             );
           })}
         </div>
 
-        {/* Monthly options */}
-        <div className="mt-4 flex items-center justify-center gap-4">
-          {MONTHLY_OPTIONS.map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => handleSelect(opt.id, opt.billing)}
-              className={`text-[12px] font-medium transition-colors ${
-                selected === opt.id
-                  ? 'text-[hsl(var(--brand))] underline'
-                  : 'text-[hsl(var(--fg-3))]'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        {/* Apple-compliant disclosure */}
+        <p className="mt-4 text-center text-[11px] leading-relaxed text-[hsl(var(--fg-3))]">
+          {disclosure}
+        </p>
+
+        {/* Error message */}
+        {error && (
+          <p className="mt-3 text-center text-[12px] text-red-500">{error}</p>
+        )}
 
         {/* Spacer to push CTA down */}
         <div className="flex-1" />
 
-        {/* Hero CTA */}
+        {/* CTA + footer */}
         <div className="pb-2 pt-6">
           <button
             type="button"
-            onClick={goNext}
-            className="w-full rounded-[14px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white transition-opacity active:opacity-80"
+            onClick={handleContinue}
+            disabled={purchasing}
+            className="w-full rounded-[14px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-60"
           >
-            Start 7-day free trial
+            {purchasing ? 'Processing...' : 'Start 3-day free trial'}
           </button>
 
           {/* Trust row */}
@@ -218,30 +292,23 @@ function WebPaywall({ goNext, setAnswer }) {
             <span>Your data is private</span>
           </div>
 
-          {/* Restore link */}
+          {/* Restore purchases */}
           <button
             type="button"
-            className="mt-4 block w-full text-center text-[12px] text-[hsl(var(--fg-3))] underline transition-colors active:text-[hsl(var(--fg-2))]"
+            onClick={handleRestore}
+            disabled={restoring}
+            className="mt-4 block w-full text-center text-[12px] text-[hsl(var(--fg-3))] underline transition-colors active:text-[hsl(var(--fg-2))] disabled:opacity-60"
           >
-            Restore purchase
+            {restoring ? 'Restoring...' : 'Restore Purchases'}
           </button>
+
+          {/* Terms / Privacy links */}
+          <div className="mt-3 mb-2 flex items-center justify-center gap-4 text-[11px] text-[hsl(var(--fg-3))]">
+            <a href="https://atlascore.app/terms" className="underline">Terms of Use</a>
+            <a href="https://atlascore.app/privacy" className="underline">Privacy Policy</a>
+          </div>
         </div>
       </motion.div>
     </div>
   );
-}
-
-/* ------------------------------------------------------------------ */
-/*  PaywallScreen                                                     */
-/* ------------------------------------------------------------------ */
-
-export default function PaywallScreen() {
-  const { goNext, setAnswer } = useOnboarding();
-  const isNative = Capacitor.isNativePlatform();
-
-  if (isNative) {
-    return <NativePaywall goNext={goNext} />;
-  }
-
-  return <WebPaywall goNext={goNext} setAnswer={setAnswer} />;
 }
