@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Moon, Sun, Globe, Save } from 'lucide-react';
+import { Moon, Sun, Save } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, Flame, Target, Droplets, Save, Zap, Calculator, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, Zap, Calculator, ChevronDown, ChevronUp } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/shared/AppContainer';
 import { FormField, SelectField, TextAreaField } from './ProfileFormField';
 import { saveLocalProfile, hasValue, formatNumber, calculateMetabolicTargets } from '@/lib/profileUtils';
 import { saveBMRSnapshot } from '@/services/bodyProgressService';

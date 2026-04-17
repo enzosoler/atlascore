@@ -11,7 +11,7 @@ import {
   Drawer,
   DrawerContent,
 } from '@/components/ui/drawer';
-import { Sparkles, Send, X, Check, Loader2, ChevronRight } from 'lucide-react';
+import { Sparkles, Send, X, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { useT } from '@/lib/i18nContext';

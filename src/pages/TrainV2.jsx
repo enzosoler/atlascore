@@ -12,20 +12,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Play, CheckCircle2, Dumbbell, Clock, Zap, Plus,
-  ArrowRight, Sparkles, Calendar, TrendingUp, Target,
+  Play, CheckCircle2, Clock, Zap, Plus,
+  ArrowRight, Sparkles, Target,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
-import { supabase } from '@/lib/supabaseClient';
 import { trackProductEvent } from '@/lib/productEvents';
-import { useDailyStateV2, DAILY_KEYS } from '@/hooks/useDailyStateV2';
+import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen';
-import WorkoutGuardSheet from '@/components/workouts/WorkoutGuardSheet';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import { AppContainer } from '@/components/shared/AppContainer';
@@ -34,10 +32,8 @@ import {
   fetchRecentWorkoutHistory,
   computePersonalRecords,
 } from '@/services/workoutHistoryService';
-import {
-  getActiveWorkoutPlans,
-  createWorkoutPlan,
-} from '@/services/workoutPlanService';
+
+
 import { saveCompletedWorkout } from '@/services/workoutService';
 import { loadSession, clearSession, hasSession } from '@/lib/workoutSession';
 import { lookupExerciseMedia } from '@/lib/exerciseDB';

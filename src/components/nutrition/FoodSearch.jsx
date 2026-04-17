@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { searchTaco } from '@/services/tacoService';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, Clock, Plus, Minus, Check } from 'lucide-react';
+import { Search, Clock, Plus, Minus, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DEBOUNCE_MS = 300;

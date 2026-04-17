@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Activity,
-  Ruler,
   Scale,
   Target,
   Save,

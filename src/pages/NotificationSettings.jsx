@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Bell, Dumbbell, UtensilsCrossed, Scale, Flame, Clock } from 'lucide-react';
+import { ArrowLeft, Bell, Scale, Flame, Clock } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
 import { ROUTES } from '@/lib/routes';
 import { AppContainer, PageHeader } from '@/components/shared/AppContainer';

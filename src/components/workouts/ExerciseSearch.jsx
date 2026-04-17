@@ -10,7 +10,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter, Lightbulb } from 'lucide-react';
+import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter } from 'lucide-react';
 import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
 import {
   searchExercises,

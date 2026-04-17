@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { ACHIEVEMENTS, computeAchievements } from '@/lib/achievements';
-import { Trophy, Lock } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CATEGORY_LABELS = {

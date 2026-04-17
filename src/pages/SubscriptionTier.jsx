@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, Check, Sparkles, Zap, Target } from 'lucide-react';
+import { ArrowLeft, Crown, Check, Sparkles, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const TIERS = [

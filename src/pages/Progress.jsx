@@ -11,7 +11,7 @@ import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip, ReferenceLine,
 } from 'recharts';
-import { format, subDays, parseISO, isValid, startOfWeek, isSameDay } from 'date-fns';
+import { format, subDays, parseISO, isValid, startOfWeek } from 'date-fns';
 import {
   TrendingDown, TrendingUp, Minus, ArrowRight,
   Camera, Sparkles, FlaskConical, Plus, Target,

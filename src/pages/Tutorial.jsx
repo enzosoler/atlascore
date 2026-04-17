@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, X, Dumbbell, Apple, Camera, TrendingUp } from 'lucide-react';
+import { ChevronRight, X, Dumbbell, Apple, Camera, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const STEPS = [

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Scale, Save, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { Save, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { FormField, SelectField } from './ProfileFormField';
-import { loadLocalProfile, saveLocalProfile, hasValue, formatNumber } from '@/lib/profileUtils';
+import { saveLocalProfile, hasValue, formatNumber } from '@/lib/profileUtils';
 import { toast } from 'sonner';
 
 function WeightDirection({ current, target }) {

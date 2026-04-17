@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -12,14 +12,11 @@ import {
   CheckCircle2,
   ChevronRight,
   FileText,
-  Filter,
   HeartPulse,
   HelpCircle,
-  Info,
   Loader2,
   Minus,
   Plus,
-  Search,
   Sparkles,
   Target,
   TrendingDown,
@@ -49,8 +46,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18nContext';

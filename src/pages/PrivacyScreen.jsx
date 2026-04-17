@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Shield, Lock, Eye, Share2, Bell, FileText } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Eye, Share2, FileText } from 'lucide-react';
 
 const PRIVACY_SECTIONS = [
   {

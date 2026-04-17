@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import MobileSheet from '@/components/shared/MobileSheet';
 import {
-  X,
   Zap,
   Dumbbell,
   Home,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Pill, Check, Circle } from 'lucide-react';
+import { Pill, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**

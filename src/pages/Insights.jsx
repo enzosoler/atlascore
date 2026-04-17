@@ -2,22 +2,17 @@ import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,
-  BarChart3,
   CalendarCheck,
   Dumbbell,
   Moon,
   Scale,
   Sparkles,
   TrendingUp,
-  Target,
-  Zap,
   UtensilsCrossed,
   Activity,
   ChevronRight,
   Lightbulb,
   Clock,
-  Flame,
-  Droplets,
   Brain,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -30,7 +25,6 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
 import { generateMvpInsights } from '@/lib/insightsEngine';
 import {
-  EmptyState,
   ErrorState,
   FilterChip,
   LoadingState,

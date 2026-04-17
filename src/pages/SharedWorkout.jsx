@@ -14,7 +14,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { getSharedWorkout, importSharedWorkout } from '@/services/shareWorkoutService';
 import { ROUTES } from '@/lib/routes';
 import {
-  Dumbbell, ChevronDown, ChevronUp, Download, Loader2, Share2, User, AlertCircle,
+  Dumbbell, ChevronDown, ChevronUp, Download, Loader2, User, AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 

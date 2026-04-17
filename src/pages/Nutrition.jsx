@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Camera,
   Loader2,
@@ -21,9 +21,7 @@ import {
 } from 'lucide-react';
 import {
   ActionRow,
-  AppContainer,
   Card,
-  Section,
 } from '@/components/shared/AppContainer';
 import {
   DateStepper,
@@ -46,11 +44,6 @@ import { searchFoods, getFoodDetails } from '@/services/foodSearchService';
 import { searchTaco } from '@/services/tacoService';
 import AIFoodInput from '@/components/nutrition/AIFoodInput';
 import FoodCameraScanner from '@/components/nutrition/FoodCameraScanner';
-import NutritionHeroCard from '@/components/nutrition/NutritionHeroCard';
-import NutritionQuickActions from '@/components/nutrition/NutritionQuickActions';
-import MealTimeline from '@/components/nutrition/MealTimeline';
-import MacroProgressBar from '@/components/nutrition/MacroProgressBar';
-import AINutritionSuggestions from '@/components/nutrition/AINutritionSuggestions';
 import QuickLogSheet from '@/components/nutrition/QuickLogSheet';
 import { useAICoach } from '@/hooks/useAICoach';
 import { toast } from 'sonner';

@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Camera, Ruler, TrendingUp, ArrowRight, Target, Zap, Scale, Activity, Sparkles } from 'lucide-react';
+import { Camera, Ruler, TrendingUp, ArrowRight, Target, Zap, Activity, Sparkles } from 'lucide-react';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
-import { FilterChip, EmptyState } from '@/components/shared/StablePage';
+import { FilterChip } from '@/components/shared/StablePage';
 import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { listMeasurements, listProgressPhotos } from '@/services/bodyProgressService';
@@ -334,7 +334,7 @@ export default function Body() {
     if (tabFromUrl && TAB_IDS.includes(tabFromUrl) && tabFromUrl !== activeTab) {
       setActiveTab(tabFromUrl);
     }
-  }, [tabFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tabFromUrl]);  
 
   const { data: measurements = [] } = useQuery({
     queryKey: ['body-measurements', user?.id],

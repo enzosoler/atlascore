@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowRight, Clock, Play, Plus, Trophy, X } from 'lucide-react';
+import { ArrowRight, Clock, Plus, Trophy, X } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
 import { Input } from '@/components/ui/input';
 import { tapMedium, celebrateHeavy } from '@/lib/haptics';
@@ -265,7 +265,7 @@ export default function WorkoutExecutionScreen({
       setSuggestionMeta({ source: s.source, label: s.label, lastDisplay: s.lastDisplay });
       return { weight: s.weight, reps: s.reps, rir: prev.rir || '' };
     });
-  }, [lastSession]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastSession]);  
 
   // ── Live PR check ─────────────────────────────────────────────────────────
   const livePR = useMemo(() => {

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
-import { formatWeight, getWeightUnit, toKilograms, isImperial } from '@/lib/units';
+import { getWeightUnit, toKilograms, isImperial } from '@/lib/units';
 import { 
   X, 
   Dumbbell, 

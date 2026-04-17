@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Filter, SlidersHorizontal, Heart, Share2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, Heart, ChevronRight } from 'lucide-react';
 
 const ITEMS = [
   { id: 1, title: 'Hypertrophy Chest Routine', category: 'Workout', author: 'Atlas Team', likes: 1240, image: 'C', tags: ['Intermediate', '60 min'] },

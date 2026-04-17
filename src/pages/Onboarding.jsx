@@ -24,7 +24,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import { cn } from '@/lib/utils';
-import { tapLight, tapMedium } from '@/lib/haptics';
+import { tapLight } from '@/lib/haptics';
 import { trackProductEvent } from '@/lib/productEvents';
 import { trackOnboardingCompleted } from '@/lib/analytics';
 

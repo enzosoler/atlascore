@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 /**
  * CoachAdherenceScore — visualizes overall adherence % for a student

@@ -6,7 +6,6 @@ import { useAuth } from '@/lib/AuthContext';
 import { DAILY_KEYS } from '@/hooks/useDailyStateV2';
 import { AI_COACH_KEY } from '@/hooks/useAICoach';
 import { useI18n } from '@/lib/i18nContext';
-import { useSubscription } from '@/lib/SubscriptionContext';
 import {
   calculateConcentrationAtTime,
   generateConcentrationSeries,

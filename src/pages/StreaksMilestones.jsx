@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Flame, Trophy, Target, Calendar, Star, Zap } from 'lucide-react';
+import { ArrowLeft, Flame, Trophy, Target, Star, Zap } from 'lucide-react';
 
 const MILESTONES = [
   { id: 1, icon: Flame, title: '7 Day Streak', desc: 'Logged for 7 days in a row', achieved: true, date: 'Jan 15' },

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { REGIONAL_PRICING, detectRegion, setRegionPricing } from '@/lib/regionalPricing';
+import { detectRegion, setRegionPricing } from '@/lib/regionalPricing';
 import { Globe } from 'lucide-react';
 
 /**
@@ -60,7 +60,7 @@ export default function RegionSelector({ onRegionChange }) {
       setLoading(false);
     }
     init();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   if (loading) return null;
 

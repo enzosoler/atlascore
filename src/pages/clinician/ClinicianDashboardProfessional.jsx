@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';

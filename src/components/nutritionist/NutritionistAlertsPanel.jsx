@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, TrendingDown, Clock, Activity } from 'lucide-react';
+import { TrendingDown, Clock, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 /**

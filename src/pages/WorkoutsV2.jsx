@@ -9,7 +9,6 @@ import {
   ChevronUp,
   Clock,
   Dumbbell,
-  Flame,
   Loader2,
   Play,
   Plus,
@@ -21,10 +20,7 @@ import {
   Zap,
   Target,
   Activity,
-  ArrowRight,
   RotateCcw,
-  Home,
-  Timer,
   AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -37,7 +33,7 @@ import AIWorkoutInput from '@/components/workouts/AIWorkoutInput';
 import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
-import { EmptyState, PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
+import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
 import { useI18n } from '@/lib/i18nContext';
 import { DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
 import {

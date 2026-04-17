@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Dumbbell, Sparkles, Target, Brain, Apple, LineChart, Settings, Zap, Search, HelpCircle, Users, CreditCard } from 'lucide-react';
-import GuideCard from '@/components/content/GuideCard';
+import { BookOpen, Dumbbell, Sparkles, Target, Brain, Apple, LineChart, Settings, Zap, Search, HelpCircle, Users } from 'lucide-react';
 import PublicSiteShell, { PublicSectionHeader } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Inbox, Search, Plus, RefreshCw } from 'lucide-react';
+import { Inbox, Plus, RefreshCw } from 'lucide-react';
 
 export default function EmptyState({ 
   title = 'Nothing here yet',

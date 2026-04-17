@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Loader2, X } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { applyCreatorCode } from '@/lib/affiliate/applyCreatorCode';

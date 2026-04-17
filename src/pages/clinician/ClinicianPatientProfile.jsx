@@ -5,7 +5,7 @@ import { getMyClients } from '@/services/professionalLinksService';
 import { useAuth } from '@/lib/AuthContext';
 import RoleGate from '@/components/rbac/RoleGate';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronLeft, Loader2, Download } from 'lucide-react';
+import { ChevronLeft, Download } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { formatDate } from '@/lib/atlas-theme';
 import { toast } from 'sonner';

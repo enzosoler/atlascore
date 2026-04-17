@@ -4,7 +4,6 @@ import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { useSubscription } from '@/lib/SubscriptionContext';
 import { useI18n } from '@/lib/i18nContext';
 import UpgradeGate from '@/components/entitlements/UpgradeGate';
 import {

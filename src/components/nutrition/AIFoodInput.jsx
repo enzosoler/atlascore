@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Sparkles, Loader2, Check, AlertCircle, X, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, X, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
 import { useI18n } from '@/lib/i18nContext';

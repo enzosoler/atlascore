@@ -17,11 +17,9 @@ import {
   RotateCcw,
   CheckCircle2,
   Info,
-  ArrowRight,
   X
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { supabase } from '@/lib/supabaseClient';
 import { invokeLLMJson } from '@/lib/llm';
 import { deactivateAllWorkoutPlans, createWorkoutPlan } from '@/services/workoutPlanService';
 import { useQueryClient } from '@tanstack/react-query';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Medal, User, Flame } from 'lucide-react';
+import { ArrowLeft, Trophy, Medal, Flame } from 'lucide-react';
 
 const TABS = ['Weekly', 'Monthly', 'All Time'];
 

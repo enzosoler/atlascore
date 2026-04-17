@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell, Check, Trash2, Settings } from 'lucide-react';
+import { ArrowLeft, Check, Trash2, Settings } from 'lucide-react';
 
 const NOTIFICATIONS = [
   { id: 1, title: 'Workout Reminder', desc: 'Your chest workout is scheduled for today', time: '2 hours ago', read: false, type: 'workout' },

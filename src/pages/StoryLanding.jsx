@@ -14,7 +14,7 @@
  *   3. No paywall, no long onboarding — straight to value
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {

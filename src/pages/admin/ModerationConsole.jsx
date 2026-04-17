@@ -8,7 +8,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -19,12 +18,8 @@ import {
   X,
   Flag,
   AlertCircle,
-  Shield,
   UserX,
   Ban,
-  MessageSquare,
-  ExternalLink,
-  ChevronLeft,
 } from 'lucide-react';
 
 const CATEGORY_COLORS = {

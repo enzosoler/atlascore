@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { AlertTriangle, Bell, RefreshCw, Zap } from 'lucide-react';
+import { AlertTriangle, Bell, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';

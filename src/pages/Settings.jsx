@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
-import { useI18n, useT } from '@/lib/i18nContext';
+import { useI18n } from '@/lib/i18nContext';
 import { locales, localeLabels } from '@/i18n/config';
 import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 import { useSubscription } from '@/lib/SubscriptionContext';
