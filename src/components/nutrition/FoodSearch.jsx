@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { searchTaco } from '@/services/tacoService';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Clock, Plus, Minus, Check } from 'lucide-react';
+import { Search, Clock, Plus, Minus, Check, UtensilsCrossed } from 'lucide-react';
+import { DataState } from '@/components/shared/DataState';
 import { toast } from 'sonner';
 
 const DEBOUNCE_MS = 300;
@@ -187,9 +188,13 @@ export default function FoodSearch({ onSelectFood, compact = false }) {
 
           {/* Search results */}
           {debouncedSearch && results.length === 0 && (
-            <div className="px-3 py-6 text-center text-[12px] text-muted-foreground">
-              No results for &quot;{debouncedSearch}&quot;
-            </div>
+            <DataState
+              variant="empty"
+              icon={UtensilsCrossed}
+              title={`No results for "${debouncedSearch}"`}
+              description="Try a different spelling or a more general term."
+              className="mx-3 my-3"
+            />
           )}
 
           {debouncedSearch && results.length > 0 && (

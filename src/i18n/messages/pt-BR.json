@@ -3834,7 +3834,20 @@
       "pause": "Pausar",
       "resume": "Retomar",
       "next": "Próximo"
-    }
+    },
+    "finishWorkout": "Finalizar Treino",
+    "elapsed": "Tempo",
+    "setN": "Série",
+    "previous": "Anterior",
+    "weight": "Peso",
+    "done": "Feito",
+    "addSet": "+ Adicionar Série",
+    "nextExercise": "Próximo exercício",
+    "upNext": "A seguir",
+    "restAfterSet": "Descanso após série {n}",
+    "tapToLog": "Toque para editar",
+    "volume": "Volume",
+    "personalRecord": "PR"
   },
   "train": {
     "thisWeek": "Esta semana",
@@ -3876,7 +3889,20 @@
     "toastSaved": "Treino salvo!",
     "toastSaveFailed": "Falha ao salvar treino.",
     "toastPlanCreated": "Plano criado!",
-    "yesterday": "Ontem"
+    "yesterday": "Ontem",
+    "lastWorkoutSummary": "Último Treino",
+    "repeatWorkout": "Repetir Treino",
+    "volumeTrend": "Tendência de Volume",
+    "totalVolume": "Volume Total",
+    "totalSets": "Total de Séries",
+    "duration": "Duração",
+    "historyTitle": "Histórico de Treinos",
+    "noHistory": "Nenhum treino registrado ainda",
+    "prBadge": "PR",
+    "sets": "séries",
+    "kg": "kg",
+    "min": "min",
+    "weeklyVolume": "Volume Semanal"
   },
   "planPage": {
     "title": "Plano",

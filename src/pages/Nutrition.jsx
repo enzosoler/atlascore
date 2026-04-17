@@ -32,6 +32,7 @@ import {
   StatusBanner,
   shiftDate,
 } from '@/components/shared/StablePage';
+import { DataState } from '@/components/shared/DataState';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ResponsiveModal } from '@/components/app/ResponsiveModal';
 import { useAuth } from '@/lib/AuthContext';
@@ -284,65 +285,152 @@ const MEAL_TYPE_HOURS = {
   evening_snack: 22,
 };
 
-// ─── Nutrition Stats Header ───────────────────────────────────────────────────
+// ─── Calorie Ring SVG ─────────────────────────────────────────────────────────
 
-function NutritionStatsHeader({ dailyTotals, profile, sortedMeals, loggingStreak, onEditTargets, t }) {
-  const mealsToday = sortedMeals.length;
-  const caloriesTarget = profile.calories_target || 0;
-  const proteinTarget = profile.protein_target || 0;
-  const caloriesRemaining = Math.max(0, caloriesTarget - dailyTotals.calories);
-  const proteinRemaining = Math.max(0, proteinTarget - dailyTotals.protein);
-  const caloriesPct = caloriesTarget > 0 ? Math.min((dailyTotals.calories / caloriesTarget) * 100, 100) : 0;
-  const proteinPct = proteinTarget > 0 ? Math.min((dailyTotals.protein / proteinTarget) * 100, 100) : 0;
+function CalorieRing({ consumed, target, size = 120, strokeWidth = 10 }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = target > 0 ? Math.min(consumed / target, 1) : 0;
+  const offset = circumference * (1 - pct);
+  const remaining = Math.max(0, Math.round(target - consumed));
+
+  // Color shifts: green when close to target, brand when in progress, warn when low
+  const ringColor = pct >= 0.9
+    ? 'hsl(var(--ok))'
+    : pct >= 0.5
+      ? 'hsl(var(--brand))'
+      : 'hsl(var(--warn))';
 
   return (
-    <div className="rounded-[24px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-sm)]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-            Day summary
-          </p>
-          <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-            Goal, actual, and remaining are shown side by side so the day is easy to scan.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onEditTargets}
-          className="rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.35)] px-3 py-1.5 text-[12px] font-semibold text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.65)]"
-        >
-          Edit goal
-        </button>
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        {/* Track */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="hsl(var(--fill))"
+          strokeWidth={strokeWidth}
+        />
+        {/* Progress */}
+        {target > 0 && (
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={ringColor}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            className="transition-all duration-700 ease-out"
+          />
+        )}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <p className="text-[22px] font-bold tracking-[-0.04em] text-[hsl(var(--fg))] leading-none">
+          {target > 0 ? remaining : '—'}
+        </p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] mt-1">
+          {target > 0 ? 'kcal left' : 'no goal'}
+        </p>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-[18px] bg-[hsl(var(--fill)/0.35)] px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Calories</p>
-          <p className="mt-2 text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
-            {Math.round(dailyTotals.calories)}
-            <span className="text-[13px] font-medium text-[hsl(var(--fg-3))]"> / {caloriesTarget || '—'} kcal</span>
-          </p>
-          <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
-            {caloriesTarget > 0 ? `${Math.round(caloriesRemaining)} left · ${Math.round(caloriesPct)}% complete` : 'Set a calorie goal to compare today against it.'}
-          </p>
-        </div>
-        <div className="rounded-[18px] bg-[hsl(var(--fill)/0.35)] px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Protein</p>
-          <p className="mt-2 text-[22px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
-            {Math.round(dailyTotals.protein)}
-            <span className="text-[13px] font-medium text-[hsl(var(--fg-3))]"> / {proteinTarget || '—'} g</span>
-          </p>
-          <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
-            {proteinTarget > 0 ? `${Math.round(proteinRemaining)} left · ${Math.round(proteinPct)}% complete` : 'Protein target is optional but helps with the daily plan.'}
-          </p>
+    </div>
+  );
+}
+
+// ─── Macro Progress Pill ──────────────────────────────────────────────────────
+
+function MacroPill({ label, consumed, target, unit, color }) {
+  const pct = target > 0 ? Math.min((consumed / target) * 100, 100) : 0;
+  return (
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-[11px] font-semibold text-[hsl(var(--fg-3))]">{label}</span>
+        <span className="text-[11px] font-medium text-[hsl(var(--fg-2))]">
+          {Math.round(consumed)}{target > 0 ? `/${target}` : ''}{unit}
+        </span>
+      </div>
+      <div className="h-[5px] rounded-full bg-[hsl(var(--fill)/0.8)] overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: target > 0 ? `${pct}%` : '0%', backgroundColor: color }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Nutrition Daily Summary (MFP-style ring + macro row) ────────────────────
+
+function NutritionDailySummary({ dailyTotals, profile, sortedMeals, loggingStreak, onEditTargets, t }) {
+  const caloriesTarget = profile.calories_target || 0;
+  const proteinTarget = profile.protein_target || 0;
+  const carbsTarget = profile.carbs_target || 0;
+  const fatTarget = profile.fat_target || 0;
+
+  return (
+    <div className="rounded-[24px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card))] p-5 shadow-[var(--shadow-sm)]">
+      {/* Ring + eaten/remaining summary */}
+      <div className="flex items-center gap-5">
+        <CalorieRing
+          consumed={dailyTotals.calories}
+          target={caloriesTarget}
+          size={110}
+          strokeWidth={9}
+        />
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+              {Math.round(dailyTotals.calories)}
+              <span className="text-[hsl(var(--fg-3))] font-medium"> / {caloriesTarget || '—'} kcal</span>
+            </p>
+            <button
+              type="button"
+              onClick={onEditTargets}
+              className="text-[11px] font-semibold text-[hsl(var(--brand))] hover:opacity-80 transition-opacity"
+            >
+              Edit
+            </button>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-[hsl(var(--fg-3))]">
+            <span className="rounded-full bg-[hsl(var(--brand)/0.08)] px-2 py-0.5 font-medium text-[hsl(var(--brand))]">
+              {sortedMeals.length} meals
+            </span>
+            {loggingStreak > 0 && (
+              <span className="rounded-full bg-[hsl(var(--fill)/0.45)] px-2 py-0.5">
+                {loggingStreak}d streak
+              </span>
+            )}
+          </div>
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-[hsl(var(--fg-2))]">
-        <span className="rounded-full bg-[hsl(var(--brand)/0.08)] px-3 py-1 font-medium text-[hsl(var(--brand))]">
-          {mealsToday} meals logged
-        </span>
-        <span className="rounded-full bg-[hsl(var(--fill)/0.45)] px-3 py-1">
-          {loggingStreak} day streak
-        </span>
+
+      {/* Macro progress bars row */}
+      <div className="mt-4 flex gap-3">
+        <MacroPill
+          label="Protein"
+          consumed={dailyTotals.protein}
+          target={proteinTarget}
+          unit="g"
+          color="hsl(var(--brand))"
+        />
+        <MacroPill
+          label="Carbs"
+          consumed={dailyTotals.carbs}
+          target={carbsTarget}
+          unit="g"
+          color="hsl(var(--brand-ai))"
+        />
+        <MacroPill
+          label="Fat"
+          consumed={dailyTotals.fat}
+          target={fatTarget}
+          unit="g"
+          color="hsl(var(--warn))"
+        />
       </div>
     </div>
   );
@@ -898,41 +986,40 @@ function MealBucket({ bucketKey, meals, onEdit, onDelete, onAdd, isProcessing })
       </div>
 
       {hasMeals && (
-        <div className="p-3 space-y-2">
+        <div className="p-3 space-y-1.5">
           {bucketMeals.map((meal) => (
-            <div
+            <button
               key={meal.id}
-              className="flex items-start justify-between gap-3 rounded-[16px] bg-[hsl(var(--fill)/0.38)] px-3 py-3"
+              type="button"
+              onClick={() => onEdit(meal)}
+              disabled={isProcessing}
+              className="w-full flex items-center justify-between gap-3 rounded-[14px] bg-[hsl(var(--fill)/0.32)] px-3 py-2.5 text-left transition-colors hover:bg-[hsl(var(--fill)/0.55)]"
             >
-              <button
-                type="button"
-                onClick={() => onEdit(meal)}
-                disabled={isProcessing}
-                className="min-w-0 flex-1 text-left"
-              >
+              <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-[hsl(var(--fg))] truncate">{meal.title}</p>
-                <p className="mt-1 text-[11px] leading-5 text-[hsl(var(--fg-2))] truncate">
-                  {getMealFoodPreview(meal) || `${getMealFoodCount(meal)} item${getMealFoodCount(meal) === 1 ? '' : 's'}`}
+                <p className="mt-0.5 text-[11px] text-[hsl(var(--fg-3))]">
+                  {meal.total_calories} kcal
+                  <span className="mx-1 opacity-40">|</span>
+                  P {meal.total_protein}g
+                  <span className="mx-1 opacity-40">|</span>
+                  C {meal.total_carbs}g
+                  <span className="mx-1 opacity-40">|</span>
+                  F {meal.total_fat}g
                 </p>
-                <p className="mt-1 text-[11px] text-[hsl(var(--fg-3))]">
-                  {meal.total_calories} kcal · {meal.total_protein}g P · {meal.total_carbs}g C · {meal.total_fat}g F
-                </p>
-              </button>
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={() => onDelete(meal)}
-                  disabled={isProcessing}
-                  className="rounded-lg p-1.5 text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))] transition-colors"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
               </div>
-            </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(meal); }}
+                disabled={isProcessing}
+                className="rounded-lg p-1.5 text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))] transition-colors shrink-0"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </button>
           ))}
           <button
             onClick={() => onAdd(bucketKey)}
             disabled={isProcessing}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[hsl(var(--border)/0.5)] py-2 text-[12px] font-medium text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.08)]"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[hsl(var(--border)/0.4)] py-2 text-[12px] font-medium text-[hsl(var(--brand))] transition-colors hover:bg-[hsl(var(--brand)/0.08)]"
           >
             <Plus className="h-3.5 w-3.5" />
             {t('pages.nutrition.add_item')}
@@ -1398,7 +1485,13 @@ function MealForm({
             )}
 
             {!isSearching && searchError && (
-              <p className="text-[13px] text-[hsl(var(--err))]">{searchError}</p>
+              <DataState
+                variant="error"
+                title="Search failed"
+                description={searchError}
+                action={{ label: 'Clear and retry', onClick: () => { setSearchError(''); setSearchQuery(''); } }}
+                className="mt-2"
+              />
             )}
 
             {!isSearching && searchResults.length > 0 && (
@@ -2079,7 +2172,7 @@ export default function NutritionPage() {
 
           {notice && <StatusBanner tone={notice.tone}>{notice.message}</StatusBanner>}
 
-          <NutritionStatsHeader
+          <NutritionDailySummary
             dailyTotals={dailyTotals}
             profile={profile}
             sortedMeals={sortedMeals}
@@ -2088,41 +2181,19 @@ export default function NutritionPage() {
             t={t}
           />
 
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleAddMeal({ inputMode: 'ai' })}
-              className="flex items-center justify-center gap-2 rounded-[16px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-3 text-[13px] font-semibold text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.6)]"
-            >
-              <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" />
-              AI log
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddMeal({ inputMode: 'search' })}
-              className="flex items-center justify-center gap-2 rounded-[16px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-3 text-[13px] font-semibold text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.6)]"
-            >
-              <Search className="h-4 w-4 text-[hsl(var(--fg-2))]" />
-              Search
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddMeal({ inputMode: 'camera' })}
-              className="flex items-center justify-center gap-2 rounded-[16px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-3 text-[13px] font-semibold text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.6)]"
-            >
-              <Camera className="h-4 w-4 text-[hsl(var(--fg-2))]" />
-              Scan
-            </button>
-          </div>
-
+          {/* Meal sections — primary organizational unit */}
           {isLoadingMeals ? (
-            <div className="space-y-3 rounded-[24px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] p-4">
-              <div className="h-5 w-40 rounded bg-[hsl(var(--fill))] animate-pulse" />
-              <div className="h-20 rounded-[18px] bg-[hsl(var(--fill)/0.45)] animate-pulse" />
-              <div className="h-20 rounded-[18px] bg-[hsl(var(--fill)/0.45)] animate-pulse" />
-            </div>
-          ) : sortedMeals.length > 0 ? (
             <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-[22px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] p-4">
+                  <div className="h-5 w-32 rounded bg-[hsl(var(--fill))] animate-pulse" />
+                  <div className="mt-3 h-14 rounded-[16px] bg-[hsl(var(--fill)/0.45)] animate-pulse" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Repeat yesterday's breakfast chip */}
               {yesterdayBreakfast && selectedDate === TODAY && (
                 <button
                   onClick={() => {
@@ -2133,315 +2204,61 @@ export default function NutritionPage() {
                       inputMode: 'ai',
                     });
                   }}
-                  className="w-full rounded-[16px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.24)] px-4 py-3 text-left text-[13px] font-medium text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.5)]"
+                  className="w-full rounded-[14px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.24)] px-4 py-2.5 text-left text-[13px] font-medium text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.5)]"
                 >
                   <span className="flex items-center gap-2">
                     <Sunrise className="h-4 w-4 text-[hsl(var(--brand))]" />
                     Repeat yesterday&apos;s breakfast
                   </span>
-                  <span className="mt-1 block text-[12px] text-[hsl(var(--fg-3))]">
-                    Reopen it as a draft and review before adding.
-                  </span>
                 </button>
               )}
 
-              <div className="flex items-center justify-between px-1">
-                <div>
-                  <h3 className="text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                    Meal log
-                  </h3>
-                  <p className="mt-1 text-[13px] text-[hsl(var(--fg-3))]">
-                    {selectedDate === TODAY ? 'Actual intake for today' : 'Actual intake for this date'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleAddMeal({ inputMode: 'ai' })}
-                  className="shrink-0 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill))] hover:border-[hsl(var(--brand)/0.3)]"
-                >
-                  <Plus className="mr-1 inline h-4 w-4" />
-                  Add
-                </button>
-              </div>
+              {/* Meal buckets: always show core 4 for today, only populated for past dates */}
+              {(selectedDate === TODAY
+                ? ['breakfast', 'lunch', 'dinner', 'evening_snack']
+                : MEAL_ORDER.filter((bucketKey) => sortedMeals.some((meal) => meal.meal_type === bucketKey))
+              ).map((bucketKey) => (
+                <MealBucket
+                  key={bucketKey}
+                  bucketKey={bucketKey}
+                  meals={sortedMeals}
+                  onEdit={handleEditMeal}
+                  onDelete={handleDeleteMeal}
+                  onAdd={handleQuickAdd}
+                  isProcessing={isSavingMeal || isSavingTargets || savingFoodId !== null}
+                />
+              ))}
 
-              <div className="space-y-3">
-                {(selectedDate === TODAY
-                  ? MEAL_ORDER
-                  : MEAL_ORDER.filter((bucketKey) => sortedMeals.some((meal) => meal.meal_type === bucketKey)))
-                  .map((bucketKey) => (
-                    <MealBucket
-                      key={bucketKey}
-                      bucketKey={bucketKey}
-                      meals={sortedMeals}
-                      onEdit={handleEditMeal}
-                      onDelete={handleDeleteMeal}
-                      onAdd={handleQuickAdd}
-                      isProcessing={isSavingMeal || isSavingTargets || savingFoodId !== null}
-                    />
-                  ))}
-              </div>
-            </div>
-          ) : (
-            <NutritionEmptyState
-              onAddMeal={() => handleAddMeal({ inputMode: 'ai' })}
-              onQuickAdd={handleQuickAdd}
-              onQuickLog={() => setQuickLogOpen(true)}
-              onOpenTargets={handleOpenTargetsEditor}
-              hasTargets={profile.calories_target > 0}
-              t={t}
-            />
-          )}
-
-          {/* ACTION-FIRST: Dominant CTA Block */}
-          {sortedMeals.length === 0 ? (
-            <div className="hidden relative rounded-3xl bg-gradient-to-br from-[hsl(var(--brand)/0.12)] via-[hsl(var(--brand-ai)/0.08)] to-[hsl(var(--card))] border border-[hsl(var(--brand)/0.25)] p-8 text-center overflow-hidden">
-              {/* Background accent */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[hsl(var(--brand)/0.1)] rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-[hsl(var(--brand-ai)/0.1)] rounded-full blur-2xl" />
-              
-              <div className="relative z-10">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[hsl(var(--brand)/0.3)]">
-                  <UtensilsCrossed className="w-10 h-10 text-white" strokeWidth={1.5} />
-                </div>
-                
-                <h2 className="text-[28px] font-bold text-[hsl(var(--fg))] mb-3 leading-tight">
-                  {selectedDate === TODAY
-                    ? t('pages.nutrition.start_nutrition_today')
-                    : t('pages.nutrition.log_meals_for_day')}
-                </h2>
-
-                <p className="text-[17px] text-[hsl(var(--fg-2))] mb-8 leading-relaxed max-w-[320px] mx-auto">
-                  {selectedDate === TODAY
-                    ? t('pages.nutrition.track_first_meal')
-                    : t('pages.nutrition.add_meals_complete_log')}
-                </p>
-                
-                <button
-                  onClick={handleAddMeal}
-                  className="group relative inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] text-white px-8 py-4 text-[16px] font-semibold hover:from-[hsl(var(--brand)/0.95)] hover:to-[hsl(var(--brand-ai)/0.95)] transition-all duration-300 shadow-[0_8px_24px_hsl(var(--brand)/0.4)] hover:shadow-[0_12px_32px_hsl(var(--brand)/0.5)] hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>{t('pages.nutrition.log_first_meal')}</span>
-                  <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </button>
-                
-                {/* Quick meal triggers */}
-                <div className="mt-8 flex items-center justify-center gap-2">
-                  <span className="text-[13px] text-[hsl(var(--fg-3))">{t('pages.nutrition.quick_add')}</span>
-                  <div className="flex gap-2">
-                    {[
-                      { type: 'breakfast', icon: Sunrise, label: t('pages.nutrition.breakfast') },
-                      { type: 'lunch', icon: Sun, label: t('pages.nutrition.lunch') },
-                      { type: 'dinner', icon: Moon, label: t('pages.nutrition.dinner') },
-                    ].map(({ type, icon: Icon, label }) => (
-                      <button
-                        key={type}
-                        onClick={() => handleQuickAdd(type)}
-                        className="flex items-center gap-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))/0.8] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--card))] hover:border-[hsl(var(--brand)/0.3)] hover:text-[hsl(var(--brand))]"
-                      >
-                        <Icon className="w-4 h-4" strokeWidth={2} />
-                        <span>{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* When meals exist: Show next action guidance */
-            <div className="hidden rounded-2xl bg-gradient-to-r from-[hsl(var(--ok)/0.08)] to-[hsl(var(--ok)/0.04)] border border-[hsl(var(--ok)/0.2)] p-5">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--ok)/0.15)] flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-[hsl(var(--ok))]" strokeWidth={2} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-[16px] font-semibold text-[hsl(var(--fg))] mb-1">
-                    {t('pages.nutrition.next_action')}
-                  </h3>
-                  <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">
-                    {profile.calories_target > 0 && dailyTotals.calories < profile.calories_target * 0.8
-                      ? t('pages.nutrition.fuel_up').replace('{n}', getRemainingValue(profile.calories_target, dailyTotals.calories))
-                      : dailyTotals.protein < (profile.protein_target || 150) * 0.7
-                      ? t('pages.nutrition.add_more_protein').replace('{n}', getRemainingValue(profile.protein_target, dailyTotals.protein))
-                      : t('pages.nutrition.great_progress')}
-                  </p>
-                </div>
-                <button
-                  onClick={handleAddMeal}
-                  className="shrink-0 rounded-xl bg-[hsl(var(--ok))] text-white px-4 py-2 text-[14px] font-semibold hover:bg-[hsl(var(--ok)/0.9)] transition-colors shadow-[0_4px_12px_hsl(var(--ok)/0.3)]"
-                >
-                  <Plus className="w-4 h-4 inline mr-1" />
-                  {t('pages.nutrition.add_meal_button')}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Meals Timeline - Progression of the Day */}
-          {isLoadingMeals ? (
-            <div className="flex items-center justify-center gap-3 rounded-[18px] bg-[hsl(var(--fill)/0.4)] p-8 text-[13px] text-[hsl(var(--fg-2))]">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('pages.nutrition.loading_meals')}
-            </div>
-          ) : sortedMeals.length > 0 ? (
-            <div className="space-y-4">
-              {/* Repeat yesterday's breakfast */}
-              {yesterdayBreakfast && (
-                <button
-                  onClick={() => {
-                    // Clone yesterday's breakfast items to today
-                    yesterdayBreakfast.forEach(item => {
-                      const clone = { ...item, date: TODAY, id: undefined, created_at: undefined };
-                      // Save via the existing saveMeal flow
-                      handleSaveMeal(clone);
-                    });
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 rounded-[12px] bg-[hsl(var(--shell))] border border-[hsl(var(--border))] text-[13px] font-medium text-[hsl(var(--fg-2))] active:scale-[0.98] transition-transform duration-100"
-                >
-                  <Sunrise className="w-4 h-4 text-[hsl(var(--brand))]" />
-                  {t('pages.nutrition.repeat_yesterday_breakfast')}
-                </button>
-              )}
-              {/* Timeline Header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-[17px] font-semibold text-[hsl(var(--fg))]">{t('pages.nutrition.todays_meals')}</h3>
-                  <p className="text-[13px] text-[hsl(var(--fg-3))] mt-1">
-                    {t('pages.nutrition.meals_logged_count').replace('{n}', sortedMeals.length)} · {t('pages.nutrition.calories_count').replace('{n}', Math.round(dailyTotals.calories))}
-                  </p>
-                </div>
-                {selectedDate === TODAY && (
-                  <button
-                    onClick={handleAddMeal}
-                    className="shrink-0 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--fill))] hover:border-[hsl(var(--brand)/0.3)]"
-                  >
-                    <Plus className="w-4 h-4 inline mr-1" />
-                    {t('pages.nutrition.add_meal_button')}
-                  </button>
-                )}
-              </div>
-
-              {/* Timeline Visual */}
-              <div className="relative">
-                {/* Progress Line */}
-                <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-[hsl(var(--brand))] via-[hsl(var(--brand-ai))] to-[hsl(var(--border)/0.3)]" />
-                
-                {/* Meal Items */}
-                <div className="space-y-6">
-                  {sortedMeals.map((meal, index) => {
-                    const mealBucketsLocal = getMealBuckets(t);
-                    const mealConfig = mealBucketsLocal[meal.meal_type];
-                    const Icon = mealConfig?.icon || UtensilsCrossed;
-                    const isPast = index < sortedMeals.length - 1;
-                    
-                    return (
-                      <div key={meal.id} className="relative flex items-start gap-4">
-                        {/* Timeline Node */}
-                        <div className={`relative z-10 w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
-                          isPast 
-                            ? 'bg-[hsl(var(--ok)/0.15)] border-2 border-[hsl(var(--ok)/0.3)]' 
-                            : 'bg-[hsl(var(--brand)/0.15)] border-2 border-[hsl(var(--brand)/0.3)]'
-                        }`}>
-                          <Icon className={`w-5 h-5 ${isPast ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--brand))]'}`} strokeWidth={2} />
-                        </div>
-                        
-                        {/* Meal Card */}
-                        <div className="flex-1 min-w-0">
-                          <div className={`rounded-2xl border p-4 transition-all ${
-                            isPast 
-                              ? 'bg-[hsl(var(--ok)/0.05)] border-[hsl(var(--ok)/0.2)]' 
-                              : 'bg-[hsl(var(--card))] border-[hsl(var(--border)/0.5)] hover:border-[hsl(var(--brand)/0.3)]'
-                          }`}>
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h4 className="text-[15px] font-semibold text-[hsl(var(--fg))] truncate">
-                                    {mealConfig?.label || getMealTypeLabel(meal.meal_type)}
-                                  </h4>
-                                  {selectedDate === TODAY && !isPast && (
-                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]">
-                                      {t('pages.nutrition.current')}
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                <p className="text-[13px] text-[hsl(var(--fg-2))] truncate mb-2">{meal.title}</p>
-                                
-                                <div className="flex items-center gap-4 text-[12px] text-[hsl(var(--fg-3))]">
-                                  <span className="flex items-center gap-1">
-                                    <Flame className="w-3 h-3" />
-                                    {meal.total_calories} kcal
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Zap className="w-3 h-3" />
-                                    {meal.total_protein}g {t('pages.nutrition.protein')}
-                                  </span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-1 ml-2">
-                                <button
-                                  onClick={() => handleEditMeal(meal)}
-                                  className="rounded-lg p-2 text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))] transition-colors"
-                                >
-                                  <Pencil className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteMeal(meal)}
-                                  className="rounded-lg p-2 text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--err)/0.1)] hover:text-[hsl(var(--err))] transition-colors"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Simple Macro Summary - Only when meals exist */}
-          {sortedMeals.length > 0 && profile.calories_target > 0 && (
-            <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-5">
-              <h3 className="text-[15px] font-semibold text-[hsl(var(--fg))] mb-4">{t('pages.nutrition.daily_progress')}</h3>
-              
-              <div className="space-y-4">
-                {/* Calories */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-[hsl(var(--fg-3))]" />
-                    <span className="text-[13px] text-[hsl(var(--fg))]">{t('pages.nutrition.calories_label')}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.calories)}</span>
-                    <span className="text-[13px] text-[hsl(var(--fg-3))] ml-1">/ {profile.calories_target}</span>
-                  </div>
-                </div>
-                
-                <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--fill))]">
-                  <div 
-                    className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--brand-ai))] transition-all duration-500"
-                    style={{ width: `${Math.min(getProgressPercent(dailyTotals.calories, profile.calories_target), 100)}%` }}
+              {/* Show additional populated buckets for today that aren't in the core 4 */}
+              {selectedDate === TODAY && MEAL_ORDER
+                .filter((k) => !['breakfast', 'lunch', 'dinner', 'evening_snack'].includes(k))
+                .filter((k) => sortedMeals.some((meal) => meal.meal_type === k))
+                .map((bucketKey) => (
+                  <MealBucket
+                    key={bucketKey}
+                    bucketKey={bucketKey}
+                    meals={sortedMeals}
+                    onEdit={handleEditMeal}
+                    onDelete={handleDeleteMeal}
+                    onAdd={handleQuickAdd}
+                    isProcessing={isSavingMeal || isSavingTargets || savingFoodId !== null}
                   />
+                ))
+              }
+
+              {/* Empty state prompt when no meals at all */}
+              {sortedMeals.length === 0 && !profile.calories_target && (
+                <div className="rounded-[16px] border border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.05)] px-4 py-3 text-center">
+                  <p className="text-[12px] font-semibold text-[hsl(var(--brand))]">{t('nutrition.empty.setTargetsFirst')}</p>
+                  <button
+                    type="button"
+                    onClick={handleOpenTargetsEditor}
+                    className="mt-2 rounded-xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] font-semibold text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.6)]"
+                  >
+                    Set daily goal
+                  </button>
                 </div>
-                
-                {/* Protein */}
-                {profile.protein_target > 0 && (
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-[hsl(var(--brand-ai))]" />
-                      <span className="text-[13px] text-[hsl(var(--fg))]">{t('pages.nutrition.protein_label')}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[15px] font-semibold text-[hsl(var(--fg))]">{Math.round(dailyTotals.protein)}g</span>
-                      <span className="text-[13px] text-[hsl(var(--fg-3))] ml-1">/ {profile.protein_target}g</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           )}
 
@@ -2649,18 +2466,32 @@ export default function NutritionPage() {
         onOpenSearch={() => handleAddMeal({ inputMode: 'search' })}
       />
 
-      {/* Quick Log FAB — visible only when meals exist (empty state already has CTAs) */}
-      {sortedMeals.length > 0 && (
-        <div className="fixed bottom-[calc(var(--tab-bar-h,72px)+env(safe-area-inset-bottom,0px)+8px)] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+      {/* Floating action bar — Photo / AI / Search actions */}
+      <div className="fixed bottom-[calc(var(--tab-bar-h,72px)+env(safe-area-inset-bottom,0px)+8px)] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+        <div className="pointer-events-auto flex items-center gap-1 rounded-full bg-[hsl(var(--card)/0.97)] border border-[hsl(var(--border)/0.6)] px-1.5 py-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.18)] backdrop-blur-md">
+          <button
+            onClick={() => handleAddMeal({ inputMode: 'camera' })}
+            className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-semibold text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--fill)/0.6)]"
+          >
+            <Camera className="h-4 w-4" strokeWidth={2} />
+            Photo
+          </button>
           <button
             onClick={() => setQuickLogOpen(true)}
-            className="pointer-events-auto flex items-center gap-2 px-5 py-3 rounded-full bg-[hsl(var(--brand))] text-white font-semibold text-[14px] tracking-[-0.01em] shadow-[0_4px_20px_rgba(0,0,0,0.25)] active:scale-[0.96] transition-transform duration-100"
+            className="flex items-center gap-1.5 rounded-full bg-[hsl(var(--brand))] px-4 py-2 text-[12px] font-semibold text-white shadow-[0_2px_8px_hsl(var(--brand)/0.4)] active:scale-[0.96] transition-transform duration-100"
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            {t('pages.nutrition.quick_log')}
+            Log
+          </button>
+          <button
+            onClick={() => handleAddMeal({ inputMode: 'search' })}
+            className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-semibold text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--fill)/0.6)]"
+          >
+            <Search className="h-4 w-4" strokeWidth={2} />
+            Search
           </button>
         </div>
-      )}
+      </div>
     </SafePageBoundary>
   );
 }

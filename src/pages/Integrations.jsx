@@ -1,33 +1,44 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Heart, Loader2, RefreshCw, Settings2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Check, Heart, Loader2, RefreshCw, Settings2, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/routes';
 import { useHealthKit } from '@/hooks/useHealthKit';
-import { DataState, PageShell, SectionCard, SafePageBoundary } from '@/components/shared/StablePage';
+import { PageShell, SectionCard, SafePageBoundary } from '@/components/shared/StablePage';
+
+/* ─── Roadmap items ───────────────────────────────────────────────────────── */
 
 const ROADMAP_INTEGRATIONS = [
-  { id: 'garmin', name: 'Garmin', detail: 'Roadmap only. Not connected in Atlas yet.' },
-  { id: 'strava', name: 'Strava', detail: 'Roadmap only. Workout import is not live yet.' },
-  { id: 'fitbit', name: 'Fitbit', detail: 'Roadmap only. Daily sync is not live yet.' },
-  { id: 'whoop', name: 'WHOOP', detail: 'Roadmap only. Recovery sync is not live yet.' },
-  { id: 'myfitnesspal', name: 'MyFitnessPal', detail: 'Roadmap only. Nutrition sync is not live yet.' },
+  { id: 'garmin', name: 'Garmin', detail: 'Activity, sleep, and body composition sync.' },
+  { id: 'strava', name: 'Strava', detail: 'Workout import and training load.' },
+  { id: 'fitbit', name: 'Fitbit', detail: 'Daily activity and sleep tracking.' },
+  { id: 'whoop', name: 'WHOOP', detail: 'Recovery and strain data.' },
+  { id: 'myfitnesspal', name: 'MyFitnessPal', detail: 'Nutrition diary sync.' },
 ];
 
-function IntegrationRoadmapRow({ item }) {
+/* ─── Roadmap row ─────────────────────────────────────────────────────────── */
+
+function IntegrationRoadmapRow({ item, isLast = false }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.26)] px-4 py-4">
-      <div className="min-w-0 flex-1">
-        <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{item.name}</p>
-        <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{item.detail}</p>
+    <div className={`flex items-center gap-3.5 px-4 py-3 ${
+      !isLast ? 'border-b border-[hsl(var(--border)/0.5)]' : ''
+    }`}>
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[hsl(var(--fill)/0.4)] text-[14px] font-semibold text-[hsl(var(--fg-3))]">
+        {item.name.charAt(0)}
       </div>
-      <span className="rounded-full bg-[hsl(var(--card)/0.85)] px-3 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">
-        Roadmap
+      <div className="min-w-0 flex-1">
+        <p className="text-[14px] font-medium tracking-[-0.01em] text-[hsl(var(--fg))]">{item.name}</p>
+        <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-3))]">{item.detail}</p>
+      </div>
+      <span className="rounded-full bg-[hsl(var(--fill)/0.56)] px-2.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">
+        2026
       </span>
     </div>
   );
 }
+
+/* ─── Apple Health card ───────────────────────────────────────────────────── */
 
 function AppleHealthCard() {
   const {
@@ -51,11 +62,10 @@ function AppleHealthCard() {
     setSyncError('');
     const granted = await connect();
     if (!granted) {
-      setSyncError('Atlas could not confirm Apple Health access. Check the system health permissions and try again.');
+      setSyncError('Could not confirm Apple Health access. Check system health permissions.');
       toast.error('Apple Health permission was not granted.');
       return;
     }
-
     toast.success('Apple Health connected');
     await handleSync();
   };
@@ -72,7 +82,7 @@ function AppleHealthCard() {
       markSynced(now);
       toast.success('Health data synced');
     } catch (error) {
-      const message = error?.message || 'Atlas could not sync Apple Health right now.';
+      const message = error?.message || 'Could not sync Apple Health right now.';
       setSyncError(message);
       toast.error(message);
     } finally {
@@ -84,115 +94,126 @@ function AppleHealthCard() {
     disconnect();
     setTodayData(null);
     setSyncError('');
-    toast('Atlas link cleared');
+    toast('Apple Health link cleared');
   };
+
+  // Relative sync time display
+  const syncTimeLabel = (() => {
+    if (!lastSync) return null;
+    const diff = Date.now() - new Date(lastSync).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return new Date(lastSync).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  })();
 
   if (!isIOS) {
     return (
-      <DataState
-        variant="empty"
-        eyebrow="Live integration"
-        meta="Unsupported on this device"
-        title="Apple Health is only available on iPhone"
-        description="Atlas uses Apple Health on iOS. Android support will arrive through a dedicated Health Connect path instead of pretending the same integration works here."
-        primaryAction={(
-          <Button asChild variant="outline">
-            <Link to={ROUTES.settings}>Back to settings</Link>
-          </Button>
-        )}
-        note="This is a truthful platform state, not a hidden failure."
-      />
+      <div className="rounded-[16px] border border-dashed border-[hsl(var(--border)/0.72)] bg-[hsl(var(--fill)/0.18)] px-5 py-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-red-500/10 text-red-400">
+            <Heart className="h-5 w-5" strokeWidth={1.8} />
+          </div>
+          <div>
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Apple Health</p>
+            <p className="mt-1 text-[13px] leading-relaxed text-[hsl(var(--fg-2))]">
+              Only available on iPhone. Android support via Health Connect is on the roadmap.
+            </p>
+            <span className="mt-2 inline-flex rounded-full bg-[hsl(var(--fill)/0.56)] px-2.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">
+              Unavailable on this device
+            </span>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  const statusTitle = connected ? 'Apple Health connected' : available ? 'Permission needed' : 'Apple Health unavailable';
-  const statusMeta = connected ? 'Live' : status === 'permission_needed' ? 'Action required' : 'Unavailable';
-
   return (
-    <div className="space-y-4 rounded-[22px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.28)] px-5 py-5">
+    <div className="space-y-4">
+      {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-red-500 text-white">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-red-500 text-white">
             <Heart className="h-5 w-5" strokeWidth={2} />
           </div>
           <div>
             <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">Apple Health</p>
-            <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-              Atlas can read body data, activity, workouts, heart rate, and sleep after you grant access.
+            <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">
+              Body data, activity, workouts, heart rate, and sleep.
             </p>
           </div>
         </div>
+
+        {/* Status badge */}
         {connected ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--ok)/0.08)] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--ok))]">
-            <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--ok)/0.08)] px-2.5 py-1 text-[11px] font-semibold text-[hsl(var(--ok))]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--ok))]" />
             Connected
           </span>
-        ) : null}
+        ) : available ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--warn)/0.08)] px-2.5 py-1 text-[11px] font-semibold text-[hsl(var(--warn))]">
+            Not connected
+          </span>
+        ) : (
+          <span className="inline-flex rounded-full bg-[hsl(var(--fill)/0.56)] px-2.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">
+            Unavailable
+          </span>
+        )}
       </div>
 
-      <DataState
-        variant={connected ? 'success' : available ? 'permission' : 'error'}
-        eyebrow="Connection state"
-        meta={statusMeta}
-        title={statusTitle}
-        description={
-          connected
-            ? `Last synced ${lastSync ? new Date(lastSync).toLocaleString() : 'not yet'}. Atlas treats this as an app link and still relies on iOS for permission ownership.`
-            : available
-              ? 'Grant Apple Health access from this card when you are ready. Atlas only asks when the live integration is relevant.'
-              : 'Atlas could not confirm Apple Health availability on this device.'
-        }
-        note="Disconnect clears the Atlas-side link and cached sync state. Revoking Apple Health permission still happens in iPhone system settings."
-      />
+      {/* Last sync time */}
+      {connected && syncTimeLabel && (
+        <div className="rounded-[12px] bg-[hsl(var(--fill)/0.36)] px-4 py-2.5">
+          <p className="text-[12px] text-[hsl(var(--fg-2))]">
+            Last synced: <span className="font-medium text-[hsl(var(--fg))]">{syncTimeLabel}</span>
+          </p>
+        </div>
+      )}
 
-      {connected ? (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[16px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.78)] px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Reads</p>
-            <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">Body, activity, workouts</p>
+      {/* Connected data preview */}
+      {connected && (
+        <div className="grid gap-2 grid-cols-3">
+          <div className="rounded-[12px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.6)] px-3 py-2.5">
+            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">Reads</p>
+            <p className="mt-0.5 text-[12px] font-medium text-[hsl(var(--fg))]">Body, activity</p>
           </div>
-          <div className="rounded-[16px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.78)] px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Writes</p>
-            <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">Weight, body fat, nutrition, workouts</p>
+          <div className="rounded-[12px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.6)] px-3 py-2.5">
+            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">Writes</p>
+            <p className="mt-0.5 text-[12px] font-medium text-[hsl(var(--fg))]">Weight, nutrition</p>
           </div>
-          <div className="rounded-[16px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.78)] px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Today</p>
-            <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">
-              {todayData ? `${todayData.steps?.toLocaleString?.() || 0} steps` : 'Sync to preview'}
+          <div className="rounded-[12px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.6)] px-3 py-2.5">
+            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">Today</p>
+            <p className="mt-0.5 text-[12px] font-medium text-[hsl(var(--fg))]">
+              {todayData ? `${todayData.steps?.toLocaleString?.() || 0} steps` : 'Sync to see'}
             </p>
           </div>
         </div>
-      ) : null}
+      )}
 
-      {syncError ? (
-        <DataState
-          variant="error"
-          eyebrow="Sync state"
-          title="Apple Health sync needs attention"
-          description={syncError}
-          primaryAction={(
-            <Button onClick={connected ? handleSync : handleConnect} disabled={loading || syncing} className="gap-2">
-              {(loading || syncing) && <Loader2 className="h-4 w-4 animate-spin" />}
-              Retry
-            </Button>
-          )}
-        />
-      ) : null}
+      {/* Error */}
+      {syncError && (
+        <div className="rounded-[12px] border border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.04)] px-4 py-3">
+          <p className="text-[13px] text-[hsl(var(--err))]">{syncError}</p>
+        </div>
+      )}
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      {/* Actions */}
+      <div className="flex gap-3">
         {connected ? (
           <>
-            <Button onClick={handleSync} disabled={syncing} className="gap-2">
-              {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            <Button onClick={handleSync} disabled={syncing} size="sm" className="gap-2">
+              {syncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
               Sync now
             </Button>
-            <Button onClick={handleDisconnect} variant="outline" className="gap-2">
-              Clear Atlas link
+            <Button onClick={handleDisconnect} variant="outline" size="sm">
+              Disconnect
             </Button>
           </>
         ) : (
-          <Button onClick={handleConnect} disabled={loading || !available} className="gap-2">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings2 className="h-4 w-4" />}
+          <Button onClick={handleConnect} disabled={loading || !available} size="sm" className="gap-2">
+            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Settings2 className="h-3.5 w-3.5" />}
             Connect Apple Health
           </Button>
         )}
@@ -201,15 +222,16 @@ function AppleHealthCard() {
   );
 }
 
+/* ─── Integrations page ───────────────────────────────────────────────────── */
+
 export default function Integrations() {
   const navigate = useNavigate();
 
   return (
     <SafePageBoundary title="Integrations" maxWidth="max-w-2xl" fallbackDescription="Manage connected services and sync state.">
       <PageShell
-        eyebrow="Integrations"
-        title="Integration center"
-        subtitle="One truthful place for what is live on this device, what Atlas can sync now, and what is still roadmap-only."
+        title="Integrations"
+        subtitle="Connect external services to sync health and activity data into Atlas."
         maxWidth="max-w-2xl"
         actions={(
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2">
@@ -218,26 +240,25 @@ export default function Integrations() {
           </Button>
         )}
       >
-        <SectionCard title="Overview" subtitle="Live integrations stay separate from future providers.">
-          <DataState
-            variant="neutral"
-            eyebrow="Atlas sync"
-            title="Apple Health is the only live integration in this build"
-            description="This page does not mix roadmap logos with working sync states. Connected services stay in the live section below. Future providers stay in a separate roadmap section."
-            note="That keeps Atlas honest about what can sync today."
-          />
-        </SectionCard>
-
-        <SectionCard title="Live integrations" subtitle="Connect, sync, inspect scope, and clear the Atlas-side link.">
+        {/* ── Live integrations ──────────────────────────────────────────── */}
+        <SectionCard title="Connected" subtitle="Services actively syncing with Atlas.">
           <AppleHealthCard />
         </SectionCard>
 
-        <SectionCard title="Roadmap" subtitle="Future providers are listed separately until backend support is real.">
-          <div className="space-y-3">
-            {ROADMAP_INTEGRATIONS.map((item) => (
-              <IntegrationRoadmapRow key={item.id} item={item} />
+        {/* ── Roadmap ────────────────────────────────────────────────────── */}
+        <SectionCard title="Coming soon" subtitle="Planned integrations. Not yet available.">
+          <div className="overflow-hidden rounded-[16px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.4)]">
+            {ROADMAP_INTEGRATIONS.map((item, i) => (
+              <IntegrationRoadmapRow
+                key={item.id}
+                item={item}
+                isLast={i === ROADMAP_INTEGRATIONS.length - 1}
+              />
             ))}
           </div>
+          <p className="mt-3 text-[12px] text-[hsl(var(--fg-3))]">
+            Integrations are added based on user demand. Follow our changelog for updates.
+          </p>
         </SectionCard>
       </PageShell>
     </SafePageBoundary>

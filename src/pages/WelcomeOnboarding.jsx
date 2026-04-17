@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { track } from '@/lib/analytics';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
@@ -15,27 +16,48 @@ export function hasSeenWelcome() {
   return localStorage.getItem(STORAGE_KEY) === 'true';
 }
 
-function AthleteHero() {
+/* ------------------------------------------------------------------ */
+/*  Gradient Orb Hero                                                  */
+/* ------------------------------------------------------------------ */
+
+function GradientOrbHero() {
   return (
-    <div className="relative mx-auto flex h-[280px] w-[280px] items-center justify-center">
-      <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,hsl(var(--brand)/0.22),transparent_58%),radial-gradient(circle_at_70%_70%,hsl(var(--accent-primary)/0.18),transparent_52%),hsl(var(--fill)/0.6)] blur-[2px]" />
-      <div className="absolute inset-[22px] rounded-full border border-[hsl(var(--border)/0.65)] bg-[hsl(var(--card)/0.82)] shadow-[0_24px_90px_rgba(0,0,0,0.12)]" />
-      <div className="absolute inset-[52px] rounded-full bg-[linear-gradient(180deg,hsl(var(--brand)/0.18),hsl(var(--accent-primary)/0.12))]" />
-      <div className="relative flex h-[148px] w-[148px] items-center justify-center rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] text-[42px] font-semibold tracking-[-0.06em] text-[hsl(var(--fg))] shadow-[0_20px_80px_rgba(0,0,0,0.12)]">
-        A
-      </div>
-      <div className="absolute right-[28px] top-[40px] rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.92)] px-3 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-        Training
-      </div>
-      <div className="absolute left-[18px] top-[92px] rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.92)] px-3 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-        Nutrition
-      </div>
-      <div className="absolute bottom-[30px] right-[48px] rounded-full border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.92)] px-3 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] shadow-[var(--shadow-xs)]">
-        Recovery
-      </div>
+    <div className="relative mx-auto flex h-[300px] w-[300px] items-center justify-center">
+      {/* Outer glow */}
+      <motion.div
+        className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_40%_35%,hsl(var(--brand)/0.30),transparent_60%),radial-gradient(circle_at_65%_70%,hsl(var(--accent-primary)/0.24),transparent_55%)]"
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
+      />
+      {/* Middle ring */}
+      <motion.div
+        className="absolute inset-[40px] rounded-full bg-[radial-gradient(circle_at_50%_40%,hsl(var(--brand)/0.18),transparent_65%),radial-gradient(circle_at_55%_65%,hsl(var(--accent-primary)/0.14),transparent_60%)] blur-[1px]"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.0, delay: 0.15, ease: 'easeOut' }}
+      />
+      {/* Inner core */}
+      <motion.div
+        className="absolute inset-[80px] rounded-full bg-[radial-gradient(circle_at_45%_45%,hsl(var(--brand)/0.32),hsl(var(--accent-primary)/0.16)_60%,transparent_85%)] shadow-[0_0_80px_hsl(var(--brand)/0.12)]"
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.9, delay: 0.3, ease: 'easeOut' }}
+      />
+      {/* Highlight dot */}
+      <motion.div
+        className="absolute left-[42%] top-[36%] h-3 w-3 rounded-full bg-white/20 blur-[2px]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+      />
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*  WelcomeOnboarding — Duolingo pattern                               */
+/* ------------------------------------------------------------------ */
 
 export default function WelcomeOnboarding() {
   const navigate = useNavigate();
@@ -58,54 +80,71 @@ export default function WelcomeOnboarding() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col overflow-hidden bg-[linear-gradient(180deg,hsl(var(--bg))_0%,hsl(var(--bg))_42%,hsl(var(--sys-bg2))_100%)]"
+      className="fixed inset-0 flex flex-col overflow-hidden bg-[hsl(var(--bg))]"
       style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[-6rem] top-[-4rem] h-64 w-64 rounded-full bg-[hsl(var(--brand)/0.16)] blur-3xl" />
-        <div className="absolute right-[-5rem] top-[18%] h-72 w-72 rounded-full bg-[hsl(var(--accent-primary)/0.14)] blur-3xl" />
-        <div className="absolute bottom-[-6rem] left-[15%] h-72 w-72 rounded-full bg-[hsl(var(--sys-green)/0.10)] blur-3xl" />
-      </div>
-
-      <div className="relative flex items-center justify-center px-6 pb-4 pt-5">
+      {/* ---- Tiny logo top center ---- */}
+      <motion.div
+        className="relative flex items-center justify-center px-6 pt-5"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
         <div className="flex items-center gap-2">
-          <AtlasCoreLogoSVG width={20} />
-          <span className="text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+          <AtlasCoreLogoSVG width={18} />
+          <span className="text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]">
             atlas.core
           </span>
         </div>
+      </motion.div>
+
+      {/* ---- Hero visual center ---- */}
+      <div className="relative flex flex-1 flex-col items-center justify-center px-6">
+        <GradientOrbHero />
+
+        <motion.h1
+          className="mx-auto mt-6 max-w-[320px] text-center text-[32px] font-bold leading-[1.05] tracking-[-0.04em] text-[hsl(var(--fg))]"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
+        >
+          Stop guessing your progress.
+        </motion.h1>
+
+        <motion.p
+          className="mx-auto mt-3 max-w-[280px] text-center text-[15px] leading-relaxed text-[hsl(var(--fg-2))]"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          Atlas builds your training, nutrition, and recovery into one plan.
+        </motion.p>
       </div>
 
-      <div className="relative flex flex-1 flex-col justify-center px-6">
-        <AthleteHero />
-
-        <div className="mx-auto mt-8 max-w-[340px] text-center">
-          <h1 className="text-[34px] font-semibold leading-[1.02] tracking-[-0.06em] text-[hsl(var(--fg))]">
-            Build the plan your last app never could.
-          </h1>
-          <p className="mt-4 text-[15px] leading-7 text-[hsl(var(--fg-2))]">
-            Atlas turns training, nutrition, recovery, and progress into one launch-ready system built around your goal.
-          </p>
-        </div>
-      </div>
-
-      <div className="relative px-6 pb-6 pt-4">
+      {/* ---- Bottom-anchored CTA ---- */}
+      <motion.div
+        className="relative px-6 pb-6 pt-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
         <button
           type="button"
           onClick={handleStart}
-          className="flex h-[56px] w-full items-center justify-center gap-2 rounded-[18px] bg-[hsl(var(--brand))] text-[15px] font-semibold text-white shadow-[0_18px_50px_hsl(var(--brand)/0.28)] transition-all active:scale-[0.98]"
+          className="flex h-[56px] w-full items-center justify-center gap-2 rounded-[16px] bg-[hsl(var(--brand))] text-[16px] font-semibold text-white shadow-[0_16px_48px_hsl(var(--brand)/0.28)] transition-all active:scale-[0.98]"
         >
-          Start my plan
-          <ArrowRight className="h-4 w-4" />
+          Build my plan
+          <ArrowRight className="h-[18px] w-[18px]" />
         </button>
+
         <button
           type="button"
           onClick={handleLogin}
-          className="mt-4 block w-full text-center text-[14px] font-medium text-[hsl(var(--fg-2))] transition-colors active:text-[hsl(var(--fg))]"
+          className="mt-4 block w-full pb-1 text-center text-[14px] font-medium text-[hsl(var(--fg-3))] transition-colors active:text-[hsl(var(--fg))]"
         >
-          Log in
+          I already have an account
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }

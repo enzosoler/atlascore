@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MessageCircle, MessagesSquare, Sparkles } from 'lucide-react';
+import { MessageCircle, Sparkles } from 'lucide-react';
 import { useT } from '@/lib/i18nContext';
 import { cn } from '@/lib/utils';
 
@@ -42,57 +42,39 @@ export default function CoachChatTrigger({ pageContext = 'today', onOpen, onSugg
 
   return (
     <section className="space-y-3">
+      {/* Composer-style chat input bar */}
       <button
         type="button"
         onClick={onOpen}
         className={cn(
-          'group relative flex w-full items-start gap-3 overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.62)]',
-          'bg-[linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--fill)/0.3)_100%)] px-4 py-4 text-left shadow-[var(--shadow-xs)]',
-          'transition-all active:scale-[0.985] active:bg-[hsl(var(--fill)/0.5)]'
+          'group flex w-full items-center gap-3 rounded-[16px] border border-[hsl(var(--border)/0.6)]',
+          'bg-[hsl(var(--card))] px-4 py-3.5 text-left shadow-[var(--shadow-xs)]',
+          'transition-all active:scale-[0.985] active:bg-[hsl(var(--fill)/0.4)]'
         )}
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))]">
-          <MessageCircle className="h-4.5 w-4.5" strokeWidth={2.2} />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))]">
+          <MessageCircle className="h-4 w-4" strokeWidth={2.2} />
         </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-              {t('coach.chat.triggerBar')}
-            </p>
-            <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--fill)/0.4)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-              Reactive
-            </span>
-          </div>
-          <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
-            Use chat for follow-up, swaps, explanations, or a quick adjustment.
-          </p>
+        <p className="flex-1 text-[14px] text-[hsl(var(--fg-3))]">
+          {t('coach.chat.triggerBar')}
+        </p>
 
-          <div className="mt-3 flex items-center gap-2 text-[12px] font-semibold text-[hsl(var(--brand-ai))]">
-            <MessagesSquare className="h-3.5 w-3.5" strokeWidth={2.2} />
-            <span>Open conversation</span>
-          </div>
-        </div>
-
-        <Sparkles className="mt-1 h-4 w-4 shrink-0 text-[hsl(var(--brand-ai)/0.4)]" />
+        <Sparkles className="h-4 w-4 shrink-0 text-[hsl(var(--brand-ai)/0.45)]" />
       </button>
 
-      <div className="space-y-2">
-        <p className="px-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-          Try asking
-        </p>
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
-          {Array.isArray(suggestions) && suggestions.map((suggestion, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onSuggestion?.(suggestion)}
-              className="shrink-0 rounded-full border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--fill)/0.36)] px-4 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] whitespace-nowrap transition-all active:scale-95 active:bg-[hsl(var(--fill)/0.72)]"
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
+      {/* Suggestion chips */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+        {Array.isArray(suggestions) && suggestions.map((suggestion, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onSuggestion?.(suggestion)}
+            className="shrink-0 rounded-full border border-[hsl(var(--border)/0.45)] bg-[hsl(var(--fill)/0.36)] px-3.5 py-1.5 text-[12px] font-medium text-[hsl(var(--fg-2))] whitespace-nowrap transition-all active:scale-95 active:bg-[hsl(var(--fill)/0.72)]"
+          >
+            {suggestion}
+          </button>
+        ))}
       </div>
     </section>
   );

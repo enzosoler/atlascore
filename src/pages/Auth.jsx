@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/lib/AuthContext';
@@ -10,17 +11,18 @@ import { email as emailService } from '@/lib/emailService';
 import { signInWithGoogle } from '@/lib/googleSignIn';
 import { useReCaptcha } from '@/lib/ReCaptchaContext';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { trackSignupCompleted } from '@/lib/analytics';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 
 const IS_NATIVE = Capacitor.isNativePlatform();
 const PENDING_AUTH_NEXT_KEY = 'atlas_auth_next';
 
+/* ------------------------------------------------------------------ */
+/*  Utility helpers (unchanged logic)                                  */
+/* ------------------------------------------------------------------ */
+
 function resolveRequestedDestination(nextParam) {
   if (!nextParam) return ROUTES.today;
-
   try {
     const url = new URL(nextParam, window.location.origin);
     if (url.origin !== window.location.origin) return ROUTES.today;
@@ -38,75 +40,26 @@ function buildAuthHref({ mode, next }) {
   return query ? `${ROUTES.auth}?${query}` : ROUTES.auth;
 }
 
-function getDestinationLabel(destination) {
-  if (!destination) return null;
-
-  let pathname = ROUTES.today;
-  try {
-    pathname = new URL(destination, window.location.origin).pathname || ROUTES.today;
-  } catch {
-    pathname = destination.startsWith('/') ? destination.split('?')[0].split('#')[0] : ROUTES.today;
-  }
-
-  const labels = {
-    [ROUTES.today]: 'the Today dashboard',
-    [ROUTES.nutrition]: 'Nutrition',
-    [ROUTES.workouts]: 'Workouts',
-    [ROUTES.protocols]: 'Protocols',
-    [ROUTES.measurements]: 'Measurements',
-    [ROUTES.labExams]: 'Labs',
-    [ROUTES.insights]: 'Insights',
-    [ROUTES.progress]: 'Progress',
-    [ROUTES.profile]: 'Profile',
-    [ROUTES.pricing]: 'Pricing',
-    [ROUTES.account]: 'Account',
-    [ROUTES.settings]: 'Settings',
-  };
-
-  return labels[pathname] || 'your next step';
-}
-
 function getAuthErrorMessage(error) {
   const message = error?.message || '';
-
   if (/invalid login credentials/i.test(message)) return 'Invalid email or password.';
   if (/email not confirmed/i.test(message)) return 'Confirm your email before signing in.';
   if (/user already registered/i.test(message)) return 'An account with this email already exists.';
   if (/password/i.test(message) && /least/i.test(message)) return 'Your password must be at least 6 characters long.';
-
   return message || 'We could not authenticate you right now. Please try again.';
 }
 
-function AuthField({ id, label, type = 'text', autoComplete, value, onChange, placeholder }) {
-  return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="text-[13px] font-medium text-[hsl(var(--fg-2))]">
-        {label}
-      </label>
-      <Input
-        id={id}
-        type={type}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="h-11 rounded-xl border-[hsl(var(--border)/0.78)] bg-[hsl(var(--fill)/0.28)] px-4 focus:border-[hsl(var(--brand))] focus:ring-0"
-      />
-    </div>
-  );
+/* ------------------------------------------------------------------ */
+/*  Inline validation helpers                                          */
+/* ------------------------------------------------------------------ */
+
+function isValidEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
-function SocialButton({ children, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.24)] text-[14px] font-medium text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.45)]"
-    >
-      {children}
-    </button>
-  );
-}
+/* ------------------------------------------------------------------ */
+/*  Auth — Linear-inspired minimal centered card                       */
+/* ------------------------------------------------------------------ */
 
 export default function Auth() {
   const location = useLocation();
@@ -131,93 +84,83 @@ export default function Auth() {
   const [successMessage, setSuccessMessage] = React.useState('');
   const [forgotPassword, setForgotPassword] = React.useState(false);
   const [resetSent, setResetSent] = React.useState(false);
+  const [emailTouched, setEmailTouched] = React.useState(false);
+  const [passwordTouched, setPasswordTouched] = React.useState(false);
 
   const ui = React.useMemo(() => (isPt ? {
-    loginTitle: 'Entre para continuar',
-    loginSubtitle: 'Acesse seu plano, histórico e próximas ações sem perder o contexto.',
+    loginTitle: 'Bem-vindo de volta',
     signupTitle: 'Crie sua conta',
-    signupSubtitle: 'Salve seu plano e continue em qualquer dispositivo.',
     recoveryTitle: 'Redefinir senha',
     recoverySubtitle: 'Enviaremos um link para o seu email.',
-    fullNameLabel: 'Nome completo',
-    fullNamePlaceholder: 'Seu nome',
-    emailLabel: 'Email',
+    fullNamePlaceholder: 'Seu nome completo',
     emailPlaceholder: 'voce@exemplo.com',
-    passwordLabel: 'Senha',
-    passwordPlaceholder: 'Sua senha',
+    passwordPlaceholder: '6+ caracteres',
     continue: 'Continuar',
     signingIn: 'Entrando...',
     creating: 'Criando...',
     recoveryButton: 'Enviar link',
     recoverySent: 'Link enviado. Verifique seu email.',
     forgotPassword: 'Esqueci minha senha',
-    backToSignIn: 'Voltar para entrar',
+    backToSignIn: 'Voltar',
     noAccount: 'Não tem conta?',
     hasAccount: 'Já tem conta?',
     createAccount: 'Criar conta',
     signInLink: 'Entrar',
-    backHome: 'Voltar ao início',
     missingCredentials: 'Digite seu email e senha.',
     missingName: 'Digite seu nome completo.',
     emailConfirmation: 'Conta criada. Confirme seu email para entrar.',
-    divider: 'ou use um método rápido',
+    divider: 'ou',
+    invalidEmail: 'Email inválido.',
+    passwordTooShort: 'Mínimo 6 caracteres.',
   } : {
-    loginTitle: 'Sign in to continue',
-    loginSubtitle: 'Get back to your plan, history, and next action without losing context.',
+    loginTitle: 'Welcome back',
     signupTitle: 'Create your account',
-    signupSubtitle: 'Save your plan and continue on any device.',
     recoveryTitle: 'Reset password',
-    recoverySubtitle: 'We’ll send a reset link to your email.',
-    fullNameLabel: 'Full name',
-    fullNamePlaceholder: 'Your name',
-    emailLabel: 'Email',
+    recoverySubtitle: "We'll send a reset link to your email.",
+    fullNamePlaceholder: 'Full name',
     emailPlaceholder: 'you@example.com',
-    passwordLabel: 'Password',
-    passwordPlaceholder: 'Your password',
+    passwordPlaceholder: '6+ characters',
     continue: 'Continue',
     signingIn: 'Signing in...',
     creating: 'Creating...',
     recoveryButton: 'Send reset link',
     recoverySent: 'Reset link sent. Check your email.',
     forgotPassword: 'Forgot password?',
-    backToSignIn: 'Back to sign in',
+    backToSignIn: 'Back',
     noAccount: "Don't have an account?",
     hasAccount: 'Already have an account?',
     createAccount: 'Create account',
     signInLink: 'Sign in',
-    backHome: 'Back to home',
     missingCredentials: 'Enter your email and password.',
     missingName: 'Enter your full name.',
     emailConfirmation: 'Account created. Check your email to confirm.',
-    divider: 'or use a faster method',
+    divider: 'or',
+    invalidEmail: 'Enter a valid email address.',
+    passwordTooShort: 'Must be at least 6 characters.',
   }), [isPt]);
 
   const loginHref = React.useMemo(() => buildAuthHref({ mode: 'login', next: nextParam }), [nextParam]);
   const signupHref = React.useMemo(() => buildAuthHref({ mode: 'signup', next: nextParam }), [nextParam]);
 
-  const destinationNote = React.useMemo(() => {
-    if (!nextParam) return '';
-    const label = getDestinationLabel(requestedDestination);
-    return isPt
-      ? `${isLogin ? 'Depois de entrar' : 'Depois de criar sua conta'}, você continuará para ${label}.`
-      : `${isLogin ? 'After sign-in' : 'After account creation'}, you will continue to ${label}.`;
-  }, [isLogin, isPt, nextParam, requestedDestination]);
+  // Inline validation states
+  const emailError = emailTouched && email.length > 0 && !isValidEmail(email) ? ui.invalidEmail : null;
+  const passwordError = passwordTouched && password.length > 0 && password.length < 6 ? ui.passwordTooShort : null;
 
   React.useEffect(() => {
     setErrorMessage('');
     setSuccessMessage('');
     setPassword('');
+    setEmailTouched(false);
+    setPasswordTouched(false);
   }, [isLogin, legacyRecoveryRequested]);
 
   React.useEffect(() => {
     if (!isAuthenticated) return;
     if (user?.onboarding_completed === null) return;
-
     if (user?.onboarding_completed === false) {
       navigate(ROUTES.onboarding, { replace: true });
       return;
     }
-
     const fallbackRoute = ROLE_HOME[user?.atlas_role] || ROUTES.today;
     navigate(requestedDestination || fallbackRoute, { replace: true });
   }, [isAuthenticated, navigate, requestedDestination, user?.atlas_role, user?.onboarding_completed]);
@@ -333,155 +276,216 @@ export default function Auth() {
     }
   };
 
-  const formContent = (
-    <div className="w-full max-w-[392px]">
-      <div className="mb-8 flex justify-center">
+  /* ---------------------------------------------------------------- */
+  /*  Shared input class                                               */
+  /* ---------------------------------------------------------------- */
+
+  const inputBase =
+    'h-12 w-full rounded-[12px] border bg-[hsl(var(--fill)/0.18)] px-4 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] outline-none transition-colors focus:border-[hsl(var(--brand))] focus:bg-[hsl(var(--fill)/0.08)]';
+  const inputDefault = `${inputBase} border-[hsl(var(--border)/0.6)]`;
+  const inputError = `${inputBase} border-[hsl(var(--err)/0.6)]`;
+
+  /* ---------------------------------------------------------------- */
+  /*  Card content                                                     */
+  /* ---------------------------------------------------------------- */
+
+  const cardContent = (
+    <motion.div
+      className="w-full max-w-[380px]"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
+      {/* Logo */}
+      <div className="mb-10 flex justify-center">
         <Link to={ROUTES.home} className="flex items-center gap-2">
-          <AtlasCoreLogoSVG className="h-6 w-auto" variant="mono" />
+          <AtlasCoreLogoSVG width={22} />
+          <span className="text-[13px] font-semibold tracking-[-0.01em] text-[hsl(var(--fg-2))]">
+            atlas.core
+          </span>
         </Link>
       </div>
 
-      <div className="rounded-[28px] border border-[hsl(var(--border)/0.78)] bg-[hsl(var(--card))] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.08)] sm:p-8">
-        <div className="mb-7 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--fg-3))]">
-            {forgotPassword ? 'Recovery' : isLogin ? 'Sign in' : 'Create account'}
-          </p>
-          <h1 className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+      {/* Card */}
+      <div className="rounded-[24px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card))] px-6 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.06)] sm:px-8">
+        {/* Title */}
+        <AnimatePresence mode="wait">
+          <motion.h1
+            key={forgotPassword ? 'recovery' : isLogin ? 'login' : 'signup'}
+            className="text-center text-[24px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+          >
             {forgotPassword ? ui.recoveryTitle : isLogin ? ui.loginTitle : ui.signupTitle}
-          </h1>
-          <p className="mt-2 text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">
-            {forgotPassword ? ui.recoverySubtitle : isLogin ? ui.loginSubtitle : ui.signupSubtitle}
-          </p>
-          {destinationNote ? (
-            <p className="mt-3 text-[12px] leading-5 text-[hsl(var(--fg-3))]">{destinationNote}</p>
-          ) : null}
-        </div>
+          </motion.h1>
+        </AnimatePresence>
 
+        {forgotPassword && (
+          <p className="mt-2 text-center text-[14px] text-[hsl(var(--fg-2))]">
+            {ui.recoverySubtitle}
+          </p>
+        )}
+
+        {/* ---- Password reset form ---- */}
         {forgotPassword && !resetSent ? (
-          <form onSubmit={handlePasswordReset} className="space-y-4">
-            <AuthField
-              id="email"
-              label={ui.emailLabel}
+          <form onSubmit={handlePasswordReset} className="mt-6 space-y-4">
+            <input
               type="email"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={ui.emailPlaceholder}
+              className={inputDefault}
             />
 
-            {errorMessage ? (
-              <div className="rounded-xl bg-[hsl(var(--err)/0.08)] px-3.5 py-2.5 text-[13px] leading-snug text-[hsl(var(--err))]">
-                {errorMessage}
-              </div>
-            ) : null}
+            {errorMessage && (
+              <p className="text-[13px] text-[hsl(var(--err))]">{errorMessage}</p>
+            )}
 
-            <Button type="submit" className="h-11 w-full rounded-xl" disabled={isSubmitting}>
-              {isSubmitting ? ui.signingIn : ui.recoveryButton}
-            </Button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex h-12 w-full items-center justify-center rounded-[12px] bg-[hsl(var(--brand))] text-[15px] font-semibold text-white transition-all active:scale-[0.98] disabled:opacity-60"
+            >
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : ui.recoveryButton}
+            </button>
 
             <button
               type="button"
-              onClick={() => {
-                setForgotPassword(false);
-                setErrorMessage('');
-              }}
-              className="flex w-full items-center justify-center gap-1.5 py-2 text-[13px] text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
+              onClick={() => { setForgotPassword(false); setErrorMessage(''); }}
+              className="flex w-full items-center justify-center gap-1.5 py-1 text-[13px] text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {ui.backToSignIn}
             </button>
           </form>
         ) : forgotPassword && resetSent ? (
-          <div className="space-y-4 text-center">
-            <div className="rounded-xl bg-[hsl(var(--ok)/0.08)] px-4 py-3 text-[13px] leading-snug text-[hsl(var(--ok))]">
+          <div className="mt-6 space-y-4 text-center">
+            <div className="rounded-[12px] bg-[hsl(var(--ok)/0.08)] px-4 py-3 text-[13px] text-[hsl(var(--ok))]">
               {ui.recoverySent}
             </div>
             <button
               type="button"
-              onClick={() => {
-                setForgotPassword(false);
-                setResetSent(false);
-                setErrorMessage('');
-              }}
-              className="py-2 text-[13px] text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
+              onClick={() => { setForgotPassword(false); setResetSent(false); setErrorMessage(''); }}
+              className="py-1 text-[13px] text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
             >
               {ui.backToSignIn}
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin ? (
-              <AuthField
-                id="fullName"
-                label={ui.fullNameLabel}
+          /* ---- Main auth form ---- */
+          <form onSubmit={handleSubmit} className="mt-6 space-y-3">
+            {/* Email first */}
+            <div>
+              <input
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setEmailTouched(true)}
+                placeholder={ui.emailPlaceholder}
+                className={emailError ? inputError : inputDefault}
+              />
+              {emailError && (
+                <p className="mt-1 text-[12px] text-[hsl(var(--err))]">{emailError}</p>
+              )}
+            </div>
+
+            {/* Name (sign-up only) */}
+            {!isLogin && (
+              <input
+                type="text"
                 autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder={ui.fullNamePlaceholder}
+                className={inputDefault}
               />
-            ) : null}
+            )}
 
-            <AuthField
-              id="email"
-              label={ui.emailLabel}
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={ui.emailPlaceholder}
-            />
+            {/* Password */}
+            <div>
+              <input
+                type="password"
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onBlur={() => setPasswordTouched(true)}
+                placeholder={ui.passwordPlaceholder}
+                className={passwordError ? inputError : inputDefault}
+              />
+              {passwordError && (
+                <p className="mt-1 text-[12px] text-[hsl(var(--err))]">{passwordError}</p>
+              )}
+            </div>
 
-            <AuthField
-              id="password"
-              label={ui.passwordLabel}
-              type="password"
-              autoComplete={isLogin ? 'current-password' : 'new-password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={ui.passwordPlaceholder}
-            />
-
-            {errorMessage ? (
-              <div className="rounded-xl bg-[hsl(var(--err)/0.08)] px-3.5 py-2.5 text-[13px] leading-snug text-[hsl(var(--err))]">
+            {/* Error / Success */}
+            {errorMessage && (
+              <div className="rounded-[10px] bg-[hsl(var(--err)/0.08)] px-3.5 py-2.5 text-[13px] text-[hsl(var(--err))]">
                 {errorMessage}
               </div>
-            ) : null}
-
-            {successMessage ? (
-              <div className="rounded-xl bg-[hsl(var(--ok)/0.08)] px-3.5 py-2.5 text-[13px] leading-snug text-[hsl(var(--ok))]">
+            )}
+            {successMessage && (
+              <div className="rounded-[10px] bg-[hsl(var(--ok)/0.08)] px-3.5 py-2.5 text-[13px] text-[hsl(var(--ok))]">
                 {successMessage}
               </div>
-            ) : null}
+            )}
 
-            {!isLogin ? (
-              <p className="text-center text-[12px] text-[hsl(var(--fg-3))]">
-                By creating an account, you agree to our{' '}
-                <Link to="/terms" target="_blank" className="underline hover:text-[hsl(var(--fg-2))]">Terms of Service</Link>{' '}
+            {/* Terms (sign-up) */}
+            {!isLogin && (
+              <p className="text-center text-[11px] leading-relaxed text-[hsl(var(--fg-3))]">
+                By continuing, you agree to our{' '}
+                <Link to="/terms" target="_blank" className="underline hover:text-[hsl(var(--fg-2))]">Terms</Link>{' '}
                 and{' '}
                 <Link to="/privacy" target="_blank" className="underline hover:text-[hsl(var(--fg-2))]">Privacy Policy</Link>.
               </p>
-            ) : null}
+            )}
 
-            <Button type="submit" className="h-11 w-full rounded-xl" disabled={isSubmitting}>
-              {isSubmitting ? (isLogin ? ui.signingIn : ui.creating) : ui.continue}
-              {!isSubmitting ? <ArrowRight className="ml-2 h-4 w-4" /> : null}
-            </Button>
+            {/* Primary CTA */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[hsl(var(--brand))] text-[15px] font-semibold text-white shadow-[0_10px_30px_hsl(var(--brand)/0.18)] transition-all active:scale-[0.98] disabled:opacity-60"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  {ui.continue}
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
 
-            <div className="relative py-2">
+            {/* Divider */}
+            <div className="relative py-3">
               <div className="absolute inset-0 flex items-center">
-                <div className="h-px w-full bg-[hsl(var(--fill-secondary))]" />
+                <div className="h-px w-full bg-[hsl(var(--border)/0.5)]" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-[hsl(var(--card))] px-3 text-[11px] text-[hsl(var(--fg-3))]">{ui.divider}</span>
+                <span className="bg-[hsl(var(--card))] px-4 text-[12px] text-[hsl(var(--fg-3))]">
+                  {ui.divider}
+                </span>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <SocialButton onClick={handleAppleAuth}>
-                <span className="text-[16px]"></span>
+            {/* Social auth */}
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={handleAppleAuth}
+                className="flex h-12 w-full items-center justify-center gap-2.5 rounded-[12px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.12)] text-[14px] font-medium text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.25)] active:scale-[0.98]"
+              >
+                <span className="text-[17px]"></span>
                 Continue with Apple
-              </SocialButton>
-              <SocialButton onClick={handleGoogleAuth}>
+              </button>
+              <button
+                type="button"
+                onClick={handleGoogleAuth}
+                className="flex h-12 w-full items-center justify-center gap-2.5 rounded-[12px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.12)] text-[14px] font-medium text-[hsl(var(--fg))] transition-colors hover:bg-[hsl(var(--fill)/0.25)] active:scale-[0.98]"
+              >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -489,52 +493,48 @@ export default function Auth() {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
                 Continue with Google
-              </SocialButton>
+              </button>
             </div>
           </form>
         )}
 
-        {!forgotPassword ? (
-          <div className="mt-6 space-y-3 border-t border-[hsl(var(--border)/0.72)] pt-5">
+        {/* Toggle login / signup */}
+        {!forgotPassword && (
+          <div className="mt-6 border-t border-[hsl(var(--border)/0.5)] pt-5">
             <p className="text-center text-[13px] text-[hsl(var(--fg-2))]">
               {isLogin ? ui.noAccount : ui.hasAccount}{' '}
-              <Link to={isLogin ? signupHref : loginHref} className="font-semibold text-[hsl(var(--brand))] hover:underline underline-offset-2">
+              <Link
+                to={isLogin ? signupHref : loginHref}
+                className="font-semibold text-[hsl(var(--brand))] hover:underline underline-offset-2"
+              >
                 {isLogin ? ui.createAccount : ui.signInLink}
               </Link>
             </p>
 
-            {isLogin ? (
+            {isLogin && (
               <button
                 type="button"
-                onClick={() => {
-                  setForgotPassword(true);
-                  setErrorMessage('');
-                  setSuccessMessage('');
-                }}
-                className="w-full py-1 text-center text-[13px] text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
+                onClick={() => { setForgotPassword(true); setErrorMessage(''); setSuccessMessage(''); }}
+                className="mt-2 w-full text-center text-[13px] text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
               >
                 {ui.forgotPassword}
               </button>
-            ) : null}
+            )}
           </div>
-        ) : null}
+        )}
       </div>
-
-      {!IS_NATIVE ? (
-        <div className="mt-6 text-center">
-          <Link to={ROUTES.home} className="text-[12px] text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]">
-            {ui.backHome}
-          </Link>
-        </div>
-      ) : null}
-    </div>
+    </motion.div>
   );
+
+  /* ---------------------------------------------------------------- */
+  /*  Layout wrappers                                                  */
+  /* ---------------------------------------------------------------- */
 
   if (IS_NATIVE) {
     return (
       <div className="mobile-screen bg-[hsl(var(--bg))]">
         <div className="safe-scroll flex flex-1 flex-col items-center justify-center px-5 py-10">
-          {formContent}
+          {cardContent}
         </div>
       </div>
     );
@@ -543,7 +543,7 @@ export default function Auth() {
   return (
     <PublicSiteShell compactNav showFooter={false}>
       <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        {formContent}
+        {cardContent}
       </div>
     </PublicSiteShell>
   );

@@ -1,12 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowRight, Clock, Plus, Trophy, X } from 'lucide-react';
+import { ArrowRight, Check, Clock, Plus, Trophy, X, Timer } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
-import { Input } from '@/components/ui/input';
 import { tapMedium, celebrateHeavy } from '@/lib/haptics';
 import { PaywallSheet } from '@/components/entitlements/PaywallTrigger';
 import { Button } from '@/components/ui/button';
-import { getWorkoutMethodLabel } from '@/lib/workoutMethods';
 import ExerciseSearch from '@/components/workouts/ExerciseSearch';
 import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
 import { toast } from 'sonner';
@@ -15,22 +13,10 @@ import { saveSession, clearSession } from '@/lib/workoutSession';
 
 // ─── Set suggestion engine ────────────────────────────────────────────────────
 
-/**
- * Compute the pre-fill suggestion for weight/reps based on history.
- *
- * Priority:
- *   1. Last completed session for the same exercise (with progressive overload)
- *   2. Last completed set in the current session
- *   3. Program target weight / rep range
- *   4. Empty
- *
- * Returns { weight, reps, rir, source, label, lastDisplay }
- */
 function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, lastSession }) {
   const none = { weight: '', reps: '', rir: '', source: null, label: null, lastDisplay: null };
   if (!exercise) return none;
 
-  // Parse a rep range string ("6-8", "10", "8–12") into { min, max }
   function parseReps(str) {
     const s = String(str || '');
     const range = s.match(/^(\d+)[-–](\d+)$/);
@@ -40,7 +26,6 @@ function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, la
     return null;
   }
 
-  // ── 1. Last session ────────────────────────────────────────────────────────
   if (lastSession?.sets?.length > 0) {
     const histSet = lastSession.sets[Math.min(setIdx, lastSession.sets.length - 1)];
     if (histSet && (histSet.load > 0 || histSet.reps > 0)) {
@@ -51,21 +36,18 @@ function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, la
 
       if (sugWeight !== null && target) {
         if (histSet.reps >= target.max) {
-          // Met or beat max reps — progressive overload: +2.5kg, back to target min
           sugWeight = Math.round((sugWeight + 2.5) * 4) / 4;
           sugReps   = target.min;
           label     = 'progressiveOverload';
         } else if (histSet.reps < target.min) {
-          // Missed target — keep weight, aim for target min
           sugReps = target.min;
         }
-        // else: within range — repeat same weight/reps
       }
 
       const lastDisplay = [
         histSet.load > 0 ? `${histSet.load}kg` : null,
         histSet.reps > 0 ? `${histSet.reps}` : null,
-      ].filter(Boolean).join(' × ');
+      ].filter(Boolean).join(' x ');
 
       return {
         weight: sugWeight !== null ? String(sugWeight) : '',
@@ -78,7 +60,6 @@ function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, la
     }
   }
 
-  // ── 2. Previous set in current session ────────────────────────────────────
   if (setIdx > 0) {
     const prev = completedSets[exerciseIdx]?.[setIdx - 1];
     if (prev && (prev.weight || prev.reps)) {
@@ -93,7 +74,6 @@ function computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, la
     }
   }
 
-  // ── 3. Plan target ─────────────────────────────────────────────────────────
   const tw = exercise.target_weight;
   const repsMatch = String(exercise.target_reps || '').match(/^(\d+)/);
   const tr = repsMatch ? repsMatch[1] : '';
@@ -149,58 +129,338 @@ function formatRestCountdown(seconds) {
   return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
-function getWorkoutContextLabels(workout) {
-  const labels = [];
-
-  if (workout?.plan_id) {
-    labels.push(workout.plan_day_index != null ? `Plan day ${Number(workout.plan_day_index) + 1}` : 'Planned workout');
-  } else {
-    labels.push('Quick session');
-  }
-
-  if (Array.isArray(workout?.exercises) && workout.exercises.length > 0) {
-    labels.push(`${workout.exercises.length} exercises`);
-  }
-
-  return labels;
+function formatElapsed(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Inline editable cell (large tap target) ─────────────────────────────────
 
-function MetricTile({ label, value, accent = false }) {
+function TapCell({ value, onChange, placeholder, className = '' }) {
+  const inputRef = useRef(null);
   return (
-    <div
-      className={`rounded-[16px] border px-4 py-3 ${
-        accent
-          ? 'border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.12)]'
-          : 'border-[hsl(var(--border)/0.88)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.76)_0%,hsl(var(--card))_100%)]'
-      }`}
-    >
-      <p className="atlas-overline">{label}</p>
-      <p className="mt-2 font-mono text-[15px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-        {value}
-      </p>
+    <input
+      ref={inputRef}
+      type="number"
+      inputMode="decimal"
+      min="0"
+      max="999"
+      value={value}
+      onChange={(e) => {
+        const v = e.target.value;
+        if (v === '' || (Number(v) >= 0 && Number(v) <= 999)) onChange(v);
+      }}
+      placeholder={placeholder}
+      className={`w-full min-h-[44px] min-w-[44px] rounded-xl bg-[hsl(var(--fill)/0.6)] border border-[hsl(var(--border)/0.4)] text-center text-[16px] font-semibold text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3)/0.5)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--brand)/0.4)] focus:border-[hsl(var(--brand)/0.5)] transition-all ${className}`}
+    />
+  );
+}
+
+// ─── Set row in the table ─────────────────────────────────────────────────────
+
+function SetRow({ setNumber, previousDisplay, weight, reps, onWeightChange, onRepsChange, onComplete, isCompleted, isPR, t }) {
+  return (
+    <div className={`grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-2 items-center min-h-[52px] px-3 py-1.5 transition-colors ${isCompleted ? 'bg-[hsl(var(--ok)/0.06)]' : ''}`}>
+      {/* Set # */}
+      <div className="flex items-center justify-center min-h-[44px]">
+        <span className={`text-[13px] font-bold ${isCompleted ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-3))]'}`}>
+          {setNumber}
+        </span>
+      </div>
+
+      {/* Previous */}
+      <div className="flex items-center justify-center min-h-[44px]">
+        <span className="text-[12px] text-[hsl(var(--fg-3))] font-medium truncate">
+          {previousDisplay || '---'}
+        </span>
+      </div>
+
+      {/* Weight input */}
+      <TapCell
+        value={weight}
+        onChange={onWeightChange}
+        placeholder="0"
+      />
+
+      {/* Reps input */}
+      <TapCell
+        value={reps}
+        onChange={onRepsChange}
+        placeholder="0"
+      />
+
+      {/* Checkmark */}
+      <button
+        onClick={onComplete}
+        className={`flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl transition-all active:scale-95 ${
+          isCompleted
+            ? 'bg-[hsl(var(--ok))] text-white shadow-sm'
+            : (weight || reps)
+              ? 'bg-[hsl(var(--brand))] text-white shadow-sm'
+              : 'bg-[hsl(var(--fill)/0.8)] text-[hsl(var(--fg-3))]'
+        }`}
+      >
+        {isPR ? (
+          <Trophy className="w-4 h-4" strokeWidth={2.5} />
+        ) : (
+          <Check className="w-4 h-4" strokeWidth={2.5} />
+        )}
+      </button>
     </div>
   );
 }
 
-function FieldInput({ label, value, onChange, placeholder }) {
+// ─── Inline rest timer (appears between sets) ────────────────────────────────
+
+function InlineRestTimer({ remaining, duration, onSkip, onAdd30, setNumber, t }) {
+  const pct = duration > 0 ? remaining / duration : 0;
+  const urgent = remaining > 0 && remaining <= 5;
+
   return (
-    <div className="space-y-1.5">
-      <label className="text-[12px] font-semibold text-[hsl(var(--fg))]">{label}</label>
-      <Input
-        type="number"
-        inputMode="decimal"
-        min="0"
-        max="999"
-        value={value}
-        onChange={(e) => {
-          const v = e.target.value;
-          if (v === '' || (Number(v) >= 0 && Number(v) <= 999)) onChange(v);
-        }}
-        placeholder={placeholder}
-        className="atlas-field h-14 rounded-[12px] border-0 text-center text-base font-medium"
-      />
+    <div className="mx-3 my-2 rounded-2xl bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.15)] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Timer className="w-4 h-4 text-[hsl(var(--brand))]" strokeWidth={2} />
+          <span className="text-[12px] font-semibold text-[hsl(var(--brand))] uppercase tracking-wide">
+            {t('workoutExecution.rest')}
+          </span>
+        </div>
+        <span className="text-[11px] text-[hsl(var(--fg-3))]">
+          {t('workoutExecution.restAfterSet', { n: setNumber })}
+        </span>
+      </div>
+
+      {/* Timer display */}
+      <div className="flex items-center gap-4">
+        <span className={`text-[2.5rem] font-bold tabular-nums leading-none tracking-tight transition-colors ${urgent ? 'text-[hsl(var(--warn))]' : 'text-[hsl(var(--fg))]'}`}>
+          {formatRestCountdown(remaining)}
+        </span>
+        <div className="flex-1">
+          <div className="h-2 w-full rounded-full bg-[hsl(var(--border)/0.3)] overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ease-linear ${urgent ? 'bg-[hsl(var(--warn))]' : 'bg-[hsl(var(--brand))]'}`}
+              style={{ width: `${pct * 100}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 mt-3">
+        <button
+          onClick={onAdd30}
+          className="rounded-full border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.5)] px-3 py-1.5 text-[11px] font-medium text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+        >
+          {t('workoutExecution.plus30s')}
+        </button>
+        <Button
+          size="sm"
+          className="rounded-full h-8 px-4 text-[12px]"
+          onClick={onSkip}
+        >
+          {t('workoutExecution.skipRest')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Exercise block ───────────────────────────────────────────────────────────
+
+function ExerciseBlock({
+  exercise,
+  exerciseIdx,
+  isActive,
+  isCurrent,
+  completedSets,
+  lastSession,
+  allCompletedSets,
+  workoutHistory,
+  personalRecords,
+  resting,
+  restRemaining,
+  restDuration,
+  restingAfterSetIdx,
+  onSetComplete,
+  onSkipRest,
+  onAdd30,
+  onAddSet,
+  onScrollRef,
+  t,
+}) {
+  const sets = exercise?.sets || [];
+
+  // Local form state for each set in this exercise
+  const [setForms, setSetForms] = useState(() => {
+    const forms = {};
+    sets.forEach((_, si) => {
+      const saved = completedSets?.[si];
+      if (saved) {
+        forms[si] = { weight: saved.weight || '', reps: saved.reps || '' };
+      } else {
+        const s = computeSetSuggestion({ exercise, setIdx: si, exerciseIdx, completedSets: allCompletedSets, lastSession });
+        forms[si] = { weight: s.weight, reps: s.reps };
+      }
+    });
+    return forms;
+  });
+
+  // Update forms when sets change (e.g., adding a set)
+  useEffect(() => {
+    setSetForms((prev) => {
+      const next = { ...prev };
+      sets.forEach((_, si) => {
+        if (next[si] === undefined) {
+          const saved = completedSets?.[si];
+          if (saved) {
+            next[si] = { weight: saved.weight || '', reps: saved.reps || '' };
+          } else {
+            const s = computeSetSuggestion({ exercise, setIdx: si, exerciseIdx, completedSets: allCompletedSets, lastSession });
+            next[si] = { weight: s.weight, reps: s.reps };
+          }
+        }
+      });
+      return next;
+    });
+  }, [sets.length]);
+
+  const handleSetComplete = (si) => {
+    const form = setForms[si] || { weight: '', reps: '' };
+    onSetComplete(exerciseIdx, si, form);
+  };
+
+  // Get previous performance per set from lastSession
+  const getPreviousDisplay = (si) => {
+    if (lastSession?.sets?.[si]) {
+      const s = lastSession.sets[si];
+      const parts = [];
+      if (s.load > 0) parts.push(`${s.load}kg`);
+      if (s.reps > 0) parts.push(`x${s.reps}`);
+      return parts.join(' ') || '---';
+    }
+    return '---';
+  };
+
+  const completedCount = Object.keys(completedSets || {}).length;
+  const allDone = completedCount >= sets.length && sets.length > 0;
+
+  return (
+    <div
+      ref={isCurrent ? onScrollRef : undefined}
+      className={`rounded-2xl border overflow-hidden transition-all ${
+        isCurrent
+          ? 'border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--card))] shadow-sm'
+          : allDone
+            ? 'border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.03)]'
+            : 'border-[hsl(var(--border)/0.4)] bg-[hsl(var(--card)/0.5)]'
+      }`}
+    >
+      {/* Exercise header */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-[hsl(var(--border)/0.2)]">
+        <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-[hsl(var(--fill)/0.5)]">
+          <ExerciseMedia exercise={exercise} size="sm" showFallback={true} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-[15px] font-semibold truncate ${allDone ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]'}`}>
+            {exercise.name}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            {exercise.primary_muscles?.slice(0, 2).map((m) => (
+              <span key={m} className="text-[10px] font-medium text-[hsl(var(--fg-3))] uppercase">
+                {m}
+              </span>
+            ))}
+            {exercise.rest_seconds && (
+              <span className="text-[10px] text-[hsl(var(--fg-3))]">
+                {exercise.rest_seconds}s rest
+              </span>
+            )}
+          </div>
+        </div>
+        {allDone && (
+          <div className="w-6 h-6 rounded-full bg-[hsl(var(--ok))] flex items-center justify-center">
+            <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+          </div>
+        )}
+        <span className="text-[11px] font-medium text-[hsl(var(--fg-3))]">
+          {completedCount}/{sets.length}
+        </span>
+      </div>
+
+      {/* Previous performance banner */}
+      {lastSession && isCurrent && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-[hsl(var(--fill)/0.3)] border-b border-[hsl(var(--border)/0.15)]">
+          <Clock className="w-3 h-3 text-[hsl(var(--fg-3))] shrink-0" strokeWidth={2} />
+          <span className="text-[11px] text-[hsl(var(--fg-2))]">
+            {t('workoutExecution.last')}{' '}
+            <span className="font-semibold text-[hsl(var(--fg))]">
+              {lastSession.setCount} {t('train.sets')} - {lastSession.maxWeight > 0 ? `${lastSession.maxWeight}kg` : ''} {lastSession.avgReps > 0 ? `x${lastSession.avgReps}` : ''}
+            </span>
+          </span>
+        </div>
+      )}
+
+      {/* Set table header */}
+      <div className="grid grid-cols-[40px_1fr_1fr_1fr_44px] gap-2 items-center px-3 py-2 border-b border-[hsl(var(--border)/0.15)]">
+        <span className="text-[10px] font-bold text-[hsl(var(--fg-3))] text-center uppercase">{t('workoutExecution.setN')}</span>
+        <span className="text-[10px] font-bold text-[hsl(var(--fg-3))] text-center uppercase">{t('workoutExecution.previous')}</span>
+        <span className="text-[10px] font-bold text-[hsl(var(--fg-3))] text-center uppercase">{t('workoutExecution.weight')}</span>
+        <span className="text-[10px] font-bold text-[hsl(var(--fg-3))] text-center uppercase">{t('workoutExecution.reps')}</span>
+        <span className="text-[10px] font-bold text-[hsl(var(--fg-3))] text-center uppercase"><Check className="w-3 h-3 mx-auto" /></span>
+      </div>
+
+      {/* Set rows */}
+      <div className="divide-y divide-[hsl(var(--border)/0.1)]">
+        {sets.map((_, si) => {
+          const isSetCompleted = !!completedSets?.[si];
+          const form = setForms[si] || { weight: '', reps: '' };
+
+          // PR check
+          const isPR = isSetCompleted && form.weight && form.reps
+            ? checkSetIsPR(personalRecords, exercise.name, Number(form.weight), Number(form.reps)).isPR
+            : false;
+
+          return (
+            <React.Fragment key={si}>
+              <SetRow
+                setNumber={si + 1}
+                previousDisplay={getPreviousDisplay(si)}
+                weight={form.weight}
+                reps={form.reps}
+                onWeightChange={(v) => setSetForms((prev) => ({ ...prev, [si]: { ...prev[si], weight: v } }))}
+                onRepsChange={(v) => setSetForms((prev) => ({ ...prev, [si]: { ...prev[si], reps: v } }))}
+                onComplete={() => handleSetComplete(si)}
+                isCompleted={isSetCompleted}
+                isPR={isPR}
+                t={t}
+              />
+              {/* Inline rest timer after completing this set */}
+              {resting && restingAfterSetIdx === si && isCurrent && (
+                <InlineRestTimer
+                  remaining={restRemaining}
+                  duration={restDuration}
+                  onSkip={onSkipRest}
+                  onAdd30={onAdd30}
+                  setNumber={si + 1}
+                  t={t}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      {/* Add set button */}
+      {isCurrent && (
+        <button
+          onClick={() => onAddSet(exerciseIdx)}
+          className="w-full flex items-center justify-center gap-1.5 py-3 text-[13px] font-semibold text-[hsl(var(--brand))] hover:bg-[hsl(var(--brand)/0.04)] transition-colors border-t border-[hsl(var(--border)/0.15)]"
+        >
+          <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+          {t('workoutExecution.addSet')}
+        </button>
+      )}
     </div>
   );
 }
@@ -217,120 +477,77 @@ export default function WorkoutExecutionScreen({
 }) {
   const { locale, t } = useI18n();
 
-  // All state initialised from saved session if provided
   const [exercises, setExercises] = useState(
     () => initialSession?.exercises || workout.exercises || []
   );
-  const [exerciseIdx, setExerciseIdx] = useState(() => initialSession?.exerciseIdx ?? 0);
-  const [setIdx, setSetIdx] = useState(() => initialSession?.setIdx ?? 0);
+  const [currentExIdx, setCurrentExIdx] = useState(() => initialSession?.exerciseIdx ?? 0);
   const [resting, setResting] = useState(() => initialSession?.resting ?? false);
-  // Timestamp-based rest: store when rest started + total duration
   const [restStartedAt, setRestStartedAt] = useState(() => initialSession?.restStartedAt ?? null);
   const [restDuration, setRestDuration] = useState(() => initialSession?.restDuration ?? 0);
-  const [formData, setFormData] = useState(() => initialSession?.formData ?? { weight: '', reps: '', rir: '' });
+  const [restingAfterSetIdx, setRestingAfterSetIdx] = useState(null);
   const [completedSets, setCompletedSets] = useState(() => initialSession?.completedSets ?? {});
-  const [suggestionMeta, setSuggestionMeta] = useState(null);
   const [showAddExercise, setShowAddExercise] = useState(
     () => (initialSession?.exercises ?? workout.exercises ?? []).length === 0
   );
   const [isDone, setIsDone] = useState(false);
   const [showWorkoutPaywall, setShowWorkoutPaywall] = useState(false);
-  const [prFlash, setPrFlash] = useState(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  // Tick counter — increments twice/sec to drive re-renders for the live countdown
   const [, forceUpdate] = useState(0);
 
   const audioRef = useRef(null);
   const startedAt = useRef(initialSession?.startedAt ?? Date.now());
+  const currentExRef = useRef(null);
 
-  // ── Computed rest remaining (derived — not stored) ────────────────────────
+  // Elapsed timer
+  const [elapsedMs, setElapsedMs] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedMs(Date.now() - startedAt.current);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Rest remaining (derived)
   const restRemaining = resting && restStartedAt
     ? Math.max(0, restDuration - Math.floor((Date.now() - restStartedAt) / 1000))
     : 0;
 
-  const exercise = exercises[exerciseIdx];
-  const sets = exercise?.sets || [];
-  const currentSet = sets?.[setIdx];
-  const contextLabels = getWorkoutContextLabels(workout);
-  const completionRatio = exercises.length
-    ? ((exerciseIdx + setIdx / Math.max(sets.length, 1)) / exercises.length) * 100
-    : 0;
-  const totalSavedSets = Object.values(completedSets).reduce(
-    (acc, ex) => acc + Object.keys(ex).length,
-    0
-  );
-
-  // ── Last-session context ──────────────────────────────────────────────────
-  const lastSession = useMemo(
-    () => (exercise ? getLastSession(workoutHistory, exercise.name) : null),
-    [workoutHistory, exercise?.name]
-  );
-
-  // ── Current suggestion (for UI display) ──────────────────────────────────
-  const currentSuggestion = useMemo(
-    () => computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, lastSession }),
-    [exercise, setIdx, exerciseIdx, completedSets, lastSession]
-  );
-
-  // ── Auto-fill on history load (fires when lastSession resolves from null) ─
-  useEffect(() => {
-    if (!exercise) return;
-    setFormData((prev) => {
-      if (prev.weight || prev.reps) return prev; // preserve user/session values
-      const s = computeSetSuggestion({ exercise, setIdx, exerciseIdx, completedSets, lastSession });
-      if (!s.source) return prev;
-      setSuggestionMeta({ source: s.source, label: s.label, lastDisplay: s.lastDisplay });
-      return { weight: s.weight, reps: s.reps, rir: prev.rir || '' };
-    });
-  }, [lastSession]);  
-
-  // ── Live PR check ─────────────────────────────────────────────────────────
-  const livePR = useMemo(() => {
-    if (!exercise || !formData.weight || !formData.reps) return null;
-    const { isPR, type } = checkSetIsPR(
-      personalRecords,
-      exercise.name,
-      Number(formData.weight),
-      Number(formData.reps)
-    );
-    return isPR ? type : null;
-  }, [personalRecords, exercise?.name, formData.weight, formData.reps]);
-
-  // ── Timer: tick twice/sec while resting ──────────────────────────────────
+  // Timer tick for rest
   useEffect(() => {
     if (!resting || !restStartedAt) return;
     const interval = setInterval(() => forceUpdate((n) => n + 1), 500);
     return () => clearInterval(interval);
   }, [resting, restStartedAt]);
 
-  // ── Auto-stop rest when timer hits 0 ─────────────────────────────────────
+  // Auto-stop rest
   useEffect(() => {
     if (resting && restRemaining === 0 && restStartedAt) {
       if (audioRef.current) audioRef.current.play().catch(() => {});
       setResting(false);
       setRestStartedAt(null);
+      setRestingAfterSetIdx(null);
     }
   }, [resting, restRemaining, restStartedAt]);
 
-  // ── Persist session to localStorage on every meaningful change ───────────
+  // Persist session
   useEffect(() => {
     if (isDone) return;
     saveSession({
       workout,
       exercises,
-      exerciseIdx,
-      setIdx,
+      exerciseIdx: currentExIdx,
+      setIdx: 0,
       completedSets,
-      formData,
+      formData: { weight: '', reps: '', rir: '' },
       resting,
       restStartedAt,
       restDuration,
       startedAt: startedAt.current,
     });
     window.dispatchEvent(new Event('atlas:session:change'));
-  }, [exercises, exerciseIdx, setIdx, completedSets, formData, resting, restStartedAt, restDuration, isDone]);
+  }, [exercises, currentExIdx, completedSets, resting, restStartedAt, restDuration, isDone]);
 
-  // ── Warn before leaving with an active workout ──────────────────────────
+  // Warn before leaving
   useEffect(() => {
     if (isDone) return;
     const handler = (e) => { e.preventDefault(); e.returnValue = ''; };
@@ -338,7 +555,36 @@ export default function WorkoutExecutionScreen({
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDone]);
 
-  // ── Payload builder ───────────────────────────────────────────────────────
+  // Get last session for each exercise
+  const lastSessions = useMemo(() => {
+    const map = {};
+    exercises.forEach((ex, i) => {
+      map[i] = getLastSession(workoutHistory, ex.name);
+    });
+    return map;
+  }, [exercises, workoutHistory]);
+
+  // Total stats
+  const totalSavedSets = Object.values(completedSets).reduce(
+    (acc, ex) => acc + Object.keys(ex).length, 0
+  );
+  const totalVolume = useMemo(() => {
+    let vol = 0;
+    Object.values(completedSets).forEach((exSets) => {
+      Object.values(exSets).forEach((s) => {
+        const w = Number(s.weight) || 0;
+        const r = Number(s.reps) || 0;
+        vol += w * r;
+      });
+    });
+    return vol;
+  }, [completedSets]);
+
+  // Completion progress
+  const totalPlannedSets = exercises.reduce((acc, ex) => acc + (ex.sets?.length || 0), 0);
+  const completionPct = totalPlannedSets > 0 ? Math.round((totalSavedSets / totalPlannedSets) * 100) : 0;
+
+  // ── Payload builder ──────────────────────────────────────────────────────
   const buildCompletedPayload = () => {
     const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
     let volumeLoad = 0;
@@ -374,90 +620,87 @@ export default function WorkoutExecutionScreen({
     };
   };
 
-  // ── Add exercise from search ──────────────────────────────────────────────
-  const handleAddExercise = (searchResult) => {
-    const newEx = searchResultToExecution(searchResult);
-    const prevCount = exercises.length;
-    const wasDone = isDone;
+  // ── Set complete handler ──────────────────────────────────────────────────
+  const handleSetComplete = useCallback((exIdx, setIdx, formData) => {
+    const hasData = formData.weight || formData.reps;
+    if (!hasData) return;
 
-    setExercises((prev) => [...prev, newEx]);
-    setShowAddExercise(false);
-
-    if (wasDone || prevCount === 0) {
-      const nextExIdx  = wasDone ? prevCount : 0;
-      const nextLast   = getLastSession(workoutHistory, newEx.name);
-      const s = computeSetSuggestion({ exercise: newEx, setIdx: 0, exerciseIdx: nextExIdx, completedSets, lastSession: nextLast });
-      setExerciseIdx(nextExIdx);
-      setSetIdx(0);
-      setFormData({ weight: s.weight, reps: s.reps, rir: '' });
-      setSuggestionMeta(s.source ? { source: s.source, label: s.label, lastDisplay: s.lastDisplay } : null);
-      if (wasDone) {
-        setResting(false);
-        setRestStartedAt(null);
-        setIsDone(false);
-      }
-    }
-  };
-
-  // ── Exercise/set progression ──────────────────────────────────────────────
-  const handleExerciseComplete = (latestCompletedSets) => {
-    const cs = latestCompletedSets ?? completedSets;
-    setResting(false);
-    setRestStartedAt(null);
-    if (exerciseIdx < exercises.length - 1) {
-      const nextExIdx = exerciseIdx + 1;
-      const nextEx    = exercises[nextExIdx];
-      const nextLast  = getLastSession(workoutHistory, nextEx.name);
-      const s = computeSetSuggestion({ exercise: nextEx, setIdx: 0, exerciseIdx: nextExIdx, completedSets: cs, lastSession: nextLast });
-      setExerciseIdx(nextExIdx);
-      setSetIdx(0);
-      setFormData({ weight: s.weight, reps: s.reps, rir: '' });
-      setSuggestionMeta(s.source ? { source: s.source, label: s.label, lastDisplay: s.lastDisplay } : null);
-      return;
-    }
-    setIsDone(true);
-  };
-
-  const handleSetComplete = () => {
-    // Validate weight/reps before saving
     const w = Number(formData.weight);
     const r = Number(formData.reps);
     if (formData.weight && (isNaN(w) || w < 0 || w > 999)) return;
     if (formData.reps && (isNaN(r) || r < 0 || r > 999)) return;
 
-    // Build the updated completedSets synchronously so suggestion can read it
-    const hasData = formData.weight || formData.reps || formData.rir;
-    const nextCompletedSets = hasData
-      ? { ...completedSets, [exerciseIdx]: { ...(completedSets[exerciseIdx] || {}), [setIdx]: { ...formData } } }
-      : completedSets;
+    setCompletedSets((prev) => ({
+      ...prev,
+      [exIdx]: {
+        ...(prev[exIdx] || {}),
+        [setIdx]: { weight: formData.weight, reps: formData.reps, rir: '' },
+      },
+    }));
 
-    if (hasData) {
-      setCompletedSets(nextCompletedSets);
-      tapMedium();
-      if (livePR) {
-        setPrFlash(exerciseIdx);
-        setTimeout(() => setPrFlash(null), 3000);
-      }
-    }
+    tapMedium();
 
-    if (setIdx < sets.length - 1) {
-      const nextSetIdx = setIdx + 1;
-      const s = computeSetSuggestion({ exercise, setIdx: nextSetIdx, exerciseIdx, completedSets: nextCompletedSets, lastSession });
-      setSetIdx(nextSetIdx);
-      setFormData({ weight: s.weight, reps: s.reps, rir: '' });
-      setSuggestionMeta(s.source ? { source: s.source, label: s.label, lastDisplay: s.lastDisplay } : null);
+    // Check if this was the last set of the exercise
+    const exercise = exercises[exIdx];
+    const setCount = exercise?.sets?.length || 0;
+    const currentCompleted = Object.keys(completedSets[exIdx] || {}).length;
+
+    if (setIdx < setCount - 1) {
+      // Start rest timer
       const duration = exercise.rest_seconds || 60;
       setResting(true);
       setRestStartedAt(Date.now());
       setRestDuration(duration);
-      return;
+      setRestingAfterSetIdx(setIdx);
+    } else if (currentCompleted + 1 >= setCount) {
+      // Exercise complete - move to next
+      if (exIdx < exercises.length - 1) {
+        setCurrentExIdx(exIdx + 1);
+        setTimeout(() => {
+          currentExRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
     }
-    handleExerciseComplete(nextCompletedSets);
+  }, [exercises, completedSets]);
+
+  // ── Add exercise ──────────────────────────────────────────────────────────
+  const handleAddExercise = (searchResult) => {
+    const newEx = searchResultToExecution(searchResult);
+    setExercises((prev) => [...prev, newEx]);
+    setShowAddExercise(false);
+    if (exercises.length === 0) {
+      setCurrentExIdx(0);
+    }
   };
+
+  // ── Add set to exercise ───────────────────────────────────────────────────
+  const handleAddSet = useCallback((exIdx) => {
+    setExercises((prev) => prev.map((ex, i) => {
+      if (i !== exIdx) return ex;
+      const newSetNum = (ex.sets?.length || 0) + 1;
+      return {
+        ...ex,
+        sets: [
+          ...(ex.sets || []),
+          {
+            set_number: newSetNum,
+            target_reps: ex.target_reps,
+            target_weight: ex.target_weight,
+          },
+        ],
+        target_sets: newSetNum,
+      };
+    }));
+  }, []);
 
   const handleSkipRest = () => {
     setResting(false);
     setRestStartedAt(null);
+    setRestingAfterSetIdx(null);
+  };
+
+  const handleAdd30 = () => {
+    setRestDuration((d) => d + 30);
   };
 
   const handleFinish = () => {
@@ -467,7 +710,6 @@ export default function WorkoutExecutionScreen({
     const payload = buildCompletedPayload();
     toast.success(t('workoutExecution.toastCompleted'));
     onComplete?.(payload);
-    // Show paywall only if user hasn't seen it before (first workout ever)
     try {
       if (!localStorage.getItem('atlas_first_workout_done')) {
         localStorage.setItem('atlas_first_workout_done', '1');
@@ -483,7 +725,7 @@ export default function WorkoutExecutionScreen({
     onCancel?.();
   };
 
-  // ── Render: Add Exercise Panel ────────────────────────────────────────────
+  // ── Render: Add Exercise Panel ──────────────────────────────────────────
   if (showAddExercise) {
     return (
       <div className="mx-auto max-w-3xl space-y-6 px-5 pb-8 pt-4 lg:px-8">
@@ -513,16 +755,15 @@ export default function WorkoutExecutionScreen({
     );
   }
 
-  // ── Paywall after workout finish ──────────────────────────────────────────
+  // ── Paywall after workout finish ────────────────────────────────────────
   if (showWorkoutPaywall) {
     return <PaywallSheet trigger="workout" show onClose={() => setShowWorkoutPaywall(false)} />;
   }
 
-  // ── Render: Completion Screen ─────────────────────────────────────────────
+  // ── Render: Completion Screen ───────────────────────────────────────────
   if (isDone) {
     const totalSets = Object.values(completedSets).reduce(
-      (acc, exSets) => acc + Object.keys(exSets).length,
-      0
+      (acc, exSets) => acc + Object.keys(exSets).length, 0
     );
     const durationMin = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
 
@@ -560,9 +801,11 @@ export default function WorkoutExecutionScreen({
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{durationMin}min</p>
             </div>
           </div>
-          <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-            Your session has been tracked continuously, including the current workout identity and all saved set history.
-          </p>
+          {totalVolume > 0 && (
+            <p className="text-[14px] font-medium text-[hsl(var(--fg-2))]">
+              {t('workoutExecution.volume')}: <span className="font-bold text-[hsl(var(--fg))]">{Math.round(totalVolume).toLocaleString()} kg</span>
+            </p>
+          )}
           <div className="flex w-full gap-3">
             <Button variant="outline" className="h-12 flex-1 rounded-[12px]" onClick={() => setShowAddExercise(true)}>
               {t('workoutExecution.addMore')}
@@ -577,345 +820,154 @@ export default function WorkoutExecutionScreen({
     );
   }
 
-  // ── Render: Rest Screen ───────────────────────────────────────────────────
-  if (resting) {
-    const R = 110;
-    const CIRC = 2 * Math.PI * R;
-    const pct = restDuration > 0 ? restRemaining / restDuration : 0;
-    const urgent = restRemaining > 0 && restRemaining <= 5;
+  // ── Check if all exercises are complete ──────────────────────────────────
+  const allExercisesComplete = exercises.length > 0 && exercises.every((ex, ei) => {
+    const setCount = ex.sets?.length || 0;
+    const doneCount = Object.keys(completedSets[ei] || {}).length;
+    return doneCount >= setCount;
+  });
 
-    return createPortal(
-      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_30%,hsl(var(--brand)/0.14),transparent_55%),hsl(var(--bg))]">
+  // Auto-trigger done screen
+  useEffect(() => {
+    if (allExercisesComplete && exercises.length > 0 && !isDone) {
+      setIsDone(true);
+    }
+  }, [allExercisesComplete, exercises.length]);
 
-        {/* Context header */}
-        <div className="flex flex-col items-center gap-2.5 px-8 mb-10 text-center">
-          <span className="inline-flex items-center rounded-full border border-[hsl(var(--brand)/0.28)] bg-[hsl(var(--brand)/0.1)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">
-            {t('workoutExecution.rest')}
-          </span>
-          <p className="text-[17px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-            {exercise.name}
-            <span className="ml-2 text-[15px] font-normal text-[hsl(var(--fg-3))]">{t('workoutExecution.setLabel', { n: setIdx + 1 })}</span>
-          </p>
-          {(formData.weight || formData.reps) && (
-            <p className="text-[14px] font-medium text-[hsl(var(--fg-2))]">
-              {[formData.weight && `${formData.weight} kg`, formData.reps && `${formData.reps} ${t('workoutExecution.reps').toLowerCase()}`].filter(Boolean).join(' × ')}
-              {suggestionMeta?.label && (
-                <span className="ml-2 text-[13px] text-[hsl(var(--fg-3))]">· {t('workoutExecution.suggestion.' + suggestionMeta.label)}</span>
-              )}
-            </p>
-          )}
-          <p className="text-[12px] uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
-            Next set {setIdx + 1} of {sets.length} · {restDuration}s target
-          </p>
-        </div>
-
-        {/* Timer ring */}
-        <div className="relative flex h-[260px] w-[260px] items-center justify-center">
-          <svg
-            className="absolute inset-0 h-full w-full -rotate-90"
-            viewBox="0 0 260 260"
-          >
-            <defs>
-              <linearGradient id="restArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="hsl(var(--brand))" stopOpacity="0.45" />
-                <stop offset="100%" stopColor="hsl(var(--brand))" />
-              </linearGradient>
-            </defs>
-            {/* Track */}
-            <circle
-              cx="130" cy="130" r={R}
-              fill="none"
-              stroke="hsl(var(--border)/0.2)"
-              strokeWidth="10"
-            />
-            {/* Progress arc */}
-            <circle
-              cx="130" cy="130" r={R}
-              fill="none"
-              stroke={urgent ? 'hsl(var(--warn))' : 'url(#restArcGrad)'}
-              strokeWidth="10"
-              strokeLinecap="round"
-              strokeDasharray={CIRC}
-              strokeDashoffset={CIRC - CIRC * pct}
-              className="transition-all duration-500 ease-linear"
-            />
-          </svg>
-          <div className="flex flex-col items-center gap-3">
-            <span
-              className={`text-[5.25rem] font-bold tabular-nums leading-none tracking-[-0.08em] transition-colors duration-300 ${
-                urgent ? 'text-[hsl(var(--warn))]' : 'text-[hsl(var(--fg))]'
-              }`}
-            >
-              {formatRestCountdown(restRemaining)}
-            </span>
-            <button
-              onClick={() => setRestDuration((d) => d + 30)}
-              className="rounded-full border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--fill)/0.5)] px-3.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))] transition-colors hover:text-[hsl(var(--fg-2))]"
-            >
-              {t('workoutExecution.plus30s')}
-            </button>
-          </div>
-        </div>
-
-        {/* Skip CTA */}
-        <div className="mt-10 w-full max-w-[280px] px-4">
-          <Button
-            className="h-14 w-full rounded-[16px] text-[15px] font-semibold tracking-[-0.01em]"
-            onClick={handleSkipRest}
-          >
-            {t('workoutExecution.skipRest')}
-          </Button>
-        </div>
-
-      </div>,
-      document.body
-    );
-  }
-
-  // ── Render: Execution Screen ──────────────────────────────────────────────
+  // ── Render: Main Execution Screen (Hevy/Strong style) ───────────────────
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-5 pb-24 pt-4 lg:px-8">
-      <div className="sticky top-0 z-10 -mx-5 bg-[hsl(var(--bg)/0.8)] px-5 py-3 backdrop-blur-md lg:-mx-8 lg:px-8">
-        <div className="atlas-card rounded-[18px] px-4 py-3">
-          <div className="mb-3 flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="atlas-overline">{workout.name}</p>
-              <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-                {t('workoutExecution.workoutInProgress')}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {contextLabels.map((label) => (
-                  <span
-                    key={label}
-                    className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.68)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))]"
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex flex-col items-end gap-1">
-                <span className="font-mono text-[11px] font-bold text-[hsl(var(--fg-3))]">
-                  {Math.round(completionRatio)}%
-                </span>
-                {totalSavedSets > 0 && (
-                  <span className="text-[10px] font-semibold text-[hsl(var(--ok))]">
-                    {totalSavedSets} {totalSavedSets === 1 ? t('workoutExecution.setSaved') : t('workoutExecution.setsSavedPlural')}
-                  </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowCancelConfirm(true)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-[hsl(var(--fg-3))] transition-colors hover:bg-[hsl(var(--fill))] hover:text-[hsl(var(--fg))]"
-                aria-label={t('workoutExecution.cancelWorkout')}
-              >
-                <X className="h-4 w-4" strokeWidth={2} />
-              </button>
-            </div>
-          </div>
-          <div className="flex-1">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-[hsl(var(--border)/0.5)]">
-              <div
-                className="h-full bg-[hsl(var(--brand))] transition-all duration-500"
-                style={{ width: `${completionRatio}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="fixed inset-0 z-50 flex flex-col bg-[hsl(var(--bg))]">
+      {/* ── Top sticky: session header ──────────────────────────────────── */}
+      <div className="sticky top-0 z-20 bg-[hsl(var(--card))] border-b border-[hsl(var(--border)/0.3)] safe-area-top">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Left: cancel */}
+          <button
+            onClick={() => setShowCancelConfirm(true)}
+            className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-[hsl(var(--fill))] transition-colors"
+          >
+            <X className="w-5 h-5 text-[hsl(var(--fg-2))]" strokeWidth={2} />
+          </button>
 
-      <section className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <p className="atlas-overline">
-              {t('workoutExecution.exerciseOf', { current: exerciseIdx + 1, total: exercises.length })}
+          {/* Center: workout title + timer */}
+          <div className="flex flex-col items-center">
+            <p className="text-[14px] font-semibold text-[hsl(var(--fg))] truncate max-w-[200px]">
+              {workout.name}
             </p>
-            <h1 className="text-[1.6rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
-              {exercise.name}
-            </h1>
-            <p className="text-[13px] text-[hsl(var(--fg-2))]">
-              {exerciseIdx + 1 < exercises.length
-                ? `After this set, the workout continues to ${exercises[exerciseIdx + 1]?.name || 'the next exercise'}.`
-                : 'This is the last exercise in the current session.'}
-            </p>
-          </div>
-          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-            <ExerciseMedia exercise={exercise} size="sm" showFallback={true} />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {exercise.primary_muscles?.map((muscle) => (
-              <span key={muscle} className="badge badge-blue text-[11px]">
-                {muscle}
+            <div className="flex items-center gap-2 mt-0.5">
+              <Clock className="w-3 h-3 text-[hsl(var(--brand))]" strokeWidth={2} />
+              <span className="text-[12px] font-mono font-medium text-[hsl(var(--brand))] tabular-nums">
+                {formatElapsed(elapsedMs)}
               </span>
-            ))}
-            {exercise.technique ? (
-              <span className="badge badge-ai text-[11px]">
-                {getWorkoutMethodLabel(exercise.technique)}
-              </span>
-            ) : null}
-            {exercise.rest_seconds ? (
-              <span className="badge badge-neutral text-[11px]">
-                {t('workoutExecution.restBadge', { seconds: exercise.rest_seconds })}
-              </span>
-            ) : null}
-          </div>
-
-          {exercise.execution_notes ? (
-            <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">
-              {exercise.execution_notes}
-            </p>
-          ) : null}
-
-          <div className="grid gap-3 md:grid-cols-3">
-            <MetricTile
-              label={t('workoutExecution.targetReps')}
-              value={currentSet?.target_reps ?? exercise.target_reps ?? '—'}
-              accent
-            />
-            <MetricTile
-              label={t('workoutExecution.targetLoad')}
-              value={
-                (currentSet?.target_weight ?? exercise.target_weight)
-                  ? `${currentSet?.target_weight ?? exercise.target_weight} kg`
-                  : '—'
-              }
-            />
-            <MetricTile
-              label={t('workoutExecution.setsLabel')}
-              value={currentSet?.target_sets ?? exercise.target_sets ?? '—'}
-            />
-          </div>
-        </div>
-      </section>
-
-      {lastSession && (
-        <div className="flex items-center gap-2.5 rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-4 py-2.5">
-          <Clock className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={2} />
-          <span className="text-[12px] text-[hsl(var(--fg-2))]">
-            {currentSuggestion?.lastDisplay ? (
-              <>
-                <span>{t('workoutExecution.last')} </span>
-                <span className="font-semibold text-[hsl(var(--fg))]">{currentSuggestion.lastDisplay}</span>
-                {currentSuggestion.label === 'progressiveOverload' && currentSuggestion.weight && (
-                  <>
-                    <span className="mx-1.5 text-[hsl(var(--fg-3))]">→</span>
-                    <span className="font-semibold text-[hsl(var(--brand))]">
-                      {currentSuggestion.weight}kg × {currentSuggestion.reps}
-                    </span>
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <span>{t('workoutExecution.last')} </span>
-                <span className="font-semibold text-[hsl(var(--fg))]">
-                  {lastSession.setCount}×{lastSession.maxWeight > 0 ? ` ${lastSession.maxWeight}kg` : ''}
-                  {lastSession.avgReps > 0 ? ` · ${lastSession.avgReps} ${t('workoutExecution.reps').toLowerCase()}` : ''}
-                </span>
-              </>
-            )}
-            <span className="ml-1.5 text-[hsl(var(--fg-3))]">
-              {new Date(lastSession.date).toLocaleDateString(locale === 'pt-BR' ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' })}
-            </span>
-          </span>
-        </div>
-      )}
-
-      <section className={`atlas-card rounded-[22px] p-5 sm:p-6 transition-all duration-300 ${prFlash === exerciseIdx ? 'border-[hsl(var(--ok)/0.7)] bg-[hsl(var(--ok)/0.04)]' : 'border-[hsl(var(--border)/0.92)]'}`}>
-        <div className="space-y-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="atlas-overline">
-                {t('workoutExecution.logSet', { current: setIdx + 1, total: sets.length })}
-              </p>
             </div>
-            {livePR && (
-              <div className="flex items-center gap-1 rounded-full bg-[hsl(var(--ok)/0.12)] border border-[hsl(var(--ok)/0.3)] px-2.5 py-1">
-                <Trophy className="h-3 w-3 text-[hsl(var(--ok))]" strokeWidth={2.5} />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--ok))]">
-                  {livePR === 'weight' ? t('workoutExecution.newWeightPR') : t('workoutExecution.newVolumePR')}
-                </span>
-              </div>
-            )}
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <FieldInput
-              label={t('workoutExecution.weightKg')}
-              value={formData.weight}
-              placeholder="0"
-              onChange={(value) => { setSuggestionMeta(null); setFormData((prev) => ({ ...prev, weight: value })); }}
-            />
-            <FieldInput
-              label={t('workoutExecution.reps')}
-              value={formData.reps}
-              placeholder="0"
-              onChange={(value) => { setSuggestionMeta(null); setFormData((prev) => ({ ...prev, reps: value })); }}
-            />
-            <FieldInput
-              label={t('workoutExecution.rir')}
-              value={formData.rir}
-              placeholder="0"
-              onChange={(value) => setFormData((prev) => ({ ...prev, rir: value }))}
-            />
-          </div>
-          {suggestionMeta?.label && (
-            <p className="text-[11px] font-medium text-[hsl(var(--brand)/0.8)]">
-              ✦ {t('workoutExecution.suggestion.' + suggestionMeta.label)}
-            </p>
-          )}
-          <Button className="h-12 w-full rounded-[12px] sm:w-auto" onClick={handleSetComplete}>
-            {setIdx < sets.length - 1 ? t('workoutExecution.saveAndNextSet') : t('workoutExecution.finishExercise')}
-            <ArrowRight className="h-4 w-4" />
+
+          {/* Right: finish */}
+          <Button
+            size="sm"
+            className="rounded-full h-9 px-4 text-[12px] font-semibold"
+            onClick={() => setIsDone(true)}
+          >
+            {t('workoutExecution.finishWorkout')}
           </Button>
-          <p className="text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-            Save the set, keep your pace, and let the history strip show the most recent entries right below.
-          </p>
         </div>
-      </section>
 
-      {Object.keys(completedSets[exerciseIdx] || {}).length > 0 ? (
-        <section className="atlas-card rounded-[22px] border-[hsl(var(--border)/0.92)] p-5 sm:p-6">
-          <div className="space-y-3">
-            <div>
-              <p className="atlas-overline">{t('workoutExecution.immediateHistory')}</p>
-              <p className="mt-2 text-sm leading-6 text-[hsl(var(--fg-2))]">
-                {t('workoutExecution.immediateHistoryDesc')}
-              </p>
-            </div>
-            <div className="space-y-2">
-              {Object.entries(completedSets[exerciseIdx]).map(([si, data]) => (
-                <div
-                  key={si}
-                  className="flex flex-wrap items-center gap-3 rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.68)_0%,hsl(var(--card))_100%)] px-4 py-3 text-[13px] text-[hsl(var(--fg-2))]"
-                >
-                  <span className="inline-flex items-center gap-1 font-semibold text-[hsl(var(--fg))]">
-                    {t('workoutExecution.setLabel', { n: Number(si) + 1 })}
-                  </span>
-                  {data.weight ? <span>{data.weight} kg</span> : null}
-                  {data.reps ? <span>{data.reps} {t('workoutExecution.reps').toLowerCase()}</span> : null}
-                  {data.rir != null && data.rir !== '' ? <span>{t('workoutExecution.rir')} {data.rir}</span> : null}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      <div className="flex justify-center pb-2">
-        <button
-          onClick={() => setShowAddExercise(true)}
-          className="flex items-center gap-1.5 rounded-[12px] px-4 py-2 text-[12px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--shell))] hover:text-[hsl(var(--fg))]"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          {t('workoutExecution.addExercise')}
-        </button>
+        {/* Progress bar */}
+        <div className="h-1 bg-[hsl(var(--border)/0.2)]">
+          <div
+            className="h-full bg-[hsl(var(--brand))] transition-all duration-500"
+            style={{ width: `${completionPct}%` }}
+          />
+        </div>
       </div>
 
+      {/* ── Scrollable exercise list ────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-4 py-4 space-y-4 pb-32">
+          {/* Stats bar */}
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-4">
+              <span className="text-[12px] text-[hsl(var(--fg-3))]">
+                {totalSavedSets} {t('workoutExecution.statsSets').toLowerCase()}
+              </span>
+              {totalVolume > 0 && (
+                <span className="text-[12px] text-[hsl(var(--fg-3))]">
+                  {Math.round(totalVolume).toLocaleString()} kg
+                </span>
+              )}
+            </div>
+            <span className="text-[12px] font-medium text-[hsl(var(--brand))]">
+              {completionPct}%
+            </span>
+          </div>
+
+          {/* Exercise blocks */}
+          {exercises.map((ex, ei) => (
+            <ExerciseBlock
+              key={ei}
+              exercise={ex}
+              exerciseIdx={ei}
+              isActive={ei <= currentExIdx}
+              isCurrent={ei === currentExIdx}
+              completedSets={completedSets[ei] || {}}
+              lastSession={lastSessions[ei]}
+              allCompletedSets={completedSets}
+              workoutHistory={workoutHistory}
+              personalRecords={personalRecords}
+              resting={resting && ei === currentExIdx}
+              restRemaining={restRemaining}
+              restDuration={restDuration}
+              restingAfterSetIdx={restingAfterSetIdx}
+              onSetComplete={handleSetComplete}
+              onSkipRest={handleSkipRest}
+              onAdd30={handleAdd30}
+              onAddSet={handleAddSet}
+              onScrollRef={currentExRef}
+              t={t}
+            />
+          ))}
+
+          {/* Next exercise preview */}
+          {currentExIdx < exercises.length - 1 && (
+            <div className="rounded-2xl border border-dashed border-[hsl(var(--border)/0.3)] bg-[hsl(var(--fill)/0.2)] p-4">
+              <div className="flex items-center gap-3">
+                <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
+                <div>
+                  <p className="text-[10px] font-semibold text-[hsl(var(--fg-3))] uppercase tracking-wide">
+                    {t('workoutExecution.upNext')}
+                  </p>
+                  <p className="text-[14px] font-medium text-[hsl(var(--fg-2))] mt-0.5">
+                    {exercises[currentExIdx + 1]?.name}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Add exercise */}
+          <button
+            onClick={() => setShowAddExercise(true)}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-[hsl(var(--border)/0.3)] text-[13px] font-semibold text-[hsl(var(--fg-3))] hover:text-[hsl(var(--brand))] hover:border-[hsl(var(--brand)/0.3)] transition-colors"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2} />
+            {t('workoutExecution.addExercise')}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Bottom sticky: Finish CTA ───────────────────────────────────── */}
+      <div className="sticky bottom-0 z-20 bg-[hsl(var(--card)/0.95)] backdrop-blur-md border-t border-[hsl(var(--border)/0.2)] safe-area-bottom">
+        <div className="max-w-3xl mx-auto px-4 py-3">
+          <Button
+            className="w-full h-[52px] rounded-2xl text-[15px] font-semibold shadow-[0_4px_16px_hsl(var(--brand)/0.25)]"
+            onClick={() => setIsDone(true)}
+          >
+            <Check className="w-5 h-5 mr-1" strokeWidth={2.5} />
+            {t('workoutExecution.finishWorkout')}
+          </Button>
+        </div>
+      </div>
+
+      {/* Audio for rest timer */}
       <audio
         ref={audioRef}
         src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA=="

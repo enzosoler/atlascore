@@ -1,31 +1,22 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { DataState } from '@/components/shared/DataState';
 
-export default function LoadingState({ 
+/**
+ * Page-level LoadingState -- wraps the unified DataState component.
+ * Keeps the same public API as the original for backward compatibility.
+ */
+export default function LoadingState({
   message = 'Loading...',
   fullScreen = false,
   size = 'md',
 }) {
-  const sizeClasses = {
-    sm: 'w-4 h-4 border-2',
-    md: 'w-8 h-8 border-[3px]',
-    lg: 'w-12 h-12 border-4',
-  };
-
   const content = (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-center gap-3"
-    >
-      <motion.div
-        className={`${sizeClasses[size]} rounded-full border-[hsl(var(--border))] border-t-[hsl(var(--accent-primary))]`}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+    <div className="w-full max-w-sm mx-auto">
+      <DataState
+        variant="loading"
+        title={message}
       />
-      {message && <p className="text-sm text-[hsl(var(--fg-2))]">{message}</p>}
-    </motion.div>
+    </div>
   );
 
   if (fullScreen) {

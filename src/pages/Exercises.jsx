@@ -1,48 +1,33 @@
 /**
- * Exercises — Exercise Library Page
+ * Exercises — Exercise Library Page (Fitbod-style)
  *
- * Primary source: ExerciseDB API (via @/lib/exerciseDB)
- * Fallback:       Legacy ExerciseMaster
- *
- * Features:
- *  - Debounced text search (PT + EN, accents, aliases)
- *  - Filter by body part, target muscle, or equipment
- *  - Favorites / Recents quick toggle
- *  - Compact vs. grid view toggle
- *  - ExerciseCard with GIF thumbnails
+ * Discovery-first layout:
+ *  1. Top: search bar + filter chips (muscle group, equipment, type)
+ *  2. Below: "Recommended for you" section based on recent usage
+ *  3. Below: category cards (Push, Pull, Legs, Core, etc.)
+ *  4. Below: full exercise list (compact or grid)
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useT } from '@/lib/i18nContext';
 import { useQuery } from '@tanstack/react-query';
 import {
   Clock,
+  Dumbbell,
   Heart,
   LayoutGrid,
   LayoutList,
   Loader2,
   Search,
-  SlidersHorizontal,
   Sparkles,
   Target,
-  Wrench,
   X,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import ExerciseCard from '@/components/exercises/ExerciseCard.jsx';
 import {
-  ActionRow,
   AppContainer,
-  Card,
-  PageHeader,
-  Section,
 } from '@/components/shared/AppContainer';
-import {
-  EmptyState,
-  FilterChip,
-  PrimaryButton,
-  SecondaryButton,
-} from '@/components/shared/StablePage';
 import {
   exerciseKeys,
   fetchExerciseLibrary,
@@ -57,6 +42,110 @@ import {
   equipmentToPT,
 } from '@/lib/exerciseDB/index.js';
 
+// ─── Category card data ──────────────────────────────────────────────────────
+
+const CATEGORY_CARDS = [
+  { id: 'chest',      label: 'Push',  muscles: ['chest', 'delts', 'triceps'],  color: 'brand',   icon: '💪' },
+  { id: 'back',       label: 'Pull',  muscles: ['back', 'biceps'],             color: 'ok',      icon: '🔄' },
+  { id: 'upper legs', label: 'Legs',  muscles: ['quads', 'hamstrings', 'glutes'], color: 'warn', icon: '🦵' },
+  { id: 'waist',      label: 'Core',  muscles: ['abs', 'obliques'],            color: 'brand-ai', icon: '🎯' },
+  { id: 'shoulders',  label: 'Shoulders', muscles: ['delts'],                  color: 'brand',   icon: '🏋️' },
+  { id: 'lower arms', label: 'Arms',  muscles: ['biceps', 'triceps', 'forearms'], color: 'ok', icon: '💪' },
+];
+
+// ─── Filter chip component ───────────────────────────────────────────────────
+
+function FilterChip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[12px] font-medium transition-all active:scale-95 ${
+        active
+          ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]'
+          : 'border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.4)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.6)]'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ─── Category card ───────────────────────────────────────────────────────────
+
+function CategoryCard({ category, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex flex-col items-center gap-2 rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] p-4 hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.03)] transition-all active:scale-[0.97]"
+    >
+      <span className="text-2xl">{category.icon}</span>
+      <span className="text-[13px] font-semibold text-[hsl(var(--fg))]">{category.label}</span>
+    </button>
+  );
+}
+
+// ─── Recommended section ─────────────────────────────────────────────────────
+
+function RecommendedSection({ recents, favorites, onSelectExercise, t }) {
+  // Merge recents and favorites, prioritize favorites
+  const recommended = useMemo(() => {
+    const seen = new Set();
+    const items = [];
+    for (const ex of [...favorites, ...recents]) {
+      const key = ex.id || ex.name;
+      if (!seen.has(key)) {
+        seen.add(key);
+        items.push(ex);
+      }
+    }
+    return items.slice(0, 6);
+  }, [recents, favorites]);
+
+  if (recommended.length === 0) return null;
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+          {t('exercises.recommended') || 'Recommended for you'}
+        </p>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+        {recommended.map((ex, i) => (
+          <div
+            key={ex.id || i}
+            className="shrink-0 w-[160px] rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] overflow-hidden hover:border-[hsl(var(--brand)/0.3)] transition-all cursor-pointer"
+            onClick={() => onSelectExercise?.(ex)}
+          >
+            <div className="h-24 bg-[hsl(var(--fill)/0.4)] flex items-center justify-center">
+              {(ex.media?.gif_url || ex.media_gif_url) ? (
+                <img
+                  src={ex.media?.gif_url || ex.media_gif_url}
+                  alt={ex.name}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <Dumbbell className="w-8 h-8 text-[hsl(var(--fg-3))]" strokeWidth={1.5} />
+              )}
+            </div>
+            <div className="p-2.5">
+              <p className="text-[12px] font-semibold text-[hsl(var(--fg))] truncate">
+                {ex.canonical_name_en || ex.name || '---'}
+              </p>
+              <p className="text-[10px] text-[hsl(var(--fg-3))] truncate mt-0.5">
+                {(ex.primary_muscles || []).slice(0, 2).join(', ')}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Exercises() {
@@ -68,7 +157,6 @@ export default function Exercises() {
   const [equipment, setEquipment]         = useState('');
   const [showFavorites, setShowFavorites] = useState(false);
   const [showRecent, setShowRecent]       = useState(false);
-  const [showFilters, setShowFilters]     = useState(false);
   const [compactView, setCompactView]     = useState(false);
 
   const debounceRef = useRef(null);
@@ -105,14 +193,12 @@ export default function Exercises() {
   const { data: favorites = [] } = useQuery({
     queryKey: ['exercises', 'favorites'],
     queryFn: fetchFavoriteExercises,
-    enabled: showFavorites,
     staleTime: 60_000,
   });
 
   const { data: recents = [] } = useQuery({
     queryKey: ['exercises', 'recents'],
     queryFn: fetchRecentExercises,
-    enabled: showRecent,
     staleTime: 60_000,
   });
 
@@ -175,49 +261,12 @@ export default function Exercises() {
   }, []);
 
   const hasActiveFilters = bodyPart || muscle || equipment || showFavorites || showRecent || search;
-  const summaryCards = [
-    {
-      label: isSearching ? t('exercises.summary.search_results') : t('exercises.summary.library'),
-      value: exercises.length,
-      detail: isSearching
-        ? t('exercises.summary.results_for').replace('{query}', debouncedSearch || search)
-        : t('exercises.summary.available_exercises'),
-      icon: Search,
-    },
-    {
-      label: t('exercises.summary.body_focus'),
-      value: bodyPart ? bodyPartToPT(bodyPart) : t('exercises.summary.all_groups'),
-      detail: bodyPart ? t('exercises.summary.filtered_body_region') : t('exercises.summary.browse_catalog'),
-      icon: Target,
-    },
-    {
-      label: t('exercises.summary.equipment'),
-      value: equipment ? equipmentToPT(equipment) : t('exercises.summary.mixed'),
-      detail: equipment ? t('exercises.summary.specific_setup') : t('exercises.summary.any_equipment'),
-      icon: Wrench,
-    },
-  ];
+  const showDiscovery = !hasActiveFilters && !isSearching;
 
-  const toggleBodyPart = (bp) => {
-    setBodyPart((p) => (p === bp ? '' : bp));
+  const handleCategoryClick = (category) => {
+    setBodyPart(category.id);
     setMuscle('');
     setEquipment('');
-    setShowFavorites(false);
-    setShowRecent(false);
-  };
-
-  const toggleMuscle = (m) => {
-    setMuscle((p) => (p === m ? '' : m));
-    setBodyPart('');
-    setEquipment('');
-    setShowFavorites(false);
-    setShowRecent(false);
-  };
-
-  const toggleEquipment = (eq) => {
-    setEquipment((p) => (p === eq ? '' : eq));
-    setBodyPart('');
-    setMuscle('');
     setShowFavorites(false);
     setShowRecent(false);
   };
@@ -225,222 +274,227 @@ export default function Exercises() {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <AppContainer maxWidth="max-w-7xl">
-      <PageHeader
-        eyebrow={t('exercises.eyebrow')}
-        title={t('exercises.title')}
-        subtitle={t('exercises.subtitle')}
-        accentClassName="from-[hsl(var(--brand)/0.14)] via-[hsl(var(--brand)/0.04)]"
-        actions={
-          <ActionRow>
-            <SecondaryButton
-              type="button"
-              onClick={() => setShowFilters((f) => !f)}
-              className={showFilters || hasActiveFilters ? 'border-[hsl(var(--brand)/0.42)] text-[hsl(var(--brand))]' : ''}
-            >
-              <SlidersHorizontal className="h-4 w-4" strokeWidth={1.9} />
-              {t('exercises.actions.filters')}
-            </SecondaryButton>
-            <SecondaryButton type="button" onClick={() => setCompactView((v) => !v)}>
-              {compactView ? <LayoutGrid className="h-4 w-4" strokeWidth={1.9} /> : <LayoutList className="h-4 w-4" strokeWidth={1.9} />}
-              {compactView ? t('exercises.actions.grid_view') : t('exercises.actions.list_view')}
-            </SecondaryButton>
-          </ActionRow>
-        }
-      >
-        <div className="grid gap-3 md:grid-cols-3">
-          {summaryCards.map(({ label, value, detail, icon: Icon }) => (
-            <Card key={label} className="px-4 py-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="atlas-metric-label">{label}</p>
-                  <p className="mt-3 text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                    {value}
-                  </p>
-                  <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">{detail}</p>
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-[18px] border border-[hsl(var(--border)/0.86)] bg-[hsl(var(--fill)/0.76)] text-[hsl(var(--brand))]">
-                  <Icon className="h-4 w-4" strokeWidth={1.9} />
-                </div>
-              </div>
-            </Card>
-          ))}
+    <AppContainer>
+      <div className="space-y-5 atlas-page-enter">
+
+        {/* Page title */}
+        <div>
+          <h1 className="text-title3 font-bold text-[hsl(var(--fg))]">{t('exercises.title')}</h1>
+          <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1">{t('exercises.subtitle')}</p>
         </div>
-      </PageHeader>
 
-      <Section
-        eyebrow={t('exercises.search.eyebrow')}
-        title={t('exercises.search.title')}
-        subtitle={t('exercises.search.subtitle')}
-      >
-        <Card className="space-y-4 px-4 py-4 sm:px-5">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-2))]" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('exercises.search.placeholder')}
-                className="atlas-field h-11 rounded-[14px] border-[hsl(var(--border)/0.86)] pl-10 pr-10 text-base"
-              />
-              {isLoading ? (
-                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[hsl(var(--fg-2))]" />
-              ) : null}
-              {search && !isLoading ? (
-                <button
-                  type="button"
-                  onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              ) : null}
-            </div>
-
-            <ActionRow className="sm:justify-end">
-              <SecondaryButton
-                type="button"
-                onClick={() => { setShowFavorites((f) => !f); setShowRecent(false); }}
-                className={showFavorites ? 'border-[hsl(var(--err)/0.32)] text-[hsl(var(--err))]' : ''}
-              >
-                <Heart className="h-4 w-4" strokeWidth={1.9} />
-                {t('exercises.actions.favorites')}
-              </SecondaryButton>
-              <SecondaryButton
-                type="button"
-                onClick={() => { setShowRecent((r) => !r); setShowFavorites(false); }}
-                className={showRecent ? 'border-[hsl(var(--brand)/0.32)] text-[hsl(var(--brand))]' : ''}
-              >
-                <Clock className="h-4 w-4" strokeWidth={1.9} />
-                {t('exercises.actions.recents')}
-              </SecondaryButton>
-              {hasActiveFilters ? (
-                <SecondaryButton type="button" onClick={clearFilters}>
-                  <X className="h-4 w-4" strokeWidth={1.9} />
-                  {t('exercises.actions.clear')}
-                </SecondaryButton>
-              ) : null}
-            </ActionRow>
-          </div>
-
-          {(bodyPart || muscle || equipment) ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[12px] font-medium text-[hsl(var(--fg-2))]">{t('exercises.filters.active_filters')}</span>
-              {bodyPart ? (
-                <FilterChip active onClick={() => setBodyPart('')}>
-                  {bodyPartToPT(bodyPart)}
-                </FilterChip>
-              ) : null}
-              {muscle ? (
-                <FilterChip active onClick={() => setMuscle('')}>
-                  {muscleToPT(muscle)}
-                </FilterChip>
-              ) : null}
-              {equipment ? (
-                <FilterChip active onClick={() => setEquipment('')}>
-                  {equipmentToPT(equipment)}
-                </FilterChip>
-              ) : null}
-            </div>
-          ) : null}
-
-          {showFilters && !isSearching ? (
-            <div className="grid gap-4 border-t border-[hsl(var(--border)/0.8)] pt-4 lg:grid-cols-3">
-              <div className="space-y-2.5">
-                <p className="atlas-metric-label">{t('exercises.filters.body_region')}</p>
-                <div className="flex flex-wrap gap-2">
-                  {bodyParts.map((bp) => (
-                    <FilterChip key={bp} active={bodyPart === bp} onClick={() => toggleBodyPart(bp)}>
-                      {bodyPartToPT(bp)}
-                    </FilterChip>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                <p className="atlas-metric-label">{t('exercises.filters.target_muscle')}</p>
-                <div className="flex flex-wrap gap-2">
-                  {muscles.map((m) => (
-                    <FilterChip key={m} active={muscle === m} onClick={() => toggleMuscle(m)}>
-                      {muscleToPT(m)}
-                    </FilterChip>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                <p className="atlas-metric-label">{t('exercises.filters.equipment')}</p>
-                <div className="flex flex-wrap gap-2">
-                  {equipmentList.map((eq) => (
-                    <FilterChip key={eq} active={equipment === eq} onClick={() => toggleEquipment(eq)}>
-                      {equipmentToPT(eq)}
-                    </FilterChip>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </Card>
-      </Section>
-
-      <Section
-        eyebrow={t('exercises.library.eyebrow')}
-        title={
-          isSearching
-            ? t('exercises.library.results_title').replace('{count}', exercises.length).replace('{query}', debouncedSearch)
-            : t('exercises.library.exercises_in_view').replace('{count}', exercises.length)
-        }
-        subtitle={t('exercises.library.subtitle')}
-        actions={
-          <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.84)] px-3 py-1.5 text-[12px] font-semibold text-[hsl(var(--fg-2))]">
-            <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--brand))]" strokeWidth={1.9} />
-            {compactView ? t('exercises.library.compact_list') : t('exercises.library.card_grid')}
-          </div>
-        }
-      >
-        {isLoading && exercises.length === 0 ? (
-          <Card className="px-5 py-14">
-            <div className="flex flex-col items-center gap-3 text-center">
-              <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={1.9} />
-              <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                {t('exercises.library.loading_title')}
-              </p>
-              <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                {t('exercises.library.loading_subtitle')}
-              </p>
-            </div>
-          </Card>
-        ) : exercises.length === 0 ? (
-          <Card className="px-0 py-0">
-            <EmptyState
-              icon={Search}
-              title={t('exercises.library.empty_title')}
-              description={t('exercises.library.empty_description')}
-              action={
-                hasActiveFilters ? (
-                  <PrimaryButton type="button" onClick={clearFilters}>
-                    {t('exercises.actions.clear_filters')}
-                  </PrimaryButton>
-                ) : null
-              }
+        {/* ── Search bar + filter row (sticky) ──────────────────────────── */}
+        <div className="sticky top-0 z-10 -mx-5 px-5 py-3 bg-[hsl(var(--bg)/0.9)] backdrop-blur-md lg:-mx-8 lg:px-8">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" strokeWidth={2} />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('exercises.search.placeholder')}
+              className="h-11 rounded-2xl border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.4)] pl-10 pr-10 text-[15px]"
             />
-          </Card>
-        ) : compactView ? (
-          <Card className="overflow-hidden px-0 py-0">
-            <div className="divide-y divide-[hsl(var(--border)/0.72)]">
-              {exercises.map((ex) => (
-                <ExerciseCard key={ex.id} exercise={ex} compact />
-              ))}
-            </div>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {exercises.map((ex) => (
-              <ExerciseCard key={ex.id} exercise={ex} />
+            {isLoading && (
+              <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[hsl(var(--fg-3))]" />
+            )}
+            {search && !isLoading && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))]"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Filter chips row */}
+          <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+            <FilterChip
+              active={showFavorites}
+              onClick={() => { setShowFavorites((f) => !f); setShowRecent(false); setBodyPart(''); setMuscle(''); setEquipment(''); }}
+            >
+              <Heart className="w-3 h-3" strokeWidth={2} />
+              {t('exercises.actions.favorites')}
+            </FilterChip>
+            <FilterChip
+              active={showRecent}
+              onClick={() => { setShowRecent((r) => !r); setShowFavorites(false); setBodyPart(''); setMuscle(''); setEquipment(''); }}
+            >
+              <Clock className="w-3 h-3" strokeWidth={2} />
+              {t('exercises.actions.recents')}
+            </FilterChip>
+
+            {/* Muscle group chips */}
+            {bodyParts.slice(0, 6).map((bp) => (
+              <FilterChip
+                key={bp}
+                active={bodyPart === bp}
+                onClick={() => {
+                  setBodyPart((p) => (p === bp ? '' : bp));
+                  setMuscle('');
+                  setEquipment('');
+                  setShowFavorites(false);
+                  setShowRecent(false);
+                }}
+              >
+                {bodyPartToPT(bp)}
+              </FilterChip>
             ))}
+
+            {/* Equipment chips */}
+            {equipmentList.slice(0, 4).map((eq) => (
+              <FilterChip
+                key={eq}
+                active={equipment === eq}
+                onClick={() => {
+                  setEquipment((p) => (p === eq ? '' : eq));
+                  setBodyPart('');
+                  setMuscle('');
+                  setShowFavorites(false);
+                  setShowRecent(false);
+                }}
+              >
+                {equipmentToPT(eq)}
+              </FilterChip>
+            ))}
+
+            {hasActiveFilters && (
+              <FilterChip active={false} onClick={clearFilters}>
+                <X className="w-3 h-3" strokeWidth={2} />
+                {t('exercises.actions.clear')}
+              </FilterChip>
+            )}
+          </div>
+        </div>
+
+        {/* ── Discovery section (shown when no filters active) ──────────── */}
+        {showDiscovery && (
+          <>
+            {/* Recommended for you */}
+            <RecommendedSection
+              recents={recents}
+              favorites={favorites}
+              t={t}
+            />
+
+            {/* Category cards grid */}
+            <div>
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))] mb-3">
+                {t('exercises.filters.body_region') || 'Browse by category'}
+              </p>
+              <div className="grid grid-cols-3 gap-2.5">
+                {CATEGORY_CARDS.map((cat) => (
+                  <CategoryCard
+                    key={cat.id}
+                    category={cat}
+                    onClick={() => handleCategoryClick(cat)}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── Active filter label ───────────────────────────────────────── */}
+        {hasActiveFilters && (
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+              {isSearching
+                ? `${exercises.length} results for "${debouncedSearch}"`
+                : showFavorites
+                  ? t('exercises.actions.favorites')
+                  : showRecent
+                    ? t('exercises.actions.recents')
+                    : `${exercises.length} exercises`
+              }
+            </p>
+            <button
+              type="button"
+              onClick={() => setCompactView((v) => !v)}
+              className="flex items-center gap-1 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+            >
+              {compactView ? <LayoutGrid className="w-3.5 h-3.5" /> : <LayoutList className="w-3.5 h-3.5" />}
+              {compactView ? t('exercises.actions.grid_view') : t('exercises.actions.list_view')}
+            </button>
           </div>
         )}
-      </Section>
+
+        {/* ── Exercise list ──────────────────────────────────────────────── */}
+        {isLoading && exercises.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-12 text-center">
+            <Loader2 className="h-6 w-6 animate-spin text-[hsl(var(--brand))]" strokeWidth={2} />
+            <p className="text-[14px] font-medium text-[hsl(var(--fg-2))]">
+              {t('exercises.library.loading_title')}
+            </p>
+          </div>
+        ) : exercises.length === 0 && hasActiveFilters ? (
+          <div className="flex flex-col items-center gap-3 py-12 text-center">
+            <Search className="h-8 w-8 text-[hsl(var(--fg-3))]" strokeWidth={1.5} />
+            <p className="text-[14px] font-medium text-[hsl(var(--fg))]">
+              {t('exercises.library.empty_title')}
+            </p>
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">
+              {t('exercises.library.empty_description')}
+            </p>
+            <button
+              onClick={clearFilters}
+              className="text-[13px] font-semibold text-[hsl(var(--brand))] hover:underline mt-1"
+            >
+              {t('exercises.actions.clear_filters')}
+            </button>
+          </div>
+        ) : exercises.length > 0 ? (
+          compactView ? (
+            <div className="rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] overflow-hidden">
+              <div className="divide-y divide-[hsl(var(--border)/0.3)]">
+                {exercises.map((ex) => (
+                  <ExerciseCard key={ex.id} exercise={ex} compact />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {exercises.map((ex) => (
+                <ExerciseCard key={ex.id} exercise={ex} />
+              ))}
+            </div>
+          )
+        ) : null}
+
+        {/* Full library link when in discovery mode */}
+        {showDiscovery && exercises.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+                {t('exercises.library.exercises_in_view')?.replace('{count}', exercises.length) || `${exercises.length} exercises`}
+              </p>
+              <button
+                type="button"
+                onClick={() => setCompactView((v) => !v)}
+                className="flex items-center gap-1 text-[12px] text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))] transition-colors"
+              >
+                {compactView ? <LayoutGrid className="w-3.5 h-3.5" /> : <LayoutList className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+            {compactView ? (
+              <div className="rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] overflow-hidden">
+                <div className="divide-y divide-[hsl(var(--border)/0.3)]">
+                  {exercises.map((ex) => (
+                    <ExerciseCard key={ex.id} exercise={ex} compact />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {exercises.map((ex) => (
+                  <ExerciseCard key={ex.id} exercise={ex} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+      </div>
     </AppContainer>
   );
 }

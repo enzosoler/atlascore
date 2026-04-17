@@ -8,7 +8,7 @@
  *   4. Supplements (placeholder)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -19,6 +19,9 @@ import {
   Check,
   Loader2,
   ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  Calculator,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SafePageBoundary } from '@/components/shared/StablePage';
@@ -87,6 +90,147 @@ function MacroInput({ label, unit, value, onChange }) {
   );
 }
 
+// ─── Macro Calculation Breakdown ──────────────────────────────────────────────
+
+const ACTIVITY_MULTIPLIERS = {
+  sedentary: { label: 'Sedentary (little/no exercise)', factor: 1.2 },
+  light: { label: 'Light (1-3 days/week)', factor: 1.375 },
+  moderate: { label: 'Moderate (3-5 days/week)', factor: 1.55 },
+  active: { label: 'Active (6-7 days/week)', factor: 1.725 },
+  very_active: { label: 'Very active (2x daily)', factor: 1.9 },
+};
+
+const GOAL_ADJUSTMENTS = {
+  cut: { label: 'Fat loss deficit', kcalDelta: -500, proteinPerKg: 2.2, fatPctOfKcal: 0.25 },
+  bulk: { label: 'Muscle gain surplus', kcalDelta: 350, proteinPerKg: 1.8, fatPctOfKcal: 0.25 },
+  maintain: { label: 'Maintenance (no change)', kcalDelta: 0, proteinPerKg: 1.6, fatPctOfKcal: 0.28 },
+  recomp: { label: 'Recomposition (slight deficit)', kcalDelta: -200, proteinPerKg: 2.0, fatPctOfKcal: 0.25 },
+};
+
+function MacroCalculationBreakdown({ profileRow, goal, calories, protein, carbs, fat, t }) {
+  const weight = Number(profileRow?.weight_kg) || 0;
+  const height = Number(profileRow?.height_cm) || 0;
+  const age = Number(profileRow?.age) || 0;
+  const sex = profileRow?.sex || 'male';
+  const activityKey = profileRow?.activity_level || 'moderate';
+  const activity = ACTIVITY_MULTIPLIERS[activityKey] || ACTIVITY_MULTIPLIERS.moderate;
+  const goalAdj = GOAL_ADJUSTMENTS[goal] || GOAL_ADJUSTMENTS.maintain;
+
+  // Mifflin-St Jeor BMR
+  const bmr = weight > 0 && height > 0 && age > 0
+    ? sex === 'female'
+      ? Math.round(10 * weight + 6.25 * height - 5 * age - 161)
+      : Math.round(10 * weight + 6.25 * height - 5 * age + 5)
+    : null;
+
+  const tdee = bmr ? Math.round(bmr * activity.factor) : null;
+  const adjustedKcal = tdee ? tdee + goalAdj.kcalDelta : null;
+
+  // Derived macro breakdown
+  const derivedProtein = weight > 0 ? Math.round(weight * goalAdj.proteinPerKg) : null;
+  const derivedFatKcal = adjustedKcal ? Math.round(adjustedKcal * goalAdj.fatPctOfKcal) : null;
+  const derivedFat = derivedFatKcal ? Math.round(derivedFatKcal / 9) : null;
+  const derivedCarbsKcal = adjustedKcal && derivedProtein && derivedFat
+    ? adjustedKcal - (derivedProtein * 4) - (derivedFat * 9)
+    : null;
+  const derivedCarbs = derivedCarbsKcal ? Math.round(derivedCarbsKcal / 4) : null;
+
+  const hasSufficientData = bmr !== null;
+
+  const rows = [
+    {
+      label: 'BMR (Mifflin-St Jeor)',
+      detail: hasSufficientData
+        ? `10 x ${weight}kg + 6.25 x ${height}cm - 5 x ${age}y ${sex === 'female' ? '- 161' : '+ 5'}`
+        : 'Missing body stats (weight, height, age)',
+      value: bmr ? `${bmr} kcal` : '--',
+    },
+    {
+      label: `Activity multiplier (x${activity.factor})`,
+      detail: activity.label,
+      value: tdee ? `${tdee} kcal` : '--',
+    },
+    {
+      label: `Goal adjustment`,
+      detail: `${goalAdj.label} (${goalAdj.kcalDelta >= 0 ? '+' : ''}${goalAdj.kcalDelta} kcal)`,
+      value: adjustedKcal ? `${adjustedKcal} kcal` : '--',
+    },
+  ];
+
+  const macroRows = [
+    {
+      label: 'Protein',
+      detail: weight > 0 ? `${goalAdj.proteinPerKg}g/kg x ${weight}kg` : 'Needs weight',
+      derived: derivedProtein ? `${derivedProtein}g` : '--',
+      actual: protein ? `${protein}g` : '--',
+    },
+    {
+      label: 'Fat',
+      detail: `${Math.round(goalAdj.fatPctOfKcal * 100)}% of total kcal`,
+      derived: derivedFat ? `${derivedFat}g` : '--',
+      actual: fat ? `${fat}g` : '--',
+    },
+    {
+      label: 'Carbs',
+      detail: 'Remaining kcal / 4',
+      derived: derivedCarbs ? `${derivedCarbs}g` : '--',
+      actual: carbs ? `${carbs}g` : '--',
+    },
+  ];
+
+  return (
+    <div className="space-y-3 mt-3">
+      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))]">
+        {t('planPage.howCalculated') || 'How this was calculated'}
+      </p>
+
+      {/* Energy calculation steps */}
+      <div className="rounded-[14px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.2)] overflow-hidden divide-y divide-[hsl(var(--border)/0.4)]">
+        {rows.map(({ label, detail, value }) => (
+          <div key={label} className="flex items-start justify-between gap-3 px-3 py-2.5">
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">{label}</p>
+              <p className="text-[11px] text-[hsl(var(--fg-3))] leading-4 mt-0.5">{detail}</p>
+            </div>
+            <span className="text-[12px] font-semibold text-[hsl(var(--brand))] shrink-0">{value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Macro breakdown */}
+      <div className="rounded-[14px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.2)] overflow-hidden">
+        <div className="px-3 py-2 border-b border-[hsl(var(--border)/0.4)]">
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
+            <span>Macro</span>
+            <div className="flex gap-6">
+              <span>Suggested</span>
+              <span>Your target</span>
+            </div>
+          </div>
+        </div>
+        {macroRows.map(({ label, detail, derived, actual }) => (
+          <div key={label} className="flex items-start justify-between gap-3 px-3 py-2.5 border-b border-[hsl(var(--border)/0.3)] last:border-0">
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] font-semibold text-[hsl(var(--fg))]">{label}</p>
+              <p className="text-[11px] text-[hsl(var(--fg-3))] leading-4 mt-0.5">{detail}</p>
+            </div>
+            <div className="flex gap-6 text-[12px] font-semibold shrink-0">
+              <span className="text-[hsl(var(--fg-2))] w-12 text-right">{derived}</span>
+              <span className="text-[hsl(var(--brand))] w-12 text-right">{actual}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {!hasSufficientData && (
+        <p className="text-[11px] text-[hsl(var(--fg-3))] leading-4">
+          Add your weight, height, and age in your profile to see personalized calculations. Current targets can still be set manually.
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ─── Main content ──────────────────────────────────────────────────────────────
 
 function PlanContent() {
@@ -114,6 +258,12 @@ function PlanContent() {
         fat_target: pd.fat_target ?? pd.targets?.fat ?? '',
         target_weight: pd.target_weight ?? '',
         current_weight: pd.current_weight ?? '',
+        // Body metrics for BMR calculation transparency
+        weight_kg: pd.current_weight ?? pd.weight_kg ?? '',
+        height_cm: pd.height_cm ?? '',
+        age: pd.age ?? '',
+        sex: pd.sex ?? pd.gender ?? '',
+        activity_level: pd.activity_level ?? 'moderate',
       };
     },
     enabled: !!user?.id,
@@ -142,6 +292,7 @@ function PlanContent() {
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
+  const [showCalcBreakdown, setShowCalcBreakdown] = useState(false);
 
   useEffect(() => {
     if (profileRow) {
@@ -323,6 +474,30 @@ function PlanContent() {
               </div>
             );
           })()}
+
+          {/* How this was calculated — expandable */}
+          <div className="mt-4 pt-3 border-t border-[hsl(var(--border)/0.4)]">
+            <button
+              type="button"
+              onClick={() => setShowCalcBreakdown((prev) => !prev)}
+              className="flex items-center gap-2 text-[12px] font-semibold text-[hsl(var(--brand))] hover:opacity-80 transition-opacity"
+            >
+              <Calculator className="w-3.5 h-3.5" strokeWidth={2} />
+              {showCalcBreakdown ? 'Hide calculation' : 'How this was calculated'}
+              {showCalcBreakdown ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+            {showCalcBreakdown && (
+              <MacroCalculationBreakdown
+                profileRow={profileRow}
+                goal={goal}
+                calories={calories}
+                protein={protein}
+                carbs={carbs}
+                fat={fat}
+                t={t}
+              />
+            )}
+          </div>
         </SectionCard>
 
         {/* ── Training Plan ─────────────────────────────────────────────────── */}

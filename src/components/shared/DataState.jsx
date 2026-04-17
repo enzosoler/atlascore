@@ -1,124 +1,362 @@
 import React from 'react';
-import { Loader2, AlertTriangle, WifiOff, RefreshCw, Database } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  Loader2,
+  RefreshCw,
+  Shield,
+  WifiOff,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function DataState({ 
-  loading, 
-  empty, 
-  error, 
-  offline, 
-  title, 
-  action, 
-  subtitle,
-  retryLabel = 'Try again'
-}) {
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--fg-3))]" />
-        <p className="mt-4 text-sm text-[hsl(var(--fg-3))]">Loading...</p>
-        {subtitle && (
-          <p className="text-xs text-[hsl(var(--fg-3))] mt-2">{subtitle}</p>
-        )}
-      </div>
-    );
-  }
+/**
+ * DataState -- unified system state component for Atlas Core.
+ *
+ * Handles: loading, empty, error, offline, permission, success, neutral.
+ *
+ * Pattern (Linear / Things 3 / Duolingo):
+ *   Eyebrow (optional context)
+ *   State title
+ *   Short explanation
+ *   Primary CTA
+ *   Optional secondary CTA
+ *   Optional note/meta
+ *
+ * Usage:
+ *   <DataState
+ *     variant="empty"
+ *     icon={Scale}
+ *     title="No measurements yet"
+ *     description="Add your first weight entry to start tracking progress."
+ *     action={{ label: "Add measurement", onClick: fn }}
+ *     secondaryAction={{ label: "Learn more", onClick: fn }}
+ *     meta="Last checked 2 minutes ago"
+ *   />
+ */
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
-        <AlertTriangle className="h-8 w-8 text-[hsl(var(--err))]" />
-        <p className="mt-4 text-sm text-[hsl(var(--err))] text-center max-w-md">
-          {title || 'Something went wrong'}
-        </p>
-        {subtitle && (
-          <p className="text-xs text-[hsl(var(--fg-3))] mt-2">{subtitle}</p>
-        )}
-        {action && (
-          <button
-            onClick={action}
-            className="mt-4 px-4 py-2 bg-[hsl(var(--brand))] text-white rounded-lg text-sm font-medium hover:bg-[hsl(var(--brand)/0.9)] transition-colors"
-          >
-            {retryLabel}
-          </button>
-        )}
-      </div>
-    );
-  }
+const VARIANT_CONFIG = {
+  loading: {
+    defaultIcon: Loader2,
+    shellClass: 'border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.18)]',
+    iconBgClass: 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
+    spin: true,
+  },
+  empty: {
+    defaultIcon: Info,
+    shellClass: 'border-dashed border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.12)]',
+    iconBgClass: 'border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card))] text-[hsl(var(--fg-3))]',
+  },
+  error: {
+    defaultIcon: AlertTriangle,
+    shellClass: 'border-[hsl(var(--err)/0.2)] bg-[hsl(var(--err)/0.04)]',
+    iconBgClass: 'border-[hsl(var(--err)/0.2)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--err))]',
+  },
+  offline: {
+    defaultIcon: WifiOff,
+    shellClass: 'border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.04)]',
+    iconBgClass: 'border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--warn))]',
+  },
+  permission: {
+    defaultIcon: Shield,
+    shellClass: 'border-[hsl(var(--brand)/0.18)] bg-[hsl(var(--brand)/0.04)]',
+    iconBgClass: 'border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--brand))]',
+  },
+  success: {
+    defaultIcon: CheckCircle2,
+    shellClass: 'border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.04)]',
+    iconBgClass: 'border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--ok))]',
+  },
+  neutral: {
+    defaultIcon: Info,
+    shellClass: 'border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.18)]',
+    iconBgClass: 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
+  },
+};
 
-  if (offline) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
-        <WifiOff className="h-8 w-8 text-[hsl(var(--fg-3))]" />
-        <p className="mt-4 text-sm text-[hsl(var(--fg-3))] text-center max-w-md">
-          You're offline
-        </p>
-        <p className="text-xs text-[hsl(var(--fg-3))] mt-2">
-          Check your connection and try again
-        </p>
+export function DataState(props) {
+  const {
+    variant: variantProp = 'neutral',
+    icon,
+    title,
+    description,
+    eyebrow,
+    meta,
+    action,
+    secondaryAction,
+    note,
+    className,
+
+    // ── Legacy prop bridge (StablePage compat) ──────────────────────────────
+    // The older StablePage DataState passed `primaryAction` / `secondaryAction`
+    // as ReactNode elements and `customIcon` as a component. We detect and
+    // forward them so every existing call-site keeps working without edits.
+    primaryAction: legacyPrimaryAction,
+    customIcon,
+    centered: legacyCentered,
+
+    // ── Boolean-flag legacy API (old DataState.jsx file) ─────────────────────
+    loading,
+    empty,
+    error,
+    offline,
+    subtitle: legacySubtitle,
+    retryLabel,
+  } = props;
+  // ── Resolve legacy boolean API → variant string ───────────────────────────
+  let resolvedVariant = variantProp;
+  if (loading) resolvedVariant = 'loading';
+  else if (error === 'partial') resolvedVariant = 'error';
+  else if (error) resolvedVariant = 'error';
+  else if (offline) resolvedVariant = 'offline';
+  else if (empty) resolvedVariant = 'empty';
+
+  // If called with boolean flags, map title/subtitle/action accordingly
+  const resolvedTitle = title ?? (loading ? 'Loading...' : undefined);
+  const resolvedDescription = description ?? legacySubtitle;
+
+  // The `action` prop is an object `{ label, onClick }` in the new API,
+  // but a plain function in the old boolean-flag API. Detect which form.
+  const isNewActionAPI = action && typeof action === 'object' && action.label;
+  const isLegacyActionFn = typeof action === 'function';
+
+  // The `secondaryAction` prop is an object `{ label, onClick }` in the new API,
+  // or a ReactNode in the StablePage compat API (`primaryAction` / `secondaryAction` as JSX).
+  const isNewSecondaryAPI = secondaryAction && typeof secondaryAction === 'object' && secondaryAction.label;
+  // When secondaryAction is a ReactNode (not an object with .label), it's legacy StablePage
+  const isLegacySecondaryNode = secondaryAction && !isNewSecondaryAPI && React.isValidElement(secondaryAction);
+
+  const config = VARIANT_CONFIG[resolvedVariant] || VARIANT_CONFIG.neutral;
+  const Icon = icon || customIcon || config.defaultIcon;
+  const isCentered = legacyCentered !== undefined ? legacyCentered : true;
+
+  // ── Build action buttons ──────────────────────────────────────────────────
+  const renderPrimary = () => {
+    // New object API  { label, onClick }
+    if (isNewActionAPI) {
+      return (
         <button
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-[hsl(var(--brand))] text-white rounded-lg text-sm font-medium hover:bg-[hsl(var(--brand)/0.9)] transition-colors"
+          type="button"
+          onClick={action.onClick}
+          className="atlas-button atlas-button-primary w-full"
         >
-          Refresh
+          {action.label}
         </button>
-      </div>
-    );
-  }
+      );
+    }
+    // Legacy ReactNode (StablePage compat -- `primaryAction` prop)
+    if (legacyPrimaryAction) return <div>{legacyPrimaryAction}</div>;
+    // Legacy boolean-flag onClick (old DataState.jsx)
+    if (isLegacyActionFn) {
+      return (
+        <button
+          type="button"
+          onClick={action}
+          className="atlas-button atlas-button-primary w-full"
+        >
+          {retryLabel || (resolvedVariant === 'error' ? 'Retry' : 'Get started')}
+        </button>
+      );
+    }
+    return null;
+  };
 
-  if (empty) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
-        <div className="text-center">
-          <div className="text-6xl text-[hsl(var(--fg-3))] mb-4">📊</div>
-          <p className="text-lg font-medium text-[hsl(var(--fg))] mb-2">{title || 'No data yet'}</p>
-          <p className="text-sm text-[hsl(var(--fg-3))] mb-4">Start tracking to see your progress here</p>
-          {subtitle && (
-            <p className="text-xs text-[hsl(var(--fg-3))] mt-2">{subtitle}</p>
+  const renderSecondary = () => {
+    // New object API  { label, onClick }
+    if (isNewSecondaryAPI) {
+      return (
+        <button
+          type="button"
+          onClick={secondaryAction.onClick}
+          className="text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:text-[hsl(var(--fg))]"
+        >
+          {secondaryAction.label}
+        </button>
+      );
+    }
+    // Legacy ReactNode (StablePage compat)
+    if (isLegacySecondaryNode) return <div>{secondaryAction}</div>;
+    return null;
+  };
+
+  const primary = renderPrimary();
+  const secondary = renderSecondary();
+
+  return (
+    <div
+      className={cn(
+        'rounded-[18px] border px-5 py-6 shadow-[var(--shadow-xs)]',
+        config.shellClass,
+        isCentered && 'text-center',
+        className,
+      )}
+    >
+      {/* Eyebrow + Meta row */}
+      {(eyebrow || meta) && (
+        <div className={cn('mb-4 flex items-center justify-between gap-3', isCentered && 'justify-center')}>
+          {eyebrow ? (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+              {eyebrow}
+            </p>
+          ) : <span />}
+          {meta ? (
+            <span className="rounded-full bg-[hsl(var(--card)/0.8)] px-2.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">
+              {meta}
+            </span>
+          ) : null}
+        </div>
+      )}
+
+      {/* Body: icon + text + actions */}
+      <div className={cn('flex items-start gap-3.5', isCentered && 'flex-col items-center')}>
+        {/* Icon circle — 48px (h-12 w-12) */}
+        <div
+          className={cn(
+            'flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] border shadow-[var(--shadow-xs)]',
+            config.iconBgClass,
           )}
-          {action && (
-            <button
-              onClick={action}
-              className="mt-4 px-6 py-3 bg-[hsl(var(--brand))] text-white rounded-lg text-sm font-medium hover:bg-[hsl(var(--brand)/0.9)] transition-colors"
-            >
-              Get started
-            </button>
+        >
+          <Icon
+            className={cn('h-5 w-5', config.spin && 'animate-spin')}
+            strokeWidth={2}
+          />
+        </div>
+
+        <div className={cn('min-w-0 flex-1', isCentered && 'flex flex-col items-center')}>
+          {/* Title — 18px semibold */}
+          {resolvedTitle && (
+            <p className="text-[18px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+              {resolvedTitle}
+            </p>
+          )}
+
+          {/* Description — 14px secondary, max-width 320px */}
+          {resolvedDescription && (
+            <p className={cn(
+              'mt-1.5 text-[14px] leading-6 text-[hsl(var(--fg-2))]',
+              isCentered && 'max-w-[320px]',
+            )}>
+              {resolvedDescription}
+            </p>
+          )}
+
+          {/* Actions */}
+          {(primary || secondary) && (
+            <div className={cn(
+              'mt-5 flex flex-col gap-2.5',
+              isCentered ? 'w-full max-w-[280px] items-center' : 'items-start',
+            )}>
+              {primary}
+              {secondary}
+            </div>
+          )}
+
+          {/* Note / meta text */}
+          {note && (
+            <p className={cn(
+              'mt-3 text-[12px] leading-5 text-[hsl(var(--fg-3))]',
+              isCentered && 'max-w-[320px]',
+            )}>
+              {note}
+            </p>
           )}
         </div>
       </div>
-    );
-  }
-
-  // Partial failure state
-  if (error === 'partial') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
-        <Database className="h-8 w-8 text-[hsl(var(--warn))]" />
-        <p className="mt-4 text-sm text-[hsl(var(--warn))] text-center max-w-md">
-          {title || 'Partial data available'}
-        </p>
-        {subtitle && (
-          <p className="text-xs text-[hsl(var(--fg-3))] mt-2">{subtitle}</p>
-        )}
-        <div className="flex gap-2 mt-4">
-          {action && (
-            <button
-              onClick={action}
-              className="px-4 py-2 bg-[hsl(var(--brand))] text-white rounded-lg text-sm font-medium hover:bg-[hsl(var(--brand)/0.9)] transition-colors"
-            >
-              Retry
-            </button>
-          )}
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg text-sm font-medium hover:bg-[hsl(var(--card-hi))] transition-colors"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }
+
+// ── Convenience pre-wired variants ──────────────────────────────────────────
+
+export function LoadingDataState({ title = 'Loading...', description, eyebrow, ...rest }) {
+  return (
+    <DataState
+      variant="loading"
+      title={title}
+      description={description}
+      eyebrow={eyebrow}
+      {...rest}
+    />
+  );
+}
+
+export function EmptyDataState({ icon, title, description, action, secondaryAction, note, ...rest }) {
+  return (
+    <DataState
+      variant="empty"
+      icon={icon}
+      title={title}
+      description={description}
+      action={action}
+      secondaryAction={secondaryAction}
+      note={note}
+      {...rest}
+    />
+  );
+}
+
+export function ErrorDataState({
+  title = 'Something went wrong',
+  description,
+  onRetry,
+  retryLabel = 'Retry',
+  secondaryAction,
+  note,
+  ...rest
+}) {
+  return (
+    <DataState
+      variant="error"
+      title={title}
+      description={description}
+      action={onRetry ? { label: retryLabel, onClick: onRetry } : undefined}
+      secondaryAction={secondaryAction}
+      note={note}
+      {...rest}
+    />
+  );
+}
+
+export function OfflineDataState({
+  title = "You're offline",
+  description = 'Check your connection and try again when ready.',
+  onRetry,
+  ...rest
+}) {
+  return (
+    <DataState
+      variant="offline"
+      title={title}
+      description={description}
+      action={onRetry ? { label: 'Retry connection', onClick: onRetry } : { label: 'Retry connection', onClick: () => window.location.reload() }}
+      {...rest}
+    />
+  );
+}
+
+export function PermissionDataState({
+  icon,
+  title,
+  description,
+  onAllow,
+  onDismiss,
+  allowLabel = 'Allow access',
+  dismissLabel = 'Not now',
+  note,
+  ...rest
+}) {
+  return (
+    <DataState
+      variant="permission"
+      icon={icon}
+      title={title}
+      description={description}
+      action={onAllow ? { label: allowLabel, onClick: onAllow } : undefined}
+      secondaryAction={onDismiss ? { label: dismissLabel, onClick: onDismiss } : undefined}
+      note={note}
+      {...rest}
+    />
+  );
+}
+
+export default DataState;

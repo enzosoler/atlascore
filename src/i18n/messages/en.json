@@ -3848,7 +3848,20 @@
       "pause": "Pause",
       "resume": "Resume",
       "next": "Next"
-    }
+    },
+    "finishWorkout": "Finish Workout",
+    "elapsed": "Elapsed",
+    "setN": "Set",
+    "previous": "Previous",
+    "weight": "Weight",
+    "done": "Done",
+    "addSet": "+ Add Set",
+    "nextExercise": "Next exercise",
+    "upNext": "Up next",
+    "restAfterSet": "Rest after set {n}",
+    "tapToLog": "Tap to edit",
+    "volume": "Volume",
+    "personalRecord": "PR"
   },
   "train": {
     "thisWeek": "This week",
@@ -3885,7 +3898,20 @@
     "workout": "Workout",
     "sessionComplete": "Session complete",
     "createPlan": "Create plan",
-    "title": "Train"
+    "title": "Train",
+    "lastWorkoutSummary": "Last Workout",
+    "repeatWorkout": "Repeat Workout",
+    "volumeTrend": "Volume Trend",
+    "totalVolume": "Total Volume",
+    "totalSets": "Total Sets",
+    "duration": "Duration",
+    "historyTitle": "Workout History",
+    "noHistory": "No workouts logged yet",
+    "prBadge": "PR",
+    "sets": "sets",
+    "kg": "kg",
+    "min": "min",
+    "weeklyVolume": "Weekly Volume"
   },
   "planPage": {
     "title": "Plan",

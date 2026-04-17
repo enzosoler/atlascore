@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useT } from '@/lib/i18nContext';
+import { DataState } from '@/components/shared/DataState';
 
 export function formatNumber(value, options = {}) {
   return new Intl.NumberFormat('en-US', options).format(Number(value || 0));
@@ -195,120 +196,9 @@ export function EmptyState({ title, description, action, icon: Icon, note }) {
   );
 }
 
-export function DataState({
-  variant = 'neutral',
-  title,
-  description,
-  eyebrow,
-  meta,
-  primaryAction,
-  secondaryAction,
-  note,
-  customIcon: CustomIcon,
-  centered = false,
-}) {
-  const variantMeta = {
-    neutral: {
-      icon: Info,
-      shellClass: 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.32)]',
-      iconClass: 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
-    },
-    loading: {
-      icon: Loader2,
-      shellClass: 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.32)]',
-      iconClass: 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
-      spin: true,
-    },
-    empty: {
-      icon: Info,
-      shellClass: 'border-dashed border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.18)]',
-      iconClass: 'border-[hsl(var(--border)/0.76)] bg-[hsl(var(--card))] text-[hsl(var(--fg-3))]',
-    },
-    error: {
-      icon: AlertTriangle,
-      shellClass: 'border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--warn)/0.05)]',
-      iconClass: 'border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--warn))]',
-    },
-    offline: {
-      icon: AlertTriangle,
-      shellClass: 'border-[hsl(var(--fg-3)/0.2)] bg-[hsl(var(--fill)/0.26)]',
-      iconClass: 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
-    },
-    permission: {
-      icon: Info,
-      shellClass: 'border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.05)]',
-      iconClass: 'border-[hsl(var(--brand)/0.24)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--brand))]',
-    },
-    success: {
-      icon: CheckCircle2,
-      shellClass: 'border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.05)]',
-      iconClass: 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--ok))]',
-    },
-  };
-
-  const resolvedMeta = variantMeta[variant] || variantMeta.neutral;
-  const Icon = CustomIcon || resolvedMeta.icon;
-
-  return (
-    <div
-      className={cn(
-        'rounded-[18px] border px-5 py-5 shadow-[var(--shadow-xs)]',
-        resolvedMeta.shellClass,
-        centered && 'text-center'
-      )}
-    >
-      {(eyebrow || meta) ? (
-        <div className={cn('mb-4 flex items-center justify-between gap-3', centered && 'justify-center')}>
-          {eyebrow ? (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-              {eyebrow}
-            </p>
-          ) : <span />}
-          {meta ? (
-            <span className="rounded-full bg-[hsl(var(--card)/0.8)] px-2.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">
-              {meta}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className={cn('flex items-start gap-3.5', centered && 'flex-col items-center')}>
-        <div
-          className={cn(
-            'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border shadow-[var(--shadow-xs)]',
-            resolvedMeta.iconClass
-          )}
-        >
-          <Icon className={cn('h-5 w-5', resolvedMeta.spin && 'animate-spin')} strokeWidth={2} />
-        </div>
-
-        <div className={cn('min-w-0 flex-1', centered && 'flex flex-col items-center')}>
-          <p className="text-[16px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-            {title}
-          </p>
-          {description ? (
-            <p className={cn('mt-1.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]', centered && 'max-w-md')}>
-              {description}
-            </p>
-          ) : null}
-
-          {(primaryAction || secondaryAction) ? (
-            <div className={cn('mt-4 flex flex-wrap gap-2.5', centered && 'justify-center')}>
-              {primaryAction ? <div>{primaryAction}</div> : null}
-              {secondaryAction ? <div>{secondaryAction}</div> : null}
-            </div>
-          ) : null}
-
-          {note ? (
-            <p className={cn('mt-3 text-[12px] leading-5 text-[hsl(var(--fg-3))]', centered && 'max-w-sm')}>
-              {note}
-            </p>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-}
+// DataState is now defined in @/components/shared/DataState.jsx and imported above.
+// Re-export it so existing `import { DataState } from '@/components/shared/StablePage'` call-sites keep working.
+export { DataState };
 
 export function StatusBanner({ children, tone = 'neutral' }) {
   const toneMeta = {

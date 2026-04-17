@@ -35,6 +35,7 @@ import {
   SecondaryButton,
   StatusBanner,
 } from '@/components/shared/StablePage';
+import { DataState } from '@/components/shared/DataState';
 import { ResponsiveModal } from '@/components/app/ResponsiveModal';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -1214,9 +1215,13 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
           {activeTab === 'trends' && (
             <>
               {!sortedMeasurements.length ? (
-                <EmptyState
+                <DataState
+                  variant="empty"
+                  icon={BarChart3}
                   title={t('measurements.trend.no_measurements_title')}
                   description={t('measurements.trend.no_measurements_description')}
+                  action={{ label: t('measurements.log_measurements'), onClick: handleCreate }}
+                  note={t('measurements.trend.need_two_note', 'You need at least two entries for trends to appear.')}
                 />
               ) : (
                 <>

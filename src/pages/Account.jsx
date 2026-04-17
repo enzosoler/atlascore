@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
+  Bell,
   ChevronRight,
   CreditCard,
+  FileOutput,
   LogOut,
-  Mail,
+  Plug,
+  Settings,
   ShieldCheck,
   Trash2,
   User,
@@ -34,36 +37,66 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { DataState, PageShell, SectionCard, SafePageBoundary } from '@/components/shared/StablePage';
+import { PageShell, SectionCard, SafePageBoundary } from '@/components/shared/StablePage';
 
-function SettingsLink({ to, icon: Icon, title, subtitle, meta, danger = false }) {
-  return (
-    <Link
-      to={to}
-      className={`flex items-center gap-4 rounded-[18px] border px-4 py-4 transition-colors ${
-        danger
-          ? 'border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] hover:border-[hsl(var(--err)/0.45)]'
-          : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.36)] hover:bg-[hsl(var(--fill)/0.52)]'
-      }`}
-    >
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${
+/* ─── Grouped row: iOS-style drill-in row ─────────────────────────────────── */
+
+function GroupedRow({ to, onClick, icon: Icon, label, value, danger = false, isLast = false }) {
+  const cls = [
+    'flex items-center gap-3.5 px-4 py-3 transition-colors',
+    danger
+      ? 'hover:bg-[hsl(var(--err)/0.04)]'
+      : 'hover:bg-[hsl(var(--fill)/0.52)]',
+    !isLast && 'border-b border-[hsl(var(--border)/0.5)]',
+  ].filter(Boolean).join(' ');
+
+  const inner = (
+    <>
+      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] ${
         danger
           ? 'bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]'
-          : 'bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]'
+          : 'bg-[hsl(var(--fill)/0.7)] text-[hsl(var(--fg-2))]'
       }`}>
-        <Icon className="h-4 w-4" strokeWidth={1.9} />
+        <Icon className="h-4 w-4" strokeWidth={1.8} />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className={`text-[15px] font-semibold tracking-[-0.02em] ${danger ? 'text-[hsl(var(--err))]' : 'text-[hsl(var(--fg))]'}`}>
-          {title}
-        </p>
-        <p className="text-[13px] text-[hsl(var(--fg-2))]">{subtitle}</p>
-      </div>
-      {meta ? <span className="text-[12px] text-[hsl(var(--fg-3))]">{meta}</span> : null}
-      <ChevronRight className={`h-4 w-4 shrink-0 ${danger ? 'text-[hsl(var(--err)/0.6)]' : 'text-[hsl(var(--fg-3))]'}`} />
+      <span className={`flex-1 text-[14px] font-medium tracking-[-0.01em] ${
+        danger ? 'text-[hsl(var(--err))]' : 'text-[hsl(var(--fg))]'
+      }`}>
+        {label}
+      </span>
+      {value && (
+        <span className="text-[13px] text-[hsl(var(--fg-3))]">{value}</span>
+      )}
+      <ChevronRight className={`h-4 w-4 shrink-0 ${
+        danger ? 'text-[hsl(var(--err)/0.4)]' : 'text-[hsl(var(--fg-3)/0.6)]'
+      }`} />
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={`w-full text-left ${cls}`}>
+        {inner}
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} className={cls}>
+      {inner}
     </Link>
   );
 }
+
+function GroupedSection({ children }) {
+  return (
+    <div className="overflow-hidden rounded-[16px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.6)]">
+      {children}
+    </div>
+  );
+}
+
+/* ─── Reset data dialog ───────────────────────────────────────────────────── */
 
 function ResetDataSection({ logout }) {
   const [open, setOpen] = useState(false);
@@ -96,18 +129,13 @@ function ResetDataSection({ logout }) {
 
   return (
     <>
-      <button type="button" onClick={() => { setOpen(true); setConfirmText(''); }} className="block w-full text-left">
-        <div className="flex items-center gap-4 rounded-[18px] border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] px-4 py-4 transition-colors hover:border-[hsl(var(--err)/0.45)]">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]">
-            <RotateCcw className="h-4 w-4" strokeWidth={1.9} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--err))]">Reset all data</p>
-            <p className="text-[13px] text-[hsl(var(--fg-2))]">Wipe tracking data and keep the account intact.</p>
-          </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-[hsl(var(--err)/0.6)]" />
-        </div>
-      </button>
+      <GroupedRow
+        onClick={() => { setOpen(true); setConfirmText(''); }}
+        icon={RotateCcw}
+        label="Reset all data"
+        value="Irreversible"
+        danger
+      />
 
       <Dialog open={open} onOpenChange={(v) => { if (!loading) setOpen(v); }}>
         <DialogContent className="sm:max-w-md">
@@ -153,6 +181,8 @@ function ResetDataSection({ logout }) {
   );
 }
 
+/* ─── Account page ────────────────────────────────────────────────────────── */
+
 export default function Account() {
   const { user, logout } = useAuth();
   const { t } = useI18n();
@@ -162,7 +192,6 @@ export default function Account() {
   const initials = getAccountInitials(user);
   const isSubscribed = ['active', 'trialing', 'granted', 'past_due'].includes(subscription?.status);
   const planLabel = formatSubscriptionPlanLabel(subscription);
-  const providerLabel = formatBillingOwner(subscription);
   const renewalLabel = formatRenewalLabel(subscription);
 
   return (
@@ -172,140 +201,107 @@ export default function Account() {
       fallbackDescription={t('account.pageSubtitle')}
     >
       <PageShell
-        eyebrow="Account"
         title={t('account.pageTitle')}
-        subtitle="Identity, billing state, and account-wide actions."
+        subtitle="Identity, subscription, and account controls."
         maxWidth="max-w-2xl"
         actions={(
           <Button asChild variant="ghost" size="sm">
             <Link to={ROUTES.profile} className="flex items-center gap-2 text-[hsl(var(--fg-2))]">
               <ArrowLeft className="h-4 w-4" />
-              Back to profile
+              Back
             </Link>
           </Button>
         )}
       >
-        <SectionCard title="Identity" subtitle="Who this account belongs to.">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <div className="flex items-start gap-4 min-w-0 flex-1">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] text-[18px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-                {initials}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[1.1rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                  {displayName}
-                </p>
-                <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-                  {user?.email || t('account.noEmail')}
-                </p>
-                <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.08)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
-                  <ShieldCheck className="h-3 w-3" strokeWidth={2} />
-                  {String(user?.atlas_role || 'athlete').replace(/\b\w/g, (char) => char.toUpperCase())}
-                </span>
-              </div>
+        {/* ── Identity card ──────────────────────────────────────────────── */}
+        <SectionCard>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.88)] text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+              {initials}
             </div>
-            <Button asChild variant="outline" className="gap-2 self-start">
-              <Link to={ROUTES.profileEdit}>
-                Edit profile
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[16px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                {displayName}
+              </p>
+              <p className="mt-0.5 truncate text-[13px] text-[hsl(var(--fg-2))]">
+                {user?.email || t('account.noEmail')}
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.25)] bg-[hsl(var(--brand)/0.06)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.03em] text-[hsl(var(--brand))]">
+              <ShieldCheck className="h-3 w-3" strokeWidth={2} />
+              {String(user?.atlas_role || 'athlete').replace(/\b\w/g, (c) => c.toUpperCase())}
+            </span>
           </div>
         </SectionCard>
 
-        <SectionCard title="Subscription hub" subtitle="Plan state, renewal timing, and the correct billing owner.">
+        {/* ── Subscription summary ───────────────────────────────────────── */}
+        <SectionCard title="Subscription" subtitle={isSubscribed ? planLabel : 'Free plan'}>
           {isSubscribed ? (
-            <DataState
-              variant={subscription?.status === 'past_due' ? 'error' : 'neutral'}
-              eyebrow="Current subscription"
-              meta={planLabel}
-              title={`${renewalLabel} · ${providerLabel}`}
-              description={
-                subscription?.source === 'revenuecat'
-                  ? 'Changes happen in the device customer center. Use Atlas to confirm the current plan, then continue in the native billing owner.'
-                  : 'Changes happen in the Stripe billing portal. Atlas keeps the plan state visible here and sends you to the correct manager.'
-              }
-              primaryAction={(
-                <Button asChild className="gap-2">
-                  <Link to={ROUTES.billing}>
-                    <CreditCard className="h-4 w-4" />
-                    Manage billing
-                  </Link>
-                </Button>
-              )}
-              secondaryAction={(
-                <div className="rounded-full bg-[hsl(var(--card)/0.82)] px-3 py-2 text-[12px] font-medium text-[hsl(var(--fg-3))]">
-                  Source: {subscription?.source || 'unknown'}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between rounded-[14px] bg-[hsl(var(--fill)/0.36)] px-4 py-3">
+                <div>
+                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{planLabel}</p>
+                  <p className="mt-0.5 text-[12px] text-[hsl(var(--fg-2))]">{renewalLabel}</p>
                 </div>
-              )}
-              note="This card is the account-level subscription owner summary. Settings holds preferences. Billing handles the handoff."
-            />
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                  subscription?.status === 'past_due'
+                    ? 'bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]'
+                    : 'bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]'
+                }`}>
+                  {subscription?.status === 'trialing' ? 'Trial' : subscription?.status === 'past_due' ? 'Past due' : 'Active'}
+                </span>
+              </div>
+              <Button asChild className="w-full gap-2">
+                <Link to={ROUTES.billing}>
+                  <CreditCard className="h-4 w-4" />
+                  Manage billing
+                </Link>
+              </Button>
+            </div>
           ) : (
-            <DataState
-              variant="empty"
-              eyebrow="Current subscription"
-              title="You are on the free plan"
-              description="Upgrade to open billing management and renewal controls."
-              primaryAction={(
-                <Button asChild>
-                  <Link to={ROUTES.pricing}>View plans</Link>
-                </Button>
-              )}
-              note="Free users manage their plan choice on Pricing. Billing only appears after a paid plan exists."
-            />
+            <div className="space-y-3">
+              <p className="text-[13px] leading-relaxed text-[hsl(var(--fg-2))]">
+                You are on the free plan. Upgrade to unlock AI insights, training plans, and advanced analytics.
+              </p>
+              <Button asChild className="w-full">
+                <Link to={ROUTES.pricing}>View plans</Link>
+              </Button>
+            </div>
           )}
         </SectionCard>
 
-        <SectionCard title="Control plane" subtitle="Shortcuts into the rest of the app settings.">
-          <div className="space-y-3">
-            <SettingsLink
-              to={ROUTES.profile}
-              icon={User}
-              title="Edit profile"
-              subtitle="Adjust identity, preferences, and body data."
-              meta="Profile"
-            />
-            <SettingsLink
-              to={ROUTES.settings}
-              icon={ShieldCheck}
-              title="Open settings"
-              subtitle="Theme, language, notifications, and data controls."
-              meta="Settings"
-            />
-            <SettingsLink
-              to={ROUTES.notificationSettings}
-              icon={Mail}
-              title="Notifications"
-              subtitle="Reminder permissions and local reminders."
-              meta="Control"
-            />
-            <SettingsLink
-              to={ROUTES.integrations}
-              icon={CreditCard}
-              title="Integrations"
-              subtitle="Connection center for devices and services."
-              meta="Connect"
-            />
-          </div>
+        {/* ── Navigation rows ────────────────────────────────────────────── */}
+        <SectionCard title="General">
+          <GroupedSection>
+            <GroupedRow to={ROUTES.profileEdit} icon={User} label="Edit profile" />
+            <GroupedRow to={ROUTES.settings} icon={Settings} label="Settings" />
+            <GroupedRow to={ROUTES.notificationSettings} icon={Bell} label="Notifications" />
+            <GroupedRow to={ROUTES.integrations} icon={Plug} label="Integrations" />
+            <GroupedRow to={ROUTES.export} icon={FileOutput} label="Export data" isLast />
+          </GroupedSection>
         </SectionCard>
 
-        <SectionCard title="Danger zone" subtitle="Account-wide actions that need confirmation.">
-          <div className="space-y-3">
+        {/* ── Danger zone ────────────────────────────────────────────────── */}
+        <SectionCard title="Danger zone">
+          <GroupedSection>
             <ResetDataSection logout={logout} />
-            <SettingsLink
+            <GroupedRow
               to={ROUTES.settingsDeleteAccount}
               icon={Trash2}
-              title="Delete account"
-              subtitle="Permanently delete the account and all connected data."
+              label="Delete account"
               danger
+              isLast
             />
-          </div>
+          </GroupedSection>
         </SectionCard>
 
-        <Button variant="outline" onClick={() => logout?.()} className="w-full gap-2">
-          <LogOut className="h-4 w-4" />
-          Log out
-        </Button>
+        {/* ── Logout — separate from destructive actions ─────────────────── */}
+        <div className="pt-2">
+          <Button variant="outline" onClick={() => logout?.()} className="w-full gap-2 text-[hsl(var(--fg-2))]">
+            <LogOut className="h-4 w-4" />
+            Log out
+          </Button>
+        </div>
       </PageShell>
     </SafePageBoundary>
   );

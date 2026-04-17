@@ -11,6 +11,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter } from 'lucide-react';
+import { DataState } from '@/components/shared/DataState';
 import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
 import {
   searchExercises,
@@ -519,30 +520,28 @@ export default function ExerciseSearch({ onSelect }) {
             <ExerciseRow key={ex.id || i} exercise={ex} onSelect={handleSelect} />
           ))}
           {!loading && results.length === 0 && (
-            <div className="px-3 py-4 text-center">
-              <p className="text-[13px] text-[hsl(var(--fg-2))] mb-2">No results found</p>
-              <button
-                onClick={() => setShowManual(true)}
-                className="text-[12px] text-[hsl(var(--brand))] font-medium hover:underline flex items-center gap-1 mx-auto"
-              >
-                <PenLine className="w-3.5 h-3.5" /> Add manually
-              </button>
-            </div>
+            <DataState
+              variant="empty"
+              icon={Dumbbell}
+              title="No exercises found"
+              description="Try a different search term, or add a custom exercise manually."
+              action={{ label: 'Add manually', onClick: () => setShowManual(true) }}
+              className="mx-3 my-2"
+            />
           )}
         </div>
       )}
 
       {/* No results for text search */}
       {query.length >= 2 && !loading && results.length === 0 && (
-        <div className="text-center py-3">
-          <p className="text-[13px] text-[hsl(var(--fg-2))] mb-1">No results for "{query}"</p>
-          <button
-            onClick={() => setShowManual(true)}
-            className="text-[12px] text-[hsl(var(--brand))] font-medium hover:underline flex items-center gap-1 mx-auto"
-          >
-            <PenLine className="w-3.5 h-3.5" /> Add manually
-          </button>
-        </div>
+        <DataState
+          variant="empty"
+          icon={Search}
+          title={`No results for "${query}"`}
+          description="The exercise database did not match anything. You can add a custom exercise instead."
+          action={{ label: 'Add manually', onClick: () => setShowManual(true) }}
+          className="my-2"
+        />
       )}
 
       {/* Manual shortcut (home state) */}

@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Capacitor } from '@capacitor/core';
-import { Loader2 } from 'lucide-react';
+import { Check, Loader2, Shield, Sparkles, TrendingUp, Target, BarChart3 } from 'lucide-react';
 import { getOfferings, purchasePackage, restorePurchases } from '@/lib/revenueCat';
 import { useOnboarding } from '../OnboardingContext';
 import { usePaywallAnalytics } from '@/hooks/usePaywallAnalytics';
@@ -34,7 +34,48 @@ function computeSavings(annualPrice, weeklyPrice) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  PaywallScreen                                                     */
+/*  Trial Timeline                                                     */
+/* ------------------------------------------------------------------ */
+
+function TrialTimeline() {
+  const steps = [
+    { day: 'Today', label: 'Full access unlocked', active: true },
+    { day: 'Day 2', label: 'Reminder before trial ends', active: false },
+    { day: 'Day 3', label: 'Billing starts (cancel anytime)', active: false },
+  ];
+
+  return (
+    <div className="rounded-[16px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.08)] p-4">
+      <div className="flex flex-col gap-0">
+        {steps.map((step, i) => (
+          <div key={step.day} className="flex gap-3">
+            {/* Timeline line + dot */}
+            <div className="flex flex-col items-center">
+              <div
+                className={`h-3 w-3 rounded-full border-2 ${
+                  step.active
+                    ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand))]'
+                    : 'border-[hsl(var(--border))] bg-[hsl(var(--card))]'
+                }`}
+              />
+              {i < steps.length - 1 && (
+                <div className="h-8 w-px bg-[hsl(var(--border)/0.5)]" />
+              )}
+            </div>
+            {/* Content */}
+            <div className="-mt-0.5 pb-2">
+              <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{step.day}</p>
+              <p className="text-[12px] text-[hsl(var(--fg-2))]">{step.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  PaywallScreen — Cal AI / Fastic pattern                            */
 /* ------------------------------------------------------------------ */
 
 export default function PaywallScreen() {
@@ -46,8 +87,8 @@ export default function PaywallScreen() {
   } = usePaywallAnalytics();
   const isNative = Capacitor.isNativePlatform();
 
-  const [selected, setSelected] = useState('annual');
-  const [packages, setPackages] = useState(null); // RevenueCat package objects keyed by billing
+  const [selected, setSelected] = useState('weekly');
+  const [packages, setPackages] = useState(null);
   const [prices, setPrices] = useState(FALLBACK_PRICES);
   const [loading, setLoading] = useState(isNative);
   const [purchasing, setPurchasing] = useState(false);
@@ -76,7 +117,7 @@ export default function PaywallScreen() {
           const priceMap = { ...FALLBACK_PRICES };
 
           for (const pkg of offering.availablePackages) {
-            const id = pkg.identifier; // e.g. '$rc_weekly'
+            const id = pkg.identifier;
             if (id === '$rc_weekly') {
               pkgMap.weekly = pkg;
               priceMap.weekly = {
@@ -133,26 +174,38 @@ export default function PaywallScreen() {
     [prices],
   );
 
-  /* ---------- Plan cards ---------- */
+  /* ---------- Plan options ---------- */
   const plans = [
     {
       key: 'weekly',
       title: 'Weekly',
       price: prices.weekly.label,
       badge: 'MOST POPULAR',
-    },
-    {
-      key: 'monthly',
-      title: 'Monthly',
-      price: prices.monthly.label,
-      badge: null,
+      sub: 'Billed every week',
     },
     {
       key: 'annual',
       title: 'Annual',
       price: prices.annual.label,
       badge: annualSavingsPct ? `SAVE ${annualSavingsPct}%` : null,
+      sub: 'Billed once per year',
     },
+    {
+      key: 'monthly',
+      title: 'Monthly',
+      price: prices.monthly.label,
+      badge: null,
+      sub: 'Billed every month',
+    },
+  ];
+
+  /* ---------- Benefits ---------- */
+  const benefits = [
+    { icon: Target, text: 'Personalized training & nutrition plan' },
+    { icon: TrendingUp, text: 'Weekly auto-adjustments based on your data' },
+    { icon: BarChart3, text: 'Full progress analytics & body metrics' },
+    { icon: Sparkles, text: 'AI-powered insights & recommendations' },
+    { icon: Shield, text: 'Cancel anytime, no commitment' },
   ];
 
   /* ---------- Handlers ---------- */
@@ -189,7 +242,7 @@ export default function PaywallScreen() {
       return;
     }
 
-    // Web: just advance — Stripe checkout happens after account creation
+    // Web: just advance
     goNext();
   }
 
@@ -214,13 +267,13 @@ export default function PaywallScreen() {
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center px-6">
-        <div className="w-full max-w-[380px] rounded-[28px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.72)] p-5 shadow-[0_20px_70px_rgba(0,0,0,0.10)]">
-          <div className="mb-4 h-4 w-32 rounded-full bg-[hsl(var(--fill)/0.9)]" />
-          <div className="mb-3 h-8 w-3/4 rounded-full bg-[hsl(var(--fill)/0.9)]" />
+        <div className="w-full max-w-[380px] rounded-[24px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card)/0.72)] p-6">
+          <div className="mb-4 h-4 w-32 animate-pulse rounded-full bg-[hsl(var(--fill)/0.9)]" />
+          <div className="mb-3 h-8 w-3/4 animate-pulse rounded-full bg-[hsl(var(--fill)/0.9)]" />
           <div className="space-y-3">
-            <div className="h-16 rounded-[16px] bg-[hsl(var(--fill)/0.6)]" />
-            <div className="h-16 rounded-[16px] bg-[hsl(var(--fill)/0.6)]" />
-            <div className="h-16 rounded-[16px] bg-[hsl(var(--fill)/0.6)]" />
+            <div className="h-16 animate-pulse rounded-[14px] bg-[hsl(var(--fill)/0.6)]" />
+            <div className="h-16 animate-pulse rounded-[14px] bg-[hsl(var(--fill)/0.6)]" />
+            <div className="h-16 animate-pulse rounded-[14px] bg-[hsl(var(--fill)/0.6)]" />
           </div>
           <div className="mt-5 flex items-center gap-2 text-[13px] text-[hsl(var(--fg-3))]">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -231,81 +284,46 @@ export default function PaywallScreen() {
     );
   }
 
-  /* ---------- Render state ---------- */
+  /* ---------- Computed display values ---------- */
   const selectedPrice = prices[selected];
   const selectedPeriod = BILLING_META[selected].period;
   const selectedPriceLabel = selectedPrice.label.split('/')[0];
   const disclosure = isNative
-    ? `3 days free, then ${selectedPriceLabel}/${selectedPeriod}. Subscription auto-renews unless canceled 24h before the current period ends.`
-    : 'Billing happens after account creation, when you confirm the plan on the web checkout screen.';
+    ? `3 days free, then ${selectedPriceLabel}/${selectedPeriod}. Auto-renews unless canceled 24h before current period ends.`
+    : 'Billing happens after account creation via web checkout.';
   const ctaLabel = isNative
     ? (purchasing ? 'Processing...' : 'Start 3-day free trial')
     : 'Continue to account setup';
-  const billingPlans = [
-    {
-      key: 'annual',
-      title: 'Annual',
-      price: prices.annual.label,
-      badge: annualSavingsPct ? `SAVE ${annualSavingsPct}%` : 'BEST VALUE',
-      note: 'Lowest effective monthly price',
-    },
-    {
-      key: 'monthly',
-      title: 'Monthly',
-      price: prices.monthly.label,
-      badge: null,
-      note: 'Flexible month-to-month',
-    },
-    {
-      key: 'weekly',
-      title: 'Weekly',
-      price: prices.weekly.label,
-      badge: null,
-      note: 'Most flexible, highest cost',
-    },
-  ];
-  const benefits = [
-    { title: 'Personalized targets', detail: 'Calories, macros, and training cues built from your baseline.' },
-    { title: 'Weekly adjustments', detail: 'Your plan updates as your inputs and progress change.' },
-    { title: 'Progress context', detail: 'Check-ins, milestones, and historical data stay in one place.' },
-  ];
 
   /* ---------- Render ---------- */
   return (
-    <div className="flex flex-1 flex-col px-5 pt-4">
+    <div className="flex flex-1 flex-col px-5 pt-2 pb-2">
       <motion.div
         className="mx-auto flex w-full max-w-[420px] flex-1 flex-col"
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        <div className="rounded-[28px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.76)] p-5 shadow-[0_20px_70px_rgba(0,0,0,0.10)]">
-          <div className="space-y-2 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--fg-3))]">
-              Choose your plan
-            </p>
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {/* Header */}
+          <div className="text-center">
             <h1 className="text-[28px] font-bold leading-tight tracking-[-0.04em] text-[hsl(var(--fg))]">
-              Unlock your full potential.
+              Unlock your full plan
             </h1>
-            <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">
-              Start a {isNative ? '3-day free trial' : 'plan selection'} and keep the version that fits your pace.
+            <p className="mt-2 text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">
+              Start your free trial and get access to everything.
             </p>
           </div>
 
-          <div className="mt-5 space-y-3 rounded-[22px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--bg)/0.35)] p-4">
-            {benefits.map((benefit) => (
-              <div key={benefit.title} className="flex gap-3">
-                <div className="mt-1 h-2 w-2 rounded-full bg-[hsl(var(--brand))]" />
-                <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{benefit.title}</p>
-                  <p className="text-[12px] leading-relaxed text-[hsl(var(--fg-2))]">{benefit.detail}</p>
-                </div>
-              </div>
-            ))}
+          {/* Trial Timeline */}
+          <div className="mt-5">
+            <TrialTimeline />
           </div>
 
-          <div className="mt-5 flex flex-col gap-3">
-            {billingPlans.map((plan) => {
+          {/* Plan Selector */}
+          <div className="mt-5 flex flex-col gap-2.5">
+            {plans.map((plan) => {
               const isSelected = selected === plan.key;
 
               return (
@@ -313,36 +331,41 @@ export default function PaywallScreen() {
                   key={plan.key}
                   type="button"
                   onClick={() => setSelected(plan.key)}
-                  className={`relative rounded-[18px] border p-4 text-left transition-colors ${
+                  className={`relative rounded-[14px] border px-4 py-3.5 text-left transition-all ${
                     isSelected
-                      ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.08)]'
-                      : 'border-[hsl(var(--border)/0.7)] bg-[hsl(var(--bg)/0.35)]'
+                      ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand)/0.06)] shadow-[0_0_0_1px_hsl(var(--brand)/0.15)]'
+                      : 'border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.06)]'
                   }`}
                 >
                   {plan.badge && (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-[hsl(var(--brand))] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                    <span
+                      className={`absolute -top-2.5 right-3 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white ${
+                        plan.key === 'weekly'
+                          ? 'bg-[hsl(var(--brand))]'
+                          : 'bg-[hsl(var(--sys-green))]'
+                      }`}
+                    >
                       {plan.badge}
                     </span>
                   )}
 
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Radio indicator */}
                       <div
-                        className={`mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 transition-colors ${
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
                           isSelected
                             ? 'border-[hsl(var(--brand))] bg-[hsl(var(--brand))]'
                             : 'border-[hsl(var(--border))]'
                         }`}
                       >
                         {isSelected && (
-                          <div className="mt-[3px] ml-[3px] h-[10px] w-[10px] rounded-full bg-white" />
+                          <div className="h-2 w-2 rounded-full bg-white" />
                         )}
                       </div>
                       <div>
-                        <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
-                          {plan.title}
-                        </p>
-                        <p className="text-[12px] text-[hsl(var(--fg-3))]">{plan.note}</p>
+                        <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">{plan.title}</p>
+                        <p className="text-[12px] text-[hsl(var(--fg-3))]">{plan.sub}</p>
                       </div>
                     </div>
                     <p className="text-[16px] font-bold text-[hsl(var(--fg))]">{plan.price}</p>
@@ -352,49 +375,58 @@ export default function PaywallScreen() {
             })}
           </div>
 
-          <p className="mt-4 text-center text-[11px] leading-relaxed text-[hsl(var(--fg-3))]">
+          {/* Benefit Stack */}
+          <div className="mt-5 space-y-2.5">
+            {benefits.map((b) => (
+              <div key={b.text} className="flex items-center gap-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.10)]">
+                  <Check className="h-3.5 w-3.5 text-[hsl(var(--brand))]" />
+                </div>
+                <p className="text-[14px] text-[hsl(var(--fg))]">{b.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ---- Sticky bottom CTA area ---- */}
+        <div className="shrink-0 pt-2 pb-1">
+          {error && (
+            <p className="mb-2 text-center text-[12px] text-red-500">{error}</p>
+          )}
+
+          {/* Dominant CTA */}
+          <button
+            type="button"
+            onClick={handleContinue}
+            disabled={purchasing}
+            className="flex h-[54px] w-full items-center justify-center rounded-[14px] bg-[hsl(var(--brand))] text-[16px] font-semibold text-white shadow-[0_16px_48px_hsl(var(--brand)/0.24)] transition-all active:scale-[0.98] disabled:opacity-60"
+          >
+            {purchasing ? <Loader2 className="h-5 w-5 animate-spin" /> : ctaLabel}
+          </button>
+
+          {/* Disclosure */}
+          <p className="mt-2.5 text-center text-[11px] leading-relaxed text-[hsl(var(--fg-3))]">
             {disclosure}
           </p>
 
-          {error && (
-            <p className="mt-3 text-center text-[12px] text-red-500">{error}</p>
-          )}
-
-          <div className="mt-5 space-y-3">
-            <button
-              type="button"
-              onClick={handleContinue}
-              disabled={purchasing}
-              className="w-full rounded-[16px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white shadow-[0_18px_50px_hsl(var(--brand)/0.22)] transition-opacity active:opacity-80 disabled:opacity-60"
-            >
-              {ctaLabel}
-            </button>
-
-            <div className="flex items-center justify-center gap-3 text-[11px] text-[hsl(var(--fg-3))]">
-              <span>{isNative ? 'Cancel in one tap' : 'Bill later after sign-up'}</span>
-              <span className="text-[hsl(var(--border))]">&middot;</span>
-              <span>{isNative ? '$0 today' : 'Choose your plan before checkout'}</span>
-            </div>
-
+          {/* Restore + Legal footer */}
+          <div className="mt-3 flex items-center justify-center gap-3">
             {isNative ? (
               <button
                 type="button"
                 onClick={handleRestore}
                 disabled={restoring}
-                className="block w-full text-center text-[12px] text-[hsl(var(--fg-3))] underline transition-colors active:text-[hsl(var(--fg-2))] disabled:opacity-60"
+                className="text-[11px] text-[hsl(var(--fg-3))] underline transition-colors active:text-[hsl(var(--fg-2))] disabled:opacity-60"
               >
                 {restoring ? 'Restoring...' : 'Restore Purchases'}
               </button>
             ) : (
-              <p className="text-center text-[12px] leading-relaxed text-[hsl(var(--fg-3))]">
-                Restore Purchases is available in the mobile app.
-              </p>
+              <span className="text-[11px] text-[hsl(var(--fg-3))]">Restore available in app</span>
             )}
-
-            <div className="flex items-center justify-center gap-4 text-[11px] text-[hsl(var(--fg-3))]">
-              <a href="https://atlascore.app/terms" className="underline">Terms of Use</a>
-              <a href="https://atlascore.app/privacy" className="underline">Privacy Policy</a>
-            </div>
+            <span className="text-[hsl(var(--border))]">&middot;</span>
+            <a href="https://atlascore.app/terms" className="text-[11px] text-[hsl(var(--fg-3))] underline">Terms</a>
+            <span className="text-[hsl(var(--border))]">&middot;</span>
+            <a href="https://atlascore.app/privacy" className="text-[11px] text-[hsl(var(--fg-3))] underline">Privacy</a>
           </div>
         </div>
       </motion.div>

@@ -34,6 +34,7 @@ import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
 import { LoadingState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
+import { DataState } from '@/components/shared/DataState';
 import { useI18n } from '@/lib/i18nContext';
 import { DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
 import {
@@ -1057,23 +1058,20 @@ export default function WorkoutsV2() {
 
       <div className="space-y-7 pb-12">
         {(isPlanError || isRecentError) && (
-          <StatusBanner tone="error">
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-[hsl(var(--fg))]">Could not load workout overview</p>
-              <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">
-                {planError?.message || recentError?.message || 'The plan or history query failed to load.'}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <SecondaryButton className="h-10" onClick={() => { refetchPlan(); refetchRecent(); }}>
-                  Try again
-                </SecondaryButton>
-              </div>
-            </div>
-          </StatusBanner>
+          <DataState
+            variant="error"
+            eyebrow="Workouts"
+            title="Could not load workout overview"
+            description={planError?.message || recentError?.message || 'The plan or history query failed to load.'}
+            action={{ label: 'Try again', onClick: () => { refetchPlan(); refetchRecent(); } }}
+            note="Your saved plans are safe. This is a temporary loading issue."
+          />
         )}
 
         {isLoading && (
-          <LoadingState
+          <DataState
+            variant="loading"
+            eyebrow="Workouts"
             title="Loading workout overview"
             description="Fetching your active plan, recent sessions, and training history."
           />
@@ -1142,27 +1140,16 @@ export default function WorkoutsV2() {
 
         {!isLoading && !activePlan && (
           <div className="space-y-6">
-            {/* NO PLAN STATE - AI-FIRST */}
-            <Card className="px-6 py-6 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--brand)/0.15)] flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-[hsl(var(--brand))]" />
-              </div>
-              <h3 className="text-xl font-bold text-[hsl(var(--fg))] mb-2">Build your training plan with AI</h3>
-              <p className="text-sm text-[hsl(var(--fg-2))] mb-6 max-w-sm mx-auto">
-                Answer 3 quick questions and get a complete, personalized training program in seconds.
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row justify-center">
-                <PrimaryButton className="gap-2" onClick={() => setShowPlanBuilder(true)}>
-                  <Sparkles className="h-4 w-4" />
-                  AI Plan Builder
-                </PrimaryButton>
-                <SecondaryButton className="gap-2" onClick={() => setShowQuickWorkout(true)}>
-                  <Zap className="h-4 w-4" />
-                  Quick Workout
-                </SecondaryButton>
-              </div>
-            </Card>
-            
+            <DataState
+              variant="empty"
+              icon={Dumbbell}
+              eyebrow="Training"
+              title="No training plan yet"
+              description="Create a personalized plan with AI or start a quick free workout to get moving today."
+              action={{ label: 'AI Plan Builder', onClick: () => setShowPlanBuilder(true) }}
+              secondaryAction={{ label: 'Quick Workout', onClick: () => setShowQuickWorkout(true) }}
+            />
+
             {/* AI INSIGHTS FOR NO-PLAN STATE */}
             <AIInsightsCard plan={null} recentSessions={recentSessions} />
           </div>

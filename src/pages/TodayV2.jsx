@@ -21,6 +21,9 @@ import { ROUTES } from '@/lib/routes';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
 import { AICoachBriefing } from '@/components/today/AICoachBriefing';
 import WeeklySummary from '@/components/today/WeeklySummary';
+import DailyHeroCard from '@/components/today/DailyHeroCard';
+import MetricCardsRow from '@/components/today/MetricCardsRow';
+import WeeklyReview from '@/components/today/WeeklyReview';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
 import QuickMealSheet from '@/components/nutrition/QuickMealSheet';
 import CoachChatTrigger from '@/components/ai/CoachChatTrigger';
@@ -879,7 +882,7 @@ function TodayContent() {
     if (!safeDaily.workoutDone && safePlan.id) return 'Triggered by your open workout';
     if (!safeDaily.nutritionLogged && kcalRemaining > 0) return 'Triggered by remaining fuel';
     if ((safeDaily.protocols?.dueToday || 0) > (safeDaily.protocols?.completedToday || 0)) return 'Triggered by pending protocols';
-    return 'Triggered by today’s state';
+    return 'Triggered by today\u2019s state';
   }, [todayCheckin?.energy, safeDaily.workoutDone, safePlan.id, safeDaily.nutritionLogged, kcalRemaining, safeDaily.protocols?.dueToday, safeDaily.protocols?.completedToday]);
   const proactiveContext = briefing.focus || (safeDaily.workoutDone ? 'Recovery focus' : 'Execution focus');
   const proactiveFreshness = useMemo(() => {
@@ -910,7 +913,7 @@ function TodayContent() {
     if (!safeDaily.workoutDone) {
       actions.push({
         label: 'Start workout',
-        detail: safePlan.id ? 'Open today’s training plan and log the session.' : 'Go to Workouts and create today’s session.',
+        detail: safePlan.id ? 'Open today\u2019s training plan and log the session.' : 'Go to Workouts and create today\u2019s session.',
         onClick: () => { window.location.href = ROUTES.workouts; },
         icon: Dumbbell,
         colorClass: 'bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]',
@@ -960,7 +963,7 @@ function TodayContent() {
         <DataState
           variant="loading"
           eyebrow="Today"
-          title="Building today’s dashboard"
+          title="Building today's dashboard"
           description="Atlas is loading your workout, nutrition, check-in, and plan context before showing the day summary."
           note="This prevents the dashboard from flashing fallback zeros that look like real data."
         />
@@ -970,7 +973,7 @@ function TodayContent() {
 
   return (
     <TodayScreen>
-      {/* 1. Header — with streak pill */}
+      {/* ── 1. Compact header: date, greeting, streak chip ── */}
       <Header
         weather={weather}
         greeting={getGreeting(safeDaily.preferredName, t)}
@@ -1009,31 +1012,40 @@ function TodayContent() {
         />
       ) : (
         <>
-          {/* 1b. Daily Status — dominant hero */}
-          <DailyStatus
-            status={dailyStatus.status}
-            message={dailyStatus.message}
+          {/* ── 2. Daily-status hero card: one big ring showing overall completion ── */}
+          <DailyHeroCard
+            workoutDone={safeDaily.workoutDone}
+            nutritionLogged={safeDaily.nutritionLogged}
+            checkinDone={!!todayCheckin}
+            weightLogged={safeDaily.weightLogged}
             completedCount={dailyStatus.completedCount}
             totalCount={dailyStatus.totalCount}
-            briefing={briefing}
-            kcalRemaining={kcalRemaining}
-            streak={streak}
-            streakUrgency={streakUrgency}
-            todayCheckin={todayCheckin}
-            primaryAction={briefing.primaryAction}
-            onOpenChat={() => setChatOpen(true)}
+            statusLabel={dailyStatus.status === 'on-track' ? t('today.status.onTrack') : dailyStatus.status === 'caution' ? t('today.status.caution') : dailyStatus.status === 'needs-attention' ? t('today.status.needsAttention') : t('today.status.gettingStarted')}
+            statusMessage={briefing.text || dailyStatus.message}
+            status={dailyStatus.status}
           />
 
-          {/* 1c. Trial countdown — only shows during active trial */}
+          {/* Trial countdown — only shows during active trial */}
           {subscription?.status === 'trialing' && trialDaysRemaining > 0 && (
             <TrialCountdown daysRemaining={trialDaysRemaining} />
           )}
         </>
       )}
 
+      {/* ── 3. Metric cards row: 4 KPI tiles ── */}
+      <MetricCardsRow
+        caloriesRemaining={kcalRemaining}
+        caloriesTarget={safeNutrition.caloriesTarget || 0}
+        proteinConsumed={Math.round(safeNutrition.proteinConsumed || 0)}
+        proteinTarget={safeNutrition.proteinTarget || 0}
+        weekWorkoutCount={safeDaily.weekWorkoutCount || 0}
+        streak={streak}
+      />
+
+      {/* ── 4. Priority action strip: next 2-3 actions ── */}
       <PriorityActionStrip actions={priorityActions} />
 
-      {/* NEW: Streak milestone celebration */}
+      {/* Streak milestone celebration */}
       {showMilestone && (
         <div className="rounded-[18px] bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.2)] p-4">
           <div className="flex items-center justify-between">
@@ -1054,7 +1066,7 @@ function TodayContent() {
         </div>
       )}
 
-      {/* NEW: Streak recovery */}
+      {/* Streak recovery */}
       {streak === 0 && recentCheckins.length > 0 && !hasCheckin && (
         <div className="rounded-[18px] bg-[hsl(var(--err)/0.06)] border border-[hsl(var(--err)/0.15)] p-4">
           <p className="text-[14px] text-[hsl(var(--fg))]">
@@ -1064,16 +1076,16 @@ function TodayContent() {
         </div>
       )}
 
-      {/* NEW: Streak paywall at 3 days */}
+      {/* Streak paywall at 3 days */}
       {streak === 3 && <PaywallTrigger trigger="streak" show={streak >= 3} />}
 
-      {/* 2. Proactive insight */}
+      {/* ── 5. Coach insight card: proactive AI ── */}
       {showAICard && (
         <AICoachBriefing
           briefing={proactiveMessage}
           focus={proactiveContext}
           reason={proactiveReason}
-          context={ai?.briefing?.focus || 'Derived from today’s status'}
+          context={ai?.briefing?.focus || 'Derived from today\u2019s status'}
           freshness={proactiveFreshness}
           primaryAction={briefing.primaryAction}
           secondaryAction={briefing.secondaryAction}
@@ -1082,35 +1094,30 @@ function TodayContent() {
         />
       )}
 
-      {/* 3. Weekly review */}
-      <WeeklySummary
-        label="Weekly review"
-        summary={weeklySummaryText}
-        narrative={weeklyNarrative}
-        highlights={weeklyHighlights}
-        segments={weeklySegments}
+      {/* ── 6. Coach chat trigger: composer-style input ── */}
+      <CoachChatTrigger
+        onOpen={() => setChatOpen(true)}
+        onSuggestion={(text) => { coach.sendMessage(text, 'today'); setChatOpen(true); }}
       />
 
-      {/* Macro rings card (macros-only nutrition mode) */}
-      {nutritionMode === 'macros_only' && (
-        <MacroRingsCard nutrition={safeNutrition} t={t} />
-      )}
+      {/* ── 7. Weekly review: Strava-style recap ── */}
+      <WeeklyReview
+        weekWorkoutCount={safeDaily.weekWorkoutCount || 0}
+        weekCheckinCount={weekCheckinCount}
+        avgCalories={safeNutrition.caloriesConsumed > 0 ? safeNutrition.caloriesConsumed : 0}
+        streak={streak}
+        segments={weeklySegments}
+        narrative={weeklyNarrative}
+        onShare={() => setShareFlowOpen(true)}
+      />
 
-      {/* 4. Coach Input */}
-      <section className="space-y-4">
-        <CoachChatTrigger
-          onOpen={() => setChatOpen(true)}
-          onSuggestion={(text) => { coach.sendMessage(text, 'today'); setChatOpen(true); }}
-        />
-      </section>
-
-      {/* NEW: 7-day chain dots */}
+      {/* 7-day chain dots */}
       <ChainDots checkinDates={checkinDates} />
 
-      {/* 3b. Protocol Summary — supplement/medication compliance */}
+      {/* Protocol Summary — supplement/medication compliance */}
       <ProtocolsSummary protocols={safeDaily.protocols} />
 
-      {/* 5. Quick Actions Grid (ORIGINAL — preserved) */}
+      {/* ── 8. Quick Actions Grid ── */}
       <section className="space-y-4">
         <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.focus_areas')}</h3>
         <div className="grid grid-cols-2 gap-3.5">
@@ -1153,7 +1160,7 @@ function TodayContent() {
         </div>
       </section>
 
-      {/* 6. Today's Plan Summary (ORIGINAL — preserved) */}
+      {/* Today's Plan Summary */}
       {safePlan.id && !safeDaily.workoutDone && (
         <section className="space-y-4">
           <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.upcoming')}</h3>
@@ -1176,7 +1183,7 @@ function TodayContent() {
         </section>
       )}
 
-      {/* 7. Recommendations (ORIGINAL — preserved) */}
+      {/* ── 9. Recommendations ── */}
       {recs.length > 0 && (
         <section className="space-y-4">
           <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.smart_recs')}</h3>
@@ -1188,13 +1195,14 @@ function TodayContent() {
         </section>
       )}
 
-      {/* NEW: First workout milestone */}
+      {/* First workout milestone */}
       {safeDaily.recentSessions?.length === 1 && safeDaily.workoutDone && (
         <div className="rounded-[18px] bg-[hsl(var(--brand)/0.06)] border border-[hsl(var(--brand)/0.15)] p-4">
           <p className="text-[14px] text-[hsl(var(--fg))]">{t('today.first_workout')}</p>
         </div>
       )}
 
+      {/* Modals — untouched */}
       <CoachChatSheet
         open={chatOpen}
         onOpenChange={setChatOpen}

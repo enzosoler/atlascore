@@ -32,12 +32,12 @@ test('Pricing.jsx success_url contains {CHECKOUT_SESSION_ID}', () => {
 
 test('Pricing.jsx success_url points at /Today', () => {
   const source = readFileSync(pricingPath, 'utf8');
-  // Match the specific pattern "success_url: ... /Today ... {CHECKOUT_SESSION_ID}"
-  // on one or two lines. Tolerant of formatting changes.
-  const re = /success_url:[^\n]*\/Today[^\n]*\{CHECKOUT_SESSION_ID\}/s;
+  // Match success_url containing either literal "/Today" or ROUTES.today + {CHECKOUT_SESSION_ID}
+  const hasSessionId = /success_url:[^\n]*\{CHECKOUT_SESSION_ID\}/s.test(source);
+  const hasTodayRoute = /success_url:[^\n]*(\/Today|ROUTES\.today)/s.test(source);
   assert.ok(
-    re.test(source),
-    'Expected Pricing.jsx to redirect to /Today with session_id on success. If you moved the post-checkout page, update TodayV2 and this test together.',
+    hasSessionId && hasTodayRoute,
+    'Expected Pricing.jsx to redirect to /Today (or ROUTES.today) with session_id on success.',
   );
 });
 

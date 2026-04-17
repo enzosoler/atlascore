@@ -13,7 +13,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Play, CheckCircle2, Clock, Zap, Plus,
-  ArrowRight, Sparkles, Target,
+  ArrowRight, Sparkles, Target, Trophy, RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -294,7 +294,7 @@ function QuickWorkoutCard({ onClick, t }) {
 
 function RecentSessionsCompact({ sessions, t }) {
   if (sessions.length === 0) return null;
-  
+
   return (
     <div>
       <p className="atlas-overline mb-2.5 px-0.5">{t('train.recent')}</p>
@@ -308,6 +308,188 @@ function RecentSessionsCompact({ sessions, t }) {
             <p className="text-caption1 text-[hsl(var(--fg-3))] shrink-0">{formatDuration(s.duration_minutes)}</p>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Last Workout Summary Card ──────────────────────────────────────────────
+
+function LastWorkoutSummaryCard({ workoutHistory, personalRecords, onRepeat, t }) {
+  if (!workoutHistory || workoutHistory.length === 0) return null;
+
+  const last = workoutHistory[0];
+  const exList = Array.isArray(last.exercises_completed) ? last.exercises_completed : [];
+  const totalSets = exList.reduce((acc, ex) => acc + (ex.sets_completed?.length || 0), 0);
+  const totalVolume = exList.reduce((acc, ex) => {
+    return acc + (ex.sets_completed || []).reduce((a, s) => {
+      return a + (Number(s.load_actual) || 0) * (Number(s.reps_actual) || 0);
+    }, 0);
+  }, 0);
+
+  const completedDate = last.completed_at ? new Date(last.completed_at) : null;
+  const dateLabel = completedDate
+    ? completedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    : '';
+
+  // Check for PRs in this workout
+  const exercisesWithPR = exList.filter((ex) => {
+    const key = (ex.name || '').toLowerCase().trim().replace(/\s+/g, ' ');
+    const rec = personalRecords[key];
+    if (!rec) return false;
+    return (ex.sets_completed || []).some((s) => {
+      const load = Number(s.load_actual) || 0;
+      const reps = Number(s.reps_actual) || 0;
+      const volume = load * reps;
+      return load >= rec.bestWeight || volume >= rec.bestVolume;
+    });
+  });
+
+  return (
+    <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] shadow-[var(--shadow-sm)] overflow-hidden">
+      <div className="px-4 py-3 border-b border-[hsl(var(--border)/0.2)] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))]" strokeWidth={2} />
+          <p className="text-[12px] font-semibold text-[hsl(var(--fg))] uppercase tracking-wide">
+            {t('train.lastWorkoutSummary')}
+          </p>
+        </div>
+        <span className="text-[11px] text-[hsl(var(--fg-3))]">{dateLabel}</span>
+      </div>
+
+      <div className="p-4">
+        {/* Workout name + stats */}
+        <p className="text-[16px] font-bold text-[hsl(var(--fg))]">{last.name || t('train.workout')}</p>
+
+        <div className="grid grid-cols-3 gap-3 mt-3">
+          <div className="text-center">
+            <p className="text-[10px] font-semibold text-[hsl(var(--fg-3))] uppercase">{t('train.totalSets')}</p>
+            <p className="text-[18px] font-bold text-[hsl(var(--fg))] mt-0.5">{totalSets}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-[10px] font-semibold text-[hsl(var(--fg-3))] uppercase">{t('train.totalVolume')}</p>
+            <p className="text-[18px] font-bold text-[hsl(var(--fg))] mt-0.5">{totalVolume > 0 ? `${Math.round(totalVolume / 1000)}k` : '---'}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-[10px] font-semibold text-[hsl(var(--fg-3))] uppercase">{t('train.duration')}</p>
+            <p className="text-[18px] font-bold text-[hsl(var(--fg))] mt-0.5">{formatDuration(last.duration_minutes || 0)}</p>
+          </div>
+        </div>
+
+        {/* Exercise list with PR badges */}
+        <div className="mt-4 space-y-1.5">
+          {exList.slice(0, 5).map((ex, i) => {
+            const hasPR = exercisesWithPR.includes(ex);
+            const bestSet = (ex.sets_completed || []).reduce((best, s) => {
+              const load = Number(s.load_actual) || 0;
+              if (load > (best?.load || 0)) return { load, reps: Number(s.reps_actual) || 0 };
+              return best;
+            }, null);
+
+            return (
+              <div key={i} className="flex items-center justify-between py-1.5">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="text-[13px] text-[hsl(var(--fg))] font-medium truncate">{ex.name}</span>
+                  {hasPR && (
+                    <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-[hsl(var(--ok)/0.12)] border border-[hsl(var(--ok)/0.25)] px-1.5 py-0.5">
+                      <Trophy className="w-2.5 h-2.5 text-[hsl(var(--ok))]" strokeWidth={2.5} />
+                      <span className="text-[9px] font-bold text-[hsl(var(--ok))] uppercase">{t('train.prBadge')}</span>
+                    </span>
+                  )}
+                </div>
+                {bestSet && (
+                  <span className="text-[12px] text-[hsl(var(--fg-3))] shrink-0 ml-2">
+                    {bestSet.load > 0 ? `${bestSet.load}kg` : ''} {bestSet.reps > 0 ? `x${bestSet.reps}` : ''}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          {exList.length > 5 && (
+            <p className="text-[11px] text-[hsl(var(--fg-3))]">+{exList.length - 5} more</p>
+          )}
+        </div>
+
+        {/* Repeat workout CTA */}
+        <Button
+          variant="outline"
+          className="w-full mt-4 rounded-xl h-10 text-[13px] font-semibold"
+          onClick={() => onRepeat(last)}
+        >
+          <RotateCcw className="w-3.5 h-3.5 mr-1.5" strokeWidth={2} />
+          {t('train.repeatWorkout')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Volume Trend Mini Chart ────────────────────────────────────────────────
+
+function VolumeTrendChart({ workoutHistory, t }) {
+  // Build weekly volume data from last 4 weeks
+  const weeklyData = useMemo(() => {
+    const now = new Date();
+    const weeks = [];
+    for (let w = 3; w >= 0; w--) {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay() - (w * 7));
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+
+      let volume = 0;
+      let sessions = 0;
+      workoutHistory.forEach((wk) => {
+        const d = new Date(wk.completed_at || wk.date);
+        if (d >= weekStart && d < weekEnd) {
+          sessions++;
+          const exList = Array.isArray(wk.exercises_completed) ? wk.exercises_completed : [];
+          exList.forEach((ex) => {
+            (ex.sets_completed || []).forEach((s) => {
+              volume += (Number(s.load_actual) || 0) * (Number(s.reps_actual) || 0);
+            });
+          });
+        }
+      });
+
+      const label = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      weeks.push({ label, volume: Math.round(volume), sessions });
+    }
+    return weeks;
+  }, [workoutHistory]);
+
+  const maxVolume = Math.max(...weeklyData.map((w) => w.volume), 1);
+  if (maxVolume === 0) return null;
+
+  return (
+    <div className="rounded-2xl bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4">
+      <p className="text-[12px] font-semibold text-[hsl(var(--fg))] uppercase tracking-wide mb-3">
+        {t('train.weeklyVolume')}
+      </p>
+      <div className="flex items-end gap-2 h-20">
+        {weeklyData.map((week, i) => {
+          const heightPct = maxVolume > 0 ? (week.volume / maxVolume) * 100 : 0;
+          const isCurrentWeek = i === weeklyData.length - 1;
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <span className="text-[9px] font-bold text-[hsl(var(--fg-3))]">
+                {week.volume > 0 ? `${Math.round(week.volume / 1000)}k` : '0'}
+              </span>
+              <div className="w-full flex justify-center">
+                <div
+                  className={`w-full max-w-[32px] rounded-t-md transition-all ${
+                    isCurrentWeek
+                      ? 'bg-[hsl(var(--brand))]'
+                      : 'bg-[hsl(var(--brand)/0.25)]'
+                  }`}
+                  style={{ height: `${Math.max(heightPct, 4)}%`, minHeight: '3px' }}
+                />
+              </div>
+              <span className="text-[9px] text-[hsl(var(--fg-3))]">{week.label}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -474,6 +656,33 @@ export default function TrainV2() {
     }
   };
 
+  const handleRepeatWorkout = (historyWorkout) => {
+    const exList = Array.isArray(historyWorkout.exercises_completed) ? historyWorkout.exercises_completed : [];
+    const session = {
+      name: historyWorkout.name || t('train.workout'),
+      exercises: exList.map((ex) => {
+        const media = lookupExerciseMedia(ex.name);
+        const setCount = ex.sets_completed?.length || ex.target_sets || 3;
+        return {
+          name: ex.name,
+          primary_muscles: [],
+          rest_seconds: 60,
+          target_sets: setCount,
+          target_reps: ex.target_reps || '10',
+          media: { gif_url: media.gif_url, image_url: null },
+          sets: Array.from({ length: setCount }, (_, i) => ({
+            set_number: i + 1,
+            target_reps: ex.target_reps || '10',
+            target_weight: null,
+          })),
+        };
+      }),
+    };
+    setActiveSession(session);
+    setInitialSession(null);
+    setMode('execution');
+  };
+
   // ── Execution mode: full takeover ──────────────────────────────────────────
   if (mode === 'execution' && activeSession) {
     return (
@@ -562,9 +771,24 @@ export default function TrainV2() {
           />
         )}
 
+        {/* Last Workout Summary with PR badges */}
+        {workoutHistory.length > 0 && (
+          <LastWorkoutSummaryCard
+            workoutHistory={workoutHistory}
+            personalRecords={personalRecords}
+            onRepeat={handleRepeatWorkout}
+            t={t}
+          />
+        )}
+
+        {/* Volume Trend Chart */}
+        {workoutHistory.length > 1 && (
+          <VolumeTrendChart workoutHistory={workoutHistory} t={t} />
+        )}
+
         {/* Recent Sessions */}
         {daily.recentSessions.length > 0 && (
-          <RecentSessionsCompact 
+          <RecentSessionsCompact
             sessions={daily.recentSessions}
             t={t}
           />

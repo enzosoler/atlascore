@@ -36,6 +36,7 @@ import {
   SafePageBoundary,
   StatusBanner,
 } from '@/components/shared/StablePage';
+import { DataState } from '@/components/shared/DataState';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import ImageCropper from '@/components/shared/ImageCropper';
@@ -854,7 +855,9 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
 
   if (!propPhotos && isLoading) {
     const loading = (
-      <LoadingState
+      <DataState
+        variant="loading"
+        eyebrow="Progress Photos"
         title="Loading progress photos"
         description="Fetching checkpoints, timeline entries, and photo metadata."
       />
@@ -864,12 +867,13 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
 
   if (!propPhotos && isError) {
     const errorState = (
-      <StatusBanner tone="error">
-        <p className="text-[13px] font-medium text-[hsl(var(--fg))]">Could not load progress photos.</p>
-        <p className="mt-1 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
-          Check your connection and try again. Photos already saved in this session will still appear locally.
-        </p>
-      </StatusBanner>
+      <DataState
+        variant="error"
+        eyebrow="Progress Photos"
+        title="Could not load progress photos"
+        description="Check your connection and try again. Photos already saved in this session will still appear locally."
+        action={{ label: 'Retry', onClick: () => window.location.reload() }}
+      />
     );
     return embedded ? <div className="space-y-7">{errorState}</div> : <AppContainer>{errorState}</AppContainer>;
   }
