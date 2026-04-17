@@ -6,56 +6,49 @@ import { supabase } from '@/lib/supabaseClient';
 import {
   Share2,
   Download,
-  Instagram,
-  Twitter,
-  Facebook,
   Trophy,
   Flame,
-  Target,
-  TrendingUp,
-  Calendar,
-  CheckCircle,
-  AlertTriangle,
-  Zap,
-  Star,
-  Activity,
   Scale,
   Dumbbell,
-  UtensilsCrossed,
+  CheckCircle,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { 
-  calculateBodyComposition, 
-  calculateWeightTrend, 
-  detectPlateau,
-  calculateSmoothedWeight 
+import {
+  calculateBodyComposition,
 } from '@/lib/bodyMath';
 
-// Card templates for different proof types
+// ── Card type definitions ────────────────────────────────────────────────────
+
 const CARD_TYPES = [
   {
     id: 'weekly_proof',
     name: 'Weekly Proof',
     description: 'Your week in review',
-    icon: Calendar,
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    requires: ['weight_data', 'nutrition_data', 'workout_data'],
+    icon: Dumbbell,
+    gradient: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)',
+    accentColor: '#4facfe',
+    requires: ['nutrition_data', 'workout_data'],
   },
   {
     id: 'physique_trajectory',
-    name: 'Physique Trajectory',
+    name: 'Physique Update',
     description: 'Body composition progress',
     icon: Scale,
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    requires: ['weight_data', 'body_fat'],
+    gradient: 'linear-gradient(160deg, #1a1a2e 0%, #2d1b3d 40%, #441a5e 100%)',
+    accentColor: '#f093fb',
+    requires: ['weight_data'],
   },
   {
     id: 'adherence_score',
-    name: 'Adherence Score',
-    description: 'Compliance and consistency',
+    name: 'Consistency',
+    description: 'Compliance and streak',
     icon: CheckCircle,
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    gradient: 'linear-gradient(160deg, #0a0a0a 0%, #1a2a1a 40%, #0d3320 100%)',
+    accentColor: '#43e97b',
     requires: ['nutrition_data', 'workout_data'],
   },
   {
@@ -63,14 +56,17 @@ const CARD_TYPES = [
     name: 'Milestone',
     description: 'Achievement unlocked',
     icon: Trophy,
-    gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    gradient: 'linear-gradient(160deg, #1a1005 0%, #2d1f0a 40%, #4a2f0a 100%)',
+    accentColor: '#f5a623',
     requires: ['any_progress'],
   },
 ];
 
+// ── Main component ───────────────────────────────────────────────────────────
+
 export default function ShareableProofCards({ open, onClose }) {
   const { user } = useAuth();
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const cardRef = useRef(null);
 
@@ -79,35 +75,32 @@ export default function ShareableProofCards({ open, onClose }) {
     queryKey: ['share-card-week-data'],
     queryFn: async () => {
       if (!user?.id) return null;
-      
+
       const weekStart = new Date();
       weekStart.setDate(weekStart.getDate() - weekStart.getDay());
       const weekStartStr = weekStart.toISOString().split('T')[0];
-      
-      // Get weight data
+
       const { data: weights } = await supabase
         .from('measurements')
         .select('weight, body_fat, date')
         .eq('user_id', user.id)
         .gte('date', weekStartStr)
         .order('date', { ascending: true });
-      
-      // Get nutrition data
+
       const { data: nutrition } = await supabase
         .from('food_logs')
         .select('calories, protein, carbs, fat, date')
         .eq('user_id', user.id)
         .gte('date', weekStartStr)
         .order('date', { ascending: true });
-      
-      // Get workout data
+
       const { data: workouts } = await supabase
         .from('workouts')
         .select('status, completed_at, duration_minutes')
         .eq('user_id', user.id)
         .gte('completed_at', `${weekStartStr}T00:00:00`)
         .order('completed_at', { ascending: true });
-      
+
       return {
         weights: weights || [],
         nutrition: nutrition || [],
@@ -117,15 +110,18 @@ export default function ShareableProofCards({ open, onClose }) {
     enabled: !!user?.id,
   });
 
+  const selectedCard = CARD_TYPES[selectedIndex];
+  const displayName = user?.full_name || user?.email?.split('@')[0] || 'Athlete';
+
   const generateCardImage = useCallback(async () => {
     if (!cardRef.current) return null;
     try {
       const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
+        scale: 2,
         useCORS: true,
         backgroundColor: null,
         logging: false,
-        onclone: (doc, el) => {
+        onclone: (_doc, el) => {
           el.style.transform = 'none';
         },
       });
@@ -136,8 +132,7 @@ export default function ShareableProofCards({ open, onClose }) {
     }
   }, []);
 
-  const handleShare = useCallback(async (platform = 'native') => {
-    if (!selectedCard) return;
+  const handleShare = useCallback(async () => {
     setIsGenerating(true);
     try {
       const blob = await generateCardImage();
@@ -146,22 +141,16 @@ export default function ShareableProofCards({ open, onClose }) {
         return;
       }
 
-      const shareText = getShareText(selectedCard);
+      const file = new File([blob], `atlas-${selectedCard.id}.png`, { type: 'image/png' });
+      const shareText = `Making progress with Atlas Core`;
       const shareUrl = 'https://useatlascore.com/start?ref=share';
 
-      if (platform === 'instagram' && navigator.canShare?.({ files: [new File([blob], 'atlas.png', { type: 'image/png' })] })) {
-        const file = new File([blob], `atlas-${selectedCard}.png`, { type: 'image/png' });
+      if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
           title: 'My Atlas Progress',
           text: `${shareText} ${shareUrl}`,
         });
-      } else if (platform === 'twitter') {
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
-        window.open(twitterUrl, '_blank');
-      } else if (platform === 'facebook') {
-        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-        window.open(fbUrl, '_blank');
       } else if (navigator.share) {
         await navigator.share({
           title: 'My Atlas Progress',
@@ -170,456 +159,466 @@ export default function ShareableProofCards({ open, onClose }) {
         });
       } else {
         // Fallback: download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `atlas-${selectedCard}-${new Date().toISOString().split('T')[0]}.png`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 100);
+        handleDownload(blob);
       }
     } catch (err) {
-      console.error('[ShareableProofCards] Share failed:', err);
-      toast.error('Share failed. Try downloading instead.');
+      if (err?.name !== 'AbortError') {
+        console.error('[ShareableProofCards] Share failed:', err);
+        toast.error('Share failed. Try downloading instead.');
+      }
     } finally {
       setIsGenerating(false);
     }
   }, [selectedCard, generateCardImage]);
 
-  const getShareText = (cardType) => {
-    const texts = {
-      weekly_proof: 'Check out my weekly progress with Atlas Core! 📈',
-      physique_trajectory: 'My physique transformation is happening! 💪',
-      adherence_score: 'Consistency is key! Hit my targets this week 🎯',
-      milestone: 'Just hit a new milestone! 🔥',
-    };
-    return texts[cardType] || 'Making progress with Atlas Core!';
-  };
+  const handleDownload = useCallback(async (existingBlob) => {
+    setIsGenerating(true);
+    try {
+      const blob = existingBlob || await generateCardImage();
+      if (!blob) {
+        toast.error('Failed to generate card image');
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `atlas-${selectedCard.id}-${new Date().toISOString().split('T')[0]}.png`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      toast.success('Card downloaded');
+    } catch (err) {
+      console.error('[ShareableProofCards] Download failed:', err);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [selectedCard, generateCardImage]);
+
+  const goNext = () => setSelectedIndex((i) => (i + 1) % CARD_TYPES.length);
+  const goPrev = () => setSelectedIndex((i) => (i - 1 + CARD_TYPES.length) % CARD_TYPES.length);
 
   if (!open) return null;
 
-  const selectedCardData = CARD_TYPES.find(card => card.id === selectedCard);
-  const displayName = user?.full_name || user?.email?.split('@')[0] || 'Athlete';
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[hsl(var(--border)/0.2)] bg-[hsl(var(--card))] shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 z-10 border-b border-[hsl(var(--border)/0.1)] bg-[hsl(var(--card))/0.95] backdrop-blur-md p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(var(--brand))] to-[hsl(var(--brand)/0.6)] text-white">
-                <Trophy className="h-6 w-6" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-[hsl(var(--fg))]">Share Your Progress</h2>
-                <p className="text-sm text-[hsl(var(--fg-2))]">Create proof cards to inspire others</p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="rounded-xl p-2 text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--shell))] transition-colors"
-            >
-              <Share2 className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Left: Card Selection */}
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-[hsl(var(--fg))] mb-2">Choose Proof Card</h3>
-                <p className="text-sm text-[hsl(var(--fg-2))] mb-4">Select what you want to share</p>
-              </div>
-
-              <div className="space-y-3">
-                {CARD_TYPES.map((card) => {
-                  const Icon = card.icon;
-                  const isAvailable = weekData?.data && (
-                    card.requires.includes('any_progress') || 
-                    (card.requires.includes('weight_data') && weekData.data.weights.length > 0) ||
-                    (card.requires.includes('nutrition_data') && weekData.data.nutrition.length > 0) ||
-                    (card.requires.includes('workout_data') && weekData.data.workouts.length > 0)
-                  );
-
-                  return (
-                    <button
-                      key={card.id}
-                      onClick={() => isAvailable && setSelectedCard(card.id)}
-                      disabled={!isAvailable}
-                      className={`w-full text-left rounded-2xl border p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
-                        selectedCard === card.id
-                          ? 'border-[hsl(var(--brand)/0.5)] bg-[hsl(var(--brand)/0.05)]'
-                          : isAvailable
-                          ? 'border-[hsl(var(--border)/0.3)] bg-[hsl(var(--card)/0.5)] hover:border-[hsl(var(--brand)/0.3)]'
-                          : 'border-[hsl(var(--border)/0.2)] bg-[hsl(var(--card)/0.3)] opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${card.gradient} text-white`}>
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-[hsl(var(--fg))]">{card.name}</h4>
-                          <p className="text-sm text-[hsl(var(--fg-2))]">{card.description}</p>
-                          
-                          {!isAvailable && (
-                            <p className="text-xs text-[hsl(var(--fg-3))] mt-2">
-                              Needs more data to unlock
-                            </p>
-                          )}
-                        </div>
-                        {selectedCard === card.id && (
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--brand))] text-white">
-                            <CheckCircle className="h-4 w-4" />
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Right: Preview & Actions */}
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-[hsl(var(--fg))] mb-2">Preview</h3>
-                <p className="text-sm text-[hsl(var(--fg-2))] mb-4">This is how your card will look</p>
-              </div>
-
-              {selectedCardData && weekData?.data ? (
-                <div className="space-y-4">
-                  {/* Card Preview */}
-                  <div className="relative overflow-hidden rounded-2xl border border-[hsl(var(--border)/0.2)] shadow-xl">
-                    <ProofCardPreview
-                      ref={cardRef}
-                      cardType={selectedCardData}
-                      data={weekData.data}
-                      displayName={displayName}
-                    />
-                  </div>
-
-                  {/* Share Actions */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => handleShare('instagram')}
-                      disabled={isGenerating}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#E4405F] to-[#C13584] px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                    >
-                      {isGenerating ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Instagram className="h-4 w-4" />
-                      )}
-                      Instagram
-                    </button>
-
-                    <button
-                      onClick={() => handleShare('twitter')}
-                      disabled={isGenerating}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[#1DA1F2] px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                    >
-                      <Twitter className="h-4 w-4" />
-                      Twitter
-                    </button>
-
-                    <button
-                      onClick={() => handleShare('facebook')}
-                      disabled={isGenerating}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[#4267B2] px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                    >
-                      <Facebook className="h-4 w-4" />
-                      Facebook
-                    </button>
-
-                    <button
-                      onClick={() => handleShare('download')}
-                      disabled={isGenerating}
-                      className="flex items-center justify-center gap-2 rounded-xl border border-[hsl(var(--border)/0.3)] bg-[hsl(var(--card))] px-4 py-3 text-sm font-semibold text-[hsl(var(--fg))] transition-all hover:bg-[hsl(var(--shell))] disabled:opacity-50"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[hsl(var(--border)/0.5)] bg-[hsl(var(--shell))] p-12 text-center">
-                  <Trophy className="h-12 w-12 text-[hsl(var(--fg-3))]" />
-                  <p className="mt-4 text-lg font-semibold text-[hsl(var(--fg))]">No Card Selected</p>
-                  <p className="mt-2 text-sm text-[hsl(var(--fg-2))]">
-                    Choose a card type to preview your shareable proof
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Proof Card Preview Component
-const ProofCardPreview = React.forwardRef(({ cardType, data, displayName }, ref) => {
-  const renderCardContent = () => {
-    switch (cardType.id) {
-      case 'weekly_proof':
-        return <WeeklyProofCard data={data} displayName={displayName} />;
-      case 'physique_trajectory':
-        return <PhysiqueTrajectoryCard data={data} displayName={displayName} />;
-      case 'adherence_score':
-        return <AdherenceScoreCard data={data} displayName={displayName} />;
-      case 'milestone':
-        return <MilestoneCard data={data} displayName={displayName} />;
-      default:
-        return <div>Card preview</div>;
-    }
-  };
-
   return (
     <div
-      ref={ref}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md"
+      onClick={onClose}
+    >
+      <div
+        className="relative flex flex-col items-center gap-4 w-full max-w-sm px-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute -top-2 right-2 z-20 rounded-full bg-white/10 p-2 text-white/60 backdrop-blur-sm hover:bg-white/20 transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Card type pills */}
+        <div className="flex gap-2 overflow-x-auto pb-1 w-full justify-center">
+          {CARD_TYPES.map((card, idx) => (
+            <button
+              key={card.id}
+              onClick={() => setSelectedIndex(idx)}
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-all ${
+                idx === selectedIndex
+                  ? 'bg-white text-black'
+                  : 'bg-white/10 text-white/60 hover:bg-white/20'
+              }`}
+            >
+              {card.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Story card preview (9:16) */}
+        <div className="relative w-full" style={{ aspectRatio: '9 / 16', maxHeight: '65vh' }}>
+          {/* Navigation arrows */}
+          <button
+            onClick={goPrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/40 p-1.5 text-white/70 backdrop-blur-sm hover:bg-black/60 transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={goNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/40 p-1.5 text-white/70 backdrop-blur-sm hover:bg-black/60 transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {/* The actual card rendered at 1080x1920, scaled to fit */}
+          <div className="w-full h-full overflow-hidden rounded-2xl shadow-2xl">
+            <div
+              ref={cardRef}
+              className="share-story-card-wrapper origin-top-left"
+              style={{
+                width: 1080,
+                height: 1920,
+                transform: 'scale(var(--story-scale))',
+              }}
+            >
+              <StoryCard
+                cardType={selectedCard}
+                data={weekData}
+                displayName={displayName}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Scale CSS */}
+        <style>{`
+          .share-story-card-wrapper {
+            --story-scale: calc(min(100vw - 32px, 24rem) / 1080);
+          }
+        `}</style>
+
+        {/* Dot indicators */}
+        <div className="flex gap-2">
+          {CARD_TYPES.map((_, idx) => (
+            <div
+              key={idx}
+              className={`h-1.5 rounded-full transition-all ${
+                idx === selectedIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Export controls */}
+        <div className="flex w-full gap-3">
+          <button
+            onClick={handleShare}
+            disabled={isGenerating}
+            className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-[15px] font-bold text-black transition-opacity active:opacity-80 disabled:opacity-50"
+          >
+            {isGenerating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                <Share2 className="w-5 h-5" />
+                Share
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => handleDownload()}
+            disabled={isGenerating}
+            className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-5 py-3.5 text-[15px] font-semibold text-white/70 transition-colors active:bg-white/5 disabled:opacity-50"
+          >
+            <Download className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Story Card (1080x1920 canvas) ────────────────────────────────────────────
+// Follows Strava pattern: one BIG hero stat, 2-3 supporting metrics below,
+// subtle branding watermark.
+
+function StoryCard({ cardType, data, displayName }) {
+  switch (cardType.id) {
+    case 'weekly_proof':
+      return <WeeklyStoryCard data={data} displayName={displayName} accent={cardType.accentColor} gradient={cardType.gradient} />;
+    case 'physique_trajectory':
+      return <PhysiqueStoryCard data={data} displayName={displayName} accent={cardType.accentColor} gradient={cardType.gradient} />;
+    case 'adherence_score':
+      return <AdherenceStoryCard data={data} displayName={displayName} accent={cardType.accentColor} gradient={cardType.gradient} />;
+    case 'milestone':
+      return <MilestoneStoryCard data={data} displayName={displayName} accent={cardType.accentColor} gradient={cardType.gradient} />;
+    default:
+      return null;
+  }
+}
+
+// ── Shared layout wrapper ────────────────────────────────────────────────────
+
+function StoryLayout({ gradient, accent, heroNumber, heroUnit, heroLabel, metrics, displayName }) {
+  return (
+    <div
       style={{
-        background: cardType.gradient,
+        width: 1080,
+        height: 1920,
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: '16px',
-        padding: '32px',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        background: gradient,
         color: '#fff',
-        minHeight: '400px',
-        aspectRatio: '1/1',
       }}
     >
-      {/* Decorative elements */}
-      <div style={{ position: 'absolute', right: '-20px', top: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
-      <div style={{ position: 'absolute', left: '-10px', bottom: '20px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+      {/* Accent glow behind hero */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '25%',
+          left: '50%',
+          width: 800,
+          height: 800,
+          transform: 'translate(-50%, -50%)',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accent}18 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        }}
+      />
 
-      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '24px' }}>
-          <p style={{ fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.8)' }}>
-            atlas.core
+      {/* Top: branding + user */}
+      <div style={{ padding: '80px 72px 0', position: 'relative', zIndex: 1 }}>
+        <p style={{
+          fontSize: 28,
+          fontWeight: 600,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.25)',
+        }}>
+          atlas.core
+        </p>
+        <p style={{
+          marginTop: 12,
+          fontSize: 34,
+          fontWeight: 500,
+          color: 'rgba(255,255,255,0.45)',
+        }}>
+          {displayName}
+        </p>
+      </div>
+
+      {/* Center: Hero stat */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 1,
+          gap: 16,
+        }}
+      >
+        <span style={{
+          fontSize: 240,
+          fontWeight: 800,
+          lineHeight: 1,
+          letterSpacing: '-0.04em',
+          color: '#fff',
+        }}>
+          {heroNumber}
+        </span>
+        <span style={{
+          fontSize: 56,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          color: accent,
+        }}>
+          {heroUnit}
+        </span>
+        {heroLabel && (
+          <p style={{
+            marginTop: 20,
+            fontSize: 36,
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.5)',
+            textAlign: 'center',
+            maxWidth: 800,
+            lineHeight: 1.4,
+          }}>
+            {heroLabel}
           </p>
-          <h3 style={{ marginTop: '8px', fontSize: '28px', fontWeight: '700', letterSpacing: '-0.04em' }}>
-            {cardType.name}
-          </h3>
-          <p style={{ marginTop: '4px', fontSize: '16px', opacity: '0.9' }}>
-            {displayName.split(' ')[0]}
-          </p>
+        )}
+      </div>
+
+      {/* Bottom: Supporting metrics row */}
+      {metrics && metrics.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            gap: 0,
+            margin: '0 72px 160px',
+            borderRadius: 24,
+            overflow: 'hidden',
+            background: 'rgba(255,255,255,0.06)',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
+          {metrics.map((m, i) => (
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                padding: '32px 16px',
+                textAlign: 'center',
+                borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              }}
+            >
+              <p style={{
+                fontSize: 44,
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                color: '#fff',
+              }}>
+                {m.value}
+              </p>
+              <p style={{
+                marginTop: 8,
+                fontSize: 22,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'rgba(255,255,255,0.35)',
+              }}>
+                {m.label}
+              </p>
+            </div>
+          ))}
         </div>
-
-        {/* Content */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-          {renderCardContent()}
-        </div>
-
-        {/* Footer */}
-        <div style={{ marginTop: '24px', borderRadius: '12px', background: 'rgba(255,255,255,0.2)', padding: '12px 16px' }}>
-          <p style={{ fontSize: '14px', fontWeight: '700', letterSpacing: '-0.01em' }}>
-            Track your own progress
-          </p>
-          <p style={{ marginTop: '2px', fontSize: '12px', opacity: '0.8' }}>
-            useatlascore.com
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-// Individual Card Components
-function WeeklyProofCard({ data, displayName }) {
-  const workoutsCompleted = data.workouts.filter(w => w.status === 'completed').length;
-  const totalCalories = data.nutrition.reduce((sum, meal) => sum + (meal.calories || 0), 0);
-  const avgCalories = Math.round(totalCalories / 7);
-  const weightChange = data.weights.length >= 2 
-    ? data.weights[data.weights.length - 1].weight - data.weights[0].weight
-    : 0;
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Workouts
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>{workoutsCompleted}</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>sessions completed</p>
-      </div>
-      
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Calories
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>{avgCalories}</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>daily average</p>
-      </div>
-      
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Weight
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>
-          {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)} kg
-        </p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>weekly change</p>
-      </div>
-      
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Consistency
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>85%</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>adherence rate</p>
-      </div>
-    </div>
-  );
-}
-
-function PhysiqueTrajectoryCard({ data, displayName }) {
-  const currentWeight = data.weights.length > 0 ? data.weights[data.weights.length - 1].weight : 0;
-  const currentBodyFat = data.weights.length > 0 ? data.weights[data.weights.length - 1].body_fat : 0;
-  const composition = currentWeight && currentBodyFat ? calculateBodyComposition(currentWeight, currentBodyFat) : null;
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Weight
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>{currentWeight.toFixed(1)}</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>kilograms</p>
-      </div>
-      
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Body Fat
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>{currentBodyFat.toFixed(1)}%</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>estimated</p>
-      </div>
-      
-      {composition && (
-        <>
-          <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-              Lean Mass
-            </p>
-            <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>{composition.lean_mass.toFixed(1)}</p>
-            <p style={{ fontSize: '12px', opacity: '0.8' }}>kilograms</p>
-          </div>
-          
-          <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-              Phase
-            </p>
-            <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>CUT</p>
-            <p style={{ fontSize: '12px', opacity: '0.8' }}>active</p>
-          </div>
-        </>
       )}
+
+      {/* Watermark bottom-right */}
+      <span
+        style={{
+          position: 'absolute',
+          bottom: 64,
+          right: 72,
+          fontSize: 22,
+          fontWeight: 600,
+          letterSpacing: '0.06em',
+          color: 'rgba(255,255,255,0.12)',
+          zIndex: 1,
+        }}
+      >
+        atlas.core
+      </span>
     </div>
   );
 }
 
-function AdherenceScoreCard({ data, displayName }) {
-  const workoutCompliance = data.workouts.length > 0 
-    ? (data.workouts.filter(w => w.status === 'completed').length / data.workouts.length) * 100
+// ── Individual card implementations ──────────────────────────────────────────
+
+function WeeklyStoryCard({ data, displayName, accent, gradient }) {
+  const workoutsCompleted = data?.workouts?.filter(w => w.status === 'completed').length || 0;
+  const totalCalories = data?.nutrition?.reduce((sum, m) => sum + (m.calories || 0), 0) || 0;
+  const avgCalories = data?.nutrition?.length > 0 ? Math.round(totalCalories / 7) : 0;
+  const totalProtein = data?.nutrition?.reduce((sum, m) => sum + (m.protein || 0), 0) || 0;
+  const avgProtein = data?.nutrition?.length > 0 ? Math.round(totalProtein / 7) : 0;
+  const weightChange = data?.weights?.length >= 2
+    ? data.weights[data.weights.length - 1].weight - data.weights[0].weight
+    : null;
+
+  const metrics = [
+    { value: `${avgCalories}`, label: 'Avg kcal' },
+    { value: `${avgProtein}g`, label: 'Avg protein' },
+  ];
+  if (weightChange !== null) {
+    metrics.push({ value: `${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}`, label: 'kg change' });
+  }
+
+  return (
+    <StoryLayout
+      gradient={gradient}
+      accent={accent}
+      heroNumber={workoutsCompleted}
+      heroUnit="workouts"
+      heroLabel="completed this week"
+      metrics={metrics}
+      displayName={displayName}
+    />
+  );
+}
+
+function PhysiqueStoryCard({ data, displayName, accent, gradient }) {
+  const currentWeight = data?.weights?.length > 0
+    ? data.weights[data.weights.length - 1].weight
     : 0;
-  
-  const nutritionDays = new Set(data.nutrition.map(n => n.date)).size;
-  const nutritionCompliance = (nutritionDays / 7) * 100;
-  
+  const currentBf = data?.weights?.length > 0
+    ? data.weights[data.weights.length - 1].body_fat
+    : null;
+  const composition = currentWeight && currentBf
+    ? calculateBodyComposition(currentWeight, currentBf)
+    : null;
+
+  const metrics = [];
+  if (currentBf) metrics.push({ value: `${currentBf.toFixed(1)}%`, label: 'Body fat' });
+  if (composition) metrics.push({ value: `${composition.lean_mass.toFixed(1)}`, label: 'Lean kg' });
+  if (data?.weights?.length >= 2) {
+    const delta = data.weights[data.weights.length - 1].weight - data.weights[0].weight;
+    metrics.push({ value: `${delta > 0 ? '+' : ''}${delta.toFixed(1)}`, label: 'kg delta' });
+  }
+
+  return (
+    <StoryLayout
+      gradient={gradient}
+      accent={accent}
+      heroNumber={currentWeight ? currentWeight.toFixed(1) : '--'}
+      heroUnit="kg"
+      heroLabel="current weight"
+      metrics={metrics}
+      displayName={displayName}
+    />
+  );
+}
+
+function AdherenceStoryCard({ data, displayName, accent, gradient }) {
+  const workoutCompliance = data?.workouts?.length > 0
+    ? Math.round((data.workouts.filter(w => w.status === 'completed').length / data.workouts.length) * 100)
+    : 0;
+  const nutritionDays = new Set(data?.nutrition?.map(n => n.date) || []).size;
+  const nutritionCompliance = Math.round((nutritionDays / 7) * 100);
   const overallCompliance = Math.round((workoutCompliance + nutritionCompliance) / 2);
 
+  const metrics = [
+    { value: `${workoutCompliance}%`, label: 'Training' },
+    { value: `${nutritionCompliance}%`, label: 'Nutrition' },
+    { value: `${nutritionDays}/7`, label: 'Days logged' },
+  ];
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Overall Score
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '32px', fontWeight: '700' }}>{overallCompliance}%</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>adherence</p>
-      </div>
-      
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Workouts
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>{Math.round(workoutCompliance)}%</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>completed</p>
-      </div>
-      
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Nutrition
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>{Math.round(nutritionCompliance)}%</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>logged</p>
-      </div>
-      
-      <div style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.15)', padding: '16px' }}>
-        <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.8)' }}>
-          Streak
-        </p>
-        <p style={{ marginTop: '8px', fontSize: '24px', fontWeight: '700' }}>12</p>
-        <p style={{ fontSize: '12px', opacity: '0.8' }}>days</p>
-      </div>
-    </div>
+    <StoryLayout
+      gradient={gradient}
+      accent={accent}
+      heroNumber={`${overallCompliance}%`}
+      heroUnit="adherence"
+      heroLabel="consistency is the real flex"
+      metrics={metrics}
+      displayName={displayName}
+    />
   );
 }
 
-function MilestoneCard({ data, displayName }) {
-  // Detect milestones based on data
+function MilestoneStoryCard({ data, displayName, accent, gradient }) {
   const milestones = [];
-  
-  if (data.workouts.filter(w => w.status === 'completed').length >= 10) {
-    milestones.push('10 Workouts Completed');
-  }
-  
-  if (data.nutrition.length >= 30) {
-    milestones.push('30 Meals Logged');
-  }
-  
-  if (data.weights.length >= 4) {
-    milestones.push('Consistent Tracking');
-  }
+  const workoutsCompleted = data?.workouts?.filter(w => w.status === 'completed').length || 0;
+  if (workoutsCompleted >= 10) milestones.push('10+ Workouts');
+  if ((data?.nutrition?.length || 0) >= 30) milestones.push('30+ Meals Logged');
+  if ((data?.weights?.length || 0) >= 4) milestones.push('Consistent Tracking');
+
+  const heroText = milestones.length > 0 ? milestones.length : 0;
+  const metrics = milestones.slice(0, 3).map((m) => ({
+    value: '\u2713',
+    label: m,
+  }));
 
   return (
-    <div style={{ textAlign: 'center', width: '100%' }}>
-      <Trophy style={{ width: '80px', height: '80px', margin: '0 auto 24px', opacity: '0.9' }} />
-      
-      <h4 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '16px' }}>
-        Milestone Unlocked!
-      </h4>
-      
-      <div style={{ display: 'grid', gap: '12px', marginBottom: '24px' }}>
-        {milestones.map((milestone, index) => (
-          <div key={index} style={{ 
-            borderRadius: '12px', 
-            background: 'rgba(255,255,255,0.15)', 
-            padding: '12px 16px',
-            fontSize: '16px',
-            fontWeight: '600'
-          }}>
-            ✓ {milestone}
-          </div>
-        ))}
-      </div>
-      
-      {milestones.length === 0 && (
-        <p style={{ fontSize: '16px', opacity: '0.8' }}>
-          Keep going! Your first milestone is just around the corner.
-        </p>
-      )}
-    </div>
+    <StoryLayout
+      gradient={gradient}
+      accent={accent}
+      heroNumber={heroText}
+      heroUnit={heroText === 1 ? 'milestone' : 'milestones'}
+      heroLabel="unlocked this week"
+      metrics={metrics.length > 0 ? metrics : [{ value: '...', label: 'Keep going' }]}
+      displayName={displayName}
+    />
   );
 }

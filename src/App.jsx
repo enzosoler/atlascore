@@ -104,6 +104,7 @@ const NutritionistPrescribeDiet = lazy(() => import('@/pages/nutritionist/Nutrit
 const SmartOnboarding = lazy(() => import('@/components/onboarding/SmartOnboarding'));
 const DecisionEngineDashboard = lazy(() => import('@/components/dashboard/DecisionEngineDashboard'));
 const ShareableProofCards = lazy(() => import('@/components/social/ShareableProofCards'));
+const CreatorDashboard = lazy(() => import('@/components/affiliate/CreatorDashboard'));
 const StartFreshModal = lazy(() => import('@/components/system/StartFreshModal'));
 const NutritionModeSelector = lazy(() => import('@/components/nutrition/NutritionModeSelector'));
 const MilestoneSystem = lazy(() => import('@/components/system/MilestoneSystem'));

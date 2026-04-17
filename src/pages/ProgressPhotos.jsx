@@ -303,7 +303,7 @@ function ComparisonSlider({ beforePhoto, afterPhoto, beforeDate, afterDate }) {
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="px-5 py-4">
+      <div className="px-5 py-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Eye className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
@@ -312,19 +312,21 @@ function ComparisonSlider({ beforePhoto, afterPhoto, beforeDate, afterDate }) {
           <span className="text-[11px] text-[hsl(var(--fg-3))]">Drag to compare</span>
         </div>
       </div>
-      <div ref={containerRef} className="relative aspect-[4/3] cursor-ew-resize select-none overflow-hidden" onMouseDown={handleStart} onTouchStart={handleStart}>
+      <div ref={containerRef} className="relative aspect-[3/4] cursor-ew-resize select-none overflow-hidden" onMouseDown={handleStart} onTouchStart={handleStart}>
         <img src={afterPhoto.photo_url} alt="After" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
         <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}>
           <img src={beforePhoto.photo_url} alt="Before" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
         </div>
-        <div className="absolute top-0 bottom-0 w-1 bg-white shadow-lg" style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}>
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg">
-            <ChevronRight className="h-4 w-4 -translate-x-0.5 text-[hsl(var(--fg))]" strokeWidth={2} />
-            <ChevronRight className="h-4 w-4 -translate-x-2 rotate-180 text-[hsl(var(--fg))]" strokeWidth={2} />
+        {/* Slider handle — improved spacing & visibility */}
+        <div className="absolute top-0 bottom-0 w-[3px] bg-white/90 shadow-[0_0_8px_rgba(0,0,0,0.3)]" style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-xl border border-black/10">
+            <ChevronRight className="h-4 w-4 -translate-x-0.5 text-[hsl(var(--fg))]" strokeWidth={2.5} />
+            <ChevronRight className="h-4 w-4 -translate-x-2 rotate-180 text-[hsl(var(--fg))]" strokeWidth={2.5} />
           </div>
         </div>
-        <div className="absolute bottom-4 left-4 rounded-full bg-black/50 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-sm">Before · {beforeDate}</div>
-        <div className="absolute bottom-4 right-4 rounded-full bg-[hsl(var(--brand)/0.9)] px-3 py-1 text-[11px] font-medium text-white backdrop-blur-sm">After · {afterDate}</div>
+        {/* Date labels — improved spacing */}
+        <div className="absolute bottom-5 left-5 rounded-full bg-black/60 px-3.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">Before &middot; {beforeDate}</div>
+        <div className="absolute bottom-5 right-5 rounded-full bg-[hsl(var(--brand)/0.92)] px-3.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md shadow-md">After &middot; {afterDate}</div>
       </div>
     </Card>
   );
@@ -491,6 +493,84 @@ function GuideSection() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Date pair selector for comparison ─────────────────────────────────────────
+
+function DatePairSelector({ dates, beforeIdx, afterIdx, onBeforeChange, onAfterChange }) {
+  const { locale } = useI18n();
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
+  if (dates.length < 2) return null;
+
+  const formatDateShort = (d) =>
+    new Date(d + 'T12:00:00').toLocaleDateString(intlLocale, { month: 'short', day: 'numeric', year: '2-digit' });
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))] mb-1">Before</p>
+        <select
+          value={beforeIdx ?? dates.length - 1}
+          onChange={(e) => onBeforeChange(parseInt(e.target.value, 10))}
+          className="w-full rounded-xl border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] focus:outline-none focus:border-[hsl(var(--brand))]"
+        >
+          {dates.map((d, i) => (
+            <option key={d} value={i}>{formatDateShort(d)}</option>
+          ))}
+        </select>
+      </div>
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--fill)/0.5)] mt-4">
+        <ChevronRight className="h-4 w-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
+      </div>
+      <div className="flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))] mb-1">After</p>
+        <select
+          value={afterIdx ?? 0}
+          onChange={(e) => onAfterChange(parseInt(e.target.value, 10))}
+          className="w-full rounded-xl border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-3 py-2 text-[13px] font-medium text-[hsl(var(--fg))] focus:outline-none focus:border-[hsl(var(--brand))]"
+        >
+          {dates.map((d, i) => (
+            <option key={d} value={i}>{formatDateShort(d)}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
+// ── Capture guidance cue ─────────────────────────────────────────────────────
+
+function CaptureGuidanceCue() {
+  return (
+    <div className="rounded-[20px] border border-[hsl(var(--brand)/0.2)] bg-gradient-to-r from-[hsl(var(--brand)/0.06)] to-[hsl(var(--brand)/0.02)] px-5 py-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--brand)/0.12)] mt-0.5">
+          <Camera className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Tips for better comparisons</p>
+          <ul className="mt-2 space-y-1.5">
+            <li className="flex items-start gap-2 text-[12px] leading-relaxed text-[hsl(var(--fg-2))]">
+              <span className="shrink-0 mt-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand)/0.5)]" />
+              Same lighting, time of day, and location each time
+            </li>
+            <li className="flex items-start gap-2 text-[12px] leading-relaxed text-[hsl(var(--fg-2))]">
+              <span className="shrink-0 mt-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand)/0.5)]" />
+              Wear the same clothes or minimal clothing
+            </li>
+            <li className="flex items-start gap-2 text-[12px] leading-relaxed text-[hsl(var(--fg-2))]">
+              <span className="shrink-0 mt-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand)/0.5)]" />
+              Take photos in the morning before eating for consistency
+            </li>
+            <li className="flex items-start gap-2 text-[12px] leading-relaxed text-[hsl(var(--fg-2))]">
+              <span className="shrink-0 mt-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand)/0.5)]" />
+              Use a timer or mirror — keep the camera at chest height
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }
@@ -730,6 +810,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const [showPhotoPaywall, setShowPhotoPaywall] = useState(false);
   const [cropState, setCropState] = useState(null); // { imageSrc, date, poseKey }
   const [poseFilter, setPoseFilter] = useState('all'); // 'all' | 'front' | 'side' | 'back' | 'pose'
+  const [selectedDate, setSelectedDate] = useState(null); // used by Timeline onSelect
 
   React.useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated && embedded) navigate(ROUTES.home, { replace: true });
@@ -838,17 +919,31 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     return poseIndex >= 0 ? datePhotos[poseIndex] : datePhotos.find((p) => p?.photo_url) || null;
   }, [photosByDate, poseFilter]);
 
+  // Date pair selector state for the comparison slider
+  const [compBeforeIdx, setCompBeforeIdx] = useState(null); // index into allDates
+  const [compAfterIdx, setCompAfterIdx] = useState(null);
+
+  // Auto-set comparison pair defaults when dates load
+  useEffect(() => {
+    if (allDates.length >= 2) {
+      if (compBeforeIdx == null) setCompBeforeIdx(allDates.length - 1); // earliest
+      if (compAfterIdx == null) setCompAfterIdx(0); // latest
+    }
+  }, [allDates.length]);
+
   const comparisonData = useMemo(() => {
     if (allDates.length < 2) return null;
-    const latest = allDates[0];
-    const earliest = allDates[allDates.length - 1];
+    const bIdx = compBeforeIdx ?? allDates.length - 1;
+    const aIdx = compAfterIdx ?? 0;
+    const beforeDate = allDates[Math.min(bIdx, allDates.length - 1)];
+    const afterDate = allDates[Math.min(aIdx, allDates.length - 1)];
     return {
-      before: photoForDateByFilter(earliest),
-      after: photoForDateByFilter(latest),
-      beforeDate: earliest,
-      afterDate: latest,
+      before: photoForDateByFilter(beforeDate),
+      after: photoForDateByFilter(afterDate),
+      beforeDate,
+      afterDate,
     };
-  }, [allDates, photoForDateByFilter]);
+  }, [allDates, photoForDateByFilter, compBeforeIdx, compAfterIdx]);
 
   const hasCheckpoints = allDates.length > 0;
   const showComparison = comparisonData?.before?.photo_url && comparisonData?.after?.photo_url;
@@ -979,6 +1074,17 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
               ))}
             </div>
           </Section>
+          {allDates.length >= 2 && (
+            <Section>
+              <DatePairSelector
+                dates={allDates}
+                beforeIdx={compBeforeIdx}
+                afterIdx={compAfterIdx}
+                onBeforeChange={setCompBeforeIdx}
+                onAfterChange={setCompAfterIdx}
+              />
+            </Section>
+          )}
           {showComparison && (
             <Section>
               <ComparisonSliderWithTracking
@@ -1010,6 +1116,9 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
         </>
       )}
 
+      {hasCheckpoints && (
+        <Section><CaptureGuidanceCue /></Section>
+      )}
       <Section><GuideSection /></Section>
 
       {showNewModal && <NewCheckpointModal onConfirm={handleCreateCheckpoint} onClose={() => setShowNewModal(false)} userId={user?.id} />}

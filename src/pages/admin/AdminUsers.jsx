@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
- 
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, RefreshCcw, MoreVertical, Eye, Crown, RotateCcw, Trash2 } from 'lucide-react';
+import { Search, RefreshCcw, MoreVertical, Eye, Crown, RotateCcw, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ import {
 } from '@/lib/adminService';
 
 function fmt(d) {
-  if (!d) return '—';
+  if (!d) return '\u2014';
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
@@ -77,136 +76,208 @@ export default function AdminUsers() {
     navigate(`/AdminPanel/view-as/${u.id}`);
   }, [navigate]);
 
+  const totalCount = (rawUsers?.users || rawUsers || []).length;
+
   return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold text-[hsl(var(--fg))]">Users</h1>
-        <p className="text-[13px] text-[hsl(var(--fg-3))]">Manage platform users</p>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-[15px] font-semibold text-[hsl(var(--fg))]">Users</h1>
+        <span className="text-[11px] tabular-nums text-[hsl(var(--fg-3))]">
+          {users.length} result{users.length !== 1 ? 's' : ''}
+        </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
-          <Input value={query} onChange={(e) => { setQuery(e.target.value); setPage(1); }} placeholder="Search by name, email, or ID..." className="pl-9" />
+      {/* Search + filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[hsl(var(--fg-3))]" />
+          <Input
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+            placeholder="Search by name, email, or ID..."
+            className="h-8 pl-8 text-[12px]"
+          />
         </div>
-        <Button variant="outline" size="icon" onClick={() => refetch()}><RefreshCcw className="h-4 w-4" /></Button>
+        <div className="flex items-center gap-0.5 rounded-[8px] border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--fill)/0.3)] p-0.5">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => { setFilter(f); setPage(1); }}
+              className={`rounded-[6px] px-2.5 py-1 text-[11px] font-medium capitalize transition ${
+                filter === f
+                  ? 'bg-[hsl(var(--card))] text-[hsl(var(--fg))] shadow-[var(--shadow-xs)]'
+                  : 'text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg-2))]'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => refetch()}>
+          <RefreshCcw className="h-3.5 w-3.5" />
+        </Button>
       </div>
 
-      <div className="flex gap-1">
-        {FILTERS.map((f) => (
-          <button key={f} type="button" onClick={() => { setFilter(f); setPage(1); }}
-            className={`rounded-[8px] px-3 py-1.5 text-[12px] font-medium capitalize transition ${filter === f ? 'bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]' : 'text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]'}`}>
-            {f}
-          </button>
-        ))}
-      </div>
-
-      <div className="overflow-x-auto rounded-[14px] border border-[hsl(var(--border)/0.6)]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-[11px] uppercase">Name</TableHead>
-              <TableHead className="text-[11px] uppercase">Email</TableHead>
-              <TableHead className="text-[11px] uppercase">Role</TableHead>
-              <TableHead className="text-[11px] uppercase">Plan</TableHead>
-              <TableHead className="text-[11px] uppercase">Onboarding</TableHead>
-              <TableHead className="text-[11px] uppercase">Created</TableHead>
-              <TableHead className="w-[60px] text-[11px] uppercase">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && <TableRow><TableCell colSpan={7} className="py-8 text-center text-[13px] text-[hsl(var(--fg-3))]">Loading...</TableCell></TableRow>}
-            {!isLoading && users.length === 0 && <TableRow><TableCell colSpan={7} className="py-8 text-center text-[13px] text-[hsl(var(--fg-3))]">No users found.</TableCell></TableRow>}
+      {/* Table */}
+      <div className="overflow-x-auto rounded-[10px] border border-[hsl(var(--border)/0.5)]">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b border-[hsl(var(--border)/0.4)] bg-[hsl(var(--fill)/0.4)]">
+              <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">Name</th>
+              <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">Email</th>
+              <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">Role</th>
+              <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">Plan</th>
+              <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">Created</th>
+              <th className="w-[44px] px-3 py-2" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[hsl(var(--border)/0.25)]">
+            {isLoading && (
+              <tr>
+                <td colSpan={6} className="py-8 text-center">
+                  <span className="inline-flex items-center gap-2 text-[12px] text-[hsl(var(--fg-3))]">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading users...
+                  </span>
+                </td>
+              </tr>
+            )}
+            {!isLoading && users.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-[12px] text-[hsl(var(--fg-3))]">
+                  No users found
+                </td>
+              </tr>
+            )}
             {users.map((u) => {
               const sub = u.subscriptions?.[0] || {};
-              const subTier = sub.tier || u.subscription_tier || '—';
-              const subStatus = sub.status || u.subscription_status || '—';
+              const subTier = sub.tier || u.subscription_tier || '\u2014';
+              const subStatus = sub.status || u.subscription_status || '\u2014';
+              const isActiveSub = subStatus === 'active' || subStatus === 'trialing';
               return (
-                <TableRow key={u.id} className="cursor-pointer hover:bg-[hsl(var(--fill)/0.4)]" onClick={() => navigate(`/AdminPanel/users/${u.id}`)}>
-                  <TableCell>
+                <tr
+                  key={u.id}
+                  className="cursor-pointer transition hover:bg-[hsl(var(--fill)/0.35)]"
+                  onClick={() => navigate(`/AdminPanel/users/${u.id}`)}
+                >
+                  <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[10px] font-bold text-[hsl(var(--brand))]">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.1)] text-[9px] font-bold text-[hsl(var(--brand))]">
                         {(u.full_name || u.email || '?')[0]?.toUpperCase()}
                       </div>
-                      <span className="text-[13px] font-medium text-[hsl(var(--fg))]">{u.full_name || '—'}</span>
+                      <span className="truncate text-[12px] font-medium text-[hsl(var(--fg))]">{u.full_name || '\u2014'}</span>
+                      {u.onboarding_completed && (
+                        <span className="text-[hsl(var(--ok))] text-[10px]" title="Onboarding complete">&#10003;</span>
+                      )}
                     </div>
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate text-[13px] text-[hsl(var(--fg-2))]">{u.email}</TableCell>
-                  <TableCell><Badge variant="outline" className="text-[10px]">{u.role || 'athlete'}</Badge></TableCell>
-                  <TableCell>
-                    <Badge className={`text-[10px] ${subStatus === 'active' || subStatus === 'trialing' ? 'bg-[hsl(var(--ok)/0.15)] text-[hsl(var(--ok))]' : 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-3))]'}`}>
-                      {subTier} · {subStatus}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{u.onboarding_completed ? <span className="text-[hsl(var(--ok))]">&#10003;</span> : <span className="text-[hsl(var(--fg-3))]">—</span>}</TableCell>
-                  <TableCell className="text-[13px] text-[hsl(var(--fg-3))]">{fmt(u.created_at)}</TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
+                  </td>
+                  <td className="max-w-[180px] truncate px-3 py-2 text-[12px] text-[hsl(var(--fg-2))]">{u.email}</td>
+                  <td className="px-3 py-2">
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0.5">{u.role || 'athlete'}</Badge>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
+                      isActiveSub
+                        ? 'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]'
+                        : 'bg-[hsl(var(--fill)/0.8)] text-[hsl(var(--fg-3))]'
+                    }`}>
+                      {subTier} &middot; {subStatus}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-[11px] tabular-nums text-[hsl(var(--fg-3))]">{fmt(u.created_at)}</td>
+                  <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/AdminPanel/users/${u.id}`)}><Eye className="mr-2 h-3.5 w-3.5" /> View Profile</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleImpersonate(u)}><Eye className="mr-2 h-3.5 w-3.5" /> Impersonate</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setDialog({ type: 'grant', userId: u.id, name: u.full_name || u.email })}><Crown className="mr-2 h-3.5 w-3.5" /> Grant Premium</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setDialog({ type: 'reset', userId: u.id, name: u.full_name || u.email })}><RotateCcw className="mr-2 h-3.5 w-3.5" /> Reset Onboarding</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setDialog({ type: 'delete', userId: u.id, name: u.full_name || u.email })} className="text-[hsl(var(--err))] focus:text-[hsl(var(--err))]"><Trash2 className="mr-2 h-3.5 w-3.5" /> Delete User</DropdownMenuItem>
+                      <DropdownMenuTrigger asChild>
+                        <button type="button" className="flex h-6 w-6 items-center justify-center rounded-[6px] text-[hsl(var(--fg-3))] transition hover:bg-[hsl(var(--fill)/0.6)] hover:text-[hsl(var(--fg))]">
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="min-w-[160px]">
+                        <DropdownMenuItem onClick={() => navigate(`/AdminPanel/users/${u.id}`)}>
+                          <Eye className="mr-2 h-3 w-3" /> View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleImpersonate(u)}>
+                          <Eye className="mr-2 h-3 w-3" /> Impersonate
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDialog({ type: 'grant', userId: u.id, name: u.full_name || u.email })}>
+                          <Crown className="mr-2 h-3 w-3" /> Grant Premium
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDialog({ type: 'reset', userId: u.id, name: u.full_name || u.email })}>
+                          <RotateCcw className="mr-2 h-3 w-3" /> Reset Onboarding
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setDialog({ type: 'delete', userId: u.id, name: u.full_name || u.email })}
+                          className="text-[hsl(var(--err))] focus:text-[hsl(var(--err))]"
+                        >
+                          <Trash2 className="mr-2 h-3 w-3" /> Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               );
             })}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
+      {/* Pagination */}
       {!query && (
         <div className="flex items-center justify-between">
-          <p className="text-[12px] text-[hsl(var(--fg-3))]">Page {page}</p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-            <Button variant="outline" size="sm" disabled={(rawUsers?.users || rawUsers || []).length < 50} onClick={() => setPage((p) => p + 1)}>Next</Button>
+          <p className="text-[11px] tabular-nums text-[hsl(var(--fg-3))]">Page {page}</p>
+          <div className="flex gap-1.5">
+            <Button variant="outline" size="sm" className="h-7 text-[11px]" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Prev</Button>
+            <Button variant="outline" size="sm" className="h-7 text-[11px]" disabled={totalCount < 50} onClick={() => setPage((p) => p + 1)}>Next</Button>
           </div>
         </div>
       )}
 
+      {/* Grant Premium Dialog */}
       <Dialog open={dialog?.type === 'grant'} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Grant Premium Access</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="text-[15px]">Grant Premium Access</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <p className="text-[14px] text-[hsl(var(--fg-2))]">Grant premium access to <strong>{dialog?.name}</strong></p>
-
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">Grant premium access to <strong>{dialog?.name}</strong></p>
             <div>
-              <label className="block mb-1.5 text-[12px] font-medium text-[hsl(var(--fg))]">Duration</label>
-              <div className="grid grid-cols-3 gap-2">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">Duration</label>
+              <div className="flex flex-wrap gap-1.5">
                 {[
-                  { value: 7, label: '7 days' },
-                  { value: 30, label: '30 days' },
-                  { value: 90, label: '90 days' },
-                  { value: 365, label: '1 year' },
+                  { value: 7, label: '7d' },
+                  { value: 30, label: '30d' },
+                  { value: 90, label: '90d' },
+                  { value: 365, label: '1yr' },
                   { value: null, label: 'Unlimited' },
                 ].map((opt) => (
-                  <button key={String(opt.value)} type="button" onClick={() => setGrantDuration(opt.value)}
-                    className={`h-9 rounded-lg border text-[12px] font-medium transition-colors ${
+                  <button
+                    key={String(opt.value)}
+                    type="button"
+                    onClick={() => setGrantDuration(opt.value)}
+                    className={`rounded-[6px] border px-2.5 py-1 text-[11px] font-medium transition ${
                       grantDuration === opt.value
-                        ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
-                        : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))]'
-                    }`}>
+                        ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]'
+                        : 'border-[hsl(var(--border)/0.5)] text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--fill)/0.5)]'
+                    }`}
+                  >
                     {opt.label}
                   </button>
                 ))}
               </div>
             </div>
-
             <div>
-              <label className="block mb-1.5 text-[12px] font-medium text-[hsl(var(--fg))]">Email language</label>
-              <div className="flex gap-2">
-                {[{ value: 'en', label: 'English' }, { value: 'pt-BR', label: 'Português' }].map((opt) => (
-                  <button key={opt.value} type="button" onClick={() => setGrantLocale(opt.value)}
-                    className={`flex-1 h-9 rounded-lg border text-[12px] font-medium transition-colors ${
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">Email language</label>
+              <div className="flex gap-1.5">
+                {[{ value: 'en', label: 'EN' }, { value: 'pt-BR', label: 'PT' }].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setGrantLocale(opt.value)}
+                    className={`rounded-[6px] border px-3 py-1 text-[11px] font-medium transition ${
                       grantLocale === opt.value
-                        ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary))]'
-                        : 'border-[hsl(var(--border))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill))]'
-                    }`}>
+                        ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]'
+                        : 'border-[hsl(var(--border)/0.5)] text-[hsl(var(--fg-3))] hover:bg-[hsl(var(--fill)/0.5)]'
+                    }`}
+                  >
                     {opt.label}
                   </button>
                 ))}
@@ -214,40 +285,45 @@ export default function AdminUsers() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
-            <Button onClick={() => grantM.mutate({ userId: dialog?.userId, duration: grantDuration, locale: grantLocale })} disabled={grantM.isPending}>
+            <Button variant="outline" size="sm" onClick={() => setDialog(null)}>Cancel</Button>
+            <Button size="sm" onClick={() => grantM.mutate({ userId: dialog?.userId, duration: grantDuration, locale: grantLocale })} disabled={grantM.isPending}>
               {grantM.isPending ? 'Processing...' : 'Grant & notify'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reset Onboarding Dialog */}
       <Dialog open={dialog?.type === 'reset'} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Reset Onboarding</DialogTitle></DialogHeader>
-          <p className="text-[14px] text-[hsl(var(--fg-2))]">Reset onboarding for <strong>{dialog?.name}</strong>?</p>
+          <DialogHeader><DialogTitle className="text-[15px]">Reset Onboarding</DialogTitle></DialogHeader>
+          <p className="text-[13px] text-[hsl(var(--fg-2))]">Reset onboarding for <strong>{dialog?.name}</strong>?</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
-            <Button onClick={() => resetM.mutate(dialog?.userId)} disabled={resetM.isPending}>{resetM.isPending ? 'Processing...' : 'Confirm'}</Button>
+            <Button variant="outline" size="sm" onClick={() => setDialog(null)}>Cancel</Button>
+            <Button size="sm" onClick={() => resetM.mutate(dialog?.userId)} disabled={resetM.isPending}>
+              {resetM.isPending ? 'Processing...' : 'Confirm'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Dialog */}
       <Dialog open={dialog?.type === 'delete'} onOpenChange={(o) => !o && setDialog(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle className="text-[hsl(var(--err))]">Delete User Permanently</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <p className="text-[14px] text-[hsl(var(--fg-2))]">This will <strong>permanently delete</strong> <strong>{dialog?.name}</strong> and all their data:</p>
-            <ul className="text-[13px] text-[hsl(var(--fg-3))] list-disc pl-5 space-y-1">
-              <li>Profile and account</li>
-              <li>Workouts, nutrition logs, measurements</li>
+          <DialogHeader><DialogTitle className="text-[14px] text-[hsl(var(--err))]">Delete User Permanently</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">Permanently delete <strong>{dialog?.name}</strong> and all their data:</p>
+            <ul className="list-disc space-y-0.5 pl-5 text-[12px] text-[hsl(var(--fg-3))]">
+              <li>Profile, workouts, nutrition logs</li>
               <li>Subscriptions and billing data</li>
               <li>AI coach messages and memory</li>
               <li>Progress photos and lab exams</li>
             </ul>
-            <p className="text-[13px] font-medium text-[hsl(var(--err))]">This action cannot be undone. The user can create a new account afterward.</p>
+            <p className="text-[12px] font-medium text-[hsl(var(--err))]">This action cannot be undone.</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialog(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => deleteM.mutate(dialog?.userId)} disabled={deleteM.isPending}>
+            <Button variant="outline" size="sm" onClick={() => setDialog(null)}>Cancel</Button>
+            <Button variant="destructive" size="sm" onClick={() => deleteM.mutate(dialog?.userId)} disabled={deleteM.isPending}>
               {deleteM.isPending ? 'Deleting...' : 'Delete permanently'}
             </Button>
           </DialogFooter>

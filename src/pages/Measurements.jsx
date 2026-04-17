@@ -77,9 +77,11 @@ const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const TABS = ['overview', 'history', 'trends'];
 
 const TREND_RANGES = [
-  { key: 30, label: '30D' },
-  { key: 90, label: '90D' },
-  { key: 180, label: '180D' },
+  { key: 7, label: '1W' },
+  { key: 30, label: '1M' },
+  { key: 90, label: '3M' },
+  { key: 180, label: '6M' },
+  { key: 365, label: '1Y' },
   { key: 'all', label: 'All' },
 ];
 
@@ -173,7 +175,24 @@ function getDeltaLabel(delta, metric, t) {
 
 function getTrendWindowLabel(days) {
   if (days === 'all') return 'All time';
+  if (days === 7)   return '1 week';
+  if (days === 30)  return '1 month';
+  if (days === 90)  return '3 months';
+  if (days === 180) return '6 months';
+  if (days === 365) return '1 year';
   return `${days} days`;
+}
+
+/** Compute a simple moving average with the given window size. */
+function computeMovingAverage(data, valueKey, windowSize = 5) {
+  return data.map((item, idx) => {
+    const start = Math.max(0, idx - windowSize + 1);
+    const window = data.slice(start, idx + 1);
+    const vals = window.map((d) => d[valueKey]).filter((v) => v != null);
+    if (!vals.length) return { ...item, movingAvg: null };
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { ...item, movingAvg: parseFloat(avg.toFixed(2)) };
+  });
 }
 
 function withinTrendWindow(date, latestDate, days) {
@@ -903,10 +922,13 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
     };
   }, [selectedMetricEntries, metricKey]);
 
-  const chartData = selectedTrendSnapshot.entries.map((m) => ({
-    date:  formatMeasurementDate(m.date, undefined, intlLocale),
-    value: getMeasurementFieldValue(m, metricKey),
-  }));
+  const chartData = useMemo(() => {
+    const raw = selectedTrendSnapshot.entries.map((m) => ({
+      date:  formatMeasurementDate(m.date, undefined, intlLocale),
+      value: getMeasurementFieldValue(m, metricKey),
+    }));
+    return computeMovingAverage(raw, 'value', Math.min(5, Math.max(2, Math.ceil(raw.length / 4))));
+  }, [selectedTrendSnapshot.entries, metricKey, intlLocale]);
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
@@ -1211,7 +1233,7 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
             </>
           )}
 
-          {/* ──── Trends tab ──── */}
+          {/* ──── Trends tab — MacroFactor pattern ──── */}
           {activeTab === 'trends' && (
             <>
               {!sortedMeasurements.length ? (
@@ -1225,89 +1247,82 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                 />
               ) : (
                 <>
-                  {/* Metric selector grid */}
-                  <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {METRIC_OPTIONS.map((metric) => (
-                      <MetricCard
+                  {/* ── Top: Measurement type selector (horizontal scroll) ── */}
+                  <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                    {METRIC_OPTIONS.filter((m) => metricSnapshots[m.key]?.entries?.length > 0).map((metric) => (
+                      <button
                         key={metric.key}
-                        label={metric.label}
-                        value={formatMetricValue(metricSnapshots[metric.key]?.value, metric)}
-                        detail={
-                          metricSnapshots[metric.key]?.entries?.length
-                            ? t('measurements.metric_selector.checkpoints_with_metric').replace('{n}', metricSnapshots[metric.key].entries.length)
-                            : t('measurements.metric_selector.insufficient_data')
-                        }
-                        isActive={metricKey === metric.key}
+                        type="button"
                         onClick={() => setMetricKey(metric.key)}
-                      />
+                        className={cn(
+                          'shrink-0 flex items-center gap-2.5 rounded-2xl border px-4 py-2.5 text-left transition-all',
+                          metricKey === metric.key
+                            ? 'border-[hsl(var(--brand))] bg-[hsl(var(--card))] shadow-[var(--shadow-sm)]'
+                            : 'border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.6)] hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--card))]'
+                        )}
+                      >
+                        <div
+                          className="h-2 w-2 rounded-full shrink-0"
+                          style={{ backgroundColor: metric.color }}
+                        />
+                        <div>
+                          <p className={cn(
+                            'text-[12px] font-semibold tracking-[-0.01em]',
+                            metricKey === metric.key ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-2))]'
+                          )}>
+                            {metric.label}
+                          </p>
+                          <p className="text-[11px] text-[hsl(var(--fg-3))]">
+                            {formatMetricValue(metricSnapshots[metric.key]?.value, metric)}
+                          </p>
+                        </div>
+                      </button>
                     ))}
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.38)] px-4 py-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Trend window</p>
-                      <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-                        Showing {selectedMetricEntries.length} entries for {selectedMetric.label.toLowerCase()}.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 overflow-x-auto">
-                      {TREND_RANGES.map((range) => (
-                        <button
-                          key={range.key}
-                          type="button"
-                          onClick={() => setTrendRangeDays(range.key)}
-                          className={cn(
-                            'shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-colors',
-                            trendRangeDays === range.key
-                              ? 'bg-[hsl(var(--brand))] text-white'
-                              : 'border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.45)]'
-                          )}
-                        >
-                          {range.label}
-                        </button>
-                      ))}
-                    </div>
+                  {/* ── Time-range chips (1W 1M 3M 6M 1Y All) ── */}
+                  <div className="flex items-center gap-1.5">
+                    {TREND_RANGES.map((range) => (
+                      <button
+                        key={range.key}
+                        type="button"
+                        onClick={() => setTrendRangeDays(range.key)}
+                        className={cn(
+                          'rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors',
+                          trendRangeDays === range.key
+                            ? 'bg-[hsl(var(--brand))] text-white'
+                            : 'bg-[hsl(var(--fill)/0.5)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.8)]'
+                        )}
+                      >
+                        {range.label}
+                      </button>
+                    ))}
                   </div>
 
-                  {/* Chart card */}
+                  {/* ── Main: Chart with moving average emphasized ── */}
                   <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] shadow-[var(--shadow-xs)]">
-                    <div
-                      className="border-b border-[hsl(var(--border)/0.82)] px-5 py-4"
-                      style={{ background: `linear-gradient(180deg, ${selectedMetric.tint} 0%, hsl(var(--card) / 0.82) 100%)` }}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className="atlas-overline">{t('measurements.trend.selected_metric_overline')}</p>
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <h3 className="text-[1.25rem] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
-                              {selectedMetric.label}
-                            </h3>
-                            <span
-                              className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold tracking-[-0.01em]"
-                              style={{ borderColor: selectedMetric.border, background: selectedMetric.tint, color: selectedMetric.color }}
-                            >
-                              {getDeltaLabel(selectedTrendSnapshot.delta, selectedMetric, t)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-5">
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.trend.current')}</p>
-                            <p className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--fg))]">{formatMetricValue(selectedTrendSnapshot.value, selectedMetric)}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.trend.since_start')}</p>
-                            <p className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--fg))]">
-                              {selectedTrendSnapshot.rangeDelta === null
-                                ? t('measurements.trend.no_data')
-                                : `${selectedTrendSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(selectedTrendSnapshot.rangeDelta, selectedMetric.digits)} ${selectedMetric.unit}`}
-                            </p>
-                          </div>
-                        </div>
+                    {/* Chart header — compact current value + delta */}
+                    <div className="px-5 py-4 border-b border-[hsl(var(--border)/0.5)]">
+                      <div className="flex items-baseline gap-3">
+                        <p className="text-[1.75rem] font-bold tracking-[-0.06em] text-[hsl(var(--fg))] leading-none">
+                          {formatMetricValue(selectedTrendSnapshot.value, selectedMetric)}
+                        </p>
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold tracking-[-0.01em]"
+                          style={{ borderColor: selectedMetric.border, background: selectedMetric.tint, color: selectedMetric.color }}
+                        >
+                          {getDeltaLabel(selectedTrendSnapshot.delta, selectedMetric, t)}
+                        </span>
                       </div>
+                      <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
+                        {selectedMetric.label} &middot; {selectedMetricEntries.length} entries over {trendWindowLabel.toLowerCase()}
+                        {selectedTrendSnapshot.rangeDelta !== null && (
+                          <> &middot; {selectedTrendSnapshot.rangeDelta > 0 ? '+' : ''}{toDisplayNumber(selectedTrendSnapshot.rangeDelta, selectedMetric.digits)} {selectedMetric.unit} total</>
+                        )}
+                      </p>
                     </div>
 
-                    <div className="h-[280px] px-4 pb-4 pt-3 lg:px-6 lg:pb-5">
+                    <div className="h-[300px] px-4 pb-4 pt-3 lg:px-6 lg:pb-5">
                       {chartData.filter((d) => d.value !== null && d.value !== undefined).length < 2 ? (
                         <div className="flex items-center justify-center h-full">
                           <div className="text-center">
@@ -1325,34 +1340,72 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                           <AreaChart data={chartData}>
                             <defs>
                               <linearGradient id={`mfill-${metricKey}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%"  stopColor={selectedMetric.color} stopOpacity={0.22} />
+                                <stop offset="5%"  stopColor={selectedMetric.color} stopOpacity={0.12} />
                                 <stop offset="95%" stopColor={selectedMetric.color} stopOpacity={0} />
                               </linearGradient>
                             </defs>
-                            <CartesianGrid vertical={false} stroke="hsl(var(--border) / 0.75)" strokeDasharray="4 6" />
+                            <CartesianGrid vertical={false} stroke="hsl(var(--border) / 0.6)" strokeDasharray="4 6" />
                             <XAxis dataKey="date" axisLine={false} tickLine={false} tickMargin={10} fontSize={11} stroke="hsl(var(--fg-3))" />
-                            <YAxis axisLine={false} tickLine={false} tickMargin={10} width={38} fontSize={11} stroke="hsl(var(--fg-3))" tickFormatter={(v) => toDisplayNumber(v, selectedMetric.digits)} />
+                            <YAxis axisLine={false} tickLine={false} tickMargin={10} width={42} fontSize={11} stroke="hsl(var(--fg-3))" tickFormatter={(v) => toDisplayNumber(v, selectedMetric.digits)} domain={['dataMin - 1', 'dataMax + 1']} />
                             <Tooltip
                               cursor={{ stroke: 'hsl(var(--border) / 0.9)', strokeDasharray: '4 4' }}
-                              contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border) / 0.88)', borderRadius: '16px', boxShadow: 'var(--shadow-md)' }}
+                              contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border) / 0.88)', borderRadius: '16px', boxShadow: 'var(--shadow-md)', fontSize: 12 }}
                               labelStyle={{ color: 'hsl(var(--fg-2))', fontSize: 11, fontWeight: 600 }}
-                              formatter={(v) => [formatMetricValue(v, selectedMetric), selectedMetric.label]}
+                              formatter={(v, name) => [
+                                formatMetricValue(v, selectedMetric),
+                                name === 'movingAvg' ? 'Moving avg' : selectedMetric.label,
+                              ]}
                               labelFormatter={(label) => t('measurements.trend.checkpoint_tooltip').replace('{n}', label)}
                             />
-                            <Area type="monotone" dataKey="value" stroke="transparent" fill={`url(#mfill-${metricKey})`} />
-                            <Line
-                              type="monotone"
-                              dataKey="value"
-                              stroke={selectedMetric.color}
-                              strokeWidth={2.5}
-                              dot={{ r: 3, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
-                              activeDot={{ r: 5, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }}
-                            />
+                            {/* Raw data area — subtle fill, faint stroke */}
+                            <Area type="monotone" dataKey="value" stroke={selectedMetric.color} strokeWidth={1} strokeOpacity={0.35} fill={`url(#mfill-${metricKey})`} dot={{ r: 2.5, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 1.5, opacity: 0.7 }} activeDot={{ r: 4, fill: selectedMetric.color, stroke: '#fff', strokeWidth: 2 }} />
+                            {/* Moving average — emphasized bold line */}
+                            <Line type="monotone" dataKey="movingAvg" stroke={selectedMetric.color} strokeWidth={2.5} dot={false} activeDot={false} connectNulls />
                           </AreaChart>
                         </ResponsiveContainer>
                       )}
                     </div>
                   </div>
+
+                  {/* ── Brief trend explanation ── */}
+                  {trendSummary && (
+                    <div className="rounded-[18px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
+                      <p className="text-[13px] leading-relaxed text-[hsl(var(--fg-2))]">
+                        {trendSummary.headline}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* ── Raw readings list ── */}
+                  {selectedMetricEntries.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))] px-1 mb-2">
+                        Raw readings ({selectedMetricEntries.length})
+                      </p>
+                      <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] overflow-hidden divide-y divide-[hsl(var(--border)/0.3)]">
+                        {[...selectedMetricEntries].reverse().slice(0, 20).map((m) => {
+                          const val = getMeasurementFieldValue(m, metricKey);
+                          return (
+                            <div key={m.id} className="flex items-center justify-between px-4 py-2.5">
+                              <p className="text-[13px] text-[hsl(var(--fg-2))]">
+                                {formatMeasurementDate(m.date, { day: '2-digit', month: 'short', year: 'numeric' }, intlLocale)}
+                              </p>
+                              <p className="text-[13px] font-semibold tabular-nums text-[hsl(var(--fg))]">
+                                {toDisplayNumber(val, selectedMetric.digits)} {selectedMetric.unit}
+                              </p>
+                            </div>
+                          );
+                        })}
+                        {selectedMetricEntries.length > 20 && (
+                          <div className="px-4 py-2 text-center">
+                            <p className="text-[11px] text-[hsl(var(--fg-3))]">
+                              +{selectedMetricEntries.length - 20} older entries
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </>

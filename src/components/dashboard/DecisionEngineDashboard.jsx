@@ -35,12 +35,14 @@ import {
   calculateSmoothedWeight 
 } from '@/lib/bodyMath';
 import ShareableProofCards from '@/components/social/ShareableProofCards';
+import CreatorDashboard from '@/components/affiliate/CreatorDashboard';
 import StartFreshModal from '@/components/system/StartFreshModal';
 import MilestoneSystem from '@/components/system/MilestoneSystem';
 
 export default function DecisionEngineDashboard() {
   const { user } = useAuth();
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showCreatorDashboard, setShowCreatorDashboard] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
 
   // Fetch today's data
@@ -553,6 +555,13 @@ export default function DecisionEngineDashboard() {
         <ShareableProofCards
           open={showShareModal}
           onClose={() => setShowShareModal(false)}
+        />
+      )}
+
+      {showCreatorDashboard && (
+        <CreatorDashboard
+          open={showCreatorDashboard}
+          onClose={() => setShowCreatorDashboard(false)}
         />
       )}
 
