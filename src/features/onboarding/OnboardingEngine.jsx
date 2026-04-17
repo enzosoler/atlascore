@@ -231,10 +231,16 @@ function NumericInputScreen({ screen, answers, setAnswer }) {
 }
 
 function InterstitialScreen({ screen, goNext }) {
+  const t = useT();
+
+  const title = (screen.titleKey && t(screen.titleKey)) || screen.title;
+  const subtitle = (screen.subtitleKey && t(screen.subtitleKey)) || screen.subtitle;
+  const keepGoingLabel = t('onboardingV2.interstitial.keepGoing') || 'Keep going';
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-5 text-center">
       {screen.emoji && (
-        <motion.span 
+        <motion.span
           className="mb-6 text-[64px] block"
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -243,22 +249,22 @@ function InterstitialScreen({ screen, goNext }) {
           {screen.emoji}
         </motion.span>
       )}
-      <motion.h1 
+      <motion.h1
         className="mb-4 text-[28px] font-bold leading-tight text-[hsl(var(--fg))]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
       >
-        {screen.title}
+        {title}
       </motion.h1>
-      {screen.subtitle && (
-        <motion.p 
+      {subtitle && (
+        <motion.p
           className="mb-10 max-w-[320px] text-[16px] leading-relaxed text-[hsl(var(--fg-2))]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          {screen.subtitle}
+          {subtitle}
         </motion.p>
       )}
       <motion.button
@@ -269,7 +275,7 @@ function InterstitialScreen({ screen, goNext }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.6 }}
       >
-        Keep going
+        {keepGoingLabel}
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>

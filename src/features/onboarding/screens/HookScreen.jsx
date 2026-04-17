@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useOnboarding } from '../OnboardingContext';
+import { useT } from '@/lib/i18nContext';
 import AtlasCoreLogoSVG from '@/components/AtlasCoreLogoSVG';
 import { ArrowRight, LogIn } from 'lucide-react';
 
@@ -12,13 +13,14 @@ import { ArrowRight, LogIn } from 'lucide-react';
 export default function HookScreen() {
   const { currentScreen, goNext } = useOnboarding();
   const navigate = useNavigate();
+  const t = useT();
 
-  const {
-    title = 'The scale lies. Your mirror lies. Your last app had no idea what was working.',
-    subtitle = 'Atlas tracks what actually matters — and adjusts every week so you stop guessing.',
-    cta = 'Build my plan',
-    secondaryCta = 'I already have an account',
-  } = currentScreen ?? {};
+  const screen = currentScreen ?? {};
+  const title = (screen.titleKey && t(screen.titleKey)) || screen.title || 'The scale lies. Your mirror lies. Your last app had no idea what was working.';
+  const subtitle = (screen.subtitleKey && t(screen.subtitleKey)) || screen.subtitle || 'Atlas tracks what actually matters — and adjusts every week so you stop guessing.';
+  const cta = (screen.ctaKey && t(screen.ctaKey)) || screen.cta || 'Build my plan';
+  const secondaryCta = (screen.secondaryCtaKey && t(screen.secondaryCtaKey)) || screen.secondaryCta || 'I already have an account';
+  const trustBadge = t('onboardingV2.hook.trustBadge') || 'Free 7-day trial • No credit card required';
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 bg-gradient-to-br from-[hsl(var(--bg))] via-[hsl(var(--bg))] to-[hsl(var(--sys-bg2))]">
@@ -98,7 +100,7 @@ export default function HookScreen() {
           transition={{ delay: 0.7, duration: 0.5 }}
         >
           <div className="w-1 h-1 rounded-full bg-[hsl(var(--ok))]" />
-          <span>Free 7-day trial • No credit card required</span>
+          <span>{trustBadge}</span>
         </motion.div>
       </motion.div>
     </div>

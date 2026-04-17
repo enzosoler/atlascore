@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useOnboarding } from '../OnboardingContext';
+import { useT } from '@/lib/i18nContext';
 
 /**
  * CommitmentScreen — a moment of gravity before conversion.
@@ -7,7 +8,15 @@ import { useOnboarding } from '../OnboardingContext';
  * advance to the next screen. The difference is emotional, not functional.
  */
 export default function CommitmentScreen() {
-  const { goNext } = useOnboarding();
+  const { currentScreen, goNext } = useOnboarding();
+  const t = useT();
+
+  const screen = currentScreen ?? {};
+  const title = t('onboardingV2.commitment.title') || 'Before we start — one promise.';
+  const body = t('onboardingV2.commitment.body') || 'Everything about your plan is designed around this: 3 sessions a week, honest food logging, and a weekly weigh-in. Not perfect. Just consistent.';
+  const prompt = t('onboardingV2.commitment.prompt') || "Do you promise yourself you'll try that for the next 8 weeks?";
+  const primaryCta = t('onboardingV2.commitment.primaryCta') || "I'm in";
+  const secondaryCta = t('onboardingV2.commitment.secondaryCta') || "I'll decide as I go";
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
@@ -19,19 +28,17 @@ export default function CommitmentScreen() {
       >
         {/* Headline */}
         <h1 className="text-[26px] font-bold leading-[1.15] tracking-[-0.03em] text-[hsl(var(--fg))]">
-          Before we start — one promise.
+          {title}
         </h1>
 
         {/* Body text */}
         <p className="text-[15px] leading-relaxed text-[hsl(var(--fg-2))]">
-          Everything about your plan is designed around this: 3 sessions a week,
-          honest food logging, and a weekly weigh-in. Not perfect. Just
-          consistent.
+          {body}
         </p>
 
         {/* Subtitle / prompt */}
         <p className="text-[14px] font-medium leading-snug text-[hsl(var(--fg))]">
-          Do you promise yourself you'll try that for the next 8 weeks?
+          {prompt}
         </p>
 
         {/* Primary CTA */}
@@ -40,7 +47,7 @@ export default function CommitmentScreen() {
           onClick={goNext}
           className="mt-4 w-full rounded-[14px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white transition-opacity active:opacity-80"
         >
-          I'm in
+          {primaryCta}
         </button>
 
         {/* Secondary link */}
@@ -49,7 +56,7 @@ export default function CommitmentScreen() {
           onClick={goNext}
           className="text-[13px] font-medium text-[hsl(var(--fg-3))] transition-colors active:text-[hsl(var(--fg-2))]"
         >
-          I'll decide as I go
+          {secondaryCta}
         </button>
       </motion.div>
     </div>

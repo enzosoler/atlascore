@@ -1,10 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Check } from 'lucide-react';
 import { useOnboarding } from '../OnboardingContext';
+import { useT } from '@/lib/i18nContext';
 
 const STEP_DELAY_MS = 700;
 const DONE_PAUSE_MS = 1000;
+
+const DEFAULT_MESSAGE_KEYS = [
+  'onboardingV2.building.defaultMsg1',
+  'onboardingV2.building.defaultMsg2',
+  'onboardingV2.building.defaultMsg3',
+  'onboardingV2.building.defaultMsg4',
+];
 
 const DEFAULT_MESSAGES = [
   'Analyzing your baseline...',
@@ -20,7 +28,20 @@ const DEFAULT_MESSAGES = [
  */
 export default function BuildingScreen() {
   const { currentScreen, goNext } = useOnboarding();
-  const messages = currentScreen?.messages ?? DEFAULT_MESSAGES;
+  const t = useT();
+
+  // Resolve translated messages: try messageKeys first, fall back to messages array
+  const messages = useMemo(() => {
+    const keys = currentScreen?.messageKeys;
+    const fallbacks = currentScreen?.messages ?? DEFAULT_MESSAGES;
+    const fallbackKeys = keys ?? DEFAULT_MESSAGE_KEYS;
+
+    return fallbackKeys.map((key, i) => {
+      const translated = key && t(key);
+      // t() returns a readable fallback when key is missing; check if it resolved to actual text
+      return (translated && translated !== key) ? translated : (fallbacks[i] ?? translated);
+    });
+  }, [currentScreen, t]);
 
   // completedCount tracks how many messages have finished (shown check)
   const [completedCount, setCompletedCount] = useState(0);
