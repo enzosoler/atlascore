@@ -465,7 +465,7 @@ const AppRoutes = () => (
 
         <Route element={<AppLayout />}>
           {/* Premium content — hard-gated behind EntitlementGate */}
-          <Route path={ROUTES.today} element={<EntitlementGate><DecisionEngineDashboard /></EntitlementGate>} />
+          <Route path={ROUTES.today} element={<EntitlementGate><Today /></EntitlementGate>} />
           <Route path={ROUTES.nutrition} element={<EntitlementGate><Nutrition /></EntitlementGate>} />
           <Route path={ROUTES.workouts} element={<EntitlementGate><WorkoutsV2 /></EntitlementGate>} />
           <Route path={ROUTES.routines} element={<EntitlementGate><Routines /></EntitlementGate>} />
