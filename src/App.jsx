@@ -368,9 +368,9 @@ const AppRoutes = () => (
       <Route path={ROUTES.demoHome} element={<DemoHome />} />
 
       {/* Shared auth */}
-      <Route path={ROUTES.auth} element={<AuthRedesigned />} />
-      <Route path={ROUTES.signup} element={<AuthRedesigned />} />
-      <Route path={ROUTES.login} element={<AuthRedesigned />} />
+      <Route path={ROUTES.auth} element={<Auth />} />
+      <Route path={ROUTES.signup} element={<Auth />} />
+      <Route path={ROUTES.login} element={<Auth />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/auth/update-password" element={<UpdatePassword />} />
 
@@ -467,7 +467,7 @@ const AppRoutes = () => (
         <Route element={<AppLayout />}>
           {/* Premium content — hard-gated behind EntitlementGate */}
           <Route path={ROUTES.today} element={<EntitlementGate><Today /></EntitlementGate>} />
-          <Route path={ROUTES.nutrition} element={<EntitlementGate><NutritionRedesigned /></EntitlementGate>} />
+          <Route path={ROUTES.nutrition} element={<EntitlementGate><Nutrition /></EntitlementGate>} />
           <Route path={ROUTES.workouts} element={<EntitlementGate><WorkoutsV2 /></EntitlementGate>} />
           <Route path={ROUTES.routines} element={<EntitlementGate><Routines /></EntitlementGate>} />
           <Route path={ROUTES.protocols} element={<EntitlementGate><Protocols /></EntitlementGate>} />
@@ -498,7 +498,7 @@ const AppRoutes = () => (
           <Route path={ROUTES.bodyProfile} element={<BodyProfile />} />
           <Route path={ROUTES.settings} element={<Settings />} />
           <Route path={ROUTES.notificationSettings} element={<NotificationSettings />} />
-          <Route path={ROUTES.account} element={<AccountRedesigned />} />
+          <Route path={ROUTES.account} element={<Account />} />
           <Route path={ROUTES.social} element={<Social />} />
           {/* Professional dashboards — gated behind private beta flag.
               Routes are only mounted when VITE_ENABLE_PRO_ROUTES=true (internal/staging).
