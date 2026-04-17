@@ -10,7 +10,7 @@ import { ROUTES } from '@/lib/routes';
 import { ClipboardList, Loader2, Dumbbell, ChevronDown, ChevronUp, Plus, User, Users, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
-import { EmptyState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
+import { EmptyState, LoadingState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
 import ShareWorkoutModal from '@/components/workouts/ShareWorkoutModal';
 
 const CREATOR_LABELS = { ai: 'Generated', coach: 'Coach', user: 'You' };
@@ -158,15 +158,11 @@ export default function MyWorkout() {
     enabled: !!user?.id,
   });
 
-  const { data: plans = [], isLoading } = useQuery({
+  const { data: plans = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['workout-plans', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      try {
-        return await getActiveWorkoutPlans(user.id);
-      } catch {
-        return [];
-      }
+      return getActiveWorkoutPlans(user.id);
     },
     enabled: !!user?.id,
   });
@@ -265,9 +261,12 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center gap-2 t-small text-[hsl(var(--fg-2))]">
-        <Loader2 className="w-4 h-4 animate-spin" /> {t('myWorkout.messages.loading')}
-      </div>
+      <AppContainer maxWidth="max-w-3xl">
+        <LoadingState
+          title={t('myWorkout.messages.loading')}
+          description="Checking for your active reusable workout plan."
+        />
+      </AppContainer>
     );
   }
 
@@ -310,6 +309,31 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
           </div>
         )}
       />
+
+      {isError && (
+        <StatusBanner tone="error">
+          <div className="space-y-3">
+            <p className="text-sm font-semibold text-[hsl(var(--fg))]">Could not load your active plan</p>
+            <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">
+              {error?.message || 'The workout plan store is temporarily unavailable.'}
+            </p>
+            <SecondaryButton className="h-10 w-fit" onClick={() => refetch()}>
+              Try again
+            </SecondaryButton>
+          </div>
+        </StatusBanner>
+      )}
+
+      {!isLoading && !isError && !plan && (
+        <StatusBanner tone="neutral">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-[hsl(var(--fg))]">No active plan yet</p>
+            <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">
+              This surface is for a single reusable active plan. Create one manually or generate a new one with AI.
+            </p>
+          </div>
+        </StatusBanner>
+      )}
 
       {genError && (
         <StatusBanner tone="error">{genError}</StatusBanner>
@@ -357,6 +381,7 @@ Create a 4-5 day workout plan with real exercises, sets, reps, and rest time.`,
                 {CreatorIcon && <CreatorIcon className="w-3 h-3" />}
                 {CREATOR_LABELS[plan.created_by_type] || 'Generated'}
               </span>
+              {plan.active && <span className="badge badge-ok">Active</span>}
               <span className="badge badge-neutral">v{plan.version || 1}</span>
             </div>
             {plan.objective && (

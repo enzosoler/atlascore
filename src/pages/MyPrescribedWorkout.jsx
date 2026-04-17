@@ -1,10 +1,14 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Activity } from 'lucide-react';
+import { Activity, Dumbbell, Calendar } from 'lucide-react';
 import AdherenceComparison from '@/components/shared/AdherenceComparison';
+import { AppContainer, Card, PageHeader } from '@/components/shared/AppContainer';
+import { EmptyState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
+import { ROUTES } from '@/lib/routes';
 import {
   flattenPrescribedWorkoutExercises,
   getPrescribedWorkoutSessions,
+  summarizePrescribedWorkout,
 } from '@/lib/prescribedWorkout';
 
 /**
@@ -53,37 +57,89 @@ export default function CoachStudentAdherence({ studentEmail, weeks = 4 }) {
     );
     return sum + pVol;
   }, 0);
+  const summary = prescribed.length > 0 ? summarizePrescribedWorkout(prescribed[0]) : null;
 
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="t-subtitle flex items-center gap-2 mb-3">
-          <Activity className="w-4 h-4" /> Workout adherence
-        </p>
-      </div>
+    <AppContainer maxWidth="max-w-4xl">
+      <PageHeader
+        eyebrow="Plan vs execution"
+        title="Prescribed workout"
+        subtitle="This view is the reference template. Completed workouts live separately as history."
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <AdherenceComparison
-          label="Completed sessions"
-          actual={completedCount}
-          prescribed={expectedCount}
-          unit="sessions"
-        />
-        {prescribedVolume > 0 && (
+      <div className="space-y-4">
+        <StatusBanner tone="neutral">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-[hsl(var(--fg))]">Built for continuity</p>
+            <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">
+              Use this view to compare the prescribed structure against what was actually logged.
+            </p>
+          </div>
+        </StatusBanner>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <AdherenceComparison
-            label="Volume total (sets × reps)"
-            actual={actualVolume}
-            prescribed={prescribedVolume}
-            unit="reps"
+            label="Completed sessions"
+            actual={completedCount}
+            prescribed={expectedCount}
+            unit="sessions"
           />
+          {prescribedVolume > 0 && (
+            <AdherenceComparison
+              label="Volume total (sets × reps)"
+              actual={actualVolume}
+              prescribed={prescribedVolume}
+              unit="reps"
+            />
+          )}
+        </div>
+
+        {summary && (
+          <Card className="space-y-3 p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="badge badge-blue gap-1">
+                <Dumbbell className="h-3 w-3" />
+                {summary.sessionCount} sessions
+              </span>
+              <span className="badge badge-neutral gap-1">
+                <Activity className="h-3 w-3" />
+                {summary.exerciseCount} exercises
+              </span>
+              {summary.totalSets > 0 && (
+                <span className="badge badge-neutral gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {summary.totalSets} sets
+                </span>
+              )}
+            </div>
+            {summary.firstExercise && (
+              <p className="t-body text-[hsl(var(--fg-2))]">
+                First exercise in the prescription: <span className="font-semibold text-[hsl(var(--fg))]">{summary.firstExercise}</span>
+              </p>
+            )}
+          </Card>
+        )}
+
+        {prescribed.length === 0 && (
+          <Card className="p-4">
+            <EmptyState
+              icon={Dumbbell}
+              title="No prescribed workout synced"
+              description="When a coach-assigned routine is available, it will appear here with its own history comparison."
+              action={(
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <SecondaryButton className="gap-2" onClick={() => window.history.back()}>
+                    Back
+                  </SecondaryButton>
+                  <PrimaryButton className="gap-2" onClick={() => window.location.assign(ROUTES.routines)}>
+                    View routines
+                  </PrimaryButton>
+                </div>
+              )}
+            />
+          </Card>
         )}
       </div>
-
-      {prescribed.length === 0 && (
-        <div className="p-4 rounded-xl bg-[hsl(var(--shell))] border border-[hsl(var(--border-h))] text-center">
-          <p className="t-small text-[hsl(var(--fg-2))]">No prescribed workout yet</p>
-        </div>
-      )}
-    </div>
+    </AppContainer>
   );
 }

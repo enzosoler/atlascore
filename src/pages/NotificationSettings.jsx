@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Bell, Scale, Flame, Clock } from 'lucide-react';
-import { useI18n } from '@/lib/i18nContext';
 import { ROUTES } from '@/lib/routes';
 import { AppContainer, PageHeader } from '@/components/shared/AppContainer';
 import { SafePageBoundary } from '@/components/shared/StablePage';
@@ -49,8 +48,7 @@ function ReminderToggle({ icon: Icon, label, description, enabled, time, onToggl
 }
 
 function NotificationSettingsContent() {
-  const { t } = useI18n();
-  const [config, setConfig] = useState(loadPrefs);
+  const [config, setConfig] = useState(() => loadPrefs());
   const [permissionStatus, setPermissionStatus] = useState('prompt');
 
   useEffect(() => {
@@ -76,7 +74,7 @@ function NotificationSettingsContent() {
     setPermissionStatus(result);
     if (result === 'granted') {
       toast.success('Notifications enabled');
-      scheduleReminders(t).catch(() => {});
+      scheduleSmartReminders().catch(() => {});
     } else {
       toast.error('Notifications denied. Enable them in Settings > atlas.core > Notifications.');
     }

@@ -6,6 +6,8 @@ import { ROUTES, ROLE_HOME } from '@/lib/routes';
 import PublicSiteShell from '@/components/public/PublicSiteShell';
 import { useI18n } from '@/lib/i18nContext';
 
+const PENDING_AUTH_NEXT_KEY = 'atlas_auth_next';
+
 async function resolvePostAuthRoute(userId) {
   try {
     const { data } = await supabase
@@ -37,7 +39,9 @@ export default function AuthCallback() {
 
         if (session?.user) {
           setStatus('success');
-          const destination = await resolvePostAuthRoute(session.user.id);
+          const pendingDestination = sessionStorage.getItem(PENDING_AUTH_NEXT_KEY);
+          if (pendingDestination) sessionStorage.removeItem(PENDING_AUTH_NEXT_KEY);
+          const destination = pendingDestination || await resolvePostAuthRoute(session.user.id);
           setTimeout(() => navigate(destination, { replace: true }), 1500);
         } else {
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -54,7 +58,9 @@ export default function AuthCallback() {
 
             if (data.session?.user) {
               setStatus('success');
-              const destination = await resolvePostAuthRoute(data.session.user.id);
+              const pendingDestination = sessionStorage.getItem(PENDING_AUTH_NEXT_KEY);
+              if (pendingDestination) sessionStorage.removeItem(PENDING_AUTH_NEXT_KEY);
+              const destination = pendingDestination || await resolvePostAuthRoute(data.session.user.id);
               setTimeout(() => navigate(destination, { replace: true }), 1500);
               return;
             }
@@ -73,7 +79,9 @@ export default function AuthCallback() {
   }, [navigate, t]);
 
   const handleRetry = () => {
-    navigate(`${ROUTES.auth}?mode=login`, { replace: true });
+    const pendingDestination = sessionStorage.getItem(PENDING_AUTH_NEXT_KEY);
+    const search = pendingDestination ? `?mode=login&next=${encodeURIComponent(pendingDestination)}` : '?mode=login';
+    navigate(`${ROUTES.auth}${search}`, { replace: true });
   };
 
   return (

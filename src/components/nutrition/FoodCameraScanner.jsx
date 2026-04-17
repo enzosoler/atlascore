@@ -204,7 +204,7 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
             <div className="text-center py-4">
               <Loader2 className="w-8 h-8 mx-auto animate-spin text-[hsl(var(--brand))]" />
               <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))]">
-                AI is analyzing your meal...
+                Capturing a structured draft...
               </p>
             </div>
           )}
@@ -213,7 +213,7 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
           {detectedFoods.length > 0 && (
             <div className="space-y-3">
               <p className="text-[13px] font-medium text-[hsl(var(--fg))]">
-                Detected foods ({detectedFoods.length}):
+                Review detected foods ({detectedFoods.length})
               </p>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {detectedFoods.map((food, idx) => (
@@ -257,7 +257,7 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
                             ? 'bg-yellow-100 text-yellow-700'
                             : 'bg-orange-100 text-orange-700'
                         }`}>
-                          {Math.round(food.confidence * 100)}% confidence
+                          {food.confidence >= 0.8 ? 'high confidence' : food.confidence >= 0.5 ? 'needs review' : 'low confidence'}
                         </span>
                       </div>
                     )}
@@ -287,7 +287,7 @@ export default function FoodCameraScanner({ open, onOpenChange, onFoodsDetected 
                   disabled={selectedFoods.size === 0}
                   className="flex-1 btn btn-primary"
                 >
-                  Add {selectedFoods.size} item{selectedFoods.size !== 1 ? 's' : ''}
+                  Confirm {selectedFoods.size} item{selectedFoods.size !== 1 ? 's' : ''}
                 </Button>
               </div>
             </div>

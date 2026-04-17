@@ -17,6 +17,7 @@ const MEAL_META = {
 function MealEntry({ meal, onEdit, onDelete }) {
   const meta = MEAL_META[meal.meal_type] || MEAL_META.lunch;
   const Icon = meta.icon;
+  const foodPreview = (meal.foods || []).map((food) => food.name).filter(Boolean).slice(0, 3).join(', ');
 
   return (
     <div className="flex gap-3 py-3">
@@ -52,17 +53,22 @@ function MealEntry({ meal, onEdit, onDelete }) {
         </div>
 
         {/* Macro pills */}
-        <div className="flex gap-2 mt-2">
-          {[
-            { label: 'kcal', value: meal.total_calories },
-            { label: 'P', value: meal.total_protein, unit: 'g' },
-            { label: 'C', value: meal.total_carbs, unit: 'g' },
-            { label: 'F', value: meal.total_fat, unit: 'g' },
-          ].map(({ label, value, unit }) => (
-            <span key={label} className="text-[10px] font-medium text-[hsl(var(--fg-3))] bg-[hsl(var(--fill)/0.6)] rounded-md px-1.5 py-0.5">
-              {Math.round(value || 0)}{unit || ''} {label}
-            </span>
-          ))}
+        <div className="mt-2">
+          <p className="text-[11px] text-[hsl(var(--fg-2))] truncate">
+            {foodPreview || `${(meal.foods || []).length} item${(meal.foods || []).length === 1 ? '' : 's'}`}
+          </p>
+          <div className="flex gap-2 mt-2">
+            {[
+              { label: 'kcal', value: meal.total_calories },
+              { label: 'P', value: meal.total_protein, unit: 'g' },
+              { label: 'C', value: meal.total_carbs, unit: 'g' },
+              { label: 'F', value: meal.total_fat, unit: 'g' },
+            ].map(({ label, value, unit }) => (
+              <span key={label} className="text-[10px] font-medium text-[hsl(var(--fg-3))] bg-[hsl(var(--fill)/0.6)] rounded-md px-1.5 py-0.5">
+                {Math.round(value || 0)}{unit || ''} {label}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -75,7 +81,7 @@ function MealEntry({ meal, onEdit, onDelete }) {
 export default function MealTimeline({ meals, onEdit, onDelete, onAddMeal }) {
   if (meals.length === 0) {
     return (
-      <div className="rounded-[16px] border border-dashed border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.15)] py-8 flex flex-col items-center gap-3">
+      <div className="rounded-[18px] border border-dashed border-[hsl(var(--border)/0.6)] bg-[hsl(var(--fill)/0.15)] py-8 flex flex-col items-center gap-3">
         <p className="text-[13px] text-[hsl(var(--fg-3))]">No meals logged today</p>
         <button
           onClick={onAddMeal}
@@ -89,7 +95,7 @@ export default function MealTimeline({ meals, onEdit, onDelete, onAddMeal }) {
   }
 
   return (
-    <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-4 divide-y divide-[hsl(var(--border)/0.4)]">
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] px-4 divide-y divide-[hsl(var(--border)/0.4)]">
       {meals.map((meal) => (
         <MealEntry
           key={meal.id}

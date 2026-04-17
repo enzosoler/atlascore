@@ -34,6 +34,7 @@ const GOAL_IDS = ['fat_loss', 'muscle_gain', 'recomp', 'performance', 'health', 
 const GOAL_EMOJIS = { fat_loss: '🔥', muscle_gain: '💪', recomp: '⚡', performance: '🏆', health: '❤️', longevity: '🌱' };
 const ACTIVITY_LEVEL_IDS = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
 const HEAR_ABOUT_US_IDS = ['instagram', 'youtube', 'google', 'indication', 'coach', 'other'];
+const STEP_TITLES = ['Your baseline', 'Choose your path'];
 
 const TOTAL_STEPS = 2; // 0=profile+goals+checkpoint(merged), 1=path choice
 
@@ -71,8 +72,16 @@ function Logo() {
 function StepDots({ step, total }) {
   const pct = ((step + 1) / total) * 100;
   return (
-    <div className="mb-5">
-      <div className="h-[3px] w-full rounded-full bg-[hsl(var(--border))] overflow-hidden">
+    <div className="mb-5 space-y-2">
+      <div className="flex items-center justify-between text-[11px]">
+        <span className="font-semibold uppercase tracking-[0.18em] text-[hsl(var(--fg-3))]">
+          Step {step + 1} of {total}
+        </span>
+        <span className="font-medium text-[hsl(var(--fg-2))]">
+          {STEP_TITLES[step] || 'Continue'}
+        </span>
+      </div>
+      <div className="h-[3px] w-full overflow-hidden rounded-full bg-[hsl(var(--border))]">
         <motion.div
           className="h-full rounded-full bg-[hsl(var(--brand))]"
           initial={{ width: 0 }}
@@ -131,24 +140,23 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
         </p>
       </div>
 
-      <div>
+      <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.72)] p-4 space-y-3">
         <h2 className="text-[18px] font-bold mb-1">{t('onboarding.page.goalTitle')}</h2>
         <p className="text-[12px] text-[hsl(var(--fg-2))]">{t('onboarding.page.goalSubtitle')}</p>
+        <div className="grid grid-cols-3 gap-2">
+          {GOAL_IDS.map((id) => (
+            <GoalChip
+              key={id}
+              selected={form.health_goals.includes(id)}
+              onClick={() => toggle('health_goals', id)}
+              emoji={GOAL_EMOJIS[id]}
+              label={t(`onboarding.page.goals.${id}`)}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {GOAL_IDS.map((id) => (
-          <GoalChip
-            key={id}
-            selected={form.health_goals.includes(id)}
-            onClick={() => toggle('health_goals', id)}
-            emoji={GOAL_EMOJIS[id]}
-            label={t(`onboarding.page.goals.${id}`)}
-          />
-        ))}
-      </div>
-
-      <div className="pt-2 space-y-3">
+      <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.72)] p-4 space-y-3">
         <p className="atlas-overline">{t('onboarding.page.basicProfile')}</p>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -242,7 +250,7 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
       </div>
 
       {/* ── Starting measurements (optional, merged from old checkpoint step) ── */}
-      <div className="pt-2 space-y-3">
+      <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.72)] p-4 space-y-3">
         <p className="atlas-overline">
           {t('onboarding.page.startingMeasurements')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal">{t('onboarding.page.optional')}</span>
         </p>
@@ -281,7 +289,7 @@ function StepProfileAndGoals({ form, set, toggle, t }) {
       </div>
 
       {/* ── Remarketing — "hear about us" is the last field (not a blocker) ── */}
-      <div className="pt-2 space-y-2.5">
+      <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.72)] p-4 space-y-2.5">
         <p className="atlas-overline">
           {t('onboarding.page.hearAboutUs')} <span className="ml-1.5 text-[10px] font-normal normal-case tracking-normal">{t('onboarding.page.optional')}</span>
         </p>
@@ -389,7 +397,7 @@ function StepPathChoice({ form, set, t }) {
 // Shows BEFORE the actual setup generation. Builds trust, explains the trial,
 // and primes users toward the annual plan without hard-selling.
 
-function PaywallPrimingScreen({ onContinue, t }) {
+function PaywallPrimingScreen({ onContinue }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -397,19 +405,24 @@ function PaywallPrimingScreen({ onContinue, t }) {
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       className="space-y-6 py-2"
     >
-      {/* Header */}
-      <div className="text-center">
-        <h2 className="text-[22px] font-bold tracking-tight mb-1.5">{t('onboarding.page.paywall.title')}</h2>
-        <p className="text-[14px] text-[hsl(var(--fg-2))] leading-relaxed">{t('onboarding.page.paywall.subtitle')}</p>
+      <div className="text-center space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--fg-3))]">
+          What happens next
+        </p>
+        <h2 className="text-[24px] font-bold tracking-[-0.03em] text-[hsl(var(--fg))]">
+          Your setup is ready.
+        </h2>
+        <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">
+          We’ll build your baseline, generate your first week, and open Atlas with a plan that matches the answers you just gave.
+        </p>
       </div>
 
-      {/* Trial timeline */}
-      <div className="space-y-0">
+      <div className="rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.7)] p-4">
         {[
-          { day: t('onboarding.page.paywall.todayLabel'), title: t('onboarding.page.paywall.todayTitle'), desc: t('onboarding.page.paywall.todayDesc'), active: true },
-          { day: t('onboarding.page.paywall.day5Label'), title: t('onboarding.page.paywall.day5Title'), desc: t('onboarding.page.paywall.day5Desc'), active: false },
-          { day: t('onboarding.page.paywall.day7Label'), title: t('onboarding.page.paywall.day7Title'), desc: t('onboarding.page.paywall.day7Desc'), active: false },
-        ].map(({ day, title, desc, active }, idx) => (
+          {day: 'Save your baseline', desc: 'We store your profile and measurements so the plan starts from reality.', active: true },
+          {day: 'Generate your setup', desc: 'Atlas calculates your targets and milestones from your answers.', active: false },
+          {day: 'Open the app', desc: 'You land on your first week with the right starting context.', active: false },
+        ].map(({ day, desc, active }) => (
           <div key={day} className="flex gap-3.5 py-3">
             <div className="flex flex-col items-center">
               <div className={cn(
@@ -423,35 +436,37 @@ function PaywallPrimingScreen({ onContinue, t }) {
                 'text-[10px] font-bold uppercase tracking-wider',
                 active ? 'text-[hsl(var(--brand))]' : 'text-[hsl(var(--fg-3))]'
               )}>{day}</span>
-              <p className="text-[14px] font-semibold leading-snug mt-0.5">{title}</p>
               <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5 leading-relaxed">{desc}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Social proof */}
       <div className="rounded-[18px] bg-[hsl(var(--fill)/0.5)] border border-[hsl(var(--border)/0.5)] p-4 space-y-2">
-        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('onboarding.page.paywall.socialProof')}</p>
-        <p className="text-[12px] text-[hsl(var(--fg-2))] italic leading-relaxed">{t('onboarding.page.paywall.testimonial')}</p>
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">What you’ll get right away</p>
+        <div className="space-y-1.5 text-[12px] leading-relaxed text-[hsl(var(--fg-2))]">
+          <p>• A calorie target based on your current weight and goal.</p>
+          <p>• A plan path based on the goal you picked.</p>
+          <p>• A first checkpoint so progress starts with a real baseline.</p>
+        </div>
       </div>
 
-      {/* Annual plan highlight */}
       <div className="pt-2">
-        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{t('onboarding.page.paywall.annualTitle')}</p>
-        <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{t('onboarding.page.paywall.annualDesc')}</p>
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">No billing surprises here</p>
+        <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">
+          You can review everything before you move on. If anything fails to save, we’ll keep you on this step.
+        </p>
       </div>
 
-      {/* CTA */}
       <button
         onClick={onContinue}
         className="atlas-button atlas-button-primary w-full h-12 rounded-2xl text-[14px] gap-2"
       >
-        {t('onboarding.page.paywall.cta')} <ArrowRight className="w-4 h-4" strokeWidth={2} />
+        Continue <ArrowRight className="w-4 h-4" strokeWidth={2} />
       </button>
 
       <p className="text-center text-[11px] text-[hsl(var(--fg-3))]">
-        {t('onboarding.page.paywall.noCreditCard')}
+        You can change your inputs later from your profile.
       </p>
     </motion.div>
   );
@@ -584,6 +599,7 @@ export default function Onboarding() {
   const { t } = useI18n();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   const [showPaywallPriming, setShowPaywallPriming] = useState(false);
   const [showGeneration, setShowGeneration] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -614,6 +630,7 @@ export default function Onboarding() {
   const saveAndFinish = async () => {
     if (!isAuthenticated || !user) { navigate(ROUTES.home, { replace: true }); return false; }
     setSaving(true);
+    setSaveError(null);
     try {
       // CRITICAL: write onboarding_completed as a direct column.
       // Do NOT include profile fields (calories_target, etc.) here — they live in
@@ -679,6 +696,7 @@ export default function Onboarding() {
       return true;
     } catch (err) {
       console.error('[Onboarding] Save failed:', err);
+      setSaveError(t('onboarding.page.saveError') || 'We could not save your setup. Check your connection and try again.');
       return false;
     } finally {
       setSaving(false);
@@ -723,7 +741,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--bg))] p-5">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-gradient-to-br from-[hsl(var(--bg))] via-[hsl(var(--bg))] to-[hsl(var(--sys-bg2))] p-5">
       <div className="w-full max-w-md">
 
         {/* ── Paywall priming screen ── */}
@@ -731,7 +749,7 @@ export default function Onboarding() {
           <>
             <Logo />
             <div className="atlas-card rounded-[22px] p-6">
-              <PaywallPrimingScreen onContinue={handlePrimingContinue} t={t} />
+              <PaywallPrimingScreen onContinue={handlePrimingContinue} />
             </div>
           </>
         )}
@@ -773,6 +791,12 @@ export default function Onboarding() {
                 </motion.div>
               </AnimatePresence>
             </div>
+
+            {saveError && (
+              <div className="mb-4 rounded-[16px] border border-[hsl(var(--err)/0.25)] bg-[hsl(var(--err)/0.08)] px-4 py-3 text-[13px] leading-relaxed text-[hsl(var(--err))]">
+                {saveError}
+              </div>
+            )}
 
             <div className="flex gap-2.5">
               {step > 0 && (

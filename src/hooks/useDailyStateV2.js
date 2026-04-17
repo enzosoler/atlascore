@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { AI_COACH_KEY } from '@/hooks/useAICoach';
+import { getDailyCheckin } from '@/services/checkinService';
 
 const todayISO = () => {
   const d = new Date();
@@ -30,6 +31,7 @@ export const DAILY_KEYS = {
   session:     (uid) => ['v2-session', uid],
   meals:       (uid) => ['v2-meals', uid],
   weight:      (uid) => ['v2-weight', uid],
+  checkin:     (uid, date) => ['v2-checkin', uid, date],
   protocols:   (uid) => ['v2-protocols', uid],
   protocolLogs:(uid) => ['v2-protocol-logs', uid],
   profile:     (uid) => ['v2-profile', uid],
@@ -77,6 +79,13 @@ export function useDailyStateV2() {
       return data;
     }),
     enabled: !!uid, staleTime: 60_000,
+  });
+
+  const { data: rawCheckin, isLoading: l3 } = useQuery({
+    queryKey: DAILY_KEYS.checkin(uid, today),
+    queryFn: () => sq(async () => getDailyCheckin(uid, today)),
+    enabled: !!uid,
+    staleTime: 30_000,
   });
 
   const { data: rawProtocols = [] } = useQuery({
@@ -203,6 +212,7 @@ export function useDailyStateV2() {
   const workoutDone = workout.completed;
   const nutritionLogged = nutrition.mealsLogged > 0;
   const weightLogged = rawWeight != null;
+  const checkinDone = !!rawCheckin;
 
   // Workout streak — consecutive days with a completed workout
   const workoutStreak = useMemo(() => {
@@ -237,11 +247,12 @@ export function useDailyStateV2() {
       invalidate(DAILY_KEYS.recentWork(uid));
     }
     if (scope === 'weight' || scope === 'all') invalidate(DAILY_KEYS.weight(uid));
+    if (scope === 'checkin' || scope === 'all') invalidate(DAILY_KEYS.checkin(uid, today));
     if (scope === 'protocol' || scope === 'all') invalidate(DAILY_KEYS.protocolLogs(uid));
     if (scope === 'plan' || scope === 'all') invalidate(DAILY_KEYS.plan(uid));
     // Always invalidate AI coach
     qc.invalidateQueries({ queryKey: [AI_COACH_KEY, uid] });
-  }, [uid, qc]);
+  }, [uid, qc, today]);
 
   const nutritionMode = profileData?.nutrition_mode || 'macros_only';
 
@@ -268,9 +279,17 @@ export function useDailyStateV2() {
     workoutDone,
     nutritionLogged,
     weightLogged,
+    checkinDone,
+
+    // Check-in
+    checkin: rawCheckin ?? null,
+    checkinMood: rawCheckin?.mood ?? null,
+    checkinEnergy: rawCheckin?.energy ?? null,
+    checkinSleepHours: rawCheckin?.sleep_hours ?? null,
+    checkinHydrationLiters: rawCheckin?.hydration_liters ?? null,
 
     // State
-    isLoading: l1 || l2,
+    isLoading: l1 || l2 || l3,
 
     // Actions
     invalidateAfterAction,

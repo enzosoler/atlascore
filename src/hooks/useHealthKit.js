@@ -11,11 +11,15 @@ import * as hk from '@/services/healthKitService';
 
 const IS_IOS = Capacitor.getPlatform() === 'ios';
 const STORAGE_KEY = 'atlas_healthkit_connected';
+const LAST_SYNC_KEY = 'atlas_healthkit_last_sync';
 
 export function useHealthKit() {
   const [available, setAvailable] = useState(false);
   const [connected, setConnected] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) === 'true'; } catch { return false; }
+  });
+  const [lastSync, setLastSync] = useState(() => {
+    try { return localStorage.getItem(LAST_SYNC_KEY); } catch { return null; }
   });
   const [loading, setLoading] = useState(false);
 
@@ -49,6 +53,14 @@ export function useHealthKit() {
   const disconnect = useCallback(() => {
     setConnected(false);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LAST_SYNC_KEY);
+    setLastSync(null);
+  }, []);
+
+  const markSynced = useCallback((date = new Date()) => {
+    const value = typeof date === 'string' ? date : date.toISOString();
+    setLastSync(value);
+    localStorage.setItem(LAST_SYNC_KEY, value);
   }, []);
 
   /**
@@ -73,10 +85,13 @@ export function useHealthKit() {
     connected,
     loading,
     isIOS: IS_IOS,
+    lastSync,
+    status: !IS_IOS ? 'unsupported' : connected ? 'connected' : available ? 'permission_needed' : 'unavailable',
 
     // Actions
     connect,
     disconnect,
+    markSynced,
     importSnapshot,
     getTodayActivity,
 

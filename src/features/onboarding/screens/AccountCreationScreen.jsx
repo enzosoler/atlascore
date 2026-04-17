@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { saveLocalProfile } from '@/lib/profileUtils';
 import { trackOnboardingCompleted } from '@/lib/analytics';
 import { trackProductEvent } from '@/lib/productEvents';
-import { ROUTES, ROLE_HOME } from '@/lib/routes';
+import { ROUTES } from '@/lib/routes';
 
 /**
  * AccountCreationScreen — the real auth + data persistence screen.
@@ -20,7 +20,7 @@ import { ROUTES, ROLE_HOME } from '@/lib/routes';
  */
 export default function AccountCreationScreen() {
   const { answers, getProfilePayload, clearDraft } = useOnboarding();
-  const { signUp, revalidateSession } = useAuth();
+  const { signUp, revalidateSession, navigateToLogin } = useAuth();
   const navigate = useNavigate();
   const t = useT();
 
@@ -28,10 +28,8 @@ export default function AccountCreationScreen() {
   const subtitleText = t('onboardingV2.account.subtitle') || "So you don't lose it if you switch phones.";
   const continueAppleText = t('onboardingV2.account.continueApple') || 'Continue with Apple';
   const continueGoogleText = t('onboardingV2.account.continueGoogle') || 'Continue with Google';
-  const useEmailText = t('onboardingV2.account.useEmail') || 'Use email';
   const createAccountText = t('onboardingV2.account.createAccount') || 'Create account';
 
-  const [showEmail, setShowEmail] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -143,48 +141,79 @@ export default function AccountCreationScreen() {
   };
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-6">
+    <div className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-6">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[hsl(var(--bg))] via-[hsl(var(--bg))] to-[hsl(var(--sys-bg2))]" />
       <motion.div
-        className="flex w-full max-w-[340px] flex-col items-center"
+        className="relative w-full max-w-[420px] rounded-[32px] border border-[hsl(var(--border)/0.6)] bg-[hsl(var(--card)/0.76)] px-6 py-7 shadow-[0_24px_80px_rgba(0,0,0,0.10)] backdrop-blur-xl sm:px-7"
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
       >
-        <h1 className="mb-2 text-center text-[26px] font-bold leading-[1.15] tracking-[-0.03em] text-[hsl(var(--fg))]">
-          {titleText}
-        </h1>
-        <p className="mb-8 text-center text-[15px] leading-relaxed text-[hsl(var(--fg-2))]">
-          {subtitleText}
-        </p>
+        <div className="mb-6 space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[hsl(var(--fg-3))]">
+            Create your account
+          </p>
+          <h1 className="text-[28px] font-bold leading-[1.12] tracking-[-0.04em] text-[hsl(var(--fg))]">
+            {titleText}
+          </h1>
+          <p className="max-w-[340px] text-[15px] leading-relaxed text-[hsl(var(--fg-2))]">
+            {subtitleText}
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-4 w-full rounded-[12px] border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.06)] px-4 py-3 text-[13px] text-[hsl(var(--err))]">
+          <div className="mb-4 rounded-[14px] border border-[hsl(var(--err)/0.25)] bg-[hsl(var(--err)/0.08)] px-4 py-3 text-[13px] leading-relaxed text-[hsl(var(--err))]">
             {error}
           </div>
         )}
 
-        <div className="flex w-full flex-col gap-3">
-          {/* Apple */}
+        <form onSubmit={handleEmailSubmit} className="space-y-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            required
+            autoComplete="email"
+            className="w-full rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--bg)/0.35)] px-4 py-3 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] outline-none transition-colors focus:border-[hsl(var(--brand))]"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password (6+ characters)"
+            required
+            autoComplete="new-password"
+            minLength={6}
+            className="w-full rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--bg)/0.35)] px-4 py-3 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] outline-none transition-colors focus:border-[hsl(var(--brand))]"
+          />
           <button
-            type="button"
-            onClick={handleApple}
+            type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] py-3.5 text-[15px] font-semibold text-[hsl(var(--fg))] transition-opacity active:opacity-80 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-50"
           >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
-              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C3.79 16.17 4.36 9.86 8.7 9.6c1.26.06 2.14.7 2.88.74.99-.2 1.94-.77 3-.66 1.28.14 2.24.67 2.87 1.63-2.63 1.57-2 5 .88 5.96-.68 1.7-1.56 3.38-3.28 5.01zM12.57 9.5C12.4 7.73 13.84 6.26 15.5 6.1c.24 2-1.83 3.5-2.93 3.4z" />
-              </svg>
-            )}
-            {continueAppleText}
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {createAccountText}
           </button>
+          <p className="text-center text-[12px] leading-relaxed text-[hsl(var(--fg-3))]">
+            We’ll save this plan to your account so you can return on any device.
+          </p>
+        </form>
 
-          {/* Google */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-[hsl(var(--border)/0.7)]" />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--fg-3))]">
+            Or continue with
+          </span>
+          <div className="h-px flex-1 bg-[hsl(var(--border)/0.7)]" />
+        </div>
+
+        <div className="space-y-3">
           <button
             type="button"
             onClick={handleGoogle}
             disabled={loading}
-            className="flex w-full items-center justify-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] py-3.5 text-[15px] font-semibold text-[hsl(var(--fg))] transition-opacity active:opacity-80 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--bg)/0.35)] py-3.5 text-[15px] font-semibold text-[hsl(var(--fg))] transition-opacity active:opacity-80 disabled:opacity-50"
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
               <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -197,58 +226,28 @@ export default function AccountCreationScreen() {
             {continueGoogleText}
           </button>
 
-          {/* Email */}
-          {!showEmail ? (
-            <button
-              type="button"
-              onClick={() => setShowEmail(true)}
-              disabled={loading}
-              className="flex w-full items-center justify-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] py-3.5 text-[15px] font-semibold text-[hsl(var(--fg))] transition-opacity active:opacity-80 disabled:opacity-50"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="M22 7l-10 6L2 7" />
+          <button
+            type="button"
+            onClick={handleApple}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-3 rounded-[14px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--bg)/0.35)] py-3.5 text-[15px] font-semibold text-[hsl(var(--fg))] transition-opacity active:opacity-80 disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C3.79 16.17 4.36 9.86 8.7 9.6c1.26.06 2.14.7 2.88.74.99-.2 1.94-.77 3-.66 1.28.14 2.24.67 2.87 1.63-2.63 1.57-2 5 .88 5.96-.68 1.7-1.56 3.38-3.28 5.01zM12.57 9.5C12.4 7.73 13.84 6.26 15.5 6.1c.24 2-1.83 3.5-2.93 3.4z" />
               </svg>
-              {useEmailText}
-            </button>
-          ) : (
-            <motion.form
-              onSubmit={handleEmailSubmit}
-              className="flex w-full flex-col gap-3"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-            >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                required
-                autoComplete="email"
-                className="w-full rounded-[12px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] px-4 py-3 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] outline-none transition-colors focus:border-[hsl(var(--brand))]"
-              />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password (6+ characters)"
-                required
-                autoComplete="new-password"
-                minLength={6}
-                className="w-full rounded-[12px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.6)] px-4 py-3 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] outline-none transition-colors focus:border-[hsl(var(--brand))]"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-50"
-              >
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {createAccountText}
-              </button>
-            </motion.form>
-          )}
+            )}
+            {continueAppleText}
+          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={navigateToLogin}
+          className="mt-5 w-full text-center text-[13px] font-medium text-[hsl(var(--fg-3))] transition-colors active:text-[hsl(var(--fg-2))]"
+        >
+          Already have an account? Log in
+        </button>
       </motion.div>
     </div>
   );

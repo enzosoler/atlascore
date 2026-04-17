@@ -9,19 +9,22 @@ import {
   FileOutput,
   HelpCircle,
   ArrowRight,
-  CreditCard,
   Shield,
   Clock,
-  UtensilsCrossed,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
-import { useI18n, useT } from '@/lib/i18nContext';
+import { useI18n } from '@/lib/i18nContext';
 import { locales, localeLabels } from '@/i18n/config';
-import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { ROUTES } from '@/lib/routes';
 import {
+  formatBillingOwner,
+  formatSubscriptionPlanLabel,
+  getAccountDisplayName,
+} from '@/lib/accountPresentation';
+import {
+  DataState,
   PageShell,
   SafePageBoundary,
   SectionCard,
@@ -158,8 +161,7 @@ function LanguageOption({ label, value, currentLocale, onSelect }) {
 function SettingsContent() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { t, locale, setLocale, switchLocale } = useI18n();
-  const { openCustomerPortal, loading: portalLoading } = useCustomerPortal();
+  const { t, locale, switchLocale } = useI18n();
   const { subscription } = useSubscription();
 
   // ── Nutrition mode ──
@@ -206,22 +208,8 @@ function SettingsContent() {
     }
   };
 
-  const planName = subscription?.plan_code
-    ? subscription.plan_code.charAt(0).toUpperCase() + subscription.plan_code.slice(1)
-    : t('settings.plan.free');
-
-  const planStatus = subscription?.status === 'active'
-    ? t('settings.plan.active')
-    : subscription?.status === 'trialing'
-    ? t('settings.plan.trial')
-    : subscription?.status === 'past_due'
-    ? t('settings.plan.pastDue')
-    : '';
-
-  // If no active subscription, show "Free" as the plan name instead of a contradictory combo
-  const displayPlanName = (!subscription?.status || !['active', 'trialing', 'past_due'].includes(subscription.status))
-    ? t('settings.plan.free')
-    : planName;
+  const displayPlanName = formatSubscriptionPlanLabel(subscription) || t('settings.plan.free');
+  const billingProviderLabel = formatBillingOwner(subscription);
 
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es' : 'en-US';
   const lastUpdated = new Date().toLocaleDateString(intlLocale, {
@@ -231,64 +219,32 @@ function SettingsContent() {
 
   return (
     <PageShell maxWidth="max-w-2xl">
-      {/* Account — Primary section */}
+      {/* Control-plane summary */}
       <SectionCard
-        title={t('settings.account.title')}
-        subtitle={t('settings.account.planSubtitle')}
+        title="Control plane"
+        subtitle="Preferences live here. Account state, billing, and destructive actions stay in their own surfaces."
       >
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
-            <div className="flex items-center gap-4 min-w-0 flex-1">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-                <User className="h-5 w-5" strokeWidth={2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))] truncate">
-                  {user?.full_name || user?.name || user?.email?.split('@')[0] || 'User'}
-                </p>
-                <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))] truncate">{user?.email || '—'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 pl-16 sm:pl-0">
-              <span className="text-[12px] text-[hsl(var(--fg-3))] shrink-0">{t('settings.account.updated')} {lastUpdated}</span>
-              <Button asChild variant="outline" size="sm" className="gap-1.5 shrink-0">
-                <Link to={ROUTES.profile}>
-                  {t('settings.account.editProfile')}
-                  <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.3)] px-5 py-4">
-            <div className="flex items-center gap-4 min-w-0 flex-1">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]">
-                <CreditCard className="h-5 w-5" strokeWidth={2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-                  {displayPlanName} {t('settings.plan.planLabel')}
-                </p>
-                <p className="mt-0.5 text-[13px] text-[hsl(var(--fg-2))]">
-                  {planStatus}
-                  {subscription?.expires_at && ` • ${t('settings.plan.renews')} ${new Date(subscription.expires_at).toLocaleDateString()}`}
-                </p>
-              </div>
-            </div>
-            {subscription && ['active', 'trialing', 'past_due'].includes(subscription.status) && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => openCustomerPortal(user?.id, user?.email)}
-                disabled={portalLoading}
-                className="gap-1.5 shrink-0 ml-16 sm:ml-0"
-              >
-                {portalLoading ? t('settings.plan.loading') : t('settings.plan.manage')}
+        <DataState
+          variant="neutral"
+          eyebrow="Settings summary"
+          meta={displayPlanName}
+          title={`${getAccountDisplayName(user)} · ${billingProviderLabel}`}
+          description={`Theme, language, nutrition mode, notifications, integrations, and data controls are managed here. Billing and destructive actions stay in Account.`}
+          primaryAction={(
+            <Button asChild variant="outline" size="sm" className="gap-1.5 shrink-0">
+              <Link to={ROUTES.account}>
+                Open account
                 <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-              </Button>
-            )}
-          </div>
-        </div>
+              </Link>
+            </Button>
+          )}
+          secondaryAction={(
+            <div className="rounded-full bg-[hsl(var(--card)/0.8)] px-3 py-2 text-[12px] text-[hsl(var(--fg-3))]">
+              Updated {lastUpdated}
+            </div>
+          )}
+          note="Settings is the truthful control plane: safe preferences stay inline, deeper system controls open dedicated screens."
+        />
       </SectionCard>
 
       {/* Experience */}
@@ -362,6 +318,16 @@ function SettingsContent() {
         </div>
       </SectionCard>
 
+      <SectionCard title="Connected services" subtitle="Live sync status and device-level data connections.">
+        <ControlRow
+          icon={User}
+          label="Integrations"
+          description="Apple Health connection state, device availability, and roadmap integrations."
+          href={ROUTES.integrations}
+          meta="Atlas sync"
+        />
+      </SectionCard>
+
       {/* Notifications */}
       <SectionCard title={t('settings.notifications.title')} subtitle={t('settings.notifications.subtitle')}>
         <ControlRow
@@ -388,7 +354,7 @@ function SettingsContent() {
             icon={Shield}
             label={t('settings.data.privacyLabel')}
             description={t('settings.data.privacyDesc')}
-            href="/settings/privacy"
+            href={ROUTES.settingsPrivacy}
           />
         </div>
       </SectionCard>

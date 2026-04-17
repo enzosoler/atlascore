@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
-  User,
+  ChevronRight,
+  CreditCard,
+  LogOut,
   Mail,
   ShieldCheck,
-  LogOut,
-  Crown,
-  CreditCard,
-  ChevronRight,
   Trash2,
+  User,
   RotateCcw,
   Loader2,
 } from 'lucide-react';
@@ -20,13 +19,13 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import { supabase } from '@/lib/supabaseClient';
 import { ROUTES } from '@/lib/routes';
 import {
-  AppContainer,
-  Card,
-  PageHeader,
-} from '@/components/shared/AppContainer';
-import {
-  SafePageBoundary,
-} from '@/components/shared/StablePage';
+  formatBillingOwner,
+  formatRenewalLabel,
+  formatSubscriptionPlanLabel,
+  getAccountDisplayName,
+  getAccountInitials,
+} from '@/lib/accountPresentation';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -35,65 +34,36 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { DataState, PageShell, SectionCard, SafePageBoundary } from '@/components/shared/StablePage';
 
-// ---------------------------------------------------------------------------
-// Account Detail Row
-// ---------------------------------------------------------------------------
-
-function AccountRow({ icon: Icon, label, value, action }) {
+function SettingsLink({ to, icon: Icon, title, subtitle, meta, danger = false }) {
   return (
-    <div className="flex items-center gap-4 rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.4)] px-4 py-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.8)] text-[hsl(var(--fg-2))]">
+    <Link
+      to={to}
+      className={`flex items-center gap-4 rounded-[18px] border px-4 py-4 transition-colors ${
+        danger
+          ? 'border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] hover:border-[hsl(var(--err)/0.45)]'
+          : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.36)] hover:bg-[hsl(var(--fill)/0.52)]'
+      }`}
+    >
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${
+        danger
+          ? 'bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]'
+          : 'bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]'
+      }`}>
         <Icon className="h-4 w-4" strokeWidth={1.9} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-          {label}
+        <p className={`text-[15px] font-semibold tracking-[-0.02em] ${danger ? 'text-[hsl(var(--err))]' : 'text-[hsl(var(--fg))]'}`}>
+          {title}
         </p>
-        <p className="truncate text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-          {value}
-        </p>
+        <p className="text-[13px] text-[hsl(var(--fg-2))]">{subtitle}</p>
       </div>
-      {action}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Settings Link Card
-// ---------------------------------------------------------------------------
-
-function SettingsLink({ to, icon: Icon, title, subtitle, danger }) {
-  return (
-    <Link to={to} className="block">
-      <div className={`flex items-center gap-4 rounded-[16px] border px-4 py-4 transition-all duration-200 hover:bg-[hsl(var(--card))] ${
-        danger
-          ? 'border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] hover:border-[hsl(var(--err)/0.5)]'
-          : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.6)] hover:border-[hsl(var(--fg)/0.2)]'
-      }`}>
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border ${
-          danger
-            ? 'border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]'
-            : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.72)] text-[hsl(var(--fg-2))]'
-        }`}>
-          <Icon className="h-4 w-4" strokeWidth={1.9} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className={`text-[15px] font-semibold tracking-[-0.02em] ${danger ? 'text-[hsl(var(--err))]' : 'text-[hsl(var(--fg))]'}`}>
-            {title}
-          </p>
-          <p className="text-[13px] text-[hsl(var(--fg-2))]">{subtitle}</p>
-        </div>
-        <ChevronRight className={`h-4 w-4 shrink-0 ${danger ? 'text-[hsl(var(--err)/0.6)]' : 'text-[hsl(var(--fg-3))]'}`} />
-      </div>
+      {meta ? <span className="text-[12px] text-[hsl(var(--fg-3))]">{meta}</span> : null}
+      <ChevronRight className={`h-4 w-4 shrink-0 ${danger ? 'text-[hsl(var(--err)/0.6)]' : 'text-[hsl(var(--fg-3))]'}`} />
     </Link>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Reset Data Section
-// ---------------------------------------------------------------------------
 
 function ResetDataSection({ logout }) {
   const [open, setOpen] = useState(false);
@@ -106,12 +76,18 @@ function ResetDataSection({ logout }) {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('reset-user-data', { body: {} });
-      if (error) { toast.error(`Reset failed: ${error?.message ?? JSON.stringify(error)}`); return; }
-      if (data?.error) { toast.error(`Reset failed: ${data.error}`); return; }
+      if (error) {
+        toast.error(`Reset failed: ${error?.message ?? JSON.stringify(error)}`);
+        return;
+      }
+      if (data?.error) {
+        toast.error(`Reset failed: ${data.error}`);
+        return;
+      }
       toast.success('Data reset complete');
       setOpen(false);
       setTimeout(() => logout?.(), 500);
-    } catch (err) {
+    } catch {
       toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -121,13 +97,13 @@ function ResetDataSection({ logout }) {
   return (
     <>
       <button type="button" onClick={() => { setOpen(true); setConfirmText(''); }} className="block w-full text-left">
-        <div className="flex items-center gap-4 rounded-[16px] border px-4 py-4 transition-all duration-200 hover:bg-[hsl(var(--card))] border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] hover:border-[hsl(var(--err)/0.5)]">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]">
+        <div className="flex items-center gap-4 rounded-[18px] border border-[hsl(var(--err)/0.3)] bg-[hsl(var(--err)/0.04)] px-4 py-4 transition-colors hover:border-[hsl(var(--err)/0.45)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[hsl(var(--err)/0.08)] text-[hsl(var(--err))]">
             <RotateCcw className="h-4 w-4" strokeWidth={1.9} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--err))]">Reset all my data</p>
-            <p className="text-[13px] text-[hsl(var(--fg-2))]">Wipe tracking data and start fresh</p>
+            <p className="text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--err))]">Reset all data</p>
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">Wipe tracking data and keep the account intact.</p>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 text-[hsl(var(--err)/0.6)]" />
         </div>
@@ -136,24 +112,32 @@ function ResetDataSection({ logout }) {
       <Dialog open={open} onOpenChange={(v) => { if (!loading) setOpen(v); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[hsl(var(--err))]">Reset all my data</DialogTitle>
+            <DialogTitle className="text-[hsl(var(--err))]">Reset all data</DialogTitle>
             <DialogDescription>This action cannot be undone.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
               <p className="mb-1.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--err)/0.8)]">Will be deleted</p>
-              <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">Your workouts, meals, measurements, check-ins, coach conversations, progress photos, and workout plans.</p>
+              <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">Workouts, meals, measurements, check-ins, photos, and plans.</p>
             </div>
             <div>
               <p className="mb-1.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-[hsl(var(--ok)/0.8)]">Will be kept</p>
-              <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">Your account, email, subscription, and basic profile.</p>
+              <p className="text-[14px] leading-relaxed text-[hsl(var(--fg-2))]">Account access, email, subscription, and profile basics.</p>
             </div>
             <div>
               <label htmlFor="reset-confirm" className="mb-1.5 block text-[13px] font-medium text-[hsl(var(--fg-2))]">
                 Type <span className="font-bold text-[hsl(var(--err))]">RESET</span> to confirm
               </label>
-              <input id="reset-confirm" type="text" autoComplete="off" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} disabled={loading}
-                className="w-full rounded-[12px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--err)/0.5)] focus:outline-none" placeholder="RESET" />
+              <input
+                id="reset-confirm"
+                type="text"
+                autoComplete="off"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                disabled={loading}
+                className="w-full rounded-[12px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.5)] px-3 py-2.5 text-[15px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--err)/0.5)] focus:outline-none"
+                placeholder="RESET"
+              />
             </div>
           </div>
           <DialogFooter>
@@ -169,217 +153,160 @@ function ResetDataSection({ logout }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main Account Page
-// ---------------------------------------------------------------------------
-
 export default function Account() {
-  const { t } = useI18n();
-  const [showResetModal, setShowResetModal] = useState(false);
-  const [showNutritionModal, setShowNutritionModal] = useState(false);
-
-  return (
-    <SafePageBoundary
-      title={t('profile.sections.account')}
-      maxWidth="max-w-2xl"
-      fallbackDescription={t('profile.sections.accountSubtitle')}
-    >
-      <AccountContent 
-        showResetModal={showResetModal}
-        setShowResetModal={setShowResetModal}
-        showNutritionModal={showNutritionModal}
-        setShowNutritionModal={setShowNutritionModal}
-      />
-      
-      {/* Modals */}
-      {showResetModal && (
-        <StartFreshModal
-          open={showResetModal}
-          onClose={() => setShowResetModal(false)}
-        />
-      )}
-      
-      {showNutritionModal && (
-        <NutritionModeSelector
-          open={showNutritionModal}
-          onClose={() => setShowNutritionModal(false)}
-          onModeSelected={() => {}}
-        />
-      )}
-    </SafePageBoundary>
-  );
-}
-
-function AccountContent({ showResetModal, setShowResetModal, showNutritionModal, setShowNutritionModal }) {
   const { user, logout } = useAuth();
   const { t } = useI18n();
   const { subscription } = useSubscription();
 
-  const isSubscribed = subscription && ['active', 'trialing', 'granted'].includes(subscription.status);
-  const tier = subscription?.tier || 'free';
-
-  const displayName = user?.full_name || user?.email || 'Athlete';
-  const initials = displayName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(chunk => chunk[0]?.toUpperCase())
-    .join('') || 'AT';
-
-  const roleLabel = {
-    athlete: t('account.roleAthlete'),
-    coach: t('account.roleCoach'),
-    nutritionist: t('account.roleNutritionist'),
-    clinician: t('account.roleClinician'),
-    admin: t('account.roleAdmin'),
-  }[user?.atlas_role] || t('account.roleAthlete');
-
-  const planLabel = isSubscribed
-    ? tier === 'pro'
-      ? t('account.planPro')
-      : tier === 'premium'
-        ? t('account.planPremium')
-        : t('account.planActive')
-    : t('account.planFree');
+  const displayName = getAccountDisplayName(user);
+  const initials = getAccountInitials(user);
+  const isSubscribed = ['active', 'trialing', 'granted', 'past_due'].includes(subscription?.status);
+  const planLabel = formatSubscriptionPlanLabel(subscription);
+  const providerLabel = formatBillingOwner(subscription);
+  const renewalLabel = formatRenewalLabel(subscription);
 
   return (
-    <AppContainer>
-      <PageHeader
-        eyebrow={t('profile.sections.account')}
+    <SafePageBoundary
+      title={t('account.pageTitle')}
+      maxWidth="max-w-2xl"
+      fallbackDescription={t('account.pageSubtitle')}
+    >
+      <PageShell
+        eyebrow="Account"
         title={t('account.pageTitle')}
-        subtitle={t('account.pageSubtitle')}
-        accentClassName="from-[hsl(var(--brand)/0.06)] via-[hsl(var(--ok)/0.02)]"
-      />
-
-      {/* Back link */}
-      <div className="mb-6">
-        <Button asChild variant="ghost" size="sm">
-          <Link to={ROUTES.profile} className="flex items-center gap-2 text-[hsl(var(--fg-2))]">
-            <ArrowLeft className="h-4 w-4" />
-            {t('account.backToProfile')}
-          </Link>
-        </Button>
-      </div>
-
-      {/* Identity Card */}
-      <section className="mb-6">
-        <Card className="p-5">
-          <div className="mb-5 flex items-start gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] text-[18px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
-              {initials}
+        subtitle="Identity, billing state, and account-wide actions."
+        maxWidth="max-w-2xl"
+        actions={(
+          <Button asChild variant="ghost" size="sm">
+            <Link to={ROUTES.profile} className="flex items-center gap-2 text-[hsl(var(--fg-2))]">
+              <ArrowLeft className="h-4 w-4" />
+              Back to profile
+            </Link>
+          </Button>
+        )}
+      >
+        <SectionCard title="Identity" subtitle="Who this account belongs to.">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="flex items-start gap-4 min-w-0 flex-1">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.88)] text-[18px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                {initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[1.1rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
+                  {displayName}
+                </p>
+                <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+                  {user?.email || t('account.noEmail')}
+                </p>
+                <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.08)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
+                  <ShieldCheck className="h-3 w-3" strokeWidth={2} />
+                  {String(user?.atlas_role || 'athlete').replace(/\b\w/g, (char) => char.toUpperCase())}
+                </span>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[1.125rem] font-semibold tracking-[-0.035em] text-[hsl(var(--fg))]">
-                {displayName}
-              </p>
-              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.08)] px-3 py-1 text-[11px] font-semibold tracking-[0.04em] text-[hsl(var(--brand))]">
-                <ShieldCheck className="h-3 w-3" strokeWidth={2} />
-                {roleLabel}
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <AccountRow
-              icon={Mail}
-              label={t('account.emailLabel')}
-              value={user?.email || t('account.noEmail')}
-            />
-            <AccountRow
-              icon={User}
-              label={t('account.nameLabel')}
-              value={user?.full_name || t('account.noName')}
-            />
-          </div>
-        </Card>
-      </section>
-
-      {/* Plan Section */}
-      <section className="mb-6">
-        <Card className="p-5">
-          <div className="mb-4 flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-[16px] ${
-              isSubscribed
-                ? 'bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]'
-                : 'bg-[hsl(var(--fg-3)/0.08)] text-[hsl(var(--fg-3))]'
-            }`}>
-              <Crown className="h-5 w-5" strokeWidth={1.8} />
-            </div>
-            <div>
-              <h3 className="text-[16px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-                {t('account.planTitle')}
-              </h3>
-            </div>
-          </div>
-
-          <div className="mb-4 flex items-center justify-between rounded-[12px] bg-[hsl(var(--fill)/0.5)] px-4 py-3">
-            <span className="text-[13px] text-[hsl(var(--fg-2))]">{t('account.currentPlan')}</span>
-            <span className={`text-[15px] font-semibold ${isSubscribed ? 'text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg))]'}`}>
-              {planLabel}
-            </span>
-          </div>
-
-          {!isSubscribed ? (
-            <Button asChild className="w-full gap-2">
-              <Link to={ROUTES.pricing}>
-                <Crown className="h-4 w-4" />
-                {t('account.upgradeCta')}
+            <Button asChild variant="outline" className="gap-2 self-start">
+              <Link to={ROUTES.profileEdit}>
+                Edit profile
+                <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Subscription hub" subtitle="Plan state, renewal timing, and the correct billing owner.">
+          {isSubscribed ? (
+            <DataState
+              variant={subscription?.status === 'past_due' ? 'error' : 'neutral'}
+              eyebrow="Current subscription"
+              meta={planLabel}
+              title={`${renewalLabel} · ${providerLabel}`}
+              description={
+                subscription?.source === 'revenuecat'
+                  ? 'Changes happen in the device customer center. Use Atlas to confirm the current plan, then continue in the native billing owner.'
+                  : 'Changes happen in the Stripe billing portal. Atlas keeps the plan state visible here and sends you to the correct manager.'
+              }
+              primaryAction={(
+                <Button asChild className="gap-2">
+                  <Link to={ROUTES.billing}>
+                    <CreditCard className="h-4 w-4" />
+                    Manage billing
+                  </Link>
+                </Button>
+              )}
+              secondaryAction={(
+                <div className="rounded-full bg-[hsl(var(--card)/0.82)] px-3 py-2 text-[12px] font-medium text-[hsl(var(--fg-3))]">
+                  Source: {subscription?.source || 'unknown'}
+                </div>
+              )}
+              note="This card is the account-level subscription owner summary. Settings holds preferences. Billing handles the handoff."
+            />
           ) : (
-            <Button asChild variant="outline" className="w-full gap-2">
-              <Link to="/billing">
-                <CreditCard className="h-4 w-4" />
-                {t('account.manageBilling')}
-              </Link>
-            </Button>
+            <DataState
+              variant="empty"
+              eyebrow="Current subscription"
+              title="You are on the free plan"
+              description="Upgrade to open billing management and renewal controls."
+              primaryAction={(
+                <Button asChild>
+                  <Link to={ROUTES.pricing}>View plans</Link>
+                </Button>
+              )}
+              note="Free users manage their plan choice on Pricing. Billing only appears after a paid plan exists."
+            />
           )}
-        </Card>
-      </section>
+        </SectionCard>
 
-      {/* Settings Links */}
-      <section className="mb-6">
-        <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
-          {t('account.settingsTitle')}
-        </h3>
-        <div className="space-y-3">
-          <SettingsLink
-            to={ROUTES.settings}
-            icon={ShieldCheck}
-            title={t('account.settingsLink')}
-            subtitle={t('account.settingsSubtitle')}
-          />
-        </div>
-      </section>
+        <SectionCard title="Control plane" subtitle="Shortcuts into the rest of the app settings.">
+          <div className="space-y-3">
+            <SettingsLink
+              to={ROUTES.profile}
+              icon={User}
+              title="Edit profile"
+              subtitle="Adjust identity, preferences, and body data."
+              meta="Profile"
+            />
+            <SettingsLink
+              to={ROUTES.settings}
+              icon={ShieldCheck}
+              title="Open settings"
+              subtitle="Theme, language, notifications, and data controls."
+              meta="Settings"
+            />
+            <SettingsLink
+              to={ROUTES.notificationSettings}
+              icon={Mail}
+              title="Notifications"
+              subtitle="Reminder permissions and local reminders."
+              meta="Control"
+            />
+            <SettingsLink
+              to={ROUTES.integrations}
+              icon={CreditCard}
+              title="Integrations"
+              subtitle="Connection center for devices and services."
+              meta="Connect"
+            />
+          </div>
+        </SectionCard>
 
-      {/* Danger Zone */}
-      <section>
-        <h3 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--err)/0.8)]">
-          {t('account.dangerZone')}
-        </h3>
-        <div className="space-y-3">
-          <ResetDataSection logout={logout} />
-          <SettingsLink
-            to="/settings/delete-account"
-            icon={Trash2}
-            title={t('account.deleteAccount')}
-            subtitle={t('account.deleteAccountSubtitle')}
-            danger
-          />
-        </div>
-      </section>
+        <SectionCard title="Danger zone" subtitle="Account-wide actions that need confirmation.">
+          <div className="space-y-3">
+            <ResetDataSection logout={logout} />
+            <SettingsLink
+              to={ROUTES.settingsDeleteAccount}
+              icon={Trash2}
+              title="Delete account"
+              subtitle="Permanently delete the account and all connected data."
+              danger
+            />
+          </div>
+        </SectionCard>
 
-      {/* Logout */}
-      <section className="mt-8">
-        <Button
-          variant="outline"
-          onClick={() => logout?.()}
-          className="w-full gap-2"
-        >
+        <Button variant="outline" onClick={() => logout?.()} className="w-full gap-2">
           <LogOut className="h-4 w-4" />
-          {t('account.logOut')}
+          Log out
         </Button>
-      </section>
-    </AppContainer>
+      </PageShell>
+    </SafePageBoundary>
   );
 }

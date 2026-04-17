@@ -37,6 +37,19 @@ export default function NutritionHeroCard({ dailyTotals, profile, mealCount, aiD
       <div className="h-[2px] bg-gradient-to-r from-[hsl(var(--brand))] via-[hsl(var(--brand-ai))] to-transparent" />
 
       <div className="p-4 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
+              Goal, actual, remaining
+            </p>
+            <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
+              This card mirrors the daily comparison logic used on Nutrition.
+            </p>
+          </div>
+          <span className="rounded-full bg-[hsl(var(--fill)/0.6)] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--fg-2))]">
+            {mealCount} meals
+          </span>
+        </div>
         {/* Two big numbers */}
         <div className="grid grid-cols-2 gap-4">
           {/* Calories */}

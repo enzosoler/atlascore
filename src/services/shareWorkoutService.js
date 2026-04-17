@@ -6,6 +6,16 @@ import { supabase } from '@/lib/supabaseClient';
 
 const FUNCTION_NAME = 'share-workout';
 
+function assertShareType(type, dayIndex) {
+  if (type !== 'plan' && type !== 'day') {
+    throw new Error('Invalid share type');
+  }
+
+  if (type === 'day' && (dayIndex === undefined || dayIndex === null || Number.isNaN(Number(dayIndex)))) {
+    throw new Error('A day index is required when sharing a single day');
+  }
+}
+
 /**
  * Create a share link for a workout plan or single day.
  * @param {'plan'|'day'} type
@@ -14,6 +24,8 @@ const FUNCTION_NAME = 'share-workout';
  * @returns {Promise<{ token: string, url: string }>}
  */
 export async function createWorkoutShare(type, planId, dayIndex) {
+  assertShareType(type, dayIndex);
+
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Not authenticated');
 

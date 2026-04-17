@@ -62,8 +62,6 @@ export default function RegionSelector({ onRegionChange }) {
     init();
   }, []);  
 
-  if (loading) return null;
-
   function handleChange(e) {
     const next = e.target.value;
     setSelected(next);
@@ -74,9 +72,13 @@ export default function RegionSelector({ onRegionChange }) {
   return (
     <div className="flex items-center gap-2 text-[13px] text-[hsl(var(--fg-2))]">
       <Globe className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--fg-3))]" strokeWidth={1.8} />
+      <span className="text-[12px] text-[hsl(var(--fg-3))]">
+        {loading ? 'Detecting region' : 'Billing region'}
+      </span>
       <select
         value={selected}
         onChange={handleChange}
+        disabled={loading}
         className="appearance-none rounded-md border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.5)] px-2.5 py-1.5 pr-7 text-[13px] text-[hsl(var(--fg))] transition-colors hover:border-[hsl(var(--border))] focus:border-[hsl(var(--brand)/0.5)] focus:outline-none focus:ring-1 focus:ring-[hsl(var(--brand)/0.3)]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,

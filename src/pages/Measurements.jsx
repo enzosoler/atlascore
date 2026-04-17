@@ -21,6 +21,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import AIMeasurementProjection from '@/components/ai/AIMeasurementProjection';
 import MeasurementInsights from '@/components/measurements/MeasurementInsights';
 import {
   AppContainer,
@@ -29,6 +30,7 @@ import {
 import {
   EmptyState,
   PrimaryButton,
+  LoadingState,
   SafePageBoundary,
   SecondaryButton,
   StatusBanner,
@@ -37,6 +39,7 @@ import { ResponsiveModal } from '@/components/app/ResponsiveModal';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabaseClient';
 import {
   MEASUREMENT_COMPOSITION_SECTION,
   MEASUREMENT_FIELD_DEFINITIONS,
@@ -71,6 +74,13 @@ const TEXTAREA_CLASS_NAME = 'atlas-field min-h-[88px] resize-y px-3.5 py-3 text-
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
 const TABS = ['overview', 'history', 'trends'];
+
+const TREND_RANGES = [
+  { key: 30, label: '30D' },
+  { key: 90, label: '90D' },
+  { key: 180, label: '180D' },
+  { key: 'all', label: 'All' },
+];
 
 const METRIC_STYLES = {
   weight:                 { color: '#0f766e', tint: 'rgba(15, 118, 110, 0.10)', border: 'rgba(15, 118, 110, 0.24)' },
@@ -158,6 +168,19 @@ function getDeltaLabel(delta, metric, t) {
   if (Math.abs(delta) < 0.05)
     return t ? t('measurements.delta.no_relevant_change') : 'No relevant change';
   return `${delta > 0 ? '+' : ''}${toDisplayNumber(delta, metric?.digits ?? 1)} ${metric?.unit || ''} ${t ? t('measurements.delta.vs_previous') : 'vs previous'}`.trim();
+}
+
+function getTrendWindowLabel(days) {
+  if (days === 'all') return 'All time';
+  return `${days} days`;
+}
+
+function withinTrendWindow(date, latestDate, days) {
+  if (days === 'all' || !latestDate) return true;
+  const latest = new Date(`${latestDate}T12:00:00`).getTime();
+  const current = new Date(`${date}T12:00:00`).getTime();
+  const deltaDays = Math.floor((latest - current) / DAY_IN_MS);
+  return deltaDays >= 0 && deltaDays <= days;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -504,16 +527,38 @@ function MeasurementSteppedForm({ measurement, onCancel, onSubmit, isSaving, sub
                 )}
                 <div className="grid gap-3.5 sm:grid-cols-2">
                   {currentStep.section.fields.map((field) => (
-                    <MeasurementField
-                      key={field.key}
-                      label={field.label}
-                      unit={field.unit}
-                      type="text"
-                      inputMode="decimal"
-                      value={form[field.key]}
-                      onChange={(e) => updateField(field.key, e.target.value)}
-                      error={fieldErrors[field.key]}
-                    />
+                    field.key === 'weight' ? (
+                      <div key={field.key} className="sm:col-span-2 rounded-[22px] border border-[hsl(var(--brand)/0.18)] bg-[linear-gradient(180deg,hsl(var(--brand)/0.06)_0%,hsl(var(--card))_100%)] px-4 py-4">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand))]">
+                          Primary signal
+                        </p>
+                        <p className="mt-1 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+                          Log your weight first. The rest of the body-composition fields are optional support data.
+                        </p>
+                        <div className="mt-3">
+                          <MeasurementField
+                            label={field.label}
+                            unit={field.unit}
+                            type="text"
+                            inputMode="decimal"
+                            value={form[field.key]}
+                            onChange={(e) => updateField(field.key, e.target.value)}
+                            error={fieldErrors[field.key]}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <MeasurementField
+                        key={field.key}
+                        label={field.label}
+                        unit={field.unit}
+                        type="text"
+                        inputMode="decimal"
+                        value={form[field.key]}
+                        onChange={(e) => updateField(field.key, e.target.value)}
+                        error={fieldErrors[field.key]}
+                      />
+                    )
                   ))}
                 </div>
               </div>
@@ -643,11 +688,31 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
 
   const [activeTab, setActiveTab]               = useState('overview');
   const [metricKey, setMetricKey]               = useState('weight');
+  const [trendRangeDays, setTrendRangeDays]     = useState(90);
   const [notice, setNotice]                     = useState(null);
   const [isFormOpen, setIsFormOpen]             = useState(false);
   const [editingMeasurement, setEditingMeasurement] = useState(null);
 
   const queryClient = useQueryClient();
+
+  const { data: profileData = {} } = useQuery({
+    queryKey: ['measurements-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return {};
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('profile_data')
+          .eq('id', user.id)
+          .maybeSingle();
+        return data?.profile_data || {};
+      } catch {
+        return {};
+      }
+    },
+    enabled: !!user?.id,
+    staleTime: 300_000,
+  });
 
   const { data: fetchedMeasurements = [], isLoading, isError } = useQuery({
     queryKey: ['measurements', user?.id],
@@ -732,6 +797,18 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
       ? getDayDifference(firstMeasurement.date, latestMeasurement.date)
       : 0;
 
+  const trendWindowMeasurements = useMemo(() => {
+    if (!sortedMeasurements.length) return [];
+    if (trendRangeDays === 'all' || !latestMeasurement) return sortedMeasurements;
+    return sortedMeasurements.filter((measurement) =>
+      withinTrendWindow(measurement.date, latestMeasurement.date, trendRangeDays)
+    );
+  }, [sortedMeasurements, latestMeasurement, trendRangeDays]);
+
+  const selectedMetricEntries = useMemo(() => {
+    return trendWindowMeasurements.filter((measurement) => getMeasurementFieldValue(measurement, metricKey) !== null);
+  }, [trendWindowMeasurements, metricKey]);
+
   const metricSnapshots = useMemo(() => {
     return METRIC_OPTIONS.reduce((acc, metric) => {
       const entries      = sortedMeasurements.filter((m) => getMeasurementFieldValue(m, metric.key) !== null);
@@ -757,9 +834,75 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
   }, [sortedMeasurements]);
 
   const selectedMetric   = METRIC_LOOKUP[metricKey] || METRIC_OPTIONS[0];
-  const selectedSnapshot = metricSnapshots[metricKey] || { entries: [], value: null, delta: null, rangeDelta: null };
+  const trendWindowLabel = getTrendWindowLabel(trendRangeDays);
 
-  const chartData = selectedSnapshot.entries.map((m) => ({
+  const trendSummary = useMemo(() => {
+    if (!trendWindowMeasurements.length || !latestMeasurement) return null;
+    const earliest = trendWindowMeasurements[0];
+    const latest = trendWindowMeasurements[trendWindowMeasurements.length - 1];
+
+    const summaryFields = [
+      { key: 'weight', label: t('measurements.hero.current_weight'), unit: 'kg', digits: 1, betterDown: false },
+      { key: 'body_fat_percent', label: t('measurements.hero.body_fat_percent'), unit: '%', digits: 1, betterDown: true },
+      { key: 'waist', label: t('measurements.latest_checkpoint.waist'), unit: 'cm', digits: 1, betterDown: true },
+    ];
+
+    const active = summaryFields
+      .map((field) => {
+        const start = getMeasurementFieldValue(earliest, field.key);
+        const end = getMeasurementFieldValue(latest, field.key);
+        if (start == null || end == null) return null;
+        const delta = end - start;
+        return { ...field, start, end, delta };
+      })
+      .filter(Boolean);
+
+    if (!active.length) {
+      return {
+        headline: 'Not enough overlapping metrics yet',
+        detail: 'Keep logging the same fields and the trend view will become more specific.',
+      };
+    }
+
+    const lead = active.find((entry) => Math.abs(entry.delta) > 0.05) || active[0];
+    const directionWord = lead.delta > 0 ? 'up' : lead.delta < 0 ? 'down' : 'steady';
+    const directionTone = lead.delta > 0 ? 'warning' : lead.delta < 0 ? 'success' : 'neutral';
+    const deltaValue = `${lead.delta > 0 ? '+' : ''}${toDisplayNumber(lead.delta, lead.digits)} ${lead.unit}`;
+
+    return {
+      headline:
+        directionWord === 'steady'
+          ? `Metrics are holding steady over ${trendWindowLabel.toLowerCase()}`
+          : `${lead.label} is ${directionWord} ${deltaValue} over ${trendWindowLabel.toLowerCase()}`,
+      detail: `Window starts on ${formatMeasurementDate(earliest.date, { day: '2-digit', month: 'short', year: 'numeric' }, intlLocale)} and ends with the latest checkpoint.`,
+      tone: directionTone,
+      activeCount: active.length,
+    };
+  }, [trendWindowMeasurements, latestMeasurement, t, trendWindowLabel, intlLocale]);
+
+  const selectedTrendSnapshot = useMemo(() => {
+    if (!selectedMetricEntries.length) {
+      return { entries: [], value: null, delta: null, rangeDelta: null };
+    }
+    const latestEntry = selectedMetricEntries[selectedMetricEntries.length - 1];
+    const previousEntry = selectedMetricEntries[selectedMetricEntries.length - 2];
+    const firstEntry = selectedMetricEntries[0];
+
+    return {
+      entries: selectedMetricEntries,
+      value: latestEntry ? getMeasurementFieldValue(latestEntry, metricKey) : null,
+      delta:
+        latestEntry && previousEntry
+          ? getMeasurementFieldValue(latestEntry, metricKey) - getMeasurementFieldValue(previousEntry, metricKey)
+          : null,
+      rangeDelta:
+        latestEntry && firstEntry
+          ? getMeasurementFieldValue(latestEntry, metricKey) - getMeasurementFieldValue(firstEntry, metricKey)
+          : null,
+    };
+  }, [selectedMetricEntries, metricKey]);
+
+  const chartData = selectedTrendSnapshot.entries.map((m) => ({
     date:  formatMeasurementDate(m.date, undefined, intlLocale),
     value: getMeasurementFieldValue(m, metricKey),
   }));
@@ -809,12 +952,8 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
 
   // ── Loading / error ────────────────────────────────────────────────
   if (isLoading) {
-    const spinner = (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-7 w-7 animate-spin rounded-full border-[3px] border-[hsl(var(--brand)/0.18)] border-t-[hsl(var(--brand))]" />
-      </div>
-    );
-    return embedded ? spinner : <AppContainer>{spinner}</AppContainer>;
+    const loading = <LoadingState title="Loading measurements" description="Reading your most recent checkpoints and trend history." />;
+    return embedded ? loading : <AppContainer>{loading}</AppContainer>;
   }
 
   if (isError) {
@@ -967,6 +1106,30 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                 />
               )}
 
+              {trendSummary ? (
+                <Card className="px-5 py-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="atlas-overline">Trend headline</p>
+                      <p className="mt-2 text-[17px] font-semibold tracking-[-0.03em] text-[hsl(var(--fg))]">
+                        {trendSummary.headline}
+                      </p>
+                      <p className="mt-2 max-w-2xl text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+                        {trendSummary.detail}
+                      </p>
+                    </div>
+                    <div className={cn(
+                      'rounded-full border px-3 py-1.5 text-[11px] font-semibold',
+                      trendSummary.tone === 'success' && 'border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]',
+                      trendSummary.tone === 'warning' && 'border-[hsl(var(--warn)/0.2)] bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]',
+                      trendSummary.tone === 'neutral' && 'border-[hsl(var(--border)/0.75)] bg-[hsl(var(--fill)/0.4)] text-[hsl(var(--fg-2))]'
+                    )}>
+                      {trendWindowLabel}
+                    </div>
+                  </div>
+                </Card>
+              ) : null}
+
               {sortedMeasurements.length > 0 && (
                 <>
                   {/* Coverage */}
@@ -1001,7 +1164,18 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                   </div>
 
                   {/* AI Insights */}
-                  <MeasurementInsights measurements={sortedMeasurements} latest={latestMeasurement} />
+                  <MeasurementInsights
+                    measurements={sortedMeasurements}
+                    latest={latestMeasurement}
+                    windowMeasurements={trendWindowMeasurements}
+                    windowLabel={trendWindowLabel}
+                  />
+
+                  <AIMeasurementProjection
+                    latest={latestMeasurement}
+                    measurements={sortedMeasurements}
+                    profile={profileData}
+                  />
                 </>
               )}
             </>
@@ -1064,6 +1238,32 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                     ))}
                   </div>
 
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[hsl(var(--border)/0.8)] bg-[hsl(var(--fill)/0.38)] px-4 py-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Trend window</p>
+                      <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
+                        Showing {selectedMetricEntries.length} entries for {selectedMetric.label.toLowerCase()}.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 overflow-x-auto">
+                      {TREND_RANGES.map((range) => (
+                        <button
+                          key={range.key}
+                          type="button"
+                          onClick={() => setTrendRangeDays(range.key)}
+                          className={cn(
+                            'shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-colors',
+                            trendRangeDays === range.key
+                              ? 'bg-[hsl(var(--brand))] text-white'
+                              : 'border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.45)]'
+                          )}
+                        >
+                          {range.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Chart card */}
                   <div className="overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card)/0.88)] shadow-[var(--shadow-xs)]">
                     <div
@@ -1081,21 +1281,21 @@ function MeasurementsContent({ embedded = false, measurements: propMeasurements 
                               className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-semibold tracking-[-0.01em]"
                               style={{ borderColor: selectedMetric.border, background: selectedMetric.tint, color: selectedMetric.color }}
                             >
-                              {getDeltaLabel(selectedSnapshot.delta, selectedMetric, t)}
+                              {getDeltaLabel(selectedTrendSnapshot.delta, selectedMetric, t)}
                             </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-5">
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.trend.current')}</p>
-                            <p className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--fg))]">{formatMetricValue(selectedSnapshot.value, selectedMetric)}</p>
+                            <p className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--fg))]">{formatMetricValue(selectedTrendSnapshot.value, selectedMetric)}</p>
                           </div>
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">{t('measurements.trend.since_start')}</p>
                             <p className="mt-0.5 text-[14px] font-semibold text-[hsl(var(--fg))]">
-                              {selectedSnapshot.rangeDelta === null
+                              {selectedTrendSnapshot.rangeDelta === null
                                 ? t('measurements.trend.no_data')
-                                : `${selectedSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(selectedSnapshot.rangeDelta, selectedMetric.digits)} ${selectedMetric.unit}`}
+                                : `${selectedTrendSnapshot.rangeDelta > 0 ? '+' : ''}${toDisplayNumber(selectedTrendSnapshot.rangeDelta, selectedMetric.digits)} ${selectedMetric.unit}`}
                             </p>
                           </div>
                         </div>

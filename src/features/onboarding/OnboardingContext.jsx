@@ -124,7 +124,7 @@ function computeCanAdvance(screen, answers) {
       return !!(
         answers.sex &&
         answers.age &&
-        answers.height &&
+        (answers.height_cm || answers.height) &&
         answers.current_weight
       );
 

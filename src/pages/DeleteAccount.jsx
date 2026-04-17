@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, AlertTriangle, Trash2, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trash2, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useT } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
+import { PageShell, SectionCard, SafePageBoundary, StatusBanner } from '@/components/shared/StablePage';
 
 export default function DeleteAccount() {
   const navigate = useNavigate();
@@ -46,55 +46,56 @@ export default function DeleteAccount() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))]">
-      <div className="flex items-center gap-4 p-4 border-b border-[hsl(var(--border))]">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-lg font-semibold">{t('deleteAccount.title')}</h1>
-      </div>
+    <SafePageBoundary title={t('deleteAccount.title')} maxWidth="max-w-2xl" fallbackDescription={t('deleteAccount.warningDesc')}>
+      <PageShell
+        eyebrow="Danger zone"
+        title={t('deleteAccount.title')}
+        subtitle="This permanently removes the account. Read the summary before continuing."
+        maxWidth="max-w-2xl"
+        actions={(
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        )}
+      >
+        <SectionCard title="Warning" subtitle={t('deleteAccount.warningDesc')}>
+          <StatusBanner tone="warning">
+            <span className="font-semibold">{t('deleteAccount.warning')}</span>
+            <span className="text-[hsl(var(--fg-2))]"> · This cannot be undone.</span>
+          </StatusBanner>
+        </SectionCard>
 
-      <div className="p-4 max-w-md mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
-              <span className="font-medium text-red-500">{t('deleteAccount.warning')}</span>
-            </div>
-            <p className="text-sm text-[hsl(var(--fg-2))]">
-              {t('deleteAccount.warningDesc')}
-            </p>
-          </div>
-
+        <SectionCard title={step === 1 ? 'What gets deleted' : 'Confirm deletion'} subtitle="Review the impact before you proceed.">
           {step === 1 ? (
             <div className="space-y-4">
-              <h2 className="font-medium">{t('deleteAccount.whatGetsDeleted')}</h2>
-              <ul className="space-y-2 text-sm text-[hsl(var(--fg-2))]">
-                <li className="flex items-center gap-2">
-                  <X className="w-4 h-4 text-red-500" />
+              <div className="space-y-2 text-[13px] text-[hsl(var(--fg-2))]">
+                <div className="flex items-center gap-2">
+                  <X className="h-4 w-4 text-[hsl(var(--err))]" />
                   {t('deleteAccount.item.workouts')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <X className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <X className="h-4 w-4 text-[hsl(var(--err))]" />
                   {t('deleteAccount.item.nutrition')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <X className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <X className="h-4 w-4 text-[hsl(var(--err))]" />
                   {t('deleteAccount.item.photos')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <X className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <X className="h-4 w-4 text-[hsl(var(--err))]" />
                   {t('deleteAccount.item.profileSettings')}
-                </li>
-              </ul>
-              <Button variant="destructive" onClick={handleDelete} className="w-full mt-4">
-                <Trash2 className="w-4 h-4 mr-2" />
+                </div>
+              </div>
+
+              <Button variant="destructive" onClick={handleDelete} className="w-full gap-2">
+                <Trash2 className="h-4 w-4" />
                 {t('deleteAccount.continueBtn')}
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm text-[hsl(var(--fg-2))]">
+              <p className="text-[13px] leading-5 text-[hsl(var(--fg-2))]">
                 {t('deleteAccount.typeToConfirmPrefix')} <strong className="text-[hsl(var(--fg))]">DELETE</strong> {t('deleteAccount.typeToConfirmSuffix')}
               </p>
               <Input
@@ -102,31 +103,33 @@ export default function DeleteAccount() {
                 onChange={(e) => setConfirmText(e.target.value)}
                 placeholder={t('deleteAccount.inputPlaceholder')}
               />
-              {error && (
-                <p className="text-sm text-red-500">{error}</p>
-              )}
+              {error ? <p className="text-[13px] text-[hsl(var(--err))]">{error}</p> : null}
               <Button
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={confirmText !== 'DELETE' || isDeleting}
-                className="w-full"
+                className="w-full gap-2"
               >
                 {isDeleting ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('deleteAccount.deletingBtn') || 'Deleting...'}</>
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('deleteAccount.deletingBtn') || 'Deleting...'}
+                  </>
                 ) : (
                   t('deleteAccount.permanentlyDeleteBtn')
                 )}
               </Button>
               <button
+                type="button"
                 onClick={() => setStep(1)}
-                className="w-full text-sm text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))] py-2"
+                className="w-full rounded-[12px] border border-[hsl(var(--border)/0.82)] px-4 py-2.5 text-[13px] font-medium text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--fill)/0.4)] hover:text-[hsl(var(--fg))]"
               >
                 {t('deleteAccount.cancel')}
               </button>
             </div>
           )}
-        </motion.div>
-      </div>
-    </div>
+        </SectionCard>
+      </PageShell>
+    </SafePageBoundary>
   );
 }

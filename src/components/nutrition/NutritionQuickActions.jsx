@@ -7,10 +7,10 @@ import { Plus, Sparkles, Search, Copy } from 'lucide-react';
  */
 export default function NutritionQuickActions({ onAddMeal, onQuickAI, onCopyYesterday, onSearch }) {
   const actions = [
-    { icon: Plus, label: 'Add Meal', color: 'brand', onClick: onAddMeal },
-    { icon: Sparkles, label: 'Quick AI', color: 'brand-ai', onClick: onQuickAI },
-    { icon: Copy, label: 'Copy Yesterday', color: 'fg-2', onClick: onCopyYesterday },
-    { icon: Search, label: 'Search Foods', color: 'fg-2', onClick: onSearch },
+    { icon: Plus, label: 'Add meal', color: 'brand', onClick: onAddMeal },
+    { icon: Sparkles, label: 'AI log', color: 'brand-ai', onClick: onQuickAI },
+    { icon: Copy, label: 'Copy yesterday', color: 'fg-2', onClick: onCopyYesterday },
+    { icon: Search, label: 'Search foods', color: 'fg-2', onClick: onSearch },
   ];
 
   return (

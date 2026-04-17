@@ -41,6 +41,27 @@ function normalizeExercise(exercise) {
   };
 }
 
+export function summarizePrescribedWorkout(prescribedWorkout) {
+  const sessions = getPrescribedWorkoutSessions(prescribedWorkout);
+  const exercises = flattenPrescribedWorkoutExercises(prescribedWorkout);
+  const muscleGroups = Array.from(
+    new Set(
+      exercises
+        .flatMap((exercise) => exercise.primary_muscles || exercise.muscle_groups || [])
+        .filter(Boolean)
+    )
+  );
+  const totalSets = exercises.reduce((sum, exercise) => sum + Number(exercise.sets || 0), 0);
+
+  return {
+    sessionCount: sessions.length,
+    exerciseCount: exercises.length,
+    totalSets,
+    muscleGroups,
+    firstExercise: exercises[0]?.name || null,
+  };
+}
+
 export function getPrescribedWorkoutSessions(prescribedWorkout) {
   if (!prescribedWorkout || typeof prescribedWorkout !== 'object') {
     return [];
@@ -83,4 +104,5 @@ export function flattenPrescribedWorkoutExercises(prescribedWorkout) {
 export default {
   flattenPrescribedWorkoutExercises,
   getPrescribedWorkoutSessions,
+  summarizePrescribedWorkout,
 };

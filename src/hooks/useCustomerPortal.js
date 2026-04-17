@@ -1,33 +1,33 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { toast } from 'sonner';
+import { ROUTES } from '@/lib/routes';
 
 export function useCustomerPortal() {
   const [loading, setLoading] = useState(false);
 
-  const openCustomerPortal = useCallback(async (userId, email, returnUrl) => {
+  const openCustomerPortal = useCallback(async (returnUrl) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-customer-portal', {
         body: {
-          return_url: returnUrl || `${window.location.origin}/Settings`,
+          return_url: returnUrl || `${window.location.origin}${ROUTES.billing}`,
         },
       });
 
       if (error) {
         console.error('Customer portal error:', error);
-        toast.error(error.message || 'Could not open billing portal');
-        return;
+        return { ok: false, error: error.message || 'Could not open billing portal' };
       }
 
       if (data?.url) {
         window.location.href = data.url;
+        return { ok: true };
       } else {
-        toast.error(data?.error || 'Could not open billing portal');
+        return { ok: false, error: data?.error || 'Could not open billing portal' };
       }
     } catch (error) {
-      toast.error('Error accessing billing portal');
       console.error('Customer portal error:', error);
+      return { ok: false, error: 'Error accessing billing portal' };
     } finally {
       setLoading(false);
     }

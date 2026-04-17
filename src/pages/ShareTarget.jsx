@@ -70,7 +70,7 @@ function detectContentType(text = '', url = '') {
 export default function ShareTarget() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [processing, setProcessing] = useState(true);
 
   // Read shared data from URL params (Web Share Target GET method)
@@ -161,7 +161,7 @@ export default function ShareTarget() {
             </div>
             <div>
               <p className="text-[15px] font-semibold text-[hsl(var(--fg))]">
-                Analyzing shared content...
+                Capturing shared content...
               </p>
               {sharedUrl && (
                 <p className="mt-2 text-[12px] text-[hsl(var(--fg-3))] truncate max-w-[280px] mx-auto">
@@ -182,10 +182,10 @@ export default function ShareTarget() {
                 <Share2 className="w-7 h-7 text-[hsl(var(--brand))]" strokeWidth={1.75} />
               </div>
               <h2 className="text-[18px] font-bold tracking-tight">
-                What would you like to log?
+                Where should this go?
               </h2>
               <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
-                We received your shared content. Choose where to log it.
+                Shared content is routed into the app, but you stay in control of whether it becomes nutrition or training data.
               </p>
             </div>
 
@@ -204,8 +204,8 @@ export default function ShareTarget() {
                   <UtensilsCrossed className="h-5 w-5" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Log as a meal</p>
-                  <p className="text-[11px] text-[hsl(var(--fg-2))]">Add to today's nutrition</p>
+                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Log as actual intake</p>
+                  <p className="text-[11px] text-[hsl(var(--fg-2))]">Add it to today&apos;s nutrition log</p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />
               </button>
@@ -218,7 +218,7 @@ export default function ShareTarget() {
                   <Dumbbell className="h-5 w-5" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Log as a workout</p>
+                  <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">Log as training</p>
                   <p className="text-[11px] text-[hsl(var(--fg-2))]">Add to your training log</p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-[hsl(var(--fg-3))]" strokeWidth={2} />

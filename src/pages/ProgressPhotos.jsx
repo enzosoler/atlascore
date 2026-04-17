@@ -32,11 +32,14 @@ import {
 } from '@/components/shared/AppContainer';
 import {
   PrimaryButton,
+  LoadingState,
   SafePageBoundary,
+  StatusBanner,
 } from '@/components/shared/StablePage';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import ImageCropper from '@/components/shared/ImageCropper';
+import ProgressPhotoCarousel from '@/components/progress/ProgressPhotoCarousel';
 import {
   createProgressPhoto,
   deleteProgressPhoto,
@@ -56,7 +59,7 @@ const POSES = [
   { key: 'pose', label: 'Free pose', hint: 'Pose of your choice for comparison' },
 ];
 
-// AI-generated insights mock
+// Visual notes mock
 const MOCK_INSIGHTS = [
   { type: 'positive', bodyPart: 'Waist', change: 'looks leaner' },
   { type: 'positive', bodyPart: 'Shoulders', change: 'more defined' },
@@ -119,7 +122,7 @@ function VisualPreview() {
           </div>
           <span>Side-by-side comparisons</span>
           <span className="text-[hsl(var(--fg-3))]">·</span>
-          <span>AI-powered insights</span>
+          <span>Visual notes</span>
           <span className="text-[hsl(var(--fg-3))]">·</span>
           <span>Visual timeline</span>
         </div>
@@ -178,14 +181,14 @@ function EmptyState({ onCreateCheckpoint, isAtLimit }) {
   );
 }
 
-// AI Insights Component
+// Visual notes component
 function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
+  const { locale, t } = useI18n();
+  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
   if (checkpoints.length < 2) return null;
   const latest = checkpoints[0];
   const previous = checkpoints[1];
   const daysDiff = daysBetween(previous, latest);
-  const { locale, t } = useI18n();
-  const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
 
   const formatRelativeDateSafe = (dateStr) => {
     const date = new Date(dateStr);
@@ -203,10 +206,10 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
       <div className="px-5 py-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">{t('progressPhotos.ai_analysis.eyebrow')}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">Visual notes</span>
         </div>
         <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
-          Comparing checkpoint {formatRelativeDateSafe(latest)} with {formatRelativeDateSafe(previous)}
+          Comparing the latest checkpoint {formatRelativeDateSafe(latest)} with {formatRelativeDateSafe(previous)}
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {insights.map((insight, i) => (
@@ -224,7 +227,7 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
         </div>
         <div className="mt-3 flex items-center gap-1 text-[11px] text-[hsl(var(--fg-3))]">
           <Clock className="h-3 w-3" strokeWidth={2} />
-          <span>{t('progressPhotos.ai_analysis.days_between', { n: daysDiff })}</span>
+          <span>{daysDiff} days between checkpoints</span>
         </div>
       </div>
     </Card>
@@ -233,8 +236,8 @@ function AIInsights({ checkpoints, insights = MOCK_INSIGHTS }) {
 
 // Consistency Component
 function ConsistencyIndicator({ checkpoints }) {
-  if (checkpoints.length === 0) return null;
   const { t } = useI18n();
+  if (checkpoints.length === 0) return null;
   const latest = checkpoints[0];
   const daysSince = daysBetween(latest, getToday());
   const isRecent = daysSince <= 7;
@@ -341,9 +344,9 @@ function ComparisonSliderWithTracking({ poseFilter, ...props }) {
 
 // Timeline Component
 function Timeline({ checkpoints, photosByDate, onSelect }) {
-  if (checkpoints.length === 0) return null;
   const { locale, t } = useI18n();
   const intlLocale = locale === 'pt-BR' ? 'pt-BR' : 'en-US';
+  if (checkpoints.length === 0) return null;
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 py-4">
@@ -413,7 +416,7 @@ function PoseSlot({ pose, photo, onUpload, onDelete, uploading }) {
 
 // Checkpoint Card
 function CheckpointCard({ date, photos, onUpload, onDelete, uploadingPose, isLatest }) {
-  const { locale, t } = useI18n();
+  const { locale } = useI18n();
   const [expanded, setExpanded] = useState(isLatest);
   const { label, isToday } = formatCheckpointDate(date, locale);
   const filledCount = photos.filter((p) => p?.photo_url).length;
@@ -685,11 +688,12 @@ function NewCheckpointModal({ onConfirm, onClose, userId }) {
 // Main page
 export default function ProgressPhotos({ embedded = false, photos: propPhotos }) {
   const { t } = useI18n();
+  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
+
   if (embedded) {
     return <ProgressPhotosContent embedded photos={propPhotos} />;
   }
-  const { isAuthenticated, isLoadingAuth } = useAuth();
-  const navigate = useNavigate();
 
   if (!isLoadingAuth && !isAuthenticated) {
     return (
@@ -723,7 +727,6 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const [uploadingPose, setUploadingPose] = useState(null);
   const [notice, setNotice] = useState(null);
   const [showPhotoPaywall, setShowPhotoPaywall] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [cropState, setCropState] = useState(null); // { imageSrc, date, poseKey }
   const [poseFilter, setPoseFilter] = useState('all'); // 'all' | 'front' | 'side' | 'back' | 'pose'
 
@@ -731,7 +734,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     if (!isLoadingAuth && !isAuthenticated && embedded) navigate(ROUTES.home, { replace: true });
   }, [isAuthenticated, isLoadingAuth, navigate, embedded]);
 
-  const { data: allPhotos = [] } = useQuery({
+  const { data: allPhotos = [], isLoading, isError } = useQuery({
     queryKey: ['progress-photos-page', user?.id],
     queryFn: () => listProgressPhotos(user.id, 200),
     enabled: !!user?.id && isAuthenticated && !propPhotos,
@@ -816,8 +819,8 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   }, [deleteMutation]);
 
   const photosByDate = useCallback((date) => {
-    return POSES.map((pose) => allPhotos.find((p) => p.date === date && p.category === pose.key) || null);
-  }, [allPhotos]);
+    return POSES.map((pose) => photos.find((p) => p.date === date && p.category === pose.key) || null);
+  }, [photos]);
 
   const savedDates = [...new Set(photos.map((p) => p.date).filter(Boolean))];
   const allDates = [...new Set([...checkpointDates, ...savedDates])].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
@@ -848,6 +851,28 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
 
   const hasCheckpoints = allDates.length > 0;
   const showComparison = comparisonData?.before?.photo_url && comparisonData?.after?.photo_url;
+
+  if (!propPhotos && isLoading) {
+    const loading = (
+      <LoadingState
+        title="Loading progress photos"
+        description="Fetching checkpoints, timeline entries, and photo metadata."
+      />
+    );
+    return embedded ? <div className="space-y-7">{loading}</div> : <AppContainer>{loading}</AppContainer>;
+  }
+
+  if (!propPhotos && isError) {
+    const errorState = (
+      <StatusBanner tone="error">
+        <p className="text-[13px] font-medium text-[hsl(var(--fg))]">Could not load progress photos.</p>
+        <p className="mt-1 text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+          Check your connection and try again. Photos already saved in this session will still appear locally.
+        </p>
+      </StatusBanner>
+    );
+    return embedded ? <div className="space-y-7">{errorState}</div> : <AppContainer>{errorState}</AppContainer>;
+  }
 
   const pageBody = (
     <>
@@ -912,6 +937,12 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
         <div className={cn('atlas-banner px-4 py-3 text-sm leading-6', notice.tone === 'error' && 'border-[hsl(var(--err)/0.25)] bg-[hsl(var(--err)/0.06)]', notice.tone === 'success' && 'border-[hsl(var(--success)/0.25)] bg-[hsl(var(--success)/0.06)]')}>
           {notice.message}
         </div>
+      )}
+
+      {hasCheckpoints && (
+        <Section>
+          <ProgressPhotoCarousel photos={photos} />
+        </Section>
       )}
 
       {!hasCheckpoints && (

@@ -48,7 +48,7 @@ export default function NutritionComparison({ profile, logged, prescribed }) {
       <div className="surface p-6">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2 className="w-4 h-4 text-[hsl(var(--ok))]" strokeWidth={2} />
-          <h3 className="text-[14px] font-semibold">Logged today</h3>
+          <h3 className="text-[14px] font-semibold">Actual today</h3>
           <span className="ml-auto text-[13px] text-muted-foreground">{Math.round(t.cal)} kcal</span>
         </div>
         <div className="flex items-baseline justify-between mb-3">
@@ -56,7 +56,7 @@ export default function NutritionComparison({ profile, logged, prescribed }) {
             <span className="kpi-sm">{Math.round(t.cal)}</span>
             <span className="text-[13px] text-muted-foreground">/ {targets.cal} kcal</span>
           </div>
-          <span className="text-[12px] text-muted-foreground">{remaining === null ? 'Target not set' : remaining > 0 ? `${remaining} left` : '✓ Target reached'}</span>
+          <span className="text-[12px] text-muted-foreground">{remaining === null ? 'Goal not set' : remaining > 0 ? `${remaining} left` : '✓ Target reached'}</span>
         </div>
         <div className="h-2 rounded-full bg-[hsl(var(--secondary))] overflow-hidden mb-5">
           <div className="h-full rounded-full transition-all duration-700 bg-[hsl(var(--brand))]" style={{ width: `${calPct}%` }} />
@@ -73,7 +73,7 @@ export default function NutritionComparison({ profile, logged, prescribed }) {
         <div className="surface p-6 border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.02)]">
           <div className="flex items-center gap-2 mb-3">
             <AlertCircle className="w-4 h-4 text-[hsl(var(--brand))]" strokeWidth={2} />
-            <h3 className="text-[14px] font-semibold">Meal plan</h3>
+            <h3 className="text-[14px] font-semibold">Planned structure</h3>
             <span className="ml-auto badge badge-blue">{prescribed.meals?.length || 0} meals</span>
           </div>
           <div className="text-[12px] space-y-2 mb-3">

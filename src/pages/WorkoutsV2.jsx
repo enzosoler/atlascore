@@ -33,7 +33,7 @@ import AIWorkoutInput from '@/components/workouts/AIWorkoutInput';
 import PlanBuilderWizard from '@/components/workouts/PlanBuilderWizard';
 import QuickWorkoutModal from '@/components/workouts/QuickWorkoutModal';
 import { ActionRow, AppContainer, Card, PageHeader, Section } from '@/components/shared/AppContainer';
-import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
+import { LoadingState, PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
 import { useI18n } from '@/lib/i18nContext';
 import { DAILY_QUERY_KEYS } from '@/hooks/useDailyState';
 import {
@@ -139,9 +139,6 @@ function getSessionStatus(dayIndex, recentSessions, plan) {
     // If started but not completed (would need more tracking)
     // For now, simplified logic:
     if (lastSession.completed_at) {
-      const completedDate = new Date(lastSession.completed_at);
-      const hoursSinceLastSession = (new Date().getTime() - completedDate.getTime()) / (1000 * 60 * 60);
-      
       // If it's today's scheduled day and not completed
       const todayIndex = getTodayDayIndex(plan);
       if (dayIndex === todayIndex && lastSessionDayIndex !== dayIndex) {
@@ -556,7 +553,7 @@ function CreatePlanModal({ onClose, onCreated, userId }) {
 
 // ─── Today's Workout Card ───────────────────────────────────────────────────
 
-function TodayWorkoutCard({ day, dayIndex, plan, status, onStart, isToday }) {
+function TodayWorkoutCard({ day, dayIndex, status, onStart }) {
   const exerciseCount = (day.exercises || []).length;
   const estimatedDuration = day.exercises?.reduce((sum, ex) => {
     const sets = ex.sets || 3;
@@ -750,7 +747,7 @@ function CircleIcon({ className }) {
 
 // ─── AI Insights Card ────────────────────────────────────────────────────────
 
-function AIInsightsCard({ plan, recentSessions }) {
+function AIInsightsCard({ recentSessions }) {
   const insights = useMemo(() => {
     const list = [];
     
@@ -847,28 +844,43 @@ function SessionCard({ session }) {
   const exerciseCount = Array.isArray(session.exercises_completed)
     ? session.exercises_completed.length
     : 0;
+  const setCount = Array.isArray(session.exercises_completed)
+    ? session.exercises_completed.reduce((sum, exercise) => sum + (exercise.sets_completed?.length || 0), 0)
+    : 0;
 
   return (
-    <div className="flex items-center gap-3 rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)] px-4 py-3.5">
-      <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+    <div className="rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.6)] px-4 py-3.5">
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold text-[hsl(var(--fg))] truncate">{session.name}</p>
+            {session.plan_id ? (
+              <span className="badge badge-ok text-[10px]">
+                {session.plan_day_index != null ? `Plan day ${Number(session.plan_day_index) + 1}` : 'Planned'}
+              </span>
+            ) : (
+              <span className="badge badge-neutral text-[10px]">Quick workout</span>
+            )}
+          </div>
+          <p className="text-xs text-[hsl(var(--fg-3))] mt-0.5">
+            {formatRelativeDate(session.completed_at, locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
+            {exerciseCount > 0 && ` · ${exerciseCount} exercises`}
+            {setCount > 0 && ` · ${setCount} sets`}
+          </p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-[hsl(var(--fg))] truncate">{session.name}</p>
-        <p className="text-xs text-[hsl(var(--fg-3))] mt-0.5">
-          {formatRelativeDate(session.completed_at, locale === 'pt-BR' ? 'pt-BR' : 'en-US')}
-          {exerciseCount > 0 && ` · ${exerciseCount} exercises`}
-        </p>
-      </div>
-      <div className="flex-shrink-0 text-right space-y-0.5">
-        <div className="flex items-center gap-1 justify-end">
+      <div className="mt-3 flex flex-wrap gap-2 text-xs text-[hsl(var(--fg-2))]">
+        <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-2.5 py-1">
           <Clock className="w-3 h-3 text-[hsl(var(--fg-3))]" />
-          <span className="text-xs text-[hsl(var(--fg-2))]">{formatDuration(session.duration_minutes)}</span>
-        </div>
-        <div className="flex items-center gap-1 justify-end">
+          {formatDuration(session.duration_minutes)}
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--card)/0.72)] px-2.5 py-1">
           <TrendingUp className="w-3 h-3 text-[hsl(var(--fg-3))]" />
-          <span className="text-xs text-[hsl(var(--fg-2))]">{formatVolume(session.volume_load)}</span>
-        </div>
+          {formatVolume(session.volume_load)}
+        </span>
       </div>
     </div>
   );
@@ -886,7 +898,6 @@ export default function WorkoutsV2() {
   const [autoStartHandled, setAutoStartHandled] = useState(false);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
-  const [profileData, setProfileData] = useState({});
   const [showQuickWorkout, setShowQuickWorkout] = useState(false);
 
   // Fetch user profile data for AI plan generation
@@ -904,7 +915,13 @@ export default function WorkoutsV2() {
     enabled: !!user?.id,
   });
 
-  const { data: activePlan, isLoading: isLoadingPlan } = useQuery({
+  const {
+    data: activePlan,
+    isLoading: isLoadingPlan,
+    isError: isPlanError,
+    error: planError,
+    refetch: refetchPlan,
+  } = useQuery({
     queryKey: ['active-workout-plan', user?.id],
     queryFn: async () => {
       const plans = await getActiveWorkoutPlans(user.id);
@@ -913,7 +930,13 @@ export default function WorkoutsV2() {
     enabled: !!user?.id,
   });
 
-  const { data: recentSessions = [], isLoading: isLoadingRecent } = useQuery({
+  const {
+    data: recentSessions = [],
+    isLoading: isLoadingRecent,
+    isError: isRecentError,
+    error: recentError,
+    refetch: refetchRecent,
+  } = useQuery({
     queryKey: ['recent-workouts', user?.id],
     queryFn: () => getRecentWorkouts(user.id, 5),
     enabled: !!user?.id,
@@ -949,11 +972,6 @@ export default function WorkoutsV2() {
   const handleStartFromPlan = (dayIndex) => {
     if (!activePlan) return;
     setActiveSession(buildSessionFromPlan(activePlan, dayIndex));
-    setMode('execution');
-  };
-
-  const handleStartEmpty = () => {
-    setActiveSession({ name: 'Free Workout', exercises: [] });
     setMode('execution');
   };
 
@@ -1038,10 +1056,27 @@ export default function WorkoutsV2() {
       </PageHeader>
 
       <div className="space-y-7 pb-12">
+        {(isPlanError || isRecentError) && (
+          <StatusBanner tone="error">
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-[hsl(var(--fg))]">Could not load workout overview</p>
+              <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">
+                {planError?.message || recentError?.message || 'The plan or history query failed to load.'}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <SecondaryButton className="h-10" onClick={() => { refetchPlan(); refetchRecent(); }}>
+                  Try again
+                </SecondaryButton>
+              </div>
+            </div>
+          </StatusBanner>
+        )}
+
         {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-[hsl(var(--brand))] animate-spin" />
-          </div>
+          <LoadingState
+            title="Loading workout overview"
+            description="Fetching your active plan, recent sessions, and training history."
+          />
         )}
 
         {!isLoading && activePlan && (

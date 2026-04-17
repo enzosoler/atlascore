@@ -47,6 +47,7 @@ export function TodayNutritionCard({
   const styles = toneStyles[tone] || toneStyles.teal;
 
   const caloriePercentage = calorieTarget > 0 ? Math.round((calories / calorieTarget) * 100) : 0;
+  const calorieRemaining = calorieTarget > 0 ? Math.max(0, calorieTarget - calories) : null;
 
   const macroData = [
     {
@@ -92,6 +93,9 @@ export function TodayNutritionCard({
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <p className="atlas-overline">{t('today.dashboardCards.todaysNutrition')}</p>
+          <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
+            Goal, actual, and remaining use the same daily target math as the Nutrition screen.
+          </p>
         </div>
         <div
           className={cn(
@@ -106,7 +110,7 @@ export function TodayNutritionCard({
       {/* Calories */}
       <div className="mb-5">
         <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))] mb-1">
-          {t('today.dashboardCards.calories')}
+          Actual calories
         </p>
         <div className="flex items-baseline gap-2">
           <span className="text-[42px] font-bold tracking-[-0.06em] text-[hsl(var(--fg))]">
@@ -115,10 +119,15 @@ export function TodayNutritionCard({
         </div>
         {calorieTarget > 0 && (
           <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1">
-            {t('today.dashboardCards.target', { n: calorieTarget.toLocaleString() })} · {t('today.dashboardCards.percentOfGoal', { n: caloriePercentage })}
+            Goal {calorieTarget.toLocaleString()} kcal · {caloriePercentage}% complete
             {caloriePercentage > 100 && (
               <span className="ml-1 text-[hsl(var(--warn))]">{t('today.dashboardCards.over')}</span>
             )}
+          </p>
+        )}
+        {calorieRemaining !== null && (
+          <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
+            {calorieRemaining} kcal remaining
           </p>
         )}
       </div>

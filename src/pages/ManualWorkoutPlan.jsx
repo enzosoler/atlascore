@@ -19,7 +19,7 @@ import {
   AppContainer, 
   Card
 } from '@/components/shared/AppContainer';
-import { PrimaryButton, SecondaryButton } from '@/components/shared/StablePage';
+import { PrimaryButton, SecondaryButton, StatusBanner } from '@/components/shared/StablePage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -36,6 +36,7 @@ export default function ManualWorkoutPlan() {
   ]);
   
   const [isSaving, setIsSaving] = useState(false);
+  const totalExercises = days.reduce((sum, day) => sum + day.exercises.length, 0);
 
   const addDay = () => {
     setDays([...days, { id: crypto.randomUUID(), name: `Workout ${String.fromCharCode(65 + days.length)}`, focus: '', exercises: [] }]);
@@ -147,6 +148,15 @@ export default function ManualWorkoutPlan() {
       </div>
 
       <div className="space-y-6">
+        <StatusBanner tone="neutral">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-[hsl(var(--fg))]">Manual plan builder</p>
+            <p className="text-sm leading-6 text-[hsl(var(--fg-2))]">
+              This creates the active workout plan that the session logger reads today. Keep the structure tight and repeatable.
+            </p>
+          </div>
+        </StatusBanner>
+
         <Card className="p-6 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -166,6 +176,21 @@ export default function ManualWorkoutPlan() {
                 placeholder={t('manualWorkout.fields.goal_placeholder')}
                 className="atlas-field h-11 rounded-[12px] border-0 px-4"
               />
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Days</p>
+              <p className="mt-1 text-[1.15rem] font-semibold text-[hsl(var(--fg))]">{days.length}</p>
+            </div>
+            <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Exercises</p>
+              <p className="mt-1 text-[1.15rem] font-semibold text-[hsl(var(--fg))]">{totalExercises}</p>
+            </div>
+            <div className="rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.56)] px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Mode</p>
+              <p className="mt-1 text-[1.15rem] font-semibold text-[hsl(var(--fg))]">Active plan</p>
             </div>
           </div>
         </Card>

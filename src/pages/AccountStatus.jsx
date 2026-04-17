@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Clock, AlertCircle, Crown, CreditCard, X } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, Crown, CreditCard, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { FEATURE_LOCKS, PLAN_LEVELS, PLAN_LABELS } from '@/lib/entitlements';
 import { ROUTES } from '@/lib/routes';
 import { useT } from '@/lib/i18nContext';
+import { PageShell, SectionCard, SafePageBoundary, StatusBanner, EmptyState } from '@/components/shared/StablePage';
 
-/* Features shown in the plan comparison — excludes role-gated features */
 const COMPARISON_FEATURES = [
   'ai_food_text',
   'ai_food_photo',
@@ -24,8 +24,18 @@ const COMPARISON_FEATURES = [
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  const d = new Date(dateStr + 'T00:00:00');
+  const d = new Date(`${dateStr}T00:00:00`);
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function DetailRow({ label, value, hint }) {
+  return (
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.36)] px-4 py-4">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</p>
+      <p className="mt-2 text-[15px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{value}</p>
+      {hint ? <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{hint}</p> : null}
+    </div>
+  );
 }
 
 export default function AccountStatus() {
@@ -42,10 +52,13 @@ export default function AccountStatus() {
   const isActive = ['active', 'granted'].includes(status);
   const isPaid = userLevel >= 1 && (isActive || isTrialing);
   const isExpired = status === 'expired' || status === 'canceled' || isTrialExpired;
-
   const expiryDate = subscription?.expires_at || subscription?.trial_ends_at;
+  const providerLabel = subscription?.source === 'revenuecat'
+    ? 'Apple / RevenueCat'
+    : subscription?.stripe_subscription_id
+      ? 'Stripe'
+      : 'No billing source';
 
-  /* Build feature rows with access info */
   const featureRows = useMemo(() => {
     return COMPARISON_FEATURES.map((key) => {
       const lock = FEATURE_LOCKS[key];
@@ -58,146 +71,109 @@ export default function AccountStatus() {
     }).filter(Boolean);
   }, [can]);
 
-  /* Status badge color + text */
-  const statusBadge = useMemo(() => {
-    if (isTrialing) return { text: t('account.statusTrialing', 'Trialing'), color: 'bg-blue-500/20 text-blue-400' };
-    if (isActive || isPaid) return { text: t('account.planActive'), color: 'bg-green-500/20 text-green-400' };
-    if (isExpired) return { text: t('account.statusExpired', 'Expired'), color: 'bg-red-500/20 text-red-400' };
-    return { text: t('account.planFree'), color: 'bg-[hsl(var(--fill))] text-[hsl(var(--fg-2))]' };
-  }, [isTrialing, isActive, isPaid, isExpired, t]);
-
-  /* Hero card gradient vs flat */
-  const heroIsPremium = isPaid || isTrialing;
+  const statusLabel = useMemo(() => {
+    if (isTrialing) return 'Trialing';
+    if (isActive || isPaid) return 'Active';
+    if (isExpired) return 'Expired';
+    return 'Free';
+  }, [isTrialing, isActive, isPaid, isExpired]);
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg))]">
-      {/* Header */}
-      <div className="flex items-center gap-4 p-4 border-b border-[hsl(var(--border))]">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-[hsl(var(--fill))] rounded-lg">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-lg font-semibold">{t('account.planTitle')}</h1>
-      </div>
-
-      <div className="p-4 max-w-md mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-
-          {/* ── Hero card ── */}
-          <div className={`p-6 rounded-2xl mb-6 ${
-            heroIsPremium
-              ? 'bg-gradient-to-br from-[hsl(var(--accent-primary))] to-[hsl(var(--accent-secondary))] text-white'
-              : 'bg-[hsl(var(--fill))]'
-          }`}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2 rounded-full ${heroIsPremium ? 'bg-white/20' : 'bg-[hsl(var(--border))]'}`}>
-                {heroIsPremium ? <Crown className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
-              </div>
-              <div>
-                <p className="text-sm opacity-90">{t('account.currentPlan')}</p>
-                <p className="text-2xl font-bold">{tierLabel}</p>
-              </div>
-              <span className={`ml-auto text-xs font-medium px-2 py-1 rounded-full ${statusBadge.color}`}>
-                {statusBadge.text}
-              </span>
-            </div>
-
-            {/* Trial countdown */}
-            {isTrialing && (
+    <SafePageBoundary title={t('account.planTitle')} maxWidth="max-w-2xl" fallbackDescription={t('account.pageSubtitle')}>
+      <PageShell
+        eyebrow="Account"
+        title={t('account.planTitle')}
+        subtitle="Current plan, renewal, and entitlement coverage."
+        maxWidth="max-w-2xl"
+        actions={(
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        )}
+      >
+        <SectionCard title="Current status" subtitle="This summary comes from the active subscription record.">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+            {isExpired && !isPaid ? (
+              <EmptyState
+                title="No active subscription"
+                description="Upgrade to restore premium access and billing management."
+                action={(
+                  <Button onClick={() => navigate(ROUTES.pricing)} className="gap-2">
+                    <Crown className="h-4 w-4" />
+                    View plans
+                  </Button>
+                )}
+              />
+            ) : (
               <>
-                <div className="flex items-center gap-2 text-sm opacity-90 mb-2">
-                  <Clock className="w-4 h-4" />
-                  <span>{t('account.trialEnds', 'Trial ends {date}').replace('{date}', formatDate(expiryDate))}</span>
+                <StatusBanner tone={status === 'past_due' ? 'warning' : 'neutral'}>
+                  <span className="font-semibold">{statusLabel}</span>
+                  <span className="text-[hsl(var(--fg-2))]"> · Managed by {providerLabel}</span>
+                </StatusBanner>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <DetailRow label="Plan" value={tierLabel} hint="The current entitlement tier on the account." />
+                  <DetailRow label="Billing owner" value={providerLabel} hint="This is where renewal and cancellation are handled." />
+                  <DetailRow label="Renewal" value={isTrialing ? `Trial ends ${formatDate(expiryDate)}` : `Renews on ${formatDate(expiryDate)}`} hint="Date from the active subscription record." />
+                  <DetailRow label="Source" value={subscription?.source || 'unknown'} hint={subscription?.stripe_subscription_id ? `Stripe subscription ${subscription.stripe_subscription_id}` : 'No Stripe subscription id on file.'} />
                 </div>
-                <div className="w-full bg-white/20 rounded-full h-2">
-                  <div
-                    className="bg-white rounded-full h-2 transition-all"
-                    style={{ width: `${Math.min(100, (trialDaysRemaining / 7) * 100)}%` }}
-                  />
-                </div>
-                <p className="text-xs mt-2 opacity-70">
-                  {t('account.daysRemaining', '{n} days remaining').replace('{n}', trialDaysRemaining)}
-                </p>
+
+                {isTrialing ? (
+                  <div className="rounded-[18px] border border-[hsl(var(--brand)/0.24)] bg-[hsl(var(--brand)/0.06)] px-4 py-4">
+                    <div className="flex items-center gap-2 text-[13px] font-semibold text-[hsl(var(--fg))]">
+                      <Clock className="h-4 w-4" />
+                      Trial progress
+                    </div>
+                    <p className="mt-2 text-[12px] text-[hsl(var(--fg-2))]">
+                      {t('account.daysRemaining', '{n} days remaining').replace('{n}', trialDaysRemaining)}
+                    </p>
+                  </div>
+                ) : null}
               </>
             )}
+          </motion.div>
+        </SectionCard>
 
-            {/* Active subscription — renewal date */}
-            {isActive && expiryDate && (
-              <div className="flex items-center gap-2 text-sm opacity-90">
-                <Clock className="w-4 h-4" />
-                <span>{t('account.renewsOn', 'Renews on {date}').replace('{date}', formatDate(expiryDate))}</span>
-              </div>
-            )}
-
-            {/* Expired notice */}
-            {isExpired && (
-              <div className="flex items-center gap-2 text-sm mt-2 text-red-300">
-                <AlertCircle className="w-4 h-4" />
-                <span>{t('account.expiredNotice', 'Your plan expired on {date}').replace('{date}', formatDate(expiryDate))}</span>
-              </div>
-            )}
-          </div>
-
-          {/* ── Feature comparison ── */}
-          <div className="space-y-3 mb-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-sm text-[hsl(var(--fg-3))] uppercase tracking-wider">
-                {t('account.featuresTitle', 'Plan Features')}
-              </h2>
-              <div className="flex gap-4 text-xs text-[hsl(var(--fg-3))]">
-                <span>{t('account.planFree')}</span>
-                <span>{t('account.planPro')}</span>
-              </div>
+        <SectionCard title="Feature coverage" subtitle="Included features are shown for the current plan and the next paid tier.">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-[12px] text-[hsl(var(--fg-3))]">
+              <span>{t('account.planFree')}</span>
+              <span>{t('account.planPro')}</span>
             </div>
-
-            {featureRows.map((f) => (
-              <div
-                key={f.key}
-                className="flex items-center justify-between p-3 rounded-lg bg-[hsl(var(--card))] border border-[hsl(var(--border))]"
-              >
-                <span className={`text-sm ${f.userHas ? '' : 'text-[hsl(var(--fg-3))]'}`}>{f.label}</span>
+            {featureRows.map((feature) => (
+              <div key={feature.key} className="flex items-center justify-between rounded-[16px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.36)] px-4 py-3">
+                <span className={`text-[13px] ${feature.userHas ? 'text-[hsl(var(--fg))]' : 'text-[hsl(var(--fg-3))]'}`}>
+                  {feature.label}
+                </span>
                 <div className="flex items-center gap-6">
-                  {/* Free column */}
-                  {f.includedInFree ? (
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <X className="w-4 h-4 text-[hsl(var(--fg-3))] opacity-40" />
-                  )}
-                  {/* Pro column */}
-                  {f.includedInPro ? (
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <X className="w-4 h-4 text-[hsl(var(--fg-3))] opacity-40" />
-                  )}
+                  {feature.includedInFree ? <CheckCircle2 className="h-4 w-4 text-[hsl(var(--ok))]" /> : <X className="h-4 w-4 text-[hsl(var(--fg-3))] opacity-40" />}
+                  {feature.includedInPro ? <CheckCircle2 className="h-4 w-4 text-[hsl(var(--ok))]" /> : <X className="h-4 w-4 text-[hsl(var(--fg-3))] opacity-40" />}
                 </div>
               </div>
             ))}
           </div>
+        </SectionCard>
 
-          {/* ── Actions ── */}
-          {!isPaid && !isTrialing ? (
-            <Button onClick={() => navigate(ROUTES.pricing)} className="w-full">
-              <Crown className="w-4 h-4 mr-2" />
-              {t('account.upgradeCta')}
-            </Button>
-          ) : (
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full" onClick={() => navigate('/billing')}>
-                <CreditCard className="w-4 h-4 mr-2" />
-                {t('account.manageBilling')}
+        <SectionCard title="Next step" subtitle="Move to the correct billing surface when you need to change payment or cancel.">
+          {isPaid || isTrialing ? (
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button onClick={() => navigate('/billing')} className="w-full gap-2 sm:w-auto">
+                <CreditCard className="h-4 w-4" />
+                Manage billing
+              </Button>
+              <Button variant="outline" onClick={() => navigate(ROUTES.settings)} className="w-full sm:w-auto">
+                Back to settings
               </Button>
             </div>
-          )}
-
-          {/* Expired users also see an upgrade CTA */}
-          {isExpired && (
-            <Button onClick={() => navigate(ROUTES.pricing)} className="w-full mt-3">
-              <Crown className="w-4 h-4 mr-2" />
-              {t('account.upgradeCta')}
+          ) : (
+            <Button onClick={() => navigate(ROUTES.pricing)} className="w-full gap-2">
+              <Crown className="h-4 w-4" />
+              View plans
             </Button>
           )}
-
-        </motion.div>
-      </div>
-    </div>
+        </SectionCard>
+      </PageShell>
+    </SafePageBoundary>
   );
 }

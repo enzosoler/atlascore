@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { createWorkoutPlan } from '@/services/workoutPlanService';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -21,34 +22,39 @@ export default function RoutineForm({ onSuccess }) {
   });
   const [selectedDays, setSelectedDays] = useState(new Set());
 
-  useQuery({
-    queryKey: ['prescribed-workouts', user?.email],
-    queryFn: async () => [],
-    enabled: !!user?.email,
-  });
-
   const createRoutine = useMutation({
     mutationFn: async (data) => {
-      const daysData = Array.from(selectedDays).map(dayNum => ({
-        day: dayNum,
-        name: DAYS[dayNum],
-        workout_id: null,
-        workout_name: null,
-      }));
+      if (!user?.id) {
+        throw new Error('You need to be signed in to save a routine.');
+      }
 
-      const routineData = {
-        ...data,
-        athlete_email: user?.email,
-        days_of_week: daysData,
-        active: true,
-        is_prescribed: false,
-      };
+      const dayList = Array.from(selectedDays)
+        .sort((a, b) => a - b)
+        .map((dayNum) => ({
+          day: dayNum,
+          name: DAYS[dayNum],
+          focus: '',
+          exercises: [],
+        }));
 
-      return {};
+      return createWorkoutPlan(user.id, {
+        name: data.name.trim(),
+        objective: data.description.trim() || null,
+        notes: data.description.trim() || null,
+        frequency: selectedDays.size,
+        days: dayList,
+        estimated_duration_minutes: Number(data.estimated_duration_minutes) || null,
+        total_exercises: Number(data.total_exercises) || 0,
+        source: 'user',
+        created_by_type: 'user',
+        active: false,
+        version: 1,
+        start_date: new Date().toISOString().split('T')[0],
+      });
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['routines'] });
-      toast.success('Routine created successfully');
+      qc.invalidateQueries({ queryKey: ['workout-plans', user?.id] });
+      toast.success('Routine saved to library');
       onSuccess?.();
     },
     onError: (err) => {
@@ -84,6 +90,15 @@ export default function RoutineForm({ onSuccess }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="rounded-[16px] border border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.06)] px-4 py-3">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--brand))]">
+          Library template
+        </p>
+        <p className="mt-1 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+          Save a reusable routine outline. It stays in your library until you choose it for training.
+        </p>
+      </div>
+
       <div className="rounded-[16px] border border-[hsl(var(--border)/0.84)] bg-[hsl(var(--fill)/0.48)] p-4">
         <label className="mb-1.5 block text-[11px] font-semibold uppercase text-[hsl(var(--fg-3))]">
           Routine name
@@ -176,7 +191,7 @@ export default function RoutineForm({ onSuccess }) {
             <Loader2 className="w-4 h-4 animate-spin mr-2" /> Creating...
           </>
         ) : (
-          'Create routine'
+          'Save routine'
         )}
       </Button>
     </form>

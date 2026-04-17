@@ -28,7 +28,7 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
 
   if (isTrialExpired) {
     return (
-      <div className="rounded-2xl border border-[hsl(var(--err)/0.3)] bg-gradient-to-r from-[hsl(var(--err)/0.08)] to-[hsl(var(--err)/0.03)] p-6 text-center space-y-4">
+      <div className="rounded-2xl border border-[hsl(var(--err)/0.3)] bg-gradient-to-br from-[hsl(var(--err)/0.1)] to-[hsl(var(--card)/0.9)] p-6 text-center space-y-4">
         <div className="w-12 h-12 rounded-xl bg-[hsl(var(--err)/0.12)] flex items-center justify-center mx-auto">
           <AlertTriangle className="w-6 h-6 text-[hsl(var(--err))]" strokeWidth={2} />
         </div>
@@ -43,12 +43,15 @@ export default function UpgradeGate({ feature, plan = 'Pro', children, title, de
         <Link to={ROUTES.pricing} className="atlas-button atlas-button-danger inline-flex h-10 px-4 rounded-lg text-[13px] gap-2">
           {t('entitlements.continueSubscription')} <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
         </Link>
+        <p className="text-[11px] leading-relaxed text-[hsl(var(--fg-3))]">
+          Already upgraded? Use Restore Purchases from the pricing screen if the app has not synced yet.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.05)] p-6 text-center space-y-4">
+    <div className="rounded-2xl border border-[hsl(var(--brand)/0.18)] bg-gradient-to-br from-[hsl(var(--brand)/0.08)] to-[hsl(var(--card)/0.9)] p-6 text-center space-y-4">
       <div className="w-12 h-12 rounded-xl bg-[hsl(var(--brand)/0.1)] flex items-center justify-center mx-auto">
         <Lock className="w-6 h-6 text-[hsl(var(--brand))]" strokeWidth={2} />
       </div>

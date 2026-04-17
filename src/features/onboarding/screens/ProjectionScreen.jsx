@@ -88,7 +88,7 @@ export default function ProjectionScreen() {
         timeline: answers.timeline,
         sex: answers.sex,
         age: answers.age,
-        height_cm: answers.height,
+        height_cm: answers.height_cm ?? answers.height,
         activity_level: answers.activity_level,
         health_goals: answers.health_goals,
       });
@@ -101,16 +101,21 @@ export default function ProjectionScreen() {
   if (!projection) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-5 text-center">
-        <p className="text-[15px] text-[hsl(var(--fg-2))]">
-          {t('onboardingV2.projection.moreInfo') || 'We need a bit more info to show your projection.'}
-        </p>
-        <button
-          type="button"
-          onClick={goNext}
-          className="mt-6 rounded-[14px] bg-[hsl(var(--brand))] px-8 py-3.5 text-[15px] font-semibold text-white"
-        >
-          Continue
-        </button>
+        <div className="max-w-[320px] rounded-[22px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.72)] p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--fg-3))]">
+            One more step
+          </p>
+          <p className="mt-2 text-[15px] leading-relaxed text-[hsl(var(--fg-2))]">
+            {t('onboardingV2.projection.moreInfo') || 'We need a bit more info to show your projection.'}
+          </p>
+          <button
+            type="button"
+            onClick={goNext}
+            className="mt-5 rounded-[14px] bg-[hsl(var(--brand))] px-8 py-3.5 text-[15px] font-semibold text-white"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     );
   }
@@ -133,7 +138,7 @@ export default function ProjectionScreen() {
   return (
     <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-4 pt-2">
       <motion.div
-        className="flex flex-col gap-5"
+        className="mx-auto flex w-full max-w-[420px] flex-col gap-5"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -142,6 +147,10 @@ export default function ProjectionScreen() {
         <h1 className="text-[24px] font-bold leading-[1.2] tracking-[-0.03em] text-[hsl(var(--fg))]">
           {t('onboardingV2.projection.headline', { target: targetWeight, date: formattedDate }) || `You can be at ${targetWeight}kg by ${formattedDate}.`}
         </h1>
+
+        <p className="text-[13px] leading-relaxed text-[hsl(var(--fg-3))]">
+          This is built from the answers you just gave us. The curve below is the realistic version, not the optimistic one.
+        </p>
 
         {/* Chart */}
         <div className="h-[160px] w-full">

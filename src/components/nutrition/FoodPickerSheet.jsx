@@ -35,6 +35,10 @@ export default function FoodPickerSheet({ open, onOpenChange, onFoodAdded, onOpe
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="mobile-sheet">
+        <div className="px-4 pt-4 pb-2">
+          <p className="text-[16px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))]">Add food</p>
+          <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">Search, describe, or scan and then confirm the item you want to log.</p>
+        </div>
         <div className="flex border-b border-[hsl(var(--border))] shrink-0 px-4 pt-1">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button

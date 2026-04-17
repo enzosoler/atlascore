@@ -1,33 +1,38 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, Camera, Sparkles } from 'lucide-react';
 import { format, parseISO, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 /**
  * ProgressPhotoCarousel
  * 
- * Displays progress photos in a beautiful carousel format showing evolution over time.
- * Groups photos by approximate time intervals and displays them with visual indicators.
+ * Displays progress photos in a carousel that frames the latest capture as the anchor
+ * and keeps the timeline visible for comparison.
  */
 export default function ProgressPhotoCarousel({ photos = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (!photos || photos.length === 0) {
+  const sortedPhotos = useMemo(() => {
+    if (!photos || photos.length === 0) return [];
+    return [...photos].sort((a, b) => {
+      const dateA = new Date(a.date || a.created_date || 0);
+      const dateB = new Date(b.date || b.created_date || 0);
+      return dateB - dateA;
+    });
+  }, [photos]);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [sortedPhotos.length]);
+
+  if (!sortedPhotos.length) {
     return null;
   }
 
-  // Sort photos by date (oldest first)
-  const sortedPhotos = [...photos].sort((a, b) => {
-    const dateA = new Date(a.date || a.created_date || 0);
-    const dateB = new Date(b.date || b.created_date || 0);
-    return dateA - dateB;
-  });
-
-  // Group photos into phases (start, middle, end)
   const getPhaseLabel = (index, total) => {
-    if (index === 0) return 'Start';
-    if (index === total - 1) return 'Current';
-    return `Week ${Math.round((index / (total - 1)) * 52)}`;
+    if (index === 0) return 'Latest';
+    if (index === total - 1) return 'Baseline';
+    return `Checkpoint ${total - index}`;
   };
 
   const safeFormatDate = (dateValue) => {
@@ -50,21 +55,30 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
 
   const currentPhoto = sortedPhotos[currentIndex];
   const phaseLabel = getPhaseLabel(currentIndex, sortedPhotos.length);
+  const poseLabel = currentPhoto?.category ? String(currentPhoto.category).replace(/_/g, ' ') : 'pose';
+  const previousPhoto = sortedPhotos[currentIndex + 1] || null;
 
   return (
-    <div className="surface rounded-xl p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="rounded-[28px] border border-[hsl(var(--border)/0.85)] bg-[linear-gradient(180deg,hsl(var(--card)/0.96)_0%,hsl(var(--card)/0.9)_100%)] p-5 shadow-[var(--shadow-xs)] space-y-5">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="t-subtitle">Visual Progress</p>
-          <p className="t-caption mt-1">Track your transformation over time</p>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">
+              Visual progress
+            </p>
+          </div>
+          <p className="mt-2 text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+            Latest checkpoint first, with the earlier captures still one tap away.
+          </p>
+        </div>
+        <div className="rounded-full border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--fill)/0.42)] px-3 py-1.5 text-[11px] font-semibold text-[hsl(var(--fg-2))]">
+          {sortedPhotos.length} photos
         </div>
       </div>
 
-      {/* Main carousel */}
       <div className="space-y-4">
-        {/* Photo display */}
-        <div className="relative rounded-2xl overflow-hidden bg-[hsl(var(--shell))] aspect-[3/4] max-w-sm mx-auto border border-[hsl(var(--border-h))]">
+        <div className="relative overflow-hidden rounded-[24px] border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.28)] aspect-[3/4] max-w-md mx-auto">
           {currentPhoto?.photo_url ? (
             <img
               src={currentPhoto.photo_url}
@@ -73,24 +87,23 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-[hsl(var(--fg-2))]">
-              <Calendar className="w-12 h-12 mb-3 opacity-50" />
+              <Camera className="w-11 h-11 mb-3 opacity-50" />
               <span className="text-sm">{safeFormatDate(currentPhoto?.date || currentPhoto?.created_date)}</span>
             </div>
           )}
 
-          {/* Navigation buttons */}
           {sortedPhotos.length > 1 && (
             <>
               <button
                 onClick={goToPrevious}
-                className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--fg)/0.1)] text-[hsl(var(--fg))] backdrop-blur-sm transition-all hover:bg-[hsl(var(--fg)/0.2)]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/35 text-white backdrop-blur-md transition-all hover:bg-black/50"
                 aria-label="Previous photo"
               >
                 <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--fg)/0.1)] text-[hsl(var(--fg))] backdrop-blur-sm transition-all hover:bg-[hsl(var(--fg)/0.2)]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/35 text-white backdrop-blur-md transition-all hover:bg-black/50"
                 aria-label="Next photo"
               >
                 <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
@@ -98,7 +111,25 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
             </>
           )}
 
-          {/* Progress indicator */}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-4 pb-4 pt-12 text-white">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white/12 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm">
+                {phaseLabel}
+              </span>
+              <span className="rounded-full bg-white/12 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm">
+                {poseLabel}
+              </span>
+            </div>
+            <p className="mt-2 text-[13px] font-medium">
+              {safeFormatDate(currentPhoto?.date || currentPhoto?.created_date)}
+            </p>
+            {previousPhoto ? (
+              <p className="mt-1 text-[11px] text-white/80">
+                Compared with {safeFormatDate(previousPhoto.date || previousPhoto.created_date)}
+              </p>
+            ) : null}
+          </div>
+
           <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 px-3">
             {sortedPhotos.map((_, idx) => (
               <button
@@ -116,24 +147,27 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
           </div>
         </div>
 
-        {/* Photo info */}
-        <div className="text-center space-y-2">
-          <p className="text-sm font-semibold text-[hsl(var(--fg))]">
-            {phaseLabel}
-          </p>
-          <p className="text-xs text-[hsl(var(--fg-2))]">
-            {safeFormatDate(currentPhoto?.date || currentPhoto?.created_date)}
-          </p>
-          <p className="text-xs text-[hsl(var(--fg-3))]">
-            {currentIndex + 1} of {sortedPhotos.length}
-          </p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-[18px] border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--fill)/0.32)] px-4 py-3 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Current</p>
+            <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{phaseLabel}</p>
+          </div>
+          <div className="rounded-[18px] border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--fill)/0.32)] px-4 py-3 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Date</p>
+            <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{safeFormatDate(currentPhoto?.date || currentPhoto?.created_date)}</p>
+          </div>
+          <div className="rounded-[18px] border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--fill)/0.32)] px-4 py-3 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Progress</p>
+            <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">
+              {currentIndex + 1} of {sortedPhotos.length}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Timeline thumbnails */}
       {sortedPhotos.length > 1 && (
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--fg-3))]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
             Timeline
           </p>
           <div className="flex gap-2 overflow-x-auto pb-2">
@@ -165,8 +199,7 @@ export default function ProgressPhotoCarousel({ photos = [] }) {
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[hsl(var(--border-h))]">
+      <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[hsl(var(--border)/0.7)]">
         <div className="text-center">
           <p className="text-xs text-[hsl(var(--fg-3))]">Total photos</p>
           <p className="text-lg font-semibold text-[hsl(var(--fg))]">{sortedPhotos.length}</p>

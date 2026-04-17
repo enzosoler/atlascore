@@ -18,11 +18,29 @@ export default function MacroProgressBar({ dailyTotals, profile }) {
     fat: profile.fat_target || 0,
   };
 
+  const caloriesRemaining = targets.calories > 0 ? Math.max(0, targets.calories - (dailyTotals.calories || 0)) : null;
+  const proteinRemaining = targets.protein > 0 ? Math.max(0, targets.protein - (dailyTotals.protein || 0)) : null;
+
   return (
-    <div className="rounded-[16px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.9)] p-4 space-y-3.5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
-        Macros
-      </p>
+    <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.94)] p-4 space-y-3.5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[hsl(var(--fg-3))]">
+            Goal vs actual
+          </p>
+          <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
+            Remaining is calculated as target minus today&apos;s log.
+          </p>
+        </div>
+        {targets.calories > 0 && (
+          <div className="rounded-[12px] bg-[hsl(var(--fill)/0.55)] px-3 py-2 text-right">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Calories left</p>
+            <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">
+              {Math.round(caloriesRemaining || 0)} kcal
+            </p>
+          </div>
+        )}
+      </div>
       {MACROS.map(({ key, label, unit, color }) => {
         const consumed = dailyTotals[key] ?? 0;
         const target = targets[key];
@@ -55,6 +73,11 @@ export default function MacroProgressBar({ dailyTotals, profile }) {
           </div>
         );
       })}
+      {targets.protein > 0 && caloriesRemaining !== null && proteinRemaining !== null && (
+        <p className="text-[11px] leading-5 text-[hsl(var(--fg-3))]">
+          Protein and calories are the primary daily targets; carbs and fat are compared the same way when set.
+        </p>
+      )}
     </div>
   );
 }

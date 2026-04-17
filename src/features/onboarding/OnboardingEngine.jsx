@@ -9,6 +9,7 @@ import SplashScreen from './screens/SplashScreen';
 import HookScreen from './screens/HookScreen';
 import BuildingScreen from './screens/BuildingScreen';
 import ProjectionScreen from './screens/ProjectionScreen';
+import BodyStatsScreen from './screens/BodyStatsScreen';
 import BodySelectScreen from './screens/BodySelectScreen';
 import SocialProofScreen from './screens/SocialProofScreen';
 import CommitmentScreen from './screens/CommitmentScreen';
@@ -41,6 +42,8 @@ const slideTransition = {
   x: { type: 'spring', stiffness: 350, damping: 32 },
   opacity: { duration: 0.2 },
 };
+
+const IMMERSIVE_TYPES = new Set(['splash', 'hook', 'building', 'projection', 'trial-explainer', 'paywall', 'account-creation']);
 
 /* ------------------------------------------------------------------ */
 /*  Inline screen renderers                                           */
@@ -351,6 +354,9 @@ function ScreenRenderer({ screen, answers, setAnswer, toggleAnswer, goNext }) {
     case 'projection':
       return <ProjectionScreen />;
 
+    case 'body-stats':
+      return <BodyStatsScreen />;
+
     case 'body-select':
       return <BodySelectScreen />;
 
@@ -386,8 +392,16 @@ function ScreenRenderer({ screen, answers, setAnswer, toggleAnswer, goNext }) {
 
 const HIDE_CONTINUE_TYPES = new Set([
   'splash',
+  'hook',
   'building',
   'interstitial',
+  'body-select',
+  'projection',
+  'social-proof',
+  'commitment',
+  'trial-explainer',
+  'paywall',
+  'account-creation',
   'connected-apps',
   'notifications',
 ]);
@@ -427,47 +441,52 @@ export default function OnboardingEngine() {
   }, [currentScreen, goNext]);
 
   /* ---- derived ---- */
-  const showProgressBar = currentScreen?.act === 'quiz';
+  const showProgressBar = Boolean(currentScreen?.showInProgress);
   const showContinue = shouldShowContinue(currentScreen);
   const progressPct =
     quizProgress.total > 0
       ? (quizProgress.current / quizProgress.total) * 100
       : 0;
+  const isImmersive = IMMERSIVE_TYPES.has(currentScreen?.type);
 
   return (
     <div className="flex h-[100dvh] flex-col bg-gradient-to-br from-[hsl(var(--bg))] via-[hsl(var(--bg))] to-[hsl(var(--sys-bg2))]" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      {/* ---- top bar ---- */}
-      <div className="flex shrink-0 items-center gap-3 px-4 pb-2 pt-3">
-        {/* back button */}
-        {!isFirstScreen ? (
-          <button
-            type="button"
-            onClick={goBack}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[hsl(var(--border)/0.3)] bg-[hsl(var(--card)/0.8)] backdrop-blur-sm text-[hsl(var(--fg-2))] transition-all hover:bg-[hsl(var(--card-hi))] hover:text-[hsl(var(--fg))] active:scale-[0.95]"
-            aria-label="Go back"
-          >
-            <ChevronLeft size={20} strokeWidth={2} />
-          </button>
-        ) : (
-          <div className="h-9 w-9" />
-        )}
+      <div className="shrink-0 px-4 pb-2 pt-3">
+        <div className="flex items-center gap-3">
+          {!isFirstScreen ? (
+            <button
+              type="button"
+              onClick={goBack}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[hsl(var(--border)/0.35)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--fg-2))] transition-all active:scale-[0.95]"
+              aria-label="Go back"
+            >
+              <ChevronLeft size={20} strokeWidth={2} />
+            </button>
+          ) : (
+            <div className="h-9 w-9" />
+          )}
 
-        {/* progress bar */}
-        {showProgressBar ? (
-          <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-[hsl(var(--border)/0.3)]">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--accent-primary))]"
-              initial={false}
-              animate={{ width: `${progressPct}%` }}
-              transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-            />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--fg-3))]">
+                {showProgressBar ? 'Build your plan' : isImmersive ? 'Atlas onboarding' : 'Quick setup'}
+              </p>
+              {showProgressBar ? (
+                <span className="shrink-0 text-[11px] font-medium tabular-nums text-[hsl(var(--fg-3))]">
+                  {quizProgress.current}/{quizProgress.total}
+                </span>
+              ) : null}
+            </div>
+            <div className="mt-2 h-[4px] overflow-hidden rounded-full bg-[hsl(var(--border)/0.28)]">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--brand))] to-[hsl(var(--accent-primary))]"
+                initial={false}
+                animate={{ width: showProgressBar ? `${progressPct}%` : isImmersive ? '100%' : '18%' }}
+                transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+              />
+            </div>
           </div>
-        ) : (
-          <div className="flex-1" />
-        )}
-
-        {/* spacer to balance the back button */}
-        <div className="h-9 w-9" />
+        </div>
       </div>
 
       {/* ---- main content (animated) ---- */}
@@ -503,7 +522,7 @@ export default function OnboardingEngine() {
             type="button"
             disabled={!canAdvance}
             onClick={goNext}
-            className="atlas-button atlas-button-primary w-full h-12 rounded-[16px] text-[15px] font-semibold gap-2 shadow-lg shadow-[hsl(var(--brand))/0.25] transition-all hover:shadow-xl hover:shadow-[hsl(var(--brand))/0.35] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-lg disabled:active:scale-100 active:scale-[0.98]"
+            className="atlas-button atlas-button-primary h-12 w-full rounded-[16px] text-[15px] font-semibold gap-2 shadow-lg shadow-[hsl(var(--brand))/0.25] transition-all hover:shadow-xl hover:shadow-[hsl(var(--brand))/0.35] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-lg disabled:active:scale-100 active:scale-[0.98]"
           >
             Continue
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

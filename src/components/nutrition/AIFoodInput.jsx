@@ -107,6 +107,12 @@ function titleCase(str) {
   );
 }
 
+function getConfidenceLabel(confidence = 0) {
+  if (confidence >= 0.8) return { label: 'High confidence', tone: 'success' };
+  if (confidence >= 0.5) return { label: 'Needs review', tone: 'warn' };
+  return { label: 'Low confidence', tone: 'danger' };
+}
+
 export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefillText, onPrefillConsumed }) {
   const { locale } = useI18n();
   const [text, setText] = useState('');
@@ -360,9 +366,14 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
         </div>
 
         {isAnalyzing && (
-          <p className="text-[11px] text-[hsl(var(--fg-3))] text-center animate-pulse">
-            AI is analyzing your meal...
-          </p>
+          <div className="rounded-[14px] border border-[hsl(var(--brand-ai)/0.15)] bg-[hsl(var(--brand-ai)/0.04)] px-3 py-2 text-center">
+            <p className="text-[11px] font-medium text-[hsl(var(--brand-ai))]">
+              Capturing meal details
+            </p>
+            <p className="mt-0.5 text-[11px] text-[hsl(var(--fg-3))] animate-pulse">
+              Atlas is turning your description into a structured review.
+            </p>
+          </div>
         )}
 
         {error && (
@@ -391,15 +402,15 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-[13px] font-medium text-[hsl(var(--fg))] flex items-center gap-1.5">
+        <p className="text-[13px] font-semibold text-[hsl(var(--fg))] flex items-center gap-1.5">
           <Sparkles className="w-4 h-4 text-[hsl(var(--brand))]" />
-          AI Result
-          {result.source === 'cache' && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 ml-1">
-              instant
-            </span>
-          )}
+          Review before adding
         </p>
+        {result.source === 'cache' && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]">
+            instant
+          </span>
+        )}
         <button
           onClick={resetState}
           className="text-[hsl(var(--fg-3))] hover:text-[hsl(var(--fg))] transition-colors"
@@ -409,49 +420,50 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
       </div>
 
       {/* Main result card */}
-      <div className="p-3 rounded-xl border border-[hsl(var(--brand)/0.3)] bg-[hsl(var(--brand)/0.05)]">
-        <div className="flex items-start justify-between mb-2">
+      <div className="rounded-[18px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card))] p-4">
+        <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-semibold text-[14px] text-[hsl(var(--fg))]">{titleCase(result.food_name)}</p>
+            <p className="font-semibold text-[15px] tracking-[-0.02em] text-[hsl(var(--fg))]">{titleCase(result.food_name)}</p>
             {result.serving_description && (
-              <p className="text-[11px] text-[hsl(var(--fg-2))] mt-0.5">{result.serving_description}</p>
+              <p className="text-[12px] text-[hsl(var(--fg-2))] mt-0.5">{result.serving_description}</p>
             )}
           </div>
           {result.confidence != null && (
-            <span
-              className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${
-                result.confidence >= 0.8
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : result.confidence >= 0.5
-                  ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                  : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-              }`}
-            >
-              {Math.round(result.confidence * 100)}%
+            <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${
+              getConfidenceLabel(result.confidence).tone === 'success'
+                ? 'bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]'
+                : getConfidenceLabel(result.confidence).tone === 'warn'
+                  ? 'bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]'
+                  : 'bg-[hsl(var(--err)/0.12)] text-[hsl(var(--err))]'
+            }`}>
+              {getConfidenceLabel(result.confidence).label}
             </span>
           )}
         </div>
 
-        {/* Macro summary */}
-        <div className="flex gap-3 text-[12px] mt-2 pt-2 border-t border-[hsl(var(--border)/0.5)]">
-          <span className="font-semibold text-[hsl(var(--fg))]">{Math.round(result.items?.length ? result.items.reduce((s, i) => s + (i.calories || 0), 0) : result.calories)} kcal</span>
-          <span className="text-[hsl(var(--fg-2))]">P <b className="text-[hsl(var(--fg))]">{Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.protein || 0), 0) : result.protein) * 10) / 10}g</b></span>
-          <span className="text-[hsl(var(--fg-2))]">C <b className="text-[hsl(var(--fg))]">{Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.carbs || 0), 0) : result.carbs) * 10) / 10}g</b></span>
-          <span className="text-[hsl(var(--fg-2))]">F <b className="text-[hsl(var(--fg))]">{Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.fat || 0), 0) : result.fat) * 10) / 10}g</b></span>
-          {result.fiber > 0 && (
-            <span className="text-[hsl(var(--fg-2))]">Fib <b className="text-[hsl(var(--fg))]">{result.fiber}g</b></span>
-          )}
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {[
+            { label: 'kcal', value: Math.round(result.items?.length ? result.items.reduce((s, i) => s + (i.calories || 0), 0) : result.calories) },
+            { label: 'P', value: `${Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.protein || 0), 0) : result.protein) * 10) / 10}g` },
+            { label: 'C', value: `${Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.carbs || 0), 0) : result.carbs) * 10) / 10}g` },
+            { label: 'F', value: `${Math.round((result.items?.length ? result.items.reduce((s, i) => s + (i.fat || 0), 0) : result.fat) * 10) / 10}g` },
+          ].map(({ label, value }) => (
+            <div key={label} className="rounded-[14px] bg-[hsl(var(--fill)/0.5)] px-2 py-2 text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{label}</p>
+              <p className="mt-1 text-[13px] font-semibold text-[hsl(var(--fg))]">{value}</p>
+            </div>
+          ))}
         </div>
 
         {/* Sub-items breakdown (expandable) */}
         {result.items?.length > 1 && (
-          <div className="mt-2">
+          <div className="mt-3">
             <button
               onClick={() => setShowItems(!showItems)}
-              className="flex items-center gap-1 text-[11px] text-[hsl(var(--brand))] hover:underline"
+              className="flex items-center gap-1 text-[11px] font-medium text-[hsl(var(--brand))] hover:underline"
             >
               {showItems ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-              {showItems ? 'Hide' : 'Show'} breakdown ({result.items.length} items)
+              {showItems ? 'Hide' : 'Review'} breakdown ({result.items.length} items)
             </button>
 
             {showItems && (
@@ -459,7 +471,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
                 {result.items.map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between text-[11px] px-2 py-1.5 rounded-lg bg-[hsl(var(--fill)/0.46)]"
+                    className="flex items-center justify-between text-[11px] px-3 py-2 rounded-[12px] bg-[hsl(var(--fill)/0.46)]"
                   >
                     <span className="text-[hsl(var(--fg))]">{titleCase(item.name)}</span>
                     <span className="text-[hsl(var(--fg-2))] shrink-0 ml-2">
@@ -476,7 +488,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
       {/* Disclaimer */}
       <div className="flex items-center gap-2 text-[11px] text-[hsl(var(--fg-3))]">
         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-        <span>AI estimates — adjust portions after adding if needed.</span>
+        <span>Estimated values only. Review portions before confirming.</span>
       </div>
 
       {/* Actions */}
@@ -501,7 +513,7 @@ export default function AIFoodInput({ onFoodsDetected, onFallbackToSearch, prefi
           className="flex-1 h-9 rounded-xl text-[12px] btn btn-primary gap-1.5 disabled:opacity-50"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          {validation && !validation.isValid ? 'Add anyway (low confidence)' : 'Add meal'}
+          {validation && !validation.isValid ? 'Confirm anyway' : 'Confirm & add'}
         </Button>
       </div>
 

@@ -142,17 +142,12 @@ export function LoadingState({
   const resolvedDescription = description ?? t('shared.stablePage.loadingDescription');
   return (
     <SectionCard title={resolvedTitle} subtitle={resolvedDescription}>
-      <div className="atlas-banner flex items-start gap-3 px-4 py-4">
-        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[hsl(var(--border)/0.9)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]">
-          <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-        </div>
-        <div>
-          <p className="text-sm font-semibold tracking-[-0.018em] text-[hsl(var(--fg))]">
-            {t('shared.stablePage.loadingText')}
-          </p>
-          <p className="atlas-copy mt-1">{resolvedDescription}</p>
-        </div>
-      </div>
+      <DataState
+        variant="loading"
+        title={resolvedTitle}
+        description={resolvedDescription}
+        eyebrow={t('shared.stablePage.loadingText')}
+      />
     </SectionCard>
   );
 }
@@ -160,21 +155,24 @@ export function LoadingState({
 export function ErrorState({
   title,
   description,
+  primaryAction,
+  secondaryAction,
+  note,
 }) {
   const t = useT();
   const resolvedTitle = title ?? t('shared.stablePage.errorTitle');
   const resolvedDescription = description ?? t('shared.stablePage.errorDescription');
   return (
     <SectionCard title={resolvedTitle} subtitle={resolvedDescription}>
-      <div className="atlas-banner flex items-start gap-3 px-4 py-4" data-tone="warning">
-        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--card)/0.82)] text-[hsl(var(--warn))]">
-          <AlertTriangle className="h-4 w-4" strokeWidth={2} />
-        </div>
-        <div>
-          <p className="text-sm font-semibold tracking-[-0.018em]">{t('shared.stablePage.errorBannerText')}</p>
-          <p className="mt-1 text-sm leading-6">{resolvedDescription}</p>
-        </div>
-      </div>
+      <DataState
+        variant="error"
+        title={resolvedTitle}
+        description={resolvedDescription}
+        eyebrow={t('shared.stablePage.errorBannerText')}
+        primaryAction={primaryAction}
+        secondaryAction={secondaryAction}
+        note={note}
+      />
     </SectionCard>
   );
 }
@@ -183,19 +181,131 @@ export function MetricCard({ label, value, hint, icon: Icon }) {
   return <StatCard label={label} value={value} detail={hint} icon={Icon} />;
 }
 
-export function EmptyState({ title, description, action, icon: Icon }) {
+export function EmptyState({ title, description, action, icon: Icon, note }) {
   return (
-    <div className="rounded-[18px] border-[1.5px] border-dashed border-[hsl(var(--border))] px-6 py-10 text-center lg:px-8">
-      {Icon ? (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[16px] mx-auto text-[hsl(var(--fg-3))]">
-          <Icon className="h-8 w-8" strokeWidth={1.5} />
+    <DataState
+      variant="empty"
+      title={title}
+      description={description}
+      customIcon={Icon}
+      primaryAction={action}
+      note={note}
+      centered
+    />
+  );
+}
+
+export function DataState({
+  variant = 'neutral',
+  title,
+  description,
+  eyebrow,
+  meta,
+  primaryAction,
+  secondaryAction,
+  note,
+  customIcon: CustomIcon,
+  centered = false,
+}) {
+  const variantMeta = {
+    neutral: {
+      icon: Info,
+      shellClass: 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.32)]',
+      iconClass: 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
+    },
+    loading: {
+      icon: Loader2,
+      shellClass: 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.32)]',
+      iconClass: 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
+      spin: true,
+    },
+    empty: {
+      icon: Info,
+      shellClass: 'border-dashed border-[hsl(var(--border))] bg-[hsl(var(--fill)/0.18)]',
+      iconClass: 'border-[hsl(var(--border)/0.76)] bg-[hsl(var(--card))] text-[hsl(var(--fg-3))]',
+    },
+    error: {
+      icon: AlertTriangle,
+      shellClass: 'border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--warn)/0.05)]',
+      iconClass: 'border-[hsl(var(--warn)/0.24)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--warn))]',
+    },
+    offline: {
+      icon: AlertTriangle,
+      shellClass: 'border-[hsl(var(--fg-3)/0.2)] bg-[hsl(var(--fill)/0.26)]',
+      iconClass: 'border-[hsl(var(--border)/0.86)] bg-[hsl(var(--card))] text-[hsl(var(--fg-2))]',
+    },
+    permission: {
+      icon: Info,
+      shellClass: 'border-[hsl(var(--brand)/0.2)] bg-[hsl(var(--brand)/0.05)]',
+      iconClass: 'border-[hsl(var(--brand)/0.24)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--brand))]',
+    },
+    success: {
+      icon: CheckCircle2,
+      shellClass: 'border-[hsl(var(--ok)/0.2)] bg-[hsl(var(--ok)/0.05)]',
+      iconClass: 'border-[hsl(var(--ok)/0.22)] bg-[hsl(var(--card)/0.9)] text-[hsl(var(--ok))]',
+    },
+  };
+
+  const resolvedMeta = variantMeta[variant] || variantMeta.neutral;
+  const Icon = CustomIcon || resolvedMeta.icon;
+
+  return (
+    <div
+      className={cn(
+        'rounded-[18px] border px-5 py-5 shadow-[var(--shadow-xs)]',
+        resolvedMeta.shellClass,
+        centered && 'text-center'
+      )}
+    >
+      {(eyebrow || meta) ? (
+        <div className={cn('mb-4 flex items-center justify-between gap-3', centered && 'justify-center')}>
+          {eyebrow ? (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+              {eyebrow}
+            </p>
+          ) : <span />}
+          {meta ? (
+            <span className="rounded-full bg-[hsl(var(--card)/0.8)] px-2.5 py-1 text-[11px] font-medium text-[hsl(var(--fg-3))]">
+              {meta}
+            </span>
+          ) : null}
         </div>
       ) : null}
-      <p className="text-[16px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
-        {title}
-      </p>
-      {description ? <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1.5 max-w-xs mx-auto">{description}</p> : null}
-      {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
+
+      <div className={cn('flex items-start gap-3.5', centered && 'flex-col items-center')}>
+        <div
+          className={cn(
+            'flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border shadow-[var(--shadow-xs)]',
+            resolvedMeta.iconClass
+          )}
+        >
+          <Icon className={cn('h-5 w-5', resolvedMeta.spin && 'animate-spin')} strokeWidth={2} />
+        </div>
+
+        <div className={cn('min-w-0 flex-1', centered && 'flex flex-col items-center')}>
+          <p className="text-[16px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+            {title}
+          </p>
+          {description ? (
+            <p className={cn('mt-1.5 text-[13px] leading-6 text-[hsl(var(--fg-2))]', centered && 'max-w-md')}>
+              {description}
+            </p>
+          ) : null}
+
+          {(primaryAction || secondaryAction) ? (
+            <div className={cn('mt-4 flex flex-wrap gap-2.5', centered && 'justify-center')}>
+              {primaryAction ? <div>{primaryAction}</div> : null}
+              {secondaryAction ? <div>{secondaryAction}</div> : null}
+            </div>
+          ) : null}
+
+          {note ? (
+            <p className={cn('mt-3 text-[12px] leading-5 text-[hsl(var(--fg-3))]', centered && 'max-w-sm')}>
+              {note}
+            </p>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

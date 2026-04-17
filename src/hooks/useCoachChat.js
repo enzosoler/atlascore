@@ -33,6 +33,7 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isHydrating, setIsHydrating] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   // Map of actionId -> 'pending' | 'loading' | 'done' | 'dismissed'
   const [actionStates, setActionStates] = useState({});
   const hydratedRef = useRef(false);
@@ -58,6 +59,7 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
         if (cancelled) return;
         if (error) {
           console.warn('[useCoachChat] hydrate failed:', error.message);
+          setLoadError('Could not load chat history right now');
           setIsHydrating(false);
           return;
         }
@@ -77,6 +79,7 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
         setMessages(prior);
       } catch (err) {
         console.warn('[useCoachChat] hydrate exception:', err?.message || err);
+        if (!cancelled) setLoadError('Could not load chat history right now');
       } finally {
         if (!cancelled) setIsHydrating(false);
       }
@@ -172,6 +175,7 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
   const clearHistory = useCallback(async () => {
     setMessages([]);
     setActionStates({});
+    setLoadError(null);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -187,6 +191,7 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
     isTyping,
     isHydrating,
     actionStates,
+    loadError,
     sendMessage,
     executeAction,
     dismissAction,

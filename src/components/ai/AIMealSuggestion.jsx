@@ -26,7 +26,7 @@ export default function AIMealSuggestion({ loggedMeals, profile, remaining }) {
 - Remaining protein target: ${remaining?.pro ?? 0}g
 - Goal: ${profile?.training_goal || 'general health'}
 
-Reply with: "Next meal: [name] - [simple ingredients, ~cal kcal]".`);
+      Reply with: "Next meal: [name] - [simple ingredients, ~cal kcal]".`);
 
       setSuggestion(text);
     } finally {
@@ -43,9 +43,17 @@ Reply with: "Next meal: [name] - [simple ingredients, ~cal kcal]".`);
           <Sparkles className="w-4 h-4 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
           <span className="text-[12px] font-semibold text-[hsl(var(--brand-ai))]">Next meal</span>
         </div>
+        <span className="text-[10px] font-medium text-[hsl(var(--fg-3))]">
+          Based on logged meals and remaining targets
+        </span>
       </div>
       {suggestion ? (
-        <p className="text-[12px] text-foreground mt-2 leading-relaxed">{suggestion}</p>
+        <div className="mt-2 space-y-2">
+          <p className="text-[12px] text-foreground leading-relaxed">{suggestion}</p>
+          <p className="text-[11px] text-[hsl(var(--fg-3))]">
+            Estimated from the meals already logged. Review portions before adding.
+          </p>
+        </div>
       ) : (
         <button
           onClick={generateSuggestion}

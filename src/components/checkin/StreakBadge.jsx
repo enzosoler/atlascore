@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame } from 'lucide-react';
+import { Flame, Sparkles } from 'lucide-react';
 import { useI18n } from '@/lib/i18nContext';
 import { cn } from '@/lib/utils';
 
@@ -30,15 +30,17 @@ export default function StreakBadge({ streak, checkins }) {
 
   return (
     <div className={cn(
-      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg',
+      'flex items-center gap-2 rounded-full border px-3 py-1.5',
       isOnFire
-        ? 'bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]'
-        : 'bg-[hsl(var(--brand)/0.12)] text-[hsl(var(--brand))]'
+        ? 'border-[hsl(var(--warn)/0.18)] bg-[hsl(var(--warn)/0.08)] text-[hsl(var(--warn))]'
+        : 'border-[hsl(var(--brand)/0.16)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))]'
     )}>
-      <Flame className="w-4 h-4" fill="currentColor" />
-      <span className="text-[12px] font-bold">
-        {count === 1 ? t('today.checkin.streak.day', { count }) : t('today.checkin.streak.days', { count })}
-      </span>
+      {isOnFire ? <Sparkles className="h-4 w-4" strokeWidth={2} /> : <Flame className="h-4 w-4" fill="currentColor" />}
+      <div className="leading-none">
+        <span className="text-[12px] font-bold">
+          {count === 1 ? t('today.checkin.streak.day', { count }) : t('today.checkin.streak.days', { count })}
+        </span>
+      </div>
     </div>
   );
 }

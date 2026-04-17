@@ -28,7 +28,7 @@ import PublicSiteShell, {
 } from '@/components/public/PublicSiteShell';
 import PublicMetadata from '@/components/public/PublicMetadata';
 import { Button } from '@/components/ui/button';
-import { getRegionPricing } from '@/lib/regionalPricing';
+import { getRegionPricing, getYearlySavingsPercent } from '@/lib/regionalPricing';
 import { ROUTES } from '@/lib/routes';
 import { trackProductEvent } from '@/lib/productEvents';
 import { trackCheckoutStarted, track } from '@/lib/analytics';
@@ -87,6 +87,7 @@ function PricingCard({
   loading,
   currentPlanId,
   isAuthenticated,
+  isNative,
   onSubscribe,
   labels,
 }) {
@@ -186,7 +187,7 @@ function PricingCard({
         ) : isFree ? (
           isAuthenticated ? labels.freeCurrent : labels.freeSignup
         ) : (
-          plan.cta
+          isNative ? labels.nativeCta : plan.cta
         )}
       </Button>
     </article>
@@ -200,7 +201,7 @@ export default function Pricing() {
   const [creatorModalOpen, setCreatorModalOpen] = useState(false);
   const [creatorStatus, setCreatorStatus] = useState({ code: null, locked: false });
   const { user, isAuthenticated } = useAuth();
-  const { subscription } = useSubscription();
+  const { subscription, isNative, showPaywall } = useSubscription();
   const { t, locale, getTranslation } = useI18n();
 
   const pricing = getRegionPricing(region);
@@ -212,9 +213,9 @@ export default function Pricing() {
       compareTitle: 'What changes when you upgrade',
       compareCopy:
         'See exactly what you get at each level. Upgrade anytime — downgrade anytime.',
-      trustA: '7-day free trial',
-      trustB: 'Cancel anytime',
-      trustC: 'No credit card required',
+      contractTitle: 'Billing contract',
+      contractBody: 'Start with a 7-day trial on eligible plans. Cancel before renewal. Checkout returns to Today and activates your plan automatically.',
+      contractMeta: 'Region-aware pricing. One subscription owner per platform.',
       popular: 'Most popular',
       aiBadge: 'AI-powered',
       current: 'Current plan',
@@ -223,6 +224,10 @@ export default function Pricing() {
       billingMonthly: 'Monthly',
       billingYearly: 'Yearly',
       savePrefix: 'Save ',
+      nativeCta: 'Open in app',
+      billingSourceWeb: 'Web billing is handled by Stripe.',
+      billingSourceNative: 'Native plans open the device paywall.',
+      nextStep: 'After checkout, Atlas returns you to Today and finalizes the subscription automatically.',
       athleteLabel: t('pricing_page.athlete'),
       professionalLabel: t('pricing_page.professional'),
       footerTitle: 'Ready to see real progress?',
@@ -232,10 +237,18 @@ export default function Pricing() {
     [t]
   );
 
+  const maxYearlySavings = useMemo(() => {
+    return ATHLETE_PLAN_META
+      .filter((plan) => plan.id !== 'free')
+      .map((plan) => getYearlySavingsPercent(region, plan.id))
+      .filter((value) => typeof value === 'number')
+      .reduce((max, value) => Math.max(max, value), 0);
+  }, [region]);
+
   const currentPlanId = (() => {
     if (!isAuthenticated || !subscription) return null;
     const status = subscription.status;
-    if (!['active', 'trialing'].includes(status)) return null;
+    if (!['active', 'trialing', 'granted', 'past_due'].includes(status)) return null;
     const code = subscription.plan_code;
     const map = {
       pro: 'athlete_pro',
@@ -245,8 +258,29 @@ export default function Pricing() {
       nutritionist: 'nutritionist',
       clinician: 'clinician',
     };
-    return map[code] || 'free';
+      return map[code] || 'free';
   })();
+
+  const faqItems = [
+    {
+      question: 'When do I get charged?',
+      answer: 'Eligible paid plans start with a trial, then charge automatically on the selected billing cadence unless cancelled first.',
+    },
+    {
+      question: 'Where do I manage billing?',
+      answer: isNative
+        ? 'Native subscriptions are managed through the device customer center.'
+        : 'Web subscriptions are managed through the Stripe billing portal.',
+    },
+    {
+      question: 'Does pricing change by region?',
+      answer: 'Yes. Prices use the selected billing region so the amount on the card matches the checkout amount.',
+    },
+    {
+      question: 'What happens after checkout?',
+      answer: 'Atlas returns you to Today, confirms the checkout session, and unlocks the purchased plan.',
+    },
+  ];
 
   const athletePlans = useMemo(() => {
     const translations = getTranslation('pricing_page.plans');
@@ -294,19 +328,28 @@ export default function Pricing() {
 
   const handleSubscribe = async (planId) => {
     if (planId === 'free') {
-      window.location.href = '/auth?mode=signup';
+      window.location.href = `${ROUTES.auth}?mode=signup`;
       return;
     }
 
     if (!isAuthenticated || !user?.id) {
       sessionStorage.setItem('pending_plan', planId);
-      window.location.href = `/auth?mode=signup&next=/Pricing`;
+      window.location.href = `${ROUTES.auth}?mode=signup&next=${encodeURIComponent(ROUTES.pricing)}`;
       return;
     }
 
     setLoading(planId);
 
     try {
+      if (isNative) {
+        const purchased = await showPaywall();
+        if (purchased) {
+          toast.success('Purchase completed');
+          window.location.href = ROUTES.today;
+        }
+        return;
+      }
+
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
@@ -332,8 +375,8 @@ export default function Pricing() {
         // redirect time. TodayV2 uses it to call complete-checkout, which
         // activates the subscription server-side. Without it, paying users
         // stay on the free tier because stripe-webhook can't be relied on.
-        success_url: `${window.location.origin}/Today?subscribed=1&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${window.location.origin}/Pricing`,
+        success_url: `${window.location.origin}${ROUTES.today}?subscribed=1&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${window.location.origin}${ROUTES.pricing}`,
       };
 
       const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`;
@@ -370,7 +413,7 @@ export default function Pricing() {
         toast.error(t('pricing_page.errors.unexpectedResponse'));
       }
 
-    } catch (error) {
+    } catch {
       toast.error(t('pricing_page.errors.connectionFailed'));
     } finally {
       setLoading(null);
@@ -380,7 +423,7 @@ export default function Pricing() {
   useEffect(() => {
     trackProductEvent(user?.id, 'pricing_page_viewed', { authenticated: isAuthenticated });
     track('pricing_page_viewed', { authenticated: isAuthenticated });
-  }, []);
+  }, [user?.id, isAuthenticated]);
 
   // Fetch creator code status for authenticated users
   useEffect(() => {
@@ -445,13 +488,17 @@ export default function Pricing() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <span className="atlas-public-pill">
-                  <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--ok))]" strokeWidth={1.9} />
-                  {ui.trustA}
-                </span>
-                <span className="atlas-public-pill">{ui.trustB}</span>
-                <span className="atlas-public-pill">{ui.trustC}</span>
+              <div className="rounded-2xl border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.36)] px-5 py-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-[hsl(var(--ok)/0.18)] bg-[hsl(var(--ok)/0.08)] text-[hsl(var(--ok))]">
+                    <ShieldCheck className="h-4 w-4" strokeWidth={1.9} />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{ui.contractTitle}</p>
+                    <p className="text-[12px] leading-5 text-[hsl(var(--fg-2))]">{ui.contractBody}</p>
+                    <p className="text-[11px] text-[hsl(var(--fg-3))]">{ui.contractMeta}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -483,7 +530,7 @@ export default function Pricing() {
                   {ui.billingYearly}
                   {billing !== 'yearly' && (
                     <span className="ml-1.5 rounded-full bg-[hsl(var(--ok)/0.1)] px-1.5 py-0.5 text-[10px] font-semibold text-[hsl(var(--ok))]">
-                      {ui.savePrefix}31%
+                      {ui.savePrefix}{maxYearlySavings || 0}%
                     </span>
                   )}
                 </button>
@@ -492,6 +539,14 @@ export default function Pricing() {
               <p className="text-[12px] text-[hsl(var(--fg-3))] leading-relaxed">
                 {ui.compareCopy}
               </p>
+              <p className="rounded-xl border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--card)/0.72)] px-3.5 py-3 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+                {ui.nextStep}
+              </p>
+              <div className="flex flex-wrap gap-x-2 gap-y-1 text-[12px] text-[hsl(var(--fg-3))]">
+                <span>{ui.billingSourceWeb}</span>
+                <span className="hidden sm:inline">•</span>
+                <span>{ui.billingSourceNative}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -499,8 +554,45 @@ export default function Pricing() {
 
       <section id="plans" className="mx-auto max-w-6xl px-5 py-6 lg:px-8">
         <div className="atlas-public-panel px-6 py-6 lg:px-8 lg:py-8">
-          {/* Comparison Snapshot */}
-          <div className="mb-10 overflow-hidden rounded-2xl bg-[hsl(var(--fill)/0.4)]">
+          <PublicSectionHeader
+            eyebrow="Athlete"
+            title={ui.athleteLabel}
+            description={t('pricing_page.subtitle')}
+            className="mb-10"
+          />
+
+          <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
+            {athletePlans.map((plan, index) => (
+              <motion.div
+                key={plan.id}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: '-80px' }}
+                variants={fade}
+                custom={index}
+              >
+                <PricingCard
+                  plan={{ ...plan, popular: plan.popular }}
+                  loading={loading}
+                  currentPlanId={currentPlanId}
+                  isAuthenticated={isAuthenticated}
+                  isNative={isNative}
+                  onSubscribe={handleSubscribe}
+                  labels={{
+                    popular: ui.popular,
+                    aiBadge: ui.aiBadge,
+                    current: ui.current,
+                    freeCurrent: ui.freeCurrent,
+                    freeSignup: ui.freeSignup,
+                    savePrefix: ui.savePrefix,
+                    nativeCta: ui.nativeCta,
+                  }}
+                />
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10 overflow-hidden rounded-2xl bg-[hsl(var(--fill)/0.4)]">
             <div className="px-5 py-3.5 lg:px-6">
               <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{ui.compareTitle}</p>
             </div>
@@ -529,11 +621,11 @@ export default function Pricing() {
                         return (
                           <td key={tier} className="px-5 py-2.5 text-center lg:px-6">
                             {val === true ? (
-                              <Check className="h-3.5 w-3.5 text-[hsl(var(--ok))] mx-auto" strokeWidth={2.5} />
+                              <Check className="mx-auto h-3.5 w-3.5 text-[hsl(var(--ok))]" strokeWidth={2.5} />
                             ) : val === false ? (
                               <span className="text-[hsl(var(--fg-3))]">—</span>
                             ) : (
-                              <span className={val === '∞' ? 'text-[hsl(var(--ok))] font-medium' : 'text-[hsl(var(--fg-2))]'}>{val}</span>
+                              <span className={val === '∞' ? 'font-medium text-[hsl(var(--ok))]' : 'text-[hsl(var(--fg-2))]'}>{val}</span>
                             )}
                           </td>
                         );
@@ -545,60 +637,30 @@ export default function Pricing() {
             </div>
           </div>
 
-          <PublicSectionHeader
-            eyebrow="Athlete"
-            title={ui.athleteLabel}
-            description={t('pricing_page.subtitle')}
-            className="mb-10"
-          />
-
-          <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
-            {athletePlans.map((plan, index) => (
-              <motion.div
-                key={plan.id}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: '-80px' }}
-                variants={fade}
-                custom={index}
-              >
-                <PricingCard
-                  plan={{ ...plan, popular: plan.popular }}
-                  loading={loading}
-                  currentPlanId={currentPlanId}
-                  isAuthenticated={isAuthenticated}
-                  onSubscribe={handleSubscribe}
-                  labels={{
-                    popular: ui.popular,
-                    aiBadge: ui.aiBadge,
-                    current: ui.current,
-                    freeCurrent: ui.freeCurrent,
-                    freeSignup: ui.freeSignup,
-                    savePrefix: ui.savePrefix,
-                  }}
-                />
-              </motion.div>
-            ))}
-          </div>
-
           {/* Creator code link */}
           {isAuthenticated && (
-            <div className="mt-6 flex justify-center">
-              {creatorStatus.code ? (
-                <span className="inline-flex items-center gap-1.5 text-[13px] text-[hsl(var(--fg-2))]">
-                  <Check className="h-3.5 w-3.5 text-[hsl(var(--ok))]" strokeWidth={2.5} />
-                  {t('affiliate.creator')}: {creatorStatus.code}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setCreatorModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--brand))] hover:underline"
-                >
-                  <Tag className="h-3.5 w-3.5" strokeWidth={2} />
-                  {t('affiliate.haveCode')}
-                </button>
-              )}
+            <div className="mt-10 rounded-2xl border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.22)] px-5 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                    Creator / affiliate code
+                  </p>
+                  <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">
+                    Apply a code before checkout so partner attribution stays attached to the plan.
+                  </p>
+                </div>
+                {creatorStatus.code ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--ok)/0.08)] px-3 py-1.5 text-[12px] font-semibold text-[hsl(var(--ok))]">
+                    <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+                    {creatorStatus.code}
+                  </span>
+                ) : (
+                  <Button type="button" variant="outline" size="sm" onClick={() => setCreatorModalOpen(true)} className="gap-2">
+                    <Tag className="h-3.5 w-3.5" strokeWidth={2} />
+                    {t('affiliate.haveCode')}
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 
@@ -608,23 +670,38 @@ export default function Pricing() {
             onApplied={(result) => setCreatorStatus({ code: result.code, locked: false })}
           />
 
-          {/* Professional CTA — coming soon / private beta */}
-          <div className="mt-12 rounded-2xl bg-[hsl(var(--fill)/0.4)] px-6 py-6 text-center">
-            <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
-              {ui.professionalLabel}
-            </p>
-            <p className="mt-2 text-[13px] text-[hsl(var(--fg-2))] leading-relaxed">
-              {t('pricing_page.professionalDesc')}
-            </p>
-            <Button asChild variant="outline" className="mt-4 h-10 rounded-xl text-[13px]">
-              <Link to="/waitlist">
-                {t('pricing_page.professionalCta') || 'Join the waitlist'}
-                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-              </Link>
-            </Button>
+          <div className="mt-10 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-2xl border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.26)] px-6 py-6">
+              <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Billing FAQ</p>
+              <div className="mt-4 space-y-4">
+                {faqItems.map((item) => (
+                  <div key={item.question} className="border-t border-[hsl(var(--border)/0.72)] pt-4 first:border-t-0 first:pt-0">
+                    <p className="text-[13px] font-semibold text-[hsl(var(--fg))]">{item.question}</p>
+                    <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{item.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.22)] px-6 py-6">
+              <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">
+                {ui.professionalLabel}
+              </p>
+              <p className="mt-2 text-[13px] leading-relaxed text-[hsl(var(--fg-2))]">
+                {t('pricing_page.professionalDesc')}
+              </p>
+              <Button asChild variant="outline" className="mt-4 h-10 rounded-xl text-[13px]">
+                <Link to="/waitlist">
+                  {t('pricing_page.professionalCta') || 'Join the waitlist'}
+                  <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
-      </section>      <section className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-12">
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-12">
         <div className="flex flex-col items-center text-center space-y-5">
           <div className="space-y-2">
             <p className="text-[14px] font-medium text-[hsl(var(--fg))]">

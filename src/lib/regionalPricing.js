@@ -1270,6 +1270,24 @@ export function getRegionPricing(region = 'US') {
 }
 
 /**
+ * Returns the integer percent saved by paying yearly for a plan, or null if
+ * the region does not have enough data to calculate it.
+ */
+export function getYearlySavingsPercent(region = 'US', planId) {
+  if (!planId || planId === 'free') return null;
+
+  const pricing = getRegionPricing(region);
+  const monthly = pricing.prices?.[planId];
+  const yearly = pricing.prices_yearly?.[planId];
+
+  if (typeof monthly !== 'number' || typeof yearly !== 'number' || monthly <= 0 || yearly <= 0) {
+    return null;
+  }
+
+  return Math.max(0, Math.round((1 - yearly / (monthly * 12)) * 100));
+}
+
+/**
  * Format a price for display.
  * Handles zero-decimal currencies (JPY, KRW, CLP, COP, IDR, NGN, ARS, PHP)
  * and comma-separated currencies (BRL, EUR locales).

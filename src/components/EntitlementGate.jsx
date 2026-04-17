@@ -20,8 +20,14 @@ export default function EntitlementGate({ children }) {
   // ── Loading state ────────────────────────────────────────────────────────
   if (isLoadingAuth || isEntitlementLoading) {
     return (
-      <div className="flex items-center justify-center h-screen w-full">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex min-h-screen w-full items-center justify-center bg-[hsl(var(--bg))] px-6">
+        <div className="flex flex-col items-center gap-3 rounded-[20px] border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--card)/0.8)] px-6 py-5 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--brand))]" />
+          <p className="text-[14px] font-semibold text-[hsl(var(--fg))]">Checking access...</p>
+          <p className="max-w-[240px] text-[12px] leading-relaxed text-[hsl(var(--fg-3))]">
+            Loading your profile and subscription state.
+          </p>
+        </div>
       </div>
     );
   }

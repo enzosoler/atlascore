@@ -149,6 +149,22 @@ function formatRestCountdown(seconds) {
   return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
+function getWorkoutContextLabels(workout) {
+  const labels = [];
+
+  if (workout?.plan_id) {
+    labels.push(workout.plan_day_index != null ? `Plan day ${Number(workout.plan_day_index) + 1}` : 'Planned workout');
+  } else {
+    labels.push('Quick session');
+  }
+
+  if (Array.isArray(workout?.exercises) && workout.exercises.length > 0) {
+    labels.push(`${workout.exercises.length} exercises`);
+  }
+
+  return labels;
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function MetricTile({ label, value, accent = false }) {
@@ -235,6 +251,7 @@ export default function WorkoutExecutionScreen({
   const exercise = exercises[exerciseIdx];
   const sets = exercise?.sets || [];
   const currentSet = sets?.[setIdx];
+  const contextLabels = getWorkoutContextLabels(workout);
   const completionRatio = exercises.length
     ? ((exerciseIdx + setIdx / Math.max(sets.length, 1)) / exercises.length) * 100
     : 0;
@@ -543,6 +560,9 @@ export default function WorkoutExecutionScreen({
               <p className="mt-1 font-mono text-[18px] font-bold text-[hsl(var(--fg))]">{durationMin}min</p>
             </div>
           </div>
+          <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
+            Your session has been tracked continuously, including the current workout identity and all saved set history.
+          </p>
           <div className="flex w-full gap-3">
             <Button variant="outline" className="h-12 flex-1 rounded-[12px]" onClick={() => setShowAddExercise(true)}>
               {t('workoutExecution.addMore')}
@@ -584,6 +604,9 @@ export default function WorkoutExecutionScreen({
               )}
             </p>
           )}
+          <p className="text-[12px] uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+            Next set {setIdx + 1} of {sets.length} · {restDuration}s target
+          </p>
         </div>
 
         {/* Timer ring */}
@@ -660,6 +683,16 @@ export default function WorkoutExecutionScreen({
               <p className="mt-1 text-[13px] text-[hsl(var(--fg-2))]">
                 {t('workoutExecution.workoutInProgress')}
               </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {contextLabels.map((label) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center rounded-full border border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.68)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-2))]"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-end gap-1">
@@ -702,6 +735,11 @@ export default function WorkoutExecutionScreen({
             <h1 className="text-[1.6rem] font-bold tracking-[-0.04em] text-[hsl(var(--fg))]">
               {exercise.name}
             </h1>
+            <p className="text-[13px] text-[hsl(var(--fg-2))]">
+              {exerciseIdx + 1 < exercises.length
+                ? `After this set, the workout continues to ${exercises[exerciseIdx + 1]?.name || 'the next exercise'}.`
+                : 'This is the last exercise in the current session.'}
+            </p>
           </div>
           <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
             <ExerciseMedia exercise={exercise} size="sm" showFallback={true} />
@@ -834,6 +872,9 @@ export default function WorkoutExecutionScreen({
             {setIdx < sets.length - 1 ? t('workoutExecution.saveAndNextSet') : t('workoutExecution.finishExercise')}
             <ArrowRight className="h-4 w-4" />
           </Button>
+          <p className="text-[12px] leading-6 text-[hsl(var(--fg-2))]">
+            Save the set, keep your pace, and let the history strip show the most recent entries right below.
+          </p>
         </div>
       </section>
 

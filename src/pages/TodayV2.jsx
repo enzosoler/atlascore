@@ -8,16 +8,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Dumbbell, UtensilsCrossed, Scale, Target, Camera,
-  ArrowRight, Sparkles, ChevronRight, X
+  ArrowRight, Sparkles, ChevronRight, X, MessageSquareMore,
+  Activity, CalendarDays, Flame, Clock3
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useAICoach } from '@/hooks/useAICoach';
-import { buildBriefing, buildRecommendations, buildDailyStatus, buildDailyNarrative } from '@/lib/rulesEngine';
+import { buildBriefing, buildRecommendations, buildDailyStatus } from '@/lib/rulesEngine';
 import { ROUTES } from '@/lib/routes';
 import { TodayScreen } from '@/components/today/TodayMobileUI';
+import { AICoachBriefing } from '@/components/today/AICoachBriefing';
+import WeeklySummary from '@/components/today/WeeklySummary';
 import BodyCheckinSheet from '@/components/body/BodyCheckinSheet';
 import QuickMealSheet from '@/components/nutrition/QuickMealSheet';
 import CoachChatTrigger from '@/components/ai/CoachChatTrigger';
@@ -34,6 +37,7 @@ import { SHARE_MILESTONES } from '@/components/social/StreakShareCard';
 import { cn } from '@/lib/utils';
 import { trackPurchaseCompleted } from '@/lib/analytics';
 import { toast } from 'sonner';
+import { DataState } from '@/components/shared/StablePage';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -99,6 +103,35 @@ function getWeekDates() {
 
 const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
+function formatRelativeAge(timestamp) {
+  if (!timestamp) return 'Live now';
+  const diffMs = Date.now() - new Date(timestamp).getTime();
+  if (!Number.isFinite(diffMs) || diffMs < 0) return 'Live now';
+  const minutes = Math.round(diffMs / 60000);
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  return `${days}d ago`;
+}
+
+function buildWeeklySegmentSummary(recentCheckins = [], todayCheckin = null) {
+  const weekDates = getWeekDates();
+  const checkinSet = new Set((recentCheckins || []).map((entry) => entry.date));
+  return weekDates.map((date, index) => {
+    const isToday = date === getToday();
+    const hasCheckin = checkinSet.has(date);
+    const isActive = hasCheckin || (isToday && !!todayCheckin);
+    return {
+      key: date,
+      label: DAY_LABELS[index],
+      value: isActive ? (isToday && todayCheckin ? 100 : 86) : 0,
+      note: hasCheckin ? 'Checked in' : isToday ? 'Today' : 'Open',
+    };
+  });
+}
+
 // ─── New plan components ─────────────────────────────────────────────────────
 
 function StreakPill({ streak, urgency }) {
@@ -150,37 +183,6 @@ function ChainDots({ checkinDates }) {
             </div>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-function ProactiveAICard({ message, onOpenChat, onDismiss, streak, firstName }) {
-  const t = useT();
-  if (!message) return null;
-  const coachLabel = streak > 14 && firstName ? t('today.coach_of', { name: firstName }) : t('today.your_coach');
-  return (
-    <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--brand-ai)/0.25)] border-l-[3px] border-l-[hsl(var(--brand-ai))] p-4">
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 mt-0.5 w-7 h-7 rounded-lg bg-[hsl(var(--brand-ai)/0.1)] flex items-center justify-center">
-          <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--brand-ai))]" strokeWidth={2} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--brand-ai))] mb-1.5">
-            {coachLabel}
-          </p>
-          <p className="text-[14px] text-[hsl(var(--fg))] leading-[1.5]">{message}</p>
-          {onOpenChat && (
-            <button onClick={onOpenChat} className="mt-2.5 text-[13px] font-semibold text-[hsl(var(--brand-ai))] active:opacity-70">
-              {t('today.continue_conversation')}
-            </button>
-          )}
-        </div>
-        {onDismiss && (
-          <button onClick={onDismiss} className="shrink-0 text-[hsl(var(--fg-3))] active:opacity-70 p-0.5">
-            <X className="w-4 h-4" />
-          </button>
-        )}
       </div>
     </div>
   );
@@ -263,9 +265,33 @@ function MacroRingsCard({ nutrition, t }) {
   );
 }
 
-function PrimaryAction({ action, briefingText, kcalRemaining }) {
+function PrimaryAction({ action, briefingText, kcalRemaining, compact = false }) {
   const t = useT();
   if (!action) return null;
+
+  if (compact) {
+    return (
+      <Link
+        to={action.path}
+        className="group flex items-center justify-between gap-3 rounded-[18px] border border-[hsl(var(--brand)/0.18)] bg-[linear-gradient(180deg,hsl(var(--brand))_0%,hsl(var(--brand)/0.85)_100%)] px-4 py-3.5 text-white shadow-[0_12px_30px_hsl(var(--brand)/0.18)] transition-all active:scale-[0.98] active:brightness-95"
+      >
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
+            Next action
+          </p>
+          <p className="mt-1 text-[14px] font-semibold leading-5 tracking-[-0.02em]">
+            {action.label}
+          </p>
+          <p className="mt-1 text-[12px] leading-5 text-white/82 line-clamp-2">
+            {briefingText}
+          </p>
+        </div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[hsl(var(--brand))] shadow-lg transition-transform group-active:scale-95">
+          <ArrowRight className="h-5 w-5" strokeWidth={3} />
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link to={action.path} className="group block">
@@ -358,6 +384,38 @@ function RecommendationCard({ rec }) {
   );
 }
 
+function PriorityActionStrip({ actions }) {
+  if (!actions?.length) return null;
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between px-0.5">
+        <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))]">Priority actions</h3>
+        <span className="text-[11px] text-[hsl(var(--fg-3))]">Act first</span>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {actions.map((action) => {
+          const Icon = action.icon;
+          return (
+            <button
+              key={action.label}
+              type="button"
+              onClick={action.onClick}
+              className="rounded-[18px] border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--card)/0.9)] px-4 py-4 text-left shadow-[var(--shadow-xs)] transition-colors active:bg-[hsl(var(--fill)/0.6)]"
+            >
+              <div className={cn('flex h-10 w-10 items-center justify-center rounded-[14px]', action.colorClass)}>
+                <Icon className="h-4.5 w-4.5" strokeWidth={2.2} />
+              </div>
+              <p className="mt-3 text-[14px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">{action.label}</p>
+              <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-2))]">{action.detail}</p>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // ─── Trial Countdown ──────────────────────────────────────────────────────────
 
 function TrialCountdown({ daysRemaining }) {
@@ -400,7 +458,19 @@ function TrialCountdown({ daysRemaining }) {
 
 // ─── Daily Status ─────────────────────────────────────────────────────────────
 
-function DailyStatus({ status, message, completedCount, totalCount }) {
+function DailyStatus({
+  status,
+  message,
+  completedCount,
+  totalCount,
+  briefing,
+  kcalRemaining,
+  streak,
+  streakUrgency,
+  todayCheckin,
+  primaryAction,
+  onOpenChat,
+}) {
   const t = useT();
   if (!status) return null;
 
@@ -412,20 +482,109 @@ function DailyStatus({ status, message, completedCount, totalCount }) {
   };
 
   const cfg = statusConfig[status] || statusConfig['neutral'];
+  const remaining = Math.max(0, kcalRemaining || 0);
+  const detailPills = [
+    { label: 'Completed', value: `${completedCount}/${totalCount}`, icon: Activity },
+    { label: 'Fuel left', value: remaining > 0 ? `${remaining} kcal` : 'Done', icon: CalendarDays },
+    streak > 0 ? { label: 'Streak', value: `${streak}d`, icon: Flame } : null,
+  ].filter(Boolean);
+  const detailGridClass = detailPills.length === 2 ? 'grid-cols-2' : 'grid-cols-3';
 
   return (
-    <div className={cn('rounded-[18px] border p-4', cfg.bg, cfg.border)}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className={cn('h-2 w-2 rounded-full', cfg.dot)} />
-          <span className="text-[14px] font-bold text-[hsl(var(--fg))]">{cfg.label}</span>
+    <section className="overflow-hidden rounded-[26px] border border-[hsl(var(--border)/0.55)] bg-[radial-gradient(circle_at_top_left,hsl(var(--brand)/0.1),transparent_45%),linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--fill)/0.16)_100%)] shadow-[0_2px_24px_hsl(var(--brand)/0.04)]">
+      <div className={cn('h-[2px]', status === 'needs-attention' ? 'bg-[hsl(var(--err))]' : status === 'caution' ? 'bg-[hsl(var(--warn))]' : 'bg-[hsl(var(--brand))]')} />
+
+      <div className="space-y-4 p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className={cn('h-2.5 w-2.5 rounded-full', cfg.dot)} />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">
+                Daily status
+              </p>
+            </div>
+            <h2 className="text-[24px] font-semibold tracking-[-0.04em] text-[hsl(var(--fg))]">
+              {cfg.label}
+            </h2>
+            <p className="max-w-[28rem] text-[14px] leading-6 text-[hsl(var(--fg-2))]">
+              {message}
+            </p>
+          </div>
+
+          <div className="shrink-0 text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+              Progress
+            </p>
+            <p className="mt-1 text-[28px] font-semibold tabular-nums tracking-[-0.06em] text-[hsl(var(--fg))]">
+              {completedCount}/{totalCount}
+            </p>
+          </div>
         </div>
-        <span className="text-[12px] font-semibold text-[hsl(var(--fg-3))]">
-          {completedCount}/{totalCount}
-        </span>
+
+        {briefing?.text ? (
+          <p className="text-[13px] leading-6 text-[hsl(var(--fg-3))]">
+            {briefing.text}
+          </p>
+        ) : null}
+
+        <div className={cn('grid gap-2.5', detailGridClass)}>
+          {detailPills.map((pill) => {
+            const Icon = pill.icon;
+            return (
+              <div key={`${pill.label}-${pill.value}`} className="rounded-[16px] border border-[hsl(var(--border)/0.55)] bg-[hsl(var(--card)/0.7)] px-3 py-2.5">
+                <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+                  <Icon className="h-3 w-3" strokeWidth={2.2} />
+                  <span>{pill.label}</span>
+                </div>
+                <p className="mt-1 text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                  {pill.value}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-[1.3fr_0.7fr]">
+          <PrimaryAction
+            action={primaryAction}
+            briefingText={briefing?.text || message}
+            kcalRemaining={remaining}
+            compact
+          />
+
+          <button
+            type="button"
+            onClick={onOpenChat}
+            className="flex items-center justify-between gap-3 rounded-[18px] border border-[hsl(var(--border)/0.65)] bg-[hsl(var(--card)/0.75)] px-4 py-3.5 text-left transition-colors active:bg-[hsl(var(--fill)/0.65)]"
+          >
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">
+                Coach chat
+              </p>
+              <p className="mt-1 text-[13px] font-semibold tracking-[-0.02em] text-[hsl(var(--fg))]">
+                Ask a follow-up
+              </p>
+              <p className="mt-1 text-[12px] leading-5 text-[hsl(var(--fg-3))]">
+                Clarify the plan or ask for a swap.
+              </p>
+            </div>
+            <div className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+              streakUrgency === 'urgent' ? 'bg-[hsl(var(--warn)/0.12)] text-[hsl(var(--warn))]' : 'bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))]'
+            )}>
+              <MessageSquareMore className="h-4.5 w-4.5" strokeWidth={2.2} />
+            </div>
+          </button>
+        </div>
+
+        {todayCheckin ? (
+          <div className="flex items-center gap-2 text-[12px] text-[hsl(var(--fg-3))]">
+            <Clock3 className="h-3.5 w-3.5" strokeWidth={2.2} />
+            <span>Built from today&apos;s check-in and training status.</span>
+          </div>
+        ) : null}
       </div>
-      <p className="text-[13px] text-[hsl(var(--fg-2))] mt-1.5 ml-[18px]">{message}</p>
-    </div>
+    </section>
   );
 }
 
@@ -459,35 +618,6 @@ function ProtocolsSummary({ protocols }) {
         })}
       </div>
     </div>
-  );
-}
-
-function WeeklyProgress({ weekWorkoutCount, planFrequency, t }) {
-  if (!planFrequency && weekWorkoutCount === 0) return null;
-  const target = planFrequency || 4;
-  const pct = Math.min(100, Math.round((weekWorkoutCount / target) * 100));
-
-  return (
-    <div className="flex items-center gap-3 px-1">
-      <div className="flex-1 h-1.5 rounded-full bg-[hsl(var(--fill))]">
-        <div
-          className="h-full rounded-full bg-[hsl(var(--brand))] transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span className="text-[11px] font-semibold text-[hsl(var(--fg-3))] whitespace-nowrap">
-        {weekWorkoutCount}/{target} {t('today.weeklyWorkouts')}
-      </span>
-    </div>
-  );
-}
-
-function DailyNarrative({ narrative }) {
-  if (!narrative) return null;
-  return (
-    <p className="text-[13px] text-[hsl(var(--fg-2))] leading-[1.5] px-0.5 -mt-1">
-      {narrative}
-    </p>
   );
 }
 
@@ -689,19 +819,6 @@ function TodayContent() {
     t,
   });
 
-  // ── Daily narrative — contextual sentence ──
-  const dailyNarrative = buildDailyNarrative({
-    workoutDone: safeDaily.workoutDone,
-    nutritionLogged: safeDaily.nutritionLogged,
-    weightLogged: safeDaily.weightLogged,
-    protocolsDue: safeDaily.protocols?.dueToday || 0,
-    protocolsComplete: safeDaily.protocols?.completedToday || 0,
-    kcalRemaining,
-    hasActivePlan: safePlan.id != null,
-    t,
-  });
-
-  const firstName = useMemo(() => getFirstName(safeDaily.preferredName), [safeDaily.preferredName]);
   const calculatedStreak = useMemo(() => calcStreak(recentCheckins), [recentCheckins]);
   const streak = daily.workoutStreak ?? calculatedStreak;
   const checkinDates = useMemo(() => recentCheckins.map(c => c.date), [recentCheckins]);
@@ -717,12 +834,63 @@ function TodayContent() {
     return null;
   }, [todayCheckin, t]);
 
+  const weeklySegments = useMemo(
+    () => buildWeeklySegmentSummary(recentCheckins, todayCheckin),
+    [recentCheckins, todayCheckin]
+  );
+  const weekDateSet = useMemo(() => new Set(getWeekDates()), []);
+  const weekCheckinCount = useMemo(
+    () => recentCheckins.filter((checkin) => weekDateSet.has(checkin.date)).length,
+    [recentCheckins, weekDateSet]
+  );
+  const weeklySummaryText = useMemo(() => {
+    const workouts = safeDaily.weekWorkoutCount || 0;
+    const checkins = weekCheckinCount;
+    return `${workouts} workouts · ${checkins}/7 check-ins`;
+  }, [safeDaily.weekWorkoutCount, weekCheckinCount]);
+  const weeklyNarrative = useMemo(() => {
+    const workouts = safeDaily.weekWorkoutCount || 0;
+    const checkins = weekCheckinCount;
+    const hasLowEnergy = todayCheckin?.energy != null && todayCheckin.energy <= 2;
+    if (hasLowEnergy) return 'Today reads as a recovery day. Keep the next step light and specific.';
+    if (checkins >= 5 && workouts >= 4) return 'Strong week so far. Keep the rhythm and stay consistent through the weekend.';
+    if (workouts > checkins) return 'Training is moving faster than tracking. A quick check-in will make the week easier to read.';
+    if (checkins === 0 && workouts === 0) return 'The week is still open. One logged session makes the pattern easier to spot.';
+    return 'Consistency is building. One steady day at a time keeps the trend readable.';
+  }, [safeDaily.weekWorkoutCount, weekCheckinCount, todayCheckin?.energy]);
+  const weeklyHighlights = useMemo(() => {
+    const workouts = safeDaily.weekWorkoutCount || 0;
+    return [
+      { label: 'Workouts', value: String(workouts) },
+      { label: 'Check-ins', value: `${weekCheckinCount}/7` },
+      { label: 'Consistency', value: `${Math.min(100, Math.round((weekCheckinCount / 7) * 100))}%` },
+    ];
+  }, [safeDaily.weekWorkoutCount, weekCheckinCount]);
+
   // Proactive AI
-  const insightAge = coachMemory?.proactive_insight_generated_at
-    ? Date.now() - new Date(coachMemory.proactive_insight_generated_at).getTime()
-    : Infinity;
-  const insightFresh = insightAge < 24 * 60 * 60 * 1000;
-  const proactiveMessage = (insightFresh && coachMemory?.proactive_insight) || ai?.briefing?.message || null;
+  const proactiveMessage = useMemo(() => {
+    const fromCoachMemory = coachMemory?.proactive_insight_generated_at
+      ? coachMemory?.proactive_insight
+      : null;
+    return fromCoachMemory || ai?.briefing?.message || null;
+  }, [coachMemory?.proactive_insight, coachMemory?.proactive_insight_generated_at, ai?.briefing?.message]);
+  const proactiveReason = useMemo(() => {
+    if (todayCheckin?.energy != null && todayCheckin.energy <= 2) return 'Triggered by a low-energy check-in';
+    if (!safeDaily.workoutDone && safePlan.id) return 'Triggered by your open workout';
+    if (!safeDaily.nutritionLogged && kcalRemaining > 0) return 'Triggered by remaining fuel';
+    if ((safeDaily.protocols?.dueToday || 0) > (safeDaily.protocols?.completedToday || 0)) return 'Triggered by pending protocols';
+    return 'Triggered by today’s state';
+  }, [todayCheckin?.energy, safeDaily.workoutDone, safePlan.id, safeDaily.nutritionLogged, kcalRemaining, safeDaily.protocols?.dueToday, safeDaily.protocols?.completedToday]);
+  const proactiveContext = briefing.focus || (safeDaily.workoutDone ? 'Recovery focus' : 'Execution focus');
+  const proactiveFreshness = useMemo(() => {
+    if (coachMemory?.proactive_insight_generated_at) {
+      return `Updated ${formatRelativeAge(coachMemory.proactive_insight_generated_at)}`;
+    }
+    if (ai?.briefing?.message) {
+      return 'Generated live';
+    }
+    return 'Fresh from today';
+  }, [coachMemory?.proactive_insight_generated_at, ai?.briefing?.message]);
   const showAICard = !aiDismissed && !!proactiveMessage;
 
   // Milestones
@@ -737,6 +905,69 @@ function TodayContent() {
     if (shareNotDismissed && streak > 0) setShareFlowOpen(true);
   }, [shareNotDismissed, streak]);
 
+  const priorityActions = useMemo(() => {
+    const actions = [];
+    if (!safeDaily.workoutDone) {
+      actions.push({
+        label: 'Start workout',
+        detail: safePlan.id ? 'Open today’s training plan and log the session.' : 'Go to Workouts and create today’s session.',
+        onClick: () => { window.location.href = ROUTES.workouts; },
+        icon: Dumbbell,
+        colorClass: 'bg-[hsl(var(--brand)/0.1)] text-[hsl(var(--brand))]',
+      });
+    }
+    if (!safeDaily.nutritionLogged) {
+      actions.push({
+        label: 'Log nutrition',
+        detail: 'Capture meals or macros before the day gets harder to reconstruct.',
+        onClick: () => setQuickMealOpen(true),
+        icon: UtensilsCrossed,
+        colorClass: 'bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))]',
+      });
+    }
+    if (!todayCheckin || !safeDaily.weightLogged) {
+      actions.push({
+        label: 'Record check-in',
+        detail: 'Update weight and recovery so the dashboard reflects today, not yesterday.',
+        onClick: () => setCheckinOpen(true),
+        icon: Scale,
+        colorClass: 'bg-[hsl(var(--ok)/0.1)] text-[hsl(var(--ok))]',
+      });
+    }
+    if (!actions.length) {
+      actions.push({
+        label: 'Ask the coach',
+        detail: 'You are on track. Use chat for a swap, adjustment, or deeper explanation.',
+        onClick: () => setChatOpen(true),
+        icon: MessageSquareMore,
+        colorClass: 'bg-[hsl(var(--brand-ai)/0.1)] text-[hsl(var(--brand-ai))]',
+      });
+    }
+    return actions.slice(0, 3);
+  }, [safeDaily.workoutDone, safeDaily.nutritionLogged, safeDaily.weightLogged, safePlan.id, todayCheckin]);
+
+  if (daily?.isLoading) {
+    return (
+      <TodayScreen>
+        <Header
+          weather={weather}
+          greeting={getGreeting(safeDaily.preferredName, t)}
+          locale={locale}
+          streak={streak}
+          streakUrgency={streakUrgency}
+          adaptiveSubtitle={adaptiveSubtitle}
+        />
+        <DataState
+          variant="loading"
+          eyebrow="Today"
+          title="Building today’s dashboard"
+          description="Atlas is loading your workout, nutrition, check-in, and plan context before showing the day summary."
+          note="This prevents the dashboard from flashing fallback zeros that look like real data."
+        />
+      </TodayScreen>
+    );
+  }
+
   return (
     <TodayScreen>
       {/* 1. Header — with streak pill */}
@@ -749,6 +980,25 @@ function TodayContent() {
         adaptiveSubtitle={adaptiveSubtitle}
       />
 
+      {ai.error ? (
+        <DataState
+          variant="error"
+          eyebrow="Coach availability"
+          title="Live coach insight is unavailable"
+          description="The daily dashboard is still usable, but the proactive coach briefing could not be generated right now."
+          primaryAction={(
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="atlas-button atlas-button-secondary"
+            >
+              Open coach chat
+            </button>
+          )}
+          note="Atlas falls back to the rules-based daily summary until AI insight returns."
+        />
+      ) : null}
+
       {/* Day 1 Banner — personalized first-day experience (onboarding V2 users only) */}
       {isDay1User(safeDaily?.profile) ? (
         <Day1Banner
@@ -759,16 +1009,20 @@ function TodayContent() {
         />
       ) : (
         <>
-          {/* 1b. Daily Status — on-track / caution / needs-attention */}
+          {/* 1b. Daily Status — dominant hero */}
           <DailyStatus
             status={dailyStatus.status}
             message={dailyStatus.message}
             completedCount={dailyStatus.completedCount}
             totalCount={dailyStatus.totalCount}
+            briefing={briefing}
+            kcalRemaining={kcalRemaining}
+            streak={streak}
+            streakUrgency={streakUrgency}
+            todayCheckin={todayCheckin}
+            primaryAction={briefing.primaryAction}
+            onOpenChat={() => setChatOpen(true)}
           />
-
-          {/* 1b2. Daily Narrative — contextual interpretation */}
-          <DailyNarrative narrative={dailyNarrative} />
 
           {/* 1c. Trial countdown — only shows during active trial */}
           {subscription?.status === 'trialing' && trialDaysRemaining > 0 && (
@@ -776,6 +1030,8 @@ function TodayContent() {
           )}
         </>
       )}
+
+      <PriorityActionStrip actions={priorityActions} />
 
       {/* NEW: Streak milestone celebration */}
       {showMilestone && (
@@ -811,11 +1067,28 @@ function TodayContent() {
       {/* NEW: Streak paywall at 3 days */}
       {streak === 3 && <PaywallTrigger trigger="streak" show={streak >= 3} />}
 
-      {/* 2. Primary Action (ORIGINAL — preserved) */}
-      <PrimaryAction
-        action={briefing.primaryAction}
-        briefingText={briefing.text}
-        kcalRemaining={kcalRemaining}
+      {/* 2. Proactive insight */}
+      {showAICard && (
+        <AICoachBriefing
+          briefing={proactiveMessage}
+          focus={proactiveContext}
+          reason={proactiveReason}
+          context={ai?.briefing?.focus || 'Derived from today’s status'}
+          freshness={proactiveFreshness}
+          primaryAction={briefing.primaryAction}
+          secondaryAction={briefing.secondaryAction}
+          onOpenChat={() => setChatOpen(true)}
+          onDismiss={() => setAiDismissed(true)}
+        />
+      )}
+
+      {/* 3. Weekly review */}
+      <WeeklySummary
+        label="Weekly review"
+        summary={weeklySummaryText}
+        narrative={weeklyNarrative}
+        highlights={weeklyHighlights}
+        segments={weeklySegments}
       />
 
       {/* Macro rings card (macros-only nutrition mode) */}
@@ -823,23 +1096,8 @@ function TodayContent() {
         <MacroRingsCard nutrition={safeNutrition} t={t} />
       )}
 
-      {/* NEW: Proactive AI card */}
-      {showAICard && (
-        <ProactiveAICard
-          message={proactiveMessage}
-          onOpenChat={() => setChatOpen(true)}
-          onDismiss={() => setAiDismissed(true)}
-          streak={streak}
-          firstName={firstName}
-        />
-      )}
-
-      {/* 3. Coach Input (ORIGINAL — preserved) */}
+      {/* 4. Coach Input */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between px-0.5">
-          <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))]">{t('today.coach_guidance')}</h3>
-          <Sparkles className="h-4 w-4 text-[hsl(var(--brand-ai))]" />
-        </div>
         <CoachChatTrigger
           onOpen={() => setChatOpen(true)}
           onSuggestion={(text) => { coach.sendMessage(text, 'today'); setChatOpen(true); }}
@@ -852,14 +1110,7 @@ function TodayContent() {
       {/* 3b. Protocol Summary — supplement/medication compliance */}
       <ProtocolsSummary protocols={safeDaily.protocols} />
 
-      {/* 3c. Weekly workout progress */}
-      <WeeklyProgress
-        weekWorkoutCount={safeDaily.weekWorkoutCount || 0}
-        planFrequency={safePlan.frequency}
-        t={t}
-      />
-
-      {/* 4. Quick Actions Grid (ORIGINAL — preserved) */}
+      {/* 5. Quick Actions Grid (ORIGINAL — preserved) */}
       <section className="space-y-4">
         <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.focus_areas')}</h3>
         <div className="grid grid-cols-2 gap-3.5">
@@ -902,7 +1153,7 @@ function TodayContent() {
         </div>
       </section>
 
-      {/* 5. Today's Plan Summary (ORIGINAL — preserved) */}
+      {/* 6. Today's Plan Summary (ORIGINAL — preserved) */}
       {safePlan.id && !safeDaily.workoutDone && (
         <section className="space-y-4">
           <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.upcoming')}</h3>
@@ -925,7 +1176,7 @@ function TodayContent() {
         </section>
       )}
 
-      {/* 6. Recommendations (ORIGINAL — preserved) */}
+      {/* 7. Recommendations (ORIGINAL — preserved) */}
       {recs.length > 0 && (
         <section className="space-y-4">
           <h3 className="text-[13px] font-bold uppercase tracking-wider text-[hsl(var(--fg-3))] px-0.5">{t('today.smart_recs')}</h3>
@@ -949,6 +1200,8 @@ function TodayContent() {
         onOpenChange={setChatOpen}
         messages={coach.messages}
         isTyping={coach.isTyping}
+        isHydrating={coach.isHydrating}
+        loadError={coach.loadError}
         actionStates={coach.actionStates}
         onSendMessage={coach.sendMessage}
         onConfirmAction={coach.executeAction}

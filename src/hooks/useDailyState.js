@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { getMeasurementFieldValue } from '@/lib/measurementModel';
 import { AI_COACH_KEY } from '@/hooks/useAICoach';
+import { getDailyCheckin } from '@/services/checkinService';
 
 /**
  * useDailyState — single unified truth for today's state.
@@ -32,6 +33,7 @@ export const DAILY_QUERY_KEYS = {
   todaySession:   (uid) => ['daily-today-session', uid],
   todayMeals:     (uid) => ['daily-today-meals', uid],
   todayWeight:    (uid) => ['daily-today-weight', uid],
+  todayCheckin:   (uid, date) => ['daily-today-checkin', uid, date],
   todayProtocols: (uid) => ['daily-today-protocols', uid],
   todayLogs:      (uid) => ['daily-today-protocol-logs', uid],
   profile:        (uid) => ['daily-profile', uid],
@@ -83,6 +85,18 @@ export function useDailyState() {
     },
     enabled: !!uid,
     staleTime: 60_000,
+  });
+
+  // ── Body — today's check-in (non-throwing) ─────────────────────────────────
+  const { data: todayCheckin, isLoading: checkinLoading } = useQuery({
+    queryKey: DAILY_QUERY_KEYS.todayCheckin(uid, today),
+    queryFn: async () => {
+      try {
+        return await getDailyCheckin(uid, today);
+      } catch { return null; }
+    },
+    enabled: !!uid,
+    staleTime: 30_000,
   });
 
   // ── Body — last weight (for delta, non-throwing) ────────────────────────────
@@ -224,6 +238,7 @@ export function useDailyState() {
   const workoutDone = workout.completed;
   const nutritionLogged = nutrition.mealsLogged > 0;
   const weightLogged = body.weightToday != null;
+  const checkinDone = !!todayCheckin;
 
   /**
    * Cascade invalidation — call after any user action that changes daily state.
@@ -242,12 +257,15 @@ export function useDailyState() {
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayWeight(uid) });
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.lastWeight(uid) });
     }
+    if (scope === 'checkin' || scope === 'all') {
+      queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayCheckin(uid, today) });
+    }
     if (scope === 'protocol' || scope === 'all') {
       queryClient.invalidateQueries({ queryKey: DAILY_QUERY_KEYS.todayLogs(uid) });
     }
     // Always invalidate AI coach cache so engine regenerates with fresh data
     queryClient.invalidateQueries({ queryKey: [AI_COACH_KEY, uid] });
-  }, [uid, queryClient]);
+  }, [uid, queryClient, today]);
 
   return {
     // Structured state (for AI engine and typed consumers)
@@ -269,13 +287,17 @@ export function useDailyState() {
     workoutDone,
     nutritionLogged,
     weightLogged,
+    checkinDone,
+
+    // Check-in data
+    checkin: todayCheckin ?? null,
 
     // Convenience aggregates (backward compat)
     totalKcal: nutrition.caloriesConsumed,
     totalProtein: nutrition.proteinConsumed,
 
     // Loading
-    isLoading: sessionLoading || mealsLoading,
+    isLoading: sessionLoading || mealsLoading || checkinLoading,
 
     // Cascade invalidation — call after user actions
     invalidateAfterAction,

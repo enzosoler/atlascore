@@ -54,9 +54,9 @@ export default function QuickLogSheet({ open, onOpenChange, onLogRecent, onAISub
       await onLogRecent?.(food);
       onOpenChange(false);
       tapMedium();
-      toast.success(`${food.name || food.food_name || 'Food'} logged.`);
+      toast.success(`${food.name || food.food_name || 'Food'} opened for review.`);
     } catch {
-      toast.error('Could not log food.');
+      toast.error('Could not open food.');
     }
   };
 
@@ -71,8 +71,13 @@ export default function QuickLogSheet({ open, onOpenChange, onLogRecent, onAISub
     <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
       <DrawerContent className="flex flex-col max-h-[85dvh] pb-[env(safe-area-inset-bottom,0px)] focus:outline-none">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3">
-          <span className="text-[16px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))]">Quick Log</span>
+        <div className="flex items-start justify-between gap-4 px-5 pt-4 pb-3">
+          <div>
+            <p className="text-[16px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))]">Quick log</p>
+            <p className="mt-1 text-[12px] text-[hsl(var(--fg-3))]">
+              Capture the meal first, then review it in Atlas.
+            </p>
+          </div>
           <button
             onClick={() => onOpenChange(false)}
             className="flex h-7 w-7 items-center justify-center rounded-full text-[hsl(var(--fg-3))]"
@@ -83,6 +88,14 @@ export default function QuickLogSheet({ open, onOpenChange, onLogRecent, onAISub
 
         <div className="px-5 pb-5 space-y-4 overflow-y-auto">
           {/* AI text input */}
+          <div className="rounded-[16px] border border-[hsl(var(--brand-ai)/0.16)] bg-[hsl(var(--brand-ai)/0.04)] px-3 py-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--brand-ai))]">
+              Fast capture
+            </p>
+            <p className="mt-1 text-[12px] text-[hsl(var(--fg-2))]">
+              Describe what you ate in one line. Atlas will open the structured review step next.
+            </p>
+          </div>
           <div className="relative">
             <textarea
               ref={inputRef}
@@ -97,7 +110,7 @@ export default function QuickLogSheet({ open, onOpenChange, onLogRecent, onAISub
               <button
                 onClick={handleSubmitAI}
                 disabled={submitting}
-                className="absolute right-3 bottom-3 h-7 w-7 rounded-full bg-[hsl(var(--brand))] flex items-center justify-center disabled:opacity-50"
+                className="absolute right-3 bottom-3 h-8 w-8 rounded-full bg-[hsl(var(--brand))] flex items-center justify-center disabled:opacity-50"
               >
                 <span className="text-white text-[12px] font-bold">↑</span>
               </button>
@@ -132,7 +145,7 @@ export default function QuickLogSheet({ open, onOpenChange, onLogRecent, onAISub
                 className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[12px] bg-[hsl(var(--fill)/0.5)] border border-[hsl(var(--border))] text-[13px] font-semibold text-[hsl(var(--fg-2))] active:scale-[0.97] transition-transform duration-100"
               >
                 <Camera className="w-4 h-4" strokeWidth={2} />
-                Scan
+                Scan photo
               </button>
             )}
             {onOpenSearch && (
@@ -141,7 +154,7 @@ export default function QuickLogSheet({ open, onOpenChange, onLogRecent, onAISub
                 className="flex-1 flex items-center justify-center gap-2 h-11 rounded-[12px] bg-[hsl(var(--fill)/0.5)] border border-[hsl(var(--border))] text-[13px] font-semibold text-[hsl(var(--fg-2))] active:scale-[0.97] transition-transform duration-100"
               >
                 <Search className="w-4 h-4" strokeWidth={2} />
-                Search
+                Search foods
               </button>
             )}
           </div>

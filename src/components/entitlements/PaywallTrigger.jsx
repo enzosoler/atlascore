@@ -18,7 +18,7 @@ import { useI18n } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { ROUTES } from '@/lib/routes';
 import { trackProductEvent } from '@/lib/productEvents';
-import { trackPaywallViewed } from '@/lib/analytics';
+import { usePaywallAnalytics } from '@/hooks/usePaywallAnalytics';
 
 const TRIGGER_KEYS = ['ai_coach', 'workout', 'photo', 'streak'];
 
@@ -35,6 +35,7 @@ export default function PaywallTrigger({ trigger, show }) {
   const { can } = useSubscription();
   const { t } = useI18n();
   const { user } = useAuth();
+  const { trackPaywallViewed } = usePaywallAnalytics();
   const [dismissed, setDismissed] = useState(false);
   const [tracked, setTracked] = useState(false);
 
@@ -66,12 +67,15 @@ export default function PaywallTrigger({ trigger, show }) {
   };
 
   return (
-    <div className="rounded-[18px] bg-[hsl(var(--warn)/0.06)] border border-[hsl(var(--warn)/0.15)] p-4">
+    <div className="rounded-[18px] border border-[hsl(var(--warn)/0.15)] bg-gradient-to-br from-[hsl(var(--warn)/0.09)] to-[hsl(var(--card)/0.8)] p-4">
       <div className="flex items-start gap-3">
         <Crown className="w-5 h-5 text-[#F59E0B] shrink-0 mt-0.5" strokeWidth={2} />
         <div className="flex-1 min-w-0">
           <p className="text-[14px] font-semibold text-[hsl(var(--fg))] leading-[1.4]">
             {t(`paywall.triggers.${key}.headline`)}
+          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-[hsl(var(--fg-2))]">
+            Unlock the full plan when the moment feels right.
           </p>
           <Link
             to={ROUTES.pricing}
@@ -130,11 +134,14 @@ export function PaywallSheet({ trigger, show, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[150] flex items-end justify-center sm:items-center" style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>
-      <div className="w-full max-w-sm rounded-t-[24px] sm:rounded-[24px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.7)] overflow-hidden atlas-sheet-enter" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="w-full max-w-sm rounded-t-[24px] sm:rounded-[24px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.7)] overflow-hidden atlas-sheet-enter" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="p-6 text-center space-y-4">
           <Crown className="w-10 h-10 text-[#F59E0B] mx-auto" strokeWidth={1.5} />
           <p className="text-[18px] font-bold tracking-[-0.02em] text-[hsl(var(--fg))]">
             {t(`paywall.triggers.${key}.headline`)}
+          </p>
+          <p className="text-[13px] leading-relaxed text-[hsl(var(--fg-2))]">
+            See the plan details, then decide whether to keep going.
           </p>
           <Link
             to={ROUTES.pricing}
