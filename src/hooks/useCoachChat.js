@@ -4,10 +4,12 @@
  * Manages message history, calls the ai-coach-chat edge function,
  * and executes actions returned by the AI (update targets, log data, swap exercises, navigate).
  *
- * No DB persistence in V1 — messages live in component state only.
+ * Messages are persisted server-side by the edge function in the `coach_messages` table.
+ * On mount, we hydrate the UI from that table so the user sees prior conversation
+ * across sessions, reloads, and device changes.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
@@ -21,13 +23,67 @@ function nextId() {
   return `msg-${++msgIdCounter}`;
 }
 
+// How many messages to hydrate from DB on mount. Matches the edge function
+// context window (limit 20) so the UI matches what the coach actually sees.
+const HISTORY_HYDRATE_LIMIT = 30;
+
 export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
   const navigate = useNavigate();
   const { locale } = useI18n();
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [isHydrating, setIsHydrating] = useState(true);
   // Map of actionId -> 'pending' | 'loading' | 'done' | 'dismissed'
   const [actionStates, setActionStates] = useState({});
+  const hydratedRef = useRef(false);
+
+  // ── Hydrate prior conversation from DB once per session ─────────────────────
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || cancelled) { setIsHydrating(false); return; }
+
+        const { data, error } = await supabase
+          .from('coach_messages')
+          .select('id, role, content, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(HISTORY_HYDRATE_LIMIT);
+
+        if (cancelled) return;
+        if (error) {
+          console.warn('[useCoachChat] hydrate failed:', error.message);
+          setIsHydrating(false);
+          return;
+        }
+
+        const prior = (data ?? [])
+          .slice()
+          .reverse()
+          .map((row) => ({
+            id: nextId(),
+            role: row.role,
+            content: row.content,
+            actions: [],
+            suggestions: [],
+            timestamp: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+          }));
+
+        setMessages(prior);
+      } catch (err) {
+        console.warn('[useCoachChat] hydrate exception:', err?.message || err);
+      } finally {
+        if (!cancelled) setIsHydrating(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, []);
 
   const appendMessage = useCallback((msg) => {
     setMessages((prev) => [...prev, { id: nextId(), timestamp: Date.now(), ...msg }]);
@@ -113,14 +169,23 @@ export function useCoachChat({ invalidateAfterAction, activePlan } = {}) {
     setActionStates((prev) => ({ ...prev, [actionKey]: 'dismissed' }));
   }, []);
 
-  const clearHistory = useCallback(() => {
+  const clearHistory = useCallback(async () => {
     setMessages([]);
     setActionStates({});
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('coach_messages').delete().eq('user_id', user.id);
+      }
+    } catch (err) {
+      console.warn('[useCoachChat] clearHistory db delete failed:', err?.message || err);
+    }
   }, []);
 
   return {
     messages,
     isTyping,
+    isHydrating,
     actionStates,
     sendMessage,
     executeAction,
@@ -137,36 +202,45 @@ async function getCurrentUserId() {
   return user.id;
 }
 
+// Validate and clamp a numeric value within safe bounds
+function safeNum(value, min, max, fallback = 0) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
 async function dispatchAction(action, { activePlan, navigate }) {
   const { type, params = {} } = action;
   const userId = await getCurrentUserId();
 
   switch (type) {
     case 'update_calorie_target': {
-      await updateProfileTarget(userId, 'calories', params.calories);
+      const cal = safeNum(params.calories, 800, 10000);
+      await updateProfileTarget(userId, 'calories', cal);
       break;
     }
     case 'update_protein_target': {
-      await updateProfileTarget(userId, 'protein', params.protein);
+      const prot = safeNum(params.protein, 20, 500);
+      await updateProfileTarget(userId, 'protein', prot);
       break;
     }
     case 'update_macro_targets': {
       const patch = {};
-      if (params.calories != null) patch.calories = params.calories;
-      if (params.protein != null) patch.protein = params.protein;
-      if (params.carbs != null) patch.carbs = params.carbs;
-      if (params.fat != null) patch.fat = params.fat;
+      if (params.calories != null) patch.calories = safeNum(params.calories, 800, 10000);
+      if (params.protein != null) patch.protein = safeNum(params.protein, 20, 500);
+      if (params.carbs != null) patch.carbs = safeNum(params.carbs, 0, 1500);
+      if (params.fat != null) patch.fat = safeNum(params.fat, 0, 500);
       await updateProfileTargets(userId, patch);
       break;
     }
     case 'log_food': {
       const { error } = await supabase.from('food_logs').insert({
         user_id: userId,
-        name: params.name ?? 'Food',
-        calories: params.calories ?? 0,
-        protein: params.protein ?? 0,
-        carbs: params.carbs ?? 0,
-        fat: params.fat ?? 0,
+        name: typeof params.name === 'string' ? params.name.slice(0, 200) : 'Food',
+        calories: safeNum(params.calories, 0, 10000),
+        protein: safeNum(params.protein, 0, 500),
+        carbs: safeNum(params.carbs, 0, 1500),
+        fat: safeNum(params.fat, 0, 500),
         date: new Date().toISOString(),
         meal_type: params.meal_type ?? 'other',
       });
@@ -174,8 +248,9 @@ async function dispatchAction(action, { activePlan, navigate }) {
       break;
     }
     case 'log_weight': {
+      const weight = safeNum(params.weight, 20, 500);
       await createMeasurement(userId, {
-        weight: params.weight,
+        weight,
         date: (() => { const _d = new Date(); return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`; })(),
       });
       break;

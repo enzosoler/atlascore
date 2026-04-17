@@ -1,5 +1,15 @@
 /**
- * revenuecat-webhook — Handle RevenueCat webhook events for affiliate commissions
+ * revenuecat-webhook — Handle RevenueCat webhook events
+ *
+ * Responsibilities:
+ *   1. Upsert the `subscriptions` row for the user (grants / revokes entitlement).
+ *   2. Create or reverse affiliate commissions for influencer referrals.
+ *   3. Store the raw event in `subscription_events` for audit + idempotency.
+ *
+ * Entitlement source of truth:
+ *   The web uses Stripe (stripe-webhook + complete-checkout).
+ *   Mobile (iOS/Android) uses RevenueCat → this webhook.
+ *   Both write to the same `subscriptions` table, keyed on user_id.
  *
  * Deploy:
  *   supabase functions deploy revenuecat-webhook --no-verify-jwt
@@ -22,6 +32,29 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+// All active RevenueCat products grant the 'pro' tier today. The RevenueCat
+// SDK layer (src/lib/revenueCat.js) uses a single entitlement `atlas.core Pro`
+// and maps every active entitlement to tier='pro'. If you ever split mobile
+// products into Pro vs Performance tiers, update this function accordingly.
+const DEFAULT_TIER = 'pro';
+
+// Event types that GRANT or EXTEND access.
+const GRANTING_EVENTS = new Set([
+  'INITIAL_PURCHASE',
+  'RENEWAL',
+  'PRODUCT_CHANGE',
+  'UNCANCELLATION',
+  'NON_RENEWING_PURCHASE',
+  'SUBSCRIPTION_EXTENDED',
+]);
+
+// Event types that REVOKE access immediately.
+const REVOKING_EVENTS = new Set([
+  'EXPIRATION',
+  'SUBSCRIPTION_PAUSED',
+  'REFUND',
+]);
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -88,8 +121,12 @@ serve(async (req) => {
   const priceInPurchasedCurrency = event.price_in_purchased_currency as number | undefined;
   const currency = event.currency as string | undefined;
   const eventTimestampMs = event.event_timestamp_ms as number | undefined;
+  const purchasedAtMs = event.purchased_at_ms as number | undefined;
+  const expirationAtMs = event.expiration_at_ms as number | undefined;
+  const periodType = (event.period_type as string | undefined)?.toUpperCase() ?? null;
+  const environment = event.environment as string | undefined;
 
-  console.log(`revenuecat-webhook: Received type=${eventType} id=${eventId} user=${appUserId}`);
+  console.log(`revenuecat-webhook: Received type=${eventType} id=${eventId} user=${appUserId} env=${environment}`);
 
   // ── Init Supabase admin client ───────────────────────────────────────────
   const supabaseAdmin = createClient(
@@ -142,40 +179,58 @@ serve(async (req) => {
       });
     }
     console.error('revenuecat-webhook: Failed to insert event:', insertError);
+    // Return 500 so RevenueCat retries — we haven't actually processed it.
+    return new Response(JSON.stringify({ error: 'Failed to record event' }), {
+      status: 500,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
   }
 
   // ── Process event ────────────────────────────────────────────────────────
   try {
-    switch (eventType) {
-      case 'INITIAL_PURCHASE': {
-        await handleInitialPurchase(supabaseAdmin, appUserId, {
-          eventId,
-          productId,
-          store,
-          transactionId,
-          price: priceInPurchasedCurrency,
-          currency,
-        });
-        break;
-      }
+    // 1. Entitlement sync — grant or revoke access in `subscriptions`.
+    if (GRANTING_EVENTS.has(eventType)) {
+      await grantSubscription(supabaseAdmin, appUserId, {
+        productId,
+        store,
+        periodType,
+        purchasedAtMs,
+        expirationAtMs,
+      });
+    } else if (eventType === 'CANCELLATION') {
+      // CANCELLATION in RevenueCat means the user turned off auto-renew.
+      // They KEEP access until expiration. Flag cancel_at_period_end but
+      // don't change status — commissions stay intact (reversal only on REFUND).
+      await markCancelAtPeriodEnd(supabaseAdmin, appUserId);
+    } else if (eventType === 'BILLING_ISSUE') {
+      await setSubscriptionStatus(supabaseAdmin, appUserId, 'past_due');
+    } else if (REVOKING_EVENTS.has(eventType)) {
+      await revokeSubscription(supabaseAdmin, appUserId, eventType);
+    }
 
-      case 'REFUND':
-      case 'CANCELLATION': {
-        await handleRefundOrCancellation(supabaseAdmin, appUserId, {
-          eventId,
-          eventType,
-          transactionId,
-          originalTransactionId,
-        });
-        break;
-      }
-
-      default:
-        console.log(`revenuecat-webhook: Unhandled event type: ${eventType}`);
+    // 2. Commission accounting — unchanged business logic, but decoupled.
+    if (eventType === 'INITIAL_PURCHASE') {
+      await handleInitialPurchaseCommission(supabaseAdmin, appUserId, {
+        eventId,
+        productId,
+        store,
+        transactionId,
+        price: priceInPurchasedCurrency,
+        currency,
+      });
+    } else if (eventType === 'REFUND') {
+      // Refunds are the only events that reverse commissions. CANCELLATION
+      // does not — the user may still be mid-period and the sale was genuine.
+      await reverseCommissions(supabaseAdmin, appUserId, eventType);
     }
   } catch (error) {
     console.error('revenuecat-webhook: Error processing event:', error);
-    // Return 200 so RevenueCat doesn't retry for processing errors
+    // Return 500 so RevenueCat retries. Idempotency is protected by the
+    // subscription_events unique constraint above.
+    return new Response(JSON.stringify({ error: 'Processing failed' }), {
+      status: 500,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+    });
   }
 
   return new Response(JSON.stringify({ received: true }), {
@@ -184,7 +239,125 @@ serve(async (req) => {
   });
 });
 
-// ── INITIAL_PURCHASE handler ───────────────────────────────────────────────
+// ── Subscription grant / revoke ───────────────────────────────────────────
+
+interface GrantDetails {
+  productId?: string;
+  store?: string;
+  periodType: string | null;
+  purchasedAtMs?: number;
+  expirationAtMs?: number;
+}
+
+async function grantSubscription(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  details: GrantDetails,
+): Promise<void> {
+  if (!userId) {
+    console.warn('revenuecat-webhook: grantSubscription called without user_id');
+    return;
+  }
+
+  const isTrial = details.periodType === 'TRIAL' || details.periodType === 'INTRO';
+  const now = new Date();
+  const periodStart = details.purchasedAtMs ? new Date(details.purchasedAtMs) : now;
+  // Non-renewing purchases (lifetime / one-shot) may have no expiration_at_ms.
+  const periodEnd = details.expirationAtMs ? new Date(details.expirationAtMs) : null;
+
+  const row = {
+    user_id: userId,
+    tier: DEFAULT_TIER,
+    status: isTrial ? 'trialing' : 'active',
+    current_period_starts_at: periodStart.toISOString(),
+    current_period_ends_at: periodEnd ? periodEnd.toISOString() : null,
+    trial_starts_at: isTrial ? periodStart.toISOString() : null,
+    trial_ends_at: isTrial && periodEnd ? periodEnd.toISOString() : null,
+    cancel_at_period_end: false,
+    // Keep stripe fields null — this subscription came from RevenueCat.
+    // The product_id can still be useful for debugging; store it in
+    // stripe_price_id as a pragmatic workaround (no RC-specific column
+    // exists yet). Rename to `external_price_id` in a future migration.
+    stripe_price_id: details.productId ?? null,
+  };
+
+  const { error } = await supabase
+    .from('subscriptions')
+    .upsert(row, { onConflict: 'user_id' });
+
+  if (error) {
+    console.error('revenuecat-webhook: Failed to grant subscription:', error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: Subscription granted/renewed user=${userId} tier=${DEFAULT_TIER} trial=${isTrial}`);
+}
+
+async function markCancelAtPeriodEnd(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<void> {
+  if (!userId) return;
+  const { error } = await supabase
+    .from('subscriptions')
+    .update({ cancel_at_period_end: true })
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('revenuecat-webhook: Failed to mark cancel_at_period_end:', error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: Marked cancel_at_period_end=true user=${userId}`);
+}
+
+async function setSubscriptionStatus(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  status: string,
+): Promise<void> {
+  if (!userId) return;
+  const { error } = await supabase
+    .from('subscriptions')
+    .update({ status })
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error(`revenuecat-webhook: Failed to set status=${status}:`, error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: Status=${status} user=${userId}`);
+}
+
+async function revokeSubscription(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  reason: string,
+): Promise<void> {
+  if (!userId) return;
+
+  // EXPIRATION → canceled; SUBSCRIPTION_PAUSED → inactive; REFUND → canceled.
+  const statusMap: Record<string, string> = {
+    EXPIRATION: 'canceled',
+    SUBSCRIPTION_PAUSED: 'inactive',
+    REFUND: 'canceled',
+  };
+  const status = statusMap[reason] ?? 'canceled';
+
+  const { error } = await supabase
+    .from('subscriptions')
+    .update({
+      status,
+      cancel_at_period_end: false,
+    })
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error(`revenuecat-webhook: Failed to revoke (${reason}):`, error);
+    throw error;
+  }
+  console.log(`revenuecat-webhook: Subscription revoked user=${userId} reason=${reason} status=${status}`);
+}
+
+// ── Affiliate commissions (unchanged business logic) ──────────────────────
 
 interface PurchaseDetails {
   eventId: string;
@@ -195,7 +368,7 @@ interface PurchaseDetails {
   currency?: string;
 }
 
-async function handleInitialPurchase(
+async function handleInitialPurchaseCommission(
   supabase: ReturnType<typeof createClient>,
   userId: string,
   details: PurchaseDetails,
@@ -279,21 +452,14 @@ async function handleInitialPurchase(
   }
 }
 
-// ── REFUND / CANCELLATION handler ──────────────────────────────────────────
-
-interface RefundDetails {
-  eventId: string;
-  eventType: string;
-  transactionId?: string;
-  originalTransactionId?: string;
-}
-
-async function handleRefundOrCancellation(
+async function reverseCommissions(
   supabase: ReturnType<typeof createClient>,
   userId: string,
-  details: RefundDetails,
+  reason: string,
 ): Promise<void> {
-  // Find pending commissions for this user to reverse
+  // Find pending commissions for this user to reverse.
+  // Only called on REFUND — CANCELLATION does not reverse because the user
+  // may still be mid-period and the sale was genuine until refunded.
   const { data: commissions, error: fetchError } = await supabase
     .from('commissions')
     .select('id')
@@ -324,7 +490,7 @@ async function handleRefundOrCancellation(
   } else {
     console.log(
       `revenuecat-webhook: Reversed ${ids.length} commission(s) for user=${userId} ` +
-      `reason=${details.eventType}`,
+      `reason=${reason}`,
     );
   }
 }

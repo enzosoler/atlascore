@@ -217,7 +217,7 @@ export async function updateUserRole(userId, newRole) {
 
   const { data, error } = await supabase
     .from('profiles')
-    .update({ role: newRole })
+    .update({ role: newRole, atlas_role: newRole })
     .eq('id', userId)
     .select()
     .single();

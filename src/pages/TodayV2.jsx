@@ -10,7 +10,7 @@ import {
   Dumbbell, UtensilsCrossed, Scale, Target, Camera,
   ArrowRight, Sparkles, ChevronRight, X
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
@@ -28,8 +28,10 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import { getDailyCheckin, listDailyCheckins } from '@/services/checkinService';
 import { getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
+import Day1Banner, { isDay1User } from '@/components/today/Day1Banner';
 import { cn } from '@/lib/utils';
 import { trackPurchaseCompleted } from '@/lib/analytics';
+import { toast } from 'sonner';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -454,14 +456,61 @@ function TodayContent() {
   const [streakCelebrationDismissed, setStreakCelebrationDismissed] = useState(false);
 
   const { trialDaysRemaining, subscription } = useSubscription();
+  const queryClient = useQueryClient();
 
-  // Track successful Stripe checkout redirect
+  // Activate subscription after Stripe redirect.
+  // The stripe-webhook is the source of truth in production, but because the
+  // webhook signing secret can drift (see docs/LAUNCH_OPS.md §5), we call the
+  // complete-checkout edge function here as a redundant activation path.
+  // Both paths upsert the same row keyed on user_id, so running both is safe.
   useEffect(() => {
-    if (searchParams.get('subscribed') === '1') {
-      trackPurchaseCompleted({ source: 'stripe_redirect' });
-      searchParams.delete('subscribed');
-      setSearchParams(searchParams, { replace: true });
+    if (searchParams.get('subscribed') !== '1') return;
+
+    const sessionId = searchParams.get('session_id');
+
+    // Always fire analytics + clear the query params immediately so the URL
+    // doesn't retain sensitive-looking data even if activation fails.
+    trackPurchaseCompleted({ source: 'stripe_redirect' });
+    searchParams.delete('subscribed');
+    searchParams.delete('session_id');
+    setSearchParams(searchParams, { replace: true });
+
+    if (!sessionId) {
+      // No session_id means this redirect came from an older build or a
+      // manually-constructed URL. The webhook will still cover it when
+      // working; log so we notice if it becomes common.
+      console.warn('[TodayV2] ?subscribed=1 without session_id; skipping complete-checkout');
+      return;
     }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('complete-checkout', {
+          body: { session_id: sessionId },
+        });
+        if (cancelled) return;
+        if (error) {
+          console.error('[TodayV2] complete-checkout failed', error);
+          // Don't surface the raw error — the webhook may still activate them
+          // within a few seconds. Invalidate the subscription query so the UI
+          // picks up the new state whichever path wrote it.
+          toast.message('Finalizing your subscription…');
+        } else if (data?.success) {
+          console.log('[TodayV2] Subscription activated', data);
+          toast.success('Subscription activated');
+        }
+      } catch (err) {
+        if (!cancelled) console.error('[TodayV2] complete-checkout threw', err);
+      } finally {
+        // Whether the direct call succeeded or the webhook is doing the work,
+        // refetch subscription state so gated features unlock promptly.
+        queryClient.invalidateQueries({ queryKey: ['subscription-supabase'] });
+      }
+    })();
+
+    return () => { cancelled = true; };
+   
   }, []);
   const today = getToday();
   const uid = user?.id;
@@ -601,7 +650,8 @@ function TodayContent() {
   });
 
   const firstName = useMemo(() => getFirstName(safeDaily.preferredName), [safeDaily.preferredName]);
-  const streak = daily.workoutStreak ?? useMemo(() => calcStreak(recentCheckins), [recentCheckins]);
+  const calculatedStreak = useMemo(() => calcStreak(recentCheckins), [recentCheckins]);
+  const streak = daily.workoutStreak ?? calculatedStreak;
   const checkinDates = useMemo(() => recentCheckins.map(c => c.date), [recentCheckins]);
   const hasCheckin = !!todayCheckin;
   const streakUrgency = getStreakUrgency(hasCheckin);
@@ -640,20 +690,32 @@ function TodayContent() {
         adaptiveSubtitle={adaptiveSubtitle}
       />
 
-      {/* 1b. Daily Status — on-track / caution / needs-attention */}
-      <DailyStatus
-        status={dailyStatus.status}
-        message={dailyStatus.message}
-        completedCount={dailyStatus.completedCount}
-        totalCount={dailyStatus.totalCount}
-      />
+      {/* Day 1 Banner — personalized first-day experience (onboarding V2 users only) */}
+      {isDay1User(safeDaily?.profile) ? (
+        <Day1Banner
+          profile={safeDaily.profile}
+          daily={safeDaily}
+          onOpenCheckin={() => setCheckinOpen(true)}
+          onOpenQuickMeal={() => setQuickMealOpen(true)}
+        />
+      ) : (
+        <>
+          {/* 1b. Daily Status — on-track / caution / needs-attention */}
+          <DailyStatus
+            status={dailyStatus.status}
+            message={dailyStatus.message}
+            completedCount={dailyStatus.completedCount}
+            totalCount={dailyStatus.totalCount}
+          />
 
-      {/* 1b2. Daily Narrative — contextual interpretation */}
-      <DailyNarrative narrative={dailyNarrative} />
+          {/* 1b2. Daily Narrative — contextual interpretation */}
+          <DailyNarrative narrative={dailyNarrative} />
 
-      {/* 1c. Trial countdown — only shows during active trial */}
-      {subscription?.status === 'trialing' && trialDaysRemaining > 0 && (
-        <TrialCountdown daysRemaining={trialDaysRemaining} />
+          {/* 1c. Trial countdown — only shows during active trial */}
+          {subscription?.status === 'trialing' && trialDaysRemaining > 0 && (
+            <TrialCountdown daysRemaining={trialDaysRemaining} />
+          )}
+        </>
       )}
 
       {/* NEW: Streak milestone celebration */}

@@ -94,9 +94,9 @@ export function SubscriptionProvider({ children }) {
   const useSupabaseSubscriptions = hasSupabaseConfig();
   const isNative = Capacitor.isNativePlatform();
 
-  // ── Supabase subscriptions (web / fallback) ──────────────────────────────
+  // ── Supabase subscriptions (all platforms — needed for Stripe web purchases on native) ──
   const shouldFetchSupabase =
-    !isLocalSession && !!user?.email && isAuthenticated && authState === 'authenticated' && !isNative;
+    !isLocalSession && !!user?.email && isAuthenticated && authState === 'authenticated';
 
   const { data: supabaseSubscriptions = [] } = useQuery({
     queryKey: ['subscription-supabase', user?.id],
@@ -130,10 +130,11 @@ export function SubscriptionProvider({ children }) {
   }, [supabaseSubscriptions]);
 
   const subscription = useMemo(() => {
-    // On native, RevenueCat is the source of truth for entitlements
-    if (isNative && rcSubscription) return rcSubscription;
+    // On native, RevenueCat is the source of truth — but fall back to Supabase
+    // for Stripe web purchases that don't sync to RevenueCat.
+    if (isNative && rcSubscription?.status !== 'inactive') return rcSubscription;
 
-    // On web, use Supabase
+    // Use Supabase (web, or native fallback for Stripe purchases)
     const active = subscriptions.filter((s) => ['active', 'trialing', 'granted'].includes(s.status));
     if (active.length === 0) return subscriptions[0] || null;
     return active.sort(
@@ -162,27 +163,32 @@ export function SubscriptionProvider({ children }) {
     if (isNative) {
       const purchased = await rcPresentPaywall();
       if (purchased) {
-        // Force refresh entitlement state
-        const updated = await checkEntitlement();
-        if (updated.isActive) {
-          // Sync to Supabase so web also sees it
-          try {
-            await supabase.functions.invoke('stripe-webhook', {
-              body: {
-                type: 'revenuecat_sync',
-                user_id: user?.id,
-                tier: 'pro',
-                status: 'active',
-              },
-            });
-          } catch { /* best-effort sync */ }
-        }
+        // Force refresh entitlement state from the RevenueCat SDK.
+        await checkEntitlement();
+        // The server-side source of truth is the `subscriptions` row, which is
+        // written by supabase/functions/revenuecat-webhook. We don't call any
+        // edge function from the client — the RevenueCat webhook fires
+        // automatically after purchase. But the webhook is asynchronous and
+        // may lag by a few seconds, so we refetch with a short backoff until
+        // the subscription row appears or we give up.
+        const refetchWithBackoff = async () => {
+          const delays = [0, 2000, 4000, 8000]; // ms — total ~14s
+          for (const delay of delays) {
+            if (delay) await new Promise(r => setTimeout(r, delay));
+            await qc.invalidateQueries({ queryKey: ['subscription-supabase', user?.id] });
+            // If the query result is already active, stop polling.
+            const state = qc.getQueryData(['subscription-supabase', user?.id]);
+            if (state?.status === 'active' || state?.status === 'trialing') return;
+          }
+        };
+        // Fire-and-forget — we don't want to block the paywall return.
+        refetchWithBackoff().catch((err) => console.warn('[SubscriptionContext] refetch backoff failed:', err));
       }
       return purchased;
     }
     // On web, navigate to pricing (handled by caller)
     return false;
-  }, [isNative, user?.id]);
+  }, [isNative, user?.id, qc]);
 
   const restore = useCallback(async () => {
     if (!isNative) return false;

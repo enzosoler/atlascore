@@ -100,7 +100,10 @@ export default function Account() {
 function AccountContent() {
   const { user, logout } = useAuth();
   const { t } = useI18n();
-  const { isSubscribed, tier } = useSubscription();
+  const { subscription } = useSubscription();
+
+  const isSubscribed = subscription && ['active', 'trialing', 'granted'].includes(subscription.status);
+  const tier = subscription?.tier || 'free';
 
   const displayName = user?.full_name || user?.email || 'Athlete';
   const initials = displayName

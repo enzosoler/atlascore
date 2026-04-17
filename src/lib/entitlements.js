@@ -167,7 +167,10 @@ export function hasFeatureAccess(user, subscription, overrides, feature) {
   if (user?.atlas_role === 'beta_tester' && feature !== 'admin_panel') return true;
 
   const lock = FEATURE_LOCKS[feature];
-  if (!lock) return true; // unknown feature = allow
+  if (!lock) {
+    console.warn(`[entitlements] Unknown feature key: "${feature}" — denying access. Add it to FEATURE_LOCKS.`);
+    return false;
+  }
 
   // Check overrides first
   const override = overrides?.find(o => o.feature_key === feature && o.enabled);
@@ -193,7 +196,10 @@ export function canAccessFeature(feature, userPlanCode, userRole = null) {
   if (userRole === 'admin') return true;
 
   const lock = FEATURE_LOCKS[feature];
-  if (!lock) return true;
+  if (!lock) {
+    console.warn(`[entitlements] Unknown feature key: "${feature}" — denying access.`);
+    return false;
+  }
 
   if (lock.roles && !lock.roles.includes(userRole)) {
     return false;

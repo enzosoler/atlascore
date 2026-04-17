@@ -328,7 +328,11 @@ export default function Pricing() {
         email: user.email,
         region: region || 'US',
         billing: billing || 'monthly',
-        success_url: `${window.location.origin}/Today?subscribed=1`,
+        // IMPORTANT: {CHECKOUT_SESSION_ID} must stay — Stripe replaces it at
+        // redirect time. TodayV2 uses it to call complete-checkout, which
+        // activates the subscription server-side. Without it, paying users
+        // stay on the free tier because stripe-webhook can't be relied on.
+        success_url: `${window.location.origin}/Today?subscribed=1&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${window.location.origin}/Pricing`,
       };
 

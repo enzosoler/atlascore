@@ -1,7 +1,14 @@
 # Atlas Core — Launch Ops Playbook
 
-**Last updated:** 2026-03-27
+**Last updated:** 2026-04-17
 **Owner:** Enzo Soler
+
+> **Recent QA pass (2026-04-17):** see `docs/QA_FINDINGS_2026-04-17.md` for the full audit. Summary of what changed:
+> - **Web Stripe activation bug fixed** — `Pricing.jsx` now passes `{CHECKOUT_SESSION_ID}` through the success URL and `TodayV2.jsx` calls `complete-checkout` on return. This is the primary fix for the issue noted in row 1 below.
+> - **RevenueCat webhook now grants entitlements** — previously it only recorded commissions. iOS/Android purchases now upsert the `subscriptions` row. See `supabase/functions/revenuecat-webhook/index.ts`.
+> - **Broken `stripe-webhook` call removed from `SubscriptionContext`** — it was invoking the wrong function with an invalid payload; it has been replaced with a React Query refetch-with-backoff pattern that waits for the RevenueCat webhook.
+> - **Unit tests added** for `lib/entitlements.js` and a contract test guards the checkout success URL against regressing.
+> - **Still required:** rotate `STRIPE_WEBHOOK_SECRET` per §5 below. `complete-checkout` is now wired up as a redundant frontend path, but the webhook remains the source of truth for renewals, payment failures, and cancellations.
 
 ---
 
@@ -9,10 +16,10 @@
 
 | # | Area | Limitation | Workaround |
 |---|------|-----------|------------|
-| 1 | Stripe webhooks | `STRIPE_WEBHOOK_SECRET` in Supabase secrets is misconfigured — webhook signature verification fails | The `complete-checkout` edge function is the primary activation path. It's called directly from the frontend after Stripe redirects back, so subscriptions activate without needing the webhook. |
+| 1 | Stripe webhooks | `STRIPE_WEBHOOK_SECRET` in Supabase secrets is still misconfigured — webhook signature verification fails until rotated. | **[FIXED 2026-04-17]** `complete-checkout` is now actually called from the frontend as a redundant activation path (previously documented but not wired up). For renewals, payment failures, and cancellations you still need to fix the webhook — see §5. |
 | 2 | AI food logging | `log-food-text` edge function returns 401 for some users under specific session states | User can log out and back in to refresh the JWT. Root cause: stale session tokens not refreshing automatically in some edge cases. |
 | 3 | Trial period | 7-day trial is set in `create-checkout` — no email reminder before trial ends | Stripe handles trial expiry emails via its built-in dunning. Ensure Stripe email settings are enabled in the Stripe dashboard. |
-| 4 | Mobile builds | iOS/Android require separate App Store / Play Store deployment — web-only at launch | Capacitor config is ready. Native builds can be submitted after web launch stabilizes. |
+| 4 | Mobile builds | iOS/Android require separate App Store / Play Store deployment — web-only at launch | Capacitor config is ready. Native builds can be submitted after web launch stabilizes. RevenueCat webhook entitlement sync was wired up on 2026-04-17; configure `REVENUECAT_WEBHOOK_SECRET` before mobile launch. |
 
 ---
 

@@ -26,35 +26,34 @@ export default function CoachDashboard() {
     enabled: !!user?.id,
   });
 
-  const studentEmails = students.map((student) => student.client_email);
+  const studentIds = students.map((student) => student.client_id).filter(Boolean);
 
   const { data: checkins = [] } = useQuery({
-    queryKey: ['coach-checkins-recent', studentEmails],
+    queryKey: ['coach-checkins-recent', studentIds],
     queryFn: async () => {
-      const { data } = await supabase.from('daily_checkins').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(50);
+      const { data } = await supabase.from('daily_checkins').select('*').in('user_id', studentIds).order('date', { ascending: false }).limit(50);
       return data || [];
     },
-    enabled: studentEmails.length > 0,
+    enabled: studentIds.length > 0,
   });
 
   const { data: workouts = [] } = useQuery({
-    queryKey: ['coach-workouts-pending', studentEmails],
+    queryKey: ['coach-workouts-pending', studentIds],
     queryFn: async () => {
-      const { data } = await supabase.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(100);
+      const { data } = await supabase.from('workouts').select('*').in('user_id', studentIds).order('date', { ascending: false }).limit(100);
       return data || [];
     },
-    enabled: studentEmails.length > 0,
+    enabled: studentIds.length > 0,
   });
 
-  const recentCheckins = checkins.filter((checkin) => studentEmails.includes(checkin.created_by));
-  const avgAdherence = recentCheckins.length
+  const avgAdherence = checkins.length
     ? Math.round(
-        recentCheckins.reduce((sum, checkin) => sum + (checkin.adherence_score || 0), 0) /
-          recentCheckins.length
+        checkins.reduce((sum, checkin) => sum + (checkin.adherence_score || 0), 0) /
+          checkins.length
       )
     : null;
   const pendingWorkouts = workouts.filter(
-    (workout) => !workout.completed && studentEmails.includes(workout.created_by)
+    (workout) => !workout.completed
   ).length;
 
   return (

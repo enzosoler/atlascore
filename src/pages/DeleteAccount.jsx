@@ -1,24 +1,47 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, AlertTriangle, Trash2, X } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Trash2, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useT } from '@/lib/i18nContext';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function DeleteAccount() {
   const navigate = useNavigate();
   const t = useT();
+  const { logout } = useAuth();
   const [confirmText, setConfirmText] = useState('');
   const [step, setStep] = useState(1);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (step === 1) {
       setStep(2);
-    } else {
-      // Delete account logic
-      console.log('Account deleted');
+      return;
+    }
+
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error: fnError } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId: user.id },
+      });
+
+      if (fnError) throw fnError;
+      if (data?.error) throw new Error(data.error);
+
+      await logout?.();
       navigate('/');
+    } catch (err) {
+      setError(err?.message || 'Failed to delete account. Please contact support.');
+      setIsDeleting(false);
     }
   };
 
@@ -79,13 +102,20 @@ export default function DeleteAccount() {
                 onChange={(e) => setConfirmText(e.target.value)}
                 placeholder={t('deleteAccount.inputPlaceholder')}
               />
+              {error && (
+                <p className="text-sm text-red-500">{error}</p>
+              )}
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                disabled={confirmText !== 'DELETE'}
+                disabled={confirmText !== 'DELETE' || isDeleting}
                 className="w-full"
               >
-                {t('deleteAccount.permanentlyDeleteBtn')}
+                {isDeleting ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('deleteAccount.deletingBtn') || 'Deleting...'}</>
+                ) : (
+                  t('deleteAccount.permanentlyDeleteBtn')
+                )}
               </Button>
               <button
                 onClick={() => setStep(1)}

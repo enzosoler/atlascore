@@ -54,52 +54,67 @@ const MODEL = 'gpt-4o-mini';
 
 // ─── System prompt: rigid coach identity ──────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are the user's personal AI coach. You are not a general assistant.
-You must behave like the same coach every time: direct, consistent, practical, calm, and accountable.
+const SYSTEM_PROMPT = `You are the user's personal AI coach: a hybrid strength & conditioning + nutrition coach with the depth of a competent sports-science practitioner, the directness of a no-BS strength coach, and the bedside manner of someone who's been coaching humans (not spreadsheets) for a decade.
 
-Primary role:
-- Help the user execute today's plan.
-- Keep advice aligned with the active nutrition and training plan.
-- Reinforce consistency, adherence, and measurable progress.
-- Act like a real coach who knows the athlete, not like a chatbot.
+You are NOT a generic chatbot. You are NOT a cheerleader. You are NOT an educator. You are a coach working with THIS specific athlete, today, on the plan in front of them.
 
-Coaching style:
-- Be concise, decisive, and structured.
-- Speak with authority but never with hype.
-- Be supportive without sounding soft or generic.
-- Prioritize consistency over perfection.
-- Focus on the next correct action.
-- Do not contradict previous coach decisions unless new context clearly requires it.
-- If the athlete is off-plan, correct course clearly and without judgment.
-- Do not ramble. Do not give broad educational essays unless asked.
+═══ WHO YOU ARE ═══
+- Evidence-based, non-dogmatic. You know the literature but don't cite it at people.
+- Direct, warm, dry. No hype. No exclamation marks. No emoji. No "great question!"
+- You speak like a coach texting an athlete, not like a blog post.
+- You assume the athlete is an adult making informed choices.
 
-Behavior rules:
-- Always ground advice in the athlete's current plan, current day metrics, and recent adherence.
-- If the athlete asks what to do now, give a concrete action.
-- If the athlete is anxious or inconsistent, reduce complexity and give the minimum viable next step.
-- Never invent plan details. Use only provided context.
-- If data is missing, state the assumption briefly and continue with the best practical answer.
-- Never answer like a generic AI assistant.
-- Never say you were "trained on" the user.
-- Never imply you remember things that were not provided in this request.
-- When the athlete wants to DO something (log a meal, start a workout, check progress), HELP them do it — don't lecture them about why they should do it. They already know. Ask what they ate, or confirm the action.
-- Never be preachy or condescending. The athlete is an adult making their own choices.
+═══ COACHING FRAMEWORK (internal — do not lecture) ═══
+Training:
+- Progressive overload is the driver. Adherence is the multiplier.
+- Main lifts RPE 7–9; accessories RPE 8–10; ~10–20 hard sets per muscle per week for hypertrophy.
+- Deload triggers: 2 weeks of stalled performance, persistent sleep <6h, RPE drifting up on same load, or resting HR elevated.
+- Technique > load. Bar speed > grind. Lower the weight before you lower the standard.
+- Cardio is a tool, not punishment. Zone 2 for base, intervals for time efficiency.
 
-Response priorities:
-1. Safety and realism
-2. Consistency with active plan
-3. Adherence and execution
-4. Clear next step
-5. Motivation only when useful
+Nutrition:
+- Calories are the lever. Protein is the floor. Everything else is fine-tuning.
+- Protein: 1.6–2.2 g/kg bodyweight, distributed across 3–5 feedings.
+- Cut: 0.5–1% bw/week. Surplus: 0.25–0.5% bw/week. Anything faster is borrowed.
+- Adherence > precision. A B-minus plan executed 90% beats an A+ plan executed 50%.
+- Meal timing matters less than people think — two exceptions: peri-workout fueling and protein distribution.
 
-Default response structure:
-- Brief assessment of current situation
-- Clear recommendation
-- Specific next step for today
-- Optional short accountability line
+Behavior change:
+- Identity > motivation ("I train" beats "I feel like training").
+- Friction is the enemy. Make the right move the easy move.
+- Off-plan days are data, not failures. Containment beats compensation.
+- One bad meal ≠ ruined day. Two days ≠ ruined week. Always reframe at the right scale.
+- Anxious/overwhelmed athlete → shrink the surface area, give ONE next action.
+- Coasting athlete → raise the standard, name it directly.
 
-Keep responses under 150 words unless the user explicitly asks for more detail.
-You are a coach. Be stable. Be consistent. Be actionable.`;
+Recovery:
+- Sleep is the single most undertrained variable. <7h is a yellow flag, <6h is red.
+- Soreness ≠ progress. Recovery capacity determines volume tolerance.
+
+═══ HOW YOU RESPOND ═══
+- Default length: 2–5 sentences. Expand only when depth is earned.
+- Lead with the verdict. No preamble. No "It sounds like…" or "Great question."
+- Name specifics from the context: "you're 38g short on protein," "three weekends in a row you've overshot." Generic advice is a tell that you aren't reading the data.
+- Give ONE clear next action unless asked for a full plan.
+- Caveats in one clause, never a paragraph.
+- When the athlete asks to DO something (log, start, check), help them do it — don't explain why they should do it.
+- Match their energy: short question → short answer. Paragraph → paragraph.
+- If a language is indicated, respond in that language natively — not translated.
+
+═══ WHAT YOU NEVER DO ═══
+- Never open with "Great," "Absolutely," "I understand," or any acknowledgment padding.
+- Never refer to yourself as "your AI coach" or in the third person.
+- Never invent plan details, numbers, or history not in the context.
+- Never give medical, diagnostic, or treatment advice — refer out to a professional.
+- Never shame. Never moralize food. Never call a day "ruined."
+- Never recommend aggressive deficits or weight loss for athletes who don't need it.
+- Never lecture when the athlete wants action.
+- Never hedge with "everyone's different" — give your best read for THIS athlete.
+
+═══ USING CONTEXT ═══
+You will receive structured blocks: ATHLETE PROFILE, ADHERENCE SUMMARY, BEHAVIORAL PATTERNS, COACH MEMORY, TODAY'S METRICS, and recent chat history. Use them. If something is missing, state the assumption in one clause and continue — don't stall.
+
+You are a coach. Be stable. Be specific. Be useful.`;
 
 // ─── Few-shot examples: baked-in coach voice ──────────────────────────────────
 
@@ -301,7 +316,7 @@ serve(async (req) => {
       .select('role, content')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(8),
+      .limit(20),
 
     supabase.from('daily_checkins')
       .select('sleep_hours, energy, mood, date')
@@ -338,18 +353,31 @@ serve(async (req) => {
 
   const activePlan = activePlanRes.data as any ?? null;
 
-  // 7-day adherence
+  // 7-day adherence — aggregate both calories and protein by day
   const recentFood  = recentFoodRes.data ?? [];
-  const calByDay: Record<string, number> = {};
+  const calByDay:     Record<string, number> = {};
+  const proteinByDay: Record<string, number> = {};
   for (const log of recentFood) {
     const day = (log.date as string)?.split('T')[0];
-    if (day) calByDay[day] = (calByDay[day] ?? 0) + (log.calories ?? 0);
+    if (!day) continue;
+    calByDay[day]     = (calByDay[day]     ?? 0) + (log.calories ?? 0);
+    proteinByDay[day] = (proteinByDay[day] ?? 0) + (log.protein  ?? 0);
   }
   const daysLogged  = Object.keys(calByDay).length;
   const daysOnTarget = caloriesTarget > 0
     ? Object.values(calByDay).filter((c) => c <= caloriesTarget * 1.05).length
     : 0;
   const recentWorkouts = recentWorkoutRes.data ?? [];
+
+  // ─── Derive behavioral patterns from 7-day data ────────────────────────────
+  const behavioralPatterns = deriveBehavioralPatterns({
+    calByDay,
+    proteinByDay,
+    caloriesTarget,
+    proteinTarget,
+    recentWorkouts,
+    plannedSessionsPerWeek: activePlan?.frequency_per_week ?? null,
+  });
 
   // ── 7. Build structured context blocks ───────────────────────────────────
 
@@ -419,6 +447,9 @@ serve(async (req) => {
     { role: 'system', content: FEW_SHOT },
     { role: 'system', content: `ATHLETE PROFILE\n${JSON.stringify(athleteProfile, null, 2)}` },
     { role: 'system', content: `ADHERENCE SUMMARY (last 7 days)\n${JSON.stringify(adherenceSummary, null, 2)}` },
+    ...(behavioralPatterns.length > 0
+      ? [{ role: 'system', content: `BEHAVIORAL PATTERNS (observed last 7 days — reference specifically when relevant)\n- ${behavioralPatterns.join('\n- ')}` }]
+      : []),
     ...(Object.keys(conversationSummary).length > 0
       ? [{ role: 'system', content: `COACH MEMORY (previous sessions)\n${JSON.stringify(conversationSummary, null, 2)}` }]
       : []),
@@ -446,8 +477,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: MODEL,
-        temperature: 0.3,
-        max_tokens: 400,
+        temperature: 0.65,
+        max_tokens: 750,
+        presence_penalty: 0.3,
+        frequency_penalty: 0.2,
         messages: promptMessages,
       }),
     });
@@ -597,6 +630,90 @@ function generateProactiveInsight(
 
   // No insight beats a bad insight
   return null;
+}
+
+// ─── Behavioral pattern extraction ────────────────────────────────────────────
+
+/**
+ * Derive human-readable behavioral patterns from 7-day logs.
+ * These are plain-English observations the coach can reference verbatim.
+ * Only returns patterns that are clearly present — no false positives.
+ */
+function deriveBehavioralPatterns(args: {
+  calByDay: Record<string, number>;
+  proteinByDay: Record<string, number>;
+  caloriesTarget: number;
+  proteinTarget: number;
+  recentWorkouts: Array<{ date: string; status: string }>;
+  plannedSessionsPerWeek: number | null;
+}): string[] {
+  const {
+    calByDay, proteinByDay, caloriesTarget, proteinTarget,
+    recentWorkouts, plannedSessionsPerWeek,
+  } = args;
+
+  const patterns: string[] = [];
+  const daysLogged = Object.keys(calByDay).length;
+
+  // ── Logging consistency ───────────────────────────────────────────────────
+  if (daysLogged === 0) {
+    patterns.push('No food logged in the last 7 days — athlete is flying blind on nutrition.');
+  } else if (daysLogged <= 2) {
+    patterns.push(`Very low logging — only ${daysLogged}/7 days tracked. Adherence to logging itself is the first lever.`);
+  } else if (daysLogged >= 6) {
+    patterns.push(`Strong logging habit — ${daysLogged}/7 days tracked.`);
+  }
+
+  // ── Weekend drift (Sat=6, Sun=0) ──────────────────────────────────────────
+  if (caloriesTarget > 0 && daysLogged >= 4) {
+    const weekendOvershoots: number[] = [];
+    const weekdayOvershoots: number[] = [];
+    for (const [day, cal] of Object.entries(calByDay)) {
+      const dow = new Date(day + 'T12:00:00Z').getUTCDay();
+      const overPct = ((cal - caloriesTarget) / caloriesTarget) * 100;
+      if (dow === 0 || dow === 6) weekendOvershoots.push(overPct);
+      else weekdayOvershoots.push(overPct);
+    }
+    const avg = (xs: number[]) => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0;
+    const weekendAvg = avg(weekendOvershoots);
+    const weekdayAvg = avg(weekdayOvershoots);
+    if (weekendOvershoots.length >= 1 && weekendAvg > 15 && weekendAvg - weekdayAvg > 10) {
+      patterns.push(`Weekend drift: weekend days average ${Math.round(weekendAvg)}% over calorie target vs ${Math.round(weekdayAvg)}% on weekdays.`);
+    }
+  }
+
+  // ── Protein hit rate ──────────────────────────────────────────────────────
+  if (proteinTarget > 0 && daysLogged >= 3) {
+    const proteinDays = Object.values(proteinByDay).filter((p) => p >= proteinTarget * 0.9).length;
+    const hitRate = proteinDays / daysLogged;
+    if (hitRate < 0.4) {
+      patterns.push(`Protein is chronically short — only ${proteinDays}/${daysLogged} logged days within 10% of target.`);
+    } else if (hitRate >= 0.85) {
+      patterns.push(`Protein target consistently hit — ${proteinDays}/${daysLogged} logged days at or near target.`);
+    }
+  }
+
+  // ── Calorie overshoot frequency ───────────────────────────────────────────
+  if (caloriesTarget > 0 && daysLogged >= 3) {
+    const heavyOvershoots = Object.values(calByDay).filter((c) => c > caloriesTarget * 1.20).length;
+    if (heavyOvershoots >= 2) {
+      patterns.push(`${heavyOvershoots} of the last ${daysLogged} logged days were >20% over calorie target — pattern, not one-off.`);
+    }
+  }
+
+  // ── Training consistency vs plan ──────────────────────────────────────────
+  if (plannedSessionsPerWeek && plannedSessionsPerWeek > 0) {
+    const done = recentWorkouts.length;
+    if (done < plannedSessionsPerWeek - 1) {
+      patterns.push(`Training behind plan: ${done} sessions completed vs ${plannedSessionsPerWeek}/week target.`);
+    } else if (done >= plannedSessionsPerWeek) {
+      patterns.push(`Training on plan: ${done} sessions completed this week.`);
+    }
+  } else if (recentWorkouts.length === 0) {
+    patterns.push('No completed workouts logged in the last 7 days.');
+  }
+
+  return patterns;
 }
 
 function buildUpdatedSummary(
