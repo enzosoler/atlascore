@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -10,7 +10,11 @@ import {
   CreditCard,
   ChevronRight,
   Trash2,
+  RefreshCw,
+  Settings,
 } from 'lucide-react';
+import StartFreshModal from '@/components/system/StartFreshModal';
+import NutritionModeSelector from '@/components/nutrition/NutritionModeSelector';
 import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '@/lib/i18nContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
@@ -85,6 +89,8 @@ function SettingsLink({ to, icon: Icon, title, subtitle, danger }) {
 
 export default function Account() {
   const { t } = useI18n();
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showNutritionModal, setShowNutritionModal] = useState(false);
 
   return (
     <SafePageBoundary
@@ -92,12 +98,33 @@ export default function Account() {
       maxWidth="max-w-2xl"
       fallbackDescription={t('profile.sections.accountSubtitle')}
     >
-      <AccountContent />
+      <AccountContent 
+        showResetModal={showResetModal}
+        setShowResetModal={setShowResetModal}
+        showNutritionModal={showNutritionModal}
+        setShowNutritionModal={setShowNutritionModal}
+      />
+      
+      {/* Modals */}
+      {showResetModal && (
+        <StartFreshModal
+          open={showResetModal}
+          onClose={() => setShowResetModal(false)}
+        />
+      )}
+      
+      {showNutritionModal && (
+        <NutritionModeSelector
+          open={showNutritionModal}
+          onClose={() => setShowNutritionModal(false)}
+          onModeSelected={() => {}}
+        />
+      )}
     </SafePageBoundary>
   );
 }
 
-function AccountContent() {
+function AccountContent({ showResetModal, setShowResetModal, showNutritionModal, setShowNutritionModal }) {
   const { user, logout } = useAuth();
   const { t } = useI18n();
   const { subscription } = useSubscription();

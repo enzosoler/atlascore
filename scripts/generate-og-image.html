@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>atlas.core OG Image</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+    }
+
+    body {
+      background-color: #05070A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+      position: relative;
+    }
+
+    /* Ambient glow */
+    .glow {
+      position: absolute;
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* Subtle top-left accent */
+    .accent-tl {
+      position: absolute;
+      top: -80px;
+      left: -80px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Subtle bottom-right accent */
+    .accent-br {
+      position: absolute;
+      bottom: -60px;
+      right: -60px;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Grid lines */
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* Top fade mask for grid */
+    .grid-mask {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, #05070A 100%);
+      pointer-events: none;
+    }
+
+    /* Content */
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* Pill badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      background: rgba(99, 102, 241, 0.08);
+      border-radius: 100px;
+      padding: 6px 16px;
+      margin-bottom: 36px;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: #6366f1;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+    }
+
+    .badge-text {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(99, 102, 241, 0.9);
+    }
+
+    /* Main title */
+    .title {
+      font-size: 92px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(
+        170deg,
+        #ffffff 0%,
+        rgba(255, 255, 255, 0.85) 60%,
+        rgba(200, 200, 220, 0.6) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 28px;
+    }
+
+    /* Divider line */
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.6), transparent);
+      margin-bottom: 28px;
+    }
+
+    /* Tagline */
+    .tagline {
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.5;
+      max-width: 520px;
+    }
+
+    .tagline strong {
+      color: rgba(255, 255, 255, 0.65);
+      font-weight: 500;
+    }
+
+    /* Bottom corner mark */
+    .corner-mark {
+      position: absolute;
+      bottom: 40px;
+      right: 52px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .corner-mark-line {
+      width: 20px;
+      height: 1px;
+      background: rgba(99, 102, 241, 0.4);
+    }
+
+    .corner-mark-text {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grid"></div>
+  <div class="grid-mask"></div>
+  <div class="glow"></div>
+  <div class="accent-tl"></div>
+  <div class="accent-br"></div>
+
+  <div class="content">
+    <div class="badge">
+      <div class="badge-dot"></div>
+      <span class="badge-text">Performance OS</span>
+    </div>
+
+    <h1 class="title">atlas.core</h1>
+
+    <div class="divider"></div>
+
+    <p class="tagline">
+      <strong>Stop guessing.</strong> Run your body like a system.
+    </p>
+  </div>
+
+  <div class="corner-mark">
+    <div class="corner-mark-line"></div>
+    <span class="corner-mark-text">atlas.core</span>
+  </div>
+
+</body>
+</html>

@@ -5,7 +5,7 @@ export const ROUTES = {
   signup: '/signup',
   welcome: '/welcome',
   demoHome: '/preview',
-  onboarding: '/Onboarding',
+  onboarding: '/onboarding',
   today: '/Today',
   nutrition: '/Nutrition',
   workouts: '/Workouts',

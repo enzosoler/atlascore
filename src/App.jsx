@@ -101,6 +101,12 @@ const NutritionistDashboard = lazy(() => import('@/pages/nutritionist/Nutritioni
 const NutritionistClients = lazy(() => import('@/pages/nutritionist/NutritionistClients.jsx'));
 const NutritionistClientProfile = lazy(() => import('@/pages/nutritionist/NutritionistClientProfile.jsx'));
 const NutritionistPrescribeDiet = lazy(() => import('@/pages/nutritionist/NutritionistPrescribeDiet'));
+const SmartOnboarding = lazy(() => import('@/components/onboarding/SmartOnboarding'));
+const DecisionEngineDashboard = lazy(() => import('@/components/dashboard/DecisionEngineDashboard'));
+const ShareableProofCards = lazy(() => import('@/components/social/ShareableProofCards'));
+const StartFreshModal = lazy(() => import('@/components/system/StartFreshModal'));
+const NutritionModeSelector = lazy(() => import('@/components/nutrition/NutritionModeSelector'));
+const MilestoneSystem = lazy(() => import('@/components/system/MilestoneSystem'));
 const Auth = lazy(() => import('@/pages/Auth.jsx'));
 const Insights = lazy(() => import('@/pages/Insights'));
 const BlockReview = lazy(() => import('@/pages/BlockReview'));
@@ -368,6 +374,7 @@ const AppRoutes = () => (
       <Route path="/auth/update-password" element={<UpdatePassword />} />
 
       {/* Entry & Onboarding */}
+      <Route path="/onboarding-smart" element={<SmartOnboarding />} />
       <Route path="/onboarding" element={<OnboardingV2 />} />
       <Route path="/splash" element={<SplashScreen />} />
 
@@ -454,12 +461,11 @@ const AppRoutes = () => (
       ))}
 
       <Route element={<RequireAuthenticatedApp />}>
-        <Route path={ROUTES.onboarding} element={<Onboarding />} />
         <Route path={ROUTES.bodyCheckpointNew} element={<NewCheckpointPage />} />
 
         <Route element={<AppLayout />}>
           {/* Premium content — hard-gated behind EntitlementGate */}
-          <Route path={ROUTES.today} element={<EntitlementGate><Today /></EntitlementGate>} />
+          <Route path={ROUTES.today} element={<EntitlementGate><DecisionEngineDashboard /></EntitlementGate>} />
           <Route path={ROUTES.nutrition} element={<EntitlementGate><Nutrition /></EntitlementGate>} />
           <Route path={ROUTES.workouts} element={<EntitlementGate><WorkoutsV2 /></EntitlementGate>} />
           <Route path={ROUTES.routines} element={<EntitlementGate><Routines /></EntitlementGate>} />
