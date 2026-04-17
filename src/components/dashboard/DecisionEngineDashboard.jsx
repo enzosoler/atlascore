@@ -418,7 +418,7 @@ export default function DecisionEngineDashboard() {
               )}
 
               {/* Muscle Risk Alert */}
-              {insights?.muscleRisk?.risk_level !== 'minimal' && (
+              {insights?.muscleRisk != null && insights.muscleRisk.risk_level !== 'minimal' && (
                 <div className="rounded-xl border border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.05)] p-4">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-[hsl(var(--warning))] mt-0.5" />
