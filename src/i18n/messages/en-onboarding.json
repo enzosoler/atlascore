@@ -58,6 +58,12 @@
       "checkpointBodyFatLabel": "Body fat (%)",
       "checkpointWaistLabel": "Waist (cm)",
       "checkpointInfo": "This checkpoint is saved in <strong>Measurements</strong> and serves as the baseline for progress comparisons in <strong>Block Review</strong>.",
+      "nutritionMode": {
+        "title": "How do you want to handle food?",
+        "subtitle": "You can always switch later in settings.",
+        "macrosLabel": "Track my macros \u2014 I eat what I want, just hit the numbers",
+        "mealPlanLabel": "Follow a meal plan \u2014 tell me what to eat"
+      },
       "pathTitle": "How do you want to start?",
       "pathSubtitle": "You can change this anytime inside the app",
       "freshTitle": "Start fresh this week",

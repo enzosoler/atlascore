@@ -215,6 +215,54 @@ function Header({ weather, greeting, locale, streak, streakUrgency, adaptiveSubt
   );
 }
 
+function CircularProgress({ size = 56, strokeWidth = 5, pct, color, children }) {
+  const r = (size - strokeWidth) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (Math.min(pct, 100) / 100) * circ;
+  return (
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="rotate-[-90deg]">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="hsl(var(--fill))" strokeWidth={strokeWidth} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" className="transition-all duration-500" />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">{children}</div>
+    </div>
+  );
+}
+
+function MacroRingsCard({ nutrition, t }) {
+  const { caloriesConsumed = 0, caloriesTarget = 0, proteinConsumed = 0, proteinTarget = 0, carbsConsumed = 0, carbsTarget = 0, fatConsumed = 0, fatTarget = 0 } = nutrition;
+  const macros = [
+    { key: 'cal', label: t('today.macros.calories') || 'Cal', consumed: Math.round(caloriesConsumed), target: caloriesTarget, unit: '', color: 'hsl(var(--fg))' },
+    { key: 'protein', label: t('today.macros.protein') || 'Protein', consumed: Math.round(proteinConsumed), target: proteinTarget, unit: 'g', color: 'hsl(var(--brand))' },
+    { key: 'carbs', label: t('today.macros.carbs') || 'Carbs', consumed: Math.round(carbsConsumed), target: carbsTarget, unit: 'g', color: 'hsl(var(--brand-ai))' },
+    { key: 'fat', label: t('today.macros.fat') || 'Fat', consumed: Math.round(fatConsumed), target: fatTarget, unit: 'g', color: 'hsl(var(--warn))' },
+  ];
+  return (
+    <Link to={ROUTES.nutrition} className="block">
+      <div className="rounded-[18px] bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] p-4 active:bg-[hsl(var(--fill)/0.5)] transition-all">
+        <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(var(--fg-3))] mb-3">Macros</p>
+        <div className="flex items-center justify-between px-1">
+          {macros.map((m) => {
+            const pct = m.target > 0 ? (m.consumed / m.target) * 100 : 0;
+            return (
+              <div key={m.key} className="flex flex-col items-center gap-1.5">
+                <CircularProgress size={52} strokeWidth={4.5} pct={pct} color={m.color}>
+                  <span className="text-[11px] font-bold text-[hsl(var(--fg))]">{m.consumed}{m.unit}</span>
+                </CircularProgress>
+                <div className="text-center">
+                  <p className="text-[10px] font-semibold text-[hsl(var(--fg-2))]">{m.label}</p>
+                  {m.target > 0 && <p className="text-[9px] text-[hsl(var(--fg-3))]">/ {m.target}{m.unit}</p>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function PrimaryAction({ action, briefingText, kcalRemaining }) {
   const t = useT();
   if (!action) return null;
@@ -550,6 +598,7 @@ function TodayContent() {
   const safePlan = safeDaily?.plan || {};
   const safeNutrition = safeDaily?.nutrition || {};
   const kcalRemaining = Math.max(0, (safeNutrition.caloriesTarget || 0) - (safeNutrition.caloriesConsumed || 0));
+  const nutritionMode = safeDaily?.nutritionMode || safeDaily?.profile?.nutrition_mode || 'macros_only';
 
   // ── Check-in data (moved up so recommendations can use energy/mood) ──
   const { data: todayCheckin } = useQuery({
@@ -768,6 +817,11 @@ function TodayContent() {
         briefingText={briefing.text}
         kcalRemaining={kcalRemaining}
       />
+
+      {/* Macro rings card (macros-only nutrition mode) */}
+      {nutritionMode === 'macros_only' && (
+        <MacroRingsCard nutrition={safeNutrition} t={t} />
+      )}
 
       {/* NEW: Proactive AI card */}
       {showAICard && (

@@ -975,6 +975,13 @@
       "title": "Protocolos"
     },
     "weeklyWorkouts": "esta semana",
+    "macros": {
+      "title": "Macros de hoy",
+      "calories": "Cal",
+      "protein": "Prot",
+      "carbs": "Carbs",
+      "fat": "Grasa"
+    },
     "trial": {
       "daysLeft": "{count} días restantes en tu prueba Pro",
       "seePlans": "Ver planes",
@@ -1103,6 +1110,16 @@
       "subtitle": "Gestiona tus recordatorios y alertas",
       "reminderLabel": "Configuración de recordatorios",
       "reminderDesc": "Recordatorios de entrenamiento, comidas, pesaje y racha"
+    },
+    "nutritionMode": {
+      "title": "Modo Nutricional",
+      "subtitle": "Elige cómo quieres llevar tu alimentación",
+      "macros": "Contar macros",
+      "macrosDesc": "Cumple tus metas diarias de proteína, carbohidratos, grasa y calorías. Registra lo que comes, sin plan alimentario.",
+      "mealPlan": "Seguir un plan alimentario",
+      "mealPlanDesc": "Recibe un plan alimentario diario estructurado con alimentos y porciones específicas.",
+      "saved": "Modo nutricional actualizado",
+      "saveFailed": "Error al actualizar modo nutricional"
     }
   },
   "profile": {

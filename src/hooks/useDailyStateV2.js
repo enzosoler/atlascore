@@ -161,6 +161,10 @@ export function useDailyStateV2() {
       caloriesConsumed: meals.reduce((s, m) => s + (Number(m.calories) || Number(m.total_calories) || 0), 0),
       proteinTarget: Number(targets.protein) || 0,
       proteinConsumed: meals.reduce((s, m) => s + (Number(m.protein) || Number(m.protein_g) || Number(m.total_protein) || 0), 0),
+      carbsTarget: Number(targets.carbs) || 0,
+      carbsConsumed: meals.reduce((s, m) => s + (Number(m.carbs) || Number(m.carbs_g) || Number(m.total_carbs) || 0), 0),
+      fatTarget: Number(targets.fat) || 0,
+      fatConsumed: meals.reduce((s, m) => s + (Number(m.fat) || Number(m.fat_g) || Number(m.total_fat) || 0), 0),
       mealsLogged: meals.length,
     };
   }, [rawMeals, targets]);
@@ -239,6 +243,8 @@ export function useDailyStateV2() {
     qc.invalidateQueries({ queryKey: [AI_COACH_KEY, uid] });
   }, [uid, qc]);
 
+  const nutritionMode = profileData?.nutrition_mode || 'macros_only';
+
   return {
     // Structured sections
     workout,
@@ -246,6 +252,7 @@ export function useDailyStateV2() {
     protocols,
     plan,
     profile: profileData,
+    nutritionMode,
     preferredName: rawProfile?.full_name || user?.email?.split('@')[0] || 'Athlete',
 
     // Raw data

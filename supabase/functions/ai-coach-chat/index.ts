@@ -15,7 +15,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { computeCoachFacts } from '../_shared/coachFacts.ts';
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 
@@ -311,12 +310,6 @@ serve(async (req) => {
       .maybeSingle(),
   ]);
 
-  // ── 5b. Compute pre-calculated coaching facts ─────────────────────────────
-
-  const profile_ = profileRes.data as any ?? {};
-  const coachFacts = await computeCoachFacts(supabase, userId, profile_);
-  console.log('[ai-coach-chat] coachFacts:', coachFacts.length, 'items');
-
   // ── 6. Derive context ─────────────────────────────────────────────────────
 
   console.log('[ai-coach-chat] stage: context loaded', {
@@ -365,6 +358,7 @@ serve(async (req) => {
     goal:              trainingGoal,
     calorie_target:    caloriesTarget,
     protein_target_g:  proteinTarget,
+    nutrition_mode:    profileData?.nutrition_mode || 'macros_only',
     active_plan:       activePlan
       ? { name: activePlan.name, days_per_week: activePlan.frequency_per_week }
       : null,
@@ -430,9 +424,6 @@ serve(async (req) => {
       ? [{ role: 'system', content: `COACH MEMORY (previous sessions)\n${JSON.stringify(conversationSummary, null, 2)}` }]
       : []),
     { role: 'system', content: `TODAY'S METRICS\n${JSON.stringify(todayMetrics, null, 2)}` },
-    ...(coachFacts.length > 0
-      ? [{ role: 'system', content: `COMPUTED FACTS (pre-calculated, trust these numbers)\n- ${coachFacts.join('\n- ')}` }]
-      : []),
     ...history,
     { role: 'user', content: userMessage.trim() },
   ];

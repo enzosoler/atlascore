@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Bell,
@@ -12,10 +12,11 @@ import {
   CreditCard,
   Shield,
   Clock,
+  UtensilsCrossed,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 import { locales, localeLabels } from '@/i18n/config';
 import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 import { useSubscription } from '@/lib/SubscriptionContext';
@@ -26,6 +27,9 @@ import {
   SectionCard,
 } from '@/components/shared/StablePage';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 // ── Theme option button ───────────────────────────────────────────────────────
 
@@ -107,6 +111,30 @@ function ControlRow({ icon: Icon, label, description, href, onClick, meta, destr
   );
 }
 
+// ── Nutrition mode option ─────────────────────────────────────────────────────
+
+function NutritionModeOption({ emoji, label, description, value, currentMode, onSelect }) {
+  const active = currentMode === value;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(value)}
+      className={cn(
+        'flex flex-1 flex-col items-start gap-1.5 rounded-[22px] border px-5 py-5 text-left transition-all duration-200',
+        active
+          ? 'border-[hsl(var(--brand)/0.4)] bg-[hsl(var(--brand)/0.08)] text-[hsl(var(--brand))] shadow-[var(--shadow-xs)]'
+          : 'border-[hsl(var(--border)/0.82)] bg-[hsl(var(--fill)/0.46)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.72)] hover:text-[hsl(var(--fg))]',
+      )}
+    >
+      <span className="text-[18px] leading-none">{emoji}</span>
+      <span className="text-[14px] font-semibold tracking-[-0.016em]">{label}</span>
+      {description && (
+        <span className="text-[12px] leading-4 opacity-80">{description}</span>
+      )}
+    </button>
+  );
+}
+
 // ── Settings content ──────────────────────────────────────────────────────────
 
 function LanguageOption({ label, value, currentLocale, onSelect }) {
@@ -133,6 +161,44 @@ function SettingsContent() {
   const { t, locale, setLocale, switchLocale } = useI18n();
   const { openCustomerPortal, loading: portalLoading } = useCustomerPortal();
   const { subscription } = useSubscription();
+
+  // ── Nutrition mode ──
+  const [nutritionMode, setNutritionMode] = useState('macros_only');
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from('profiles')
+      .select('profile_data')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        const mode = data?.profile_data?.nutrition_mode;
+        if (mode) setNutritionMode(mode);
+      });
+  }, [user?.id]);
+
+  const handleNutritionModeChange = async (mode) => {
+    setNutritionMode(mode);
+    if (!user?.id) return;
+    try {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('profile_data')
+        .eq('id', user.id)
+        .single();
+      const pd = existing?.profile_data ?? {};
+      const merged = { ...pd, nutrition_mode: mode };
+      const { error } = await supabase
+        .from('profiles')
+        .update({ profile_data: merged })
+        .eq('id', user.id);
+      if (error) throw error;
+      toast.success(t('settings.nutritionMode.saved'));
+    } catch {
+      toast.error(t('settings.nutritionMode.saveFailed'));
+    }
+  };
 
   const handleLogout = async () => {
     if (window.confirm(t('settings.signout.confirm'))) {
@@ -268,6 +334,31 @@ function SettingsContent() {
               onSelect={switchLocale}
             />
           ))}
+        </div>
+      </SectionCard>
+
+      {/* Nutrition Mode */}
+      <SectionCard
+        title={t('settings.nutritionMode.title')}
+        subtitle={t('settings.nutritionMode.subtitle')}
+      >
+        <div className="flex gap-3">
+          <NutritionModeOption
+            emoji={'\uD83C\uDFAF'}
+            label={t('settings.nutritionMode.macros')}
+            description={t('settings.nutritionMode.macrosDesc')}
+            value="macros_only"
+            currentMode={nutritionMode}
+            onSelect={handleNutritionModeChange}
+          />
+          <NutritionModeOption
+            emoji={'\uD83D\uDCCB'}
+            label={t('settings.nutritionMode.mealPlan')}
+            description={t('settings.nutritionMode.mealPlanDesc')}
+            value="meal_plan"
+            currentMode={nutritionMode}
+            onSelect={handleNutritionModeChange}
+          />
         </div>
       </SectionCard>
 

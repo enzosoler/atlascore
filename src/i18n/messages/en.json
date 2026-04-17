@@ -1200,6 +1200,13 @@
       "title": "Protocols"
     },
     "weeklyWorkouts": "this week",
+    "macros": {
+      "title": "Today's macros",
+      "calories": "Cal",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat"
+    },
     "trial": {
       "daysLeft": "{count} days left in your Pro trial",
       "seePlans": "See plans",
@@ -1328,6 +1335,16 @@
       "subtitle": "Manage your reminders and alerts",
       "reminderLabel": "Reminder settings",
       "reminderDesc": "Workout, meals, weigh-in, and streak reminders"
+    },
+    "nutritionMode": {
+      "title": "Nutrition Mode",
+      "subtitle": "Choose how you want to track food",
+      "macros": "Track macros",
+      "macrosDesc": "Hit your daily protein, carbs, fat, and calorie targets. Log what you eat, no meal plan needed.",
+      "mealPlan": "Follow a meal plan",
+      "mealPlanDesc": "Get a structured daily meal plan with specific foods and portions.",
+      "saved": "Nutrition mode updated",
+      "saveFailed": "Failed to update nutrition mode"
     }
   },
   "profile": {

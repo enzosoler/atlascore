@@ -58,6 +58,12 @@
       "checkpointBodyFatLabel": "Gordura corporal (%)",
       "checkpointWaistLabel": "Cintura (cm)",
       "checkpointInfo": "Este checkpoint é salvo em <strong>Medidas</strong> e serve como base para comparações de progresso na <strong>Revisão de Bloco</strong>.",
+      "nutritionMode": {
+        "title": "Como você quer lidar com a alimentação?",
+        "subtitle": "Você pode trocar depois nas configurações.",
+        "macrosLabel": "Contar meus macros — como o que quiser, só bater os números",
+        "mealPlanLabel": "Seguir um plano alimentar — me diga o que comer"
+      },
       "pathTitle": "Como você quer começar?",
       "pathSubtitle": "Você pode mudar isso a qualquer momento no app",
       "freshTitle": "Começar esta semana",
