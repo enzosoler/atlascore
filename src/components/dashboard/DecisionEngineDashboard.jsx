@@ -36,7 +36,7 @@ import {
 } from '@/lib/bodyMath';
 import ShareableProofCards from '@/components/social/ShareableProofCards';
 import StartFreshModal from '@/components/system/StartFreshModal';
-import { MilestoneSystem } from '@/components/system/MilestoneSystem';
+import MilestoneSystem from '@/components/system/MilestoneSystem';
 
 export default function DecisionEngineDashboard() {
   const { user } = useAuth();
