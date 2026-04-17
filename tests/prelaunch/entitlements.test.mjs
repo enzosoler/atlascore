@@ -44,11 +44,11 @@ test('free user CAN access free features', () => {
   assert.equal(hasFeatureAccess(user(), sub('free'), [], 'social_cards'), true);
 });
 
-test('pro user can access pro features but not performance-only', () => {
+test('pro user can access all features (single-tier pricing)', () => {
   assert.equal(hasFeatureAccess(user(), sub('pro'), [], 'ai_food_photo'), true);
   assert.equal(hasFeatureAccess(user(), sub('pro'), [], 'atlas_ai'), true);
-  assert.equal(hasFeatureAccess(user(), sub('pro'), [], 'premium_exports'), false);
-  assert.equal(hasFeatureAccess(user(), sub('pro'), [], 'advanced_protocol_tracking'), false);
+  assert.equal(hasFeatureAccess(user(), sub('pro'), [], 'premium_exports'), true);
+  assert.equal(hasFeatureAccess(user(), sub('pro'), [], 'advanced_protocol_tracking'), true);
 });
 
 test('performance user gets both pro and performance features', () => {
@@ -111,11 +111,10 @@ test('subscription object may use plan_code instead of tier', () => {
   assert.equal(hasFeatureAccess(user(), { plan_code: 'free' }, [], 'ai_food_photo'), false);
 });
 
-test('custom tier maps to level 1 (pro-equivalent)', () => {
-  // PLAN_LEVELS has `custom: 1` for admin-granted access.
-  assert.equal(PLAN_LEVELS.custom, 1);
+test('custom tier maps to level 2 (full access, same as pro)', () => {
+  assert.equal(PLAN_LEVELS.custom, 2);
   assert.equal(hasFeatureAccess(user(), sub('custom'), [], 'ai_food_photo'), true);
-  assert.equal(hasFeatureAccess(user(), sub('custom'), [], 'premium_exports'), false);
+  assert.equal(hasFeatureAccess(user(), sub('custom'), [], 'premium_exports'), true);
 });
 
 // ─── canAccessFeature (legacy, plan-only signature) ────────────────────────

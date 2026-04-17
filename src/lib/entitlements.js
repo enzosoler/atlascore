@@ -141,14 +141,14 @@ export const FEATURE_LABELS = Object.fromEntries(
   Object.entries(FEATURE_LOCKS).map(([key, lock]) => [key, lock.label])
 );
 
-// Plan levels
+// Plan levels — single-tier pricing (pro unlocks everything performance did)
 export const PLAN_LEVELS = {
   free: 0,
-  pro: 1,
+  pro: 2,
   premium: 2,
   performance: 2,
   internal: 2,
-  custom: 1,
+  custom: 2,
   coach: 3,
   nutritionist: 3,
   clinician: 3,
