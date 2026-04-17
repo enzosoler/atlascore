@@ -45,6 +45,7 @@ const Landing = lazy(() => import('@/pages/Landing.jsx'));
 const WelcomeOnboarding = lazy(() => import('@/pages/WelcomeOnboarding'));
 const DemoHome = lazy(() => import('@/pages/DemoHome'));
 const Onboarding = lazy(() => import('@/pages/Onboarding'));
+const OnboardingV2 = lazy(() => import('@/pages/OnboardingV2'));
 const Today = lazy(() => import('@/pages/TodayV2'));
 const Nutrition = lazy(() => import('@/pages/Nutrition'));
 const WorkoutsV2 = lazy(() => import('@/pages/TrainV2'));
@@ -291,18 +292,24 @@ const RequireAuthenticatedApp = () => {
   if (authState === 'error') return <ProfileFetchErrorScreen />;
 
   if (!isAuthenticated) {
-    // On native: route to welcome onboarding or demo home (never force auth)
-    // On web: keep existing redirect to auth for deep-linked protected routes
+    // New users → onboarding V2 (public, no auth needed)
+    // On native: route to onboarding flow directly
+    // On web: for deep-linked protected routes, redirect to auth; otherwise onboarding
     if (Capacitor.isNativePlatform()) {
-      return <Navigate to={hasSeenWelcome() ? ROUTES.demoHome : ROUTES.welcome} replace />;
+      return <Navigate to="/onboarding" replace />;
     }
-    const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
-    return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
+    // If the user is trying to access a specific deep link, send to auth with redirect
+    const isDeepLink = location.pathname !== '/' && location.pathname !== ROUTES.today;
+    if (isDeepLink) {
+      const nextUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
+      return <Navigate to={`/auth?mode=login&next=${encodeURIComponent(nextUrl)}`} replace />;
+    }
+    return <Navigate to="/onboarding" replace />;
   }
 
   // Onboarding Guard: Single source of truth is profiles.onboarding_completed.
   // We sync local storage to match DB state to prevent inconsistencies.
-  const isOnboardingRoute = location.pathname === ROUTES.onboarding;
+  const isOnboardingRoute = location.pathname === ROUTES.onboarding || location.pathname === '/onboarding';
   const dbOnboarded = user?.onboarding_completed === true;
   const localOnboardingDone = localStorage.getItem(`onboarding_done_${user?.id}`) === 'true';
   
@@ -360,6 +367,7 @@ const AppRoutes = () => (
       <Route path="/auth/update-password" element={<UpdatePassword />} />
 
       {/* Entry & Onboarding */}
+      <Route path="/onboarding" element={<OnboardingV2 />} />
       <Route path="/splash" element={<SplashScreen />} />
 
       {/* Dev-only: Design System Styleguide */}
