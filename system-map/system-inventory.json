@@ -1,0 +1,48 @@
+{
+  "system": "Atlas Core",
+  "version": "1.0.0",
+  "architecture": {
+    "frontend": "React 18 (Vite)",
+    "mobile": "Capacitor 8",
+    "backend": "Supabase (Postgres + Edge Functions)",
+    "hosting": "Vercel / Netlify",
+    "auth": "Supabase Auth"
+  },
+  "domains": {
+    "auth": {
+      "screens": ["/auth", "/signup", "/login", "/auth/callback"],
+      "logic": "src/lib/AuthContext.jsx",
+      "webhooks": ["on-auth-user-created"]
+    },
+    "onboarding": {
+      "screens": ["/onboarding", "/onboarding-smart", "/welcome"],
+      "logic": "src/features/onboarding/",
+      "storage": ["onboarding_done_${userId}"]
+    },
+    "training": {
+      "screens": ["/Today", "/Workout", "/Exercises", "/Protocols"],
+      "services": ["workoutService.js", "protocolService.js"],
+      "tables": ["workout_plans", "exercises", "workout_history"]
+    },
+    "nutrition": {
+      "screens": ["/Nutrition", "/Diary", "/MyDiet"],
+      "services": ["nutritionService.js", "fatsecretService.js"],
+      "tables": ["nutrition_logs", "diet_plans"]
+    },
+    "monetization": {
+      "web_provider": "Stripe",
+      "mobile_provider": "RevenueCat",
+      "entitlements": ["pro"],
+      "logic": "src/lib/revenueCat.js",
+      "webhooks": ["stripe-webhook", "revenuecat-webhook"]
+    },
+    "emails": {
+      "provider": "Resend",
+      "templates": ["welcome", "confirm_email", "trial_started", "trial_ending", "trial_expired", "payment_success", "payment_failed", "inactivity_nudge", "weekly_report", "milestone"],
+      "function": "send-email"
+    }
+  },
+  "integrations": [
+    "PostHog", "Sentry", "Vercel Analytics", "HealthKit"
+  ]
+}

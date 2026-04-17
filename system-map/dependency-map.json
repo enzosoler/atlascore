@@ -1,0 +1,19 @@
+{
+  "screens": {
+    "/Today": ["AppLayoutV2", "EntitlementGate", "dailyStore", "workoutHistoryService"],
+    "/Workout": ["AppLayoutV2", "EntitlementGate", "workoutService", "workoutPlanService"],
+    "/Nutrition": ["AppLayoutV2", "EntitlementGate", "nutritionService", "fatsecretService"],
+    "/onboarding": ["OnboardingV2", "AuthContext", "profiles_table"]
+  },
+  "functions": {
+    "on-auth-user-created": ["profiles", "subscriptions", "send-email"],
+    "send-email": ["Resend", "email_events_table"],
+    "stripe-webhook": ["subscriptions", "profiles", "send-email"],
+    "ai-coach-chat": ["ai_conversations", "insightsEngine"]
+  },
+  "storage": {
+    "onboarding_done": ["App.jsx", "AuthContext"],
+    "atlas_theme": ["ThemeContext", "index.html"],
+    "atlas_locale": ["i18nContext", "insightsEngine"]
+  }
+}
