@@ -4,6 +4,7 @@ import {
   normalizeMeasurementEntry,
   prepareMeasurementWritePayload,
 } from '@/lib/measurementModel';
+import { stripExif, resizeImage } from '@/lib/imageUtils';
 
 const MEASUREMENTS_TABLE = 'measurements';
 const PROGRESS_PHOTOS_TABLE = 'progress_photos';
@@ -167,9 +168,11 @@ async function resolvePhotoUrl(photo) {
     return photo;
   }
 
+  // 24-hour TTL (86400s) so images survive long browsing sessions and
+  // don't break if the user leaves the tab open overnight.
   const { data, error } = await supabase.storage
     .from(STORAGE_BUCKET)
-    .createSignedUrl(storagePath, 60 * 60);
+    .createSignedUrl(storagePath, 86400);
 
   if (error) {
     throw error;
@@ -348,6 +351,29 @@ export async function deleteMeasurement(userId, id) {
   }
 }
 
+/**
+ * Fetch the user's most recent measurement entry (weight, body_fat).
+ * Used to auto-fill metadata when creating a progress photo checkpoint.
+ */
+export async function getLatestMeasurement(userId) {
+  requireUserId(userId);
+
+  const { data, error } = await supabase
+    .from(MEASUREMENTS_TABLE)
+    .select('weight, body_fat, date')
+    .eq('user_id', userId)
+    .order('date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    // Non-critical — return null so the UI just shows empty fields
+    return null;
+  }
+
+  return data;
+}
+
 export async function listProgressPhotos(userId, limit = 200) {
   requireUserId(userId);
 
@@ -380,7 +406,11 @@ export async function uploadProgressPhoto(userId, file) {
   requireUserId(userId);
 
   try {
-    return await uploadToSupabaseStorage(userId, file);
+    // Privacy + performance pipeline: strip EXIF metadata (GPS, device info),
+    // then resize to max 2048px on the longest side before uploading.
+    const stripped = await stripExif(file);
+    const resized = await resizeImage(stripped, 2048);
+    return await uploadToSupabaseStorage(userId, resized);
   } catch (storageError) {
     throw new Error(`Progress photo upload failed: ${storageError.message}`);
   }

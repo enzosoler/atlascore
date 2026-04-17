@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useOnboarding } from '../OnboardingContext';
+import { useT } from '@/lib/i18nContext';
 import { useAuth } from '@/lib/AuthContext';
 import { signInWithGoogle } from '@/lib/googleSignIn';
 import { supabase } from '@/lib/supabaseClient';
@@ -21,6 +22,14 @@ export default function AccountCreationScreen() {
   const { answers, getProfilePayload, clearDraft } = useOnboarding();
   const { signUp, revalidateSession } = useAuth();
   const navigate = useNavigate();
+  const t = useT();
+
+  const titleText = t('onboardingV2.account.title') || 'Save your plan.';
+  const subtitleText = t('onboardingV2.account.subtitle') || "So you don't lose it if you switch phones.";
+  const continueAppleText = t('onboardingV2.account.continueApple') || 'Continue with Apple';
+  const continueGoogleText = t('onboardingV2.account.continueGoogle') || 'Continue with Google';
+  const useEmailText = t('onboardingV2.account.useEmail') || 'Use email';
+  const createAccountText = t('onboardingV2.account.createAccount') || 'Create account';
 
   const [showEmail, setShowEmail] = useState(false);
   const [email, setEmail] = useState('');
@@ -142,10 +151,10 @@ export default function AccountCreationScreen() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <h1 className="mb-2 text-center text-[26px] font-bold leading-[1.15] tracking-[-0.03em] text-[hsl(var(--fg))]">
-          Save your plan.
+          {titleText}
         </h1>
         <p className="mb-8 text-center text-[15px] leading-relaxed text-[hsl(var(--fg-2))]">
-          So you don't lose it if you switch phones.
+          {subtitleText}
         </p>
 
         {error && (
@@ -167,7 +176,7 @@ export default function AccountCreationScreen() {
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C3.79 16.17 4.36 9.86 8.7 9.6c1.26.06 2.14.7 2.88.74.99-.2 1.94-.77 3-.66 1.28.14 2.24.67 2.87 1.63-2.63 1.57-2 5 .88 5.96-.68 1.7-1.56 3.38-3.28 5.01zM12.57 9.5C12.4 7.73 13.84 6.26 15.5 6.1c.24 2-1.83 3.5-2.93 3.4z" />
               </svg>
             )}
-            Continue with Apple
+            {continueAppleText}
           </button>
 
           {/* Google */}
@@ -185,7 +194,7 @@ export default function AccountCreationScreen() {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
               </svg>
             )}
-            Continue with Google
+            {continueGoogleText}
           </button>
 
           {/* Email */}
@@ -200,7 +209,7 @@ export default function AccountCreationScreen() {
                 <rect x="2" y="4" width="20" height="16" rx="2" />
                 <path d="M22 7l-10 6L2 7" />
               </svg>
-              Use email
+              {useEmailText}
             </button>
           ) : (
             <motion.form
@@ -235,7 +244,7 @@ export default function AccountCreationScreen() {
                 className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white transition-opacity active:opacity-80 disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                Create account
+                {createAccountText}
               </button>
             </motion.form>
           )}

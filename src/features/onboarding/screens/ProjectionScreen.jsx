@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from 'recharts';
 import { useOnboarding } from '../OnboardingContext';
+import { useT } from '@/lib/i18nContext';
 import { computeProjection } from '../projectionEngine';
 
 /* ------------------------------------------------------------------ */
@@ -77,6 +78,7 @@ function ChartTooltip({ active, payload, label }) {
 
 export default function ProjectionScreen() {
   const { answers, goNext } = useOnboarding();
+  const t = useT();
 
   const projection = useMemo(() => {
     try {
@@ -100,7 +102,7 @@ export default function ProjectionScreen() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-5 text-center">
         <p className="text-[15px] text-[hsl(var(--fg-2))]">
-          We need a bit more info to show your projection.
+          {t('onboardingV2.projection.moreInfo') || 'We need a bit more info to show your projection.'}
         </p>
         <button
           type="button"
@@ -138,7 +140,7 @@ export default function ProjectionScreen() {
       >
         {/* Headline */}
         <h1 className="text-[24px] font-bold leading-[1.2] tracking-[-0.03em] text-[hsl(var(--fg))]">
-          You can be at {targetWeight}kg by {formattedDate}.
+          {t('onboardingV2.projection.headline', { target: targetWeight, date: formattedDate }) || `You can be at ${targetWeight}kg by ${formattedDate}.`}
         </h1>
 
         {/* Chart */}
@@ -228,17 +230,14 @@ export default function ProjectionScreen() {
         {is_aggressive && suggested_weeks && (
           <div className="rounded-[12px] border border-[hsl(var(--warn)/0.3)] bg-[hsl(var(--warn)/0.08)] px-4 py-3">
             <p className="text-[13px] leading-snug text-[hsl(var(--warn))]">
-              That's aggressive. We recommend extending to{' '}
-              <span className="font-semibold">{suggested_weeks} weeks</span> for
-              sustainable results.
+              {t('onboardingV2.projection.aggressive', { weeks: suggested_weeks }) || `That's aggressive. We recommend extending to ${suggested_weeks} weeks for sustainable results.`}
             </p>
           </div>
         )}
 
         {/* Subtext */}
         <p className="text-[13px] leading-relaxed text-[hsl(var(--fg-3))]">
-          That's {total_weeks} weeks from today. Not a miracle — just a plan
-          that matches your body.
+          {t('onboardingV2.projection.subtext', { weeks: total_weeks }) || `That's ${total_weeks} weeks from today. Not a miracle — just a plan that matches your body.`}
         </p>
 
         {/* Continue */}
@@ -247,7 +246,7 @@ export default function ProjectionScreen() {
           onClick={goNext}
           className="mt-2 w-full rounded-[14px] bg-[hsl(var(--brand))] py-3.5 text-[15px] font-semibold text-white transition-opacity active:opacity-80"
         >
-          Continue
+          {t('onboardingV2.projection.continue') || 'Continue'}
         </button>
       </motion.div>
     </div>

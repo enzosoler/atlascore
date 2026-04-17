@@ -42,7 +42,9 @@ import {
   deleteProgressPhoto,
   listProgressPhotos,
   uploadProgressPhoto,
+  getLatestMeasurement,
 } from '@/services/bodyProgressService';
+import { track } from '@/lib/analytics';
 import { useI18n } from '@/lib/i18nContext';
 import PaywallTrigger from '@/components/entitlements/PaywallTrigger';
 
@@ -324,6 +326,19 @@ function ComparisonSlider({ beforePhoto, afterPhoto, beforeDate, afterDate }) {
   );
 }
 
+// ComparisonSlider wrapper that fires analytics when the slider becomes visible
+function ComparisonSliderWithTracking({ poseFilter, ...props }) {
+  const trackedRef = useRef(false);
+  useEffect(() => {
+    if (!trackedRef.current && props.beforePhoto?.photo_url && props.afterPhoto?.photo_url) {
+      track('compare_viewed', { pose: poseFilter || 'all' });
+      trackedRef.current = true;
+    }
+  }, [props.beforePhoto, props.afterPhoto, poseFilter]);
+
+  return <ComparisonSlider {...props} />;
+}
+
 // Timeline Component
 function Timeline({ checkpoints, photosByDate, onSelect }) {
   if (checkpoints.length === 0) return null;
@@ -595,8 +610,28 @@ function DateWheelPicker({ value, onChange }) {
 }
 
 // New Checkpoint Modal
-function NewCheckpointModal({ onConfirm, onClose }) {
+function NewCheckpointModal({ onConfirm, onClose, userId }) {
   const [date, setDate] = useState(getToday());
+  const [weight, setWeight] = useState('');
+  const [bodyFat, setBodyFat] = useState('');
+  const [loadingMeasurement, setLoadingMeasurement] = useState(false);
+
+  // Auto-fill weight and body_fat from the user's most recent measurement
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    setLoadingMeasurement(true);
+    getLatestMeasurement(userId)
+      .then((m) => {
+        if (cancelled || !m) return;
+        if (m.weight != null) setWeight(String(m.weight));
+        if (m.body_fat != null) setBodyFat(String(m.body_fat));
+      })
+      .catch(() => { /* non-critical */ })
+      .finally(() => { if (!cancelled) setLoadingMeasurement(false); });
+    return () => { cancelled = true; };
+  }, [userId]);
+
   return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
@@ -611,9 +646,35 @@ function NewCheckpointModal({ onConfirm, onClose }) {
           <label className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Checkpoint date</label>
           <DateWheelPicker value={date} onChange={setDate} />
         </div>
+        {/* Auto-filled from latest measurement — editable */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Weight (kg)</label>
+            <input
+              type="number"
+              step="0.1"
+              placeholder={loadingMeasurement ? '...' : '—'}
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="h-10 w-full rounded-xl border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-3 text-[14px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--brand))] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--fg-3))]">Body fat %</label>
+            <input
+              type="number"
+              step="0.1"
+              placeholder={loadingMeasurement ? '...' : '—'}
+              value={bodyFat}
+              onChange={(e) => setBodyFat(e.target.value)}
+              className="h-10 w-full rounded-xl border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] px-3 text-[14px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--brand))] focus:outline-none"
+            />
+          </div>
+        </div>
+        <p className="mt-1.5 text-[11px] text-[hsl(var(--fg-3))]">Pre-filled from your latest check-in. You can edit before saving.</p>
         <div className="mt-5 flex gap-3">
           <button type="button" onClick={onClose} className="atlas-button atlas-button-secondary flex-1">Cancel</button>
-          <PrimaryButton type="button" onClick={() => onConfirm(date)} className="flex-1">Create checkpoint</PrimaryButton>
+          <PrimaryButton type="button" onClick={() => onConfirm(date, { weight: weight ? parseFloat(weight) : null, bodyFat: bodyFat ? parseFloat(bodyFat) : null })} className="flex-1">Create checkpoint</PrimaryButton>
         </div>
       </div>
     </div>,
@@ -664,6 +725,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const [showPhotoPaywall, setShowPhotoPaywall] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [cropState, setCropState] = useState(null); // { imageSrc, date, poseKey }
+  const [poseFilter, setPoseFilter] = useState('all'); // 'all' | 'front' | 'side' | 'back' | 'pose'
 
   React.useEffect(() => {
     if (!isLoadingAuth && !isAuthenticated && embedded) navigate(ROUTES.home, { replace: true });
@@ -687,15 +749,22 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     onError: () => setNotice({ tone: 'error', message: 'Error removing photo.' }),
   });
 
-  const handleCreateCheckpoint = (date) => {
+  // checkpointMeta stores per-date metadata (weight, bodyFat) from the modal
+  const [checkpointMeta, setCheckpointMeta] = useState({});
+
+  const handleCreateCheckpoint = (date, meta) => {
     setCheckpointDates((prev) => {
       if (prev.includes(date)) return prev;
       return [date, ...prev].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
     });
+    if (meta) {
+      setCheckpointMeta((prev) => ({ ...prev, [date]: meta }));
+    }
     setShowNewModal(false);
   };
 
   const handleFileSelected = useCallback((date, poseKey, file) => {
+    track('photo_captured', { pose: poseKey, source: 'file_input' });
     const reader = new FileReader();
     reader.onload = () => setCropState({ imageSrc: reader.result, date, poseKey });
     reader.readAsDataURL(file);
@@ -718,7 +787,13 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     setUploadingPose(key);
     try {
       const photoUrl = await uploadProgressPhoto(user.id, file);
-      await createProgressPhoto(user.id, { photo_url: photoUrl, date, category: poseKey });
+      // Include weight/bodyFat metadata from the checkpoint modal if available
+      const meta = checkpointMeta[date] || {};
+      const payload = { photo_url: photoUrl, date, category: poseKey };
+      if (meta.weight != null) payload.weight_kg = meta.weight;
+      if (meta.bodyFat != null) payload.body_fat_percent = meta.bodyFat;
+      await createProgressPhoto(user.id, payload);
+      track('photo_uploaded', { pose: poseKey, date });
       qc.invalidateQueries({ queryKey: ['progress-photos-page', user?.id] });
       qc.invalidateQueries({ queryKey: ['progress-photos', user?.id] });
       setNotice({ tone: 'success', message: 'Photo saved successfully.' });
@@ -733,7 +808,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
     } finally {
       setUploadingPose(null);
     }
-  }, [qc, user?.id, isAuthenticated, navigate]);
+  }, [qc, user?.id, isAuthenticated, navigate, checkpointMeta]);
 
   const handleDelete = useCallback((photo) => {
     if (!window.confirm('Remove this photo from the checkpoint?')) return;
@@ -751,17 +826,25 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
   const FREE_PHOTO_LIMIT = 5;
   const isAtLimit = planCode === 'free' && allDates.length >= FREE_PHOTO_LIMIT;
 
+  // Find the first photo matching the active pose filter for a given date
+  const photoForDateByFilter = useCallback((date) => {
+    const datePhotos = photosByDate(date);
+    if (poseFilter === 'all') return datePhotos.find((p) => p?.photo_url) || null;
+    const poseIndex = POSES.findIndex((p) => p.key === poseFilter);
+    return poseIndex >= 0 ? datePhotos[poseIndex] : datePhotos.find((p) => p?.photo_url) || null;
+  }, [photosByDate, poseFilter]);
+
   const comparisonData = useMemo(() => {
     if (allDates.length < 2) return null;
     const latest = allDates[0];
     const earliest = allDates[allDates.length - 1];
     return {
-      before: photosByDate(earliest)[0],
-      after: photosByDate(latest)[0],
+      before: photoForDateByFilter(earliest),
+      after: photoForDateByFilter(latest),
       beforeDate: earliest,
       afterDate: latest,
     };
-  }, [allDates, photosByDate]);
+  }, [allDates, photoForDateByFilter]);
 
   const hasCheckpoints = allDates.length > 0;
   const showComparison = comparisonData?.before?.photo_url && comparisonData?.after?.photo_url;
@@ -841,13 +924,34 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
         <>
           <Section><ConsistencyIndicator checkpoints={allDates} /></Section>
           {allDates.length >= 2 && <Section><AIInsights checkpoints={allDates} /></Section>}
+          {/* Pose filter chips — lets users compare front-to-front, side-to-side, etc. */}
+          <Section>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {[{ key: 'all', label: 'All' }, ...POSES.map(p => ({ key: p.key, label: p.label }))].map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={() => setPoseFilter(chip.key)}
+                  className={cn(
+                    'shrink-0 rounded-full px-4 py-1.5 text-[12px] font-semibold transition-colors',
+                    poseFilter === chip.key
+                      ? 'bg-[hsl(var(--brand))] text-white'
+                      : 'border border-[hsl(var(--border)/0.7)] bg-[hsl(var(--fill)/0.3)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--fill)/0.6)]'
+                  )}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          </Section>
           {showComparison && (
             <Section>
-              <ComparisonSlider
+              <ComparisonSliderWithTracking
                 beforePhoto={comparisonData.before}
                 afterPhoto={comparisonData.after}
                 beforeDate={new Date(comparisonData.beforeDate).toLocaleDateString(navigator.language, { month: 'short', day: 'numeric' })}
                 afterDate={new Date(comparisonData.afterDate).toLocaleDateString(navigator.language, { month: 'short', day: 'numeric' })}
+                poseFilter={poseFilter}
               />
             </Section>
           )}
@@ -873,7 +977,7 @@ function ProgressPhotosContent({ embedded = false, photos: propPhotos }) {
 
       <Section><GuideSection /></Section>
 
-      {showNewModal && <NewCheckpointModal onConfirm={handleCreateCheckpoint} onClose={() => setShowNewModal(false)} />}
+      {showNewModal && <NewCheckpointModal onConfirm={handleCreateCheckpoint} onClose={() => setShowNewModal(false)} userId={user?.id} />}
     </>
   );
 
