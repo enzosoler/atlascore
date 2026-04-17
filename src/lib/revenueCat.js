@@ -4,7 +4,7 @@
  * Handles iOS/Android subscriptions via RevenueCat SDK.
  * Only active on native platforms (Capacitor). Web uses Stripe via Supabase.
  *
- * Entitlement: "atlas.core Pro"
+ * Entitlement: "pro"
  * Products: atlas_pro_weekly, atlas_pro_monthly, atlas_pro_annual
  */
 
@@ -14,7 +14,7 @@ import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
 const RC_API_KEY_IOS = 'appl_GANHAhnNxGacwbbkWZtCxlORwZp';
 const RC_API_KEY_ANDROID = 'goog_REPLACE_WITH_ANDROID_KEY'; // TODO: replace with real key from RevenueCat dashboard
 const RC_API_KEY = Capacitor.getPlatform() === 'android' ? RC_API_KEY_ANDROID : RC_API_KEY_IOS;
-const ENTITLEMENT_ID = 'atlas.core Pro';
+const ENTITLEMENT_ID = 'pro';
 
 /**
  * Initialize RevenueCat — call once on app boot (native only).
