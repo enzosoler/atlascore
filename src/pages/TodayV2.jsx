@@ -29,6 +29,8 @@ import { getDailyCheckin, listDailyCheckins } from '@/services/checkinService';
 import { getToday } from '@/lib/atlas-theme';
 import { supabase } from '@/lib/supabaseClient';
 import Day1Banner, { isDay1User } from '@/components/today/Day1Banner';
+import ShareFlow, { isShareDismissed } from '@/components/social/ShareFlow';
+import { SHARE_MILESTONES } from '@/components/social/StreakShareCard';
 import { cn } from '@/lib/utils';
 import { trackPurchaseCompleted } from '@/lib/analytics';
 import { toast } from 'sonner';
@@ -452,6 +454,7 @@ function TodayContent() {
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [quickMealOpen, setQuickMealOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [shareFlowOpen, setShareFlowOpen] = useState(false);
   const [aiDismissed, setAiDismissed] = useState(false);
   const [streakCelebrationDismissed, setStreakCelebrationDismissed] = useState(false);
 
@@ -678,6 +681,13 @@ function TodayContent() {
   const streakMilestone = MILESTONE_THRESHOLDS.includes(streak) ? streak : null;
   const showMilestone = !!streakMilestone && !streakCelebrationDismissed;
 
+  // Share-flow milestones (7, 14, 30, 60, 100, 365)
+  const isShareMilestone = SHARE_MILESTONES.includes(streak);
+  const shareNotDismissed = isShareMilestone && !isShareDismissed(streak);
+  useEffect(() => {
+    if (shareNotDismissed && streak > 0) setShareFlowOpen(true);
+  }, [shareNotDismissed, streak]);
+
   return (
     <TodayScreen>
       {/* 1. Header — with streak pill */}
@@ -893,6 +903,14 @@ function TodayContent() {
       />
       <BodyCheckinSheet open={checkinOpen} onOpenChange={setCheckinOpen} />
       <QuickMealSheet open={quickMealOpen} onOpenChange={setQuickMealOpen} />
+      <ShareFlow
+        open={shareFlowOpen}
+        onClose={() => setShareFlowOpen(false)}
+        streak={streak}
+        workouts={safeDaily.weekWorkoutCount || 0}
+        meals={safeNutrition.caloriesConsumed > 0 ? 1 : 0}
+        weightEntries={safeDaily.weightLogged ? 1 : 0}
+      />
     </TodayScreen>
   );
 }
