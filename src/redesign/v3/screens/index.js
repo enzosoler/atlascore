@@ -36,6 +36,7 @@ export { default as S32_Capture } from './S32_Capture.jsx';
 export { default as S33_Profile } from './S33_Profile.jsx';
 export { default as S34_Watch } from './S34_Watch.jsx';
 export { default as S35_Search } from './S35_Search.jsx';
+export { default as S36_Auth } from './S36_Auth.jsx';
 export { default as S37_Inbox } from './S37_Inbox.jsx';
 export { default as S38_Food_Detail } from './S38_Food_Detail.jsx';
 export { default as S39_Recipe_Builder } from './S39_Recipe_Builder.jsx';

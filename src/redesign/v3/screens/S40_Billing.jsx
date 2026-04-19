@@ -159,11 +159,11 @@ function S40_Billing({
               <button key={i} type="button" onClick={() => onOpenInvoice?.(r.n)} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '11px 0', width: '100%', textAlign: 'left',
+                background: 'transparent',
+                border: 'none',
                 borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
                 borderBottom: `1px solid ${c.hair}`,
-                border: 'none', borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
-                borderBottom: `1px solid ${c.hair}`,
-                background: 'transparent', cursor: 'pointer',
+                cursor: 'pointer',
               }}>
                 <div style={{ fontFamily: ACFonts.mono, fontSize: 10, color: c.dim, letterSpacing: 0.4, width: 76 }}>{r.d}</div>
                 <div style={{ flex: 1, fontFamily: ACFonts.mono, fontSize: 11, color: c.fg, letterSpacing: 0.3, fontWeight: 600 }}>{r.n}</div>
@@ -182,8 +182,8 @@ function S40_Billing({
         <button type="button" onClick={onSwitchPlan} style={{
           marginTop: 22, padding: 16, width: '100%', textAlign: 'left',
           background: c.card, borderRadius: ACRadii.card,
+          border: 'none',
           borderLeft: `3px solid ${c.accent}`,
-          border: 'none', borderLeft: `3px solid ${c.accent}`,
           cursor: 'pointer',
         }}>
           <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase' }}>

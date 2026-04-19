@@ -83,10 +83,9 @@ function S37_Inbox({
         {_items.map((it, i) => (
           <button key={i} type="button" onClick={() => onOpenItem?.(it)} style={{
             display: 'flex', gap: 12, padding: '14px 0', width: '100%', textAlign: 'left',
-            borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
-            borderBottom: `1px solid ${c.hair}`,
             opacity: it.t === 'bill' ? 0.72 : 1,
-            background: 'transparent', border: 'none',
+            background: 'transparent',
+            border: 'none',
             borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
             borderBottom: `1px solid ${c.hair}`,
             cursor: 'pointer',
