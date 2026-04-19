@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 !.env.analytics.example
+!.env.local
 
 # logs
 logs
@@ -19,6 +20,7 @@ dist
 dist-ssr
 .vite
 *.local
+!.env.local
 
 # editor / system
 .vscode/*
@@ -32,6 +34,7 @@ dist-ssr
 *.sw?
 .vercel
 .env*.local
+!.env.local
 e2e/.auth/
 playwright-report/
 test-results/

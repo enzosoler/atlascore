@@ -13,6 +13,7 @@ export default defineConfig({
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         // Skip SW on Capacitor native — navigateFallback only for web
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],
@@ -68,8 +69,19 @@ export default defineConfig({
   ],
   base: '/',
   server: {
+    host: true, // listen on all interfaces so phones on the same Wi-Fi can reach the dev server
     port: process.env.PORT ? parseInt(process.env.PORT) : 5173,
     strictPort: false,
+    // Allow any ngrok subdomain (free + paid) + any localtunnel / Cloudflare tunnel / LAN IP.
+    // The leading "." means "any subdomain of", e.g. briskness-bunny-apply.ngrok-free.dev
+    allowedHosts: [
+      'localhost',
+      '.ngrok-free.dev',
+      '.ngrok-free.app',
+      '.ngrok.io',
+      '.trycloudflare.com',
+      '.loca.lt',
+    ],
   },
   resolve: {
     alias: {

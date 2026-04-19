@@ -17,23 +17,23 @@
       "sound": "beep.wav"
     },
     "SplashScreen": {
-      "launchShowDuration": 8000,
-      "launchAutoHide": false,
-      "launchFadeOutDuration": 200,
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 300,
       "showSpinner": false,
-      "backgroundColor": "#05070A",
+      "backgroundColor": "#efe9da",
       "splashImmersive": true,
       "splashFullScreen": true,
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_CROP"
     },
     "StatusBar": {
-      "style": "DARK",
-      "backgroundColor": "#05070A"
+      "style": "LIGHT",
+      "backgroundColor": "#efe9da"
     },
     "Keyboard": {
       "resize": "body",
-      "style": "dark"
+      "style": "light"
     }
   },
   "android": {

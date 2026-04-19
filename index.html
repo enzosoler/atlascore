@@ -2,14 +2,14 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link id="app-favicon" rel="icon" type="image/png" href="/branding/dark/favicon.png" sizes="32x32" />
-    <link id="app-apple-touch-icon" rel="apple-touch-icon" href="/branding/dark/apple-touch-icon.png" />
+    <link id="app-favicon" rel="icon" type="image/svg+xml" href="/branding/v3/svg/app-icon-ink.svg" />
+    <link id="app-apple-touch-icon" rel="apple-touch-icon" href="/branding/v3/app-icon/paper-180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="atlas.core" />
-    <meta id="app-theme-color" name="theme-color" content="#05070A" />
+    <meta id="app-theme-color" name="theme-color" content="#0A0A0A" />
     <meta
       name="description"
       content="atlas.core is the performance operating system for workouts, nutrition, measurements, supplements, and real-world progress."
@@ -34,6 +34,13 @@
     <meta name="twitter:image" content="/branding/og-image.png" />
     <link rel="canonical" href="https://useatlascore.com/" />
     <link rel="manifest" href="/manifest.json" />
+    <!-- Web font fallback for the /v2 redesign on non-Apple devices. SF Pro is used natively on macOS/iOS via -apple-system. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;650;700&display=swap" />
+    <!-- v3 brand fonts: Archivo Black is the brand voice (logo, splash, manifesto moments only).
+         JetBrains Mono carries data: timestamps, codes, set numbers. Keep usage tight. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600&display=swap" />
     <title>atlas.core</title>
     <script>
       (function () {
@@ -41,25 +48,31 @@
         var THEME_EXPLICIT_KEY = 'atlas-theme-explicit';
         var DEFAULT_THEME = 'dark';
         var root = document.documentElement;
+        var urlTheme = new URLSearchParams(window.location.search).get('theme');
         var storedTheme = localStorage.getItem(THEME_KEY);
         var hasExplicitPreference = localStorage.getItem(THEME_EXPLICIT_KEY) === 'true';
         var theme =
-          hasExplicitPreference && (storedTheme === 'dark' || storedTheme === 'light')
+          (urlTheme === 'dark' || urlTheme === 'light')
+            ? urlTheme
+            : hasExplicitPreference && (storedTheme === 'dark' || storedTheme === 'light')
             ? storedTheme
             : DEFAULT_THEME;
-        var isDark = theme === 'dark';
         var favicon = document.getElementById('app-favicon');
         var appleTouchIcon = document.getElementById('app-apple-touch-icon');
         var themeColor = document.getElementById('app-theme-color');
+        var prefersDarkChrome = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
         root.classList.remove('light', 'dark');
         root.classList.add(theme);
         root.dataset.theme = theme;
         localStorage.setItem(THEME_KEY, theme);
 
-        if (favicon) favicon.setAttribute('href', isDark ? '/branding/dark/favicon.png' : '/branding/light/favicon.png');
-        if (appleTouchIcon) appleTouchIcon.setAttribute('href', isDark ? '/branding/dark/apple-touch-icon.png' : '/branding/light/apple-touch-icon.png');
-        if (themeColor) themeColor.setAttribute('content', isDark ? '#05070A' : '#FFFFFF');
+        if (favicon) {
+          favicon.setAttribute('href', prefersDarkChrome ? '/branding/v3/svg/app-icon-paper.svg' : '/branding/v3/svg/app-icon-ink.svg');
+          favicon.setAttribute('type', 'image/svg+xml');
+        }
+        if (appleTouchIcon) appleTouchIcon.setAttribute('href', '/branding/v3/app-icon/paper-180.png');
+        if (themeColor) themeColor.setAttribute('content', theme === 'dark' ? '#0A0A0A' : '#EFE9DA');
       })();
     </script>
   </head>

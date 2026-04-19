@@ -4,35 +4,35 @@
   "description": "Training, nutrition, labs, and progress in one connected system.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#05070A",
-  "theme_color": "#05070A",
+  "background_color": "#EFE9DA",
+  "theme_color": "#0A0A0A",
   "icons": [
     {
-      "src": "/branding/dark/favicon.png",
+      "src": "/branding/v3/favicon/favicon-32.png",
       "sizes": "32x32",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/branding/dark/icon-192.png",
+      "src": "/branding/v3/app-icon/paper-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/branding/dark/icon-512.png",
+      "src": "/branding/v3/app-icon/paper-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/branding/dark/icon-192-maskable.png",
+      "src": "/branding/v3/app-icon/paper-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/branding/dark/icon-512-maskable.png",
+      "src": "/branding/v3/app-icon/paper-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
