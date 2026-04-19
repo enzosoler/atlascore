@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Atlas Core — Redesign Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'rd-bg':           'hsl(var(--rd-bg-app))',
+        'rd-surface':      'hsl(var(--rd-bg-surface))',
+        'rd-surface-2':    'hsl(var(--rd-bg-surface-2))',
+        'rd-elevated':     'hsl(var(--rd-bg-elevated))',
+        'rd-fg':           'hsl(var(--rd-fg-primary))',
+        'rd-fg-secondary': 'hsl(var(--rd-fg-secondary))',
+        'rd-fg-muted':     'hsl(var(--rd-fg-muted))',
+        'rd-accent':       'hsl(var(--rd-accent))',
+        'rd-accent-hover': 'hsl(var(--rd-accent-hover))',
+        'rd-ai':           'hsl(var(--rd-ai))',
+        'rd-premium':      'hsl(var(--rd-premium))',
+        'rd-success':      'hsl(var(--rd-success))',
+        'rd-warning':      'hsl(var(--rd-warning))',
+        'rd-danger':       'hsl(var(--rd-danger))',
+      },
+      borderRadius: {
+        'rd-sm': '8px', 'rd-md': '12px', 'rd-control': '14px',
+        'rd-card': '18px', 'rd-xl': '20px', 'rd-sheet': '24px', 'rd-2xl': '28px',
+      },
+      fontFamily: {
+        sans: ['"SF Pro Text"','Inter','-apple-system','system-ui','sans-serif'],
+      },
+    },
+  },
+};
+</script>
+<style>
+:root {
+  --rd-bg-app: 222 40% 3%;
+  --rd-bg-surface: 220 25% 7%;
+  --rd-bg-surface-2: 220 22% 10%;
+  --rd-bg-elevated: 220 20% 14%;
+  --rd-fg-primary: 220 20% 97%;
+  --rd-fg-secondary: 220 18% 84%;
+  --rd-fg-muted: 220 10% 60%;
+  --rd-accent: 180 100% 50%;
+  --rd-accent-hover: 180 100% 55%;
+  --rd-ai: 258 90% 66%;
+  --rd-premium: 40 46% 60%;
+  --rd-success: 160 84% 39%;
+  --rd-warning: 38 92% 50%;
+  --rd-danger: 0 84% 60%;
+  --rd-health-excellent: 160 70% 52%;
+  --rd-health-good: 180 100% 55%;
+  --rd-health-moderate: 38 92% 55%;
+  --rd-health-low: 0 84% 60%;
+}
+html, body { background: hsl(var(--rd-bg-app)); color: hsl(var(--rd-fg-primary)); font-family: 'SF Pro Text','Inter',system-ui,sans-serif; }
+.tnum { font-variant-numeric: tabular-nums; }
+.rd-canvas {
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(0,255,255,0.06), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(139,92,246,0.04), transparent 60%),
+    hsl(var(--rd-bg-app));
+}
+.phone {
+  width: 390px;
+  min-height: 844px;
+  border-radius: 44px;
+  padding: 12px;
+  background: #111;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+.phone > .screen {
+  width: 100%; height: 820px;
+  border-radius: 34px; overflow: hidden;
+  position: relative;
+  background: hsl(var(--rd-bg-app));
+}
+.phone-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--rd-fg-muted)); margin-top: 14px; text-align: center;}
+@keyframes shimmer { 0% { background-position:-200% 0 } 100% { background-position:200% 0 }}
+.glow { box-shadow: 0 0 0 1px rgba(0,255,255,0.24), 0 0 24px -4px rgba(0,255,255,0.35); }
+.noscroll::-webkit-scrollbar { display:none; }
+.noscroll { scrollbar-width: none; }
+</style>
+</head>
+<body class="rd-canvas">
+
+<!-- ─── HERO BAR ─────────────────────────────────────────────────── -->
+<header class="sticky top-0 z-50 border-b border-white/10 bg-[hsl(222_40%_3%/.85)] backdrop-blur">
+  <div class="mx-auto flex max-w-[1400px] items-center justify-between px-6 h-14">
+    <div class="flex items-center gap-2">
+      <span class="inline-block h-6 w-6 rounded-md bg-rd-accent"></span>
+      <span class="font-semibold">Atlas Core — Redesign Preview</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-5 text-[13px] text-rd-fg-secondary">
+      <a href="#tokens">Tokens</a>
+      <a href="#primitives">Primitives</a>
+      <a href="#screens">Screens</a>
+      <a href="#overlays">Overlays</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ─── INTRO ────────────────────────────────────────────────────── -->
+<section class="mx-auto max-w-[900px] px-6 pt-20 pb-12 text-center">
+  <span class="inline-flex items-center gap-2 rounded-full border border-rd-accent/30 bg-[hsl(180_100%_50%/.10)] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-rd-accent">Dark · Premium · System-first</span>
+  <h1 class="mt-6 text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]">
+    The Atlas Core UI,<br/>rebuilt from first principles.
+  </h1>
+  <p class="mx-auto mt-5 max-w-xl text-[15px] text-rd-fg-secondary">
+    Tokens → primitives → layouts → modules → screens → overlays. Obsidian base, cyan accent,
+    Whoop / MacroFactor / Hevy / Linear DNA. One coherent system, 57 files, 121 surfaces.
+  </p>
+  <div class="mt-6 flex justify-center gap-2 text-[12px] text-rd-fg-muted">
+    <span>Scroll through the mockups below ↓</span>
+  </div>
+</section>
+
+<!-- ─── TOKENS ───────────────────────────────────────────────────── -->
+<section id="tokens" class="mx-auto max-w-[1400px] px-6 py-16">
+  <p class="text-[11px] uppercase tracking-[0.12em] text-rd-fg-muted">01 · Tokens</p>
+  <h2 class="mt-2 text-3xl font-bold">Design tokens</h2>
+  <p class="mt-2 text-rd-fg-muted max-w-xl">Every component pulls from these. No hex values anywhere in screens.</p>
+
+  <div class="mt-8 grid gap-4 md:grid-cols-4">
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-4">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted">Surfaces</p>
+      <div class="mt-3 space-y-2 text-[12px]">
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-bg-app))"></span> bg-app · #05070A</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm border border-white/10" style="background:hsl(var(--rd-bg-surface))"></span> surface · #0B0F15</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm border border-white/10" style="background:hsl(var(--rd-bg-surface-2))"></span> surface-2 · #141A22</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm border border-white/10" style="background:hsl(var(--rd-bg-elevated))"></span> elevated · #1D242E</div>
+      </div>
+    </div>
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-4">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted">Accents</p>
+      <div class="mt-3 space-y-2 text-[12px]">
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-accent))"></span> accent · cyan #00FFFF</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-ai))"></span> AI · violet #8B5CF6</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-premium))"></span> premium · gold #C9A96A</div>
+      </div>
+    </div>
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-4">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted">Status</p>
+      <div class="mt-3 space-y-2 text-[12px]">
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-success))"></span> success</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-warning))"></span> warning</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-danger))"></span> danger</div>
+      </div>
+    </div>
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-4">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted">Health rings</p>
+      <div class="mt-3 space-y-2 text-[12px]">
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-health-excellent))"></span> excellent 80+</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-health-good))"></span> good 60-79</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-health-moderate))"></span> moderate 40-59</div>
+        <div class="flex items-center gap-2"><span class="h-6 w-6 rounded-rd-sm" style="background:hsl(var(--rd-health-low))"></span> low &lt;40</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRIMITIVES ──────────────────────────────────────────────── -->
+<section id="primitives" class="mx-auto max-w-[1400px] px-6 py-16 border-t border-white/5">
+  <p class="text-[11px] uppercase tracking-[0.12em] text-rd-fg-muted">02 · Primitives</p>
+  <h2 class="mt-2 text-3xl font-bold">Components</h2>
+
+  <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <!-- Buttons -->
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-5">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted mb-3">Buttons</p>
+      <div class="flex flex-wrap gap-2">
+        <button class="h-10 px-4 rounded-rd-control bg-rd-accent text-[#05070A] text-[14px] font-medium hover:bg-rd-accent-hover transition">Primary</button>
+        <button class="h-10 px-4 rounded-rd-control bg-rd-surface-2 border border-white/10 text-rd-fg text-[14px] font-medium">Secondary</button>
+        <button class="h-10 px-4 rounded-rd-control text-rd-fg text-[14px] font-medium hover:bg-rd-surface-2">Ghost</button>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button class="h-10 px-4 rounded-rd-control bg-rd-premium text-[#05070A] text-[14px] font-medium">Premium</button>
+        <button class="h-10 px-4 rounded-rd-control bg-rd-ai text-white text-[14px] font-medium">AI</button>
+        <button class="h-10 px-4 rounded-rd-control bg-rd-danger text-white text-[14px] font-medium">Destructive</button>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-5">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted mb-3">Badges</p>
+      <div class="flex flex-wrap gap-2">
+        <span class="inline-flex items-center rounded-full border border-white/10 bg-rd-surface-2 px-2 h-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-rd-fg-secondary">neutral</span>
+        <span class="inline-flex items-center rounded-full border border-rd-accent/30 bg-[hsl(180_100%_50%/.12)] px-2 h-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-rd-accent">accent</span>
+        <span class="inline-flex items-center rounded-full border border-rd-success/30 bg-[hsl(160_84%_39%/.12)] px-2 h-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-rd-success">success</span>
+        <span class="inline-flex items-center rounded-full border border-rd-warning/30 bg-[hsl(38_92%_50%/.14)] px-2 h-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-rd-warning">warning</span>
+        <span class="inline-flex items-center rounded-full border border-[hsl(258_90%_66%/.24)] bg-[hsl(258_90%_66%/.10)] px-2 h-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-rd-ai">AI</span>
+        <span class="inline-flex items-center rounded-full border border-[hsl(40_46%_60%/.28)] bg-[hsl(40_46%_60%/.12)] px-2 h-6 text-[11px] font-semibold uppercase tracking-[0.06em] text-rd-premium">premium</span>
+      </div>
+    </div>
+
+    <!-- Ring progress -->
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-5">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted mb-3">Ring progress</p>
+      <div class="flex items-center justify-around">
+        <div class="relative" style="width:88px;height:88px">
+          <svg viewBox="0 0 88 88" class="-rotate-90">
+            <circle cx="44" cy="44" r="38" fill="none" stroke="hsl(220 22% 10%)" stroke-width="8"/>
+            <circle cx="44" cy="44" r="38" fill="none" stroke="hsl(160 70% 52%)" stroke-width="8" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="47.75"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-[22px] font-bold tnum">80</span>
+            <span class="text-[9px] uppercase tracking-[0.08em] text-rd-fg-muted">ready</span>
+          </div>
+        </div>
+        <div class="relative" style="width:88px;height:88px">
+          <svg viewBox="0 0 88 88" class="-rotate-90">
+            <circle cx="44" cy="44" r="38" fill="none" stroke="hsl(220 22% 10%)" stroke-width="8"/>
+            <circle cx="44" cy="44" r="38" fill="none" stroke="hsl(38 92% 55%)" stroke-width="8" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="119.38"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-[22px] font-bold tnum">50</span>
+            <span class="text-[9px] uppercase tracking-[0.08em] text-rd-fg-muted">mod</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric card -->
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-5">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted">HRV</p>
+      <div class="mt-2 flex items-baseline gap-1.5">
+        <span class="text-[32px] font-bold tnum">64</span>
+        <span class="text-[13px] text-rd-fg-muted">ms</span>
+      </div>
+      <p class="text-[12px] tnum text-rd-success mt-1">+8% vs 7-day avg</p>
+    </div>
+
+    <!-- Input -->
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-5">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted mb-3">Input</p>
+      <label class="text-[13px] font-medium text-rd-fg-secondary">Email</label>
+      <div class="mt-1.5 flex items-center rounded-rd-control border border-white/10 bg-rd-surface-2 px-3 h-10">
+        <input placeholder="you@email.com" class="flex-1 bg-transparent outline-none text-[14px]"/>
+      </div>
+      <p class="mt-1 text-[12px] text-rd-fg-muted">We'll never share your email.</p>
+    </div>
+
+    <!-- Segmented -->
+    <div class="rounded-rd-card border border-white/10 bg-rd-surface p-5">
+      <p class="text-[11px] uppercase tracking-[0.08em] text-rd-fg-muted mb-3">Segmented</p>
+      <div class="inline-flex items-center gap-1 rounded-rd-control bg-rd-surface-2 p-1">
+        <button class="h-8 px-3 rounded-rd-sm bg-rd-elevated text-rd-fg text-[13px] font-medium">Today</button>
+        <button class="h-8 px-3 rounded-rd-sm text-rd-fg-secondary text-[13px] font-medium">Plan</button>
+        <button class="h-8 px-3 rounded-rd-sm text-rd-fg-secondary text-[13px] font-medium">History</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SCREENS ─────────────────────────────────────────────────── -->
+<section id="screens" class="mx-auto max-w-[1400px] px-6 py-16 border-t border-white/5">
+  <p class="text-[11px] uppercase tracking-[0.12em] text-rd-fg-muted">03 · Screens</p>
+  <h2 class="mt-2 text-3xl font-bold">Mobile screens</h2>
+  <p class="mt-2 text-rd-fg-muted max-w-xl">Representative mockups of the core surfaces. Scroll each phone to see the full screen.</p>
+
+  <div class="mt-12 flex flex-wrap justify-center gap-12">
+
+    <!-- ░ TODAY ░ -->
+    <div>
+      <div class="phone">
+        <div class="screen overflow-y-auto noscroll">
+          <!-- status bar -->
+          <div class="flex justify-between items-center px-6 pt-3 text-[12px] font-semibold tnum">
+            <span>9:41</span><span>● ● ●</span>
+          </div>
+          <!-- header -->
+          <div class="px-5 pt-3 pb-2">
+            <p class="text-[12px] text-rd-fg-muted">Friday · Apr 17</p>
+            <h1 class="text-[24px] font-bold">Hi, Enzo</h1>
+          </div>
+
+          <!-- Readiness card -->
+          <div class="mx-5 rounded-rd-card border border-white/10 bg-rd-surface p-4">
+            <div class="flex items-center gap-4">
+              <div class="relative shrink-0" style="width:104px;height:104px">
+                <svg viewBox="0 0 104 104" class="-rotate-90">
+                  <circle cx="52" cy="52" r="46" fill="none" stroke="hsl(220 22% 10%)" stroke-width="10"/>
+                  <circle cx="52" cy="52" r="46" fill="none" stroke="hsl(180 100% 55%)" stroke-width="10" stroke-linecap="round" stroke-dasharray="289.03" stroke-dashoffset="75.15"/>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="text-[26px] font-bold tnum">74</span>
+                  <span class="text-[9px] uppercase tracking-[0.08em] text-rd-fg-muted">ready</span>
+                </div>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rd-health-good"></span><p class="text-[16px] font-semibold">Ready</p></div>
+                <p class="text-[12px] text-rd-fg-muted mt-0.5">Primed for a moderate session.</p>
+                <div class="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                  <div><p class="uppercase tracking-[0.08em] text-rd-fg-muted">HRV</p><p class="text-[15px] font-semibold tnum">64<span class="text-[10px] text-rd-fg-muted font-normal"> ms</span></p></div>
+                  <div><p class="uppercase tracking-[0.08em] text-rd-fg-muted">RHR</p><p class="text-[15px] font-semibold tnum">54<span class="text-[10px] text-rd-fg-muted font-normal"> bpm</span></p></div>
+                  <div><p class="uppercase tracking-[0.08em] text-rd-fg-muted">Sleep</p><p class="text-[15px] font-semibold tnum">7.4<span class="text-[10px] text-rd-fg-muted font-normal"> h</span></p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="px-5 mt-3 grid grid-cols-4 gap-2">
+            <div class="flex flex-col items-center gap-2 rounded-rd-card border border-white/10 bg-rd-surface p-2.5"><span class="h-8 w-8 rounded-full bg-rd-surface-2 flex items-center justify-center">🍽</span><span class="text-[10px] text-rd-fg-secondary">Log food</span></div>
+            <div class="flex flex-col items-center gap-2 rounded-rd-card border border-white/10 bg-rd-surface p-2.5"><span class="h-8 w-8 rounded-full bg-rd-surface-2 flex items-center justify-center">🏋</span><span class="text-[10px] text-rd-fg-secondary">Workout</span></div>
+            <div class="flex flex-col items-center gap-2 rounded-rd-card border border-white/10 bg-rd-surface p-2.5"><span class="h-8 w-8 rounded-full bg-rd-surface-2 flex items-center justify-center">⚖</span><span class="text-[10px] text-rd-fg-secondary">Weigh in</span></div>
+            <div class="flex flex-col items-center gap-2 rounded-rd-card border border-white/10 bg-rd-surface p-2.5"><span class="h-8 w-8 rounded-full bg-rd-surface-2 flex items-center justify-center">✨</span><span class="text-[10px] text-rd-fg-secondary">Coach</span></div>
+          </div>
+
+          <!-- Targets card -->
+          <div class="mx-5 mt-3 rounded-rd-card border border-white/10 bg-rd-surface p-4">
+            <p class="text-[13px] font-semibold">Today's targets</p>
+            <p class="text-[11px] text-rd-fg-muted">Calories · Protein · Carbs</p>
+            <div class="mt-3 flex items-center gap-4">
+              <div class="relative shrink-0" style="width:80px;height:80px">
+                <svg viewBox="0 0 80 80" class="-rotate-90">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(220 22% 10%)" stroke-width="8"/>
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(180 100% 55%)" stroke-width="8" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="99.4"/>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="text-[17px] font-bold tnum">1,412</span>
+                  <span class="text-[8px] uppercase tracking-[0.08em] text-rd-fg-muted">kcal</span>
+                </div>
+              </div>
+              <div class="flex-1 space-y-2">
+                <div>
+                  <div class="flex items-baseline justify-between"><span class="text-[11px] text-rd-fg-muted">Protein</span><span class="text-[11px] tnum"><b class="text-rd-fg">112</b>/185g</span></div>
+                  <div class="mt-1 h-1.5 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-health-good" style="width:60%"></div></div>
+                </div>
+                <div>
+                  <div class="flex items-baseline justify-between"><span class="text-[11px] text-rd-fg-muted">Carbs</span><span class="text-[11px] tnum"><b class="text-rd-fg">148</b>/280g</span></div>
+                  <div class="mt-1 h-1.5 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-premium" style="width:52%"></div></div>
+                </div>
+                <div>
+                  <div class="flex items-baseline justify-between"><span class="text-[11px] text-rd-fg-muted">Fat</span><span class="text-[11px] tnum"><b class="text-rd-fg">41</b>/82g</span></div>
+                  <div class="mt-1 h-1.5 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-warning" style="width:50%"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI insight -->
+          <div class="mx-5 mt-3 rounded-rd-card border border-[hsl(258_90%_66%/.24)] bg-[hsl(258_90%_66%/.10)] p-4">
+            <div class="flex items-center gap-2 text-rd-ai">
+              <span>✨</span><span class="text-[12px] font-semibold">Coach insight</span>
+            </div>
+            <p class="mt-2 text-[15px] font-semibold leading-tight">Protein target updated</p>
+            <p class="mt-1 text-[13px] text-rd-fg-secondary">Increased to 185 g/day based on last 2 weeks of training volume.</p>
+            <div class="mt-3 flex gap-2">
+              <button class="h-8 px-3 rounded-rd-sm bg-rd-ai text-white text-[12px] font-medium">Apply</button>
+              <button class="h-8 px-3 rounded-rd-sm text-rd-fg-secondary text-[12px] font-medium">Why this?</button>
+            </div>
+          </div>
+
+          <!-- Bottom nav -->
+          <div class="h-20"></div>
+          <div class="fixed-nav absolute bottom-0 inset-x-0 border-t border-white/10 bg-[hsl(222_40%_3%/.9)] backdrop-blur">
+            <div class="flex h-16 items-center justify-around px-2">
+              <div class="flex flex-col items-center gap-1 text-rd-accent"><span class="text-[20px]">◉</span><span class="text-[9px] font-medium">Today</span></div>
+              <div class="flex flex-col items-center gap-1 text-rd-fg-muted"><span class="text-[20px]">◎</span><span class="text-[9px]">Nutrition</span></div>
+              <div class="flex flex-col items-center gap-1 text-rd-fg-muted"><span class="text-[20px]">◎</span><span class="text-[9px]">Workouts</span></div>
+              <div class="flex flex-col items-center gap-1 text-rd-fg-muted"><span class="text-[20px]">◎</span><span class="text-[9px]">Body</span></div>
+              <div class="flex flex-col items-center gap-1 text-rd-fg-muted"><span class="text-[20px]">◎</span><span class="text-[9px]">Coach</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-label">Today · Dashboard</p>
+    </div>
+
+    <!-- ░ NUTRITION ░ -->
+    <div>
+      <div class="phone">
+        <div class="screen overflow-y-auto noscroll">
+          <div class="flex justify-between items-center px-6 pt-3 text-[12px] font-semibold tnum"><span>9:41</span><span>● ● ●</span></div>
+          <div class="flex items-center justify-between px-5 pt-3 pb-3">
+            <div><h1 class="text-[22px] font-bold">Nutrition</h1><p class="text-[12px] text-rd-fg-muted">Friday · Apr 17</p></div>
+            <button class="h-8 px-3 rounded-rd-control bg-rd-accent text-[#05070A] text-[12px] font-semibold">+ Log food</button>
+          </div>
+
+          <div class="px-5 mb-3">
+            <div class="inline-flex items-center gap-1 rounded-rd-control bg-rd-surface-2 p-1 text-[12px]">
+              <button class="h-7 px-3 rounded-rd-sm bg-rd-elevated font-medium">Today</button>
+              <button class="h-7 px-3 rounded-rd-sm text-rd-fg-muted">Plan</button>
+              <button class="h-7 px-3 rounded-rd-sm text-rd-fg-muted">History</button>
+            </div>
+          </div>
+
+          <!-- totals -->
+          <div class="mx-5 rounded-rd-card border border-white/10 bg-rd-surface p-4">
+            <div class="flex items-baseline justify-between">
+              <div>
+                <p class="text-[10px] uppercase tracking-[0.08em] text-rd-fg-muted">Today</p>
+                <p class="text-[28px] font-bold tnum">1,412 <span class="text-[12px] text-rd-fg-muted font-normal">/ 2,640 kcal</span></p>
+              </div>
+            </div>
+            <div class="mt-3 grid grid-cols-3 gap-3 text-[11px]">
+              <div><div class="flex items-baseline justify-between"><span class="text-rd-fg-muted">Protein</span><span class="tnum"><b>112</b>/185g</span></div><div class="mt-1 h-1.5 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-health-good" style="width:60%"></div></div></div>
+              <div><div class="flex items-baseline justify-between"><span class="text-rd-fg-muted">Carbs</span><span class="tnum"><b>148</b>/280g</span></div><div class="mt-1 h-1.5 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-premium" style="width:52%"></div></div></div>
+              <div><div class="flex items-baseline justify-between"><span class="text-rd-fg-muted">Fat</span><span class="tnum"><b>41</b>/82g</span></div><div class="mt-1 h-1.5 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-warning" style="width:50%"></div></div></div>
+            </div>
+          </div>
+
+          <!-- meals -->
+          <div class="mx-5 mt-4 space-y-3 pb-24">
+            <!-- Breakfast -->
+            <div class="rounded-rd-card border border-white/10 bg-rd-surface overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2.5">
+                <div>
+                  <p class="text-[14px] font-semibold">Breakfast</p>
+                  <p class="text-[11px] text-rd-fg-muted tnum">7:40 AM · 612 kcal · 42P · 58C · 22F</p>
+                </div>
+                <button class="text-[12px] text-rd-fg-muted">+ Add</button>
+              </div>
+              <div class="border-t border-white/5 divide-y divide-white/5">
+                <div class="px-4 py-2.5"><p class="text-[13px]">Overnight oats + whey</p><p class="text-[11px] text-rd-fg-muted tnum">1 bowl · 32P · 48C · 14F</p></div>
+                <div class="px-4 py-2.5"><p class="text-[13px]">Blueberries</p><p class="text-[11px] text-rd-fg-muted tnum">80 g · 1P · 10C · 0F</p></div>
+                <div class="px-4 py-2.5"><p class="text-[13px]">Almond butter</p><p class="text-[11px] text-rd-fg-muted tnum">1 tbsp · 9P · 0C · 8F</p></div>
+              </div>
+            </div>
+            <!-- Lunch -->
+            <div class="rounded-rd-card border border-white/10 bg-rd-surface overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2.5">
+                <div>
+                  <p class="text-[14px] font-semibold">Lunch</p>
+                  <p class="text-[11px] text-rd-fg-muted tnum">1:10 PM · 800 kcal · 70P · 90C · 19F</p>
+                </div>
+                <button class="text-[12px] text-rd-fg-muted">+ Add</button>
+              </div>
+              <div class="border-t border-white/5 divide-y divide-white/5">
+                <div class="px-4 py-2.5"><p class="text-[13px]">Grilled chicken bowl</p><p class="text-[11px] text-rd-fg-muted tnum">1 bowl · 62P · 70C · 14F</p></div>
+                <div class="px-4 py-2.5"><p class="text-[13px]">Greek yogurt</p><p class="text-[11px] text-rd-fg-muted tnum">150 g · 8P · 20C · 5F</p></div>
+              </div>
+            </div>
+            <!-- Dinner (empty) -->
+            <div class="rounded-rd-card border border-white/10 bg-rd-surface overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2.5">
+                <div><p class="text-[14px] font-semibold">Dinner</p><p class="text-[11px] text-rd-fg-muted">Planned</p></div>
+                <button class="text-[12px] text-rd-fg-muted">+ Add</button>
+              </div>
+              <div class="border-t border-white/5 px-4 py-3 text-[12px] text-rd-fg-muted">Empty — tap to add a food.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-label">Nutrition · Daily log</p>
+    </div>
+
+    <!-- ░ ACTIVE WORKOUT ░ -->
+    <div>
+      <div class="phone">
+        <div class="screen overflow-y-auto noscroll">
+          <div class="flex justify-between items-center px-6 pt-3 text-[12px] font-semibold tnum"><span>9:41</span><span>● ● ●</span></div>
+          <header class="flex items-center justify-between px-4 pt-3 pb-3 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <button class="h-8 w-8 rounded-rd-sm text-rd-fg-muted">←</button>
+              <div><p class="text-[10px] text-rd-fg-muted">In progress</p><p class="text-[14px] font-semibold">Upper Push</p></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex h-6 items-center px-2 rounded-full border border-rd-accent/30 bg-[hsl(180_100%_50%/.12)] text-[11px] font-semibold tnum text-rd-accent">30:22</span>
+              <button class="h-8 px-2.5 rounded-rd-sm bg-rd-surface-2 border border-white/10 text-[12px] font-medium">Finish</button>
+            </div>
+          </header>
+
+          <!-- Rest timer -->
+          <div class="mx-4 mt-3 rounded-rd-card border border-rd-accent/30 bg-[hsl(180_100%_50%/.08)] p-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="relative" style="width:36px;height:36px">
+                <svg viewBox="0 0 36 36" class="-rotate-90">
+                  <circle cx="18" cy="18" r="16" fill="none" stroke="hsl(220 22% 10%)" stroke-width="3"/>
+                  <circle cx="18" cy="18" r="16" fill="none" stroke="hsl(180 100% 55%)" stroke-width="3" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="35"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[9px] uppercase tracking-[0.08em] text-rd-accent">Rest</p>
+                <p class="text-[20px] font-bold tnum">1:04</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-[11px]">
+              <button class="h-8 px-2 rounded-rd-sm bg-rd-surface-2 border border-white/10">−15</button>
+              <button class="h-8 px-2 rounded-rd-sm bg-rd-surface-2 border border-white/10">+15</button>
+              <button class="h-8 px-2 text-rd-fg-muted">Skip</button>
+            </div>
+          </div>
+
+          <!-- Exercise -->
+          <div class="mx-4 mt-4 rounded-rd-card border border-white/10 bg-rd-surface overflow-hidden">
+            <div class="p-4">
+              <p class="text-[20px] font-bold leading-tight">Barbell Bench Press</p>
+              <p class="text-[11px] text-rd-fg-muted mt-0.5">Target: 4 × 5-7 @ RPE 8 · Last: 92.5 kg × 5</p>
+            </div>
+            <!-- plate calc -->
+            <div class="mx-4 mb-3 rounded-rd-control bg-rd-surface-2 p-2 flex items-center gap-2 text-[11px] text-rd-fg-muted">
+              <span class="tnum text-rd-fg">92.5 kg</span>
+              <span>=</span>
+              <span class="tnum">20 kg bar</span>
+              <span>+</span>
+              <span class="flex gap-1">
+                <span class="px-1 rounded-sm bg-rd-accent/20 text-rd-accent tnum text-[10px]">25</span>
+                <span class="px-1 rounded-sm bg-rd-accent/20 text-rd-accent tnum text-[10px]">10</span>
+                <span class="px-1 rounded-sm bg-rd-accent/20 text-rd-accent tnum text-[10px]">1.25</span>
+              </span>
+              <span>per side</span>
+            </div>
+            <!-- set logger -->
+            <div class="border-t border-white/5">
+              <div class="grid grid-cols-[32px_1fr_1fr_52px_40px] gap-2 bg-rd-surface-2 px-3 py-2 text-[10px] uppercase tracking-[0.08em] text-rd-fg-muted">
+                <span>Set</span><span>Kg</span><span>Reps</span><span>RPE</span><span></span>
+              </div>
+              <div class="divide-y divide-white/5">
+                <div class="grid grid-cols-[32px_1fr_1fr_52px_40px] items-center gap-2 px-3 py-2 bg-[hsl(160_84%_39%/.08)]"><span class="tnum text-[12px] text-rd-fg-muted">1</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">70</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">8</span><span class="h-8 w-12 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">7</span><span class="h-8 w-8 rounded-rd-sm bg-rd-success text-white flex items-center justify-center">✓</span></div>
+                <div class="grid grid-cols-[32px_1fr_1fr_52px_40px] items-center gap-2 px-3 py-2 bg-[hsl(160_84%_39%/.08)]"><span class="tnum text-[12px] text-rd-fg-muted">2</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">85</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">6</span><span class="h-8 w-12 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">8</span><span class="h-8 w-8 rounded-rd-sm bg-rd-success text-white flex items-center justify-center">✓</span></div>
+                <div class="grid grid-cols-[32px_1fr_1fr_52px_40px] items-center gap-2 px-3 py-2 bg-[hsl(160_84%_39%/.08)]"><span class="tnum text-[12px] text-rd-fg-muted">3</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">92.5</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">5</span><span class="h-8 w-12 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] tnum">8.5</span><span class="h-8 w-8 rounded-rd-sm bg-rd-success text-white flex items-center justify-center">✓</span></div>
+                <div class="grid grid-cols-[32px_1fr_1fr_52px_40px] items-center gap-2 px-3 py-2"><span class="tnum text-[12px] text-rd-fg-muted">4</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] text-rd-fg-muted tnum">92.5</span><span class="h-8 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] text-rd-fg-muted">—</span><span class="h-8 w-12 rounded-rd-sm border border-white/10 bg-rd-surface-2 px-2 flex items-center text-[13px] text-rd-fg-muted">—</span><span class="h-8 w-8 rounded-rd-sm bg-rd-surface-2 border border-white/10 text-rd-fg-muted flex items-center justify-center">✓</span></div>
+              </div>
+              <button class="w-full border-t border-white/5 py-2 text-[12px] text-rd-accent">+ Add set</button>
+            </div>
+          </div>
+
+          <div class="h-20"></div>
+          <div class="absolute bottom-0 inset-x-0 p-3 border-t border-white/10 bg-[hsl(222_40%_3%/.9)] backdrop-blur grid grid-cols-2 gap-2">
+            <button class="h-11 rounded-rd-control bg-rd-surface-2 border border-white/10 text-[14px] font-medium">Pause</button>
+            <button class="h-11 rounded-rd-control bg-rd-accent text-[#05070A] text-[14px] font-semibold">Finish</button>
+          </div>
+        </div>
+      </div>
+      <p class="phone-label">Active workout · Hevy-style</p>
+    </div>
+
+    <!-- ░ ONBOARDING ░ -->
+    <div>
+      <div class="phone">
+        <div class="screen overflow-y-auto noscroll">
+          <div class="flex justify-between items-center px-6 pt-3 text-[12px] font-semibold tnum"><span>9:41</span><span>● ● ●</span></div>
+          <!-- progress -->
+          <div class="flex items-center gap-2 px-4 pt-3 h-12">
+            <button class="h-9 w-9 rounded-rd-control text-rd-fg-muted">←</button>
+            <div class="flex-1 h-1 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-accent" style="width:20%"></div></div>
+            <span class="text-[11px] text-rd-fg-muted tnum w-8 text-right">2/10</span>
+          </div>
+
+          <div class="px-6 mt-4">
+            <h1 class="text-[26px] font-bold leading-[1.1]">What's your main goal?</h1>
+            <p class="mt-2 text-[13px] text-rd-fg-muted">Pick one. You can change this later.</p>
+
+            <div class="mt-6 space-y-2.5">
+              <button class="w-full flex items-center gap-3 rounded-rd-card border border-rd-accent bg-[hsl(180_100%_50%/.12)] p-4 text-left glow">
+                <span class="text-2xl">⬇</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-[15px] font-semibold">Lose fat</span>
+                  <span class="block mt-0.5 text-[11px] text-rd-fg-muted">Drop body fat while keeping muscle.</span>
+                </span>
+                <span class="h-5 w-5 shrink-0 rounded-full bg-rd-accent text-[#05070A] flex items-center justify-center text-[11px]">✓</span>
+              </button>
+              <button class="w-full flex items-center gap-3 rounded-rd-card border border-white/10 bg-rd-surface p-4 text-left">
+                <span class="text-2xl">⬆</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-[15px] font-semibold">Build muscle</span>
+                  <span class="block mt-0.5 text-[11px] text-rd-fg-muted">Add lean mass with progressive load.</span>
+                </span>
+                <span class="h-5 w-5 shrink-0 rounded-full border border-white/15"></span>
+              </button>
+              <button class="w-full flex items-center gap-3 rounded-rd-card border border-white/10 bg-rd-surface p-4 text-left">
+                <span class="text-2xl">⚡</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-[15px] font-semibold">Perform</span>
+                  <span class="block mt-0.5 text-[11px] text-rd-fg-muted">Train for a specific goal or sport.</span>
+                </span>
+                <span class="h-5 w-5 shrink-0 rounded-full border border-white/15"></span>
+              </button>
+              <button class="w-full flex items-center gap-3 rounded-rd-card border border-white/10 bg-rd-surface p-4 text-left">
+                <span class="text-2xl">♥</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-[15px] font-semibold">Feel healthier</span>
+                  <span class="block mt-0.5 text-[11px] text-rd-fg-muted">Energy, sleep, labs. No specific body goal.</span>
+                </span>
+                <span class="h-5 w-5 shrink-0 rounded-full border border-white/15"></span>
+              </button>
+            </div>
+
+            <details class="mt-6">
+              <summary class="cursor-pointer text-[12px] text-rd-fg-muted">Why we ask this</summary>
+              <p class="mt-2 rounded-rd-md border border-white/10 bg-rd-surface-2 p-3 text-[12px] text-rd-fg-secondary">We adjust calories, protein targets, and training volume differently for each goal.</p>
+            </details>
+          </div>
+
+          <div class="absolute bottom-0 inset-x-0 p-4 border-t border-white/10 bg-[hsl(222_40%_3%/.9)] backdrop-blur">
+            <button class="w-full h-14 rounded-rd-lg bg-rd-accent text-[#05070A] font-semibold">Continue</button>
+          </div>
+        </div>
+      </div>
+      <p class="phone-label">Onboarding · Goal step</p>
+    </div>
+
+    <!-- ░ PAYWALL ░ -->
+    <div>
+      <div class="phone">
+        <div class="screen overflow-y-auto noscroll">
+          <div class="flex justify-between items-center px-6 pt-3 text-[12px] font-semibold tnum"><span>9:41</span><span>● ● ●</span></div>
+          <div class="flex items-center gap-2 px-4 pt-3 h-12">
+            <button class="h-9 w-9 rounded-rd-control text-rd-fg-muted">←</button>
+            <div class="flex-1 h-1 rounded-full bg-rd-surface-2 overflow-hidden"><div class="h-full bg-rd-accent" style="width:100%"></div></div>
+            <span class="text-[11px] text-rd-fg-muted tnum w-8 text-right">10/10</span>
+          </div>
+
+          <div class="px-5 mt-4 text-center">
+            <span class="inline-flex items-center rounded-full border border-rd-accent/30 bg-[hsl(180_100%_50%/.12)] px-2 h-6 text-[10px] font-semibold uppercase tracking-[0.08em] text-rd-accent">Full access during trial</span>
+            <h1 class="mt-4 text-[28px] font-bold leading-[1.1]">Try everything free for 7 days.</h1>
+            <p class="mt-2 text-[13px] text-rd-fg-muted">No charge today. Cancel in two taps.</p>
+          </div>
+
+          <div class="px-5 mt-7 space-y-2.5">
+            <!-- Weekly -->
+            <button class="relative w-full flex items-center gap-3 rounded-rd-card border border-[hsl(40_46%_60%/.28)] bg-[hsl(40_46%_60%/.10)] p-4 text-left">
+              <span class="absolute -top-2 right-4 rounded-full bg-rd-premium px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#05070A]">Most popular</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-[15px] font-semibold">Weekly</p>
+                <p class="text-[11px] text-rd-fg-muted">billed weekly</p>
+                <p class="mt-1 text-[12px] text-rd-accent">3-day free trial</p>
+              </div>
+              <p class="text-[20px] font-bold tnum">$6.99</p>
+            </button>
+            <!-- Annual -->
+            <button class="relative w-full flex items-center gap-3 rounded-rd-card border border-rd-accent bg-[hsl(180_100%_50%/.12)] p-4 text-left glow">
+              <span class="absolute -top-2 left-4 rounded-full bg-rd-accent px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#05070A]">Save 40%</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-[15px] font-semibold">Annual</p>
+                <p class="text-[11px] text-rd-fg-muted">$4.99/mo</p>
+                <p class="mt-1 text-[12px] text-rd-accent">7-day free trial</p>
+              </div>
+              <p class="text-[20px] font-bold tnum">$59.99</p>
+            </button>
+            <!-- Monthly -->
+            <button class="relative w-full flex items-center gap-3 rounded-rd-card border border-white/10 bg-rd-surface p-4 text-left">
+              <div class="flex-1 min-w-0">
+                <p class="text-[15px] font-semibold">Monthly</p>
+                <p class="text-[11px] text-rd-fg-muted">billed monthly</p>
+              </div>
+              <p class="text-[20px] font-bold tnum">$14.99</p>
+            </button>
+          </div>
+
+          <div class="mx-5 mt-5 rounded-rd-card border border-white/10 bg-rd-surface p-4">
+            <p class="text-[10px] uppercase tracking-[0.08em] text-rd-fg-muted">Included</p>
+            <ul class="mt-2 text-[12px] text-rd-fg-secondary space-y-1">
+              <li>· Adaptive weekly plans</li>
+              <li>· AI coach + insights</li>
+              <li>· HealthKit sync</li>
+              <li>· Labs interpretation</li>
+              <li>· Priority support</li>
+            </ul>
+          </div>
+
+          <div class="h-24"></div>
+          <div class="absolute bottom-0 inset-x-0 p-4 border-t border-white/10 bg-[hsl(222_40%_3%/.9)] backdrop-blur">
+            <button class="w-full h-14 rounded-rd-lg bg-rd-accent text-[#05070A] font-semibold">Start 7-day free trial</button>
+            <p class="mt-2 text-center text-[10px] text-rd-fg-muted">We'll remind you 2 days before it ends.</p>
+          </div>
+        </div>
+      </div>
+      <p class="phone-label">Paywall · Cal AI pattern</p>
+    </div>
+
+    <!-- ░ COACH CHAT ░ -->
+    <div>
+      <div class="phone">
+        <div class="screen flex flex-col">
+          <div class="flex justify-between items-center px-6 pt-3 text-[12px] font-semibold tnum"><span>9:41</span><span>● ● ●</span></div>
+          <header class="flex items-center gap-3 px-4 pt-3 pb-3 border-b border-white/10">
+            <button class="h-8 w-8 rounded-rd-sm text-rd-fg-muted">←</button>
+            <div class="min-w-0 flex-1">
+              <p class="text-[14px] font-semibold">Coach</p>
+              <p class="text-[10px] text-rd-fg-muted">Online</p>
+            </div>
+            <span class="inline-flex items-center rounded-full border border-[hsl(258_90%_66%/.24)] bg-[hsl(258_90%_66%/.10)] px-2 h-5 text-[9px] font-semibold uppercase tracking-[0.08em] text-rd-ai">AI</span>
+          </header>
+
+          <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3 noscroll">
+            <!-- coach -->
+            <div class="flex gap-2.5">
+              <span class="mt-1 h-7 w-7 shrink-0 rounded-full bg-[hsl(258_90%_66%/.15)] text-rd-ai flex items-center justify-center text-[14px]">✨</span>
+              <div class="max-w-[80%] rounded-2xl rounded-tl-sm bg-rd-surface-2 border border-white/10 px-3.5 py-2.5">
+                <p class="text-[14px] leading-snug">Morning. Your HRV is up 8% and sleep was solid — today looks like a good day to push intensity.</p>
+                <p class="text-[10px] text-rd-fg-muted mt-1">8:02 AM</p>
+              </div>
+            </div>
+            <!-- user -->
+            <div class="flex justify-end gap-2.5">
+              <div class="max-w-[80%] rounded-2xl rounded-tr-sm bg-rd-accent text-[#05070A] px-3.5 py-2.5">
+                <p class="text-[14px] leading-snug">Swap legs to pull instead?</p>
+                <p class="text-[10px] text-[#05070A]/70 mt-1">8:05 AM</p>
+              </div>
+            </div>
+            <!-- coach -->
+            <div class="flex gap-2.5">
+              <span class="mt-1 h-7 w-7 shrink-0 rounded-full bg-[hsl(258_90%_66%/.15)] text-rd-ai flex items-center justify-center text-[14px]">✨</span>
+              <div class="max-w-[80%] rounded-2xl rounded-tl-sm bg-rd-surface-2 border border-white/10 px-3.5 py-2.5">
+                <p class="text-[14px] leading-snug">I can. Your last pull session was Saturday — three days ago. Want me to pull up your usual Pull A?</p>
+                <p class="text-[10px] text-rd-fg-muted mt-1">Confidence 92% · <span class="underline">Why?</span></p>
+                <p class="text-[10px] text-rd-fg-muted mt-0.5">8:05 AM</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-white/10 p-3">
+            <div class="flex gap-2 overflow-x-auto noscroll mb-2">
+              <button class="h-8 px-3 rounded-full border border-white/10 bg-rd-surface-2 text-[12px] text-rd-fg-secondary whitespace-nowrap">Plan my day</button>
+              <button class="h-8 px-3 rounded-full border border-white/10 bg-rd-surface-2 text-[12px] text-rd-fg-secondary whitespace-nowrap">Why is my HRV low?</button>
+              <button class="h-8 px-3 rounded-full border border-white/10 bg-rd-surface-2 text-[12px] text-rd-fg-secondary whitespace-nowrap">Swap workout</button>
+            </div>
+            <div class="flex items-end gap-2 rounded-rd-xl border border-white/10 bg-rd-surface px-3 py-2">
+              <span class="flex-1 text-[14px] text-rd-fg-muted">Ask your coach anything…</span>
+              <button class="h-8 px-3 rounded-rd-sm bg-rd-accent text-[#05070A] text-[12px] font-semibold">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="phone-label">Coach · ChatGPT mental model</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── LANDING PREVIEW ─────────────────────────────────────────── -->
+<section id="landing" class="mx-auto max-w-[1400px] px-6 py-16 border-t border-white/5">
+  <p class="text-[11px] uppercase tracking-[0.12em] text-rd-fg-muted">04 · Marketing</p>
+  <h2 class="mt-2 text-3xl font-bold">Landing page</h2>
+  <div class="mt-8 rounded-rd-2xl border border-white/10 bg-rd-surface overflow-hidden">
+    <div class="border-b border-white/10 h-12 flex items-center justify-between px-5">
+      <div class="flex items-center gap-2"><span class="h-5 w-5 rounded-sm bg-rd-accent"></span><span class="text-[14px] font-semibold">Atlas Core</span></div>
+      <div class="flex items-center gap-4 text-[12px] text-rd-fg-secondary">
+        <a>Pricing</a><a>Guides</a><a>Help</a><a>Sign in</a>
+        <span class="inline-flex items-center h-7 px-3 rounded-rd-control bg-rd-accent text-[#05070A] font-medium text-[12px]">Get started</span>
+      </div>
+    </div>
+    <div class="text-center px-6 py-20 relative overflow-hidden">
+      <div class="absolute inset-0 -z-0" style="background:radial-gradient(600px 300px at 50% -10%, rgba(0,255,255,0.12), transparent)"></div>
+      <span class="relative inline-flex items-center rounded-full border border-rd-accent/30 bg-[hsl(180_100%_50%/.12)] px-3 py-1 text-[11px] uppercase tracking-[0.1em] text-rd-accent">New · Whoop & HealthKit integrations</span>
+      <h1 class="relative mt-6 text-5xl font-bold tracking-tight leading-[1.05]">Your plan,<br/>built for you.</h1>
+      <p class="relative mx-auto mt-4 max-w-xl text-[15px] text-rd-fg-secondary">Training, nutrition, recovery, and labs — adapted weekly to your actual data.</p>
+      <div class="relative mt-7 flex justify-center gap-3">
+        <button class="h-12 px-6 rounded-rd-lg bg-rd-accent text-[#05070A] font-semibold">Start free trial</button>
+        <button class="h-12 px-6 rounded-rd-lg text-rd-fg-secondary">See how it works</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="mx-auto max-w-[1400px] px-6 py-12 border-t border-white/5 text-center text-[12px] text-rd-fg-muted">
+  <p>Atlas Core redesign · 57 files · 121 surfaces · 24 primitives · 9 shared modules · 26 overlays.</p>
+  <p class="mt-1">Source lives at <code class="text-rd-fg-secondary">src/redesign/</code> · nothing overrides existing code.</p>
+</footer>
+
+</body>
+</html>

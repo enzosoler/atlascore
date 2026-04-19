@@ -1,0 +1,205 @@
+/* ============================================================================
+   atlas.core — Redesign Theme (Dark Premium)
+   Mirrors design-tokens.js as CSS variables.
+   Import once at app root AFTER tailwind base.
+   ========================================================================== */
+
+/* ── Fonts ──────────────────────────────────────────────────────────────
+   SF Pro is Apple-licensed and can't be redistributed, so we use the
+   native stack: `-apple-system` / `BlinkMacSystemFont` renders SF Pro on
+   macOS & iOS. Inter is loaded from Google Fonts as the web fallback
+   — near-identical metrics, keeps the premium feel on Windows/Android. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;650;700&display=swap');
+
+
+:root,
+.rd-dark {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --rd-bg-app:        222 40% 3%;     /* #05070A */
+  --rd-bg-surface:    220 25% 7%;     /* #0B0F15 */
+  --rd-bg-surface-2:  220 22% 10%;    /* #141A22 */
+  --rd-bg-elevated:   220 20% 14%;    /* #1D242E */
+  --rd-bg-inverse:    220 20% 97%;
+  --rd-bg-overlay:    222 50% 2% / .72;
+
+  /* Foreground */
+  --rd-fg-primary:    220 20% 97%;    /* #F5F7FA */
+  --rd-fg-secondary:  220 18% 84%;    /* #C6CDD7 */
+  --rd-fg-muted:      220 10% 60%;    /* #8E98A5 */
+  --rd-fg-disabled:   220 10% 42%;
+  --rd-fg-on-accent:  222 40% 3%;
+  --rd-fg-on-premium: 222 40% 3%;
+
+  /* Borders */
+  --rd-border-subtle:  0 0% 100% / .06;
+  --rd-border-default: 0 0% 100% / .10;
+  --rd-border-strong:  0 0% 100% / .18;
+
+  /* Accents */
+  --rd-accent:         180 100% 50%;  /* #00FFFF cyan */
+  --rd-accent-hover:   180 100% 55%;
+  --rd-accent-muted:   180 100% 50% / .12;
+  --rd-ai:             258 90% 66%;   /* #8B5CF6 */
+  --rd-ai-muted:       258 90% 66% / .10;
+  --rd-ai-border:      258 90% 66% / .24;
+  --rd-premium:        40 46% 60%;    /* #C9A96A gold */
+  --rd-premium-muted:  40 46% 60% / .12;
+  --rd-premium-border: 40 46% 60% / .28;
+
+  /* Status */
+  --rd-success:        160 84% 39%;
+  --rd-success-muted:  160 84% 39% / .12;
+  --rd-warning:        38 92% 50%;
+  --rd-warning-muted:  38 92% 50% / .14;
+  --rd-danger:         0 84% 60%;
+  --rd-danger-muted:   0 84% 60% / .12;
+  --rd-info:           180 100% 55%;
+  --rd-info-muted:     180 100% 55% / .10;
+
+  /* Health ring color scale */
+  --rd-health-excellent: 160 70% 52%;
+  --rd-health-good:      180 100% 55%;
+  --rd-health-moderate:  38 92% 55%;
+  --rd-health-low:       0 84% 60%;
+
+  /* Chart palette */
+  --rd-chart-1: 180 100% 55%;
+  --rd-chart-2: 258 90% 70%;
+  --rd-chart-3: 40 46% 65%;
+  --rd-chart-4: 160 70% 52%;
+  --rd-chart-5: 0 84% 65%;
+  --rd-chart-6: 38 92% 55%;
+
+  /* Radii */
+  --rd-radius-xs: 4px;
+  --rd-radius-sm: 8px;
+  --rd-radius-md: 12px;
+  --rd-radius-control: 14px;
+  --rd-radius-lg: 16px;
+  --rd-radius-card: 18px;
+  --rd-radius-xl: 20px;
+  --rd-radius-sheet: 24px;
+  --rd-radius-2xl: 28px;
+
+  /* Shadows */
+  --rd-shadow-sm: 0 1px 2px 0 rgba(0,0,0,.40);
+  --rd-shadow-md: 0 4px 12px -2px rgba(0,0,0,.50);
+  --rd-shadow-lg: 0 12px 28px -4px rgba(0,0,0,.55), 0 4px 10px -2px rgba(0,0,0,.40);
+  --rd-shadow-xl: 0 24px 48px -8px rgba(0,0,0,.65), 0 8px 16px -4px rgba(0,0,0,.40);
+  --rd-shadow-glow: 0 0 0 1px rgba(0,255,255,.24), 0 0 24px -4px rgba(0,255,255,.35);
+  --rd-shadow-inset: inset 0 1px 0 0 rgba(255,255,255,.04);
+
+  /* Motion */
+  --rd-ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+  --rd-ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --rd-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --rd-duration-fast: 140ms;
+  --rd-duration-base: 200ms;
+  --rd-duration-slow: 320ms;
+
+  /* Layout */
+  --rd-sidebar-w: 260px;
+  --rd-sidebar-compact-w: 72px;
+  --rd-bottom-nav-h: 64px;
+  --rd-top-bar-h: 56px;
+}
+
+/* Optional light theme (not primary). Kept intentionally terse. */
+.rd-light {
+  color-scheme: light;
+  --rd-bg-app:       220 20% 98%;
+  --rd-bg-surface:   0 0% 100%;
+  --rd-bg-surface-2: 220 20% 96%;
+  --rd-bg-elevated:  220 20% 94%;
+  --rd-fg-primary:   222 40% 6%;
+  --rd-fg-secondary: 222 20% 30%;
+  --rd-fg-muted:     222 10% 50%;
+  --rd-border-subtle:  0 0% 0% / .06;
+  --rd-border-default: 0 0% 0% / .10;
+  --rd-border-strong:  0 0% 0% / .18;
+}
+
+/* ─── Redesign scope ─────────────────────────────────────────────────────
+   IMPORTANT: the redesign is intentionally isolated. We apply ALL styling
+   inside a .rd-scope wrapper so the legacy design-system.css (electric
+   green accent, different base tokens, different fonts) never bleeds in,
+   and vice versa. Every redesign Shell root includes `rd-scope`.
+   ──────────────────────────────────────────────────────────────────────── */
+.rd-scope {
+  background: hsl(var(--rd-bg-app));
+  color: hsl(var(--rd-fg-primary));
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv11','ss01','ss03';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  min-height: 100dvh;
+  letter-spacing: normal; /* reset legacy -0.014em body tracking */
+  line-height: 1.45;      /* reset legacy 1.5 */
+}
+.rd-scope, .rd-scope * {
+  box-sizing: border-box;
+}
+/* Headings inside scope use the design-tokens ramp, not the legacy ramp. */
+.rd-scope h1, .rd-scope h2, .rd-scope h3, .rd-scope h4, .rd-scope h5, .rd-scope h6 {
+  font-family: inherit;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.rd-scope p, .rd-scope ul, .rd-scope ol { margin: 0; }
+.rd-scope button { font-family: inherit; letter-spacing: inherit; }
+.rd-scope a { color: inherit; text-decoration: none; }
+.rd-scope img { max-width: 100%; }
+
+/* Defensive resets — neutralize legacy design-system.css bleed. These only
+   fire INSIDE the redesign scope, so existing pages are unaffected. */
+.rd-scope input,
+.rd-scope textarea,
+.rd-scope select,
+.rd-scope button {
+  color: inherit;
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+.rd-scope :where(.container, .Container) { all: unset; display: block; }
+/* Legacy apps often fix a bottom tab bar globally — override it off /v2. */
+html:has(.rd-scope[data-rd-root]) body > [data-legacy-bottom-nav],
+html:has(.rd-scope[data-rd-root]) body > .legacy-bottom-nav {
+  display: none !important;
+}
+
+/* Tabular numerals for all metric classes */
+.rd-tnum { font-variant-numeric: tabular-nums; }
+
+/* Selection */
+::selection {
+  background: hsl(var(--rd-accent) / .30);
+  color: hsl(var(--rd-fg-primary));
+}
+
+/* Focus ring */
+.rd-focus-ring {
+  outline: 2px solid hsl(var(--rd-accent));
+  outline-offset: 2px;
+}
+
+/* Safe-area helpers (Capacitor iOS notch/home indicator) */
+.rd-safe-top    { padding-top: env(safe-area-inset-top); }
+.rd-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.rd-safe-x      { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+
+/* Subtle noise on app canvas — adds perceived depth on OLED */
+.rd-canvas {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(0,255,255,0.05), transparent 60%),
+    radial-gradient(900px  500px at 110% 10%, rgba(139,92,246,0.04), transparent 60%),
+    hsl(var(--rd-bg-app));
+}
+
+/* Hide scrollbar on mobile lists (keep space for fat scrolling) */
+.rd-scroll-hide::-webkit-scrollbar { display: none; }
+.rd-scroll-hide { scrollbar-width: none; }

@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+    presets: [require('./src/redesign/tokens/tailwind.preset.cjs')],
     darkMode: "class",
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
