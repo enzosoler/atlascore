@@ -16,14 +16,36 @@
  *    once the detail route lands.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
 import { listRoutines } from '@/lib/workoutsService';
+import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import S24_Library from '../screens/S24_Library.jsx';
 
 const DEV = typeof import.meta !== 'undefined' && import.meta?.env?.DEV;
+
+/**
+ * Map a row from `workout_plans` (the assigned/active program source) →
+ * the shape S24_Library expects for a program card. This is the source
+ * for things like "NF Team 2" — coach- or self-assigned programs that
+ * live separately from user-created routines.
+ */
+function mapPlanToProgram(plan) {
+  if (!plan) return null;
+  const weeks = Number(plan.weeks || plan.duration_weeks || plan.length_weeks);
+  const days = Number(plan.days_per_week || plan.sessions_per_week);
+  return {
+    id: plan.id,
+    name: (typeof plan.name === 'string' && plan.name.trim()) ? plan.name.trim() : 'Current program',
+    w: Number.isFinite(weeks) && weeks > 0 ? weeks : '—',
+    d: Number.isFinite(days) && days > 0 ? days : '—',
+    a: plan.author || plan.coach_name || undefined,
+    lvl: plan.level || undefined,
+    tag: 'Assigned',
+  };
+}
 
 /**
  * Map a raw routines row → the shape S24_Library expects for a program card.
@@ -54,6 +76,12 @@ export default function V3Train() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Active assigned plan (workout_plans.active=true) — source for "NF Team 2".
+  // useDailyStateV2 already fetches this; we reuse it so the Library and the
+  // Today/Coach views share one source of truth.
+  const { daily } = useDailyStateV2();
+  const activePlan = daily?.plan || null;
+
   // undefined = loading (mock renders) / array = real rows (possibly empty).
   const [routines, setRoutines] = useState(undefined);
 
@@ -79,18 +107,36 @@ export default function V3Train() {
 
   const dark = theme === 'dark';
 
-  // Resolve props. Pass undefined while loading so S24 shows the mock catalog
-  // (prevents an empty-state flash for users who *do* have routines).
-  let programs;
-  let activeProgramId;
-  if (routines === undefined) {
-    programs = undefined;            // loading → mock
-    activeProgramId = undefined;
-  } else {
-    programs = routines.map(mapRoutineToProgram).filter(Boolean);
-    // No is_active column yet — use the first (most recently used) row.
-    activeProgramId = routines[0]?.id;
-  }
+  // Merge the active assigned plan (from workout_plans) with user-created
+  // routines. The assigned plan always sits first so it reads as the current
+  // program — mirrors what Today / Coach already show.
+  const { programs, activeProgramId } = useMemo(() => {
+    if (routines === undefined) {
+      // Loading: if we already have the active plan, surface it so the user
+      // never sees a "no program" flash. Otherwise fall through to mock.
+      if (activePlan) {
+        const assigned = mapPlanToProgram(activePlan);
+        return { programs: [assigned].filter(Boolean), activeProgramId: assigned?.id };
+      }
+      return { programs: undefined, activeProgramId: undefined };
+    }
+    const userPrograms = routines.map(mapRoutineToProgram).filter(Boolean);
+    if (activePlan) {
+      const assigned = mapPlanToProgram(activePlan);
+      // De-dupe in case the assigned plan is also mirrored as a routine row.
+      const filtered = assigned
+        ? userPrograms.filter((p) => p.id !== assigned.id && p.name !== assigned.name)
+        : userPrograms;
+      return {
+        programs: [assigned, ...filtered].filter(Boolean),
+        activeProgramId: assigned?.id,
+      };
+    }
+    return {
+      programs: userPrograms,
+      activeProgramId: routines[0]?.id,
+    };
+  }, [routines, activePlan]);
 
   const handleStartWorkout = () => {
     navigate('/app/workouts/active');

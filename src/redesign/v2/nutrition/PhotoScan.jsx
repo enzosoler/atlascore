@@ -8,8 +8,15 @@
  * - Shutter button 80pt, big hit area
  * - Gallery picker + flash + flip camera affordances
  * - Permission-denied state
+ *
+ * Native (iOS/Android): uses @capacitor/camera — the plugin handles
+ * permission, preview, and capture natively. The custom canvas+video
+ * UI below is the web fallback only.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
+
+const IS_NATIVE = Capacitor.isNativePlatform();
 
 export default function PhotoScan({
   permission = 'prompt',    // 'prompt' | 'granted' | 'denied'
@@ -21,8 +28,44 @@ export default function PhotoScan({
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [capturing, setCapturing] = useState(false);
+  const nativeInvokedRef = useRef(false);
+
+  // On native devices: immediately invoke the platform camera UI. The user
+  // sees Apple/Android's native camera — our custom UI is web-only.
+  useEffect(() => {
+    if (!IS_NATIVE || nativeInvokedRef.current) return;
+    nativeInvokedRef.current = true;
+    (async () => {
+      try {
+        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera');
+        const photo = await Camera.getPhoto({
+          quality: 80,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera,
+          saveToGallery: false,
+        });
+        onCapture?.({
+          dataUrl: photo?.dataUrl || null,
+          format: photo?.format || 'jpeg',
+          timestamp: Date.now(),
+          source: 'native',
+        });
+      } catch (err) {
+        // User cancelled or permission denied — step back to the caller.
+        if (err?.message?.toLowerCase().includes('cancel')) {
+          onCancel?.();
+        } else {
+          console.warn('[PhotoScan] Camera.getPhoto failed:', err);
+          onCancel?.();
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
+    if (IS_NATIVE) return; // Web-only preview.
     let active = true;
     async function start() {
       if (permission !== 'granted') return;
@@ -48,7 +91,18 @@ export default function PhotoScan({
     setCapturing(true);
     setTimeout(() => {
       setCapturing(false);
-      onCapture?.({ timestamp: Date.now() });
+      // Web capture: grab a still from the video stream as a dataUrl.
+      let dataUrl = null;
+      try {
+        if (videoRef.current && videoRef.current.videoWidth) {
+          const canvas = document.createElement('canvas');
+          canvas.width = videoRef.current.videoWidth;
+          canvas.height = videoRef.current.videoHeight;
+          canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
+          dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        }
+      } catch { /* fall through without dataUrl */ }
+      onCapture?.({ dataUrl, format: 'jpeg', timestamp: Date.now(), source: 'web' });
     }, 420);
   };
 

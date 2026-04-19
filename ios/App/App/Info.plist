@@ -37,6 +37,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>atlas.core uses your camera to scan food items and barcodes for nutrition tracking.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>atlas.core uses your microphone to log meals by voice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>atlas.core uses speech recognition to turn your voice meal logs into text.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>atlas.core reads your health data to track progress, sync workouts, and personalize coaching recommendations.</string>
 	<key>NSHealthUpdateUsageDescription</key>

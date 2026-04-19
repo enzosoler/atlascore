@@ -18,6 +18,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LiquidButton } from '../lib/glass';
 
+// iOS WKWebView supports SpeechRecognition when NSMicrophoneUsageDescription
+// and NSSpeechRecognitionUsageDescription are present in Info.plist (both
+// were added for atlas.core). If a future Capacitor 8-compatible speech
+// plugin becomes available, we can layer it in here. For now: one web path.
 const HAS_SPEECH =
   typeof window !== 'undefined' &&
   !!(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -88,7 +92,9 @@ export default function VoiceLog({
       };
       tick();
 
-      // Web Speech API transcription
+      // Web Speech API transcription (works in iOS WKWebView when the
+      // NSMicrophoneUsageDescription and NSSpeechRecognitionUsageDescription
+      // Info.plist entries are present — they are).
       if (HAS_SPEECH) {
         const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
         const rec = new Rec();

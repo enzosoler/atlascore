@@ -329,7 +329,20 @@ function PhotoScanRoute() {
           setPerm('granted');
         } catch { setPerm('denied'); }
       }}
-      onCapture={() => navigate('/app/nutrition/photo/confirm')}
+      onCapture={(result) => {
+        // Stash the captured photo on window (size can be large; URL params
+        // would break on JPEGs). PhotoScanConfirm picks it up synchronously.
+        try {
+          if (result?.dataUrl) {
+            window.__acCapturedPhoto = {
+              dataUrl: result.dataUrl,
+              format: result.format || 'jpeg',
+              timestamp: result.timestamp || Date.now(),
+            };
+          }
+        } catch {}
+        navigate('/app/nutrition/photo/confirm');
+      }}
       onPickFromGallery={() => navigate('/app/nutrition/photo/confirm')}
       onCancel={() => navigate(-1)}
     />
