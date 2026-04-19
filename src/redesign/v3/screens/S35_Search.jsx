@@ -7,6 +7,8 @@ import {
 export default function S35_Search({
   dark = false,
   query = 'deadlift',
+  onQueryChange,
+  placeholder = 'Search',
   scopes,
   activeScope = 'All',
   topMatch,
@@ -81,10 +83,25 @@ export default function S35_Search({
             <circle cx="7" cy="7" r="5.5" stroke={c.dim} strokeWidth="1.8"/>
             <path d="M11 11l3.5 3.5" stroke={c.dim} strokeWidth="1.8" strokeLinecap="round"/>
           </svg>
-          <div style={{ flex: 1, fontSize: 15, color: c.fg, letterSpacing: -0.2, fontWeight: 500 }}>
-            {query}
-            <span style={{ display: 'inline-block', width: 1.5, height: 14, background: c.accent, marginLeft: 2, verticalAlign: 'middle' }} />
-          </div>
+          {onQueryChange ? (
+            <input
+              type="text"
+              value={query}
+              placeholder={placeholder}
+              onChange={(e) => onQueryChange(e.target.value)}
+              autoFocus
+              style={{
+                flex: 1, fontSize: 15, color: c.fg, letterSpacing: -0.2, fontWeight: 500,
+                background: 'transparent', border: 'none', outline: 'none',
+                fontFamily: 'inherit', padding: 0, minWidth: 0,
+              }}
+            />
+          ) : (
+            <div style={{ flex: 1, fontSize: 15, color: c.fg, letterSpacing: -0.2, fontWeight: 500 }}>
+              {query}
+              <span style={{ display: 'inline-block', width: 1.5, height: 14, background: c.accent, marginLeft: 2, verticalAlign: 'middle' }} />
+            </div>
+          )}
           <div style={{
             padding: '3px 8px', fontSize: 10, fontWeight: 700,
             color: c.dim, background: c.faint, borderRadius: 4,

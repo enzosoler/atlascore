@@ -12,10 +12,27 @@ export function AuthInput({
 }) {
   return (
     <label style={{ display: 'block' }}>
+      {/* Kill Safari/Chrome autofill blue + add focus ring in dark theme. */}
+      <style>{`
+        .ac-auth-input:-webkit-autofill,
+        .ac-auth-input:-webkit-autofill:hover,
+        .ac-auth-input:-webkit-autofill:focus,
+        .ac-auth-input:-webkit-autofill:active {
+          -webkit-text-fill-color: hsl(var(--rd-fg-primary)) !important;
+          -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+          transition: background-color 5000s ease-in-out 0s !important;
+          caret-color: hsl(var(--rd-fg-primary)) !important;
+        }
+        .ac-auth-input-wrap:focus-within {
+          border-color: rgba(255,255,255,0.22) !important;
+          background: rgba(255,255,255,0.06) !important;
+        }
+      `}</style>
       <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'hsl(var(--rd-fg-muted))', fontWeight: 700, marginBottom: 6 }}>
         {label}
       </div>
       <div
+        className="ac-auth-input-wrap"
         style={{
           position: 'relative',
           display: 'flex',
@@ -26,6 +43,7 @@ export function AuthInput({
           border: `1px solid ${error ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.10)'}`,
           backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
+          transition: 'background-color 160ms ease, border-color 160ms ease',
         }}
       >
         {icon && (
@@ -34,6 +52,7 @@ export function AuthInput({
           </span>
         )}
         <input
+          className="ac-auth-input"
           type={type}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}

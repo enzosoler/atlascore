@@ -297,6 +297,38 @@ export async function presentCustomerCenter() {
 }
 
 /**
+ * Open subscription management in the most-native way available:
+ *   - iOS/Android + RevenueCat configured → RevenueCatUI customer center (in-app sheet)
+ *   - iOS + RevenueCat NOT configured      → deep-link to App Store subscriptions
+ *   - Android + RevenueCat NOT configured  → deep-link to Play Store subscriptions
+ *   - Web                                  → returns false so the caller can
+ *                                            navigate to the web management UI
+ *
+ * Returns true when the native path was taken (caller should NOT navigate).
+ */
+export async function openSubscriptionManagement() {
+  if (!Capacitor.isNativePlatform()) return false;
+
+  if (isRevenueCatAvailable()) {
+    await presentCustomerCenter();
+    return true;
+  }
+
+  try {
+    const { App } = await import('@capacitor/app');
+    const platform = Capacitor.getPlatform();
+    const url = platform === 'ios'
+      ? 'itms-apps://apps.apple.com/account/subscriptions'
+      : 'https://play.google.com/store/account/subscriptions';
+    await App.openUrl({ url });
+    return true;
+  } catch (err) {
+    console.error('[RevenueCat] openSubscriptionManagement failed:', err);
+    return false;
+  }
+}
+
+/**
  * Subscribe to customer-info updates. The callback fires whenever the user's
  * entitlement state changes (purchase, renewal, cancellation, expiration).
  *

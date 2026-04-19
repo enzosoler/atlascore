@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { openSubscriptionManagement } from '@/lib/revenueCat';
 import S19_Settings from '../screens/S19_Settings.jsx';
 
 function buildRealUser(authUser) {
@@ -104,11 +105,17 @@ export default function V3Settings() {
       dark={theme === 'dark'}
       versionLabel={typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_VERSION ? `v ${import.meta.env.VITE_APP_VERSION}` : 'v current'}
       groups={groups}
-      onOpenRow={(key) => {
+      onOpenRow={async (key) => {
         // Theme toggle works directly — no sub-screen needed
         if (key === 'theme') {
           setTheme(theme === 'dark' ? 'light' : 'dark');
           toast(`Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+          return;
+        }
+        // Subscription management: native sheet on iOS/Android, web page on web.
+        if (key === 'plan') {
+          const handled = await openSubscriptionManagement();
+          if (!handled) navigate('/app/billing');
           return;
         }
         // Routes that exist
