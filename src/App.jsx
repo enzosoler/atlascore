@@ -934,7 +934,6 @@ function AppRoutes() {
         <Route path="/app/nutrition/voice" element={isAuthed ? <PlatformGate><VoiceLogRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/workouts/active" element={isAuthed ? <PlatformGate><ActiveWorkoutRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/workouts/manual-plan" element={isAuthed ? <PlatformGate><ManualWorkoutPlanRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/workouts/plan-builder" element={isAuthed ? <PlatformGate><ManualWorkoutPlanRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/exercises" element={isAuthed ? <PlatformGate><V3ExerciseLibrary /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/exercises/:id" element={isAuthed ? <PlatformGate><V3ExerciseDetail /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/coach/chat" element={isAuthed ? <PlatformGate><V3CoachChat /></PlatformGate> : <Navigate to="/auth/login" replace />} />
