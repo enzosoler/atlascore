@@ -13,11 +13,6 @@ import pluginUnusedImports from "eslint-plugin-unused-imports";
 // Anything else importing from v2 is a regression.
 const V2_IMPORT_ALLOWLIST = [
   "src/App.jsx",
-  // Migration debt — remove these once DEMO_EXERCISES / findExerciseById
-  // are extracted to a shared location (out of v2/workouts/ExerciseLibrary).
-  "src/redesign/v3/routes/V3ExerciseLibrary.jsx",
-  "src/redesign/v3/routes/V3ExerciseDetail.jsx",
-  "src/redesign/v3/routes/V3RoutineDetail.jsx",
 ];
 
 export default [
