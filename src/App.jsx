@@ -1066,13 +1066,7 @@ function AppRoutes() {
           <Route key={from} path={from} element={<Navigate to={to} replace />} />
         ))}
 
-        {/* ── Admin / Pro — gated, placeholder for now ───────────── */}
-        <Route path="/admin/*" element={<ComingSoonNav name="Admin" />} />
-        <Route path="/pro/*"   element={<ComingSoonNav name="Pro" />} />
-
-        {/* ── Marketing (public, coming soon) ────────────────────── */}
-        <Route path="/blog/*"   element={<ComingSoonNav name="Blog" />} />
-        <Route path="/guides/*" element={<ComingSoonNav name="Guides" />} />
+        {/* ── Help (still referenced from marketing footer) ──────── */}
         <Route path="/help"     element={<ComingSoonNav name="Help center" />} />
 
         {/* ── 404 catch-all — MUST be the last route ───────────────── */}
