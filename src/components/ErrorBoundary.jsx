@@ -38,15 +38,74 @@ export default class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-[100dvh] flex items-center justify-center bg-[hsl(var(--bg))] px-6">
-          <div className="max-w-sm w-full">
-            <DataState
-              variant="error"
-              title="Something went wrong"
-              description="We couldn't load this section. Try again or go back."
-              action={{ label: 'Try again', onClick: () => window.location.reload() }}
-              secondaryAction={{ label: 'Go back', onClick: () => window.history.back() }}
-            />
+        <div
+          style={{
+            minHeight: '100dvh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#efe9da',
+            padding: '0 24px',
+          }}
+        >
+          <div style={{ maxWidth: 380, width: '100%', textAlign: 'center' }}>
+            <h1
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: '-0.025em',
+                color: '#0a0a0a',
+                margin: '0 0 10px',
+              }}
+            >
+              System interruption
+            </h1>
+            <p
+              style={{
+                fontSize: 15,
+                lineHeight: 1.5,
+                color: '#0a0a0a',
+                opacity: 0.7,
+                margin: '0 0 28px',
+              }}
+            >
+              This section didn't load. Your system state is safe.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  border: 'none',
+                  borderRadius: 10,
+                  background: '#e8b500',
+                  color: '#0a0a0a',
+                  cursor: 'pointer',
+                }}
+              >
+                Retry
+              </button>
+              <button
+                onClick={() => {
+                  window.location.href =
+                    (import.meta.env.BASE_URL || '/') + 'app/today';
+                }}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  border: '1px solid rgba(10,10,10,0.15)',
+                  borderRadius: 10,
+                  background: 'transparent',
+                  color: '#0a0a0a',
+                  cursor: 'pointer',
+                }}
+              >
+                Back to Today
+              </button>
+            </div>
           </div>
         </div>
       );

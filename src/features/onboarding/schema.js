@@ -114,6 +114,12 @@ const screens = [
     autoAdvance: true,
     showInProgress: true,
   },
+  {
+    id: 'q-lifestyle-habits',
+    act: 2,
+    type: 'lifestyle-habits',
+    showInProgress: true,
+  },
 
   // ─── INTERSTITIAL 1 ────────────────────────────────────────────
   {
@@ -186,6 +192,12 @@ const screens = [
       { value: 'chaotic', emoji: '🎲', labelKey: 'onboardingV2.quiz.eatingPatterns_chaotic', label: 'Completely different every day' },
     ],
     autoAdvance: true,
+    showInProgress: true,
+  },
+  {
+    id: 'q-dietary-preferences',
+    act: 2,
+    type: 'dietary-preferences',
     showInProgress: true,
   },
   {
@@ -350,6 +362,11 @@ const screens = [
     title: 'Your weight projection',
   },
   {
+    id: 'personalized-summary',
+    act: 3,
+    type: 'personalized-summary',
+  },
+  {
     id: 'social-proof',
     act: 3,
     type: 'social-proof',
@@ -438,7 +455,7 @@ const screens = [
   {
     id: 'paywall',
     act: 3,
-    type: 'paywall',
+    type: 'post-onboarding-paywall',
   },
   {
     id: 'account-creation',

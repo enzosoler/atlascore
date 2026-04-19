@@ -27,19 +27,30 @@ import {
   Crown,
   Sparkles
 } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 // Import design system classes
 import '@/styles/design-system.css';
 
-// Mock user data
-const mockUserData = {
-  name: 'Alex Johnson',
-  email: 'alex.johnson@example.com',
-  tier: 'Premium',
-  avatar: '/api/placeholder/40/40',
-  notifications: 3,
-  streak: 12
-};
+/**
+ * Maps the real Supabase user (via useAuth) into the shape this layout expects.
+ * NEVER hardcode demo users here — that leaked into production before (Alex Johnson bug).
+ */
+function useLayoutUser() {
+  const { user } = useAuth();
+  if (!user) {
+    return { name: '', email: '', tier: 'Free', avatar: null, notifications: 0, streak: 0 };
+  }
+  const metadata = user.user_metadata ?? {};
+  return {
+    name: user.full_name || (user.email ? user.email.split('@')[0] : 'Athlete'),
+    email: user.email || '',
+    tier: metadata.tier || (user.atlas_role === 'coach' ? 'Coach' : 'Free'),
+    avatar: metadata.avatar_url || null,
+    notifications: 0, // TODO: wire to real notifications service
+    streak: metadata.streak || 0,
+  };
+}
 
 // Navigation items
 const navigationItems = [
@@ -332,6 +343,7 @@ function AppLayoutV2() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const layoutUser = useLayoutUser();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -376,7 +388,7 @@ function AppLayoutV2() {
         onItemClick={handleNavigation}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        user={mockUserData}
+        user={layoutUser}
       />
 
       {/* Main Content */}
@@ -387,9 +399,9 @@ function AppLayoutV2() {
           subtitle={getPageSubtitle()}
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
           onSearch={handleSearch}
-          notifications={mockUserData.notifications}
+          notifications={layoutUser.notifications}
           onNotifications={handleNotifications}
-          user={mockUserData}
+          user={layoutUser}
         />
 
         {/* Page Content */}

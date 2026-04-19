@@ -1,48 +1,100 @@
 /**
  * RevenueCat — In-app purchase management for atlas.core
  *
- * Handles iOS/Android subscriptions via RevenueCat SDK.
- * Only active on native platforms (Capacitor). Web uses Stripe via Supabase.
+ * Handles iOS / Android subscriptions via the RevenueCat Capacitor SDK.
+ * On web we fall through to Stripe Checkout (via the existing
+ * `create-checkout` Supabase Edge Function) since the RevenueCat web SDK
+ * doesn't ship with Capacitor.
  *
- * Entitlement: "pro"
- * Products: atlas_pro_weekly, atlas_pro_monthly, atlas_pro_annual
+ * Entitlement identifier: "pro"
+ * Products:
+ *   - atlas_core_pro_weekly   (package `$rc_weekly`)
+ *   - atlas_core_pro_monthly  (package `$rc_monthly`)
+ *   - atlas_core_pro_yearly   (package `$rc_annual`)
+ *
+ * Env vars (all optional — missing keys fall through to a clear no-op with
+ * a console.warn, so the app never crashes in dev without RevenueCat set up):
+ *   VITE_REVENUECAT_IOS_KEY       — public SDK key starting with `appl_`
+ *   VITE_REVENUECAT_ANDROID_KEY   — public SDK key starting with `goog_`
+ *   VITE_REVENUECAT_WEB_KEY       — public SDK key starting with `strp_` (RC Billing)
+ *
+ * See docs/REVENUECAT_SETUP.md for a full dashboard walk-through.
  */
 
+import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
 
-const RC_API_KEY_IOS = 'appl_GANHAhnNxGacwbbkWZtCxlORwZp';
-const RC_API_KEY_ANDROID = 'goog_REPLACE_WITH_ANDROID_KEY'; // TODO: replace with real key from RevenueCat dashboard
-const RC_API_KEY = Capacitor.getPlatform() === 'android' ? RC_API_KEY_ANDROID : RC_API_KEY_IOS;
 const ENTITLEMENT_ID = 'pro';
 
+/** Read the key for the current platform. Returns null if not configured. */
+function getApiKey() {
+  const platform = Capacitor.getPlatform();
+  if (platform === 'ios')     return import.meta.env.VITE_REVENUECAT_IOS_KEY || null;
+  if (platform === 'android') return import.meta.env.VITE_REVENUECAT_ANDROID_KEY || null;
+  return import.meta.env.VITE_REVENUECAT_WEB_KEY || null; // web — RC Billing (Stripe)
+}
+
+/** True when the SDK can actually be used on this device. */
+function isRevenueCatAvailable() {
+  // RC Capacitor SDK only supports native. Web users go through Stripe Checkout.
+  if (!Capacitor.isNativePlatform()) return false;
+  return Boolean(getApiKey());
+}
+
+let _configured = false;
+let _configuring = null;
+
 /**
- * Initialize RevenueCat — call once on app boot (native only).
- * @param {string|null} userId — Supabase user ID for cross-platform identity
+ * Configure the SDK once per app session. Safe to call multiple times; only
+ * the first call performs work. Subsequent calls await the original promise.
+ *
+ * @param {string|null} userId — Supabase user id. Pass null to configure
+ *   anonymously; call identifyUser(id) later when auth completes.
  */
 export async function initRevenueCat(userId = null) {
-  if (!Capacitor.isNativePlatform()) return;
-
-  try {
-    await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
-    await Purchases.configure({ apiKey: RC_API_KEY });
-
-    // Link RevenueCat customer to Supabase user for cross-platform sync
-    if (userId) {
-      await Purchases.logIn({ appUserID: userId });
+  if (!isRevenueCatAvailable()) {
+    if (Capacitor.isNativePlatform()) {
+      console.warn(
+        '[RevenueCat] No API key for this platform. ' +
+        'Set VITE_REVENUECAT_IOS_KEY / VITE_REVENUECAT_ANDROID_KEY in .env.local. ' +
+        'Purchases will show a friendly fallback until configured.'
+      );
     }
-
-    console.log('[RevenueCat] Configured successfully');
-  } catch (err) {
-    console.error('[RevenueCat] Configuration failed:', err);
+    return;
   }
+
+  if (_configured) {
+    if (userId) await identifyUser(userId);
+    return;
+  }
+  if (_configuring) return _configuring;
+
+  _configuring = (async () => {
+    try {
+      await Purchases.setLogLevel({ level: import.meta.env.DEV ? LOG_LEVEL.DEBUG : LOG_LEVEL.WARN });
+      await Purchases.configure({ apiKey: getApiKey() });
+      if (userId) {
+        await Purchases.logIn({ appUserID: userId });
+      }
+      _configured = true;
+      console.log('[RevenueCat] Configured');
+    } catch (err) {
+      console.error('[RevenueCat] Configuration failed:', err);
+    } finally {
+      _configuring = null;
+    }
+  })();
+
+  return _configuring;
 }
 
 /**
- * Set the Supabase user ID on RevenueCat after login.
+ * Link the RevenueCat customer to a Supabase user id. Call after sign-in.
+ * No-op if the SDK isn't available on this platform.
  */
 export async function identifyUser(userId) {
-  if (!Capacitor.isNativePlatform() || !userId) return;
+  if (!isRevenueCatAvailable() || !userId) return;
   try {
     await Purchases.logIn({ appUserID: userId });
   } catch (err) {
@@ -50,11 +102,9 @@ export async function identifyUser(userId) {
   }
 }
 
-/**
- * Clear RevenueCat identity on logout.
- */
+/** Clear RevenueCat identity on logout. */
 export async function logOutRevenueCat() {
-  if (!Capacitor.isNativePlatform()) return;
+  if (!isRevenueCatAvailable()) return;
   try {
     await Purchases.logOut();
   } catch (err) {
@@ -63,11 +113,20 @@ export async function logOutRevenueCat() {
 }
 
 /**
- * Check if user has active "atlas.core Pro" entitlement.
- * @returns {{ isActive: boolean, tier: string, expiresAt: string|null, willRenew: boolean }}
+ * Read the current entitlement state from the SDK.
+ * Returns a normalized shape so callers never have to touch raw customerInfo.
+ *
+ * @returns {{
+ *   isActive: boolean,
+ *   tier: 'free' | 'pro',
+ *   expiresAt: string | null,
+ *   willRenew: boolean,
+ *   productId?: string,
+ *   periodType?: 'NORMAL' | 'TRIAL' | 'INTRO',
+ * }}
  */
 export async function checkEntitlement() {
-  if (!Capacitor.isNativePlatform()) {
+  if (!isRevenueCatAvailable()) {
     return { isActive: false, tier: 'free', expiresAt: null, willRenew: false };
   }
 
@@ -82,7 +141,7 @@ export async function checkEntitlement() {
         expiresAt: entitlement.expirationDate || null,
         willRenew: entitlement.willRenew ?? true,
         productId: entitlement.productIdentifier,
-        periodType: entitlement.periodType, // 'normal', 'trial', 'intro'
+        periodType: entitlement.periodType, // 'NORMAL' | 'TRIAL' | 'INTRO'
       };
     }
 
@@ -94,12 +153,19 @@ export async function checkEntitlement() {
 }
 
 /**
- * Get available offerings (products/packages).
- * @param {{ currentOnly?: boolean }} options — Pass { currentOnly: true } for just the current offering
- * @returns {object|null} Full offerings object, or current offering if currentOnly is true
+ * Alias exposed to callers who think in terms of "current subscription"
+ * rather than "entitlement." Same data, friendlier name.
+ */
+export async function getCurrentSubscription() {
+  return checkEntitlement();
+}
+
+/**
+ * Fetch all offerings. Pass { currentOnly: true } to get just the current
+ * one (usually what the paywall wants). Returns null if not available.
  */
 export async function getOfferings({ currentOnly = false } = {}) {
-  if (!Capacitor.isNativePlatform()) return null;
+  if (!isRevenueCatAvailable()) return null;
 
   try {
     const { offerings } = await Purchases.getOfferings();
@@ -113,11 +179,10 @@ export async function getOfferings({ currentOnly = false } = {}) {
 
 /**
  * Set custom attributes on the RevenueCat subscriber.
- * Useful for attaching metadata like creator codes, referral info, etc.
- * @param {Record<string, string>} attrs — Key-value pairs to set
+ * Useful for attaching metadata like creator codes or referral info.
  */
 export async function setRevenueCatAttributes(attrs) {
-  if (!Capacitor.isNativePlatform() || !attrs) return;
+  if (!isRevenueCatAvailable() || !attrs) return;
   try {
     await Purchases.setAttributes(attrs);
   } catch (err) {
@@ -126,36 +191,72 @@ export async function setRevenueCatAttributes(attrs) {
 }
 
 /**
- * Purchase a package from an offering.
- * @param {{ identifier: string }} pkg — The package to purchase
- * @returns {{ success: boolean, customerInfo: object|null, error: string|null }}
+ * Purchase a package. Accepts either:
+ *   - the full package object returned from `getOfferings().current.availablePackages`
+ *   - a package identifier string like `$rc_monthly`, `$rc_weekly`, `$rc_annual`
+ *
+ * When given an identifier, we look up the matching package in the current
+ * offering before calling the SDK.
+ *
+ * @returns {{ success: boolean, customerInfo: object|null, error: string|null, userCancelled: boolean }}
  */
-export async function purchasePackage(pkg) {
-  if (!Capacitor.isNativePlatform()) {
-    return { success: false, customerInfo: null, error: 'Not on native platform' };
+export async function purchasePackage(pkgOrIdentifier) {
+  if (!isRevenueCatAvailable()) {
+    return {
+      success: false,
+      customerInfo: null,
+      error: 'billing_unavailable',
+      userCancelled: false,
+    };
+  }
+
+  let pkg = pkgOrIdentifier;
+
+  // Resolve string identifier to a package object from the current offering.
+  if (typeof pkgOrIdentifier === 'string') {
+    const current = await getOfferings({ currentOnly: true });
+    if (!current) {
+      return { success: false, customerInfo: null, error: 'no_offering', userCancelled: false };
+    }
+    const match = (current.availablePackages || []).find(
+      (p) => p.identifier === pkgOrIdentifier
+    );
+    if (!match) {
+      return {
+        success: false,
+        customerInfo: null,
+        error: `package_not_found:${pkgOrIdentifier}`,
+        userCancelled: false,
+      };
+    }
+    pkg = match;
   }
 
   try {
     const { customerInfo } = await Purchases.purchasePackage({ aPackage: pkg });
     const isActive = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== 'undefined';
-
-    return { success: isActive, customerInfo, error: null };
+    return { success: isActive, customerInfo, error: null, userCancelled: false };
   } catch (err) {
-    // User cancelled is not an error
-    if (err.code === 1 || err.userCancelled) {
-      return { success: false, customerInfo: null, error: null };
+    // User cancelling is not an error. Normalize to a clean shape.
+    if (err?.code === 1 || err?.userCancelled) {
+      return { success: false, customerInfo: null, error: null, userCancelled: true };
     }
     console.error('[RevenueCat] purchasePackage failed:', err);
-    return { success: false, customerInfo: null, error: err.message };
+    return {
+      success: false,
+      customerInfo: null,
+      error: err?.message || 'purchase_failed',
+      userCancelled: false,
+    };
   }
 }
 
 /**
- * Restore previous purchases (e.g., after reinstall).
+ * Restore previous purchases (re-install, new device, lost receipt).
  * @returns {{ success: boolean, isActive: boolean }}
  */
 export async function restorePurchases() {
-  if (!Capacitor.isNativePlatform()) {
+  if (!isRevenueCatAvailable()) {
     return { success: false, isActive: false };
   }
 
@@ -169,38 +270,23 @@ export async function restorePurchases() {
   }
 }
 
-/**
- * Present the RevenueCat native paywall.
- * @returns {Promise<boolean>} true if purchased/restored, false otherwise
- */
+/** Present the RevenueCat-hosted native paywall (optional helper). */
 export async function presentPaywall() {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!isRevenueCatAvailable()) return false;
 
   try {
     const { RevenueCatUI, PAYWALL_RESULT } = await import('@revenuecat/purchases-capacitor-ui');
     const { result } = await RevenueCatUI.presentPaywall();
-
-    switch (result) {
-      case PAYWALL_RESULT.PURCHASED:
-      case PAYWALL_RESULT.RESTORED:
-        return true;
-      case PAYWALL_RESULT.NOT_PRESENTED:
-      case PAYWALL_RESULT.ERROR:
-      case PAYWALL_RESULT.CANCELLED:
-      default:
-        return false;
-    }
+    return result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.RESTORED;
   } catch (err) {
     console.error('[RevenueCat] presentPaywall failed:', err);
     return false;
   }
 }
 
-/**
- * Present the RevenueCat Customer Center (manage subscription).
- */
+/** Present the RevenueCat Customer Center (manage subscription). */
 export async function presentCustomerCenter() {
-  if (!Capacitor.isNativePlatform()) return;
+  if (!isRevenueCatAvailable()) return;
 
   try {
     const { RevenueCatUI } = await import('@revenuecat/purchases-capacitor-ui');
@@ -211,12 +297,20 @@ export async function presentCustomerCenter() {
 }
 
 /**
- * Listen for customer info updates (subscription changes).
- * @param {Function} callback — Called with updated customerInfo
- * @returns {Function} Cleanup function to remove listener
+ * Subscribe to customer-info updates. The callback fires whenever the user's
+ * entitlement state changes (purchase, renewal, cancellation, expiration).
+ *
+ * @param {(state: {
+ *   isActive: boolean,
+ *   tier: 'free' | 'pro',
+ *   expiresAt: string | null,
+ *   willRenew: boolean,
+ *   customerInfo: object,
+ * }) => void} callback
+ * @returns {() => void} Cleanup — call to remove the listener.
  */
 export function onCustomerInfoUpdate(callback) {
-  if (!Capacitor.isNativePlatform()) return () => {};
+  if (!isRevenueCatAvailable()) return () => {};
 
   const listener = Purchases.addCustomerInfoUpdateListener(({ customerInfo }) => {
     const entitlement = customerInfo.entitlements.active[ENTITLEMENT_ID];
@@ -225,6 +319,8 @@ export function onCustomerInfoUpdate(callback) {
       tier: entitlement ? 'pro' : 'free',
       expiresAt: entitlement?.expirationDate || null,
       willRenew: entitlement?.willRenew ?? false,
+      productId: entitlement?.productIdentifier,
+      periodType: entitlement?.periodType,
       customerInfo,
     });
   });
@@ -232,4 +328,73 @@ export function onCustomerInfoUpdate(callback) {
   return () => listener?.remove?.();
 }
 
-export { ENTITLEMENT_ID, RC_API_KEY };
+/* ─────────────────────────────────────────────────────────────────────────
+ * React hook
+ *
+ * A lightweight hook for components that only need the current RC entitlement
+ * state and don't want to pull in the global SubscriptionContext (which also
+ * merges Supabase / Stripe web purchases).
+ *
+ * Shape:
+ *   {
+ *     tier: 'free' | 'pro',
+ *     status: 'active' | 'trialing' | 'inactive' | 'loading' | 'unavailable',
+ *     productId: string | null,
+ *     renewsAt: string | null,
+ *     willRenew: boolean,
+ *     isLoading: boolean,
+ *     error: Error | null,
+ *   }
+ * ───────────────────────────────────────────────────────────────────────── */
+
+export function useSubscription() {
+  const available = isRevenueCatAvailable();
+  const [state, setState] = useState(() => ({
+    tier: 'free',
+    status: available ? 'loading' : 'unavailable',
+    productId: null,
+    renewsAt: null,
+    willRenew: false,
+    isLoading: available,
+    error: null,
+  }));
+
+  useEffect(() => {
+    if (!available) return undefined;
+
+    let cancelled = false;
+
+    function apply(rc) {
+      if (cancelled) return;
+      setState({
+        tier: rc.tier,
+        status: rc.isActive
+          ? (rc.periodType === 'TRIAL' ? 'trialing' : 'active')
+          : 'inactive',
+        productId: rc.productId || null,
+        renewsAt: rc.expiresAt || null,
+        willRenew: rc.willRenew ?? false,
+        isLoading: false,
+        error: null,
+      });
+    }
+
+    checkEntitlement()
+      .then(apply)
+      .catch((err) => {
+        if (cancelled) return;
+        setState((prev) => ({ ...prev, isLoading: false, error: err }));
+      });
+
+    const cleanup = onCustomerInfoUpdate(apply);
+
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
+  }, [available]);
+
+  return state;
+}
+
+export { ENTITLEMENT_ID, isRevenueCatAvailable };

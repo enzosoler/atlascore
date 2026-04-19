@@ -3,6 +3,7 @@
  * All take { open, onClose } to match Sheet/Dialog/FullScreenModal API.
  */
 import React, { useState } from 'react';
+export { ResetAccountDialog } from './ResetAccountDialog';
 import { Sheet, Dialog, FullScreenModal, Button, Input, Badge, Switch, SearchInput, ListRow, Chip } from '../ui';
 import { QuickAddSheet as NutritionQuickAdd, FoodSearchPanel, PhotoScanConfirm, SaveOfferCard, ShareCardPreview, CreatorCodeEntry, BodyCheckIn as BodyCheckInCard, CoachMessage, CoachComposer } from '../modules';
 import { mockMeals, mockPlans, mockCoachMessages } from '../lib/mock-data';

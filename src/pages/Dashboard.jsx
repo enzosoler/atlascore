@@ -26,17 +26,23 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+import { useAuth } from '@/lib/AuthContext';
+
 // Import design system classes
 import '@/styles/design-system.css';
 
-// Mock data - replace with real hooks
+// Mock data — ONLY used as shape fallback for UI skeleton.
+// User fields are overridden from AuthContext at render time so no one ever
+// sees "Alex" again. Fitness stats below (streak, workouts) remain TODO — they
+// need to be wired to the real workout/streak services; until then they render
+// as zeros on accounts that have no data yet.
 const mockData = {
   user: {
-    name: 'Alex',
-    streak: 12,
+    name: '',
+    streak: 0,
     weeklyGoal: 5,
-    completedWorkouts: 3,
-    totalWorkouts: 127
+    completedWorkouts: 0,
+    totalWorkouts: 0
   },
   today: {
     caloriesRemaining: 450,
@@ -336,6 +342,14 @@ function RecentAchievements({ achievements }) {
 function Dashboard() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+
+  // Pull the REAL first name from the authenticated user.
+  // Falls back to the part before "@" in the email, then to a neutral greeting.
+  const displayName =
+    (user?.full_name || '').split(' ')[0] ||
+    (user?.email ? user.email.split('@')[0] : '') ||
+    'there';
 
   useEffect(() => {
     // Simulate loading
@@ -361,7 +375,7 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="display-sm text-white mb-1">Welcome back, {mockData.user.name}</h1>
+              <h1 className="display-sm text-white mb-1">Welcome back, {displayName}</h1>
               <p className="text-gray-400">Ready to crush your goals today?</p>
             </div>
             <StreakCounter streak={mockData.user.streak} />

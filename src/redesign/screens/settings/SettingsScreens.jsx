@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import { SettingsShell, AppShell } from '../../layouts';
 import { PageHeader, Button, Card, CardBody, Badge, Switch, Input, Avatar } from '../../ui';
 import { ProfileHeader, SettingsGroup, SettingsRow, IntegrationTile, SubscriptionSummaryTile } from '../../modules';
+import { ResetAccountDialog } from '../../overlays/ResetAccountDialog';
 import { mockUser } from '../../lib/mock-data';
 
 export function SettingsHub() {
+  const [resetOpen, setResetOpen] = useState(false);
+  const { logout } = useAuth();
   return (
     <AppShell current="settings" topBar={<PageHeader title="Settings" />}>
       <ProfileHeader user={mockUser} />
@@ -21,14 +25,22 @@ export function SettingsHub() {
           <SettingsRow icon="🔌" title="Integrations"  subtitle="HealthKit, Whoop…" onClick={() => {}} />
         </SettingsGroup>
         <SettingsGroup title="Data">
-          <SettingsRow icon="⬇"  title="Export data" onClick={() => {}} />
-          <SettingsRow icon="♻"  title="Start fresh" subtitle="Reset onboarding"      onClick={() => {}} />
+          <SettingsRow icon="⬇" title="Export data" onClick={() => {}} />
+          <SettingsRow
+            icon="↻"
+            title="Start fresh"
+            subtitle="Wipe logs, keep biometrics + Pro. Redo onboarding."
+            destructive
+            onClick={() => setResetOpen(true)}
+          />
         </SettingsGroup>
         <SettingsGroup title="Danger zone">
-          <SettingsRow icon="←"  title="Sign out"     onClick={() => {}} />
-          <SettingsRow icon="✕"  title="Delete account" destructive onClick={() => {}} />
+          <SettingsRow icon="←" title="Sign out" onClick={() => logout?.()} />
+          <SettingsRow icon="✕" title="Delete account" destructive onClick={() => {}} />
         </SettingsGroup>
       </div>
+
+      <ResetAccountDialog open={resetOpen} onClose={() => setResetOpen(false)} />
     </AppShell>
   );
 }
@@ -128,17 +140,37 @@ export function DataExport() {
 }
 
 export function DangerZone() {
+  const [resetOpen, setResetOpen] = useState(false);
+  const { logout } = useAuth();
   return (
     <SettingsShell current="/app/settings/danger">
-      <SettingsGroup title="Start over">
-        <SettingsRow title="Reset onboarding" subtitle="Keeps your data, restarts questions" onClick={() => {}} />
+      <SettingsGroup title="Start fresh" description="For when you've drifted and want to begin again from zero.">
+        <SettingsRow
+          icon="↻"
+          title="Reset account"
+          subtitle="Wipe all logs, keep your biometrics + Pro. Redo onboarding."
+          destructive
+          onClick={() => setResetOpen(true)}
+        />
       </SettingsGroup>
       <div className="mt-6">
-        <SettingsGroup title="Permanent">
-          <SettingsRow title="Sign out"       onClick={() => {}} />
-          <SettingsRow title="Delete account" subtitle="All data removed within 30 days" destructive onClick={() => {}} />
+        <SettingsGroup title="Session">
+          <SettingsRow title="Sign out" onClick={() => logout?.()} />
         </SettingsGroup>
       </div>
+      <div className="mt-6">
+        <SettingsGroup title="Permanent">
+          <SettingsRow
+            icon="✕"
+            title="Delete account"
+            subtitle="All data removed within 30 days. This cannot be undone."
+            destructive
+            onClick={() => { /* TODO: wire DeleteAccountDialog — edge fn admin-delete-user */ }}
+          />
+        </SettingsGroup>
+      </div>
+
+      <ResetAccountDialog open={resetOpen} onClose={() => setResetOpen(false)} />
     </SettingsShell>
   );
 }

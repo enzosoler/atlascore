@@ -15,6 +15,10 @@ import SocialProofScreen from './screens/SocialProofScreen';
 import CommitmentScreen from './screens/CommitmentScreen';
 import TrialExplainerScreen from './screens/TrialExplainerScreen';
 import PaywallScreen from './screens/PaywallScreen';
+import PostOnboardingPaywall from './screens/PostOnboardingPaywall';
+import DietaryPreferences from './screens/DietaryPreferences';
+import LifestyleHabits from './screens/LifestyleHabits';
+import PersonalizedSummary from './screens/PersonalizedSummary';
 import AccountCreationScreen from './screens/AccountCreationScreen';
 import ConnectedAppsScreen from './screens/ConnectedAppsScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
@@ -43,7 +47,7 @@ const slideTransition = {
   opacity: { duration: 0.2 },
 };
 
-const IMMERSIVE_TYPES = new Set(['splash', 'hook', 'building', 'projection', 'trial-explainer', 'paywall', 'account-creation']);
+const IMMERSIVE_TYPES = new Set(['splash', 'hook', 'building', 'projection', 'trial-explainer', 'paywall', 'post-onboarding-paywall', 'personalized-summary', 'account-creation']);
 
 /* ------------------------------------------------------------------ */
 /*  Inline screen renderers                                           */
@@ -372,6 +376,18 @@ function ScreenRenderer({ screen, answers, setAnswer, toggleAnswer, goNext }) {
     case 'paywall':
       return <PaywallScreen />;
 
+    case 'post-onboarding-paywall':
+      return <PostOnboardingPaywall />;
+
+    case 'dietary-preferences':
+      return <DietaryPreferences />;
+
+    case 'lifestyle-habits':
+      return <LifestyleHabits />;
+
+    case 'personalized-summary':
+      return <PersonalizedSummary />;
+
     case 'account-creation':
       return <AccountCreationScreen />;
 
@@ -401,6 +417,8 @@ const HIDE_CONTINUE_TYPES = new Set([
   'commitment',
   'trial-explainer',
   'paywall',
+  'post-onboarding-paywall',
+  'personalized-summary',
   'account-creation',
   'connected-apps',
   'notifications',

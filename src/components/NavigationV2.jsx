@@ -26,6 +26,7 @@ import {
   Zap,
   LogOut
 } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 // Import design system classes
 import '@/styles/design-system.css';
@@ -208,20 +209,45 @@ function SidebarNavigation({ items, activePath, onItemClick, isOpen, onClose }) 
           </nav>
           
           {/* Footer */}
-          <div className="p-4 border-t border-white/10">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-blue-500 p-1 mx-auto mb-3">
-                <div className="w-full h-full rounded-full bg-base-100 flex items-center justify-center">
-                  <User className="w-6 h-6 text-gray-400" />
-                </div>
-              </div>
-              <p className="text-white font-medium text-sm">Alex Johnson</p>
-              <p className="text-gray-400 text-xs">Premium Member</p>
-            </div>
-          </div>
+          <SidebarUserFooter />
+
         </div>
       </aside>
     </>
+  );
+}
+
+// Sidebar user footer — reads REAL user from AuthContext (no mock Alex Johnson)
+function SidebarUserFooter() {
+  const { user } = useAuth();
+  const name = user?.full_name || (user?.email ? user.email.split('@')[0] : 'Athlete');
+  const tierLabel =
+    user?.user_metadata?.tier ||
+    (user?.atlas_role === 'coach' ? 'Coach' : 'Member');
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const initials = name
+    .split(/\s+/)
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+  return (
+    <div className="p-4 border-t border-white/10" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-blue-500 p-[2px] mx-auto mb-3">
+          <div className="w-full h-full rounded-full bg-base-100 flex items-center justify-center overflow-hidden">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white text-[12px] font-semibold tracking-tight">{initials || '·'}</span>
+            )}
+          </div>
+        </div>
+        <p className="text-white font-medium text-sm truncate max-w-[200px] mx-auto" title={name}>{name || '—'}</p>
+        <p className="text-gray-400 text-xs truncate max-w-[200px] mx-auto">{tierLabel}</p>
+      </div>
+    </div>
   );
 }
 

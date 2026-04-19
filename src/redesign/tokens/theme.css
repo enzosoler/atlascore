@@ -7,9 +7,9 @@
 /* ── Fonts ──────────────────────────────────────────────────────────────
    SF Pro is Apple-licensed and can't be redistributed, so we use the
    native stack: `-apple-system` / `BlinkMacSystemFont` renders SF Pro on
-   macOS & iOS. Inter is loaded from Google Fonts as the web fallback
-   — near-identical metrics, keeps the premium feel on Windows/Android. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;650;700&display=swap');
+   macOS & iOS. Inter (Windows/Android web fallback) is loaded via a
+   <link rel="stylesheet"> in index.html to avoid @import-ordering issues
+   when this file is inlined into src/index.css. */
 
 
 :root,

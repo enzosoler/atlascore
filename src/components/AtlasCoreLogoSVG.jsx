@@ -3,12 +3,11 @@ import { cn } from '@/lib/utils';
 /**
  * AtlasCoreLogoSVG — brand mark component.
  *
- * variant="icon"    (default) — square gradient wave PNG mark only.
+ * variant="icon"    (default) — square brand app icon.
  *                               Use in headers/nav where text is separate.
  *
- * variant="lockup"            — full logo: 3D wave mark + "atlas.core" text
- *                               below. Square aspect ratio. Use on loading
- *                               screens, auth pages, and standalone displays.
+ * variant="lockup"            — full lockup asset.
+ *                               Use on loading screens, auth pages, and standalone displays.
  *
  * `width` controls the rendered size in both variants.
  * `color` and `height` are accepted for backwards-compatibility but unused.
@@ -18,13 +17,13 @@ export default function AtlasCoreLogoSVG({
   height,   // unused — always square
   variant = 'icon',
   className = '',
-  color,    // unused — gradient is baked in
+  color,    // unused — brand asset is baked in
   alt = 'atlas.core',
 }) {
   if (variant === 'lockup') {
     return (
       <img
-        src="/branding/logo-lockup.svg"
+        src="/branding/v3/svg/lockup-stacked.svg"
         width={width}
         height={width}
         alt={alt}
@@ -36,7 +35,7 @@ export default function AtlasCoreLogoSVG({
 
   return (
     <img
-      src="/branding/dark/icon-192.png"
+      src="/branding/v3/app-icon/paper-192.png"
       width={width}
       height={width}
       alt={alt}

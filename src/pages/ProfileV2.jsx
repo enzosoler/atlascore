@@ -37,46 +37,64 @@ import {
   BarChart3
 } from 'lucide-react';
 
+import { useAuth } from '@/lib/AuthContext';
+
 // Import design system classes
 import '@/styles/design-system.css';
 
-// Mock user data
-const mockUserData = {
-  profile: {
-    name: 'Alex Johnson',
-    email: 'alex.johnson@example.com',
-    location: 'San Francisco, CA',
-    memberSince: '2024-01-15',
-    avatar: '/api/placeholder/150/150',
-    bio: 'Fitness enthusiast focused on strength training and nutrition. Love tracking progress and pushing my limits.',
-    level: 'Advanced',
-    tier: 'Premium'
-  },
-  stats: {
-    totalWorkouts: 127,
-    currentStreak: 12,
-    longestStreak: 28,
-    totalCalories: 15420,
-    personalRecords: 8,
-    achievements: 24,
-    workoutHours: 96
-  },
-  achievements: [
-    { id: 1, name: 'Early Bird', description: '50 morning workouts', icon: <Zap className="w-4 h-4" />, earned: true, date: '2024-03-01' },
-    { id: 2, name: 'Consistency King', description: '30-day streak', icon: <Flame className="w-4 h-4" />, earned: true, date: '2024-02-15' },
-    { id: 3, name: 'Iron Will', description: '100 workouts completed', icon: <Trophy className="w-4 h-4" />, earned: true, date: '2024-03-10' },
-    { id: 4, name: 'Beast Mode', description: '200 workouts completed', icon: <Activity className="w-4 h-4" />, earned: false },
-    { id: 5, name: 'Calorie Crusher', description: '50,000 calories burned', icon: <Target className="w-4 h-4" />, earned: false },
-    { id: 6, name: 'Marathon Runner', description: '1000 miles logged', icon: <TrendingUp className="w-4 h-4" />, earned: false }
-  ],
-  preferences: {
-    notifications: true,
-    darkMode: true,
-    units: 'imperial',
-    language: 'en',
-    privateProfile: false
-  }
-};
+/**
+ * Builds profile payload from the REAL authenticated Supabase user.
+ * Stats/achievements are placeholders (zero/empty) until the real services are wired.
+ * NEVER reintroduce a hardcoded "Alex Johnson" — that shipped to production once already.
+ */
+function useRealProfileData() {
+  const { user } = useAuth();
+  const metadata = user?.user_metadata ?? {};
+  const fallbackName = user?.email ? user.email.split('@')[0] : '';
+  const createdAt =
+    metadata.created_at ||
+    user?.raw_user?.created_at ||
+    user?.raw_user?.confirmed_at ||
+    null;
+  return {
+    profile: {
+      name: user?.full_name || fallbackName || '—',
+      email: user?.email || '',
+      location: metadata.location || '',
+      memberSince: createdAt ? new Date(createdAt).toISOString().slice(0, 10) : null,
+      avatar: metadata.avatar_url || null,
+      bio: metadata.bio || '',
+      level: metadata.level || '',
+      tier:
+        metadata.tier ||
+        (user?.atlas_role === 'coach'
+          ? 'Coach'
+          : user?.atlas_role === 'admin'
+          ? 'Admin'
+          : 'Free'),
+    },
+    stats: {
+      totalWorkouts: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      totalCalories: 0,
+      personalRecords: 0,
+      achievements: 0,
+      workoutHours: 0,
+    },
+    // No achievements until the real achievement service feeds this.
+    // The 6 hardcoded entries that lived here before were demo copy and
+    // showed false personal records to real users.
+    achievements: [],
+    preferences: {
+      notifications: true,
+      darkMode: true,
+      units: 'imperial',
+      language: 'en',
+      privateProfile: false,
+    },
+  };
+}
 
 // Profile Header Component
 function ProfileHeader({ profile, onEdit }) {
@@ -295,13 +313,18 @@ function QuickActions() {
 
 // Main Profile Component
 function ProfileV2() {
-  const [userData, setUserData] = useState(mockUserData);
+  const realProfile = useRealProfileData();
+  const [userData, setUserData] = useState(realProfile);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Keep local userData in sync if auth user changes (login/logout/refresh).
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => setIsLoading(false), 1000);
+    setUserData(realProfile);
+  }, [realProfile.profile.email, realProfile.profile.name, realProfile.profile.avatar]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
     return () => clearTimeout(timer);
   }, []);
 
