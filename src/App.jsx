@@ -42,7 +42,7 @@ import {
 } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { DailyStoreProvider } from '@/store/dailyStore';
-import { ThemeProvider } from '@/lib/ThemeContext';
+import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
 import { I18nProvider } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
@@ -164,9 +164,11 @@ import WorkoutDetail         from '@/redesign/v2/workouts/WorkoutDetail';
 import WorkoutHistory        from '@/redesign/v2/workouts/WorkoutHistory';
 import ManualWorkoutPlan     from '@/redesign/v2/workouts/ManualWorkoutPlan';
 import CoachInsightDetail    from '@/redesign/v2/coach/CoachInsightDetail';
-import WeightEntry           from '@/redesign/v2/body/WeightEntry';
 import BodyCheckIn           from '@/redesign/v2/body/BodyCheckIn';
-import { MeasurementsRoute }              from '@/redesign/v2/body/Measurements.jsx';
+// V2 WeightEntry and MeasurementsRoute are replaced by v3 screens (S6, S17).
+// Kept unimported; the v2 files remain on disk as migration debt.
+import S6_Weight_B            from '@/redesign/v3/screens/S6_Weight_B.jsx';
+import S17_Measurements_Entry from '@/redesign/v3/screens/S17_Measurements_Entry.jsx';
 import { BodyCompositionHistoryRoute }    from '@/redesign/v2/body/BodyCompositionHistory.jsx';
 import { ProgressComparisonRoute }        from '@/redesign/v2/body/ProgressComparison.jsx';
 import { ProfileEditorRoute } from '@/redesign/v2/profile/ProfileEditor';
@@ -805,11 +807,14 @@ function DangerZoneRoute() {
 
 function WeightEntryRoute() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   return (
-    <WeightEntry
-      onCancel={() => navigate(-1)}
+    <S6_Weight_B
+      dark={theme === 'dark'}
+      onBack={() => navigate(-1)}
       onSave={(entry) => {
         // TODO: persist to bodyProgressService.logWeight(entry)
+        // entry shape: { weight: number, unit: string, when: string (ISO) }
         console.log('Weight logged', entry);
         toast.success('Weight logged \u2192 tracking updated', {
           description: 'View history to see your trend.',
@@ -821,6 +826,24 @@ function WeightEntryRoute() {
         navigate('/app/body');
       }}
       onViewHistory={() => navigate('/app/body/composition')}
+    />
+  );
+}
+
+function MeasurementsRoute() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  return (
+    <S17_Measurements_Entry
+      dark={theme === 'dark'}
+      onClose={() => navigate(-1)}
+      onSave={(measurements) => {
+        // TODO: persist to bodyProgressService.logMeasurements(measurements)
+        // measurements shape: { chest?, waist?, hips?, arm?, thigh?, neck? }
+        console.log('Measurements logged', measurements);
+        toast.success('Measurements saved');
+        navigate('/app/body');
+      }}
     />
   );
 }
