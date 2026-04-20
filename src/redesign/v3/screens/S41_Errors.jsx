@@ -14,15 +14,19 @@ import {
  * Props:
  *   dark           — light/dark variant
  *   initialTab     — 'conflict' | 'server' | 'limit' | 'offline'
+ *   conflicts      — [{src, t, reps, w, rpe}] conflicting sets; falls back to demo
+ *   offlineQueue   — [{t, at}] items waiting to sync; falls back to demo
  *   onBack         — back navigation
- *   onRetry        — retry action (500, offline)
- *   onResolve      — resolve conflict (conflict tab)
- *   onKeepBoth     — keep both conflicting sets
- *   onNotifyReady  — rate limit: notify when ready
+ *   onRetry({tab}) — retry action; tab = 'server' | 'offline'
+ *   onResolve(item)— resolve conflict with the selected conflict item
+ *   onKeepBoth()   — keep both conflicting sets
+ *   onNotifyReady()— rate limit: notify when ready
  */
 function S41_Errors({
   dark = false,
   initialTab = 'conflict',
+  conflicts,
+  offlineQueue,
   onBack,
   onRetry,
   onResolve,
@@ -63,16 +67,25 @@ function S41_Errors({
       </div>
 
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '14px 22px 22px' }}>
-        {tab === 'conflict' && <ErrConflict c={c} dark={dark} onResolve={onResolve} onKeepBoth={onKeepBoth} />}
-        {tab === 'server'   && <ErrServer c={c} dark={dark} onRetry={onRetry} />}
+        {tab === 'conflict' && <ErrConflict c={c} dark={dark} conflicts={conflicts} onResolve={onResolve} onKeepBoth={onKeepBoth} />}
+        {tab === 'server'   && <ErrServer c={c} dark={dark} onRetry={() => onRetry?.({ tab: 'server' })} />}
         {tab === 'limit'    && <ErrLimit c={c} dark={dark} onNotifyReady={onNotifyReady} />}
-        {tab === 'offline'  && <ErrOffline c={c} dark={dark} onRetry={onRetry} />}
+        {tab === 'offline'  && <ErrOffline c={c} dark={dark} offlineQueue={offlineQueue} onRetry={() => onRetry?.({ tab: 'offline' })} />}
       </div>
     </div>
   );
 }
 
-function ErrConflict({ c, dark, onResolve, onKeepBoth }) {
+const DEMO_CONFLICTS = [
+  { src: 'Watch', t: '15:42', reps: 1, w: 415, rpe: 9.0 },
+  { src: 'Phone', t: '15:43', reps: 2, w: 415, rpe: 8.5 },
+];
+
+function ErrConflict({ c, dark, conflicts, onResolve, onKeepBoth }) {
+  const items = conflicts || DEMO_CONFLICTS;
+  const [selected, setSelected] = React.useState(items[0]?.src ?? null);
+  const selectedItem = items.find((r) => r.src === selected) ?? items[0];
+
   return (
     <div>
       <ACLabel size={10} color="#c2391a" style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase' }}>
@@ -89,45 +102,47 @@ function ErrConflict({ c, dark, onResolve, onKeepBoth }) {
       </div>
 
       <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {[
-          { src: 'Watch', t: '15:42', reps: 1, w: 415, rpe: 9.0, hi: true },
-          { src: 'Phone', t: '15:43', reps: 2, w: 415, rpe: 8.5 },
-        ].map((r, i) => (
-          <div key={i} style={{
-            padding: 16, borderRadius: ACRadii.card,
-            border: r.hi ? `2px solid ${c.accent}` : `1px solid ${c.hair}`,
-            background: c.card,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase' }}>
-                {r.src} · logged {r.t}
-              </ACLabel>
-              {r.hi && <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.5 }}>KEEP</ACLabel>}
-            </div>
-            <div style={{ marginTop: 10, display: 'flex', alignItems: 'baseline', gap: 14 }}>
-              <div>
-                <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5 }}>REPS × WEIGHT</ACLabel>
-                <div style={{
-                  fontFamily: ACFonts.display, fontSize: 24, fontWeight: 700,
-                  letterSpacing: -0.7, color: c.fg, fontVariantNumeric: 'tabular-nums',
-                }}>
-                  {r.reps} × {r.w}<span style={{ fontFamily: ACFonts.mono, fontSize: 10, color: c.dim, marginLeft: 3 }}>lb</span>
+        {items.map((r) => {
+          const isSelected = r.src === selected;
+          return (
+            <button key={r.src} type="button" onClick={() => setSelected(r.src)} style={{
+              padding: 16, borderRadius: ACRadii.card,
+              border: isSelected ? `2px solid ${c.accent}` : `1px solid ${c.hair}`,
+              background: c.card, width: '100%', textAlign: 'left', cursor: 'pointer',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase' }}>
+                  {r.src} · logged {r.t}
+                </ACLabel>
+                {isSelected && <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.5 }}>KEEP</ACLabel>}
+              </div>
+              <div style={{ marginTop: 10, display: 'flex', alignItems: 'baseline', gap: 14 }}>
+                <div>
+                  <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5 }}>REPS × WEIGHT</ACLabel>
+                  <div style={{
+                    fontFamily: ACFonts.display, fontSize: 24, fontWeight: 700,
+                    letterSpacing: -0.7, color: c.fg, fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {r.reps} × {r.w}<span style={{ fontFamily: ACFonts.mono, fontSize: 10, color: c.dim, marginLeft: 3 }}>lb</span>
+                  </div>
+                </div>
+                <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+                  <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5 }}>RPE</ACLabel>
+                  <div style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, color: c.fg, letterSpacing: -0.5 }}>{r.rpe}</div>
                 </div>
               </div>
-              <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5 }}>RPE</ACLabel>
-                <div style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, color: c.fg, letterSpacing: -0.5 }}>{r.rpe}</div>
-              </div>
-            </div>
-          </div>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ marginTop: 22 }}>
-        <ACBtn primary dark={dark} size="lg" pill block onClick={onResolve}>Keep watch · discard phone</ACBtn>
+        <ACBtn primary dark={dark} size="lg" pill block onClick={() => onResolve?.(selectedItem)}>
+          Keep {selected?.toLowerCase()} · discard other
+        </ACBtn>
       </div>
       <div style={{ marginTop: 10, textAlign: 'center' }}>
-        <button type="button" onClick={onKeepBoth} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+        <button type="button" onClick={() => onKeepBoth?.(items)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
           <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.4, textTransform: 'uppercase' }}>
             Keep both as separate sets
           </ACLabel>
@@ -251,14 +266,16 @@ function ErrLimit({ c, dark, onNotifyReady }) {
   );
 }
 
-function ErrOffline({ c, dark, onRetry }) {
-  const queue = [
-    { t: 'Deadlift · set 4 · 415×1', at: '15:42' },
-    { t: 'Deadlift · set 5 · 415×1', at: '15:47' },
-    { t: 'Fuel · chicken · 6 oz',    at: '12:41' },
-    { t: 'Bodyweight · 182.4 lb',     at: '08:02' },
-    { t: 'Sleep sync · 7:42',         at: '07:00' },
-  ];
+const DEMO_QUEUE = [
+  { t: 'Deadlift · set 4 · 415×1', at: '15:42' },
+  { t: 'Deadlift · set 5 · 415×1', at: '15:47' },
+  { t: 'Fuel · chicken · 6 oz',    at: '12:41' },
+  { t: 'Bodyweight · 182.4 lb',     at: '08:02' },
+  { t: 'Sleep sync · 7:42',         at: '07:00' },
+];
+
+function ErrOffline({ c, dark, offlineQueue, onRetry }) {
+  const queue = offlineQueue || DEMO_QUEUE;
   return (
     <div>
       <style>{`@keyframes ac-spin { to { transform: rotate(360deg); } }`}</style>
@@ -299,7 +316,7 @@ function ErrOffline({ c, dark, onRetry }) {
 
       <div style={{ marginTop: 22 }}>
         <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, textTransform: 'uppercase' }}>
-          Waiting · {queue.length} items
+          Queue · {queue.length} item{queue.length !== 1 ? 's' : ''}
         </ACLabel>
         <div style={{ marginTop: 10 }}>
           {queue.map((q, i) => (
