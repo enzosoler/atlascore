@@ -23,15 +23,13 @@ function getBuildLocale() {
 }
 
 /**
- * Detect locale from browser language (navigator.language).
- * Portuguese → 'pt-BR', Spanish → 'es', otherwise 'en'.
+ * Browser language detection is intentionally disabled.
+ * Marketing page content is not yet fully wired through t(), so auto-detecting
+ * Portuguese from the device/browser produces a mixed-language UI (PT nav + EN body).
+ * Default to 'en' and let users pick PT explicitly via the toggle or the /br/ build.
  */
 function getBrowserLocale() {
-  if (typeof navigator === 'undefined') return defaultLocale;
-  const lang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-  if (lang.startsWith('pt')) return 'pt-BR';
-  if (lang.startsWith('es')) return 'es';
-  return 'en';
+  return defaultLocale;
 }
 
 /**
