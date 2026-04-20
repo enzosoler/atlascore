@@ -70,8 +70,51 @@ function PermIcon({ k, on }) {
   return null;
 }
 
-function S11_Onboard_Permissions({ dark = false, onBack, onContinue, onSkip }) {
+function S11_Onboard_Permissions({
+  dark = false,
+  onBack,
+  onContinue,
+  onSkip,
+  value,
+  onChange,
+}) {
   const c = useACT(dark);
+  const [perms, setPerms] = React.useState(value || {
+    health: false,
+    notif: false,
+    whoop: false,
+  });
+
+  function toggle(k) {
+    const next = { ...perms, [k]: !perms[k] };
+    setPerms(next);
+    onChange?.(next);
+  }
+
+  const items = [
+    {
+      k: 'health',
+      t: 'Apple Health',
+      d: 'HRV, sleep, steps, heart rate',
+      status: perms.health ? 'Connected' : 'Connect',
+      on: perms.health,
+    },
+    {
+      k: 'notif',
+      t: 'Notifications',
+      d: 'Coach check-ins, workout reminders',
+      status: perms.notif ? 'Enabled' : 'Enable',
+      on: perms.notif,
+    },
+    {
+      k: 'whoop',
+      t: 'Whoop / Oura',
+      d: 'Optional · import recovery scores',
+      status: perms.whoop ? 'Connected' : 'Connect',
+      on: perms.whoop,
+    },
+  ];
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <OBHeader step={5} total={10} dark={dark} onBack={onBack} />
@@ -89,39 +132,26 @@ function S11_Onboard_Permissions({ dark = false, onBack, onContinue, onSkip }) {
         </div>
 
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {[
-            {
-              k: 'health',
-              t: 'Apple Health',
-              d: 'HRV, sleep, steps, heart rate',
-              status: 'Connected', on: true,
-            },
-            {
-              k: 'notif',
-              t: 'Notifications',
-              d: 'Coach check-ins, workout reminders',
-              status: 'Enable', on: false,
-            },
-            {
-              k: 'whoop',
-              t: 'Whoop / Oura',
-              d: 'Optional · import recovery scores',
-              status: 'Skip for now', on: false, muted: true,
-            },
-          ].map((p, i) => (
-            <div key={i} style={{
-              padding: 18, borderRadius: ACRadii.card,
-              background: c.card,
-              display: 'flex', alignItems: 'center', gap: 14,
-              opacity: p.muted ? 0.6 : 1,
-            }}>
+          {items.map((p, i) => (
+            <button
+              key={p.k}
+              type="button"
+              onClick={() => toggle(p.k)}
+              style={{
+                padding: 18, borderRadius: ACRadii.card,
+                background: c.card,
+                display: 'flex', alignItems: 'center', gap: 14,
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                width: '100%',
+              }}
+            >
               <PermIcon k={p.k} on={p.on} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 15, fontWeight: 600, color: c.fg }}>{p.t}</div>
                 <ACLabel size={12} color={c.dim}>{p.d}</ACLabel>
               </div>
               <ACChip accent={p.on} dark={dark}>{p.status}</ACChip>
-            </div>
+            </button>
           ))}
         </div>
 

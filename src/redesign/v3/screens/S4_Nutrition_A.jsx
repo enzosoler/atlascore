@@ -256,7 +256,6 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture, onOpenMeal, on
                 {items.map((it, i) => (
                   <button key={it.id || i} type="button" onClick={() => onOpenMeal?.(it.id || it.name)} style={{
                     display: 'flex', padding: '12px 0', alignItems: 'flex-start',
-                    borderTop: `1px solid ${c.hair}`,
                     background: 'transparent', border: 'none', borderTop: `1px solid ${c.hair}`,
                     width: '100%', textAlign: 'left', cursor: onOpenMeal ? 'pointer' : 'default',
                   }}>

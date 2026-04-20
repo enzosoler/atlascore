@@ -4,6 +4,40 @@ import {
   ACLabel, ACNum, ACBtn,
 } from '../lib/paper.jsx';
 
+/**
+ * S25_Program_Detail — program deep-dive with stats, adaptations, wave structure.
+ *
+ * Gallery:    <S25_Program_Detail dark />
+ * Production: <S25_Program_Detail dark programCode="PROGRAM 014"
+ *               matchLabel="86% match" title="5/3/1 BBB" accentWord="BBB"
+ *               meta="BY JIM WENDLER · 16 WK · 4 D/WK" description="..."
+ *               stats={[{k,v},...]} adaptations={[{lift,now,proj,unit},...]}
+ *               waves={[{n,tag,pct,sets},...]}
+ *               crewAvatars={['JK','MR','LA','SO']} crewCount={4} crewGain="+28 lb on squat"
+ *               onBack={fn} onSave={fn} onPreviewWeek={fn} onStartProgram={fn} />
+ */
+
+const DEMO_STATS = [
+  { k: 'Weeks',    v: '16' },
+  { k: 'Days/wk',  v: '4' },
+  { k: 'Sets/sess', v: '28' },
+  { k: 'Runners',  v: '12.4k' },
+];
+
+const DEMO_ADAPTATIONS = [
+  { lift: 'Squat',    now: 325, proj: 355, unit: 'lb' },
+  { lift: 'Bench',    now: 275, proj: 295, unit: 'lb' },
+  { lift: 'Deadlift', now: 415, proj: 445, unit: 'lb' },
+  { lift: 'OHP',      now: 165, proj: 180, unit: 'lb' },
+];
+
+const DEMO_WAVES = [
+  { n: 1, tag: '5s week', pct: '65/75/85', sets: '×5' },
+  { n: 2, tag: '3s week', pct: '70/80/90', sets: '×3' },
+  { n: 3, tag: '1s week', pct: '75/85/95', sets: '×1+' },
+  { n: 4, tag: 'Deload',  pct: '40/50/60', sets: '×5' },
+];
+
 function S25_Program_Detail({
   dark = false,
   programCode = 'PROGRAM 014',
@@ -12,6 +46,12 @@ function S25_Program_Detail({
   accentWord = 'BBB',
   meta = 'BY JIM WENDLER · 16 WK · 4 D/WK',
   description = 'A four-day strength cycle built on submaximal training max percentages. Boring But Big adds 5×10 volume on the main lift for hypertrophy. Proven, slow, honest.',
+  stats,
+  adaptations,
+  waves,
+  crewAvatars = ['JK', 'MR', 'LA', 'SO'],
+  crewCount = 4,
+  crewGain = '+28 lb on squat',
   onBack,
   onSave,
   onPreviewWeek,
@@ -20,12 +60,9 @@ function S25_Program_Detail({
   const c = useACT(dark);
   const hasAccentWord = Boolean(accentWord && accentWord.trim());
   const plainTitle = hasAccentWord ? title.replace(accentWord, '').trim() : title;
-  const weeks = [
-    { n: 1, tag: '5s week',  pct: '65/75/85',  sets: '×5' },
-    { n: 2, tag: '3s week',  pct: '70/80/90',  sets: '×3' },
-    { n: 3, tag: '1s week',  pct: '75/85/95',  sets: '×1+' },
-    { n: 4, tag: 'Deload',   pct: '40/50/60',  sets: '×5' },
-  ];
+  const _stats = stats || DEMO_STATS;
+  const _adaptations = adaptations || DEMO_ADAPTATIONS;
+  const _waves = waves || DEMO_WAVES;
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

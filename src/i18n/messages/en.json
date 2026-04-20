@@ -1291,6 +1291,15 @@
         "high": "high",
         "medium": "medium",
         "low": "low"
+      },
+      "momentum": {
+        "building": "Momentum building",
+        "downtrend": "Downtrend detected"
+      },
+      "integrity": {
+        "stable": "System stable",
+        "degrading": "System degrading — restore consistency",
+        "broken": "System broken — reset required"
       }
     }
   },
@@ -4178,6 +4187,7 @@
     }
   },
   "paywall": {
+    "footerNote": "atlas.core is built for mobile. This is your account dashboard.",
     "eyebrow": "/// upgrade",
     "titlePart1": "unlock your",
     "titleAccent": "core",

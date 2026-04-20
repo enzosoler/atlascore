@@ -1278,6 +1278,15 @@
         "high": "alta",
         "medium": "média",
         "low": "baixa"
+      },
+      "momentum": {
+        "building": "Ganhando impulso",
+        "downtrend": "Tendência de queda"
+      },
+      "integrity": {
+        "stable": "Sistema estável",
+        "degrading": "Sistema degradando — restaure a consistência",
+        "broken": "Sistema quebrado — reset necessário"
       }
     }
   },
@@ -4169,6 +4178,7 @@
     }
   },
   "paywall": {
+    "footerNote": "atlas.core foi construído para mobile. Este é o seu dashboard de conta.",
     "eyebrow": "/// upgrade",
     "titlePart1": "libere seu",
     "titleAccent": "core",

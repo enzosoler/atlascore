@@ -337,7 +337,7 @@ export default function V3Paywall() {
         textAlign: 'center', fontFamily: ACFonts.mono, fontSize: 11,
         letterSpacing: 0.4, color: MC.dim, lineHeight: 1.6,
       }}>
-        atlas.core is built for mobile. This is your account dashboard.
+        {t('paywall.footerNote')}
       </div>
     </div>
   );

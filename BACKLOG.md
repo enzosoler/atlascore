@@ -101,13 +101,15 @@ PROD (confirmed production-interactive after 2026-04-19 re-audit):
   S22_Notifications (wired this session), S24_Library,
   S35_Search, S36_Auth (wired this session), S38_Food_Detail,
   S39_Recipe_Builder, S41_Errors (wired this session),
-  S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose
+  S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose,
+  S11_Onboard_Permissions (wired this session)
 
 STILL SHELL (lower priority — detail/secondary screens):
-- `[ ]` S32_Capture — mode switcher only; capture is native-dependent (Capacitor)
-- `[ ]` S5_Paywall_A — plan toggle works; onStartTrial(planId) already correct
-- S1_Splash_A/B, S10_Onboard_Plan, S11_Onboard_Permissions,
+- [ ] S32_Capture — mode switcher only; capture is native-dependent (Capacitor)
+- [ ] S5_Paywall_A — plan toggle works; onStartTrial(planId) already correct
+- S1_Splash_A/B, S10_Onboard_Plan,
   S13_Coach_Brief, S15_Labs_Inbox, S16_Biomarker_Detail,
+
   S18_Progress_Photos, S19_Settings, S20_PR_Gallery,
   S21_Share_Card, S25_Program_Detail, S26_Calendar,
   S27_Exercise_Detail, S28_Crew, S29_Workout_Summary,
