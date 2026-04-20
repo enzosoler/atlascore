@@ -108,7 +108,7 @@ STILL SHELL (highest-leverage targets):
 - [x] S29_Workout_Summary — onShare({sessionId,sharedAt}) + onRepeat({sessionId,repeatedAt}) already wired (2026-04-20 re-audit)
 - [x] S30_Weekly_Recap -- onShare contract + 3-stage gift-moment reveal (commit e6fe75d)
 - [x] S26_Calendar -- days/weekLabel/volumeBars props; onChangeView, onAcceptReschedule, onRejectReschedule, onBack wired; reschedule note conditional
-- [ ] S31_Sleep_Detail -- static sleep; needs onRefresh/onCompare handlers
+- [x] S31_Sleep_Detail -- onShare emits payload; onConnectDevice CTA in noData state
 - [ ] S28_Crew -- needs real onInvite({userId})/onMessage({userId,text}) payload shapes
 - [ ] S37_Inbox -- static messages; needs onOpen({itemId})/onArchive({itemId}) handlers
 - [ ] S40_Billing -- display-only; needs Stripe/RevenueCat onEditPayment/onSwitchPlan contract
@@ -117,7 +117,7 @@ STILL SHELL (highest-leverage targets):
 
 NOTE: S33_Profile confirmed production-interactive (real props + handlers) — removed from shell list.
 
-NEXT TARGET: S31_Sleep_Detail
+NEXT TARGET: S28_Crew
 
 ## Handoffs (design → engineering)
 

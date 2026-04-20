@@ -14,10 +14,12 @@ import { HeartMark } from '../lib/brandMarks.jsx';
  *               windowLabel="23:18 → 07:00 · 94% EFFICIENCY"
  *               stageLegend={[...]} stageHours={[...]}
  *               signals={[...]} coachNote="..." showTabBar={false}
- *               onBack={fn} onShare={fn} />
+ *               onBack={fn} onShare={fn} onConnectDevice={fn} />
  *
  * stageLegend: [{k, v, sub}] — e.g. [{k:'DEEP', v:'1:48', sub:'23%'}, ...]
  * signals: [{k, v, u, trend, data}] — 4 biometric sparklines
+ * onShare({nightLabel, scoreLabel, durationDisplay, stageLegend, sharedAt})
+ * onConnectDevice() — CTA in noData state to trigger device pairing flow
  */
 
 const DEMO_STAGE_LEGEND = [
@@ -63,11 +65,17 @@ export default function S31_Sleep_Detail({
   showTabBar = false,
   onBack,
   onShare,
+  onConnectDevice,
 }) {
   const c = useACT(dark);
   const _legend = stageLegend || DEMO_STAGE_LEGEND;
   const _signals = signals || DEMO_SIGNALS;
   const _segs = stageSegments || DEMO_SEGS;
+
+  const handleShare = () => {
+    if (typeof onShare === 'function')
+      onShare({ nightLabel, scoreLabel, durationDisplay, stageLegend: _legend, sharedAt: Date.now() });
+  };
 
   // Legend colour mapping: DEEP → fg, LIGHT/REM → dim, AWAKE → accent
   function legendColor(k) {
@@ -83,7 +91,7 @@ export default function S31_Sleep_Detail({
           <svg width="10" height="10" viewBox="0 0 10 10"><path d="M7 1L3 5l4 4" stroke={c.fg} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
         <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5 }}>{nightLabel}</ACLabel>
-        <button type="button" onClick={onShare} style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: onShare ? 'pointer' : 'default' }}>
+        <button type="button" onClick={handleShare} style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: onShare ? 'pointer' : 'default' }}>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8M2 10l8-8" stroke={c.fg} strokeWidth="1.6" strokeLinecap="round"/></svg>
         </button>
       </div>
@@ -105,6 +113,13 @@ export default function S31_Sleep_Detail({
               <div style={{ marginTop: 6, fontSize: 13, color: c.dim, lineHeight: 1.55 }}>
                 Connect Apple Watch, Oura, or Whoop to unlock sleep stages, HRV, and coach interpretation.
               </div>
+              {onConnectDevice && (
+                <button type="button" onClick={onConnectDevice} style={{
+                  marginTop: 14, padding: '9px 16px', borderRadius: 999,
+                  border: 'none', background: c.accent, color: c.ink,
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                }}>Connect device →</button>
+              )}
             </div>
           </>
         ) : (
