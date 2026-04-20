@@ -5,9 +5,8 @@ import {
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
-function CrewRow({ p, rank, c, onMessage }) {
-  const valueKey = 'prs';
-  const val = p[valueKey];
+function CrewRow({ p, rank, c, onMessage, sortKey = 'prs' }) {
+  const val = p[sortKey];
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12,
@@ -55,26 +54,72 @@ function CrewRow({ p, rank, c, onMessage }) {
   );
 }
 
-function S28_Crew({ dark = false, onInvite, onMessage }) {
+const DEMO_MEMBERS = [
+  { id: 'jk', name: 'Jordan K.',  initials: 'JK', prs: 4, tonnes: 58, streak: 22, top: true },
+  { id: 'mk', name: 'You',        initials: 'MK', prs: 3, tonnes: 52, streak: 14, isMe: true },
+  { id: 'lr', name: 'Lin R.',     initials: 'LR', prs: 2, tonnes: 44, streak: 9 },
+  { id: 'ss', name: 'Sam S.',     initials: 'SS', prs: 2, tonnes: 41, streak: 18 },
+  { id: 'mo', name: 'Marcos O.',  initials: 'MO', prs: 1, tonnes: 38, streak: 6 },
+];
+
+const DEMO_WEEK_STATS = [
+  { k: 'PRs',      v: '12' },
+  { k: 'Tonnes',   v: '233' },
+  { k: 'Sessions', v: '28' },
+];
+
+const DEMO_FEED = [
+  { id: 'f1', who: 'Jordan K.',  initials: 'JK', did: 'pulled 500 lb',                       when: '2h',  hot: true },
+  { id: 'f2', who: 'Lin R.',     initials: 'LR', did: 'hit 200 on bench · 40-lb jump',        when: 'Yest' },
+  { id: 'f3', who: 'Sam S.',     initials: 'SS', did: 'completed week 8 of 5/3/1',            when: '2d' },
+  { id: 'f4', who: 'You',        initials: 'MK', did: 'pulled 415 lb',                        when: '4h',  mine: true },
+];
+
+const SORT_KEYS = { PRs: 'prs', Tonnes: 'tonnes', Streak: 'streak' };
+
+/**
+ * S28_Crew — accountability crew leaderboard + feed.
+ *
+ * Gallery:    <S28_Crew dark />
+ * Production: <S28_Crew dark
+ *               members={[{id, name, initials, prs, tonnes, streak, isMe?, top?},...]}
+ *               weekStats={[{k, v},...]} weekHeadline="..."
+ *               feed={[{id, who, initials, did, when, hot?, mine?},...]}
+ *               onInvite={fn} onMessage={fn} />
+ *
+ * onInvite({source, crewCount}) — invite button tapped
+ * onMessage({to, name}) — message button on a crew row
+ */
+function S28_Crew({
+  dark = false,
+  members = null,
+  weekStats = null,
+  weekHeadline = null,
+  feed = null,
+  onInvite,
+  onMessage,
+}) {
   const c = useACT(dark);
-  const me = { id: 'mk', name: 'You',      initials: 'MK', prs: 3, tonnes: 52, streak: 14, isMe: true };
-  const crew = [
-    { id: 'jk', name: 'Jordan K.',  initials: 'JK', prs: 4, tonnes: 58, streak: 22, top: true },
-    me,
-    { id: 'lr', name: 'Lin R.',     initials: 'LR', prs: 2, tonnes: 44, streak: 9 },
-    { id: 'ss', name: 'Sam S.',     initials: 'SS', prs: 2, tonnes: 41, streak: 18 },
-    { id: 'mo', name: 'Marcos O.',  initials: 'MO', prs: 1, tonnes: 38, streak: 6 },
-  ];
+  const _members = Array.isArray(members) && members.length > 0 ? members : DEMO_MEMBERS;
+  const _weekStats = Array.isArray(weekStats) && weekStats.length > 0 ? weekStats : DEMO_WEEK_STATS;
+  const _feed = Array.isArray(feed) && feed.length > 0 ? feed : DEMO_FEED;
+  const _weekHeadline = weekHeadline ||
+    'Your crew moved more total weight this week than any week since Jan. Jordan led with 4 new PRs.';
+
+  const [activeSort, setActiveSort] = React.useState('PRs');
+  const sortKey = SORT_KEYS[activeSort] || 'prs';
+  const sortedMembers = [..._members].sort((a, b) => (b[sortKey] || 0) - (a[sortKey] || 0));
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Your crew · 5</ACLabel>
+          <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Your crew · {_members.length}</ACLabel>
           <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
             Training together
           </div>
         </div>
-        <button type="button" onClick={() => { if (typeof onInvite === 'function') onInvite({ source: 'crew', crewCount: crew.length }); }} style={{
+        <button type="button" onClick={() => { if (typeof onInvite === 'function') onInvite({ source: 'crew', crewCount: _members.length }); }} style={{
           width: 34, height: 34, borderRadius: 999, background: c.card,
           display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer',
         }}>
@@ -84,7 +129,7 @@ function S28_Crew({ dark = false, onInvite, onMessage }) {
         </button>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '14px 22px 20px' }}>
+      <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '14px 22px 20px' }}>
         {/* Week headline */}
         <div style={{
           padding: 22, background: c.fg, color: c.bg, borderRadius: ACRadii.card,
@@ -93,11 +138,7 @@ function S28_Crew({ dark = false, onInvite, onMessage }) {
             This week · together
           </ACLabel>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', marginTop: 16, gap: 0 }}>
-            {[
-              { k: 'PRs',     v: '12' },
-              { k: 'Tonnes',  v: '233' },
-              { k: 'Sessions',v: '28' },
-            ].map((m, i) => (
+            {_weekStats.map((m, i) => (
               <div key={i} style={{
                 borderLeft: i === 0 ? 'none' : '1px solid rgba(239,233,218,0.14)',
                 paddingLeft: i === 0 ? 0 : 14,
@@ -111,7 +152,7 @@ function S28_Crew({ dark = false, onInvite, onMessage }) {
             marginTop: 18, fontSize: 13, color: 'rgba(239,233,218,0.7)',
             lineHeight: 1.5,
           }}>
-            Your crew moved more total weight this week than any week since Jan. Jordan led with 4 new PRs.
+            {_weekHeadline}
           </div>
         </div>
 
@@ -120,20 +161,21 @@ function S28_Crew({ dark = false, onInvite, onMessage }) {
           marginTop: 18, padding: 4, display: 'flex', gap: 2,
           background: c.card, borderRadius: 10,
         }}>
-          {['PRs', 'Tonnes', 'Streak'].map((t, i) => (
-            <div key={t} style={{
+          {['PRs', 'Tonnes', 'Streak'].map((t) => (
+            <button key={t} type="button" onClick={() => setActiveSort(t)} style={{
               flex: 1, padding: '8px 0', textAlign: 'center',
-              background: i === 0 ? c.fg : 'transparent',
-              color: i === 0 ? c.bg : c.dim,
+              background: activeSort === t ? c.fg : 'transparent',
+              color: activeSort === t ? c.bg : c.dim,
               fontSize: 12, fontWeight: 600, borderRadius: 7,
-            }}>{t}</div>
+              border: 'none', cursor: 'pointer',
+            }}>{t}</button>
           ))}
         </div>
 
-        {/* Leaderboard */}
+        {/* Leaderboard — sorted by active tab */}
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column' }}>
-          {crew.map((p, i) => (
-            <CrewRow key={p.id} p={p} rank={i + 1} c={c} onMessage={onMessage} />
+          {sortedMembers.map((p, i) => (
+            <CrewRow key={p.id} p={p} rank={i + 1} c={c} onMessage={onMessage} sortKey={sortKey} />
           ))}
         </div>
 
@@ -143,13 +185,8 @@ function S28_Crew({ dark = false, onInvite, onMessage }) {
             Crew feed · this week
           </ACLabel>
           <div style={{ marginTop: 10 }}>
-            {[
-              { who: 'Jordan K.',  did: 'pulled 500 lb', when: '2h',  hot: true },
-              { who: 'Lin R.',     did: 'hit 200 on bench · 40-lb jump from last cycle', when: 'Yest' },
-              { who: 'Sam S.',     did: 'completed week 8 of 5/3/1',                     when: '2d' },
-              { who: 'You',        did: 'pulled 415 lb',                                 when: '4h', mine: true },
-            ].map((f, i) => (
-              <div key={i} style={{
+            {_feed.map((f, i) => (
+              <div key={f.id || i} style={{
                 display: 'flex', gap: 12, padding: '12px 0',
                 borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
                 borderBottom: `1px solid ${c.hair}`,
@@ -162,7 +199,7 @@ function S28_Crew({ dark = false, onInvite, onMessage }) {
                   fontFamily: ACFonts.display, fontSize: 10, fontWeight: 700,
                   flexShrink: 0,
                 }}>
-                  {f.who.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                  {f.initials || f.who.split(' ').map(w => w[0]).join('').slice(0, 2)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, color: c.fg, lineHeight: 1.5 }}>
