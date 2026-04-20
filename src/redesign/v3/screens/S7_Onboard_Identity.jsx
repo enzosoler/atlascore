@@ -26,12 +26,25 @@ function OBHeader({ step, total, dark, onBack = true }) {
   );
 }
 
-function S7_Onboard_Identity({ dark = false, onContinue }) {
+function S7_Onboard_Identity({ dark = false, onContinue, onBack, onChange, value }) {
   const c = useACT(dark);
-  const [sex, setSex] = React.useState('male');
+  const [sex, setSex] = React.useState(value?.sex || 'male');
+  const [ageRaw, setAgeRaw] = React.useState(value?.age ? String(value.age) : '');
+  const [heightCmRaw, setHeightCmRaw] = React.useState(value?.heightCm ? String(value.heightCm) : '');
+
+  const age = parseInt(ageRaw) || 0;
+  const heightCm = parseInt(heightCmRaw) || 0;
+  const heightFt = Math.floor(heightCm / 30.48);
+  const heightIn = Math.round((heightCm - heightFt * 30.48) / 2.54);
+  const canContinue = age >= 13 && age <= 120 && heightCm >= 100 && heightCm <= 250;
+
+  function emit(patch) {
+    onChange?.({ sex, age: parseInt(ageRaw) || 0, heightCm: parseInt(heightCmRaw) || 0, ...patch });
+  }
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
-      <OBHeader step={1} total={10} dark={dark} onBack={false} />
+      <OBHeader step={1} total={10} dark={dark} onBack={onBack || false} />
 
       <div style={{ flex: 1, overflow: 'auto', padding: '28px 28px 16px' }}>
         <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>About you</ACLabel>
@@ -51,7 +64,7 @@ function S7_Onboard_Identity({ dark = false, onContinue }) {
             {['male', 'female'].map(k => {
               const on = sex === k;
               return (
-                <button key={k} type="button" onClick={() => setSex(k)} style={{
+                <button key={k} type="button" onClick={() => { setSex(k); emit({ sex: k }); }} style={{
                   flex: 1, padding: '16px 0', textAlign: 'center',
                   borderRadius: ACRadii.input,
                   background: on ? c.fg : c.card,
@@ -67,10 +80,25 @@ function S7_Onboard_Identity({ dark = false, onContinue }) {
         <div style={{ marginTop: 24 }}>
           <ACLabel size={12} color={c.dim}>Age</ACLabel>
           <div style={{
-            marginTop: 10, padding: '16px 18px', background: c.card,
+            marginTop: 10, padding: '12px 18px', background: c.card,
             borderRadius: ACRadii.input, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
           }}>
-            <ACNum size={30} color={c.fg} weight={700}>32</ACNum>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="28"
+              value={ageRaw}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\D/g, '').slice(0, 3);
+                setAgeRaw(v);
+                emit({ age: parseInt(v) || 0 });
+              }}
+              style={{
+                fontFamily: ACFonts.display, fontSize: 30, fontWeight: 700,
+                color: c.fg, background: 'transparent', border: 'none', outline: 'none',
+                width: 80, padding: 0, fontVariantNumeric: 'tabular-nums',
+              }}
+            />
             <ACLabel size={12} color={c.dim}>years</ACLabel>
           </div>
         </div>
@@ -78,24 +106,45 @@ function S7_Onboard_Identity({ dark = false, onContinue }) {
         <div style={{ marginTop: 24 }}>
           <ACLabel size={12} color={c.dim}>Height</ACLabel>
           <div style={{
-            marginTop: 10, padding: '16px 18px', background: c.card,
+            marginTop: 10, padding: '12px 18px', background: c.card,
             borderRadius: ACRadii.input, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
           }}>
-            <div>
-              <ACNum size={30} color={c.fg} weight={700}>5</ACNum>
-              <span style={{ fontSize: 13, color: c.dim, marginLeft: 3 }}>ft</span>
-              <span style={{ marginLeft: 14 }}>
-                <ACNum size={30} color={c.fg} weight={700}>11</ACNum>
-                <span style={{ fontSize: 13, color: c.dim, marginLeft: 3 }}>in</span>
-              </span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="180"
+                value={heightCmRaw}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, '').slice(0, 3);
+                  setHeightCmRaw(v);
+                  emit({ heightCm: parseInt(v) || 0 });
+                }}
+                style={{
+                  fontFamily: ACFonts.display, fontSize: 30, fontWeight: 700,
+                  color: c.fg, background: 'transparent', border: 'none', outline: 'none',
+                  width: 60, padding: 0, fontVariantNumeric: 'tabular-nums',
+                }}
+              />
+              <span style={{ fontSize: 13, color: c.dim }}>cm</span>
             </div>
-            <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono }}>180 cm</ACLabel>
+            {heightCm >= 100 && (
+              <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono }}>
+                {heightFt}'{heightIn}"
+              </ACLabel>
+            )}
           </div>
         </div>
       </div>
 
       <div style={{ padding: '14px 28px 26px', background: c.bg }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={onContinue}>Continue →</ACBtn>
+        <ACBtn
+          primary block dark={dark} size="lg" pill
+          onClick={canContinue ? onContinue : undefined}
+          style={{ opacity: canContinue ? 1 : 0.4, pointerEvents: canContinue ? 'auto' : 'none' }}
+        >
+          Continue →
+        </ACBtn>
       </div>
     </div>
   );

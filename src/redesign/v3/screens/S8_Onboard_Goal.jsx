@@ -41,9 +41,9 @@ function TrendIcon({ k, color, size = 28 }) {
   </svg>;
 }
 
-function S8_Onboard_Goal({ dark = false, onBack, onContinue }) {
+function S8_Onboard_Goal({ dark = false, onBack, onContinue, onChange, value }) {
   const c = useACT(dark);
-  const [goal, setGoal] = React.useState('recomp');
+  const [goal, setGoal] = React.useState(value?.goal || 'recomp');
   const goals = [
     { k: 'lose',     t: 'Lose fat',        d: 'Cut body fat, hold strength',      trend: 'down' },
     { k: 'recomp',   t: 'Recomp',          d: 'Replace fat with muscle',          trend: 'level' },
@@ -67,7 +67,7 @@ function S8_Onboard_Goal({ dark = false, onBack, onContinue }) {
           {goals.map(g => {
             const on = goal === g.k;
             return (
-              <button key={g.k} type="button" onClick={() => setGoal(g.k)} style={{
+              <button key={g.k} type="button" onClick={() => { setGoal(g.k); onChange?.({ goal: g.k }); }} style={{
                 padding: 18, borderRadius: ACRadii.card,
                 background: on ? c.fg : c.card,
                 color: on ? c.bg : c.fg,
