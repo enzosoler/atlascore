@@ -22,6 +22,21 @@ export default function V3AuthLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Show a clear message when the production build lacks Supabase env vars
+  const isConfigured = import.meta.env.VITE_SUPABASE_URL &&
+    (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+
+  if (!isConfigured) {
+    return (
+      <V3StandaloneLayout>
+        <div style={{ padding: 24, maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>Sign-in unavailable</div>
+          <div>Supabase is not configured in this build. Sign-in is unavailable. Please use a development build or contact the engineering team.</div>
+        </div>
+      </V3StandaloneLayout>
+    );
+  }
+
   const onSubmit = async (e) => {
     e.preventDefault();
     const em = email.trim().toLowerCase();
