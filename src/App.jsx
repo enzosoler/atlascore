@@ -71,7 +71,8 @@ import OnboardingWorkout     from '@/redesign/v2/onboarding/OnboardingWorkout';
 import OnboardingHabits      from '@/redesign/v2/onboarding/OnboardingHabits';
 import OnboardingConstraints from '@/redesign/v2/onboarding/OnboardingConstraints';
 import OnboardingSummary     from '@/redesign/v2/onboarding/OnboardingSummary';
-import OnboardingPaywall     from '@/redesign/v2/onboarding/OnboardingPaywall';
+import S5_Paywall_A from '@/redesign/v3/screens/S5_Paywall_A.jsx';
+import V3StandaloneLayout from '@/redesign/v3/layouts/V3StandaloneLayout.jsx';
 import OnboardingTour        from '@/redesign/v2/onboarding/OnboardingTour';
 import SmartOnboarding       from '@/redesign/v2/onboarding/SmartOnboarding';
 import {
@@ -273,14 +274,18 @@ function OnboardingSummaryRoute() {
 }
 function OnboardingPaywallRoute() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const platform = Capacitor.isNativePlatform() ? 'native' : 'web';
   return (
-    <OnboardingPaywall
-      platform={platform}
-      onStartTrial={() => navigate('/onboarding/tour')}
-      onRestore={() => navigate('/app/billing/restore')}
-      onSkip={() => navigate('/app/today')}
-    />
+    <V3StandaloneLayout>
+      <S5_Paywall_A
+        dark={theme === 'dark'}
+        platform={platform}
+        onStartTrial={() => navigate('/onboarding/tour')}
+        onRestore={() => navigate('/app/billing/restore')}
+        onSkip={() => navigate('/app/today')}
+      />
+    </V3StandaloneLayout>
   );
 }
 function OnboardingTourRoute() {
