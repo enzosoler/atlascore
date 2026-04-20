@@ -102,6 +102,7 @@ function S18_Progress_Photos({
   showTabBar = false,
 }) {
   const c = useACT(dark);
+  const [activeView, setActiveView] = React.useState('front');
   const defaultMonths = [
     { m: 'Apr 18', w: '182.4', bf: '17.2', latest: true },
     { m: 'Mar 18', w: '184.8', bf: '18.0' },
@@ -112,6 +113,13 @@ function S18_Progress_Photos({
   ];
   const monthRows = photos === undefined ? defaultMonths : photos;
   const isEmpty = Array.isArray(monthRows) && monthRows.length === 0;
+
+  const views = [
+    { k: 'front', l: 'Front' },
+    { k: 'side', l: 'Side' },
+    { k: 'back', l: 'Back' },
+  ];
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -145,10 +153,26 @@ function S18_Progress_Photos({
           </div>
         ) : (
           <>
+            {/* View switcher */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 18, padding: 3, background: c.card, borderRadius: 10 }}>
+              {views.map(v => {
+                const on = activeView === v.k;
+                return (
+                  <button key={v.k} type="button" onClick={() => setActiveView(v.k)} style={{
+                    flex: 1, padding: '6px 0', borderRadius: 7,
+                    background: on ? c.fg : 'transparent',
+                    color: on ? c.bg : c.dim,
+                    fontSize: 12, fontWeight: 600,
+                    border: 'none', cursor: 'pointer',
+                  }}>{v.l}</button>
+                );
+              })}
+            </div>
+
             {/* Compare strip */}
             <div style={{ padding: 14, background: c.card, borderRadius: ACRadii.card }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <ACLabel size={12} color={c.dim}>Nov → Apr</ACLabel>
+                <ACLabel size={12} color={c.dim}>Nov → Apr · {activeView}</ACLabel>
                 <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>−5.8 lb · −1.8% BF</ACLabel>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
@@ -165,7 +189,7 @@ function S18_Progress_Photos({
             <div style={{ marginTop: 22 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                 <ACLabel size={12} color={c.dim}>All months · {monthRows.length}</ACLabel>
-                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>Front view</ACLabel>
+                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{views.find(v => v.k === activeView).l} view</ACLabel>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
                 {monthRows.map((m, i) => (
