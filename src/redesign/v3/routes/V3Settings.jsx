@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
 import S19_Settings from '../screens/S19_Settings.jsx';
 
@@ -35,62 +35,75 @@ function buildRealUser(authUser) {
   };
 }
 
-function memberSinceLabel(value) {
-  if (!value) return 'member recently';
+function memberSinceLabel(value, locale, t) {
+  if (!value) return t('settings.v3.memberRecently');
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'member recently';
-  return `member since ${date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}`;
+  if (Number.isNaN(date.getTime())) return t('settings.v3.memberRecently');
+  const formatted = date.toLocaleDateString(locale, { month: 'short', year: '2-digit' });
+  return t('settings.v3.memberSince', { date: formatted });
 }
 
 export default function V3Settings() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { locale, switchLocale } = useI18n();
+  const t = useT();
   const { user, logout } = useAuth();
   const realUser = buildRealUser(user);
   const currentLanguageLabel = LANGUAGE_LABELS[locale] || LANGUAGE_LABELS.en;
+  const currentThemeLabel = theme === 'dark' ? 'dark' : 'light';
 
   const groups = [
     {
-      l: 'Account',
+      l: t('settings.v3.sections.account'),
       rows: [
         {
           k: 'profile',
-          t: realUser?.name || 'Your profile',
-          d: [realUser?.email, memberSinceLabel(realUser?.memberSince)].filter(Boolean).join(' · '),
+          t: realUser?.name || t('settings.v3.rows.yourProfile'),
+          d: [realUser?.email, memberSinceLabel(realUser?.memberSince, locale, t)].filter(Boolean).join(' · '),
           chevron: true,
           avatar: true,
         },
         {
           k: 'plan',
-          t: realUser?.tier && realUser.tier !== 'Free' ? `${realUser.tier} plan` : 'Subscription',
-          d: realUser?.tier && realUser.tier !== 'Free' ? `${realUser.tier} access active` : 'Upgrade, manage billing, restore access',
+          t: realUser?.tier && realUser.tier !== 'Free'
+            ? t('settings.v3.rows.planLabel', { tier: realUser.tier })
+            : t('settings.v3.rows.subscription'),
+          d: realUser?.tier && realUser.tier !== 'Free'
+            ? t('settings.v3.rows.planActive', { tier: realUser.tier })
+            : t('settings.v3.rows.planUpgrade'),
           chevron: true,
           chip: realUser?.tier && realUser.tier !== 'Free' ? realUser.tier : undefined,
         },
       ],
     },
     {
-      l: 'Integrations',
+      l: t('settings.v3.sections.integrations'),
       rows: [
-        { k: 'integrations', t: 'Connected services', d: 'Apple Health, wearables · improves readiness accuracy', chevron: true, dot: 'on' },
+        {
+          k: 'integrations',
+          t: t('settings.v3.rows.connectedServices'),
+          d: t('settings.v3.rows.connectedServicesDesc'),
+          chevron: true,
+          dot: 'on',
+        },
       ],
     },
     {
-      l: 'Preferences',
+      l: t('settings.v3.sections.preferences'),
       rows: [
-        { k: 'theme',    t: 'Appearance',    d: `Currently ${theme === 'dark' ? 'dark' : 'light'} · tap to switch`, chevron: true },
-        { k: 'language', t: 'Language',      d: `${currentLanguageLabel} · tap to switch`, chevron: true },
-        { k: 'notifs',   t: 'Notifications', d: 'Coming soon', chevron: false, muted: true },
-        { k: 'goals',    t: 'Daily targets', d: 'Drives your daily protein target · used by Today', chevron: true },
+        { k: 'theme',    t: t('settings.v3.rows.appearance'),    d: t('settings.v3.rows.appearanceDesc', { theme: currentThemeLabel }), chevron: true },
+        { k: 'language', t: t('settings.v3.rows.language'),      d: t('settings.v3.rows.languageDesc', { language: currentLanguageLabel }), chevron: true },
+        { k: 'notifs',   t: t('settings.v3.rows.notifications'), d: t('settings.v3.rows.notificationsDesc'), chevron: false, muted: true },
+        { k: 'goals',    t: t('settings.v3.rows.dailyTargets'),  d: t('settings.v3.rows.dailyTargetsDesc'), chevron: true },
       ],
     },
     {
-      l: 'Data & privacy',
+      l: t('settings.v3.sections.dataPrivacy'),
       rows: [
-        { k: 'export', t: 'Export data',      d: 'Download your logs and history', chevron: true },
-        { k: 'photos', t: 'Progress photos',  d: 'Body trend tracking · used by composition system', chevron: true, chip: 'Local' },
-        { k: 'delete', t: 'Danger zone',      d: 'Delete account and reset data', chevron: true, danger: true },
+        { k: 'export', t: t('settings.v3.rows.exportData'),      d: t('settings.v3.rows.exportDataDesc'), chevron: true },
+        { k: 'photos', t: t('settings.v3.rows.progressPhotos'),  d: t('settings.v3.rows.progressPhotosDesc'), chevron: true, chip: 'Local' },
+        { k: 'delete', t: t('settings.v3.rows.dangerZone'),      d: t('settings.v3.rows.dangerZoneDesc'), chevron: true, danger: true },
       ],
     },
   ];
@@ -114,8 +127,9 @@ export default function V3Settings() {
       onOpenRow={async (key) => {
         // Theme toggle works directly — no sub-screen needed
         if (key === 'theme') {
-          setTheme(theme === 'dark' ? 'light' : 'dark');
-          toast(`Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+          const nextTheme = theme === 'dark' ? 'light' : 'dark';
+          setTheme(nextTheme);
+          toast(t('settings.v3.toasts.themeSwitch', { theme: nextTheme }));
           return;
         }
         // Language: cycle EN ↔ PT in place. switchLocale handles both the
@@ -124,7 +138,7 @@ export default function V3Settings() {
         if (key === 'language') {
           const next = locale === 'pt-BR' ? 'en' : 'pt-BR';
           switchLocale(next);
-          toast(next === 'pt-BR' ? 'Idioma: Português' : 'Language: English');
+          toast(next === 'pt-BR' ? t('settings.v3.toasts.languagePT') : t('settings.v3.toasts.languageEN'));
           return;
         }
         // Subscription management: native sheet on iOS/Android, web page on web.
@@ -138,7 +152,7 @@ export default function V3Settings() {
         if (next) {
           navigate(next);
         } else {
-          toast('This feature is coming soon');
+          toast(t('settings.v3.toasts.comingSoon'));
         }
       }}
       onSignOut={async () => {

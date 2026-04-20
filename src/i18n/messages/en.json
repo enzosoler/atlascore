@@ -1422,6 +1422,45 @@
       "mealPlanDesc": "Get a structured daily meal plan with specific foods and portions.",
       "saved": "Nutrition mode updated",
       "saveFailed": "Failed to update nutrition mode"
+    },
+    "v3": {
+      "sections": {
+        "account": "Account",
+        "integrations": "Integrations",
+        "preferences": "Preferences",
+        "dataPrivacy": "Data & privacy"
+      },
+      "rows": {
+        "yourProfile": "Your profile",
+        "subscription": "Subscription",
+        "connectedServices": "Connected services",
+        "connectedServicesDesc": "Apple Health, wearables · improves readiness accuracy",
+        "appearance": "Appearance",
+        "appearanceDesc": "Currently {theme} · tap to switch",
+        "language": "Language",
+        "languageDesc": "{language} · tap to switch",
+        "notifications": "Notifications",
+        "notificationsDesc": "Coming soon",
+        "dailyTargets": "Daily targets",
+        "dailyTargetsDesc": "Drives your daily protein target · used by Today",
+        "exportData": "Export data",
+        "exportDataDesc": "Download your logs and history",
+        "progressPhotos": "Progress photos",
+        "progressPhotosDesc": "Body trend tracking · used by composition system",
+        "dangerZone": "Danger zone",
+        "dangerZoneDesc": "Delete account and reset data",
+        "planLabel": "{tier} plan",
+        "planActive": "{tier} access active",
+        "planUpgrade": "Upgrade, manage billing, restore access"
+      },
+      "memberRecently": "member recently",
+      "memberSince": "member since {date}",
+      "toasts": {
+        "themeSwitch": "Switched to {theme} mode",
+        "languagePT": "Idioma: Português",
+        "languageEN": "Language: English",
+        "comingSoon": "This feature is coming soon"
+      }
     }
   },
   "profile": {

@@ -1409,6 +1409,45 @@
       "mealPlanDesc": "Receba um plano alimentar diário estruturado com alimentos e porções específicas.",
       "saved": "Modo nutricional atualizado",
       "saveFailed": "Falha ao atualizar modo nutricional"
+    },
+    "v3": {
+      "sections": {
+        "account": "Conta",
+        "integrations": "Integrações",
+        "preferences": "Preferências",
+        "dataPrivacy": "Dados e privacidade"
+      },
+      "rows": {
+        "yourProfile": "Seu perfil",
+        "subscription": "Assinatura",
+        "connectedServices": "Serviços conectados",
+        "connectedServicesDesc": "Apple Health, wearables · melhora a precisão da prontidão",
+        "appearance": "Aparência",
+        "appearanceDesc": "Atualmente {theme} · toque para alternar",
+        "language": "Idioma",
+        "languageDesc": "{language} · toque para alternar",
+        "notifications": "Notificações",
+        "notificationsDesc": "Em breve",
+        "dailyTargets": "Metas diárias",
+        "dailyTargetsDesc": "Define sua meta diária de proteína · usado pelo Hoje",
+        "exportData": "Exportar dados",
+        "exportDataDesc": "Baixe seus registros e histórico",
+        "progressPhotos": "Fotos de progresso",
+        "progressPhotosDesc": "Acompanhamento de composição corporal · usado pelo sistema de composição",
+        "dangerZone": "Zona de perigo",
+        "dangerZoneDesc": "Excluir conta e redefinir dados",
+        "planLabel": "Plano {tier}",
+        "planActive": "Acesso {tier} ativo",
+        "planUpgrade": "Upgrade, gerenciar cobrança, restaurar acesso"
+      },
+      "memberRecently": "membro recente",
+      "memberSince": "membro desde {date}",
+      "toasts": {
+        "themeSwitch": "Alternado para modo {theme}",
+        "languagePT": "Idioma: Português",
+        "languageEN": "Language: English",
+        "comingSoon": "Esta funcionalidade estará disponível em breve"
+      }
     }
   },
   "profile": {
