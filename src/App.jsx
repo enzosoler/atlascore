@@ -80,6 +80,11 @@ import {
   V3OnboardingActivity,
   V3OnboardingPlan,
   V3OnboardingPermissions,
+  V3OnboardingWorkout,
+  V3OnboardingHabits,
+  V3OnboardingConstraints,
+  V3OnboardingSummary,
+  V3OnboardingTour,
 } from '@/redesign/v3/routes/V3OnboardingRoutes.jsx';
 import FoodDetail            from '@/redesign/v2/nutrition/FoodDetail';
 import PhotoScan             from '@/redesign/v2/nutrition/PhotoScan';
@@ -1153,12 +1158,12 @@ function AppRoutes() {
         <Route path="/onboarding/activity" element={<V3OnboardingActivity />} />
         <Route path="/onboarding/stats" element={<V3OnboardingPlan />} />
         <Route path="/onboarding/diet" element={<V3OnboardingPermissions />} />
-        <Route path="/onboarding/workout" element={<OnboardingWorkoutRoute />} />
-        <Route path="/onboarding/habits" element={<OnboardingHabitsRoute />} />
-        <Route path="/onboarding/constraints" element={<OnboardingConstraintsRoute />} />
-        <Route path="/onboarding/summary" element={<OnboardingSummaryRoute />} />
+        <Route path="/onboarding/workout" element={<V3OnboardingWorkout />} />
+        <Route path="/onboarding/habits" element={<V3OnboardingHabits />} />
+        <Route path="/onboarding/constraints" element={<V3OnboardingConstraints />} />
+        <Route path="/onboarding/summary" element={<V3OnboardingSummary />} />
         <Route path="/onboarding/paywall" element={<OnboardingPaywallRoute />} />
-        <Route path="/onboarding/tour" element={<OnboardingTourRoute />} />
+        <Route path="/onboarding/tour" element={<V3OnboardingTour />} />
         <Route path="/onboarding/smart" element={<SmartOnboarding onContinue={() => {}} />} />
 
         {/* Public profile lives outside the shell (no auth guard on view) */}

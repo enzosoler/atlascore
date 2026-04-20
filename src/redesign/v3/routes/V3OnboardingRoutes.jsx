@@ -7,6 +7,11 @@ import S8_Onboard_Goal from '../screens/S8_Onboard_Goal.jsx';
 import S9_Onboard_Activity from '../screens/S9_Onboard_Activity.jsx';
 import S10_Onboard_Plan from '../screens/S10_Onboard_Plan.jsx';
 import S11_Onboard_Permissions from '../screens/S11_Onboard_Permissions.jsx';
+import S58_Onboard_Workout from '../screens/S58_Onboard_Workout.jsx';
+import S59_Onboard_Habits from '../screens/S59_Onboard_Habits.jsx';
+import S60_Onboard_Constraints from '../screens/S60_Onboard_Constraints.jsx';
+import S61_Onboard_Summary from '../screens/S61_Onboard_Summary.jsx';
+import S62_Onboard_Tour from '../screens/S62_Onboard_Tour.jsx';
 
 const STORAGE_KEY = 'atlas_onboarding_v3';
 
@@ -108,6 +113,89 @@ export function V3OnboardingPermissions() {
         onBack={() => navigate('/onboarding/stats')}
         onContinue={() => navigate('/onboarding/workout')}
         onSkip={() => navigate('/onboarding/workout')}
+      />
+    </Wrap>
+  );
+}
+
+export function V3OnboardingWorkout() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { data, update } = useOnboardingState();
+  return (
+    <Wrap>
+      <S58_Onboard_Workout
+        dark={theme === 'dark'}
+        value={data}
+        onChange={update}
+        onBack={() => navigate('/onboarding/diet')}
+        onContinue={() => navigate('/onboarding/habits')}
+      />
+    </Wrap>
+  );
+}
+
+export function V3OnboardingHabits() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { data, update } = useOnboardingState();
+  return (
+    <Wrap>
+      <S59_Onboard_Habits
+        dark={theme === 'dark'}
+        value={data}
+        onChange={update}
+        onBack={() => navigate('/onboarding/workout')}
+        onContinue={() => navigate('/onboarding/constraints')}
+      />
+    </Wrap>
+  );
+}
+
+export function V3OnboardingConstraints() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { data, update } = useOnboardingState();
+  return (
+    <Wrap>
+      <S60_Onboard_Constraints
+        dark={theme === 'dark'}
+        value={data}
+        onChange={update}
+        onBack={() => navigate('/onboarding/habits')}
+        onContinue={() => navigate('/onboarding/summary')}
+        onSkip={() => navigate('/onboarding/summary')}
+      />
+    </Wrap>
+  );
+}
+
+export function V3OnboardingSummary() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { data } = useOnboardingState();
+  return (
+    <Wrap>
+      <S61_Onboard_Summary
+        dark={theme === 'dark'}
+        targets={data}
+        constraints={data}
+        onBack={() => navigate('/onboarding/constraints')}
+        onContinue={() => navigate('/onboarding/paywall')}
+      />
+    </Wrap>
+  );
+}
+
+export function V3OnboardingTour() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  return (
+    <Wrap>
+      <S62_Onboard_Tour
+        dark={theme === 'dark'}
+        onFinish={() => navigate('/app/today')}
+        onSkip={() => navigate('/app/today')}
       />
     </Wrap>
   );
