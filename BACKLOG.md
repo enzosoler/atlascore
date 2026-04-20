@@ -28,9 +28,7 @@ Legend
 
 ## 1. Activation / core-value surfaces
 
-- `[ ]` V3Today — 18 hardcoded English strings bypass i18n (flagged in the
-  pt-BR audit). Move to `en.json` + add `pt-BR.json` entries. Primary daily
-  screen, pt-BR users hit this first.
+- `[x]` V3Today — all strings wired via today.* keys. 6ed6f2d
 - `[ ]` Login / signup — make sure the email-first flow, magic link, and
   Apple/Google handoff all work on public-web frame (not just phone frame).
   Validate after the recent V3StandaloneLayout split.
@@ -40,11 +38,9 @@ Legend
 
 ## 2. Conversion / retention
 
-- `[ ]` V3Paywall — 14 hardcoded English strings (PLANS copy, toasts, nav).
-  Move to i18n so Portuguese paywall actually reads in Portuguese.
-- `[ ]` V3SubscriptionManage — hardcoded "email support@useatlascore.com"
-  toast + "Get the app" nav link. i18n-wire both.
-- `[ ]` V3CoachChat — 5 hardcoded toast messages. i18n-wire.
+- `[x]` V3Paywall — 14 hardcoded English strings wired via t(). a9bc389
+- `[x]` V3SubscriptionManage — cancel toast + "Get the app" nav link wired via t(). 7dbc1d1
+- `[x]` V3CoachChat — 5 hardcoded toast messages + placeholder wired via t(). 7dbc1d1
 
 ## 3. Reliability / edge cases
 
@@ -76,10 +72,9 @@ Legend
 
 ## 6. Polish / design consistency
 
-- `[ ]` DailyCheckinGate — 6 hardcoded English strings. Minor in scope,
-  noticeable for PT users.
-- `[ ]` V3MagicLinkSent — 2 hardcoded strings.
-- `[ ]` V3ExerciseDetail — "Favoriting coming soon" toast copy in English.
+- `[x]` DailyCheckinGate — 20+ strings fully wired via checkin.* keys. f1d21ef
+- `[x]` V3MagicLinkSent — all visible strings wired via magicLink.* keys. f1d21ef
+- `[x]` V3ExerciseDetail — favoriting + history toasts wired. f1d21ef
 
 ## 7. Infra / ops
 
@@ -130,17 +125,18 @@ STILL SHELL (lower priority — detail/secondary screens):
 - `[x]` V3Settings.jsx — "Manage subscription" on native should call
   presentCustomerCenter() instead of navigating to /app/billing.
   DONE: f807a43 (engineering implemented before lane split).
-- `[ ]` V3AppShell.jsx + V3StandaloneLayout.jsx — add `data-v3` attr
-  to root container div so CSS can scope v3-specific styles (focus ring
-  suppression, etc). Acceptance: `<div data-v3 style={{...}}>`.
-  Design already added the CSS rule in index.css targeting `[data-v3]`.
+- `[x]` V3AppShell.jsx + V3StandaloneLayout.jsx — data-v3 attr added to all root container divs. 7dbc1d1
 
 ## Recent ships
 
+- f1d21ef feat(i18n): wire DailyCheckinGate, V3MagicLinkSent, V3ExerciseDetail
+- 7dbc1d1 feat(i18n): wire V3CoachChat+V3SubscriptionManage toasts; data-v3 layout roots
 - f225ae5 fix(design): S4_Nutrition_A — missing ACChip import + arguments[0] bug
 - cba0676 feat(design): S41_Errors — selectable conflict cards, typed payloads
 - 1862772 feat(design): S22_Notifications — onToggle/onOpen/onMarkAllRead contract
 - e48866e feat(design): S36_Auth — onSubmit emits {email,password,mode} + &apos; fix
+- a9bc389 feat(i18n): wire V3Paywall + add shared webNav keys
+- 6ed6f2d feat(i18n): wire V3Today through useT()
 - dc4eb1b fix(#1): remove blue focus rectangle on login/signup inputs
 - 8942bfd fix(#4): Body page hero card colors now theme-aware
 - f807a43 fix(#3): Manage Subscription opens native RevenueCat on mobile
