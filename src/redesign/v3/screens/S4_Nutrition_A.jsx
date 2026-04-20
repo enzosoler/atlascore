@@ -1,11 +1,10 @@
 import React from 'react';
 import {
-  ACFonts, ACRadii, useACT, useACTheme,
-  ACDot, ACLabel, ACMono, ACNum, ACBtn,
-  ACSpark, ACRing, ACBars, ACLine, ACChip,
-  ACHeader, ACBrandMark, ACTabBar, CaptureIcon,
+  ACFonts, ACRadii, useACT,
+  ACLabel, ACMono, ACNum, ACBtn,
+  ACHeader, ACTabBar, CaptureIcon,
 } from '../lib/paper.jsx';
-import { HeartMark, ChevronMark, ChevronHeartMark, Wordmark, LockupH, LockupV, LockupTag } from '../lib/brandMarks.jsx';
+import { HeartMark } from '../lib/brandMarks.jsx';
 
 /* ──────────────────────────────────────────────────────────────────────────
  * Mock data (gallery preview). When props are undefined, these render — this
@@ -75,7 +74,7 @@ function niceDateLabel(d = new Date()) {
  *                 - []          → empty-state copy renders (real user, no logs)
  *   onCapture  : (kind:'scan'|'camera'|'voice'|'recents') => void
  * ──────────────────────────────────────────────────────────────────────── */
-function S4_Nutrition_A({ dark = false, macros, meals, onCapture }) {
+function S4_Nutrition_A({ dark = false, macros, meals, onCapture, onOpenMeal, onAddToSlot, showTabBar = false }) {
   const c = useACT(dark);
 
   const isRealData = meals !== undefined || macros !== undefined;
@@ -256,9 +255,11 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture }) {
                   </ACLabel>
                 </div>
                 {items.map((it, i) => (
-                  <div key={it.id || i} style={{
+                  <button key={it.id || i} type="button" onClick={() => onOpenMeal?.(it.id || it.name)} style={{
                     display: 'flex', padding: '12px 0', alignItems: 'flex-start',
                     borderTop: `1px solid ${c.hair}`,
+                    background: 'transparent', border: 'none', borderTop: `1px solid ${c.hair}`,
+                    width: '100%', textAlign: 'left', cursor: onOpenMeal ? 'pointer' : 'default',
                   }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14.5, color: c.fg }}>{it.name || it.t}</div>
@@ -267,7 +268,7 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture }) {
                     <span style={{ fontSize: 13, fontWeight: 600, color: c.fg }}>
                       {Math.round(Number(it.kcal) || 0)}
                     </span>
-                  </div>
+                  </button>
                 ))}
                 <button
                   type="button"
