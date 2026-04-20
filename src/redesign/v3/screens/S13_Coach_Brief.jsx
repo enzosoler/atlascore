@@ -18,7 +18,7 @@ function S13_Coach_Brief({
   sparklineData = null,
   reasonText = 'HRV recovered above baseline overnight. Four training days this week — hitting today puts you in the top 5% of your age bracket.',
   movesLabel = 'Today · three moves',
-  movesProgressLabel = '01 / 03',
+  movesProgressLabel,
   moves,
   signalLabel = 'Signal trend · 14d',
   signalStatus = 'All green',
@@ -28,14 +28,30 @@ function S13_Coach_Brief({
   onClose,
   onStartToday,
   onAskCoach,
+  onToggleMove,
 }) {
   const c = useACT(dark);
   const readinessHistory = Array.isArray(sparklineData) && sparklineData.length > 0 ? sparklineData : null;
-  const moveRows = moves || [
-    { n: '01', t: 'Train', d: 'Heavy Lower · 58 min', meta: '4 PR attempts queued', lead: true },
-    { n: '02', t: 'Fuel', d: 'Hit 186g protein', meta: '148g tracked · 38g to go' },
-    { n: '03', t: 'Sleep', d: 'In bed by 10:30', meta: 'Shifted 42 min later this week' },
+  
+  const defaultMoves = [
+    { id: 'm1', n: '01', t: 'Train', d: 'Heavy Lower · 58 min', meta: '4 PR attempts queued', lead: true },
+    { id: 'm2', n: '02', t: 'Fuel', d: 'Hit 186g protein', meta: '148g tracked · 38g to go' },
+    { id: 'm3', n: '03', t: 'Sleep', d: 'In bed by 10:30', meta: 'Shifted 42 min later this week' },
   ];
+
+  const moveRows = moves || defaultMoves;
+  const [checkedMoves, setCheckedMoves] = React.useState({});
+
+  const doneCount = moveRows.filter(m => checkedMoves[m.id || m.n]).length;
+  const progressLabel = movesProgressLabel || `${String(doneCount).padStart(2, '0')} / ${String(moveRows.length).padStart(2, '0')}`;
+
+  function handleToggle(m) {
+    const key = m.id || m.n;
+    const next = { ...checkedMoves, [key]: !checkedMoves[key] };
+    setCheckedMoves(next);
+    onToggleMove?.(m, next[key]);
+  }
+
   const signalRows = signals || [];
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.fg, color: c.bg }}>
@@ -127,44 +143,59 @@ function S13_Coach_Brief({
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.25, textTransform: 'uppercase' }}>{movesLabel}</ACLabel>
-          <ACLabel size={11} color={c.mute} style={{ fontFamily: ACFonts.body, fontWeight: 600 }}>{movesProgressLabel}</ACLabel>
+          <ACLabel size={11} color={c.mute} style={{ fontFamily: ACFonts.body, fontWeight: 600 }}>{progressLabel}</ACLabel>
         </div>
 
         {/* Three moves — bigger, more breathing room, clearer lead item */}
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column' }}>
-          {moveRows.map((r, i) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'center', gap: 16,
-              padding: '16px 0',
-              borderTop: i === 0 ? 'none' : `1px solid ${c.hair}`,
-            }}>
-              <div style={{
-                width: 32, textAlign: 'left',
-                fontFamily: ACFonts.mono, fontSize: 13, fontWeight: 700,
-                color: r.lead ? c.accent : c.mute, letterSpacing: 0.3,
-              }}>{r.n}</div>
-              <div style={{ flex: 1 }}>
+          {moveRows.map((r, i) => {
+            const isDone = checkedMoves[r.id || r.n];
+            return (
+              <button key={i} type="button" onClick={() => handleToggle(r)} style={{
+                display: 'flex', alignItems: 'center', gap: 16,
+                padding: '16px 0',
+                borderTop: i === 0 ? 'none' : `1px solid ${c.hair}`,
+                background: 'transparent', borderLeft: 'none', borderRight: 'none', borderBottom: 'none',
+                width: '100%', textAlign: 'left', cursor: 'pointer',
+                opacity: isDone ? 0.5 : 1,
+              }}>
                 <div style={{
-                  fontFamily: ACFonts.display, fontSize: 18, fontWeight: 600,
-                  letterSpacing: -0.4, color: c.fg,
-                }}>
-                  {r.t} <span style={{ color: c.mute, fontWeight: 400 }}>·</span> <span style={{ fontWeight: 500, color: c.fg }}>{r.d}</span>
+                  width: 32, textAlign: 'left',
+                  fontFamily: ACFonts.mono, fontSize: 13, fontWeight: 700,
+                  color: isDone ? c.dim : (r.lead ? c.accent : c.mute), letterSpacing: 0.3,
+                }}>{r.n}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontFamily: ACFonts.display, fontSize: 18, fontWeight: 600,
+                    letterSpacing: -0.4, color: c.fg,
+                    textDecoration: isDone ? 'line-through' : 'none',
+                  }}>
+                    {r.t} <span style={{ color: c.mute, fontWeight: 400 }}>·</span> <span style={{ fontWeight: 500, color: c.fg }}>{r.d}</span>
+                  </div>
+                  <ACLabel size={12} color={c.dim} style={{ marginTop: 2 }}>{r.meta}</ACLabel>
                 </div>
-                <ACLabel size={12} color={c.dim} style={{ marginTop: 2 }}>{r.meta}</ACLabel>
-              </div>
-              {r.lead ? (
-                <div style={{
-                  width: 28, height: 28, borderRadius: 999,
-                  background: c.accent, display: 'flex',
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 1l4 4-4 4" stroke={c.ink} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-              ) : (
-                <svg width="10" height="12" viewBox="0 0 10 12"><path d="M2 1l5 5-5 5" stroke={c.mute} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              )}
-            </div>
-          ))}
+                {isDone ? (
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 999,
+                    background: c.faint, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 3 4.5-6" stroke={c.fg} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                ) : r.lead ? (
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 999,
+                    background: c.accent, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 1l4 4-4 4" stroke={c.ink} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                ) : (
+                  <svg width="10" height="12" viewBox="0 0 10 12"><path d="M2 1l5 5-5 5" stroke={c.mute} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Signal trend — redesigned as horizontal pills with micro-sparks */}

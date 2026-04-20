@@ -102,16 +102,18 @@ PROD (confirmed production-interactive after 2026-04-19 re-audit):
   S39_Recipe_Builder, S41_Errors (wired this session),
   S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose,
   S11_Onboard_Permissions (wired this session),
-  S10_Onboard_Plan (wired this session)
+  S10_Onboard_Plan (wired this session),
+  S13_Coach_Brief (wired this session)
 
 STILL SHELL (lower priority — detail/secondary screens):
 - [ ] S32_Capture — mode switcher only; capture is native-dependent (Capacitor)
 - [ ] S5_Paywall_A — plan toggle works; onStartTrial(planId) already correct
 - S1_Splash_A/B,
-  S13_Coach_Brief, S15_Labs_Inbox, S16_Biomarker_Detail,
+  S15_Labs_Inbox, S16_Biomarker_Detail,
 ...
 ## Handoffs (design → engineering)
 
+- `[ ]` 2026-04-19 — V3CoachChat.jsx (or similar) — Wire S13_Coach_Brief to handle onToggleMove. It now has local state for checkboxes but needs persistence if desired.
 - `[ ]` 2026-04-19 — V3OnboardingRoutes.jsx — Wire S10_Onboard_Plan to useOnboardingState. It now has onChange (partial) and onContinue(final) props. — State persists after plan tweak.
 - `[ ]` 2026-04-19 — V3OnboardingRoutes.jsx — Wire S11_Onboard_Permissions to useOnboardingState. It now has value and onChange props. — Permissions persist across steps.
 - `[x]` V3Settings.jsx — "Manage subscription" on native should call
