@@ -46,18 +46,47 @@ function Toggle({ on, c, onClick }) {
   );
 }
 
-function S22_Notifications({ dark = false, showTabBar = false }) {
-  const [prefs, setPrefs] = React.useState({
+/**
+ * S22_Notifications — notification preferences + recent list.
+ *
+ * Gallery:    <S22_Notifications dark />
+ * Production: <S22_Notifications dark prefs={obj} notifications={[...]} onToggle={fn} onMarkAllRead={fn} onOpen={fn} />
+ *
+ * onToggle(key: string, newValue: boolean) — called on each pref toggle
+ * onMarkAllRead() — called when "Mark all read" is tapped
+ * onOpen(notification) — called when a notification row is tapped
+ * prefs — controlled prefs object; falls back to local state if omitted
+ */
+function S22_Notifications({
+  dark = false,
+  showTabBar = false,
+  prefs: prefsProp,
+  notifications,
+  onToggle,
+  onMarkAllRead,
+  onOpen,
+}) {
+  const [localPrefs, setLocalPrefs] = React.useState({
     brief: true, pr: true, protein: true, labs: true, sleep: false, social: false,
   });
+  // Controlled if prefsProp provided, local otherwise
+  const prefs = prefsProp ?? localPrefs;
+
+  function handleToggle(key) {
+    const newValue = !prefs[key];
+    if (!prefsProp) setLocalPrefs((p) => ({ ...p, [key]: newValue }));
+    onToggle?.(key, newValue);
+  }
+
   const c = useACT(dark);
-  const recent = [
+  const recent = notifications || [
     { t: 'Daily brief · ready',       d: 'Readiness 87 · three moves queued',              ago: '7m',  kind: 'brief',   fresh: true },
     { t: 'Lab panel in',              d: 'Function Q2 · 3 flags need attention',           ago: '2h',  kind: 'labs',    fresh: true },
     { t: 'PR window open',            d: 'Deadlift +10 projected · your bar is warm',      ago: '4h',  kind: 'pr' },
     { t: 'Protein below pace',        d: '92g / 186g · 10h left in day',                    ago: 'Yest', kind: 'protein' },
     { t: 'Bench press PR · 275 lb',   d: 'You moved 10 lb over last ceiling',               ago: '7d',  kind: 'pr' },
   ];
+  const _recent = notifications || recent;
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -82,14 +111,20 @@ function S22_Notifications({ dark = false, showTabBar = false }) {
         <div style={{ marginBottom: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
             <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, textTransform: 'uppercase' }}>Recent · 7 days</ACLabel>
-            <ACLabel size={11} color={c.accent} style={{ fontWeight: 600 }}>Mark all read</ACLabel>
+            <button type="button" onClick={onMarkAllRead} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600 }}>Mark all read</ACLabel>
+            </button>
           </div>
           <div style={{ background: c.card, borderRadius: ACRadii.card, overflow: 'hidden' }}>
-            {recent.map((n, i) => (
-              <div key={i} style={{
+            {_recent.map((n, i) => (
+              <button key={i} type="button" onClick={() => onOpen?.(n)} style={{
+                display: 'block', width: '100%', background: 'none', border: 'none',
+                borderTop: i === 0 ? 'none' : `1px solid ${c.hair}`,
+                padding: 0, cursor: onOpen ? 'pointer' : 'default', textAlign: 'left',
+              }}>
+              <div style={{
                 display: 'flex', alignItems: 'flex-start', gap: 12,
                 padding: '14px 16px',
-                borderTop: i === 0 ? 'none' : `1px solid ${c.hair}`,
               }}>
                 <NotifMark kind={n.kind} c={c} />
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -108,6 +143,7 @@ function S22_Notifications({ dark = false, showTabBar = false }) {
                   <ACLabel size={12} color={c.dim} style={{ marginTop: 2, display: 'block' }}>{n.d}</ACLabel>
                 </div>
               </div>
+              </button>
             ))}
           </div>
         </div>
@@ -135,7 +171,7 @@ function S22_Notifications({ dark = false, showTabBar = false }) {
                   <div style={{ fontSize: 14.5, fontWeight: 500, color: c.fg }}>{r.t}</div>
                   <ACLabel size={12} color={c.dim} style={{ marginTop: 2 }}>{r.d}</ACLabel>
                 </div>
-                <Toggle on={prefs[r.k]} c={c} onClick={() => setPrefs({ ...prefs, [r.k]: !prefs[r.k] })} />
+                <Toggle on={prefs[r.k]} c={c} onClick={() => handleToggle(r.k)} />
               </div>
             ))}
           </div>
