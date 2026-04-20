@@ -85,302 +85,49 @@
   },
   "landing": {
     "nav": {
-      "howItWorks": "Como funciona",
-      "pricing": "Planos",
-      "faq": "FAQ",
-      "login": "Entrar",
-      "signup": "Cadastrar"
+      "theApp": "O app",
+      "method": "Método",
+      "labs": "Exames",
+      "pricing": "Preços",
+      "fieldNotes": "Notas de campo",
+      "signIn": "Entrar",
+      "downloadApp": "baixar o app"
     },
     "hero": {
-      "badge": "Bem-vindo",
-      "title": "Pare com o caos.\nTome o controle.",
-      "subtitle": "Treinos, nutrição, exames, medidas, protocolos — tudo em um só lugar. Sem screenshots. Sem confusão. Um dashboard para seu progresso real.",
-      "benefit1": "Veja progresso real",
-      "benefit2": "Dados não mentem",
-      "benefit3": "Compartilhe com confiança",
-      "cta": "Começar grátis",
-      "learnMore": "Saiba mais"
+      "eyebrow": "/// o app de composição para quem treina",
+      "line1": "seu corpo,",
+      "line2Before": "em",
+      "line2Box": "registro",
+      "line2After": ".",
+      "subtitlePart1": "Treino, nutrição, sono e exames em um só sistema, um só arquivo, e um coach calmo que fala em",
+      "subtitleAccent": " medições, não motivação.",
+      "cta": "baixar o app",
+      "ctaCaption": "sem cartão · sem streaks · cancela em um toque"
     },
-    "mock": {
-      "date": "Domingo, 16 de março",
-      "greeting": "Bom dia, Ana 👋",
-      "actionNeeded": "Ação necessária",
-      "workoutTitle": "Treino Inferior A — hoje",
-      "workoutMeta": "5 exercícios · 45 min",
-      "stockTitle": "Creatina — 5 dias",
-      "stockMeta": "Repor em breve",
-      "nutrition": "Nutrição",
-      "training": "Treino",
-      "trainingTitle": "Inferior A",
-      "trainingSubtitle": "Pernas e glúteos",
-      "pending": "Pendente",
-      "adherenceTitle": "Adesão forte",
-      "adherenceSubtitle": "Treino, nutrição e sono em dia",
-      "aiLabel": "Insights",
-      "aiInsight": "Padrão consistente: treinos leves de domingo melhoram recuperação em 15%. Continue assim!"
-    },
-    "problem": {
-      "label": "O Problema",
-      "title": "Tudo espalhado\nem apps diferentes.",
-      "subtitle": "Treinos num app, nutrição noutro, exames em PDFs no email, medidas em fotos. Seu histórico? Não existe. Você nunca sabe se está realmente progredindo.",
-      "items": {
-        "workout": "Treinos",
-        "workoutWhere": "no app da academia",
-        "diet": "Nutrição",
-        "dietWhere": "no MyFitnessPal",
-        "labs": "Resultados de exames",
-        "labsWhere": "em PDFs no email",
-        "measurements": "Medidas",
-        "measurementsWhere": "nas fotos do celular",
-        "protocols": "Protocolos",
-        "protocolsWhere": "em anotações soltas",
-        "history": "Histórico",
-        "historyWhere": "não existe"
-      }
-    },
-    "solution": {
-      "label": "A Solução Real",
-      "title": "Centralizar tudo\nmuda como você vê o progresso.",
-      "subtitle": "atlas.core não é mais um app. É o sistema operacional que reúne treino, nutrição, exames, medidas e protocolos em uma só visão. Histórico real. Contexto real. Dados que realmente importam.",
-      "gains": {
-        "dashboard": {
-          "title": "Seu dashboard completo",
-          "desc": "Um só lugar para ver as prioridades de hoje: próximo treino, próxima refeição, protocolos ativos, alertas importantes. Sem ficar alternando entre 5 apps."
-        },
-        "data": {
-          "title": "Dados de progresso reais",
-          "desc": "Veja exatamente o quanto você está seguindo seu plano — dieta, treino, medidas, exames. Sem chutes. Sem suposições. Dados frios que dizem a verdade."
-        },
-        "score": {
-          "title": "Score de adesão real",
-          "desc": "Avaliação diária baseada em treinos completados, refeições registradas, sono, hidratação. Você vê onde está falhando e corrige. Não é gamificação — é feedback real."
-        },
-        "trends": {
-          "title": "Progresso visível em gráficos",
-          "desc": "Peso, gordura corporal, medidas, força — tudo em gráficos mostrando tendências. Você vê mudanças que não notaria no dia a dia."
-        },
-        "ai": {
-          "title": "Insights de progresso dos seus dados reais",
-          "desc": "Atlas lê seus treinos reais, refeições, exames e histórico. Sem suposições genéricas — tendências claras dos SEUS dados reais."
-        },
-        "team": {
-          "title": "Seu treinador/médico no circuito",
-          "desc": "Compartilhe seus dados com quem quiser. Treinador vê adesão real. Médico vê histórico de exames. Sem WhatsApp. Sem screenshots. Sem confusão."
-        }
-      }
-    },
-    "forWho": {
-      "label": "Para Quem",
-      "title": "Construído para quem quer\nprogresso baseado em dados.",
-      "subtitle": "Se você mede por dados, não por sensação. Se quer saber exatamente o que funciona.",
-      "athlete": {
-        "title": "Atleta e entusiasta",
-        "desc": "Você treina consistentemente, acerta a dieta, verifica os exames. Mas está tudo espalhado. atlas.core reúne tudo.",
-        "features": [
-          "Registro completo de treino + nutrição",
-          "Acompanhamento de progresso com fotos e medidas",
-          "Alertas de estoque de suplementos",
-          "Insights de progresso com contexto real"
-        ]
-      },
-      "coach": {
-        "title": "Treinador e coach — em breve",
-        "desc": "Em breve. Você gerencia múltiplos atletas. Precisa acompanhar adesão, prescrever treinos e ver progresso sem depender de screenshots.",
-        "features": [
-          "Dashboard de atletas com adesão",
-          "Prescrição de treino + nutrição",
-          "Acompanhamento de check-ins",
-          "Relatórios exportáveis"
-        ]
-      },
-      "nutritionist": {
-        "title": "Nutricionista — em breve",
-        "desc": "Em breve. Você acompanha clientes na nutrição. Visualiza refeições, medidas, fotos e cria planos alimentares manualmente ou a partir de templates estruturados.",
-        "features": [
-          "Dashboard de cliente",
-          "Histórico e tendências de refeições",
-          "Prescrição de plano alimentar",
-          "Exportações de relatórios nutricionais"
-        ]
-      },
-      "clinician": {
-        "title": "Médico e clínico — em breve",
-        "desc": "Em breve. Você prescreve protocolos e precisa de dados para tomar decisões. Exames, medidas e histórico de uso tudo em um só lugar.",
-        "features": [
-          "Histórico completo de exames",
-          "Monitoramento de protocolos",
-          "Acompanhamento de composição corporal",
-          "Exportações de relatórios clínicos"
-        ]
-      }
-    },
-    "system": {
-      "title": "Não é só treino.\nUm sistema completo.",
-      "items": [
-        {
-          "before": "Só treinos",
-          "after": "Treinos + recuperação + adesão"
-        },
-        {
-          "before": "Só nutrição",
-          "after": "Nutrição + protocolos + contexto"
-        },
-        {
-          "before": "Só exames",
-          "after": "Exames + histórico + tendências"
-        },
-        {
-          "before": "Suposições genéricas",
-          "after": "Feedback baseado em dados"
-        },
-        {
-          "before": "Acompanhamento sozinho",
-          "after": "Histórico compartilhado com profissionais (em breve)"
-        },
-        {
-          "before": "App bonito",
-          "after": "Sistema que resolve o caos"
-        }
-      ]
-    },
-    "pricing": {
-      "label": "Planos",
-      "title": "Comece grátis,\nevolua quando estiver pronto.",
-      "subtitle": "Sem cartão de crédito. Sem compromisso. 7 dias grátis nos planos pagos. Cancele quando quiser.",
-      "popular": "Popular",
-      "period": "/mês",
-      "monthly": "Mensal",
-      "yearly": "Anual",
-      "saveBadge": "até 31%",
-      "athleteLabel": "Atleta",
-      "mostChosen": "Mais escolhido",
-      "professionalTitle": "Planos profissionais — em breve",
-      "professionalDesc": "Planos para treinadores, nutricionistas e clínicos estão em desenvolvimento. Entre na lista de espera para acesso antecipado.",
-      "joinWaitlist": "Entrar na lista de espera",
-      "plans": [
-        {
-          "id": "free",
-          "name": "Grátis",
-          "pitch": "Comece a registrar.",
-          "price": "Grátis",
-          "popular": false,
-          "isFree": true,
-          "features": [
-            "Dashboard básico de Hoje",
-            "Registro de treino e nutrição",
-            "Acompanhamento de medidas",
-            "Insights semanais"
-          ],
-          "missing": [
-            "Ferramentas de plano estruturado",
-            "Acompanhamento de exames",
-            "Fotos de progresso",
-            "Análises avançadas"
-          ],
-          "cta": "Criar conta grátis"
-        },
-        {
-          "id": "athlete_pro",
-          "name": "Pro",
-          "pitch": "Use de verdade todo dia.",
-          "price": "R$ 29,90",
-          "popular": true,
-          "isFree": false,
-          "features": [
-            "Tudo do Grátis",
-            "Ferramentas de plano alimentar",
-            "Ferramentas de plano de treino",
-            "Acompanhamento de exames",
-            "Fotos de progresso ilimitadas",
-            "Análises completas",
-            "Exportação PDF e CSV"
-          ],
-          "missing": [],
-          "cta": "Assinar Pro"
-        },
-        {
-          "id": "athlete_performance",
-          "name": "Performance",
-          "pitch": "O hub central da sua rotina.",
-          "price": "R$ 59,90",
-          "popular": false,
-          "isFree": false,
-          "features": [
-            "Tudo do Pro",
-            "Acompanhamento inteligente de protocolos",
-            "Relatórios premium",
-            "Histórico ilimitado",
-            "Resumos avançados de progresso"
-          ],
-          "missing": [],
-          "cta": "Assinar Performance"
-        }
-      ]
-    },
-    "faq": {
-      "label": "FAQ",
-      "title": "Perguntas frequentes",
-      "items": [
-        {
-          "q": "O atlas.core substitui meu treinador ou nutricionista?",
-          "a": "Não. atlas.core organiza seus dados — não substitui profissionais. A colaboração com treinadores, nutricionistas e médicos está em beta privado e chegando em breve. Quando disponível, vocês verão os mesmos dados. Sem screenshots necessários."
-        },
-        {
-          "q": "Posso usar com meu treinador, nutricionista e médico ao mesmo tempo?",
-          "a": "Em breve. A colaboração com profissionais está em beta privado. Quando lançada, cada profissional verá apenas o que você permitir e todos acompanharão seu histórico real juntos."
-        },
-        {
-          "q": "O que está incluído no plano Grátis?",
-          "a": "Registro completo de treino + nutrição, acompanhamento de medidas, check-ins diários, 30 dias de histórico, perfil e configurações. O Grátis não expira — é seu para começar."
-        },
-        {
-          "q": "Qual a diferença do Pro (R$ 29,90/mês)?",
-          "a": "Ferramentas estruturadas de plano alimentar e de treino, acompanhamento completo de exames, fotos de progresso ilimitadas, 1 ano de histórico, análises avançadas e exportações PDF/CSV."
-        },
-        {
-          "q": "Qual a diferença do Performance (R$ 59,90/mês)?",
-          "a": "Tudo do Pro, mais acompanhamento inteligente de protocolos com curvas de meia-vida, alertas de estoque, relatórios premium, dashboards profundos e histórico ilimitado. Para controle completo."
-        },
-        {
-          "q": "Funciona no celular?",
-          "a": "100%. atlas.core é totalmente responsivo e otimizado para iOS e Android. Mesma experiência de registro e acompanhamento no celular que no desktop."
-        },
-        {
-          "q": "Posso exportar meus dados?",
-          "a": "Sim. Exporte relatórios PDF (com resumo, métricas, medidas, exames) ou planilhas CSV no Pro e superior. Seus dados são seus."
-        },
-        {
-          "q": "Posso cancelar quando quiser?",
-          "a": "Sim. Sem compromisso, sem taxas de cancelamento. Cancele com um clique. Mas a maioria fica depois de ver seus dados reais em tendência."
-        },
-        {
-          "q": "O app cria treinos e refeições automaticamente?",
-          "a": "Sim, no Pro e superior. Dê seus dados (metas, peso, atividade, preferências) e Atlas constrói um ponto de partida estruturado. Você refina, seu treinador refina — tudo permanece embasado em contexto real."
-        },
-        {
-          "q": "E se eu já tiver um plano do meu treinador?",
-          "a": "Perfeito. Registre no atlas.core, marque como prescrito e acompanhe sua adesão vs. o plano. Seu treinador vê tudo e ajusta quando necessário."
-        },
-        {
-          "q": "Como o Atlas cria insights para mim?",
-          "a": "Ele lê seus dados reais: treinos registrados, refeições, medidas, exames e protocolos ativos. Sem chutes. É por isso que os insights permanecem úteis e contextuais."
-        }
-      ]
-    },
-    "cta": {
-      "title": "Você pode realmente\nver seu progresso.",
-      "subtitle": "Crie sua conta grátis. Em 2 minutos, seu primeiro dashboard está pronto.",
-      "noCard": "Sem cartão de crédito · Sem compromisso · Histórico grátis para sempre"
+    "sections": {
+      "whatItDoes": "/// o que faz",
+      "principles": "/// princípios",
+      "method": "/// o método",
+      "pricing": "/// preços",
+      "closing": "/// encerramento"
     },
     "footer": {
-      "copyright": "© 2026 atlas.core. Todos os direitos reservados.",
-      "home": "Início",
-      "blog": "Blog",
-      "pricing": "Preços",
-      "help": "Ajuda",
-      "login": "Entrar",
-      "tagline": "Atlas lê seus treinos, refeições, exames e histórico reais. Sem suposições genéricas — tendências claras dos SEUS dados reais.",
-      "subtitle": "Performance OS"
+      "copyright": "© 2026 atlas.core · notas de campo do corpo",
+      "terms": "Termos",
+      "privacy": "Privacidade",
+      "contact": "Contato"
+    },
+    "shell": {
+      "sliceEnd": {
+        "top": "atlas.core é feito para mobile.",
+        "bottom": "Esta é a camada de conta e cobrança."
+      }
+    },
+    "settings": {
+      "languageRow": {
+        "title": "Idioma",
+        "subtitleFormat": "{label} · toque para trocar"
+      }
     }
   },
   "pricing_page": {

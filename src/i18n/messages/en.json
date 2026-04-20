@@ -85,302 +85,49 @@
   },
   "landing": {
     "nav": {
-      "howItWorks": "How it works",
-      "pricing": "Plans",
-      "faq": "FAQ",
-      "login": "Sign in",
-      "signup": "Sign up"
+      "theApp": "The app",
+      "method": "Method",
+      "labs": "Labs",
+      "pricing": "Pricing",
+      "fieldNotes": "Field notes",
+      "signIn": "Sign in",
+      "downloadApp": "download the app"
     },
     "hero": {
-      "badge": "Welcome",
-      "title": "Stop the chaos.\nTake control.",
-      "subtitle": "Workouts, nutrition, labs, measurements, protocols — all in one place. No screenshots. No confusion. One dashboard for your real progress.",
-      "benefit1": "See real progress",
-      "benefit2": "Data doesn't lie",
-      "benefit3": "Share with confidence",
-      "cta": "Start free",
-      "learnMore": "Learn more"
+      "eyebrow": "/// the composition app for people who lift",
+      "line1": "your body,",
+      "line2Before": "on the",
+      "line2Box": "record",
+      "line2After": ".",
+      "subtitlePart1": "Training, fuel, sleep and labs in one system, one file, and one calm coach that speaks in",
+      "subtitleAccent": " measurements, not motivation.",
+      "cta": "download the app",
+      "ctaCaption": "no card · no streaks · cancel in one tap"
     },
-    "mock": {
-      "date": "Sunday, March 16",
-      "greeting": "Good morning, Ana 👋",
-      "actionNeeded": "Action needed",
-      "workoutTitle": "Lower A workout — today",
-      "workoutMeta": "5 exercises · 45 min",
-      "stockTitle": "Creatine — 5 days",
-      "stockMeta": "Restock soon",
-      "nutrition": "Nutrition",
-      "training": "Workout",
-      "trainingTitle": "Lower A",
-      "trainingSubtitle": "Legs and glutes",
-      "pending": "Pending",
-      "adherenceTitle": "Strong adherence",
-      "adherenceSubtitle": "Workout, nutrition, and sleep on track",
-      "aiLabel": "Insights",
-      "aiInsight": "Consistent pattern: light Sunday sessions improve recovery by 15%. Keep it up!"
-    },
-    "problem": {
-      "label": "The Problem",
-      "title": "Everything scattered\nacross different apps.",
-      "subtitle": "Workouts in one app, nutrition in another, labs in email PDFs, measurements in photos. Your history? Nowhere. You never know if you're really making progress.",
-      "items": {
-        "workout": "Workouts",
-        "workoutWhere": "in your gym app",
-        "diet": "Nutrition",
-        "dietWhere": "in MyFitnessPal",
-        "labs": "Lab results",
-        "labsWhere": "in email PDFs",
-        "measurements": "Measurements",
-        "measurementsWhere": "in photo files",
-        "protocols": "Protocols",
-        "protocolsWhere": "in loose notes",
-        "history": "History",
-        "historyWhere": "nowhere"
-      }
-    },
-    "solution": {
-      "label": "The Real Solution",
-      "title": "Centralizing everything\nchanges how you see progress.",
-      "subtitle": "atlas.core isn't another app. It's the operating system that brings together training, nutrition, labs, measurements, and protocols in one view. Real history. Real context. Data that actually matters.",
-      "gains": {
-        "dashboard": {
-          "title": "Your entire dashboard",
-          "desc": "One place to see today's priorities: upcoming workout, next meal, active protocols, important alerts. No switching between 5 apps."
-        },
-        "data": {
-          "title": "Real progress data",
-          "desc": "See exactly how well you're following your plan — diet, training, measurements, labs. No guessing. No assumptions. Cold data that tells the truth."
-        },
-        "score": {
-          "title": "Real adherence score",
-          "desc": "Daily rating based on workouts completed, meals logged, sleep, hydration. You see where you're slipping and fix it. Not gamification — real feedback."
-        },
-        "trends": {
-          "title": "Progress visible in charts",
-          "desc": "Weight, body fat, measurements, strength — all in charts showing trends. You see changes you wouldn't notice day-to-day."
-        },
-        "ai": {
-          "title": "Progress insights from your real data",
-          "desc": "Atlas reads your actual workouts, meals, labs, and history. No generic assumptions — clear trends from YOUR real data."
-        },
-        "team": {
-          "title": "Your coach/doctor in the loop",
-          "desc": "Share your data with anyone. Coach sees real adherence. Doctor sees lab history. No WhatsApp. No screenshots. No confusion."
-        }
-      }
-    },
-    "forWho": {
-      "label": "For Whom",
-      "title": "Built for people who want\ndata-driven progress.",
-      "subtitle": "If you measure by data, not feeling. If you want to know exactly what works.",
-      "athlete": {
-        "title": "Athlete & enthusiast",
-        "desc": "You train consistently, nail your diet, check your labs. But it's all scattered. atlas.core brings it together.",
-        "features": [
-          "Complete workout + nutrition logging",
-          "Progress tracking with photos & measurements",
-          "Supplement stock alerts",
-          "Progress insights with real context"
-        ]
-      },
-      "coach": {
-        "title": "Coach & trainer — coming soon",
-        "desc": "Coming soon. You manage multiple athletes. You need to track adherence, prescribe training, and see progress without relying on screenshots.",
-        "features": [
-          "Athlete dashboard with adherence",
-          "Training + nutrition prescription",
-          "Check-in tracking",
-          "Exportable reports"
-        ]
-      },
-      "nutritionist": {
-        "title": "Nutritionist — coming soon",
-        "desc": "Coming soon. You coach clients through nutrition. View meals, measurements, photos, and create meal plans manually or from structured templates.",
-        "features": [
-          "Client dashboard",
-          "Meal history & trends",
-          "Meal plan prescription",
-          "Nutrition report exports"
-        ]
-      },
-      "clinician": {
-        "title": "Doctor & clinician — coming soon",
-        "desc": "Coming soon. You prescribe protocols and need data to make decisions. Labs, measurements, and usage history all in one place.",
-        "features": [
-          "Complete lab history",
-          "Protocol monitoring",
-          "Body composition tracking",
-          "Clinical report exports"
-        ]
-      }
-    },
-    "system": {
-      "title": "Not just workouts.\nA complete system.",
-      "items": [
-        {
-          "before": "Workouts only",
-          "after": "Workouts + recovery + adherence"
-        },
-        {
-          "before": "Nutrition only",
-          "after": "Nutrition + protocols + context"
-        },
-        {
-          "before": "Labs only",
-          "after": "Labs + history + trends"
-        },
-        {
-          "before": "Generic guesswork",
-          "after": "Data-driven feedback"
-        },
-        {
-          "before": "Tracking alone",
-          "after": "Shared history with professionals (coming soon)"
-        },
-        {
-          "before": "Pretty app",
-          "after": "System that solves chaos"
-        }
-      ]
-    },
-    "pricing": {
-      "label": "Plans",
-      "title": "Start free,\nupgrade when ready.",
-      "subtitle": "No credit card. No commitment. 7 free days on paid plans. Cancel anytime.",
-      "popular": "Popular",
-      "period": "/month",
-      "monthly": "Monthly",
-      "yearly": "Yearly",
-      "saveBadge": "up to 31%",
-      "athleteLabel": "Athlete",
-      "mostChosen": "Most chosen",
-      "professionalTitle": "Professional plans — coming soon",
-      "professionalDesc": "Plans for coaches, nutritionists, and clinicians are in private beta. Join the waitlist for early access.",
-      "joinWaitlist": "Join the waitlist",
-      "plans": [
-        {
-          "id": "free",
-          "name": "Free",
-          "pitch": "Start tracking.",
-          "price": "Free",
-          "popular": false,
-          "isFree": true,
-          "features": [
-            "Basic Today dashboard",
-            "Workout and nutrition logging",
-            "Measurement tracking",
-            "Weekly insights"
-          ],
-          "missing": [
-            "Structured plan tools",
-            "Lab tracking",
-            "Progress photos",
-            "Advanced analytics"
-          ],
-          "cta": "Create free account"
-        },
-        {
-          "id": "athlete_pro",
-          "name": "Pro",
-          "pitch": "Use it for real every day.",
-          "price": "$14.99",
-          "popular": true,
-          "isFree": false,
-          "features": [
-            "Everything in Free",
-            "Meal plan tools",
-            "Workout plan tools",
-            "Lab tracking",
-            "Progress photos",
-            "Full analytics",
-            "PDF and CSV export"
-          ],
-          "missing": [],
-          "cta": "Subscribe to Pro"
-        },
-        {
-          "id": "athlete_performance",
-          "name": "Performance",
-          "pitch": "The central hub of your routine.",
-          "price": "$29.99",
-          "popular": false,
-          "isFree": false,
-          "features": [
-            "Everything in Pro",
-            "Complete smart protocol tracking",
-            "Premium reports",
-            "Unlimited history",
-            "Advanced progress summaries"
-          ],
-          "missing": [],
-          "cta": "Subscribe to Performance"
-        }
-      ]
-    },
-    "faq": {
-      "label": "FAQ",
-      "title": "Frequently asked",
-      "items": [
-        {
-          "q": "Does atlas.core replace my coach or nutritionist?",
-          "a": "No. atlas.core focuses on your personal data — workouts, nutrition, labs, measurements, and protocols. Professional collaboration (coaches, nutritionists, clinicians) is in private beta and coming soon."
-        },
-        {
-          "q": "Can I use it with my coach, nutritionist, and doctor at once?",
-          "a": "Professional collaboration is coming soon in private beta. For now, atlas.core is built for individual athletes who want full control of their own data."
-        },
-        {
-          "q": "What's included in the Free plan?",
-          "a": "Complete workout + nutrition logging, measurement tracking, daily check-ins, 30 days of history, profile and settings. Free never expires — it's yours to start."
-        },
-        {
-          "q": "What's different in Pro ($14.99/month)?",
-          "a": "Structured meal and workout plan tools, complete lab tracking, unlimited progress photos, 1 year history, advanced analytics, and PDF/CSV exports."
-        },
-        {
-          "q": "What's different in Performance ($29.99/month)?",
-          "a": "Everything in Pro, plus intelligent protocol tracking with half-life curves, stock alerts, premium reports, deep dashboards, and unlimited history. For complete control."
-        },
-        {
-          "q": "Does it work on mobile?",
-          "a": "100%. atlas.core is fully responsive and optimized for iOS and Android. Same experience logging and tracking on your phone as desktop."
-        },
-        {
-          "q": "Can I export my data?",
-          "a": "Yes. Export PDF reports (with summary, metrics, measurements, labs) or CSV spreadsheets on Pro and up. Your data is yours."
-        },
-        {
-          "q": "Can I cancel anytime?",
-          "a": "Yes. No commitment, no cancellation fees. Cancel in one click. But most people stay once they see their real data trending."
-        },
-        {
-          "q": "Does the app build workouts and meals automatically?",
-          "a": "Yes, on Pro and up. Give it your data (goals, weight, activity, preferences) and Atlas builds a structured starting point. You refine it, your coach refines it — everything stays grounded in real context."
-        },
-        {
-          "q": "What if I already have a plan from my coach?",
-          "a": "Perfect. Log it into atlas.core, mark it as prescribed, and track your adherence vs. the plan. Your coach sees everything and adjusts when needed."
-        },
-        {
-          "q": "How does Atlas build insights for me?",
-          "a": "It reads your real data: logged workouts, meals, measurements, labs, and active protocols. No guessing. That's why the insights stay useful and contextual."
-        }
-      ]
-    },
-    "cta": {
-      "title": "You can actually\nsee your progress.",
-      "subtitle": "Create your account free. In 2 minutes, your first dashboard is ready.",
-      "noCard": "No credit card · No commitment · Free history forever"
+    "sections": {
+      "whatItDoes": "/// what it does",
+      "principles": "/// principles",
+      "method": "/// the method",
+      "pricing": "/// pricing",
+      "closing": "/// sign off"
     },
     "footer": {
-      "copyright": "© 2026 atlas.core. All rights reserved.",
-      "home": "Home",
-      "blog": "Blog",
-      "pricing": "Pricing",
-      "help": "Help",
-      "login": "Log in",
-      "tagline": "Atlas reads your actual workouts, meals, labs, and history. No generic assumptions — clear trends from YOUR real data.",
-      "subtitle": "Performance OS"
+      "copyright": "© 2026 atlas.core · field notes from the body",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "contact": "Contact"
+    },
+    "shell": {
+      "sliceEnd": {
+        "top": "atlas.core is built for mobile.",
+        "bottom": "This is the account and billing layer."
+      }
+    },
+    "settings": {
+      "languageRow": {
+        "title": "Language",
+        "subtitleFormat": "{label} · tap to switch"
+      }
     }
   },
   "pricing_page": {
@@ -1224,6 +971,74 @@
       "errorName": "Enter a meal description.",
       "errorCalories": "Enter a valid calorie amount.",
       "errorFailed": "Could not log meal. Try again."
+    },
+    "system": {
+      "greeting": {
+        "morning": "Good morning",
+        "afternoon": "Good afternoon",
+        "evening": "Good evening"
+      },
+      "checkIn": {
+        "heading": "How are you today?",
+        "subtitle": "Quick check-in. Three inputs. Takes 5 seconds.",
+        "sleep": "Sleep quality",
+        "recovery": "Recovery feel",
+        "soreness": "Soreness level",
+        "submit": "Build my day →",
+        "scale": {
+          "terrible": "Terrible",
+          "poor": "Poor",
+          "okay": "Okay",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "sorenessScale": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High",
+          "extreme": "Extreme"
+        }
+      },
+      "readinessLabel": "Readiness · {level}",
+      "outOf": "/ 100",
+      "trend7d": "7-day adherence",
+      "warnings": {
+        "proteinTargetMissing": "Protein target not set",
+        "noHistory": "No history yet — keep checking in",
+        "adherenceDeclining": "Adherence declining",
+        "systemPrefix": "System: {list}"
+      },
+      "status": {
+        "allDone": "System green. Full execution.",
+        "anchorsDone": "Anchors complete. Finish remaining actions.",
+        "trainDoneProteinMissing": "Training complete. Protein still missing ({consumed}/{target}g).",
+        "proteinDoneTrainPending": "Protein on track. Workout pending.",
+        "started": "Execution started. Key actions pending.",
+        "recovery": "Recovery day. Move light.",
+        "ready": "Protocol ready. Start executing."
+      },
+      "whatToDo": "What to do today",
+      "proteinProgress": "Protein: {consumed}g / {target}g",
+      "remaining": "{amount}g remaining",
+      "anchorBadge": "key",
+      "firstWin": "System active. Keep going.",
+      "reveal": {
+        "building": "Building today's system...",
+        "consequenceHigh": "Push day — high output available.",
+        "consequenceMedium": "Moderate day — train smart.",
+        "consequenceLow": "Recovery day — reduce load."
+      },
+      "firstTime": {
+        "title": "This is your system.",
+        "body": "Check in. Execute your actions. It adapts based on what you actually do.",
+        "cta": "Let's go"
+      },
+      "levels": {
+        "high": "high",
+        "medium": "medium",
+        "low": "low"
+      }
     }
   },
   "restore": {
