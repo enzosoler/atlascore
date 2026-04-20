@@ -2,6 +2,40 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { HeartMark } from '@/redesign/v3/lib/brandMarks.jsx';
+import { useI18n } from '@/lib/i18nContext';
+
+/** Compact EN · PT toggle pill — same pattern as V3MarketingLayout. */
+function LocaleToggle() {
+  const { locale, switchLocale } = useI18n();
+  const isPT = locale === 'pt-BR';
+  const btn = (active, label, value) => (
+    <button
+      key={value}
+      type="button"
+      onClick={() => { if (!active) switchLocale(value); }}
+      style={{
+        padding: '6px 10px',
+        background: active ? ACBrand.ink : 'transparent',
+        color: active ? ACBrand.paper : ACBrand.ink,
+        border: 'none',
+        fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.6,
+        textTransform: 'uppercase', fontWeight: 700,
+        cursor: active ? 'default' : 'pointer', borderRadius: 999,
+      }}
+      aria-pressed={active}
+      aria-label={`Switch language to ${label}`}
+    >{label}</button>
+  );
+  return (
+    <div role="group" aria-label="Language" style={{
+      display: 'inline-flex', alignItems: 'center', padding: 2,
+      border: '1px solid rgba(10,10,10,0.14)', borderRadius: 999,
+    }}>
+      {btn(!isPT, 'EN', 'en')}
+      {btn(isPT,  'PT', 'pt-BR')}
+    </div>
+  );
+}
 
 const NAV_ITEMS = [
   { label: 'The app', href: '/the-app' },
@@ -276,7 +310,8 @@ export default function S42_Web_Landing() {
           ))}
         </div>
 
-        <div className="ac-land-header-ctas" style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div className="ac-land-header-ctas" style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <LocaleToggle />
           <CTAButton to="/webapp">Sign in</CTAButton>
           <CTAButton to="/download-app" primary>download the app</CTAButton>
         </div>
