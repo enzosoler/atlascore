@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ACFonts, ACRadii, useACT,
   ACLabel,
@@ -23,6 +23,7 @@ function S12_Coach_Chat({
   onSend,
 }) {
   const c = useACT(dark);
+  const [draft, setDraft] = useState('');
   const rows = messages || [
     {
       text: <>Good morning. HRV came back strong, <b style={{ color: c.accent }}>72 ms</b>, up 8 from your rolling average. Your body's primed for heavy lower today.</>,
@@ -157,11 +158,23 @@ function S12_Coach_Chat({
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M3 9l6 6M9 15V3M9 3l6 6" stroke={c.dim} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span style={{ flex: 1, fontSize: 14, color: c.dim }}>{draftPlaceholder}</span>
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={draftPlaceholder}
+            disabled={composerDisabled}
+            onKeyDown={(e) => { if (e.key === 'Enter' && draft.trim()) { onSend?.(draft.trim()); setDraft(''); } }}
+            style={{
+              flex: 1, fontSize: 14, color: c.fg, background: 'transparent',
+              border: 'none', outline: 'none', boxShadow: 'none',
+              fontFamily: ACFonts.body,
+            }}
+          />
           <button
             type="button"
-            disabled={composerDisabled}
-            onClick={() => onSend?.()}
+            disabled={composerDisabled || !draft.trim()}
+            onClick={() => { if (draft.trim()) { onSend?.(draft.trim()); setDraft(''); } }}
             style={{
             width: 30, height: 30, borderRadius: 999,
             background: composerDisabled ? c.mute : c.accent,
