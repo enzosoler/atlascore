@@ -77,7 +77,66 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Pure-CSS splash — visible instantly while the React bundle loads.
+           React replaces this div's contents on mount. -->
+      <div id="ac-splash" style="
+        min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+        justify-content:center;gap:0;
+        background:var(--ac-bg);color:var(--ac-fg);
+        padding:env(safe-area-inset-top) max(24px,env(safe-area-inset-right))
+               env(safe-area-inset-bottom) max(24px,env(safe-area-inset-left));
+        box-sizing:border-box;
+      ">
+        <style>
+          :root{--ac-bg:#0A0A0A;--ac-fg:#EFE9DA;--ac-accent:#e8b500;--ac-dim:rgba(239,233,218,0.4);--ac-hair:rgba(239,233,218,0.08)}
+          html.light{--ac-bg:#EFE9DA;--ac-fg:#0A0A0A;--ac-dim:rgba(10,10,10,0.4);--ac-hair:rgba(10,10,10,0.08)}
+          #ac-splash *{margin:0;padding:0;box-sizing:border-box}
+          @keyframes ac-s-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.96)}}
+          @keyframes ac-s-trace{0%{stroke-dashoffset:260}80%,100%{stroke-dashoffset:0}}
+          @keyframes ac-s-fade{0%,85%{opacity:1}95%,100%{opacity:0}}
+          @keyframes ac-s-in{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+        </style>
+
+        <!-- HeartMark -->
+        <div style="animation:ac-s-pulse 2.4s ease-in-out infinite">
+          <svg width="48" height="48" viewBox="0 0 96 96" style="display:block">
+            <path d="M48 82 C34 72,10 58,10 36 C10 22,22 12,32 12 C40 12,44 18,48 24 C52 18,56 12,64 12 C74 12,86 22,86 36 C86 58,62 72,48 82Z" fill="var(--ac-fg)"/>
+            <path d="M10 50 L30 50 L36 50 L42 42 L48 60 L54 32 L60 58 L66 50 L86 50" fill="none" stroke="var(--ac-accent)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- Wordmark -->
+        <div style="
+          margin-top:20px;
+          font-family:'Archivo Black',Impact,sans-serif;
+          font-size:28px;letter-spacing:-1.4px;line-height:1;
+          text-transform:lowercase;color:var(--ac-fg);
+          animation:ac-s-in .6s ease-out both;animation-delay:.15s;
+        ">atlas<span style="color:var(--ac-accent)">.</span>core</div>
+
+        <!-- ECG loading trace -->
+        <div style="margin-top:32px;width:200px;height:32px;position:relative;overflow:hidden;animation:ac-s-in .6s ease-out both;animation-delay:.3s">
+          <svg width="200" height="32" viewBox="0 0 200 32" style="display:block;animation:ac-s-fade 2s linear infinite">
+            <line x1="0" y1="16" x2="200" y2="16" stroke="var(--ac-hair)" stroke-width="1"/>
+            <path d="M0 16 L40 16 L50 16 L56 4 L64 28 L72 10 L80 16 L120 16 L130 16 L136 4 L144 28 L152 10 L160 16 L200 16"
+              fill="none" stroke="var(--ac-accent)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              stroke-dasharray="260" stroke-dashoffset="260"
+              style="animation:ac-s-trace 2s linear infinite"/>
+          </svg>
+        </div>
+
+        <!-- Phase label -->
+        <div style="
+          margin-top:16px;
+          font-family:'JetBrains Mono',monospace;
+          font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
+          color:var(--ac-dim);
+          animation:ac-s-in .6s ease-out both;animation-delay:.45s;
+        ">initializing</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
