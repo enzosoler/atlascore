@@ -26,8 +26,63 @@ function OBHeader({ step, total, dark, onBack = true }) {
   );
 }
 
-function S10_Onboard_Plan({ dark = false, onBack, onContinue }) {
+/**
+ * Mifflin-St Jeor BMR. Weight estimated from height + sex when not provided.
+ * Activity multipliers: 1=1.2, 2=1.375, 3=1.55, 4=1.725, 5=1.9
+ * Goal adjustments: lose=-500, recomp=-200, maintain=0, gain=+300
+ */
+function computePlan(data) {
+  const sex = data?.sex || 'male';
+  const age = data?.age || 28;
+  const heightCm = data?.heightCm || 178;
+  const activity = data?.activity || 3;
+  const goal = data?.goal || 'recomp';
+
+  // Estimate weight from height when not available (regression from CDC data)
+  const weightKg = sex === 'male'
+    ? 0.65 * heightCm - 38
+    : 0.55 * heightCm - 30;
+
+  const bmr = sex === 'male'
+    ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
+    : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+
+  const multipliers = { 1: 1.2, 2: 1.375, 3: 1.55, 4: 1.725, 5: 1.9 };
+  const tdee = Math.round(bmr * (multipliers[activity] || 1.55));
+
+  const goalAdj = { lose: -500, recomp: -200, maintain: 0, gain: 300 };
+  const calories = Math.round(tdee + (goalAdj[goal] || 0));
+
+  // Macro split: protein 1g/lb, fat 25%, carbs remainder
+  const weightLb = Math.round(weightKg * 2.205);
+  const proteinG = Math.round(weightLb * 1.0);
+  const fatG = Math.round((calories * 0.25) / 9);
+  const carbsG = Math.round((calories - proteinG * 4 - fatG * 9) / 4);
+  const proteinPct = Math.round((proteinG * 4 / calories) * 100);
+  const carbsPct = Math.round((carbsG * 4 / calories) * 100);
+  const fatPct = 100 - proteinPct - carbsPct;
+
+  const deficit = tdee - calories;
+  const weeklyLb = Math.abs(deficit * 7 / 3500).toFixed(1);
+  const deficitLabel = deficit > 0
+    ? `${deficit} kcal deficit · ${weeklyLb} lb / wk`
+    : deficit < 0
+      ? `${Math.abs(deficit)} kcal surplus · +${weeklyLb} lb / wk`
+      : 'Maintenance · weight stable';
+
+  const daysPerWeek = Math.min(activity + 1, 6);
+  const goalLabels = { lose: 'Cut fat', recomp: 'Recomp', maintain: 'Maintain', gain: 'Build muscle' };
+
+  return {
+    calories, proteinG, carbsG, fatG, proteinPct, carbsPct, fatPct,
+    deficitLabel, daysPerWeek, weightLb, goalLabel: goalLabels[goal] || 'Recomp',
+  };
+}
+
+function S10_Onboard_Plan({ dark = false, onBack, onContinue, onboardingData }) {
   const c = useACT(dark);
+  const plan = React.useMemo(() => computePlan(onboardingData), [onboardingData]);
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <OBHeader step={4} total={10} dark={dark} onBack={onBack} />
@@ -47,20 +102,20 @@ function S10_Onboard_Plan({ dark = false, onBack, onContinue }) {
         }}>
           <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Calories · daily</ACLabel>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
-            <ACNum size={72} color={c.bg} weight={700}>2,380</ACNum>
+            <ACNum size={72} color={c.bg} weight={700}>{plan.calories.toLocaleString()}</ACNum>
             <ACLabel size={13} color="rgba(239,233,218,0.6)">kcal</ACLabel>
           </div>
           <ACLabel size={11} color="rgba(239,233,218,0.55)" style={{ marginTop: 2 }}>
-            400 kcal deficit · 0.8 lb / wk
+            {plan.deficitLabel}
           </ACLabel>
 
           <div style={{ marginTop: 18, height: 1, background: 'rgba(239,233,218,0.12)' }} />
 
           <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {[
-              { l: 'Protein', v: '186', u: 'g', p: 0.31, pct: '31%' },
-              { l: 'Carbs',   v: '286', u: 'g', p: 0.48, pct: '48%' },
-              { l: 'Fat',     v: '79',  u: 'g',  p: 0.21, pct: '21%' },
+              { l: 'Protein', v: String(plan.proteinG), u: 'g', pct: `${plan.proteinPct}%` },
+              { l: 'Carbs',   v: String(plan.carbsG),   u: 'g', pct: `${plan.carbsPct}%` },
+              { l: 'Fat',     v: String(plan.fatG),      u: 'g', pct: `${plan.fatPct}%` },
             ].map((m, i) => (
               <div key={i}>
                 <ACLabel size={11} color="rgba(239,233,218,0.55)">{m.l}</ACLabel>
@@ -81,13 +136,13 @@ function S10_Onboard_Plan({ dark = false, onBack, onContinue }) {
             <div>
               <ACLabel size={11} color={c.dim}>Training</ACLabel>
               <div style={{ marginTop: 4, fontSize: 15, fontWeight: 600, color: c.fg }}>
-                4 days / week
+                {plan.daysPerWeek} days / week
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <ACLabel size={11} color={c.dim}>Target</ACLabel>
+              <ACLabel size={11} color={c.dim}>Goal</ACLabel>
               <div style={{ marginTop: 4, fontSize: 15, fontWeight: 600, color: c.fg }}>
-                175 lb by Jul
+                {plan.goalLabel}
               </div>
             </div>
           </div>
