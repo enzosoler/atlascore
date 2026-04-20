@@ -1224,6 +1224,74 @@
       "errorName": "Enter a meal description.",
       "errorCalories": "Enter a valid calorie amount.",
       "errorFailed": "Could not log meal. Try again."
+    },
+    "system": {
+      "greeting": {
+        "morning": "Good morning",
+        "afternoon": "Good afternoon",
+        "evening": "Good evening"
+      },
+      "checkIn": {
+        "heading": "How are you today?",
+        "subtitle": "Quick check-in. Three inputs. Takes 5 seconds.",
+        "sleep": "Sleep quality",
+        "recovery": "Recovery feel",
+        "soreness": "Soreness level",
+        "submit": "Build my day →",
+        "scale": {
+          "terrible": "Terrible",
+          "poor": "Poor",
+          "okay": "Okay",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "sorenessScale": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High",
+          "extreme": "Extreme"
+        }
+      },
+      "readinessLabel": "Readiness · {level}",
+      "outOf": "/ 100",
+      "trend7d": "7-day adherence",
+      "warnings": {
+        "proteinTargetMissing": "Protein target not set",
+        "noHistory": "No history yet — keep checking in",
+        "adherenceDeclining": "Adherence declining",
+        "systemPrefix": "System: {list}"
+      },
+      "status": {
+        "allDone": "System green. Full execution.",
+        "anchorsDone": "Anchors complete. Finish remaining actions.",
+        "trainDoneProteinMissing": "Training complete. Protein still missing ({consumed}/{target}g).",
+        "proteinDoneTrainPending": "Protein on track. Workout pending.",
+        "started": "Execution started. Key actions pending.",
+        "recovery": "Recovery day. Move light.",
+        "ready": "Protocol ready. Start executing."
+      },
+      "whatToDo": "What to do today",
+      "proteinProgress": "Protein: {consumed}g / {target}g",
+      "remaining": "{amount}g remaining",
+      "anchorBadge": "key",
+      "firstWin": "System active. Keep going.",
+      "reveal": {
+        "building": "Building today's system...",
+        "consequenceHigh": "Push day — high output available.",
+        "consequenceMedium": "Moderate day — train smart.",
+        "consequenceLow": "Recovery day — reduce load."
+      },
+      "firstTime": {
+        "title": "This is your system.",
+        "body": "Check in. Execute your actions. It adapts based on what you actually do.",
+        "cta": "Let's go"
+      },
+      "levels": {
+        "high": "high",
+        "medium": "medium",
+        "low": "low"
+      }
     }
   },
   "restore": {

@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { useDailySystem, getSystemIntegrity } from '@/lib/dailySystem';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { useLiveWeather } from '../lib/useLiveWeather.js';
@@ -26,10 +27,18 @@ import {
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
-function timeOfDaySalute(hour) {
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+function timeOfDaySalute(hour, t) {
+  if (hour < 12) return t('today.system.greeting.morning');
+  if (hour < 17) return t('today.system.greeting.afternoon');
+  return t('today.system.greeting.evening');
+}
+
+function interpolate(template, vars) {
+  if (!template) return '';
+  return Object.keys(vars || {}).reduce(
+    (acc, k) => acc.replace(new RegExp(`\\{${k}\\}`, 'g'), String(vars[k])),
+    template
+  );
 }
 
 function resolveDisplayName(user) {
@@ -62,13 +71,26 @@ function WeatherChip({ weather, c }) {
 // ─── CHECK-IN SCREEN ────────────────────────────────────────
 
 function CheckInScreen({ dark, greeting, weather, onSubmit }) {
+  const t = useT();
   const c = useACT(dark);
   const [sleep, setSleep] = useState(3);
   const [recovery, setRecovery] = useState(3);
   const [soreness, setSoreness] = useState(1);
 
-  const labels = { 1: 'Terrible', 2: 'Poor', 3: 'Okay', 4: 'Good', 5: 'Excellent' };
-  const sorenessLabels = { 1: 'None', 2: 'Mild', 3: 'Moderate', 4: 'High', 5: 'Extreme' };
+  const labels = {
+    1: t('today.system.checkIn.scale.terrible'),
+    2: t('today.system.checkIn.scale.poor'),
+    3: t('today.system.checkIn.scale.okay'),
+    4: t('today.system.checkIn.scale.good'),
+    5: t('today.system.checkIn.scale.excellent'),
+  };
+  const sorenessLabels = {
+    1: t('today.system.checkIn.sorenessScale.none'),
+    2: t('today.system.checkIn.sorenessScale.mild'),
+    3: t('today.system.checkIn.sorenessScale.moderate'),
+    4: t('today.system.checkIn.sorenessScale.high'),
+    5: t('today.system.checkIn.sorenessScale.extreme'),
+  };
 
   function ScaleRow({ label, value, onChange, labelMap }) {
     return (
@@ -121,15 +143,15 @@ function CheckInScreen({ dark, greeting, weather, onSubmit }) {
           marginTop: 24, fontFamily: ACFonts.display, fontSize: 28, fontWeight: 700,
           letterSpacing: -0.8, lineHeight: 1.1, color: c.fg,
         }}>
-          How are you today?
+          {t('today.system.checkIn.heading')}
         </div>
         <div style={{ marginTop: 6, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-          Quick check-in. Three inputs. Takes 5 seconds.
+          {t('today.system.checkIn.subtitle')}
         </div>
 
-        <ScaleRow label="Sleep quality" value={sleep} onChange={setSleep} labelMap={labels} />
-        <ScaleRow label="Recovery feel" value={recovery} onChange={setRecovery} labelMap={labels} />
-        <ScaleRow label="Soreness level" value={soreness} onChange={setSoreness} labelMap={sorenessLabels} />
+        <ScaleRow label={t('today.system.checkIn.sleep')}    value={sleep}    onChange={setSleep}    labelMap={labels} />
+        <ScaleRow label={t('today.system.checkIn.recovery')} value={recovery} onChange={setRecovery} labelMap={labels} />
+        <ScaleRow label={t('today.system.checkIn.soreness')} value={soreness} onChange={setSoreness} labelMap={sorenessLabels} />
 
         <button
           type="button"
@@ -141,7 +163,7 @@ function CheckInScreen({ dark, greeting, weather, onSubmit }) {
             fontWeight: 600, letterSpacing: -0.2, cursor: 'pointer',
           }}
         >
-          Build my day →
+          {t('today.system.checkIn.submit')}
         </button>
       </div>
     </div>
@@ -151,6 +173,7 @@ function CheckInScreen({ dark, greeting, weather, onSubmit }) {
 // ─── DAILY SYSTEM SCREEN ────────────────────────────────────
 
 function DailySystemScreen({ dark, greeting, weather, readiness, actions, completions, adherence, trend, momentum, proteinConsumed, proteinTarget, onToggle, onNavigate }) {
+  const t = useT();
   const c = useACT(dark);
   const navigate = useNavigate();
 
@@ -161,12 +184,12 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
       try {
         if (!localStorage.getItem('atlas.firstWin')) {
           localStorage.setItem('atlas.firstWin', '1');
-          toast.success('System active. Keep going.');
+          toast.success(t('today.system.firstWin'));
         }
       } catch {}
     }
     prevDone.current = adherence.done;
-  }, [adherence.done]);
+  }, [adherence.done, t]);
 
   const statusColors = {
     high: c.accent,
@@ -201,9 +224,9 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
         {/* SYSTEM HEALTH — warnings about missing inputs */}
         {(() => {
           const warnings = [];
-          if (!proteinTarget || proteinTarget <= 0) warnings.push('Protein target not set');
-          if (trend.values.length === 0) warnings.push('No history yet — keep checking in');
-          if (trend.values.length > 0 && trend.direction === '↓') warnings.push('Adherence declining');
+          if (!proteinTarget || proteinTarget <= 0) warnings.push(t('today.system.warnings.proteinTargetMissing'));
+          if (trend.values.length === 0) warnings.push(t('today.system.warnings.noHistory'));
+          if (trend.values.length > 0 && trend.direction === '↓') warnings.push(t('today.system.warnings.adherenceDeclining'));
 
           if (warnings.length === 0) return null;
           return (
@@ -212,7 +235,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
               border: `1px solid ${c.hair}`,
             }}>
               <ACMono size={9} color={c.mute} style={{ fontWeight: 600, letterSpacing: 0.5 }}>
-                System: {warnings.join(' · ')}
+                {interpolate(t('today.system.warnings.systemPrefix'), { list: warnings.join(' · ') })}
               </ACMono>
             </div>
           );
@@ -227,11 +250,11 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <ACMono size={10} color={statusColors[readiness.level]} style={{ fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
-                Readiness · {readiness.level}
+                {interpolate(t('today.system.readinessLabel'), { level: t(`today.system.levels.${readiness.level}`) || readiness.level })}
               </ACMono>
               <div style={{ marginTop: 6, display: 'flex', alignItems: 'baseline', gap: 8 }}>
                 <ACNum size={48} color={c.fg} weight={700}>{readiness.score}</ACNum>
-                <ACLabel size={12} color={c.dim}>/ 100</ACLabel>
+                <ACLabel size={12} color={c.dim}>{t('today.system.outOf')}</ACLabel>
               </div>
             </div>
             <ACRing size={64} value={readiness.score} dark={dark} thickness={5} color={statusColors[readiness.level]} />
@@ -256,7 +279,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
             justifyContent: 'space-between', alignItems: 'center',
           }}>
             <ACMono size={10} color={c.dim} style={{ fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' }}>
-              7-day adherence
+              {t('today.system.trend7d')}
             </ACMono>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <ACLabel size={14} color={c.fg} style={{ fontWeight: 700 }}>{trend.avg}%</ACLabel>
@@ -286,22 +309,26 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
 
           let statusText, statusColor;
           if (allDone) {
-            statusText = 'System green. Full execution.';
+            statusText = t('today.system.status.allDone');
             statusColor = c.accent;
           } else if (trainingDone && proteinDone) {
-            statusText = 'Anchors complete. Finish remaining actions.';
+            statusText = t('today.system.status.anchorsDone');
             statusColor = c.accent;
           } else if (trainingDone && !proteinDone) {
-            statusText = `Training complete. Protein still missing (${proteinConsumed}/${proteinTarget}g).`;
+            statusText = interpolate(t('today.system.status.trainDoneProteinMissing'), {
+              consumed: proteinConsumed, target: proteinTarget,
+            });
             statusColor = c.fg;
           } else if (!trainingDone && proteinDone) {
-            statusText = 'Protein on track. Workout pending.';
+            statusText = t('today.system.status.proteinDoneTrainPending');
             statusColor = c.fg;
           } else if (adherence.done > 0) {
-            statusText = 'Execution started. Key actions pending.';
+            statusText = t('today.system.status.started');
             statusColor = c.dim;
           } else {
-            statusText = readiness.level === 'low' ? 'Recovery day. Move light.' : 'Protocol ready. Start executing.';
+            statusText = readiness.level === 'low'
+              ? t('today.system.status.recovery')
+              : t('today.system.status.ready');
             statusColor = c.dim;
           }
 
@@ -331,7 +358,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
         <div style={{ marginTop: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <ACMono size={10} color={c.dim} style={{ fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase' }}>
-              What to do today
+              {t('today.system.whatToDo')}
             </ACMono>
             <ACMono size={10} color={c.accent} style={{ fontWeight: 700 }}>
               {adherence.done}/{adherence.total}
@@ -405,7 +432,9 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
                       color: isDone ? c.dim : c.fg,
                       textDecoration: isDone ? 'line-through' : 'none',
                     }}>
-                      {isProteinAction ? `Protein: ${proteinConsumed}g / ${proteinTarget}g` : action.text}
+                      {isProteinAction
+                        ? interpolate(t('today.system.proteinProgress'), { consumed: proteinConsumed, target: proteinTarget })
+                        : action.text}
                     </div>
                     {isProteinAction && !isDone && (() => {
                       const remaining = Math.max(0, proteinTarget - proteinConsumed);
@@ -417,7 +446,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
                           fontSize: 11, fontWeight: 600, letterSpacing: 0.2,
                           color: deficitColor,
                         }}>
-                          {remaining}g remaining
+                          {interpolate(t('today.system.remaining'), { amount: remaining })}
                         </div>
                       ) : null;
                     })()}
@@ -438,7 +467,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
 
                   {/* Anchor badge or category dot */}
                   {action.anchor ? (
-                    <ACMono size={8} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>key</ACMono>
+                    <ACMono size={8} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>{t('today.system.anchorBadge')}</ACMono>
                   ) : (
                     <ACMono size={9} color={c.mute}>{categoryIcons[action.category]}</ACMono>
                   )}
@@ -484,6 +513,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
 // ─── READINESS REVEAL (3-stage gift: anticipation → reveal → celebration) ──
 
 function ReadinessReveal({ dark, readiness, onComplete }) {
+  const t = useT();
   const c = useACT(dark);
   const [phase, setPhase] = React.useState('anticipation');
 
@@ -498,10 +528,10 @@ function ReadinessReveal({ dark, readiness, onComplete }) {
 
   // Consequence line — connects state → decision immediately
   const consequenceLine = readiness.level === 'high'
-    ? 'Push day — high output available.'
+    ? t('today.system.reveal.consequenceHigh')
     : readiness.level === 'medium'
-      ? 'Moderate day — train smart.'
-      : 'Recovery day — reduce load.';
+      ? t('today.system.reveal.consequenceMedium')
+      : t('today.system.reveal.consequenceLow');
 
   return (
     <div style={{
@@ -523,7 +553,7 @@ function ReadinessReveal({ dark, readiness, onComplete }) {
             marginTop: 16, fontFamily: ACFonts.mono, fontSize: 11,
             letterSpacing: 1.5, textTransform: 'uppercase', color: c.dim,
           }}>
-            Building today's system...
+            {t('today.system.reveal.building')}
           </div>
         </div>
       )}
@@ -531,7 +561,7 @@ function ReadinessReveal({ dark, readiness, onComplete }) {
       {phase === 'reveal' && (
         <div style={{ textAlign: 'center', animation: 'revealFadeUp 0.4s ease-out' }}>
           <ACMono size={10} color={statusColors[readiness.level]} style={{ fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase' }}>
-            Readiness · {readiness.level}
+            {interpolate(t('today.system.readinessLabel'), { level: t(`today.system.levels.${readiness.level}`) || readiness.level })}
           </ACMono>
           <div style={{ marginTop: 10, animation: 'revealCountUp 0.35s ease-out 0.1s both' }}>
             <ACNum size={88} color={c.fg} weight={700}>{readiness.score}</ACNum>
@@ -555,6 +585,7 @@ function ReadinessReveal({ dark, readiness, onComplete }) {
 // ─── FIRST-TIME WELCOME OVERLAY ─────────────────────────────
 
 function FirstTimeOverlay({ dark, onDismiss }) {
+  const t = useT();
   const c = useACT(dark);
   return (
     <div style={{
@@ -571,10 +602,10 @@ function FirstTimeOverlay({ dark, onDismiss }) {
           marginTop: 18, fontFamily: ACFonts.display, fontSize: 24,
           fontWeight: 700, letterSpacing: -0.8, lineHeight: 1.1,
         }}>
-          This is your system.
+          {t('today.system.firstTime.title')}
         </div>
         <div style={{ marginTop: 12, fontSize: 14, color: c.dim, lineHeight: 1.6 }}>
-          Check in. Execute your actions. It adapts based on what you actually do.
+          {t('today.system.firstTime.body')}
         </div>
         <button
           type="button"
@@ -586,7 +617,7 @@ function FirstTimeOverlay({ dark, onDismiss }) {
             fontWeight: 600, cursor: 'pointer',
           }}
         >
-          Let's go
+          {t('today.system.firstTime.cta')}
         </button>
       </div>
     </div>
@@ -598,6 +629,7 @@ function FirstTimeOverlay({ dark, onDismiss }) {
 export default function V3Today() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const t = useT();
   const weather = useLiveWeather();
   const navigate = useNavigate();
   const dark = theme === 'dark';
@@ -605,7 +637,7 @@ export default function V3Today() {
   const daily = useDailyStateV2() || { nutrition: null, todayMeals: [], recentSessions: [], workoutStreak: 0 };
 
   const name = resolveDisplayName(user);
-  const greeting = name ? `${timeOfDaySalute(new Date().getHours())}, ${name}` : undefined;
+  const greeting = name ? `${timeOfDaySalute(new Date().getHours(), t)}, ${name}` : undefined;
 
   const proteinTarget = daily.nutrition?.proteinTarget || user?.user_metadata?.daily_protein_target || 150;
   const proteinConsumed = daily.nutrition?.proteinConsumed || 0;

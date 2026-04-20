@@ -1211,6 +1211,74 @@
       "errorName": "Descreva a refeição.",
       "errorCalories": "Insira um valor válido de calorias.",
       "errorFailed": "Não foi possível registrar. Tente novamente."
+    },
+    "system": {
+      "greeting": {
+        "morning": "Bom dia",
+        "afternoon": "Boa tarde",
+        "evening": "Boa noite"
+      },
+      "checkIn": {
+        "heading": "Como você está hoje?",
+        "subtitle": "Check-in rápido. Três entradas. Leva 5 segundos.",
+        "sleep": "Qualidade do sono",
+        "recovery": "Sensação de recuperação",
+        "soreness": "Nível de dor muscular",
+        "submit": "Construir meu dia →",
+        "scale": {
+          "terrible": "Péssimo",
+          "poor": "Ruim",
+          "okay": "Ok",
+          "good": "Bom",
+          "excellent": "Excelente"
+        },
+        "sorenessScale": {
+          "none": "Nenhuma",
+          "mild": "Leve",
+          "moderate": "Moderada",
+          "high": "Alta",
+          "extreme": "Extrema"
+        }
+      },
+      "readinessLabel": "Prontidão · {level}",
+      "outOf": "/ 100",
+      "trend7d": "Aderência 7 dias",
+      "warnings": {
+        "proteinTargetMissing": "Meta de proteína não definida",
+        "noHistory": "Sem histórico ainda — continue fazendo check-in",
+        "adherenceDeclining": "Aderência caindo",
+        "systemPrefix": "Sistema: {list}"
+      },
+      "status": {
+        "allDone": "Sistema verde. Execução total.",
+        "anchorsDone": "Âncoras concluídas. Finalize as ações restantes.",
+        "trainDoneProteinMissing": "Treino concluído. Proteína ainda faltando ({consumed}/{target}g).",
+        "proteinDoneTrainPending": "Proteína em dia. Treino pendente.",
+        "started": "Execução iniciada. Ações-chave pendentes.",
+        "recovery": "Dia de recuperação. Mova-se leve.",
+        "ready": "Protocolo pronto. Comece a executar."
+      },
+      "whatToDo": "O que fazer hoje",
+      "proteinProgress": "Proteína: {consumed}g / {target}g",
+      "remaining": "{amount}g restantes",
+      "anchorBadge": "chave",
+      "firstWin": "Sistema ativo. Continue.",
+      "reveal": {
+        "building": "Construindo o sistema de hoje...",
+        "consequenceHigh": "Dia de empurrar — alto rendimento disponível.",
+        "consequenceMedium": "Dia moderado — treine com cabeça.",
+        "consequenceLow": "Dia de recuperação — reduza a carga."
+      },
+      "firstTime": {
+        "title": "Este é o seu sistema.",
+        "body": "Faça o check-in. Execute suas ações. Ele se adapta ao que você realmente faz.",
+        "cta": "Vamos lá"
+      },
+      "levels": {
+        "high": "alta",
+        "medium": "média",
+        "low": "baixa"
+      }
     }
   },
   "restore": {
