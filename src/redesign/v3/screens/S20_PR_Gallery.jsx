@@ -30,16 +30,50 @@ function TrophyStamp({ color, accent, fresh }) {
   );
 }
 
-function S20_PR_Gallery({ dark = false }) {
+/**
+ * S20_PR_Gallery — personal records wall.
+ *
+ * Gallery:    <S20_PR_Gallery dark />
+ * Production: <S20_PR_Gallery dark prs={[...]} summary={{...}} filterCategories={[...]}
+ *               onOpenPR={fn} showTabBar={true} />
+ *
+ * prs: [{lift, w, u, e1rm, date, days, fresh, category?}]
+ * summary: {monthLabel, count, tonnage, biggestLift, biggestUnit, biggestLiftName, delta, yearCount}
+ * onOpenPR(pr) — called when a PR row is tapped
+ */
+const DEMO_PRS = [
+  { lift: 'Deadlift',     w: '415', u: 'lb × 1', e1rm: '415', date: 'Apr 18', days: 'today', fresh: true, category: 'Deadlift' },
+  { lift: 'Bench press',  w: '275', u: 'lb × 1', e1rm: '275', date: 'Apr 11', days: '7d ago', category: 'Bench' },
+  { lift: 'Back squat',   w: '325', u: 'lb × 3', e1rm: '352', date: 'Apr 04', days: '14d ago', category: 'Squat' },
+  { lift: 'Overhead press', w: '165', u: 'lb × 1', e1rm: '165', date: 'Mar 28', days: '21d ago', category: 'Press' },
+  { lift: 'Weighted pullup', w: '95', u: 'lb × 5', e1rm: '108', date: 'Mar 21', days: '28d ago', category: 'Accessory' },
+  { lift: 'Front squat',  w: '255', u: 'lb × 3', e1rm: '276', date: 'Mar 14', days: '35d ago', category: 'Squat' },
+];
+
+const DEMO_SUMMARY = {
+  monthLabel: 'April PRs', count: 3, tonnage: '52 total tonnes',
+  biggestLift: '415', biggestUnit: 'lb', biggestLiftName: 'Deadlift · today',
+  delta: '+10 lb vs Feb', yearCount: 6,
+};
+
+function S20_PR_Gallery({
+  dark = false,
+  prs,
+  summary,
+  filterCategories,
+  onOpenPR,
+  showTabBar = true,
+}) {
   const c = useACT(dark);
-  const prs = [
-    { lift: 'Deadlift',     w: '415', u: 'lb × 1', e1rm: '415', date: 'Apr 18', days: 'today', fresh: true },
-    { lift: 'Bench press',  w: '275', u: 'lb × 1', e1rm: '275', date: 'Apr 11', days: '7d ago' },
-    { lift: 'Back squat',   w: '325', u: 'lb × 3', e1rm: '352', date: 'Apr 04', days: '14d ago' },
-    { lift: 'Overhead press', w: '165', u: 'lb × 1', e1rm: '165', date: 'Mar 28', days: '21d ago' },
-    { lift: 'Weighted pullup', w: '95', u: 'lb × 5', e1rm: '108', date: 'Mar 21', days: '28d ago' },
-    { lift: 'Front squat',  w: '255', u: 'lb × 3', e1rm: '276', date: 'Mar 14', days: '35d ago' },
-  ];
+  const _prs = prs || DEMO_PRS;
+  const _summary = summary || DEMO_SUMMARY;
+  const categories = filterCategories || ['All lifts', 'Squat', 'Bench', 'Deadlift', 'Press', 'Accessory'];
+  const [activeFilter, setActiveFilter] = React.useState('All lifts');
+
+  const visiblePrs = activeFilter === 'All lifts'
+    ? _prs
+    : _prs.filter((r) => r.category === activeFilter);
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -49,19 +83,19 @@ function S20_PR_Gallery({ dark = false }) {
             The wall
           </div>
         </div>
-        <ACChip accent dark={dark}>+6 this yr</ACChip>
+        <ACChip accent dark={dark}>+{_summary.yearCount} this yr</ACChip>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '14px 22px 20px' }}>
+      <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '14px 22px 20px' }}>
         {/* Summary hero — this month's tonnage / PR count */}
         <div style={{
           padding: 22, background: c.fg, color: c.bg, borderRadius: ACRadii.card,
           display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 18,
         }}>
           <div>
-            <ACLabel size={10} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>April PRs</ACLabel>
-            <ACNum size={76} color={c.bg} weight={700}>3</ACNum>
-            <ACLabel size={11} color="rgba(239,233,218,0.6)">lifts moved · 52 total tonnes</ACLabel>
+            <ACLabel size={10} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' }}>{_summary.monthLabel}</ACLabel>
+            <ACNum size={76} color={c.bg} weight={700}>{_summary.count}</ACNum>
+            <ACLabel size={11} color="rgba(239,233,218,0.6)">lifts moved · {_summary.tonnage}</ACLabel>
           </div>
           <div style={{
             borderLeft: '1px solid rgba(239,233,218,0.14)', paddingLeft: 18,
@@ -69,11 +103,11 @@ function S20_PR_Gallery({ dark = false }) {
           }}>
             <div>
               <ACLabel size={10} color="rgba(239,233,218,0.5)" style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Biggest lift</ACLabel>
-              <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, marginTop: 4 }}>415 lb</div>
-              <ACLabel size={11} color="rgba(239,233,218,0.55)">Deadlift · today</ACLabel>
+              <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, marginTop: 4 }}>{_summary.biggestLift} {_summary.biggestUnit}</div>
+              <ACLabel size={11} color="rgba(239,233,218,0.55)">{_summary.biggestLiftName}</ACLabel>
             </div>
             <div>
-              <div style={{ fontFamily: ACFonts.mono, fontSize: 11, color: c.accent, fontWeight: 700 }}>+10 lb vs Feb</div>
+              <div style={{ fontFamily: ACFonts.mono, fontSize: 11, color: c.accent, fontWeight: 700 }}>{_summary.delta}</div>
             </div>
           </div>
         </div>
@@ -82,21 +116,25 @@ function S20_PR_Gallery({ dark = false }) {
         <div style={{
           marginTop: 18, display: 'flex', gap: 6, overflow: 'auto', paddingBottom: 2,
         }}>
-          {['All lifts', 'Squat', 'Bench', 'Deadlift', 'Press', 'Accessory'].map((t, i) => (
-            <div key={t} style={{
+          {categories.map((t) => (
+            <button key={t} type="button" onClick={() => setActiveFilter(t)} style={{
               padding: '8px 14px', borderRadius: 999,
-              background: i === 0 ? c.fg : c.card,
-              color: i === 0 ? c.bg : c.fg,
+              background: activeFilter === t ? c.fg : c.card,
+              color: activeFilter === t ? c.bg : c.fg,
               fontSize: 12, fontWeight: 600,
-              flexShrink: 0,
-            }}>{t}</div>
+              flexShrink: 0, border: 'none', cursor: 'pointer',
+            }}>{t}</button>
           ))}
         </div>
 
         {/* Records list */}
         <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {prs.map((r, i) => (
-            <div key={i} style={{
+          {visiblePrs.length === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center' }}>
+              <ACLabel size={12} color={c.dim}>No records in {activeFilter}</ACLabel>
+            </div>
+          ) : visiblePrs.map((r, i) => (
+            <button key={i} type="button" onClick={() => onOpenPR?.(r)} style={{
               position: 'relative',
               padding: '16px 16px 16px 18px',
               background: c.card, borderRadius: ACRadii.card,
@@ -133,12 +171,12 @@ function S20_PR_Gallery({ dark = false }) {
                   <span>{r.days}</span>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
 
-      <ACTabBar active="workout" dark={dark} HeartMarkComp={HeartMark} />
+      {showTabBar ? <ACTabBar active="workout" dark={dark} HeartMarkComp={HeartMark} /> : null}
     </div>
   );
 }
