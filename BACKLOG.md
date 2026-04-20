@@ -111,13 +111,13 @@ STILL SHELL (highest-leverage targets):
 - [x] S31_Sleep_Detail -- onShare emits payload; onConnectDevice CTA in noData state
 - [x] S28_Crew -- members/weekStats/feed/weekHeadline props; leaderboard tab sorts live; crewCount from real array
 - [x] S37_Inbox -- filter chips stateful (live filter by type); onOpenItem emits {id,type,title}; badge shows hi-count
-- [ ] S40_Billing -- display-only; needs Stripe/RevenueCat onEditPayment/onSwitchPlan contract
+- [x] S40_Billing -- typed payloads: onEditPayment({last4,brand}), onSwitchPlan({fromPlan,targetInterval}), onCancel({planName}), onOpenInvoice({invoiceId,date,amount})
 - [ ] S16_Biomarker_Detail -- gift moment (§12: lab result parsing); pure display, needs onShare/onFlag handlers
 - [ ] S34_Watch -- display-only by design; low priority
 
 NOTE: S33_Profile confirmed production-interactive (real props + handlers) — removed from shell list.
 
-NEXT TARGET: S40_Billing
+NEXT TARGET: S16_Biomarker_Detail
 
 ## Handoffs (design → engineering)
 

@@ -23,7 +23,16 @@ const DEMO_INVOICES = [
  * S40_Billing — subscription / billing management screen.
  *
  * Gallery:    <S40_Billing dark />
- * Production: <S40_Billing dark onBack={fn} onEditPayment={fn} onSwitchPlan={fn} onCancel={fn} />
+ * Production: <S40_Billing dark planName="atlas.core" price="$12" interval="/month"
+ *               nextCharge="MAY 18" perks={[...]} invoices={[{d,n,a,s},...]}
+ *               paymentLast4="4242" paymentBrand="VISA" paymentExpiry="08/27"
+ *               onBack={fn} onEditPayment={fn} onSwitchPlan={fn}
+ *               onCancel={fn} onOpenInvoice={fn} />
+ *
+ * onEditPayment({last4, brand}) — edit payment method
+ * onSwitchPlan({fromPlan, targetInterval}) — switch to annual
+ * onCancel({planName}) — cancel subscription
+ * onOpenInvoice({invoiceId, date, amount}) — open invoice PDF/detail
  */
 function S40_Billing({
   dark = false,
@@ -45,6 +54,19 @@ function S40_Billing({
   const c = useACT(dark);
   const _perks = perks || DEMO_PERKS;
   const _invoices = invoices || DEMO_INVOICES;
+
+  const handleEditPayment = () => {
+    if (typeof onEditPayment === 'function') onEditPayment({ last4: paymentLast4, brand: paymentBrand });
+  };
+  const handleSwitchPlan = () => {
+    if (typeof onSwitchPlan === 'function') onSwitchPlan({ fromPlan: planName, targetInterval: 'annual' });
+  };
+  const handleCancel = () => {
+    if (typeof onCancel === 'function') onCancel({ planName });
+  };
+  const handleOpenInvoice = (r) => {
+    if (typeof onOpenInvoice === 'function') onOpenInvoice({ invoiceId: r.n, date: r.d, amount: r.a });
+  };
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -141,7 +163,7 @@ function S40_Billing({
                 EXPIRES {paymentExpiry}
               </ACLabel>
             </div>
-            <button type="button" onClick={onEditPayment} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}>
+            <button type="button" onClick={handleEditPayment} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}>
               <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.6 }}>
                 EDIT
               </ACLabel>
@@ -156,7 +178,7 @@ function S40_Billing({
           </ACLabel>
           <div style={{ marginTop: 10 }}>
             {_invoices.map((r, i) => (
-              <button key={i} type="button" onClick={() => onOpenInvoice?.(r.n)} style={{
+              <button key={i} type="button" onClick={() => handleOpenInvoice(r)} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '11px 0', width: '100%', textAlign: 'left',
                 background: 'transparent',
@@ -179,7 +201,7 @@ function S40_Billing({
         </div>
 
         {/* Plan swap CTA */}
-        <button type="button" onClick={onSwitchPlan} style={{
+        <button type="button" onClick={handleSwitchPlan} style={{
           marginTop: 22, padding: 16, width: '100%', textAlign: 'left',
           background: c.card, borderRadius: ACRadii.card,
           border: 'none',
@@ -199,7 +221,7 @@ function S40_Billing({
 
         {/* Cancel */}
         <div style={{ marginTop: 22, textAlign: 'center' }}>
-          <button type="button" onClick={onCancel} style={{
+          <button type="button" onClick={handleCancel} style={{
             background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px 16px',
             fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5,
             color: '#c2391a', textTransform: 'uppercase', fontWeight: 600,
