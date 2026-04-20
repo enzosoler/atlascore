@@ -93,7 +93,6 @@ Legend
 
 Full audit 2026-04-19. PROD=real inputs+real onSave, SEMI=some state
 but incomplete, SHELL=display-only/hardcoded.
-
 PROD (confirmed production-interactive after 2026-04-19 re-audit):
 - S2_Today_A, S3_Workout_A, S4_Nutrition_A (bug fixed), S6_Weight_B,
   S7_Onboard_Identity, S8_Onboard_Goal, S9_Onboard_Activity,
@@ -102,16 +101,21 @@ PROD (confirmed production-interactive after 2026-04-19 re-audit):
   S35_Search, S36_Auth (wired this session), S38_Food_Detail,
   S39_Recipe_Builder, S41_Errors (wired this session),
   S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose,
-  S11_Onboard_Permissions (wired this session)
+  S11_Onboard_Permissions (wired this session),
+  S10_Onboard_Plan (wired this session)
 
 STILL SHELL (lower priority — detail/secondary screens):
 - [ ] S32_Capture — mode switcher only; capture is native-dependent (Capacitor)
 - [ ] S5_Paywall_A — plan toggle works; onStartTrial(planId) already correct
-- S1_Splash_A/B, S10_Onboard_Plan,
+- S1_Splash_A/B,
   S13_Coach_Brief, S15_Labs_Inbox, S16_Biomarker_Detail,
+...
+## Handoffs (design → engineering)
 
-  S18_Progress_Photos, S19_Settings, S20_PR_Gallery,
-  S21_Share_Card, S25_Program_Detail, S26_Calendar,
+- `[ ]` 2026-04-19 — V3OnboardingRoutes.jsx — Wire S10_Onboard_Plan to useOnboardingState. It now has onChange (partial) and onContinue(final) props. — State persists after plan tweak.
+- `[ ]` 2026-04-19 — V3OnboardingRoutes.jsx — Wire S11_Onboard_Permissions to useOnboardingState. It now has value and onChange props. — Permissions persist across steps.
+- `[x]` V3Settings.jsx — "Manage subscription" on native should call
+
   S27_Exercise_Detail, S28_Crew, S29_Workout_Summary,
   S30_Weekly_Recap, S31_Sleep_Detail, S33_Profile,
   S34_Watch, S37_Inbox, S40_Billing, S42_Web_Landing,

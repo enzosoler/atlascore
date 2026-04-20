@@ -79,9 +79,30 @@ function computePlan(data) {
   };
 }
 
-function S10_Onboard_Plan({ dark = false, onBack, onContinue, onboardingData }) {
+function S10_Onboard_Plan({
+  dark = false,
+  onBack,
+  onContinue,
+  onboardingData,
+  value,
+  onChange,
+}) {
   const c = useACT(dark);
-  const plan = React.useMemo(() => computePlan(onboardingData), [onboardingData]);
+  const [localData, setLocalData] = React.useState(value || onboardingData || {});
+  const plan = React.useMemo(() => computePlan(localData), [localData]);
+
+  function update(patch) {
+    const next = { ...localData, ...patch };
+    setLocalData(next);
+    onChange?.(next);
+  }
+
+  const goals = [
+    { k: 'lose', l: 'Cut fat' },
+    { k: 'recomp', l: 'Recomp' },
+    { k: 'maintain', l: 'Maintain' },
+    { k: 'gain', l: 'Build' },
+  ];
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -97,8 +118,9 @@ function S10_Onboard_Plan({ dark = false, onBack, onContinue, onboardingData }) 
           <span style={{ background: c.accent, color: c.ink, padding: '0 10px', borderRadius: 8 }}>daily core</span>.
         </div>
 
+        {/* The plan card */}
         <div style={{
-          marginTop: 28, padding: 22, background: c.fg, color: c.bg, borderRadius: ACRadii.card,
+          marginTop: 24, padding: 22, background: c.fg, color: c.bg, borderRadius: ACRadii.card,
         }}>
           <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Calories · daily</ACLabel>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
@@ -129,8 +151,47 @@ function S10_Onboard_Plan({ dark = false, onBack, onContinue, onboardingData }) 
           </div>
         </div>
 
+        {/* Tweak section */}
+        <div style={{ marginTop: 28 }}>
+          <ACLabel size={11} color={c.dim} style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }}>Tweak your targets</ACLabel>
+          
+          <div style={{ marginTop: 14 }}>
+            <ACLabel size={10} color={c.mute}>Primary goal</ACLabel>
+            <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+              {goals.map(g => {
+                const on = localData.goal === g.k;
+                return (
+                  <button key={g.k} type="button" onClick={() => update({ goal: g.k })} style={{
+                    flex: 1, padding: '10px 0', borderRadius: 8,
+                    background: on ? c.accent : c.card,
+                    color: on ? c.ink : c.dim,
+                    fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
+                  }}>{g.l}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 18 }}>
+            <ACLabel size={10} color={c.mute}>Activity level (1–5)</ACLabel>
+            <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+              {[1, 2, 3, 4, 5].map(v => {
+                const on = localData.activity === v;
+                return (
+                  <button key={v} type="button" onClick={() => update({ activity: v })} style={{
+                    flex: 1, height: 32, borderRadius: 8,
+                    background: on ? c.fg : c.card,
+                    color: on ? c.bg : c.fg,
+                    fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer',
+                  }}>{v}</button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         <div style={{
-          marginTop: 14, padding: 18, background: c.card, borderRadius: ACRadii.card,
+          marginTop: 22, padding: 18, background: c.card, borderRadius: ACRadii.card,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
@@ -160,7 +221,7 @@ function S10_Onboard_Plan({ dark = false, onBack, onContinue, onboardingData }) 
       </div>
 
       <div style={{ padding: '14px 28px 26px', background: c.bg }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={onContinue}>Looks good →</ACBtn>
+        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onContinue?.(localData)}>Looks good →</ACBtn>
       </div>
     </div>
   );
