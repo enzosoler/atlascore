@@ -24,8 +24,14 @@ export default function S36_Auth({
 }) {
   const c = useACT(dark);
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit?.({ email, password, mode });
+  };
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
+      <style>{`.v3-auth-input:focus-visible,.v3-auth-input:focus{outline:none!important;box-shadow:none!important}`}</style>
       <div style={{ padding: '14px 22px 0', display: 'flex', justifyContent: 'flex-end' }}>
         <button
           type="button"
@@ -49,7 +55,7 @@ export default function S36_Auth({
       </div>
 
       <form
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
         style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 24px 0' }}
       >
         <div style={{ marginTop: 14 }}>
@@ -87,7 +93,7 @@ export default function S36_Auth({
         >
           {description || (
             mode === 'magic'
-              ? 'We&apos;ll email you a magic link. No passwords to remember.'
+              ? "We'll email you a magic link. No passwords to remember."
               : 'Use your email and password to get back in.'
           )}
         </div>
@@ -144,6 +150,7 @@ export default function S36_Auth({
             }}
           >
             <input
+              className="v3-auth-input"
               type="email"
               autoComplete="email"
               autoFocus
@@ -155,12 +162,15 @@ export default function S36_Auth({
                 height: 48,
                 border: 'none',
                 outline: 'none',
+                boxShadow: 'none',
                 background: 'transparent',
                 color: c.fg,
                 fontSize: 16,
                 letterSpacing: -0.2,
                 fontWeight: 500,
                 fontFamily: ACFonts.body,
+                WebkitAppearance: 'none',
+                WebkitTapHighlightColor: 'transparent',
               }}
             />
           </div>
@@ -194,6 +204,7 @@ export default function S36_Auth({
               }}
             >
               <input
+                className="v3-auth-input"
                 type="password"
                 autoComplete="current-password"
                 value={password}
@@ -204,12 +215,15 @@ export default function S36_Auth({
                   height: 48,
                   border: 'none',
                   outline: 'none',
+                  boxShadow: 'none',
                   background: 'transparent',
                   color: c.fg,
                   fontSize: 16,
                   letterSpacing: -0.2,
                   fontWeight: 500,
                   fontFamily: ACFonts.body,
+                  WebkitAppearance: 'none',
+                  WebkitTapHighlightColor: 'transparent',
                 }}
               />
             </div>
