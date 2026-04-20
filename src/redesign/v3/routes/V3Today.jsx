@@ -260,7 +260,11 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
             <ACRing size={64} value={readiness.score} dark={dark} thickness={5} color={statusColors[readiness.level]} />
           </div>
           <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-            {readiness.label}
+            {readiness.level === 'high'
+              ? t('today.system.reveal.consequenceHigh')
+              : readiness.level === 'medium'
+                ? t('today.system.reveal.consequenceMedium')
+                : t('today.system.reveal.consequenceLow')}
           </div>
           {readiness.reasons && readiness.reasons.length > 0 && (
             <div style={{ marginTop: 8 }}>
@@ -294,7 +298,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
         {momentum && (
           <div style={{ marginTop: 6, paddingLeft: 16 }}>
             <ACMono size={10} color={trend.direction === '↑' ? c.accent : (ACBrand.error || '#c65b4b')} style={{ fontWeight: 600, letterSpacing: 0.3 }}>
-              {momentum}
+              {trend.direction === '↑' ? t('today.system.momentum.building') : t('today.system.momentum.downtrend')}
             </ACMono>
           </div>
         )}
@@ -339,6 +343,10 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
             : integrity.state === 'degrading' ? c.fg
             : (ACBrand.error || '#c65b4b');
 
+          const integrityLabel = integrity.state === 'stable' ? t('today.system.integrity.stable')
+            : integrity.state === 'degrading' ? t('today.system.integrity.degrading')
+            : t('today.system.integrity.broken');
+
           return (
             <div style={{
               marginTop: 10, padding: '10px 16px', borderRadius: ACRadii.button,
@@ -348,7 +356,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
                 {statusText}
               </ACMono>
               <ACMono size={10} color={integrityColor} style={{ fontWeight: 600, letterSpacing: 0.4, marginTop: 6, display: 'block' }}>
-                {integrity.label}
+                {integrityLabel}
               </ACMono>
             </div>
           );

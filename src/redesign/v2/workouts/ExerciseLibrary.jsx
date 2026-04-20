@@ -20,6 +20,8 @@ import { SafeScreen, SpringReveal } from '../lib/glass';
 import { MuscleGroupIcon } from '../lib/icons';
 import { DEMO_EXERCISES } from '@/redesign/v3/lib/exerciseCatalog.js';
 
+export { DEMO_EXERCISES };
+
 
 const MUSCLE_GROUPS = ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core', 'Cardio'];
 const EQUIPMENT_FILTERS = ['Any', 'Barbell', 'Dumbbell', 'Cable', 'Machine', 'Smith', 'Bodyweight'];
