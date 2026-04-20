@@ -38,7 +38,10 @@ export default function V3AuthLogin() {
   }
 
   const onSubmit = async (e) => {
-    e.preventDefault();
+    // Accept being called without a DOM event (some child components call onSubmit())
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     const em = email.trim().toLowerCase();
     setError('');
     if (!em) {
