@@ -103,13 +103,20 @@ PROD (confirmed production-interactive after 2026-04-19 re-audit):
   S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose,
   S11_Onboard_Permissions (wired this session),
   S10_Onboard_Plan (wired this session),
-  S13_Coach_Brief (wired this session)
+  S13_Coach_Brief (wired this session),
+  S15_Labs_Inbox (wired this session)
 
 STILL SHELL (lower priority — detail/secondary screens):
 - [ ] S32_Capture — mode switcher only; capture is native-dependent (Capacitor)
 - [ ] S5_Paywall_A — plan toggle works; onStartTrial(planId) already correct
 - S1_Splash_A/B,
-  S15_Labs_Inbox, S16_Biomarker_Detail,
+  S16_Biomarker_Detail,
+...
+## Handoffs (design → engineering)
+
+- `[ ]` 2026-04-19 — V3LabsPage.jsx (or similar) — Wire S15_Labs_Inbox to handle onUpload (panel) and onOpenPanel. Current local state is demo-only.
+- `[ ]` 2026-04-19 — V3CoachChat.jsx (or similar) — Wire S13_Coach_Brief to handle onToggleMove. It now has local state for checkboxes but needs persistence if desired.
+
 ...
 ## Handoffs (design → engineering)
 
@@ -132,6 +139,7 @@ STILL SHELL (lower priority — detail/secondary screens):
 
 ## Recent ships
 
+- 06ba1c9 fix(i18n): wire V3Today readiness label, momentum, and system integrity via t()
 - f1d21ef feat(i18n): wire DailyCheckinGate, V3MagicLinkSent, V3ExerciseDetail
 - 7dbc1d1 feat(i18n): wire V3CoachChat+V3SubscriptionManage toasts; data-v3 layout roots
 - f225ae5 fix(design): S4_Nutrition_A — missing ACChip import + arguments[0] bug

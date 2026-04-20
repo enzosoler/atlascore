@@ -26,8 +26,9 @@ function S15_Labs_Inbox({
 }) {
   const c = useACT(dark);
   const [activeFilter, setActiveFilter] = React.useState('all');
-  const panelRows = panels || [
+  const [localPanels, setLocalPanels] = React.useState(panels || [
     {
+      id: 'p1',
       date: 'Apr 18', lab: 'Function Health', n: 'Q2 Panel',
       flagged: 3, total: 42, isNew: true,
       markers: [
@@ -39,6 +40,7 @@ function S15_Labs_Inbox({
       ],
     },
     {
+      id: 'p2',
       date: 'Jan 14', lab: 'Function Health', n: 'Q1 Panel',
       flagged: 5, total: 42, isNew: false,
       markers: [
@@ -46,9 +48,33 @@ function S15_Labs_Inbox({
         { t: 'Vitamin D',     v: '34',  u: 'ng/mL', flag: 'ok',  d: 'baseline' },
       ],
     },
-  ];
-  const summaryRow = summary || { panelCount: 2, totalMarkers: 84, attentionCount: 3, optimalCount: 37, elevatedCount: 3, lowCount: 2 };
-  const isEmpty = !isLocked && Array.isArray(panelRows) && panelRows.length === 0;
+  ]);
+
+  function handleUpload() {
+    if (onUpload) {
+      onUpload();
+      return;
+    }
+    // Demo behavior: add a new panel
+    const newPanel = {
+      id: `p${localPanels.length + 1}`,
+      date: 'Today', lab: 'LabCorp', n: 'Quick Panel',
+      flagged: 1, total: 12, isNew: true,
+      markers: [
+        { t: 'Glucose', v: '92', u: 'mg/dL', flag: 'ok', d: 'optimal' },
+        { t: 'Ferritin', v: '18', u: 'ng/mL', flag: 'low', d: '↓ 4' },
+      ],
+    };
+    setLocalPanels([newPanel, ...localPanels]);
+  }
+
+  const summaryRow = summary || { 
+    panelCount: localPanels.length, 
+    totalMarkers: localPanels.reduce((acc, p) => acc + p.total, 0),
+    attentionCount: localPanels.reduce((acc, p) => acc + p.flagged, 0),
+    optimalCount: 37, elevatedCount: 3, lowCount: 2 
+  };
+  const isEmpty = !isLocked && Array.isArray(localPanels) && localPanels.length === 0;
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -93,7 +119,7 @@ function S15_Labs_Inbox({
             <div style={{ marginTop: 8, fontSize: 13.5, color: c.dim, lineHeight: 1.55 }}>
               Upload your first lab PDF to turn this into a living biology inbox.
             </div>
-            <button type="button" onClick={onUpload} style={{ marginTop: 14, padding: '10px 16px', borderRadius: 999, border: 'none', background: c.fg, color: c.bg, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+            <button type="button" onClick={handleUpload} style={{ marginTop: 14, padding: '10px 16px', borderRadius: 999, border: 'none', background: c.fg, color: c.bg, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
               Upload panel →
             </button>
           </div>
@@ -116,8 +142,20 @@ function S15_Labs_Inbox({
           </div>
         )}
 
+        {/* Action bar for Upload */}
+        {!isLocked && !isEmpty && (
+          <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={handleUpload} style={{ 
+              padding: '6px 12px', borderRadius: 999, border: `1px solid ${c.faint}`, 
+              background: 'transparent', color: c.fg, fontSize: 12, fontWeight: 600, cursor: 'pointer' 
+            }}>
+              + Upload panel
+            </button>
+          </div>
+        )}
+
         {/* Panels list */}
-        {!isLocked && !isEmpty ? panelRows.map((p, pi) => {
+        {!isLocked && !isEmpty ? localPanels.map((p, pi) => {
           const visibleMarkers = activeFilter === 'flags'
             ? p.markers.filter((r) => r.flag === 'high' || r.flag === 'low')
             : p.markers;
