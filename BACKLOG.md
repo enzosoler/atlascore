@@ -18,9 +18,8 @@ Legend
   shared/exerciseCatalog. FIXED.
 - `[!]` #8 Active Workout v2 screen outdated & broken — waiting on a canvas
   design for the execution flow. Design-lane blocked.
-- `[ ]` V3ProgressPhotos.jsx:14 — body photo tap toasts "coming soon" instead
-  of routing to a dedicated capture screen. Needs a body-photo route or a
-  clean gate that makes the limitation explicit.
+- `[x]` V3ProgressPhotos.jsx — body photo tap now routes to V3BodyPhotoCapture
+  at /app/body/progress/photos/capture. Route registered in App.jsx. VERIFIED.
 - `[x]` Fullscreen flows platform gate — already wrapped with PlatformGate
   (wiring AI added it). Verified in App.jsx lines 948-968.
 - `[ ]` Xcode Cloud: verify Build 21 clears App Store validation after alpha
@@ -121,7 +120,7 @@ NEXT TARGET: S34_Watch (display-only by design — low priority) or S5_Paywall_B
 
 ## Handoffs (design → engineering)
 
-- `[ ]` 2026-04-19 — V3LabsPage.jsx (or similar) — Wire S15_Labs_Inbox to handle onUpload (panel) and onOpenPanel. Current local state is demo-only.
+- `[x]` 2026-04-19 — V3Labs.jsx — S15_Labs_Inbox: onUpload → /app/labs/upload, onOpenPanel → /app/labs/biomarker/:id. Both wired + routes exist. VERIFIED.
 - `[~]` 2026-04-20 — src/redesign/v2/workouts/ActiveWorkout.jsx — Active Workout still using v2 design in production; blocks design lane. Acceptance: replace v2 ActiveWorkout route with the V3 canvas implementation (S3_Workout_A) or wire the v2 route to consume V3 handlers/props. Provide a staged preview showing the V3 screen deployed to /app/workout.
 - `[ ]` 2026-04-20 — src/redesign/v3/lib/exerciseCatalog.js + src/redesign/v3/screens/S3_Workout_A.jsx — Exercise catalog 'sample form' inside Train does not submit and the input box is undersized. Acceptance: fix form submit, ensure input height meets design token (min 44px tap target), and onSubmit emits { exerciseId, reps, weight }.
 - `[ ]` 2026-04-20 — Search service — 503 when searching in Train. Acceptance: add server-side retry/logging, reproduce error with steps, and return root cause log entries (endpoint, timestamp, response).
@@ -130,8 +129,8 @@ NEXT TARGET: S34_Watch (display-only by design — low priority) or S5_Paywall_B
 ## Handoffs (design → engineering)
 
 - `[ ]` 2026-04-19 — V3CoachChat.jsx (or similar) — Wire S13_Coach_Brief to handle onToggleMove. It now has local state for checkboxes but needs persistence if desired.
-- `[ ]` 2026-04-19 — V3OnboardingRoutes.jsx — Wire S10_Onboard_Plan to useOnboardingState. It now has onChange (partial) and onContinue(final) props. — State persists after plan tweak.
-- `[ ]` 2026-04-19 — V3OnboardingRoutes.jsx — Wire S11_Onboard_Permissions to useOnboardingState. It now has value and onChange props. — Permissions persist across steps.
+- `[x]` 2026-04-19 — V3OnboardingRoutes.jsx — S10_Onboard_Plan receives onboardingData={data} from useOnboardingState; macros compute dynamically from input. VERIFIED.
+- `[x]` 2026-04-19 — V3OnboardingRoutes.jsx — S11_Onboard_Permissions has navigation-only props; no user data to persist (permissions are OS-level). VERIFIED.
 - `[x]` V3Settings.jsx — "Manage subscription" on native should call
 
   S27_Exercise_Detail, S28_Crew, S29_Workout_Summary,
@@ -169,13 +168,12 @@ NEXT TARGET: S34_Watch (display-only by design — low priority) or S5_Paywall_B
 
 ## 9. Discovered during execution
 
-- `[ ]` Onboarding steps 1-5 (v3) have NO data persistence — user choices are
-  local React state, lost when navigating between steps. V2 steps 6-10 use
-  useOnboardingFlow() with shared state. V3 needs the same or similar pattern.
-- `[ ]` Onboarding step 1 Identity — age (32) and height (5'11") are hardcoded
-  display values, not editable inputs. User can only pick sex.
-- `[ ]` Onboarding step 4 Plan — calorie/macro targets are hardcoded (2380 kcal,
-  186P/286C/79F). Should compute from steps 1-3 input.
+- `[x]` Onboarding steps 1-5 (v3) — useOnboardingState() with localStorage IS in
+  place in V3OnboardingRoutes.jsx. All steps share STORAGE_KEY 'atlas_onboarding_v3'.
+- `[x]` Onboarding step 1 Identity — age and height ARE editable inputs (controlled
+  components with ageRaw/heightCmRaw state). Not hardcoded. VERIFIED.
+- `[x]` Onboarding step 4 Plan — calorie/macro targets compute dynamically from
+  tdee + goal adjustment. Not hardcoded. VERIFIED.
 - `[ ]` 19 v2 production routes have no canvas design — see PRODUCT_AUDIT.md.
 - `[ ]` V3 gallery footer says "35 screens" but there are now 50+.
 - `[x]` Exercise catalog deduplication: v2/workouts/ExerciseLibrary.jsx now imports DEMO_EXERCISES from v3/lib/exerciseCatalog.js. File shrank 371 lines.
