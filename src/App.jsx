@@ -134,6 +134,7 @@ const V3Notifications = lazy(() => import('@/redesign/v3/routes/V3Notifications.
 const V3BiomarkerDetail = lazy(() => import('@/redesign/v3/routes/V3BiomarkerDetail.jsx'));
 const V3ProgressPhotos = lazy(() => import('@/redesign/v3/routes/V3ProgressPhotos.jsx'));
 const V3BodyPhotoCapture = lazy(() => import('@/redesign/v3/routes/V3BodyPhotoCapture.jsx'));
+const V3PersonalRecords = lazy(() => import('@/redesign/v3/routes/V3PersonalRecords.jsx'));
 const V3WeeklyReview = lazy(() => import('@/redesign/v3/routes/V3WeeklyReview.jsx'));
 const V3Welcome  = lazy(() => import('@/redesign/v3/routes/V3Welcome.jsx'));
 const V3Manifesto = lazy(() => import('@/redesign/v3/routes/V3Manifesto.jsx'));
@@ -1023,6 +1024,7 @@ function AppRoutes() {
           {/* Workout sub-screens */}
           <Route path="workouts/history" element={<WorkoutHistoryRoute />} />
           <Route path="workouts/:id" element={<WorkoutDetailRoute />} />
+          <Route path="workouts/records" element={<V3PersonalRecords />} />
           <Route path="routines/presets" element={<RoutinePresetsRoute />} />
           <Route path="routines/presets/:id" element={<RoutinePresetDetailRoute />} />
 
