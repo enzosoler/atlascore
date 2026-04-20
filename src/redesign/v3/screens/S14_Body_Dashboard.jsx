@@ -121,9 +121,9 @@ function S14_Body_Dashboard({
               <ACLabel size={10} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Weight · today</ACLabel>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
                 <ACNum size={hasWeight ? 44 : 28} color={c.bg} weight={700}>{heroData.weight}</ACNum>
-                {heroData.unit ? <ACLabel size={12} color="rgba(239,233,218,0.6)">{heroData.unit}</ACLabel> : null}
+                {heroData.unit ? <ACLabel size={12} color={dark ? 'rgba(239,233,218,0.6)' : 'rgba(10,10,10,0.55)'}>{heroData.unit}</ACLabel> : null}
               </div>
-              <ACLabel size={11} color="rgba(239,233,218,0.55)" style={{ marginTop: 2 }}>
+              <ACLabel size={11} color={dark ? 'rgba(239,233,218,0.55)' : 'rgba(10,10,10,0.48)'} style={{ marginTop: 2 }}>
                 {heroData.subtitle}
               </ACLabel>
             </div>
