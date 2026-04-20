@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { useI18n } from '@/lib/i18nContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
 import S19_Settings from '../screens/S19_Settings.jsx';
+
+const LANGUAGE_LABELS = { en: 'English', 'pt-BR': 'Português (Brasil)' };
 
 function buildRealUser(authUser) {
   if (!authUser) return null;
@@ -42,8 +45,10 @@ function memberSinceLabel(value) {
 export default function V3Settings() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { locale, switchLocale } = useI18n();
   const { user, logout } = useAuth();
   const realUser = buildRealUser(user);
+  const currentLanguageLabel = LANGUAGE_LABELS[locale] || LANGUAGE_LABELS.en;
 
   const groups = [
     {
@@ -74,9 +79,10 @@ export default function V3Settings() {
     {
       l: 'Preferences',
       rows: [
-        { k: 'theme',  t: 'Appearance',    d: `Currently ${theme === 'dark' ? 'dark' : 'light'} · tap to switch`, chevron: true },
-        { k: 'notifs', t: 'Notifications', d: 'Coming soon', chevron: false, muted: true },
-        { k: 'goals',  t: 'Daily targets', d: 'Drives your daily protein target · used by Today', chevron: true },
+        { k: 'theme',    t: 'Appearance',    d: `Currently ${theme === 'dark' ? 'dark' : 'light'} · tap to switch`, chevron: true },
+        { k: 'language', t: 'Language',      d: `${currentLanguageLabel} · tap to switch`, chevron: true },
+        { k: 'notifs',   t: 'Notifications', d: 'Coming soon', chevron: false, muted: true },
+        { k: 'goals',    t: 'Daily targets', d: 'Drives your daily protein target · used by Today', chevron: true },
       ],
     },
     {
@@ -110,6 +116,15 @@ export default function V3Settings() {
         if (key === 'theme') {
           setTheme(theme === 'dark' ? 'light' : 'dark');
           toast(`Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+          return;
+        }
+        // Language: cycle EN ↔ PT in place. switchLocale handles both the
+        // main build (state update, dictionaries are bundled) and the /br/
+        // build (full nav) correctly.
+        if (key === 'language') {
+          const next = locale === 'pt-BR' ? 'en' : 'pt-BR';
+          switchLocale(next);
+          toast(next === 'pt-BR' ? 'Idioma: Português' : 'Language: English');
           return;
         }
         // Subscription management: native sheet on iOS/Android, web page on web.
