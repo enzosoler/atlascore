@@ -6,19 +6,27 @@ import {
 import { HeartMark } from '../lib/brandMarks.jsx';
 
 const DEMO_ITEMS = [
-  { t: 'coach', when: '06:41', title: 'Readiness held at 87', body: 'Sleep was good, HRV top-band. Heavy Lower is on the plan — pull when you are ready.', cta: 'Open today', hi: true },
-  { t: 'plan',  when: '12:00', title: 'Protein · 64g of 186', body: 'Track to land the target. Suggest 8oz chicken or a FairLife bottle next.', cta: 'Log fuel' },
-  { t: 'labs',  when: '09:14', title: 'Your Q3 panel arrived', body: '18 markers. 15 optimal, 2 elevated (ApoB, LDL-P), 1 borderline. Tap to read.', cta: 'Open labs', hi: true },
-  { t: 'crew',  when: '08:02', title: 'Mara hit 315 squat',     body: 'Third session of the week. She added a note: "felt grippy."', cta: 'Send kudos' },
-  { t: 'rest',  when: 'Yest',  title: 'Rescheduled Heavy Pull', body: 'HRV dropped on Wed. Moved to Sat. Keep Thu mobility as planned.' },
-  { t: 'bill',  when: 'Mon',   title: 'Receipt · Core $12',     body: 'Your monthly subscription renewed.' },
+  { id: 'i1', t: 'coach', when: '06:41', title: 'Readiness held at 87', body: 'Sleep was good, HRV top-band. Heavy Lower is on the plan — pull when you are ready.', cta: 'Open today', hi: true },
+  { id: 'i2', t: 'plan',  when: '12:00', title: 'Protein · 64g of 186', body: 'Track to land the target. Suggest 8oz chicken or a FairLife bottle next.', cta: 'Log fuel' },
+  { id: 'i3', t: 'labs',  when: '09:14', title: 'Your Q3 panel arrived', body: '18 markers. 15 optimal, 2 elevated (ApoB, LDL-P), 1 borderline. Tap to read.', cta: 'Open labs', hi: true },
+  { id: 'i4', t: 'crew',  when: '08:02', title: 'Mara hit 315 squat',    body: 'Third session of the week. She added a note: "felt grippy."', cta: 'Send kudos' },
+  { id: 'i5', t: 'rest',  when: 'Yest',  title: 'Rescheduled Heavy Pull', body: 'HRV dropped on Wed. Moved to Sat. Keep Thu mobility as planned.' },
+  { id: 'i6', t: 'bill',  when: 'Mon',   title: 'Receipt · Core $12',    body: 'Your monthly subscription renewed.' },
 ];
+
+const FILTER_TABS = ['All', 'Coach', 'Plan', 'Labs', 'Crew', 'Billing'];
+const FILTER_TYPE_MAP = { Coach: 'coach', Plan: 'plan', Labs: 'labs', Crew: 'crew', Billing: 'bill' };
 
 /**
  * S37_Inbox — notifications / coach inbox.
  *
  * Gallery:    <S37_Inbox dark />
- * Production: <S37_Inbox dark items={[...]} onOpenItem={fn} onMarkAllRead={fn} onCompose={fn} />
+ * Production: <S37_Inbox dark items={[{id,t,when,title,body,cta?,hi?},...]}
+ *               onOpenItem={fn} onMarkAllRead={fn} onCompose={fn} />
+ *
+ * onOpenItem({id, type, title}) — inbox row tapped
+ * onMarkAllRead() — mark-all button tapped
+ * onCompose() — compose button tapped
  */
 function S37_Inbox({
   dark = false,
@@ -30,6 +38,16 @@ function S37_Inbox({
 }) {
   const c = useACT(dark);
   const _items = items || DEMO_ITEMS;
+  const [activeFilter, setActiveFilter] = React.useState('All');
+
+  const visibleItems = activeFilter === 'All'
+    ? _items
+    : _items.filter((it) => it.t === FILTER_TYPE_MAP[activeFilter]);
+
+  const handleOpenItem = (it, idx) => {
+    if (typeof onOpenItem === 'function')
+      onOpenItem({ id: it.id || String(idx), type: it.t, title: it.title });
+  };
 
   const typeCol = (t) => ({
     coach: c.accent, labs: c.accent, plan: c.fg,
@@ -43,7 +61,7 @@ function S37_Inbox({
           <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6h8M6 2v8" stroke={c.fg} strokeWidth="1.8" strokeLinecap="round"/></svg>
         </button>
         <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.6, textTransform: 'uppercase' }}>
-          Inbox · {_items.length} new
+          Inbox · {_items.filter(it => it.hi).length} new
         </ACLabel>
         <button type="button" onClick={onMarkAllRead} style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -68,20 +86,20 @@ function S37_Inbox({
 
       {/* filter chips */}
       <div style={{ padding: '2px 22px 0', display: 'flex', gap: 6, overflow: 'auto' }}>
-        {['All', 'Coach', 'Plan', 'Labs', 'Crew', 'Billing'].map((s, i) => (
-          <div key={s} style={{
+        {FILTER_TABS.map((s) => (
+          <button key={s} type="button" onClick={() => setActiveFilter(s)} style={{
             padding: '6px 12px', borderRadius: 999,
-            background: i === 0 ? c.fg : 'transparent',
-            border: i === 0 ? 'none' : `1px solid ${c.hair}`,
-            color: i === 0 ? c.bg : c.dim,
-            fontSize: 11, fontWeight: 600, flexShrink: 0,
-          }}>{s}</div>
+            background: activeFilter === s ? c.fg : 'transparent',
+            border: activeFilter === s ? 'none' : `1px solid ${c.hair}`,
+            color: activeFilter === s ? c.bg : c.dim,
+            fontSize: 11, fontWeight: 600, flexShrink: 0, cursor: 'pointer',
+          }}>{s}</button>
         ))}
       </div>
 
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '12px 22px 20px' }}>
-        {_items.map((it, i) => (
-          <button key={i} type="button" onClick={() => onOpenItem?.(it)} style={{
+        {visibleItems.map((it, i) => (
+          <button key={it.id || i} type="button" onClick={() => handleOpenItem(it, i)} style={{
             display: 'flex', gap: 12, padding: '14px 0', width: '100%', textAlign: 'left',
             opacity: it.t === 'bill' ? 0.72 : 1,
             background: 'transparent',
