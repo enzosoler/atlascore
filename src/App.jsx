@@ -178,6 +178,13 @@ const V3PRMoment = lazy(() => import('@/redesign/v3/routes/V3PRMoment.jsx'));
 const V3WeightTrend = lazy(() => import('@/redesign/v3/routes/V3WeightTrend.jsx'));
 const V3EmptyStates = lazy(() => import('@/redesign/v3/routes/V3EmptyStates.jsx'));
 const V3Errors = lazy(() => import('@/redesign/v3/routes/V3Errors.jsx'));
+const V3FoodDiary = lazy(() => import('@/redesign/v3/routes/V3FoodDiary.jsx'));
+const V3MacroTargets = lazy(() => import('@/redesign/v3/routes/V3MacroTargets.jsx'));
+const V3WaterLog = lazy(() => import('@/redesign/v3/routes/V3WaterLog.jsx'));
+const V3WorkoutHistory = lazy(() => import('@/redesign/v3/routes/V3WorkoutHistory.jsx'));
+const V3WorkoutDetail = lazy(() => import('@/redesign/v3/routes/V3WorkoutDetail.jsx'));
+const V3CompositionHistory = lazy(() => import('@/redesign/v3/routes/V3CompositionHistory.jsx'));
+const V3CoachInsight = lazy(() => import('@/redesign/v3/routes/V3CoachInsight.jsx'));
 const V3Terms = lazy(() => import('@/redesign/v3/routes/V3Terms.jsx'));
 const V3Privacy = lazy(() => import('@/redesign/v3/routes/V3Privacy.jsx'));
 const V3Paywall = lazy(() => import('@/redesign/v3/routes/V3Paywall.jsx'));
@@ -1040,28 +1047,28 @@ function AppRoutes() {
           <Route path="today/celebrate/:kind" element={<CelebrationsRoute />} />
 
           {/* Nutrition sub-screens */}
-          <Route path="nutrition/diary" element={<FoodDiaryRoute />} />
-          <Route path="nutrition/targets" element={<MacroTargetsRoute />} />
-          <Route path="nutrition/water" element={<WaterLogRoute />} />
+          <Route path="nutrition/diary" element={<V3FoodDiary />} />
+          <Route path="nutrition/targets" element={<V3MacroTargets />} />
+          <Route path="nutrition/water" element={<V3WaterLog />} />
           <Route path="nutrition/meal-plans" element={<MealPlansRoute />} />
 
           {/* Workout sub-screens */}
-          <Route path="workouts/history" element={<WorkoutHistoryRoute />} />
-          <Route path="workouts/:id" element={<WorkoutDetailRoute />} />
+          <Route path="workouts/history" element={<V3WorkoutHistory />} />
+          <Route path="workouts/:id" element={<V3WorkoutDetail />} />
           <Route path="workouts/records" element={<V3PersonalRecords />} />
           <Route path="workouts/share" element={<V3SharePR />} />
           <Route path="routines/presets" element={<RoutinePresetsRoute />} />
           <Route path="routines/presets/:id" element={<RoutinePresetDetailRoute />} />
 
           {/* Body sub-screens */}
-          <Route path="body/composition" element={<BodyCompositionHistoryRoute />} />
+          <Route path="body/composition" element={<V3CompositionHistory />} />
 
           {/* Labs sub-screens */}
           <Route path="labs/history" element={<LabHistoryRoute />} />
           <Route path="labs/exam/:id" element={<LabExamDetailRoute />} />
 
           {/* Coach sub-screens */}
-          <Route path="coach/insights/:id" element={<CoachInsightDetailRoute />} />
+          <Route path="coach/insights/:id" element={<V3CoachInsight />} />
 
           {/* Profile + Settings sub-screens */}
           <Route path="profile/edit" element={<ProfileEditorRoute />} />
