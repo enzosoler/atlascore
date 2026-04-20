@@ -62,6 +62,7 @@ function PhoneFrameInner({ children }) {
 
   return (
     <div
+      data-v3
       style={{
         minHeight: '100dvh',
         background: dark
@@ -109,7 +110,7 @@ function PhoneFrameInner({ children }) {
 /** Web chrome — marketing-style header, centered card, footer. */
 function WebFrameInner({ children }) {
   return (
-    <div style={{
+    <div data-v3 style={{
       minHeight: '100dvh',
       background: ACBrand.paper,
       color: ACBrand.ink,

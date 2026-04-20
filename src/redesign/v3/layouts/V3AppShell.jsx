@@ -84,6 +84,7 @@ function V3ShellInner() {
 
   return (
     <div
+      data-v3
       style={{
         minHeight: '100dvh',
         background: dark

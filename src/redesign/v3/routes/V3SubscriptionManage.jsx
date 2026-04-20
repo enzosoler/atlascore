@@ -14,6 +14,7 @@ import { MC } from './V3MarketingLayout.jsx';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { presentCustomerCenter, isRevenueCatAvailable } from '@/lib/revenueCat';
+import { useT } from '@/lib/i18nContext';
 
 function NavLink({ to, children }) {
   return (
@@ -28,6 +29,7 @@ export default function V3SubscriptionManage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { subscription } = useSubscription();
+  const t = useT();
 
   const isActive = subscription && ['active', 'trialing', 'granted'].includes(subscription.status);
   const planLabel = isActive
@@ -49,8 +51,8 @@ export default function V3SubscriptionManage() {
     if (isRevenueCatAvailable()) {
       await presentCustomerCenter();
     } else {
-      toast('To cancel your subscription, email support@useatlascore.com', {
-        description: 'Web cancellation is coming soon.',
+      toast(t('subscriptionManage.cancelToast'), {
+        description: t('subscriptionManage.cancelToastDesc'),
       });
     }
   }
@@ -86,7 +88,7 @@ export default function V3SubscriptionManage() {
           <NavLink to="/app/export">Export</NavLink>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
-          <NavLink to="/download-app">Get the app</NavLink>
+          <NavLink to="/download-app">{t('webNav.getApp')}</NavLink>
           <button type="button" onClick={async () => { try { await logout?.(); } catch {} navigate('/auth/login', { replace: true }); }}
             style={{ background: 'none', border: 'none', fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: MC.dim, cursor: 'pointer' }}>
             Sign out

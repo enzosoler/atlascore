@@ -2,12 +2,14 @@ import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S12_Coach_Chat from '../screens/S12_Coach_Chat.jsx';
 
 export default function V3CoachChat() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const t = useT();
   const [params] = useSearchParams();
   const ask = params.get('ask');
 
@@ -32,19 +34,19 @@ export default function V3CoachChat() {
         messages={messages}
         onBack={() => navigate(-1)}
         onSuggestionAction={(label) => {
-          if (/add to plan/i.test(label)) return toast('Added to your plan');
-          if (/not today/i.test(label)) return toast('Dismissed for today');
-          toast('Noted');
+          if (/add to plan/i.test(label)) return toast(t('coach.chat.addedToPlan'));
+          if (/not today/i.test(label)) return toast(t('coach.chat.dismissedForToday'));
+          toast(t('coach.chat.noted'));
         }}
         onQuickAction={(label) => {
           if (/log/i.test(label)) return navigate('/app/nutrition/search');
           if (/show/i.test(label)) return navigate('/app/nutrition/search');
-          if (/later/i.test(label)) return toast('Saved for later');
+          if (/later/i.test(label)) return toast(t('coach.chat.savedForLater'));
           toast(label);
         }}
         composerDisabled
-        draftPlaceholder="Coach AI is being connected..."
-        onSend={() => toast('The AI coach is being connected. This will work soon.')}
+        draftPlaceholder={t('coach.chat.connectingPlaceholder')}
+        onSend={() => toast(t('coach.chat.connectingToast'))}
       />
     </V3StandaloneLayout>
   );

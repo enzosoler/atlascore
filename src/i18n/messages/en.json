@@ -3407,7 +3407,13 @@
           "trends": "Summarize my trends",
           "deficit": "Am I in a deficit?"
         }
-      }
+      },
+      "addedToPlan": "Added to your plan",
+      "dismissedForToday": "Dismissed for today",
+      "noted": "Noted",
+      "savedForLater": "Saved for later",
+      "connectingToast": "The AI coach is being connected. This will work soon.",
+      "connectingPlaceholder": "Coach AI is being connected..."
     }
   },
   "nutritionist": {
@@ -4301,5 +4307,9 @@
     "signOut": "Sign out",
     "terms": "Terms",
     "privacy": "Privacy"
+  },
+  "subscriptionManage": {
+    "cancelToast": "To cancel your subscription, email support@useatlascore.com",
+    "cancelToastDesc": "Web cancellation is coming soon."
   }
 }
