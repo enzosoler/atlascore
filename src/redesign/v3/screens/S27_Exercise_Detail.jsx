@@ -51,6 +51,7 @@ function defaultHistory() {
 
 function S27_Exercise_Detail({
   dark = false,
+  exercise = null,
   title = 'Deadlift',
   classification = 'LIFT · COMPOUND',
   musclePattern = 'POSTERIOR CHAIN · HINGE PATTERN',
@@ -66,6 +67,7 @@ function S27_Exercise_Detail({
   onSave,
   onOpenHistory,
   onLogSet,
+  onFavorite,
 }) {
   const c = useACT(dark);
   const lineData = Array.isArray(history) && history.length > 0 ? history : defaultHistory();
@@ -76,6 +78,18 @@ function S27_Exercise_Detail({
     { n: '04', t: 'Lock knees + hips together', d: 'Finish in one snap at the top' },
   ];
   const resolvedEngagement = Array.isArray(muscleEngagement) && muscleEngagement.length > 0 ? muscleEngagement : null;
+
+  // Stable prop contract helpers
+  const exerciseId = (exercise && exercise.id) || titleCaseWords(title);
+  const [favorited, setFavorited] = React.useState(false);
+  const handleFavorite = () => {
+    const next = !favorited;
+    setFavorited(next);
+    if (typeof onFavorite === 'function') onFavorite({ exerciseId, favorite: next, favoritedAt: Date.now() });
+  };
+  const handleLog = (payload = {}) => {
+    if (typeof onLogSet === 'function') onLogSet({ exerciseId, loggedAt: Date.now(), ...payload });
+  };
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -88,6 +102,15 @@ function S27_Exercise_Detail({
           <svg width="10" height="10" viewBox="0 0 10 10"><path d="M7 1L3 5l4 4" stroke={c.fg} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
         <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5 }}>{classification}</ACLabel>
+        <button type="button" onClick={handleFavorite} aria-pressed={favorited} style={{
+          width: 28, height: 28, borderRadius: 999, background: c.card,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: 'none', cursor: 'pointer', marginRight: 8,
+        }}>
+          <svg width="14" height="12" viewBox="0 0 24 24" fill="none">
+            <path d="M12 21s-7-4.35-9-7.02C1.24 11.94 2 7.5 6 6c2.2-.86 4 1 6 3 2-2 3.8-3.86 6-3 4 1.5 4.76 5.94 3 7.98C19 16.65 12 21 12 21z" fill={favorited ? c.accent : 'none'} stroke={c.fg} strokeWidth="1.2" />
+          </svg>
+        </button>
         <button type="button" onClick={onSave} style={{
           width: 28, height: 28, borderRadius: 999, background: c.card,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -239,7 +262,7 @@ function S27_Exercise_Detail({
           <ACBtn dark={dark} size="lg" pill block onClick={onOpenHistory}>All sets</ACBtn>
         </div>
         <div style={{ flex: 1.3 }}>
-          <ACBtn primary dark={dark} size="lg" pill block onClick={onLogSet}>Log set →</ACBtn>
+          <ACBtn primary dark={dark} size="lg" pill block onClick={() => handleLog()}>Log set →</ACBtn>
         </div>
       </div>
     </div>

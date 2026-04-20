@@ -98,37 +98,31 @@ PROD (confirmed production-interactive after 2026-04-20 re-audit):
   S7_Onboard_Identity, S8_Onboard_Goal, S9_Onboard_Activity,
   S10_Onboard_Plan, S11_Onboard_Permissions, S12_Coach_Chat,
   S13_Coach_Brief, S14_Body_Dashboard, S15_Labs_Inbox,
-  S17_Measurements_Entry, S22_Notifications, S24_Library,
-  S35_Search, S36_Auth, S38_Food_Detail, S39_Recipe_Builder,
+  S17_Measurements_Entry, S18_Progress_Photos, S19_Settings, S20_PR_Gallery, S21_Share_Card, S22_Notifications, S24_Library,
+  S32_Capture, S35_Search, S36_Auth, S38_Food_Detail, S39_Recipe_Builder,
   S41_Errors, S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose
 
 STILL SHELL (highest-leverage targets):
-- [ ] S1_Splash_A -- onGetStarted/onSignIn callbacks are no-op; needs routing integration
-- [ ] S5_Paywall_A -- plan toggle works but onStartTrial(planId) needs payment wiring  
-- [ ] S16_Biomarker_Detail -- static demo data; needs onRefresh/onDownload handlers
-- [ ] S18_Progress_Photos -- "coming soon" toast; needs onCapture/onCompare flows
-- [ ] S19_Settings -- toggles are local state; needs persistence via onPreferenceChange
-- [ ] S20_PR_Gallery -- static grid; needs onSelectPhoto/onShare handlers
-- [ ] S21_Share_Card -- static preview; needs onGenerateShare/onExport handlers
-- [ ] S23_Empty_States -- static illustrations; needs contextual onAction handlers
-- [ ] S25_Program_Detail -- demo program; needs onEnroll/onPreview handlers
+- [x] S25_Program_Detail — wired prop contract + small handlers (commit fcdbb81)
 - [ ] S26_Calendar -- static dates; needs onSelectDate/onAddSession handlers
 - [ ] S27_Exercise_Detail -- demo exercise; needs onFavorite/onLog handlers
 - [ ] S28_Crew -- demo members; needs onInvite/onMessage handlers
 - [ ] S29_Workout_Summary -- static summary; needs onShare/onRepeat handlers
 - [ ] S30_Weekly_Recap -- demo data; needs onExport/onDrillDown handlers
 - [ ] S31_Sleep_Detail -- static sleep; needs onRefresh/onCompare handlers
-- [ ] S32_Capture -- mode switcher works; capture needs native Capacitor integration
 - [ ] S33_Profile -- static profile; needs onEditField/onPhoto handlers
 - [ ] S34_Watch -- demo watch; needs onSync/onConfigure handlers
 - [ ] S37_Inbox -- static messages; needs onOpen/onArchive handlers
 - [ ] S40_Billing -- demo billing; needs onEditPayment/onSwitchPlan handlers
 
-NEXT TARGET: S32_Capture (mode switcher works but needs onScanResult/onCameraCapture/onVoiceTranscribe callbacks for real native integration)
+NEXT TARGET: S25_Program_Detail (training program preview with demo data that needs enrollment functionality)
 
 ## Handoffs (design → engineering)
 
 - `[ ]` 2026-04-19 — V3LabsPage.jsx (or similar) — Wire S15_Labs_Inbox to handle onUpload (panel) and onOpenPanel. Current local state is demo-only.
+- `[~]` 2026-04-20 — src/redesign/v2/workouts/ActiveWorkout.jsx — Active Workout still using v2 design in production; blocks design lane. Acceptance: replace v2 ActiveWorkout route with the V3 canvas implementation (S3_Workout_A) or wire the v2 route to consume V3 handlers/props. Provide a staged preview showing the V3 screen deployed to /app/workout.
+- `[ ]` 2026-04-20 — src/redesign/v3/lib/exerciseCatalog.js + src/redesign/v3/screens/S3_Workout_A.jsx — Exercise catalog 'sample form' inside Train does not submit and the input box is undersized. Acceptance: fix form submit, ensure input height meets design token (min 44px tap target), and onSubmit emits { exerciseId, reps, weight }.
+- `[ ]` 2026-04-20 — Search service — 503 when searching in Train. Acceptance: add server-side retry/logging, reproduce error with steps, and return root cause log entries (endpoint, timestamp, response).
 - `[ ]` 2026-04-19 — V3CoachChat.jsx (or similar) — Wire S13_Coach_Brief to handle onToggleMove. It now has local state for checkboxes but needs persistence if desired.
 
 ## Handoffs (design → engineering)
