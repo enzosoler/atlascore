@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { Capacitor } from '@capacitor/core';
+import { presentCustomerCenter, isRevenueCatAvailable } from '@/lib/revenueCat';
 import S19_Settings from '../screens/S19_Settings.jsx';
 
 function buildRealUser(authUser) {
@@ -111,6 +113,14 @@ export default function V3Settings() {
           toast(`Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`);
           return;
         }
+        // Native subscription management — open RevenueCat customer center
+        if (key === 'plan' && Capacitor.isNativePlatform() && isRevenueCatAvailable()) {
+          presentCustomerCenter().catch(() => {
+            toast.error('Could not open subscription manager');
+          });
+          return;
+        }
+
         // Routes that exist
         const next = routeMap[key];
         if (next) {
