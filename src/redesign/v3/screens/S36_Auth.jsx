@@ -26,6 +26,7 @@ export default function S36_Auth({
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
+      <style>{`.v3-auth-input:focus-visible, .v3-auth-input:focus { outline: none !important; box-shadow: none !important; }`}</style>
       <div style={{ padding: '14px 22px 0', display: 'flex', justifyContent: 'flex-end' }}>
         <button
           type="button"
@@ -144,6 +145,7 @@ export default function S36_Auth({
             }}
           >
             <input
+              className="v3-auth-input"
               type="email"
               autoComplete="email"
               autoFocus
@@ -155,12 +157,15 @@ export default function S36_Auth({
                 height: 48,
                 border: 'none',
                 outline: 'none',
+                boxShadow: 'none',
                 background: 'transparent',
                 color: c.fg,
                 fontSize: 16,
                 letterSpacing: -0.2,
                 fontWeight: 500,
                 fontFamily: ACFonts.body,
+                WebkitAppearance: 'none',
+                WebkitTapHighlightColor: 'transparent',
               }}
             />
           </div>
@@ -194,6 +199,7 @@ export default function S36_Auth({
               }}
             >
               <input
+                className="v3-auth-input"
                 type="password"
                 autoComplete="current-password"
                 value={password}
@@ -204,12 +210,15 @@ export default function S36_Auth({
                   height: 48,
                   border: 'none',
                   outline: 'none',
+                  boxShadow: 'none',
                   background: 'transparent',
                   color: c.fg,
                   fontSize: 16,
                   letterSpacing: -0.2,
                   fontWeight: 500,
                   fontFamily: ACFonts.body,
+                  WebkitAppearance: 'none',
+                  WebkitTapHighlightColor: 'transparent',
                 }}
               />
             </div>
