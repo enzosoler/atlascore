@@ -25,16 +25,19 @@ function RangeBar({ min, max, optimal, value, c }) {
   );
 }
 
-function BiomarkerTrend({ data, c, dark, optimal }) {
+function BiomarkerTrend({ data, c, dark, optimal, rangeMin, rangeMax, currentValue }) {
   const w = 276, h = 120;
-  const max = 100, min = 60;
-  const span = max - min;
-  const step = w / (data.length - 1);
+  const min = rangeMin ?? 60;
+  const max = rangeMax ?? 100;
+  const span = max - min || 1;
+  const step = data.length > 1 ? w / (data.length - 1) : w;
   const pts = data.map((d, i) => [i * step, h - ((d.v - min) / span) * (h - 20) - 10]);
   const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
   // optimal band
   const yOptHigh = h - ((optimal.high - min) / span) * (h - 20) - 10;
   const yOptLow  = h - ((optimal.low  - min) / span) * (h - 20) - 10;
+  const lastPt = pts[pts.length - 1];
+  const labelVal = currentValue ?? data[data.length - 1]?.v ?? '';
   return (
     <svg width={w} height={h} style={{ display: 'block' }}>
       {/* optimal band */}
@@ -58,10 +61,12 @@ function BiomarkerTrend({ data, c, dark, optimal }) {
         );
       })}
       {/* last label */}
-      <text x={pts[pts.length - 1][0] - 16} y={pts[pts.length - 1][1] - 10}
-        fontFamily="ui-monospace, SF Mono, monospace" fontSize="10" fill={c.accent} fontWeight="600">
-        82
-      </text>
+      {lastPt && (
+        <text x={Math.max(0, lastPt[0] - 16)} y={Math.max(12, lastPt[1] - 10)}
+          fontFamily="ui-monospace, SF Mono, monospace" fontSize="10" fill={c.accent} fontWeight="600">
+          {labelVal}
+        </text>
+      )}
     </svg>
   );
 }
@@ -79,28 +84,62 @@ function ArrowIcon({ dir, color, size = 20 }) {
   );
 }
 
+/**
+ * S16_Biomarker_Detail — single biomarker drill-down.
+ *
+ * Gallery:    <S16_Biomarker_Detail dark />
+ * Production: <S16_Biomarker_Detail dark biomarkerName="ApoB"
+ *               currentValue={82} currentUnit="mg/dL"
+ *               statusLabel="Elevated · above optimal"
+ *               deltaLabel="↑ 4 since Jan · 2 above optimal range"
+ *               range={{ min:50, max:110, optimal:{ low:60, high:80 } }}
+ *               history={[{d,v},...]}
+ *               drivers={[{t,d,dir},...]}
+ *               coachNote="..." coachCta="Start 4-week protocol →"
+ *               onBack={fn} onOpenUpload={fn} onAskCoach={fn} onCoachCta={fn} onMore={fn} />
+ */
+const DEMO_HISTORY = [
+  { d: 'Apr 23', v: 92 },
+  { d: 'Oct 23', v: 88 },
+  { d: 'Jan 24', v: 85 },
+  { d: 'Apr 24', v: 80 },
+  { d: 'Jul 24', v: 76 },
+  { d: 'Oct 24', v: 75 },
+  { d: 'Jan 25', v: 78 },
+  { d: 'Apr 25', v: 82 },
+];
+
+const DEMO_DRIVERS = [
+  { t: 'Saturated fat intake', d: 'Lower sat fat to ≤20g / day', dir: 'down' },
+  { t: 'Soluble fiber', d: 'Oats, beans, psyllium — target 10g', dir: 'up' },
+  { t: 'Weekly cardio minutes', d: 'Currently 140 / 180 target', dir: 'up' },
+  { t: 'Alcohol frequency', d: 'Currently 4× / week', dir: 'down' },
+];
+
 function S16_Biomarker_Detail({
   dark = false,
   biomarkerName = 'Apo B',
   noData = false,
+  currentValue = 82,
+  currentUnit = 'mg/dL',
+  statusLabel = 'Elevated · above optimal',
+  deltaLabel = '↑ 4 since Jan · 2 above optimal range',
+  range,
+  history,
+  drivers,
+  coachNote = 'ApoB above 80 raises cardiovascular risk independently of LDL. You were at 75 last quarter — the drift correlates with your sat-fat intake climbing to 28g/day. Let\'s plan four weeks.',
+  coachCta = 'Start 4-week protocol →',
   onBack,
   onOpenUpload,
   onAskCoach,
+  onCoachCta,
+  onMore,
 }) {
   const c = useACT(dark);
-  // 8 historical readings over 24 months
-  const history = [
-    { d: 'Apr 23', v: 92 },
-    { d: 'Oct 23', v: 88 },
-    { d: 'Jan 24', v: 85 },
-    { d: 'Apr 24', v: 80 },
-    { d: 'Jul 24', v: 76 },
-    { d: 'Oct 24', v: 75 },
-    { d: 'Jan 25', v: 78 },
-    { d: 'Apr 25', v: 82 },
-  ];
-  const max = 110, min = 50;
-  const optimal = { low: 60, high: 80 };
+  const _history = history || DEMO_HISTORY;
+  const _drivers = drivers || DEMO_DRIVERS;
+  const _range = range || { min: 50, max: 110, optimal: { low: 60, high: 80 } };
+  const { min, max, optimal } = _range;
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -108,9 +147,9 @@ function S16_Biomarker_Detail({
           <svg width="10" height="10" viewBox="0 0 10 10"><path d="M7 1L3 5l4 4" stroke={c.fg} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
         <ACLabel size={12} color={c.dim} style={{ fontWeight: 500 }}>{biomarkerName}</ACLabel>
-        <div style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button type="button" onClick={onMore} style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: onMore ? 'pointer' : 'default' }}>
           <svg width="14" height="3" viewBox="0 0 14 3"><circle cx="2" cy="1.5" r="1.3" fill={c.fg}/><circle cx="7" cy="1.5" r="1.3" fill={c.fg}/><circle cx="12" cy="1.5" r="1.3" fill={c.fg}/></svg>
-        </div>
+        </button>
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: '20px 22px 20px' }}>
@@ -141,25 +180,25 @@ function S16_Biomarker_Detail({
           </>
         ) : (
           <>
-            <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Elevated · above optimal</ACLabel>
+            <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{statusLabel}</ACLabel>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 8 }}>
-              <ACNum size={88} color={c.fg} weight={700}>82</ACNum>
-              <ACLabel size={14} color={c.dim}>mg/dL</ACLabel>
+              <ACNum size={88} color={c.fg} weight={700}>{currentValue}</ACNum>
+              <ACLabel size={14} color={c.dim}>{currentUnit}</ACLabel>
             </div>
             <div style={{ marginTop: 4 }}>
-              <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>↑ 4 since Jan · 2 above optimal range</ACLabel>
+              <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{deltaLabel}</ACLabel>
             </div>
 
             {/* Range bar */}
             <div style={{ marginTop: 22, padding: 18, background: c.card, borderRadius: ACRadii.card }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
                 <ACLabel size={11} color={c.dim}>Your reading vs optimal range</ACLabel>
-                <ACLabel size={11} color={c.mute} style={{ fontFamily: ACFonts.mono }}>50 – 110</ACLabel>
+                <ACLabel size={11} color={c.mute} style={{ fontFamily: ACFonts.mono }}>{min} – {max}</ACLabel>
               </div>
-              <RangeBar min={min} max={max} optimal={optimal} value={82} c={c} />
+              <RangeBar min={min} max={max} optimal={optimal} value={currentValue} c={c} />
               <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between' }}>
                 <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono }}>Low</ACLabel>
-                <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono }}>Optimal 60–80</ACLabel>
+                <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono }}>Optimal {optimal.low}–{optimal.high}</ACLabel>
                 <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono }}>High</ACLabel>
               </div>
             </div>
@@ -168,20 +207,15 @@ function S16_Biomarker_Detail({
             <div style={{ marginTop: 12, padding: 18, background: c.card, borderRadius: ACRadii.card }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <ACLabel size={12} color={c.dim}>24-month trend</ACLabel>
-                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>8 readings</ACLabel>
+                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{_history.length} readings</ACLabel>
               </div>
-              <BiomarkerTrend data={history} c={c} dark={dark} optimal={optimal} />
+              <BiomarkerTrend data={_history} c={c} dark={dark} optimal={optimal} rangeMin={min} rangeMax={max} currentValue={currentValue} />
             </div>
 
             {/* What drives this */}
             <div style={{ marginTop: 22 }}>
               <ACLabel size={12} color={c.dim}>What drives this</ACLabel>
-              {[
-                { t: 'Saturated fat intake', d: 'Lower sat fat to ≤20g / day', dir: 'down' },
-                { t: 'Soluble fiber', d: 'Oats, beans, psyllium — target 10g', dir: 'up' },
-                { t: 'Weekly cardio minutes', d: 'Currently 140 / 180 target', dir: 'up' },
-                { t: 'Alcohol frequency', d: 'Currently 4× / week', dir: 'down' },
-              ].map((r, i) => (
+              {_drivers.map((r, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0',
                   borderTop: i === 0 ? `1px solid ${c.hair}` : 'none',
@@ -197,15 +231,19 @@ function S16_Biomarker_Detail({
             </div>
 
             {/* Coach note */}
-            <div style={{ marginTop: 22, padding: 16, background: c.card, borderRadius: ACRadii.card, borderLeft: `3px solid ${c.accent}` }}>
-              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }}>Coach</ACLabel>
-              <div style={{ marginTop: 6, fontSize: 14, color: c.fg, lineHeight: 1.5 }}>
-                ApoB above 80 raises cardiovascular risk independently of LDL. You were at 75 last quarter — the drift correlates with your sat-fat intake climbing to 28g/day. Let's plan four weeks.
+            {coachNote && (
+              <div style={{ marginTop: 22, padding: 16, background: c.card, borderRadius: ACRadii.card, borderLeft: `3px solid ${c.accent}` }}>
+                <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3 }}>Coach</ACLabel>
+                <div style={{ marginTop: 6, fontSize: 14, color: c.fg, lineHeight: 1.5 }}>
+                  {coachNote}
+                </div>
+                {coachCta && (
+                  <button type="button" onClick={onCoachCta} style={{ marginTop: 10, padding: '8px 12px', background: c.accent, color: c.ink, fontSize: 12, fontWeight: 600, borderRadius: 8, display: 'inline-block', border: 'none', cursor: onCoachCta ? 'pointer' : 'default' }}>
+                    {coachCta}
+                  </button>
+                )}
               </div>
-              <div style={{ marginTop: 10, padding: '8px 12px', background: c.accent, color: c.ink, fontSize: 12, fontWeight: 600, borderRadius: 8, display: 'inline-block' }}>
-                Start 4-week protocol →
-              </div>
-            </div>
+            )}
           </>
         )}
       </div>
