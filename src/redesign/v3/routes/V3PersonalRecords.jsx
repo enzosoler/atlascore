@@ -114,20 +114,20 @@ export default function V3PersonalRecords() {
   }
 
   function handleSharePR(pr) {
-    // Share PR functionality
-    if (navigator.share) {
-      navigator.share({
-        title: `${pr.lift} Personal Record`,
-        text: `New PR: ${pr.lift} ${pr.w} ${pr.u}!`,
-        url: window.location.href
-      }).catch(() => {
-        toast('Share cancelled');
-      });
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(`New PR: ${pr.lift} ${pr.w} ${pr.u}!`);
-      toast('PR details copied to clipboard');
-    }
+    // Navigate to share PR route with PR data
+    const prData = {
+      lift: pr.lift,
+      weight: pr.w,
+      reps: pr.u.includes('×') ? pr.u.split('×')[1].trim() : '1',
+      date: pr.date,
+      e1rm: pr.e1rm,
+      rpe: '9.0', // Would come from actual data
+      bodyweight: '182', // Would come from user profile
+      improvement: '+5', // Would calculate from previous PR
+      days: pr.days
+    };
+    
+    navigate('/app/workouts/share', { state: { prData } });
   }
 
   if (loading) {
