@@ -133,6 +133,7 @@ const V3NutritionSearch = lazy(() => import('@/redesign/v3/routes/V3NutritionSea
 const V3Notifications = lazy(() => import('@/redesign/v3/routes/V3Notifications.jsx'));
 const V3BiomarkerDetail = lazy(() => import('@/redesign/v3/routes/V3BiomarkerDetail.jsx'));
 const V3ProgressPhotos = lazy(() => import('@/redesign/v3/routes/V3ProgressPhotos.jsx'));
+const V3BodyPhotoCapture = lazy(() => import('@/redesign/v3/routes/V3BodyPhotoCapture.jsx'));
 const V3WeeklyReview = lazy(() => import('@/redesign/v3/routes/V3WeeklyReview.jsx'));
 const V3Welcome  = lazy(() => import('@/redesign/v3/routes/V3Welcome.jsx'));
 const V3Manifesto = lazy(() => import('@/redesign/v3/routes/V3Manifesto.jsx'));
@@ -1001,6 +1002,7 @@ function AppRoutes() {
           <Route path="labs" element={<V3Labs />} />
           <Route path="labs/biomarker/:id" element={<V3BiomarkerDetail />} />
           <Route path="body/progress/photos" element={<V3ProgressPhotos />} />
+          <Route path="body/progress/photos/capture" element={<V3BodyPhotoCapture />} />
           <Route path="notifications" element={<V3Notifications />} />
           <Route path="routines/:id" element={<V3RoutineDetail />} />
           {/* Billing routes moved outside V3AppShell — full-width web pages */}

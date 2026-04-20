@@ -13,9 +13,7 @@ export default function V3ProgressPhotos() {
       dark={theme === 'dark'}
       photos={[]}
       onTakePhoto={() => {
-        // TODO: route to a body-photo capture screen (not nutrition photo)
-        // /app/body/photo/capture doesn't exist yet — needs a v3 screen + route
-        toast('Body photo capture coming soon', { description: 'This will open a dedicated body-photo camera.' });
+        navigate('/app/body/progress/photos/capture');
       }}
       onOpenPhoto={(id) => navigate('/app/body')}
       showTabBar={false}
