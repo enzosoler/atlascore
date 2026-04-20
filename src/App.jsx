@@ -155,6 +155,24 @@ const V3MethodPage = lazy(() => import('@/redesign/v3/routes/V3MethodPage.jsx'))
 const V3LabsPage = lazy(() => import('@/redesign/v3/routes/V3LabsPage.jsx'));
 const V3PricingPage = lazy(() => import('@/redesign/v3/routes/V3PricingPage.jsx'));
 const V3AppPage = lazy(() => import('@/redesign/v3/routes/V3AppPage.jsx'));
+const V3WorkoutSummary = lazy(() => import('@/redesign/v3/routes/V3WorkoutSummary.jsx'));
+const V3SleepDetail = lazy(() => import('@/redesign/v3/routes/V3SleepDetail.jsx'));
+const V3Capture = lazy(() => import('@/redesign/v3/routes/V3Capture.jsx'));
+const V3Inbox = lazy(() => import('@/redesign/v3/routes/V3Inbox.jsx'));
+const V3FoodDetail = lazy(() => import('@/redesign/v3/routes/V3FoodDetail.jsx'));
+const V3Calendar = lazy(() => import('@/redesign/v3/routes/V3Calendar.jsx'));
+const V3Crew = lazy(() => import('@/redesign/v3/routes/V3Crew.jsx'));
+const V3RecipeBuilder = lazy(() => import('@/redesign/v3/routes/V3RecipeBuilder.jsx'));
+const V3Billing = lazy(() => import('@/redesign/v3/routes/V3Billing.jsx'));
+const V3Watch = lazy(() => import('@/redesign/v3/routes/V3Watch.jsx'));
+const V3Protocols = lazy(() => import('@/redesign/v3/routes/V3Protocols.jsx'));
+const V3ProtocolsEmpty = lazy(() => import('@/redesign/v3/routes/V3ProtocolsEmpty.jsx'));
+const V3ProtocolDetail = lazy(() => import('@/redesign/v3/routes/V3ProtocolDetail.jsx'));
+const V3ProtocolForm = lazy(() => import('@/redesign/v3/routes/V3ProtocolForm.jsx'));
+const V3SubstancePicker = lazy(() => import('@/redesign/v3/routes/V3SubstancePicker.jsx'));
+const V3LogDose = lazy(() => import('@/redesign/v3/routes/V3LogDose.jsx'));
+const V3ProtocolTimeline = lazy(() => import('@/redesign/v3/routes/V3ProtocolTimeline.jsx'));
+const V3TodayDose = lazy(() => import('@/redesign/v3/routes/V3TodayDose.jsx'));
 const V3Terms = lazy(() => import('@/redesign/v3/routes/V3Terms.jsx'));
 const V3Privacy = lazy(() => import('@/redesign/v3/routes/V3Privacy.jsx'));
 const V3Paywall = lazy(() => import('@/redesign/v3/routes/V3Paywall.jsx'));
@@ -1051,6 +1069,36 @@ function AppRoutes() {
           <Route path="social" element={<SocialFeedRoute />} />
           <Route path="social/friends" element={<FriendsRoute />} />
           <Route path="social/follow" element={<FollowRoute />} />
+
+          {/* Workout sub-screens */}
+          <Route path="workouts/summary" element={<V3WorkoutSummary />} />
+          <Route path="workouts/calendar" element={<V3Calendar />} />
+
+          {/* Nutrition sub-screens */}
+          <Route path="nutrition/food" element={<V3FoodDetail />} />
+          <Route path="nutrition/capture" element={<V3Capture />} />
+          <Route path="nutrition/recipes/new" element={<V3RecipeBuilder />} />
+
+          {/* Body sub-screens */}
+          <Route path="sleep" element={<V3SleepDetail />} />
+          <Route path="watch" element={<V3Watch />} />
+
+          {/* Crew + Inbox */}
+          <Route path="crew" element={<V3Crew />} />
+          <Route path="inbox" element={<V3Inbox />} />
+
+          {/* Billing */}
+          <Route path="billing" element={<V3Billing />} />
+
+          {/* Protocols module */}
+          <Route path="protocols" element={<V3Protocols />} />
+          <Route path="protocols/empty" element={<V3ProtocolsEmpty />} />
+          <Route path="protocols/new" element={<V3ProtocolForm />} />
+          <Route path="protocols/substances" element={<V3SubstancePicker />} />
+          <Route path="protocols/log" element={<V3LogDose />} />
+          <Route path="protocols/timeline" element={<V3ProtocolTimeline />} />
+          <Route path="protocols/today" element={<V3TodayDose />} />
+          <Route path="protocols/:id" element={<V3ProtocolDetail />} />
         </Route>
 
         {/* ── Marketing (public web) — root is now the landing page ── */}
