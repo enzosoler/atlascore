@@ -104,18 +104,20 @@ PROD (confirmed production-interactive after 2026-04-20 re-audit):
 
 STILL SHELL (highest-leverage targets):
 - [x] S25_Program_Detail — wired prop contract + small handlers (commit fcdbb81)
-- [ ] S26_Calendar -- static dates; needs onSelectDate/onAddSession handlers
-- [ ] S27_Exercise_Detail -- demo exercise; needs onFavorite/onLog handlers
-- [ ] S28_Crew -- demo members; needs onInvite/onMessage handlers
-- [ ] S29_Workout_Summary -- static summary; needs onShare/onRepeat handlers
-- [ ] S30_Weekly_Recap -- demo data; needs onExport/onDrillDown handlers
+- [x] S27_Exercise_Detail — onFavorite({exerciseId,favorite,favoritedAt}) + onLogSet({exerciseId,loggedAt,...}) already wired (2026-04-20 re-audit)
+- [x] S29_Workout_Summary — onShare({sessionId,sharedAt}) + onRepeat({sessionId,repeatedAt}) already wired (2026-04-20 re-audit)
+- [ ] S30_Weekly_Recap -- needs onShare contract + 3-stage gift-moment reveal (§12: streak/adherence update)
+- [ ] S26_Calendar -- static dates; needs onSelectDate({date})/onAddSession({date}) handlers
 - [ ] S31_Sleep_Detail -- static sleep; needs onRefresh/onCompare handlers
-- [ ] S33_Profile -- static profile; needs onEditField/onPhoto handlers
-- [ ] S34_Watch -- demo watch; needs onSync/onConfigure handlers
-- [ ] S37_Inbox -- static messages; needs onOpen/onArchive handlers
-- [ ] S40_Billing -- demo billing; needs onEditPayment/onSwitchPlan handlers
+- [ ] S28_Crew -- needs real onInvite({userId})/onMessage({userId,text}) payload shapes
+- [ ] S37_Inbox -- static messages; needs onOpen({itemId})/onArchive({itemId}) handlers
+- [ ] S40_Billing -- display-only; needs Stripe/RevenueCat onEditPayment/onSwitchPlan contract
+- [ ] S16_Biomarker_Detail -- gift moment (§12: lab result parsing); pure display, needs onShare/onFlag handlers
+- [ ] S34_Watch -- display-only by design; low priority
 
-NEXT TARGET: S25_Program_Detail (training program preview with demo data that needs enrollment functionality)
+NOTE: S33_Profile confirmed production-interactive (real props + handlers) — removed from shell list.
+
+NEXT TARGET: S30_Weekly_Recap
 
 ## Handoffs (design → engineering)
 
