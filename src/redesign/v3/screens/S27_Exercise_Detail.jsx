@@ -55,6 +55,7 @@ function S27_Exercise_Detail({
   classification = 'LIFT · COMPOUND',
   musclePattern = 'POSTERIOR CHAIN · HINGE PATTERN',
   bestWeight = 415,
+  bestUnit = 'lb',
   bestReps = 1,
   bestDate,
   history,
@@ -98,7 +99,7 @@ function S27_Exercise_Detail({
         </button>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '14px 22px 20px' }}>
+      <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '14px 22px 20px' }}>
         <div style={{
           fontFamily: ACFonts.display, fontSize: 42, fontWeight: 700,
           letterSpacing: -1.8, lineHeight: 0.95, color: c.fg,
@@ -159,7 +160,7 @@ function S27_Exercise_Detail({
               <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, textTransform: 'uppercase' }}>All-time best</ACLabel>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 6 }}>
                 <ACNum size={40} color={c.fg} weight={700}>{bestWeight}</ACNum>
-                <span style={{ fontSize: 12, color: c.dim, fontFamily: ACFonts.mono }}>kg × {bestReps}</span>
+                <span style={{ fontSize: 12, color: c.dim, fontFamily: ACFonts.mono }}>{bestUnit} × {bestReps}</span>
               </div>
               <ACLabel size={11} color={c.accent} style={{ marginTop: 4, fontWeight: 600 }}>{formatDateLabel(bestDate)}</ACLabel>
             </div>
