@@ -5,15 +5,19 @@ import {
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
-function DayRow({ d, c, first }) {
+function DayRow({ d, c, first, onSelect, onOpenSession }) {
   const isRest = d.status === 'rest';
   const isShifted = d.status === 'shifted';
   const isToday = d.today;
   return (
-    <div style={{
+    <div role="button" onClick={() => {
+      if (typeof onSelect === 'function') onSelect({ date: d.date, type: d.type, status: d.status });
+      if (d.status !== 'rest' && typeof onOpenSession === 'function') onOpenSession({ date: d.date });
+    }} style={{
       display: 'flex', alignItems: 'stretch', gap: 14,
       padding: '14px 0',
       borderTop: first ? 'none' : `1px solid ${c.hair}`,
+      cursor: 'pointer',
     }}>
       {/* Day column */}
       <div style={{
@@ -96,7 +100,7 @@ function DayRow({ d, c, first }) {
  * Gallery:    <S26_Calendar dark />
  * Production: <S26_Calendar dark onBack={fn} onOpenSession={fn} onStartWorkout={fn} />
  */
-function S26_Calendar({ dark = false, onBack, onOpenSession, onStartWorkout }) {
+function S26_Calendar({ dark = false, onBack, onOpenSession, onStartWorkout, onSelectDate, onAddSession }) {
   const c = useACT(dark);
   const days = [
     { date: 'Sat 18', today: true,  type: 'Heavy Lower', vol: 'High',   read: 87, status: 'today', duration: '58m' },
@@ -116,15 +120,23 @@ function S26_Calendar({ dark = false, onBack, onOpenSession, onStartWorkout }) {
             Apr 18 — 24
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 2, padding: 3, background: c.card, borderRadius: 10 }}>
-          {['W', 'M'].map((r, i) => (
-            <div key={r} style={{
-              padding: '6px 12px', borderRadius: 7,
-              background: i === 0 ? c.fg : 'transparent',
-              color: i === 0 ? c.bg : c.dim,
-              fontSize: 12, fontWeight: 600,
-            }}>{r}</div>
-          ))}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 2, padding: 3, background: c.card, borderRadius: 10 }}>
+            {['W', 'M'].map((r, i) => (
+              <div key={r} style={{
+                padding: '6px 12px', borderRadius: 7,
+                background: i === 0 ? c.fg : 'transparent',
+                color: i === 0 ? c.bg : c.dim,
+                fontSize: 12, fontWeight: 600,
+              }}>{r}</div>
+            ))}
+          </div>
+          <button type="button" onClick={() => {
+            if (typeof onAddSession === 'function') onAddSession({ weekStart: 'Apr 18', weekEnd: 'Apr 24' });
+          }} style={{
+            padding: '6px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            background: c.accent, color: c.ink, fontWeight: 700, fontSize: 12
+          }}>Add</button>
         </div>
       </div>
 
@@ -166,7 +178,10 @@ function S26_Calendar({ dark = false, onBack, onOpenSession, onStartWorkout }) {
         {/* Day list */}
         <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column' }}>
           {days.map((d, i) => (
-            <DayRow key={i} d={d} c={c} first={i === 0} />
+            <DayRow key={i} d={d} c={c} first={i === 0}
+              onSelect={(payload) => { if (typeof onSelectDate === 'function') onSelectDate(payload); }}
+              onOpenSession={onOpenSession}
+            />
           ))}
         </div>
 
