@@ -391,7 +391,7 @@ Gotcha: the Supabase URL needs the Function to be deployed first (`supabase func
 
 ## 13. Fill in `plans.js` product IDs
 
-Once products are live in RevenueCat, edit `src/redesign/v2/billing/plans.js`:
+Once products are live in RevenueCat, edit `src/redesign/archived/v2/billing/plans.js`:
 
 ```js
 productIdWeekly:  'atlas_core_pro_weekly',

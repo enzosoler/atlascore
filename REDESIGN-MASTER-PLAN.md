@@ -16,7 +16,7 @@
 - A coluna "Remaining screens" do `coverage-summary.md` deixa claro que muitas telas não foram sequer feitas — só listadas.
 
 **Como vai ser agora:**
-- **1 arquivo por tela.** Cada rota do registry vira um `.jsx` próprio em `src/redesign/v2/<domain>/<ScreenName>.jsx`.
+- **1 arquivo por tela.** Cada rota do registry vira um `.jsx` próprio em `src/redesign/archived/v2/<domain>/<ScreenName>.jsx`.
 - **Cada tela copia o layout do app top performer daquela feature específica** (não um só app para tudo).
 - **Paleta restrita:** obsidian (#05070A, #0B0F15, #141A22) + cyan (#00FFFF, accent) + violet (#8B5CF6, AI) + gold (#C9A96A, premium) + status (emerald/amber/rose). Nada fora disso.
 - **Continuidade garantida.** Esta checklist vive no workspace. Próxima sessão lê isto e continua.
@@ -68,7 +68,7 @@ Regra: cada tela copia o app que é **melhor do mundo naquela função específi
 
 ## Inventário completo: 94 telas canônicas + 26 overlays
 
-**Estrutura do arquivo:** `src/redesign/v2/<domain>/<ScreenName>.jsx`  
+**Estrutura do arquivo:** `src/redesign/archived/v2/<domain>/<ScreenName>.jsx`  
 Cada linha abaixo é **um arquivo .jsx separado** (sem agrupamento).
 
 ### Status legend
@@ -347,7 +347,7 @@ Ao concluir cada tela, eu marco o status aqui de ⬜ para ✅. Assim, se a sess�
 
 ### Fase 3 — Cutover
 Quando todas ✅, eu:
-1. Movo `src/redesign/v2/` para substituir `src/redesign/` antigo
+1. Movo `src/redesign/archived/v2/` para substituir `src/redesign/` antigo
 2. Aponto `App.jsx` para usar o novo registry
 3. Arquivo o antigo em `_archived/redesign-v1/`
 4. Gero preview HTML final
@@ -360,7 +360,7 @@ Se você voltar em outra sessão e quiser continuar o redesign, é só dizer "co
 ## Pendências aguardando sua decisão
 
 1. **Aprovar o mapeamento de apps de referência acima.** Quer trocar algum? (Ex: se você prefere Zero em vez de Happy Scale para trend de peso, ou Yuka em vez de Cal AI pra barcode.)
-2. **Aprovar a estrutura de paths.** Eu uso `src/redesign/v2/<domain>/<Screen>.jsx` para não conflitar com o redesign v1 (que fica preservado). Quando v2 estiver pronto, migra tudo.
+2. **Aprovar a estrutura de paths.** Eu uso `src/redesign/archived/v2/<domain>/<Screen>.jsx` para não conflitar com o redesign v1 (que fica preservado). Quando v2 estiver pronto, migra tudo.
 3. **Confirmar piloto = Nutrition.** Ou você prefere outro domínio pra começar (ex: Today, que é a home)?
 
 Depois que esses 3 pontos estiverem OK, eu começo a executar a Fase 1 sem parar.
@@ -379,7 +379,7 @@ Depois que esses 3 pontos estiverem OK, eu começo a executar a Fase 1 sem parar
   - `src/components/layout/AppLayoutV2.jsx` — substituído `mockUserData` por `useLayoutUser()` que lê o user real do AuthContext
   - `src/components/NavigationV2.jsx` — criado `SidebarUserFooter` que lê user real + respeita safe-area-inset-bottom
   - `src/pages/ProfileV2.jsx` — substituído `mockUserData` por `useRealProfileData()`, zerados achievements/stats (até services reais entrarem)
-- **Primitives Liquid Glass v2** em `src/redesign/v2/lib/glass.jsx`:
+- **Primitives Liquid Glass v2** em `src/redesign/archived/v2/lib/glass.jsx`:
   - `SafeScreen` — wrapper com safe-area-inset em todos os 4 lados, opções `hasTopBar`/`hasBottomNav`/`hasFab` pra nunca colidir com chrome fixo
   - `Glass` — surface translúcida com backdrop-blur + saturate + specular edge highlight + ambient shadow
   - `LiquidButton` — CTA com spring-press scale(.97), 6 variantes (primary/neutral/ghost/premium/ai/danger)
@@ -388,7 +388,7 @@ Depois que esses 3 pontos estiverem OK, eu começo a executar a Fase 1 sem parar
   - `ChoicePill` — option row 56pt Cal AI/Noom-style com selected state em accent
   - `BigNumberInput` — input numérico gigante centrado
   - `SpringReveal` — animação de entrada com translate+fade, respeita prefers-reduced-motion
-- **15 telas entregues** em `src/redesign/v2/`:
+- **15 telas entregues** em `src/redesign/archived/v2/`:
   1. ✅ `auth/Splash.jsx` — tela de launch com heartbeat→arrow animado, variant firstLaunch vs normal, suporta error/syncing/ready
   2. ✅ `auth/Welcome.jsx` — primeira tela pra quem nunca entrou, com aurora cyan+violet, 3 benefícios, 2 CTAs
   3. ✅ `onboarding/OnboardingShell.jsx` — layout compartilhado (top bar com progress + back + step counter, body scrollable 560px max, footer sticky com CTA)
@@ -405,7 +405,7 @@ Depois que esses 3 pontos estiverem OK, eu começo a executar a Fase 1 sem parar
   14. ✅ `onboarding/OnboardingTour.jsx` — 3 slides (photo log, coach chat, recovery ring) + dots + finish
   15. ✅ `onboarding/SmartOnboarding.jsx` — adaptive flow pra returning users com profile parcial
   16. ✅ `today/Today.jsx` — home com greeting, RecoveryHero (ring 0-100 + bucket + streak), MacrosCard (cal + 3 macros), WorkoutCard (prescribed ou rest day), CoachTipCard (violet, opcional)
-- **Barrel export** em `src/redesign/v2/index.js`
+- **Barrel export** em `src/redesign/archived/v2/index.js`
 
 **Garantias aplicadas em TODAS as 15 telas:**
 - `env(safe-area-inset-*)` em top/bottom/left/right — nunca colide com status bar iOS nem home indicator
@@ -422,7 +422,7 @@ Depois que esses 3 pontos estiverem OK, eu começo a executar a Fase 1 sem parar
 2. **Fase 2 — Nutrition** (13 telas) — Cal AI + MyFitnessPal + Yazio
 3. **Fase 3 — Workouts** (16 telas) — Strong + Hevy + Fitbod
 4. Depois: Body, Coach, Labs, Billing restante, Settings/Profile, Social, Admin/Pro, Marketing, System, Dev, Overlays (28)
-5. Cutover: apontar `App.jsx` para usar `redesign/v2/*` e arquivar o `redesign/` antigo em `_archived/`
+5. Cutover: apontar `App.jsx` para usar `redesign/archived/v2/*` e arquivar o `redesign/` antigo em `_archived/`
 
 ### Como continuar em sessão futura
 
@@ -454,9 +454,9 @@ Se você voltar em outra sessão, diga: **"continua o redesign v2"**. Eu:
   - Deep-link OAuth nativo (`atlascore://auth/callback`) preservado
   - Analytics page-view tracking preservado
 - **Novas primitives e layouts:**
-  - `src/redesign/v2/system/ComingSoon.jsx` — placeholder Liquid Glass pra qualquer rota ainda não redesenhada ("In redesign" pill cyan + heading + back/home CTAs)
-  - `src/redesign/v2/layouts/AppShell.jsx` — shell das rotas autenticadas com top bar blurred (56pt + safe-area-inset-top), bottom nav de 5 tabs (Today/Train/Food/Body/Profile, 64pt + safe-area-inset-bottom), FAB opcional. Lê `useAuth()` para avatar/iniciais reais. **Nunca vai ter Alex Johnson.**
-  - `src/redesign/v2/layouts/AuthShell.jsx` — shell das rotas públicas (sem nav), safe-area em todos os lados, aurora sutil de fundo
+  - `src/redesign/archived/v2/system/ComingSoon.jsx` — placeholder Liquid Glass pra qualquer rota ainda não redesenhada ("In redesign" pill cyan + heading + back/home CTAs)
+  - `src/redesign/archived/v2/layouts/AppShell.jsx` — shell das rotas autenticadas com top bar blurred (56pt + safe-area-inset-top), bottom nav de 5 tabs (Today/Train/Food/Body/Profile, 64pt + safe-area-inset-bottom), FAB opcional. Lê `useAuth()` para avatar/iniciais reais. **Nunca vai ter Alex Johnson.**
+  - `src/redesign/archived/v2/layouts/AuthShell.jsx` — shell das rotas públicas (sem nav), safe-area em todos os lados, aurora sutil de fundo
 - **Fluxo wireado:**
   - `/` e `/welcome` → `Welcome` v2 (Get started → signup, I already have an account → login)
   - `/auth`, `/auth/login`, `/auth/signup` → `LegacyAuth` refinado com Google + Apple + cyan liquid glass

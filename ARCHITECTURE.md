@@ -8,7 +8,7 @@ and go against how premium apps (Linear, Superhuman, Whoop, Arc, Apple
 Fitness) treat iconography.
 
 Use:
-- **Atlas iconography** from `src/redesign/v2/lib/icons.jsx` (clean line
+- **Atlas iconography** from `src/redesign/archived/v2/lib/icons.jsx` (clean line
   SVGs, stroke 1.75, currentColor) for all UI affordances.
 - **Lucide React** (already in `package.json`) for anything the Atlas set
   doesn't cover. `import { Flame, Leaf, Target } from 'lucide-react'`.
@@ -261,27 +261,27 @@ These are Postgres values, not secrets. Already handled in `log-food-text`:
 ## Frontend contract
 
 Every Atlas v2 screen that needs AI calls ONE helper per domain. These helpers
-all live in `src/redesign/v2/<domain>/<domain>Ai.js`:
+all live in `src/redesign/archived/v2/<domain>/<domain>Ai.js`:
 
 ```js
-// src/redesign/v2/nutrition/nutritionAi.js
+// src/redesign/archived/v2/nutrition/nutritionAi.js
 parseFoodText(text, opts)         // → { food_name, items[], totals, confidence }
 parseFoodImage(blob, opts)        // → same shape from image
 ```
 
 ```js
-// src/redesign/v2/coach/coachAi.js  (future)
+// src/redesign/archived/v2/coach/coachAi.js  (future)
 askCoach(message, context, opts)  // → { reply, sources[], confidence }
 ```
 
 ```js
-// src/redesign/v2/workouts/workoutAi.js  (future)
+// src/redesign/archived/v2/workouts/workoutAi.js  (future)
 generateWorkout(brief, opts)      // → { name, exercises[], estimated_duration }
 adaptWorkout(existing, changes)   // uses local math, not AI
 ```
 
 ```js
-// src/redesign/v2/nutrition/mealPlanAi.js  (future)
+// src/redesign/archived/v2/nutrition/mealPlanAi.js  (future)
 generateMealPlan(targets, prefs)  // → { days[...7], grocery_list }
 scaleMealPlan(plan, newTargets)   // uses local math, not AI
 ```

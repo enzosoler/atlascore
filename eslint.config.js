@@ -4,10 +4,10 @@ import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginUnusedImports from "eslint-plugin-unused-imports";
 
-// V2 migration guardrail — block new imports from src/redesign/v2.
+// V2 migration guardrail — block new imports from src/redesign/archived/v2.
 // The v2 codebase is being replaced by v3. The only files that are
 // expected to reference v2 are:
-//   - src/redesign/v2/**       (v2 can import itself)
+//   - src/redesign/archived/v2/**       (v2 can import itself)
 //   - src/App.jsx              (route wiring during migration)
 //   - explicit migration-debt allowlist (shrinks as v2 cross-deps are lifted)
 // Anything else importing from v2 is a regression.
@@ -72,7 +72,7 @@ export default [
     // V2 import guardrail — applies to every source file under src/
     // except v2 itself and the allowlist above.
     files: ["src/**/*.{js,mjs,cjs,jsx}"],
-    ignores: ["src/redesign/v2/**", ...V2_IMPORT_ALLOWLIST],
+    ignores: ["src/redesign/archived/v2/**", ...V2_IMPORT_ALLOWLIST],
     languageOptions: {
       parserOptions: {
         ecmaVersion: 2022,
@@ -86,9 +86,9 @@ export default [
         {
           patterns: [
             {
-              group: ["@/redesign/v2/*", "**/redesign/v2/*"],
+              group: ["@/redesign/archived/v2/*", "**/redesign/archived/v2/*"],
               message:
-                "Do not import from src/redesign/v2. The v2 codebase is being migrated to v3. If you need a shared utility, extract it out of v2 (into src/redesign/shared/ or src/lib/) first, then import from there.",
+                "Do not import from src/redesign/archived/v2. The v2 codebase is being migrated to v3. If you need a shared utility, extract it out of v2 (into src/redesign/shared/ or src/lib/) first, then import from there.",
             },
           ],
         },

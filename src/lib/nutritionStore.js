@@ -1,4 +1,4 @@
-// Minimal nutritionStore shim to avoid importing legacy redesign/v2 sources in the build.
+// Minimal nutritionStore shim to avoid importing legacy redesign/archived/v2 sources in the build.
 // This file provides the small API surface used by App.jsx and returns safe fallbacks.
 
 export async function getEntriesForDate(userId, date) {

@@ -10,13 +10,13 @@ From the repo root `atlas.core-official/`:
 
 ```bash
 # 1. Pull my commit in from the bundle
-git fetch ./redesign-v2.bundle redesign/v2-preview:redesign/v2-preview
+git fetch ./redesign-v2.bundle redesign/archived/v2-preview:redesign/archived/v2-preview
 
 # 2. Push it to GitHub
-git push -u origin redesign/v2-preview
+git push -u origin redesign/archived/v2-preview
 ```
 
-That's it. Then open a PR from `redesign/v2-preview` → your main branch on
+That's it. Then open a PR from `redesign/archived/v2-preview` → your main branch on
 https://github.com/enzosoler/atlascore.
 
 ## What's in the commit
@@ -52,7 +52,7 @@ access to that path with your GitHub credentials:
 
 ```bash
 cd /tmp/atlas-work/atlas-clone
-git push -u origin redesign/v2-preview
+git push -u origin redesign/archived/v2-preview
 ```
 
 ## Clean up after pushing

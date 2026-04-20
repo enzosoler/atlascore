@@ -52,7 +52,7 @@ tooling, performance.
 | `src/App.jsx` | Router, providers, route wrappers |
 | `src/redesign/v3/routes/V3*.jsx` | Route-level wiring: data, nav, handlers |
 | `src/redesign/v3/layouts/**` | Platform gates, shell logic |
-| `src/redesign/v2/**` | Legacy teardown + v2 route wrappers |
+| `src/redesign/archived/v2/**` | Legacy teardown + v2 route wrappers |
 | `src/i18n/**` | Dictionaries + translation engine |
 | `src/lib/**` | Services, contexts, hooks |
 | `src/hooks/**`, `src/services/**`, `src/store/**` | Data layer |

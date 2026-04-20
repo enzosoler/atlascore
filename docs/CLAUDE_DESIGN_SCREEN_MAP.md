@@ -16,142 +16,142 @@ These are the routes actually mounted right now from `src/App.jsx`.
 
 ### Public / Marketing
 
-- `/` and `/landing` -> `Landing` -> [src/redesign/v2/marketing/Landing.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/marketing/Landing.jsx)
+- `/` and `/landing` -> `Landing` -> [src/redesign/archived/v2/marketing/Landing.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/marketing/Landing.jsx)
   Function: marketing home / primary acquisition page.
-- `/pricing` -> `Pricing` -> [src/redesign/v2/marketing/Pricing.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/marketing/Pricing.jsx)
+- `/pricing` -> `Pricing` -> [src/redesign/archived/v2/marketing/Pricing.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/marketing/Pricing.jsx)
   Function: pricing and upgrade framing.
-- `/terms` -> `Terms` -> [src/redesign/v2/marketing/Terms.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/marketing/Terms.jsx)
+- `/terms` -> `Terms` -> [src/redesign/archived/v2/marketing/Terms.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/marketing/Terms.jsx)
   Function: terms of service.
-- `/privacy` -> `Privacy` -> [src/redesign/v2/marketing/Privacy.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/marketing/Privacy.jsx)
+- `/privacy` -> `Privacy` -> [src/redesign/archived/v2/marketing/Privacy.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/marketing/Privacy.jsx)
   Function: privacy policy.
 
 ### Auth
 
-- `/welcome` -> `WelcomeRoute` wrapper -> [src/redesign/v2/auth/Welcome.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/auth/Welcome.jsx)
+- `/welcome` -> `WelcomeRoute` wrapper -> [src/redesign/archived/v2/auth/Welcome.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/auth/Welcome.jsx)
   Function: pre-auth intro / choose sign in or sign up.
-- `/auth/login` -> `Login` -> [src/redesign/v2/auth/Login.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/auth/Login.jsx)
+- `/auth/login` -> `Login` -> [src/redesign/archived/v2/auth/Login.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/auth/Login.jsx)
   Function: sign in.
-- `/auth/signup` -> `Signup` -> [src/redesign/v2/auth/Signup.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/auth/Signup.jsx)
+- `/auth/signup` -> `Signup` -> [src/redesign/archived/v2/auth/Signup.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/auth/Signup.jsx)
   Function: create account.
-- `/auth/forgot` -> `ForgotPassword` -> [src/redesign/v2/auth/ForgotPassword.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/auth/ForgotPassword.jsx)
+- `/auth/forgot` -> `ForgotPassword` -> [src/redesign/archived/v2/auth/ForgotPassword.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/auth/ForgotPassword.jsx)
   Function: password reset request.
-- `/auth/reset` -> `ResetPassword` -> [src/redesign/v2/auth/ResetPassword.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/auth/ResetPassword.jsx)
+- `/auth/reset` -> `ResetPassword` -> [src/redesign/archived/v2/auth/ResetPassword.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/auth/ResetPassword.jsx)
   Function: set new password.
-- `/auth/magic` -> `MagicLinkSent` -> [src/redesign/v2/auth/MagicLinkSent.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/auth/MagicLinkSent.jsx)
+- `/auth/magic` -> `MagicLinkSent` -> [src/redesign/archived/v2/auth/MagicLinkSent.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/auth/MagicLinkSent.jsx)
   Function: email-magic-link confirmation state.
 - `/auth/callback` -> `ComingSoonNav("Authenticating")`
   Function: temporary auth callback placeholder.
 
 ### Onboarding
 
-- `/onboarding` -> `OnboardingRoot` -> [src/redesign/v2/onboarding/OnboardingRoot.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingRoot.jsx)
-- `/onboarding/goal` -> `OnboardingGoal` -> [src/redesign/v2/onboarding/OnboardingGoal.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingGoal.jsx)
-- `/onboarding/activity` -> `OnboardingActivity` -> [src/redesign/v2/onboarding/OnboardingActivity.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingActivity.jsx)
-- `/onboarding/stats` -> `OnboardingStats` -> [src/redesign/v2/onboarding/OnboardingStats.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingStats.jsx)
-- `/onboarding/diet` -> `OnboardingDiet` -> [src/redesign/v2/onboarding/OnboardingDiet.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingDiet.jsx)
-- `/onboarding/workout` -> `OnboardingWorkout` -> [src/redesign/v2/onboarding/OnboardingWorkout.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingWorkout.jsx)
-- `/onboarding/habits` -> `OnboardingHabits` -> [src/redesign/v2/onboarding/OnboardingHabits.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingHabits.jsx)
-- `/onboarding/constraints` -> `OnboardingConstraints` -> [src/redesign/v2/onboarding/OnboardingConstraints.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingConstraints.jsx)
-- `/onboarding/summary` -> `OnboardingSummary` -> [src/redesign/v2/onboarding/OnboardingSummary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingSummary.jsx)
-- `/onboarding/paywall` -> `OnboardingPaywall` -> [src/redesign/v2/onboarding/OnboardingPaywall.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingPaywall.jsx)
-- `/onboarding/tour` -> `OnboardingTour` -> [src/redesign/v2/onboarding/OnboardingTour.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/OnboardingTour.jsx)
-- `/onboarding/smart` -> `SmartOnboarding` -> [src/redesign/v2/onboarding/SmartOnboarding.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/onboarding/SmartOnboarding.jsx)
+- `/onboarding` -> `OnboardingRoot` -> [src/redesign/archived/v2/onboarding/OnboardingRoot.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingRoot.jsx)
+- `/onboarding/goal` -> `OnboardingGoal` -> [src/redesign/archived/v2/onboarding/OnboardingGoal.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingGoal.jsx)
+- `/onboarding/activity` -> `OnboardingActivity` -> [src/redesign/archived/v2/onboarding/OnboardingActivity.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingActivity.jsx)
+- `/onboarding/stats` -> `OnboardingStats` -> [src/redesign/archived/v2/onboarding/OnboardingStats.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingStats.jsx)
+- `/onboarding/diet` -> `OnboardingDiet` -> [src/redesign/archived/v2/onboarding/OnboardingDiet.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingDiet.jsx)
+- `/onboarding/workout` -> `OnboardingWorkout` -> [src/redesign/archived/v2/onboarding/OnboardingWorkout.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingWorkout.jsx)
+- `/onboarding/habits` -> `OnboardingHabits` -> [src/redesign/archived/v2/onboarding/OnboardingHabits.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingHabits.jsx)
+- `/onboarding/constraints` -> `OnboardingConstraints` -> [src/redesign/archived/v2/onboarding/OnboardingConstraints.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingConstraints.jsx)
+- `/onboarding/summary` -> `OnboardingSummary` -> [src/redesign/archived/v2/onboarding/OnboardingSummary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingSummary.jsx)
+- `/onboarding/paywall` -> `OnboardingPaywall` -> [src/redesign/archived/v2/onboarding/OnboardingPaywall.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingPaywall.jsx)
+- `/onboarding/tour` -> `OnboardingTour` -> [src/redesign/archived/v2/onboarding/OnboardingTour.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/OnboardingTour.jsx)
+- `/onboarding/smart` -> `SmartOnboarding` -> [src/redesign/archived/v2/onboarding/SmartOnboarding.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/onboarding/SmartOnboarding.jsx)
 
 ### App Core
 
-- `/app/today` -> `Today` -> [src/redesign/v2/today/Today.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/today/Today.jsx)
+- `/app/today` -> `Today` -> [src/redesign/archived/v2/today/Today.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/today/Today.jsx)
   Function: primary daily dashboard.
-- `/app/weekly` -> `WeeklyReview` -> [src/redesign/v2/today/WeeklyReview.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/today/WeeklyReview.jsx)
+- `/app/weekly` -> `WeeklyReview` -> [src/redesign/archived/v2/today/WeeklyReview.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/today/WeeklyReview.jsx)
   Function: weekly review summary.
-- `/app/insights` -> `InsightsScreen` -> [src/redesign/v2/today/Insights.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/today/Insights.jsx)
+- `/app/insights` -> `InsightsScreen` -> [src/redesign/archived/v2/today/Insights.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/today/Insights.jsx)
   Function: premium insights.
-- `/app/diary` -> `Diary` -> [src/redesign/v2/today/Diary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/today/Diary.jsx)
+- `/app/diary` -> `Diary` -> [src/redesign/archived/v2/today/Diary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/today/Diary.jsx)
   Function: cross-domain timeline / daily log.
-- `/app/today/focus` -> `FocusModeRoute` -> [src/redesign/v2/today/FocusMode.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/today/FocusMode.jsx)
-- `/app/today/streaks` -> `StreaksDetailRoute` -> [src/redesign/v2/today/StreaksDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/today/StreaksDetail.jsx)
-- `/app/today/celebrate/:kind` -> `CelebrationsRoute` -> [src/redesign/v2/today/Celebrations.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/today/Celebrations.jsx)
+- `/app/today/focus` -> `FocusModeRoute` -> [src/redesign/archived/v2/today/FocusMode.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/today/FocusMode.jsx)
+- `/app/today/streaks` -> `StreaksDetailRoute` -> [src/redesign/archived/v2/today/StreaksDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/today/StreaksDetail.jsx)
+- `/app/today/celebrate/:kind` -> `CelebrationsRoute` -> [src/redesign/archived/v2/today/Celebrations.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/today/Celebrations.jsx)
 - `/app/plan` -> `AppPlaceholder("Plan")`
 
 ### Nutrition
 
-- `/app/nutrition` -> `NutritionToday` -> [src/redesign/v2/nutrition/NutritionToday.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/NutritionToday.jsx)
-- `/app/nutrition/diary` -> `FoodDiaryRoute` -> [src/redesign/v2/nutrition/FoodDiary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/FoodDiary.jsx)
-- `/app/nutrition/targets` -> `MacroTargetsRoute` -> [src/redesign/v2/nutrition/MacroTargets.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/MacroTargets.jsx)
-- `/app/nutrition/water` -> `WaterLogRoute` -> [src/redesign/v2/nutrition/WaterLog.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/WaterLog.jsx)
-- `/app/nutrition/meal-plans` -> `MealPlansRoute` -> [src/redesign/v2/nutrition/MealPlans.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/MealPlans.jsx)
-- `/app/nutrition/search` -> `FoodSearch` -> [src/redesign/v2/nutrition/FoodSearch.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/FoodSearch.jsx)
-- `/app/nutrition/food/new` -> `CustomFoodRoute` -> [src/redesign/v2/nutrition/CustomFood.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/CustomFood.jsx)
-- `/app/nutrition/food/:id` -> `FoodDetail` -> [src/redesign/v2/nutrition/FoodDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/FoodDetail.jsx)
-- `/app/nutrition/meal/:id` -> `MealDetailRoute` -> [src/redesign/v2/nutrition/MealDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/MealDetail.jsx)
-- `/app/nutrition/photo` -> `PhotoScan` -> [src/redesign/v2/nutrition/PhotoScan.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/PhotoScan.jsx)
-- `/app/nutrition/photo/confirm` -> `PhotoScanConfirm` -> [src/redesign/v2/nutrition/PhotoScanConfirm.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/PhotoScanConfirm.jsx)
-- `/app/nutrition/voice` -> `VoiceLog` -> [src/redesign/v2/nutrition/VoiceLog.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/nutrition/VoiceLog.jsx)
+- `/app/nutrition` -> `NutritionToday` -> [src/redesign/archived/v2/nutrition/NutritionToday.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/NutritionToday.jsx)
+- `/app/nutrition/diary` -> `FoodDiaryRoute` -> [src/redesign/archived/v2/nutrition/FoodDiary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/FoodDiary.jsx)
+- `/app/nutrition/targets` -> `MacroTargetsRoute` -> [src/redesign/archived/v2/nutrition/MacroTargets.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/MacroTargets.jsx)
+- `/app/nutrition/water` -> `WaterLogRoute` -> [src/redesign/archived/v2/nutrition/WaterLog.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/WaterLog.jsx)
+- `/app/nutrition/meal-plans` -> `MealPlansRoute` -> [src/redesign/archived/v2/nutrition/MealPlans.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/MealPlans.jsx)
+- `/app/nutrition/search` -> `FoodSearch` -> [src/redesign/archived/v2/nutrition/FoodSearch.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/FoodSearch.jsx)
+- `/app/nutrition/food/new` -> `CustomFoodRoute` -> [src/redesign/archived/v2/nutrition/CustomFood.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/CustomFood.jsx)
+- `/app/nutrition/food/:id` -> `FoodDetail` -> [src/redesign/archived/v2/nutrition/FoodDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/FoodDetail.jsx)
+- `/app/nutrition/meal/:id` -> `MealDetailRoute` -> [src/redesign/archived/v2/nutrition/MealDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/MealDetail.jsx)
+- `/app/nutrition/photo` -> `PhotoScan` -> [src/redesign/archived/v2/nutrition/PhotoScan.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/PhotoScan.jsx)
+- `/app/nutrition/photo/confirm` -> `PhotoScanConfirm` -> [src/redesign/archived/v2/nutrition/PhotoScanConfirm.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/PhotoScanConfirm.jsx)
+- `/app/nutrition/voice` -> `VoiceLog` -> [src/redesign/archived/v2/nutrition/VoiceLog.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/nutrition/VoiceLog.jsx)
 
 ### Workouts / Training
 
-- `/app/workouts` -> `WorkoutsHome` -> [src/redesign/v2/workouts/WorkoutsHome.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/WorkoutsHome.jsx)
-- `/app/workouts/history` -> `WorkoutHistory` -> [src/redesign/v2/workouts/WorkoutHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/WorkoutHistory.jsx)
-- `/app/workouts/:id` -> `WorkoutDetail` -> [src/redesign/v2/workouts/WorkoutDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/WorkoutDetail.jsx)
-- `/app/workouts/active` -> `ActiveWorkout` -> [src/redesign/v2/workouts/ActiveWorkout.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/ActiveWorkout.jsx)
-- `/app/workouts/manual-plan` and `/app/workouts/plan-builder` -> `ManualWorkoutPlan` -> [src/redesign/v2/workouts/ManualWorkoutPlan.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/ManualWorkoutPlan.jsx)
-- `/app/routines` -> `Routines` -> [src/redesign/v2/workouts/Routines.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/Routines.jsx)
-- `/app/routines/presets` -> `RoutinePresetsRoute` -> [src/redesign/v2/workouts/RoutinePresets.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/RoutinePresets.jsx)
-- `/app/routines/presets/:id` -> `RoutinePresetDetailRoute` -> [src/redesign/v2/workouts/RoutinePresetDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/RoutinePresetDetail.jsx)
+- `/app/workouts` -> `WorkoutsHome` -> [src/redesign/archived/v2/workouts/WorkoutsHome.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/WorkoutsHome.jsx)
+- `/app/workouts/history` -> `WorkoutHistory` -> [src/redesign/archived/v2/workouts/WorkoutHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/WorkoutHistory.jsx)
+- `/app/workouts/:id` -> `WorkoutDetail` -> [src/redesign/archived/v2/workouts/WorkoutDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/WorkoutDetail.jsx)
+- `/app/workouts/active` -> `ActiveWorkout` -> [src/redesign/archived/v2/workouts/ActiveWorkout.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/ActiveWorkout.jsx)
+- `/app/workouts/manual-plan` and `/app/workouts/plan-builder` -> `ManualWorkoutPlan` -> [src/redesign/archived/v2/workouts/ManualWorkoutPlan.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/ManualWorkoutPlan.jsx)
+- `/app/routines` -> `Routines` -> [src/redesign/archived/v2/workouts/Routines.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/Routines.jsx)
+- `/app/routines/presets` -> `RoutinePresetsRoute` -> [src/redesign/archived/v2/workouts/RoutinePresets.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/RoutinePresets.jsx)
+- `/app/routines/presets/:id` -> `RoutinePresetDetailRoute` -> [src/redesign/archived/v2/workouts/RoutinePresetDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/RoutinePresetDetail.jsx)
 - `/app/routines/:id` -> `RoutineDetailRoute`
-- `/app/exercises` -> `ExerciseLibrary` -> [src/redesign/v2/workouts/ExerciseLibrary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/ExerciseLibrary.jsx)
-- `/app/exercises/:id` -> `ExerciseDetail` -> [src/redesign/v2/workouts/ExerciseDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/workouts/ExerciseDetail.jsx)
+- `/app/exercises` -> `ExerciseLibrary` -> [src/redesign/archived/v2/workouts/ExerciseLibrary.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/ExerciseLibrary.jsx)
+- `/app/exercises/:id` -> `ExerciseDetail` -> [src/redesign/archived/v2/workouts/ExerciseDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/workouts/ExerciseDetail.jsx)
 - `/app/protocols` and `/app/protocols/*` -> placeholders today.
 
 ### Body / Measurements / Progress
 
-- `/app/body` -> `BodyOverview` -> [src/redesign/v2/body/BodyOverview.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/body/BodyOverview.jsx)
-- `/app/body/progress/photos` -> `ProgressPhotos` -> [src/redesign/v2/body/ProgressPhotos.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/body/ProgressPhotos.jsx)
-- `/app/body/composition` -> `BodyCompositionHistoryRoute` -> [src/redesign/v2/body/BodyCompositionHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/body/BodyCompositionHistory.jsx)
-- `/app/body/weight` -> `WeightEntry` -> [src/redesign/v2/body/WeightEntry.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/body/WeightEntry.jsx)
-- `/app/body/checkin` -> `BodyCheckIn` -> [src/redesign/v2/body/BodyCheckIn.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/body/BodyCheckIn.jsx)
-- `/app/body/measurements` -> `MeasurementsRoute` -> [src/redesign/v2/body/Measurements.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/body/Measurements.jsx)
-- `/app/body/compare` -> `ProgressComparisonRoute` -> [src/redesign/v2/body/ProgressComparison.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/body/ProgressComparison.jsx)
+- `/app/body` -> `BodyOverview` -> [src/redesign/archived/v2/body/BodyOverview.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/body/BodyOverview.jsx)
+- `/app/body/progress/photos` -> `ProgressPhotos` -> [src/redesign/archived/v2/body/ProgressPhotos.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/body/ProgressPhotos.jsx)
+- `/app/body/composition` -> `BodyCompositionHistoryRoute` -> [src/redesign/archived/v2/body/BodyCompositionHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/body/BodyCompositionHistory.jsx)
+- `/app/body/weight` -> `WeightEntry` -> [src/redesign/archived/v2/body/WeightEntry.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/body/WeightEntry.jsx)
+- `/app/body/checkin` -> `BodyCheckIn` -> [src/redesign/archived/v2/body/BodyCheckIn.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/body/BodyCheckIn.jsx)
+- `/app/body/measurements` -> `MeasurementsRoute` -> [src/redesign/archived/v2/body/Measurements.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/body/Measurements.jsx)
+- `/app/body/compare` -> `ProgressComparisonRoute` -> [src/redesign/archived/v2/body/ProgressComparison.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/body/ProgressComparison.jsx)
 
 ### Labs
 
-- `/app/labs` -> `LabsOverview` -> [src/redesign/v2/labs/LabsOverview.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/labs/LabsOverview.jsx)
-- `/app/labs/history` -> `LabHistory` -> [src/redesign/v2/labs/LabHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/labs/LabHistory.jsx)
-- `/app/labs/exam/:id` -> `LabExamDetail` -> [src/redesign/v2/labs/LabExamDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/labs/LabExamDetail.jsx)
-- `/app/labs/biomarker/:id` -> `BiomarkerDetail` -> [src/redesign/v2/labs/BiomarkerDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/labs/BiomarkerDetail.jsx)
-- `/app/labs/upload` -> `LabUpload` -> [src/redesign/v2/labs/LabUpload.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/labs/LabUpload.jsx)
+- `/app/labs` -> `LabsOverview` -> [src/redesign/archived/v2/labs/LabsOverview.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/labs/LabsOverview.jsx)
+- `/app/labs/history` -> `LabHistory` -> [src/redesign/archived/v2/labs/LabHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/labs/LabHistory.jsx)
+- `/app/labs/exam/:id` -> `LabExamDetail` -> [src/redesign/archived/v2/labs/LabExamDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/labs/LabExamDetail.jsx)
+- `/app/labs/biomarker/:id` -> `BiomarkerDetail` -> [src/redesign/archived/v2/labs/BiomarkerDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/labs/BiomarkerDetail.jsx)
+- `/app/labs/upload` -> `LabUpload` -> [src/redesign/archived/v2/labs/LabUpload.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/labs/LabUpload.jsx)
 
 ### Coach / AI
 
-- `/app/coach` -> `CoachHome` -> [src/redesign/v2/coach/CoachHome.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/coach/CoachHome.jsx)
-- `/app/coach/chat` -> `CoachChat` -> [src/redesign/v2/coach/CoachChat.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/coach/CoachChat.jsx)
-- `/app/coach/insights/:id` -> `CoachInsightDetail` -> [src/redesign/v2/coach/CoachInsightDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/coach/CoachInsightDetail.jsx)
+- `/app/coach` -> `CoachHome` -> [src/redesign/archived/v2/coach/CoachHome.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/coach/CoachHome.jsx)
+- `/app/coach/chat` -> `CoachChat` -> [src/redesign/archived/v2/coach/CoachChat.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/coach/CoachChat.jsx)
+- `/app/coach/insights/:id` -> `CoachInsightDetail` -> [src/redesign/archived/v2/coach/CoachInsightDetail.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/coach/CoachInsightDetail.jsx)
 
 ### Profile / Settings / Billing / Social
 
-- `/app/profile` -> `Profile` -> [src/redesign/v2/profile/Profile.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/profile/Profile.jsx)
-- `/app/profile/edit` -> `ProfileEditorRoute` -> [src/redesign/v2/profile/ProfileEditor.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/profile/ProfileEditor.jsx)
-- `/app/settings` -> `SettingsHub` -> [src/redesign/v2/settings/SettingsHub.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/settings/SettingsHub.jsx)
-- `/app/settings/account` -> `AccountSettings` -> [src/redesign/v2/settings/AccountSettings.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/settings/AccountSettings.jsx)
-- `/app/settings/integrations` -> `Integrations` -> [src/redesign/v2/settings/Integrations.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/settings/Integrations.jsx)
-- `/app/settings/danger` -> `DangerZone` -> [src/redesign/v2/settings/DangerZone.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/settings/DangerZone.jsx)
-- `/app/settings/diagnostics` -> `AppDiagnosticsRoute` -> [src/redesign/v2/system/AppDiagnostics.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/system/AppDiagnostics.jsx)
-- `/app/billing` -> `SubscriptionSettingsRoute` -> [src/redesign/v2/billing/SubscriptionSettings.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/billing/SubscriptionSettings.jsx)
-- `/app/billing/paywall` and `/app/billing/plans` -> `PaywallRoute` -> [src/redesign/v2/billing/Paywall.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/billing/Paywall.jsx)
-- `/app/billing/invoices` -> `BillingHistoryRoute` -> [src/redesign/v2/billing/BillingHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/billing/BillingHistory.jsx)
-- `/app/billing/cancel` -> `CancelFlowRoute` -> [src/redesign/v2/billing/CancelFlow.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/billing/CancelFlow.jsx)
-- `/app/social` -> `SocialFeedRoute` -> [src/redesign/v2/social/SocialFeed.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/social/SocialFeed.jsx)
-- `/app/social/friends` -> `FriendsRoute` -> [src/redesign/v2/social/Friends.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/social/Friends.jsx)
-- `/app/social/follow` -> `FollowRoute` -> [src/redesign/v2/social/Follow.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/social/Follow.jsx)
-- `/app/u/:username` -> `PublicProfileRoute` -> [src/redesign/v2/social/PublicProfile.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/social/PublicProfile.jsx)
-- `/app/social/share` -> `ShareWorkoutRoute` -> [src/redesign/v2/social/ShareWorkout.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/social/ShareWorkout.jsx)
+- `/app/profile` -> `Profile` -> [src/redesign/archived/v2/profile/Profile.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/profile/Profile.jsx)
+- `/app/profile/edit` -> `ProfileEditorRoute` -> [src/redesign/archived/v2/profile/ProfileEditor.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/profile/ProfileEditor.jsx)
+- `/app/settings` -> `SettingsHub` -> [src/redesign/archived/v2/settings/SettingsHub.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/settings/SettingsHub.jsx)
+- `/app/settings/account` -> `AccountSettings` -> [src/redesign/archived/v2/settings/AccountSettings.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/settings/AccountSettings.jsx)
+- `/app/settings/integrations` -> `Integrations` -> [src/redesign/archived/v2/settings/Integrations.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/settings/Integrations.jsx)
+- `/app/settings/danger` -> `DangerZone` -> [src/redesign/archived/v2/settings/DangerZone.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/settings/DangerZone.jsx)
+- `/app/settings/diagnostics` -> `AppDiagnosticsRoute` -> [src/redesign/archived/v2/system/AppDiagnostics.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/system/AppDiagnostics.jsx)
+- `/app/billing` -> `SubscriptionSettingsRoute` -> [src/redesign/archived/v2/billing/SubscriptionSettings.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/billing/SubscriptionSettings.jsx)
+- `/app/billing/paywall` and `/app/billing/plans` -> `PaywallRoute` -> [src/redesign/archived/v2/billing/Paywall.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/billing/Paywall.jsx)
+- `/app/billing/invoices` -> `BillingHistoryRoute` -> [src/redesign/archived/v2/billing/BillingHistory.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/billing/BillingHistory.jsx)
+- `/app/billing/cancel` -> `CancelFlowRoute` -> [src/redesign/archived/v2/billing/CancelFlow.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/billing/CancelFlow.jsx)
+- `/app/social` -> `SocialFeedRoute` -> [src/redesign/archived/v2/social/SocialFeed.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/social/SocialFeed.jsx)
+- `/app/social/friends` -> `FriendsRoute` -> [src/redesign/archived/v2/social/Friends.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/social/Friends.jsx)
+- `/app/social/follow` -> `FollowRoute` -> [src/redesign/archived/v2/social/Follow.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/social/Follow.jsx)
+- `/app/u/:username` -> `PublicProfileRoute` -> [src/redesign/archived/v2/social/PublicProfile.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/social/PublicProfile.jsx)
+- `/app/social/share` -> `ShareWorkoutRoute` -> [src/redesign/archived/v2/social/ShareWorkout.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/social/ShareWorkout.jsx)
 
 ### System / Error / Utilities
 
-- `/app/offline` -> `OfflineRoute` -> [src/redesign/v2/system/Offline.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/system/Offline.jsx)
-- `/maintenance` -> `MaintenanceRoute` -> [src/redesign/v2/system/Maintenance.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/system/Maintenance.jsx)
-- `/force-update` -> `ForceUpdateRoute` -> [src/redesign/v2/system/ForceUpdate.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/system/ForceUpdate.jsx)
-- `/500` -> `ServerErrorRoute` -> [src/redesign/v2/system/ServerError.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/system/ServerError.jsx)
-- `/404` and `*` -> `NotFoundRoute` -> [src/redesign/v2/system/NotFound.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/v2/system/NotFound.jsx)
+- `/app/offline` -> `OfflineRoute` -> [src/redesign/archived/v2/system/Offline.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/system/Offline.jsx)
+- `/maintenance` -> `MaintenanceRoute` -> [src/redesign/archived/v2/system/Maintenance.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/system/Maintenance.jsx)
+- `/force-update` -> `ForceUpdateRoute` -> [src/redesign/archived/v2/system/ForceUpdate.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/system/ForceUpdate.jsx)
+- `/500` -> `ServerErrorRoute` -> [src/redesign/archived/v2/system/ServerError.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/system/ServerError.jsx)
+- `/404` and `*` -> `NotFoundRoute` -> [src/redesign/archived/v2/system/NotFound.jsx](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/redesign/archived/v2/system/NotFound.jsx)
 - `/admin/*`, `/pro/*`, `/blog/*`, `/guides/*`, `/help` fallback placeholders -> `ComingSoonNav`
 
 ## 2. Active Claude-Design `v3` Screens
@@ -308,7 +308,7 @@ This section is grouped by folder so the inventory stays usable. Each line lists
 - [src/components/today](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/components/today)
   Files: `AICoachBriefing`, `AIRecommendations`, `AdherenceScore`, `AlertsSection`, `DailyHeroCard`, `Day1Banner`, `MacroRing`, `MetricCardsRow`, `MilestoneCard`, `ProgressReviewCard`, `ProgressSnapshot`, `QuickActions`, `QuickCheckin`, `ReadinessRow`, `SubscriptionBanner`, `TodayMobileUI`, `TodayNutrition`, `TodayPlanSection`, `TodayWorkout`, `WeeklyCheckinModal`, `WeeklyReview`, `WeeklySummary`
   Function: cards and composites for `Today`, weekly recap, quick actions, daily status, hero sections.
-  Attached to: `TodayV2`, `src/redesign/v2/today/Today.jsx`, weekly review surfaces.
+  Attached to: `TodayV2`, `src/redesign/archived/v2/today/Today.jsx`, weekly review surfaces.
 
 - [src/components/dashboard](/Users/enzosoler/Documents/Atlas.Core/atlas.core-official/src/components/dashboard)
   Files: `DecisionEngineDashboard`, `NutritionCard`, `ProtocolCard`, `TimelineCard`, `WorkoutCard`
