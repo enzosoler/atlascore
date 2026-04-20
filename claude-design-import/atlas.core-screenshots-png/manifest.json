@@ -1,0 +1,737 @@
+[
+  {
+    "file": "001_welcome_light.png",
+    "index": 1,
+    "label": "welcome",
+    "mode": "light",
+    "component": "S1_Splash_A"
+  },
+  {
+    "file": "002_welcome_dark.png",
+    "index": 2,
+    "label": "welcome",
+    "mode": "dark",
+    "component": "S1_Splash_A"
+  },
+  {
+    "file": "003_manifesto_light.png",
+    "index": 3,
+    "label": "manifesto",
+    "mode": "light",
+    "component": "S1_Splash_B"
+  },
+  {
+    "file": "004_manifesto_dark.png",
+    "index": 4,
+    "label": "manifesto",
+    "mode": "dark",
+    "component": "S1_Splash_B"
+  },
+  {
+    "file": "005_today_light.png",
+    "index": 5,
+    "label": "today",
+    "mode": "light",
+    "component": "S2_Today_A"
+  },
+  {
+    "file": "006_today_dark.png",
+    "index": 6,
+    "label": "today",
+    "mode": "dark",
+    "component": "S2_Today_A"
+  },
+  {
+    "file": "007_workout_light.png",
+    "index": 7,
+    "label": "workout",
+    "mode": "light",
+    "component": "S3_Workout_A"
+  },
+  {
+    "file": "008_workout_dark.png",
+    "index": 8,
+    "label": "workout",
+    "mode": "dark",
+    "component": "S3_Workout_A"
+  },
+  {
+    "file": "009_fuel_light.png",
+    "index": 9,
+    "label": "fuel",
+    "mode": "light",
+    "component": "S4_Nutrition_A"
+  },
+  {
+    "file": "010_fuel_dark.png",
+    "index": 10,
+    "label": "fuel",
+    "mode": "dark",
+    "component": "S4_Nutrition_A"
+  },
+  {
+    "file": "011_plans_light.png",
+    "index": 11,
+    "label": "plans",
+    "mode": "light",
+    "component": "S5_Paywall_A"
+  },
+  {
+    "file": "012_plans_dark.png",
+    "index": 12,
+    "label": "plans",
+    "mode": "dark",
+    "component": "S5_Paywall_A"
+  },
+  {
+    "file": "013_pr-moment_light.png",
+    "index": 13,
+    "label": "pr moment",
+    "mode": "light",
+    "component": "S5_Paywall_B"
+  },
+  {
+    "file": "014_pr-moment_dark.png",
+    "index": 14,
+    "label": "pr moment",
+    "mode": "dark",
+    "component": "S5_Paywall_B"
+  },
+  {
+    "file": "015_trend_light.png",
+    "index": 15,
+    "label": "trend",
+    "mode": "light",
+    "component": "S6_Weight_A"
+  },
+  {
+    "file": "016_trend_dark.png",
+    "index": 16,
+    "label": "trend",
+    "mode": "dark",
+    "component": "S6_Weight_A"
+  },
+  {
+    "file": "017_entry_light.png",
+    "index": 17,
+    "label": "entry",
+    "mode": "light",
+    "component": "S6_Weight_B"
+  },
+  {
+    "file": "018_entry_dark.png",
+    "index": 18,
+    "label": "entry",
+    "mode": "dark",
+    "component": "S6_Weight_B"
+  },
+  {
+    "file": "019_identity_light.png",
+    "index": 19,
+    "label": "identity",
+    "mode": "light",
+    "component": "S7_Onboard_Identity"
+  },
+  {
+    "file": "020_identity_dark.png",
+    "index": 20,
+    "label": "identity",
+    "mode": "dark",
+    "component": "S7_Onboard_Identity"
+  },
+  {
+    "file": "021_goal_light.png",
+    "index": 21,
+    "label": "goal",
+    "mode": "light",
+    "component": "S8_Onboard_Goal"
+  },
+  {
+    "file": "022_goal_dark.png",
+    "index": 22,
+    "label": "goal",
+    "mode": "dark",
+    "component": "S8_Onboard_Goal"
+  },
+  {
+    "file": "023_activity_light.png",
+    "index": 23,
+    "label": "activity",
+    "mode": "light",
+    "component": "S9_Onboard_Activity"
+  },
+  {
+    "file": "024_activity_dark.png",
+    "index": 24,
+    "label": "activity",
+    "mode": "dark",
+    "component": "S9_Onboard_Activity"
+  },
+  {
+    "file": "025_plan_light.png",
+    "index": 25,
+    "label": "plan",
+    "mode": "light",
+    "component": "S10_Onboard_Plan"
+  },
+  {
+    "file": "026_plan_dark.png",
+    "index": 26,
+    "label": "plan",
+    "mode": "dark",
+    "component": "S10_Onboard_Plan"
+  },
+  {
+    "file": "027_connect_light.png",
+    "index": 27,
+    "label": "connect",
+    "mode": "light",
+    "component": "S11_Onboard_Permissions"
+  },
+  {
+    "file": "028_connect_dark.png",
+    "index": 28,
+    "label": "connect",
+    "mode": "dark",
+    "component": "S11_Onboard_Permissions"
+  },
+  {
+    "file": "029_chat_light.png",
+    "index": 29,
+    "label": "chat",
+    "mode": "light",
+    "component": "S12_Coach_Chat"
+  },
+  {
+    "file": "030_chat_dark.png",
+    "index": 30,
+    "label": "chat",
+    "mode": "dark",
+    "component": "S12_Coach_Chat"
+  },
+  {
+    "file": "031_brief_light.png",
+    "index": 31,
+    "label": "brief",
+    "mode": "light",
+    "component": "S13_Coach_Brief"
+  },
+  {
+    "file": "032_brief_dark.png",
+    "index": 32,
+    "label": "brief",
+    "mode": "dark",
+    "component": "S13_Coach_Brief"
+  },
+  {
+    "file": "033_body_light.png",
+    "index": 33,
+    "label": "body",
+    "mode": "light",
+    "component": "S14_Body_Dashboard"
+  },
+  {
+    "file": "034_body_dark.png",
+    "index": 34,
+    "label": "body",
+    "mode": "dark",
+    "component": "S14_Body_Dashboard"
+  },
+  {
+    "file": "035_labs_light.png",
+    "index": 35,
+    "label": "labs",
+    "mode": "light",
+    "component": "S15_Labs_Inbox"
+  },
+  {
+    "file": "036_labs_dark.png",
+    "index": 36,
+    "label": "labs",
+    "mode": "dark",
+    "component": "S15_Labs_Inbox"
+  },
+  {
+    "file": "037_apob_light.png",
+    "index": 37,
+    "label": "apob",
+    "mode": "light",
+    "component": "S16_Biomarker_Detail"
+  },
+  {
+    "file": "038_apob_dark.png",
+    "index": 38,
+    "label": "apob",
+    "mode": "dark",
+    "component": "S16_Biomarker_Detail"
+  },
+  {
+    "file": "039_entry_light.png",
+    "index": 39,
+    "label": "entry",
+    "mode": "light",
+    "component": "S17_Measurements_Entry"
+  },
+  {
+    "file": "040_entry_dark.png",
+    "index": 40,
+    "label": "entry",
+    "mode": "dark",
+    "component": "S17_Measurements_Entry"
+  },
+  {
+    "file": "041_photos_light.png",
+    "index": 41,
+    "label": "photos",
+    "mode": "light",
+    "component": "S18_Progress_Photos"
+  },
+  {
+    "file": "042_photos_dark.png",
+    "index": 42,
+    "label": "photos",
+    "mode": "dark",
+    "component": "S18_Progress_Photos"
+  },
+  {
+    "file": "043_settings_light.png",
+    "index": 43,
+    "label": "settings",
+    "mode": "light",
+    "component": "S19_Settings"
+  },
+  {
+    "file": "044_settings_dark.png",
+    "index": 44,
+    "label": "settings",
+    "mode": "dark",
+    "component": "S19_Settings"
+  },
+  {
+    "file": "045_wall_light.png",
+    "index": 45,
+    "label": "wall",
+    "mode": "light",
+    "component": "S20_PR_Gallery"
+  },
+  {
+    "file": "046_wall_dark.png",
+    "index": 46,
+    "label": "wall",
+    "mode": "dark",
+    "component": "S20_PR_Gallery"
+  },
+  {
+    "file": "047_share_light.png",
+    "index": 47,
+    "label": "share",
+    "mode": "light",
+    "component": "S21_Share_Card"
+  },
+  {
+    "file": "048_share_dark.png",
+    "index": 48,
+    "label": "share",
+    "mode": "dark",
+    "component": "S21_Share_Card"
+  },
+  {
+    "file": "049_notifs_light.png",
+    "index": 49,
+    "label": "notifs",
+    "mode": "light",
+    "component": "S22_Notifications"
+  },
+  {
+    "file": "050_notifs_dark.png",
+    "index": 50,
+    "label": "notifs",
+    "mode": "dark",
+    "component": "S22_Notifications"
+  },
+  {
+    "file": "051_states_light.png",
+    "index": 51,
+    "label": "states",
+    "mode": "light",
+    "component": "S23_Empty_States"
+  },
+  {
+    "file": "052_states_dark.png",
+    "index": 52,
+    "label": "states",
+    "mode": "dark",
+    "component": "S23_Empty_States"
+  },
+  {
+    "file": "053_library_light.png",
+    "index": 53,
+    "label": "library",
+    "mode": "light",
+    "component": "S24_Library"
+  },
+  {
+    "file": "054_library_dark.png",
+    "index": 54,
+    "label": "library",
+    "mode": "dark",
+    "component": "S24_Library"
+  },
+  {
+    "file": "055_program_light.png",
+    "index": 55,
+    "label": "program",
+    "mode": "light",
+    "component": "S25_Program_Detail"
+  },
+  {
+    "file": "056_program_dark.png",
+    "index": 56,
+    "label": "program",
+    "mode": "dark",
+    "component": "S25_Program_Detail"
+  },
+  {
+    "file": "057_calendar_light.png",
+    "index": 57,
+    "label": "calendar",
+    "mode": "light",
+    "component": "S26_Calendar"
+  },
+  {
+    "file": "058_calendar_dark.png",
+    "index": 58,
+    "label": "calendar",
+    "mode": "dark",
+    "component": "S26_Calendar"
+  },
+  {
+    "file": "059_deadlift_light.png",
+    "index": 59,
+    "label": "deadlift",
+    "mode": "light",
+    "component": "S27_Exercise_Detail"
+  },
+  {
+    "file": "060_deadlift_dark.png",
+    "index": 60,
+    "label": "deadlift",
+    "mode": "dark",
+    "component": "S27_Exercise_Detail"
+  },
+  {
+    "file": "061_crew_light.png",
+    "index": 61,
+    "label": "crew",
+    "mode": "light",
+    "component": "S28_Crew"
+  },
+  {
+    "file": "062_crew_dark.png",
+    "index": 62,
+    "label": "crew",
+    "mode": "dark",
+    "component": "S28_Crew"
+  },
+  {
+    "file": "063_summary_light.png",
+    "index": 63,
+    "label": "summary",
+    "mode": "light",
+    "component": "S29_Workout_Summary"
+  },
+  {
+    "file": "064_summary_dark.png",
+    "index": 64,
+    "label": "summary",
+    "mode": "dark",
+    "component": "S29_Workout_Summary"
+  },
+  {
+    "file": "065_recap_light.png",
+    "index": 65,
+    "label": "recap",
+    "mode": "light",
+    "component": "S30_Weekly_Recap"
+  },
+  {
+    "file": "066_recap_dark.png",
+    "index": 66,
+    "label": "recap",
+    "mode": "dark",
+    "component": "S30_Weekly_Recap"
+  },
+  {
+    "file": "067_sleep_light.png",
+    "index": 67,
+    "label": "sleep",
+    "mode": "light",
+    "component": "S31_Sleep_Detail"
+  },
+  {
+    "file": "068_sleep_dark.png",
+    "index": 68,
+    "label": "sleep",
+    "mode": "dark",
+    "component": "S31_Sleep_Detail"
+  },
+  {
+    "file": "069_capture_light.png",
+    "index": 69,
+    "label": "capture",
+    "mode": "light",
+    "component": "S32_Capture"
+  },
+  {
+    "file": "070_capture_dark.png",
+    "index": 70,
+    "label": "capture",
+    "mode": "dark",
+    "component": "S32_Capture"
+  },
+  {
+    "file": "071_profile_light.png",
+    "index": 71,
+    "label": "profile",
+    "mode": "light",
+    "component": "S33_Profile"
+  },
+  {
+    "file": "072_profile_dark.png",
+    "index": 72,
+    "label": "profile",
+    "mode": "dark",
+    "component": "S33_Profile"
+  },
+  {
+    "file": "073_watch_light.png",
+    "index": 73,
+    "label": "watch",
+    "mode": "light",
+    "component": "S34_Watch"
+  },
+  {
+    "file": "074_watch_dark.png",
+    "index": 74,
+    "label": "watch",
+    "mode": "dark",
+    "component": "S34_Watch"
+  },
+  {
+    "file": "075_search_light.png",
+    "index": 75,
+    "label": "search",
+    "mode": "light",
+    "component": "S35_Search"
+  },
+  {
+    "file": "076_search_dark.png",
+    "index": 76,
+    "label": "search",
+    "mode": "dark",
+    "component": "S35_Search"
+  },
+  {
+    "file": "077_auth_light.png",
+    "index": 77,
+    "label": "auth",
+    "mode": "light",
+    "component": "S36_Auth"
+  },
+  {
+    "file": "078_auth_dark.png",
+    "index": 78,
+    "label": "auth",
+    "mode": "dark",
+    "component": "S36_Auth"
+  },
+  {
+    "file": "079_inbox_light.png",
+    "index": 79,
+    "label": "inbox",
+    "mode": "light",
+    "component": "S37_Inbox"
+  },
+  {
+    "file": "080_inbox_dark.png",
+    "index": 80,
+    "label": "inbox",
+    "mode": "dark",
+    "component": "S37_Inbox"
+  },
+  {
+    "file": "081_food_light.png",
+    "index": 81,
+    "label": "food",
+    "mode": "light",
+    "component": "S38_Food_Detail"
+  },
+  {
+    "file": "082_food_dark.png",
+    "index": 82,
+    "label": "food",
+    "mode": "dark",
+    "component": "S38_Food_Detail"
+  },
+  {
+    "file": "083_recipe_light.png",
+    "index": 83,
+    "label": "recipe",
+    "mode": "light",
+    "component": "S39_Recipe_Builder"
+  },
+  {
+    "file": "084_recipe_dark.png",
+    "index": 84,
+    "label": "recipe",
+    "mode": "dark",
+    "component": "S39_Recipe_Builder"
+  },
+  {
+    "file": "085_billing_light.png",
+    "index": 85,
+    "label": "billing",
+    "mode": "light",
+    "component": "S40_Billing"
+  },
+  {
+    "file": "086_billing_dark.png",
+    "index": 86,
+    "label": "billing",
+    "mode": "dark",
+    "component": "S40_Billing"
+  },
+  {
+    "file": "087_errors_light.png",
+    "index": 87,
+    "label": "errors",
+    "mode": "light",
+    "component": "S41_Errors"
+  },
+  {
+    "file": "088_errors_dark.png",
+    "index": 88,
+    "label": "errors",
+    "mode": "dark",
+    "component": "S41_Errors"
+  },
+  {
+    "file": "089_home_light.png",
+    "index": 89,
+    "label": "home",
+    "mode": "light",
+    "component": "S43_Protocols_Home"
+  },
+  {
+    "file": "090_home_dark.png",
+    "index": 90,
+    "label": "home",
+    "mode": "dark",
+    "component": "S43_Protocols_Home"
+  },
+  {
+    "file": "091_states_light.png",
+    "index": 91,
+    "label": "states",
+    "mode": "light",
+    "component": "S44_Protocols_Empty_Locked"
+  },
+  {
+    "file": "092_states_dark.png",
+    "index": 92,
+    "label": "states",
+    "mode": "dark",
+    "component": "S44_Protocols_Empty_Locked"
+  },
+  {
+    "file": "093_detail_light.png",
+    "index": 93,
+    "label": "detail",
+    "mode": "light",
+    "component": "S45_Protocol_Detail"
+  },
+  {
+    "file": "094_detail_dark.png",
+    "index": 94,
+    "label": "detail",
+    "mode": "dark",
+    "component": "S45_Protocol_Detail"
+  },
+  {
+    "file": "095_form_light.png",
+    "index": 95,
+    "label": "form",
+    "mode": "light",
+    "component": "S46_Protocol_Form"
+  },
+  {
+    "file": "096_form_dark.png",
+    "index": 96,
+    "label": "form",
+    "mode": "dark",
+    "component": "S46_Protocol_Form"
+  },
+  {
+    "file": "097_picker_light.png",
+    "index": 97,
+    "label": "picker",
+    "mode": "light",
+    "component": "S47_Substance_Picker"
+  },
+  {
+    "file": "098_picker_dark.png",
+    "index": 98,
+    "label": "picker",
+    "mode": "dark",
+    "component": "S47_Substance_Picker"
+  },
+  {
+    "file": "099_log_light.png",
+    "index": 99,
+    "label": "log",
+    "mode": "light",
+    "component": "S48_Log_Dose"
+  },
+  {
+    "file": "100_log_dark.png",
+    "index": 100,
+    "label": "log",
+    "mode": "dark",
+    "component": "S48_Log_Dose"
+  },
+  {
+    "file": "101_timeline_light.png",
+    "index": 101,
+    "label": "timeline",
+    "mode": "light",
+    "component": "S49_Protocol_Timeline"
+  },
+  {
+    "file": "102_timeline_dark.png",
+    "index": 102,
+    "label": "timeline",
+    "mode": "dark",
+    "component": "S49_Protocol_Timeline"
+  },
+  {
+    "file": "103_complete_light.png",
+    "index": 103,
+    "label": "complete",
+    "mode": "light",
+    "component": "S50_Today_Dose_Module"
+  },
+  {
+    "file": "104_complete_dark.png",
+    "index": 104,
+    "label": "complete",
+    "mode": "dark",
+    "component": "S50_Today_Dose_Module"
+  },
+  {
+    "file": "105_web-landing_desktop.png",
+    "index": 105,
+    "label": "web landing",
+    "mode": "desktop",
+    "component": "S42_Web_Landing"
+  }
+]

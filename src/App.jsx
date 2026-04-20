@@ -60,20 +60,8 @@ import {
   toastConnectResult as integToast,
 } from '@/lib/integrationsService';
 
-// ─── v2 screens (everything below is redesigned, Liquid Glass, safe-area aware) ─
-import ComingSoon         from '@/redesign/v2/system/ComingSoon';
-import { V3Offline }         from '@/redesign/v2/system/Offline';
-import { V3ServerError }     from '@/redesign/v2/system/ServerError';
-import { V3Maintenance }     from '@/redesign/v2/system/Maintenance';
-import { V3ForceUpdate }     from '@/redesign/v2/system/ForceUpdate';
-import { AppDiagnosticsRoute }  from '@/redesign/v2/system/AppDiagnostics';
-import OnboardingWorkout     from '@/redesign/v2/onboarding/OnboardingWorkout';
-import OnboardingHabits      from '@/redesign/v2/onboarding/OnboardingHabits';
-import OnboardingConstraints from '@/redesign/v2/onboarding/OnboardingConstraints';
-import OnboardingSummary     from '@/redesign/v2/onboarding/OnboardingSummary';
-import OnboardingPaywall     from '@/redesign/v2/onboarding/OnboardingPaywall';
-import OnboardingTour        from '@/redesign/v2/onboarding/OnboardingTour';
-import SmartOnboarding       from '@/redesign/v2/onboarding/SmartOnboarding';
+// v3 screens and routes only — v2 design imports removed to ensure v3-first build.
+// Onboarding v3 wrappers are imported from V3OnboardingRoutes (used below).
 import {
   V3OnboardingIdentity,
   V3OnboardingGoal,
@@ -86,23 +74,8 @@ import {
   V3OnboardingSummary,
   V3OnboardingTour,
 } from '@/redesign/v3/routes/V3OnboardingRoutes.jsx';
-import FoodDetail            from '@/redesign/v2/nutrition/FoodDetail';
-import PhotoScan             from '@/redesign/v2/nutrition/PhotoScan';
-import PhotoScanConfirm      from '@/redesign/v2/nutrition/PhotoScanConfirm';
-import VoiceLog              from '@/redesign/v2/nutrition/VoiceLog';
-import { FoodDiaryRoute }    from '@/redesign/v2/nutrition/FoodDiary.jsx';
-import { MacroTargetsRoute } from '@/redesign/v2/nutrition/MacroTargets.jsx';
-import { WaterLogRoute }     from '@/redesign/v2/nutrition/WaterLog.jsx';
-import { MealPlansRoute }    from '@/redesign/v2/nutrition/MealPlans.jsx';
-import { V3MealDetail }   from '@/redesign/v2/nutrition/MealDetail.jsx';
-import { CustomFoodRoute }   from '@/redesign/v2/nutrition/CustomFood.jsx';
-import ActiveWorkout         from '@/redesign/v2/workouts/ActiveWorkout';
-import ExerciseLibrary, {
-  DEMO_EXERCISES,
-  findExerciseById,
-} from '@/redesign/v2/workouts/ExerciseLibrary';
-import { V3RoutinePresets }      from '@/redesign/v2/workouts/RoutinePresets.jsx';
-import { V3RoutinePresetDetail } from '@/redesign/v2/workouts/RoutinePresetDetail.jsx';
+const V3RoutinePresets = lazy(() => import('@/redesign/v3/routes/V3RoutinePresets.jsx'));
+const V3RoutinePresetDetail = lazy(() => import('@/redesign/v3/routes/V3RoutinePresetDetail.jsx'));
 import {
   saveWorkoutSession,
   listWorkoutSessions,
@@ -212,36 +185,12 @@ const V3NotFound = lazy(() => import('@/redesign/v3/routes/V3NotFound.jsx'));
 const V3DataExport = lazy(() => import('@/redesign/v3/routes/V3DataExport.jsx'));
 const V3BillingHistory = lazy(() => import('@/redesign/v3/routes/V3BillingHistory.jsx'));
 const V3SubscriptionManage = lazy(() => import('@/redesign/v3/routes/V3SubscriptionManage.jsx'));
-import WorkoutDetail         from '@/redesign/v2/workouts/WorkoutDetail';
-import WorkoutHistory        from '@/redesign/v2/workouts/WorkoutHistory';
-import ManualWorkoutPlan     from '@/redesign/v2/workouts/ManualWorkoutPlan';
-import CoachInsightDetail    from '@/redesign/v2/coach/CoachInsightDetail';
-import BodyCheckIn           from '@/redesign/v2/body/BodyCheckIn';
-// V2 WeightEntry and MeasurementsRoute are replaced by v3 screens (S6, S17).
-// Kept unimported; the v2 files remain on disk as migration debt.
+// v2 screen imports removed. Use v3 route wrappers and services only.
 import S6_Weight_B            from '@/redesign/v3/screens/S6_Weight_B.jsx';
 import S17_Measurements_Entry from '@/redesign/v3/screens/S17_Measurements_Entry.jsx';
-import { BodyCompositionHistoryRoute }    from '@/redesign/v2/body/BodyCompositionHistory.jsx';
-import { ProgressComparisonRoute }        from '@/redesign/v2/body/ProgressComparison.jsx';
-import { ProfileEditorRoute } from '@/redesign/v2/profile/ProfileEditor';
-import AccountSettings       from '@/redesign/v2/settings/AccountSettings';
-import Integrations          from '@/redesign/v2/settings/Integrations';
-import DangerZone            from '@/redesign/v2/settings/DangerZone';
-import InsightsScreen        from '@/redesign/v2/today/Insights';
-import Diary                 from '@/redesign/v2/today/Diary';
-import { FocusModeRoute }      from '@/redesign/v2/today/FocusMode';
-import { StreaksDetailRoute }  from '@/redesign/v2/today/StreaksDetail';
-import { CelebrationsRoute }   from '@/redesign/v2/today/Celebrations';
-import LabExamDetail         from '@/redesign/v2/labs/LabExamDetail';
-import LabUpload             from '@/redesign/v2/labs/LabUpload';
-import LabHistory            from '@/redesign/v2/labs/LabHistory';
-import { SocialFeedRoute }    from '@/redesign/v2/social/SocialFeed';
-import { FriendsRoute }       from '@/redesign/v2/social/Friends';
-import { ShareWorkoutRoute }  from '@/redesign/v2/social/ShareWorkout';
-import { FollowRoute }        from '@/redesign/v2/social/Follow';
-import { PublicProfileRoute } from '@/redesign/v2/social/PublicProfile';
 import { supabase as supabaseClient } from '@/lib/supabaseClient';
 import {
+  // v3 nutrition services will be used; keep alias names for compatibility
   getEntriesForDate         as nutritionGetEntries,
   addEntry                  as nutritionAddEntry,
   addEntries                as nutritionAddEntries,

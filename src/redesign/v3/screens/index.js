@@ -51,3 +51,6 @@ export { default as S47_Substance_Picker } from './S47_Substance_Picker.jsx';
 export { default as S48_Log_Dose } from './S48_Log_Dose.jsx';
 export { default as S49_Protocol_Timeline } from './S49_Protocol_Timeline.jsx';
 export { default as S50_Today_Dose_Module } from './S50_Today_Dose_Module.jsx';
+export { default as S69_Social_Feed } from './S69_Social_Feed.jsx';
+export { default as S70_Friends } from './S70_Friends.jsx';
+export { default as S71_Follow } from './S71_Follow.jsx';

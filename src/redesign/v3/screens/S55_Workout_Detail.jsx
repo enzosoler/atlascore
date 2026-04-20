@@ -297,7 +297,7 @@ export default function S55_Workout_Detail({
                 {ex.sets.map((s, sIdx) => (
                   <div key={sIdx} style={{
                     display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr 22px',
-                    gap: 4, padding: '8px 0',
+                    gap: 4,
                     borderBottom: sIdx < ex.sets.length - 1 ? `1px solid ${c.hair}` : 'none',
                     background: s.pr ? (dark ? 'rgba(232,181,0,0.08)' : 'rgba(232,181,0,0.06)') : 'transparent',
                     borderRadius: s.pr ? 6 : 0,
