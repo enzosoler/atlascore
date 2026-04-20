@@ -26,9 +26,9 @@ function OBHeader({ step, total, dark, onBack = true }) {
   );
 }
 
-function S9_Onboard_Activity({ dark = false, onBack, onContinue }) {
+function S9_Onboard_Activity({ dark = false, onBack, onContinue, onChange, value }) {
   const c = useACT(dark);
-  const [lvl, setLvl] = React.useState(3);
+  const [lvl, setLvl] = React.useState(value?.activity || 3);
   const levels = [
     { k: 1, t: 'Sedentary',   d: 'Desk-bound, little movement',          mult: '1.2×' },
     { k: 2, t: 'Light',       d: '1–2 training days / week',             mult: '1.38×' },
@@ -56,7 +56,7 @@ function S9_Onboard_Activity({ dark = false, onBack, onContinue }) {
           {levels.map(l => {
             const on = lvl === l.k;
             return (
-              <button key={l.k} type="button" onClick={() => setLvl(l.k)} style={{
+              <button key={l.k} type="button" onClick={() => { setLvl(l.k); onChange?.({ activity: l.k }); }} style={{
                 padding: '16px 18px', borderRadius: ACRadii.input,
                 background: on ? c.fg : 'transparent',
                 color: on ? c.bg : c.fg,
