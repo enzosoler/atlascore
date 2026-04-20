@@ -34,6 +34,7 @@ const DEMO_STATS = [
 
 export default function S29_Workout_Summary({
   dark = false,
+  session = null,
   sessionLabel = 'SESSION 087 · 18 APR',
   sessionName = 'Heavy Lower',
   sessionMeta = '58 MIN · 5 LIFTS · 18 SETS · 1 PR',
@@ -42,8 +43,12 @@ export default function S29_Workout_Summary({
   lifts,
   nextSession,
   onShare,
+  onRepeat,
   onClose,
 }) {
+  const sessionId = (session && session.id) || sessionLabel;
+  const handleShare = () => { if (typeof onShare === 'function') onShare({ sessionId, sharedAt: Date.now() }); };
+  const handleRepeat = () => { if (typeof onRepeat === 'function') onRepeat({ sessionId, repeatedAt: Date.now() }); };
   const c = useACT(dark);
   const _lifts = lifts || DEMO_LIFTS;
   const _stats = stats || DEMO_STATS;
@@ -216,7 +221,10 @@ export default function S29_Workout_Summary({
 
       <div style={{ padding: '12px 22px 22px', display: 'flex', gap: 8, background: c.bg }}>
         <div style={{ flex: 1 }}>
-          <ACBtn dark={dark} size="lg" pill block onClick={onShare}>Share PR</ACBtn>
+          <ACBtn dark={dark} size="lg" pill block onClick={handleShare}>Share PR</ACBtn>
+        </div>
+        <div style={{ flex: 1 }}>
+          <ACBtn dark={dark} size="lg" pill block onClick={handleRepeat}>Repeat</ACBtn>
         </div>
         <div style={{ flex: 1.3 }}>
           <ACBtn primary dark={dark} size="lg" pill block onClick={onClose}>Save · close →</ACBtn>
