@@ -25,6 +25,7 @@ function S15_Labs_Inbox({
   showTabBar = false,
 }) {
   const c = useACT(dark);
+  const [activeFilter, setActiveFilter] = React.useState('all');
   const panelRows = panels || [
     {
       date: 'Apr 18', lab: 'Function Health', n: 'Q2 Panel',
@@ -58,13 +59,14 @@ function S15_Labs_Inbox({
           </div>
         </div>
         <div style={{ display: 'flex', gap: 2, padding: 3, background: c.card, borderRadius: 10 }}>
-          {['All', 'Flags'].map((r, i) => (
-            <div key={r} style={{
+          {[['all', 'All'], ['flags', 'Flags']].map(([k, label]) => (
+            <button key={k} type="button" onClick={() => setActiveFilter(k)} style={{
               padding: '6px 12px', borderRadius: 7,
-              background: i === 0 ? c.fg : 'transparent',
-              color: i === 0 ? c.bg : c.dim,
+              background: activeFilter === k ? c.fg : 'transparent',
+              color: activeFilter === k ? c.bg : c.dim,
               fontSize: 12, fontWeight: 600,
-            }}>{r}</div>
+              border: 'none', cursor: 'pointer',
+            }}>{label}</button>
           ))}
         </div>
       </div>
@@ -115,7 +117,12 @@ function S15_Labs_Inbox({
         )}
 
         {/* Panels list */}
-        {!isLocked && !isEmpty ? panelRows.map((p, pi) => (
+        {!isLocked && !isEmpty ? panelRows.map((p, pi) => {
+          const visibleMarkers = activeFilter === 'flags'
+            ? p.markers.filter((r) => r.flag === 'high' || r.flag === 'low')
+            : p.markers;
+          if (visibleMarkers.length === 0) return null;
+          return (
           <div key={pi} style={{ marginTop: 22 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', paddingBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
@@ -124,7 +131,7 @@ function S15_Labs_Inbox({
               </div>
               <ACLabel size={11} color={c.dim}>{p.date} · {p.lab}</ACLabel>
             </div>
-            {p.markers.map((r, i) => {
+            {visibleMarkers.map((r, i) => {
               const col = r.flag === 'high' ? c.accent
                         : r.flag === 'low' ? '#e85a2f'
                         : c.fg;
@@ -151,7 +158,8 @@ function S15_Labs_Inbox({
               );
             })}
           </div>
-        )) : null}
+          );
+        }) : null}
       </div>
 
       {showTabBar ? <ACTabBar active="body" dark={dark} HeartMarkComp={HeartMark} /> : null}
