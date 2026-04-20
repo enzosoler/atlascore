@@ -228,10 +228,10 @@ function S38_Food_Detail({
 
       <div style={{ padding: '12px 22px 22px', background: c.bg, display: 'flex', gap: 8 }}>
         <div style={{ flex: 1 }}>
-          <ACBtn dark={dark} size="lg" pill block onClick={onSaveAsMeal}>Save as meal</ACBtn>
+          <ACBtn dark={dark} size="lg" pill block onClick={() => onSaveAsMeal?.({ name: foodTitle, items: _items, calories, macros: _macros, meal })}>Save as meal</ACBtn>
         </div>
         <div style={{ flex: 1.2 }}>
-          <ACBtn primary dark={dark} size="lg" pill block onClick={onConfirm}>Confirm · log</ACBtn>
+          <ACBtn primary dark={dark} size="lg" pill block onClick={() => onConfirm?.({ name: foodTitle, items: _items, calories, macros: _macros, meal })}>Confirm · log</ACBtn>
         </div>
       </div>
     </div>

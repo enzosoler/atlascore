@@ -99,6 +99,70 @@ Legend
 - `[ ]` Coach insight cards — confirm each shows state + insight + action +
   trajectory per CLAUDE.md §5, not just a one-liner.
 
+## Design-shells to harden
+
+Full audit 2026-04-19. PROD=real inputs+real onSave, SEMI=some state
+but incomplete, SHELL=display-only/hardcoded.
+
+PROD (2 — done):
+- S39_Recipe_Builder, S46_Protocol_Form
+
+SEMI (14 — partial interactivity, need real onSave payloads or inputs):
+- `[ ]` S5_Paywall_A — plan toggle works, onStartTrial needs planId (has it)
+- `[x]` S6_Weight_B — numpad + onSave({weight,unit,when})
+- `[x]` S7_Onboard_Identity — editable age/height, onChange emits
+- `[x]` S8_Onboard_Goal — onChange emits goal
+- `[x]` S9_Onboard_Activity — onChange emits activity
+- `[ ]` S17_Measurements_Entry — numpad works but onSave needs to pass values
+- `[ ]` S22_Notifications — toggle state but no onToggle callback
+- `[ ]` S24_Library — filter state but no onSelectProgram payload
+- `[ ]` S32_Capture — mode switcher only, no real capture (native-dependent)
+- `[ ]` S41_Errors — tabs work, onRetry/onResolve need payloads
+- `[ ]` S44_Protocols_Empty_Locked — tab state only
+- `[ ]` S48_Log_Dose — mode+site+reason state, onSubmit has payload
+
+SHELL (37 — display-only, highest priority for wiring):
+Priority (user-facing daily screens):
+- `[ ]` S36_Auth — inputs exist but no onSubmit payload shape from screen
+- `[ ]` S35_Search — has input but no onSearch callback
+- `[ ]` S38_Food_Detail — onConfirm/onSaveAsMeal accept but don't pass data
+- `[ ]` S3_Workout_A — active session, all hardcoded
+- `[ ]` S4_Nutrition_A — fuel ledger, all hardcoded
+- `[ ]` S2_Today_A — daily dashboard, gallery-only
+- `[ ]` S12_Coach_Chat — chat UI, all hardcoded
+- `[ ]` S14_Body_Dashboard — composition data hardcoded
+
+Lower priority (detail/secondary screens):
+- S1_Splash_A/B, S10_Onboard_Plan, S11_Onboard_Permissions,
+  S13_Coach_Brief, S15_Labs_Inbox, S16_Biomarker_Detail,
+  S18_Progress_Photos, S19_Settings, S20_PR_Gallery,
+  S21_Share_Card, S25_Program_Detail, S26_Calendar,
+  S27_Exercise_Detail, S28_Crew, S29_Workout_Summary,
+  S30_Weekly_Recap, S31_Sleep_Detail, S33_Profile,
+  S34_Watch, S37_Inbox, S40_Billing, S42_Web_Landing,
+  S43-S45, S47, S49-S50, S5_Paywall_B, S6_Weight_A
+
+## Handoffs (design → engineering)
+
+- `[x]` V3Settings.jsx — "Manage subscription" on native should call
+  presentCustomerCenter() instead of navigating to /app/billing.
+  DONE: f807a43 (engineering implemented before lane split).
+- `[ ]` V3AppShell.jsx + V3StandaloneLayout.jsx — add `data-v3` attr
+  to root container div so CSS can scope v3-specific styles (focus ring
+  suppression, etc). Acceptance: `<div data-v3 style={{...}}>`.
+  Design already added the CSS rule in index.css targeting `[data-v3]`.
+
+## Recent ships
+
+- dc4eb1b fix(#1): remove blue focus rectangle on login/signup inputs
+- 8942bfd fix(#4): Body page hero card colors now theme-aware
+- f807a43 fix(#3): Manage Subscription opens native RevenueCat on mobile
+- 23f43e2 feat(onboarding): swap paywall to v3 paper+ink+amber design
+- 343aabc feat(onboarding): Plan preview computes real targets
+- 533839a/1dc1307 feat(onboarding): interactive Identity + shared state
+- 375b42e chore: delete 162 dead files from src/pages/
+- d28a0e5 fix(critical): reconnect onboarding funnel step 5→6
+
 ## 9. Discovered during execution
 
 - `[ ]` Onboarding steps 1-5 (v3) have NO data persistence — user choices are
