@@ -4159,21 +4159,42 @@
     }
   },
   "paywall": {
-    "seePlans": "Ver planos",
-    "maybeLater": "Talvez depois",
-    "triggers": {
-      "ai_coach": {
-        "headline": "Seu coach pode ir mais fundo com o Premium."
-      },
-      "workout": {
-        "headline": "Acompanhe seu progresso a longo prazo."
-      },
-      "photo": {
-        "headline": "Compare seu progresso lado a lado — recurso Pro."
-      },
-      "streak": {
-        "headline": "Proteja sua sequência com o Premium."
-      }
+    "eyebrow": "/// upgrade",
+    "titlePart1": "libere seu",
+    "titleAccent": "core",
+    "titleEnd": ".",
+    "subtitle": "Acesso total a todos os recursos. Sem limites. Cancele quando quiser.",
+    "plans": {
+      "weekly": "1 semana",
+      "monthly": "1 mês",
+      "yearly": "12 meses",
+      "save": "Economize 62%"
+    },
+    "features": {
+      "heading": "tudo incluído",
+      "coach": "Coach IA & briefing diário",
+      "logs": "Registros ilimitados de treino e comida",
+      "analytics": "Análise completa de treino e histórico",
+      "labs": "Resultados de exames e tendências",
+      "photos": "Fotos de progresso com comparação",
+      "export": "Exportação completa (CSV + JSON)"
+    },
+    "cta": {
+      "processing": "processando...",
+      "buy": "assinar pro",
+      "webFallback": "baixe o app para assinar"
+    },
+    "links": {
+      "restore": "Restaurar compras"
+    },
+    "toasts": {
+      "welcome": "Bem-vindo ao Pro!",
+      "genericError": "Algo deu errado. Tente novamente.",
+      "restored": "Assinatura restaurada!",
+      "restoreFailed": "Não foi possível restaurar as compras.",
+      "webComingSoon": "Assine pelo app — checkout web em breve.",
+      "noActiveSub": "Nenhuma assinatura ativa encontrada.",
+      "billingUnavailable": "Compras não disponíveis neste dispositivo."
     }
   },
   "reactivation": {
@@ -4262,5 +4283,14 @@
     "action": "Isso requer uma conta",
     "continueAs": "Continuar como visitante",
     "or": "ou"
+  },
+  "webNav": {
+    "account": "Conta",
+    "billing": "Cobrança",
+    "export": "Exportar",
+    "getApp": "Baixar o app",
+    "signOut": "Sair",
+    "terms": "Termos",
+    "privacy": "Privacidade"
   }
 }

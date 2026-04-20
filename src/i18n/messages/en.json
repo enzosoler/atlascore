@@ -4168,21 +4168,42 @@
     }
   },
   "paywall": {
-    "seePlans": "See plans",
-    "maybeLater": "Maybe later",
-    "triggers": {
-      "ai_coach": {
-        "headline": "Your coach can go deeper with Premium."
-      },
-      "workout": {
-        "headline": "Track your progress long-term."
-      },
-      "photo": {
-        "headline": "Compare progress side by side — Pro feature."
-      },
-      "streak": {
-        "headline": "Protect your streak with Premium."
-      }
+    "eyebrow": "/// upgrade",
+    "titlePart1": "unlock your",
+    "titleAccent": "core",
+    "titleEnd": ".",
+    "subtitle": "Full access to every feature. No limits. Cancel anytime.",
+    "plans": {
+      "weekly": "1 week",
+      "monthly": "1 month",
+      "yearly": "12 months",
+      "save": "Save 62%"
+    },
+    "features": {
+      "heading": "everything included",
+      "coach": "AI coach & daily brief",
+      "logs": "Unlimited workout & food logs",
+      "analytics": "Full training analytics & history",
+      "labs": "Lab results & biomarker trends",
+      "photos": "Progress photos with comparison",
+      "export": "Full data export (CSV + JSON)"
+    },
+    "cta": {
+      "processing": "processing...",
+      "buy": "get pro",
+      "webFallback": "get the app to subscribe"
+    },
+    "links": {
+      "restore": "Restore purchases"
+    },
+    "toasts": {
+      "welcome": "Welcome to Pro!",
+      "genericError": "Something went wrong. Please try again.",
+      "restored": "Subscription restored!",
+      "restoreFailed": "Could not restore purchases.",
+      "webComingSoon": "Subscribe through the app — web checkout coming soon.",
+      "noActiveSub": "No active subscription found.",
+      "billingUnavailable": "Purchases are not available on this device."
     }
   },
   "reactivation": {
@@ -4271,5 +4292,14 @@
     "action": "This requires an account",
     "continueAs": "Continue as guest",
     "or": "or"
+  },
+  "webNav": {
+    "account": "Account",
+    "billing": "Billing",
+    "export": "Export",
+    "getApp": "Get the app",
+    "signOut": "Sign out",
+    "terms": "Terms",
+    "privacy": "Privacy"
   }
 }

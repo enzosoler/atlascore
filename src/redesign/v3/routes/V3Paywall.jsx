@@ -10,10 +10,11 @@
  *   Yearly  → $79/yr    ($rc_annual)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { ACFonts, ACBrand, ACRadii } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { MC } from './V3MarketingLayout.jsx';
@@ -30,20 +31,29 @@ const BILLING_TO_PACKAGE = {
   yearly: '$rc_annual',
 };
 
-const PLANS = [
-  { k: 'weekly', t: '1 week', p: '$3.99', pm: '$3.99 / wk', save: null },
-  { k: 'monthly', t: '1 month', p: '$9.99', pm: '$9.99 / mo', save: null },
-  { k: 'yearly', t: '12 months', p: '$79', pm: '$6.58 / mo', save: 'Save 62%' },
-];
+/** Price + cadence strings are intentionally unlocalized — they mirror
+ *  the RevenueCat product config exactly. Only the cadence label
+ *  ("1 week") goes through i18n. */
+function usePlans() {
+  const t = useT();
+  return [
+    { k: 'weekly',  t: t('paywall.plans.weekly'),  p: '$3.99', pm: '$3.99 / wk', save: null },
+    { k: 'monthly', t: t('paywall.plans.monthly'), p: '$9.99', pm: '$9.99 / mo', save: null },
+    { k: 'yearly',  t: t('paywall.plans.yearly'),  p: '$79',   pm: '$6.58 / mo', save: t('paywall.plans.save') },
+  ];
+}
 
-const FEATURES = [
-  'AI coach & daily brief',
-  'Unlimited workout & food logs',
-  'Full training analytics & history',
-  'Lab results & biomarker trends',
-  'Progress photos with comparison',
-  'Full data export (CSV + JSON)',
-];
+function useFeatures() {
+  const t = useT();
+  return useMemo(() => [
+    t('paywall.features.coach'),
+    t('paywall.features.logs'),
+    t('paywall.features.analytics'),
+    t('paywall.features.labs'),
+    t('paywall.features.photos'),
+    t('paywall.features.export'),
+  ], [t]);
+}
 
 function NavLink({ to, children }) {
   return (
@@ -57,6 +67,9 @@ function NavLink({ to, children }) {
 export default function V3Paywall() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const t = useT();
+  const PLANS = usePlans();
+  const FEATURES = useFeatures();
   const [plan, setPlan] = useState('yearly');
   const [loading, setLoading] = useState(false);
   const isNative = Capacitor.isNativePlatform();
@@ -64,7 +77,7 @@ export default function V3Paywall() {
   async function handlePurchase() {
     if (!isNative) {
       // Web checkout is not available yet — direct user to the app
-      toast('Subscribe through the app — web checkout coming soon.');
+      toast(t('paywall.toasts.webComingSoon'));
       navigate('/download-app');
       return;
     }
@@ -78,19 +91,19 @@ export default function V3Paywall() {
           return;
         }
         if (result.success) {
-          toast.success('Welcome to Pro!');
+          toast.success(t('paywall.toasts.welcome'));
           navigate('/app/today', { replace: true });
           return;
         }
         if (result.error) {
           toast.error(result.error === 'billing_unavailable'
-            ? 'Purchases are not available on this device.'
-            : 'Something went wrong. Please try again.');
+            ? t('paywall.toasts.billingUnavailable')
+            : t('paywall.toasts.genericError'));
         }
       }
     } catch (err) {
       console.error('[V3Paywall] purchase error:', err);
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('paywall.toasts.genericError'));
     } finally {
       setLoading(false);
     }
@@ -101,13 +114,13 @@ export default function V3Paywall() {
     try {
       const result = await restorePurchases();
       if (result.isActive) {
-        toast.success('Subscription restored!');
+        toast.success(t('paywall.toasts.restored'));
         navigate('/app/today', { replace: true });
       } else {
-        toast('No active subscription found.');
+        toast(t('paywall.toasts.noActiveSub'));
       }
     } catch {
-      toast.error('Could not restore purchases.');
+      toast.error(t('paywall.toasts.restoreFailed'));
     } finally {
       setLoading(false);
     }
@@ -156,12 +169,12 @@ export default function V3Paywall() {
           </span>
         </Link>
         <div className="pw-nav" style={{ display: 'flex', gap: 24 }}>
-          <NavLink to="/app/account">Account</NavLink>
-          <NavLink to="/app/billing">Billing</NavLink>
-          <NavLink to="/app/export">Export</NavLink>
+          <NavLink to="/app/account">{t('webNav.account')}</NavLink>
+          <NavLink to="/app/billing">{t('webNav.billing')}</NavLink>
+          <NavLink to="/app/export">{t('webNav.export')}</NavLink>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
-          <NavLink to="/download-app">Get the app</NavLink>
+          <NavLink to="/download-app">{t('webNav.getApp')}</NavLink>
           <button
             type="button"
             onClick={async () => { try { await logout?.(); } catch {} navigate('/auth/login', { replace: true }); }}
@@ -171,7 +184,7 @@ export default function V3Paywall() {
               color: MC.dim, cursor: 'pointer',
             }}
           >
-            Sign out
+            {t('webNav.signOut')}
           </button>
         </div>
       </div>
@@ -183,17 +196,17 @@ export default function V3Paywall() {
       }}>
         {/* Eyebrow + title */}
         <div style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: MC.dim }}>
-          /// upgrade
+          {t('paywall.eyebrow')}
         </div>
         <h1 style={{
           margin: '12px 0 0', fontFamily: ACFonts.brand,
           fontSize: 'clamp(36px, 6vw, 56px)', letterSpacing: '-0.04em',
           lineHeight: 0.9, textTransform: 'lowercase',
         }}>
-          unlock your <span style={{ color: ACBrand.accent }}>core</span>.
+          {t('paywall.titlePart1')} <span style={{ color: ACBrand.accent }}>{t('paywall.titleAccent')}</span>{t('paywall.titleEnd')}
         </h1>
         <p style={{ margin: '16px 0 0', fontSize: 18, lineHeight: 1.55, color: MC.body, maxWidth: 520 }}>
-          Full access to every feature. No limits. Cancel anytime.
+          {t('paywall.subtitle')}
         </p>
 
         {/* Plan cards — 3-column grid */}
@@ -255,7 +268,7 @@ export default function V3Paywall() {
 
         {/* Features — 2-column grid */}
         <div style={{ fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: MC.dim, marginBottom: 20 }}>
-          everything included
+          {t('paywall.features.heading')}
         </div>
         <div className="pw-features-grid" style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 32px',
@@ -290,7 +303,7 @@ export default function V3Paywall() {
               opacity: loading ? 0.6 : 1,
             }}
           >
-            {loading ? 'processing...' : isNative ? 'get pro' : 'get the app to subscribe'}
+            {loading ? t('paywall.cta.processing') : isNative ? t('paywall.cta.buy') : t('paywall.cta.webFallback')}
           </button>
         </div>
 
@@ -305,15 +318,15 @@ export default function V3Paywall() {
               cursor: 'pointer', textDecoration: 'underline', padding: 0,
             }}
           >
-            Restore purchases
+            {t('paywall.links.restore')}
           </button>
           <span style={{ color: MC.mute }}>&middot;</span>
           <Link to="/terms" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textDecoration: 'underline' }}>
-            Terms
+            {t('webNav.terms')}
           </Link>
           <span style={{ color: MC.mute }}>&middot;</span>
           <Link to="/privacy" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textDecoration: 'underline' }}>
-            Privacy
+            {t('webNav.privacy')}
           </Link>
         </div>
       </div>
