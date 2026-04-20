@@ -214,6 +214,9 @@ export default function V3You() {
       onOpenSettings={() => navigate('/app/settings')}
       onOpenProgram={() => navigate(program ? '/app/workouts' : '/app/routines')}
       onOpenComposition={() => navigate('/app/body')}
+      onOpenCrew={() => navigate('/app/crew')}
+      onOpenWatch={() => navigate('/app/watch')}
+      onOpenProtocols={() => navigate('/app/protocols')}
     />
   );
 }

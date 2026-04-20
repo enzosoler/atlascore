@@ -105,7 +105,8 @@ export default function V3Eat() {
   };
 
   const handleCapture = (kind) => {
-    if (kind === 'camera') return navigate('/app/nutrition/photo');
+    if (kind === 'scan') return navigate('/app/nutrition/capture');
+    if (kind === 'camera') return navigate('/app/nutrition/capture');
     if (kind === 'voice') return navigate('/app/nutrition/voice');
     if (kind === 'recents') return navigate('/app/nutrition/diary');
     return navigate('/app/nutrition/search');

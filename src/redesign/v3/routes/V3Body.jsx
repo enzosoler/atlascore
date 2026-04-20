@@ -133,6 +133,9 @@ export default function V3Body() {
       labs={[]}
       onOpenMeasurements={() => navigate('/app/body/measurements')}
       onOpenLabs={() => navigate('/app/labs')}
+      onOpenWeight={() => navigate('/app/body/weight/trend')}
+      onOpenSleep={() => navigate('/app/sleep')}
+      onOpenPhotos={() => navigate('/app/body/progress/photos')}
     />
   );
 }

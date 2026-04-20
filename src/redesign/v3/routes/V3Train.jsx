@@ -157,6 +157,8 @@ export default function V3Train() {
       onSearch={() => navigate('/app/exercises')}
       onBuildProgram={() => navigate('/app/workouts/manual-plan')}
       onOpenFeatured={() => navigate('/app/routines/presets')}
+      onOpenCalendar={() => navigate('/app/workouts/calendar')}
+      onOpenHistory={() => navigate('/app/workouts/history')}
       showTabBar={false}
     />
   );
