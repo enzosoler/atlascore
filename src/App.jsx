@@ -173,6 +173,11 @@ const V3SubstancePicker = lazy(() => import('@/redesign/v3/routes/V3SubstancePic
 const V3LogDose = lazy(() => import('@/redesign/v3/routes/V3LogDose.jsx'));
 const V3ProtocolTimeline = lazy(() => import('@/redesign/v3/routes/V3ProtocolTimeline.jsx'));
 const V3TodayDose = lazy(() => import('@/redesign/v3/routes/V3TodayDose.jsx'));
+const V3MobilePaywall = lazy(() => import('@/redesign/v3/routes/V3MobilePaywall.jsx'));
+const V3PRMoment = lazy(() => import('@/redesign/v3/routes/V3PRMoment.jsx'));
+const V3WeightTrend = lazy(() => import('@/redesign/v3/routes/V3WeightTrend.jsx'));
+const V3EmptyStates = lazy(() => import('@/redesign/v3/routes/V3EmptyStates.jsx'));
+const V3Errors = lazy(() => import('@/redesign/v3/routes/V3Errors.jsx'));
 const V3Terms = lazy(() => import('@/redesign/v3/routes/V3Terms.jsx'));
 const V3Privacy = lazy(() => import('@/redesign/v3/routes/V3Privacy.jsx'));
 const V3Paywall = lazy(() => import('@/redesign/v3/routes/V3Paywall.jsx'));
@@ -1099,6 +1104,13 @@ function AppRoutes() {
           <Route path="protocols/timeline" element={<V3ProtocolTimeline />} />
           <Route path="protocols/today" element={<V3TodayDose />} />
           <Route path="protocols/:id" element={<V3ProtocolDetail />} />
+
+          {/* Paywall + Weight + Utility */}
+          <Route path="paywall" element={<V3MobilePaywall />} />
+          <Route path="pr-moment" element={<V3PRMoment />} />
+          <Route path="body/weight/trend" element={<V3WeightTrend />} />
+          <Route path="empty-states" element={<V3EmptyStates />} />
+          <Route path="errors" element={<V3Errors />} />
         </Route>
 
         {/* ── Marketing (public web) — root is now the landing page ── */}
