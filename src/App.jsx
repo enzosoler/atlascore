@@ -62,10 +62,10 @@ import {
 
 // ─── v2 screens (everything below is redesigned, Liquid Glass, safe-area aware) ─
 import ComingSoon         from '@/redesign/v2/system/ComingSoon';
-import { OfflineRoute }         from '@/redesign/v2/system/Offline';
-import { ServerErrorRoute }     from '@/redesign/v2/system/ServerError';
-import { MaintenanceRoute }     from '@/redesign/v2/system/Maintenance';
-import { ForceUpdateRoute }     from '@/redesign/v2/system/ForceUpdate';
+import { V3Offline }         from '@/redesign/v2/system/Offline';
+import { V3ServerError }     from '@/redesign/v2/system/ServerError';
+import { V3Maintenance }     from '@/redesign/v2/system/Maintenance';
+import { V3ForceUpdate }     from '@/redesign/v2/system/ForceUpdate';
 import { AppDiagnosticsRoute }  from '@/redesign/v2/system/AppDiagnostics';
 import OnboardingWorkout     from '@/redesign/v2/onboarding/OnboardingWorkout';
 import OnboardingHabits      from '@/redesign/v2/onboarding/OnboardingHabits';
@@ -94,15 +94,15 @@ import { FoodDiaryRoute }    from '@/redesign/v2/nutrition/FoodDiary.jsx';
 import { MacroTargetsRoute } from '@/redesign/v2/nutrition/MacroTargets.jsx';
 import { WaterLogRoute }     from '@/redesign/v2/nutrition/WaterLog.jsx';
 import { MealPlansRoute }    from '@/redesign/v2/nutrition/MealPlans.jsx';
-import { MealDetailRoute }   from '@/redesign/v2/nutrition/MealDetail.jsx';
+import { V3MealDetail }   from '@/redesign/v2/nutrition/MealDetail.jsx';
 import { CustomFoodRoute }   from '@/redesign/v2/nutrition/CustomFood.jsx';
 import ActiveWorkout         from '@/redesign/v2/workouts/ActiveWorkout';
 import ExerciseLibrary, {
   DEMO_EXERCISES,
   findExerciseById,
 } from '@/redesign/v2/workouts/ExerciseLibrary';
-import { RoutinePresetsRoute }      from '@/redesign/v2/workouts/RoutinePresets.jsx';
-import { RoutinePresetDetailRoute } from '@/redesign/v2/workouts/RoutinePresetDetail.jsx';
+import { V3RoutinePresets }      from '@/redesign/v2/workouts/RoutinePresets.jsx';
+import { V3RoutinePresetDetail } from '@/redesign/v2/workouts/RoutinePresetDetail.jsx';
 import {
   saveWorkoutSession,
   listWorkoutSessions,
@@ -658,7 +658,7 @@ function WorkoutHistoryRoute() {
 
 /* ─── Labs routes ─────────────────────────────────────────────────────── */
 
-function LabExamDetailRoute() {
+function V3LabExamDetail() {
   const navigate = useNavigate();
   // TODO: fetch exam by :id from labExamService.
   return (
@@ -674,7 +674,7 @@ function LabExamDetailRoute() {
   );
 }
 
-function LabHistoryRoute() {
+function V3LabHistory() {
   const navigate = useNavigate();
   return (
     <LabHistory
@@ -686,7 +686,7 @@ function LabHistoryRoute() {
   );
 }
 
-function LabUploadRoute() {
+function V3LabUpload() {
   const navigate = useNavigate();
   return (
     <LabUpload
@@ -1019,7 +1019,7 @@ function AppRoutes() {
         <Route path="/app/nutrition/search" element={isAuthed ? <PlatformGate><V3NutritionSearch /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/food/new" element={isAuthed ? <PlatformGate><CustomFoodRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/food/:id" element={isAuthed ? <PlatformGate><FoodDetailRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/meal/:id" element={isAuthed ? <PlatformGate><MealDetailRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/meal/:id" element={isAuthed ? <PlatformGate><V3MealDetail /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/photo" element={isAuthed ? <PlatformGate><PhotoScanRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/photo/confirm" element={isAuthed ? <PlatformGate><PhotoScanConfirmRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/voice" element={isAuthed ? <PlatformGate><VoiceLogRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
@@ -1032,7 +1032,7 @@ function AppRoutes() {
         <Route path="/app/body/checkin" element={isAuthed ? <PlatformGate><BodyCheckInRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/body/measurements" element={isAuthed ? <PlatformGate><MeasurementsRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/body/compare" element={isAuthed ? <PlatformGate><ProgressComparisonRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/labs/upload" element={isAuthed ? <PlatformGate><LabUploadRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/labs/upload" element={isAuthed ? <PlatformGate><V3LabUpload /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/social/share" element={isAuthed ? <PlatformGate><ShareWorkoutRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
 
         {/* ── v3 live app core (mounted on the real athlete routes) ───── */}
@@ -1076,15 +1076,15 @@ function AppRoutes() {
           <Route path="workouts/:id" element={<V3WorkoutDetail />} />
           <Route path="workouts/records" element={<V3PersonalRecords />} />
           <Route path="workouts/share" element={<V3SharePR />} />
-          <Route path="routines/presets" element={<RoutinePresetsRoute />} />
-          <Route path="routines/presets/:id" element={<RoutinePresetDetailRoute />} />
+          <Route path="routines/presets" element={<V3RoutinePresets />} />
+          <Route path="routines/presets/:id" element={<V3RoutinePresetDetail />} />
 
           {/* Body sub-screens */}
           <Route path="body/composition" element={<V3CompositionHistory />} />
 
           {/* Labs sub-screens */}
-          <Route path="labs/history" element={<LabHistoryRoute />} />
-          <Route path="labs/exam/:id" element={<LabExamDetailRoute />} />
+          <Route path="labs/history" element={<V3LabHistory />} />
+          <Route path="labs/exam/:id" element={<V3LabExamDetail />} />
 
           {/* Coach sub-screens */}
           <Route path="coach/insights/:id" element={<V3CoachInsight />} />
@@ -1186,10 +1186,10 @@ function AppRoutes() {
         {/* ── System screens (pre-auth-aware; no guard) ─────────────────── */}
         {/* /app/offline is intentionally outside the auth-guarded block —
             the whole point of the screen is to work when sync can't. */}
-        <Route path="/app/offline"  element={<OfflineRoute />} />
-        <Route path="/maintenance"  element={<MaintenanceRoute />} />
-        <Route path="/force-update" element={<ForceUpdateRoute />} />
-        <Route path="/500"          element={<ServerErrorRoute />} />
+        <Route path="/app/offline"  element={<V3Offline />} />
+        <Route path="/maintenance"  element={<V3Maintenance />} />
+        <Route path="/force-update" element={<V3ForceUpdate />} />
+        <Route path="/500"          element={<V3ServerError />} />
         <Route path="/404"          element={<V3NotFound />} />
 
         {/* ── Legacy route redirects — keep old bookmarks/deep-links working ── */}
