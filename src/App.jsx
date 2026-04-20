@@ -196,6 +196,14 @@ const V3DangerZone = lazy(() => import('@/redesign/v3/routes/V3DangerZone.jsx'))
 const V3Diagnostics = lazy(() => import('@/redesign/v3/routes/V3Diagnostics.jsx'));
 const V3ProfileEditor = lazy(() => import('@/redesign/v3/routes/V3ProfileEditor.jsx'));
 const V3MealPlans = lazy(() => import('@/redesign/v3/routes/V3MealPlans.jsx'));
+const V3SocialFeed = lazy(() => import('@/redesign/v3/routes/V3SocialFeed.jsx'));
+const V3Friends = lazy(() => import('@/redesign/v3/routes/V3Friends.jsx'));
+const V3Follow = lazy(() => import('@/redesign/v3/routes/V3Follow.jsx'));
+const V3Insights = lazy(() => import('@/redesign/v3/routes/V3Insights.jsx'));
+const V3FocusMode = lazy(() => import('@/redesign/v3/routes/V3FocusMode.jsx'));
+const V3Streaks = lazy(() => import('@/redesign/v3/routes/V3Streaks.jsx'));
+const V3Celebrations = lazy(() => import('@/redesign/v3/routes/V3Celebrations.jsx'));
+const V3PublicProfile = lazy(() => import('@/redesign/v3/routes/V3PublicProfile.jsx'));
 const V3Terms = lazy(() => import('@/redesign/v3/routes/V3Terms.jsx'));
 const V3Privacy = lazy(() => import('@/redesign/v3/routes/V3Privacy.jsx'));
 const V3Paywall = lazy(() => import('@/redesign/v3/routes/V3Paywall.jsx'));
@@ -1051,11 +1059,11 @@ function AppRoutes() {
           {/* Billing routes moved outside V3AppShell — full-width web pages */}
 
           {/* Today-domain expansions */}
-          <Route path="insights" element={<InsightsRoute />} />
-          <Route path="diary" element={<DiaryRoute />} />
-          <Route path="today/focus" element={<FocusModeRoute />} />
-          <Route path="today/streaks" element={<StreaksDetailRoute />} />
-          <Route path="today/celebrate/:kind" element={<CelebrationsRoute />} />
+          <Route path="insights" element={<V3Insights />} />
+          <Route path="diary" element={<V3FoodDiary />} />
+          <Route path="today/focus" element={<V3FocusMode />} />
+          <Route path="today/streaks" element={<V3Streaks />} />
+          <Route path="today/celebrate/:kind" element={<V3Celebrations />} />
 
           {/* Nutrition sub-screens */}
           <Route path="nutrition/diary" element={<V3FoodDiary />} />
@@ -1089,9 +1097,9 @@ function AppRoutes() {
           <Route path="settings/diagnostics" element={<V3Diagnostics />} />
 
           {/* Social */}
-          <Route path="social" element={<SocialFeedRoute />} />
-          <Route path="social/friends" element={<FriendsRoute />} />
-          <Route path="social/follow" element={<FollowRoute />} />
+          <Route path="social" element={<V3SocialFeed />} />
+          <Route path="social/friends" element={<V3Friends />} />
+          <Route path="social/follow" element={<V3Follow />} />
 
           {/* Workout sub-screens */}
           <Route path="workouts/summary" element={<V3WorkoutSummary />} />
@@ -1173,7 +1181,7 @@ function AppRoutes() {
         <Route path="/onboarding/smart" element={<SmartOnboarding onContinue={() => {}} />} />
 
         {/* Public profile lives outside the shell (no auth guard on view) */}
-        <Route path="/app/u/:username" element={<PublicProfileRoute />} />
+        <Route path="/app/u/:username" element={<V3PublicProfile />} />
 
         {/* ── System screens (pre-auth-aware; no guard) ─────────────────── */}
         {/* /app/offline is intentionally outside the auth-guarded block —
