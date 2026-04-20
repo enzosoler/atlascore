@@ -94,45 +94,112 @@ function DayRow({ d, c, first, onSelect, onOpenSession }) {
   );
 }
 
+const DEMO_DAYS = [
+  { date: 'Sat 18', today: true,  type: 'Heavy Lower',   vol: 'High', read: 87, status: 'today',    duration: '58m' },
+  { date: 'Sun 19', type: 'Recovery',                    vol: 'Rest', read: null, status: 'rest' },
+  { date: 'Mon 20', type: 'Upper push',                  vol: 'Mod',  read: 78,  status: 'upcoming', duration: '52m' },
+  { date: 'Tue 21', type: 'Conditioning',                vol: 'Low',  read: 72,  status: 'upcoming', duration: '28m' },
+  { date: 'Wed 22', type: 'Heavy Pull',                  vol: 'High', read: 74,  status: 'shifted',  shift: 'moved 1d later' },
+  { date: 'Thu 23', type: 'Recovery',                    vol: 'Rest', read: null, status: 'rest' },
+  { date: 'Fri 24', type: 'Full body',                   vol: 'Mod',  read: 80,  status: 'upcoming', duration: '45m' },
+];
+
+const DEMO_VOLUME_BARS = [75, 0, 55, 30, 80, 0, 50];
+
 /**
- * S26_Calendar — workout history as a week calendar.
+ * S26_Calendar — workout week view.
  *
  * Gallery:    <S26_Calendar dark />
- * Production: <S26_Calendar dark onBack={fn} onOpenSession={fn} onStartWorkout={fn} />
+ * Production: <S26_Calendar dark
+ *               days={[{date,today?,type,vol,read,status,duration?,shift?},...]}
+ *               weekLabel="Apr 18 — 24" weekMeta="Plan · week 07 of 16"
+ *               volumeBars={[0-100,...]} volumeStatus="On track"
+ *               rescheduled={{label, reason}}
+ *               onBack={fn} onSelectDate={fn} onOpenSession={fn}
+ *               onAddSession={fn} onChangeView={fn}
+ *               onAcceptReschedule={fn} onRejectReschedule={fn} />
+ *
+ * onSelectDate({date, type, status}) — day row tapped
+ * onOpenSession({date}) — non-rest day row tapped (also fires onSelectDate)
+ * onAddSession({weekLabel}) — "Add" button in header
+ * onChangeView({view}) — 'W' | 'M' toggle
+ * onAcceptReschedule({label}) — accept auto-reschedule
+ * onRejectReschedule({label}) — keep original schedule
  */
-function S26_Calendar({ dark = false, onBack, onOpenSession, onStartWorkout, onSelectDate, onAddSession }) {
+function S26_Calendar({
+  dark = false,
+  days = null,
+  weekLabel = 'Apr 18 — 24',
+  weekMeta = 'Plan · week 07 of 16',
+  volumeBars = null,
+  volumeStatus = 'On track',
+  rescheduled = null,
+  onBack,
+  onSelectDate,
+  onOpenSession,
+  onAddSession,
+  onChangeView,
+  onAcceptReschedule,
+  onRejectReschedule,
+}) {
   const c = useACT(dark);
-  const days = [
-    { date: 'Sat 18', today: true,  type: 'Heavy Lower', vol: 'High',   read: 87, status: 'today', duration: '58m' },
-    { date: 'Sun 19', type: 'Recovery',    vol: 'Rest',   read: null, status: 'rest' },
-    { date: 'Mon 20', type: 'Upper push',  vol: 'Mod',    read: 78, status: 'upcoming', duration: '52m' },
-    { date: 'Tue 21', type: 'Conditioning',vol: 'Low',    read: 72, status: 'upcoming', duration: '28m' },
-    { date: 'Wed 22', type: 'Heavy Pull',  vol: 'High',   read: 74, status: 'shifted', shift: 'moved 1d later' },
-    { date: 'Thu 23', type: 'Recovery',    vol: 'Rest',   read: null, status: 'rest' },
-    { date: 'Fri 24', type: 'Full body',   vol: 'Mod',    read: 80, status: 'upcoming', duration: '45m' },
-  ];
+  const _days = Array.isArray(days) && days.length > 0 ? days : DEMO_DAYS;
+  const _bars = Array.isArray(volumeBars) && volumeBars.length > 0 ? volumeBars : DEMO_VOLUME_BARS;
+  const [view, setView] = React.useState('W');
+
+  // Derive reschedule note from props or detect shifted days in demo data
+  const shiftedDay = !rescheduled ? _days.find((d) => d.status === 'shifted') : null;
+  const rescheduleLabel = rescheduled ? rescheduled.label : (shiftedDay ? shiftedDay.type : null);
+  const rescheduleReason = rescheduled ? rescheduled.reason
+    : "Your readiness trended low from back-to-back high-volume days — we gave you a recovery buffer.";
+  const showReschedule = !!(rescheduleLabel);
+
+  const handleChangeView = (v) => {
+    setView(v);
+    if (typeof onChangeView === 'function') onChangeView({ view: v });
+  };
+
+  const handleAccept = () => {
+    if (typeof onAcceptReschedule === 'function') onAcceptReschedule({ label: rescheduleLabel });
+  };
+  const handleReject = () => {
+    if (typeof onRejectReschedule === 'function') onRejectReschedule({ label: rescheduleLabel });
+  };
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <div>
-          <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>Plan · week 07 of 16</ACLabel>
-          <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
-            Apr 18 — 24
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
+          {onBack && (
+            <button type="button" onClick={onBack} style={{
+              width: 28, height: 28, borderRadius: 999, background: c.card,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: 'none', cursor: 'pointer', marginBottom: 2,
+            }}>
+              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M7 1L3 5l4 4" stroke={c.fg} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          )}
+          <div>
+            <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.5, textTransform: 'uppercase' }}>{weekMeta}</ACLabel>
+            <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
+              {weekLabel}
+            </div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 2, padding: 3, background: c.card, borderRadius: 10 }}>
-            {['W', 'M'].map((r, i) => (
-              <div key={r} style={{
+            {['W', 'M'].map((r) => (
+              <button key={r} type="button" onClick={() => handleChangeView(r)} style={{
                 padding: '6px 12px', borderRadius: 7,
-                background: i === 0 ? c.fg : 'transparent',
-                color: i === 0 ? c.bg : c.dim,
+                background: view === r ? c.fg : 'transparent',
+                color: view === r ? c.bg : c.dim,
                 fontSize: 12, fontWeight: 600,
-              }}>{r}</div>
+                border: 'none', cursor: 'pointer',
+              }}>{r}</button>
             ))}
           </div>
           <button type="button" onClick={() => {
-            if (typeof onAddSession === 'function') onAddSession({ weekStart: 'Apr 18', weekEnd: 'Apr 24' });
+            if (typeof onAddSession === 'function') onAddSession({ weekLabel });
           }} style={{
             padding: '6px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
             background: c.accent, color: c.ink, fontWeight: 700, fontSize: 12
@@ -140,44 +207,42 @@ function S26_Calendar({ dark = false, onBack, onOpenSession, onStartWorkout, onS
         </div>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '14px 22px 20px' }}>
+      <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '14px 22px 20px' }}>
         {/* Week summary */}
         <div style={{
           padding: 18, background: c.card, borderRadius: ACRadii.card,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
             <ACLabel size={11} color={c.dim}>Week · volume distribution</ACLabel>
-            <ACLabel size={11} color={c.accent} style={{ fontWeight: 600 }}>On track</ACLabel>
+            <ACLabel size={11} color={c.accent} style={{ fontWeight: 600 }}>{volumeStatus}</ACLabel>
           </div>
           <div style={{ display: 'flex', gap: 3, height: 40, alignItems: 'flex-end' }}>
-            {[75, 0, 55, 30, 80, 0, 50].map((v, i) => (
+            {_bars.map((v, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                 <div style={{
                   width: '100%', height: v > 0 ? `${v}%` : 2,
-                  background: i === 0 ? c.accent : v === 0 ? c.faint : c.fg,
+                  background: _days[i] && _days[i].today ? c.accent : v === 0 ? c.faint : c.fg,
                   opacity: v === 0 ? 0.3 : 1,
                   borderRadius: 2,
                 }} />
               </div>
             ))}
           </div>
-          <div style={{
-            marginTop: 6, display: 'flex', gap: 3,
-          }}>
-            {['S', 'S', 'M', 'T', 'W', 'T', 'F'].map((l, i) => (
+          <div style={{ marginTop: 6, display: 'flex', gap: 3 }}>
+            {_days.map((d, i) => (
               <div key={i} style={{
                 flex: 1, textAlign: 'center',
                 fontFamily: ACFonts.mono, fontSize: 9,
-                color: i === 0 ? c.accent : c.mute, fontWeight: 600,
+                color: d.today ? c.accent : c.mute, fontWeight: 600,
                 letterSpacing: 0.5,
-              }}>{l}</div>
+              }}>{d.date.split(' ')[0][0]}</div>
             ))}
           </div>
         </div>
 
         {/* Day list */}
         <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column' }}>
-          {days.map((d, i) => (
+          {_days.map((d, i) => (
             <DayRow key={i} d={d} c={c} first={i === 0}
               onSelect={(payload) => { if (typeof onSelectDate === 'function') onSelectDate(payload); }}
               onOpenSession={onOpenSession}
@@ -185,33 +250,35 @@ function S26_Calendar({ dark = false, onBack, onOpenSession, onStartWorkout, onS
           ))}
         </div>
 
-        {/* Reschedule note */}
-        <div style={{
-          marginTop: 18, padding: 16,
-          background: c.card, borderRadius: ACRadii.card,
-          borderLeft: `3px solid ${c.accent}`,
-        }}>
-          <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase' }}>
-            Auto-reschedule
-          </ACLabel>
+        {/* Auto-reschedule note — only shown when a shifted session exists */}
+        {showReschedule && (
           <div style={{
-            marginTop: 6, fontSize: 13.5, color: c.fg, lineHeight: 1.5,
+            marginTop: 18, padding: 16,
+            background: c.card, borderRadius: ACRadii.card,
+            borderLeft: `3px solid ${c.accent}`,
           }}>
-            Wed's Heavy Pull moved to Thu. Your readiness trended low from back-to-back high-volume days — we gave you a recovery buffer.
-          </div>
-          <div style={{
-            marginTop: 10, display: 'flex', gap: 8,
-          }}>
+            <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase' }}>
+              Auto-reschedule · {rescheduleLabel}
+            </ACLabel>
             <div style={{
-              padding: '6px 12px', background: c.fg, color: c.bg,
-              fontSize: 11, fontWeight: 600, borderRadius: 999,
-            }}>Accept</div>
-            <div style={{
-              padding: '6px 12px', border: `1px solid ${c.faint}`,
-              fontSize: 11, fontWeight: 600, color: c.fg, borderRadius: 999,
-            }}>Keep original</div>
+              marginTop: 6, fontSize: 13.5, color: c.fg, lineHeight: 1.5,
+            }}>
+              {rescheduleReason}
+            </div>
+            <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+              <button type="button" onClick={handleAccept} style={{
+                padding: '6px 12px', background: c.fg, color: c.bg,
+                fontSize: 11, fontWeight: 600, borderRadius: 999,
+                border: 'none', cursor: 'pointer',
+              }}>Accept</button>
+              <button type="button" onClick={handleReject} style={{
+                padding: '6px 12px', border: `1px solid ${c.faint}`,
+                fontSize: 11, fontWeight: 600, color: c.fg, borderRadius: 999,
+                background: 'transparent', cursor: 'pointer',
+              }}>Keep original</button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <ACTabBar active="workout" dark={dark} HeartMarkComp={HeartMark} />

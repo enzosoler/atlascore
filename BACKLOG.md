@@ -106,8 +106,8 @@ STILL SHELL (highest-leverage targets):
 - [x] S25_Program_Detail — wired prop contract + small handlers (commit fcdbb81)
 - [x] S27_Exercise_Detail — onFavorite({exerciseId,favorite,favoritedAt}) + onLogSet({exerciseId,loggedAt,...}) already wired (2026-04-20 re-audit)
 - [x] S29_Workout_Summary — onShare({sessionId,sharedAt}) + onRepeat({sessionId,repeatedAt}) already wired (2026-04-20 re-audit)
-- [ ] S30_Weekly_Recap -- needs onShare contract + 3-stage gift-moment reveal (§12: streak/adherence update)
-- [ ] S26_Calendar -- static dates; needs onSelectDate({date})/onAddSession({date}) handlers
+- [x] S30_Weekly_Recap -- onShare contract + 3-stage gift-moment reveal (commit e6fe75d)
+- [x] S26_Calendar -- days/weekLabel/volumeBars props; onChangeView, onAcceptReschedule, onRejectReschedule, onBack wired; reschedule note conditional
 - [ ] S31_Sleep_Detail -- static sleep; needs onRefresh/onCompare handlers
 - [ ] S28_Crew -- needs real onInvite({userId})/onMessage({userId,text}) payload shapes
 - [ ] S37_Inbox -- static messages; needs onOpen({itemId})/onArchive({itemId}) handlers
@@ -117,7 +117,7 @@ STILL SHELL (highest-leverage targets):
 
 NOTE: S33_Profile confirmed production-interactive (real props + handlers) — removed from shell list.
 
-NEXT TARGET: S30_Weekly_Recap
+NEXT TARGET: S31_Sleep_Detail
 
 ## Handoffs (design → engineering)
 
@@ -148,6 +148,7 @@ NEXT TARGET: S30_Weekly_Recap
 
 - d253909 fix(auth): tolerate non-event onSubmit calls in V3AuthLogin
 
+- 26778a0 feat(i18n): wire V3Settings through useT(); locale-aware memberSinceLabel
 - 06ba1c9 fix(i18n): wire V3Today readiness label, momentum, and system integrity via t()
 - f1d21ef feat(i18n): wire DailyCheckinGate, V3MagicLinkSent, V3ExerciseDetail
 - 7dbc1d1 feat(i18n): wire V3CoachChat+V3SubscriptionManage toasts; data-v3 layout roots
