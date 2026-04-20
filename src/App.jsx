@@ -190,6 +190,12 @@ const V3WorkoutHistory = lazy(() => import('@/redesign/v3/routes/V3WorkoutHistor
 const V3WorkoutDetail = lazy(() => import('@/redesign/v3/routes/V3WorkoutDetail.jsx'));
 const V3CompositionHistory = lazy(() => import('@/redesign/v3/routes/V3CompositionHistory.jsx'));
 const V3CoachInsight = lazy(() => import('@/redesign/v3/routes/V3CoachInsight.jsx'));
+const V3AccountSettings = lazy(() => import('@/redesign/v3/routes/V3AccountSettings.jsx'));
+const V3Integrations = lazy(() => import('@/redesign/v3/routes/V3Integrations.jsx'));
+const V3DangerZone = lazy(() => import('@/redesign/v3/routes/V3DangerZone.jsx'));
+const V3Diagnostics = lazy(() => import('@/redesign/v3/routes/V3Diagnostics.jsx'));
+const V3ProfileEditor = lazy(() => import('@/redesign/v3/routes/V3ProfileEditor.jsx'));
+const V3MealPlans = lazy(() => import('@/redesign/v3/routes/V3MealPlans.jsx'));
 const V3Terms = lazy(() => import('@/redesign/v3/routes/V3Terms.jsx'));
 const V3Privacy = lazy(() => import('@/redesign/v3/routes/V3Privacy.jsx'));
 const V3Paywall = lazy(() => import('@/redesign/v3/routes/V3Paywall.jsx'));
@@ -1055,7 +1061,7 @@ function AppRoutes() {
           <Route path="nutrition/diary" element={<V3FoodDiary />} />
           <Route path="nutrition/targets" element={<V3MacroTargets />} />
           <Route path="nutrition/water" element={<V3WaterLog />} />
-          <Route path="nutrition/meal-plans" element={<MealPlansRoute />} />
+          <Route path="nutrition/meal-plans" element={<V3MealPlans />} />
 
           {/* Workout sub-screens */}
           <Route path="workouts/history" element={<V3WorkoutHistory />} />
@@ -1076,11 +1082,11 @@ function AppRoutes() {
           <Route path="coach/insights/:id" element={<V3CoachInsight />} />
 
           {/* Profile + Settings sub-screens */}
-          <Route path="profile/edit" element={<ProfileEditorRoute />} />
-          <Route path="settings/account" element={<AccountSettingsRoute />} />
-          <Route path="settings/integrations" element={<IntegrationsRoute />} />
-          <Route path="settings/danger" element={<DangerZoneRoute />} />
-          <Route path="settings/diagnostics" element={<AppDiagnosticsRoute />} />
+          <Route path="profile/edit" element={<V3ProfileEditor />} />
+          <Route path="settings/account" element={<V3AccountSettings />} />
+          <Route path="settings/integrations" element={<V3Integrations />} />
+          <Route path="settings/danger" element={<V3DangerZone />} />
+          <Route path="settings/diagnostics" element={<V3Diagnostics />} />
 
           {/* Social */}
           <Route path="social" element={<SocialFeedRoute />} />
