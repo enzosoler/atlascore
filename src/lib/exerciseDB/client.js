@@ -12,9 +12,10 @@
 
 import { supabase } from '@/lib/supabaseClient';
 
-const TIMEOUT_MS = 10_000;
+const TIMEOUT_MS = 12_000;
+const RETRY_DELAYS = [800, 2000]; // ms between attempts (3 total: initial + 2 retries)
 
-async function apiRequest(path, params = {}) {
+async function apiRequest(path, params = {}, attempt = 1) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -26,7 +27,16 @@ async function apiRequest(path, params = {}) {
     clearTimeout(timeoutId);
 
     if (error) {
-      console.error(`[ExerciseDB] Edge function error on ${path}:`, error.message);
+      // Surface the upstream status if available so logs are actionable.
+      const status = error?.context?.status ?? error?.status ?? '?';
+      const isTransient = status === 503 || status === 502 || status === 429 || status === 500;
+      if (isTransient && attempt <= RETRY_DELAYS.length) {
+        const delay = RETRY_DELAYS[attempt - 1];
+        console.warn(`[ExerciseDB] ${status} on ${path} — retry ${attempt}/${RETRY_DELAYS.length} in ${delay}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        return apiRequest(path, params, attempt + 1);
+      }
+      console.error(`[ExerciseDB] Edge function error on ${path} (status ${status}):`, error.message);
       return null;
     }
 
@@ -34,7 +44,12 @@ async function apiRequest(path, params = {}) {
   } catch (err) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      console.warn(`[ExerciseDB] Request timeout: ${path}`);
+      console.warn(`[ExerciseDB] Request timeout (attempt ${attempt}): ${path}`);
+      if (attempt <= RETRY_DELAYS.length) {
+        const delay = RETRY_DELAYS[attempt - 1];
+        await new Promise((r) => setTimeout(r, delay));
+        return apiRequest(path, params, attempt + 1);
+      }
     } else {
       console.error(`[ExerciseDB] Request failed: ${path}`, err.message);
     }

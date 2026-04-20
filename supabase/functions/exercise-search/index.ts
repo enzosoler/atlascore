@@ -88,25 +88,39 @@ serve(async (req) => {
 
   const apiKey = Deno.env.get('EXERCISEDB_API_KEY');
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'ExerciseDB API key not configured.' }), {
+    console.error(`[exercise-search] ${new Date().toISOString()} EXERCISEDB_API_KEY secret not set — deploy: supabase secrets set EXERCISEDB_API_KEY=<key>`);
+    return new Response(JSON.stringify({ error: 'ExerciseDB API key not configured.', hint: 'supabase secrets set EXERCISEDB_API_KEY=<key>' }), {
       status: 503, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
+  }
+
+  // Fetch from RapidAPI with one retry on transient failures (429, 500, 503).
+  async function upstreamFetch(url: string, attempt = 1): Promise<Response> {
+    const res = await fetch(url, {
+      headers: {
+        'x-rapidapi-key': apiKey,
+        'x-rapidapi-host': 'exercisedb.p.rapidapi.com',
+      },
+    });
+    const retryable = !res.ok && (res.status === 429 || res.status >= 500);
+    if (retryable && attempt < 3) {
+      const delay = attempt === 1 ? 600 : 1500;
+      console.warn(`[exercise-search] ${new Date().toISOString()} upstream ${res.status} on ${path} — retry ${attempt}/3 in ${delay}ms`);
+      await new Promise((r) => setTimeout(r, delay));
+      return upstreamFetch(url, attempt + 1);
+    }
+    return res;
   }
 
   try {
     const url = new URL(`${EXERCISEDB_BASE}${path}`);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, String(v)));
 
-    const upstreamRes = await fetch(url.toString(), {
-      headers: {
-        'x-rapidapi-key': apiKey,
-        'x-rapidapi-host': 'exercisedb.p.rapidapi.com',
-      },
-    });
+    const upstreamRes = await upstreamFetch(url.toString());
 
     if (!upstreamRes.ok) {
-      console.error(`[exercise-search] ExerciseDB ${upstreamRes.status} on ${path}`);
-      return new Response(JSON.stringify({ error: 'Upstream error', status: upstreamRes.status }), {
+      console.error(`[exercise-search] ${new Date().toISOString()} ExerciseDB ${upstreamRes.status} on ${path} (exhausted retries)`);
+      return new Response(JSON.stringify({ error: 'Upstream error', upstreamStatus: upstreamRes.status, path, ts: new Date().toISOString() }), {
         status: 502, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       });
     }
@@ -117,8 +131,8 @@ serve(async (req) => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[exercise-search] Error:', message);
-    return new Response(JSON.stringify({ error: 'Internal error' }), {
+    console.error(`[exercise-search] ${new Date().toISOString()} internal error on ${path}: ${message}`);
+    return new Response(JSON.stringify({ error: 'Internal error', message, path, ts: new Date().toISOString() }), {
       status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
   }
