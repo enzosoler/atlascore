@@ -44,9 +44,7 @@ Legend
 
 ## 3. Reliability / edge cases
 
-- `[ ]` useDailyStateV2 — confirm it handles the Supabase race where a
-  brand-new user has no `workout_plans` row yet. Library should render
-  empty-but-inviting, not crash.
+- `[x]` useDailyStateV2 — verified safe: maybeSingle() returns null (not error) for missing workout_plans, plan derived value guards on !rawPlan, all queries wrapped in sq().
 - `[x]` PhotoScan web path — App.jsx onCapture now guards on null dataUrl; no-op if capture failed instead of navigating to confirm.
 - `[ ]` Food search — empty query flash. Already handled, but validate
   debounce cancellation on rapid typing.
@@ -154,6 +152,4 @@ STILL SHELL (lower priority — detail/secondary screens):
   186P/286C/79F). Should compute from steps 1-3 input.
 - `[ ]` 19 v2 production routes have no canvas design — see PRODUCT_AUDIT.md.
 - `[ ]` V3 gallery footer says "35 screens" but there are now 50+.
-- `[ ]` Exercise catalog is duplicated: v2/workouts/ExerciseLibrary.jsx (332
-  exercises) AND v3/lib/exerciseCatalog.js (same data). V2 file should
-  re-export from v3 lib to single-source it.
+- `[x]` Exercise catalog deduplication: v2/workouts/ExerciseLibrary.jsx now imports DEMO_EXERCISES from v3/lib/exerciseCatalog.js. File shrank 371 lines.
