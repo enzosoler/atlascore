@@ -5,7 +5,7 @@ import {
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
-function CrewRow({ p, rank, c }) {
+function CrewRow({ p, rank, c, onMessage }) {
   const valueKey = 'prs';
   const val = p[valueKey];
   return (
@@ -44,15 +44,18 @@ function CrewRow({ p, rank, c }) {
           {p.tonnes}t · {p.streak}d streak
         </div>
       </div>
-      <div style={{ textAlign: 'right' }}>
-        <ACNum size={22} color={rank === 1 ? c.accent : c.fg} weight={700}>{val}</ACNum>
-        <div style={{ fontFamily: ACFonts.mono, fontSize: 9, color: c.mute, letterSpacing: 0.5 }}>PRS</div>
+      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+        <div>
+          <ACNum size={22} color={rank === 1 ? c.accent : c.fg} weight={700}>{val}</ACNum>
+          <div style={{ fontFamily: ACFonts.mono, fontSize: 9, color: c.mute, letterSpacing: 0.5 }}>PRS</div>
+        </div>
+        <button type="button" onClick={() => { if (typeof onMessage === 'function') onMessage({ to: p.id, name: p.name }); }} style={{ padding: '6px 8px', fontSize: 11, borderRadius: 8, border: 'none', background: c.accent, color: c.ink, cursor: 'pointer' }}>Message</button>
       </div>
     </div>
   );
 }
 
-function S28_Crew({ dark = false }) {
+function S28_Crew({ dark = false, onInvite, onMessage }) {
   const c = useACT(dark);
   const me = { id: 'mk', name: 'You',      initials: 'MK', prs: 3, tonnes: 52, streak: 14, isMe: true };
   const crew = [
@@ -71,14 +74,14 @@ function S28_Crew({ dark = false }) {
             Training together
           </div>
         </div>
-        <div style={{
+        <button type="button" onClick={() => { if (typeof onInvite === 'function') onInvite({ source: 'crew', crewCount: crew.length }); }} style={{
           width: 34, height: 34, borderRadius: 999, background: c.card,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer',
         }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 2v10M2 7h10" stroke={c.fg} strokeWidth="2" strokeLinecap="round"/>
           </svg>
-        </div>
+        </button>
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: '14px 22px 20px' }}>
@@ -130,7 +133,7 @@ function S28_Crew({ dark = false }) {
         {/* Leaderboard */}
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column' }}>
           {crew.map((p, i) => (
-            <CrewRow key={p.id} p={p} rank={i + 1} c={c} />
+            <CrewRow key={p.id} p={p} rank={i + 1} c={c} onMessage={onMessage} />
           ))}
         </div>
 
