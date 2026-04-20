@@ -75,8 +75,8 @@ export function V3OnboardingPermissions() {
       <S11_Onboard_Permissions
         dark={theme === 'dark'}
         onBack={() => navigate('/onboarding/stats')}
-        onContinue={() => navigate('/app/today')}
-        onSkip={() => navigate('/app/today')}
+        onContinue={() => navigate('/onboarding/workout')}
+        onSkip={() => navigate('/onboarding/workout')}
       />
     </Wrap>
   );
