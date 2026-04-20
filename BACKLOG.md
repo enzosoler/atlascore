@@ -144,7 +144,7 @@ NEXT TARGET: S25_Program_Detail (training program preview with demo data that ne
   DONE: f807a43 (engineering implemented before lane split).
 - `[x]` V3AppShell.jsx + V3StandaloneLayout.jsx — data-v3 attr added to all root container divs. 7dbc1d1
 
-## Recent ships
+- d253909 fix(auth): tolerate non-event onSubmit calls in V3AuthLogin
 
 - 06ba1c9 fix(i18n): wire V3Today readiness label, momentum, and system integrity via t()
 - f1d21ef feat(i18n): wire DailyCheckinGate, V3MagicLinkSent, V3ExerciseDetail
