@@ -112,12 +112,12 @@ STILL SHELL (highest-leverage targets):
 - [x] S28_Crew -- members/weekStats/feed/weekHeadline props; leaderboard tab sorts live; crewCount from real array
 - [x] S37_Inbox -- filter chips stateful (live filter by type); onOpenItem emits {id,type,title}; badge shows hi-count
 - [x] S40_Billing -- typed payloads: onEditPayment({last4,brand}), onSwitchPlan({fromPlan,targetInterval}), onCancel({planName}), onOpenInvoice({invoiceId,date,amount})
-- [ ] S16_Biomarker_Detail -- gift moment (§12: lab result parsing); pure display, needs onShare/onFlag handlers
+- [x] S16_Biomarker_Detail -- 3-stage reveal (§12); onShare + typed payloads for onCoachCta/onAskCoach/onMore; scroll fixed
 - [ ] S34_Watch -- display-only by design; low priority
 
 NOTE: S33_Profile confirmed production-interactive (real props + handlers) — removed from shell list.
 
-NEXT TARGET: S16_Biomarker_Detail
+NEXT TARGET: S34_Watch (display-only by design — low priority) or S5_Paywall_B / S6_Weight_A (visual variants, no action needed)
 
 ## Handoffs (design → engineering)
 
