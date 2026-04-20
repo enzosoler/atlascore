@@ -8,6 +8,7 @@ import { getDailyCheckin, upsertDailyCheckin } from '@/services/checkinService';
 import { getToday } from '@/lib/atlas-theme';
 import { toast } from 'sonner';
 import { celebrateHeavy, tick, notifyError } from '@/lib/haptics';
+import { useT } from '@/lib/i18nContext';
 
 // Gate opens at or after 10:00 local time.
 function isPast10am() {
@@ -18,30 +19,7 @@ function localDateKey() {
   return getToday();
 }
 
-const MOOD_LABELS = ['', 'Very low', 'Low', 'Neutral', 'Good', 'Great'];
-
-const STEPS = [
-  {
-    key: 'intro',
-    title: 'Quick check-in',
-    subtitle: 'A short pause keeps the trendline honest.',
-  },
-  {
-    key: 'recovery',
-    title: 'Recovery',
-    subtitle: 'Sleep and hydration set the context for today.',
-  },
-  {
-    key: 'state',
-    title: 'State of the day',
-    subtitle: 'Energy and mood tell us how the day is landing.',
-  },
-  {
-    key: 'review',
-    title: 'Review and save',
-    subtitle: 'Add a note if there is any context worth remembering.',
-  },
-];
+const STEP_KEYS = ['intro', 'recovery', 'state', 'review'];
 
 const DEFAULT_VALS = {
   sleep_hours: 7,
@@ -92,6 +70,14 @@ export default function DailyCheckinGate() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const today = localDateKey();
+  const t = useT();
+
+  const MOOD_LABELS = ['', t('checkin.moodLabels.veryLow'), t('checkin.moodLabels.low'), t('checkin.moodLabels.neutral'), t('checkin.moodLabels.good'), t('checkin.moodLabels.great')];
+  const STEPS = STEP_KEYS.map((key) => ({
+    key,
+    title: t(`checkin.steps.${key}.title`),
+    subtitle: t(`checkin.steps.${key}.subtitle`),
+  }));
 
   // Track whether it's past 10am. Re-evaluate on visibility changes.
   const [past10, setPast10] = useState(isPast10am);
@@ -149,10 +135,10 @@ export default function DailyCheckinGate() {
       queryClient.invalidateQueries({ queryKey: ['daily-checkin', user.id] });
       queryClient.invalidateQueries({ queryKey: ['daily-checkins', user.id] });
       celebrateHeavy();
-      toast.success('Check-in saved');
+      toast.success(t('checkin.toastSaved'));
     } catch (err) {
       notifyError();
-      toast.error('Could not save check-in. Try again.');
+      toast.error(t('checkin.toastError'));
       console.error('[DailyCheckinGate]', err);
     } finally {
       setSaving(false);
@@ -180,7 +166,7 @@ export default function DailyCheckinGate() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={2} />
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--brand))]">
-                Daily check-in
+                {t('checkin.eyebrow')}
               </p>
             </div>
             <div className="rounded-full border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--fill)/0.42)] px-3 py-1 text-[11px] font-semibold text-[hsl(var(--fg-2))]">
@@ -212,14 +198,14 @@ export default function DailyCheckinGate() {
           {stepIndex === 0 && (
             <div className="space-y-4 rounded-[24px] border border-[hsl(var(--border)/0.75)] bg-[linear-gradient(180deg,hsl(var(--fill)/0.28)_0%,hsl(var(--card))_100%)] px-4 py-4">
               <p className="text-[13px] leading-6 text-[hsl(var(--fg-2))]">
-                Record a calm snapshot of how today is landing. The app only uses the fields you already log.
+                {t('checkin.introBody')}
               </p>
               <div className="grid gap-2.5 sm:grid-cols-2">
                 {[
-                  { icon: Moon, label: 'Sleep' },
-                  { icon: Droplets, label: 'Hydration' },
-                  { icon: Zap, label: 'Energy' },
-                  { icon: Smile, label: 'Mood' },
+                  { icon: Moon, label: t('checkin.labels.sleep') },
+                  { icon: Droplets, label: t('checkin.labels.hydration') },
+                  { icon: Zap, label: t('checkin.labels.energy') },
+                  { icon: Smile, label: t('checkin.labels.mood') },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-2 rounded-[16px] border border-[hsl(var(--border)/0.65)] bg-[hsl(var(--card)/0.76)] px-3 py-2.5">
                     <item.icon className="h-4 w-4 text-[hsl(var(--brand))]" strokeWidth={1.9} />
@@ -232,7 +218,7 @@ export default function DailyCheckinGate() {
                 onClick={() => setStepIndex(1)}
                 className="h-11 w-full rounded-[16px] bg-[hsl(var(--primary))] text-[14px] font-semibold text-white hover:bg-[hsl(var(--primary)/0.9)]"
               >
-                Start check-in
+                {t('checkin.startBtn')}
                 <ChevronRight className="ml-1.5 h-4 w-4" strokeWidth={2} />
               </Button>
             </div>
@@ -241,7 +227,7 @@ export default function DailyCheckinGate() {
           {stepIndex === 1 && (
             <div className="space-y-3.5">
               <MetricRow
-                label="Sleep"
+                label={t('checkin.labels.sleep')}
                 icon={Moon}
                 value={vals.sleep_hours}
                 format={(v) => `${Number(v).toFixed(1)}h`}
@@ -251,7 +237,7 @@ export default function DailyCheckinGate() {
                 onChange={(value) => setValue('sleep_hours', value)}
               />
               <MetricRow
-                label="Hydration"
+                label={t('checkin.labels.hydration')}
                 icon={Droplets}
                 value={vals.hydration_liters}
                 format={(v) => `${Number(v).toFixed(1)}L`}
@@ -266,7 +252,7 @@ export default function DailyCheckinGate() {
           {stepIndex === 2 && (
             <div className="space-y-3.5">
               <MetricRow
-                label="Energy"
+                label={t('checkin.labels.energy')}
                 icon={Zap}
                 value={vals.energy}
                 format={(v) => `${v}/5`}
@@ -276,7 +262,7 @@ export default function DailyCheckinGate() {
                 onChange={(value) => setValue('energy', value)}
               />
               <MetricRow
-                label="Mood"
+                label={t('checkin.labels.mood')}
                 icon={Smile}
                 value={vals.mood}
                 format={(v) => MOOD_LABELS[v] || `${v}/5`}
@@ -292,29 +278,29 @@ export default function DailyCheckinGate() {
             <div className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-[20px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Sleep</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{t('checkin.labels.sleep')}</p>
                   <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{Number(vals.sleep_hours).toFixed(1)}h</p>
                 </div>
                 <div className="rounded-[20px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Hydration</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{t('checkin.labels.hydration')}</p>
                   <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{Number(vals.hydration_liters).toFixed(1)}L</p>
                 </div>
                 <div className="rounded-[20px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Energy</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{t('checkin.labels.energy')}</p>
                   <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{vals.energy}/5</p>
                 </div>
                 <div className="rounded-[20px] border border-[hsl(var(--border)/0.72)] bg-[hsl(var(--fill)/0.3)] px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">Mood</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--fg-3))]">{t('checkin.labels.mood')}</p>
                   <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--fg))]">{MOOD_LABELS[vals.mood] || `${vals.mood}/5`}</p>
                 </div>
               </div>
 
               <label className="block rounded-[24px] border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--card)/0.85)] px-4 py-4">
-                <span className="text-[13px] font-medium text-[hsl(var(--fg-2))]">Optional note</span>
+                <span className="text-[13px] font-medium text-[hsl(var(--fg-2))]">{t('checkin.optionalNote')}</span>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Anything that makes today's score make sense?"
+                  placeholder={t('checkin.notePlaceholder')}
                   rows={4}
                   className="mt-2 w-full resize-none rounded-[16px] border border-[hsl(var(--border)/0.75)] bg-[hsl(var(--fill)/0.28)] px-3 py-3 text-[14px] text-[hsl(var(--fg))] placeholder:text-[hsl(var(--fg-3))] focus:border-[hsl(var(--brand))] focus:outline-none"
                 />
@@ -331,7 +317,7 @@ export default function DailyCheckinGate() {
             className="inline-flex items-center gap-1 text-[13px] font-semibold text-[hsl(var(--fg-3))] disabled:opacity-40"
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-            Back
+            {t('checkin.back')}
           </button>
 
           {stepIndex < 3 ? (
@@ -340,7 +326,7 @@ export default function DailyCheckinGate() {
               onClick={() => setStepIndex((prev) => Math.min(3, prev + 1))}
               className="h-11 rounded-[16px] bg-[hsl(var(--primary))] px-5 text-[14px] font-semibold text-white hover:bg-[hsl(var(--primary)/0.9)]"
             >
-              Next
+              {t('checkin.next')}
               <ChevronRight className="ml-1.5 h-4 w-4" strokeWidth={2} />
             </Button>
           ) : (
@@ -349,7 +335,7 @@ export default function DailyCheckinGate() {
               disabled={saving}
               className="h-11 rounded-[16px] bg-[hsl(var(--primary))] px-5 text-[14px] font-semibold text-white hover:bg-[hsl(var(--primary)/0.9)] disabled:opacity-60"
             >
-              {saving ? 'Saving…' : 'Save check-in'}
+              {saving ? t('checkin.saving') : t('checkin.saveBtn')}
             </Button>
           )}
         </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import { ACFonts, useACT, ACLabel, ACBtn, ACBrand } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
@@ -20,6 +21,7 @@ function mailClientUrl(email) {
 function MagicLinkState() {
   const [params] = useSearchParams();
   const { theme } = useTheme();
+  const t = useT();
   const dark = theme === 'dark';
   const c = useACT(dark);
   const email = params.get('email') || '';
@@ -39,7 +41,7 @@ function MagicLinkState() {
       if (err) throw err;
       setResent(true);
     } catch (err) {
-      setError(err?.message || 'Could not resend the link.');
+      setError(err?.message || t('magicLink.errorFallback'));
     } finally {
       setSending(false);
     }
@@ -50,7 +52,7 @@ function MagicLinkState() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <HeartMark size={20} color={c.fg} accent={c.accent} />
         <ACLabel size={11} color={c.mute} style={{ fontFamily: ACFonts.mono, letterSpacing: 0.6, textTransform: 'uppercase' }}>
-          Check inbox
+          {t('magicLink.eyebrow')}
         </ACLabel>
       </div>
 
@@ -63,16 +65,16 @@ function MagicLinkState() {
         </div>
 
         <div style={{ marginTop: 22, fontFamily: ACFonts.brand, fontSize: 42, letterSpacing: -1.8, lineHeight: 0.92, textTransform: 'lowercase' }}>
-          check your
+          {t('magicLink.headingLine1')}
           <br />
-          <span style={{ color: c.accent }}>email.</span>
+          <span style={{ color: c.accent }}>{t('magicLink.headingAccent')}</span>
         </div>
 
         <div style={{ marginTop: 14, fontSize: 15, lineHeight: 1.6, color: c.dim, maxWidth: 310 }}>
           {email ? (
-            <>We sent a sign-in link to <span style={{ color: c.fg, fontWeight: 600 }}>{email}</span>. Tap it and you&apos;re in.</>
+            <>{t('magicLink.bodyWithEmail').split('{email}')[0]}<span style={{ color: c.fg, fontWeight: 600 }}>{email}</span>{t('magicLink.bodyWithEmail').split('{email}')[1]}</>
           ) : (
-            <>We sent you a sign-in link. Tap it from your inbox and you&apos;re in.</>
+            <>{t('magicLink.bodyNoEmail')}</>
           )}
         </div>
 
@@ -80,21 +82,21 @@ function MagicLinkState() {
           <div style={{ marginTop: 14, fontSize: 13, color: ACBrand.error, lineHeight: 1.5 }}>{error}</div>
         ) : null}
         {resent ? (
-          <div style={{ marginTop: 14, fontSize: 13, color: c.accent, lineHeight: 1.5 }}>Link resent. Check again in a moment.</div>
+          <div style={{ marginTop: 14, fontSize: 13, color: c.accent, lineHeight: 1.5 }}>{t('magicLink.resentConfirm')}</div>
         ) : null}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <ACBtn primary block dark={dark} size="lg" pill onClick={() => { window.location.href = mailClientUrl(email); }}>
-          Open mail app →
+          {t('magicLink.openMailApp')}
         </ACBtn>
         <ACBtn block dark={dark} size="lg" pill onClick={resend} style={{ opacity: !email || sending || resent ? 0.5 : 1 }}>
-          {resent ? 'Sent' : sending ? 'Sending…' : 'Resend link'}
+          {resent ? t('magicLink.sent') : sending ? t('magicLink.sending') : t('magicLink.resend')}
         </ACBtn>
         <div style={{ textAlign: 'center', paddingTop: 4, fontSize: 13, color: c.dim }}>
-          Wrong email?{' '}
+          {t('magicLink.wrongEmail')}{' '}
           <Link to="/auth/login" style={{ color: c.fg, fontWeight: 600, textDecoration: 'none' }}>
-            Go back
+            {t('magicLink.goBack')}
           </Link>
         </div>
       </div>

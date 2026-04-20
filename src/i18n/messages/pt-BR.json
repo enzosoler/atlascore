@@ -3655,6 +3655,10 @@
       "loading_subtitle": "Buscando as correspondências e metadados de exercícios.",
       "empty_title": "Nenhum exercício encontrado",
       "empty_description": "Tente um termo de busca mais amplo ou limpe os filtros ativos para reabrir o catálogo completo."
+    },
+    "detail": {
+      "favoritingComingSoon": "Favoritar exercícios em breve",
+      "historyComingSoon": "Visualização completa do histórico em breve"
     }
   },
   "myWorkout": {
@@ -4302,5 +4306,65 @@
   "subscriptionManage": {
     "cancelToast": "Para cancelar sua assinatura, envie um e-mail para support@useatlascore.com",
     "cancelToastDesc": "Cancelamento pelo site disponível em breve."
+  },
+  "magicLink": {
+    "eyebrow": "Verifique o e-mail",
+    "heading": "verifique seu e-mail.",
+    "bodyWithEmail": "Enviamos um link de acesso para {email}. Toque nele e pronto.",
+    "bodyNoEmail": "Enviamos um link de acesso. Toque nele na sua caixa de entrada.",
+    "resentConfirm": "Link reenviado. Verifique em instantes.",
+    "errorFallback": "Não foi possível reenviar o link.",
+    "openMailApp": "Abrir e-mail →",
+    "sent": "Enviado",
+    "sending": "Enviando…",
+    "resend": "Reenviar link",
+    "wrongEmail": "E-mail errado?",
+    "goBack": "Voltar",
+    "headingLine1": "verifique seu",
+    "headingAccent": "e-mail."
+  },
+  "checkin": {
+    "eyebrow": "Check-in diário",
+    "steps": {
+      "intro": {
+        "title": "Check-in rápido",
+        "subtitle": "Uma pausa curta mantém a linha de tendência honesta."
+      },
+      "recovery": {
+        "title": "Recuperação",
+        "subtitle": "Sono e hidratação definem o contexto do dia."
+      },
+      "state": {
+        "title": "Estado do dia",
+        "subtitle": "Energia e humor mostram como o dia está indo."
+      },
+      "review": {
+        "title": "Revisar e salvar",
+        "subtitle": "Adicione uma nota se houver contexto importante."
+      }
+    },
+    "moodLabels": {
+      "veryLow": "Muito baixo",
+      "low": "Baixo",
+      "neutral": "Neutro",
+      "good": "Bom",
+      "great": "Ótimo"
+    },
+    "toastSaved": "Check-in salvo",
+    "toastError": "Não foi possível salvar o check-in. Tente novamente.",
+    "introBody": "Registre um snapshot calmo de como hoje está. O app usa apenas os campos que você já registra.",
+    "labels": {
+      "sleep": "Sono",
+      "hydration": "Hidratação",
+      "energy": "Energia",
+      "mood": "Humor"
+    },
+    "startBtn": "Iniciar check-in",
+    "optionalNote": "Nota opcional",
+    "notePlaceholder": "Algo que explique o resultado de hoje?",
+    "back": "Voltar",
+    "next": "Próximo",
+    "saving": "Salvando…",
+    "saveBtn": "Salvar check-in"
   }
 }

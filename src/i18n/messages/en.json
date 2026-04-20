@@ -3669,6 +3669,10 @@
       "loading_subtitle": "Pulling the latest exercise matches and metadata.",
       "empty_title": "No exercises found",
       "empty_description": "Try a broader search term or clear the active filters to reopen the full catalog."
+    },
+    "detail": {
+      "favoritingComingSoon": "Favoriting exercises is coming soon",
+      "historyComingSoon": "Full history view coming soon"
     }
   },
   "myWorkout": {
@@ -4311,5 +4315,65 @@
   "subscriptionManage": {
     "cancelToast": "To cancel your subscription, email support@useatlascore.com",
     "cancelToastDesc": "Web cancellation is coming soon."
+  },
+  "magicLink": {
+    "eyebrow": "Check inbox",
+    "heading": "check your email.",
+    "bodyWithEmail": "We sent a sign-in link to {email}. Tap it and you're in.",
+    "bodyNoEmail": "We sent you a sign-in link. Tap it from your inbox and you're in.",
+    "resentConfirm": "Link resent. Check again in a moment.",
+    "errorFallback": "Could not resend the link.",
+    "openMailApp": "Open mail app →",
+    "sent": "Sent",
+    "sending": "Sending…",
+    "resend": "Resend link",
+    "wrongEmail": "Wrong email?",
+    "goBack": "Go back",
+    "headingLine1": "check your",
+    "headingAccent": "email."
+  },
+  "checkin": {
+    "eyebrow": "Daily check-in",
+    "steps": {
+      "intro": {
+        "title": "Quick check-in",
+        "subtitle": "A short pause keeps the trendline honest."
+      },
+      "recovery": {
+        "title": "Recovery",
+        "subtitle": "Sleep and hydration set the context for today."
+      },
+      "state": {
+        "title": "State of the day",
+        "subtitle": "Energy and mood tell us how the day is landing."
+      },
+      "review": {
+        "title": "Review and save",
+        "subtitle": "Add a note if there is any context worth remembering."
+      }
+    },
+    "moodLabels": {
+      "veryLow": "Very low",
+      "low": "Low",
+      "neutral": "Neutral",
+      "good": "Good",
+      "great": "Great"
+    },
+    "toastSaved": "Check-in saved",
+    "toastError": "Could not save check-in. Try again.",
+    "introBody": "Record a calm snapshot of how today is landing. The app only uses the fields you already log.",
+    "labels": {
+      "sleep": "Sleep",
+      "hydration": "Hydration",
+      "energy": "Energy",
+      "mood": "Mood"
+    },
+    "startBtn": "Start check-in",
+    "optionalNote": "Optional note",
+    "notePlaceholder": "Anything that makes today's score make sense?",
+    "back": "Back",
+    "next": "Next",
+    "saving": "Saving…",
+    "saveBtn": "Save check-in"
   }
 }

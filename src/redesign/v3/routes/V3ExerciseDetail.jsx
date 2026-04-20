@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import { findExerciseById } from '../lib/exerciseCatalog.js';
 import { getPersonalBest, getSetsForExercise } from '@/lib/workoutsService';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
@@ -64,6 +65,7 @@ export default function V3ExerciseDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { theme } = useTheme();
+  const t = useT();
   const exercise = useMemo(() => findExerciseById(id), [id]);
   const [sets, setSets] = useState([]);
   const [best, setBest] = useState(null);
@@ -105,8 +107,8 @@ export default function V3ExerciseDetail() {
         cues={buildCues(exercise)}
         muscleEngagement={buildMuscleEngagement(exercise)}
         onBack={() => navigate(-1)}
-        onSave={() => toast('Favoriting exercises is coming soon')}
-        onOpenHistory={() => toast('Full history view coming soon')}
+        onSave={() => toast(t('exercises.detail.favoritingComingSoon'))}
+        onOpenHistory={() => toast(t('exercises.detail.historyComingSoon'))}
         onLogSet={() => navigate('/app/workouts/active')}
       />
     </V3StandaloneLayout>
