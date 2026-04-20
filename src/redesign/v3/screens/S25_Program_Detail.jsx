@@ -40,6 +40,7 @@ const DEMO_WAVES = [
 
 function S25_Program_Detail({
   dark = false,
+  program = null, // optional program object
   programCode = 'PROGRAM 014',
   matchLabel = '86% match · strength focus',
   title = '5/3/1 BBB',
@@ -58,11 +59,26 @@ function S25_Program_Detail({
   onStartProgram,
 }) {
   const c = useACT(dark);
+  const programId = (program && program.id) || programCode;
   const hasAccentWord = Boolean(accentWord && accentWord.trim());
   const plainTitle = hasAccentWord ? title.replace(accentWord, '').trim() : title;
   const _stats = stats || DEMO_STATS;
   const _adaptations = adaptations || DEMO_ADAPTATIONS;
   const _waves = waves || DEMO_WAVES;
+
+  // Small, safe wrappers that define the design->engine prop contract.
+  const handleSave = () => {
+    if (typeof onSave === 'function') {
+      onSave({ programId, title, savedAt: Date.now() });
+    }
+  };
+  const handlePreview = (week = 1) => {
+    if (typeof onPreviewWeek === 'function') onPreviewWeek({ programId, week });
+  };
+  const handleStart = (opts = {}) => {
+    if (typeof onStartProgram === 'function') onStartProgram({ programId, startedAt: Date.now(), ...opts });
+  };
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -71,7 +87,7 @@ function S25_Program_Detail({
         </button>
         <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.25 }}>{programCode}</ACLabel>
         {onSave ? (
-          <button type="button" onClick={onSave} style={{
+          <button type="button" onClick={handleSave} style={{
             width: 28, height: 28, borderRadius: 999, background: c.card,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: 'none', cursor: 'pointer',
@@ -178,7 +194,7 @@ function S25_Program_Detail({
             Wave structure · 4 wk block
           </ACLabel>
           <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {weeks.map((w, i) => (
+            {_waves.map((w, i) => (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: 14,
                 padding: '14px 16px',
@@ -232,10 +248,10 @@ function S25_Program_Detail({
 
         <div style={{ padding: '12px 22px 22px', display: 'flex', gap: 8, background: c.bg }}>
           <div style={{ flex: 1 }}>
-          <ACBtn dark={dark} size="lg" pill block onClick={onPreviewWeek}>Preview week</ACBtn>
+          <ACBtn dark={dark} size="lg" pill block onClick={() => handlePreview(1)}>Preview week</ACBtn>
           </div>
           <div style={{ flex: 1.3 }}>
-          <ACBtn primary dark={dark} size="lg" pill block onClick={onStartProgram}>Start program →</ACBtn>
+          <ACBtn primary dark={dark} size="lg" pill block onClick={() => handleStart()}>Start program →</ACBtn>
           </div>
         </div>
     </div>
