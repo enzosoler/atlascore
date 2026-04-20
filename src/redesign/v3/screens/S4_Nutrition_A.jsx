@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   ACFonts, ACRadii, useACT,
-  ACLabel, ACMono, ACNum, ACBtn,
-  ACHeader, ACTabBar, CaptureIcon,
+  ACLabel, ACNum, ACChip, ACTabBar, CaptureIcon,
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 
@@ -289,7 +288,7 @@ function S4_Nutrition_A({ dark = false, macros, meals, onCapture, onOpenMeal, on
         })()}
       </div>
 
-      {arguments[0]?.showTabBar !== false ? <ACTabBar active="eat" dark={dark} HeartMarkComp={HeartMark} /> : null}
+      {showTabBar ? <ACTabBar active="eat" dark={dark} HeartMarkComp={HeartMark} /> : null}
     </div>
   );
 }
