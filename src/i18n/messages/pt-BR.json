@@ -4415,5 +4415,24 @@
     "next": "Próximo",
     "saving": "Salvando…",
     "saveBtn": "Salvar check-in"
+  },
+  "marketing": {
+    "nav": {
+      "theApp": "O app",
+      "method": "Método",
+      "labs": "Labs",
+      "pricing": "Planos",
+      "terms": "Termos",
+      "privacy": "Privacidade"
+    },
+    "cta": {
+      "signIn": "Entrar",
+      "getApp": "baixar o app",
+      "downloadApp": "baixar o app",
+      "startWeb": "começar na web"
+    },
+    "footer": {
+      "copyright": "© 2026 atlas.core · registros do corpo"
+    }
   }
 }

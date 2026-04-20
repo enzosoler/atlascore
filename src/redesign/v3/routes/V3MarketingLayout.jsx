@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { HeartMark } from '@/redesign/v3/lib/brandMarks.jsx';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 
 /**
  * Marketing page palette — light-mode only, derived from ACBrand tokens.
@@ -122,6 +122,7 @@ function CTA({ to, children, primary = false }) {
 
 export default function V3MarketingLayout({ eyebrow, title, intro, children, hideCTAs = false }) {
   const { pathname } = useLocation();
+  const t = useT();
   return (
     <div style={{ minHeight: '100vh', background: ACBrand.paper, color: ACBrand.ink, fontFamily: ACFonts.body }}>
       <style>{`
@@ -176,16 +177,16 @@ export default function V3MarketingLayout({ eyebrow, title, intro, children, hid
         </Link>
 
         <div className="mkt-nav-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          <NavItem to="/the-app">The app</NavItem>
-          <NavItem to="/method">Method</NavItem>
-          <NavItem to="/labs">Labs</NavItem>
-          <NavItem to="/pricing">Pricing</NavItem>
+          <NavItem to="/the-app">{t('marketing.nav.theApp')}</NavItem>
+          <NavItem to="/method">{t('marketing.nav.method')}</NavItem>
+          <NavItem to="/labs">{t('marketing.nav.labs')}</NavItem>
+          <NavItem to="/pricing">{t('marketing.nav.pricing')}</NavItem>
         </div>
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <LocaleToggle />
-          <CTA to="/webapp">Sign in</CTA>
-          <CTA to="/download-app" primary>get the app</CTA>
+          <CTA to="/webapp">{t('marketing.cta.signIn')}</CTA>
+          <CTA to="/download-app" primary>{t('marketing.cta.getApp')}</CTA>
         </div>
       </div>
 
@@ -212,8 +213,8 @@ export default function V3MarketingLayout({ eyebrow, title, intro, children, hid
 
         {!hideCTAs && (
           <div style={{ marginTop: 28, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <CTA to="/download-app" primary>download the app</CTA>
-            <CTA to="/webapp">start on web</CTA>
+            <CTA to="/download-app" primary>{t('marketing.cta.downloadApp')}</CTA>
+            <CTA to="/webapp">{t('marketing.cta.startWeb')}</CTA>
           </div>
         )}
 
@@ -236,10 +237,10 @@ export default function V3MarketingLayout({ eyebrow, title, intro, children, hid
           color: MC.dim,
         }}
       >
-        <span>&copy; 2026 atlas.core &middot; field notes from the body</span>
+        <span>{t('marketing.footer.copyright')}</span>
         <span style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
-          <NavItem to="/terms">Terms</NavItem>
-          <NavItem to="/privacy">Privacy</NavItem>
+          <NavItem to="/terms">{t('marketing.nav.terms')}</NavItem>
+          <NavItem to="/privacy">{t('marketing.nav.privacy')}</NavItem>
         </span>
       </div>
     </div>

@@ -4424,5 +4424,24 @@
     "next": "Next",
     "saving": "Saving…",
     "saveBtn": "Save check-in"
+  },
+  "marketing": {
+    "nav": {
+      "theApp": "The app",
+      "method": "Method",
+      "labs": "Labs",
+      "pricing": "Pricing",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    },
+    "cta": {
+      "signIn": "Sign in",
+      "getApp": "get the app",
+      "downloadApp": "download the app",
+      "startWeb": "start on web"
+    },
+    "footer": {
+      "copyright": "© 2026 atlas.core · field notes from the body"
+    }
   }
 }
