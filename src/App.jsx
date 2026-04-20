@@ -332,14 +332,17 @@ function PhotoScanRoute() {
       onCapture={(result) => {
         // Stash the captured photo on window (size can be large; URL params
         // would break on JPEGs). PhotoScanConfirm picks it up synchronously.
+        if (!result?.dataUrl) {
+          // Permission was blocked or capture failed — don't navigate to confirm.
+          // The PhotoScan screen already shows the denied/error state; just return.
+          return;
+        }
         try {
-          if (result?.dataUrl) {
-            window.__acCapturedPhoto = {
-              dataUrl: result.dataUrl,
-              format: result.format || 'jpeg',
-              timestamp: result.timestamp || Date.now(),
-            };
-          }
+          window.__acCapturedPhoto = {
+            dataUrl: result.dataUrl,
+            format: result.format || 'jpeg',
+            timestamp: result.timestamp || Date.now(),
+          };
         } catch {}
         navigate('/app/nutrition/photo/confirm');
       }}

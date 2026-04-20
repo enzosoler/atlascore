@@ -47,9 +47,7 @@ Legend
 - `[ ]` useDailyStateV2 — confirm it handles the Supabase race where a
   brand-new user has no `workout_plans` row yet. Library should render
   empty-but-inviting, not crash.
-- `[ ]` PhotoScan web path — if getUserMedia fails (blocked permission) the
-  shutter still calls onCapture with dataUrl=null. Route handler needs to
-  branch on null and show an error state instead of navigating to confirm.
+- `[x]` PhotoScan web path — App.jsx onCapture now guards on null dataUrl; no-op if capture failed instead of navigating to confirm.
 - `[ ]` Food search — empty query flash. Already handled, but validate
   debounce cancellation on rapid typing.
 
@@ -65,8 +63,7 @@ Legend
 - `[ ]` src/pages/ — 124 files / ~1.5MB of dead code from v1 era. Zero
   imports from App.jsx. Separate cleanup task; verify no lazy-import paths
   reference it before deleting.
-- `[ ]` V3Settings — drop the unused `useSubscription` import + sanity-check
-  every row key has a routeMap entry or an explicit handler.
+- `[x]` V3Settings — useSubscription import already absent; verified clean.
 - `[ ]` App.jsx is 1600+ lines. Many Route wrappers could be extracted to
   their own files in src/redesign/v3/routes/.
 
