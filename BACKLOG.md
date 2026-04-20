@@ -91,33 +91,46 @@ Legend
 
 ## Design-shells to harden
 
-Full audit 2026-04-19. PROD=real inputs+real onSave, SEMI=some state
+Full audit 2026-04-20. PROD=real inputs+real onSave, SEMI=some state
 but incomplete, SHELL=display-only/hardcoded.
-PROD (confirmed production-interactive after 2026-04-19 re-audit):
-- S2_Today_A, S3_Workout_A, S4_Nutrition_A (bug fixed), S6_Weight_B,
+PROD (confirmed production-interactive after 2026-04-20 re-audit):
+- S2_Today_A, S3_Workout_A, S4_Nutrition_A, S6_Weight_B,
   S7_Onboard_Identity, S8_Onboard_Goal, S9_Onboard_Activity,
-  S12_Coach_Chat, S14_Body_Dashboard, S17_Measurements_Entry,
-  S22_Notifications (wired this session), S24_Library,
-  S35_Search, S36_Auth (wired this session), S38_Food_Detail,
-  S39_Recipe_Builder, S41_Errors (wired this session),
-  S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose,
-  S11_Onboard_Permissions (wired this session),
-  S10_Onboard_Plan (wired this session),
-  S13_Coach_Brief (wired this session),
-  S15_Labs_Inbox (wired this session)
+  S10_Onboard_Plan, S11_Onboard_Permissions, S12_Coach_Chat,
+  S13_Coach_Brief, S14_Body_Dashboard, S15_Labs_Inbox,
+  S17_Measurements_Entry, S22_Notifications, S24_Library,
+  S35_Search, S36_Auth, S38_Food_Detail, S39_Recipe_Builder,
+  S41_Errors, S44_Protocols_Empty_Locked, S46_Protocol_Form, S48_Log_Dose
 
-STILL SHELL (lower priority — detail/secondary screens):
-- [ ] S32_Capture — mode switcher only; capture is native-dependent (Capacitor)
-- [ ] S5_Paywall_A — plan toggle works; onStartTrial(planId) already correct
-- S1_Splash_A/B,
-  S16_Biomarker_Detail,
-...
+STILL SHELL (highest-leverage targets):
+- [ ] S1_Splash_A -- onGetStarted/onSignIn callbacks are no-op; needs routing integration
+- [ ] S5_Paywall_A -- plan toggle works but onStartTrial(planId) needs payment wiring  
+- [ ] S16_Biomarker_Detail -- static demo data; needs onRefresh/onDownload handlers
+- [ ] S18_Progress_Photos -- "coming soon" toast; needs onCapture/onCompare flows
+- [ ] S19_Settings -- toggles are local state; needs persistence via onPreferenceChange
+- [ ] S20_PR_Gallery -- static grid; needs onSelectPhoto/onShare handlers
+- [ ] S21_Share_Card -- static preview; needs onGenerateShare/onExport handlers
+- [ ] S23_Empty_States -- static illustrations; needs contextual onAction handlers
+- [ ] S25_Program_Detail -- demo program; needs onEnroll/onPreview handlers
+- [ ] S26_Calendar -- static dates; needs onSelectDate/onAddSession handlers
+- [ ] S27_Exercise_Detail -- demo exercise; needs onFavorite/onLog handlers
+- [ ] S28_Crew -- demo members; needs onInvite/onMessage handlers
+- [ ] S29_Workout_Summary -- static summary; needs onShare/onRepeat handlers
+- [ ] S30_Weekly_Recap -- demo data; needs onExport/onDrillDown handlers
+- [ ] S31_Sleep_Detail -- static sleep; needs onRefresh/onCompare handlers
+- [ ] S32_Capture -- mode switcher works; capture needs native Capacitor integration
+- [ ] S33_Profile -- static profile; needs onEditField/onPhoto handlers
+- [ ] S34_Watch -- demo watch; needs onSync/onConfigure handlers
+- [ ] S37_Inbox -- static messages; needs onOpen/onArchive handlers
+- [ ] S40_Billing -- demo billing; needs onEditPayment/onSwitchPlan handlers
+
+NEXT TARGET: S32_Capture (mode switcher works but needs onScanResult/onCameraCapture/onVoiceTranscribe callbacks for real native integration)
+
 ## Handoffs (design → engineering)
 
 - `[ ]` 2026-04-19 — V3LabsPage.jsx (or similar) — Wire S15_Labs_Inbox to handle onUpload (panel) and onOpenPanel. Current local state is demo-only.
 - `[ ]` 2026-04-19 — V3CoachChat.jsx (or similar) — Wire S13_Coach_Brief to handle onToggleMove. It now has local state for checkboxes but needs persistence if desired.
 
-...
 ## Handoffs (design → engineering)
 
 - `[ ]` 2026-04-19 — V3CoachChat.jsx (or similar) — Wire S13_Coach_Brief to handle onToggleMove. It now has local state for checkboxes but needs persistence if desired.

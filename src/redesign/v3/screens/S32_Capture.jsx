@@ -4,7 +4,7 @@ import {
   ACLabel,
 } from '../lib/paper.jsx';
 
-function CaptureScan({ c, dark }) {
+function CaptureScan({ c, dark, onScanResult, onAddItem }) {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
       {/* Viewfinder area */}
@@ -69,17 +69,32 @@ function CaptureScan({ c, dark }) {
               170 kcal · 26P · 8C · 4.5F · 14 fl oz
             </div>
           </div>
-          <div style={{
-            padding: '8px 14px', background: c.accent, color: c.ink,
-            fontSize: 12, fontWeight: 700, borderRadius: 999,
-          }}>Add</div>
+          <button 
+            type="button"
+            onClick={() => onAddItem?.({
+              name: 'Core Power chocolate',
+              brand: 'FairLife 26g',
+              barcode: '0123456789012',
+              nutrition: {
+                kcal: 170,
+                protein: 26,
+                carbs: 8,
+                fat: 4.5,
+                serving: '14 fl oz'
+              }
+            })}
+            style={{
+              padding: '8px 14px', background: c.accent, color: c.ink,
+              fontSize: 12, fontWeight: 700, borderRadius: 999,
+              border: 'none', cursor: 'pointer',
+            }}>Add</button>
         </div>
       </div>
     </div>
   );
 }
 
-function CaptureCamera({ c, dark }) {
+function CaptureCamera({ c, dark, onCameraCapture, onAddItem }) {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
       {/* fake photo frame w/ detected zones */}
@@ -96,14 +111,27 @@ function CaptureCamera({ c, dark }) {
           }} />
           {/* detection pins */}
           {[
-            { x: '25%', y: '30%', l: 'chicken', v: '6 oz' },
-            { x: '62%', y: '42%', l: 'rice',    v: '1 cup' },
-            { x: '72%', y: '72%', l: 'broccoli', v: '~2 cups' },
+            { x: '25%', y: '30%', l: 'chicken', v: '6 oz', nutrition: { kcal: 180, protein: 36, carbs: 0, fat: 4 } },
+            { x: '62%', y: '42%', l: 'rice',    v: '1 cup', nutrition: { kcal: 205, protein: 4, carbs: 44, fat: 0 } },
+            { x: '72%', y: '72%', l: 'broccoli', v: '~2 cups', nutrition: { kcal: 60, protein: 5, carbs: 12, fat: 0 } },
           ].map((p, i) => (
-            <div key={i} style={{
-              position: 'absolute', left: p.x, top: p.y,
-              transform: 'translate(-50%, -50%)',
-            }}>
+            <button
+              key={i}
+              type="button"
+              onClick={() => onAddItem?.({
+                name: p.l.charAt(0).toUpperCase() + p.l.slice(1),
+                serving: p.v,
+                nutrition: p.nutrition,
+                source: 'camera_ai',
+                confidence: 0.92
+              })}
+              style={{
+                position: 'absolute', left: p.x, top: p.y,
+                transform: 'translate(-50%, -50%)',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                padding: 0,
+              }}
+            >
               <div style={{
                 width: 12, height: 12, borderRadius: 999,
                 background: c.accent, border: '2px solid #efe9da',
@@ -116,9 +144,35 @@ function CaptureCamera({ c, dark }) {
                 fontFamily: ACFonts.mono, fontSize: 9, letterSpacing: 0.3,
                 whiteSpace: 'nowrap', fontWeight: 600,
               }}>{p.l.toUpperCase()} · {p.v}</div>
-            </div>
+            </button>
           ))}
         </div>
+      </div>
+
+      {/* Capture button overlay */}
+      <div style={{
+        position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+        zIndex: 10,
+      }}>
+        <button
+          type="button"
+          onClick={() => onCameraCapture?.({
+            timestamp: Date.now(),
+            mode: 'food_analysis',
+            mockData: true
+          })}
+          style={{
+            width: 64, height: 64, borderRadius: 999,
+            background: 'rgba(239,233,218,0.9)', border: '3px solid #efe9da',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          }}
+        >
+          <div style={{
+            width: 54, height: 54, borderRadius: 999,
+            background: c.accent, border: '2px solid #efe9da',
+          }} />
+        </button>
       </div>
 
       {/* Analysis card */}
@@ -156,7 +210,7 @@ function CaptureCamera({ c, dark }) {
   );
 }
 
-function CaptureVoice({ c, dark }) {
+function CaptureVoice({ c, dark, onVoiceTranscribe, onAddItem }) {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '0 22px', position: 'relative' }}>
       {/* Ring meter */}
@@ -194,17 +248,25 @@ function CaptureVoice({ c, dark }) {
       </div>
 
       {/* Transcribed line */}
-      <div style={{
-        marginTop: 22, width: '100%', padding: 18,
-        background: 'rgba(239,233,218,0.06)', borderRadius: ACRadii.card,
-      }}>
+      <button
+        type="button"
+        onClick={() => onVoiceTranscribe?.({
+          transcript: "Had a six ounce ribeye, sweet potato, and a handful of almonds",
+          confidence: 0.94,
+          timestamp: Date.now()
+        })}
+        style={{
+          marginTop: 22, width: '100%', padding: 18,
+          background: 'rgba(239,233,218,0.06)', borderRadius: ACRadii.card,
+          border: 'none', cursor: 'pointer',
+        }}>
         <div style={{
           fontSize: 17, color: '#efe9da', lineHeight: 1.45,
           letterSpacing: -0.3,
         }}>
-          "Had a <span style={{ color: c.accent, fontWeight: 600 }}>six ounce ribeye</span>, <span style={{ color: c.accent, fontWeight: 600 }}>sweet potato</span>, and a <span style={{ color: c.accent, fontWeight: 600 }}>handful of almonds</span>…"
+          "Had a <span style={{ color: c.accent, fontWeight: 600 }}>six ounce ribeye</span>, <span style={{ color: c.accent, fontWeight: 600 }}>sweet potato</span>, and a <span style={{ color: c.accent, fontWeight: 600 }}>handful of almonds</span>..."
         </div>
-      </div>
+      </button>
 
       {/* parsed items */}
       <div style={{
@@ -212,43 +274,80 @@ function CaptureVoice({ c, dark }) {
         display: 'flex', flexDirection: 'column', gap: 6,
       }}>
         {[
-          { t: 'Ribeye · 6 oz',           k: '420 · 48P' },
-          { t: 'Sweet potato · medium',    k: '105 · 2P' },
-          { t: 'Almonds · ~1 oz',          k: '164 · 6P' },
+          { t: 'Ribeye · 6 oz',           k: '420 · 48P', nutrition: { kcal: 420, protein: 48, carbs: 0, fat: 28 } },
+          { t: 'Sweet potato · medium',    k: '105 · 2P', nutrition: { kcal: 105, protein: 2, carbs: 24, fat: 0 } },
+          { t: 'Almonds · ~1 oz',          k: '164 · 6P', nutrition: { kcal: 164, protein: 6, carbs: 6, fat: 14 } },
         ].map((r, i) => (
-          <div key={i} style={{
-            padding: '10px 14px', background: 'rgba(239,233,218,0.94)',
-            color: c.ink, borderRadius: 10,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          }}>
+          <button
+            key={i}
+            type="button"
+            onClick={() => onAddItem?.({
+              name: r.t.split(' · ')[0],
+              serving: r.t.split(' · ')[1],
+              nutrition: r.nutrition,
+              source: 'voice_ai',
+              confidence: 0.94
+            })}
+            style={{
+              padding: '10px 14px', background: 'rgba(239,233,218,0.94)',
+              color: c.ink, borderRadius: 10,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              border: 'none', cursor: 'pointer',
+            }}
+          >
             <span style={{ fontSize: 13, fontWeight: 500 }}>{r.t}</span>
             <span style={{ fontFamily: ACFonts.mono, fontSize: 10, color: 'rgba(10,10,10,0.6)', letterSpacing: 0.3 }}>{r.k}</span>
-          </div>
+          </button>
         ))}
       </div>
     </div>
   );
 }
 
-export default function S32_Capture({ dark = false }) {
+/**
+ * S32_Capture -- fuel logging capture interface (barcode, camera, voice).
+ *
+ * Gallery:    <S32_Capture dark />
+ * Production: <S32_Capture dark onClose={fn} onScanResult={fn} onCameraCapture={fn} onVoiceTranscribe={fn} onAddItem={fn} />
+ *
+ * Props:
+ *   dark               -- light/dark variant
+ *   onClose            -- close/cancel handler
+ *   onScanResult       -- (barcodeData) => void -- barcode scan completed
+ *   onCameraCapture    -- (imageData) => void -- photo captured for AI analysis
+ *   onVoiceTranscribe  -- (transcript) => void -- voice transcription completed
+ *   onAddItem          -- (foodItem) => void -- add detected food item to log
+ */
+export default function S32_Capture({ 
+  dark = false, 
+  onClose,
+  onScanResult,
+  onCameraCapture, 
+  onVoiceTranscribe,
+  onAddItem,
+}) {
   const [active, setActive] = React.useState('scan');
   const c = useACT(dark);
   const views = {
-    scan: <CaptureScan c={c} dark={dark} />,
-    camera: <CaptureCamera c={c} dark={dark} />,
-    voice: <CaptureVoice c={c} dark={dark} />,
+    scan: <CaptureScan c={c} dark={dark} onScanResult={onScanResult} onAddItem={onAddItem} />,
+    camera: <CaptureCamera c={c} dark={dark} onCameraCapture={onCameraCapture} onAddItem={onAddItem} />,
+    voice: <CaptureVoice c={c} dark={dark} onVoiceTranscribe={onVoiceTranscribe} onAddItem={onAddItem} />,
   };
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.ink, color: '#efe9da' }}>
       {/* top bar */}
       <div style={{ padding: '14px 22px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: 999,
-          background: 'rgba(239,233,218,0.12)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            width: 28, height: 28, borderRadius: 999,
+            background: 'rgba(239,233,218,0.12)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: 'none', cursor: 'pointer',
+          }}>
           <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 1l8 8M9 1l-8 8" stroke="#efe9da" strokeWidth="1.8" strokeLinecap="round"/></svg>
-        </div>
+        </button>
         <ACLabel size={11} color="rgba(239,233,218,0.75)" style={{ fontFamily: ACFonts.mono, letterSpacing: 0.7, fontWeight: 600 }}>
           LOG FUEL · 12:41 PM
         </ACLabel>
