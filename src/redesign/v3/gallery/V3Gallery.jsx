@@ -371,7 +371,7 @@ export default function V3Gallery() {
               maxWidth: 720,
             }}
           >
-            35 screens translated from Claude Design. Paper + ink + amber. SF Pro for UI,
+            50 screens translated from Claude Design. Paper + ink + amber. SF Pro for UI,
             Archivo Black for brand moments, JetBrains Mono for data. Preview each screen
             in light and dark, device-framed, scrolling inside its own bezel.
           </p>
@@ -397,7 +397,7 @@ export default function V3Gallery() {
               marginBottom: 10,
             }}
           >
-            /// done · 35 screens
+            /// done · 50 screens
           </div>
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.65, color: 'rgba(40,30,20,0.85)' }}>
             Ready for review. Next pass: wire the v3 screens to real navigation + Supabase data and
