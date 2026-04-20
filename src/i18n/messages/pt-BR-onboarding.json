@@ -134,7 +134,7 @@
         "settingUp": "Configurando seu Atlas Core..."
       },
       "success": {
-        "title": "Tudo pronto! 🎉",
+        "title": "Tudo pronto!",
         "freshMessage": "Seu primeiro checkpoint está salvo. Vá para Hoje e comece seu primeiro registro do dia.",
         "ownMessage": "Seu Atlas Core está pronto. Explore os módulos no seu ritmo.",
         "focusTitle": "Esta semana, foque em",
@@ -145,227 +145,226 @@
       }
     }
   },
-  "_comment_onboardingV2": "NEEDS HUMAN REVIEW: Machine-translated from English. All strings below require review by a native Portuguese speaker.",
   "onboardingV2": {
     "hook": {
-      "title": "A balanca mente. O espelho mente. Seu ultimo app nao fazia ideia do que estava funcionando.",
-      "subtitle": "O Atlas rastreia o que realmente importa — e ajusta toda semana para voce parar de adivinhar.",
+      "title": "A balança mente. O espelho mente. Seu último app não fazia ideia do que estava funcionando.",
+      "subtitle": "O Atlas monitora o que realmente importa — e ajusta toda semana para você parar de adivinhar.",
       "cta": "Me mostre como",
-      "secondary": "Ja tenho uma conta",
-      "trustBadge": "7 dias gratis • Sem cartao de credito"
+      "secondary": "Já tenho uma conta",
+      "trustBadge": "7 dias grátis • Sem cartão de crédito"
     },
     "quiz": {
       "primaryGoal": {
-        "title": "O que voce realmente quer fazer?",
-        "subtitle": "Escolha tudo que se aplica. Construimos em torno de todos."
+        "title": "O que você quer realmente alcançar?",
+        "subtitle": "Marque tudo que se aplica. Construímos o plano em torno de todos."
       },
       "primaryGoal_fat_loss": "Perder gordura",
-      "primaryGoal_muscle_gain": "Ganhar musculo",
-      "primaryGoal_recomp": "Recomp — perder gordura e ganhar musculo",
-      "primaryGoal_energy_health": "Mais energia e melhores indicadores de saude",
-      "primaryGoal_event_prep": "Preparacao para um evento ou data especifica",
+      "primaryGoal_muscle_gain": "Ganhar massa muscular",
+      "primaryGoal_recomp": "Recomp — perder gordura e ganhar músculo",
+      "primaryGoal_energy_health": "Mais energia e melhores indicadores de saúde",
+      "primaryGoal_event_prep": "Preparação para uma data ou evento específico",
       "targetWeight": {
-        "title": "Qual peso voce quer atingir?",
-        "subtitle": "Um numero aproximado esta otimo. Vamos refinar quando virmos seus dados de composicao corporal."
+        "title": "Qual peso você quer atingir?",
+        "subtitle": "Um número aproximado já serve. Vamos refinar quando vermos seus dados de composição corporal."
       },
       "timeline": {
-        "title": "Quando voce quer chegar la?",
-        "subtitle": "Vamos te dizer se e realista — sem enrolar."
+        "title": "Até quando você quer chegar lá?",
+        "subtitle": "Vamos te dizer se é realista — sem enrolar."
       },
-      "timeline_6w": "6 semanas — agressivo mas possivel",
+      "timeline_6w": "6 semanas — agressivo, mas possível",
       "timeline_3m": "3 meses — o ponto ideal para a maioria",
-      "timeline_6m": "6 meses — ritmo sustentavel, grande transformacao",
-      "timeline_specific_date": "Tenho uma data especifica",
+      "timeline_6m": "6 meses — ritmo sustentável, grande transformação",
+      "timeline_specific_date": "Tenho uma data específica",
       "bodyStats": {
-        "title": "O basico",
-        "subtitle": "Usamos isso para calcular seu metabolismo. Nada sai do seu dispositivo sem sua permissao."
+        "title": "O básico",
+        "subtitle": "Usamos isso para calcular seu metabolismo. Nada sai do seu dispositivo sem sua permissão."
       },
       "activityBaseline": {
-        "title": "Quao ativo voce e fora do treino?",
-        "subtitle": "Pense em um dia de semana tipico — nao sua melhor semana."
+        "title": "Quão ativo você é fora do treino?",
+        "subtitle": "Pense num dia de semana típico — não na sua melhor semana."
       },
-      "activityBaseline_barely": "Trabalho de escritorio, quase nao me mexo",
-      "activityBaseline_light": "Algumas caminhadas, maioria sedentario",
-      "activityBaseline_moderate": "Fico de pe bastante",
-      "activityBaseline_high": "Trabalho fisico ou estilo de vida muito ativo",
-      "activityBaseline_athlete": "Ja treino 5+ vezes por semana",
+      "activityBaseline_barely": "Trabalho de escritório, mal me mexo",
+      "activityBaseline_light": "Algumas caminhadas, maior parte do dia sentado",
+      "activityBaseline_moderate": "Fico de pé boa parte do dia",
+      "activityBaseline_high": "Trabalho físico ou rotina muito ativa",
+      "activityBaseline_athlete": "Já treino 5+ vezes por semana",
       "pastAttempts": {
-        "title": "O que voce ja tentou que nao funcionou?",
-        "subtitle": "Sem julgamento. So precisamos saber o que fazer diferente."
+        "title": "O que você já tentou e não engrenou?",
+        "subtitle": "Sem julgamento. Só precisamos saber o que fazer diferente."
       },
       "pastAttempts_calorie_tracker": "App de contagem de calorias",
       "pastAttempts_strict_diet": "Dieta restrita ou plano alimentar",
       "pastAttempts_personal_trainer": "Personal trainer",
       "pastAttempts_fitness_app": "Outro app de fitness",
       "pastAttempts_eating_clean": "\"Comer limpo\" sem registrar",
-      "pastAttempts_first_attempt": "Esta e minha primeira tentativa seria",
+      "pastAttempts_first_attempt": "Essa é minha primeira tentativa de verdade",
       "biggestBlocker": {
-        "title": "O que geralmente mata seu momentum?",
+        "title": "O que costuma matar seu ritmo?",
         "subtitle": "Escolha o que pega mais forte."
       },
-      "biggestBlocker_no_time": "Nao tenho tempo para registrar tudo",
-      "biggestBlocker_lose_motivation": "Perco a motivacao depois de 2-3 semanas",
-      "biggestBlocker_weekends": "Fins de semana destroem meu progresso",
-      "biggestBlocker_dont_know_working": "Nunca sei se o que estou fazendo funciona",
-      "biggestBlocker_chaotic_schedule": "Minha agenda e muito caotica",
-      "biggestBlocker_plateau": "Atinjo um plato e desisto",
+      "biggestBlocker_no_time": "Não tenho tempo de registrar tudo",
+      "biggestBlocker_lose_motivation": "Perco a motivação depois de 2–3 semanas",
+      "biggestBlocker_weekends": "Finais de semana destroem meu progresso",
+      "biggestBlocker_dont_know_working": "Nunca sei se o que estou fazendo está funcionando",
+      "biggestBlocker_chaotic_schedule": "Minha rotina é caótica demais",
+      "biggestBlocker_plateau": "Bato num platô e desisto",
       "eatingPatterns": {
-        "title": "Como voce realmente come em um dia normal?",
-        "subtitle": "Seja honesto — estamos construindo em torno da sua vida, nao de um livro."
+        "title": "Como você come de fato num dia normal?",
+        "subtitle": "Seja honesto — estamos construindo em volta da sua vida, não de um livro."
       },
-      "eatingPatterns_three_meals": "3 refeicoes, bem consistente",
-      "eatingPatterns_skipper": "Pulo refeicoes — geralmente cafe da manha",
+      "eatingPatterns_three_meals": "3 refeições, bem consistente",
+      "eatingPatterns_skipper": "Pulo refeições — normalmente o café",
       "eatingPatterns_grazer": "Belisco o dia todo, sem estrutura",
-      "eatingPatterns_evening_eater": "Pouco durante o dia, muito a noite",
+      "eatingPatterns_evening_eater": "Pouco durante o dia, muito à noite",
       "eatingPatterns_chaotic": "Completamente diferente todo dia",
       "trainingPrefs": {
-        "title": "Onde voce treina?",
-        "subtitle": "Isso determina sua biblioteca de exercicios."
+        "title": "Onde você treina?",
+        "subtitle": "Isso define sua biblioteca de exercícios."
       },
       "trainingPrefs_full_gym": "Academia completa",
       "trainingPrefs_home_barbell": "Home gym — barra e rack",
-      "trainingPrefs_home_dumbbells": "Casa — so halteres",
-      "trainingPrefs_bodyweight": "Apenas peso corporal",
-      "trainingPrefs_no_training": "Nao estou treinando agora",
+      "trainingPrefs_home_dumbbells": "Em casa — só halteres",
+      "trainingPrefs_bodyweight": "Só peso corporal",
+      "trainingPrefs_no_training": "Não estou treinando agora",
       "currentBody": {
-        "title": "Qual silhueta se parece mais com voce agora?",
-        "subtitle": "Nao precisa ser exato. Isso ajuda a definir marcos visuais realistas."
+        "title": "Qual silhueta se parece mais com você hoje?",
+        "subtitle": "Não precisa ser exato. Isso ajuda a definir marcos visuais realistas."
       },
       "desiredBody": {
-        "title": "Qual e mais perto de onde voce quer estar?",
-        "subtitle": "Usamos isso para moldar seus alvos de treino e nutricao."
+        "title": "Qual está mais perto de onde você quer chegar?",
+        "subtitle": "Usamos isso para moldar seus alvos de treino e nutrição."
       },
       "whatWouldChange": {
-        "title": "Se voce realmente atingir esse objetivo — o que muda?",
-        "subtitle": "Escolha o que importa para voce. Vamos voltar nisso."
+        "title": "Se você realmente atingir esse objetivo — o que muda?",
+        "subtitle": "Escolha o que importa pra você. Vamos retomar isso depois."
       },
-      "whatWouldChange_clothes_fit": "Minhas roupas vestem como eu quero",
-      "whatWouldChange_more_energy": "Tenho energia o dia todo",
-      "whatWouldChange_confidence": "Nao estou mais evitando espelhos",
-      "whatWouldChange_better_labs": "Meus exames e indicadores de saude melhoram",
-      "whatWouldChange_stronger_lifts": "Sou realmente forte, nao so magro",
-      "whatWouldChange_feel_like_myself": "Me sinto eu mesmo de novo",
+      "whatWouldChange_clothes_fit": "Minhas roupas caem do jeito que eu quero",
+      "whatWouldChange_more_energy": "Tenho energia o dia inteiro",
+      "whatWouldChange_confidence": "Paro de desviar de espelhos",
+      "whatWouldChange_better_labs": "Meus exames e indicadores de saúde melhoram",
+      "whatWouldChange_stronger_lifts": "Fico forte de verdade, não só magro",
+      "whatWouldChange_feel_like_myself": "Volto a me sentir eu mesmo",
       "trackingHistory": {
-        "title": "Voce ja registrou calorias ou macros antes?",
-        "subtitle": "Isso muda como fazemos sua integracao no rastreador."
+        "title": "Você já registrou calorias ou macros antes?",
+        "subtitle": "Isso muda como vamos te integrar no rastreador."
       },
-      "trackingHistory_a_lot": "Sim — ja fiz isso seriamente",
-      "trackingHistory_some": "Um pouco, mas nunca consistentemente",
+      "trackingHistory_a_lot": "Sim — já fiz isso a sério",
+      "trackingHistory_some": "Um pouco, mas nunca de forma consistente",
       "trackingHistory_none": "Nunca",
       "connectedApps": {
-        "title": "Quer conectar algo que ja usa?",
-        "subtitle": "Puxamos seus dados para voce comecar com contexto, nao do zero."
+        "title": "Quer conectar algo que você já usa?",
+        "subtitle": "Puxamos seus dados para você começar com contexto, não do zero."
       },
       "connectedApps_apple_health": "Apple Health",
       "connectedApps_apple_watch": "Apple Watch",
       "connectedApps_garmin": "Garmin",
       "connectedApps_mfp_import": "Importar do MyFitnessPal",
-      "connectedApps_skip": "Pular — configuro isso depois",
+      "connectedApps_skip": "Pular — configuro depois",
       "notifications": {
-        "title": "Podemos te lembrar quando importa?",
-        "subtitle": "Um check-in de manha, um a noite. Sem spam. Voce pode desativar quando quiser."
+        "title": "Podemos te avisar quando importa?",
+        "subtitle": "Um check-in pela manhã, um à noite. Sem spam. Você pode desativar quando quiser."
       },
-      "notifications_yes": "Sim — me mantenha responsavel",
+      "notifications_yes": "Sim — me mantenha responsável",
       "notifications_maybe_later": "Talvez depois"
     },
     "interstitial": {
       "social": {
-        "title": "Voce esta em boa companhia.",
+        "title": "Você está em boa companhia.",
         "subtitle": "Mais de 12.000 pessoas usaram o Atlas para atingir um objetivo que realmente importava."
       },
       "stats": {
-        "title": "Mais de 12.000 pessoas construiram seu plano aqui.",
-        "subtitle": "O usuario medio do Atlas ve mudanca mensuravel em 11 dias."
+        "title": "Mais de 12.000 pessoas montaram o plano delas aqui.",
+        "subtitle": "O usuário médio do Atlas vê mudanças mensuráveis em 11 dias."
       },
       "building": {
-        "title": "Construindo seu plano...",
-        "subtitle": "Processando seus numeros contra 12.000+ resultados reais."
+        "title": "Montando seu plano...",
+        "subtitle": "Cruzando seus números com mais de 12.000 resultados reais."
       },
       "keepGoing": "Continuar"
     },
     "building": {
       "msg1": "Analisando seu metabolismo...",
-      "msg2": "Comparando com perfis similares...",
-      "msg3": "Calculando seu deficit ideal...",
-      "msg4": "Mapeando sua divisao de treino...",
+      "msg2": "Comparando com perfis parecidos...",
+      "msg3": "Calculando seu déficit ideal...",
+      "msg4": "Mapeando sua divisão de treino...",
       "msg5": "Definindo marcos semanais...",
       "msg6": "Gerando sua primeira semana...",
       "defaultMsg1": "Analisando sua base...",
-      "defaultMsg2": "Comparando com perfis similares...",
+      "defaultMsg2": "Comparando com perfis parecidos...",
       "defaultMsg3": "Calibrando seu plano...",
       "defaultMsg4": "Quase pronto..."
     },
     "projection": {
-      "title": "Aqui esta o que encontramos",
-      "weightTitle": "Sua projecao de peso",
-      "headline": "Voce pode estar com {target}kg ate {date}.",
-      "moreInfo": "Precisamos de mais informacoes para mostrar sua projecao.",
-      "aggressive": "Isso e agressivo. Recomendamos estender para {weeks} semanas para resultados sustentaveis.",
-      "subtext": "Sao {weeks} semanas a partir de hoje. Nao e milagre — apenas um plano que combina com seu corpo.",
+      "title": "Veja o que encontramos",
+      "weightTitle": "Sua projeção de peso",
+      "headline": "Você pode estar com {target}kg até {date}.",
+      "moreInfo": "Precisamos de um pouco mais de informação para mostrar sua projeção.",
+      "aggressive": "Isso é agressivo. Recomendamos estender para {weeks} semanas para um resultado sustentável.",
+      "subtext": "São {weeks} semanas a partir de hoje. Sem milagre — só um plano que combina com seu corpo.",
       "targetDate": "Data alvo",
       "weeklyPace": "Ritmo semanal",
-      "dailyTarget": "Meta diaria",
-      "withAtlas": "Com Atlas",
-      "noChange": "Sem mudanca",
+      "dailyTarget": "Meta diária",
+      "withAtlas": "Com o Atlas",
+      "noChange": "Sem mudança",
       "continue": "Continuar"
     },
     "socialProof": {
-      "title": "Pessoas como voce ja estao fazendo isso.",
-      "subtitle": "Resultados reais de pessoas com objetivos similares.",
+      "title": "Pessoas como você já estão fazendo isso.",
+      "subtitle": "Resultados reais de gente com objetivos parecidos.",
       "cta": "Estou pronto",
       "testimonials": {
         "marco": {
           "goal": "Perda de gordura",
-          "quote": "Perdi 9 kg em 10 semanas. Os ajustes semanais fizeram com que eu nunca estagnasse — primeira vez que isso aconteceu.",
-          "metric": "-9 kg em 10 semanas"
+          "quote": "Perdi 9 kg em 10 semanas. Os ajustes semanais fizeram com que eu nunca estagnasse — foi a primeira vez que isso aconteceu.",
+          "metric": "−9 kg em 10 semanas"
         },
         "sarah": {
           "goal": "Recomp",
-          "quote": "Ja usei todos os apps. O Atlas e o unico que mudou o que eu estava fazendo baseado no que realmente estava acontecendo.",
-          "metric": "-6 kg gordura, +2 kg musculo"
+          "quote": "Já usei todos os apps. O Atlas é o único que mudou o que eu estava fazendo com base no que estava realmente acontecendo.",
+          "metric": "−6 kg de gordura, +2 kg de músculo"
         },
         "james": {
-          "goal": "Energia e saude",
-          "quote": "Meus exames melhoraram em 8 semanas. Meu medico perguntou o que mudei. Eu so disse \"parei de adivinhar.\"",
+          "goal": "Energia e saúde",
+          "quote": "Meus exames melhoraram em 8 semanas. Meu médico perguntou o que eu tinha mudado. Só respondi: \"parei de adivinhar\".",
           "metric": "Exames normalizados em 8 semanas"
         }
       }
     },
     "commitment": {
-      "title": "Antes de comecar — uma promessa.",
-      "body": "Tudo no seu plano foi projetado em torno disso: 3 sessoes por semana, registro honesto de comida e uma pesagem semanal. Nao perfeito. Apenas consistente.",
-      "prompt": "Voce se promete tentar isso pelas proximas 8 semanas?",
+      "title": "Antes de começar — uma promessa.",
+      "body": "Tudo no seu plano foi pensado em torno disso: 3 sessões por semana, registro honesto da comida e uma pesagem semanal. Não é perfeição. É consistência.",
+      "prompt": "Você se compromete a tentar isso pelas próximas 8 semanas?",
       "primaryCta": "Estou dentro",
-      "secondaryCta": "Vou decidir conforme avancar"
+      "secondaryCta": "Vou decidir no caminho"
     },
     "trial": {
       "title": "Como funciona o trial gratuito de 7 dias.",
-      "subtitle": "Sem surpresas. Sem pegadinhas.",
+      "subtitle": "Sem surpresas. Sem pegadinha.",
       "today": "Hoje",
-      "todayText": "Acesso completo. Sem cartao necessario para comecar.",
+      "todayText": "Acesso completo. Sem cartão para começar.",
       "day5": "Dia 5",
-      "day5Text": "Vamos te lembrar que o trial acaba em 2 dias.",
+      "day5Text": "Vamos te avisar que o trial acaba em 2 dias.",
       "day7": "Dia 7",
-      "day7Text": "Se esta vendo resultados, entra no seu plano. Se nao, cancele em um toque.",
-      "cta": "Ver opcoes de plano"
+      "day7Text": "Se estiver vendo resultado, vira o seu plano. Se não, cancele em um toque.",
+      "cta": "Ver opções de plano"
     },
     "paywall": {
-      "title": "Escolha o plano que se encaixa no seu objetivo."
+      "title": "Escolha o plano que combina com seu objetivo."
     },
     "account": {
       "title": "Salve seu plano.",
-      "subtitle": "Para nao perder se trocar de celular.",
+      "subtitle": "Para não perder nada se trocar de celular.",
       "continueApple": "Continuar com Apple",
       "continueGoogle": "Continuar com Google",
       "useEmail": "Usar email",
       "createAccount": "Criar conta",
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Senha (6+ caracteres)",
-      "checkEmail": "Verifique seu email para confirmar sua conta e volte.",
+      "checkEmail": "Confira seu email para confirmar a conta e volte aqui.",
       "signupFailed": "Cadastro falhou. Tente outro email.",
       "googleFailed": "Login com Google falhou.",
       "appleFailed": "Login com Apple falhou.",
-      "persistFailed": "Conta criada mas a configuracao falhou. Tente fazer login."
+      "persistFailed": "Conta criada, mas a configuração falhou. Tente fazer login."
     }
   }
 }
