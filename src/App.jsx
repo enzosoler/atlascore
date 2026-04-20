@@ -195,7 +195,7 @@ import {
   addEntry                  as nutritionAddEntry,
   addEntries                as nutritionAddEntries,
   subscribe                 as nutritionSubscribe,
-} from '@/redesign/v2/nutrition/nutritionStore';
+} from '@/lib/nutritionStore';
 
 // ─── Analytics pageviews ─────────────────────────────────────────────────────
 function usePageViewTracking() {
