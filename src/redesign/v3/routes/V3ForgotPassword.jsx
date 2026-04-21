@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabaseClient';
+import { email as emailService } from '@/lib/emailService';
 import { useTheme } from '@/lib/ThemeContext';
 import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
@@ -200,10 +200,7 @@ export default function V3ForgotPassword() {
 
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.resetPasswordForEmail(em, {
-        redirectTo: `${window.location.origin}/auth/reset`,
-      });
-      if (err) throw err;
+      await emailService.passwordReset({ email: em });
       setEmail(em);
       setSent(true);
     } catch (err) {

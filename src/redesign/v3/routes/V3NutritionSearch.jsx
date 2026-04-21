@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { toast } from 'sonner';
+import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S35_Search from '../screens/S35_Search.jsx';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
@@ -24,6 +25,7 @@ function formatSub(food) {
 export default function V3NutritionSearch() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const t = useT();
   const [params] = useSearchParams();
   const meal = params.get('meal');
   const { nutrition } = useDailyStateV2();
@@ -54,11 +56,11 @@ export default function V3NutritionSearch() {
         setResults(res.results || []);
       } else {
         setResults([]);
-        setErrorText(res?.error || 'Search failed');
+        setErrorText(res?.error || t('nutritionSearch.errorSearchFailed'));
       }
     }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(handle);
-  }, [query]);
+  }, [query, t]);
 
   const groups = useMemo(() => {
     const trimmed = query.trim();
@@ -68,23 +70,23 @@ export default function V3NutritionSearch() {
         {
           cat: 'START TYPING · 2+ LETTERS',
           rows: [
-            { t: 'Try: "chicken breast"', sub: 'Search 2M+ foods across the Open Food Facts catalogue' },
-            { t: 'Try: "greek yogurt"',  sub: 'Name, brand, or barcode works' },
+            { t: t('nutritionSearch.tryChicken'), sub: t('nutritionSearch.idleSearchCatalog') },
+            { t: t('nutritionSearch.tryYogurt'),  sub: t('nutritionSearch.idleNameBrandBarcode') },
           ],
         },
       ];
     }
     if (loading) {
-      return [{ cat: 'SEARCHING…', rows: [{ t: 'Looking up foods', sub: trimmed }] }];
+      return [{ cat: t('nutritionSearch.searchingCategory'), rows: [{ t: t('nutritionSearch.searchingTitle'), sub: trimmed }] }];
     }
     if (errorText) {
-      return [{ cat: 'ERROR', rows: [{ t: errorText, sub: 'Try again in a moment' }] }];
+      return [{ cat: t('common.error').toUpperCase(), rows: [{ t: errorText, sub: t('nutritionSearch.tryAgainSoon') }] }];
     }
     if (results.length === 0) {
-      return [{ cat: 'NO RESULTS', rows: [{ t: `No foods matched "${trimmed}"`, sub: 'Check spelling or try a broader term' }] }];
+      return [{ cat: t('nutritionSearch.noResultsCategory'), rows: [{ t: t('nutritionSearch.noResultsTitle', { query: trimmed }), sub: t('nutritionSearch.noResultsBody') }] }];
     }
     return [{
-      cat: `FOODS · ${results.length}`,
+      cat: t('nutritionSearch.resultsCategory', { count: results.length }),
       rows: results.slice(0, 50).map((food) => ({
         t: food.name,
         sub: formatSub(food),
@@ -100,12 +102,12 @@ export default function V3NutritionSearch() {
     if (Number.isFinite(food.protein) && food.protein > 0) metaParts.push(`${Math.round(food.protein)}G PROTEIN`);
     if (Number.isFinite(food.carbs) && food.carbs > 0) metaParts.push(`${Math.round(food.carbs)}G CARBS`);
     return {
-      label: food.brand ? `Top match · ${food.brand}` : 'Top match · Food',
+      label: food.brand ? t('nutritionSearch.topMatchBrand', { brand: food.brand }) : t('nutritionSearch.topMatchFood'),
       title: food.name,
       meta: metaParts.join(' · ').toUpperCase(),
       _food: food,
     };
-  }, [results]);
+  }, [results, t]);
 
   const proteinConsumed = Math.round(nutrition?.proteinConsumed || 0);
   const proteinTarget = Math.round(nutrition?.proteinTarget || 0);
@@ -124,22 +126,22 @@ export default function V3NutritionSearch() {
             borderBottom: theme === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
           }}
         >
-          {proteinConsumed}g / {proteinTarget}g protein today
+          {t('nutritionSearch.proteinToday', { consumed: proteinConsumed, target: proteinTarget })}
         </div>
       )}
       <S35_Search
         dark={theme === 'dark'}
         query={query}
         onQueryChange={setQuery}
-        placeholder="Search foods…"
-        scopes={['Foods', 'Meals', 'Recents', 'Brands']}
-        activeScope="Foods"
+        placeholder={t('nutritionSearch.placeholder')}
+        scopes={[t('nutritionSearch.scopes.foods'), t('nutritionSearch.scopes.meals'), t('nutritionSearch.scopes.recents'), t('nutritionSearch.scopes.brands')]}
+        activeScope={t('nutritionSearch.scopes.foods')}
         topMatch={topMatch}
         groups={groups}
         prompts={[
-          'Find high-protein breakfast ideas',
-          'Show foods under 300 kcal',
-          'What should I eat pre-workout?',
+          t('nutritionSearch.prompts.breakfast'),
+          t('nutritionSearch.prompts.under300'),
+          t('nutritionSearch.prompts.preWorkout'),
         ]}
         onBack={() => navigate(-1)}
         onPickScope={() => {}}

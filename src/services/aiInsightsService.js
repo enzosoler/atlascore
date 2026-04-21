@@ -1,16 +1,15 @@
 /**
  * Atlas Core — AI Insights Service
  *
- * Orchestrates the full AI Insights pipeline:
- *   1. Builds the Health Dossier from user data
- *   2. Calls the generate-holistic-insight Edge Function
- *   3. Caches results to avoid redundant API calls
- *   4. Enforces tier-based rate limits (free = 1/week, pro = 1/day)
+ * Orchestrates the AI Insights client contract.
+ *
+ * The standalone reflection feed is currently disabled until the
+ * production backend exists. Callers receive an honest unavailable
+ * response rather than fabricated or partially wired insight cards.
  *
  * Usage:
  *   const { insights, meta, cached } = await generateInsights({ ...data, tier });
  */
-import { supabase } from '@/lib/supabaseClient';
 import { buildHealthDossier, buildTeaserDossier } from '@/lib/healthDossier';
 
 // ── Cache Keys ───────────────────────────────────────────────────────────────
@@ -151,6 +150,11 @@ export async function generateInsights({
   protocolLogs = [],
   forceRefresh = false,
 }) {
+  const unavailableMeta = {
+    unavailable: true,
+    error: 'Standalone insights are temporarily unavailable.',
+  };
+
   // 1. Check cache first
   if (!forceRefresh) {
     const cached = getCachedInsights(userId, tier);
@@ -189,29 +193,20 @@ export async function generateInsights({
           tier,
         });
 
-  // 4. Call the Edge Function
-  try {
-    const { data, error } = await supabase.functions.invoke('generate-holistic-insight', {
-      body: { dossier, tier, locale },
-    });
+  console.warn('[aiInsightsService] Standalone insights requested while backend is disabled.', {
+    userId,
+    tier,
+    locale,
+    dossierKind: tier === 'free' ? 'teaser' : 'full',
+    hasDossier: Boolean(dossier),
+  });
 
-    if (error) {
-      console.warn('[aiInsightsService] Edge function error:', error.message);
-      return { insights: [], meta: { error: error.message }, cached: false, teaser: tier === 'free' };
-    }
-
-    const insights = data?.insights || [];
-    const meta = data?.meta || {};
-
-    // 5. Cache the result
-    setCachedInsights(userId, tier, { insights, meta });
-    recordRateLimit(userId);
-
-    return { insights, meta, cached: false, teaser: tier === 'free' };
-  } catch (err) {
-    console.warn('[aiInsightsService] Failed:', err.message);
-    return { insights: [], meta: { error: err.message }, cached: false, teaser: tier === 'free' };
-  }
+  return {
+    insights: [],
+    meta: unavailableMeta,
+    cached: false,
+    teaser: tier === 'free',
+  };
 }
 
 /**

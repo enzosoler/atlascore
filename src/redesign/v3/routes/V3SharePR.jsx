@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import html2canvas from 'html2canvas';
 import S21_Share_Card from '../screens/S21_Share_Card.jsx';
 
@@ -17,6 +18,7 @@ export default function V3SharePR() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user } = useAuth();
+  const t = useT();
   const cardRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -36,7 +38,7 @@ export default function V3SharePR() {
 
   async function handleExport(format) {
     if (!cardRef.current) {
-      toast.error('Card not ready for export');
+      toast.error(t('sharePR.cardNotReady'));
       return;
     }
 
@@ -62,15 +64,15 @@ export default function V3SharePR() {
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           
-          toast.success('PR image saved to device');
+          toast.success(t('sharePR.imageSaved'));
         }, 'image/png');
       } else if (format === 'pdf') {
         // PDF export would require additional library like jsPDF
-        toast.info('PDF export coming soon');
+        toast.info(t('sharePR.pdfComingSoon'));
       }
     } catch (error) {
       console.error('Export failed:', error);
-      toast.error('Failed to export image');
+      toast.error(t('sharePR.exportFailed'));
     } finally {
       setIsExporting(false);
     }
@@ -84,7 +86,7 @@ export default function V3SharePR() {
       if (platform === 'instagram') {
         // Instagram doesn't support direct sharing, so we save the image
         await handleExport('image');
-        toast.success('Image saved! Share it to Instagram Stories');
+        toast.success(t('sharePR.instagramSaved'));
       } else if (platform === 'general') {
         if (navigator.share) {
           await navigator.share({
@@ -95,13 +97,13 @@ export default function V3SharePR() {
         } else {
           // Fallback: copy to clipboard
           await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-          toast.success('Share details copied to clipboard');
+          toast.success(t('sharePR.shareCopied'));
         }
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Share failed:', error);
-        toast.error('Failed to share');
+        toast.error(t('sharePR.shareFailed'));
       }
     }
   }
@@ -110,10 +112,10 @@ export default function V3SharePR() {
     try {
       const shareUrl = `${window.location.origin}/app/workouts/records`;
       await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link copied to clipboard');
+      toast.success(t('sharePR.linkCopied'));
     } catch (error) {
       console.error('Copy failed:', error);
-      toast.error('Failed to copy link');
+      toast.error(t('sharePR.copyFailed'));
     }
   }
 
@@ -168,8 +170,8 @@ export default function V3SharePR() {
             textAlign: 'center',
             boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
           }}>
-            <div style={{ fontSize: '14px', marginBottom: '8px' }}>Exporting image...</div>
-            <div style={{ fontSize: '12px', opacity: 0.7 }}>Please wait</div>
+            <div style={{ fontSize: '14px', marginBottom: '8px' }}>{t('sharePR.exporting')}</div>
+            <div style={{ fontSize: '12px', opacity: 0.7 }}>{t('sharePR.pleaseWait')}</div>
           </div>
         )}
       </div>

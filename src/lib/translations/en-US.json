@@ -47,6 +47,24 @@
       "remembered": "Remembered your password?",
       "backToLogin": "Back to sign in"
     },
+    "form": {
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "defaultHint": "Returning? We will recognize this one.",
+      "defaultHeadlineLine1": "one screen.",
+      "defaultHeadlineLine2Prefix": "one",
+      "defaultHeadlineAccent": "field.",
+      "defaultMagicDescription": "We'll email you a magic link. No passwords to remember.",
+      "defaultPasswordDescription": "Use your email and password to get back in.",
+      "magicMode": "Magic link",
+      "passwordMode": "Password",
+      "emailPlaceholder": "you@email.com",
+      "passwordPlaceholder": "••••••••",
+      "working": "Working…",
+      "sendMagic": "Send magic link →",
+      "signIn": "Sign in →",
+      "orUse": "Or use"
+    },
     "redirecting": "Redirecting…",
     "didNotOpen": "Sign-in did not open automatically",
     "openNow": "Open sign-in now",
@@ -1588,7 +1606,23 @@
       "cta": "See my plan options"
     },
     "paywall": {
-      "title": "Pick the plan that fits your goal."
+      "title": "Pick the plan that fits your goal.",
+      "seePlans": "See plans",
+      "maybeLater": "Maybe later",
+      "triggers": {
+        "workout": {
+          "headline": "Your first workout is logged. Keep the system going."
+        },
+        "ai_coach": {
+          "headline": "Unlock the full coach when you need the next step."
+        },
+        "photo": {
+          "headline": "Your first progress photo is in. Unlock the full record."
+        },
+        "streak": {
+          "headline": "You built momentum. Keep the streak inside the system."
+        }
+      }
     },
     "account": {
       "title": "Save your plan.",

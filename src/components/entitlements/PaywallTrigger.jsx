@@ -103,6 +103,7 @@ export function PaywallSheet({ trigger, show, onClose }) {
   const { can } = useSubscription();
   const { t } = useI18n();
   const { user } = useAuth();
+  const { trackPaywallViewed } = usePaywallAnalytics();
   const [dismissed, setDismissed] = useState(false);
   const [tracked, setTracked] = useState(false);
 

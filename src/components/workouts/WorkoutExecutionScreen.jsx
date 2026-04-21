@@ -373,7 +373,7 @@ function ExerciseBlock({
             ))}
             {exercise.rest_seconds && (
               <span className="text-[10px] text-[hsl(var(--fg-3))]">
-                {exercise.rest_seconds}s rest
+                {t('workoutExecution.restBadge', { seconds: exercise.rest_seconds })}
               </span>
             )}
           </div>
@@ -726,6 +726,20 @@ export default function WorkoutExecutionScreen({
     onCancel?.();
   };
 
+  // Keep hook order stable even when the screen swaps between
+  // add-exercise, paywall, completion, and main execution states.
+  const allExercisesComplete = exercises.length > 0 && exercises.every((ex, ei) => {
+    const setCount = ex.sets?.length || 0;
+    const doneCount = Object.keys(completedSets[ei] || {}).length;
+    return doneCount >= setCount;
+  });
+
+  useEffect(() => {
+    if (allExercisesComplete && exercises.length > 0 && !isDone) {
+      setIsDone(true);
+    }
+  }, [allExercisesComplete, exercises.length, isDone]);
+
   // ── Render: Add Exercise Panel ──────────────────────────────────────────
   if (showAddExercise) {
     return (
@@ -804,7 +818,7 @@ export default function WorkoutExecutionScreen({
           </div>
           {totalVolume > 0 && (
             <p className="text-[14px] font-medium text-[hsl(var(--fg-2))]">
-              {t('workoutExecution.volume')}: <span className="font-bold text-[hsl(var(--fg))]">{Math.round(totalVolume).toLocaleString()} kg</span>
+              {t('workoutExecution.volume')}: <span className="font-bold text-[hsl(var(--fg))]">{Math.round(totalVolume).toLocaleString(locale)} kg</span>
             </p>
           )}
           <div className="flex w-full gap-3">
@@ -820,20 +834,6 @@ export default function WorkoutExecutionScreen({
       document.body
     );
   }
-
-  // ── Check if all exercises are complete ──────────────────────────────────
-  const allExercisesComplete = exercises.length > 0 && exercises.every((ex, ei) => {
-    const setCount = ex.sets?.length || 0;
-    const doneCount = Object.keys(completedSets[ei] || {}).length;
-    return doneCount >= setCount;
-  });
-
-  // Auto-trigger done screen
-  useEffect(() => {
-    if (allExercisesComplete && exercises.length > 0 && !isDone) {
-      setIsDone(true);
-    }
-  }, [allExercisesComplete, exercises.length]);
 
   // ── Render: Main Execution Screen (Hevy/Strong style) ───────────────────
   return (
@@ -892,7 +892,7 @@ export default function WorkoutExecutionScreen({
               </span>
               {totalVolume > 0 && (
                 <span className="text-[12px] text-[hsl(var(--fg-3))]">
-                  {Math.round(totalVolume).toLocaleString()} kg
+                  {Math.round(totalVolume).toLocaleString(locale)} kg
                 </span>
               )}
             </div>

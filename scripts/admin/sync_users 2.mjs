@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://xrtqwdpczgdomqebmfkk.supabase.co'
-const serviceRoleKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHF3ZHBjemdkb21xZWJtZmtrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mzg3MzA5MiwiZXhwIjoyMDg5NDQ5MDkyfQ.8siwRIHcN4WojlPNfC0WNaSG6RGNAGCSfZ5iDOTce6o'
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://xrtqwdpczgdomqebmfkk.supabase.co'
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!serviceRoleKey) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required')
+}
 
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { email as emailService } from '@/lib/emailService';
 import { useT } from '@/lib/i18nContext';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
@@ -10,11 +10,11 @@ import {
   disconnectProvider,
   getIntegrationConnections,
 } from '@/lib/integrationsService';
-import S63_Account_Settings from '../screens/S63_Account_Settings.jsx';
+import { WEBAPP_DANGER } from '@/lib/platformRoutes';
+import { WebAccountRow, WebAccountScaffold, WebAccountSection } from './WebAccountScaffold.jsx';
 
 export default function V3AccountSettings() {
   const navigate = useNavigate();
-  const { theme } = useTheme();
   const { user } = useAuth();
   const t = useT();
 
@@ -56,10 +56,6 @@ export default function V3AccountSettings() {
   }, [t, user?.id]);
 
   const sessionsCount = user ? 1 : 0;
-  const resetPasswordRedirect = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/reset-password`
-    : undefined;
-
   const email = user?.email || '';
 
   const providerServiceIds = useMemo(() => ({
@@ -109,10 +105,7 @@ export default function V3AccountSettings() {
     }
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: resetPasswordRedirect,
-      });
-      if (error) throw error;
+      await emailService.passwordReset({ email });
       toast.success(t('accountSettings.toasts.passwordResetSent'), {
         description: t('accountSettings.toasts.openInboxPassword', { email }),
       });
@@ -135,10 +128,7 @@ export default function V3AccountSettings() {
         if (aalError) throw aalError;
 
         if (aalData?.currentLevel !== 'aal2') {
-          const disableCode = window.prompt(
-            t('accountSettings.prompts.disable2fa'),
-            ''
-          );
+          const disableCode = window.prompt(t('accountSettings.prompts.disable2fa'), '');
           if (!disableCode) return;
           const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
             factorId: verifiedFactor.id,
@@ -249,20 +239,63 @@ export default function V3AccountSettings() {
   }
 
   return (
-    <S63_Account_Settings
-      dark={theme === 'dark'}
-      email={email}
-      twoFactorEnabled={mfaEnabled}
-      sessionsCount={sessionsCount}
-      providers={providers}
-      onChangeEmail={handleChangeEmail}
-      onChangePassword={handleChangePassword}
-      onToggle2FA={handleToggle2FA}
-      onLinkProvider={handleLinkProvider}
-      onUnlinkProvider={handleUnlinkProvider}
-      onManageSessions={handleManageSessions}
-      onBack={() => navigate(-1)}
-      showTabBar={false}
-    />
+    <WebAccountScaffold
+      eyebrow={t('accountSettingsPage.eyebrow')}
+      title={t('accountSettingsPage.heading')}
+      description={t('accountSettingsPage.description')}
+    >
+      <WebAccountSection title={t('accountSettingsPage.sections.access')}>
+        <WebAccountRow
+          title={t('accountSettingsPage.rows.email')}
+          description={email || t('accountSettingsPage.rows.emailMissing')}
+          actionLabel={t('accountSettingsPage.actions.changeEmail')}
+          onAction={handleChangeEmail}
+        />
+        <WebAccountRow
+          title={t('accountSettingsPage.rows.password')}
+          description={t('accountSettingsPage.rows.passwordDesc')}
+          actionLabel={t('accountSettingsPage.actions.resetPassword')}
+          onAction={handleChangePassword}
+        />
+        <WebAccountRow
+          title={t('accountSettingsPage.rows.twoFactor')}
+          description={mfaEnabled ? t('accountSettingsPage.rows.twoFactorOn') : t('accountSettingsPage.rows.twoFactorOff')}
+          actionLabel={mfaEnabled ? t('accountSettingsPage.actions.disable') : t('accountSettingsPage.actions.enable')}
+          onAction={handleToggle2FA}
+        />
+      </WebAccountSection>
+
+      <WebAccountSection title={t('accountSettingsPage.sections.connections')}>
+        {providers.map((provider, index) => (
+          <div key={provider.id} style={{ borderTop: index === 0 ? 'none' : '1px solid rgba(10,10,10,0.08)' }}>
+            <WebAccountRow
+              title={provider.name}
+              description={provider.connected ? t('accountSettingsPage.rows.providerConnected') : t('accountSettingsPage.rows.providerDisconnected')}
+              actionLabel={provider.connected ? t('accountSettingsPage.actions.disconnect') : t('accountSettingsPage.actions.connect')}
+              onAction={() => (provider.connected ? handleUnlinkProvider(provider.id) : handleLinkProvider(provider.id))}
+            />
+          </div>
+        ))}
+      </WebAccountSection>
+
+      <WebAccountSection title={t('accountSettingsPage.sections.sessions')}>
+        <WebAccountRow
+          title={t('accountSettingsPage.rows.sessions')}
+          description={t('accountSettingsPage.rows.sessionsDesc', { count: sessionsCount })}
+          actionLabel={t('accountSettingsPage.actions.revokeOthers')}
+          onAction={handleManageSessions}
+        />
+      </WebAccountSection>
+
+      <WebAccountSection title={t('accountSettingsPage.sections.recovery')}>
+        <WebAccountRow
+          title={t('accountSettingsPage.rows.danger')}
+          description={t('accountSettingsPage.rows.dangerDesc')}
+          actionLabel={t('accountSettingsPage.actions.openDanger')}
+          onAction={() => navigate(WEBAPP_DANGER)}
+          danger
+        />
+      </WebAccountSection>
+    </WebAccountScaffold>
   );
 }

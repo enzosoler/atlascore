@@ -710,8 +710,8 @@ export default function V3Today() {
       daily.invalidateAfterAction?.('checkin');
     } catch (error) {
       console.error('[V3Today] checkin save failed', error);
-      toast.error('Check-in saved locally, but cloud sync failed.', {
-        description: error?.message || 'Try again later.',
+      toast.error(t('today.system.checkIn.cloudSyncFailed'), {
+        description: error?.message || t('today.system.checkIn.cloudSyncRetry'),
       });
     }
   }

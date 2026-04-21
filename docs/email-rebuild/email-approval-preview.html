@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>atlas.core email approval preview</title>
+    <style>
+      :root {
+        --paper: #f6f1e8;
+        --ink: #0f0a05;
+        --sulfur: #e7ff2b;
+        --muted: rgba(15, 10, 5, 0.62);
+        --border: rgba(15, 10, 5, 0.12);
+        --bg: #efe7d8;
+        --good: #155724;
+        --good-bg: #d4edda;
+        --bad: #721c24;
+        --bad-bg: #f8d7da;
+        --hold: #856404;
+        --hold-bg: #fff3cd;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #efe7d8 0%, #f6f1e8 100%);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
+      }
+
+      .hero {
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font: 700 11px/1.4 "Courier New", monospace;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+        font-size: clamp(42px, 8vw, 72px);
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+        text-transform: lowercase;
+      }
+
+      .hero p {
+        max-width: 760px;
+        margin: 16px 0 0;
+        font-size: 16px;
+        line-height: 1.65;
+      }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        padding: 14px 16px;
+        margin-bottom: 24px;
+        background: rgba(246, 241, 232, 0.92);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+      }
+
+      .toolbar label,
+      .toolbar span {
+        font: 700 11px/1.4 "Courier New", monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .toolbar select {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: var(--paper);
+        color: var(--ink);
+        padding: 10px 12px;
+        font: 700 12px/1 "Courier New", monospace;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(640px, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.45);
+        border: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+        min-height: 760px;
+        overflow: hidden;
+      }
+
+      .meta {
+        padding: 20px;
+        border-right: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.32);
+      }
+
+      .meta h2 {
+        margin: 0 0 10px;
+        font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+        font-size: 28px;
+        line-height: 0.98;
+        letter-spacing: -0.04em;
+        text-transform: lowercase;
+      }
+
+      .locale {
+        display: inline-block;
+        margin-bottom: 14px;
+        padding: 6px 8px;
+        background: var(--sulfur);
+        font: 700 11px/1 "Courier New", monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .template-id {
+        margin: 0 0 16px;
+        font: 700 11px/1.4 "Courier New", monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .field {
+        margin-bottom: 14px;
+      }
+
+      .field-label {
+        margin-bottom: 4px;
+        font: 700 10px/1.4 "Courier New", monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .field-value {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .status-row {
+        display: flex;
+        gap: 8px;
+        margin: 18px 0 12px;
+      }
+
+      .status-btn {
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--ink);
+        padding: 10px 12px;
+        font: 700 11px/1 "Courier New", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .status-btn.active[data-status="approved"] {
+        background: var(--good-bg);
+        color: var(--good);
+        border-color: rgba(21, 87, 36, 0.28);
+      }
+
+      .status-btn.active[data-status="needs-work"] {
+        background: var(--bad-bg);
+        color: var(--bad);
+        border-color: rgba(114, 28, 36, 0.28);
+      }
+
+      .status-btn.active[data-status="hold"] {
+        background: var(--hold-bg);
+        color: var(--hold);
+        border-color: rgba(133, 100, 4, 0.28);
+      }
+
+      .notes {
+        width: 100%;
+        min-height: 110px;
+        resize: vertical;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.6);
+        padding: 12px;
+        color: var(--ink);
+        font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .preview {
+        background: #ddd3c1;
+        padding: 20px;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        min-height: 720px;
+        border: 0;
+        background: white;
+      }
+
+      .empty {
+        padding: 28px;
+        border: 1px dashed var(--border);
+        font: 700 12px/1.6 "Courier New", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 1100px) {
+        .card {
+          grid-template-columns: 1fr;
+        }
+
+        .meta {
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+      }
+
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="hero">
+        <p class="eyebrow">atlas.core / email approval / actual preview</p>
+        <h1>approve the<br />actual emails.</h1>
+        <p>
+          Each card below renders the actual email body in a browser preview, using the current
+          shared template system and sample data. Use the status buttons and notes area to mark
+          what should ship, what needs revision, and what should stay on hold.
+        </p>
+      </div>
+
+      <div class="toolbar">
+        <span>locale</span>
+        <select id="locale-filter">
+          <option value="all">show all</option>
+          <option value="en">english only</option>
+          <option value="pt-BR">portuguese only</option>
+        </select>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </div>
+
+    <script>
+      const STORAGE_PREFIX = "atlas-email-approval:";
+
+      const brand = {
+        name: "atlas.core",
+        siteUrl: "https://www.useatlascore.com",
+        supportEmail: "support@useatlascore.com",
+        defaultLocale: "pt-BR",
+        colors: {
+          paper: "#F6F1E8",
+          ink: "#0F0A05",
+          sulfur: "#E7FF2B",
+          border: "rgba(15,10,5,0.12)",
+          textPrimary: "rgba(15,10,5,0.88)",
+          textSecondary: "rgba(15,10,5,0.62)"
+        }
+      };
+
+      const templates = {
+        welcome: {
+          "pt-BR": {
+            subject: "atlas.core - boas-vindas",
+            preheader: "Seu workspace esta pronto.",
+            headline: "Bem-vindo ao atlas.core",
+            body: [
+              "Seu workspace esta pronto.",
+              "Tracking, treinos, nutricao, exames, composicao corporal e protocolos ja estao ativos.",
+              "Comece limpo. Construa o padrao desde o inicio."
+            ],
+            ctaLabel: "Entrar no atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "Voce esta recebendo este e-mail porque uma conta do atlas.core foi criada para este endereco."
+          },
+          en: {
+            subject: "atlas.core - welcome",
+            preheader: "Your workspace is ready.",
+            headline: "Welcome to atlas.core",
+            body: [
+              "Your workspace is ready.",
+              "Tracking, workouts, nutrition, labs, body composition, and protocols are live.",
+              "Start clean. Build the standard early."
+            ],
+            ctaLabel: "Enter atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "You are receiving this email because an atlas.core account was created for this address."
+          }
+        },
+        confirm_email: {
+          "pt-BR": {
+            subject: "atlas.core - confirme sua conta",
+            preheader: "Confirme seu e-mail para ativar seu workspace.",
+            headline: "Confirme seu e-mail",
+            body: [
+              "Sua conta esta pronta.",
+              "Confirme seu e-mail para ativar seu workspace e continuar a configuracao."
+            ],
+            ctaLabel: "Confirmar e-mail",
+            ctaUrl: "{{confirm_email_url}}",
+            note: "Se voce nao criou esta conta, ignore este e-mail."
+          },
+          en: {
+            subject: "atlas.core - confirm your account",
+            preheader: "Confirm your email to activate your workspace.",
+            headline: "Confirm your email",
+            body: [
+              "Your account is ready.",
+              "Confirm your email to activate your workspace and continue setup."
+            ],
+            ctaLabel: "Confirm email",
+            ctaUrl: "{{confirm_email_url}}",
+            note: "If you did not create this account, ignore this email."
+          }
+        },
+        reset_password: {
+          "pt-BR": {
+            subject: "atlas.core - redefina sua senha",
+            preheader: "Use este link para definir uma nova senha.",
+            headline: "Redefina sua senha",
+            body: [
+              "Use o link abaixo para definir uma nova senha.",
+              "Faca isso agora. Este link expira em breve."
+            ],
+            ctaLabel: "Redefinir senha",
+            ctaUrl: "{{reset_password_url}}",
+            note: "Se voce nao solicitou esta redefinicao, ignore este e-mail."
+          },
+          en: {
+            subject: "atlas.core - reset your password",
+            preheader: "Use this link to set a new password.",
+            headline: "Reset your password",
+            body: [
+              "Use the link below to set a new password.",
+              "Do it now. This link expires soon."
+            ],
+            ctaLabel: "Reset password",
+            ctaUrl: "{{reset_password_url}}",
+            note: "If you did not request this reset, ignore this email."
+          }
+        },
+        trial_started: {
+          "pt-BR": {
+            subject: "atlas.core - teste iniciado",
+            preheader: "Voce agora tem acesso completo.",
+            headline: "Seu teste esta ativo",
+            body: [
+              "Voce agora tem acesso completo ao atlas.core.",
+              "Use esse periodo direito. Tudo esta liberado."
+            ],
+            ctaLabel: "Entrar no atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "Seu teste termina em {{trial_end_date}}."
+          },
+          en: {
+            subject: "atlas.core - trial started",
+            preheader: "You now have full access.",
+            headline: "Your trial is active",
+            body: [
+              "You now have full access to atlas.core.",
+              "Use the trial window properly. Everything is unlocked."
+            ],
+            ctaLabel: "Enter atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "Your trial ends on {{trial_end_date}}."
+          }
+        },
+        trial_ending: {
+          "pt-BR": {
+            subject: "atlas.core - faltam 2 dias",
+            preheader: "Seu teste termina em 2 dias.",
+            headline: "Faltam 2 dias",
+            body: [
+              "Seu teste termina em 2 dias.",
+              "Faca o upgrade para manter acesso ao seu workspace, historico, protocolos e relatorios.",
+              "Nao perca ritmo por causa de tarefa administrativa."
+            ],
+            ctaLabel: "Ver planos",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            secondaryCtaLabel: "Entrar no atlas.core",
+            secondaryCtaUrl: `${brand.siteUrl}/app`,
+            note: "Nenhuma acao e necessaria se voce nao pretende continuar."
+          },
+          en: {
+            subject: "atlas.core - 2 days remaining",
+            preheader: "Your trial ends in 2 days.",
+            headline: "2 days remaining",
+            body: [
+              "Your trial ends in 2 days.",
+              "Upgrade to keep access to your workspace, history, protocols, and reporting.",
+              "Do not lose momentum over admin."
+            ],
+            ctaLabel: "View plans",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            secondaryCtaLabel: "Enter atlas.core",
+            secondaryCtaUrl: `${brand.siteUrl}/app`,
+            note: "No action is required if you do not plan to continue."
+          }
+        },
+        trial_expired: {
+          "pt-BR": {
+            subject: "atlas.core - teste encerrado",
+            preheader: "Seu workspace esta pausado ate que voce faca o upgrade.",
+            headline: "Teste encerrado",
+            body: [
+              "Seu workspace esta pausado.",
+              "Seus dados continuam intactos.",
+              "Faca o upgrade para restaurar o acesso e continuar de onde parou."
+            ],
+            ctaLabel: "Fazer upgrade",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            note: "Seus dados foram preservados e voltarao a ficar disponiveis apos o upgrade."
+          },
+          en: {
+            subject: "atlas.core - trial ended",
+            preheader: "Your workspace is paused until you upgrade.",
+            headline: "Trial ended",
+            body: [
+              "Your workspace is paused.",
+              "Your data remains intact.",
+              "Upgrade to restore access and continue where you left off."
+            ],
+            ctaLabel: "Upgrade now",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            note: "Your data is preserved and will be available again after upgrade."
+          }
+        },
+        payment_success: {
+          "pt-BR": {
+            subject: "atlas.core - pagamento confirmado",
+            preheader: "Sua assinatura segue ativa.",
+            headline: "Pagamento confirmado",
+            body: [
+              "Seu pagamento foi processado com sucesso.",
+              "Seu acesso segue ativo. Nenhuma outra acao e necessaria."
+            ],
+            ctaLabel: "Abrir cobranca",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            note: "Recibo: {{receipt_id}}"
+          },
+          en: {
+            subject: "atlas.core - payment confirmed",
+            preheader: "Your subscription remains active.",
+            headline: "Payment confirmed",
+            body: [
+              "Your payment was processed successfully.",
+              "Access remains active. Nothing else is required."
+            ],
+            ctaLabel: "Open billing",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            note: "Receipt ID: {{receipt_id}}"
+          }
+        },
+        payment_failed: {
+          "pt-BR": {
+            subject: "atlas.core - falha no pagamento",
+            preheader: "Atualize seus dados de cobranca para evitar interrupcao.",
+            headline: "Falha no pagamento",
+            body: [
+              "Nao foi possivel processar seu pagamento.",
+              "Atualize seus dados de cobranca agora para evitar interrupcao."
+            ],
+            ctaLabel: "Atualizar pagamento",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            note: "Vamos tentar novamente em {{retry_date}}."
+          },
+          en: {
+            subject: "atlas.core - payment failed",
+            preheader: "Update billing details to avoid interruption.",
+            headline: "Payment failed",
+            body: [
+              "We could not process your payment.",
+              "Update your billing details now to avoid interruption."
+            ],
+            ctaLabel: "Update payment",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            note: "We will retry payment on {{retry_date}}."
+          }
+        },
+        subscription_canceled: {
+          "pt-BR": {
+            subject: "atlas.core - assinatura cancelada",
+            preheader: "Sua assinatura foi cancelada.",
+            headline: "Assinatura cancelada",
+            body: [
+              "Sua assinatura foi cancelada.",
+              "Seu acesso segue ativo ate {{access_end_date}}.",
+              "Depois disso, o workspace sera pausado ate a reativacao."
+            ],
+            ctaLabel: "Reativar assinatura",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            secondaryCtaLabel: "Entrar no atlas.core",
+            secondaryCtaUrl: `${brand.siteUrl}/app`,
+            note: "Seus dados permanecem intactos durante o periodo de cobranca atual."
+          },
+          en: {
+            subject: "atlas.core - subscription canceled",
+            preheader: "Your subscription has been canceled.",
+            headline: "Subscription canceled",
+            body: [
+              "Your subscription has been canceled.",
+              "Access remains available until {{access_end_date}}.",
+              "After that, the workspace is paused until you reactivate."
+            ],
+            ctaLabel: "Reactivate subscription",
+            ctaUrl: `${brand.siteUrl}/billing`,
+            secondaryCtaLabel: "Enter atlas.core",
+            secondaryCtaUrl: `${brand.siteUrl}/app`,
+            note: "Your data remains intact during the current billing period."
+          }
+        },
+        inactivity_nudge: {
+          "pt-BR": {
+            subject: "atlas.core - volte para seu workspace",
+            preheader: "Seu workspace esta parado.",
+            headline: "Seu workspace esta parado",
+            body: [
+              "Voce nao acessa ha algum tempo.",
+              "Volte para o trabalho. Continue de onde parou.",
+              "Voce nao esta aqui para registrar dado por registrar."
+            ],
+            ctaLabel: "Entrar no atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "Seu workspace continua disponivel."
+          },
+          en: {
+            subject: "atlas.core - return to your workspace",
+            preheader: "Your workspace is idle.",
+            headline: "Your workspace is idle",
+            body: [
+              "You have not logged in recently.",
+              "Return to the work. Continue where you left off.",
+              "You are not here to log data for the sake of it."
+            ],
+            ctaLabel: "Enter atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "Your workspace is still available."
+          }
+        },
+        weekly_report: {
+          "pt-BR": {
+            subject: "atlas.core - sua semana, {{report_date_range}}",
+            preheader: "Revise a semana. Encontre a falha. Ajuste.",
+            headline: "Sua semana",
+            body: [
+              "Revise a semana. Encontre a falha. Ajuste.",
+              "Metrica so importa se muda a proxima decisao.",
+              "Abra o relatorio e aja em cima dele."
+            ],
+            ctaLabel: "Ver relatorio",
+            ctaUrl: "{{weekly_report_url}}",
+            note: "Periodo: {{report_date_range}}"
+          },
+          en: {
+            subject: "atlas.core - your week, {{report_date_range}}",
+            preheader: "Review the week. Identify the gap. Adjust.",
+            headline: "Your week",
+            body: [
+              "Review the week. Identify the gap. Adjust.",
+              "Metrics matter only if they change the next decision.",
+              "Open the report and act on it."
+            ],
+            ctaLabel: "View report",
+            ctaUrl: "{{weekly_report_url}}",
+            note: "Week: {{report_date_range}}"
+          }
+        },
+        milestone_streak_7: {
+          "pt-BR": {
+            subject: "atlas.core - sequencia de 7 dias",
+            preheader: "Sete dias. Conquistados, nao declarados.",
+            headline: "Sequencia de 7 dias",
+            body: [
+              "Sete dias. Conquistados, nao declarados.",
+              "A maioria para cedo. Voce nao.",
+              "Mantenha o padrao onde ele pertence."
+            ],
+            ctaLabel: "Entrar no atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "Sequencia atual: 7 dias."
+          },
+          en: {
+            subject: "atlas.core - 7-day streak",
+            preheader: "Seven days. Earned, not claimed.",
+            headline: "7-day streak",
+            body: [
+              "Seven days. Earned, not claimed.",
+              "Most people stop early. You did not.",
+              "Keep the standard where it belongs."
+            ],
+            ctaLabel: "Enter atlas.core",
+            ctaUrl: `${brand.siteUrl}/app`,
+            note: "Streak count: 7 days."
+          }
+        },
+        invite_beta: {
+          "pt-BR": {
+            subject: "atlas.core - acesso antecipado",
+            preheader: "Voce foi convidado para o atlas.core.",
+            headline: "Acesso antecipado",
+            body: [
+              "Acesso antecipado, {{first_name}}.",
+              "Estou construindo o atlas.core - um sistema de treino e saude para atletas e os profissionais que gerenciam eles.",
+              "Voce faz parte de um grupo pequeno com acesso direto antes do lancamento.",
+              "Seu acesso inclui tudo: tracking de atletas, treinos, nutricao, exames, composicao corporal, fluxos para coaches, fluxos para clinicos e protocolos.",
+              "Sem restricoes.",
+              "Use direito. Quebre, se precisar.",
+              "Quero feedback direto: o que funciona, o que atrasa voce e o que nao deveria existir."
+            ],
+            ctaLabel: "Entrar no atlas.core",
+            ctaUrl: "{{invite_url}}",
+            note: "Voce esta recebendo este e-mail porque foi convidado diretamente para o acesso antecipado. O convite expira em {{invite_expiry_date}}."
+          },
+          en: {
+            subject: "atlas.core - early access",
+            preheader: "You have been invited to atlas.core.",
+            headline: "Early access",
+            body: [
+              "Early access, {{first_name}}.",
+              "I am building atlas.core - a training and health system for athletes and the professionals who manage them.",
+              "You are part of a small group with direct access before launch.",
+              "Your access includes everything: athlete tracking, workouts, nutrition, labs, body composition, coach workflows, clinician workflows, and protocols.",
+              "No restrictions.",
+              "Use it properly. Break it if needed.",
+              "I want direct feedback: what works, what slows you down, and what should not exist."
+            ],
+            ctaLabel: "Enter atlas.core",
+            ctaUrl: "{{invite_url}}",
+            note: "You are receiving this email because you were invited directly to early access. Invitation expires on {{invite_expiry_date}}."
+          }
+        },
+        founder_welcome: {
+          "pt-BR": {
+            subject: "atlas.core - uma nota pessoal do fundador",
+            preheader: "Obrigado por baixar o atlas.core.",
+            headline: "Obrigado por baixar o atlas.core",
+            body: [
+              "Oi {{first_name}}, eu sou o Enzo, fundador do atlas.core.",
+              "Criei este app porque eu estava cansado de ver treino, nutricao, exames e progresso espalhados em ferramentas desconectadas.",
+              "Quis construir um sistema mais claro, mais honesto e realmente util no dia a dia.",
+              "Se voce topar, eu adoraria acompanhar sua primeira experiencia de perto e aprender com o que esta funcionando e com o que esta travando voce.",
+              "Qualquer resposta sua vai direto para mim e tem valor real no produto."
+            ],
+            ctaLabel: "Responder ao fundador",
+            ctaUrl: "mailto:{{reply_email}}",
+            secondaryCtaLabel: "Abrir atlas.core",
+            secondaryCtaUrl: `${brand.siteUrl}/app`,
+            note: "Se estiver tudo bem para voce, eu tambem posso fazer um check-in semanal durante seu primeiro mes no app. Preferencias: {{reply_email}}."
+          },
+          en: {
+            subject: "atlas.core - a personal note from the founder",
+            preheader: "Thank you for downloading atlas.core.",
+            headline: "Thank you for downloading atlas.core",
+            body: [
+              "Hi {{first_name}}, I am Enzo, the founder of atlas.core.",
+              "I built this app because I was tired of seeing training, nutrition, labs, and progress split across disconnected tools.",
+              "I wanted to build a system that feels clearer, more honest, and actually useful in day-to-day practice.",
+              "If you are open to it, I would love to stay close to your first experience and learn what is working and what is slowing you down.",
+              "Any reply goes directly to me and has real value for the product."
+            ],
+            ctaLabel: "Reply to the founder",
+            ctaUrl: "mailto:{{reply_email}}",
+            secondaryCtaLabel: "Open atlas.core",
+            secondaryCtaUrl: `${brand.siteUrl}/app`,
+            note: "If you are comfortable with it, I can also follow up once a week during your first month in the app. Contact: {{reply_email}}."
+          }
+        },
+        founder_check_in: {
+          "pt-BR": {
+            subject: "atlas.core - como esta sua semana {{week_label}}?",
+            preheader: "Um check-in rapido do fundador.",
+            headline: "Como esta sua semana {{week_label}}?",
+            body: [
+              "Oi {{first_name}}, passando para fazer um check-in rapido.",
+              "Quero entender como sua experiencia com o atlas.core esta evoluindo agora que voce ja teve algum tempo real dentro do app.",
+              "Se voce puder, me diga o que esta claro, o que esta confuso e o que voce gostaria que existisse.",
+              "Feedback honesto aqui vale mais do que educacao. Eu estou usando isso para lapidar o produto antes do lancamento."
+            ],
+            ctaLabel: "Enviar feedback",
+            ctaUrl: "{{feedback_url}}",
+            secondaryCtaLabel: "Responder por e-mail",
+            secondaryCtaUrl: "mailto:{{reply_email}}",
+            note: "Este e um check-in pessoal do fundador durante seu primeiro mes. Se preferir nao receber esse acompanhamento, basta responder este e-mail."
+          },
+          en: {
+            subject: "atlas.core - how is week {{week_label}} going?",
+            preheader: "A quick founder check-in.",
+            headline: "How is week {{week_label}} going?",
+            body: [
+              "Hi {{first_name}}, sending you a quick check-in.",
+              "I want to understand how your atlas.core experience is developing now that you have had some real time inside the app.",
+              "If you can, tell me what feels clear, what feels confusing, and what you wish existed.",
+              "Honest feedback is more useful than politeness here. I am using it to sharpen the product before launch."
+            ],
+            ctaLabel: "Send feedback",
+            ctaUrl: "{{feedback_url}}",
+            secondaryCtaLabel: "Reply by email",
+            secondaryCtaUrl: "mailto:{{reply_email}}",
+            note: "This is a personal founder check-in during your first month. If you would rather not receive these follow-ups, just reply to this email."
+          }
+        }
+      };
+
+      const sampleVars = {
+        welcome: {},
+        confirm_email: { confirm_email_url: `${brand.siteUrl}/auth/callback?mode=confirm&token=preview` },
+        reset_password: { reset_password_url: `${brand.siteUrl}/auth/reset?token=preview` },
+        trial_started: { trial_end_date: "April 30, 2026" },
+        trial_ending: {},
+        trial_expired: {},
+        payment_success: { receipt_id: "RCP-001-PREVIEW" },
+        payment_failed: { retry_date: "April 30, 2026" },
+        subscription_canceled: { access_end_date: "May 30, 2026" },
+        inactivity_nudge: {},
+        weekly_report: {
+          report_date_range: "Apr 14-Apr 20",
+          weekly_report_url: `${brand.siteUrl}/app/weekly`
+        },
+        milestone_streak_7: {},
+        invite_beta: {
+          first_name: "Alex",
+          invite_url: `${brand.siteUrl}/invite?token=preview`,
+          invite_expiry_date: "May 1, 2026"
+        },
+        founder_welcome: {
+          first_name: "Alex",
+          reply_email: "enzo@useatlascore.com"
+        },
+        founder_check_in: {
+          first_name: "Alex",
+          week_label: "2",
+          feedback_url: `${brand.siteUrl}/feedback?source=founder-email`,
+          reply_email: "enzo@useatlascore.com"
+        }
+      };
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function interpolate(input, variables) {
+        return input.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_, key) => variables[key] ?? `{{${key}}}`);
+      }
+
+      function renderEmail(templateKey, locale) {
+        const template = templates[templateKey][locale] || templates[templateKey][brand.defaultLocale];
+        const variables = sampleVars[templateKey] || {};
+        const subject = interpolate(template.subject, variables);
+        const preheader = interpolate(template.preheader, variables);
+        const headline = interpolate(template.headline, variables);
+        const body = template.body.map((line) => interpolate(line, variables));
+        const note = template.note ? interpolate(template.note, variables) : "";
+        const ctaUrl = template.ctaUrl ? interpolate(template.ctaUrl, variables) : "";
+        const secondaryCtaUrl = template.secondaryCtaUrl ? interpolate(template.secondaryCtaUrl, variables) : "";
+        const fallbackLinkLabel = locale === "pt-BR"
+          ? "Se o botao nao funcionar, use este link:"
+          : "If the button does not work, use this link:";
+
+        const html = `<!doctype html>
+<html lang="${locale === "pt-BR" ? "pt-BR" : "en"}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="supported-color-schemes" content="light only" />
+    <title>${escapeHtml(subject)}</title>
+  </head>
+  <body style="margin:0;padding:0;background:${brand.colors.paper};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;visibility:hidden;">${escapeHtml(preheader)}</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${brand.colors.paper};margin:0;padding:24px 0;">
+      <tr>
+        <td align="center" style="padding:0 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:${brand.colors.paper};border:1px solid ${brand.colors.border};">
+            <tr>
+              <td style="padding:28px 28px 12px 28px;">
+                <div style="font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-size:22px;line-height:1;font-weight:800;letter-spacing:-0.04em;color:${brand.colors.ink};text-transform:lowercase;">atlas<span style="color:${brand.colors.sulfur};">.</span>core</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 28px 0 28px;">
+                <h1 style="margin:0;color:${brand.colors.ink};font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-size:34px;line-height:1.02;font-weight:800;letter-spacing:-0.04em;text-transform:lowercase;">${escapeHtml(headline)}</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 28px 0 28px;">
+                ${body.map((paragraph) => `<p style="margin:0 0 12px 0;color:${brand.colors.textPrimary};font-size:16px;line-height:1.6;">${escapeHtml(paragraph)}</p>`).join("")}
+              </td>
+            </tr>
+            ${template.ctaLabel && ctaUrl ? `
+            <tr>
+              <td style="padding:20px 28px 0 28px;">
+                <a href="${escapeHtml(ctaUrl)}" style="display:inline-block;background:${brand.colors.ink};color:${brand.colors.paper};text-decoration:none;font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:14px;font-weight:800;padding:14px 18px;border-radius:10px;letter-spacing:-0.02em;text-transform:lowercase;">${escapeHtml(template.ctaLabel)}</a>
+              </td>
+            </tr>` : ""}
+            ${template.secondaryCtaLabel && secondaryCtaUrl ? `
+            <tr>
+              <td style="padding:12px 28px 0 28px;">
+                <a href="${escapeHtml(secondaryCtaUrl)}" style="display:inline-block;color:${brand.colors.ink};text-decoration:none;font-family:'Courier New',monospace;font-size:12px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">${escapeHtml(template.secondaryCtaLabel)}</a>
+              </td>
+            </tr>` : ""}
+            <tr>
+              <td style="padding:28px 28px 0 28px;">
+                <div style="height:1px;background:${brand.colors.border};font-size:1px;line-height:1px;">&nbsp;</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 28px 28px 28px;">
+                ${note ? `<p style="margin:0 0 10px 0;color:${brand.colors.textSecondary};font-family:'Courier New',monospace;font-size:11px;line-height:1.7;letter-spacing:0.04em;text-transform:uppercase;">${escapeHtml(note)}</p>` : ""}
+                <p style="margin:0 0 10px 0;color:${brand.colors.textSecondary};font-size:13px;line-height:1.55;word-break:break-word;">${escapeHtml(fallbackLinkLabel)}<br /><span style="color:${brand.colors.ink};">${escapeHtml(ctaUrl || brand.siteUrl)}</span></p>
+                <p style="margin:0;color:${brand.colors.textSecondary};font-family:'Courier New',monospace;font-size:11px;line-height:1.7;letter-spacing:0.04em;text-transform:uppercase;">body · operating · system<br />${brand.name} &middot; ${brand.supportEmail} &middot; useatlascore.com</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+        return { subject, preheader, html };
+      }
+
+      function entryKey(templateKey, locale) {
+        return `${templateKey}:${locale}`;
+      }
+
+      function loadState(key) {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_PREFIX + key) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function saveState(key, value) {
+        localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+      }
+
+      function renderCards(localeFilter = "all") {
+        const grid = document.getElementById("grid");
+        grid.innerHTML = "";
+
+        const entries = Object.keys(templates).flatMap((templateKey) =>
+          Object.keys(templates[templateKey]).map((locale) => ({ templateKey, locale }))
+        );
+
+        const filtered = localeFilter === "all"
+          ? entries
+          : entries.filter((entry) => entry.locale === localeFilter);
+
+        if (!filtered.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "No previews for this filter.";
+          grid.appendChild(empty);
+          return;
+        }
+
+        for (const { templateKey, locale } of filtered) {
+          const { subject, preheader, html } = renderEmail(templateKey, locale);
+          const stateKey = entryKey(templateKey, locale);
+          const state = loadState(stateKey);
+
+          const card = document.createElement("section");
+          card.className = "card";
+          card.dataset.locale = locale;
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.innerHTML = `
+            <div class="locale">${escapeHtml(locale)}</div>
+            <p class="template-id">${escapeHtml(templateKey)}</p>
+            <h2>${escapeHtml(templateKey.replace(/_/g, " "))}</h2>
+            <div class="field">
+              <div class="field-label">subject</div>
+              <div class="field-value">${escapeHtml(subject)}</div>
+            </div>
+            <div class="field">
+              <div class="field-label">preheader</div>
+              <div class="field-value">${escapeHtml(preheader)}</div>
+            </div>
+            <div class="status-row">
+              <button class="status-btn" data-status="approved">approved</button>
+              <button class="status-btn" data-status="needs-work">needs work</button>
+              <button class="status-btn" data-status="hold">hold</button>
+            </div>
+            <div class="field">
+              <div class="field-label">notes</div>
+              <textarea class="notes" placeholder="Leave approval notes here...">${escapeHtml(state.notes || "")}</textarea>
+            </div>
+          `;
+
+          const preview = document.createElement("div");
+          preview.className = "preview";
+          const frame = document.createElement("iframe");
+          frame.setAttribute("loading", "lazy");
+          frame.srcdoc = html;
+          preview.appendChild(frame);
+
+          card.appendChild(meta);
+          card.appendChild(preview);
+          grid.appendChild(card);
+
+          const buttons = [...meta.querySelectorAll(".status-btn")];
+          const notes = meta.querySelector(".notes");
+
+          function applyStatus(status) {
+            buttons.forEach((button) => {
+              button.classList.toggle("active", button.dataset.status === status);
+            });
+          }
+
+          applyStatus(state.status || "");
+
+          buttons.forEach((button) => {
+            button.addEventListener("click", () => {
+              const nextStatus = button.dataset.status;
+              const current = loadState(stateKey);
+              current.status = current.status === nextStatus ? "" : nextStatus;
+              saveState(stateKey, current);
+              applyStatus(current.status);
+            });
+          });
+
+          notes.addEventListener("input", () => {
+            const current = loadState(stateKey);
+            current.notes = notes.value;
+            saveState(stateKey, current);
+          });
+        }
+      }
+
+      document.getElementById("locale-filter").addEventListener("change", (event) => {
+        renderCards(event.target.value);
+      });
+
+      renderCards();
+    </script>
+  </body>
+</html>

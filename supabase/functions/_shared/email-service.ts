@@ -254,6 +254,42 @@ export async function sendBetaInvite(
   });
 }
 
+export async function sendFounderWelcome(
+  to: string,
+  firstName: string,
+  replyEmail: string,
+  userId?: string,
+  language?: string
+): Promise<SendResult> {
+  const { appUrl } = getConfig();
+  return sendEmail({
+    type: 'founder_welcome',
+    to,
+    userId,
+    language,
+    payload: { firstName, replyEmail, appUrl },
+  });
+}
+
+export async function sendFounderCheckIn(
+  to: string,
+  firstName: string,
+  weekLabel: string,
+  feedbackUrl: string,
+  replyEmail: string,
+  userId?: string,
+  language?: string
+): Promise<SendResult> {
+  const { appUrl } = getConfig();
+  return sendEmail({
+    type: 'founder_check_in',
+    to,
+    userId,
+    language,
+    payload: { firstName, weekLabel, feedbackUrl, replyEmail, appUrl },
+  });
+}
+
 export async function sendPaymentSuccess(
   to: string,
   firstName: string,

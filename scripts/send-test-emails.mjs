@@ -3,10 +3,14 @@
  * Usage: node scripts/send-test-emails.mjs
  */
 
-const RESEND_API_KEY = 're_XGLcasmD_6UH52aBoSptuCDJit1tCHxux';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const TO = 'admin@useatlascore.com';
 const FROM = 'atlas.core <noreply@useatlascore.com>';
 const APP = 'https://useatlascore.com';
+
+if (!RESEND_API_KEY) {
+  throw new Error('RESEND_API_KEY is required to run scripts/send-test-emails.mjs');
+}
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 

@@ -31,6 +31,16 @@ const SAMPLE_VARS: Record<string, Record<string, string>> = {
     invite_url: `${APP}/invite?token=preview_token`,
     invite_expiry_date: '3 de abril de 2026',
   },
+  founder_welcome: {
+    first_name: 'Alex',
+    reply_email: 'enzo@useatlascore.com',
+  },
+  founder_check_in: {
+    first_name: 'Alex',
+    week_label: '2',
+    feedback_url: `${APP}/feedback?source=founder-email`,
+    reply_email: 'enzo@useatlascore.com',
+  },
 };
 
 serve(async (req) => {

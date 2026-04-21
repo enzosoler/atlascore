@@ -14,6 +14,13 @@ import { supabase } from '@/lib/supabaseClient';
 
 const TIMEOUT_MS = 12_000;
 const RETRY_DELAYS = [800, 2000]; // ms between attempts (3 total: initial + 2 retries)
+const REMOTE_EXERCISE_SEARCH_ENABLED = import.meta.env.VITE_ENABLE_REMOTE_EXERCISE_SEARCH === 'true';
+
+function canUseRemoteExerciseSearch() {
+  if (!REMOTE_EXERCISE_SEARCH_ENABLED) return false;
+  if (typeof window === 'undefined') return true;
+  return !['localhost', '127.0.0.1'].includes(window.location.hostname);
+}
 
 async function apiRequest(path, params = {}, attempt = 1) {
   const controller = new AbortController();
@@ -99,5 +106,9 @@ export async function fetchEquipmentList() {
   return apiRequest('/exercises/equipmentList');
 }
 
-/** Always true now — the edge function is the gating mechanism. */
-export const isConfigured = true;
+/**
+ * Only use the remote edge function when explicitly enabled in a deployed
+ * environment. Local dev should prefer the bundled catalog to avoid noisy
+ * edge-function/CORS failures obscuring real app issues.
+ */
+export const isConfigured = canUseRemoteExerciseSearch();

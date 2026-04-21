@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import WorkoutExecutionScreen from '@/components/workouts/WorkoutExecutionScreen.jsx';
 import { saveCompletedWorkout } from '@/services/workoutService';
@@ -60,8 +61,8 @@ function buildSetTemplates(item, targetSets, targetReps, targetWeight) {
   }));
 }
 
-function mapPlanExercise(item) {
-  const name = item?.exercise_name || item?.name || item?.manual_exercise_name || 'Exercise';
+function mapPlanExercise(item, t) {
+  const name = item?.exercise_name || item?.name || item?.manual_exercise_name || t('workoutExecution.fallbackExercise');
   const exerciseId = item?.exerciseId || item?.exercise_id || item?.exercise_master_id || item?.id || findExerciseIdByName(name);
   const catalog = exerciseId ? DEMO_EXERCISES.find((entry) => entry.id === exerciseId) : null;
   const targetSets = coercePositiveInt(item?.target_sets, item?.sets?.length, item?.set_count) || 3;
@@ -80,10 +81,10 @@ function mapPlanExercise(item) {
   };
 }
 
-function mapWorkoutSourceToExecution(source) {
-  const exercises = Array.isArray(source?.exercises) ? source.exercises.map(mapPlanExercise) : [];
+function mapWorkoutSourceToExecution(source, t) {
+  const exercises = Array.isArray(source?.exercises) ? source.exercises.map((item) => mapPlanExercise(item, t)) : [];
   return {
-    name: source?.sessionName || source?.name || 'Free session',
+    name: source?.sessionName || source?.name || t('workoutExecution.freeSession'),
     plan_id: source?.planId || null,
     routineId: source?.routineId || null,
     plan_day_index: source?.planDayIndex ?? null,
@@ -100,6 +101,7 @@ function pickRoutineDay(days) {
 export default function V3ActiveWorkout() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const t = useT();
   const { activePlan, plan, invalidateAfterAction } = useDailyStateV2();
   const [routines, setRoutines] = useState([]);
   const [history, setHistory] = useState([]);
@@ -139,11 +141,11 @@ export default function V3ActiveWorkout() {
 
     if (activePlan && Array.isArray(plan?.todayExercises) && plan.todayExercises.length > 0) {
       return mapWorkoutSourceToExecution({
-        sessionName: [activePlan.name, plan.todayDayLabel].filter(Boolean).join(' · ') || activePlan.name || 'Today workout',
+        sessionName: [activePlan.name, plan.todayDayLabel].filter(Boolean).join(' · ') || activePlan.name || t('workoutExecution.todayWorkout'),
         planId: activePlan.id,
         planDayIndex: plan.todayDayIndex ?? 0,
         exercises: plan.todayExercises,
-      });
+      }, t);
     }
 
     const routine = Array.isArray(routines) ? routines[0] : null;
@@ -151,21 +153,21 @@ export default function V3ActiveWorkout() {
       const days = Array.isArray(routine.days) ? routine.days : [];
       const { day, index } = pickRoutineDay(days);
       return mapWorkoutSourceToExecution({
-        sessionName: [routine.name, day?.name].filter(Boolean).join(' · ') || routine.name || 'Saved routine',
+        sessionName: [routine.name, day?.name].filter(Boolean).join(' · ') || routine.name || t('workoutExecution.savedRoutine'),
         routineId: routine.id,
         planDayIndex: index,
         exercises: Array.isArray(day?.exercises) ? day.exercises : [],
-      });
+      }, t);
     }
 
     return {
-      name: 'Free session',
+      name: t('workoutExecution.freeSession'),
       plan_id: null,
       routineId: null,
       plan_day_index: null,
       exercises: [],
     };
-  }, [persistedSession, activePlan, plan, routines]);
+  }, [persistedSession, activePlan, plan, routines, t]);
 
   useEffect(() => {
     if (persistedSession?.workout || !workout?.routineId) return;
@@ -185,7 +187,7 @@ export default function V3ActiveWorkout() {
       onCancel={() => navigate('/app/train')}
       onComplete={async (payload) => {
         if (!user?.id) {
-          toast.error('You must be signed in to save a workout.');
+          toast.error(t('workoutExecution.mustBeSignedIn'));
           return;
         }
 
@@ -213,19 +215,23 @@ export default function V3ActiveWorkout() {
           });
 
           if (flatSets.length > 0) {
-            await saveWorkoutSession({
-              routineId: workout.routineId || null,
-              startedAt,
-              endedAt,
-              sets: flatSets,
-            });
+            try {
+              await saveWorkoutSession({
+                routineId: workout.routineId || null,
+                startedAt,
+                endedAt,
+                sets: flatSets,
+              });
+            } catch (sidecarError) {
+              console.warn('[V3ActiveWorkout] workout session mirror failed', sidecarError?.message || sidecarError);
+            }
           }
 
           invalidateAfterAction('workout');
           navigate('/app/workouts/history', { replace: true });
         } catch (error) {
           console.error('[V3ActiveWorkout] save failed', error);
-          toast.error(error?.message || 'Failed to save workout. Please try again.');
+          toast.error(error?.message || t('workoutExecution.saveFailed'));
         }
       }}
     />

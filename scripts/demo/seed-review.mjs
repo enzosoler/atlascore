@@ -12,12 +12,15 @@
 import { createClient } from '@supabase/supabase-js'
 
 // ─── Config ────────────────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://xrtqwdpczgdomqebmfkk.supabase.co'
-const SERVICE_ROLE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHF3ZHBjemdkb21xZWJtZmtrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mzg3MzA5MiwiZXhwIjoyMDg5NDQ5MDkyfQ.8siwRIHcN4WojlPNfC0WNaSG6RGNAGCSfZ5iDOTce6o'
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://xrtqwdpczgdomqebmfkk.supabase.co'
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const USER_ID = '13f976a2-006a-45b9-88c5-6c85f7ffc40a'
 const USER_EMAIL = 'review@useatlascore.com'
 const MAX_FALLBACK = 30
+
+if (!SERVICE_ROLE_KEY) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required to run scripts/demo/seed-review.mjs')
+}
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
 

@@ -1,9 +1,9 @@
 /**
- * Contract test: the Stripe checkout success URL constructed in
- * src/pages/Pricing.jsx must include the `{CHECKOUT_SESSION_ID}` placeholder.
+ * Contract test: the current web Stripe checkout flow must include the
+ * `{CHECKOUT_SESSION_ID}` placeholder and confirm checkout on `/webapp/success`.
  *
  * Why: without it, Stripe redirects to a URL missing the session_id, which
- * means src/pages/TodayV2.jsx cannot call complete-checkout, which means the
+ * means the web purchase success route cannot call complete-checkout, which means the
  * user's subscription never activates in the database even though Stripe
  * collected payment. This is a silent revenue-leak bug that happened once
  * (fixed in the QA pass of 2026-04-17) and should never happen again.
@@ -19,36 +19,48 @@ import { test } from 'node:test';
 import path from 'node:path';
 
 const here = path.dirname(new URL(import.meta.url).pathname);
-const pricingPath = path.resolve(here, '../../src/pages/Pricing.jsx');
-const todayPath = path.resolve(here, '../../src/pages/TodayV2.jsx');
+const billingServicePath = path.resolve(here, '../../src/services/billingService.js');
+const purchaseSuccessPath = path.resolve(here, '../../src/redesign/v3/routes/V3WebPurchaseSuccess.jsx');
+const createCheckoutPath = path.resolve(here, '../../supabase/functions/create-checkout/index.ts');
 
-test('Pricing.jsx success_url contains {CHECKOUT_SESSION_ID}', () => {
-  const source = readFileSync(pricingPath, 'utf8');
+test('billingService success_url contains {CHECKOUT_SESSION_ID}', () => {
+  const source = readFileSync(billingServicePath, 'utf8');
   assert.ok(
     source.includes('{CHECKOUT_SESSION_ID}'),
-    'Pricing.jsx must include the {CHECKOUT_SESSION_ID} placeholder in success_url so that TodayV2 can call complete-checkout after redirect. Without this, subscriptions never activate.',
+    'billingService must include the {CHECKOUT_SESSION_ID} placeholder so /webapp/success can confirm the subscription after redirect.',
   );
 });
 
-test('Pricing.jsx success_url points at /Today', () => {
-  const source = readFileSync(pricingPath, 'utf8');
-  // Match success_url containing either literal "/Today" or ROUTES.today + {CHECKOUT_SESSION_ID}
-  const hasSessionId = /success_url:[^\n]*\{CHECKOUT_SESSION_ID\}/s.test(source);
-  const hasTodayRoute = /success_url:[^\n]*(\/Today|ROUTES\.today)/s.test(source);
+test('billingService success_url points at /webapp/success', () => {
+  const source = readFileSync(billingServicePath, 'utf8');
+  const hasSessionId = /successUrl\s*=\s*.*\{CHECKOUT_SESSION_ID\}/s.test(source);
+  const hasSuccessRoute = /\/webapp\/success/.test(source);
   assert.ok(
-    hasSessionId && hasTodayRoute,
-    'Expected Pricing.jsx to redirect to /Today (or ROUTES.today) with session_id on success.',
+    hasSessionId && hasSuccessRoute,
+    'Expected billingService to redirect to /webapp/success with session_id on success.',
   );
 });
 
-test('TodayV2.jsx reads session_id from search params and calls complete-checkout', () => {
-  const source = readFileSync(todayPath, 'utf8');
+test('V3WebPurchaseSuccess reads session_id and calls completeWebCheckout', () => {
+  const source = readFileSync(purchaseSuccessPath, 'utf8');
   assert.ok(
-    /searchParams\.get\(['"]session_id['"]\)/.test(source),
-    'TodayV2.jsx must read ?session_id from the URL after Stripe redirects back.',
+    /URLSearchParams\(window\.location\.search\)\.get\(['"]session_id['"]\)/.test(source),
+    'V3WebPurchaseSuccess must read ?session_id from the URL after Stripe redirects back.',
   );
   assert.ok(
-    source.includes("supabase.functions.invoke('complete-checkout'"),
-    'TodayV2.jsx must call complete-checkout with the session_id so the subscription row is created. Without this, the user pays Stripe but stays on the free tier.',
+    source.includes('completeWebCheckout(sessionId)'),
+    'V3WebPurchaseSuccess must call completeWebCheckout with the session_id so the subscription row is created. Without this, the user pays Stripe but stays on the free tier.',
+  );
+});
+
+test('create-checkout fallback URLs use current web billing routes', () => {
+  const source = readFileSync(createCheckoutPath, 'utf8');
+  assert.ok(
+    source.includes('/webapp/success?session_id={CHECKOUT_SESSION_ID}'),
+    'create-checkout fallback success_url must point at /webapp/success with session_id.',
+  );
+  assert.ok(
+    source.includes('/webapp/billing/paywall'),
+    'create-checkout fallback cancel_url must point at /webapp/billing/paywall.',
   );
 });

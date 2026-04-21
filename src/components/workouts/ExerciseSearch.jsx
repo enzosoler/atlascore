@@ -13,6 +13,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Loader2, X, Star, Clock, PenLine, Dumbbell, Filter } from 'lucide-react';
 import { DataState } from '@/components/shared/DataState';
 import ExerciseMedia from '@/components/exercises/ExerciseMedia.jsx';
+import { useT } from '@/lib/i18nContext';
 import {
   searchExercises,
   searchByMuscle,
@@ -145,7 +146,7 @@ function SectionHeader({ icon: Icon, label }) {
 
 // ─── ManualEntry ──────────────────────────────────────────────────────────────
 
-function ManualEntry({ onAdd, onBack }) {
+function ManualEntry({ onAdd, onBack, t }) {
   const [name, setName] = useState('');
   return (
     <div className="space-y-3">
@@ -153,16 +154,16 @@ function ManualEntry({ onAdd, onBack }) {
         onClick={onBack}
         className="flex items-center gap-1.5 text-[12px] text-[hsl(var(--fg-2))] hover:text-[hsl(var(--fg))]"
       >
-        ← Back
+        {t('exerciseSearch.back')}
       </button>
       <div>
         <label className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] block mb-1.5">
-          Exercise name
+          {t('exerciseSearch.manualName')}
         </label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: My custom exercise"
+          placeholder={t('exerciseSearch.manualPlaceholder')}
           className="atlas-field h-11 w-full rounded-[12px] border-0 px-4"
           autoFocus
         />
@@ -184,7 +185,7 @@ function ManualEntry({ onAdd, onBack }) {
         disabled={!name.trim() || name.trim().length < 2 || name.trim().length > 80}
         className="btn btn-primary h-11 w-full rounded-[10px] text-[13px] gap-1.5 disabled:opacity-50"
       >
-        <PenLine className="w-3.5 h-3.5" /> Add manually
+        <PenLine className="w-3.5 h-3.5" /> {t('exerciseSearch.addManually')}
       </button>
     </div>
   );
@@ -193,6 +194,9 @@ function ManualEntry({ onAdd, onBack }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ExerciseSearch({ onSelect }) {
+  const t = useT();
+  const muscleLabel = useCallback((value) => t(`exerciseSearch.muscles.${value}`), [t]);
+  const equipmentLabel = useCallback((value) => t(`exerciseSearch.equipment.${value}`), [t]);
   const [query, setQuery]               = useState('');
   const [results, setResults]           = useState([]);
   const [loading, setLoading]           = useState(false);
@@ -344,6 +348,7 @@ export default function ExerciseSearch({ onSelect }) {
       <ManualEntry
         onAdd={(ex) => { handleSelect(ex); setShowManual(false); }}
         onBack={() => setShowManual(false)}
+        t={t}
       />
     );
   }
@@ -359,7 +364,7 @@ export default function ExerciseSearch({ onSelect }) {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search exercise… (bench press, squat)"
+            placeholder={t('exerciseSearch.searchPlaceholder')}
             className="atlas-field h-11 w-full rounded-[12px] border-0 pl-9 pr-9"
             inputMode="text"
           />
@@ -391,7 +396,7 @@ export default function ExerciseSearch({ onSelect }) {
       {showFilters && (
         <div className="atlas-card space-y-2 rounded-[18px] border-[hsl(var(--border)/0.82)] p-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">Muscle</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">{t('exerciseSearch.filters.muscle')}</p>
             <div className="flex flex-wrap gap-1.5">
               {MUSCLE_FILTER_OPTIONS.map(({ label, value }) => (
                 <button
@@ -403,13 +408,13 @@ export default function ExerciseSearch({ onSelect }) {
                       : 'border-[hsl(var(--border-h))] bg-[hsl(var(--fill)/0.48)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card))]'
                   }`}
                 >
-                  {label}
+                  {muscleLabel(value)}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">Equipment</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-1.5">{t('exerciseSearch.filters.equipment')}</p>
             <div className="flex flex-wrap gap-1.5">
               {EQUIPMENT_FILTER_OPTIONS.map(({ label, value }) => (
                 <button
@@ -421,7 +426,7 @@ export default function ExerciseSearch({ onSelect }) {
                       : 'border-[hsl(var(--border-h))] bg-[hsl(var(--fill)/0.48)] text-[hsl(var(--fg-2))] hover:bg-[hsl(var(--card))]'
                   }`}
                 >
-                  {label}
+                  {equipmentLabel(value)}
                 </button>
               ))}
             </div>
@@ -434,7 +439,7 @@ export default function ExerciseSearch({ onSelect }) {
         <div className="space-y-4">
           {/* Categories */}
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2 px-1">Categories</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))] mb-2 px-1">{t('exerciseSearch.categories')}</p>
             <div className="grid grid-cols-4 gap-2">
               {MUSCLE_FILTER_OPTIONS.slice(0, 4).map(({ label, value, icon }) => (
                 <button
@@ -443,7 +448,7 @@ export default function ExerciseSearch({ onSelect }) {
                   className="flex flex-col items-center gap-1 p-3 rounded-xl border border-[hsl(var(--border-h))] bg-[hsl(var(--card))] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.04)] transition-colors"
                 >
                   <span className="text-xl">{icon}</span>
-                  <span className="text-[11px] font-medium text-[hsl(var(--fg))]">{label}</span>
+                  <span className="text-[11px] font-medium text-[hsl(var(--fg))]">{muscleLabel(value)}</span>
                 </button>
               ))}
             </div>
@@ -452,7 +457,7 @@ export default function ExerciseSearch({ onSelect }) {
           {/* Popular Exercises */}
           <div>
             <div className="flex items-center justify-between mb-2 px-1">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">Popular</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--fg-2))]">{t('exerciseSearch.popular')}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {POPULAR_EXERCISES.map((ex) => (
@@ -484,7 +489,7 @@ export default function ExerciseSearch({ onSelect }) {
             <div className="overflow-hidden rounded-[18px] border border-[hsl(var(--border-h))] bg-[hsl(var(--card))]">
               {recents.length > 0 && (
                 <>
-                  <SectionHeader icon={Clock} label="Recent" />
+                  <SectionHeader icon={Clock} label={t('exerciseSearch.recent')} />
                   {recents.slice(0, 4).map((ex, i) => (
                     <ExerciseRow key={`rec-${i}`} exercise={ex} onSelect={handleSelect} />
                   ))}
@@ -492,7 +497,7 @@ export default function ExerciseSearch({ onSelect }) {
               )}
               {favorites.length > 0 && (
                 <>
-                  <SectionHeader icon={Star} label="Favorites" />
+                  <SectionHeader icon={Star} label={t('exerciseSearch.favorites')} />
                   {favorites.slice(0, 3).map((ex, i) => (
                     <ExerciseRow key={`fav-${i}`} exercise={ex} onSelect={handleSelect} />
                   ))}
@@ -511,8 +516,8 @@ export default function ExerciseSearch({ onSelect }) {
               icon={Dumbbell}
               label={
                 muscleFilter
-                  ? `Muscle: ${MUSCLE_FILTER_OPTIONS.find((o) => o.value === muscleFilter)?.label || muscleFilter}`
-                  : `Equipment: ${EQUIPMENT_FILTER_OPTIONS.find((o) => o.value === equipFilter)?.label || equipFilter}`
+                  ? t('exerciseSearch.filteredMuscle', { value: muscleLabel(muscleFilter) })
+                  : t('exerciseSearch.filteredEquipment', { value: equipmentLabel(equipFilter) })
               }
             />
           )}
@@ -523,9 +528,9 @@ export default function ExerciseSearch({ onSelect }) {
             <DataState
               variant="empty"
               icon={Dumbbell}
-              title="No exercises found"
-              description="Try a different search term, or add a custom exercise manually."
-              action={{ label: 'Add manually', onClick: () => setShowManual(true) }}
+              title={t('exerciseSearch.emptyTitle')}
+              description={t('exerciseSearch.emptyDescription')}
+              action={{ label: t('exerciseSearch.addManually'), onClick: () => setShowManual(true) }}
               className="mx-3 my-2"
             />
           )}
@@ -537,9 +542,9 @@ export default function ExerciseSearch({ onSelect }) {
         <DataState
           variant="empty"
           icon={Search}
-          title={`No results for "${query}"`}
-          description="The exercise database did not match anything. You can add a custom exercise instead."
-          action={{ label: 'Add manually', onClick: () => setShowManual(true) }}
+          title={t('exerciseSearch.noResultsTitle', { query })}
+          description={t('exerciseSearch.noResultsDescription')}
+          action={{ label: t('exerciseSearch.addManually'), onClick: () => setShowManual(true) }}
           className="my-2"
         />
       )}
@@ -550,7 +555,7 @@ export default function ExerciseSearch({ onSelect }) {
           onClick={() => setShowManual(true)}
           className="flex w-full items-center justify-center gap-1.5 rounded-[12px] py-2 text-[12px] text-[hsl(var(--fg-2))] transition-colors hover:bg-[hsl(var(--shell))] hover:text-[hsl(var(--fg))]"
         >
-          <PenLine className="w-3.5 h-3.5" strokeWidth={2} /> Add exercise manually
+          <PenLine className="w-3.5 h-3.5" strokeWidth={2} /> {t('exerciseSearch.addExerciseManually')}
         </button>
       )}
     </div>

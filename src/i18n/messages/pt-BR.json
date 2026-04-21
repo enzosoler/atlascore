@@ -14,9 +14,16 @@
     "error": "Erro",
     "success": "Sucesso",
     "tryAgain": "Tente novamente.",
+    "comingSoonDescription": "Estamos conectando isso na próxima sessão.",
     "termsOfUse": "termos de serviço",
     "athlete": "Atleta",
     "dismiss": "×"
+  },
+  "appShell": {
+    "comingSoon": {
+      "status": "Em breve",
+      "back": "Voltar"
+    }
   },
   "auth": {
     "kicker": "Sistema de evolução pessoal",
@@ -639,6 +646,10 @@
         }
       ],
       "terms": "Ao continuar, você concorda com nossos {termsOfUse}."
+    },
+    "paywall": {
+      "mustBeSignedIn": "Você precisa estar autenticado para concluir o onboarding.",
+      "finishFailed": "Não foi possível concluir o onboarding"
     },
     "goalsAndBasics": {
       "title": "Qual seu objetivo principal?",
@@ -1299,6 +1310,8 @@
       "checkIn": {
         "heading": "Como você está hoje?",
         "subtitle": "Check-in rápido. Três entradas. Leva 5 segundos.",
+        "cloudSyncFailed": "Check-in salvo localmente, mas a sincronização com a nuvem falhou.",
+        "cloudSyncRetry": "Tente novamente mais tarde.",
         "sleep": "Qualidade do sono",
         "recovery": "Sensação de recuperação",
         "soreness": "Nível de dor muscular",
@@ -2514,6 +2527,14 @@
       "errorWeightFailed": "Falha ao registrar peso",
       "errorSaveFailed": "Falha ao salvar",
       "subLogged": "{type} registrado"
+    },
+    "routeToasts": {
+      "weightLoggedTitle": "Peso registrado → acompanhamento atualizado",
+      "weightLoggedBody": "Veja o histórico para acompanhar sua tendência.",
+      "viewHistory": "Ver histórico",
+      "weightSaveFailed": "Falha ao salvar peso",
+      "measurementsSaved": "Medidas salvas",
+      "measurementsSaveFailed": "Falha ao salvar medidas"
     }
   },
   "measurements": {
@@ -4039,6 +4060,10 @@
   },
   "workoutExecution": {
     "session": "Sessão",
+    "freeSession": "Sessão livre",
+    "todayWorkout": "Treino de hoje",
+    "savedRoutine": "Rotina salva",
+    "fallbackExercise": "Exercício",
     "addExercise": "Adicionar exercício",
     "searchLibrary": "Busque na biblioteca ou adicione manualmente.",
     "cancelLabel": "← Cancelar",
@@ -4106,7 +4131,90 @@
     "restAfterSet": "Descanso após série {n}",
     "tapToLog": "Toque para editar",
     "volume": "Volume",
-    "personalRecord": "PR"
+    "personalRecord": "PR",
+    "mustBeSignedIn": "Você precisa estar conectado para salvar um treino.",
+    "saveFailed": "Não foi possível salvar o treino. Tente novamente."
+  },
+  "sharePR": {
+    "cardNotReady": "O card ainda não está pronto para exportação",
+    "imageSaved": "Imagem do PR salva no dispositivo",
+    "pdfComingSoon": "Exportação em PDF em breve",
+    "exportFailed": "Não foi possível exportar a imagem",
+    "instagramSaved": "Imagem salva! Compartilhe nos Stories do Instagram",
+    "shareCopied": "Detalhes para compartilhamento copiados",
+    "shareFailed": "Não foi possível compartilhar",
+    "linkCopied": "Link copiado",
+    "copyFailed": "Não foi possível copiar o link",
+    "exporting": "Exportando imagem...",
+    "pleaseWait": "Aguarde"
+  },
+  "nutritionSearch": {
+    "placeholder": "Buscar alimentos…",
+    "errorSearchFailed": "Falha na busca",
+    "tryChicken": "Tente: \"peito de frango\"",
+    "tryYogurt": "Tente: \"iogurte grego\"",
+    "idleSearchCatalog": "Busque em mais de 2 milhões de alimentos do catálogo Open Food Facts",
+    "idleNameBrandBarcode": "Nome, marca ou código de barras funcionam",
+    "searchingCategory": "BUSCANDO…",
+    "searchingTitle": "Procurando alimentos",
+    "tryAgainSoon": "Tente novamente em instantes",
+    "noResultsCategory": "SEM RESULTADOS",
+    "noResultsTitle": "Nenhum alimento corresponde a \"{query}\"",
+    "noResultsBody": "Verifique a grafia ou tente um termo mais amplo",
+    "resultsCategory": "ALIMENTOS · {count}",
+    "topMatchBrand": "Melhor resultado · {brand}",
+    "topMatchFood": "Melhor resultado · Alimento",
+    "proteinToday": "{consumed}g / {target}g de proteína hoje",
+    "scopes": {
+      "foods": "Alimentos",
+      "meals": "Refeições",
+      "recents": "Recentes",
+      "brands": "Marcas"
+    },
+    "prompts": {
+      "breakfast": "Encontre ideias de café da manhã rico em proteína",
+      "under300": "Mostre alimentos com menos de 300 kcal",
+      "preWorkout": "O que devo comer antes do treino?"
+    }
+  },
+  "exerciseSearch": {
+    "back": "← Voltar",
+    "manualName": "Nome do exercício",
+    "manualPlaceholder": "Ex: Meu exercício personalizado",
+    "addManually": "Adicionar manualmente",
+    "addExerciseManually": "Adicionar exercício manualmente",
+    "searchPlaceholder": "Buscar exercício… (supino, agachamento)",
+    "categories": "Categorias",
+    "popular": "Populares",
+    "recent": "Recentes",
+    "favorites": "Favoritos",
+    "filteredMuscle": "Músculo: {value}",
+    "filteredEquipment": "Equipamento: {value}",
+    "emptyTitle": "Nenhum exercício encontrado",
+    "emptyDescription": "Tente outro termo de busca ou adicione um exercício manualmente.",
+    "noResultsTitle": "Nenhum resultado para \"{query}\"",
+    "noResultsDescription": "A base de exercícios não encontrou nada. Você pode adicionar um exercício personalizado.",
+    "filters": {
+      "muscle": "Músculo",
+      "equipment": "Equipamento"
+    },
+    "muscles": {
+      "chest": "Peito",
+      "back": "Costas",
+      "delts": "Ombros",
+      "biceps": "Bíceps",
+      "triceps": "Tríceps",
+      "legs": "Pernas",
+      "abs": "Core"
+    },
+    "equipment": {
+      "barbell": "Barra",
+      "dumbbell": "Halter",
+      "cable": "Cabo",
+      "machine": "Máquina",
+      "body weight": "Peso corporal",
+      "kettlebell": "Kettlebell"
+    }
   },
   "train": {
     "thisWeek": "Esta semana",
@@ -4585,6 +4693,7 @@
     "header": "Zona de perigo",
     "title": "Ações irreversíveis",
     "subtitle": "Estas ações destroem dados permanentemente. Exporte antes se quiser uma cópia.",
+    "backToSettings": "← Voltar para as configurações",
     "sections": {
       "safe": "Seguro",
       "destructive": "Destrutivo",
@@ -4592,13 +4701,24 @@
     },
     "export": {
       "title": "Baixar seus dados",
-      "description": "Arquivo JSON com todas as refeições, treinos, medidas e chats"
+      "description": "Arquivo JSON com todas as refeições, treinos, medidas e chats",
+      "action": "Exportar dados"
     },
     "reset": {
       "title": "Resetar todos os dados do atlas",
       "description": "Apaga toda entrada de comida, treino, medida, foto e chat. Sua conta, e-mail e assinatura continuam intactos. Não pode ser desfeito.",
       "action": "Resetar dados",
       "confirm": "Tem certeza? Toque para confirmar"
+    },
+    "billing": {
+      "title": "Gerencie a cobrança antes de excluir",
+      "description": "Se esta conta ainda estiver sendo cobrada pela loja, cancele essa assinatura antes de excluir a conta.",
+      "action": "Abrir cobrança"
+    },
+    "delete": {
+      "title": "Excluir conta permanentemente",
+      "description": "Isso remove {email} e todos os dados de acompanhamento associados. Não pode ser desfeito.",
+      "action": "Excluir conta"
     },
     "prompts": {
       "typeEmail": "Digite {email} para excluir permanentemente esta conta.",
@@ -4717,6 +4837,7 @@
   },
   "webNav": {
     "account": "Conta",
+    "settings": "Configurações",
     "billing": "Cobrança",
     "export": "Exportar",
     "getApp": "Baixar o app",
@@ -4725,6 +4846,8 @@
     "privacy": "Privacidade"
   },
   "webapp": {
+    "backToAccount": "← Voltar para a conta",
+    "footer": "atlas.core foi feito para mobile. Este é o seu painel de conta.",
     "accountHub": {
       "planPro": "Pro",
       "planFree": "Grátis",
@@ -4844,6 +4967,66 @@
       "sessionsRevoked": "Outras sessões foram encerradas",
       "thisDeviceActive": "Este dispositivo continua ativo.",
       "sessionsRevokeFailed": "Não foi possível encerrar as outras sessões"
+    }
+  },
+  "accountSettingsPage": {
+    "eyebrow": "Conta e segurança",
+    "heading": "mantenha a conta ajustada.",
+    "description": "Gerencie acesso, recuperação, serviços conectados e sessões ativas no centro de conta da web.",
+    "sections": {
+      "access": "Acesso",
+      "connections": "Conexões",
+      "sessions": "Sessões",
+      "recovery": "Recuperação"
+    },
+    "rows": {
+      "email": "E-mail",
+      "emailMissing": "Nenhum e-mail cadastrado",
+      "password": "Senha",
+      "passwordDesc": "Envie um link de redefinição para sua caixa de entrada.",
+      "twoFactor": "Autenticação em dois fatores",
+      "twoFactorOn": "Uma segunda etapa de verificação está ativada.",
+      "twoFactorOff": "Uma segunda etapa de verificação está desativada.",
+      "providerConnected": "Conectado",
+      "providerDisconnected": "Não conectado",
+      "sessions": "Sessões ativas",
+      "sessionsDesc": "{count} sessão ativa",
+      "danger": "Zona de perigo",
+      "dangerDesc": "Redefina ou exclua permanentemente os dados da sua conta."
+    },
+    "actions": {
+      "changeEmail": "Alterar e-mail",
+      "resetPassword": "Redefinir senha",
+      "enable": "Ativar",
+      "disable": "Desativar",
+      "connect": "Conectar",
+      "disconnect": "Desconectar",
+      "revokeOthers": "Encerrar outras",
+      "openDanger": "Abrir zona de perigo"
+    }
+  },
+  "diagnosticsPage": {
+    "eyebrow": "Diagnóstico",
+    "heading": "verifique o runtime.",
+    "description": "Use esta página para confirmar build, locale, sessão e ambiente atuais antes de suporte ou QA de lançamento.",
+    "copied": "Diagnóstico copiado",
+    "copyFailed": "Não foi possível copiar o diagnóstico",
+    "sections": {
+      "runtime": "Runtime",
+      "session": "Sessão"
+    },
+    "rows": {
+      "version": "Versão do app",
+      "platform": "Plataforma",
+      "locale": "Locale",
+      "theme": "Tema",
+      "email": "E-mail",
+      "userId": "ID do usuário",
+      "copy": "Carga de suporte",
+      "copyDesc": "Copie o pacote atual de diagnóstico para suporte ou notas de QA."
+    },
+    "actions": {
+      "copy": "Copiar diagnóstico"
     }
   },
   "subscriptionManage": {

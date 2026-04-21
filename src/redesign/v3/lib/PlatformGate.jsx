@@ -7,10 +7,9 @@
  *
  * Bypasses:
  *   - Native (Capacitor) always passes.
- *   - `?dev=1` sets a persistent localStorage flag.
- *   - localStorage `atlas.dev=1` passes.
  *   - localhost / 127.0.0.1 pass (dev server).
  *   - import.meta.env.DEV passes.
+ *   - Optional internal override when VITE_ENABLE_PLATFORM_GATE_BYPASS=true.
  */
 
 import React, { useEffect, useMemo } from 'react';
@@ -28,15 +27,17 @@ export function isWebAllowedRoute(pathname) {
 export function useDevMode() {
   const location = useLocation();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const bypassEnabled = import.meta.env.VITE_ENABLE_PLATFORM_GATE_BYPASS === 'true';
 
   useEffect(() => {
-    if (params.get('dev') === '1') {
+    if (bypassEnabled && params.get('dev') === '1') {
       try { localStorage.setItem('atlas.dev', '1'); } catch {}
     }
-  }, [params]);
+  }, [bypassEnabled, params]);
 
   if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) return true;
   if (import.meta.env.DEV) return true;
+  if (!bypassEnabled) return false;
   if (params.get('dev') === '1') return true;
   try { return localStorage.getItem('atlas.dev') === '1'; } catch { return false; }
 }

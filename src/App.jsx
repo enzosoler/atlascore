@@ -26,8 +26,10 @@ import { toast } from 'sonner';
  * Used anywhere a route handler doesn't yet have a real service backing it.
  * Replaces browser `alert()` so the UI doesn't show ugly native dialogs.
  */
-function todoToast(feature) {
-  toast(`${feature} coming soon`, { description: 'Wiring this up next session.' });
+function todoToast(feature, t) {
+  toast(`${feature} · ${t('appShell.comingSoon.status')}`, {
+    description: t('common.comingSoonDescription'),
+  });
 }
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
@@ -44,7 +46,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { DailyStoreProvider } from '@/store/dailyStore';
 import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
-import { I18nProvider } from '@/lib/i18nContext';
+import { I18nProvider, useT } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/lib/supabaseClient';
@@ -212,11 +214,12 @@ import { WEBAPP_DANGER, WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 
 // ─── ComingSoon stub (no v2 equivalent; keeps /help and fallback routes alive) ─
 function ComingSoon({ routeName, onGoHome, onBack }) {
+  const t = useT();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', padding: '24px', gap: 16 }}>
       <p style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{routeName}</p>
-      <p style={{ fontSize: 15, opacity: 0.6, margin: 0 }}>Coming soon</p>
-      <button onClick={onGoHome || onBack || (() => window.history.back())} style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: '#e8b500', fontWeight: 600, cursor: 'pointer' }}>Go back</button>
+      <p style={{ fontSize: 15, opacity: 0.6, margin: 0 }}>{t('appShell.comingSoon.status')}</p>
+      <button onClick={onGoHome || onBack || (() => window.history.back())} style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: '#e8b500', fontWeight: 600, cursor: 'pointer' }}>{t('appShell.comingSoon.back')}</button>
     </div>
   );
 }
@@ -298,13 +301,14 @@ function OnboardingSummaryRoute() {
 }
 function OnboardingPaywallRoute() {
   const navigate = useNavigate();
+  const t = useT();
   const { theme } = useTheme();
   const platform = Capacitor.isNativePlatform() ? 'native' : 'web';
   const { user } = useAuth();
 
   async function completeAndGo(nextPath) {
     if (!user?.id) {
-      toast.error('You must be signed in to complete onboarding.');
+      toast.error(t('onboarding.paywall.mustBeSignedIn'));
       return;
     }
 
@@ -314,8 +318,8 @@ function OnboardingPaywallRoute() {
       navigate(nextPath);
     } catch (error) {
       console.error('[OnboardingPaywallRoute] finalize failed', error);
-      toast.error('Could not finish onboarding', {
-        description: error?.message || 'Try again.',
+      toast.error(t('onboarding.paywall.finishFailed'), {
+        description: error?.message || t('common.tryAgain'),
       });
     }
   }
@@ -566,17 +570,18 @@ function buildGoalFromMetadata(meta) {
 
 function AccountSettingsRoute() {
   const navigate = useNavigate();
+  const t = useT();
   const { user } = useAuth();
   const realUser = buildRealUser(user);
   return (
     <AccountSettings
       user={realUser}
       onBack={() => navigate('/app/settings')}
-      onChangeEmail={() => todoToast('Change email')}
-      onChangePassword={() => todoToast('Change password')}
-      onEnable2FA={() => todoToast('Two-factor setup')}
-      onManageSessions={() => todoToast('Active sessions')}
-      onUnlinkProvider={(p) => todoToast(`Unlink ${p}`)}
+      onChangeEmail={() => todoToast(t('accountSettingsPage.actions.changeEmail'), t)}
+      onChangePassword={() => todoToast(t('accountSettingsPage.actions.resetPassword'), t)}
+      onEnable2FA={() => todoToast(t('accountSettingsPage.rows.twoFactor'), t)}
+      onManageSessions={() => todoToast(t('accountSettingsPage.rows.sessions'), t)}
+      onUnlinkProvider={(p) => todoToast(`${t('accountSettingsPage.actions.disconnect')} ${p}`, t)}
       onDeleteAccount={() => navigate(WEBAPP_DANGER)}
     />
   );
@@ -600,16 +605,17 @@ function IntegrationsRoute() {
 
 function DangerZoneRoute() {
   const navigate = useNavigate();
+  const t = useT();
   const { user, logout } = useAuth();
   return (
     <DangerZone
       userEmail={user?.email || ''}
       onBack={() => navigate('/app/settings')}
-      onExportData={() => todoToast('Data export')}
+      onExportData={() => todoToast(t('dangerZone.export.action'), t)}
       onResetData={async () => {
         // TODO: invoke reset-user-data edge function
         await new Promise((r) => setTimeout(r, 600));
-        toast.success('Data reset complete \u2192 system cleared');
+        toast.success(t('dangerZone.toasts.resetSuccess'));
         navigate('/app/today');
       }}
       onDeleteAccount={async () => {
@@ -626,6 +632,7 @@ function DangerZoneRoute() {
 
 function WeightEntryRoute() {
   const navigate = useNavigate();
+  const t = useT();
   const { theme } = useTheme();
   const { user } = useAuth();
   return (
@@ -638,17 +645,17 @@ function WeightEntryRoute() {
             weight: entry.weight,
             date: entry.when || new Date().toISOString(),
           });
-          toast.success('Weight logged \u2192 tracking updated', {
-            description: 'View history to see your trend.',
+          toast.success(t('body.routeToasts.weightLoggedTitle'), {
+            description: t('body.routeToasts.weightLoggedBody'),
             action: {
-              label: 'View history',
+              label: t('body.routeToasts.viewHistory'),
               onClick: () => navigate('/app/body/composition'),
             },
           });
           navigate('/app/body');
         } catch (err) {
-          toast.error('Failed to save weight', {
-            description: err?.message || 'Please try again.',
+          toast.error(t('body.routeToasts.weightSaveFailed'), {
+            description: err?.message || t('common.tryAgain'),
           });
         }
       }}
@@ -659,6 +666,7 @@ function WeightEntryRoute() {
 
 function MeasurementsRoute() {
   const navigate = useNavigate();
+  const t = useT();
   const { theme } = useTheme();
   const { user } = useAuth();
   return (
@@ -668,11 +676,11 @@ function MeasurementsRoute() {
       onSave={async (measurements) => {
         try {
           await createMeasurement(user.id, measurements);
-          toast.success('Measurements saved');
+          toast.success(t('body.routeToasts.measurementsSaved'));
           navigate('/app/body');
         } catch (err) {
-          toast.error('Failed to save measurements', {
-            description: err?.message || 'Please try again.',
+          toast.error(t('body.routeToasts.measurementsSaveFailed'), {
+            description: err?.message || t('common.tryAgain'),
           });
         }
       }}

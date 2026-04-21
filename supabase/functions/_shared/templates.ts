@@ -25,15 +25,16 @@ const brand = {
   supportEmail: 'support@useatlascore.com',
   defaultLocale: 'pt-BR' as Locale,
   colors: {
-    cyan: '#00FFFF',
-    obsidian: '#05070A',
+    paper: '#F6F1E8',
+    ink: '#0F0A05',
+    sulfur: '#E7FF2B',
     white: '#FFFFFF',
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
-    border: 'rgba(255,255,255,0.10)',
-    textPrimary: 'rgba(255,255,255,0.92)',
-    textSecondary: 'rgba(255,255,255,0.64)',
+    border: 'rgba(15,10,5,0.12)',
+    textPrimary: 'rgba(15,10,5,0.88)',
+    textSecondary: 'rgba(15,10,5,0.62)',
   },
 };
 
@@ -420,6 +421,78 @@ export const templates: Record<string, EmailTemplateSet> = {
       note: 'You are receiving this email because you were invited directly to early access. Invitation expires on {{invite_expiry_date}}.',
     },
   },
+
+  founder_welcome: {
+    'pt-BR': {
+      subject: 'atlas.core — uma nota pessoal do fundador',
+      preheader: 'Obrigado por baixar o atlas.core.',
+      headline: 'Obrigado por baixar o atlas.core',
+      body: [
+        'Oi {{first_name}}, eu sou o Enzo, fundador do atlas.core.',
+        'Criei este app porque eu estava cansado de ver treino, nutrição, exames e progresso espalhados em ferramentas desconectadas.',
+        'Quis construir um sistema mais claro, mais honesto e realmente útil no dia a dia.',
+        'Se você topar, eu adoraria acompanhar sua primeira experiência de perto e aprender com o que está funcionando e com o que está travando você.',
+        'Qualquer resposta sua vai direto para mim e tem valor real no produto.',
+      ],
+      ctaLabel: 'Responder ao fundador',
+      ctaUrl: 'mailto:{{reply_email}}',
+      secondaryCtaLabel: 'Abrir atlas.core',
+      secondaryCtaUrl: `${brand.siteUrl}/app`,
+      note: 'Se estiver tudo bem para você, eu também posso fazer um check-in semanal durante seu primeiro mês no app. Preferências: {{reply_email}}.',
+    },
+    en: {
+      subject: 'atlas.core — a personal note from the founder',
+      preheader: 'Thank you for downloading atlas.core.',
+      headline: 'Thank you for downloading atlas.core',
+      body: [
+        'Hi {{first_name}}, I am Enzo, the founder of atlas.core.',
+        'I built this app because I was tired of seeing training, nutrition, labs, and progress split across disconnected tools.',
+        'I wanted to build a system that feels clearer, more honest, and actually useful in day-to-day practice.',
+        'If you are open to it, I would love to stay close to your first experience and learn what is working and what is slowing you down.',
+        'Any reply goes directly to me and has real value for the product.',
+      ],
+      ctaLabel: 'Reply to the founder',
+      ctaUrl: 'mailto:{{reply_email}}',
+      secondaryCtaLabel: 'Open atlas.core',
+      secondaryCtaUrl: `${brand.siteUrl}/app`,
+      note: 'If you are comfortable with it, I can also follow up once a week during your first month in the app. Contact: {{reply_email}}.',
+    },
+  },
+
+  founder_check_in: {
+    'pt-BR': {
+      subject: 'atlas.core — como está sua semana {{week_label}}?',
+      preheader: 'Um check-in rápido do fundador.',
+      headline: 'Como está sua semana {{week_label}}?',
+      body: [
+        'Oi {{first_name}}, passando para fazer um check-in rápido.',
+        'Quero entender como sua experiência com o atlas.core está evoluindo agora que você já teve algum tempo real dentro do app.',
+        'Se você puder, me diga o que está claro, o que está confuso e o que você gostaria que existisse.',
+        'Feedback honesto aqui vale mais do que educação. Eu estou usando isso para lapidar o produto antes do lançamento.',
+      ],
+      ctaLabel: 'Enviar feedback',
+      ctaUrl: '{{feedback_url}}',
+      secondaryCtaLabel: 'Responder por e-mail',
+      secondaryCtaUrl: 'mailto:{{reply_email}}',
+      note: 'Este é um check-in pessoal do fundador durante seu primeiro mês. Se preferir não receber esse acompanhamento, basta responder este e-mail.',
+    },
+    en: {
+      subject: 'atlas.core — how is week {{week_label}} going?',
+      preheader: 'A quick founder check-in.',
+      headline: 'How is week {{week_label}} going?',
+      body: [
+        'Hi {{first_name}}, sending you a quick check-in.',
+        'I want to understand how your atlas.core experience is developing now that you have had some real time inside the app.',
+        'If you can, tell me what feels clear, what feels confusing, and what you wish existed.',
+        'Honest feedback is more useful than politeness here. I am using it to sharpen the product before launch.',
+      ],
+      ctaLabel: 'Send feedback',
+      ctaUrl: '{{feedback_url}}',
+      secondaryCtaLabel: 'Reply by email',
+      secondaryCtaUrl: 'mailto:{{reply_email}}',
+      note: 'This is a personal founder check-in during your first month. If you would rather not receive these follow-ups, just reply to this email.',
+    },
+  },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -478,25 +551,25 @@ export function renderEmail(
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark only" />
-    <meta name="supported-color-schemes" content="dark only" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="supported-color-schemes" content="light only" />
     <title>${escapeHtml(subject)}</title>
   </head>
-  <body style="margin:0;padding:0;background:${brand.colors.obsidian};font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <body style="margin:0;padding:0;background:${brand.colors.paper};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;visibility:hidden;">
       ${escapeHtml(preheader)}
     </div>
 
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${brand.colors.obsidian};margin:0;padding:24px 0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${brand.colors.paper};margin:0;padding:24px 0;">
       <tr>
         <td align="center" style="padding:0 16px;">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:${brand.colors.obsidian};border:1px solid ${brand.colors.border};">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background:${brand.colors.paper};border:1px solid ${brand.colors.border};">
 
             <!-- Wordmark -->
             <tr>
               <td style="padding:28px 28px 12px 28px;">
-                <div style="font-size:20px;line-height:1;font-weight:700;letter-spacing:-0.03em;color:${brand.colors.white};">
-                  atlas.core
+                <div style="font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-size:22px;line-height:1;font-weight:800;letter-spacing:-0.04em;color:${brand.colors.ink};text-transform:lowercase;">
+                  atlas<span style="color:${brand.colors.sulfur};">.</span>core
                 </div>
               </td>
             </tr>
@@ -504,7 +577,7 @@ export function renderEmail(
             <!-- Headline -->
             <tr>
               <td style="padding:8px 28px 0 28px;">
-                <h1 style="margin:0;color:${brand.colors.white};font-size:32px;line-height:1.08;font-weight:700;letter-spacing:-0.02em;">
+                <h1 style="margin:0;color:${brand.colors.ink};font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-size:34px;line-height:1.02;font-weight:800;letter-spacing:-0.04em;text-transform:lowercase;">
                   ${escapeHtml(headline)}
                 </h1>
               </td>
@@ -516,7 +589,7 @@ export function renderEmail(
                 ${body
                   .map(
                     (paragraph) =>
-                      `<p style="margin:0 0 12px 0;color:${brand.colors.textPrimary};font-size:16px;line-height:1.55;">${escapeHtml(paragraph)}</p>`,
+                      `<p style="margin:0 0 12px 0;color:${brand.colors.textPrimary};font-size:16px;line-height:1.6;">${escapeHtml(paragraph)}</p>`,
                   )
                   .join('\n                ')}
               </td>
@@ -526,7 +599,7 @@ export function renderEmail(
             <!-- Primary CTA -->
             <tr>
               <td style="padding:20px 28px 0 28px;">
-                <a href="${escapeHtml(ctaUrl)}" style="display:inline-block;background:${brand.colors.cyan};color:${brand.colors.obsidian};text-decoration:none;font-size:15px;line-height:15px;font-weight:700;padding:14px 18px;border-radius:6px;">${escapeHtml(template.ctaLabel)}</a>
+                <a href="${escapeHtml(ctaUrl)}" style="display:inline-block;background:${brand.colors.ink};color:${brand.colors.paper};text-decoration:none;font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:14px;font-weight:800;padding:14px 18px;border-radius:10px;letter-spacing:-0.02em;text-transform:lowercase;">${escapeHtml(template.ctaLabel)}</a>
               </td>
             </tr>` : ''}
 
@@ -534,7 +607,7 @@ export function renderEmail(
             <!-- Secondary CTA -->
             <tr>
               <td style="padding:12px 28px 0 28px;">
-                <a href="${escapeHtml(secondaryCtaUrl)}" style="display:inline-block;color:${brand.colors.cyan};text-decoration:none;font-size:14px;line-height:20px;font-weight:600;">${escapeHtml(template.secondaryCtaLabel)}</a>
+                <a href="${escapeHtml(secondaryCtaUrl)}" style="display:inline-block;color:${brand.colors.ink};text-decoration:none;font-family:'Courier New',monospace;font-size:12px;line-height:18px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">${escapeHtml(template.secondaryCtaLabel)}</a>
               </td>
             </tr>` : ''}
 
@@ -548,12 +621,13 @@ export function renderEmail(
             <!-- Footer -->
             <tr>
               <td style="padding:16px 28px 28px 28px;">
-                ${note ? `<p style="margin:0 0 10px 0;color:${brand.colors.textSecondary};font-size:13px;line-height:1.55;">${escapeHtml(note)}</p>` : ''}
+                ${note ? `<p style="margin:0 0 10px 0;color:${brand.colors.textSecondary};font-family:'Courier New',monospace;font-size:11px;line-height:1.7;letter-spacing:0.04em;text-transform:uppercase;">${escapeHtml(note)}</p>` : ''}
                 <p style="margin:0 0 10px 0;color:${brand.colors.textSecondary};font-size:13px;line-height:1.55;word-break:break-word;">
                   ${escapeHtml(fallbackLinkLabel)}<br />
-                  <span style="color:${brand.colors.white};">${escapeHtml(ctaUrl || brand.siteUrl)}</span>
+                  <span style="color:${brand.colors.ink};">${escapeHtml(ctaUrl || brand.siteUrl)}</span>
                 </p>
-                <p style="margin:0;color:${brand.colors.textSecondary};font-size:12px;line-height:1.55;">
+                <p style="margin:0;color:${brand.colors.textSecondary};font-family:'Courier New',monospace;font-size:11px;line-height:1.7;letter-spacing:0.04em;text-transform:uppercase;">
+                  body · operating · system<br />
                   ${brand.name} &middot; <a href="mailto:${brand.supportEmail}" style="color:${brand.colors.textSecondary};text-decoration:none;">${brand.supportEmail}</a> &middot; <a href="${brand.siteUrl}" style="color:${brand.colors.textSecondary};text-decoration:none;">useatlascore.com</a>
                 </p>
               </td>
@@ -592,6 +666,8 @@ export type EmailType =
   | 'trial_started'
   | 'reset_password'
   | 'invite_beta'
+  | 'founder_welcome'
+  | 'founder_check_in'
   | 'payment_success'
   | 'payment_failed'
   | 'subscription_canceled';
@@ -618,6 +694,13 @@ export function buildTemplate(
     reset_password: { resetUrl: 'reset_password_url' },
     trial_started: { trialDaysLeft: 'trial_end_date' },
     invite_beta: { inviteUrl: 'invite_url', notes: 'first_name' },
+    founder_welcome: { firstName: 'first_name', replyEmail: 'reply_email' },
+    founder_check_in: {
+      firstName: 'first_name',
+      replyEmail: 'reply_email',
+      feedbackUrl: 'feedback_url',
+      weekLabel: 'week_label',
+    },
     payment_failed: { billingUrl: 'billing_url' },
     subscription_canceled: { periodEnd: 'access_end_date' },
   };

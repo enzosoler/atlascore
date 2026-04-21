@@ -14,9 +14,16 @@
     "error": "Error",
     "success": "Success",
     "tryAgain": "Try again.",
+    "comingSoonDescription": "Wiring this up next session.",
     "termsOfUse": "terms of service",
     "athlete": "Athlete",
     "dismiss": "×"
+  },
+  "appShell": {
+    "comingSoon": {
+      "status": "Coming soon",
+      "back": "Go back"
+    }
   },
   "auth": {
     "kicker": "Personal evolution system",
@@ -644,6 +651,10 @@
         }
       ],
       "terms": "By continuing, you agree to our {termsOfUse}."
+    },
+    "paywall": {
+      "mustBeSignedIn": "You must be signed in to complete onboarding.",
+      "finishFailed": "Could not finish onboarding"
     },
     "goalsAndBasics": {
       "title": "What's your main goal?",
@@ -1312,6 +1323,8 @@
       "checkIn": {
         "heading": "How are you today?",
         "subtitle": "Quick check-in. Three inputs. Takes 5 seconds.",
+        "cloudSyncFailed": "Check-in saved locally, but cloud sync failed.",
+        "cloudSyncRetry": "Try again later.",
         "sleep": "Sleep quality",
         "recovery": "Recovery feel",
         "soreness": "Soreness level",
@@ -2528,6 +2541,14 @@
       "errorWeightFailed": "Failed to log weight",
       "errorSaveFailed": "Failed to save",
       "subLogged": "{type} logged"
+    },
+    "routeToasts": {
+      "weightLoggedTitle": "Weight logged → tracking updated",
+      "weightLoggedBody": "View history to see your trend.",
+      "viewHistory": "View history",
+      "weightSaveFailed": "Failed to save weight",
+      "measurementsSaved": "Measurements saved",
+      "measurementsSaveFailed": "Failed to save measurements"
     }
   },
   "measurements": {
@@ -4053,6 +4074,10 @@
   },
   "workoutExecution": {
     "session": "Session",
+    "freeSession": "Free session",
+    "todayWorkout": "Today workout",
+    "savedRoutine": "Saved routine",
+    "fallbackExercise": "Exercise",
     "addExercise": "Add exercise",
     "searchLibrary": "Search the library or add manually.",
     "cancelLabel": "← Cancel",
@@ -4120,7 +4145,90 @@
     "restAfterSet": "Rest after set {n}",
     "tapToLog": "Tap to edit",
     "volume": "Volume",
-    "personalRecord": "PR"
+    "personalRecord": "PR",
+    "mustBeSignedIn": "You must be signed in to save a workout.",
+    "saveFailed": "Failed to save workout. Please try again."
+  },
+  "sharePR": {
+    "cardNotReady": "Card not ready for export",
+    "imageSaved": "PR image saved to device",
+    "pdfComingSoon": "PDF export coming soon",
+    "exportFailed": "Failed to export image",
+    "instagramSaved": "Image saved! Share it to Instagram Stories",
+    "shareCopied": "Share details copied to clipboard",
+    "shareFailed": "Failed to share",
+    "linkCopied": "Link copied to clipboard",
+    "copyFailed": "Failed to copy link",
+    "exporting": "Exporting image...",
+    "pleaseWait": "Please wait"
+  },
+  "nutritionSearch": {
+    "placeholder": "Search foods…",
+    "errorSearchFailed": "Search failed",
+    "tryChicken": "Try: \"chicken breast\"",
+    "tryYogurt": "Try: \"greek yogurt\"",
+    "idleSearchCatalog": "Search 2M+ foods across the Open Food Facts catalogue",
+    "idleNameBrandBarcode": "Name, brand, or barcode works",
+    "searchingCategory": "SEARCHING…",
+    "searchingTitle": "Looking up foods",
+    "tryAgainSoon": "Try again in a moment",
+    "noResultsCategory": "NO RESULTS",
+    "noResultsTitle": "No foods matched \"{query}\"",
+    "noResultsBody": "Check spelling or try a broader term",
+    "resultsCategory": "FOODS · {count}",
+    "topMatchBrand": "Top match · {brand}",
+    "topMatchFood": "Top match · Food",
+    "proteinToday": "{consumed}g / {target}g protein today",
+    "scopes": {
+      "foods": "Foods",
+      "meals": "Meals",
+      "recents": "Recents",
+      "brands": "Brands"
+    },
+    "prompts": {
+      "breakfast": "Find high-protein breakfast ideas",
+      "under300": "Show foods under 300 kcal",
+      "preWorkout": "What should I eat pre-workout?"
+    }
+  },
+  "exerciseSearch": {
+    "back": "← Back",
+    "manualName": "Exercise name",
+    "manualPlaceholder": "Ex: My custom exercise",
+    "addManually": "Add manually",
+    "addExerciseManually": "Add exercise manually",
+    "searchPlaceholder": "Search exercise… (bench press, squat)",
+    "categories": "Categories",
+    "popular": "Popular",
+    "recent": "Recent",
+    "favorites": "Favorites",
+    "filteredMuscle": "Muscle: {value}",
+    "filteredEquipment": "Equipment: {value}",
+    "emptyTitle": "No exercises found",
+    "emptyDescription": "Try a different search term, or add a custom exercise manually.",
+    "noResultsTitle": "No results for \"{query}\"",
+    "noResultsDescription": "The exercise database did not match anything. You can add a custom exercise instead.",
+    "filters": {
+      "muscle": "Muscle",
+      "equipment": "Equipment"
+    },
+    "muscles": {
+      "chest": "Chest",
+      "back": "Back",
+      "delts": "Shoulders",
+      "biceps": "Biceps",
+      "triceps": "Triceps",
+      "legs": "Legs",
+      "abs": "Core"
+    },
+    "equipment": {
+      "barbell": "Barbell",
+      "dumbbell": "Dumbbell",
+      "cable": "Cable",
+      "machine": "Machine",
+      "body weight": "Bodyweight",
+      "kettlebell": "Kettlebell"
+    }
   },
   "train": {
     "thisWeek": "This week",
@@ -4594,6 +4702,7 @@
     "header": "Danger zone",
     "title": "Irreversible actions",
     "subtitle": "These actions destroy data permanently. Export first if you want a copy.",
+    "backToSettings": "← Back to settings",
     "sections": {
       "safe": "Safe",
       "destructive": "Destructive",
@@ -4601,13 +4710,24 @@
     },
     "export": {
       "title": "Download your data",
-      "description": "JSON archive of all meals, workouts, measurements, and chats"
+      "description": "JSON archive of all meals, workouts, measurements, and chats",
+      "action": "Export data"
     },
     "reset": {
       "title": "Reset all atlas data",
       "description": "Wipes every food entry, workout, measurement, photo, and chat. Your account, email, and subscription stay intact. Cannot be undone.",
       "action": "Reset data",
       "confirm": "Are you sure? Tap to confirm"
+    },
+    "billing": {
+      "title": "Manage billing before deletion",
+      "description": "If this account is still billed through the store, cancel that subscription before deleting the account.",
+      "action": "Open billing"
+    },
+    "delete": {
+      "title": "Delete account permanently",
+      "description": "This removes {email} and all associated tracking data. This cannot be undone.",
+      "action": "Delete account"
     },
     "prompts": {
       "typeEmail": "Type {email} to permanently delete this account.",
@@ -4726,6 +4846,7 @@
   },
   "webNav": {
     "account": "Account",
+    "settings": "Settings",
     "billing": "Billing",
     "export": "Export",
     "getApp": "Get the app",
@@ -4734,6 +4855,8 @@
     "privacy": "Privacy"
   },
   "webapp": {
+    "backToAccount": "← Back to account",
+    "footer": "atlas.core is built for mobile. This is your account dashboard.",
     "accountHub": {
       "planPro": "Pro",
       "planFree": "Free",
@@ -4853,6 +4976,66 @@
       "sessionsRevoked": "Signed out other sessions",
       "thisDeviceActive": "This device stays active.",
       "sessionsRevokeFailed": "Could not revoke other sessions"
+    }
+  },
+  "accountSettingsPage": {
+    "eyebrow": "Account and security",
+    "heading": "keep the account tight.",
+    "description": "Manage sign-in, recovery, connected services, and active sessions from the web account center.",
+    "sections": {
+      "access": "Access",
+      "connections": "Connections",
+      "sessions": "Sessions",
+      "recovery": "Recovery"
+    },
+    "rows": {
+      "email": "Email",
+      "emailMissing": "No email on file",
+      "password": "Password",
+      "passwordDesc": "Send a reset link to your inbox.",
+      "twoFactor": "Two-factor authentication",
+      "twoFactorOn": "A second verification step is currently enabled.",
+      "twoFactorOff": "A second verification step is currently disabled.",
+      "providerConnected": "Connected",
+      "providerDisconnected": "Not connected",
+      "sessions": "Active sessions",
+      "sessionsDesc": "{count} active session",
+      "danger": "Danger zone",
+      "dangerDesc": "Reset or permanently delete your account data."
+    },
+    "actions": {
+      "changeEmail": "Change email",
+      "resetPassword": "Reset password",
+      "enable": "Enable",
+      "disable": "Disable",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "revokeOthers": "Sign out others",
+      "openDanger": "Open danger zone"
+    }
+  },
+  "diagnosticsPage": {
+    "eyebrow": "Diagnostics",
+    "heading": "check the runtime.",
+    "description": "Use this page to confirm the current build, locale, session, and environment before support or launch QA.",
+    "copied": "Diagnostics copied",
+    "copyFailed": "Could not copy diagnostics",
+    "sections": {
+      "runtime": "Runtime",
+      "session": "Session"
+    },
+    "rows": {
+      "version": "App version",
+      "platform": "Platform",
+      "locale": "Locale",
+      "theme": "Theme",
+      "email": "Email",
+      "userId": "User ID",
+      "copy": "Support payload",
+      "copyDesc": "Copy the current diagnostics bundle for support or QA notes."
+    },
+    "actions": {
+      "copy": "Copy diagnostics"
     }
   },
   "subscriptionManage": {

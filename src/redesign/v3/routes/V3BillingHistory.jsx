@@ -181,7 +181,7 @@ export default function V3BillingHistory() {
                     {t(`billingHistory.status.${(row.status || 'inactive').replace(/-/g, '_')}`) || (row.status || 'inactive').replace(/_/g, ' ')}
                   </div>
                   <div style={{ marginTop: 6, fontSize: 15, fontWeight: 600 }}>
-                    ((row.tier || t('billingHistory.planFallback')).toUpperCase())
+                    {(row.tier || t('billingHistory.planFallback')).toUpperCase()}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
