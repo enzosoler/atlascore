@@ -347,27 +347,11 @@ function VoiceLogRoute() {
 /* ─── Workout routes ──────────────────────────────────────────────────── */
 
 function ActiveWorkoutRoute() {
-  const navigate = useNavigate();
-  // Track the session start timestamp once, at mount. The elapsed counter
-  // inside ActiveWorkout is for display — the real start is captured here so
-  // pauses don't affect what we persist as started_at.
-  const [startedAt] = useState(() => new Date());
-  return <Navigate to="/app/workouts" replace />;
+  return <V3WorkoutHistory />;
 }
 
-/**
- * ManualWorkoutPlanRoute — wraps ManualWorkoutPlan with a modal exercise picker.
- * When user taps "Add exercise", we render ExerciseLibrary as an overlay that
- * resolves a promise with the picked exercise (or null on close).
- */
 function ManualWorkoutPlanRoute() {
-  const navigate = useNavigate();
-  const [pickerResolve, setPickerResolve] = useState(null);
-
-  const openPicker = () =>
-    new Promise((resolve) => { setPickerResolve(() => resolve); });
-
-  return <Navigate to="/app/routines" replace />;
+  return <V3RoutinePresets />;
 }
 
 function WorkoutDetailRoute() {
