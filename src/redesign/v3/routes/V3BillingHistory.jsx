@@ -14,6 +14,9 @@ import { ACFonts, ACBrand, ACRadii } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { MC } from './V3MarketingLayout.jsx';
 import { useAuth } from '@/lib/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { listBillingSubscriptions, openWebBillingPortal } from '@/services/billingService';
+import { toast } from 'sonner';
 
 function NavLink({ to, children }) {
   return (
@@ -26,7 +29,22 @@ function NavLink({ to, children }) {
 
 export default function V3BillingHistory() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const { data: rows = [] } = useQuery({
+    queryKey: ['v3-billing-history', user?.id],
+    queryFn: () => listBillingSubscriptions(user.id),
+    enabled: !!user?.id,
+  });
+
+  async function handleOpenPortal() {
+    try {
+      await openWebBillingPortal(`${window.location.origin}/app/billing/invoices`);
+    } catch (error) {
+      toast.error('Could not open billing portal', {
+        description: error?.message || 'Try again.',
+      });
+    }
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: ACBrand.paper, color: ACBrand.ink, fontFamily: ACFonts.body }}>
@@ -102,32 +120,80 @@ export default function V3BillingHistory() {
           Your payment history and receipts.
         </p>
 
-        {/* Empty state */}
-        <div style={{
-          marginTop: 48, padding: 40, border: MC.border, borderRadius: ACRadii.card,
-          textAlign: 'center',
-        }}>
-          {/* Invoice icon placeholder */}
-          <div style={{
-            width: 56, height: 56, margin: '0 auto 20px',
-            borderRadius: ACRadii.card, background: 'rgba(10,10,10,0.04)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: ACFonts.mono, fontSize: 24, color: MC.mute,
-          }}>
-            $
+        <div style={{ marginTop: 40, display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ fontSize: 14, color: MC.body }}>
+            Stripe remains the source of truth for receipts and payment method updates.
           </div>
-          <div style={{
-            fontFamily: ACFonts.display, fontSize: 18, fontWeight: 700,
-            letterSpacing: -0.4,
-          }}>
-            No invoices yet
-          </div>
-          <p style={{
-            margin: '10px 0 0', fontSize: 14, lineHeight: 1.5, color: MC.body, maxWidth: 400,
-            marginLeft: 'auto', marginRight: 'auto',
-          }}>
-            Your billing history will appear here after your first payment.
-          </p>
+          <button
+            type="button"
+            onClick={handleOpenPortal}
+            style={{
+              border: 'none',
+              borderRadius: 999,
+              padding: '12px 18px',
+              background: ACBrand.ink,
+              color: ACBrand.paper,
+              fontFamily: ACFonts.body,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Open billing portal
+          </button>
+        </div>
+
+        <div style={{ marginTop: 24, border: MC.border, borderRadius: ACRadii.card, overflow: 'hidden' }}>
+          {rows.length === 0 ? (
+            <div style={{ padding: 32, textAlign: 'center' }}>
+              <div style={{ fontFamily: ACFonts.display, fontSize: 18, fontWeight: 700, letterSpacing: -0.4 }}>
+                No billing activity yet
+              </div>
+              <p style={{ margin: '10px 0 0', fontSize: 14, lineHeight: 1.5, color: MC.body }}>
+                Your subscription and trial events will appear here after checkout begins.
+              </p>
+            </div>
+          ) : (
+            rows.map((row) => (
+              <button
+                key={row.id}
+                type="button"
+                onClick={handleOpenPortal}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '16px 18px',
+                  border: 'none',
+                  borderTop: row === rows[0] ? 'none' : MC.border,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <div style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, color: MC.dim, textTransform: 'uppercase' }}>
+                    {(row.status || 'inactive').replace(/_/g, ' ')}
+                  </div>
+                  <div style={{ marginTop: 6, fontSize: 15, fontWeight: 600 }}>
+                    {(row.tier || 'pro').toUpperCase()}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: ACFonts.mono, fontSize: 11, color: MC.dim }}>
+                    {row.created_at
+                      ? new Date(row.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' }).toUpperCase()
+                      : '—'}
+                  </div>
+                  <div style={{ marginTop: 6, fontFamily: ACFonts.mono, fontSize: 11, color: MC.dim }}>
+                    {row.stripe_subscription_id || row.id}
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
         </div>
 
         {/* Back link */}

@@ -23,7 +23,9 @@ export default function V3AuthSignup() {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     const em = email.trim().toLowerCase();
     setError('');
     if (!em) {

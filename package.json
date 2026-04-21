@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "design:prototype": "vite atlas.core-prototype --host 127.0.0.1 --port 4174",
     "dev:pt": "VITE_LOCALE=pt-BR vite --config vite.config.i18n.js --mode pt",
     "build": "vite build",
     "build:en": "VITE_LOCALE=en-US vite build --config vite.config.i18n.js --mode en",

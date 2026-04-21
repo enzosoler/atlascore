@@ -24,6 +24,7 @@ import {
   isRevenueCatAvailable,
 } from '@/lib/revenueCat';
 import { Capacitor } from '@capacitor/core';
+import { startWebCheckout } from '@/services/billingService';
 
 const BILLING_TO_PACKAGE = {
   weekly: '$rc_weekly',
@@ -75,14 +76,20 @@ export default function V3Paywall() {
   const isNative = Capacitor.isNativePlatform();
 
   async function handlePurchase() {
-    if (!isNative) {
-      // Web checkout is not available yet — direct user to the app
-      toast(t('paywall.toasts.webComingSoon'));
-      navigate('/download-app');
-      return;
-    }
     setLoading(true);
     try {
+      if (!isNative) {
+        const checkoutUrl = await startWebCheckout({
+          userId: user?.id,
+          email: user?.email,
+          billing: plan === 'yearly' ? 'yearly' : 'monthly',
+          region: 'us',
+          plan: 'athlete_pro',
+        });
+        window.location.href = checkoutUrl;
+        return;
+      }
+
       if (isRevenueCatAvailable()) {
         const pkgId = BILLING_TO_PACKAGE[plan];
         const result = await purchasePackage(pkgId);
@@ -101,6 +108,7 @@ export default function V3Paywall() {
             : t('paywall.toasts.genericError'));
         }
       }
+      toast.error(t('paywall.toasts.billingUnavailable'));
     } catch (err) {
       console.error('[V3Paywall] purchase error:', err);
       toast.error(t('paywall.toasts.genericError'));

@@ -1,25 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { ACFonts, ACRadii } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { MC } from './V3MarketingLayout.jsx';
 import { useAuth } from '@/lib/AuthContext';
+import { downloadUserDataCsv, downloadUserDataJson } from '@/services/dataExportService';
 
 const EXPORT_OPTIONS = [
   {
     title: 'Full export (JSON)',
     description: 'Machine-readable. Import into other tools.',
-    button: 'Available soon',
+    button: 'Download JSON',
+    format: 'json',
   },
   {
     title: 'Spreadsheet (CSV)',
     description: 'Open in Excel, Sheets, or Numbers.',
-    button: 'Available soon',
+    button: 'Download CSV',
+    format: 'csv',
   },
 ];
 
 export default function V3DataExport() {
-  useAuth();
+  const { user } = useAuth();
+  const [activeFormat, setActiveFormat] = useState(null);
+
+  async function handleExport(format) {
+    if (!user?.id) {
+      toast.error('You must be signed in to export data.');
+      return;
+    }
+
+    setActiveFormat(format);
+    try {
+      if (format === 'json') {
+        await downloadUserDataJson(user.id);
+      } else {
+        await downloadUserDataCsv(user.id);
+      }
+      toast.success(`${format.toUpperCase()} export ready`);
+    } catch (error) {
+      console.error('[V3DataExport] export failed', error);
+      toast.error('Export failed', { description: error?.message || 'Please try again.' });
+    } finally {
+      setActiveFormat(null);
+    }
+  }
 
   return (
     <div
@@ -119,7 +146,7 @@ export default function V3DataExport() {
               </div>
               <button
                 type="button"
-                disabled
+                onClick={() => handleExport(opt.format)}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -133,12 +160,12 @@ export default function V3DataExport() {
                   fontSize: 14,
                   fontWeight: 600,
                   letterSpacing: -0.1,
-                  cursor: 'not-allowed',
-                  opacity: 0.5,
+                  cursor: activeFormat ? 'wait' : 'pointer',
+                  opacity: activeFormat && activeFormat !== opt.format ? 0.6 : 1,
                   WebkitAppearance: 'none',
                 }}
               >
-                {opt.button}
+                {activeFormat === opt.format ? 'Preparing…' : opt.button}
               </button>
             </div>
           ))}
@@ -154,7 +181,7 @@ export default function V3DataExport() {
             marginTop: 32,
           }}
         >
-          Data export is being built. Your data is always yours.
+          Export includes your profile, workouts, nutrition logs, measurements, check-ins, routines, and available session history.
         </p>
       </div>
     </div>

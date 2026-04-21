@@ -1,0 +1,21 @@
+Read `prompt-system.md` and follow it strictly.
+
+Context:
+Here is my component system:
+[PASTE `screens-lib.jsx`]
+
+Here is the closest existing screen:
+[PASTE one screen from `screens.jsx` or `screens-p*.jsx`]
+
+Task:
+Generate 3 different UI screens for:
+[WRITE GOAL HERE]
+
+Requirements:
+- Each version should take a different UX approach
+- Keep them minimal
+- Focus on decision-making
+- Reuse atlas.core patterns and tokens
+
+Output:
+Return 3 React JSX components

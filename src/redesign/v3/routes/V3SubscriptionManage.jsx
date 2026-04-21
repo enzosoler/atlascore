@@ -14,7 +14,8 @@ import { MC } from './V3MarketingLayout.jsx';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { useT } from '@/lib/i18nContext';
-import { presentCustomerCenter, isRevenueCatAvailable } from '@/lib/revenueCat';
+import { openSubscriptionManagement } from '@/lib/revenueCat';
+import { openWebBillingPortal } from '@/services/billingService';
 
 function NavLink({ to, children }) {
   return (
@@ -48,11 +49,14 @@ export default function V3SubscriptionManage() {
   }
 
   async function handleCancel() {
-    if (isRevenueCatAvailable()) {
-      await presentCustomerCenter();
-    } else {
-      toast(t('manageSub.cancelFallback.title'), {
-        description: t('manageSub.cancelFallback.description'),
+    try {
+      const handled = await openSubscriptionManagement();
+      if (!handled) {
+        await openWebBillingPortal(`${window.location.origin}/app/billing`);
+      }
+    } catch (error) {
+      toast.error(t('manageSub.cancelFallback.title'), {
+        description: error?.message || t('manageSub.cancelFallback.description'),
       });
     }
   }

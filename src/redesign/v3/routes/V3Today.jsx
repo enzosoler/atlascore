@@ -19,6 +19,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/i18nContext';
 import { useDailySystem, getSystemIntegrity } from '@/lib/dailySystem';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
+import { upsertDailyCheckin } from '@/services/checkinService';
 import { useLiveWeather } from '../lib/useLiveWeather.js';
 import {
   ACFonts, ACRadii, useACT, ACBrand,
@@ -49,6 +50,29 @@ function resolveDisplayName(user) {
   if (user.full_name && user.full_name !== 'Athlete') return user.full_name;
   if (user.email) return user.email.split('@')[0];
   return null;
+}
+
+function sleepScaleToHours(scale) {
+  const map = { 1: 4.5, 2: 6, 3: 7, 4: 8, 5: 9 };
+  return map[scale] || 7;
+}
+
+function hoursToSleepScale(hours) {
+  const value = Number(hours);
+  if (!Number.isFinite(value)) return 3;
+  if (value < 5.5) return 1;
+  if (value < 6.5) return 2;
+  if (value < 7.5) return 3;
+  if (value < 8.5) return 4;
+  return 5;
+}
+
+function checkinToScales(checkin) {
+  return {
+    sleep: hoursToSleepScale(checkin?.sleep_hours),
+    recovery: Math.min(5, Math.max(1, Number(checkin?.recovery ?? checkin?.energy ?? 3) || 3)),
+    soreness: Math.min(5, Math.max(1, Number(checkin?.soreness ?? 1) || 1)),
+  };
 }
 
 function WeatherChip({ weather, c }) {
@@ -647,10 +671,11 @@ export default function V3Today() {
   const name = resolveDisplayName(user);
   const greeting = name ? `${timeOfDaySalute(new Date().getHours(), t)}, ${name}` : undefined;
 
-  const proteinTarget = daily.nutrition?.proteinTarget || user?.user_metadata?.daily_protein_target || 150;
+  const proteinTarget = daily.nutrition?.proteinTarget || user?.user_metadata?.daily_protein_target || 0;
   const proteinConsumed = daily.nutrition?.proteinConsumed || 0;
 
   const system = useDailySystem({ proteinTarget });
+  const bootstrappedCheckin = useRef(false);
 
   // First-time welcome (one-time, localStorage)
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -661,10 +686,34 @@ export default function V3Today() {
   const [showReveal, setShowReveal] = useState(false);
   const [justCheckedIn, setJustCheckedIn] = useState(false);
 
-  function handleCheckIn(sleep, recovery, soreness) {
+  useEffect(() => {
+    if (!daily.checkin || system.checkedIn || bootstrappedCheckin.current) return;
+    const scales = checkinToScales(daily.checkin);
+    bootstrappedCheckin.current = true;
+    system.checkIn(scales.sleep, scales.recovery, scales.soreness);
+  }, [daily.checkin, system]);
+
+  async function handleCheckIn(sleep, recovery, soreness) {
     system.checkIn(sleep, recovery, soreness);
     setJustCheckedIn(true);
     setShowReveal(true);
+    if (!user?.id) return;
+
+    try {
+      await upsertDailyCheckin(user.id, {
+        date: new Date().toISOString().slice(0, 10),
+        sleep_hours: sleepScaleToHours(sleep),
+        energy: recovery,
+        recovery,
+        soreness,
+      });
+      daily.invalidateAfterAction?.('checkin');
+    } catch (error) {
+      console.error('[V3Today] checkin save failed', error);
+      toast.error('Check-in saved locally, but cloud sync failed.', {
+        description: error?.message || 'Try again later.',
+      });
+    }
   }
 
   function dismissWelcome() {
@@ -672,8 +721,12 @@ export default function V3Today() {
     setShowWelcome(false);
   }
 
+  if (daily.checkinDone && !system.checkedIn) {
+    return null;
+  }
+
   // Not checked in → show check-in (with optional welcome overlay)
-  if (!system.checkedIn) {
+  if (!system.checkedIn && !daily.checkinDone) {
     return (
       <>
         {showWelcome && <FirstTimeOverlay dark={dark} onDismiss={dismissWelcome} />}

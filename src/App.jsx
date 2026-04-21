@@ -59,6 +59,8 @@ import {
   refreshProvider as integRefresh,
   toastConnectResult as integToast,
 } from '@/lib/integrationsService';
+import { createMeasurement } from '@/services/bodyProgressService';
+import { finalizeOnboarding } from '@/services/onboardingService';
 
 // v3 screens and routes only — v2 design imports removed to ensure v3-first build.
 // Onboarding v3 wrappers are imported from V3OnboardingRoutes (used below).
@@ -161,6 +163,7 @@ const V3MacroTargets = lazy(() => import('@/redesign/v3/routes/V3MacroTargets.js
 const V3WaterLog = lazy(() => import('@/redesign/v3/routes/V3WaterLog.jsx'));
 const V3WorkoutHistory = lazy(() => import('@/redesign/v3/routes/V3WorkoutHistory.jsx'));
 const V3WorkoutDetail = lazy(() => import('@/redesign/v3/routes/V3WorkoutDetail.jsx'));
+const V3ActiveWorkout = lazy(() => import('@/redesign/v3/routes/V3ActiveWorkout.jsx'));
 const V3CompositionHistory = lazy(() => import('@/redesign/v3/routes/V3CompositionHistory.jsx'));
 const V3CoachInsight = lazy(() => import('@/redesign/v3/routes/V3CoachInsight.jsx'));
 const V3AccountSettings = lazy(() => import('@/redesign/v3/routes/V3AccountSettings.jsx'));
@@ -295,12 +298,32 @@ function OnboardingSummaryRoute() {
 function OnboardingPaywallRoute() {
   const navigate = useNavigate();
   const platform = Capacitor.isNativePlatform() ? 'native' : 'web';
+  const { user } = useAuth();
+
+  async function completeAndGo(nextPath) {
+    if (!user?.id) {
+      toast.error('You must be signed in to complete onboarding.');
+      return;
+    }
+
+    try {
+      await finalizeOnboarding(user.id);
+      await queryClientInstance.invalidateQueries();
+      navigate(nextPath);
+    } catch (error) {
+      console.error('[OnboardingPaywallRoute] finalize failed', error);
+      toast.error('Could not finish onboarding', {
+        description: error?.message || 'Try again.',
+      });
+    }
+  }
+
   return (
     <OnboardingPaywall
       platform={platform}
-      onStartTrial={() => navigate('/onboarding/tour')}
-      onRestore={() => navigate('/app/billing/restore')}
-      onSkip={() => navigate('/app/today')}
+      onStartTrial={() => completeAndGo('/app/billing/paywall')}
+      onRestore={() => completeAndGo('/app/billing/paywall')}
+      onSkip={() => completeAndGo('/app/today')}
     />
   );
 }
@@ -347,7 +370,7 @@ function VoiceLogRoute() {
 /* ─── Workout routes ──────────────────────────────────────────────────── */
 
 function ActiveWorkoutRoute() {
-  return <V3WorkoutHistory />;
+  return <V3ActiveWorkout />;
 }
 
 function ManualWorkoutPlanRoute() {
@@ -601,22 +624,30 @@ function DangerZoneRoute() {
 function WeightEntryRoute() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { user } = useAuth();
   return (
     <S6_Weight_B
       dark={theme === 'dark'}
       onBack={() => navigate(-1)}
-      onSave={(entry) => {
-        // TODO: persist to bodyProgressService.logWeight(entry)
-        // entry shape: { weight: number, unit: string, when: string (ISO) }
-        console.log('Weight logged', entry);
-        toast.success('Weight logged \u2192 tracking updated', {
-          description: 'View history to see your trend.',
-          action: {
-            label: 'View history',
-            onClick: () => navigate('/app/body/composition'),
-          },
-        });
-        navigate('/app/body');
+      onSave={async (entry) => {
+        try {
+          await createMeasurement(user.id, {
+            weight: entry.weight,
+            date: entry.when || new Date().toISOString(),
+          });
+          toast.success('Weight logged \u2192 tracking updated', {
+            description: 'View history to see your trend.',
+            action: {
+              label: 'View history',
+              onClick: () => navigate('/app/body/composition'),
+            },
+          });
+          navigate('/app/body');
+        } catch (err) {
+          toast.error('Failed to save weight', {
+            description: err?.message || 'Please try again.',
+          });
+        }
       }}
       onViewHistory={() => navigate('/app/body/composition')}
     />
@@ -626,23 +657,28 @@ function WeightEntryRoute() {
 function MeasurementsRoute() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { user } = useAuth();
   return (
     <S17_Measurements_Entry
       dark={theme === 'dark'}
       onClose={() => navigate(-1)}
-      onSave={(measurements) => {
-        // TODO: persist to bodyProgressService.logMeasurements(measurements)
-        // measurements shape: { chest?, waist?, hips?, arm?, thigh?, neck? }
-        console.log('Measurements logged', measurements);
-        toast.success('Measurements saved');
-        navigate('/app/body');
+      onSave={async (measurements) => {
+        try {
+          await createMeasurement(user.id, measurements);
+          toast.success('Measurements saved');
+          navigate('/app/body');
+        } catch (err) {
+          toast.error('Failed to save measurements', {
+            description: err?.message || 'Please try again.',
+          });
+        }
       }}
     />
   );
 }
 
 function BodyCheckInRoute() {
-  return <V3Body />;
+  return <Navigate to="/app/body/measurements" replace />;
 }
 
 /* ─── Coach routes ────────────────────────────────────────────────────── */

@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 
 const CHECKINS_TABLE = 'daily_checkins';
+const ATLAS_V3_NOTE_PREFIX = '[atlas_v3]';
 
 function requireUserId(userId) {
   if (!userId) {
@@ -33,7 +34,14 @@ function toDateKey(value) {
 function normalizeCheckin(entry) {
   if (!entry || typeof entry !== 'object') return null;
   const date = toDateKey(entry.date);
-  return { ...entry, date };
+  const parsed = parseAtlasV3Notes(entry.notes);
+  return {
+    ...entry,
+    date,
+    notes: parsed.notes,
+    recovery: entry.recovery ?? parsed.recovery ?? null,
+    soreness: entry.soreness ?? parsed.soreness ?? null,
+  };
 }
 
 function sortByDateDesc(list) {
@@ -89,7 +97,7 @@ function buildCheckinPayload(userId, payload) {
     date: toDateKey(payload?.date),
   };
 
-  const numericFields = ['energy', 'mood', 'sleep_hours', 'hydration_liters'];
+  const numericFields = ['energy', 'mood', 'sleep_hours', 'hydration_liters', 'recovery', 'soreness'];
   for (const key of numericFields) {
     if (hasOwn(payload, key)) {
       const value = payload[key];
@@ -103,6 +111,38 @@ function buildCheckinPayload(userId, payload) {
   }
 
   return normalized;
+}
+
+function parseAtlasV3Notes(notes) {
+  if (typeof notes !== 'string' || !notes.startsWith(ATLAS_V3_NOTE_PREFIX)) {
+    return { notes: notes || null, recovery: null, soreness: null };
+  }
+
+  try {
+    const payload = JSON.parse(notes.slice(ATLAS_V3_NOTE_PREFIX.length));
+    return {
+      notes: payload?.notes || null,
+      recovery: payload?.recovery ?? null,
+      soreness: payload?.soreness ?? null,
+    };
+  } catch {
+    return { notes: notes || null, recovery: null, soreness: null };
+  }
+}
+
+function encodeAtlasV3Notes(notes, recovery, soreness) {
+  if (recovery == null && soreness == null) return notes ?? null;
+  return `${ATLAS_V3_NOTE_PREFIX}${JSON.stringify({
+    notes: notes ?? null,
+    recovery: recovery ?? null,
+    soreness: soreness ?? null,
+  })}`;
+}
+
+function isMissingColumnError(error, column) {
+  if (!error || !column) return false;
+  const haystack = `${error.code || ''} ${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase();
+  return haystack.includes(String(column).toLowerCase()) && (haystack.includes('column') || haystack.includes('schema cache'));
 }
 
 export async function listDailyCheckins(userId, options = {}) {
@@ -163,12 +203,28 @@ export async function getDailyCheckin(userId, date) {
 export async function upsertDailyCheckin(userId, payload) {
   requireUserId(userId);
   const normalized = buildCheckinPayload(userId, payload || {});
+  const primaryPayload = {
+    ...normalized,
+    notes: encodeAtlasV3Notes(normalized.notes, normalized.recovery, normalized.soreness),
+  };
 
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from(CHECKINS_TABLE)
-    .upsert(normalized, { onConflict: 'user_id,date' })
+    .upsert(primaryPayload, { onConflict: 'user_id,date' })
     .select()
     .maybeSingle();
+
+  if (error && (isMissingColumnError(error, 'recovery') || isMissingColumnError(error, 'soreness'))) {
+    const fallbackPayload = { ...primaryPayload };
+    delete fallbackPayload.recovery;
+    delete fallbackPayload.soreness;
+
+    ({ data, error } = await supabase
+      .from(CHECKINS_TABLE)
+      .upsert(fallbackPayload, { onConflict: 'user_id,date' })
+      .select()
+      .maybeSingle());
+  }
 
   if (error) {
     if (!isMissingTableError(error)) throw error;
@@ -176,10 +232,10 @@ export async function upsertDailyCheckin(userId, payload) {
     const profileData = await readProfileData(userId);
     const list = getCheckinsFromProfile(profileData);
     const existing = list.find((entry) => entry.date === normalized.date) || {};
-    const nextEntry = {
+    const nextEntry = normalizeCheckin({
       ...existing,
-      ...normalized,
-    };
+      ...primaryPayload,
+    });
     const { user_id: _ignoredUserId, ...cleanEntry } = nextEntry;
 
     const nextList = sortByDateDesc([
@@ -194,8 +250,8 @@ export async function upsertDailyCheckin(userId, payload) {
 
     await writeProfileData(userId, nextProfile);
 
-    return nextEntry;
+    return normalizeCheckin(nextEntry);
   }
 
-  return data || normalized;
+  return normalizeCheckin(data || primaryPayload);
 }

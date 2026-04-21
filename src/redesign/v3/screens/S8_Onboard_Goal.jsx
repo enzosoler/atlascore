@@ -1,30 +1,9 @@
 import React from 'react';
 import {
   ACFonts, ACRadii, useACT,
-  ACLabel, ACBtn,
+  ACLabel, ACMono,
 } from '../lib/paper.jsx';
-
-function OBHeader({ step, total, dark, onBack = true }) {
-  const c = useACT(dark);
-  return (
-    <div style={{ padding: '14px 22px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      {onBack ? (
-        <button type="button" onClick={typeof onBack === 'function' ? onBack : undefined} style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M7 1L3 5l4 4" stroke={c.fg} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </button>
-      ) : <div style={{ width: 28 }} />}
-      <div style={{ flex: 1, margin: '0 14px', display: 'flex', gap: 4 }}>
-        {Array.from({ length: total }).map((_, i) => (
-          <div key={i} style={{
-            flex: 1, height: 3, borderRadius: 2,
-            background: i < step ? c.accent : (i === step ? c.fg : c.faint),
-          }} />
-        ))}
-      </div>
-      <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600 }}>{step}/{total}</ACLabel>
-    </div>
-  );
-}
+import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
 function TrendIcon({ k, color, size = 28 }) {
   if (k === 'down') return <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
@@ -51,52 +30,88 @@ function S8_Onboard_Goal({ dark = false, onBack, onContinue, onChange, value }) 
     { k: 'gain',     t: 'Build muscle',    d: 'Lean bulk, track PRs',             trend: 'up' },
   ];
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
-      <OBHeader step={2} total={10} dark={dark} onBack={onBack} />
+    <OnboardingShell
+      dark={dark}
+      step={2}
+      total={10}
+      onBack={onBack}
+      eyebrow="Direction"
+      footer={<OnboardingPrimaryAction dark={dark} onClick={onContinue}>Continue →</OnboardingPrimaryAction>}
+    >
+      <OnboardingHero
+        dark={dark}
+        label="Your goal"
+        title={<>Choose the dominant outcome.</>}
+        body="Atlas can only make clean tradeoffs if one direction wins. This sets the bias for calories, recovery, and progression."
+        aside={(
+          <>
+            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Focus</ACLabel>
+            <div style={{ marginTop: 8, fontSize: 12, color: c.dim, lineHeight: 1.45 }}>One target. Less drift.</div>
+          </>
+        )}
+      />
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px 16px' }}>
-        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Your goal</ACLabel>
-        <div style={{
-          marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
-          letterSpacing: -1, lineHeight: 1.05, color: c.fg,
-        }}>
-          What are we<br/>building toward?
-        </div>
-
-        <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {goals.map(g => {
-            const on = goal === g.k;
-            return (
-              <button key={g.k} type="button" onClick={() => { setGoal(g.k); onChange?.({ goal: g.k }); }} style={{
-                padding: 18, borderRadius: ACRadii.card,
-                background: on ? c.fg : c.card,
-                color: on ? c.bg : c.fg,
-                display: 'flex', alignItems: 'center', gap: 14,
-                cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
+      <div style={{ display: 'grid', gap: 10 }}>
+        {goals.map((g) => {
+          const on = goal === g.k;
+          return (
+            <button
+              key={g.k}
+              type="button"
+              onClick={() => { setGoal(g.k); onChange?.({ goal: g.k }); }}
+              style={{ background: 'transparent', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+            >
+              <OnboardingCard dark={dark} accent={on} style={{
+                background: on
+                  ? (dark ? 'rgba(239,233,218,0.08)' : 'rgba(255,255,255,0.48)')
+                  : undefined,
               }}>
-                <TrendIcon k={g.trend} color={on ? c.accent : c.fg} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 16, fontWeight: 600, letterSpacing: -0.2 }}>{g.t}</div>
-                  <div style={{ fontSize: 12, marginTop: 3, opacity: on ? 0.6 : 0.55 }}>{g.d}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    background: on ? c.accent : (dark ? 'rgba(239,233,218,0.06)' : 'rgba(10,10,10,0.05)'),
+                    color: on ? c.ink : c.fg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <TrendIcon k={g.trend} color={on ? c.ink : c.fg} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 16, fontWeight: 650, letterSpacing: -0.25 }}>{g.t}</div>
+                    <div style={{ fontSize: 12, marginTop: 4, color: c.dim, lineHeight: 1.45 }}>{g.d}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <ACMono size={10} color={on ? c.accent : c.mute}>{g.trend.toUpperCase()}</ACMono>
+                    <div style={{
+                      width: 20,
+                      height: 20,
+                      marginTop: 7,
+                      marginLeft: 'auto',
+                      borderRadius: 999,
+                      border: `1.5px solid ${on ? c.accent : c.faint}`,
+                      background: on ? c.accent : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      {on ? (
+                        <svg width="10" height="10" viewBox="0 0 10 10">
+                          <path d="M2 5l2 2 4-4" stroke={c.ink} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
-                <div style={{
-                  width: 20, height: 20, borderRadius: 999,
-                  border: `1.8px solid ${on ? c.accent : c.faint}`,
-                  background: on ? c.accent : 'transparent',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  {on && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" stroke={c.ink} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+              </OnboardingCard>
+            </button>
+          );
+        })}
       </div>
-
-      <div style={{ padding: '14px 28px 26px', background: c.bg }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={onContinue}>Continue →</ACBtn>
-      </div>
-    </div>
+    </OnboardingShell>
   );
 }
 

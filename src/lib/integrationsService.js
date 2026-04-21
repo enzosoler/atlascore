@@ -45,6 +45,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabaseClient';
 
 /* ─── OAuth provider configs ────────────────────────────────────────────── */
 
@@ -77,36 +78,183 @@ const OAUTH_PROVIDERS = {
   },
 };
 
+const CONNECTION_GROUPS = {
+  apple_health: 'Health data',
+  whoop: 'Health data',
+  oura: 'Health data',
+  garmin: 'Health data',
+  mfp: 'Nutrition',
+  cronometer: 'Nutrition',
+  strava: 'Training',
+  hevy: 'Training',
+  google_fit: 'Health data',
+};
+
+const CONNECTION_NAMES = {
+  apple_health: 'Apple Health',
+  whoop: 'Whoop',
+  oura: 'Oura',
+  garmin: 'Garmin',
+  mfp: 'MyFitnessPal',
+  cronometer: 'Cronometer',
+  strava: 'Strava',
+  hevy: 'Hevy',
+  google_fit: 'Google Fit',
+};
+
+const ALL_PROVIDER_IDS = Object.keys(CONNECTION_NAMES);
+
+function localMirrorKey(userId) {
+  return `atlas.integrations.${userId || 'anon'}`;
+}
+
+function loadLocalMirror(userId) {
+  try {
+    const raw = localStorage.getItem(localMirrorKey(userId));
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveLocalMirror(userId, next) {
+  try {
+    localStorage.setItem(localMirrorKey(userId), JSON.stringify(next || {}));
+  } catch {}
+}
+
+function normalizeRow(row) {
+  const providerId = row?.provider_id || row?.provider || row?.id;
+  if (!providerId) return null;
+  const isConnected =
+    row?.status === 'connected'
+    || row?.status === 'active'
+    || row?.connected === true
+    || !!row?.access_token
+    || !!row?.refresh_token
+    || !!row?.connected_at;
+
+  return {
+    id: providerId,
+    name: CONNECTION_NAMES[providerId] || providerId,
+    group: CONNECTION_GROUPS[providerId] || 'Other',
+    status: isConnected ? 'connected' : 'disconnected',
+    lastSyncAt: row?.last_synced_at || row?.synced_at || row?.updated_at || row?.connected_at || null,
+  };
+}
+
+function mergeWithDefaults(rows, mirror) {
+  const byId = new Map();
+
+  (rows || []).forEach((row) => {
+    const normalized = normalizeRow(row);
+    if (normalized) byId.set(normalized.id, normalized);
+  });
+
+  Object.entries(mirror || {}).forEach(([id, row]) => {
+    const normalized = normalizeRow({ id, ...row });
+    if (normalized && !byId.has(id)) byId.set(id, normalized);
+  });
+
+  return ALL_PROVIDER_IDS.map((id) => byId.get(id) || {
+    id,
+    name: CONNECTION_NAMES[id] || id,
+    group: CONNECTION_GROUPS[id] || 'Other',
+    status: 'disconnected',
+    lastSyncAt: null,
+  });
+}
+
+function upsertMirrorRow(userId, providerId, partial) {
+  if (!userId || !providerId) return;
+  const current = loadLocalMirror(userId);
+  current[providerId] = {
+    ...(current[providerId] || {}),
+    ...partial,
+  };
+  saveLocalMirror(userId, current);
+}
+
+function clearMirrorRow(userId, providerId) {
+  if (!userId || !providerId) return;
+  const current = loadLocalMirror(userId);
+  delete current[providerId];
+  saveLocalMirror(userId, current);
+}
+
+export async function getIntegrationConnections(userId) {
+  const mirror = loadLocalMirror(userId);
+
+  try {
+    if (!userId) return mergeWithDefaults([], mirror);
+
+    const { data, error } = await supabase
+      .from('user_integrations')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) {
+      const msg = `${error.code || ''} ${error.message || ''} ${error.details || ''}`.toLowerCase();
+      if (msg.includes('does not exist') || msg.includes('schema cache') || msg.includes('not found')) {
+        return mergeWithDefaults([], mirror);
+      }
+      throw error;
+    }
+
+    return mergeWithDefaults(data || [], mirror);
+  } catch (error) {
+    console.warn('[integrationsService] getIntegrationConnections failed:', error?.message || error);
+    return mergeWithDefaults([], mirror);
+  }
+}
+
 /* ─── Public API ────────────────────────────────────────────────────────── */
 
 /**
  * Start the connect flow for a provider. Returns a promise that resolves with
  * `{ success, status, message }`. The caller can show toasts based on result.
  */
-export async function connectProvider(providerId) {
+export async function connectProvider(providerId, userId = null) {
+  let result;
   switch (providerId) {
-    case 'apple_health': return connectAppleHealth();
-    case 'google_fit':   return startOAuth('google_fit');
-    case 'whoop':        return startOAuth('whoop');
-    case 'oura':         return startOAuth('oura');
-    case 'strava':       return startOAuth('strava');
-    case 'garmin':       return startGarmin();
-    case 'hevy':         return notSupported('Hevy', 'Hevy doesn\'t expose a public API. Export your data as CSV from the Hevy app and import via Settings → Data.');
-    case 'mfp':          return notSupported('MyFitnessPal', 'MyFitnessPal doesn\'t expose a public API. Export your food log as CSV from MFP and import via Settings → Data.');
-    case 'cronometer':   return connectCronometer();
-    default:             return { success: false, status: 'unknown', message: `Unknown provider: ${providerId}` };
+    case 'apple_health': result = await connectAppleHealth(); break;
+    case 'google_fit':   result = await startOAuth('google_fit'); break;
+    case 'whoop':        result = await startOAuth('whoop'); break;
+    case 'oura':         result = await startOAuth('oura'); break;
+    case 'strava':       result = await startOAuth('strava'); break;
+    case 'garmin':       result = await startGarmin(); break;
+    case 'hevy':         result = await notSupported('Hevy', 'Hevy doesn\'t expose a public API. Export your data as CSV from the Hevy app and import via Settings → Data.'); break;
+    case 'mfp':          result = await notSupported('MyFitnessPal', 'MyFitnessPal doesn\'t expose a public API. Export your food log as CSV from MFP and import via Settings → Data.'); break;
+    case 'cronometer':   result = await connectCronometer(); break;
+    default:             result = { success: false, status: 'unknown', message: `Unknown provider: ${providerId}` };
   }
+
+  if (result?.success && ['connected', 'redirecting'].includes(result.status)) {
+    upsertMirrorRow(userId, providerId, {
+      status: result.status === 'connected' ? 'connected' : 'disconnected',
+      connected_at: result.status === 'connected' ? new Date().toISOString() : null,
+      last_synced_at: result.status === 'connected' ? new Date().toISOString() : null,
+    });
+  }
+
+  return result;
 }
 
-export async function disconnectProvider(providerId) {
+export async function disconnectProvider(providerId, userId = null) {
   // TODO: call Supabase RPC `disconnect_integration(provider)` which deletes
   // tokens from user_integrations and revokes upstream where possible.
+  clearMirrorRow(userId, providerId);
   return { success: true, status: 'disconnected', message: `Disconnected ${providerId}` };
 }
 
-export async function refreshProvider(providerId) {
+export async function refreshProvider(providerId, userId = null) {
   // TODO: call Supabase Edge Function `sync-integration` with providerId.
   // For now, honest pending status.
+  upsertMirrorRow(userId, providerId, {
+    status: 'connected',
+    last_synced_at: new Date().toISOString(),
+  });
   return { success: false, status: 'pending', message: 'Sync engine not wired yet' };
 }
 

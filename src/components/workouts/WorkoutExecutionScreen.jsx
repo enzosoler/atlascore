@@ -607,6 +607,7 @@ export default function WorkoutExecutionScreen({
       });
       return {
         name: ex.name,
+        exercise_master_id: ex.exercise_master_id || null,
         target_sets: ex.target_sets,
         target_reps: ex.target_reps,
         sets_completed,

@@ -37,7 +37,363 @@ function PhoneRow({ title, subtitle, variants, idx }) {
   );
 }
 
+function DesktopRow({ title, subtitle, variants, idx }) {
+  return (
+    <div style={{ marginBottom: 110 }}>
+      <div style={{ padding: '0 60px 24px', maxWidth: 1100 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
+          <span style={{
+            fontFamily: '"JetBrains Mono", monospace', fontSize: 11, letterSpacing: 3,
+            color: 'rgba(60,50,40,0.6)', textTransform: 'uppercase',
+          }}>screen {String(idx).padStart(2, '0')}</span>
+          <span style={{
+            fontSize: 22, fontWeight: 600, letterSpacing: -0.3, color: 'rgba(40,30,20,0.9)',
+          }}>{title}</span>
+        </div>
+        {subtitle && <div style={{
+          fontSize: 14, color: 'rgba(60,50,40,0.6)', maxWidth: 720,
+        }}>{subtitle}</div>}
+      </div>
+
+      <div style={{
+        display: 'flex', gap: 32, padding: '0 60px',
+        alignItems: 'flex-start', width: 'max-content',
+      }}>
+        {variants.map((v, vi) => (
+          <React.Fragment key={vi}>
+            {vi > 0 && <div style={{ width: 40 }} />}
+            <div>
+              <div style={{
+                marginBottom: 12,
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 10,
+                letterSpacing: 2.4,
+                textTransform: 'uppercase',
+                color: 'rgba(60,50,40,0.6)',
+              }}>
+                {v.label} · light
+              </div>
+              <v.Comp dark={false} />
+            </div>
+            <div>
+              <div style={{
+                marginBottom: 12,
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 10,
+                letterSpacing: 2.4,
+                textTransform: 'uppercase',
+                color: 'rgba(60,50,40,0.6)',
+              }}>
+                {v.label} · dark
+              </div>
+              <v.Comp dark={true} />
+            </div>
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function useSwipe(onLeft, onRight) {
+  const startX = React.useRef(0);
+
+  return React.useMemo(() => ({
+    onTouchStart: (e) => {
+      startX.current = e.touches[0]?.clientX || 0;
+    },
+    onTouchEnd: (e) => {
+      const endX = e.changedTouches[0]?.clientX || 0;
+      const diff = endX - startX.current;
+      if (diff > 50) onRight();
+      if (diff < -50) onLeft();
+    },
+  }), [onLeft, onRight]);
+}
+
+function PreviewTopBar({ query, setQuery, currentName, previewFlow, setPreviewFlow, presentation, setPresentation }) {
+  return (
+    <div style={{
+      padding: 12,
+      background: 'rgba(12,12,12,0.92)',
+      display: 'flex',
+      gap: 10,
+      alignItems: 'center',
+      borderBottom: '1px solid rgba(255,255,255,0.08)',
+      backdropFilter: 'blur(18px)',
+    }}>
+      <input
+        placeholder="Search screen..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        style={{
+          flex: 1,
+          minWidth: 0,
+          height: 38,
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.08)',
+          background: '#191919',
+          color: '#f4f1ea',
+          padding: '0 12px',
+          outline: 'none',
+          fontSize: 14,
+        }}
+      />
+      <button onClick={() => setPreviewFlow(null)} style={previewFlow === null ? previewToggleButtonSel : previewToggleButton}>
+        Explore
+      </button>
+      <button onClick={() => setPreviewFlow('onboarding')} style={previewFlow === 'onboarding' ? previewToggleButtonSel : previewToggleButton}>
+        Start Onboarding
+      </button>
+      <button onClick={() => setPresentation((value) => !value)} style={previewToggleButton}>
+        Demo Mode
+      </button>
+      <span style={{
+        color: 'rgba(255,255,255,0.58)',
+        fontFamily: '"JetBrains Mono", monospace',
+        fontSize: 11,
+        letterSpacing: 1.2,
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+      }}>
+        {currentName || 'No match'}
+      </span>
+    </div>
+  );
+}
+
+const previewToggleButton = {
+  height: 38,
+  padding: '0 12px',
+  borderRadius: 10,
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: '#151515',
+  color: '#f4f1ea',
+  cursor: 'pointer',
+  fontSize: 13,
+};
+
+const previewToggleButtonSel = {
+  ...previewToggleButton,
+  background: '#f4f1ea',
+  color: '#111',
+  borderColor: '#f4f1ea',
+};
+
+function PreviewMode() {
+  const screenList = window.MOBILE_SCREEN_LIST || [];
+  const [index, setIndex] = React.useState(0);
+  const [query, setQuery] = React.useState('');
+  const [previewFlow, setPreviewFlow] = React.useState(null);
+  const [presentation, setPresentation] = React.useState(false);
+
+  const activeScreens = React.useMemo(() => {
+    if (!previewFlow) return screenList;
+    const flowNames = (window.FLOWS && window.FLOWS[previewFlow]) || [];
+    return flowNames
+      .map((name) => screenList.find((screen) => screen.name === name))
+      .filter(Boolean);
+  }, [previewFlow, screenList]);
+
+  const filteredScreens = React.useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return activeScreens;
+    return activeScreens.filter((screen) => screen.name.toLowerCase().includes(normalized));
+  }, [activeScreens, query]);
+
+  React.useEffect(() => {
+    setIndex(0);
+  }, [query, previewFlow]);
+
+  React.useEffect(() => {
+    setIndex((value) => Math.min(value, Math.max(filteredScreens.length - 1, 0)));
+  }, [filteredScreens.length]);
+
+  React.useEffect(() => {
+    const hash = window.location.hash.replace(/^#/, '');
+    if (!hash) return;
+
+    const hashedIndex = filteredScreens.findIndex((screen) => screen.name === hash);
+    if (hashedIndex >= 0) {
+      setIndex(hashedIndex);
+      return;
+    }
+
+    const inFlow = activeScreens.some((screen) => screen.name === hash);
+    if (inFlow) {
+      setQuery('');
+      const activeIndex = activeScreens.findIndex((screen) => screen.name === hash);
+      if (activeIndex >= 0) setIndex(activeIndex);
+    }
+  }, [activeScreens, filteredScreens]);
+
+  const current = filteredScreens[index] || filteredScreens[0] || null;
+  const Screen = current?.Comp || null;
+
+  React.useEffect(() => {
+    if (current?.name) window.location.hash = current.name;
+  }, [current]);
+
+  const goPrev = React.useCallback(() => {
+    setIndex((value) => Math.max(value - 1, 0));
+  }, []);
+
+  const goNext = React.useCallback(() => {
+    setIndex((value) => Math.min(value + 1, filteredScreens.length - 1));
+  }, [filteredScreens.length]);
+
+  const goTo = React.useCallback((name) => {
+    const targetIndex = filteredScreens.findIndex((screen) => screen.name === name);
+    if (targetIndex >= 0) {
+      setIndex(targetIndex);
+      return;
+    }
+
+    const globalMatch = activeScreens.find((screen) => screen.name === name);
+    if (globalMatch) {
+      setQuery('');
+      const activeIndex = activeScreens.findIndex((screen) => screen.name === name);
+      if (activeIndex >= 0) setIndex(activeIndex);
+    }
+  }, [activeScreens, filteredScreens]);
+
+  const navigationValue = React.useMemo(() => ({
+    current,
+    goTo,
+    goNext,
+    goPrev,
+    activeScreens,
+  }), [activeScreens, current, goNext, goPrev, goTo]);
+
+  const swipe = useSwipe(goNext, goPrev);
+
+  return (
+    <window.MockStateProvider>
+      <window.PreviewNavigationContext.Provider value={navigationValue}>
+        <div style={{
+          width: '100vw',
+          height: '100vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#050505',
+        }}>
+          {!presentation && (
+            <PreviewTopBar
+              query={query}
+              setQuery={(value) => {
+                setQuery(value);
+                setIndex(0);
+              }}
+              currentName={current?.name}
+              previewFlow={previewFlow}
+              setPreviewFlow={setPreviewFlow}
+              presentation={presentation}
+              setPresentation={setPresentation}
+            />
+          )}
+
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: presentation ? 'center' : 'stretch',
+            padding: presentation ? 0 : 18,
+            background: 'radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 34%), #050505',
+          }}>
+            <div
+              {...swipe}
+              style={{
+                width: presentation ? '100vw' : 'min(390px, 100%)',
+                height: presentation ? '100vh' : '100%',
+                maxHeight: presentation ? '100vh' : 844,
+                borderRadius: presentation ? 0 : 32,
+                overflow: 'hidden',
+                background: '#000',
+                boxShadow: presentation ? 'none' : '0 20px 60px rgba(0,0,0,0.6)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                {Screen ? <Screen dark={false} /> : (
+                  <div style={{
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'rgba(255,255,255,0.62)',
+                    fontSize: 14,
+                  }}>
+                    No screen matches this filter.
+                  </div>
+                )}
+              </div>
+
+              {!presentation && (
+                <div style={{
+                  padding: 12,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  background: '#111',
+                  borderTop: '1px solid rgba(255,255,255,0.08)',
+                }}>
+                  <button onClick={goPrev} style={previewToggleButton}>Prev</button>
+                  <div style={{
+                    color: 'rgba(255,255,255,0.58)',
+                    fontFamily: '"JetBrains Mono", monospace',
+                    fontSize: 11,
+                    letterSpacing: 1.2,
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}>
+                    {filteredScreens.length ? `${index + 1}/${filteredScreens.length}` : '0/0'}
+                  </div>
+                  <button onClick={goNext} style={previewToggleButton}>Next</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </window.PreviewNavigationContext.Provider>
+    </window.MockStateProvider>
+  );
+}
+
 function App() {
+  const [mode, setMode] = React.useState(() => window.location.hash ? 'preview' : 'design');
+
+  return (
+    <>
+      <div style={{
+        position: 'fixed',
+        top: 20,
+        right: 20,
+        zIndex: 9999,
+        display: 'flex',
+        gap: 8,
+        background: 'rgba(0,0,0,0.68)',
+        padding: '6px 8px',
+        borderRadius: 12,
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 12px 30px rgba(0,0,0,0.22)',
+      }}>
+        <button onClick={() => setMode('design')} style={mode === 'design' ? previewToggleButtonSel : previewToggleButton}>
+          Design
+        </button>
+        <button onClick={() => setMode('preview')} style={mode === 'preview' ? previewToggleButtonSel : previewToggleButton}>
+          Preview
+        </button>
+      </div>
+
+      {mode === 'design' ? <DesignMode /> : <PreviewMode />}
+    </>
+  );
+}
+
+function DesignMode() {
   const t = window.useTheme();
   return (
     <DesignCanvas>
@@ -655,50 +1011,135 @@ function App() {
         </h2>
         <p style={{ margin: '18px 0 0', fontSize: 15, lineHeight: 1.6, color: 'rgba(40,30,20,0.8)', maxWidth: 720 }}>
           Ten desktop screens for the admin console — overview, analytics, users, user detail, subscriptions,
-          waitlist, moderation, errors + logs, audit trail, and settings. Same design system,
-          scaled to a browser window with a sidebar layout.
+          waitlist, moderation, errors + logs, audit trail, and settings. This is a webapp-only surface,
+          rendered in browser frames and excluded from the mobile app.
         </p>
       </div>
 
-      <PhoneRow idx={80} title="admin · overview"
-        subtitle="Dashboard. KPI cards (DAU, MAU, revenue, churn), sparklines, alert feed, system health (API latency, error rate, uptime)."
+      <DesktopRow idx={80} title="admin · overview"
+        subtitle="Desktop-only webapp dashboard. KPI cards (DAU, MAU, revenue, churn), sparklines, alert feed, system health (API latency, error rate, uptime)."
         variants={[{ label: 'overview', Comp: S80_Admin_Overview }]} />
 
-      <PhoneRow idx={81} title="admin · analytics"
-        subtitle="DAU/MAU chart, retention cohort grid (6 weeks), conversion funnel (signup → paid), top features by usage. Period selector."
+      <DesktopRow idx={81} title="admin · analytics"
+        subtitle="Desktop-only analytics workspace. DAU/MAU chart, retention cohort grid (6 weeks), conversion funnel (signup → paid), top features by usage."
         variants={[{ label: 'analytics', Comp: S81_Admin_Analytics }]} />
 
-      <PhoneRow idx={82} title="admin · users"
-        subtitle="Search, filter chips, 8-row sortable table (name, email, plan, joined, last active, revenue). Bulk actions, pagination."
+      <DesktopRow idx={82} title="admin · users"
+        subtitle="Desktop-only user management. Search, filter chips, 8-row sortable table (name, email, plan, joined, last active, revenue)."
         variants={[{ label: 'users', Comp: S82_Admin_Users }]} />
 
-      <PhoneRow idx={83} title="admin · user detail"
-        subtitle="Profile card, engagement metrics grid, subscription history timeline, activity timeline, impersonation trigger with warning."
+      <DesktopRow idx={83} title="admin · user detail"
+        subtitle="Desktop-only account review. Profile card, engagement metrics grid, subscription history timeline, activity timeline, impersonation trigger."
         variants={[{ label: 'user', Comp: S83_Admin_User_Detail }]} />
 
-      <PhoneRow idx={84} title="admin · subscriptions"
-        subtitle="MRR/ARR/conversion/churn KPIs, plan breakdown chart, 12-month revenue trend, subscription events table."
+      <DesktopRow idx={84} title="admin · subscriptions"
+        subtitle="Desktop-only billing analytics. MRR/ARR/conversion/churn KPIs, plan breakdown chart, 12-month revenue trend, subscription events table."
         variants={[{ label: 'subs', Comp: S84_Admin_Subscriptions }]} />
 
-      <PhoneRow idx={85} title="admin · waitlist"
-        subtitle="Total/invited/converted KPIs, 10-row table (email, date, status, source), bulk invite action."
+      <DesktopRow idx={85} title="admin · waitlist"
+        subtitle="Desktop-only ops queue. Total/invited/converted KPIs, 10-row table (email, date, status, source), bulk invite action."
         variants={[{ label: 'waitlist', Comp: S85_Admin_Waitlist }]} />
 
-      <PhoneRow idx={86} title="admin · moderation"
-        subtitle="Flagged content queue. 5 items with type badges, preview, flag reason, reporter, action buttons (approve/remove/warn/ban)."
+      <DesktopRow idx={86} title="admin · moderation"
+        subtitle="Desktop-only moderation queue. Flagged content, preview, flag reason, reporter, and action controls."
         variants={[{ label: 'mod', Comp: S86_Admin_Moderation }]} />
 
-      <PhoneRow idx={87} title="admin · errors + logs"
-        subtitle="Error rate sparkline, top 5 errors table, live log stream (12 entries), severity filter. Combined view."
+      <DesktopRow idx={87} title="admin · errors + logs"
+        subtitle="Desktop-only incident view. Error rate sparkline, top 5 errors table, live log stream, and severity filters."
         variants={[{ label: 'errors', Comp: S87_Admin_Errors }]} />
 
-      <PhoneRow idx={88} title="admin · audit log"
-        subtitle="Admin actions trail. 10-entry table (timestamp, admin, action, target, details). Filter by admin, type, date range."
+      <DesktopRow idx={88} title="admin · audit log"
+        subtitle="Desktop-only audit trail. Admin actions table with filters for actor, action type, and date range."
         variants={[{ label: 'audit', Comp: S88_Admin_Audit }]} />
 
-      <PhoneRow idx={89} title="admin · settings"
-        subtitle="Maintenance mode toggle, 6 feature flags with keys, role management table, system config with masked API keys."
+      <DesktopRow idx={89} title="admin · settings"
+        subtitle="Desktop-only console settings. Maintenance mode, feature flags, role management, and masked system config."
         variants={[{ label: 'settings', Comp: S89_Admin_Settings }]} />
+
+      <div style={{ padding: '40px 60px 48px', maxWidth: 1100 }}>
+        <div style={{
+          fontFamily: '"JetBrains Mono", monospace', fontSize: 10, letterSpacing: 3, textTransform: 'uppercase',
+          color: 'rgba(40,30,20,0.6)', marginBottom: 10,
+        }}>
+          /// atlas.core · onboarding · phase 13
+        </div>
+        <h2 style={{
+          margin: 0, fontFamily: '"Archivo Black", sans-serif',
+          fontSize: 72, letterSpacing: -3, lineHeight: 0.9,
+          color: 'rgba(15,10,5,0.94)', textTransform: 'lowercase',
+        }}>
+          calibrate <span style={{ color: t.accent }}>the</span><br/>
+          <span style={{ background: 'black', color: 'white', padding: '0 10px' }}>system</span>.
+        </h2>
+        <p style={{ margin: '18px 0 0', fontSize: 15, lineHeight: 1.6, color: 'rgba(40,30,20,0.8)', maxWidth: 720 }}>
+          A full calibration flow built as a system, not a form. Signals, constraints, live inputs, reflection,
+          final state, trajectory, and immediate handoff into Today.
+        </p>
+      </div>
+
+      <PhoneRow idx={90} title="system · entry"
+        subtitle="Boot screen for calibration. Frames onboarding as signals, constraints, and system inputs."
+        variants={[{ label: 'boot', Comp: S90_System_Calibration_Entry }]} />
+
+      <PhoneRow idx={91} title="system · biological baseline"
+        subtitle="Age, height, mass, and physiology as engine inputs rather than profile trivia."
+        variants={[{ label: 'baseline', Comp: S91_System_Bio_Baseline }]} />
+
+      <PhoneRow idx={92} title="system · direction"
+        subtitle="Choose the dominant control target so the system can resolve tradeoffs."
+        variants={[{ label: 'direction', Comp: S92_System_Direction }]} />
+
+      <PhoneRow idx={93} title="system · load profile"
+        subtitle="Measure current training output and the usable equipment environment."
+        variants={[{ label: 'load', Comp: S93_System_Load_Profile }]} />
+
+      <PhoneRow idx={94} title="system · recovery window"
+        subtitle="Sleep consistency and stress load define usable recovery margin."
+        variants={[{ label: 'recovery', Comp: S94_System_Recovery_Window }]} />
+
+      <PhoneRow idx={95} title="system · fuel signal"
+        subtitle="Protein consistency and appetite volatility converted into nutritional control signals."
+        variants={[{ label: 'fuel', Comp: S95_System_Fuel_Signal }]} />
+
+      <PhoneRow idx={96} title="system · schedule constraints"
+        subtitle="Identify the training windows that survive the real calendar."
+        variants={[{ label: 'schedule', Comp: S96_System_Schedule_Constraints }]} />
+
+      <PhoneRow idx={97} title="system · movement constraints"
+        subtitle="Treat pain, surgery history, and restricted patterns as routing constraints."
+        variants={[{ label: 'movement', Comp: S97_System_Movement_Constraints }]} />
+
+      <PhoneRow idx={98} title="system · adherence risk"
+        subtitle="Find the real break point and the available decision bandwidth."
+        variants={[{ label: 'risk', Comp: S98_System_Adherence_Risk }]} />
+
+      <PhoneRow idx={99} title="system · data inputs"
+        subtitle="Connect Apple Health, wearables, calendar, and food logs as live telemetry."
+        variants={[{ label: 'inputs', Comp: S99_System_Data_Inputs }]} />
+
+      <PhoneRow idx={100} title="system · reflection"
+        subtitle="The system reflects back what it understands before locking the model."
+        variants={[{ label: 'reflection', Comp: S100_System_Reflection }]} />
+
+      <PhoneRow idx={101} title="system · control settings"
+        subtitle="Set change rate and correction cadence for the operating loop."
+        variants={[{ label: 'control', Comp: S101_System_Calibration_Plan }]} />
+
+      <PhoneRow idx={102} title="system · week 01"
+        subtitle="A concrete first week with train, fuel, recover, and measure actions."
+        variants={[{ label: 'week 01', Comp: S102_System_First_Week }]} />
+
+      <PhoneRow idx={103} title="system · state"
+        subtitle="The final configured system state with readiness, cadence, and protein floor."
+        variants={[{ label: 'state', Comp: S103_System_State }]} />
+
+      <PhoneRow idx={104} title="system · trajectory"
+        subtitle="Projected six-week drift with decision rules if compliance or recovery changes."
+        variants={[{ label: 'trajectory', Comp: S104_System_Trajectory }]} />
+
+      <PhoneRow idx={105} title="today · live handoff"
+        subtitle="Immediate handoff into a live Today screen with one clear next action."
+        variants={[{ label: 'today', Comp: S105_System_Today }]} />
 
       {/* ── FINAL FOOTER ─────────────────────────────────── */}
       <div style={{ padding: '0 60px 80px', maxWidth: 900 }}>
@@ -706,7 +1147,7 @@ function App() {
           fontFamily: '"JetBrains Mono", monospace', fontSize: 10, letterSpacing: 3,
           textTransform: 'uppercase', color: 'rgba(40,30,20,0.6)', marginBottom: 10,
         }}>
-          /// mvp complete · 89 screens · 12 phases
+          /// mvp complete · 105 screens · 13 phases
         </div>
         <h2 style={{
           margin: '0 0 18px', fontFamily: '"Archivo Black", sans-serif',
@@ -716,12 +1157,12 @@ function App() {
           that's the system.
         </h2>
         <p style={{ margin: 0, fontSize: 15, lineHeight: 1.65, color: 'rgba(40,30,20,0.85)' }}>
-          89 screens across 12 phases — core loop (6), onboarding + coach (7), body + biology (5),
+          105 screens across 13 phases — core loop (6), onboarding + coach (7), body + biology (5),
           settings + edges (5), programs + crew (5), bookends + companions (7), MVP front door (9),
           onboarding deep pass (7), core extensions (8), domain depth (12), settings + billing + system (8),
-          and admin console (10). All in light + dark, built on one system: Archivo Black for brand,
+          admin console (10), and system calibration onboarding (16). All in light + dark, built on one system: Archivo Black for brand,
           SF Pro for UI, SF Mono for data; paper + ink + sulfur; ECG as the motif that binds it all.
-          Consumer + admin. Phone + desktop. The full product, designed.
+          Consumer mobile app + desktop admin console. The full product, designed without treating admin as a mobile surface.
         </p>
       </div>
     </DesignCanvas>

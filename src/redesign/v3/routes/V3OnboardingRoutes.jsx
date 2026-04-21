@@ -12,21 +12,21 @@ import S59_Onboard_Habits from '../screens/S59_Onboard_Habits.jsx';
 import S60_Onboard_Constraints from '../screens/S60_Onboard_Constraints.jsx';
 import S61_Onboard_Summary from '../screens/S61_Onboard_Summary.jsx';
 import S62_Onboard_Tour from '../screens/S62_Onboard_Tour.jsx';
-
-const STORAGE_KEY = 'atlas_onboarding_v3';
+import {
+  buildProfileDataFromOnboarding,
+  readOnboardingDraft,
+  writeOnboardingDraft,
+} from '@/services/onboardingService';
 
 /** Shared onboarding state — persists to localStorage across steps. */
 function useOnboardingState() {
   const [data, setData] = useState(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : {};
-    } catch { return {}; }
+    return readOnboardingDraft();
   });
   const update = useCallback((patch) => {
     setData((prev) => {
       const next = { ...prev, ...patch };
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      writeOnboardingDraft(next);
       return next;
     });
   }, []);
@@ -90,14 +90,18 @@ export function V3OnboardingActivity() {
 export function V3OnboardingPlan() {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { data } = useOnboardingState();
+  const { data, update } = useOnboardingState();
   return (
     <Wrap>
       <S10_Onboard_Plan
         dark={theme === 'dark'}
         onboardingData={data}
+        onChange={update}
         onBack={() => navigate('/onboarding/activity')}
-        onContinue={() => navigate('/onboarding/diet')}
+        onContinue={(nextData) => {
+          update(nextData || {});
+          navigate('/onboarding/diet');
+        }}
       />
     </Wrap>
   );
@@ -174,12 +178,25 @@ export function V3OnboardingSummary() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { data } = useOnboardingState();
+  const profileData = buildProfileDataFromOnboarding(data);
+  const summaryTargets = {
+    calories: profileData?.targets?.calories,
+    protein: profileData?.targets?.protein,
+    carbs: profileData?.targets?.carbs,
+    fat: profileData?.targets?.fat,
+    weeklySessions: profileData?.training_days_per_week,
+    experience: profileData?.training_experience,
+    sleep: profileData?.sleep_target_hours,
+    waterL: profileData?.water_target_liters,
+    steps: profileData?.steps_target,
+  };
+  const summaryConstraints = profileData?.constraints || data;
   return (
     <Wrap>
       <S61_Onboard_Summary
         dark={theme === 'dark'}
-        targets={data}
-        constraints={data}
+        targets={summaryTargets}
+        constraints={summaryConstraints}
         onBack={() => navigate('/onboarding/constraints')}
         onContinue={() => navigate('/onboarding/paywall')}
       />

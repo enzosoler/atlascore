@@ -5,19 +5,31 @@
  * proper camera integration for progress tracking.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
+import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/i18nContext';
 import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import {
+  createProgressPhoto,
+  uploadProgressPhoto,
+} from '@/services/bodyProgressService';
 import { ACFonts, ACRadii, useACT, ACBrand } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
+
+async function dataUrlToFile(dataUrl, filename) {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type || 'image/jpeg' });
+}
 
 export default function V3BodyPhotoCapture() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { user } = useAuth();
   const t = useT();
   const dark = theme === 'dark';
   const c = useACT(dark);
@@ -25,6 +37,7 @@ export default function V3BodyPhotoCapture() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const videoRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const views = [
     { k: 'front', l: 'Front', instruction: 'Stand facing forward, arms at sides' },
@@ -33,13 +46,18 @@ export default function V3BodyPhotoCapture() {
   ];
 
   async function handleCapture() {
-    if (!Capacitor.isNativePlatform()) {
-      toast.error('Camera capture is only available on mobile devices');
+    if (!user?.id) {
+      toast.error('You need to be signed in to save progress photos');
       return;
     }
 
     setIsCapturing(true);
     try {
+      if (!Capacitor.isNativePlatform()) {
+        fileInputRef.current?.click();
+        return;
+      }
+
       const image = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
@@ -68,12 +86,44 @@ export default function V3BodyPhotoCapture() {
     setCapturedPhoto(null);
   }
 
-  function handleSave() {
-    if (!capturedPhoto) return;
-    
-    // In a real implementation, this would save to storage/backend
-    toast.success('Photo saved to progress timeline');
-    navigate('/app/body/progress/photos');
+  async function handleFileSelected(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCapturedPhoto(typeof reader.result === 'string' ? reader.result : null);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error('Failed to load photo');
+    } finally {
+      event.target.value = '';
+    }
+  }
+
+  async function handleSave() {
+    if (!capturedPhoto || !user?.id) return;
+
+    setIsCapturing(true);
+    try {
+      const file = await dataUrlToFile(capturedPhoto, `${activeView}-${Date.now()}.jpg`);
+      const photoUrl = await uploadProgressPhoto(user.id, file);
+      await createProgressPhoto(user.id, {
+        category: activeView,
+        photo_url: photoUrl,
+        date: new Date().toISOString(),
+      });
+      toast.success('Photo saved to progress timeline');
+      navigate('/app/body/progress/photos');
+    } catch (error) {
+      toast.error('Failed to save photo', {
+        description: error?.message || 'Try again.',
+      });
+    } finally {
+      setIsCapturing(false);
+    }
   }
 
   return (
@@ -85,6 +135,14 @@ export default function V3BodyPhotoCapture() {
       display: 'flex',
       flexDirection: 'column'
     }}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleFileSelected}
+        style={{ display: 'none' }}
+      />
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -301,19 +359,20 @@ export default function V3BodyPhotoCapture() {
               <button
                 type="button"
                 onClick={handleSave}
+                disabled={isCapturing}
                 style={{
                   flex: 1,
                   padding: '14px',
-                  background: c.accent,
+                  background: isCapturing ? c.faint : c.accent,
                   color: c.ink,
                   border: 'none',
                   borderRadius: 999,
                   fontSize: 14,
                   fontWeight: 600,
-                  cursor: 'pointer'
+                  cursor: isCapturing ? 'not-allowed' : 'pointer'
                 }}
               >
-                Save Photo
+                {isCapturing ? 'Saving…' : 'Save Photo'}
               </button>
             </div>
           </div>

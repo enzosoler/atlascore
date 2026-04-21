@@ -1,30 +1,9 @@
 import React from 'react';
 import {
   ACFonts, ACRadii, useACT,
-  ACLabel, ACNum, ACBtn,
+  ACLabel,
 } from '../lib/paper.jsx';
-
-function OBHeader({ step, total, dark, onBack = true }) {
-  const c = useACT(dark);
-  return (
-    <div style={{ padding: '14px 22px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      {onBack ? (
-        <button type="button" onClick={typeof onBack === 'function' ? onBack : undefined} style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M7 1L3 5l4 4" stroke={c.fg} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </button>
-      ) : <div style={{ width: 28 }} />}
-      <div style={{ flex: 1, margin: '0 14px', display: 'flex', gap: 4 }}>
-        {Array.from({ length: total }).map((_, i) => (
-          <div key={i} style={{
-            flex: 1, height: 3, borderRadius: 2,
-            background: i < step ? c.accent : (i === step ? c.fg : c.faint),
-          }} />
-        ))}
-      </div>
-      <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.body, fontWeight: 600 }}>{step}/{total}</ACLabel>
-    </div>
-  );
-}
+import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
 function S7_Onboard_Identity({ dark = false, onContinue, onBack, onChange, value }) {
   const c = useACT(dark);
@@ -43,46 +22,71 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onChange, value
   }
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
-      <OBHeader step={1} total={10} dark={dark} onBack={onBack || false} />
+    <OnboardingShell
+      dark={dark}
+      step={1}
+      total={10}
+      onBack={onBack || false}
+      eyebrow="Foundation"
+      footer={(
+        <OnboardingPrimaryAction
+          dark={dark}
+          onClick={canContinue ? onContinue : undefined}
+          style={{ opacity: canContinue ? 1 : 0.42, pointerEvents: canContinue ? 'auto' : 'none' }}
+        >
+          Continue →
+        </OnboardingPrimaryAction>
+      )}
+    >
+      <OnboardingHero
+        dark={dark}
+        label="About you"
+        title={<>Get the baseline right.</>}
+        body="These inputs set the first draft of energy, recovery, and macro assumptions. They stay private."
+        aside={(
+          <>
+            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Use</ACLabel>
+            <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.45, color: c.dim }}>Targets only. Never shared.</div>
+          </>
+        )}
+      />
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '28px 28px 16px' }}>
-        <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>About you</ACLabel>
-        <div style={{
-          marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
-          letterSpacing: -1, lineHeight: 1.05, color: c.fg,
-        }}>
-          Let's get the<br/>basics right.
-        </div>
-        <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-          Used for calorie + macro targets. Never shared.
-        </div>
-
-        <div style={{ marginTop: 34 }}>
-          <ACLabel size={12} color={c.dim}>Sex at birth</ACLabel>
-          <div style={{ marginTop: 10, display: 'flex', gap: 10 }}>
-            {['male', 'female'].map(k => {
-              const on = sex === k;
-              return (
-                <button key={k} type="button" onClick={() => { setSex(k); emit({ sex: k }); }} style={{
-                  flex: 1, padding: '16px 0', textAlign: 'center',
+      <OnboardingCard dark={dark} accent>
+        <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>Sex at birth</ACLabel>
+        <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
+          {['male', 'female'].map((k) => {
+            const on = sex === k;
+            return (
+              <button
+                key={k}
+                type="button"
+                onClick={() => { setSex(k); emit({ sex: k }); }}
+                style={{
+                  flex: 1,
+                  padding: '16px 0',
+                  textAlign: 'center',
                   borderRadius: ACRadii.input,
-                  background: on ? c.fg : c.card,
+                  background: on ? (dark ? 'rgba(239,233,218,0.92)' : 'rgba(10,10,10,0.92)') : 'transparent',
                   color: on ? c.bg : c.fg,
-                  fontSize: 15, fontWeight: 600, textTransform: 'capitalize',
-                  cursor: 'pointer', border: 'none',
-                }}>{k}</button>
-              );
-            })}
-          </div>
+                  boxShadow: on && !dark ? '0 8px 18px rgba(10,10,10,0.08)' : 'none',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  textTransform: 'capitalize',
+                  cursor: 'pointer',
+                  border: `1px solid ${on ? 'transparent' : c.hair}`,
+                }}
+              >
+                {k}
+              </button>
+            );
+          })}
         </div>
+      </OnboardingCard>
 
-        <div style={{ marginTop: 24 }}>
-          <ACLabel size={12} color={c.dim}>Age</ACLabel>
-          <div style={{
-            marginTop: 10, padding: '12px 18px', background: c.card,
-            borderRadius: ACRadii.input, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
-          }}>
+      <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+        <OnboardingCard dark={dark}>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>Age</ACLabel>
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
             <input
               type="text"
               inputMode="numeric"
@@ -94,22 +98,27 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onChange, value
                 emit({ age: parseInt(v) || 0 });
               }}
               style={{
-                fontFamily: ACFonts.display, fontSize: 30, fontWeight: 700,
-                color: c.fg, background: 'transparent', border: 'none', outline: 'none',
-                width: 80, padding: 0, fontVariantNumeric: 'tabular-nums',
+                fontFamily: ACFonts.display,
+                fontSize: 44,
+                fontWeight: 700,
+                color: c.fg,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                width: 92,
+                padding: 0,
+                letterSpacing: -1.2,
+                fontVariantNumeric: 'tabular-nums',
               }}
             />
-            <ACLabel size={12} color={c.dim}>years</ACLabel>
+            <ACLabel size={12} color={c.dim} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>years</ACLabel>
           </div>
-        </div>
+        </OnboardingCard>
 
-        <div style={{ marginTop: 24 }}>
-          <ACLabel size={12} color={c.dim}>Height</ACLabel>
-          <div style={{
-            marginTop: 10, padding: '12px 18px', background: c.card,
-            borderRadius: ACRadii.input, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+        <OnboardingCard dark={dark}>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>Height</ACLabel>
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <input
                 type="text"
                 inputMode="numeric"
@@ -121,32 +130,30 @@ function S7_Onboard_Identity({ dark = false, onContinue, onBack, onChange, value
                   emit({ heightCm: parseInt(v) || 0 });
                 }}
                 style={{
-                  fontFamily: ACFonts.display, fontSize: 30, fontWeight: 700,
-                  color: c.fg, background: 'transparent', border: 'none', outline: 'none',
-                  width: 60, padding: 0, fontVariantNumeric: 'tabular-nums',
+                  fontFamily: ACFonts.display,
+                  fontSize: 44,
+                  fontWeight: 700,
+                  color: c.fg,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  width: 92,
+                  padding: 0,
+                  letterSpacing: -1.2,
+                  fontVariantNumeric: 'tabular-nums',
                 }}
               />
-              <span style={{ fontSize: 13, color: c.dim }}>cm</span>
+              <span style={{ fontSize: 12, color: c.dim, fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>cm</span>
             </div>
-            {heightCm >= 100 && (
-              <ACLabel size={11} color={c.dim} style={{ fontFamily: ACFonts.mono }}>
+            {heightCm >= 100 ? (
+              <ACLabel size={12} color={c.accent} style={{ fontFamily: ACFonts.mono }}>
                 {heightFt}'{heightIn}"
               </ACLabel>
-            )}
+            ) : null}
           </div>
-        </div>
+        </OnboardingCard>
       </div>
-
-      <div style={{ padding: '14px 28px 26px', background: c.bg }}>
-        <ACBtn
-          primary block dark={dark} size="lg" pill
-          onClick={canContinue ? onContinue : undefined}
-          style={{ opacity: canContinue ? 1 : 0.4, pointerEvents: canContinue ? 'auto' : 'none' }}
-        >
-          Continue →
-        </ACBtn>
-      </div>
-    </div>
+    </OnboardingShell>
   );
 }
 
