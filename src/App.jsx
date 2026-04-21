@@ -190,6 +190,9 @@ const V3Offline = lazy(() => import('@/redesign/v3/routes/V3Offline.jsx'));
 const V3Maintenance = lazy(() => import('@/redesign/v3/routes/V3Maintenance.jsx'));
 const V3ForceUpdate = lazy(() => import('@/redesign/v3/routes/V3ForceUpdate.jsx'));
 const V3ServerError = lazy(() => import('@/redesign/v3/routes/V3ServerError.jsx'));
+const _V3LabExamDetail = lazy(() => import('@/redesign/v3/routes/V3LabExamDetail.jsx'));
+const _V3LabHistory    = lazy(() => import('@/redesign/v3/routes/V3LabHistory.jsx'));
+const _V3LabUpload     = lazy(() => import('@/redesign/v3/routes/V3LabUpload.jsx'));
 // v2 screen imports removed. Use v3 route wrappers and services only.
 import SmartOnboarding        from '@/components/onboarding/SmartOnboarding.jsx';
 import S6_Weight_B            from '@/redesign/v3/screens/S6_Weight_B.jsx';
@@ -202,6 +205,17 @@ import {
   addEntries                as nutritionAddEntries,
   subscribe                 as nutritionSubscribe,
 } from '@/lib/nutritionStore';
+
+// ─── ComingSoon stub (no v2 equivalent; keeps /help and fallback routes alive) ─
+function ComingSoon({ routeName, onGoHome, onBack }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', padding: '24px', gap: 16 }}>
+      <p style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{routeName}</p>
+      <p style={{ fontSize: 15, opacity: 0.6, margin: 0 }}>Coming soon</p>
+      <button onClick={onGoHome || onBack || (() => window.history.back())} style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: '#e8b500', fontWeight: 600, cursor: 'pointer' }}>Go back</button>
+    </div>
+  );
+}
 
 // ─── Analytics pageviews ─────────────────────────────────────────────────────
 function usePageViewTracking() {
@@ -303,60 +317,13 @@ function FoodDetailRoute() {
   const params = new URLSearchParams(useLocation().search);
   const meal = params.get('meal') || 'breakfast';
   const label = meal.charAt(0).toUpperCase() + meal.slice(1);
-  return (
-    <FoodDetail
-      meal={label}
-      onClose={() => navigate(-1)}
-      onAdd={(entry) => {
-        // Persist to the local nutrition store (swap for Supabase later).
-        nutritionAddEntry(user?.id, new Date(), meal, {
-          name: entry.name,
-          brand: entry.brand,
-          portion: `${entry.portion?.amount ?? entry.calculated?.portion ?? ''}${entry.portion?.unit ? ' ' + entry.portion.unit : ''}`,
-          calories: entry.calculated?.calories ?? entry.nutrients?.calories ?? 0,
-          protein:  entry.calculated?.protein  ?? entry.nutrients?.protein  ?? 0,
-          carbs:    entry.calculated?.carbs    ?? entry.nutrients?.carbs    ?? 0,
-          fat:      entry.calculated?.fat      ?? entry.nutrients?.fat      ?? 0,
-        });
-        navigate('/app/nutrition');
-      }}
-    />
-  );
+  return <V3FoodDetail />;
 }
 
 function PhotoScanRoute() {
   const navigate = useNavigate();
   const [perm, setPerm] = useState('prompt');
-  return (
-    <PhotoScan
-      permission={perm}
-      onRequestPermission={async () => {
-        try {
-          await navigator.mediaDevices.getUserMedia({ video: true });
-          setPerm('granted');
-        } catch { setPerm('denied'); }
-      }}
-      onCapture={(result) => {
-        // Stash the captured photo on window (size can be large; URL params
-        // would break on JPEGs). PhotoScanConfirm picks it up synchronously.
-        if (!result?.dataUrl) {
-          // Permission was blocked or capture failed — don't navigate to confirm.
-          // The PhotoScan screen already shows the denied/error state; just return.
-          return;
-        }
-        try {
-          window.__acCapturedPhoto = {
-            dataUrl: result.dataUrl,
-            format: result.format || 'jpeg',
-            timestamp: result.timestamp || Date.now(),
-          };
-        } catch {}
-        navigate('/app/nutrition/photo/confirm');
-      }}
-      onPickFromGallery={() => navigate('/app/nutrition/photo/confirm')}
-      onCancel={() => navigate(-1)}
-    />
-  );
+  return <V3Capture />;
 }
 
 function PhotoScanConfirmRoute() {
@@ -366,30 +333,7 @@ function PhotoScanConfirmRoute() {
   const aiText = params.get('ai');
   const meal = params.get('meal') || 'breakfast';
   const label = meal.charAt(0).toUpperCase() + meal.slice(1);
-  return (
-    <PhotoScanConfirm
-      mealLabel={label}
-      parseText={aiText || null}
-      onCancel={() => navigate(-1)}
-      onRetake={() => navigate(aiText ? `/app/nutrition/voice?meal=${meal}` : '/app/nutrition/photo')}
-      onSave={({ items }) => {
-        nutritionAddEntries(
-          user?.id,
-          new Date(),
-          meal,
-          items.map((i) => ({
-            name: i.name,
-            portion: `${i.portion} ${i.unit}`,
-            calories: i.calories || 0,
-            protein:  i.protein  || 0,
-            carbs:    i.carbs    || 0,
-            fat:      i.fat      || 0,
-          })),
-        );
-        navigate('/app/nutrition');
-      }}
-    />
-  );
+  return <V3Capture />;
 }
 
 function VoiceLogRoute() {
@@ -397,15 +341,7 @@ function VoiceLogRoute() {
   const params = new URLSearchParams(useLocation().search);
   const meal = params.get('meal') || 'breakfast';
   const label = meal.charAt(0).toUpperCase() + meal.slice(1);
-  return (
-    <VoiceLog
-      mealLabel={label}
-      onCancel={() => navigate(-1)}
-      onSubmit={(transcript) => {
-        navigate(`/app/nutrition/photo/confirm?ai=${encodeURIComponent(transcript)}&meal=${meal}`);
-      }}
-    />
-  );
+  return <V3Capture />;
 }
 
 /* ─── Workout routes ──────────────────────────────────────────────────── */
@@ -416,68 +352,7 @@ function ActiveWorkoutRoute() {
   // inside ActiveWorkout is for display — the real start is captured here so
   // pauses don't affect what we persist as started_at.
   const [startedAt] = useState(() => new Date());
-  return (
-    <ActiveWorkout
-      onFinish={async (summary) => {
-        const endedAt = new Date();
-        // Transform ActiveWorkout's nested state into the flat `sets` payload
-        // the service expects. Only persist sets the user marked done.
-        const flatSets = [];
-        (summary?.exercises || []).forEach((ex) => {
-          (ex.sets || []).forEach((s, idx) => {
-            if (!s.done) return;
-            const weight = s.weight === '' || s.weight == null ? null : Number(s.weight);
-            const reps = s.reps === '' || s.reps == null ? null : Number(s.reps);
-            if (weight == null && reps == null) return;
-            flatSets.push({
-              exerciseId: ex.id,
-              setIndex: idx + 1,
-              weightKg: weight,
-              reps,
-              rir: s.rir ?? null,
-              restSec: ex.restSeconds ?? null,
-              isWarmup: !!s.isWarmup,
-            });
-          });
-        });
-
-        try {
-          await saveWorkoutSession({
-            routineId: null,
-            startedAt,
-            endedAt,
-            sets: flatSets,
-          });
-          // Feed the daily system: auto-complete training action + record workout type
-          try {
-            const { loadDailyState, saveDailyState, calculateReadiness, generateActions, calculateAdherence, loadYesterdayModifier } = await import('@/lib/dailySystem');
-            const ds = loadDailyState();
-            if (ds?.checkedIn) {
-              const updated = { ...ds, completions: { ...ds.completions, a1: 'done' }, lastWorkoutType: 'full' };
-              const { modifier: mod } = loadYesterdayModifier();
-              const r = calculateReadiness(updated.sleep, updated.recovery, updated.soreness, mod);
-              const acts = generateActions(r.level, { proteinTarget: 150, lastWorkoutType: updated.lastWorkoutType, soreness: updated.soreness });
-              const adh = calculateAdherence(updated.completions, acts);
-              saveDailyState({ ...updated, adherence: adh.adherence });
-            }
-          } catch {}
-          toast.success('Workout saved \u2192 system updated');
-          navigate('/app/today');
-        } catch (err) {
-          // Keep the user on-screen so they don't lose data.
-          toast.error(err?.message || 'Could not save workout');
-        }
-      }}
-      onDiscard={() => {
-        if (window.confirm('Discard this workout? All logged sets will be lost.')) {
-          navigate('/app/workouts');
-        }
-      }}
-      onLog={(exId, setId, set) => {
-        // TODO: persist each set as it happens for crash recovery.
-      }}
-    />
-  );
+  return <Navigate to="/app/workouts" replace />;
 }
 
 /**
@@ -492,64 +367,15 @@ function ManualWorkoutPlanRoute() {
   const openPicker = () =>
     new Promise((resolve) => { setPickerResolve(() => resolve); });
 
-  return (
-    <>
-      <ManualWorkoutPlan
-        onCancel={() => navigate('/app/routines')}
-        onSave={async (routine) => {
-          // TODO: persist to workoutPlanService.
-          console.info('Saved routine (stub)', routine);
-          toast.success(`Routine "${routine.name}" saved \u2192 plan updated`);
-          navigate('/app/routines');
-        }}
-        onOpenExercisePicker={openPicker}
-      />
-      {pickerResolve && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 100,
-            background: 'hsl(var(--rd-bg-app))',
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          <ExerciseLibrary
-            onClose={() => { pickerResolve(null); setPickerResolve(null); }}
-            onPick={(exercise) => { pickerResolve(exercise); setPickerResolve(null); }}
-          />
-        </div>
-      )}
-    </>
-  );
+  return <Navigate to="/app/routines" replace />;
 }
 
 function WorkoutDetailRoute() {
-  const navigate = useNavigate();
-  // TODO: fetch workout by :id from workoutService (could be template OR session).
-  return (
-    <WorkoutDetail
-      workout={null}
-      onBack={() => navigate(-1)}
-      onStart={() => navigate('/app/workouts/active')}
-      onEdit={() => todoToast('Routine editor')}
-      onShare={() => todoToast('Share')}
-      onDelete={() => todoToast('Delete session')}
-    />
-  );
+  return <V3WorkoutDetail />;
 }
 
 function RoutineDetailRoute() {
-  const navigate = useNavigate();
-  // Reuse WorkoutDetail with mode='template'
-  return (
-    <WorkoutDetail
-      workout={null}
-      onBack={() => navigate(-1)}
-      onStart={() => navigate('/app/workouts/active')}
-      onEdit={() => todoToast('Routine editor')}
-      onShare={() => todoToast('Share')}
-    />
-  );
+  return <V3WorkoutDetail />;
 }
 
 function WorkoutHistoryRoute() {
@@ -600,61 +426,21 @@ function WorkoutHistoryRoute() {
     return () => { cancelled = true; };
   }, []);
 
-  return (
-    <WorkoutHistory
-      sessions={sessions}
-      heatmap={null}
-      stats={stats}
-      onBack={() => navigate(-1)}
-      onOpenSession={(id) => navigate(`/app/workouts/${id}`)}
-    />
-  );
+  return <V3WorkoutHistory />;
 }
 
 /* ─── Labs routes ─────────────────────────────────────────────────────── */
 
 function V3LabExamDetail() {
-  const navigate = useNavigate();
-  // TODO: fetch exam by :id from labExamService.
-  return (
-    <LabExamDetail
-      exam={null}
-      biomarkers={[]}
-      coachSummary={null}
-      onBack={() => navigate(-1)}
-      onAsk={(prompt) => navigate(`/app/coach/chat?ask=${encodeURIComponent(prompt)}`)}
-      onOpenBiomarker={(id) => navigate(`/app/labs/biomarker/${id}`)}
-      onShare={() => todoToast('Share with coach')}
-    />
-  );
+  return <_V3LabExamDetail />;
 }
 
 function V3LabHistory() {
-  const navigate = useNavigate();
-  return (
-    <LabHistory
-      exams={[]}
-      onBack={() => navigate('/app/labs')}
-      onOpenExam={(id) => navigate(`/app/labs/exam/${id}`)}
-      onUpload={() => navigate('/app/labs/upload')}
-    />
-  );
+  return <_V3LabHistory />;
 }
 
 function V3LabUpload() {
-  const navigate = useNavigate();
-  return (
-    <LabUpload
-      onCancel={() => navigate(-1)}
-      onSubmit={async (file) => {
-        // TODO: POST file to Supabase Storage + invoke parse-lab-pdf edge function.
-        console.log('Upload lab PDF', file?.name);
-        await new Promise((r) => setTimeout(r, 400));
-        return { examId: 'pending', biomarkerCount: 0 };
-      }}
-      onViewResults={(examId) => navigate(`/app/labs/exam/${examId}`)}
-    />
-  );
+  return <_V3LabUpload />;
 }
 
 /* ─── Today expansions routes ─────────────────────────────────────────── */
@@ -872,17 +658,7 @@ function MeasurementsRoute() {
 }
 
 function BodyCheckInRoute() {
-  const navigate = useNavigate();
-  return (
-    <BodyCheckIn
-      onCancel={() => navigate(-1)}
-      onSave={(checkin) => {
-        // TODO: persist to checkinService.save(checkin)
-        console.log('Check-in saved', checkin);
-        navigate('/app/body');
-      }}
-    />
-  );
+  return <V3Body />;
 }
 
 /* ─── Coach routes ────────────────────────────────────────────────────── */
