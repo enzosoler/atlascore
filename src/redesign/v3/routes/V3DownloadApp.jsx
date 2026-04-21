@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useT } from '@/lib/i18nContext';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { HeartMark } from '@/redesign/v3/lib/brandMarks.jsx';
 import { MC } from './V3MarketingLayout.jsx';
@@ -8,6 +9,7 @@ import { APP_STORE_URL, detectPlatform } from './marketingLinks.js';
 export default function V3DownloadApp() {
   const platform = detectPlatform();
   const isMobile = platform === 'ios';
+  const t = useT();
 
   return (
     <div
@@ -31,16 +33,16 @@ export default function V3DownloadApp() {
           letterSpacing: -2.2, lineHeight: 0.92, textTransform: 'lowercase',
         }}>
           {isMobile ? (
-            <>get the<br /><span style={{ color: ACBrand.accent }}>app.</span></>
+            <>{t('marketing.downloadAppPage.mobileTitleLine1')}<br /><span style={{ color: ACBrand.accent }}>{t('marketing.downloadAppPage.mobileTitleAccent')}</span></>
           ) : (
-            <>built for<br /><span style={{ color: ACBrand.accent }}>iPhone.</span></>
+            <>{t('marketing.downloadAppPage.desktopTitleLine1')}<br /><span style={{ color: ACBrand.accent }}>{t('marketing.downloadAppPage.desktopTitleAccent')}</span></>
           )}
         </div>
 
         <p style={{ margin: '18px 0 0', fontSize: 16, lineHeight: 1.6, color: MC.body }}>
           {isMobile
-            ? 'atlas.core is an iOS app. Tap below to get it from the App Store.'
-            : 'atlas.core lives on your iPhone — training, nutrition, body comp, and coaching in one place.'}
+            ? t('marketing.downloadAppPage.mobileBody')
+            : t('marketing.downloadAppPage.desktopBody')}
         </p>
 
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -54,7 +56,7 @@ export default function V3DownloadApp() {
               letterSpacing: -0.7, textTransform: 'lowercase',
             }}
           >
-            {isMobile ? 'download the app' : 'app store'}
+            {isMobile ? t('marketing.downloadAppPage.downloadApp') : t('marketing.downloadAppPage.appStore')}
           </a>
 
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
@@ -63,14 +65,14 @@ export default function V3DownloadApp() {
               color: MC.dim, fontFamily: ACFonts.mono, fontSize: 11,
               letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600,
             }}>
-              Sign in
+              {t('marketing.cta.signIn')}
             </Link>
             <Link to="/pricing" style={{
               padding: '12px 20px', textDecoration: 'none',
               color: MC.dim, fontFamily: ACFonts.mono, fontSize: 11,
               letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600,
             }}>
-              Pricing
+              {t('marketing.nav.pricing')}
             </Link>
           </div>
         </div>

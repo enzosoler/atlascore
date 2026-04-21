@@ -1,4 +1,5 @@
 import React from 'react';
+import { useT } from '@/lib/i18nContext';
 import V3MarketingLayout, { MC } from './V3MarketingLayout.jsx';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 
@@ -13,21 +14,21 @@ function useInView(ref, opts = {}) {
   return inView;
 }
 
-const PRINCIPLES = [
-  ['One place', 'Training, food, sleep, labs, and body comp — everything that shapes your body lives in one app. See how your week actually connects instead of guessing across five different tools.'],
-  ['Coaching when it matters', 'The AI coach speaks when it has something useful to say. Clear signals after a session, a flag when your markers shift, silence the rest of the time.'],
-  ['Clear signals, not noise', 'No streaks. No guilt. No confetti. You get volume trends, macro totals, weight trajectory, and biomarker movement. Numbers you can act on, not notifications you swipe away.'],
-];
-
 export default function V3MethodPage() {
   const cardsRef = React.useRef(null);
   const cardsInView = useInView(cardsRef);
+  const t = useT();
+  const PRINCIPLES = [
+    [t('routeContent.methodPage.principles.one.title'), t('routeContent.methodPage.principles.one.body')],
+    [t('routeContent.methodPage.principles.two.title'), t('routeContent.methodPage.principles.two.body')],
+    [t('routeContent.methodPage.principles.three.title'), t('routeContent.methodPage.principles.three.body')],
+  ];
 
   return (
     <V3MarketingLayout
-      eyebrow="/// method"
-      title={<>measurements over <span style={{ color: ACBrand.accent }}>motivation.</span></>}
-      intro="No streaks, no gimmicks, no fake urgency. atlas.core gives you clear feedback on what your body is actually doing — so you can train smarter, eat better, and stop second-guessing."
+      eyebrow={t('routeContent.methodPage.eyebrow')}
+      title={<>{t('routeContent.methodPage.titlePrefix')} <span style={{ color: ACBrand.accent }}>{t('routeContent.methodPage.titleAccent')}</span></>}
+      intro={t('routeContent.methodPage.intro')}
     >
       <style>{`
         @keyframes methodFadeUp {

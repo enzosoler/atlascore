@@ -137,17 +137,20 @@
       "signOut": "Sair"
     },
     "form": {
+      "emailLabel": "E-mail",
+      "passwordLabel": "Senha",
+      "defaultHint": "Voltando? Vamos reconhecer este endereço.",
       "defaultHeadlineLine1": "uma tela.",
       "defaultHeadlineLine2Prefix": "um",
       "defaultHeadlineAccent": "campo.",
-      "defaultMagicDescription": "Vamos enviar um magic link por e-mail. Sem senhas para lembrar.",
+      "defaultMagicDescription": "Vamos enviar um link mágico por e-mail. Sem senhas para lembrar.",
       "defaultPasswordDescription": "Use seu e-mail e senha para entrar novamente.",
-      "magicMode": "Magic link",
+      "magicMode": "Link mágico",
       "passwordMode": "Senha",
       "emailPlaceholder": "voce@email.com",
       "passwordPlaceholder": "••••••••",
       "working": "Processando…",
-      "sendMagic": "Enviar magic link →",
+      "sendMagic": "Enviar link mágico →",
       "signIn": "Entrar →",
       "orUse": "Ou use",
       "continueApple": "Continuar com Apple",
@@ -4649,6 +4652,15 @@
     "skip": "Pular",
     "continue": "Continuar",
     "getStarted": "Começar",
+    "tagline": "Seu corpo, em sinal.",
+    "memberPrompt": "Já faz parte?",
+    "signIn": "Entrar",
+    "manifestoEyebrow": "Manifesto",
+    "manifestoTitleLine1": "O coração",
+    "manifestoTitleLine2": "é o",
+    "manifestoCore": "núcleo",
+    "manifestoBody": "Um app para treinar, comer e acompanhar a prontidão. Sem sequências. Sem coaching que parece coaching. Só sinal.",
+    "createAccount": "Criar conta",
     "slides": {
       "s1": {
         "title": "Gerencie seu corpo\ncomo um sistema.",
@@ -4902,10 +4914,12 @@
     "nav": {
       "theApp": "O app",
       "method": "Método",
-      "labs": "Labs",
+      "labs": "Exames",
       "pricing": "Planos",
       "terms": "Termos",
-      "privacy": "Privacidade"
+      "privacy": "Privacidade",
+      "security": "Segurança",
+      "contact": "Contato"
     },
     "cta": {
       "signIn": "Entrar",
@@ -4913,8 +4927,414 @@
       "downloadApp": "baixar o app",
       "startWeb": "começar na web"
     },
+    "downloadAppPage": {
+      "mobileTitleLine1": "baixe o",
+      "mobileTitleAccent": "app.",
+      "desktopTitleLine1": "feito para",
+      "desktopTitleAccent": "iPhone.",
+      "mobileBody": "atlas.core é um app para iPhone. Toque abaixo para baixar na App Store.",
+      "desktopBody": "atlas.core vive no seu iPhone — treino, nutrição, composição corporal e coaching em um só lugar.",
+      "appStore": "app store",
+      "downloadApp": "baixar o app"
+    },
+    "landingPage": {
+      "ariaLanguage": "Idioma",
+      "eyebrow": "/// o app de composição corporal para quem treina",
+      "heroLine1": "seu corpo,",
+      "heroLine2Prefix": "no",
+      "heroLine2Accent": "registro",
+      "heroLine2Suffix": ".",
+      "subtitlePrefix": "Treino, alimentação, sono e exames em um sistema, um registro e um coach calmo que fala em",
+      "subtitleAccent": "medidas, não motivação.",
+      "heroMeta": "sem cartão · sem sequências · cancele com um toque",
+      "sectionWhatItDoes": "/// o que ele faz",
+      "pillars": {
+        "training": {
+          "label": "Treino",
+          "body": "Programação para hipertrofia e força, registro ao vivo e o histórico do que realmente aconteceu.",
+          "statSub": "sessões registradas"
+        },
+        "fuel": {
+          "label": "Combustível",
+          "body": "Escaneie, fotografe ou fale. Registro nutricional rápido sem transformar o app em planilha.",
+          "statSub": "média de proteína"
+        },
+        "biology": {
+          "label": "Biologia",
+          "body": "Sono, exames e composição corporal conectados ao mesmo arquivo do treino e da alimentação.",
+          "statSub": "marcadores acompanhados"
+        }
+      },
+      "sectionMethod": "/// método",
+      "principles": {
+        "oneTitle": "Sem sequências.",
+        "oneBody": "Consistência é medida, não gamificada. Perder um dia não zera nada. Seu histórico continua honesto.",
+        "twoTitle": "Seus dados são seus.",
+        "twoBody": "Exporte tudo. CSV, JSON, a qualquer momento. Sem aprisionamento, sem dados reféns.",
+        "threeTitle": "Coaching quando importa.",
+        "threeBody": "A IA fala quando tem algo útil. Sinais claros depois das sessões, silêncio no resto do tempo."
+      },
+      "features": {
+        "coach": "Coach ilimitado",
+        "programs": "Biblioteca de programas",
+        "labs": "Acompanhamento de exames",
+        "watch": "Companheiro no relógio",
+        "crew": "Equipe de 10",
+        "privacy": "Privacidade em primeiro lugar"
+      },
+      "methodTitleLine1": "medidas",
+      "methodTitleLine2Prefix": "acima da",
+      "methodTitleLine2Accent": "motivação.",
+      "sectionPlan": "/// um plano",
+      "planBody": "Tudo incluído. Coach ilimitado, integração de exames e analytics completos. Ou escolha o anual por US$ 79 e economize 62%."
+    },
     "footer": {
       "copyright": "© 2026 atlas.core · registros do corpo"
+    }
+  },
+  "routeContent": {
+    "appPage": {
+      "eyebrow": "/// o app",
+      "titlePrefix": "tudo em",
+      "titleAccent": "um só lugar.",
+      "intro": "Treino, alimentação, composição corporal, exames e coaching — registre em segundos e siga com o dia. Sem alternar entre cinco apps. Sem atrito extra.",
+      "shots": {
+        "today": {
+          "title": "Hoje",
+          "subtitle": "Recuperação, alimentação, peso e seu próximo treino — uma olhada, sem procurar."
+        },
+        "workout": {
+          "title": "Treino",
+          "subtitle": "Registre séries em segundos. Estrutura real de exercício, não uma planilha em branco."
+        },
+        "nutrition": {
+          "title": "Nutrição",
+          "subtitle": "Fotografe, fale ou digite. Bata seus macros sem pagar o imposto do registro."
+        },
+        "coach": {
+          "title": "Coach",
+          "subtitle": "IA que lê sua semana e diz o que realmente importa hoje."
+        },
+        "body": {
+          "title": "Corpo",
+          "subtitle": "Tendência de peso, composição corporal e exames — tudo conectado, tudo em um só lugar."
+        }
+      }
+    },
+    "methodPage": {
+      "eyebrow": "/// método",
+      "titlePrefix": "medidas acima da",
+      "titleAccent": "motivação.",
+      "intro": "Sem sequências, sem truques, sem urgência falsa. atlas.core dá um retorno claro do que seu corpo realmente está fazendo — para você treinar melhor, comer melhor e parar de duvidar do processo.",
+      "principles": {
+        "one": {
+          "title": "Um só lugar",
+          "body": "Treino, alimentação, sono, exames e composição corporal — tudo que molda seu corpo vive em um único app. Veja como sua semana se conecta de verdade em vez de adivinhar entre cinco ferramentas diferentes."
+        },
+        "two": {
+          "title": "Coaching quando importa",
+          "body": "O coach de IA fala quando tem algo útil para dizer. Sinais claros depois de uma sessão, alerta quando seus marcadores mudam, silêncio no resto do tempo."
+        },
+        "three": {
+          "title": "Sinais claros, não ruído",
+          "body": "Sem sequências. Sem culpa. Sem confete. Você recebe tendência de volume, totais de macro, trajetória de peso e movimento dos biomarcadores. Números para agir, não notificações para ignorar."
+        }
+      }
+    },
+    "labsPage": {
+      "eyebrow": "/// exames",
+      "titlePrefix": "transforme exames de sangue em",
+      "titleAccent": "respostas claras.",
+      "intro": "Seus resultados não deveriam ficar presos em um PDF que você nunca mais abre. Envie uma vez, acompanhe cada marcador ao longo do tempo e veja o que realmente importa para seu treino e sua recuperação.",
+      "howItWorks": "como funciona",
+      "heroLine1": "envie uma vez.",
+      "heroLine2": "acompanhe para sempre.",
+      "heroBody": "Envie seus resultados de qualquer laboratório. Cada marcador entra no gráfico, tendências são sinalizadas e tudo se conecta ao resto dos seus dados corporais — treino, nutrição, peso, tudo.",
+      "steps": {
+        "one": {
+          "title": "Envie seu painel",
+          "body": "Tire uma foto ou envie o PDF. Cada marcador é extraído automaticamente — sem digitação manual."
+        },
+        "two": {
+          "title": "Entenda o que mudou",
+          "body": "Veja cada biomarcador contra o intervalo de referência, acompanhe a evolução no tempo e entenda isso junto do seu treino e da sua nutrição."
+        },
+        "three": {
+          "title": "Receba respostas claras",
+          "body": "Não sabe o que ferritina ou HbA1c significam para seus treinos? Pergunte ao coach de IA — ele lê seus exames ao lado do histórico de treino."
+        }
+      }
+    }
+  },
+  "legal": {
+    "lastUpdated": "Abril de 2026",
+    "terms": {
+      "eyebrow": "/// legal",
+      "titlePrefix": "termos de",
+      "titleAccent": "serviço.",
+      "introPrefix": "Última atualização:",
+      "sections": [
+        {
+          "n": "1",
+          "title": "Acordo",
+          "paragraphs": [
+            "Estes Termos de Serviço (os \"Termos\") regem seu acesso e uso do site atlas.core, dos aplicativos móveis e de todos os serviços relacionados (coletivamente, o \"Serviço\") operados por atlas.core (\"nós\", \"nosso\"). Ao criar uma conta ou usar o Serviço de qualquer forma, você concorda com estes Termos.",
+            "Se você não concorda com estes Termos, não use o Serviço."
+          ]
+        },
+        {
+          "n": "2",
+          "title": "Elegibilidade e contas",
+          "paragraphs": [
+            "Você deve ter pelo menos 18 anos, ou a maioridade legal em sua jurisdição, para usar o Serviço. Você concorda que:"
+          ],
+          "items": [
+            "Todas as informações fornecidas no cadastro são precisas e estão atualizadas.",
+            "Você é responsável por manter a confidencialidade das suas credenciais.",
+            "Você é responsável por toda atividade realizada em sua conta.",
+            "Você nos notificará imediatamente sobre qualquer uso não autorizado da sua conta."
+          ]
+        },
+        {
+          "n": "3",
+          "title": "Não é aconselhamento médico",
+          "paragraphs": [
+            "O Serviço fornece informações gerais sobre fitness, nutrição e bem-estar, incluindo coaching e recomendações geradas por IA. Ele não substitui aconselhamento, diagnóstico ou tratamento médico profissional. Sempre consulte um profissional de saúde qualificado antes de iniciar qualquer programa novo de treino, nutrição ou suplementação, especialmente se você tiver alguma condição médica ou usar medicamentos.",
+            "O coach de IA foi treinado para fornecer recomendações gerais e pode ocasionalmente produzir informações imprecisas ou desatualizadas. Use seu próprio julgamento e consulte profissionais para decisões médicas pessoais."
+          ]
+        },
+        {
+          "n": "4",
+          "title": "Assinaturas e cobrança",
+          "paragraphs": [
+            "Alguns recursos exigem assinatura paga. Ao assinar, você nos autoriza (ou ao nosso processador de pagamentos) a cobrar seu método de pagamento de forma recorrente até o cancelamento. Termos principais:"
+          ],
+          "items": [
+            "As assinaturas são renovadas automaticamente ao final de cada período de cobrança, salvo cancelamento.",
+            "Você pode cancelar a qualquer momento em Ajustes. O acesso continua até o fim do período pago atual.",
+            "Planos anuais podem ser reembolsados em até 14 dias da cobrança inicial. Planos mensais e semanais não são reembolsáveis.",
+            "Podemos alterar os preços periodicamente. Assinantes atuais receberão aviso com pelo menos 30 dias de antecedência para mudanças aplicáveis à próxima renovação.",
+            "Impostos aplicáveis em sua jurisdição serão adicionados quando exigido."
+          ]
+        },
+        {
+          "n": "5",
+          "title": "Uso aceitável",
+          "paragraphs": [
+            "Você concorda em não:"
+          ],
+          "items": [
+            "Usar o Serviço de forma que viole qualquer lei ou regulamento aplicável.",
+            "Fazer engenharia reversa, descompilar ou tentar extrair o código-fonte do Serviço.",
+            "Usar sistemas automatizados (bots, scrapers) para acessar o Serviço sem nossa permissão por escrito.",
+            "Interferir, interromper ou impor carga excessiva ao Serviço.",
+            "Se passar por outra pessoa ou representar de forma falsa sua identidade ou vínculo com qualquer entidade.",
+            "Usar o Serviço para armazenar, transmitir ou processar conteúdo ilegal, infrator ou nocivo."
+          ]
+        },
+        {
+          "n": "6",
+          "title": "Conteúdo do usuário",
+          "paragraphs": [
+            "Você mantém a titularidade de todo conteúdo enviado ao Serviço, incluindo registros de treino, alimentos, fotos e exames (\"Conteúdo do Usuário\"). Ao enviar Conteúdo do Usuário, você nos concede uma licença mundial, não exclusiva e livre de royalties para hospedá-lo, processá-lo e exibi-lo exclusivamente com o objetivo de operar e melhorar o Serviço para você.",
+            "Você é responsável pela legalidade e precisão do seu Conteúdo do Usuário, bem como por manter seus próprios backups quando isso for crítico."
+          ]
+        },
+        {
+          "n": "7",
+          "title": "Propriedade intelectual",
+          "paragraphs": [
+            "O Serviço, incluindo todo software, design, texto, gráficos e modelos de IA, é propriedade da atlas.core ou de nossos licenciadores e é protegido por leis de propriedade intelectual. Nada nestes Termos concede a você qualquer direito, título ou interesse sobre o Serviço além do direito limitado de usá-lo conforme descrito."
+          ]
+        },
+        {
+          "n": "8",
+          "title": "Conteúdo gerado por IA",
+          "paragraphs": [
+            "O Serviço utiliza modelos de IA de terceiros para gerar respostas de coaching, sugestões de refeições e outras recomendações. As saídas podem ser imprecisas ou refletir vieses do modelo subjacente. Não oferecemos garantia de qualquer tipo sobre as saídas da IA e não somos responsáveis por decisões tomadas com base nelas."
+          ]
+        },
+        {
+          "n": "9",
+          "title": "Encerramento",
+          "paragraphs": [
+            "Podemos suspender ou encerrar sua conta a qualquer momento por qualquer motivo, incluindo, entre outros, violações destes Termos. Você pode encerrar sua conta a qualquer momento em Ajustes. O encerramento não dá direito a reembolso fora da política descrita na Seção 4."
+          ]
+        },
+        {
+          "n": "10",
+          "title": "Isenções de responsabilidade",
+          "paragraphs": [
+            "O SERVIÇO É FORNECIDO \"NO ESTADO EM QUE SE ENCONTRA\" E \"CONFORME DISPONÍVEL\", SEM GARANTIAS DE QUALQUER TIPO, EXPRESSAS OU IMPLÍCITAS, INCLUINDO GARANTIAS DE COMERCIABILIDADE, ADEQUAÇÃO A UM FIM ESPECÍFICO OU NÃO VIOLAÇÃO. NA MÁXIMA EXTENSÃO PERMITIDA POR LEI, RENUNCIAMOS A TODAS ESSAS GARANTIAS."
+          ]
+        },
+        {
+          "n": "11",
+          "title": "Limitação de responsabilidade",
+          "paragraphs": [
+            "NA MÁXIMA EXTENSÃO PERMITIDA POR LEI, A ATLAS CORE NÃO SERÁ RESPONSÁVEL POR QUAISQUER DANOS INDIRETOS, INCIDENTAIS, ESPECIAIS, CONSEQUENCIAIS OU PUNITIVOS DECORRENTES DE OU RELACIONADOS AO USO DO SERVIÇO. NOSSA RESPONSABILIDADE TOTAL PERANTE VOCÊ POR QUALQUER RECLAMAÇÃO DECORRENTE DE OU RELACIONADA A ESTES TERMOS OU AO SERVIÇO NÃO EXCEDERÁ OS VALORES PAGOS POR VOCÊ A NÓS NOS DOZE (12) MESES ANTERIORES À RECLAMAÇÃO."
+          ]
+        },
+        {
+          "n": "12",
+          "title": "Lei aplicável",
+          "paragraphs": [
+            "Estes Termos são regidos pelas leis do Brasil, sem consideração a princípios de conflito de leis. Qualquer disputa decorrente de ou relacionada a estes Termos será resolvida nos tribunais competentes do Estado de São Paulo, Brasil — exceto quando regras obrigatórias de proteção ao consumidor da sua jurisdição determinarem o contrário."
+          ]
+        },
+        {
+          "n": "13",
+          "title": "Alterações destes Termos",
+          "paragraphs": [
+            "Podemos atualizar estes Termos periodicamente. Notificaremos mudanças materiais por meio do Serviço ou por e-mail. Seu uso continuado do Serviço após a entrada em vigor de uma alteração constitui aceitação dos Termos atualizados."
+          ]
+        },
+        {
+          "n": "14",
+          "title": "Contato",
+          "paragraphs": [
+            "Dúvidas sobre estes Termos? Envie um e-mail para"
+          ],
+          "email": "legal@useatlascore.com"
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "/// legal",
+      "titlePrefix": "política de",
+      "titleAccent": "privacidade.",
+      "introPrefix": "Última atualização:",
+      "sections": [
+        {
+          "n": "1",
+          "title": "Nosso compromisso",
+          "paragraphs": [
+            "atlas.core foi criado para pessoas que levam o próprio corpo a sério, e levamos sua privacidade a sério em troca. Esta política explica quais dados coletamos, por que coletamos, como usamos essas informações e quais direitos você tem sobre elas.",
+            "Não vendemos seus dados pessoais. Não os compartilhamos com anunciantes. Não os usamos para treinar modelos de IA de terceiros."
+          ]
+        },
+        {
+          "n": "2",
+          "title": "O que coletamos",
+          "paragraphs": [
+            "Coletamos informações fornecidas diretamente por você e informações geradas pelo uso do Serviço:"
+          ],
+          "items": [
+            "Informações da conta: endereço de e-mail, nome e credenciais de autenticação.",
+            "Informações de perfil: altura, peso, data de nascimento, objetivos físicos e preferências de treino.",
+            "Dados de atividade: registros de treino, alimentos, medidas corporais, fotos de progresso e resultados de exames.",
+            "Conversas com o coach: mensagens trocadas com o coach de IA.",
+            "Informações do dispositivo: tipo de dispositivo, sistema operacional e versão do app para depuração e compatibilidade.",
+            "Analytics de uso: visualizações de página, padrões de uso de recursos e relatórios de falha (anonimizados quando possível)."
+          ]
+        },
+        {
+          "n": "3",
+          "title": "Como usamos seus dados",
+          "items": [
+            "Para fornecer e operar o Serviço, incluindo o coach de IA, rastreamento nutricional e registro de treinos.",
+            "Para personalizar sua experiência: metas de macro, recomendações de treino e insights do coach.",
+            "Para processar pagamentos e gerenciar sua assinatura.",
+            "Para enviar comunicações transacionais (redefinições de senha, recibos de cobrança e avisos críticos de segurança).",
+            "Para melhorar o Serviço por meio de analytics agregados e anonimizados.",
+            "Para cumprir obrigações legais."
+          ]
+        },
+        {
+          "n": "4",
+          "title": "Dados de saúde",
+          "paragraphs": [
+            "atlas.core lida com dados relacionados à saúde (peso corporal, composição corporal, ingestão alimentar, resultados de exames e fotos de progresso). Tratamos todos esses dados com cuidado elevado:"
+          ],
+          "items": [
+            "Dados de saúde são criptografados em trânsito (TLS 1.3) e em repouso (AES-256).",
+            "Dados de saúde nunca são compartilhados com terceiros para publicidade ou marketing.",
+            "Dados de saúde nunca são usados para treinar modelos de IA de terceiros.",
+            "Você pode exportar ou excluir seus dados de saúde a qualquer momento em Ajustes."
+          ]
+        },
+        {
+          "n": "5",
+          "title": "Processamento por IA",
+          "paragraphs": [
+            "Quando você usa o coach de IA, suas mensagens e o contexto relevante (treinos recentes, dados de nutrição e métricas corporais) são enviados a provedores de IA de terceiros para gerar respostas. Trabalhamos com provedores que não retêm nem treinam com dados de usuários. As conversas são armazenadas em nossos servidores para fornecer histórico e continuidade."
+          ]
+        },
+        {
+          "n": "6",
+          "title": "Compartilhamento de dados",
+          "paragraphs": [
+            "Compartilhamos seus dados apenas nestas circunstâncias limitadas:"
+          ],
+          "items": [
+            "Prestadores de serviço: hospedagem (Supabase, Vercel), processamento de pagamentos (Stripe, RevenueCat / App Store), analytics (Vercel Analytics) e provedores de inferência de IA — todos sob acordos de processamento de dados.",
+            "Exigências legais: quando exigido por lei, intimação ou ordem judicial.",
+            "Transferências de negócio: em conexão com fusão, aquisição ou venda de ativos (você será avisado).",
+            "Com seu consentimento: recursos sociais (crew, treinos compartilhados) compartilham apenas o que você escolher explicitamente compartilhar."
+          ]
+        },
+        {
+          "n": "7",
+          "title": "Retenção de dados",
+          "paragraphs": [
+            "Mantemos seus dados enquanto sua conta estiver ativa. Se você excluir a conta, removemos seus dados pessoais em até 30 dias. Dados anonimizados e agregados podem ser mantidos por tempo indeterminado para analytics. Cópias de backup são eliminadas em até 90 dias após a exclusão da conta."
+          ]
+        },
+        {
+          "n": "8",
+          "title": "Seus direitos",
+          "paragraphs": [
+            "Dependendo da sua jurisdição, você pode ter o direito de:"
+          ],
+          "items": [
+            "Acesso: solicitar uma cópia de todos os dados pessoais que mantemos sobre você.",
+            "Retificação: corrigir dados imprecisos ou incompletos.",
+            "Exclusão: solicitar a exclusão da sua conta e dos seus dados pessoais.",
+            "Portabilidade: exportar seus dados em formatos legíveis por máquina (CSV, JSON).",
+            "Restrição: limitar como processamos seus dados em determinadas circunstâncias.",
+            "Oposição: se opor ao processamento baseado em interesses legítimos."
+          ],
+          "emailLead": "Para exercer qualquer um desses direitos, vá em Ajustes ou envie um e-mail para",
+          "email": "privacy@useatlascore.com",
+          "emailTail": "Respondemos a todas as solicitações em até 30 dias."
+        },
+        {
+          "n": "9",
+          "title": "Cookies e rastreamento",
+          "paragraphs": [
+            "O site atlas.core usa analytics mínimos (Vercel Analytics) e não utiliza cookies publicitários de terceiros. O aplicativo móvel não usa cookies. Não participamos de rastreamento entre sites nem de redes de retargeting."
+          ]
+        },
+        {
+          "n": "10",
+          "title": "Crianças",
+          "paragraphs": [
+            "O Serviço não é direcionado a menores de 18 anos. Não coletamos intencionalmente informações pessoais de crianças. Se você acredita que uma criança nos forneceu dados pessoais, entre em contato conosco e faremos a exclusão prontamente."
+          ]
+        },
+        {
+          "n": "11",
+          "title": "Transferências internacionais",
+          "paragraphs": [
+            "Seus dados podem ser processados em países diferentes do seu (incluindo Estados Unidos e Brasil). Garantimos salvaguardas apropriadas, incluindo cláusulas contratuais padrão quando exigidas por GDPR ou LGPD."
+          ]
+        },
+        {
+          "n": "12",
+          "title": "Alterações desta política",
+          "paragraphs": [
+            "Podemos atualizar esta política periodicamente. Mudanças materiais serão comunicadas por meio do Serviço ou por e-mail. Seu uso continuado após a entrada em vigor de uma alteração constitui aceitação."
+          ]
+        },
+        {
+          "n": "13",
+          "title": "Contato",
+          "paragraphs": [
+            "Dúvidas sobre esta política? Envie um e-mail para"
+          ],
+          "email": "privacy@useatlascore.com"
+        }
+      ]
     }
   }
 }

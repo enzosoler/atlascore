@@ -1,36 +1,9 @@
 import React from 'react';
+import { useI18n, useT } from '@/lib/i18nContext';
 import V3MarketingLayout from './V3MarketingLayout.jsx';
 import IOSFrame from '@/redesign/v3/gallery/IOSFrame.jsx';
 import { PaperThemeProvider, ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { S2_Today_A, S3_Workout_A, S4_Nutrition_A, S13_Coach_Brief, S14_Body_Dashboard } from '@/redesign/v3/screens/index.js';
-
-const SHOTS = [
-  {
-    title: 'Today',
-    subtitle: 'Recovery, fuel, weight, and your next session — one glance, no digging.',
-    Comp: S2_Today_A,
-  },
-  {
-    title: 'Workout',
-    subtitle: 'Log sets in seconds. Real exercise structure, not a blank spreadsheet.',
-    Comp: S3_Workout_A,
-  },
-  {
-    title: 'Nutrition',
-    subtitle: 'Snap, speak, or type. Hit your macros without the logging tax.',
-    Comp: S4_Nutrition_A,
-  },
-  {
-    title: 'Coach',
-    subtitle: 'AI that reads your week and tells you what actually matters today.',
-    Comp: S13_Coach_Brief,
-  },
-  {
-    title: 'Body',
-    subtitle: 'Weight trend, body comp, and labs — all connected, all in one place.',
-    Comp: S14_Body_Dashboard,
-  },
-];
 
 const shotAnimStyles = `
 @keyframes shotEnter {
@@ -49,6 +22,7 @@ const shotAnimStyles = `
 
 function ShotCard({ shot, dark = false, index = 0 }) {
   const Comp = shot.Comp;
+  const { locale } = useI18n();
   const enterDelay = index * 0.15;
   const floatDelay = index * 0.5;
   const textDelay = enterDelay + 0.1;
@@ -77,7 +51,44 @@ function ShotCard({ shot, dark = false, index = 0 }) {
       </div>
       <PaperThemeProvider>
         <IOSFrame dark={dark}>
-          <Comp dark={dark} />
+          {locale === 'pt-BR' ? (
+            <div
+              style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                padding: 18,
+                background: dark ? '#0a0a0a' : '#efe9da',
+                color: dark ? '#efe9da' : '#0a0a0a',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', opacity: 0.6 }}>
+                  atlas.core
+                </div>
+                <div style={{ width: 10, height: 10, borderRadius: 999, background: ACBrand.accent }} />
+              </div>
+              <div>
+                <div style={{ fontFamily: ACFonts.brand, fontSize: 28, lineHeight: 0.95, letterSpacing: -1.2, textTransform: 'lowercase' }}>
+                  {shot.title}.
+                </div>
+                <div style={{ marginTop: 10, fontSize: 13.5, lineHeight: 1.5, opacity: 0.76 }}>
+                  {shot.subtitle}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gap: 10 }}>
+                {[0, 1, 2].map((row) => (
+                  <div key={row} style={{ display: 'grid', gridTemplateColumns: row === 0 ? '1.2fr 0.8fr' : '1fr 1fr', gap: 10 }}>
+                    <div style={{ minHeight: row === 0 ? 76 : 56, borderRadius: 18, background: dark ? 'rgba(239,233,218,0.08)' : 'rgba(10,10,10,0.06)' }} />
+                    <div style={{ minHeight: row === 0 ? 76 : 56, borderRadius: 18, background: dark ? 'rgba(239,233,218,0.12)' : 'rgba(10,10,10,0.08)' }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Comp dark={dark} />
+          )}
         </IOSFrame>
       </PaperThemeProvider>
     </div>
@@ -85,11 +96,39 @@ function ShotCard({ shot, dark = false, index = 0 }) {
 }
 
 export default function V3AppPage() {
+  const t = useT();
+  const SHOTS = [
+    {
+      title: t('routeContent.appPage.shots.today.title'),
+      subtitle: t('routeContent.appPage.shots.today.subtitle'),
+      Comp: S2_Today_A,
+    },
+    {
+      title: t('routeContent.appPage.shots.workout.title'),
+      subtitle: t('routeContent.appPage.shots.workout.subtitle'),
+      Comp: S3_Workout_A,
+    },
+    {
+      title: t('routeContent.appPage.shots.nutrition.title'),
+      subtitle: t('routeContent.appPage.shots.nutrition.subtitle'),
+      Comp: S4_Nutrition_A,
+    },
+    {
+      title: t('routeContent.appPage.shots.coach.title'),
+      subtitle: t('routeContent.appPage.shots.coach.subtitle'),
+      Comp: S13_Coach_Brief,
+    },
+    {
+      title: t('routeContent.appPage.shots.body.title'),
+      subtitle: t('routeContent.appPage.shots.body.subtitle'),
+      Comp: S14_Body_Dashboard,
+    },
+  ];
   return (
     <V3MarketingLayout
-      eyebrow="/// the app"
-      title={<>everything in <span style={{ color: ACBrand.accent }}>one place.</span></>}
-      intro="Training, food, body comp, labs, and coaching — track it in seconds and move on with your day. No switching between five apps. No extra friction."
+      eyebrow={t('routeContent.appPage.eyebrow')}
+      title={<>{t('routeContent.appPage.titlePrefix')} <span style={{ color: ACBrand.accent }}>{t('routeContent.appPage.titleAccent')}</span></>}
+      intro={t('routeContent.appPage.intro')}
     >
       <style>{shotAnimStyles}{`
         @keyframes appEcgTrace {

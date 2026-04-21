@@ -1,4 +1,5 @@
 import React from 'react';
+import { useT } from '@/lib/i18nContext';
 import V3MarketingLayout, { MC } from './V3MarketingLayout.jsx';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 
@@ -13,21 +14,21 @@ function useInView(ref, opts = {}) {
   return inView;
 }
 
-const STEPS = [
-  ['01', 'Upload your panel', 'Snap a photo or drop in the PDF. Every marker gets extracted automatically — no manual entry.'],
-  ['02', 'Understand what changed', 'See each biomarker against its reference range, track movement over time, and understand it alongside your training and nutrition.'],
-  ['03', 'Get clear answers', 'Not sure what your ferritin or HbA1c means for your lifts? Ask the AI coach — it reads your labs next to your workout history.'],
-];
-
 export default function V3LabsPage() {
   const sectionRef = React.useRef(null);
   const sectionInView = useInView(sectionRef);
+  const t = useT();
+  const STEPS = [
+    ['01', t('routeContent.labsPage.steps.one.title'), t('routeContent.labsPage.steps.one.body')],
+    ['02', t('routeContent.labsPage.steps.two.title'), t('routeContent.labsPage.steps.two.body')],
+    ['03', t('routeContent.labsPage.steps.three.title'), t('routeContent.labsPage.steps.three.body')],
+  ];
 
   return (
     <V3MarketingLayout
-      eyebrow="/// labs"
-      title={<>turn bloodwork into <span style={{ color: ACBrand.accent }}>clear answers.</span></>}
-      intro="Your lab results shouldn't sit in a PDF you never open again. Upload once, track every marker over time, and see what actually matters for your training and recovery."
+      eyebrow={t('routeContent.labsPage.eyebrow')}
+      title={<>{t('routeContent.labsPage.titlePrefix')} <span style={{ color: ACBrand.accent }}>{t('routeContent.labsPage.titleAccent')}</span></>}
+      intro={t('routeContent.labsPage.intro')}
     >
       <style>{`
         @keyframes labsFadeUp {
@@ -65,15 +66,15 @@ export default function V3LabsPage() {
           }}
         >
           <div style={{ fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: ACBrand.accent }}>
-            how it works
+            {t('routeContent.labsPage.howItWorks')}
           </div>
           <div style={{ marginTop: 16, fontFamily: ACFonts.brand, fontSize: 42, lineHeight: 0.92, letterSpacing: -1.8, textTransform: 'lowercase' }}>
-            upload once.
+            {t('routeContent.labsPage.heroLine1')}
             <br />
-            track forever.
+            {t('routeContent.labsPage.heroLine2')}
           </div>
           <p style={{ margin: '16px 0 0', fontSize: 15, lineHeight: 1.6, color: MC.darkBody }}>
-            Drop in your results from any provider. Every marker gets plotted, trends get flagged, and everything connects to the rest of your body data — training, nutrition, weight, all of it.
+            {t('routeContent.labsPage.heroBody')}
           </p>
           {/* ECG heartbeat trace — amber on dark */}
           <svg width="100%" height="32" viewBox="0 0 800 32" preserveAspectRatio="none" aria-hidden="true" style={{ marginTop: 20, display: 'block' }}>

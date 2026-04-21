@@ -26,8 +26,8 @@ export const localeToPublicPath = (locale: Locale): string => {
   return locale;
 };
 
-export const publicPathToLocale = (path: string): Locale => {
-  return publicLocaleMap[path] || defaultLocale;
+export const publicPathToLocale = (path: string): Locale | null => {
+  return publicLocaleMap[path] || null;
 };
 
 export const isValidLocale = (locale: string): locale is Locale => {

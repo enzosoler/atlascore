@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { HeartMark } from '@/redesign/v3/lib/brandMarks.jsx';
-import { useI18n } from '@/lib/i18nContext';
+import { useI18n, useT } from '@/lib/i18nContext';
 
 /** Compact EN · PT toggle pill — same pattern as V3MarketingLayout. */
 function LocaleToggle() {
@@ -23,11 +23,12 @@ function LocaleToggle() {
         cursor: active ? 'default' : 'pointer', borderRadius: 999,
       }}
       aria-pressed={active}
-      aria-label={`Switch language to ${label}`}
+      aria-label={`${label}`}
     >{label}</button>
   );
+  const t = useT();
   return (
-    <div role="group" aria-label="Language" style={{
+    <div role="group" aria-label={t('marketing.landingPage.ariaLanguage')} style={{
       display: 'inline-flex', alignItems: 'center', padding: 2,
       border: '1px solid rgba(10,10,10,0.14)', borderRadius: 999,
     }}>
@@ -36,65 +37,6 @@ function LocaleToggle() {
     </div>
   );
 }
-
-const NAV_ITEMS = [
-  { label: 'The app', href: '/the-app' },
-  { label: 'Method', href: '/method' },
-  { label: 'Labs', href: '/labs' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Field notes', href: '/terms' },
-];
-
-const PILLARS = [
-  {
-    n: '01',
-    k: 'Training',
-    v: 'Hypertrophy and strength programming, live logging, and the record of what actually happened.',
-    stat: '87',
-    sub: 'sessions logged',
-  },
-  {
-    n: '02',
-    k: 'Fuel',
-    v: 'Scan, snap, or speak. Fast nutrition logging without turning the app into a spreadsheet.',
-    stat: '186g',
-    sub: 'avg protein',
-  },
-  {
-    n: '03',
-    k: 'Biology',
-    v: 'Sleep, labs, and body composition tied back to the same file as training and food.',
-    stat: '84',
-    sub: 'markers tracked',
-  },
-];
-
-const PRINCIPLES = [
-  {
-    n: 'I.',
-    k: 'No streaks.',
-    v: 'Consistency is measured, not gamified. Missing a day doesn\'t reset anything. Your record stays honest.',
-  },
-  {
-    n: 'II.',
-    k: 'Your data is yours.',
-    v: 'Export everything. CSV, JSON, anytime. No lock-in, no hostage data.',
-  },
-  {
-    n: 'III.',
-    k: 'Coaching when it matters.',
-    v: 'The AI speaks when it has something useful. Clear signals after sessions, silence the rest of the time.',
-  },
-];
-
-const FEATURES = [
-  'Unlimited coach',
-  'Programs library',
-  'Lab tracking',
-  'Watch companion',
-  'Crew of 10',
-  'Privacy-first',
-];
 
 function NavLink({ href, children, strong }) {
   const common = {
@@ -173,6 +115,62 @@ function ECGDivider({ dark = false, spikes = [180, 520, 860], delayOffset = 0 })
 }
 
 export default function S42_Web_Landing() {
+  const t = useT();
+  const NAV_ITEMS = [
+    { label: t('marketing.nav.theApp'), href: '/the-app' },
+    { label: t('marketing.nav.method'), href: '/method' },
+    { label: t('marketing.nav.labs'), href: '/labs' },
+    { label: t('marketing.nav.pricing'), href: '/pricing' },
+    { label: t('marketing.nav.terms'), href: '/terms' },
+  ];
+  const PILLARS = [
+    {
+      n: '01',
+      k: t('marketing.landingPage.pillars.training.label'),
+      v: t('marketing.landingPage.pillars.training.body'),
+      stat: '87',
+      sub: t('marketing.landingPage.pillars.training.statSub'),
+    },
+    {
+      n: '02',
+      k: t('marketing.landingPage.pillars.fuel.label'),
+      v: t('marketing.landingPage.pillars.fuel.body'),
+      stat: '186g',
+      sub: t('marketing.landingPage.pillars.fuel.statSub'),
+    },
+    {
+      n: '03',
+      k: t('marketing.landingPage.pillars.biology.label'),
+      v: t('marketing.landingPage.pillars.biology.body'),
+      stat: '84',
+      sub: t('marketing.landingPage.pillars.biology.statSub'),
+    },
+  ];
+  const PRINCIPLES = [
+    {
+      n: 'I.',
+      k: t('marketing.landingPage.principles.oneTitle'),
+      v: t('marketing.landingPage.principles.oneBody'),
+    },
+    {
+      n: 'II.',
+      k: t('marketing.landingPage.principles.twoTitle'),
+      v: t('marketing.landingPage.principles.twoBody'),
+    },
+    {
+      n: 'III.',
+      k: t('marketing.landingPage.principles.threeTitle'),
+      v: t('marketing.landingPage.principles.threeBody'),
+    },
+  ];
+  const FEATURES = [
+    t('marketing.landingPage.features.coach'),
+    t('marketing.landingPage.features.programs'),
+    t('marketing.landingPage.features.labs'),
+    t('marketing.landingPage.features.watch'),
+    t('marketing.landingPage.features.crew'),
+    t('marketing.landingPage.features.privacy'),
+  ];
   return (
     <div
       style={{
@@ -312,8 +310,8 @@ export default function S42_Web_Landing() {
 
         <div className="ac-land-header-ctas" style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <LocaleToggle />
-          <CTAButton to="/webapp">Sign in</CTAButton>
-          <CTAButton to="/download-app" primary>download the app</CTAButton>
+          <CTAButton to="/webapp">{t('marketing.cta.signIn')}</CTAButton>
+          <CTAButton to="/download-app" primary>{t('marketing.cta.downloadApp')}</CTAButton>
         </div>
       </div>
 
@@ -327,7 +325,7 @@ export default function S42_Web_Landing() {
             color: 'rgba(10,10,10,0.6)',
           }}
         >
-          /// the composition app for people who lift
+          {t('marketing.landingPage.eyebrow')}
         </div>
         <h1
           style={{
@@ -340,8 +338,8 @@ export default function S42_Web_Landing() {
             maxWidth: 1100,
           }}
         >
-          <span className="ac-hero-line1">your body,</span>
-          <span className="ac-hero-line2">on the <span className="ac-hero-record-box">record</span>.</span>
+          <span className="ac-hero-line1">{t('marketing.landingPage.heroLine1')}</span>
+          <span className="ac-hero-line2">{t('marketing.landingPage.heroLine2Prefix')} <span className="ac-hero-record-box">{t('marketing.landingPage.heroLine2Accent')}</span>{t('marketing.landingPage.heroLine2Suffix')}</span>
         </h1>
 
         <div
@@ -365,12 +363,12 @@ export default function S42_Web_Landing() {
               maxWidth: 760,
             }}
           >
-            Training, fuel, sleep and labs in one system, one file, and one calm coach that speaks in
-            <span style={{ color: ACBrand.accent, fontWeight: 700 }}> measurements, not motivation.</span>
+            {t('marketing.landingPage.subtitlePrefix')}
+            <span style={{ color: ACBrand.accent, fontWeight: 700 }}> {t('marketing.landingPage.subtitleAccent')}</span>
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <CTAButton to="/welcome" primary>
-              download the app
+              {t('marketing.cta.downloadApp')}
             </CTAButton>
             <div
               style={{
@@ -382,7 +380,7 @@ export default function S42_Web_Landing() {
                 textTransform: 'uppercase',
               }}
             >
-              no card · no streaks · cancel in one tap
+              {t('marketing.landingPage.heroMeta')}
             </div>
           </div>
         </div>
@@ -402,7 +400,7 @@ export default function S42_Web_Landing() {
             color: 'rgba(10,10,10,0.6)',
           }}
         >
-          /// what it does
+          {t('marketing.landingPage.sectionWhatItDoes')}
         </div>
         <div
           style={{
@@ -480,7 +478,7 @@ export default function S42_Web_Landing() {
               fontWeight: 700,
             }}
           >
-            /// the method
+            {t('marketing.landingPage.sectionMethod')}
           </div>
           <div
             style={{
@@ -493,9 +491,9 @@ export default function S42_Web_Landing() {
               maxWidth: 1100,
             }}
           >
-            measurements
+            {t('marketing.landingPage.methodTitleLine1')}
             <br />
-            over <span style={{ color: ACBrand.accent }}>motivation.</span>
+            {t('marketing.landingPage.methodTitleLine2Prefix')} <span style={{ color: ACBrand.accent }}>{t('marketing.landingPage.methodTitleLine2Accent')}</span>
           </div>
 
           {/* ECG trace on dark — the method's heartbeat */}
@@ -547,7 +545,7 @@ export default function S42_Web_Landing() {
             color: 'rgba(10,10,10,0.6)',
           }}
         >
-          /// one plan
+          {t('marketing.landingPage.sectionPlan')}
         </div>
         <div
           className="ac-land-price-grid"
@@ -564,7 +562,7 @@ export default function S42_Web_Landing() {
               $9.99<span style={{ color: 'rgba(10,10,10,0.45)' }}>/mo</span>
             </div>
             <div style={{ marginTop: 14, maxWidth: 480, fontSize: 16, lineHeight: 1.55, color: 'rgba(10,10,10,0.75)' }}>
-              Everything. Unlimited coach, labs integration, full analytics. Or go yearly at $79 and save 62%.
+              {t('marketing.landingPage.planBody')}
             </div>
           </div>
           <div className="ac-land-feat-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -609,12 +607,12 @@ export default function S42_Web_Landing() {
           color: 'rgba(10,10,10,0.6)',
         }}
       >
-        <span>© 2026 atlas.core · field notes from the body</span>
+        <span>{t('marketing.footer.copyright')}</span>
         <span style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          <NavLink href="/terms" strong>Terms</NavLink>
-          <NavLink href="/privacy" strong>Privacy</NavLink>
-          <NavLink href="/faq" strong>Security</NavLink>
-          <NavLink href="/auth/login" strong>Contact</NavLink>
+          <NavLink href="/terms" strong>{t('marketing.nav.terms')}</NavLink>
+          <NavLink href="/privacy" strong>{t('marketing.nav.privacy')}</NavLink>
+          <NavLink href="/faq" strong>{t('marketing.nav.security')}</NavLink>
+          <NavLink href="/auth/login" strong>{t('marketing.nav.contact')}</NavLink>
         </span>
       </div>
     </div>
