@@ -15,6 +15,27 @@ export function registerServiceWorker() {
     return;
   }
 
+  // During local preview / development on localhost, avoid registering the
+  // service worker and proactively unregister any existing service workers to
+  // prevent stale cached bundles from being served.
+  if (typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    try {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          regs.forEach((r) => r.unregister().catch(() => {}));
+        }).catch(() => {});
+      }
+      if (window.caches) {
+        caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
+      }
+      // eslint-disable-next-line no-console
+      console.log('[SW] Localhost detected — unregistered existing service workers and cleared caches.');
+    } catch (err) {
+      // ignore
+    }
+    return;
+  }
+
   if (!('serviceWorker' in navigator)) {
     return;
   }

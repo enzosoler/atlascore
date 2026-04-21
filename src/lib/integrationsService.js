@@ -117,7 +117,8 @@ async function connectAppleHealth() {
     return { success: false, status: 'unsupported', message: 'Apple Health only available on iOS' };
   }
   try {
-    const { CapacitorHealthkit } = await import('@perfood/capacitor-healthkit');
+    const modName = '@perfood/capacitor-healthkit';
+    const { CapacitorHealthkit } = await import(modName);
     await CapacitorHealthkit.requestAuthorization({
       all: [],
       read: ['steps', 'heart-rate', 'sleep-analysis', 'active-energy', 'workouts', 'weight', 'height'],
@@ -125,6 +126,7 @@ async function connectAppleHealth() {
     });
     return { success: true, status: 'connected', message: 'Apple Health connected' };
   } catch (e) {
+    // Module missing or authorization failed
     return { success: false, status: 'error', message: e?.message || 'Apple Health authorization failed' };
   }
 }

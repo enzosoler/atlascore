@@ -17,8 +17,14 @@ async function getHK() {
   if (!IS_IOS) return null;
   if (!_hk) {
     try {
-      const mod = await import('@perfood/capacitor-healthkit');
-      _hk = mod.CapacitorHealthkit;
+      try {
+        const modName = '@perfood/capacitor-healthkit';
+        const mod = await import(modName);
+        _hk = mod.CapacitorHealthkit;
+      } catch (e) {
+        console.warn('[HealthKit] plugin missing at build time:', e?.message);
+        return null;
+      }
     } catch (e) {
       console.warn('[HealthKit] Failed to load plugin:', e?.message);
       return null;

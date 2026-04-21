@@ -185,7 +185,13 @@ const V3NotFound = lazy(() => import('@/redesign/v3/routes/V3NotFound.jsx'));
 const V3DataExport = lazy(() => import('@/redesign/v3/routes/V3DataExport.jsx'));
 const V3BillingHistory = lazy(() => import('@/redesign/v3/routes/V3BillingHistory.jsx'));
 const V3SubscriptionManage = lazy(() => import('@/redesign/v3/routes/V3SubscriptionManage.jsx'));
+const V3MealDetail = lazy(() => import('@/redesign/v3/routes/V3MealDetail.jsx'));
+const V3Offline = lazy(() => import('@/redesign/v3/routes/V3Offline.jsx'));
+const V3Maintenance = lazy(() => import('@/redesign/v3/routes/V3Maintenance.jsx'));
+const V3ForceUpdate = lazy(() => import('@/redesign/v3/routes/V3ForceUpdate.jsx'));
+const V3ServerError = lazy(() => import('@/redesign/v3/routes/V3ServerError.jsx'));
 // v2 screen imports removed. Use v3 route wrappers and services only.
+import SmartOnboarding        from '@/components/onboarding/SmartOnboarding.jsx';
 import S6_Weight_B            from '@/redesign/v3/screens/S6_Weight_B.jsx';
 import S17_Measurements_Entry from '@/redesign/v3/screens/S17_Measurements_Entry.jsx';
 import { supabase as supabaseClient } from '@/lib/supabaseClient';
@@ -966,7 +972,7 @@ function AppRoutes() {
              Wrapped in <PlatformGate> so public web users are redirected to
              /download-app (CLAUDE.md §13–16). Native + dev mode bypass. */}
         <Route path="/app/nutrition/search" element={isAuthed ? <PlatformGate><V3NutritionSearch /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/food/new" element={isAuthed ? <PlatformGate><CustomFoodRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/food/new" element={isAuthed ? <PlatformGate><V3FoodDetail /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/food/:id" element={isAuthed ? <PlatformGate><FoodDetailRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/meal/:id" element={isAuthed ? <PlatformGate><V3MealDetail /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/nutrition/photo" element={isAuthed ? <PlatformGate><PhotoScanRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
@@ -980,9 +986,9 @@ function AppRoutes() {
         <Route path="/app/body/weight" element={isAuthed ? <PlatformGate><WeightEntryRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/body/checkin" element={isAuthed ? <PlatformGate><BodyCheckInRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/body/measurements" element={isAuthed ? <PlatformGate><MeasurementsRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/body/compare" element={isAuthed ? <PlatformGate><ProgressComparisonRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/body/compare" element={isAuthed ? <PlatformGate><V3Body /></PlatformGate> : <Navigate to="/auth/login" replace />} />
         <Route path="/app/labs/upload" element={isAuthed ? <PlatformGate><V3LabUpload /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/social/share" element={isAuthed ? <PlatformGate><ShareWorkoutRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/social/share" element={isAuthed ? <PlatformGate><V3SharePR /></PlatformGate> : <Navigate to="/auth/login" replace />} />
 
         {/* ── v3 live app core (mounted on the real athlete routes) ───── */}
         <Route
