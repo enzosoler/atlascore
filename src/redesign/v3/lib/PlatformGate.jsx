@@ -18,9 +18,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 
 export const WEB_ALLOWED_PREFIXES = [
-  '/app/billing',
-  '/app/account',
-  '/app/export',
+  '/webapp',
 ];
 
 export function isWebAllowedRoute(pathname) {

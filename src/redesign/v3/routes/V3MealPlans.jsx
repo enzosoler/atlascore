@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 import S68_Meal_Plans from '../screens/S68_Meal_Plans.jsx';
 
 export default function V3MealPlans() {
@@ -17,7 +18,7 @@ export default function V3MealPlans() {
       onStartTemplate={(t) => navigate('/app/nutrition/recipes/new', { state: { template: t } })}
       onOpenPlan={(id) => navigate(`/app/nutrition/meal/${id}`)}
       onGeneratePlan={() => navigate('/app/coach/chat')}
-      onUpgrade={() => navigate('/app/billing/plans')}
+      onUpgrade={() => navigate(WEBAPP_PAYWALL)}
       onBack={() => navigate(-1)}
       showTabBar={false}
     />

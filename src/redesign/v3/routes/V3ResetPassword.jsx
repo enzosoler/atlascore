@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import { ACBtn, ACFonts, ACLabel, ACBrand, useACT } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
@@ -16,6 +17,7 @@ function ResetPasswordCard({
   onPasswordChange,
   onConfirmChange,
   onSubmit,
+  t,
 }) {
   const c = useACT(dark);
   const mismatch = password && confirm && password !== confirm;
@@ -36,7 +38,7 @@ function ResetPasswordCard({
             color: c.fg,
             textDecoration: 'none',
           }}
-          aria-label="Back to login"
+          aria-label={t('auth.reset.backToLogin')}
         >
           <svg width="10" height="10" viewBox="0 0 10 10">
             <path d="M6.5 1.4L2.5 5l4 3.6" stroke={c.fg} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -50,13 +52,13 @@ function ResetPasswordCard({
         </div>
 
         <div style={{ marginTop: 22, fontFamily: ACFonts.brand, fontSize: 44, letterSpacing: -2, lineHeight: 0.9, textTransform: 'lowercase' }}>
-          set a new
+          {t('auth.reset.headingLine1')}
           <br />
-          <span style={{ color: c.accent }}>password.</span>
+          <span style={{ color: c.accent }}>{t('auth.reset.headingAccent')}</span>
         </div>
 
         <div style={{ marginTop: 12, maxWidth: 300, fontSize: 14, lineHeight: 1.55, color: c.dim }}>
-          {done ? 'Password updated. Redirecting you back to sign in.' : 'Pick something you have not used before.'}
+          {done ? t('auth.reset.doneBody') : t('auth.reset.body')}
         </div>
 
         {done ? (
@@ -72,7 +74,7 @@ function ResetPasswordCard({
               color: c.dim,
             }}
           >
-            Password successfully changed.
+            {t('auth.reset.doneCard')}
           </div>
         ) : (
           <>
@@ -97,7 +99,7 @@ function ResetPasswordCard({
                   autoFocus
                   value={password}
                   onChange={(e) => onPasswordChange(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder={t('auth.reset.passwordPlaceholder')}
                   style={{
                     flex: 1,
                     height: 48,
@@ -134,7 +136,7 @@ function ResetPasswordCard({
                   autoComplete="new-password"
                   value={confirm}
                   onChange={(e) => onConfirmChange(e.target.value)}
-                  placeholder="Type it again"
+                  placeholder={t('auth.reset.confirmPlaceholder')}
                   style={{
                     flex: 1,
                     height: 48,
@@ -154,13 +156,13 @@ function ResetPasswordCard({
                 color={error || mismatch ? ACBrand.error : c.mute}
                 style={{ fontFamily: ACFonts.body, letterSpacing: 0.1, marginTop: 8, display: 'block' }}
               >
-                {error || (mismatch ? "Passwords don't match." : 'Use 8 characters or more.')}
+                {error || (mismatch ? t('auth.reset.passwordsDontMatch') : t('auth.reset.passwordHint'))}
               </ACLabel>
             </div>
 
             <div style={{ marginTop: 22 }}>
               <ACBtn primary dark={dark} size="lg" pill block type="submit" style={{ opacity: loading ? 0.6 : 1 }}>
-                {loading ? 'Updating…' : 'Update password →'}
+                {loading ? t('auth.reset.updating') : t('auth.reset.submit')}
               </ACBtn>
             </div>
           </>
@@ -173,6 +175,7 @@ function ResetPasswordCard({
 export default function V3ResetPassword() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const t = useT();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -183,11 +186,11 @@ export default function V3ResetPassword() {
     e.preventDefault();
     setError('');
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError(t('auth.reset.passwordMin'));
       return;
     }
     if (password !== confirm) {
-      setError("Passwords don't match.");
+      setError(t('auth.reset.passwordsDontMatch'));
       return;
     }
 
@@ -198,7 +201,7 @@ export default function V3ResetPassword() {
       setDone(true);
       window.setTimeout(() => navigate('/auth/login', { replace: true }), 1500);
     } catch (err) {
-      setError(err?.message || 'Could not update password. The link may have expired.');
+      setError(err?.message || t('auth.reset.updateFailed'));
     } finally {
       setLoading(false);
     }
@@ -216,6 +219,7 @@ export default function V3ResetPassword() {
         onPasswordChange={setPassword}
         onConfirmChange={setConfirm}
         onSubmit={onSubmit}
+        t={t}
       />
     </V3StandaloneLayout>
   );

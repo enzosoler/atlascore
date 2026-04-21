@@ -2,6 +2,7 @@ import React from 'react';
 import V3MarketingLayout, { MC } from './V3MarketingLayout.jsx';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { Link } from 'react-router-dom';
+import { useT } from '@/lib/i18nContext';
 
 function useInView(ref, opts = {}) {
   const [inView, setInView] = React.useState(false);
@@ -14,55 +15,31 @@ function useInView(ref, opts = {}) {
   return inView;
 }
 
-const PLANS = [
-  {
-    id: 'weekly',
-    label: 'Weekly',
-    price: '$3.99',
-    period: '/ week',
-    equivalent: '$17.30 / mo equivalent',
-    note: 'No commitment. Cancel in one tap.',
-  },
-  {
-    id: 'monthly',
-    label: 'Monthly',
-    price: '$9.99',
-    period: '/ month',
-    equivalent: null,
-    note: 'Full access. No limits. Cancel anytime.',
-    popular: true,
-  },
-  {
-    id: 'yearly',
-    label: 'Yearly',
-    price: '$79',
-    period: '/ year',
-    equivalent: '$6.58 / mo, billed yearly',
-    note: 'Best value. Two months free.',
-    save: 'Save 62%',
-  },
-];
-
-const INCLUDED = [
-  'Unlimited workout logging and routines',
-  'Unlimited AI coach',
-  'Photo, voice, and text food logging',
-  'Body comp and weight trends',
-  'Lab uploads and biomarker tracking',
-  'Full training analytics and history',
-  'Progress photos with comparison',
-  'Full data export (CSV + JSON)',
-];
-
 export default function V3PricingPage() {
+  const t = useT();
   const plansRef = React.useRef(null);
   const plansInView = useInView(plansRef);
+  const plans = [
+    { id: 'weekly', label: t('pricingPage.plans.weekly.label'), price: '$3.99', period: t('pricingPage.plans.weekly.period'), equivalent: t('pricingPage.plans.weekly.equivalent'), note: t('pricingPage.plans.weekly.note') },
+    { id: 'monthly', label: t('pricingPage.plans.monthly.label'), price: '$9.99', period: t('pricingPage.plans.monthly.period'), equivalent: null, note: t('pricingPage.plans.monthly.note'), popular: true },
+    { id: 'yearly', label: t('pricingPage.plans.yearly.label'), price: '$79', period: t('pricingPage.plans.yearly.period'), equivalent: t('pricingPage.plans.yearly.equivalent'), note: t('pricingPage.plans.yearly.note'), save: t('pricingPage.plans.yearly.save') },
+  ];
+  const included = [
+    t('pricingPage.included.workoutLogging'),
+    t('pricingPage.included.aiCoach'),
+    t('pricingPage.included.foodLogging'),
+    t('pricingPage.included.bodyComp'),
+    t('pricingPage.included.labTracking'),
+    t('pricingPage.included.analytics'),
+    t('pricingPage.included.photos'),
+    t('pricingPage.included.export'),
+  ];
 
   return (
     <V3MarketingLayout
-      eyebrow="/// pricing"
-      title={<>one plan. everything <span style={{ color: ACBrand.accent }}>included.</span></>}
-      intro="No tiers, no upsells, no confusion. Pick the billing cycle that works for you — every feature is unlocked from day one."
+      eyebrow={t('pricingPage.eyebrow')}
+      title={<>{t('pricingPage.titlePrefix')} <span style={{ color: ACBrand.accent }}>{t('pricingPage.titleAccent')}</span></>}
+      intro={t('pricingPage.intro')}
     >
       <style>{`
         @keyframes pricingFadeUp {
@@ -108,7 +85,7 @@ export default function V3PricingPage() {
         .pricing-ecg-1 { animation-delay: 0.9s; }
       `}</style>
       <div ref={plansRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
-        {PLANS.map((plan, index) => (
+        {plans.map((plan, index) => (
           <div
             key={plan.id}
             className={`pricing-card${plansInView ? ' in-view' : ''}${plan.popular ? ' pricing-card--popular' : ''}`}
@@ -180,7 +157,7 @@ export default function V3PricingPage() {
                 textTransform: 'lowercase',
               }}
             >
-              get started
+              {t('pricingPage.getStarted')}
             </Link>
           </div>
         ))}
@@ -200,10 +177,10 @@ export default function V3PricingPage() {
           fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 2,
           textTransform: 'uppercase', color: MC.mute, marginBottom: 16,
         }}>
-          everything included
+          {t('pricingPage.includedHeading')}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
-          {INCLUDED.map((feature) => (
+          {included.map((feature) => (
             <div key={feature} style={{
               padding: '14px 18px', borderRadius: 16,
               border: MC.border,
@@ -226,10 +203,10 @@ export default function V3PricingPage() {
 
       <div style={{ marginTop: 56, padding: 28, borderRadius: 28, border: '1px solid rgba(10,10,10,0.1)' }}>
         <div style={{ fontFamily: ACFonts.brand, fontSize: 28, letterSpacing: -1.1, lineHeight: 0.95, textTransform: 'lowercase' }}>
-          start free, upgrade when it proves itself.
+          {t('pricingPage.footerTitle')}
         </div>
         <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.6, color: MC.body, maxWidth: 600 }}>
-          Workout logging, food tracking, body comp, and 10 coach messages a week — all free, no card required. Upgrade when you want unlimited everything.
+          {t('pricingPage.footerBody')}
         </p>
       </div>
     </V3MarketingLayout>

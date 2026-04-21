@@ -20,7 +20,7 @@
  */
 
 import { supabase } from '@/lib/supabaseClient';
-import { detectPreferredLanguage } from '@/lib/i18n';
+import { detectPreferredLocale } from '@/i18n/runtime';
 
 const APP_URL = import.meta.env.VITE_APP_URL || 'https://atlascore.app';
 
@@ -34,7 +34,7 @@ function normaliseLang(lang) {
 }
 
 function detectBrowserLang() {
-  return detectPreferredLanguage?.() || navigator.language || 'en';
+  return detectPreferredLocale?.() || navigator.language || 'en';
 }
 
 // ─── Core Dispatcher ────────────────────────────────────────────────────────

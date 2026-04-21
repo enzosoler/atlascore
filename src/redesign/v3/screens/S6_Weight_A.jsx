@@ -6,18 +6,20 @@ import {
   ACHeader, ACBrandMark, ACTabBar, CaptureIcon,
 } from '../lib/paper.jsx';
 import { HeartMark, ChevronMark, ChevronHeartMark, Wordmark, LockupH, LockupV, LockupTag } from '../lib/brandMarks.jsx';
+import { useT } from '@/lib/i18nContext';
 
 function S6_Weight_A({ dark = false }) {
   const c = useACT(dark);
+  const t = useT();
   const days = [188.2,187.9,187.6,186.9,186.5,186.1,185.8,185.9,185.4,185.2,184.7,184.3,184.4,184,183.7,183.4,183.2,182.8,182.6,182.4];
   const data = days.map((v, i) => ({ k: i, v }));
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <ACLabel size={11} color={c.dim}>Body · Readings</ACLabel>
+          <ACLabel size={11} color={c.dim}>{t('bodyweight.runtime.eyebrow')}</ACLabel>
           <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
-            Bodyweight
+            {t('bodyweight.runtime.title')}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 2, padding: 3, background: c.card, borderRadius: 10 }}>
@@ -37,7 +39,7 @@ function S6_Weight_A({ dark = false }) {
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
             <ACNum size={92} color={c.fg} weight={700}>182.4</ACNum>
             <div style={{ paddingBottom: 10 }}>
-              <ACLabel size={12} color={c.dim}>lb · today</ACLabel>
+              <ACLabel size={12} color={c.dim}>{t('bodyweight.runtime.todayWeightUnit')}</ACLabel>
               <div style={{ marginTop: 6 }}>
                 <ACChip accent dark={dark}>↓ 1.8 · 14d</ACChip>
               </div>
@@ -47,8 +49,8 @@ function S6_Weight_A({ dark = false }) {
 
         <div style={{ padding: 20, background: c.card, borderRadius: ACRadii.card }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-            <ACLabel size={12} color={c.dim}>7-day avg trend</ACLabel>
-            <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>↓ 0.3 lb / wk</ACLabel>
+            <ACLabel size={12} color={c.dim}>{t('bodyweight.runtime.avgTrend')}</ACLabel>
+            <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{t('bodyweight.runtime.avgTrendDelta')}</ACLabel>
           </div>
           <ACLine w={296} h={140} data={data} dark={dark} />
           <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
@@ -59,9 +61,9 @@ function S6_Weight_A({ dark = false }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', marginTop: 12, borderRadius: ACRadii.card, overflow: 'hidden', background: c.card }}>
           {[
-            { l: 'Start', v: '188.2', u: 'lb', d: 'Apr 01' },
-            { l: 'Goal',  v: '175.0', u: 'lb', d: 'Jul 01' },
-            { l: 'To go', v: '7.4',   u: 'lb', d: '24 wk' },
+            { l: t('bodyweight.runtime.stats.start'), v: '188.2', u: t('bodyweight.runtime.poundsShort'), d: 'Apr 01' },
+            { l: t('bodyweight.runtime.stats.goal'),  v: '175.0', u: t('bodyweight.runtime.poundsShort'), d: 'Jul 01' },
+            { l: t('bodyweight.runtime.stats.toGo'), v: '7.4',   u: t('bodyweight.runtime.poundsShort'), d: t('bodyweight.runtime.weeksRemaining') },
           ].map((s, i) => (
             <div key={i} style={{
               padding: 16, borderRight: i < 2 ? `1px solid ${c.hair}` : 'none',
@@ -78,13 +80,13 @@ function S6_Weight_A({ dark = false }) {
 
         <div style={{ marginTop: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-            <ACLabel size={12} color={c.dim}>Log · recent</ACLabel>
-            <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>View all</ACLabel>
+            <ACLabel size={12} color={c.dim}>{t('bodyweight.runtime.recentLog')}</ACLabel>
+            <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{t('bodyweight.runtime.viewAll')}</ACLabel>
           </div>
           {[
-            { d: 'Today · 7:14 AM', v: '182.4', delta: '−0.2' },
-            { d: 'Fri · 7:22 AM',   v: '182.6', delta: '−0.2' },
-            { d: 'Thu · 7:08 AM',   v: '182.8', delta: '−0.4' },
+            { d: t('bodyweight.runtime.entries.today'), v: '182.4', delta: '−0.2' },
+            { d: t('bodyweight.runtime.entries.fri'),   v: '182.6', delta: '−0.2' },
+            { d: t('bodyweight.runtime.entries.thu'),   v: '182.8', delta: '−0.4' },
           ].map((r, i) => (
             <div key={i} style={{
               display: 'flex', alignItems: 'center', padding: '14px 0',
@@ -104,7 +106,7 @@ function S6_Weight_A({ dark = false }) {
       </div>
 
       <div style={{ padding: '12px 22px 6px' }}>
-        <ACBtn primary block dark={dark} size="md" pill>+ Log today's weight</ACBtn>
+        <ACBtn primary block dark={dark} size="md" pill>{t('bodyweight.runtime.logToday')}</ACBtn>
       </div>
       <ACTabBar active="body" dark={dark} HeartMarkComp={HeartMark} />
     </div>

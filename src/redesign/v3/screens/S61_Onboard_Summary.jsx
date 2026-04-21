@@ -25,6 +25,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACNum, ACBtn, ACSpark,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 
 /* ── progress header (matches S7–S11 exactly) ──────────────── */
 function OBHeader({ step, total, dark, onBack = true }) {
@@ -50,11 +51,11 @@ function OBHeader({ step, total, dark, onBack = true }) {
 }
 
 /* ── experience label helper ────────────────────────────────── */
-function expLabel(v) {
-  if (v === 'beginner' || v === 1)     return 'Beginner';
-  if (v === 'intermediate' || v === 2) return 'Intermediate';
-  if (v === 'advanced' || v === 3)     return 'Advanced';
-  return String(v || 'Intermediate');
+function expLabel(v, tr) {
+  if (v === 'beginner' || v === 1)     return tr('onboardSummary.runtime.experience.beginner');
+  if (v === 'intermediate' || v === 2) return tr('onboardSummary.runtime.experience.intermediate');
+  if (v === 'advanced' || v === 3)     return tr('onboardSummary.runtime.experience.advanced');
+  return String(v || tr('onboardSummary.runtime.experience.intermediate'));
 }
 
 /* ── animation durations (3-stage gift moment) ──────────────── */
@@ -73,9 +74,10 @@ function S61_Onboard_Summary({
   onContinue,
 }) {
   const c = useACT(dark);
+  const tr = useT();
 
   /* safe target defaults */
-  const t = {
+  const targetData = {
     calories:       targets?.calories       ?? 2200,
     protein:        targets?.protein        ?? 165,
     carbs:          targets?.carbs          ?? 220,
@@ -126,7 +128,7 @@ function S61_Onboard_Summary({
               fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700,
               letterSpacing: -0.6, color: c.fg, lineHeight: 1.3,
             }}>
-              Computing your protocol...
+              {tr('onboardSummary.runtime.computingTitle')}
             </div>
             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', gap: 6 }}>
               {[0, 1, 2].map(i => (
@@ -140,7 +142,7 @@ function S61_Onboard_Summary({
             </div>
             <style>{`@keyframes pulse-dot { from { opacity: 0.25; } to { opacity: 1; } }`}</style>
             <div style={{ marginTop: 22, fontSize: 13, color: c.dim, lineHeight: 1.5 }}>
-              Analyzing identity, goal, activity level,<br />and constraints...
+              {tr('onboardSummary.runtime.computingBodyLine1')}<br />{tr('onboardSummary.runtime.computingBodyLine2')}
             </div>
           </div>
         )}
@@ -150,12 +152,12 @@ function S61_Onboard_Summary({
           <>
             {/* heading */}
             <div style={fadeIn(showReveal)}>
-              <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Your protocol</ACLabel>
+              <ACLabel size={12} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{tr('onboardSummary.runtime.protocolLabel')}</ACLabel>
               <div style={{
                 marginTop: 10, fontFamily: ACFonts.display, fontSize: 32, fontWeight: 700,
                 letterSpacing: -1, lineHeight: 1.05, color: c.fg,
               }}>
-                Your system<br/>is <span style={{ color: c.accent }}>ready</span>.
+                {tr('onboardSummary.runtime.headlineLine1')}<br/>{tr('onboardSummary.runtime.headlineLine2Prefix')} <span style={{ color: c.accent }}>{tr('onboardSummary.runtime.headlineAccent')}</span>.
               </div>
             </div>
 
@@ -165,19 +167,19 @@ function S61_Onboard_Summary({
               borderRadius: ACRadii.card,
               ...fadeIn(showReveal, 80),
             }}>
-              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Daily target</ACLabel>
+              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>{tr('onboardSummary.runtime.dailyTarget')}</ACLabel>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
-                <ACNum size={72} color={c.bg} weight={700}>{t.calories.toLocaleString()}</ACNum>
-                <ACLabel size={13} color="rgba(239,233,218,0.6)">kcal</ACLabel>
+                <ACNum size={72} color={c.bg} weight={700}>{targetData.calories.toLocaleString()}</ACNum>
+                <ACLabel size={13} color="rgba(239,233,218,0.6)">{tr('onboardSummary.runtime.kcal')}</ACLabel>
               </div>
 
               <div style={{ marginTop: 18, height: 1, background: 'rgba(239,233,218,0.12)' }} />
 
               <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 {[
-                  { l: 'Protein', v: String(t.protein), u: 'g' },
-                  { l: 'Carbs',   v: String(t.carbs),   u: 'g' },
-                  { l: 'Fat',     v: String(t.fat),      u: 'g' },
+                  { l: tr('onboardSummary.runtime.macros.protein'), v: String(targetData.protein), u: tr('onboardSummary.runtime.grams') },
+                  { l: tr('onboardSummary.runtime.macros.carbs'),   v: String(targetData.carbs),   u: tr('onboardSummary.runtime.grams') },
+                  { l: tr('onboardSummary.runtime.macros.fat'),     v: String(targetData.fat),      u: tr('onboardSummary.runtime.grams') },
                 ].map((m, i) => (
                   <div key={i}>
                     <ACLabel size={11} color="rgba(239,233,218,0.55)">{m.l}</ACLabel>
@@ -196,19 +198,19 @@ function S61_Onboard_Summary({
               borderRadius: ACRadii.card,
               ...fadeIn(showCelebrate, 0),
             }}>
-              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Training</ACLabel>
+              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{tr('onboardSummary.runtime.training')}</ACLabel>
               <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 <div>
-                  <ACLabel size={11} color={c.dim}>Sessions / wk</ACLabel>
-                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{t.weeklySessions}</div>
+                  <ACLabel size={11} color={c.dim}>{tr('onboardSummary.runtime.sessionsPerWeek')}</ACLabel>
+                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{targetData.weeklySessions}</div>
                 </div>
                 <div>
-                  <ACLabel size={11} color={c.dim}>Avg duration</ACLabel>
-                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{t.sessionMinutes}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>min</span></div>
+                  <ACLabel size={11} color={c.dim}>{tr('onboardSummary.runtime.avgDuration')}</ACLabel>
+                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{targetData.sessionMinutes}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>{tr('onboardSummary.runtime.minutesShort')}</span></div>
                 </div>
                 <div>
-                  <ACLabel size={11} color={c.dim}>Experience</ACLabel>
-                  <div style={{ marginTop: 4, fontSize: 14, fontWeight: 600, color: c.fg }}>{expLabel(t.experience)}</div>
+                  <ACLabel size={11} color={c.dim}>{tr('onboardSummary.runtime.experienceLabel')}</ACLabel>
+                  <div style={{ marginTop: 4, fontSize: 14, fontWeight: 600, color: c.fg }}>{expLabel(targetData.experience, tr)}</div>
                 </div>
               </div>
               <div style={{ marginTop: 14 }}>
@@ -222,19 +224,19 @@ function S61_Onboard_Summary({
               borderRadius: ACRadii.card,
               ...fadeIn(showCelebrate, 120),
             }}>
-              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Recovery</ACLabel>
+              <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{tr('onboardSummary.runtime.recovery')}</ACLabel>
               <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 <div>
-                  <ACLabel size={11} color={c.dim}>Sleep target</ACLabel>
-                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{t.sleep}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>hrs</span></div>
+                  <ACLabel size={11} color={c.dim}>{tr('onboardSummary.runtime.sleepTarget')}</ACLabel>
+                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{targetData.sleep}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>{tr('onboardSummary.runtime.hoursShort')}</span></div>
                 </div>
                 <div>
-                  <ACLabel size={11} color={c.dim}>Water target</ACLabel>
-                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{t.waterL}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>L</span></div>
+                  <ACLabel size={11} color={c.dim}>{tr('onboardSummary.runtime.waterTarget')}</ACLabel>
+                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{targetData.waterL}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>{tr('onboardSummary.runtime.litersShort')}</span></div>
                 </div>
                 <div>
-                  <ACLabel size={11} color={c.dim}>Step goal</ACLabel>
-                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{(t.steps / 1000).toFixed(0)}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>k</span></div>
+                  <ACLabel size={11} color={c.dim}>{tr('onboardSummary.runtime.stepGoal')}</ACLabel>
+                  <div style={{ marginTop: 4, fontSize: 20, fontWeight: 700, fontFamily: ACFonts.display, color: c.fg }}>{(targetData.steps / 1000).toFixed(0)}<span style={{ fontSize: 12, color: c.dim, marginLeft: 2 }}>{tr('onboardSummary.runtime.thousandShort')}</span></div>
                 </div>
               </div>
             </div>
@@ -246,10 +248,10 @@ function S61_Onboard_Summary({
                 borderRadius: ACRadii.card,
                 ...fadeIn(showCelebrate, 240),
               }}>
-                <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Constraints</ACLabel>
+                <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{tr('onboardSummary.runtime.constraints')}</ACLabel>
                 {constraints?.injuries?.length > 0 && (
                   <div style={{ marginTop: 10 }}>
-                    <ACLabel size={10} color={c.dim}>Injuries</ACLabel>
+                    <ACLabel size={10} color={c.dim}>{tr('onboardSummary.runtime.injuries')}</ACLabel>
                     <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {constraints.injuries.map(item => (
                         <span key={item} style={{
@@ -265,7 +267,7 @@ function S61_Onboard_Summary({
                 )}
                 {constraints?.medical?.length > 0 && (
                   <div style={{ marginTop: 10 }}>
-                    <ACLabel size={10} color={c.dim}>Medical</ACLabel>
+                    <ACLabel size={10} color={c.dim}>{tr('onboardSummary.runtime.medical')}</ACLabel>
                     <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {constraints.medical.map(item => (
                         <span key={item} style={{
@@ -294,7 +296,7 @@ function S61_Onboard_Summary({
               ...fadeIn(showCelebrate, 320),
             }}>
               <ACLabel size={12} color={c.dim} style={{ lineHeight: 1.5, display: 'block' }}>
-                atlas.core recalibrates weekly from your weight trend, logs, and readiness. These targets evolve with you.
+                {tr('onboardSummary.runtime.recalibrationNote')}
               </ACLabel>
             </div>
           </>
@@ -311,7 +313,7 @@ function S61_Onboard_Summary({
           onClick={() => onContinue?.()}
           style={{ opacity: showCelebrate ? 1 : 0.4, pointerEvents: showCelebrate ? 'auto' : 'none' }}
         >
-          Activate system →
+          {tr('onboardSummary.runtime.activate')}
         </ACBtn>
       </div>
     </div>

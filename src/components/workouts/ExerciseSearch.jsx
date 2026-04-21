@@ -458,16 +458,16 @@ export default function ExerciseSearch({ onSelect }) {
               {POPULAR_EXERCISES.map((ex) => (
                 <button
                   key={ex.name}
-                  onClick={() => {
+                  onClick={async () => {
                     setQuery(ex.name);
-                    // Trigger search after a brief delay to let state update
-                    setTimeout(() => {
-                      searchExercises(ex.name, 5).then(data => {
-                        if (data && data.length > 0) {
-                          handleSelect(data[0]);
-                        }
-                      });
-                    }, 100);
+                    try {
+                      const data = await searchExercises(ex.name, 5);
+                      if (data && data.length > 0) {
+                        handleSelect(data[0]);
+                      }
+                    } catch (error) {
+                      console.warn('[ExerciseSearch] popular shortcut failed:', error?.message || error);
+                    }
                   }}
                   className="px-3 py-2 rounded-xl border border-[hsl(var(--border-h))] bg-[hsl(var(--fill)/0.5)] hover:border-[hsl(var(--brand)/0.4)] hover:bg-[hsl(var(--brand)/0.06)] transition-colors text-sm text-[hsl(var(--fg))]"
                 >

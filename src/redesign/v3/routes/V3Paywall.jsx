@@ -25,6 +25,7 @@ import {
 } from '@/lib/revenueCat';
 import { Capacitor } from '@capacitor/core';
 import { startWebCheckout } from '@/services/billingService';
+import { WEBAPP_BILLING, WEBAPP_EXPORT, WEBAPP_HOME } from '@/lib/platformRoutes';
 
 const BILLING_TO_PACKAGE = {
   weekly: '$rc_weekly',
@@ -38,9 +39,9 @@ const BILLING_TO_PACKAGE = {
 function usePlans() {
   const t = useT();
   return [
-    { k: 'weekly',  t: t('paywall.plans.weekly'),  p: '$3.99', pm: '$3.99 / wk', save: null },
-    { k: 'monthly', t: t('paywall.plans.monthly'), p: '$9.99', pm: '$9.99 / mo', save: null },
-    { k: 'yearly',  t: t('paywall.plans.yearly'),  p: '$79',   pm: '$6.58 / mo', save: t('paywall.plans.save') },
+    { k: 'weekly',  t: t('paywall.plans.weekly'),  p: '$3.99', pm: t('paywall.pricing.weekly'), save: null },
+    { k: 'monthly', t: t('paywall.plans.monthly'), p: '$9.99', pm: t('paywall.pricing.monthly'), save: null },
+    { k: 'yearly',  t: t('paywall.plans.yearly'),  p: '$79',   pm: t('paywall.pricing.yearlyEffective'), save: t('paywall.plans.save') },
   ];
 }
 
@@ -170,16 +171,16 @@ export default function V3Paywall() {
         display: 'flex', alignItems: 'center', gap: 28, padding: '22px 56px',
         borderBottom: MC.border, flexWrap: 'wrap',
       }}>
-        <Link to="/app/account" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
+        <Link to={WEBAPP_HOME} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
           <HeartMark size={34} strokeW={2} />
           <span style={{ fontFamily: ACFonts.brand, fontSize: 22, letterSpacing: -0.5, textTransform: 'lowercase' }}>
             atlas.<span style={{ color: ACBrand.accent }}>core</span>
           </span>
         </Link>
         <div className="pw-nav" style={{ display: 'flex', gap: 24 }}>
-          <NavLink to="/app/account">{t('webNav.account')}</NavLink>
-          <NavLink to="/app/billing">{t('webNav.billing')}</NavLink>
-          <NavLink to="/app/export">{t('webNav.export')}</NavLink>
+          <NavLink to={WEBAPP_HOME}>{t('webNav.account')}</NavLink>
+          <NavLink to={WEBAPP_BILLING}>{t('webNav.billing')}</NavLink>
+          <NavLink to={WEBAPP_EXPORT}>{t('webNav.export')}</NavLink>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
           <NavLink to="/download-app">{t('webNav.getApp')}</NavLink>

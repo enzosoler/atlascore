@@ -5,9 +5,13 @@ import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
+import {
+  WEBAPP_BILLING,
+  WEBAPP_DANGER,
+  WEBAPP_EXPORT,
+  WEBAPP_HOME,
+} from '@/lib/platformRoutes';
 import S19_Settings from '../screens/S19_Settings.jsx';
-
-const LANGUAGE_LABELS = { en: 'English', 'pt-BR': 'Português (Brasil)' };
 
 function buildRealUser(authUser) {
   if (!authUser) return null;
@@ -35,14 +39,6 @@ function buildRealUser(authUser) {
   };
 }
 
-function memberSinceLabel(value, locale, t) {
-  if (!value) return t('settings.v3.memberRecently');
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return t('settings.v3.memberRecently');
-  const formatted = date.toLocaleDateString(locale, { month: 'short', year: '2-digit' });
-  return t('settings.v3.memberSince', { date: formatted });
-}
-
 export default function V3Settings() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
@@ -50,8 +46,12 @@ export default function V3Settings() {
   const t = useT();
   const { user, logout } = useAuth();
   const realUser = buildRealUser(user);
-  const currentLanguageLabel = LANGUAGE_LABELS[locale] || LANGUAGE_LABELS.en;
-  const currentThemeLabel = theme === 'dark' ? 'dark' : 'light';
+  const currentLanguageLabel = locale === 'pt-BR'
+    ? t('settings.v3.labels.languagePortugueseBrazil')
+    : t('settings.v3.labels.languageEnglish');
+  const currentThemeLabel = theme === 'dark'
+    ? t('settings.v3.labels.themeDark')
+    : t('settings.v3.labels.themeLight');
 
   const groups = [
     {
@@ -59,8 +59,8 @@ export default function V3Settings() {
       rows: [
         {
           k: 'profile',
-          t: realUser?.name || t('settings.v3.rows.yourProfile'),
-          d: [realUser?.email, memberSinceLabel(realUser?.memberSince, locale, t)].filter(Boolean).join(' · '),
+          t: t('settings.v3.rows.yourProfile'),
+          d: t('settings.v3.rows.desktopAccountDesc'),
           chevron: true,
           avatar: true,
         },
@@ -101,22 +101,22 @@ export default function V3Settings() {
     {
       l: t('settings.v3.sections.dataPrivacy'),
       rows: [
-        { k: 'export', t: t('settings.v3.rows.exportData'),      d: t('settings.v3.rows.exportDataDesc'), chevron: true },
-        { k: 'photos', t: t('settings.v3.rows.progressPhotos'),  d: t('settings.v3.rows.progressPhotosDesc'), chevron: true, chip: 'Local' },
-        { k: 'delete', t: t('settings.v3.rows.dangerZone'),      d: t('settings.v3.rows.dangerZoneDesc'), chevron: true, danger: true },
+        { k: 'export', t: t('settings.v3.rows.exportData'),      d: t('settings.v3.rows.desktopExportDesc'), chevron: true },
+        { k: 'photos', t: t('settings.v3.rows.progressPhotos'),  d: t('settings.v3.rows.progressPhotosDesc'), chevron: true, chip: t('settings.v3.rows.localChip') },
+        { k: 'delete', t: t('settings.v3.rows.dangerZone'),      d: t('settings.v3.rows.desktopDangerDesc'), chevron: true, danger: true },
       ],
     },
   ];
 
   const routeMap = {
-    profile: '/app/profile',
-    plan: '/app/billing',
+    profile: WEBAPP_HOME,
+    plan: WEBAPP_BILLING,
     integrations: '/app/settings/integrations',
     // theme is handled directly in onOpenRow (toggle, no navigation)
     goals: '/app/nutrition/targets',
-    export: '/app/export',
+    export: WEBAPP_EXPORT,
     photos: '/app/body/progress/photos',
-    delete: '/app/settings/danger',
+    delete: WEBAPP_DANGER,
   };
 
   return (
@@ -129,7 +129,11 @@ export default function V3Settings() {
         if (key === 'theme') {
           const nextTheme = theme === 'dark' ? 'light' : 'dark';
           setTheme(nextTheme);
-          toast(t('settings.v3.toasts.themeSwitch', { theme: nextTheme }));
+          toast(t('settings.v3.toasts.themeSwitch', {
+            theme: nextTheme === 'dark'
+              ? t('settings.v3.labels.themeDark')
+              : t('settings.v3.labels.themeLight'),
+          }));
           return;
         }
         // Language: cycle EN ↔ PT in place. switchLocale handles both the
@@ -144,7 +148,7 @@ export default function V3Settings() {
         // Subscription management: native sheet on iOS/Android, web page on web.
         if (key === 'plan') {
           const handled = await openSubscriptionManagement();
-          if (!handled) navigate('/app/billing');
+          if (!handled) navigate(WEBAPP_BILLING);
           return;
         }
         // Routes that exist

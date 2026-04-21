@@ -13,6 +13,7 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
+    "tryAgain": "Try again.",
     "termsOfUse": "terms of service",
     "athlete": "Athlete",
     "dismiss": "×"
@@ -36,19 +37,72 @@
       "subtitle": "Signing you in to atlas.core…",
       "noAccount": "Don't have an account yet?",
       "createAccount": "Create free account",
-      "forgotPassword": "Forgot my password"
+      "forgotPassword": "Forgot my password",
+      "unavailableTitle": "Sign-in unavailable",
+      "unavailableBody": "Supabase is not configured in this build. Sign-in is unavailable. Please use a development build or contact the engineering team.",
+      "enterEmail": "Enter your email first.",
+      "enterPassword": "Enter your password.",
+      "signInFailed": "Could not sign you in.",
+      "magicLinkFailed": "Could not send magic link.",
+      "appleStartFailed": "Could not start Apple sign in.",
+      "googleStartFailed": "Could not start Google sign in."
     },
     "signup": {
       "title": "Start your progress",
       "subtitle": "Creating your atlas.core access…",
       "hasAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "hint": "Use email and password. You can add the rest inside the app.",
+      "enterEmail": "Enter your email first.",
+      "enterPassword": "Enter a password.",
+      "passwordMin": "Password must be at least 8 characters.",
+      "confirmEmailHint": "Check your inbox and confirm your email, then come back and sign in.",
+      "createFailed": "Could not create your account.",
+      "appleStartFailed": "Could not start Apple sign up.",
+      "googleStartFailed": "Could not start Google sign up.",
+      "headlineLine1": "create your",
+      "headlineAccent": "account.",
+      "description": "Start with email and password. The rest of setup happens inside atlas.core.",
+      "submit": "Create account →"
     },
     "forgot": {
       "title": "Reset password",
       "subtitle": "We'll help you regain access…",
       "remembered": "Remembered your password?",
-      "backToLogin": "Back to sign in"
+      "backToLogin": "Back to sign in",
+      "headingLine1": "reset your",
+      "headingAccent": "password.",
+      "body": "Enter your email and we will send you a reset link.",
+      "sentBody": "We sent reset instructions to {email}. The link is valid for one hour.",
+      "checkSpam": "If it does not show up, check spam or try a different email.",
+      "backToSignIn": "Back to sign in →",
+      "tryDifferentEmail": "Try a different email",
+      "hint": "We will send the reset link to this inbox.",
+      "sending": "Sending…",
+      "submit": "Send reset link →",
+      "enterEmail": "Enter your email.",
+      "sendFailed": "Could not send reset email."
+    },
+    "reset": {
+      "backToLogin": "Back to login",
+      "headingLine1": "set a new",
+      "headingAccent": "password.",
+      "body": "Pick something you have not used before.",
+      "doneBody": "Password updated. Redirecting you back to sign in.",
+      "doneCard": "Password successfully changed.",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPlaceholder": "Type it again",
+      "passwordsDontMatch": "Passwords don't match.",
+      "passwordHint": "Use 8 characters or more.",
+      "updating": "Updating…",
+      "submit": "Update password →",
+      "passwordMin": "Password must be at least 8 characters.",
+      "updateFailed": "Could not update password. The link may have expired."
+    },
+    "form": {
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "defaultHint": "Returning? We will recognize this one."
     },
     "redirecting": "Redirecting…",
     "didNotOpen": "Sign-in did not open automatically",
@@ -81,7 +135,28 @@
       "message": "We couldn't load your profile. Check your connection and try again.",
       "tryAgain": "Try Again",
       "signOut": "Sign Out"
+    },
+    "form": {
+      "defaultHeadlineLine1": "one screen.",
+      "defaultHeadlineLine2Prefix": "one",
+      "defaultHeadlineAccent": "field.",
+      "defaultMagicDescription": "We'll email you a magic link. No passwords to remember.",
+      "defaultPasswordDescription": "Use your email and password to get back in.",
+      "magicMode": "Magic link",
+      "passwordMode": "Password",
+      "emailPlaceholder": "you@email.com",
+      "passwordPlaceholder": "••••••••",
+      "working": "Working…",
+      "sendMagic": "Send magic link →",
+      "signIn": "Sign in →",
+      "orUse": "Or use",
+      "continueApple": "Continue with Apple",
+      "continueGoogle": "Continue with Google",
+      "legal": "By continuing you accept our terms and privacy notice. Health data never leaves this device by default."
     }
+  },
+  "format": {
+    "localeTag": "en-US"
   },
   "landing": {
     "nav": {
@@ -1432,6 +1507,7 @@
       },
       "rows": {
         "yourProfile": "Your profile",
+        "desktopAccountDesc": "Account, billing, and export live in the desktop webapp.",
         "subscription": "Subscription",
         "connectedServices": "Connected services",
         "connectedServicesDesc": "Apple Health, wearables · improves readiness accuracy",
@@ -1445,16 +1521,25 @@
         "dailyTargetsDesc": "Drives your daily protein target · used by Today",
         "exportData": "Export data",
         "exportDataDesc": "Download your logs and history",
+        "desktopExportDesc": "Use the desktop webapp to export your account data.",
         "progressPhotos": "Progress photos",
         "progressPhotosDesc": "Body trend tracking · used by composition system",
+        "localChip": "Local",
         "dangerZone": "Danger zone",
         "dangerZoneDesc": "Delete account and reset data",
+        "desktopDangerDesc": "Account reset and deletion are desktop-only management flows.",
         "planLabel": "{tier} plan",
         "planActive": "{tier} access active",
         "planUpgrade": "Upgrade, manage billing, restore access"
       },
       "memberRecently": "member recently",
       "memberSince": "member since {date}",
+      "labels": {
+        "languageEnglish": "English",
+        "languagePortugueseBrazil": "Portuguese (Brazil)",
+        "themeLight": "light",
+        "themeDark": "dark"
+      },
       "toasts": {
         "themeSwitch": "Switched to {theme} mode",
         "languagePT": "Idioma: Português",
@@ -2767,6 +2852,25 @@
     "timeline": {
       "eyebrow": "Checkpoint Timeline"
     },
+    "runtime": {
+      "eyebrow": "Progress · photos",
+      "rangeLabel": "6 months",
+      "emptyTitle": "No progress photos yet.",
+      "emptyDescription": "Take your first front, side, or back photo to unlock visual comparisons over time.",
+      "takePhoto": "Take photo →",
+      "views": {
+        "front": "Front",
+        "side": "Side",
+        "back": "Back"
+      },
+      "compareLabel": "Nov → Apr · {view}",
+      "compareDelta": "−5.8 lb · −1.8% BF",
+      "allMonths": "All months · {count}",
+      "viewLabel": "{view} view",
+      "privacyNote": "Photos stay on-device. Never leave your phone without your permission.",
+      "previewUnavailable": "Photo preview unavailable",
+      "previewUnavailableDescription": "Capture a photo first to open it here."
+    },
     "new_checkpoint_modal": {
       "eyebrow": "New Checkpoint",
       "title": "Record your progress",
@@ -3461,7 +3565,33 @@
       "noted": "Noted",
       "savedForLater": "Saved for later",
       "connectingToast": "The AI coach is being connected. This will work soon.",
-      "connectingPlaceholder": "Coach AI is being connected..."
+      "connectingPlaceholder": "Coach AI is being connected...",
+      "runtime": {
+        "back": "Back",
+        "menuLabel": "Chat actions",
+        "defaultDateLabel": "Today · 07:42 AM",
+        "contextReadyText": "Syncing your current state. Ask anything.",
+        "contextReadyMeta": "Coach · context ready",
+        "notAuthenticated": "Not authenticated",
+        "limitMeta": "Coach · limit reached",
+        "justNowMeta": "Coach · just now",
+        "errorText": "Something went wrong. Try again.",
+        "errorMeta": "Coach · error",
+        "typingMeta": "Coach · typing",
+        "thinking": "Thinking…",
+        "liveStatus": "Reading your signal · live",
+        "suggestionLabel": "Suggested · today",
+        "suggestionText": "Add a 30g protein shake between lunch and training. Keeps you above threshold without extra meals.",
+        "actions": {
+          "addToPlan": "Add to plan",
+          "notToday": "Not today"
+        },
+        "quick": {
+          "logMeal": "Log oats + whey",
+          "showOptions": "Show me options",
+          "later": "Later"
+        }
+      }
     }
   },
   "nutritionist": {
@@ -4238,6 +4368,11 @@
       "yearly": "12 months",
       "save": "Save 62%"
     },
+    "pricing": {
+      "weekly": "$3.99 / wk",
+      "monthly": "$9.99 / mo",
+      "yearlyEffective": "$6.58 / mo"
+    },
     "features": {
       "heading": "everything included",
       "coach": "AI coach & daily brief",
@@ -4255,6 +4390,20 @@
     "links": {
       "restore": "Restore purchases"
     },
+    "mobile": {
+      "skip": "Not now",
+      "stepLabel": "Step 3 of 3",
+      "titleLine1": "Unlock",
+      "titleLine2Prefix": "your",
+      "titleAccent": "core",
+      "subtitle": "3-day free trial. Cancel in one tap. Your data is yours to export forever.",
+      "startTrial": "Start 3-day free trial →",
+      "nativeDisclaimer": "No charge today · remind before billing",
+      "webDisclaimer": "Secure checkout by Stripe · Cancel anytime",
+      "features": {
+        "recovery": "Readiness + recovery tracking"
+      }
+    },
     "toasts": {
       "welcome": "Welcome to Pro!",
       "genericError": "Something went wrong. Please try again.",
@@ -4263,6 +4412,217 @@
       "webComingSoon": "Subscribe through the app — web checkout coming soon.",
       "noActiveSub": "No active subscription found.",
       "billingUnavailable": "Purchases are not available on this device."
+    }
+  },
+  "paywallB": {
+    "runtime": {
+      "kicker": "New · Personal Record",
+      "recordLabel": "Back squat · 1RM est.",
+      "poundsShort": "lb",
+      "recordDelta": "+8 lb · new all-time high",
+      "headlineLine1": "You're in the",
+      "headlineLine2Prefix": "top",
+      "headlinePercent": "12%",
+      "headlineLine2Suffix": "for",
+      "headlineLine3": "your weight class.",
+      "body": "atlas.core Pro unlocks full 1RM tracking, powerlifting ranks, readiness-adjusted programming, and the AI coach.",
+      "badge": "PRO · YEARLY",
+      "period": "/ year",
+      "equivalent": "$6.58 / mo · billed yearly",
+      "cta": "Upgrade to Pro →",
+      "footerLinks": "Restore · Terms · Privacy"
+    }
+  },
+  "pricingPage": {
+    "eyebrow": "/// pricing",
+    "titlePrefix": "one plan. everything",
+    "titleAccent": "included.",
+    "intro": "No tiers, no upsells, no confusion. Pick the billing cycle that works for you — every feature is unlocked from day one.",
+    "getStarted": "get started",
+    "includedHeading": "everything included",
+    "footerTitle": "start free, upgrade when it proves itself.",
+    "footerBody": "Workout logging, food tracking, body comp, and 10 coach messages a week — all free, no card required. Upgrade when you want unlimited everything.",
+    "plans": {
+      "weekly": {
+        "label": "Weekly",
+        "period": "/ week",
+        "equivalent": "$17.30 / mo equivalent",
+        "note": "No commitment. Cancel in one tap."
+      },
+      "monthly": {
+        "label": "Monthly",
+        "period": "/ month",
+        "note": "Full access. No limits. Cancel anytime."
+      },
+      "yearly": {
+        "label": "Yearly",
+        "period": "/ year",
+        "equivalent": "$6.58 / mo, billed yearly",
+        "note": "Best value. Two months free.",
+        "save": "Save 62%"
+      }
+    },
+    "included": {
+      "workoutLogging": "Unlimited workout logging and routines",
+      "aiCoach": "Unlimited AI coach",
+      "foodLogging": "Photo, voice, and text food logging",
+      "bodyComp": "Body comp and weight trends",
+      "labTracking": "Lab uploads and biomarker tracking",
+      "analytics": "Full training analytics and history",
+      "photos": "Progress photos with comparison",
+      "export": "Full data export (CSV + JSON)"
+    }
+  },
+  "onboardPlan": {
+    "runtime": {
+      "eyebrow": "Output",
+      "label": "Your plan",
+      "title": "Daily targets, first pass.",
+      "body": "This is the initial operating preset. The system should feel precise, not final.",
+      "adaptive": "Adaptive",
+      "adaptiveBody": "Recalibrated weekly.",
+      "cta": "Looks good →",
+      "caloriesDaily": "Calories · daily",
+      "kcal": "kcal",
+      "grams": "g",
+      "tweakModel": "Tweak the model",
+      "primaryGoal": "Primary goal",
+      "activityLevel": "Activity level",
+      "training": "Training",
+      "goal": "Goal",
+      "expectedCurve": "Expected body composition curve · 12 weeks",
+      "recalibrationNote": "atlas.core recalibrates weekly from your weight trend, logs, and readiness.",
+      "maintenance": "Maintenance · weight stable",
+      "deficit": "{kcal} kcal deficit · {weeklyLb} lb / wk",
+      "surplus": "{kcal} kcal surplus · +{weeklyLb} lb / wk",
+      "daysPerWeek": "{count} days / week",
+      "macros": {
+        "protein": "Protein",
+        "carbs": "Carbs",
+        "fat": "Fat"
+      },
+      "goals": {
+        "lose": "Cut fat",
+        "recomp": "Recomp",
+        "maintain": "Maintain",
+        "gain": "Build muscle",
+        "build": "Build"
+      }
+    }
+  },
+  "onboardSummary": {
+    "runtime": {
+      "computingTitle": "Computing your protocol...",
+      "computingBodyLine1": "Analyzing identity, goal, activity level,",
+      "computingBodyLine2": "and constraints...",
+      "protocolLabel": "Your protocol",
+      "headlineLine1": "Your system",
+      "headlineLine2Prefix": "is",
+      "headlineAccent": "ready",
+      "dailyTarget": "Daily target",
+      "kcal": "kcal",
+      "grams": "g",
+      "training": "Training",
+      "sessionsPerWeek": "Sessions / wk",
+      "avgDuration": "Avg duration",
+      "minutesShort": "min",
+      "experienceLabel": "Experience",
+      "recovery": "Recovery",
+      "sleepTarget": "Sleep target",
+      "hoursShort": "hrs",
+      "waterTarget": "Water target",
+      "litersShort": "L",
+      "stepGoal": "Step goal",
+      "thousandShort": "k",
+      "constraints": "Constraints",
+      "injuries": "Injuries",
+      "medical": "Medical",
+      "recalibrationNote": "atlas.core recalibrates weekly from your weight trend, logs, and readiness. These targets evolve with you.",
+      "activate": "Activate system →",
+      "macros": {
+        "protein": "Protein",
+        "carbs": "Carbs",
+        "fat": "Fat"
+      },
+      "experience": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      }
+    }
+  },
+  "bodyweight": {
+    "runtime": {
+      "eyebrow": "Body · Readings",
+      "title": "Bodyweight",
+      "todayWeightUnit": "lb · today",
+      "avgTrend": "7-day avg trend",
+      "avgTrendDelta": "↓ 0.3 lb / wk",
+      "poundsShort": "lb",
+      "weeksRemaining": "24 wk",
+      "recentLog": "Log · recent",
+      "viewAll": "View all",
+      "logToday": "+ Log today's weight",
+      "stats": {
+        "start": "Start",
+        "goal": "Goal",
+        "toGo": "To go"
+      },
+      "entries": {
+        "today": "Today · 7:14 AM",
+        "fri": "Fri · 7:22 AM",
+        "thu": "Thu · 7:08 AM"
+      }
+    }
+  },
+  "webPurchaseSuccess": {
+    "missingSession": "Missing checkout session.",
+    "confirmFailed": "Could not confirm checkout.",
+    "loadingTitle": "confirming.",
+    "successTitle": "you are in.",
+    "errorTitle": "checkout blocked.",
+    "loadingBody": "Finalizing your subscription with Stripe and syncing your access.",
+    "successBody": "Purchase confirmed. Your subscription is now linked to this account.",
+    "openBilling": "open billing",
+    "openApp": "open app",
+    "backToPlans": "back to plans"
+  },
+  "dangerZone": {
+    "header": "Danger zone",
+    "title": "Irreversible actions",
+    "subtitle": "These actions destroy data permanently. Export first if you want a copy.",
+    "sections": {
+      "safe": "Safe",
+      "destructive": "Destructive",
+      "terminal": "Terminal"
+    },
+    "export": {
+      "title": "Download your data",
+      "description": "JSON archive of all meals, workouts, measurements, and chats"
+    },
+    "reset": {
+      "title": "Reset all atlas data",
+      "description": "Wipes every food entry, workout, measurement, photo, and chat. Your account, email, and subscription stay intact. Cannot be undone.",
+      "action": "Reset data",
+      "confirm": "Are you sure? Tap to confirm"
+    },
+    "prompts": {
+      "typeEmail": "Type {email} to permanently delete this account.",
+      "finalConfirm": "This permanently deletes your account and tracking data. This cannot be undone."
+    },
+    "toasts": {
+      "notSignedIn": "Not signed in",
+      "resetSuccess": "Data reset — account cleared",
+      "resetFailed": "Reset failed",
+      "noAccount": "No authenticated account found",
+      "deleteCancelled": "Account deletion cancelled",
+      "emailMismatch": "The confirmation email did not match.",
+      "cancelSubscriptionFirst": "Cancel store subscription first",
+      "cancelSubscriptionDescription": "Open subscription management, cancel there, then retry deletion.",
+      "deleteSuccess": "Account deleted",
+      "deleteFailed": "Account deletion failed",
+      "manageBillingFirst": "Manage billing first if needed",
+      "manageBillingDescription": "If this account still has store-managed billing, cancel it before retrying deletion."
     }
   },
   "reactivation": {
@@ -4360,6 +4720,128 @@
     "signOut": "Sign out",
     "terms": "Terms",
     "privacy": "Privacy"
+  },
+  "webapp": {
+    "accountHub": {
+      "planPro": "Pro",
+      "planFree": "Free",
+      "statusTrial": "Trial",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "eyebrow": "/// account",
+      "greeting": "hey, {name}.",
+      "there": "there",
+      "currentPlan": "current plan",
+      "managePlan": "Manage plan",
+      "upgrade": "Upgrade to Pro",
+      "billingHistoryTitle": "Billing history",
+      "billingHistoryDesc": "View past invoices and payment receipts.",
+      "billingHistoryCta": "View invoices",
+      "exportTitle": "Export data",
+      "exportDesc": "Download your full body record as CSV or JSON.",
+      "exportCta": "Export",
+      "getAppTitle": "Get the app",
+      "getAppDesc": "atlas.core lives on your iPhone. Get it from the App Store.",
+      "getAppCta": "Download",
+      "footer": "atlas.core is built for mobile. This is your account dashboard."
+    }
+  },
+  "manageSub": {
+    "planPro": "Pro",
+    "planFree": "Free",
+    "statusTrial": "Trial",
+    "statusGranted": "Granted",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "backToAccount": "← Back to account",
+    "eyebrow": "/// manage subscription",
+    "headingPrefix": "your",
+    "headingAccent": "plan.",
+    "currentPlan": "current plan",
+    "trialEnds": "Trial ends",
+    "renews": "Renews",
+    "changePlanTitle": "Change plan",
+    "changePlanDesc": "Switch between weekly, monthly, or yearly billing.",
+    "viewPlans": "View plans",
+    "cancelTitle": "Cancel subscription",
+    "cancelDesc": "Access continues until the end of your current billing period.",
+    "cancelPlan": "Cancel plan",
+    "billingHistory": "Billing history",
+    "exportData": "Export data",
+    "footer": "atlas.core is built for mobile. This is your account dashboard.",
+    "cancelFallback": {
+      "title": "Could not open subscription management",
+      "description": "Try again."
+    }
+  },
+  "billingHistory": {
+    "eyebrow": "/// billing history",
+    "heading": "invoices.",
+    "description": "Your payment history and receipts.",
+    "portalNote": "Stripe remains the source of truth for receipts and payment method updates.",
+    "openPortal": "Open billing portal",
+    "openPortalFailed": "Could not open billing portal",
+    "emptyTitle": "No billing activity yet",
+    "emptyDesc": "Your subscription and trial events will appear here after checkout begins.",
+    "planFallback": "pro",
+    "backToAccount": "← Back to account",
+    "footer": "atlas.core is built for mobile. This is your account dashboard.",
+    "status": {
+      "inactive": "inactive",
+      "active": "active",
+      "trialing": "trialing",
+      "granted": "granted",
+      "past_due": "past due"
+    }
+  },
+  "dataExport": {
+    "mustBeSignedIn": "You must be signed in to export data.",
+    "ready": "{format} export ready",
+    "failed": "Export failed",
+    "backToAccount": "← Back to account",
+    "heading": "Export your data",
+    "description": "Download your complete body record — workouts, nutrition, measurements, and labs. Your data is always yours.",
+    "jsonTitle": "Full export (JSON)",
+    "jsonDesc": "Machine-readable. Import into other tools.",
+    "jsonButton": "Download JSON",
+    "csvTitle": "Spreadsheet (CSV)",
+    "csvDesc": "Open in Excel, Sheets, or Numbers.",
+    "csvButton": "Download CSV",
+    "preparing": "Preparing…",
+    "footerNote": "Export includes your profile, workouts, nutrition logs, measurements, check-ins, routines, and available session history."
+  },
+  "accountSettings": {
+    "providers": {
+      "apple": "Apple Health",
+      "google": "Google Fit"
+    },
+    "prompts": {
+      "changeEmail": "Enter your new email address.",
+      "disable2fa": "Enter the 6-digit code from your authenticator app to disable two-factor authentication.",
+      "enable2fa": "Scan the QR code in your authenticator app, or use this secret: {secret}\n\nEnter the 6-digit code to verify."
+    },
+    "toasts": {
+      "emailUpdateRequested": "Email update requested",
+      "checkEmailConfirm": "Check {email} to confirm the change.",
+      "emailUpdateFailed": "Could not update email",
+      "noEmail": "No email found for this account",
+      "passwordResetSent": "Password reset email sent",
+      "openInboxPassword": "Open {email} to set a new password.",
+      "passwordResetFailed": "Could not send reset email",
+      "twoFactorDisabled": "Two-factor disabled",
+      "twoFactorEnabled": "Two-factor enabled",
+      "twoFactorFailed": "Two-factor update failed",
+      "connectionFailed": "Connection failed",
+      "appleStarted": "Apple Health connection started",
+      "googleStarted": "Google Fit connection started",
+      "finishProviderFlow": "Finish the provider flow to complete setup.",
+      "disconnectFailed": "Disconnect failed",
+      "appleDisconnected": "Apple Health disconnected",
+      "googleDisconnected": "Google Fit disconnected",
+      "sessionsRevoked": "Signed out other sessions",
+      "thisDeviceActive": "This device stays active.",
+      "sessionsRevokeFailed": "Could not revoke other sessions"
+    }
   },
   "subscriptionManage": {
     "cancelToast": "To cancel your subscription, email support@useatlascore.com",

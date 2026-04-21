@@ -4,6 +4,7 @@ import {
   ACLabel, ACNum, ACSpark,
 } from '../lib/paper.jsx';
 import { computeOnboardingPlan } from '@/services/onboardingService';
+import { useT } from '@/lib/i18nContext';
 import { OnboardingCard, OnboardingHero, OnboardingPrimaryAction, OnboardingShell } from './onboardingShared.jsx';
 
 function S10_Onboard_Plan({
@@ -15,26 +16,32 @@ function S10_Onboard_Plan({
   onChange,
 }) {
   const c = useACT(dark);
+  const t = useT();
   const [localData, setLocalData] = React.useState(value || onboardingData || {});
   const plan = React.useMemo(() => {
     const computed = computeOnboardingPlan(localData);
     const deficit = computed.tdee - computed.calories;
     const weeklyLb = Math.abs(deficit * 7 / 3500).toFixed(1);
     const deficitLabel = deficit > 0
-      ? `${deficit} kcal deficit · ${weeklyLb} lb / wk`
+      ? t('onboardPlan.runtime.deficit', { kcal: deficit, weeklyLb })
       : deficit < 0
-        ? `${Math.abs(deficit)} kcal surplus · +${weeklyLb} lb / wk`
-        : 'Maintenance · weight stable';
-    const goalLabels = { lose: 'Cut fat', recomp: 'Recomp', maintain: 'Maintain', gain: 'Build muscle' };
+        ? t('onboardPlan.runtime.surplus', { kcal: Math.abs(deficit), weeklyLb })
+        : t('onboardPlan.runtime.maintenance');
+    const goalLabels = {
+      lose: t('onboardPlan.runtime.goals.lose'),
+      recomp: t('onboardPlan.runtime.goals.recomp'),
+      maintain: t('onboardPlan.runtime.goals.maintain'),
+      gain: t('onboardPlan.runtime.goals.gain'),
+    };
 
     return {
       ...computed,
       deficitLabel,
       daysPerWeek: Math.min((Number(localData?.activity) || 3) + 1, 6),
       weightLb: Math.round((computed.estimatedWeightKg || 0) * 2.205),
-      goalLabel: goalLabels[localData?.goal] || 'Recomp',
+      goalLabel: goalLabels[localData?.goal] || t('onboardPlan.runtime.goals.recomp'),
     };
-  }, [localData]);
+  }, [localData, t]);
 
   function update(patch) {
     const next = { ...localData, ...patch };
@@ -43,10 +50,10 @@ function S10_Onboard_Plan({
   }
 
   const goals = [
-    { k: 'lose', l: 'Cut fat' },
-    { k: 'recomp', l: 'Recomp' },
-    { k: 'maintain', l: 'Maintain' },
-    { k: 'gain', l: 'Build' },
+    { k: 'lose', l: t('onboardPlan.runtime.goals.lose') },
+    { k: 'recomp', l: t('onboardPlan.runtime.goals.recomp') },
+    { k: 'maintain', l: t('onboardPlan.runtime.goals.maintain') },
+    { k: 'gain', l: t('onboardPlan.runtime.goals.build') },
   ];
 
   return (
@@ -55,18 +62,18 @@ function S10_Onboard_Plan({
       step={4}
       total={10}
       onBack={onBack}
-      eyebrow="Output"
-      footer={<OnboardingPrimaryAction dark={dark} onClick={() => onContinue?.(localData)}>Looks good →</OnboardingPrimaryAction>}
+      eyebrow={t('onboardPlan.runtime.eyebrow')}
+      footer={<OnboardingPrimaryAction dark={dark} onClick={() => onContinue?.(localData)}>{t('onboardPlan.runtime.cta')}</OnboardingPrimaryAction>}
     >
       <OnboardingHero
         dark={dark}
-        label="Your plan"
-        title={<>Daily targets, first pass.</>}
-        body="This is the initial operating preset. The system should feel precise, not final."
+        label={t('onboardPlan.runtime.label')}
+        title={<>{t('onboardPlan.runtime.title')}</>}
+        body={t('onboardPlan.runtime.body')}
         aside={(
           <>
-            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Adaptive</ACLabel>
-            <div style={{ marginTop: 8, fontSize: 12, color: c.dim, lineHeight: 1.45 }}>Recalibrated weekly.</div>
+            <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardPlan.runtime.adaptive')}</ACLabel>
+            <div style={{ marginTop: 8, fontSize: 12, color: c.dim, lineHeight: 1.45 }}>{t('onboardPlan.runtime.adaptiveBody')}</div>
           </>
         )}
       />
@@ -75,10 +82,10 @@ function S10_Onboard_Plan({
         marginTop: 4, padding: 22, background: c.fg, color: c.bg, borderRadius: ACRadii.card,
         boxShadow: dark ? 'none' : '0 20px 40px rgba(10,10,10,0.12)',
       }}>
-          <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>Calories · daily</ACLabel>
+          <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>{t('onboardPlan.runtime.caloriesDaily')}</ACLabel>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
             <ACNum size={72} color={c.bg} weight={700}>{plan.calories.toLocaleString()}</ACNum>
-            <ACLabel size={13} color="rgba(239,233,218,0.6)">kcal</ACLabel>
+            <ACLabel size={13} color="rgba(239,233,218,0.6)">{t('onboardPlan.runtime.kcal')}</ACLabel>
           </div>
           <ACLabel size={11} color="rgba(239,233,218,0.55)" style={{ marginTop: 2 }}>
             {plan.deficitLabel}
@@ -88,9 +95,9 @@ function S10_Onboard_Plan({
 
           <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {[
-              { l: 'Protein', v: String(plan.proteinG), u: 'g', pct: `${plan.proteinPct}%` },
-              { l: 'Carbs',   v: String(plan.carbsG),   u: 'g', pct: `${plan.carbsPct}%` },
-              { l: 'Fat',     v: String(plan.fatG),      u: 'g', pct: `${plan.fatPct}%` },
+              { l: t('onboardPlan.runtime.macros.protein'), v: String(plan.proteinG), u: t('onboardPlan.runtime.grams'), pct: `${plan.proteinPct}%` },
+              { l: t('onboardPlan.runtime.macros.carbs'),   v: String(plan.carbsG),   u: t('onboardPlan.runtime.grams'), pct: `${plan.carbsPct}%` },
+              { l: t('onboardPlan.runtime.macros.fat'),     v: String(plan.fatG),      u: t('onboardPlan.runtime.grams'), pct: `${plan.fatPct}%` },
             ].map((m, i) => (
               <div key={i}>
                 <ACLabel size={11} color="rgba(239,233,218,0.55)">{m.l}</ACLabel>
@@ -105,10 +112,10 @@ function S10_Onboard_Plan({
       </div>
 
       <OnboardingCard dark={dark} style={{ marginTop: 16 }}>
-        <ACLabel size={11} color={c.dim} style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6 }}>Tweak the model</ACLabel>
+        <ACLabel size={11} color={c.dim} style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6 }}>{t('onboardPlan.runtime.tweakModel')}</ACLabel>
 
         <div style={{ marginTop: 16 }}>
-          <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Primary goal</ACLabel>
+          <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardPlan.runtime.primaryGoal')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {goals.map((g) => {
               const on = localData.goal === g.k;
@@ -130,7 +137,7 @@ function S10_Onboard_Plan({
         </div>
 
         <div style={{ marginTop: 18 }}>
-          <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>Activity level</ACLabel>
+          <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, textTransform: 'uppercase' }}>{t('onboardPlan.runtime.activityLevel')}</ACLabel>
           <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
             {[1, 2, 3, 4, 5].map((v) => {
               const on = localData.activity === v;
@@ -155,13 +162,13 @@ function S10_Onboard_Plan({
       <OnboardingCard dark={dark} style={{ marginTop: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
-              <ACLabel size={11} color={c.dim}>Training</ACLabel>
+              <ACLabel size={11} color={c.dim}>{t('onboardPlan.runtime.training')}</ACLabel>
               <div style={{ marginTop: 4, fontSize: 15, fontWeight: 600, color: c.fg }}>
-                {plan.daysPerWeek} days / week
+                {t('onboardPlan.runtime.daysPerWeek', { count: plan.daysPerWeek })}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <ACLabel size={11} color={c.dim}>Goal</ACLabel>
+              <ACLabel size={11} color={c.dim}>{t('onboardPlan.runtime.goal')}</ACLabel>
               <div style={{ marginTop: 4, fontSize: 15, fontWeight: 600, color: c.fg }}>
                 {plan.goalLabel}
               </div>
@@ -169,13 +176,13 @@ function S10_Onboard_Plan({
           </div>
           <ACSpark w={272} h={30} dark={dark} stroke={2} />
           <ACLabel size={11} color={c.mute} style={{ marginTop: 8 }}>
-            Expected body composition curve · 12 weeks
+            {t('onboardPlan.runtime.expectedCurve')}
           </ACLabel>
       </OnboardingCard>
 
       <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: ACRadii.card, border: `1px dashed ${c.faint}` }}>
           <ACLabel size={12} color={c.dim} style={{ lineHeight: 1.5, display: 'block' }}>
-            atlas.core recalibrates weekly from your weight trend, logs, and readiness.
+            {t('onboardPlan.runtime.recalibrationNote')}
           </ACLabel>
       </div>
     </OnboardingShell>

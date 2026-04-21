@@ -4,19 +4,7 @@ import {
   ACLabel, ACBtn,
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
-
-const PLANS = [
-  { k: 'yearly',  t: '12 months', p: '$79',   pm: '$6.58 / mo',  save: 'Save 62%' },
-  { k: 'monthly', t: '1 month',   p: '$9.99', pm: '$9.99 / mo',  save: null },
-];
-
-const FEATURES = [
-  'AI coach & daily brief',
-  'Unlimited workout & food logs',
-  'Readiness + recovery tracking',
-  'Lab results & biomarker trends',
-  'Full data export · CSV + JSON',
-];
+import { useT } from '@/lib/i18nContext';
 
 /**
  * S5_Paywall_A — onboarding trial gate (mobile).
@@ -34,8 +22,20 @@ const FEATURES = [
  */
 function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, platform = 'native' }) {
   const c = useACT(dark);
+  const t = useT();
   const [plan, setPlan] = React.useState('yearly');
   const handleClose = onClose || onSkip;
+  const plans = [
+    { k: 'yearly', t: t('paywall.plans.yearly'), p: '$79', pm: t('paywall.pricing.yearlyEffective'), save: t('paywall.plans.save') },
+    { k: 'monthly', t: t('paywall.plans.monthly'), p: '$9.99', pm: t('paywall.pricing.monthly'), save: null },
+  ];
+  const features = [
+    t('paywall.features.coach'),
+    t('paywall.features.logs'),
+    t('paywall.mobile.features.recovery'),
+    t('paywall.features.labs'),
+    t('paywall.features.export'),
+  ];
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -44,10 +44,10 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
         </button>
         {onSkip && (
           <button type="button" onClick={onSkip} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <ACLabel size={12} color={c.dim}>Not now</ACLabel>
+            <ACLabel size={12} color={c.dim}>{t('paywall.mobile.skip')}</ACLabel>
           </button>
         )}
-        {!onSkip && <ACLabel size={11} color={c.dim}>Step 3 of 3</ACLabel>}
+        {!onSkip && <ACLabel size={11} color={c.dim}>{t('paywall.mobile.stepLabel')}</ACLabel>}
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px 16px' }}>
@@ -56,14 +56,14 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
           marginTop: 18, fontFamily: ACFonts.display, fontSize: 38, fontWeight: 700,
           letterSpacing: -1.4, lineHeight: 1.05, color: c.fg,
         }}>
-          Unlock<br/>your <span style={{ background: c.accent, color: c.ink, padding: '2px 8px', borderRadius: 8 }}>core</span>.
+          {t('paywall.mobile.titleLine1')}<br/>{t('paywall.mobile.titleLine2Prefix')} <span style={{ background: c.accent, color: c.ink, padding: '2px 8px', borderRadius: 8 }}>{t('paywall.mobile.titleAccent')}</span>.
         </div>
         <div style={{ marginTop: 16, fontSize: 15, lineHeight: 1.5, color: c.dim }}>
-          3-day free trial. Cancel in one tap. Your data is yours to export forever.
+          {t('paywall.mobile.subtitle')}
         </div>
 
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {FEATURES.map((b, i) => (
+          {features.map((b, i) => (
             <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <div style={{ width: 20, height: 20, borderRadius: 7, background: c.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="12" height="12" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke={c.ink} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -74,7 +74,7 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
         </div>
 
         <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {PLANS.map(p => {
+          {plans.map(p => {
             const on = p.k === plan;
             return (
               <button key={p.k} type="button" onClick={() => setPlan(p.k)}
@@ -104,16 +104,16 @@ function S5_Paywall_A({ dark = false, onClose, onStartTrial, onRestore, onSkip, 
       </div>
 
       <div style={{ padding: '14px 28px 26px', background: c.bg }}>
-        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onStartTrial?.({ planId: plan })}>Start 3-day free trial →</ACBtn>
+        <ACBtn primary block dark={dark} size="lg" pill onClick={() => onStartTrial?.({ planId: plan })}>{t('paywall.mobile.startTrial')}</ACBtn>
         <div style={{ textAlign: 'center', marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <ACLabel size={11} color={c.dim}>
             {platform === 'web'
-              ? 'Secure checkout by Stripe · Cancel anytime'
-              : 'No charge today · remind before billing'}
+              ? t('paywall.mobile.webDisclaimer')
+              : t('paywall.mobile.nativeDisclaimer')}
           </ACLabel>
           {onRestore && (
             <button type="button" onClick={onRestore} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-              <ACLabel size={11} color={c.dim} style={{ textDecoration: 'underline' }}>Restore purchases</ACLabel>
+              <ACLabel size={11} color={c.dim} style={{ textDecoration: 'underline' }}>{t('paywall.links.restore')}</ACLabel>
             </button>
           )}
         </div>

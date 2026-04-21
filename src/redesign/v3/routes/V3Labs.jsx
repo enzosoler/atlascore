@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 import S15_Labs_Inbox from '../screens/S15_Labs_Inbox.jsx';
 
 export default function V3Labs() {
@@ -17,7 +18,7 @@ export default function V3Labs() {
       isLocked={!isPremium}
       panels={[]}
       summary={{ panelCount: 0, totalMarkers: 0, attentionCount: 0, optimalCount: 0, elevatedCount: 0, lowCount: 0 }}
-      onUpgrade={() => navigate('/app/billing/plans')}
+      onUpgrade={() => navigate(WEBAPP_PAYWALL)}
       onUpload={() => navigate('/app/labs/upload')}
       onOpenPanel={(_, row) => navigate(`/app/labs/biomarker/${encodeURIComponent(row?.t || 'marker')}`)}
       showTabBar={false}

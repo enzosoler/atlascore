@@ -26,7 +26,7 @@ export async function startWebCheckout({
   const accessToken = await getAccessToken();
   const origin = getOrigin();
   const successUrl = `${origin}/webapp/success?session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${origin}/app/billing/paywall`;
+  const cancelUrl = `${origin}/webapp/billing/paywall`;
 
   const { data, error } = await supabase.functions.invoke('create-checkout', {
     body: {
@@ -55,7 +55,7 @@ export async function openWebBillingPortal(returnUrl) {
   const accessToken = await getAccessToken();
   const { data, error } = await supabase.functions.invoke('create-customer-portal', {
     body: {
-      return_url: returnUrl || `${getOrigin()}/app/billing`,
+      return_url: returnUrl || `${getOrigin()}/webapp/billing`,
     },
     headers: authHeaders(accessToken),
   });

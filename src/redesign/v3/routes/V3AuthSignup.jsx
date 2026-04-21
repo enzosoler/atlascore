@@ -5,21 +5,22 @@ import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S36_Auth from '../screens/S36_Auth.jsx';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { ACBrand } from '../lib/paper.jsx';
 
-function friendlyOAuthError(provider, err) {
-  const label = provider === 'apple' ? 'Apple' : 'Google';
-  return err?.message || `Could not start ${label} sign up.`;
+function friendlyOAuthError(provider, err, t) {
+  return err?.message || t(provider === 'apple' ? 'auth.signup.appleStartFailed' : 'auth.signup.googleStartFailed');
 }
 
 export default function V3AuthSignup() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { signUp } = useAuth();
+  const t = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [hint, setHint] = useState('Use email and password. You can add the rest inside the app.');
+  const [hint, setHint] = useState(t('auth.signup.hint'));
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e) => {
@@ -29,15 +30,15 @@ export default function V3AuthSignup() {
     const em = email.trim().toLowerCase();
     setError('');
     if (!em) {
-      setError('Enter your email first.');
+      setError(t('auth.signup.enterEmail'));
       return;
     }
     if (!password) {
-      setError('Enter a password.');
+      setError(t('auth.signup.enterPassword'));
       return;
     }
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError(t('auth.signup.passwordMin'));
       return;
     }
 
@@ -45,12 +46,12 @@ export default function V3AuthSignup() {
     try {
       const result = await signUp(em, password, {});
       if (result?.needsEmailConfirmation) {
-        setHint('Check your inbox and confirm your email, then come back and sign in.');
+        setHint(t('auth.signup.confirmEmailHint'));
         return;
       }
       navigate(result?.onboarding_completed ? '/app/today' : '/onboarding', { replace: true });
     } catch (err) {
-      setError(err?.message || 'Could not create your account.');
+      setError(err?.message || t('auth.signup.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,7 @@ export default function V3AuthSignup() {
       });
       if (oauthError) throw oauthError;
     } catch (err) {
-      setError(friendlyOAuthError(provider, err));
+      setError(friendlyOAuthError(provider, err, t));
     }
   };
 
@@ -78,13 +79,13 @@ export default function V3AuthSignup() {
         mode="password"
         headline={(
           <>
-            create your
+            {t('auth.signup.headlineLine1')}
             <br />
-            <span style={{ color: ACBrand.accent }}>account.</span>
+            <span style={{ color: ACBrand.accent }}>{t('auth.signup.headlineAccent')}</span>
           </>
         )}
-        description="Start with email and password. The rest of setup happens inside atlas.core."
-        submitLabel="Create account →"
+        description={t('auth.signup.description')}
+        submitLabel={t('auth.signup.submit')}
         showModeSwitch={false}
         onEmailChange={setEmail}
         onPasswordChange={setPassword}

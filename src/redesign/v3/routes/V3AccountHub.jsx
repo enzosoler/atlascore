@@ -14,6 +14,8 @@ import { HeartMark } from '../lib/brandMarks.jsx';
 import { MC } from './V3MarketingLayout.jsx';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/lib/SubscriptionContext';
+import { useT } from '@/lib/i18nContext';
+import { WEBAPP_BILLING, WEBAPP_EXPORT, WEBAPP_HOME } from '@/lib/platformRoutes';
 
 function deriveFirstName(user) {
   if (!user) return '';
@@ -68,12 +70,13 @@ export default function V3AccountHub() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { subscription } = useSubscription();
+  const t = useT();
   const firstName = deriveFirstName(user);
   const isActive = subscription && ['active', 'trialing', 'granted'].includes(subscription.status);
   const planLabel = isActive
-    ? (subscription.tier || subscription.plan_code || 'Pro').charAt(0).toUpperCase() + (subscription.tier || subscription.plan_code || 'pro').slice(1)
-    : 'Free';
-  const statusLabel = isActive ? (subscription.status === 'trialing' ? 'Trial' : 'Active') : 'Inactive';
+    ? (subscription.tier || subscription.plan_code || t('webapp.accountHub.planPro')).charAt(0).toUpperCase() + (subscription.tier || subscription.plan_code || t('webapp.accountHub.planPro').toLowerCase()).slice(1)
+    : t('webapp.accountHub.planFree');
+  const statusLabel = isActive ? (subscription.status === 'trialing' ? t('webapp.accountHub.statusTrial') : t('webapp.accountHub.statusActive')) : t('webapp.accountHub.statusInactive');
 
   return (
     <div style={{ minHeight: '100vh', background: ACBrand.paper, color: ACBrand.ink, fontFamily: ACFonts.body }}>
@@ -112,19 +115,19 @@ export default function V3AccountHub() {
         display: 'flex', alignItems: 'center', gap: 28, padding: '22px 56px',
         borderBottom: MC.border, flexWrap: 'wrap',
       }}>
-        <Link to="/app/account" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
+        <Link to={WEBAPP_HOME} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
           <HeartMark size={34} stroke={2} />
           <span style={{ fontFamily: ACFonts.brand, fontSize: 22, letterSpacing: -0.5, textTransform: 'lowercase' }}>
             atlas.<span style={{ color: ACBrand.accent }}>core</span>
           </span>
         </Link>
         <div className="hub-nav" style={{ display: 'flex', gap: 24 }}>
-          <NavLink to="/app/account">Account</NavLink>
-          <NavLink to="/app/billing">Billing</NavLink>
-          <NavLink to="/app/export">Export</NavLink>
+          <NavLink to={WEBAPP_HOME}>{t('webNav.account')}</NavLink>
+          <NavLink to={WEBAPP_BILLING}>{t('webNav.billing')}</NavLink>
+          <NavLink to={WEBAPP_EXPORT}>{t('webNav.export')}</NavLink>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
-          <NavLink to="/download-app">Get the app</NavLink>
+          <NavLink to="/download-app">{t('webNav.getApp')}</NavLink>
           <button
             type="button"
             onClick={async () => { try { await logout?.(); } catch {} navigate('/auth/login', { replace: true }); }}
@@ -134,7 +137,7 @@ export default function V3AccountHub() {
               color: MC.dim, cursor: 'pointer',
             }}
           >
-            Sign out
+            {t('webNav.signOut')}
           </button>
         </div>
       </div>
@@ -151,13 +154,13 @@ export default function V3AccountHub() {
         }}>
           <div>
             <div style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: MC.dim }}>
-              /// account
+              {t('webapp.accountHub.eyebrow')}
             </div>
             <h1 style={{
               margin: '12px 0 0', fontFamily: ACFonts.brand, fontSize: 'clamp(36px, 6vw, 56px)',
               letterSpacing: '-0.04em', lineHeight: 0.9, textTransform: 'lowercase',
             }}>
-              hey, {firstName || 'there'}.
+              {t('webapp.accountHub.greeting', { name: firstName || t('webapp.accountHub.there') })}
             </h1>
           </div>
           <div style={{
@@ -180,7 +183,7 @@ export default function V3AccountHub() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
             <div>
               <div style={{ fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: ACBrand.accent }}>
-                current plan
+                {t('webapp.accountHub.currentPlan')}
               </div>
               <div style={{
                 marginTop: 8, fontFamily: ACFonts.brand, fontSize: 42, letterSpacing: -2,
@@ -189,13 +192,13 @@ export default function V3AccountHub() {
                 {planLabel.toLowerCase()}
               </div>
             </div>
-            <Link to="/app/billing" className="hub-manage-btn" style={{
+            <Link to={WEBAPP_BILLING} className="hub-manage-btn" style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               padding: '14px 24px', borderRadius: 999, textDecoration: 'none',
               background: ACBrand.accent, color: ACBrand.ink,
               fontFamily: ACFonts.body, fontSize: 15, fontWeight: 600, letterSpacing: -0.2,
             }}>
-              {isActive ? 'Manage plan' : 'Upgrade to Pro'}
+              {isActive ? t('webapp.accountHub.managePlan') : t('webapp.accountHub.upgrade')}
             </Link>
           </div>
         </div>
@@ -205,23 +208,23 @@ export default function V3AccountHub() {
           marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16,
         }}>
           <ActionCard
-            title="Billing history"
-            description="View past invoices and payment receipts."
-            cta="View invoices"
-            onClick={() => navigate('/app/billing/invoices')}
+            title={t('webapp.accountHub.billingHistoryTitle')}
+            description={t('webapp.accountHub.billingHistoryDesc')}
+            cta={t('webapp.accountHub.billingHistoryCta')}
+            onClick={() => navigate('/webapp/billing/invoices')}
             style={{ opacity: 0, animation: 'acHubFade 0.6s ease-out forwards', animationDelay: '0.2s' }}
           />
           <ActionCard
-            title="Export data"
-            description="Download your full body record as CSV or JSON."
-            cta="Export"
-            onClick={() => navigate('/app/export')}
+            title={t('webapp.accountHub.exportTitle')}
+            description={t('webapp.accountHub.exportDesc')}
+            cta={t('webapp.accountHub.exportCta')}
+            onClick={() => navigate(WEBAPP_EXPORT)}
             style={{ opacity: 0, animation: 'acHubFade 0.6s ease-out forwards', animationDelay: '0.25s' }}
           />
           <ActionCard
-            title="Get the app"
-            description="atlas.core lives on your iPhone. Get it from the App Store."
-            cta="Download"
+            title={t('webapp.accountHub.getAppTitle')}
+            description={t('webapp.accountHub.getAppDesc')}
+            cta={t('webapp.accountHub.getAppCta')}
             onClick={() => navigate('/download-app')}
             style={{ opacity: 0, animation: 'acHubFade 0.6s ease-out forwards', animationDelay: '0.3s' }}
           />
@@ -234,7 +237,7 @@ export default function V3AccountHub() {
         textAlign: 'center', fontFamily: ACFonts.mono, fontSize: 11,
         letterSpacing: 0.4, color: MC.dim, lineHeight: 1.6,
       }}>
-        atlas.core is built for mobile. This is your account dashboard.
+        {t('webapp.accountHub.footer')}
       </div>
     </div>
   );

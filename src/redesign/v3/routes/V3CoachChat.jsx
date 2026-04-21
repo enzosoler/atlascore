@@ -21,14 +21,19 @@ export default function V3CoachChat() {
 
   // Daily state for context
   const { workoutDone, nutrition, checkin } = useDailyStateV2();
+  const addToPlanLabel = t('coach.chat.runtime.actions.addToPlan');
+  const notTodayLabel = t('coach.chat.runtime.actions.notToday');
+  const logActionLabel = t('coach.chat.runtime.quick.logMeal');
+  const showOptionsLabel = t('coach.chat.runtime.quick.showOptions');
+  const laterLabel = t('coach.chat.runtime.quick.later');
 
   // Build initial messages from URL param
   const buildInitial = () => {
     if (!ask) return [];
     return [
       {
-        text: 'Syncing your current state. Ask anything.',
-        meta: 'Coach · context ready',
+        text: t('coach.chat.runtime.contextReadyText'),
+        meta: t('coach.chat.runtime.contextReadyMeta'),
       },
       { mine: true, text: ask },
     ];
@@ -56,7 +61,7 @@ export default function V3CoachChat() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Not authenticated');
+      if (!session?.access_token) throw new Error(t('coach.chat.runtime.notAuthenticated'));
 
       const pageContext = {
         workout_done: workoutDone ?? false,
@@ -84,7 +89,7 @@ export default function V3CoachChat() {
           toast(limitMsg);
           setMessages((prev) => [
             ...prev,
-            { text: limitMsg, meta: 'Coach · limit reached' },
+            { text: limitMsg, meta: t('coach.chat.runtime.limitMeta') },
           ]);
           return;
         }
@@ -96,7 +101,7 @@ export default function V3CoachChat() {
 
       setMessages((prev) => [
         ...prev,
-        { text: reply, meta: 'Coach · just now' },
+        { text: reply, meta: t('coach.chat.runtime.justNowMeta') },
       ]);
     } catch (err) {
       console.error('[V3CoachChat] send error:', err);
@@ -104,7 +109,7 @@ export default function V3CoachChat() {
       toast(errMsg);
       setMessages((prev) => [
         ...prev,
-        { text: 'Something went wrong. Try again.', meta: 'Coach · error' },
+        { text: t('coach.chat.runtime.errorText'), meta: t('coach.chat.runtime.errorMeta') },
       ]);
     } finally {
       setLoading(false);
@@ -113,7 +118,7 @@ export default function V3CoachChat() {
 
   // Build messages array for S12, appending typing indicator when loading
   const visibleMessages = loading
-    ? [...messages, { text: '…', meta: 'Coach · typing' }]
+    ? [...messages, { text: '…', meta: t('coach.chat.runtime.typingMeta') }]
     : messages;
 
   return (
@@ -121,23 +126,26 @@ export default function V3CoachChat() {
       <S12_Coach_Chat
         dark={theme === 'dark'}
         messages={visibleMessages.length > 0 ? visibleMessages : undefined}
-        statusLabel={loading ? 'Thinking…' : 'Reading your signal · live'}
+        statusLabel={loading ? t('coach.chat.runtime.thinking') : t('coach.chat.runtime.liveStatus')}
+        suggestionLabel={t('coach.chat.runtime.suggestionLabel')}
+        suggestionText={t('coach.chat.runtime.suggestionText')}
+        suggestionActions={[addToPlanLabel, notTodayLabel]}
+        quickActions={[logActionLabel, showOptionsLabel, laterLabel]}
         onBack={() => navigate(-1)}
         onSuggestionAction={(label) => {
-          if (/add to plan/i.test(label)) return toast(t('coach.chat.addedToPlan'));
-          if (/not today/i.test(label)) return toast(t('coach.chat.dismissedForToday'));
+          if (label === addToPlanLabel) return toast(t('coach.chat.addedToPlan'));
+          if (label === notTodayLabel) return toast(t('coach.chat.dismissedForToday'));
           toast(t('coach.chat.noted'));
         }}
         onQuickAction={(label) => {
-          if (/log/i.test(label)) return navigate('/app/nutrition/search');
-          if (/show/i.test(label)) return navigate('/app/nutrition/search');
-          if (/workout/i.test(label)) return navigate('/app/train');
-          if (/later/i.test(label)) return toast(t('coach.chat.savedForLater'));
+          if (label === logActionLabel) return navigate('/app/nutrition/search');
+          if (label === showOptionsLabel) return navigate('/app/nutrition/search');
+          if (label === laterLabel) return toast(t('coach.chat.savedForLater'));
           // Route quick actions from AI suggestions as new messages
           sendMessage(label);
         }}
         composerDisabled={loading}
-        draftPlaceholder={loading ? t('coach.chat.connectingPlaceholder') : t('coach.chat.placeholder', { defaultValue: 'Ask the coach…' })}
+        draftPlaceholder={loading ? t('coach.chat.connectingPlaceholder') : t('coach.chat.placeholder')}
         onSend={sendMessage}
       />
     </V3StandaloneLayout>

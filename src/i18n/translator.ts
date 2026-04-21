@@ -19,13 +19,12 @@ export function createTranslator(dictionary: Dictionary) {
   return function t(key: string, vars?: Record<string, string | number>): string {
     let text = getNestedValue(dictionary, key);
 
-    // Fallback to readable text if translation missing
-    // Convert key like "profile.overview.title" to "Your Profile"
     if (!text || typeof text !== 'string') {
-      console.warn(`[i18n] Missing translation key: "${key}"`);
-      // Generate readable fallback from the last segment of the key
-      const lastSegment = key.split('.').pop() || key;
-      return readableFallback(lastSegment);
+      if (import.meta.env.DEV) {
+        console.error(`[i18n] Missing translation key for active locale: "${key}"`);
+        return `[missing:${key}]`;
+      }
+      return key;
     }
 
     // No interpolation needed

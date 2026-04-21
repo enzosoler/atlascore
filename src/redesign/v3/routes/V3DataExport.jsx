@@ -5,30 +5,32 @@ import { ACFonts, ACRadii } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
 import { MC } from './V3MarketingLayout.jsx';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { downloadUserDataCsv, downloadUserDataJson } from '@/services/dataExportService';
-
-const EXPORT_OPTIONS = [
-  {
-    title: 'Full export (JSON)',
-    description: 'Machine-readable. Import into other tools.',
-    button: 'Download JSON',
-    format: 'json',
-  },
-  {
-    title: 'Spreadsheet (CSV)',
-    description: 'Open in Excel, Sheets, or Numbers.',
-    button: 'Download CSV',
-    format: 'csv',
-  },
-];
+import { WEBAPP_HOME } from '@/lib/platformRoutes';
 
 export default function V3DataExport() {
   const { user } = useAuth();
+  const t = useT();
   const [activeFormat, setActiveFormat] = useState(null);
+  const exportOptions = [
+    {
+      title: t('dataExport.jsonTitle'),
+      description: t('dataExport.jsonDesc'),
+      button: t('dataExport.jsonButton'),
+      format: 'json',
+    },
+    {
+      title: t('dataExport.csvTitle'),
+      description: t('dataExport.csvDesc'),
+      button: t('dataExport.csvButton'),
+      format: 'csv',
+    },
+  ];
 
   async function handleExport(format) {
     if (!user?.id) {
-      toast.error('You must be signed in to export data.');
+      toast.error(t('dataExport.mustBeSignedIn'));
       return;
     }
 
@@ -39,10 +41,10 @@ export default function V3DataExport() {
       } else {
         await downloadUserDataCsv(user.id);
       }
-      toast.success(`${format.toUpperCase()} export ready`);
+      toast.success(t('dataExport.ready', { format: format.toUpperCase() }));
     } catch (error) {
       console.error('[V3DataExport] export failed', error);
-      toast.error('Export failed', { description: error?.message || 'Please try again.' });
+      toast.error(t('dataExport.failed'), { description: error?.message || t('common.tryAgain') });
     } finally {
       setActiveFormat(null);
     }
@@ -64,7 +66,7 @@ export default function V3DataExport() {
       <div style={{ width: '100%', maxWidth: 520 }}>
         {/* Back link */}
         <Link
-          to="/app/account"
+          to={WEBAPP_HOME}
           style={{
             display: 'inline-block',
             color: MC.dim,
@@ -75,7 +77,7 @@ export default function V3DataExport() {
             marginBottom: 32,
           }}
         >
-          &larr; Back to account
+          {t('dataExport.backToAccount')}
         </Link>
 
         {/* HeartMark centered */}
@@ -95,7 +97,7 @@ export default function V3DataExport() {
             textAlign: 'center',
           }}
         >
-          Export your data
+          {t('dataExport.heading')}
         </h1>
 
         {/* Description */}
@@ -108,13 +110,12 @@ export default function V3DataExport() {
             margin: '0 0 36px',
           }}
         >
-          Download your complete body record — workouts, nutrition, measurements,
-          and labs. Your data is always yours.
+          {t('dataExport.description')}
         </p>
 
         {/* Export option cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {EXPORT_OPTIONS.map((opt) => (
+          {exportOptions.map((opt) => (
             <div
               key={opt.title}
               style={{
@@ -165,7 +166,7 @@ export default function V3DataExport() {
                   WebkitAppearance: 'none',
                 }}
               >
-                {activeFormat === opt.format ? 'Preparing…' : opt.button}
+                {activeFormat === opt.format ? t('dataExport.preparing') : opt.button}
               </button>
             </div>
           ))}
@@ -181,7 +182,7 @@ export default function V3DataExport() {
             marginTop: 32,
           }}
         >
-          Export includes your profile, workouts, nutrition logs, measurements, check-ins, routines, and available session history.
+          {t('dataExport.footerNote')}
         </p>
       </div>
     </div>

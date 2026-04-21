@@ -5,6 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { toast } from 'sonner';
+import { WEBAPP_EXPORT } from '@/lib/platformRoutes';
+import { useT } from '@/lib/i18nContext';
 import S65_Danger_Zone from '../screens/S65_Danger_Zone.jsx';
 
 export default function V3DangerZone() {
@@ -12,46 +14,47 @@ export default function V3DangerZone() {
   const { theme } = useTheme();
   const { user, logout } = useAuth();
   const { subscription, showCustomerCenter } = useSubscription();
+  const t = useT();
 
   const handleResetData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not signed in');
+      if (!session) throw new Error(t('dangerZone.toasts.notSignedIn'));
       const { error } = await supabase.functions.invoke('reset-user-data', {
         body: {},
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) throw error;
-      toast.success('Data reset — account cleared');
+      toast.success(t('dangerZone.toasts.resetSuccess'));
       await logout(); // hard redirects to / → auth reads onboarding_completed=false → /onboarding
     } catch (err) {
       console.error('[V3DangerZone] reset error', err);
-      toast.error('Reset failed', { description: err?.message || 'Try again.' });
+      toast.error(t('dangerZone.toasts.resetFailed'), { description: err?.message || t('common.tryAgain') });
     }
   };
 
   const handleDeleteAccount = async () => {
     if (!user?.email) {
-      toast.error('No authenticated account found');
+      toast.error(t('dangerZone.toasts.noAccount'));
       return;
     }
 
-    const confirmEmail = window.prompt(`Type ${user.email} to permanently delete this account.`, '');
+    const confirmEmail = window.prompt(t('dangerZone.prompts.typeEmail', { email: user.email }), '');
     if (confirmEmail !== user.email) {
-      toast('Account deletion cancelled', {
-        description: 'The confirmation email did not match.',
+      toast(t('dangerZone.toasts.deleteCancelled'), {
+        description: t('dangerZone.toasts.emailMismatch'),
       });
       return;
     }
 
     const confirmed = window.confirm(
-      'This permanently deletes your account and tracking data. This cannot be undone.'
+      t('dangerZone.prompts.finalConfirm')
     );
     if (!confirmed) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Not signed in');
+      if (!session?.access_token) throw new Error(t('dangerZone.toasts.notSignedIn'));
 
       const { data, error } = await supabase.functions.invoke('self-delete-user', {
         body: {},
@@ -61,8 +64,8 @@ export default function V3DangerZone() {
       if (error) throw error;
       if (data?.error) {
         if (data.code === 'cancel_store_subscription_first') {
-          toast.error('Cancel store subscription first', {
-            description: 'Open subscription management, cancel there, then retry deletion.',
+          toast.error(t('dangerZone.toasts.cancelSubscriptionFirst'), {
+            description: t('dangerZone.toasts.cancelSubscriptionDescription'),
           });
           await showCustomerCenter?.();
           return;
@@ -70,18 +73,18 @@ export default function V3DangerZone() {
         throw new Error(data.error);
       }
 
-      toast.success('Account deleted');
+      toast.success(t('dangerZone.toasts.deleteSuccess'));
       try { await logout(); } catch {}
       navigate('/', { replace: true });
     } catch (err) {
-      const message = err?.message || 'Try again.';
-      toast.error('Account deletion failed', { description: message });
+      const message = err?.message || t('common.tryAgain');
+      toast.error(t('dangerZone.toasts.deleteFailed'), { description: message });
       if (
         subscription?.status &&
         ['active', 'trialing', 'granted', 'past_due'].includes(subscription.status)
       ) {
-        toast('Manage billing first if needed', {
-          description: 'If this account still has store-managed billing, cancel it before retrying deletion.',
+        toast(t('dangerZone.toasts.manageBillingFirst'), {
+          description: t('dangerZone.toasts.manageBillingDescription'),
         });
       }
     }
@@ -91,7 +94,7 @@ export default function V3DangerZone() {
     <S65_Danger_Zone
       dark={theme === 'dark'}
       userEmail={user?.email}
-      onExportData={() => navigate('/app/export')}
+      onExportData={() => navigate(WEBAPP_EXPORT)}
       onResetData={handleResetData}
       onDeleteAccount={handleDeleteAccount}
       onBack={() => navigate(-1)}

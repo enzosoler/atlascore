@@ -3,24 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { defaultLocale, isValidLocale } from '@/i18n/config';
 import { getDictionarySync } from '@/i18n/dictionaries';
 import { createTranslator } from '@/i18n/translator';
-import { readableFallback } from '@/i18n/translator';
+import { getBuildLocale, getStoredLocale, getLocaleFromPath, LOCALE_STORAGE_KEY, storeLocale } from '@/i18n/runtime';
 
 const I18nContext = createContext(null);
-
-const LOCALE_STORAGE_KEY = 'atlas_locale';
-
-/**
- * Detect locale from the build-time env variable (set by vite.config.i18n.js)
- * or fall back to parsing the browser URL.
- * When BrowserRouter has basename="/br/", useLocation().pathname strips the prefix,
- * so we rely on the build locale instead.
- */
-function getBuildLocale() {
-  const buildLocale = import.meta.env.VITE_LOCALE;
-  if (buildLocale === 'pt-BR') return 'pt-BR';
-  if (buildLocale === 'en-US') return 'en';
-  return null;
-}
 
 /**
  * Browser language detection is intentionally disabled.
@@ -30,32 +15,6 @@ function getBuildLocale() {
  */
 function getBrowserLocale() {
   return defaultLocale;
-}
-
-/**
- * Read persisted locale from localStorage.
- */
-function getStoredLocale() {
-  if (typeof window === 'undefined') return null;
-  try {
-    const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (stored && isValidLocale(stored)) return stored;
-  } catch {
-    // localStorage may be unavailable
-  }
-  return null;
-}
-
-/**
- * Persist locale to localStorage.
- */
-function storeLocale(locale) {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  } catch {
-    // localStorage may be unavailable
-  }
 }
 
 /**
@@ -94,24 +53,6 @@ function resolveInitialLocale(pathname) {
   const browserLocale = getBrowserLocale();
   storeLocale(browserLocale);
   return browserLocale;
-}
-
-function getLocaleFromPath(pathname) {
-  // First check build-time locale (reliable for /br/ builds with basename)
-  const buildLocale = getBuildLocale();
-  if (buildLocale) return buildLocale;
-
-  // Fallback: parse from path (for dev mode or non-i18n builds)
-  const parts = pathname.split('/').filter(Boolean);
-  const firstSegment = parts[0];
-  if (firstSegment === 'en') return 'en';
-  if (firstSegment === 'pt' || firstSegment === 'br') return 'pt-BR';
-
-  // Don't override stored locale on path changes within the app
-  const stored = getStoredLocale();
-  if (stored) return stored;
-
-  return defaultLocale;
 }
 
 function buildPathWithLocale(pathname, targetLocale) {
@@ -158,7 +99,7 @@ export function I18nProvider({ children }) {
   }, [locale]);
 
   const t = useMemo(() => {
-    if (!dictionary) return (key) => readableFallback(key);
+    if (!dictionary) return (key) => key;
     return createTranslator(dictionary);
   }, [dictionary]);
 

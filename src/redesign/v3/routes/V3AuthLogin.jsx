@@ -5,10 +5,10 @@ import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S36_Auth from '../screens/S36_Auth.jsx';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 
-function friendlyOAuthError(provider, err) {
-  const label = provider === 'apple' ? 'Apple' : 'Google';
-  return err?.message || `Could not start ${label} sign in.`;
+function friendlyOAuthError(provider, err, t) {
+  return err?.message || t(provider === 'apple' ? 'auth.login.appleStartFailed' : 'auth.login.googleStartFailed');
 }
 
 export default function V3AuthLogin() {
@@ -16,6 +16,7 @@ export default function V3AuthLogin() {
   const [params] = useSearchParams();
   const { theme } = useTheme();
   const { signIn } = useAuth();
+  const t = useT();
   const [email, setEmail] = useState(params.get('email') || '');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState(params.get('mode') === 'password' ? 'password' : 'magic');
@@ -30,8 +31,8 @@ export default function V3AuthLogin() {
     return (
       <V3StandaloneLayout>
         <div style={{ padding: 24, maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Sign-in unavailable</div>
-          <div>Supabase is not configured in this build. Sign-in is unavailable. Please use a development build or contact the engineering team.</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>{t('auth.login.unavailableTitle')}</div>
+          <div>{t('auth.login.unavailableBody')}</div>
         </div>
       </V3StandaloneLayout>
     );
@@ -45,11 +46,11 @@ export default function V3AuthLogin() {
     const em = email.trim().toLowerCase();
     setError('');
     if (!em) {
-      setError('Enter your email first.');
+      setError(t('auth.login.enterEmail'));
       return;
     }
     if (mode === 'password' && !password) {
-      setError('Enter your password.');
+      setError(t('auth.login.enterPassword'));
       return;
     }
 
@@ -68,7 +69,7 @@ export default function V3AuthLogin() {
       }
     } catch (err) {
       setError(
-        err?.message || (mode === 'password' ? 'Could not sign you in.' : 'Could not send magic link.')
+        err?.message || (mode === 'password' ? t('auth.login.signInFailed') : t('auth.login.magicLinkFailed'))
       );
     } finally {
       setLoading(false);
@@ -84,7 +85,7 @@ export default function V3AuthLogin() {
       });
       if (oauthError) throw oauthError;
     } catch (err) {
-      setError(friendlyOAuthError(provider, err));
+      setError(friendlyOAuthError(provider, err, t));
     }
   };
 

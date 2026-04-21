@@ -16,6 +16,7 @@ import { useSubscription } from '@/lib/SubscriptionContext';
 import { useT } from '@/lib/i18nContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
 import { openWebBillingPortal } from '@/services/billingService';
+import { WEBAPP_BILLING, WEBAPP_EXPORT, WEBAPP_HOME, WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 
 function NavLink({ to, children }) {
   return (
@@ -34,17 +35,17 @@ export default function V3SubscriptionManage() {
 
   const isActive = subscription && ['active', 'trialing', 'granted'].includes(subscription.status);
   const planLabel = isActive
-    ? (subscription.tier || 'Pro').charAt(0).toUpperCase() + (subscription.tier || 'pro').slice(1)
-    : 'Free';
-  const statusLabel = subscription?.status === 'trialing' ? 'Trial'
-    : subscription?.status === 'granted' ? 'Granted'
-    : subscription?.status === 'active' ? 'Active' : 'Inactive';
+    ? (subscription.tier || t('manageSub.planPro')).charAt(0).toUpperCase() + (subscription.tier || t('manageSub.planPro').toLowerCase()).slice(1)
+    : t('manageSub.planFree');
+  const statusLabel = subscription?.status === 'trialing' ? t('manageSub.statusTrial')
+    : subscription?.status === 'granted' ? t('manageSub.statusGranted')
+    : subscription?.status === 'active' ? t('manageSub.statusActive') : t('manageSub.statusInactive');
 
   let renewalDate = null;
   const rawDate = subscription?.expires_at || subscription?.trial_ends_at;
   if (rawDate) {
     try {
-      renewalDate = new Date(rawDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        renewalDate = new Date(rawDate).toLocaleDateString(t('format.localeTag'), { month: 'long', day: 'numeric', year: 'numeric' });
     } catch {}
   }
 
@@ -52,7 +53,7 @@ export default function V3SubscriptionManage() {
     try {
       const handled = await openSubscriptionManagement();
       if (!handled) {
-        await openWebBillingPortal(`${window.location.origin}/app/billing`);
+        await openWebBillingPortal(`${window.location.origin}${WEBAPP_BILLING}`);
       }
     } catch (error) {
       toast.error(t('manageSub.cancelFallback.title'), {
@@ -80,16 +81,16 @@ export default function V3SubscriptionManage() {
         display: 'flex', alignItems: 'center', gap: 28, padding: '22px 56px',
         borderBottom: MC.border, flexWrap: 'wrap',
       }}>
-        <Link to="/app/account" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
+        <Link to={WEBAPP_HOME} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: ACBrand.ink, textDecoration: 'none' }}>
           <HeartMark size={34} stroke={2} />
           <span style={{ fontFamily: ACFonts.brand, fontSize: 22, letterSpacing: -0.5, textTransform: 'lowercase' }}>
             atlas.<span style={{ color: ACBrand.accent }}>core</span>
           </span>
         </Link>
         <div className="mg-nav" style={{ display: 'flex', gap: 24 }}>
-          <NavLink to="/app/account">{t('webNav.account')}</NavLink>
-          <NavLink to="/app/billing">{t('webNav.billing')}</NavLink>
-          <NavLink to="/app/export">{t('webNav.export')}</NavLink>
+          <NavLink to={WEBAPP_HOME}>{t('webNav.account')}</NavLink>
+          <NavLink to={WEBAPP_BILLING}>{t('webNav.billing')}</NavLink>
+          <NavLink to={WEBAPP_EXPORT}>{t('webNav.export')}</NavLink>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
           <NavLink to="/download-app">{t('webNav.getApp')}</NavLink>
@@ -105,23 +106,23 @@ export default function V3SubscriptionManage() {
         maxWidth: 960, margin: '0 auto', padding: '64px 56px 96px',
         animation: 'acMgFade 0.4s ease-out',
       }}>
-        <Link to="/app/account" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600, color: MC.dim, textDecoration: 'none' }}>
-          &larr; Back to account
+        <Link to={WEBAPP_HOME} style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600, color: MC.dim, textDecoration: 'none' }}>
+          {t('manageSub.backToAccount')}
         </Link>
 
         <div style={{ marginTop: 24 }}>
           <div style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: MC.dim }}>
-            /// manage subscription
+            {t('manageSub.eyebrow')}
           </div>
           <h1 style={{ margin: '12px 0 0', fontFamily: ACFonts.brand, fontSize: 'clamp(36px, 6vw, 56px)', letterSpacing: '-0.04em', lineHeight: 0.9, textTransform: 'lowercase' }}>
-            your <span style={{ color: ACBrand.accent }}>plan.</span>
+            {t('manageSub.headingPrefix')} <span style={{ color: ACBrand.accent }}>{t('manageSub.headingAccent')}</span>
           </h1>
         </div>
 
         {/* Current plan card */}
         <div style={{ marginTop: 40, padding: 32, background: ACBrand.ink, color: ACBrand.paper, borderRadius: ACRadii.card }}>
           <div style={{ fontFamily: ACFonts.mono, fontSize: 10, letterSpacing: 0.8, textTransform: 'uppercase', color: ACBrand.accent }}>
-            current plan
+            {t('manageSub.currentPlan')}
           </div>
           <div style={{ marginTop: 10, fontFamily: ACFonts.brand, fontSize: 48, letterSpacing: -2.2, lineHeight: 0.9, textTransform: 'lowercase' }}>
             {planLabel.toLowerCase()}
@@ -132,7 +133,7 @@ export default function V3SubscriptionManage() {
             </span>
             {renewalDate && (
               <span style={{ fontFamily: ACFonts.mono, fontSize: 12, letterSpacing: 0.3, color: 'rgba(239,233,218,0.6)' }}>
-                {subscription?.status === 'trialing' ? 'Trial ends' : 'Renews'} {renewalDate}
+                {subscription?.status === 'trialing' ? t('manageSub.trialEnds') : t('manageSub.renews')} {renewalDate}
               </span>
             )}
           </div>
@@ -142,27 +143,27 @@ export default function V3SubscriptionManage() {
         <div className="mg-grid" style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div style={{ padding: 28, border: MC.border, borderRadius: ACRadii.card }}>
             <div style={{ fontFamily: ACFonts.display, fontSize: 18, fontWeight: 700, letterSpacing: -0.4 }}>
-              Change plan
+              {t('manageSub.changePlanTitle')}
             </div>
             <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, color: MC.body }}>
-              Switch between weekly, monthly, or yearly billing.
+              {t('manageSub.changePlanDesc')}
             </div>
-            <Link to="/app/billing/paywall" style={{
+            <Link to={WEBAPP_PAYWALL} style={{
               display: 'inline-flex', marginTop: 16, padding: '10px 20px',
               background: ACBrand.ink, color: ACBrand.paper, border: 'none',
               borderRadius: ACRadii.button, fontFamily: ACFonts.body, fontSize: 14,
               fontWeight: 600, letterSpacing: -0.2, textDecoration: 'none',
             }}>
-              View plans
+              {t('manageSub.viewPlans')}
             </Link>
           </div>
 
           <div style={{ padding: 28, border: MC.border, borderRadius: ACRadii.card }}>
             <div style={{ fontFamily: ACFonts.display, fontSize: 18, fontWeight: 700, letterSpacing: -0.4 }}>
-              Cancel subscription
+              {t('manageSub.cancelTitle')}
             </div>
             <div style={{ marginTop: 8, fontSize: 14, lineHeight: 1.5, color: MC.body }}>
-              Access continues until the end of your current billing period.
+              {t('manageSub.cancelDesc')}
             </div>
             <button type="button" onClick={handleCancel} style={{
               display: 'inline-flex', marginTop: 16, padding: '10px 20px',
@@ -171,18 +172,18 @@ export default function V3SubscriptionManage() {
               fontFamily: ACFonts.body, fontSize: 14, fontWeight: 600,
               letterSpacing: -0.2, cursor: 'pointer',
             }}>
-              Cancel plan
+              {t('manageSub.cancelPlan')}
             </button>
           </div>
         </div>
 
         {/* Quick links */}
         <div style={{ marginTop: 28, display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          <Link to="/app/billing/invoices" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600, color: MC.dim, textDecoration: 'underline' }}>
-            Billing history
+          <Link to="/webapp/billing/invoices" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600, color: MC.dim, textDecoration: 'underline' }}>
+            {t('manageSub.billingHistory')}
           </Link>
-          <Link to="/app/export" style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600, color: MC.dim, textDecoration: 'underline' }}>
-            Export data
+          <Link to={WEBAPP_EXPORT} style={{ fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600, color: MC.dim, textDecoration: 'underline' }}>
+            {t('manageSub.exportData')}
           </Link>
         </div>
       </div>
@@ -192,7 +193,7 @@ export default function V3SubscriptionManage() {
         padding: '32px 56px 48px', borderTop: MC.border, textAlign: 'center',
         fontFamily: ACFonts.mono, fontSize: 11, letterSpacing: 0.4, color: MC.dim,
       }}>
-        atlas.core is built for mobile. This is your account dashboard.
+        {t('manageSub.footer')}
       </div>
     </div>
   );

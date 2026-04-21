@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useTheme } from '@/lib/ThemeContext';
+import { useT } from '@/lib/i18nContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import { ACBtn, ACFonts, ACLabel, ACBrand, useACT } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
@@ -16,6 +17,7 @@ function ForgotPasswordCard({
   onSubmit,
   onClose,
   onTryAgain,
+  t,
 }) {
   const c = useACT(dark);
 
@@ -35,7 +37,7 @@ function ForgotPasswordCard({
             color: c.fg,
             textDecoration: 'none',
           }}
-          aria-label="Back to login"
+          aria-label={t('auth.forgot.backToLogin')}
         >
           <svg width="10" height="10" viewBox="0 0 10 10">
             <path d="M6.5 1.4L2.5 5l4 3.6" stroke={c.fg} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -55,7 +57,7 @@ function ForgotPasswordCard({
             justifyContent: 'center',
             cursor: 'pointer',
           }}
-          aria-label="Close"
+          aria-label={t('common.close')}
         >
           <svg width="10" height="10" viewBox="0 0 10 10">
             <path d="M1 1l8 8M9 1l-8 8" stroke={c.fg} strokeWidth="1.8" strokeLinecap="round" />
@@ -69,15 +71,15 @@ function ForgotPasswordCard({
         </div>
 
         <div style={{ marginTop: 22, fontFamily: ACFonts.brand, fontSize: 44, letterSpacing: -2, lineHeight: 0.9, textTransform: 'lowercase' }}>
-          reset your
+          {t('auth.forgot.headingLine1')}
           <br />
-          <span style={{ color: c.accent }}>password.</span>
+          <span style={{ color: c.accent }}>{t('auth.forgot.headingAccent')}</span>
         </div>
 
         <div style={{ marginTop: 12, maxWidth: 300, fontSize: 14, lineHeight: 1.55, color: c.dim }}>
           {sent
-            ? `We sent reset instructions to ${email}. The link is valid for one hour.`
-            : 'Enter your email and we will send you a reset link.'}
+            ? t('auth.forgot.sentBody', { email })
+            : t('auth.forgot.body')}
         </div>
 
         {sent ? (
@@ -94,11 +96,11 @@ function ForgotPasswordCard({
                 color: c.dim,
               }}
             >
-              If it does not show up, check spam or try a different email.
+              {t('auth.forgot.checkSpam')}
             </div>
             <div style={{ marginTop: 22 }}>
               <ACBtn primary dark={dark} size="lg" pill block type="button" onClick={() => onClose('/auth/login')}>
-                Back to sign in →
+                {t('auth.forgot.backToSignIn')}
               </ACBtn>
             </div>
             <button
@@ -116,7 +118,7 @@ function ForgotPasswordCard({
                 cursor: 'pointer',
               }}
             >
-              Try a different email
+              {t('auth.forgot.tryDifferentEmail')}
             </button>
           </>
         ) : (
@@ -142,7 +144,7 @@ function ForgotPasswordCard({
                   autoFocus
                   value={email}
                   onChange={(e) => onEmailChange(e.target.value)}
-                  placeholder="you@email.com"
+                  placeholder={t('auth.form.emailPlaceholder')}
                   style={{
                     flex: 1,
                     height: 48,
@@ -162,13 +164,13 @@ function ForgotPasswordCard({
                 color={error ? ACBrand.error : c.mute}
                 style={{ fontFamily: ACFonts.body, letterSpacing: 0.1, marginTop: 8, display: 'block' }}
               >
-                {error || 'We will send the reset link to this inbox.'}
+                {error || t('auth.forgot.hint')}
               </ACLabel>
             </div>
 
             <div style={{ marginTop: 22 }}>
               <ACBtn primary dark={dark} size="lg" pill block type="submit" style={{ opacity: loading ? 0.6 : 1 }}>
-                {loading ? 'Sending…' : 'Send reset link →'}
+                {loading ? t('auth.forgot.sending') : t('auth.forgot.submit')}
               </ACBtn>
             </div>
           </>
@@ -181,6 +183,7 @@ function ForgotPasswordCard({
 export default function V3ForgotPassword() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const t = useT();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -191,7 +194,7 @@ export default function V3ForgotPassword() {
     setError('');
     const em = email.trim().toLowerCase();
     if (!em) {
-      setError('Enter your email.');
+      setError(t('auth.forgot.enterEmail'));
       return;
     }
 
@@ -204,7 +207,7 @@ export default function V3ForgotPassword() {
       setEmail(em);
       setSent(true);
     } catch (err) {
-      setError(err?.message || 'Could not send reset email.');
+      setError(err?.message || t('auth.forgot.sendFailed'));
     } finally {
       setLoading(false);
     }
@@ -225,6 +228,7 @@ export default function V3ForgotPassword() {
           setSent(false);
           setError('');
         }}
+        t={t}
       />
     </V3StandaloneLayout>
   );

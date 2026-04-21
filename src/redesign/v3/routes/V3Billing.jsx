@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
 import { listBillingSubscriptions, openWebBillingPortal } from '@/services/billingService';
+import { WEBAPP_BILLING, WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 import { toast } from 'sonner';
 import S40_Billing from '../screens/S40_Billing.jsx';
 
@@ -39,7 +40,7 @@ export default function V3Billing() {
     try {
       const handled = await openSubscriptionManagement();
       if (!handled) {
-        await openWebBillingPortal(`${window.location.origin}/app/billing`);
+        await openWebBillingPortal(`${window.location.origin}${WEBAPP_BILLING}`);
       }
     } catch (error) {
       toast.error('Could not open billing management', {
@@ -57,7 +58,7 @@ export default function V3Billing() {
       nextCharge={nextCharge}
       invoices={invoices}
       onEditPayment={openPortal}
-      onSwitchPlan={() => navigate('/app/billing/plans')}
+      onSwitchPlan={() => navigate(WEBAPP_PAYWALL)}
       onCancel={openPortal}
       onOpenInvoice={openPortal}
       onBack={() => navigate(-1)}

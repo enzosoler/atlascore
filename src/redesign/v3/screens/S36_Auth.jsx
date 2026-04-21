@@ -1,6 +1,7 @@
 import React from 'react';
 import { ACFonts, useACT, ACLabel, ACBtn } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
+import { useT } from '@/lib/i18nContext';
 
 export default function S36_Auth({
   dark = false,
@@ -20,9 +21,10 @@ export default function S36_Auth({
   onSwitchMode,
   loading = false,
   error = '',
-  hint = 'Returning? We will recognize this one.',
+  hint,
 }) {
   const c = useACT(dark);
+  const t = useT();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -75,9 +77,9 @@ export default function S36_Auth({
         >
           {headline || (
             <>
-              one screen.
+              {t('auth.form.defaultHeadlineLine1')}
               <br />
-              one <span style={{ color: c.accent }}>field.</span>
+              {t('auth.form.defaultHeadlineLine2Prefix')} <span style={{ color: c.accent }}>{t('auth.form.defaultHeadlineAccent')}</span>
             </>
           )}
         </div>
@@ -93,16 +95,16 @@ export default function S36_Auth({
         >
           {description || (
             mode === 'magic'
-              ? "We'll email you a magic link. No passwords to remember."
-              : 'Use your email and password to get back in.'
+              ? t('auth.form.defaultMagicDescription')
+              : t('auth.form.defaultPasswordDescription')
           )}
         </div>
 
         {showModeSwitch ? (
           <div style={{ marginTop: 22, display: 'flex', gap: 8 }}>
             {[
-              { key: 'magic', label: 'Magic link' },
-              { key: 'password', label: 'Password' },
+              { key: 'magic', label: t('auth.form.magicMode') },
+              { key: 'password', label: t('auth.form.passwordMode') },
             ].map((option) => {
               const active = option.key === mode;
               return (
@@ -136,7 +138,7 @@ export default function S36_Auth({
             color={c.dim}
             style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}
           >
-            Email
+            {t('auth.form.emailLabel')}
           </ACLabel>
           <div
             style={{
@@ -156,7 +158,7 @@ export default function S36_Auth({
               autoFocus
               value={email}
               onChange={(e) => onEmailChange?.(e.target.value)}
-              placeholder="you@email.com"
+              placeholder={t('auth.form.emailPlaceholder')}
               style={{
                 flex: 1,
                 height: 48,
@@ -179,7 +181,7 @@ export default function S36_Auth({
             color={error ? '#c65b4b' : c.mute}
             style={{ fontFamily: ACFonts.body, letterSpacing: 0.1, marginTop: 8, display: 'block' }}
           >
-            {error || hint}
+            {error || hint || t('auth.form.defaultHint')}
           </ACLabel>
         </div>
 
@@ -190,7 +192,7 @@ export default function S36_Auth({
               color={c.dim}
               style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}
             >
-              Password
+              {t('auth.form.passwordLabel')}
             </ACLabel>
             <div
               style={{
@@ -209,7 +211,7 @@ export default function S36_Auth({
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => onPasswordChange?.(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t('auth.form.passwordPlaceholder')}
                 style={{
                   flex: 1,
                   height: 48,
@@ -232,22 +234,22 @@ export default function S36_Auth({
 
         <div style={{ marginTop: 22 }}>
           <ACBtn primary dark={dark} size="lg" pill block type="submit" style={{ opacity: loading ? 0.6 : 1 }}>
-            {loading ? 'Working…' : submitLabel || (mode === 'magic' ? 'Send magic link →' : 'Sign in →')}
+            {loading ? t('auth.form.working') : submitLabel || (mode === 'magic' ? t('auth.form.sendMagic') : t('auth.form.signIn'))}
           </ACBtn>
         </div>
 
         <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1, height: 1, background: c.hair }} />
           <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>
-            Or use
+            {t('auth.form.orUse')}
           </ACLabel>
           <div style={{ flex: 1, height: 1, background: c.hair }} />
         </div>
 
         <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[
-            { key: 'apple', label: 'Continue with Apple', action: onApple },
-            { key: 'google', label: 'Continue with Google', action: onGoogle },
+            { key: 'apple', label: t('auth.form.continueApple'), action: onApple },
+            { key: 'google', label: t('auth.form.continueGoogle'), action: onGoogle },
           ].map((provider) => (
             <button
               key={provider.key}
@@ -298,8 +300,7 @@ export default function S36_Auth({
             maxWidth: 280,
           }}
         >
-          By continuing you accept our terms and privacy notice. Health data never leaves this
-          device by default.
+          {t('auth.form.legal')}
         </div>
       </form>
     </div>

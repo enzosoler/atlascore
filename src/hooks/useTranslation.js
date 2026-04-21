@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useI18n } from '@/lib/i18nContext';
+import { locales } from '@/i18n/config';
 
 export const useTranslation = () => {
   const { locale, t, getTranslation } = useI18n();
@@ -9,6 +10,6 @@ export const useTranslation = () => {
     getTranslation,
     language: locale,
     setLanguage: () => {},
-    supportedLanguages: ['en-US', 'pt-BR'],
+    supportedLanguages: [...locales],
   }), [locale, t, getTranslation]);
 };

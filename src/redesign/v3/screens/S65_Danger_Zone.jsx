@@ -3,6 +3,7 @@ import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBtn, ACMono,
 } from '../lib/paper.jsx';
+import { useT } from '@/lib/i18nContext';
 
 /**
  * S65_Danger_Zone — Destructive actions with escalating confirmation.
@@ -32,6 +33,7 @@ function S65_Danger_Zone({
   onBack,
 }) {
   const c = useACT(dark);
+  const t = useT();
   const DANGER = '#c2391a';
   const DANGER_FAINT = dark ? 'rgba(194,57,26,0.15)' : 'rgba(194,57,26,0.08)';
   const DANGER_HAIR = dark ? 'rgba(194,57,26,0.30)' : 'rgba(194,57,26,0.20)';
@@ -82,7 +84,7 @@ function S65_Danger_Zone({
           fontFamily: ACFonts.mono, letterSpacing: 0.5, fontWeight: 700,
           textTransform: 'uppercase',
         }}>
-          DANGER ZONE
+          {t('dangerZone.header')}
         </ACLabel>
         <div style={{ width: 28 }} />
       </div>
@@ -93,12 +95,12 @@ function S65_Danger_Zone({
           fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700,
           letterSpacing: -0.8, color: c.fg, lineHeight: 1.1,
         }}>
-          Irreversible actions
+          {t('dangerZone.title')}
         </div>
         <div style={{
           marginTop: 6, fontSize: 13.5, color: c.dim, lineHeight: 1.5,
         }}>
-          These actions destroy data permanently. Export first if you want a copy.
+          {t('dangerZone.subtitle')}
         </div>
       </div>
 
@@ -113,7 +115,7 @@ function S65_Danger_Zone({
           fontFamily: ACFonts.body, fontWeight: 600, letterSpacing: 0.3,
           textTransform: 'uppercase', marginLeft: 2,
         }}>
-          Safe
+          {t('dangerZone.sections.safe')}
         </ACLabel>
         <div style={{
           marginTop: 10, background: c.card, borderRadius: ACRadii.card,
@@ -141,10 +143,10 @@ function S65_Danger_Zone({
                 fontSize: 15, fontWeight: 500, color: c.fg,
                 display: 'flex', alignItems: 'center', gap: 8,
               }}>
-                Download your data
+                {t('dangerZone.export.title')}
               </div>
               <ACLabel size={12} color={c.dim} style={{ marginTop: 2 }}>
-                JSON archive of all meals, workouts, measurements, and chats
+                {t('dangerZone.export.description')}
               </ACLabel>
             </div>
             <svg width="10" height="12" viewBox="0 0 10 12" style={{ flexShrink: 0 }}>
@@ -159,7 +161,7 @@ function S65_Danger_Zone({
             fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.7,
             textTransform: 'uppercase', marginLeft: 2,
           }}>
-            Destructive
+            {t('dangerZone.sections.destructive')}
           </ACLabel>
           <div style={{
             marginTop: 10, background: DANGER_FAINT,
@@ -185,12 +187,12 @@ function S65_Danger_Zone({
                   fontSize: 15, fontWeight: 600, color: DANGER,
                   letterSpacing: -0.1,
                 }}>
-                  Reset all atlas data
+                  {t('dangerZone.reset.title')}
                 </div>
                 <div style={{
                   marginTop: 4, fontSize: 13, color: c.dim, lineHeight: 1.5,
                 }}>
-                  Wipes every food entry, workout, measurement, photo, and chat. Your account, email, and subscription stay intact. Cannot be undone.
+                  {t('dangerZone.reset.description')}
                 </div>
               </div>
             </div>
@@ -209,7 +211,7 @@ function S65_Danger_Zone({
                   fontWeight: 700,
                 }}
               >
-                {resetConfirm ? 'Are you sure? Tap to confirm' : 'Reset data'}
+                {resetConfirm ? t('dangerZone.reset.confirm') : t('dangerZone.reset.action')}
               </ACBtn>
             </div>
             {resetConfirm && (
@@ -222,7 +224,7 @@ function S65_Danger_Zone({
                     fontFamily: ACFonts.mono, letterSpacing: 0.4,
                     textTransform: 'uppercase',
                   }}>
-                    Cancel
+                    {t('common.cancel')}
                   </ACLabel>
                 </button>
               </div>
@@ -236,7 +238,7 @@ function S65_Danger_Zone({
             fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.7,
             textTransform: 'uppercase', marginLeft: 2,
           }}>
-            Terminal
+            {t('dangerZone.sections.terminal')}
           </ACLabel>
           <div style={{
             marginTop: 10,

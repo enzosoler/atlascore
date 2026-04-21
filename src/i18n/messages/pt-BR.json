@@ -13,6 +13,7 @@
     "loading": "Carregando...",
     "error": "Erro",
     "success": "Sucesso",
+    "tryAgain": "Tente novamente.",
     "termsOfUse": "termos de serviço",
     "athlete": "Atleta",
     "dismiss": "×"
@@ -36,19 +37,72 @@
       "subtitle": "Entrando no atlas.core...",
       "noAccount": "Ainda não tem uma conta?",
       "createAccount": "Criar conta gratuita",
-      "forgotPassword": "Esqueci minha senha"
+      "forgotPassword": "Esqueci minha senha",
+      "unavailableTitle": "Login indisponível",
+      "unavailableBody": "O Supabase não está configurado nesta build. O login não está disponível. Use uma build de desenvolvimento ou fale com a equipe de engenharia.",
+      "enterEmail": "Digite seu e-mail primeiro.",
+      "enterPassword": "Digite sua senha.",
+      "signInFailed": "Não foi possível fazer seu login.",
+      "magicLinkFailed": "Não foi possível enviar o magic link.",
+      "appleStartFailed": "Não foi possível iniciar o login com Apple.",
+      "googleStartFailed": "Não foi possível iniciar o login com Google."
     },
     "signup": {
       "title": "Comece seu progresso",
       "subtitle": "Criando seu acesso ao atlas.core...",
       "hasAccount": "Já tem uma conta?",
-      "signIn": "Entrar"
+      "signIn": "Entrar",
+      "hint": "Use e-mail e senha. O restante da configuração acontece dentro do app.",
+      "enterEmail": "Digite seu e-mail primeiro.",
+      "enterPassword": "Digite uma senha.",
+      "passwordMin": "A senha deve ter pelo menos 8 caracteres.",
+      "confirmEmailHint": "Verifique sua caixa de entrada, confirme seu e-mail e depois volte para entrar.",
+      "createFailed": "Não foi possível criar sua conta.",
+      "appleStartFailed": "Não foi possível iniciar o cadastro com Apple.",
+      "googleStartFailed": "Não foi possível iniciar o cadastro com Google.",
+      "headlineLine1": "crie sua",
+      "headlineAccent": "conta.",
+      "description": "Comece com e-mail e senha. O restante da configuração acontece dentro do atlas.core.",
+      "submit": "Criar conta →"
     },
     "forgot": {
       "title": "Redefinir senha",
       "subtitle": "Vamos ajudá-lo a recuperar o acesso...",
       "remembered": "Lembrou sua senha?",
-      "backToLogin": "Voltar ao login"
+      "backToLogin": "Voltar ao login",
+      "headingLine1": "redefina sua",
+      "headingAccent": "senha.",
+      "body": "Digite seu e-mail e enviaremos um link para redefinir a senha.",
+      "sentBody": "Enviamos as instruções de redefinição para {email}. O link vale por uma hora.",
+      "checkSpam": "Se não aparecer, verifique o spam ou tente outro e-mail.",
+      "backToSignIn": "Voltar para entrar →",
+      "tryDifferentEmail": "Tentar outro e-mail",
+      "hint": "Vamos enviar o link de redefinição para esta caixa de entrada.",
+      "sending": "Enviando…",
+      "submit": "Enviar link de redefinição →",
+      "enterEmail": "Digite seu e-mail.",
+      "sendFailed": "Não foi possível enviar o e-mail de redefinição."
+    },
+    "reset": {
+      "backToLogin": "Voltar ao login",
+      "headingLine1": "defina uma nova",
+      "headingAccent": "senha.",
+      "body": "Escolha algo que você ainda não tenha usado.",
+      "doneBody": "Senha atualizada. Redirecionando você para entrar novamente.",
+      "doneCard": "Senha alterada com sucesso.",
+      "passwordPlaceholder": "Pelo menos 8 caracteres",
+      "confirmPlaceholder": "Digite novamente",
+      "passwordsDontMatch": "As senhas não coincidem.",
+      "passwordHint": "Use 8 caracteres ou mais.",
+      "updating": "Atualizando…",
+      "submit": "Atualizar senha →",
+      "passwordMin": "A senha deve ter pelo menos 8 caracteres.",
+      "updateFailed": "Não foi possível atualizar a senha. O link pode ter expirado."
+    },
+    "form": {
+      "emailLabel": "E-mail",
+      "passwordLabel": "Senha",
+      "defaultHint": "Voltando? Vamos reconhecer este endereço."
     },
     "redirecting": "Redirecionando...",
     "didNotOpen": "O login não abriu automaticamente",
@@ -81,7 +135,28 @@
       "message": "Não foi possível carregar seu perfil. Verifique sua conexão e tente novamente.",
       "tryAgain": "Tentar Novamente",
       "signOut": "Sair"
+    },
+    "form": {
+      "defaultHeadlineLine1": "uma tela.",
+      "defaultHeadlineLine2Prefix": "um",
+      "defaultHeadlineAccent": "campo.",
+      "defaultMagicDescription": "Vamos enviar um magic link por e-mail. Sem senhas para lembrar.",
+      "defaultPasswordDescription": "Use seu e-mail e senha para entrar novamente.",
+      "magicMode": "Magic link",
+      "passwordMode": "Senha",
+      "emailPlaceholder": "voce@email.com",
+      "passwordPlaceholder": "••••••••",
+      "working": "Processando…",
+      "sendMagic": "Enviar magic link →",
+      "signIn": "Entrar →",
+      "orUse": "Ou use",
+      "continueApple": "Continuar com Apple",
+      "continueGoogle": "Continuar com Google",
+      "legal": "Ao continuar, você aceita nossos termos e aviso de privacidade. Dados de saúde não saem deste dispositivo por padrão."
     }
+  },
+  "format": {
+    "localeTag": "pt-BR"
   },
   "landing": {
     "nav": {
@@ -1419,6 +1494,7 @@
       },
       "rows": {
         "yourProfile": "Seu perfil",
+        "desktopAccountDesc": "Conta, cobrança e exportação vivem na webapp desktop.",
         "subscription": "Assinatura",
         "connectedServices": "Serviços conectados",
         "connectedServicesDesc": "Apple Health, wearables · melhora a precisão da prontidão",
@@ -1432,20 +1508,29 @@
         "dailyTargetsDesc": "Define sua meta diária de proteína · usado pelo Hoje",
         "exportData": "Exportar dados",
         "exportDataDesc": "Baixe seus registros e histórico",
+        "desktopExportDesc": "Use a webapp desktop para exportar os dados da sua conta.",
         "progressPhotos": "Fotos de progresso",
         "progressPhotosDesc": "Acompanhamento de composição corporal · usado pelo sistema de composição",
+        "localChip": "Local",
         "dangerZone": "Zona de perigo",
         "dangerZoneDesc": "Excluir conta e redefinir dados",
+        "desktopDangerDesc": "Redefinição e exclusão de conta são fluxos de gestão exclusivos do desktop.",
         "planLabel": "Plano {tier}",
         "planActive": "Acesso {tier} ativo",
         "planUpgrade": "Upgrade, gerenciar cobrança, restaurar acesso"
       },
       "memberRecently": "membro recente",
       "memberSince": "membro desde {date}",
+      "labels": {
+        "languageEnglish": "Inglês",
+        "languagePortugueseBrazil": "Português (Brasil)",
+        "themeLight": "claro",
+        "themeDark": "escuro"
+      },
       "toasts": {
         "themeSwitch": "Alternado para modo {theme}",
         "languagePT": "Idioma: Português",
-        "languageEN": "Language: English",
+        "languageEN": "Idioma: Inglês",
         "comingSoon": "Esta funcionalidade estará disponível em breve"
       }
     }
@@ -2753,6 +2838,25 @@
     "timeline": {
       "eyebrow": "Linha do Tempo de Checkpoints"
     },
+    "runtime": {
+      "eyebrow": "Progresso · fotos",
+      "rangeLabel": "6 meses",
+      "emptyTitle": "Ainda não há fotos de progresso.",
+      "emptyDescription": "Tire sua primeira foto frontal, lateral ou traseira para liberar comparações visuais ao longo do tempo.",
+      "takePhoto": "Tirar foto →",
+      "views": {
+        "front": "Frente",
+        "side": "Lado",
+        "back": "Costas"
+      },
+      "compareLabel": "Nov → Abr · {view}",
+      "compareDelta": "−5,8 lb · −1,8% GC",
+      "allMonths": "Todos os meses · {count}",
+      "viewLabel": "Visão {view}",
+      "privacyNote": "As fotos ficam no dispositivo. Nunca saem do seu telefone sem sua permissão.",
+      "previewUnavailable": "Prévia da foto indisponível",
+      "previewUnavailableDescription": "Capture uma foto primeiro para abri-la aqui."
+    },
     "new_checkpoint_modal": {
       "eyebrow": "Novo Checkpoint",
       "title": "Registre seu progresso",
@@ -3447,7 +3551,33 @@
       "noted": "Anotado",
       "savedForLater": "Salvo para depois",
       "connectingToast": "O coach IA está sendo conectado. Isso funcionará em breve.",
-      "connectingPlaceholder": "Coach IA sendo conectado..."
+      "connectingPlaceholder": "Coach IA sendo conectado...",
+      "runtime": {
+        "back": "Voltar",
+        "menuLabel": "Ações do chat",
+        "defaultDateLabel": "Hoje · 07:42",
+        "contextReadyText": "Sincronizando seu estado atual. Pergunte o que quiser.",
+        "contextReadyMeta": "Coach · contexto pronto",
+        "notAuthenticated": "Não autenticado",
+        "limitMeta": "Coach · limite atingido",
+        "justNowMeta": "Coach · agora",
+        "errorText": "Algo deu errado. Tente novamente.",
+        "errorMeta": "Coach · erro",
+        "typingMeta": "Coach · digitando",
+        "thinking": "Pensando…",
+        "liveStatus": "Lendo seu sinal · ao vivo",
+        "suggestionLabel": "Sugerido · hoje",
+        "suggestionText": "Adicione um shake com 30g de proteína entre o almoço e o treino. Isso mantém você acima do limiar sem refeições extras.",
+        "actions": {
+          "addToPlan": "Adicionar ao plano",
+          "notToday": "Hoje não"
+        },
+        "quick": {
+          "logMeal": "Registrar aveia + whey",
+          "showOptions": "Me mostre opções",
+          "later": "Depois"
+        }
+      }
     }
   },
   "nutritionist": {
@@ -4229,6 +4359,11 @@
       "yearly": "12 meses",
       "save": "Economize 62%"
     },
+    "pricing": {
+      "weekly": "$3.99 / sem",
+      "monthly": "$9.99 / mês",
+      "yearlyEffective": "$6.58 / mês"
+    },
     "features": {
       "heading": "tudo incluído",
       "coach": "Coach IA & briefing diário",
@@ -4246,6 +4381,20 @@
     "links": {
       "restore": "Restaurar compras"
     },
+    "mobile": {
+      "skip": "Agora não",
+      "stepLabel": "Passo 3 de 3",
+      "titleLine1": "Liberte",
+      "titleLine2Prefix": "seu",
+      "titleAccent": "core",
+      "subtitle": "Teste grátis por 3 dias. Cancele com um toque. Seus dados são seus para exportar para sempre.",
+      "startTrial": "Começar teste grátis de 3 dias →",
+      "nativeDisclaimer": "Sem cobrança hoje · avisar antes da cobrança",
+      "webDisclaimer": "Checkout seguro com Stripe · Cancele quando quiser",
+      "features": {
+        "recovery": "Monitoramento de prontidão + recuperação"
+      }
+    },
     "toasts": {
       "welcome": "Bem-vindo ao Pro!",
       "genericError": "Algo deu errado. Tente novamente.",
@@ -4254,6 +4403,217 @@
       "webComingSoon": "Assine pelo app — checkout web em breve.",
       "noActiveSub": "Nenhuma assinatura ativa encontrada.",
       "billingUnavailable": "Compras não disponíveis neste dispositivo."
+    }
+  },
+  "paywallB": {
+    "runtime": {
+      "kicker": "Novo · Recorde Pessoal",
+      "recordLabel": "Agachamento livre · 1RM est.",
+      "poundsShort": "lb",
+      "recordDelta": "+8 lb · novo recorde histórico",
+      "headlineLine1": "Você está entre os",
+      "headlineLine2Prefix": "top",
+      "headlinePercent": "12%",
+      "headlineLine2Suffix": "da",
+      "headlineLine3": "sua categoria de peso.",
+      "body": "O atlas.core Pro libera rastreamento completo de 1RM, rankings de powerlifting, programação ajustada por prontidão e o coach IA.",
+      "badge": "PRO · ANUAL",
+      "period": "/ ano",
+      "equivalent": "$6.58 / mês · cobrado anualmente",
+      "cta": "Assinar Pro →",
+      "footerLinks": "Restaurar · Termos · Privacidade"
+    }
+  },
+  "pricingPage": {
+    "eyebrow": "/// preços",
+    "titlePrefix": "um plano. tudo",
+    "titleAccent": "incluído.",
+    "intro": "Sem níveis, sem upsells, sem confusão. Escolha o ciclo de cobrança que funciona para você — todos os recursos ficam liberados desde o primeiro dia.",
+    "getStarted": "começar",
+    "includedHeading": "tudo incluído",
+    "footerTitle": "comece grátis, faça upgrade quando provar valor.",
+    "footerBody": "Registro de treino, alimentação, composição corporal e 10 mensagens do coach por semana — tudo grátis, sem cartão. Faça upgrade quando quiser tudo ilimitado.",
+    "plans": {
+      "weekly": {
+        "label": "Semanal",
+        "period": "/ semana",
+        "equivalent": "$17.30 / mês equivalente",
+        "note": "Sem compromisso. Cancele com um toque."
+      },
+      "monthly": {
+        "label": "Mensal",
+        "period": "/ mês",
+        "note": "Acesso total. Sem limites. Cancele quando quiser."
+      },
+      "yearly": {
+        "label": "Anual",
+        "period": "/ ano",
+        "equivalent": "$6.58 / mês, cobrado anualmente",
+        "note": "Melhor valor. Dois meses grátis.",
+        "save": "Economize 62%"
+      }
+    },
+    "included": {
+      "workoutLogging": "Registro ilimitado de treinos e rotinas",
+      "aiCoach": "Coach IA ilimitado",
+      "foodLogging": "Registro de comida por foto, voz e texto",
+      "bodyComp": "Tendências de composição corporal e peso",
+      "labTracking": "Upload de exames e acompanhamento de biomarcadores",
+      "analytics": "Análise completa de treino e histórico",
+      "photos": "Fotos de progresso com comparação",
+      "export": "Exportação completa de dados (CSV + JSON)"
+    }
+  },
+  "onboardPlan": {
+    "runtime": {
+      "eyebrow": "Resultado",
+      "label": "Seu plano",
+      "title": "Metas diárias, primeira leitura.",
+      "body": "Este é o preset operacional inicial. O sistema deve parecer preciso, não final.",
+      "adaptive": "Adaptativo",
+      "adaptiveBody": "Recalibrado semanalmente.",
+      "cta": "Parece bom →",
+      "caloriesDaily": "Calorias · diárias",
+      "kcal": "kcal",
+      "grams": "g",
+      "tweakModel": "Ajuste o modelo",
+      "primaryGoal": "Objetivo principal",
+      "activityLevel": "Nível de atividade",
+      "training": "Treino",
+      "goal": "Objetivo",
+      "expectedCurve": "Curva esperada de composição corporal · 12 semanas",
+      "recalibrationNote": "O atlas.core recalibra semanalmente com sua tendência de peso, logs e prontidão.",
+      "maintenance": "Manutenção · peso estável",
+      "deficit": "{kcal} kcal de déficit · {weeklyLb} lb / sem",
+      "surplus": "{kcal} kcal de superávit · +{weeklyLb} lb / sem",
+      "daysPerWeek": "{count} dias / semana",
+      "macros": {
+        "protein": "Proteína",
+        "carbs": "Carboidratos",
+        "fat": "Gordura"
+      },
+      "goals": {
+        "lose": "Perder gordura",
+        "recomp": "Recomp",
+        "maintain": "Manter",
+        "gain": "Ganhar massa",
+        "build": "Ganhar"
+      }
+    }
+  },
+  "onboardSummary": {
+    "runtime": {
+      "computingTitle": "Calculando seu protocolo...",
+      "computingBodyLine1": "Analisando identidade, objetivo, nível de atividade,",
+      "computingBodyLine2": "e restrições...",
+      "protocolLabel": "Seu protocolo",
+      "headlineLine1": "Seu sistema",
+      "headlineLine2Prefix": "está",
+      "headlineAccent": "pronto",
+      "dailyTarget": "Meta diária",
+      "kcal": "kcal",
+      "grams": "g",
+      "training": "Treino",
+      "sessionsPerWeek": "Sessões / sem",
+      "avgDuration": "Duração média",
+      "minutesShort": "min",
+      "experienceLabel": "Experiência",
+      "recovery": "Recuperação",
+      "sleepTarget": "Meta de sono",
+      "hoursShort": "h",
+      "waterTarget": "Meta de água",
+      "litersShort": "L",
+      "stepGoal": "Meta de passos",
+      "thousandShort": "mil",
+      "constraints": "Restrições",
+      "injuries": "Lesões",
+      "medical": "Condições médicas",
+      "recalibrationNote": "O atlas.core recalibra semanalmente com sua tendência de peso, logs e prontidão. Estas metas evoluem com você.",
+      "activate": "Ativar sistema →",
+      "macros": {
+        "protein": "Proteína",
+        "carbs": "Carboidratos",
+        "fat": "Gordura"
+      },
+      "experience": {
+        "beginner": "Iniciante",
+        "intermediate": "Intermediário",
+        "advanced": "Avançado"
+      }
+    }
+  },
+  "bodyweight": {
+    "runtime": {
+      "eyebrow": "Corpo · Leituras",
+      "title": "Peso corporal",
+      "todayWeightUnit": "lb · hoje",
+      "avgTrend": "Tendência média de 7 dias",
+      "avgTrendDelta": "↓ 0.3 lb / sem",
+      "poundsShort": "lb",
+      "weeksRemaining": "24 sem",
+      "recentLog": "Log · recentes",
+      "viewAll": "Ver tudo",
+      "logToday": "+ Registrar peso de hoje",
+      "stats": {
+        "start": "Início",
+        "goal": "Meta",
+        "toGo": "Faltam"
+      },
+      "entries": {
+        "today": "Hoje · 7:14",
+        "fri": "Sex · 7:22",
+        "thu": "Qui · 7:08"
+      }
+    }
+  },
+  "webPurchaseSuccess": {
+    "missingSession": "Sessão de checkout ausente.",
+    "confirmFailed": "Não foi possível confirmar o checkout.",
+    "loadingTitle": "confirmando.",
+    "successTitle": "você entrou.",
+    "errorTitle": "checkout bloqueado.",
+    "loadingBody": "Finalizando sua assinatura com a Stripe e sincronizando seu acesso.",
+    "successBody": "Compra confirmada. Sua assinatura agora está vinculada a esta conta.",
+    "openBilling": "abrir cobrança",
+    "openApp": "abrir app",
+    "backToPlans": "voltar aos planos"
+  },
+  "dangerZone": {
+    "header": "Zona de perigo",
+    "title": "Ações irreversíveis",
+    "subtitle": "Estas ações destroem dados permanentemente. Exporte antes se quiser uma cópia.",
+    "sections": {
+      "safe": "Seguro",
+      "destructive": "Destrutivo",
+      "terminal": "Terminal"
+    },
+    "export": {
+      "title": "Baixar seus dados",
+      "description": "Arquivo JSON com todas as refeições, treinos, medidas e chats"
+    },
+    "reset": {
+      "title": "Resetar todos os dados do atlas",
+      "description": "Apaga toda entrada de comida, treino, medida, foto e chat. Sua conta, e-mail e assinatura continuam intactos. Não pode ser desfeito.",
+      "action": "Resetar dados",
+      "confirm": "Tem certeza? Toque para confirmar"
+    },
+    "prompts": {
+      "typeEmail": "Digite {email} para excluir permanentemente esta conta.",
+      "finalConfirm": "Isto exclui permanentemente sua conta e seus dados de acompanhamento. Não pode ser desfeito."
+    },
+    "toasts": {
+      "notSignedIn": "Sessão não autenticada",
+      "resetSuccess": "Dados resetados — conta limpa",
+      "resetFailed": "Falha ao resetar",
+      "noAccount": "Nenhuma conta autenticada encontrada",
+      "deleteCancelled": "Exclusão de conta cancelada",
+      "emailMismatch": "O e-mail de confirmação não correspondeu.",
+      "cancelSubscriptionFirst": "Cancele a assinatura da loja primeiro",
+      "cancelSubscriptionDescription": "Abra o gerenciamento de assinatura, cancele lá e depois tente excluir novamente.",
+      "deleteSuccess": "Conta excluída",
+      "deleteFailed": "Falha ao excluir a conta",
+      "manageBillingFirst": "Gerencie a cobrança primeiro, se necessário",
+      "manageBillingDescription": "Se esta conta ainda tiver cobrança gerenciada pela loja, cancele antes de tentar excluir novamente."
     }
   },
   "reactivation": {
@@ -4351,6 +4711,128 @@
     "signOut": "Sair",
     "terms": "Termos",
     "privacy": "Privacidade"
+  },
+  "webapp": {
+    "accountHub": {
+      "planPro": "Pro",
+      "planFree": "Grátis",
+      "statusTrial": "Teste",
+      "statusActive": "Ativo",
+      "statusInactive": "Inativo",
+      "eyebrow": "/// conta",
+      "greeting": "olá, {name}.",
+      "there": "você",
+      "currentPlan": "plano atual",
+      "managePlan": "Gerenciar plano",
+      "upgrade": "Fazer upgrade para Pro",
+      "billingHistoryTitle": "Histórico de cobrança",
+      "billingHistoryDesc": "Veja faturas anteriores e comprovantes de pagamento.",
+      "billingHistoryCta": "Ver faturas",
+      "exportTitle": "Exportar dados",
+      "exportDesc": "Baixe todo o seu registro corporal em CSV ou JSON.",
+      "exportCta": "Exportar",
+      "getAppTitle": "Baixar o app",
+      "getAppDesc": "O atlas.core vive no seu iPhone. Baixe na App Store.",
+      "getAppCta": "Baixar",
+      "footer": "atlas.core foi feito para mobile. Este é o seu painel de conta."
+    }
+  },
+  "manageSub": {
+    "planPro": "Pro",
+    "planFree": "Grátis",
+    "statusTrial": "Teste",
+    "statusGranted": "Concedido",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo",
+    "backToAccount": "← Voltar para a conta",
+    "eyebrow": "/// gerenciar assinatura",
+    "headingPrefix": "seu",
+    "headingAccent": "plano.",
+    "currentPlan": "plano atual",
+    "trialEnds": "Teste termina",
+    "renews": "Renova em",
+    "changePlanTitle": "Trocar plano",
+    "changePlanDesc": "Alterne entre cobrança semanal, mensal ou anual.",
+    "viewPlans": "Ver planos",
+    "cancelTitle": "Cancelar assinatura",
+    "cancelDesc": "O acesso continua até o fim do período atual de cobrança.",
+    "cancelPlan": "Cancelar plano",
+    "billingHistory": "Histórico de cobrança",
+    "exportData": "Exportar dados",
+    "footer": "atlas.core foi feito para mobile. Este é o seu painel de conta.",
+    "cancelFallback": {
+      "title": "Não foi possível abrir o gerenciamento da assinatura",
+      "description": "Tente novamente."
+    }
+  },
+  "billingHistory": {
+    "eyebrow": "/// histórico de cobrança",
+    "heading": "faturas.",
+    "description": "Seu histórico de pagamentos e recibos.",
+    "portalNote": "O Stripe continua sendo a fonte de verdade para recibos e atualizações do método de pagamento.",
+    "openPortal": "Abrir portal de cobrança",
+    "openPortalFailed": "Não foi possível abrir o portal de cobrança",
+    "emptyTitle": "Ainda não há atividade de cobrança",
+    "emptyDesc": "Seus eventos de assinatura e período de teste aparecerão aqui depois que o checkout começar.",
+    "planFallback": "pro",
+    "backToAccount": "← Voltar para a conta",
+    "footer": "atlas.core foi feito para mobile. Este é o seu painel de conta.",
+    "status": {
+      "inactive": "inativo",
+      "active": "ativo",
+      "trialing": "em teste",
+      "granted": "concedido",
+      "past_due": "em atraso"
+    }
+  },
+  "dataExport": {
+    "mustBeSignedIn": "Você precisa estar autenticado para exportar dados.",
+    "ready": "Exportação {format} pronta",
+    "failed": "Falha na exportação",
+    "backToAccount": "← Voltar para a conta",
+    "heading": "Exporte seus dados",
+    "description": "Baixe seu registro corporal completo — treinos, nutrição, medidas e exames. Seus dados são sempre seus.",
+    "jsonTitle": "Exportação completa (JSON)",
+    "jsonDesc": "Legível por máquina. Importe em outras ferramentas.",
+    "jsonButton": "Baixar JSON",
+    "csvTitle": "Planilha (CSV)",
+    "csvDesc": "Abra no Excel, Sheets ou Numbers.",
+    "csvButton": "Baixar CSV",
+    "preparing": "Preparando…",
+    "footerNote": "A exportação inclui seu perfil, treinos, registros de nutrição, medidas, check-ins, rotinas e histórico de sessões disponível."
+  },
+  "accountSettings": {
+    "providers": {
+      "apple": "Apple Health",
+      "google": "Google Fit"
+    },
+    "prompts": {
+      "changeEmail": "Digite seu novo endereço de e-mail.",
+      "disable2fa": "Digite o código de 6 dígitos do seu app autenticador para desativar a autenticação em dois fatores.",
+      "enable2fa": "Escaneie o QR code no seu app autenticador ou use este segredo: {secret}\n\nDigite o código de 6 dígitos para verificar."
+    },
+    "toasts": {
+      "emailUpdateRequested": "Solicitação de alteração de e-mail enviada",
+      "checkEmailConfirm": "Verifique {email} para confirmar a alteração.",
+      "emailUpdateFailed": "Não foi possível atualizar o e-mail",
+      "noEmail": "Nenhum e-mail encontrado para esta conta",
+      "passwordResetSent": "E-mail de redefinição enviado",
+      "openInboxPassword": "Abra {email} para definir uma nova senha.",
+      "passwordResetFailed": "Não foi possível enviar o e-mail de redefinição",
+      "twoFactorDisabled": "Autenticação em dois fatores desativada",
+      "twoFactorEnabled": "Autenticação em dois fatores ativada",
+      "twoFactorFailed": "Falha ao atualizar a autenticação em dois fatores",
+      "connectionFailed": "Falha na conexão",
+      "appleStarted": "Conexão com Apple Health iniciada",
+      "googleStarted": "Conexão com Google Fit iniciada",
+      "finishProviderFlow": "Conclua o fluxo do provedor para finalizar a configuração.",
+      "disconnectFailed": "Falha ao desconectar",
+      "appleDisconnected": "Apple Health desconectado",
+      "googleDisconnected": "Google Fit desconectado",
+      "sessionsRevoked": "Outras sessões foram encerradas",
+      "thisDeviceActive": "Este dispositivo continua ativo.",
+      "sessionsRevokeFailed": "Não foi possível encerrar as outras sessões"
+    }
   },
   "subscriptionManage": {
     "cancelToast": "Para cancelar sua assinatura, envie um e-mail para support@useatlascore.com",

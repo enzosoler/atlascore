@@ -4,17 +4,18 @@ import {
   ACLabel,
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
+import { useT } from '@/lib/i18nContext';
 
 function S12_Coach_Chat({
   dark = false,
-  dateLabel = 'Today · 07:42 AM',
-  statusLabel = 'Reading your signal · live',
+  dateLabel,
+  statusLabel,
   messages,
-  suggestionLabel = 'Suggested · today',
-  suggestionText = 'Add a 30g protein shake between lunch and training. Keeps you above threshold without extra meals.',
-  suggestionActions = ['Add to plan', 'Not today'],
-  quickActions = ['Log oats + whey', 'Show me options', 'Later'],
-  draftPlaceholder = 'Ask the coach…',
+  suggestionLabel,
+  suggestionText,
+  suggestionActions,
+  quickActions,
+  draftPlaceholder,
   composerDisabled = false,
   onBack,
   onOpenMenu,
@@ -23,7 +24,22 @@ function S12_Coach_Chat({
   onSend,
 }) {
   const c = useACT(dark);
+  const t = useT();
   const [draft, setDraft] = useState('');
+  const resolvedDateLabel = dateLabel || t('coach.chat.runtime.defaultDateLabel');
+  const resolvedStatusLabel = statusLabel || t('coach.chat.runtime.liveStatus');
+  const resolvedSuggestionLabel = suggestionLabel || t('coach.chat.runtime.suggestionLabel');
+  const resolvedSuggestionText = suggestionText || t('coach.chat.runtime.suggestionText');
+  const resolvedSuggestionActions = suggestionActions || [
+    t('coach.chat.runtime.actions.addToPlan'),
+    t('coach.chat.runtime.actions.notToday'),
+  ];
+  const resolvedQuickActions = quickActions || [
+    t('coach.chat.runtime.quick.logMeal'),
+    t('coach.chat.runtime.quick.showOptions'),
+    t('coach.chat.runtime.quick.later'),
+  ];
+  const resolvedDraftPlaceholder = draftPlaceholder || t('coach.chat.placeholder');
   const rows = messages || [
     {
       text: <>Good morning. HRV came back strong, <b style={{ color: c.accent }}>72 ms</b>, up 8 from your rolling average. Your body's primed for heavy lower today.</>,
@@ -69,7 +85,7 @@ function S12_Coach_Chat({
             background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: onBack ? 'pointer' : 'default',
           }}
-          aria-label="Back"
+          aria-label={t('coach.chat.runtime.back')}
         >
           <svg width="10" height="10" viewBox="0 0 10 10">
             <path d="M6.5 1.4L2.5 5l4 3.6" stroke={c.fg} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -85,7 +101,7 @@ function S12_Coach_Chat({
           <div style={{ fontSize: 15, fontWeight: 600, color: c.fg, letterSpacing: -0.2 }}>Coach</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
             <div style={{ width: 6, height: 6, borderRadius: 999, background: c.accent }} />
-            <ACLabel size={11} color={c.dim}>{statusLabel}</ACLabel>
+            <ACLabel size={11} color={c.dim}>{resolvedStatusLabel}</ACLabel>
           </div>
         </div>
         {onOpenMenu && (
@@ -93,7 +109,7 @@ function S12_Coach_Chat({
             type="button"
             onClick={onOpenMenu}
             style={{ width: 28, height: 28, borderRadius: 999, background: c.card, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
-            aria-label="Chat actions"
+            aria-label={t('coach.chat.runtime.menuLabel')}
           >
             <svg width="16" height="4" viewBox="0 0 16 4"><circle cx="2" cy="2" r="1.6" fill={c.fg}/><circle cx="8" cy="2" r="1.6" fill={c.fg}/><circle cx="14" cy="2" r="1.6" fill={c.fg}/></svg>
           </button>
@@ -102,7 +118,7 @@ function S12_Coach_Chat({
 
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch', padding: '16px 22px' }}>
         <div style={{ textAlign: 'center', margin: '4px 0 18px' }}>
-          <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, letterSpacing: 1, textTransform: 'uppercase' }}>{dateLabel}</ACLabel>
+          <ACLabel size={10} color={c.mute} style={{ fontFamily: ACFonts.mono, letterSpacing: 1, textTransform: 'uppercase' }}>{resolvedDateLabel}</ACLabel>
         </div>
 
         {rows.map((row, idx) => (
@@ -112,12 +128,12 @@ function S12_Coach_Chat({
         ))}
 
         <div style={{ marginBottom: 14, padding: 12, background: c.card, borderRadius: ACRadii.input, borderLeft: `3px solid ${c.accent}` }}>
-          <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{suggestionLabel}</ACLabel>
+          <ACLabel size={11} color={c.accent} style={{ fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>{resolvedSuggestionLabel}</ACLabel>
           <div style={{ marginTop: 6, fontSize: 13.5, color: c.fg, lineHeight: 1.5 }}>
-            {suggestionText}
+            {resolvedSuggestionText}
           </div>
           <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-            {suggestionActions.map((label, i) => (
+            {resolvedSuggestionActions.map((label, i) => (
               <button
                 key={label}
                 type="button"
@@ -140,7 +156,7 @@ function S12_Coach_Chat({
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-          {quickActions.map((s, i) => (
+          {resolvedQuickActions.map((s, i) => (
             <button key={i} type="button" onClick={() => onQuickAction?.(s)} style={{
               padding: '8px 12px', background: 'transparent', border: `1px solid ${c.faint}`,
               borderRadius: 999, fontSize: 12, color: c.fg, fontWeight: 500,
@@ -162,7 +178,7 @@ function S12_Coach_Chat({
             type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={draftPlaceholder}
+            placeholder={resolvedDraftPlaceholder}
             disabled={composerDisabled}
             onKeyDown={(e) => { if (e.key === 'Enter' && draft.trim()) { onSend?.(draft.trim()); setDraft(''); } }}
             style={{

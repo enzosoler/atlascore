@@ -226,6 +226,22 @@ export async function createMeasurement(userId, payload) {
   requireUserId(userId);
 
   const writePayload = prepareMeasurementWritePayload(payload);
+  const dateKey = writePayload.date || toDateKey(payload?.date);
+
+  const { data: existing, error: existingError } = await supabase
+    .from(MEASUREMENTS_TABLE)
+    .select('id')
+    .eq('user_id', userId)
+    .eq('date', dateKey)
+    .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existing?.id) {
+    return updateMeasurement(userId, existing.id, payload);
+  }
 
   const { data, error } = await supabase
     .from(MEASUREMENTS_TABLE)

@@ -152,15 +152,15 @@ export function SettingsShell({ current, children }) {
       <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
         <nav className="flex flex-col gap-0.5">
           {[
-            ['Account','/app/settings/account'],
+            ['Account','/webapp/settings'],
             ['Notifications','/app/settings/notifications'],
             ['Appearance','/app/settings/appearance'],
             ['Integrations','/app/settings/integrations'],
             ['Language','/app/settings/language'],
             ['Privacy','/app/settings/privacy'],
-            ['Data','/app/settings/data'],
-            ['Billing','/app/billing'],
-            ['Danger zone','/app/settings/danger'],
+            ['Data','/webapp/export'],
+            ['Billing','/webapp/billing'],
+            ['Danger zone','/webapp/settings/danger'],
           ].map(([label, href]) => (
             <a key={href} href={href} className={cn(
               'rounded-rd-md px-3 py-2 text-[13px] text-rd-fg-secondary hover:bg-rd-surface-2 hover:text-rd-fg',

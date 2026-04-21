@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useT } from '@/lib/i18nContext';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
 import { HeartMark } from '@/redesign/v3/lib/brandMarks.jsx';
 import { completeWebCheckout } from '@/services/billingService';
+import { MOBILE_APP_HOME, WEBAPP_BILLING, WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 
 export default function V3WebPurchaseSuccess() {
+  const t = useT();
   const [state, setState] = useState({ loading: true, error: '', done: false });
 
   useEffect(() => {
@@ -12,7 +15,7 @@ export default function V3WebPurchaseSuccess() {
     const sessionId = new URLSearchParams(window.location.search).get('session_id');
 
     if (!sessionId) {
-      setState({ loading: false, error: 'Missing checkout session.', done: false });
+      setState({ loading: false, error: t('webPurchaseSuccess.missingSession'), done: false });
       return;
     }
 
@@ -21,7 +24,7 @@ export default function V3WebPurchaseSuccess() {
         if (!cancelled) setState({ loading: false, error: '', done: true });
       })
       .catch((error) => {
-        if (!cancelled) setState({ loading: false, error: error?.message || 'Could not confirm checkout.', done: false });
+        if (!cancelled) setState({ loading: false, error: error?.message || t('webPurchaseSuccess.confirmFailed'), done: false });
       });
 
     return () => { cancelled = true; };
@@ -44,19 +47,19 @@ export default function V3WebPurchaseSuccess() {
       <div style={{ maxWidth: 480, textAlign: 'center' }}>
         <HeartMark size={88} color={ACBrand.ink} accent={ACBrand.accent} />
         <div style={{ marginTop: 24, fontFamily: ACFonts.brand, fontSize: 56, letterSpacing: -2.4, lineHeight: 0.9, textTransform: 'lowercase' }}>
-          {state.loading ? 'confirming.' : state.done ? 'you are in.' : 'checkout blocked.'}
+          {state.loading ? t('webPurchaseSuccess.loadingTitle') : state.done ? t('webPurchaseSuccess.successTitle') : t('webPurchaseSuccess.errorTitle')}
         </div>
         <p style={{ margin: '18px 0 0', fontSize: 17, lineHeight: 1.65, color: 'rgba(10,10,10,0.74)' }}>
           {state.loading
-            ? 'Finalizing your subscription with Stripe and syncing your access.'
+            ? t('webPurchaseSuccess.loadingBody')
             : state.done
-              ? 'Purchase confirmed. Your subscription is now linked to this account.'
+              ? t('webPurchaseSuccess.successBody')
               : state.error}
         </p>
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {state.done ? (
             <Link
-              to="/app/billing"
+              to={WEBAPP_BILLING}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -72,11 +75,11 @@ export default function V3WebPurchaseSuccess() {
                 textTransform: 'lowercase',
               }}
             >
-              open billing
+              {t('webPurchaseSuccess.openBilling')}
             </Link>
           ) : null}
           <Link
-            to={state.done ? '/app/today' : '/app/billing/paywall'}
+            to={state.done ? MOBILE_APP_HOME : WEBAPP_PAYWALL}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -93,7 +96,7 @@ export default function V3WebPurchaseSuccess() {
               fontWeight: 700,
             }}
           >
-            {state.done ? 'open app' : 'back to plans'}
+            {state.done ? t('webPurchaseSuccess.openApp') : t('webPurchaseSuccess.backToPlans')}
           </Link>
         </div>
       </div>

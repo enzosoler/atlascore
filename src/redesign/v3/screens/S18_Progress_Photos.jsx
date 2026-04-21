@@ -4,6 +4,7 @@ import {
   ACLabel, ACTabBar,
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
+import { useT } from '@/lib/i18nContext';
 
 function CameraIconSolid({ color = '#000' }) {
   return (
@@ -102,6 +103,7 @@ function S18_Progress_Photos({
   showTabBar = false,
 }) {
   const c = useACT(dark);
+  const t = useT();
   const [activeView, setActiveView] = React.useState('front');
   const defaultMonths = [
     { m: 'Apr 18', w: '182.4', bf: '17.2', latest: true },
@@ -115,18 +117,18 @@ function S18_Progress_Photos({
   const isEmpty = Array.isArray(monthRows) && monthRows.length === 0;
 
   const views = [
-    { k: 'front', l: 'Front' },
-    { k: 'side', l: 'Side' },
-    { k: 'back', l: 'Back' },
+    { k: 'front', l: t('progressPhotos.runtime.views.front') },
+    { k: 'side', l: t('progressPhotos.runtime.views.side') },
+    { k: 'back', l: t('progressPhotos.runtime.views.back') },
   ];
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
       <div style={{ padding: '14px 22px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <ACLabel size={11} color={c.dim}>Progress · photos</ACLabel>
+          <ACLabel size={11} color={c.dim}>{t('progressPhotos.runtime.eyebrow')}</ACLabel>
           <div style={{ fontFamily: ACFonts.display, fontSize: 26, fontWeight: 700, letterSpacing: -0.8, color: c.fg, marginTop: 4 }}>
-            6 months
+            {t('progressPhotos.runtime.rangeLabel')}
           </div>
         </div>
         <button type="button" onClick={onTakePhoto} style={{
@@ -142,13 +144,13 @@ function S18_Progress_Photos({
         {isEmpty ? (
           <div style={{ padding: 18, background: c.card, borderRadius: ACRadii.card }}>
             <div style={{ fontFamily: ACFonts.display, fontSize: 22, fontWeight: 700, letterSpacing: -0.6, color: c.fg }}>
-              No progress photos yet.
+              {t('progressPhotos.runtime.emptyTitle')}
             </div>
             <div style={{ marginTop: 8, fontSize: 13.5, color: c.dim, lineHeight: 1.55 }}>
-              Take your first front, side, or back photo to unlock visual comparisons over time.
+              {t('progressPhotos.runtime.emptyDescription')}
             </div>
             <button type="button" onClick={onTakePhoto} style={{ marginTop: 14, padding: '10px 16px', borderRadius: 999, border: 'none', background: c.fg, color: c.bg, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-              Take photo →
+              {t('progressPhotos.runtime.takePhoto')}
             </button>
           </div>
         ) : (
@@ -172,8 +174,8 @@ function S18_Progress_Photos({
             {/* Compare strip */}
             <div style={{ padding: 14, background: c.card, borderRadius: ACRadii.card }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <ACLabel size={12} color={c.dim}>Nov → Apr · {activeView}</ACLabel>
-                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>−5.8 lb · −1.8% BF</ACLabel>
+                <ACLabel size={12} color={c.dim}>{t('progressPhotos.runtime.compareLabel', { view: views.find((v) => v.k === activeView)?.l || activeView })}</ACLabel>
+                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{t('progressPhotos.runtime.compareDelta')}</ACLabel>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <CompareTile label="Nov 18" c={c} dark={dark} dim />
@@ -188,8 +190,8 @@ function S18_Progress_Photos({
             {/* Grid */}
             <div style={{ marginTop: 22 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <ACLabel size={12} color={c.dim}>All months · {monthRows.length}</ACLabel>
-                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{views.find(v => v.k === activeView).l} view</ACLabel>
+                <ACLabel size={12} color={c.dim}>{t('progressPhotos.runtime.allMonths', { count: monthRows.length })}</ACLabel>
+                <ACLabel size={12} color={c.accent} style={{ fontWeight: 600 }}>{t('progressPhotos.runtime.viewLabel', { view: views.find(v => v.k === activeView).l })}</ACLabel>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
                 {monthRows.map((m, i) => (
@@ -207,7 +209,7 @@ function S18_Progress_Photos({
           border: `1px dashed ${c.faint}`, textAlign: 'center',
         }}>
           <ACLabel size={12} color={c.dim} style={{ lineHeight: 1.6 }}>
-            Photos stay on-device. Never leave your phone without your permission.
+            {t('progressPhotos.runtime.privacyNote')}
           </ACLabel>
         </div>
       </div>

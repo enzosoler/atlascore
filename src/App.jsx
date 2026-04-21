@@ -143,7 +143,6 @@ const V3FoodDetail = lazy(() => import('@/redesign/v3/routes/V3FoodDetail.jsx'))
 const V3Calendar = lazy(() => import('@/redesign/v3/routes/V3Calendar.jsx'));
 const V3Crew = lazy(() => import('@/redesign/v3/routes/V3Crew.jsx'));
 const V3RecipeBuilder = lazy(() => import('@/redesign/v3/routes/V3RecipeBuilder.jsx'));
-const V3Billing = lazy(() => import('@/redesign/v3/routes/V3Billing.jsx'));
 const V3Watch = lazy(() => import('@/redesign/v3/routes/V3Watch.jsx'));
 const V3Protocols = lazy(() => import('@/redesign/v3/routes/V3Protocols.jsx'));
 const V3ProtocolsEmpty = lazy(() => import('@/redesign/v3/routes/V3ProtocolsEmpty.jsx'));
@@ -200,6 +199,7 @@ const _V3LabUpload     = lazy(() => import('@/redesign/v3/routes/V3LabUpload.jsx
 import SmartOnboarding        from '@/components/onboarding/SmartOnboarding.jsx';
 import S6_Weight_B            from '@/redesign/v3/screens/S6_Weight_B.jsx';
 import S17_Measurements_Entry from '@/redesign/v3/screens/S17_Measurements_Entry.jsx';
+import S5_Paywall_A           from '@/redesign/v3/screens/S5_Paywall_A.jsx';
 import { supabase as supabaseClient } from '@/lib/supabaseClient';
 import {
   // v3 nutrition services will be used; keep alias names for compatibility
@@ -208,6 +208,7 @@ import {
   addEntries                as nutritionAddEntries,
   subscribe                 as nutritionSubscribe,
 } from '@/lib/nutritionStore';
+import { WEBAPP_DANGER, WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 
 // ─── ComingSoon stub (no v2 equivalent; keeps /help and fallback routes alive) ─
 function ComingSoon({ routeName, onGoHome, onBack }) {
@@ -297,6 +298,7 @@ function OnboardingSummaryRoute() {
 }
 function OnboardingPaywallRoute() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const platform = Capacitor.isNativePlatform() ? 'native' : 'web';
   const { user } = useAuth();
 
@@ -319,10 +321,11 @@ function OnboardingPaywallRoute() {
   }
 
   return (
-    <OnboardingPaywall
+    <S5_Paywall_A
+      dark={theme === 'dark'}
       platform={platform}
-      onStartTrial={() => completeAndGo('/app/billing/paywall')}
-      onRestore={() => completeAndGo('/app/billing/paywall')}
+      onStartTrial={() => completeAndGo('/webapp/billing/paywall')}
+      onRestore={() => completeAndGo('/webapp/billing/paywall')}
       onSkip={() => completeAndGo('/app/today')}
     />
   );
@@ -461,7 +464,7 @@ function InsightsRoute() {
     <InsightsScreen
       isPremium={isPremium}
       insights={[]}
-      onUpgrade={() => navigate('/app/billing/plans')}
+      onUpgrade={() => navigate(WEBAPP_PAYWALL)}
       onOpenInsight={(id) => navigate(`/app/coach/insights/${id}`)}
       onAsk={(text) => navigate(`/app/coach/chat?ask=${encodeURIComponent(text)}`)}
       onBack={() => navigate('/app/today')}
@@ -574,7 +577,7 @@ function AccountSettingsRoute() {
       onEnable2FA={() => todoToast('Two-factor setup')}
       onManageSessions={() => todoToast('Active sessions')}
       onUnlinkProvider={(p) => todoToast(`Unlink ${p}`)}
-      onDeleteAccount={() => navigate('/app/settings/danger')}
+      onDeleteAccount={() => navigate(WEBAPP_DANGER)}
     />
   );
 }
@@ -754,15 +757,30 @@ function AppRoutes() {
           <Route path="*"        element={<Navigate to="today" replace />} />
         </Route>
 
-        {/* ── Web account management (full-width, no phone frame) ──
-             Declared BEFORE /app so they match first in React Router. */}
-        <Route path="/app/account" element={isAuthed ? <V3AccountHub /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/export" element={isAuthed ? <V3DataExport /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/billing" element={isAuthed ? <V3SubscriptionManage /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/billing/manage" element={isAuthed ? <V3SubscriptionManage /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/billing/plans" element={isAuthed ? <V3Paywall /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/billing/paywall" element={isAuthed ? <V3Paywall /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/billing/invoices" element={isAuthed ? <V3BillingHistory /> : <Navigate to="/auth/login" replace />} />
+        {/* ── Desktop/webapp utility surface (full-width, no phone frame) ── */}
+        <Route path="/webapp" element={<V3WebAppEntry />} />
+        <Route path="/webapp/account" element={isAuthed ? <V3AccountHub /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/export" element={isAuthed ? <V3DataExport /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing" element={isAuthed ? <V3SubscriptionManage /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/manage" element={isAuthed ? <V3SubscriptionManage /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/plans" element={isAuthed ? <V3Paywall /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/paywall" element={isAuthed ? <V3Paywall /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/invoices" element={isAuthed ? <V3BillingHistory /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/settings" element={isAuthed ? <V3AccountSettings /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/settings/danger" element={isAuthed ? <V3DangerZone /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/settings/diagnostics" element={isAuthed ? <V3Diagnostics /> : <Navigate to="/auth/login" replace />} />
+
+        {/* Legacy mixed paths now redirect into the desktop utility surface. */}
+        <Route path="/app/account" element={<Navigate to="/webapp/account" replace />} />
+        <Route path="/app/export" element={<Navigate to="/webapp/export" replace />} />
+        <Route path="/app/billing" element={<Navigate to="/webapp/billing" replace />} />
+        <Route path="/app/billing/manage" element={<Navigate to="/webapp/billing/manage" replace />} />
+        <Route path="/app/billing/plans" element={<Navigate to="/webapp/billing/plans" replace />} />
+        <Route path="/app/billing/paywall" element={<Navigate to="/webapp/billing/paywall" replace />} />
+        <Route path="/app/billing/invoices" element={<Navigate to="/webapp/billing/invoices" replace />} />
+        <Route path="/app/settings/account" element={<Navigate to="/webapp/settings" replace />} />
+        <Route path="/app/settings/danger" element={<Navigate to="/webapp/settings/danger" replace />} />
+        <Route path="/app/settings/diagnostics" element={<Navigate to="/webapp/settings/diagnostics" replace />} />
 
         {/* ── Fullscreen flows (no shell chrome, MUST come before /app) ──
              Wrapped in <PlatformGate> so public web users are redirected to
@@ -842,10 +860,7 @@ function AppRoutes() {
 
           {/* Profile + Settings sub-screens */}
           <Route path="profile/edit" element={<V3ProfileEditor />} />
-          <Route path="settings/account" element={<V3AccountSettings />} />
           <Route path="settings/integrations" element={<V3Integrations />} />
-          <Route path="settings/danger" element={<V3DangerZone />} />
-          <Route path="settings/diagnostics" element={<V3Diagnostics />} />
 
           {/* Social */}
           <Route path="social" element={<V3SocialFeed />} />
@@ -869,9 +884,6 @@ function AppRoutes() {
           <Route path="crew" element={<V3Crew />} />
           <Route path="inbox" element={<V3Inbox />} />
 
-          {/* Billing */}
-          <Route path="billing" element={<V3Billing />} />
-
           {/* Protocols module */}
           <Route path="protocols" element={<V3Protocols />} />
           <Route path="protocols/empty" element={<V3ProtocolsEmpty />} />
@@ -894,7 +906,6 @@ function AppRoutes() {
         <Route path="/"        element={<RootRoute />} />
         <Route path="/landing" element={<V3Landing />} />
         <Route path="/download-app" element={<V3DownloadApp />} />
-        <Route path="/webapp" element={<V3WebAppEntry />} />
         <Route path="/webapp/success" element={<V3WebPurchaseSuccess />} />
         <Route path="/the-app" element={<V3AppPage />} />
         <Route path="/method"  element={<V3MethodPage />} />

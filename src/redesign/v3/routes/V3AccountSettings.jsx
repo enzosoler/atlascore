@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18nContext';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import {
@@ -15,10 +16,11 @@ export default function V3AccountSettings() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user } = useAuth();
+  const t = useT();
 
   const [providers, setProviders] = useState([
-    { id: 'apple', name: 'Apple Health', connected: false },
-    { id: 'google', name: 'Google Fit', connected: false },
+    { id: 'apple', name: t('accountSettings.providers.apple'), connected: false },
+    { id: 'google', name: t('accountSettings.providers.google'), connected: false },
   ]);
   const [mfaEnabled, setMfaEnabled] = useState(false);
 
@@ -33,12 +35,12 @@ export default function V3AccountSettings() {
       setProviders([
         {
           id: 'apple',
-          name: 'Apple Health',
+          name: t('accountSettings.providers.apple'),
           connected: byId.get('apple_health')?.status === 'connected',
         },
         {
           id: 'google',
-          name: 'Google Fit',
+          name: t('accountSettings.providers.google'),
           connected: byId.get('google_fit')?.status === 'connected',
         },
       ]);
@@ -51,7 +53,7 @@ export default function V3AccountSettings() {
 
     loadProviders();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [t, user?.id]);
 
   const sessionsCount = user ? 1 : 0;
   const resetPasswordRedirect = typeof window !== 'undefined'
@@ -72,37 +74,37 @@ export default function V3AccountSettings() {
     setProviders([
       {
         id: 'apple',
-        name: 'Apple Health',
+        name: t('accountSettings.providers.apple'),
         connected: byId.get('apple_health')?.status === 'connected',
       },
       {
         id: 'google',
-        name: 'Google Fit',
+        name: t('accountSettings.providers.google'),
         connected: byId.get('google_fit')?.status === 'connected',
       },
     ]);
   }
 
   async function handleChangeEmail() {
-    const nextEmail = window.prompt('Enter your new email address.', email);
+    const nextEmail = window.prompt(t('accountSettings.prompts.changeEmail'), email);
     if (!nextEmail || nextEmail === email) return;
 
     try {
       const { error } = await supabase.auth.updateUser({ email: nextEmail.trim() });
       if (error) throw error;
-      toast.success('Email update requested', {
-        description: `Check ${nextEmail.trim()} to confirm the change.`,
+      toast.success(t('accountSettings.toasts.emailUpdateRequested'), {
+        description: t('accountSettings.toasts.checkEmailConfirm', { email: nextEmail.trim() }),
       });
     } catch (err) {
-      toast.error('Could not update email', {
-        description: err?.message || 'Try again.',
+      toast.error(t('accountSettings.toasts.emailUpdateFailed'), {
+        description: err?.message || t('common.tryAgain'),
       });
     }
   }
 
   async function handleChangePassword() {
     if (!email) {
-      toast.error('No email found for this account');
+      toast.error(t('accountSettings.toasts.noEmail'));
       return;
     }
 
@@ -111,12 +113,12 @@ export default function V3AccountSettings() {
         redirectTo: resetPasswordRedirect,
       });
       if (error) throw error;
-      toast.success('Password reset email sent', {
-        description: `Open ${email} to set a new password.`,
+      toast.success(t('accountSettings.toasts.passwordResetSent'), {
+        description: t('accountSettings.toasts.openInboxPassword', { email }),
       });
     } catch (err) {
-      toast.error('Could not send reset email', {
-        description: err?.message || 'Try again.',
+      toast.error(t('accountSettings.toasts.passwordResetFailed'), {
+        description: err?.message || t('common.tryAgain'),
       });
     }
   }
@@ -134,7 +136,7 @@ export default function V3AccountSettings() {
 
         if (aalData?.currentLevel !== 'aal2') {
           const disableCode = window.prompt(
-            'Enter the 6-digit code from your authenticator app to disable two-factor authentication.',
+            t('accountSettings.prompts.disable2fa'),
             ''
           );
           if (!disableCode) return;
@@ -153,7 +155,7 @@ export default function V3AccountSettings() {
         const { error: disableError } = await supabase.auth.mfa.unenroll({ factorId: verifiedFactor.id });
         if (disableError) throw disableError;
         setMfaEnabled(false);
-        toast.success('Two-factor disabled');
+        toast.success(t('accountSettings.toasts.twoFactorDisabled'));
         return;
       }
 
@@ -176,7 +178,7 @@ export default function V3AccountSettings() {
       }
 
       const code = window.prompt(
-        `Scan the QR code in your authenticator app, or use this secret: ${enrollData?.totp?.secret || ''}\n\nEnter the 6-digit code to verify.`,
+        t('accountSettings.prompts.enable2fa', { secret: enrollData?.totp?.secret || '' }),
         ''
       );
       if (!code) return;
@@ -194,10 +196,10 @@ export default function V3AccountSettings() {
       if (verifyError) throw verifyError;
 
       setMfaEnabled(true);
-      toast.success('Two-factor enabled');
+      toast.success(t('accountSettings.toasts.twoFactorEnabled'));
     } catch (err) {
-      toast.error('Two-factor update failed', {
-        description: err?.message || 'Try again.',
+      toast.error(t('accountSettings.toasts.twoFactorFailed'), {
+        description: err?.message || t('common.tryAgain'),
       });
     }
   }
@@ -207,14 +209,14 @@ export default function V3AccountSettings() {
     if (!serviceId) return;
     const result = await connectProvider(serviceId, user?.id);
     if (!result?.success) {
-      toast.error('Connection failed', {
-        description: result?.message || 'Try again.',
+      toast.error(t('accountSettings.toasts.connectionFailed'), {
+        description: result?.message || t('common.tryAgain'),
       });
       return;
     }
     await refreshProviders();
-    toast.success(`${providerId === 'apple' ? 'Apple Health' : 'Google Fit'} connection started`, {
-      description: result?.message || 'Finish the provider flow to complete setup.',
+    toast.success(t(providerId === 'apple' ? 'accountSettings.toasts.appleStarted' : 'accountSettings.toasts.googleStarted'), {
+      description: result?.message || t('accountSettings.toasts.finishProviderFlow'),
     });
   }
 
@@ -223,25 +225,25 @@ export default function V3AccountSettings() {
     if (!serviceId) return;
     const result = await disconnectProvider(serviceId, user?.id);
     if (!result?.success) {
-      toast.error('Disconnect failed', {
-        description: result?.message || 'Try again.',
+      toast.error(t('accountSettings.toasts.disconnectFailed'), {
+        description: result?.message || t('common.tryAgain'),
       });
       return;
     }
     await refreshProviders();
-    toast.success(`${providerId === 'apple' ? 'Apple Health' : 'Google Fit'} disconnected`);
+    toast.success(t(providerId === 'apple' ? 'accountSettings.toasts.appleDisconnected' : 'accountSettings.toasts.googleDisconnected'));
   }
 
   async function handleManageSessions() {
     try {
       const { error } = await supabase.auth.signOut({ scope: 'others' });
       if (error) throw error;
-      toast.success('Signed out other sessions', {
-        description: 'This device stays active.',
+      toast.success(t('accountSettings.toasts.sessionsRevoked'), {
+        description: t('accountSettings.toasts.thisDeviceActive'),
       });
     } catch (err) {
-      toast.error('Could not revoke other sessions', {
-        description: err?.message || 'Try again.',
+      toast.error(t('accountSettings.toasts.sessionsRevokeFailed'), {
+        description: err?.message || t('common.tryAgain'),
       });
     }
   }

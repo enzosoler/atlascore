@@ -29,9 +29,7 @@ const TAB_ROUTES = {
 
 /** Routes allowed on public web (account management, billing, export). */
 const WEB_ALLOWED_PREFIXES = [
-  '/app/billing',
-  '/app/account',
-  '/app/export',
+  '/webapp',
 ];
 
 function isWebAllowedRoute(pathname) {
@@ -64,7 +62,7 @@ function tabFromPath(pathname) {
   if (pathname.startsWith('/app/workouts') || pathname.startsWith('/app/routines') || pathname.startsWith('/app/exercises')) return 'train';
   if (pathname.startsWith('/app/nutrition')) return 'eat';
   if (pathname.startsWith('/app/body') || pathname.startsWith('/app/labs')) return 'body';
-  if (pathname.startsWith('/app/profile') || pathname.startsWith('/app/settings') || pathname.startsWith('/app/billing') || pathname.startsWith('/app/social')) return 'you';
+  if (pathname.startsWith('/app/profile') || pathname.startsWith('/app/settings') || pathname.startsWith('/app/social')) return 'you';
   if (pathname.startsWith('/app/coach')) return 'today';
   if (pathname.startsWith('/app/v3/')) {
     const legacy = pathname.replace('/app/v3/', '');
