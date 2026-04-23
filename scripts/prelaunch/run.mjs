@@ -10,13 +10,6 @@ import {
   getLocaleFallbackChain,
   negotiateLocale,
 } from '../../shared/localization.js';
-import {
-  TBBM_CHANNELS,
-  buildSampleEnvelope,
-  listTbbmInventory,
-  renderMessage,
-  validateCatalogCoverage,
-} from '../../shared/tbbm/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '../..');
@@ -115,6 +108,18 @@ function createCheck(area, priority, status, summary, evidence) {
   };
 }
 
+async function loadTbbmModule() {
+  try {
+    return await import('../../shared/tbbm/index.js');
+  } catch (error) {
+    return { error };
+  }
+}
+
+const tbbmModule = await loadTbbmModule();
+const hasTbbmModule = !('error' in tbbmModule);
+const TBBM_CHANNELS = hasTbbmModule ? tbbmModule.TBBM_CHANNELS : [];
+
 const packageJson = readJson('package.json');
 const detectedCommands = {
   package_manager: fileExists('package-lock.json') ? 'npm' : 'unknown',
@@ -153,22 +158,26 @@ const i18nSamples = {
   currency_enUS: formatCurrencyValue(123.45, 'en-US', 'USD'),
 };
 
-const tbbmCoverage = validateCatalogCoverage();
-const tbbmInventory = listTbbmInventory();
-const tbbmSamples = [
-  renderMessage(buildSampleEnvelope('welcome_user', 'en-US', 'email')),
-  renderMessage(buildSampleEnvelope('trial_ends_soon', 'en-US', 'email')),
-  renderMessage(buildSampleEnvelope('invite_user', 'en-US', 'push')),
-].map((entry) => ({
-  template_id: entry.template_id,
-  channel: entry.channel,
-  locale: entry.locale,
-  preview: Object.fromEntries(
-    Object.entries(entry.content)
-      .filter(([, value]) => typeof value === 'string')
-      .slice(0, 2)
-  ),
-}));
+const tbbmCoverage = hasTbbmModule
+  ? tbbmModule.validateCatalogCoverage()
+  : { coveragePct: 0, covered: [], missing: ['shared/tbbm/index.js missing'] };
+const tbbmInventory = hasTbbmModule ? tbbmModule.listTbbmInventory() : [];
+const tbbmSamples = hasTbbmModule
+  ? [
+      tbbmModule.renderMessage(tbbmModule.buildSampleEnvelope('welcome_user', 'en-US', 'email')),
+      tbbmModule.renderMessage(tbbmModule.buildSampleEnvelope('trial_ends_soon', 'en-US', 'email')),
+      tbbmModule.renderMessage(tbbmModule.buildSampleEnvelope('invite_user', 'en-US', 'push')),
+    ].map((entry) => ({
+      template_id: entry.template_id,
+      channel: entry.channel,
+      locale: entry.locale,
+      preview: Object.fromEntries(
+        Object.entries(entry.content)
+          .filter(([, value]) => typeof value === 'string')
+          .slice(0, 2)
+      ),
+    }))
+  : [];
 
 const distAssets = listDistAssets();
 const largestAsset = distAssets[0] || null;
@@ -191,9 +200,10 @@ const hasPolicyDocs =
   runCommand("find . -maxdepth 3 -type f \\( -iname '*privacy*' -o -iname '*terms*' -o -iname '*consent*' \\)")
     .stdout
     .trim().length > 0;
-const hasDualTrialProvisioning =
-  fileExists('supabase/functions/on-auth-user-created/index.ts') &&
-  fileExists('
+const hasLegacyAuthEmailOverlap =
+  fileExists('supabase/functions/auth-webhook/index.ts') &&
+  (fileExists('supabase/functions/on-auth-user-created/index.ts') ||
+    fileExists('supabase/functions/send-welcome-email/index.ts'));
 
 const checks = [
   createCheck(
@@ -207,7 +217,7 @@ const checks = [
       `package_manager=${detectedCommands.package_manager}`,
       `env_refs=${listEnvReferences().join(', ') || 'none'}`,
       `supported_locales=${SUPPORTED_LOCALES.join(', ')}`,
-      `tbbm_templates=${tbbmInventory.length}`,
+      `tbbm_templates=${hasTbbmModule ? tbbmInventory.length : 'retired_or_missing'}`,
     ]
   ),
   createCheck(
@@ -290,22 +300,22 @@ const checks = [
     'The repo has account deletion functionality but no complete policy/consent audit or launch evidence for LGPD sign-off.',
     [
       `policy_docs_detected=${hasPolicyDocs}`,
-      'delete_account_function=
+      'delete_account_function=self-delete-user',
       'privacy_review=not_run',
     ]
   ),
   createCheck(
     'TBBM',
     'P0',
-    commandResults.unit?.exitCode === 0 && tbbmCoverage.coveragePct === 100 ? 'PASS' : 'FAIL',
-    commandResults.unit?.exitCode === 0 && tbbmCoverage.coveragePct === 100
+    hasTbbmModule && commandResults.unit?.exitCode === 0 && tbbmCoverage.coveragePct === 100 ? 'PASS' : 'BLOCKED',
+    hasTbbmModule && commandResults.unit?.exitCode === 0 && tbbmCoverage.coveragePct === 100
       ? 'Critical templates cover email, sms, push, and in_app in English with snapshot-backed validation.'
-      : 'TBBM catalog validation is incomplete.',
+      : 'TBBM catalog validation is blocked because the shared/tbbm module is no longer present in the repo.',
     [
       `coverage_pct=${tbbmCoverage.coveragePct}`,
       `covered_variants=${tbbmCoverage.covered.length}`,
       `missing_variants=${tbbmCoverage.missing.length}`,
-      'snapshot_tests=tests/prelaunch/tbbm.test.mjs',
+      `snapshot_tests=${hasTbbmModule ? 'tests/prelaunch/tbbm.test.mjs' : 'retired_or_missing'}`,
     ]
   ),
   createCheck(
@@ -371,10 +381,10 @@ const risks = [
   },
   {
     id: 'RISK-005',
-    title: 'Two separate trial-provisioning paths exist in Base44 and Supabase',
-    severity: hasDualTrialProvisioning ? 'P1' : 'P2',
-    status: hasDualTrialProvisioning ? 'open' : 'mitigated',
-    mitigation: 'Converge signup/trial ownership so the product has a single source of truth for subscriptions.',
+    title: 'Legacy auth/email compatibility paths still exist alongside the canonical webhook',
+    severity: hasLegacyAuthEmailOverlap ? 'P1' : 'P2',
+    status: hasLegacyAuthEmailOverlap ? 'open' : 'mitigated',
+    mitigation: 'Retire the old auth/email wrappers after production confirms auth-webhook is the sole owner of signup, confirmation, and reset flows.',
   },
 ];
 
@@ -458,7 +468,7 @@ const planLines = [
   '1. Detect stack and runnable commands from package.json and the repo layout.',
   '2. Execute local baseline commands: lint, typecheck, build, and unit tests.',
   '3. Audit i18n coverage, locale negotiation, and formatting behavior.',
-  '4. Validate the TBBM catalog across locales and channels with snapshots.',
+  `4. ${hasTbbmModule ? 'Validate the TBBM catalog across locales and channels with snapshots.' : 'Record that the retired TBBM catalog module is missing and block that gate explicitly.'}`,
   '5. Summarize P0/P1 findings and emit launch-readiness artifacts.',
 ];
 
@@ -526,7 +536,7 @@ ${commandSections}
 ## Evidence highlights
 
 - i18n samples: \`${JSON.stringify(i18nSamples)}\`
-- TBBM coverage: \`${tbbmCoverage.coveragePct}%\`
+- TBBM coverage: \`${hasTbbmModule ? `${tbbmCoverage.coveragePct}%` : 'blocked (shared/tbbm missing)'}\`
 - Top asset: \`${largestAsset ? `${largestAsset.file} (${formatBytes(largestAsset.bytes)})` : 'n/a'}\`
 - Changed files observed: ${changedFiles.length > 0 ? changedFiles.map((file) => `\`${file}\``).join(', ') : 'none'}
 

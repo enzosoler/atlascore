@@ -129,8 +129,8 @@ export const MILESTONE_KEYS = /** @type {const} */ ({
 export const email = {
 
   /**
-   * Welcome email — sent after signup.
-   * Usually triggered from AuthContext.signUp() or on-auth-user-created webhook.
+ * Welcome email — sent after signup.
+ * Usually triggered from AuthContext.signUp() or the canonical auth-webhook path.
    */
   welcome({ email: to, firstName, language, userId } = {}) {
     dispatch({ type: 'welcome', to, language, userId, payload: { firstName } });
@@ -237,7 +237,7 @@ export const emailEvents = {
 
   /**
    * Fired once after a user successfully signs up.
-   * The on-auth-user-created webhook handles this automatically on the backend.
+   * The auth-webhook path handles this automatically on the backend.
    * Call this from AuthContext.signUp() as a belt-and-suspenders fallback.
    */
   onSignup({ user }) {

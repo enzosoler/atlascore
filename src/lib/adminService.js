@@ -16,7 +16,8 @@ import { supabase } from '@/lib/supabaseClient';
  * The `email` column on profiles is populated by:
  *   1. The `handle_new_user()` trigger on auth.users INSERT
  *   2. The `sync_auth_email_to_profile()` trigger on auth.users UPDATE
- *   3. The `on-auth-user-created` and `auth-webhook` edge functions
+ *   3. The canonical `auth-webhook` path plus a temporary compatibility shim
+ *      for older `on-auth-user-created` deployments
  *   4. A one-time backfill in the migration SQL
  */
 
