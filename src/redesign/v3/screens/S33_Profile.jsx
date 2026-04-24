@@ -57,6 +57,7 @@ export default function S33_Profile({
   composition,
   recent,
   badges,
+  quickLinks = [],
   onGoBack,
   onOpenSettings,
   onOpenProgram,
@@ -254,6 +255,43 @@ export default function S33_Profile({
             </div>
           ) : null}
 
+          {Array.isArray(quickLinks) && quickLinks.length > 0 ? (
+            <div style={{ marginTop: 14 }}>
+              <ACLabel size={10} color={c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                More from profile
+              </ACLabel>
+              <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {quickLinks.map((link) => (
+                  <button
+                    key={link.key || link.label}
+                    type="button"
+                    onClick={link.onClick}
+                    style={{
+                      padding: 12,
+                      background: c.card,
+                      borderRadius: ACRadii.card,
+                      border: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <ACLabel size={10} color={link.meta ? c.accent : c.dim} style={{ fontFamily: ACFonts.body, letterSpacing: 0.35, textTransform: 'uppercase', fontWeight: 700 }}>
+                      {link.meta || 'Open'}
+                    </ACLabel>
+                    <div style={{ marginTop: 6, fontSize: 14, fontWeight: 600, color: c.fg }}>
+                      {link.label}
+                    </div>
+                    {link.description ? (
+                      <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.45, color: c.dim }}>
+                        {link.description}
+                      </div>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           {/* Cred strip */}
           {Array.isArray(badgeRows) && badgeRows.length > 0 ? (
             <div style={{
@@ -274,7 +312,7 @@ export default function S33_Profile({
         </div>
       </div>
 
-      {showTabBar ? <ACTabBar active="you" dark={dark} HeartMarkComp={HeartMark} /> : null}
+      {showTabBar ? <ACTabBar active="profile" dark={dark} HeartMarkComp={HeartMark} /> : null}
     </div>
   );
 }

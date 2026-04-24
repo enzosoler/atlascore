@@ -42,6 +42,19 @@ function PermIcon({ k, on }) {
       </svg>
     </div>
   );
+  if (k === 'camera') return (
+    <div style={{
+      width: 38, height: 38, borderRadius: 10,
+      background: '#0a0a0a',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+        <path d="M3 7a2 2 0 0 1 2-2h2l1.5-2h5L15 5h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" />
+        <circle cx="11" cy="11.5" r="3.2" stroke="#fff" strokeWidth="1.8" />
+        <circle cx="16.2" cy="8" r="0.9" fill="#e8b500" />
+      </svg>
+    </div>
+  );
   // Notifications — iOS bell in accent-filled rounded square
   if (k === 'notif') return (
     <div style={{
@@ -81,6 +94,7 @@ function S11_Onboard_Permissions({
   const c = useACT(dark);
   const [perms, setPerms] = React.useState(value || {
     health: false,
+    camera: false,
     notif: false,
     whoop: false,
   });
@@ -95,21 +109,28 @@ function S11_Onboard_Permissions({
     {
       k: 'health',
       t: 'Apple Health',
-      d: 'HRV, sleep, steps, heart rate',
+      d: 'Why it matters: recovery, sleep, steps, and heart rate let coach adjust the day instead of guessing.',
       status: perms.health ? 'Connected' : 'Connect',
       on: perms.health,
     },
     {
+      k: 'camera',
+      t: 'Camera',
+      d: 'Why it matters: progress photos, barcode scans, and meal capture work faster when camera access is ready.',
+      status: perms.camera ? 'Enabled' : 'Enable',
+      on: perms.camera,
+    },
+    {
       k: 'notif',
       t: 'Notifications',
-      d: 'Coach check-ins, workout reminders',
+      d: 'Why it matters: day-5 trial reminders, coach nudges, and workout check-ins land at the right moment.',
       status: perms.notif ? 'Enabled' : 'Enable',
       on: perms.notif,
     },
     {
       k: 'whoop',
       t: 'Whoop / Oura',
-      d: 'Optional · import recovery scores',
+      d: 'Optional: import readiness signals if you already track recovery somewhere else.',
       status: perms.whoop ? 'Connected' : 'Connect',
       on: perms.whoop,
     },
@@ -128,7 +149,7 @@ function S11_Onboard_Permissions({
           Connect your sources.
         </div>
         <div style={{ marginTop: 10, fontSize: 14, color: c.dim, lineHeight: 1.5 }}>
-          atlas.core reads signal — never writes without asking.
+          We explain each permission before the OS prompt so the ask feels earned. atlas.core reads signal and never writes without asking.
         </div>
 
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>

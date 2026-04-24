@@ -14,6 +14,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { renderBrandedEmail, renderEmail } from '../_shared/templates.ts';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 type RequestedLang = string;
 type RenderLang = 'pt-BR' | 'en';
@@ -64,12 +65,6 @@ interface EmailResult {
   html: string;
   text: string;
 }
-
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
 
 function resolveLanguage(requested?: RequestedLang): RenderLang {
   return requested?.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en';
@@ -391,12 +386,15 @@ function build(type: EmailType, payload: EmailPayload, lang: RenderLang, appUrl:
 
 async function isAuthorized(req: Request): Promise<boolean> {
   const authHeader = req.headers.get('Authorization') || '';
-  if (!authHeader.startsWith('Bearer ')) return false;
-
-  const token = authHeader.replace('Bearer ', '');
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  if (serviceKey && token === serviceKey) return true;
+  const apiKeyHeader = req.headers.get('apikey') || '';
+  const webhookSecret = req.headers.get('x-webhook-secret') || '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.replace('Bearer ', '') : '';
+  const token = bearerToken || apiKeyHeader || webhookSecret;
+
+  if (!token) return false;
+  if (serviceKey && (token === serviceKey || apiKeyHeader === serviceKey || webhookSecret === serviceKey)) return true;
 
   const supabase = createClient(
     supabaseUrl,
@@ -452,21 +450,23 @@ async function logEvent(opts: {
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   if (!(await isAuthorized(req))) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -476,7 +476,7 @@ serve(async (req) => {
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -485,7 +485,7 @@ serve(async (req) => {
   if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to.trim())) {
     return new Response(JSON.stringify({ error: 'Valid recipient email required' }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -506,7 +506,7 @@ serve(async (req) => {
   if (!validTypes.includes(type as EmailType)) {
     return new Response(JSON.stringify({ error: `Invalid email type: ${type}` }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -514,7 +514,7 @@ serve(async (req) => {
   if (!resendApiKey) {
     return new Response(JSON.stringify({ error: 'Email service not configured' }), {
       status: 503,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -533,7 +533,7 @@ serve(async (req) => {
     console.error(`send-email: template error [${type}]:`, message);
     return new Response(JSON.stringify({ error: message }), {
       status: 400,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -558,7 +558,7 @@ serve(async (req) => {
     await logEvent({ userId, email: to, type, language: lang, status: 'failed', errorMessage: errText });
     return new Response(JSON.stringify({ error: 'Email delivery failed' }), {
       status: 502,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -568,6 +568,6 @@ serve(async (req) => {
 
   return new Response(JSON.stringify({ success: true, id: data.id }), {
     status: 200,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });

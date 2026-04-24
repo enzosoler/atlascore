@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './playwright.global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -16,8 +17,9 @@ export default defineConfig({
   },
 
   projects: [
+    // Desktop Chrome for full gallery review (primary dev surface)
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // iOS-only app — validate on iPhone viewport only
     { name: 'iphone-14', use: { ...devices['iPhone 14'] } },
-    { name: 'pixel-7', use: { ...devices['Pixel 7'] } },
   ],
 });

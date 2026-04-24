@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>atlas.core — motion spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --bg:  #efe9da;
+    --accent: #e8b500;
+    --dim: rgba(10,10,10,0.55);
+    --line: rgba(10,10,10,0.12);
+    --soft: rgba(10,10,10,0.04);
+    --card: rgba(10,10,10,0.03);
+    --display: "Archivo Black", sans-serif;
+    --body: "Inter", -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .page {
+    max-width: 1200px; margin: 0 auto; padding: 64px 48px 120px;
+  }
+  .mono { font-family: var(--mono); letter-spacing: 1.6px; text-transform: uppercase; font-size: 11px; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); }
+  h1.display {
+    margin: 10px 0 20px;
+    font-family: var(--display); font-size: 96px; letter-spacing: -4px; line-height: 0.9;
+    text-transform: lowercase;
+  }
+  h1.display .accent { color: var(--accent); }
+  h1.display .stamp { background: var(--ink); color: var(--bg); padding: 0 14px; }
+  .lede { font-size: 17px; line-height: 1.55; max-width: 720px; color: rgba(10,10,10,0.82); }
+  h2.section {
+    font-family: var(--display); font-size: 44px; letter-spacing: -1.6px;
+    line-height: 1; text-transform: lowercase; margin: 96px 0 8px;
+  }
+  .section-sub { font-size: 14px; color: var(--dim); margin-bottom: 28px; max-width: 620px; line-height: 1.5; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;
+  }
+  .grid-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    min-height: 360px;
+  }
+  .card-head {
+    padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--line);
+  }
+  .card-head-l { display: flex; align-items: baseline; gap: 10px; }
+  .card-id {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .card-title { font-size: 14px; font-weight: 600; letterspacing: -0.2px; }
+  .card-replay {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--ink);
+    padding: 3px 8px; border: 1px solid var(--line); cursor: pointer;
+    background: transparent;
+  }
+  .card-replay:hover { background: var(--ink); color: var(--bg); }
+  .card-stage {
+    flex: 1;
+    background: var(--soft);
+    display: grid; place-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-spec {
+    padding: 14px 16px;
+    border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px 16px;
+  }
+  .spec-k { font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--dim); }
+  .spec-v { font-family: var(--mono); font-size: 11px; letter-spacing: 0.6px; color: var(--ink); }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px;
+    text-transform: uppercase; font-weight: 600;
+    background: rgba(10,10,10,0.08); color: var(--ink);
+  }
+  .tag.accent { background: var(--accent); color: var(--ink); }
+  .tag.dim    { background: rgba(10,10,10,0.06); color: var(--dim); }
+
+  /* CURVES TABLE */
+  .curves {
+    display: grid; grid-template-columns: 180px 200px 1fr 140px; gap: 0;
+    border: 1px solid var(--line);
+    margin-top: 20px;
+  }
+  .curves-row {
+    display: contents;
+  }
+  .curves-cell {
+    padding: 14px 16px;
+    border-top: 1px solid var(--line);
+    font-size: 13px; display: flex; align-items: center;
+  }
+  .curves-row:first-child .curves-cell { border-top: 0; background: rgba(10,10,10,0.03); font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); }
+  .curves-cell.mono-v { font-family: var(--mono); font-size: 11px; }
+  .curves-cell svg { width: 120px; height: 40px; }
+
+  /* footer rules */
+  .rules {
+    margin-top: 40px;
+    padding: 28px 32px;
+    background: var(--ink); color: var(--bg);
+  }
+  .rules .eyebrow { color: rgba(239,233,218,0.6); }
+  .rules h3 { font-family: var(--display); font-size: 36px; letter-spacing: -1.2px; margin: 4px 0 18px; text-transform: lowercase; }
+  .rules ul { padding-left: 18px; font-size: 14px; line-height: 1.7; margin: 0; column-count: 2; column-gap: 48px; }
+  .rules li::marker { color: var(--accent); }
+
+  .backlink {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px;
+    text-transform: uppercase; color: var(--dim);
+    text-decoration: none;
+  }
+  .backlink:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="index.html" class="backlink">← atlas.core · back to canvas</a>
+
+  <div style="margin-top: 32px;">
+    <div class="eyebrow">/// atlas.core · motion · phase 13</div>
+    <h1 class="display">
+      motion is <span class="accent">branding</span>.<br/>
+      <span class="stamp">every curve. every ms.</span>
+    </h1>
+    <p class="lede">
+      atlas.core is a fitness product — motion carries the physicality. Every transition, every
+      micro-interaction, every celebration is spec'd here. Curves are drawn from the ECG motif
+      family (slow entry, sharp apex, fast settle) unless physics demands otherwise.
+      Use tabular timings · sparse durations · no bounces that aren't earned.
+    </p>
+  </div>
+
+  <!-- ══════════════════ CURVES ══════════════════ -->
+  <h2 class="section">curves.</h2>
+  <p class="section-sub">Four families. Name them, use them, stop inventing new ones.</p>
+
+  <div class="curves">
+    <div class="curves-row">
+      <div class="curves-cell">name</div>
+      <div class="curves-cell">css</div>
+      <div class="curves-cell">shape</div>
+      <div class="curves-cell">when</div>
+    </div>
+    <div class="curves-row">
+      <div class="curves-cell">ac-ease</div>
+      <div class="curves-cell mono-v">cubic-bezier(.2,.8,.2,1)</div>
+      <div class="curves-cell"><svg viewBox="0 0 120 40"><path d="M0 36 C 24 36, 24 4, 120 4" fill="none" stroke="#0a0a0a" stroke-width="2"/></svg></div>
+      <div class="curves-cell mono-v">default · ui</div>
+    </div>
+    <div class="curves-row">
+      <div class="curves-cell">ac-emphasis</div>
+      <div class="curves-cell mono-v">cubic-bezier(.3,0,0,1)</div>
+      <div class="curves-cell"><svg viewBox="0 0 120 40"><path d="M0 36 C 36 36, 0 4, 120 4" fill="none" stroke="#e8b500" stroke-width="2"/></svg></div>
+      <div class="curves-cell mono-v">rings · hero</div>
+    </div>
+    <div class="curves-row">
+      <div class="curves-cell">ac-ecg</div>
+      <div class="curves-cell mono-v">steps — 12:hold, 4:spike, 84:linger</div>
+      <div class="curves-cell"><svg viewBox="0 0 120 40"><path d="M0 20 L40 20 L50 8 L60 32 L70 20 L120 20" fill="none" stroke="#0a0a0a" stroke-width="2"/></svg></div>
+      <div class="curves-cell mono-v">celebration</div>
+    </div>
+    <div class="curves-row">
+      <div class="curves-cell">ac-physical</div>
+      <div class="curves-cell mono-v">cubic-bezier(.34,1.56,.64,1)</div>
+      <div class="curves-cell"><svg viewBox="0 0 120 40"><path d="M0 36 C 40 36, 50 -4, 72 8 C 84 12, 84 8, 120 8" fill="none" stroke="#0a0a0a" stroke-width="2"/></svg></div>
+      <div class="curves-cell mono-v">weight plates · PR</div>
+    </div>
+    <div class="curves-row">
+      <div class="curves-cell">ac-linear</div>
+      <div class="curves-cell mono-v">linear</div>
+      <div class="curves-cell"><svg viewBox="0 0 120 40"><path d="M0 36 L120 4" fill="none" stroke="#0a0a0a" stroke-width="2"/></svg></div>
+      <div class="curves-cell mono-v">progress · loading</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ DEMOS ══════════════════ -->
+  <h2 class="section">interactions.</h2>
+  <p class="section-sub">Eight moments that carry the brand. Tap any tile to replay.</p>
+
+  <div id="demos" class="grid"></div>
+
+  <!-- ══════════════════ RULES ══════════════════ -->
+  <div class="rules">
+    <div class="eyebrow">/// rules &amp; anti-patterns</div>
+    <h3>the short list.</h3>
+    <ul>
+      <li><strong>Motion is informational.</strong> If it doesn't make meaning clearer, delete it.</li>
+      <li><strong>Tabular timings.</strong> 120 · 200 · 320 · 480 · 720 ms. Nothing else unless physics.</li>
+      <li><strong>Entrance slow, exit fast.</strong> Arrivals breathe. Exits get out of the way.</li>
+      <li><strong>ECG is reserved.</strong> Only for PRs, completions, labs posting. Not for nav.</li>
+      <li><strong>No spring-bouncing buttons.</strong> We're not a toy.</li>
+      <li><strong>Haptic = motion + tick.</strong> Every earned haptic pairs with visible motion.</li>
+      <li><strong>Respect reduced-motion.</strong> Rings count-up becomes instant; fades replace slides.</li>
+      <li><strong>One hero per screen.</strong> Only one thing animates on entry. The rest is there already.</li>
+    </ul>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="motion-demos.jsx"></script>
+
+</body>
+</html>

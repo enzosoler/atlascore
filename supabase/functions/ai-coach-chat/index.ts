@@ -15,42 +15,118 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-// ─── CORS ─────────────────────────────────────────────────────────────────────
-
-function getAllowedOrigin(requestOrigin: string): string {
-  const appUrls = Deno.env.get('APP_URLS') || '';
-  const extraAllowed = appUrls.split(',').map((u) => u.trim()).filter(Boolean);
-
-  // Allow any subdomain of useatlascore.com (www, non-www, future subdomains)
-  if (requestOrigin?.endsWith('useatlascore.com')) return requestOrigin;
-
-  const allowedList = [
-    ...extraAllowed,
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:8080',
-    'capacitor://localhost',
-    'atlascore://localhost',
-  ];
-  if (allowedList.includes(requestOrigin)) return requestOrigin;
-
-  console.warn('[ai-coach-chat] CORS blocked origin:', requestOrigin);
-  return 'https://useatlascore.com';
-}
-
-function getCorsHeaders(req: Request) {
-  const origin = req.headers.get('origin') ?? '';
-  return {
-    'Access-Control-Allow-Origin': getAllowedOrigin(origin),
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
-}
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MODEL = 'gpt-4o-mini';
+const RETRYABLE_OPENAI_STATUS = new Set([408, 409, 429, 500, 502, 503, 504]);
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function buildCoachFallback(
+  userMessage: string,
+  todayMetrics: {
+    calories_remaining?: number;
+    protein_eaten_g?: number;
+    protein_target_g?: number;
+    workout_status?: string;
+  },
+  locale: string,
+) {
+  const pt = locale.toLowerCase().startsWith('pt');
+  const trimmed = userMessage.trim();
+  const lower = trimmed.toLowerCase();
+  const proteinRemaining = Math.max(
+    0,
+    Math.round((todayMetrics.protein_target_g ?? 0) - (todayMetrics.protein_eaten_g ?? 0)),
+  );
+
+  if (lower.includes('workout') || lower.includes('train') || lower.includes('treino')) {
+    return {
+      message: pt
+        ? 'O coach ao vivo caiu, então vou te passar o próximo passo seguro: faça o treino planejado de hoje, registre a primeira série e ajuste depois se a energia estiver baixa.'
+        : 'Live coach is down, so here is the safe next step: do today\'s planned session, log the first working set, and adjust volume later if energy is low.',
+      suggestions: pt ? ['Iniciar treino', 'Registrar série', 'Ver rotina'] : ['Start workout', 'Log set', 'Open routine'],
+    };
+  }
+
+  if (lower.includes('food') || lower.includes('meal') || lower.includes('eat') || lower.includes('comi') || lower.includes('meal')) {
+    return {
+      message: pt
+        ? 'O coach ao vivo caiu. Mantenha o básico: registre a refeição, priorize proteína e feche o dia sem tentar compensar demais.'
+        : 'Live coach is down. Keep the basics intact: log the meal, prioritize protein, and finish the day without over-correcting.',
+      suggestions: pt ? ['Registrar refeição', 'Ver proteína', 'Abrir nutrição'] : ['Log meal', 'Check protein', 'Open nutrition'],
+    };
+  }
+
+  if ((todayMetrics.workout_status ?? 'not_logged') === 'not_logged') {
+    return {
+      message: pt
+        ? 'O coach ao vivo está temporariamente indisponível. Próximo passo seguro: execute a sessão de hoje, bata sua proteína e registre o que fizer.'
+        : 'Live coach is temporarily unavailable. Safe next step: execute today\'s session, hit protein, and log what you do.',
+      suggestions: pt ? ['Iniciar treino', 'Registrar refeição', 'Ver metas'] : ['Start workout', 'Log meal', 'Check targets'],
+    };
+  }
+
+  if (proteinRemaining > 0) {
+    return {
+      message: pt
+        ? `O coach ao vivo caiu. Passo prático por enquanto: faltam cerca de ${proteinRemaining}g de proteína, então resolva isso na próxima refeição e mantenha o dia estável.`
+        : `Live coach is down. Practical next step for now: you are about ${proteinRemaining}g short on protein, so close that gap in the next meal and keep the day stable.`,
+      suggestions: pt ? ['Registrar refeição', 'Ver proteína', 'Abrir hoje'] : ['Log meal', 'Check protein', 'Open today'],
+    };
+  }
+
+  return {
+    message: pt
+      ? 'O coach ao vivo está temporariamente indisponível. Fique no plano de hoje, registre alimentação e treino, e tente novamente em alguns minutos.'
+      : 'Live coach is temporarily unavailable. Stay on today\'s plan, log food and training, and try again in a few minutes.',
+    suggestions: pt ? ['Abrir hoje', 'Registrar refeição', 'Iniciar treino'] : ['Open today', 'Log meal', 'Start workout'],
+  };
+}
+
+async function callOpenAIWithRetry(messages: Array<{ role: string; content: string }>, openaiKey: string) {
+  const attempts = [0, 750, 1500];
+  let lastErrorText = 'Unknown error';
+  let lastStatus = 0;
+
+  for (let attempt = 0; attempt < attempts.length; attempt += 1) {
+    if (attempts[attempt] > 0) {
+      await sleep(attempts[attempt]);
+    }
+
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        temperature: 0.3,
+        max_tokens: 400,
+        messages,
+      }),
+    });
+
+    if (res.ok) {
+      return { ok: true as const, payload: await res.json() };
+    }
+
+    lastStatus = res.status;
+    lastErrorText = await res.text();
+    console.error(`[ai-coach-chat] OpenAI error ${res.status} attempt ${attempt + 1}:`, lastErrorText);
+
+    if (!RETRYABLE_OPENAI_STATUS.has(res.status)) {
+      break;
+    }
+  }
+
+  return { ok: false as const, status: lastStatus, errorText: lastErrorText };
+}
 
 // ─── System prompt: rigid coach identity ──────────────────────────────────────
 
@@ -143,7 +219,7 @@ serve(async (req) => {
 
   console.log('[ai-coach-chat] origin:', req.headers.get('origin'), '| method:', req.method);
 
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
+  if (req.method === 'OPTIONS') return buildPreflightResponse(req);
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   console.log('[ai-coach-chat] stage: auth');
@@ -439,33 +515,32 @@ serve(async (req) => {
   let assistantContent = '';
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiKey}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.3,
-        max_tokens: 400,
-        messages: promptMessages,
-      }),
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error(`[ai-coach-chat] OpenAI error ${res.status}:`, errText);
-      return json({ error: 'AI service error. Please try again.' }, 502);
+    const aiResult = await callOpenAIWithRetry(promptMessages, openaiKey);
+    if (!aiResult.ok) {
+      const fallback = buildCoachFallback(userMessage.trim(), todayMetrics, userLocaleResolved);
+      return json({
+        message: fallback.message,
+        actions: [],
+        suggestions: fallback.suggestions,
+        source: 'deterministic_fallback',
+        code: 'UPSTREAM_UNAVAILABLE',
+      });
     }
 
-    const data = await res.json();
+    const data = aiResult.payload;
     assistantContent = data.choices?.[0]?.message?.content ?? '';
     inputTokens  = data.usage?.prompt_tokens ?? 0;
     outputTokens = data.usage?.completion_tokens ?? 0;
   } catch (err) {
     console.error('[ai-coach-chat] fetch error:', err);
-    return json({ error: 'AI service unavailable' }, 503);
+    const fallback = buildCoachFallback(userMessage.trim(), todayMetrics, userLocaleResolved);
+    return json({
+      message: fallback.message,
+      actions: [],
+      suggestions: fallback.suggestions,
+      source: 'deterministic_fallback',
+      code: 'UPSTREAM_UNAVAILABLE',
+    });
   }
 
   // ── 10. Persist messages ──────────────────────────────────────────────────

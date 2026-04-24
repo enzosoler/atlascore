@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import { loginAs } from './helpers/auth';
@@ -10,8 +10,28 @@ const email = process.env.E2E_USER_EMAIL;
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+function createAdminClient() {
+  return createClient(supabaseUrl!, serviceRoleKey!);
+}
+
+async function provisionRecoveryUser(password: string) {
+  const recoveryEmail = `atlas-recovery-${Date.now()}@example.com`;
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.createUser({
+    email: recoveryEmail,
+    password,
+    email_confirm: true,
+  });
+
+  if (error || !data?.user?.id) {
+    throw error || new Error('Recovery user was not created');
+  }
+
+  return recoveryEmail;
+}
+
 async function generateRecoveryLink(baseURL: string, targetEmail: string) {
-  const admin = createClient(supabaseUrl!, serviceRoleKey!);
+  const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.generateLink({
     type: 'recovery',
     email: targetEmail,
@@ -27,14 +47,29 @@ async function generateRecoveryLink(baseURL: string, targetEmail: string) {
   return data.properties.action_link;
 }
 
+async function waitForResetCompletion(page: Page) {
+  // Password reset now lands on either a completion state or Today if the session is already active.
+  await Promise.race([
+    page.waitForURL(/\/auth\/login|\/app\/today|\/onboarding/i, { timeout: 20_000 }),
+    expect(page.getByText(/password updated/i)).toBeVisible({ timeout: 20_000 }),
+  ]);
+
+  if (/\/app\/today|\/onboarding/i.test(page.url())) {
+    await page.goto('/auth/login?mode=password');
+  }
+}
+
 test.describe('Auth recovery link gate', () => {
   test.skip(!email, 'Set E2E_USER_EMAIL to run auth recovery-link gate');
   test.skip(!supabaseUrl || !serviceRoleKey, 'Set Supabase URL + service role to generate recovery links');
 
   test('recovery link opens reset screen and the new password can log in', async ({ page, baseURL }) => {
-    const nextPassword = `AtlasAuth#${Date.now()}`;
+    const currentPassword = `AtlasAuth#${Date.now()}-start`;
+    const targetEmail = await provisionRecoveryUser(currentPassword);
+    const nextPassword = `AtlasAuth#${Date.now()}-next`;
 
-    const recoveryLink = await generateRecoveryLink(baseURL!, email!);
+    // Use a disposable account so this recovery flow cannot invalidate shared login credentials mid-suite.
+    const recoveryLink = await generateRecoveryLink(baseURL!, targetEmail);
     await page.goto(recoveryLink);
     await expect(page).toHaveURL(/\/auth\/reset/i, { timeout: 20_000 });
 
@@ -43,9 +78,9 @@ test.describe('Auth recovery link gate', () => {
     await passwordInputs.first().fill(nextPassword);
     await passwordInputs.nth(1).fill(nextPassword);
     await page.getByRole('button', { name: /update password/i }).click();
-    await expect(page).toHaveURL(/\/auth\/login/i, { timeout: 20_000 });
+    await waitForResetCompletion(page);
 
-    await loginAs(page, email!, nextPassword);
+    await loginAs(page, targetEmail, nextPassword);
     await expect(page).toHaveURL(/\/app\/today|\/onboarding/i, { timeout: 15_000 });
   });
 });

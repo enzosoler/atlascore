@@ -9,6 +9,7 @@
  *   RESEND_API_KEY, FROM_EMAIL, APP_URL
  *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  *   + all STRIPE_PRICE_* env vars
+ *   Optional for QA: STRIPE_TEST_MODE, STRIPE_TEST_SECRET_KEY, STRIPE_WEBHOOK_SECRET_TEST
  *
  * NOTE: Email helpers are inlined here (not imported from _shared/) to avoid
  * the Supabase Edge Runtime BOOT_ERROR caused by the logger+templates module
@@ -25,6 +26,23 @@ const CORS = {
   'Access-Control-Allow-Headers': 'stripe-signature, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+function isTruthy(value: string | undefined | null): boolean {
+  return ['1', 'true', 'yes', 'on'].includes((value || '').trim().toLowerCase());
+}
+
+function resolveStripeMode() {
+  const defaultSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
+  const testMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE')) || defaultSecretKey.startsWith('sk_test_');
+  const stripeSecretKey = testMode
+    ? (Deno.env.get('STRIPE_TEST_SECRET_KEY') || defaultSecretKey)
+    : defaultSecretKey;
+  const webhookSecret = testMode
+    ? (Deno.env.get('STRIPE_WEBHOOK_SECRET_TEST') || Deno.env.get('STRIPE_WEBHOOK_SECRET') || '')
+    : (Deno.env.get('STRIPE_WEBHOOK_SECRET') || '');
+
+  return { testMode, stripeSecretKey, webhookSecret };
+}
 
 // Map Stripe price IDs to plan codes.
 // Env var names must match create-checkout/index.ts (ATHLETE_PRO, ATHLETE_PERFORMANCE).
@@ -165,8 +183,7 @@ serve(async (req) => {
     });
   }
 
-  const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  const { stripeSecretKey, webhookSecret, testMode } = resolveStripeMode();
 
   if (!stripeSecretKey || !webhookSecret) {
     return new Response(JSON.stringify({ error: 'Stripe not configured' }), {
@@ -196,7 +213,7 @@ serve(async (req) => {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Invalid signature';
-    console.error('stripe-webhook: Signature verification failed:', message);
+    console.error('stripe-webhook: Signature verification failed:', message, { testMode });
     return new Response(JSON.stringify({ error: 'Invalid signature' }), {
       status: 400,
       headers: { ...CORS, 'Content-Type': 'application/json' },

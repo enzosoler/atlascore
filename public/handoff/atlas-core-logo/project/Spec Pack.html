@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>atlas.core · spec pack</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #efe9da; color: #1a1410; font-family: -apple-system, "SF Pro Text", sans-serif; }
+  body { padding: 60px 48px 120px; max-width: 1100px; margin: 0 auto; }
+  .kicker { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(40,30,20,0.6); margin-bottom: 12px; }
+  h1 { font-family: "Archivo Black", sans-serif; font-size: 84px; letter-spacing: -4px; line-height: 0.88; text-transform: lowercase; color: rgba(15,10,5,0.94); }
+  h1 .inv { background: #0f0a05; color: #efe9da; padding: 0 10px; }
+  h1 .accent { color: #c9a227; }
+  .lede { margin-top: 22px; max-width: 720px; font-size: 15px; line-height: 1.65; color: rgba(40,30,20,0.85); }
+  .grid { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .card { background: #fff8e8; border: 1.5px solid #0f0a05; padding: 28px 26px 24px; display: flex; flex-direction: column; min-height: 240px; text-decoration: none; color: inherit; position: relative; }
+  .card:hover { background: #0f0a05; color: #efe9da; }
+  .card:hover .card-id { color: #c9a227; }
+  .card:hover .card-meta { color: rgba(239,233,218,0.6); }
+  .card-id { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 3px; color: rgba(40,30,20,0.55); text-transform: uppercase; margin-bottom: 12px; transition: color 0.15s; }
+  .card-title { font-family: "Archivo Black", sans-serif; font-size: 34px; letter-spacing: -1.4px; line-height: 0.95; text-transform: lowercase; margin-bottom: 14px; }
+  .card-body { font-size: 13.5px; line-height: 1.55; flex: 1; }
+  .card-meta { margin-top: 18px; font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(40,30,20,0.55); display: flex; justify-content: space-between; transition: color 0.15s; }
+  .card-arrow { font-family: "JetBrains Mono", monospace; font-size: 16px; }
+
+  .strip { margin-top: 48px; background: #0f0a05; color: #efe9da; padding: 28px 32px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .strip-col-k { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 3px; color: #c9a227; margin-bottom: 6px; text-transform: uppercase; }
+  .strip-col-h { font-family: "Archivo Black", sans-serif; font-size: 22px; letter-spacing: -0.6px; text-transform: lowercase; margin-bottom: 10px; }
+  .strip-col-b { font-family: "JetBrains Mono", monospace; font-size: 11px; line-height: 1.7; color: rgba(239,233,218,0.78); }
+
+  .footer { margin-top: 64px; padding-top: 20px; border-top: 1.5px solid rgba(15,10,5,0.2); display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(40,30,20,0.55); }
+  a.back { color: inherit; text-decoration: none; }
+  a.back:hover { color: #0f0a05; }
+</style>
+</head>
+<body>
+
+<div class="kicker">/// atlas.core · handoff · spec pack</div>
+<h1>the <span class="accent">spec</span> layer.<br/><span class="inv">how designs become an app</span>.</h1>
+<p class="lede">
+  Four documents that turn 107 designed screens into wiring instructions.
+  Read in order: screen map first (what connects to what), then the data model
+  (what drives each screen), then features (what's considered "done"), then
+  per-screen wiring (what every button does). Bundle alongside the designs in
+  any handoff — to Claude Code, a human team, or both.
+</p>
+
+<div class="grid">
+  <a class="card" href="SPEC/README.md" target="_top">
+    <div class="card-id">/ readme</div>
+    <div class="card-title">start here.</div>
+    <div class="card-body">Read order, stack assumptions, explicit scope. What ships as real UI vs. what's illustrative only.</div>
+    <div class="card-meta"><span>orientation</span><span class="card-arrow">↗</span></div>
+  </a>
+  <a class="card" href="SPEC/00-screen-map.md" target="_top">
+    <div class="card-id">/ doc 00 · map</div>
+    <div class="card-title">screen map.</div>
+    <div class="card-body">All 107 screens → routes, states, entry points, exits. Tab bar, onboarding gates, route guards, coach web app.</div>
+    <div class="card-meta"><span>when does this appear?</span><span class="card-arrow">↗</span></div>
+  </a>
+  <a class="card" href="SPEC/01-data-model.md" target="_top">
+    <div class="card-id">/ doc 01 · data</div>
+    <div class="card-title">data model.</div>
+    <div class="card-body">Entities as TypeScript-ish pseudocode. User, Profile, Program, Set, MealLog, Protocol, Lab, Coach — plus derived values + privacy classes.</div>
+    <div class="card-meta"><span>what drives this screen?</span><span class="card-arrow">↗</span></div>
+  </a>
+  <a class="card" href="SPEC/02-features.md" target="_top">
+    <div class="card-id">/ doc 02 · features</div>
+    <div class="card-title">features.</div>
+    <div class="card-body">Behavior specs in Given/When/Then. Auth, onboarding, training, nutrition, body, protocols, coach, social, platform, coach-side — plus explicit non-goals.</div>
+    <div class="card-meta"><span>is this done?</span><span class="card-arrow">↗</span></div>
+  </a>
+  <a class="card" href="SPEC/03-wiring-notes.md" target="_top" style="grid-column: 1 / -1;">
+    <div class="card-id">/ doc 03 · wiring</div>
+    <div class="card-title">wiring notes.</div>
+    <div class="card-body">Per-screen map of every tap, every read, every emit. Plus the global event bus (set.logged, session.completed, insight.published…) for the parts that glue screens together.</div>
+    <div class="card-meta"><span>what does this button do?</span><span class="card-arrow">↗</span></div>
+  </a>
+</div>
+
+<div class="strip">
+  <div>
+    <div class="strip-col-k">STACK</div>
+    <div class="strip-col-h">assumed.</div>
+    <div class="strip-col-b">
+      react native · ios first<br/>
+      node + typescript api<br/>
+      postgres · redis<br/>
+      coach web · react 1280<br/>
+      auth · magic code only<br/>
+      sync · offline-first wal
+    </div>
+  </div>
+  <div>
+    <div class="strip-col-k">SCOPE</div>
+    <div class="strip-col-h">in v1.</div>
+    <div class="strip-col-b">
+      107 product screens<br/>
+      4 coach-web surfaces<br/>
+      watch companion (ios)<br/>
+      full auth + billing<br/>
+      protocols (pro-gated)<br/>
+      — — — — — —<br/>
+      no android watch<br/>
+      no athlete web app<br/>
+      no community feed<br/>
+      no streak mechanics
+    </div>
+  </div>
+  <div>
+    <div class="strip-col-k">HANDOFF</div>
+    <div class="strip-col-h">how to use.</div>
+    <div class="strip-col-b">
+      1 · read readme<br/>
+      2 · scan screen map<br/>
+      3 · lift data model<br/>
+      4 · prioritize features<br/>
+      5 · wire per screen<br/>
+      — — — — — —<br/>
+      ship in this order:<br/>
+      auth → onboarding →<br/>
+      today → workout → fuel →<br/>
+      body → protocols → coach
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <a class="back" href="index.html" target="_top">← back to design canvas</a>
+  <span>/// 5 docs · ~60kb · 107 screens covered</span>
+</div>
+
+</body>
+</html>

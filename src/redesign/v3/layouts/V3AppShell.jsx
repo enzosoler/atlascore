@@ -21,10 +21,10 @@ import { Capacitor } from '@capacitor/core';
 
 const TAB_ROUTES = {
   today: '/app/today',
-  train: '/app/workouts',
-  eat:   '/app/nutrition',
-  body:  '/app/body',
-  you:   '/app/profile',
+  workouts: '/app/workouts',
+  nutrition: '/app/nutrition',
+  coach: '/app/coach',
+  profile: '/app/profile',
 };
 
 /** Routes allowed on public web (account management, billing, export). */
@@ -59,14 +59,21 @@ function useDevMode() {
 
 function tabFromPath(pathname) {
   if (pathname === '/app' || pathname.startsWith('/app/today') || pathname.startsWith('/app/insights') || pathname.startsWith('/app/diary') || pathname.startsWith('/app/weekly')) return 'today';
-  if (pathname.startsWith('/app/workouts') || pathname.startsWith('/app/routines') || pathname.startsWith('/app/exercises')) return 'train';
-  if (pathname.startsWith('/app/nutrition')) return 'eat';
-  if (pathname.startsWith('/app/body') || pathname.startsWith('/app/labs')) return 'body';
-  if (pathname.startsWith('/app/profile') || pathname.startsWith('/app/settings') || pathname.startsWith('/app/social')) return 'you';
-  if (pathname.startsWith('/app/coach')) return 'today';
+  if (pathname.startsWith('/app/workouts') || pathname.startsWith('/app/routines') || pathname.startsWith('/app/exercises')) return 'workouts';
+  if (pathname.startsWith('/app/nutrition')) return 'nutrition';
+  if (pathname.startsWith('/app/coach')) return 'coach';
+  if (
+    pathname.startsWith('/app/profile') ||
+    pathname.startsWith('/app/settings') ||
+    pathname.startsWith('/app/social') ||
+    pathname.startsWith('/app/body') ||
+    pathname.startsWith('/app/labs') ||
+    pathname.startsWith('/app/protocols') ||
+    pathname.startsWith('/app/watch')
+  ) return 'profile';
   if (pathname.startsWith('/app/v3/')) {
     const legacy = pathname.replace('/app/v3/', '');
-    return ({ today: 'today', train: 'train', eat: 'eat', body: 'body', you: 'you' }[legacy]) || 'today';
+    return ({ today: 'today', train: 'workouts', eat: 'nutrition', body: 'profile', you: 'profile' }[legacy]) || 'today';
   }
   return 'today';
 }

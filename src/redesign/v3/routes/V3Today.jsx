@@ -11,13 +11,13 @@
  *   5. Feeds adherence back into next day's readiness
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/i18nContext';
-import { useDailySystem, getSystemIntegrity } from '@/lib/dailySystem';
+import { useDailySystem, getSystemIntegrity, calculateReadiness, generateActions, loadYesterdayModifier } from '@/lib/dailySystem';
 import { useDailyStateV2 } from '@/hooks/useDailyStateV2';
 import { upsertDailyCheckin } from '@/services/checkinService';
 import { useLiveWeather } from '../lib/useLiveWeather.js';
@@ -27,6 +27,7 @@ import {
   ACBrandMark,
 } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
+import OfflineBanner from '@/redesign/v3/components/states/OfflineBanner.jsx';
 
 function timeOfDaySalute(hour, t) {
   if (hour < 12) return t('today.system.greeting.morning');
@@ -90,6 +91,16 @@ function WeatherChip({ weather, c }) {
       {temp}{weather.condition ? ` · ${weather.condition}` : ''}
     </div>
   );
+}
+
+function buildEstimatedReadiness(t, reason) {
+  return {
+    score: 60,
+    level: 'medium',
+    label: t('today.system.reveal.consequenceMedium'),
+    reasons: [reason || 'Estimated until today\'s check-in is complete.'],
+    estimated: true,
+  };
 }
 
 // ─── CHECK-IN SCREEN ────────────────────────────────────────
@@ -196,7 +207,7 @@ function CheckInScreen({ dark, greeting, weather, onSubmit }) {
 
 // ─── DAILY SYSTEM SCREEN ────────────────────────────────────
 
-function DailySystemScreen({ dark, greeting, weather, readiness, actions, completions, adherence, trend, momentum, proteinConsumed, proteinTarget, onToggle, onNavigate }) {
+function DailySystemScreen({ dark, greeting, weather, readiness, actions, completions, adherence, trend, momentum, proteinConsumed, proteinTarget, onToggle, onNavigate, topContent = null }) {
   const t = useT();
   const c = useACT(dark);
   const navigate = useNavigate();
@@ -227,6 +238,7 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
     recover: '○',
     habit: '—',
   };
+  const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -244,6 +256,19 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
             {greeting}
           </div>
         )}
+        {offline ? <OfflineBanner dark={dark} /> : null}
+        {topContent}
+        {readiness?.estimated ? (
+          <div style={{
+            marginTop: 12, padding: '10px 14px', borderRadius: ACRadii.button,
+            background: 'rgba(239,233,218,0.06)',
+            border: `1px solid ${c.hair}`,
+          }}>
+            <ACMono size={10} color={c.dim} style={{ fontWeight: 600, letterSpacing: 0.4 }}>
+              {readiness.reasons?.[0] || 'Estimated until today\'s check-in is complete.'}
+            </ACMono>
+          </div>
+        ) : null}
 
         {/* SYSTEM HEALTH — warnings about missing inputs */}
         {(() => {
@@ -540,6 +565,113 @@ function DailySystemScreen({ dark, greeting, weather, readiness, actions, comple
   );
 }
 
+function OptionalCheckInCard({ dark, onSubmit }) {
+  const t = useT();
+  const c = useACT(dark);
+  const [sleep, setSleep] = useState(3);
+  const [recovery, setRecovery] = useState(3);
+  const [soreness, setSoreness] = useState(1);
+  const [saving, setSaving] = useState(false);
+
+  const labels = {
+    1: t('today.system.checkIn.scale.terrible'),
+    2: t('today.system.checkIn.scale.poor'),
+    3: t('today.system.checkIn.scale.okay'),
+    4: t('today.system.checkIn.scale.good'),
+    5: t('today.system.checkIn.scale.excellent'),
+  };
+
+  function ScaleRow({ label, value, onChange }) {
+    return (
+      <div style={{ marginTop: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <ACLabel size={12} color={c.fg} style={{ fontWeight: 600 }}>{label}</ACLabel>
+          <ACMono size={10} color={c.accent}>{labels[value]}</ACMono>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[1, 2, 3, 4, 5].map((next) => (
+            <button
+              key={next}
+              type="button"
+              onClick={() => onChange(next)}
+              style={{
+                flex: 1, height: 36, borderRadius: ACRadii.button,
+                border: 'none', cursor: 'pointer',
+                background: next <= value ? c.accent : c.card,
+                color: next <= value ? c.ink : c.dim,
+                fontFamily: ACFonts.display, fontSize: 14, fontWeight: 700,
+              }}
+            >
+              {next}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      marginTop: 16,
+      padding: 18,
+      background: c.card,
+      borderRadius: ACRadii.card,
+      border: `1px solid ${c.hair}`,
+    }}>
+      <ACMono size={10} color={c.accent} style={{ fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+        Optional check-in
+      </ACMono>
+      <div style={{
+        marginTop: 8,
+        fontFamily: ACFonts.display,
+        fontSize: 20,
+        fontWeight: 700,
+        letterSpacing: -0.5,
+        color: c.fg,
+      }}>
+        Refine today&apos;s readiness
+      </div>
+      <div style={{ marginTop: 6, fontSize: 13, color: c.dim, lineHeight: 1.5 }}>
+        Your score is estimated until you complete today&apos;s check-in.
+      </div>
+
+      <ScaleRow label={t('today.system.checkIn.sleep')} value={sleep} onChange={setSleep} />
+      <ScaleRow label={t('today.system.checkIn.recovery')} value={recovery} onChange={setRecovery} />
+      <ScaleRow label={t('today.system.checkIn.soreness')} value={soreness} onChange={setSoreness} />
+
+      <button
+        type="button"
+        disabled={saving}
+        onClick={async () => {
+          if (saving) return;
+          setSaving(true);
+          try {
+            await onSubmit(sleep, recovery, soreness);
+          } finally {
+            setSaving(false);
+          }
+        }}
+        style={{
+          marginTop: 18,
+          width: '100%',
+          padding: '14px 20px',
+          background: c.accent,
+          color: c.ink,
+          border: 'none',
+          borderRadius: 999,
+          fontFamily: ACFonts.body,
+          fontSize: 15,
+          fontWeight: 600,
+          cursor: saving ? 'default' : 'pointer',
+          opacity: saving ? 0.6 : 1,
+        }}
+      >
+        {saving ? t('today.system.checkIn.submit') : 'Complete check-in'}
+      </button>
+    </div>
+  );
+}
+
 // ─── ROUTE ──────────────────────────────────────────────────
 
 // ─── READINESS REVEAL (3-stage gift: anticipation → reveal → celebration) ──
@@ -673,9 +805,11 @@ export default function V3Today() {
 
   const proteinTarget = daily.nutrition?.proteinTarget || user?.user_metadata?.daily_protein_target || 0;
   const proteinConsumed = daily.nutrition?.proteinConsumed || 0;
+  const mandatoryCheckin = daily.dailyCheckinRequired !== false;
 
   const system = useDailySystem({ proteinTarget });
   const bootstrappedCheckin = useRef(false);
+  const modifier = useMemo(() => loadYesterdayModifier().modifier, []);
 
   // First-time welcome (one-time, localStorage)
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -697,9 +831,8 @@ export default function V3Today() {
     system.checkIn(sleep, recovery, soreness);
     setJustCheckedIn(true);
     setShowReveal(true);
-    if (!user?.id) return;
-
     try {
+      if (!user?.id) return;
       await upsertDailyCheckin(user.id, {
         date: new Date().toISOString().slice(0, 10),
         sleep_hours: sleepScaleToHours(sleep),
@@ -721,12 +854,26 @@ export default function V3Today() {
     setShowWelcome(false);
   }
 
-  if (daily.checkinDone && !system.checkedIn) {
-    return null;
-  }
+  const fallbackReadiness = useMemo(() => {
+    if (daily.checkin) {
+      const scales = checkinToScales(daily.checkin);
+      return calculateReadiness(scales.sleep, scales.recovery, scales.soreness, modifier);
+    }
+    if (daily.isLoading || daily.profileLoading) {
+      return buildEstimatedReadiness(t, 'Loading your readiness inputs...');
+    }
+    return buildEstimatedReadiness(t);
+  }, [daily.checkin, daily.isLoading, daily.profileLoading, modifier, t]);
 
-  // Not checked in → show check-in (with optional welcome overlay)
-  if (!system.checkedIn && !daily.checkinDone) {
+  const readiness = system.readiness || fallbackReadiness;
+  const actions = system.actions.length > 0
+    ? system.actions
+    : generateActions(readiness.level, { proteinTarget });
+  const shouldGate = !daily.profileLoading && mandatoryCheckin && !daily.checkinDone && !system.checkedIn;
+  const shouldShowOptionalCheckIn = !mandatoryCheckin && !daily.checkinDone;
+
+  // Not checked in + mandatory mode → show the gate.
+  if (shouldGate) {
     return (
       <>
         {showWelcome && <FirstTimeOverlay dark={dark} onDismiss={dismissWelcome} />}
@@ -756,8 +903,8 @@ export default function V3Today() {
       dark={dark}
       greeting={greeting}
       weather={weather}
-      readiness={system.readiness}
-      actions={system.actions}
+      readiness={readiness}
+      actions={actions}
       completions={system.completions}
       adherence={system.adherence}
       trend={system.trend}
@@ -766,6 +913,7 @@ export default function V3Today() {
       proteinTarget={proteinTarget}
       onToggle={system.toggleAction}
       onNavigate={(route) => navigate(route)}
+      topContent={shouldShowOptionalCheckIn ? <OptionalCheckInCard dark={dark} onSubmit={handleCheckIn} /> : null}
     />
   );
 }

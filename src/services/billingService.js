@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
+import { getStripeBillingConfig } from '@/services/stripeBillingConfig';
 
 function getOrigin() {
   return typeof window !== 'undefined' ? window.location.origin : 'https://useatlascore.com';
@@ -48,7 +49,27 @@ export async function startWebCheckout({
     throw new Error(data?.error || 'Checkout URL was not returned.');
   }
 
-  return data.url;
+  const clientConfig = getStripeBillingConfig();
+  const publishableKey = data.publishableKey || clientConfig.publishableKey;
+  const testMode = typeof data.testMode === 'boolean' ? data.testMode : clientConfig.testMode;
+
+  if (!publishableKey) {
+    throw new Error('Stripe publishable key is not configured for billing.');
+  }
+
+  if (testMode && !publishableKey.startsWith('pk_test_')) {
+    throw new Error('Stripe test mode is enabled but the client publishable key is not a test key.');
+  }
+
+  if (!testMode && publishableKey.startsWith('pk_test_')) {
+    throw new Error('Stripe live mode is enabled but the client publishable key is still a test key.');
+  }
+
+  return {
+    url: data.url,
+    publishableKey,
+    testMode,
+  };
 }
 
 export async function openWebBillingPortal(returnUrl) {

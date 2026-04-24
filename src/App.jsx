@@ -15,22 +15,10 @@
  *  - Safe-area-aware throughout. No screen collides with iOS chrome.
  */
 
-import React, { lazy, Suspense, useEffect, useState, useMemo } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Toaster as Sonner } from '@/components/ui/sonner';
-import { toast } from 'sonner';
-
-/**
- * todoToast — polite "coming soon" notification for wiring placeholders.
- * Used anywhere a route handler doesn't yet have a real service backing it.
- * Replaces browser `alert()` so the UI doesn't show ugly native dialogs.
- */
-function todoToast(feature, t) {
-  toast(`${feature} · ${t('appShell.comingSoon.status')}`, {
-    description: t('common.comingSoonDescription'),
-  });
-}
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
 import {
@@ -38,62 +26,37 @@ import {
   Route,
   Routes,
   Navigate,
-  Outlet,
   useLocation,
   useNavigate,
 } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { DailyStoreProvider } from '@/store/dailyStore';
-import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
+import { ThemeProvider } from '@/lib/ThemeContext';
 import { SubscriptionProvider } from '@/lib/SubscriptionContext';
-import { I18nProvider, useT } from '@/lib/i18nContext';
+import { I18nProvider } from '@/lib/i18nContext';
 import { GoogleReCaptchaProvider } from '@/lib/ReCaptchaContext';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/lib/supabaseClient';
-import { App as CapApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { trackPageView, initAnalytics } from '@/lib/analytics';
 import { LEGACY_ROUTE_REDIRECTS } from '@/lib/routes';
-import {
-  connectProvider as integConnect,
-  disconnectProvider as integDisconnect,
-  refreshProvider as integRefresh,
-  toastConnectResult as integToast,
-} from '@/lib/integrationsService';
-import { createMeasurement } from '@/services/bodyProgressService';
-import { finalizeOnboarding } from '@/services/onboardingService';
+
+const lazyOnboardingRoute = (name) =>
+  lazy(() =>
+    import('@/redesign/v3/routes/V3OnboardingRoutes.jsx').then((module) => ({
+      default: module[name],
+    }))
+  );
 
 // v3 screens and routes only — v2 design imports removed to ensure v3-first build.
-// Onboarding v3 wrappers are imported from V3OnboardingRoutes (used below).
-import {
-  V3OnboardingIdentity,
-  V3OnboardingGoal,
-  V3OnboardingActivity,
-  V3OnboardingPlan,
-  V3OnboardingPermissions,
-  V3OnboardingWorkout,
-  V3OnboardingHabits,
-  V3OnboardingConstraints,
-  V3OnboardingSummary,
-  V3OnboardingTour,
-} from '@/redesign/v3/routes/V3OnboardingRoutes.jsx';
 const V3RoutinePresets = lazy(() => import('@/redesign/v3/routes/V3RoutinePresets.jsx'));
 const V3RoutinePresetDetail = lazy(() => import('@/redesign/v3/routes/V3RoutinePresetDetail.jsx'));
-import {
-  saveWorkoutSession,
-  listWorkoutSessions,
-  listRecentSessions,
-  listSetsForExercise,
-  getSetsForExercise,
-  getPersonalBestForExercise,
-  getPersonalBest,
-  cloneRoutineFromPreset,
-  listRoutines,
-} from '@/lib/workoutsService';
 // v3 design preview — paper+ink+amber screens translated from Claude Design.
 // Lazy so the 35-screen gallery only loads when /v3 is visited.
 const V3Gallery  = lazy(() => import('@/redesign/v3/gallery/V3Gallery.jsx'));
+const V3DesignHandoff = lazy(() => import('@/redesign/v3/routes/V3DesignHandoff.jsx'));
 // v3 running app — bottom-tab shell + core-loop routes (today/train/eat/body/you)
 const V3AppShell = lazy(() => import('@/redesign/v3/layouts/V3AppShell.jsx'));
 // Platform gate — eagerly loaded so Category B fullscreen flows can be wrapped
@@ -136,7 +99,6 @@ const V3WebPurchaseSuccess = lazy(() => import('@/redesign/v3/routes/V3WebPurcha
 const V3MethodPage = lazy(() => import('@/redesign/v3/routes/V3MethodPage.jsx'));
 const V3LabsPage = lazy(() => import('@/redesign/v3/routes/V3LabsPage.jsx'));
 const V3PricingPage = lazy(() => import('@/redesign/v3/routes/V3PricingPage.jsx'));
-const V3AppPage = lazy(() => import('@/redesign/v3/routes/V3AppPage.jsx'));
 const V3WorkoutSummary = lazy(() => import('@/redesign/v3/routes/V3WorkoutSummary.jsx'));
 const V3SleepDetail = lazy(() => import('@/redesign/v3/routes/V3SleepDetail.jsx'));
 const V3Capture = lazy(() => import('@/redesign/v3/routes/V3Capture.jsx'));
@@ -157,8 +119,6 @@ const V3TodayDose = lazy(() => import('@/redesign/v3/routes/V3TodayDose.jsx'));
 const V3MobilePaywall = lazy(() => import('@/redesign/v3/routes/V3MobilePaywall.jsx'));
 const V3PRMoment = lazy(() => import('@/redesign/v3/routes/V3PRMoment.jsx'));
 const V3WeightTrend = lazy(() => import('@/redesign/v3/routes/V3WeightTrend.jsx'));
-const V3EmptyStates = lazy(() => import('@/redesign/v3/routes/V3EmptyStates.jsx'));
-const V3Errors = lazy(() => import('@/redesign/v3/routes/V3Errors.jsx'));
 const V3FoodDiary = lazy(() => import('@/redesign/v3/routes/V3FoodDiary.jsx'));
 const V3MacroTargets = lazy(() => import('@/redesign/v3/routes/V3MacroTargets.jsx'));
 const V3WaterLog = lazy(() => import('@/redesign/v3/routes/V3WaterLog.jsx'));
@@ -194,32 +154,33 @@ const V3Offline = lazy(() => import('@/redesign/v3/routes/V3Offline.jsx'));
 const V3Maintenance = lazy(() => import('@/redesign/v3/routes/V3Maintenance.jsx'));
 const V3ForceUpdate = lazy(() => import('@/redesign/v3/routes/V3ForceUpdate.jsx'));
 const V3ServerError = lazy(() => import('@/redesign/v3/routes/V3ServerError.jsx'));
-const _V3LabExamDetail = lazy(() => import('@/redesign/v3/routes/V3LabExamDetail.jsx'));
-const _V3LabHistory    = lazy(() => import('@/redesign/v3/routes/V3LabHistory.jsx'));
-const _V3LabUpload     = lazy(() => import('@/redesign/v3/routes/V3LabUpload.jsx'));
-// v2 screen imports removed. Use v3 route wrappers and services only.
-import SmartOnboarding        from '@/components/onboarding/SmartOnboarding.jsx';
-import S6_Weight_B            from '@/redesign/v3/screens/S6_Weight_B.jsx';
-import S17_Measurements_Entry from '@/redesign/v3/screens/S17_Measurements_Entry.jsx';
-import S5_Paywall_A           from '@/redesign/v3/screens/S5_Paywall_A.jsx';
-import { supabase as supabaseClient } from '@/lib/supabaseClient';
-import {
-  // v3 nutrition services will be used; keep alias names for compatibility
-  getEntriesForDate         as nutritionGetEntries,
-  addEntry                  as nutritionAddEntry,
-  addEntries                as nutritionAddEntries,
-  subscribe                 as nutritionSubscribe,
-} from '@/lib/nutritionStore';
-import { WEBAPP_DANGER, WEBAPP_PAYWALL } from '@/lib/platformRoutes';
+const V3OnboardingIdentity = lazyOnboardingRoute('V3OnboardingIdentity');
+const V3OnboardingDietPreferences = lazyOnboardingRoute('V3OnboardingDietPreferences');
+const V3OnboardingGoal = lazyOnboardingRoute('V3OnboardingGoal');
+const V3OnboardingActivity = lazyOnboardingRoute('V3OnboardingActivity');
+const V3OnboardingPlan = lazyOnboardingRoute('V3OnboardingPlan');
+const V3OnboardingPermissions = lazyOnboardingRoute('V3OnboardingPermissions');
+const V3OnboardingWorkout = lazyOnboardingRoute('V3OnboardingWorkout');
+const V3OnboardingHabits = lazyOnboardingRoute('V3OnboardingHabits');
+const V3OnboardingConstraints = lazyOnboardingRoute('V3OnboardingConstraints');
+const V3OnboardingSummary = lazyOnboardingRoute('V3OnboardingSummary');
+const V3OnboardingCoachMatch = lazyOnboardingRoute('V3OnboardingCoachMatch');
+const V3OnboardingTour = lazyOnboardingRoute('V3OnboardingTour');
+const V3LabExamDetail = lazy(() => import('@/redesign/v3/routes/V3LabExamDetail.jsx'));
+const V3LabHistory = lazy(() => import('@/redesign/v3/routes/V3LabHistory.jsx'));
+const V3LabUpload = lazy(() => import('@/redesign/v3/routes/V3LabUpload.jsx'));
+const SmartOnboarding = lazy(() => import('@/components/onboarding/SmartOnboarding.jsx'));
+const WeightEntryRoute = lazy(() => import('@/routes/app/WeightEntryRoute.jsx'));
+const MeasurementsRoute = lazy(() => import('@/routes/app/MeasurementsRoute.jsx'));
+const BodyCheckInRoute = lazy(() => import('@/routes/app/BodyCheckInRoute.jsx'));
 
 // ─── ComingSoon stub (no v2 equivalent; keeps /help and fallback routes alive) ─
 function ComingSoon({ routeName, onGoHome, onBack }) {
-  const t = useT();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', padding: '24px', gap: 16 }}>
       <p style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{routeName}</p>
-      <p style={{ fontSize: 15, opacity: 0.6, margin: 0 }}>{t('appShell.comingSoon.status')}</p>
-      <button onClick={onGoHome || onBack || (() => window.history.back())} style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: '#e8b500', fontWeight: 600, cursor: 'pointer' }}>{t('appShell.comingSoon.back')}</button>
+      <p style={{ fontSize: 15, opacity: 0.6, margin: 0 }}>Coming soon</p>
+      <button onClick={onGoHome || onBack || (() => window.history.back())} style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: '#e8b500', fontWeight: 600, cursor: 'pointer' }}>Go back</button>
     </div>
   );
 }
@@ -232,506 +193,17 @@ function usePageViewTracking() {
   }, [location.pathname]);
 }
 
-// ─── Onboarding flow — shared local state across all 10 steps ────────────────
-const ONBOARDING_ORDER = [
-  '/onboarding',
-  '/onboarding/goal',
-  '/onboarding/activity',
-  '/onboarding/stats',
-  '/onboarding/diet',
-  '/onboarding/workout',
-  '/onboarding/habits',
-  '/onboarding/constraints',
-  '/onboarding/summary',
-  '/onboarding/paywall',
-];
-
-function useOnboardingFlow() {
-  const navigate = useNavigate();
-  const [answers, setAnswers] = useState({});
-  const location = useLocation();
-  const idx = ONBOARDING_ORDER.indexOf(location.pathname);
-  const prev = idx > 0 ? ONBOARDING_ORDER[idx - 1] : null;
-  const next = idx >= 0 && idx < ONBOARDING_ORDER.length - 1 ? ONBOARDING_ORDER[idx + 1] : '/app/today';
-  return {
-    answers,
-    setKey: (k, v) => setAnswers((s) => ({ ...s, [k]: v })),
-    onBack: () => (prev ? navigate(prev) : navigate(-1)),
-    onContinue: () => navigate(next),
-  };
-}
-
-// ─── Connected screens ───────────────────────────────────────────────────────
-function OnboardingWorkoutRoute() {
-  const { answers, setKey, onBack, onContinue } = useOnboardingFlow();
-  return (
-    <OnboardingWorkout
-      value={answers.workout}
-      onChange={(v) => setKey('workout', v)}
-      onBack={onBack}
-      onContinue={onContinue}
-    />
-  );
-}
-function OnboardingHabitsRoute() {
-  const { answers, setKey, onBack, onContinue } = useOnboardingFlow();
-  return (
-    <OnboardingHabits
-      value={answers.habits}
-      onChange={(v) => setKey('habits', v)}
-      onBack={onBack}
-      onContinue={onContinue}
-    />
-  );
-}
-function OnboardingConstraintsRoute() {
-  const { answers, setKey, onBack, onContinue } = useOnboardingFlow();
-  return (
-    <OnboardingConstraints
-      value={answers.constraints}
-      onChange={(v) => setKey('constraints', v)}
-      onBack={onBack}
-      onContinue={onContinue}
-    />
-  );
-}
-function OnboardingSummaryRoute() {
-  const { onBack, onContinue } = useOnboardingFlow();
-  return <OnboardingSummary onBack={onBack} onContinue={onContinue} />;
-}
-function OnboardingPaywallRoute() {
-  const navigate = useNavigate();
-  const t = useT();
-  const { theme } = useTheme();
-  const platform = Capacitor.isNativePlatform() ? 'native' : 'web';
-  const { user } = useAuth();
-
-  async function completeAndGo(nextPath) {
-    if (!user?.id) {
-      toast.error(t('onboarding.paywall.mustBeSignedIn'));
-      return;
-    }
-
-    try {
-      await finalizeOnboarding(user.id);
-      await queryClientInstance.invalidateQueries();
-      navigate(nextPath);
-    } catch (error) {
-      console.error('[OnboardingPaywallRoute] finalize failed', error);
-      toast.error(t('onboarding.paywall.finishFailed'), {
-        description: error?.message || t('common.tryAgain'),
-      });
-    }
-  }
-
-  return (
-    <S5_Paywall_A
-      dark={theme === 'dark'}
-      platform={platform}
-      onStartTrial={() => completeAndGo('/webapp/billing/paywall')}
-      onRestore={() => completeAndGo('/webapp/billing/paywall')}
-      onSkip={() => completeAndGo('/app/today')}
-    />
-  );
-}
-function OnboardingTourRoute() {
-  const navigate = useNavigate();
-  return <OnboardingTour onFinish={() => navigate('/app/today')} />;
-}
-
-/* ─── Nutrition routes ────────────────────────────────────────────────── */
-
-function FoodDetailRoute() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const params = new URLSearchParams(useLocation().search);
-  const meal = params.get('meal') || 'breakfast';
-  const label = meal.charAt(0).toUpperCase() + meal.slice(1);
-  return <V3FoodDetail />;
-}
-
-function PhotoScanRoute() {
-  const navigate = useNavigate();
-  const [perm, setPerm] = useState('prompt');
-  return <V3Capture />;
-}
-
-function PhotoScanConfirmRoute() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const params = new URLSearchParams(useLocation().search);
-  const aiText = params.get('ai');
-  const meal = params.get('meal') || 'breakfast';
-  const label = meal.charAt(0).toUpperCase() + meal.slice(1);
-  return <V3Capture />;
-}
-
-function VoiceLogRoute() {
-  const navigate = useNavigate();
-  const params = new URLSearchParams(useLocation().search);
-  const meal = params.get('meal') || 'breakfast';
-  const label = meal.charAt(0).toUpperCase() + meal.slice(1);
-  return <V3Capture />;
-}
-
-/* ─── Workout routes ──────────────────────────────────────────────────── */
-
-function ActiveWorkoutRoute() {
-  return <V3ActiveWorkout />;
-}
-
-function ManualWorkoutPlanRoute() {
-  return <V3RoutinePresets />;
-}
-
-function WorkoutDetailRoute() {
-  return <V3WorkoutDetail />;
-}
-
-function RoutineDetailRoute() {
-  return <V3WorkoutDetail />;
-}
-
-function WorkoutHistoryRoute() {
-  const navigate = useNavigate();
-  const [sessions, setSessions] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const rows = await listRecentSessions({ limit: 50 });
-        if (cancelled) return;
-        const projected = (rows || []).map((s) => {
-          const sets = Array.isArray(s.sets) ? s.sets : [];
-          const exerciseIds = new Set(sets.map((x) => x.exercise_id).filter(Boolean));
-          return {
-            id: s.id,
-            name: 'Workout',
-            at: s.started_at || s.created_at,
-            duration: s.duration_sec != null ? Math.round(s.duration_sec / 60) : null,
-            volume: s.total_volume_kg != null ? Number(s.total_volume_kg) : null,
-            exerciseCount: exerciseIds.size,
-            prCount: 0,
-          };
-        });
-        setSessions(projected);
-        // Lightweight stats strip computed from the fetched page.
-        if (projected.length > 0) {
-          const totalVolume = projected.reduce((sum, s) => sum + (s.volume || 0), 0);
-          // Rough per-week average: sessions in the range divided by weeks spanned.
-          const first = new Date(projected[projected.length - 1].at).getTime();
-          const last = new Date(projected[0].at).getTime();
-          const weeks = Math.max(1, (last - first) / (7 * 86400000));
-          setStats({
-            totalSessions: projected.length,
-            totalVolumeKg: totalVolume,
-            avgPerWeek: projected.length / weeks,
-          });
-        } else {
-          setStats(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  return <V3WorkoutHistory />;
-}
-
-/* ─── Labs routes ─────────────────────────────────────────────────────── */
-
-function V3LabExamDetail() {
-  return <_V3LabExamDetail />;
-}
-
-function V3LabHistory() {
-  return <_V3LabHistory />;
-}
-
-function V3LabUpload() {
-  return <_V3LabUpload />;
-}
-
-/* ─── Today expansions routes ─────────────────────────────────────────── */
-
-function InsightsRoute() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const tier = user?.user_metadata?.tier;
-  const isPremium = tier === 'Premium' || tier === 'Pro' || user?.atlas_role === 'admin';
-  return (
-    <InsightsScreen
-      isPremium={isPremium}
-      insights={[]}
-      onUpgrade={() => navigate(WEBAPP_PAYWALL)}
-      onOpenInsight={(id) => navigate(`/app/coach/insights/${id}`)}
-      onAsk={(text) => navigate(`/app/coach/chat?ask=${encodeURIComponent(text)}`)}
-      onBack={() => navigate('/app/today')}
-    />
-  );
-}
-
-function DiaryRoute() {
-  const navigate = useNavigate();
-  // TODO: wire to a diary service (Supabase table `diary_entries`).
-  // For now, local session-only store so the UI is testable.
-  const [entries, setEntries] = React.useState([]);
-  return (
-    <Diary
-      entries={entries}
-      suggestedPrompt={null}
-      onSave={({ text, mood }) => {
-        setEntries((list) => [
-          { id: `e_${Date.now()}`, at: new Date().toISOString(), text, mood, metrics: null },
-          ...list,
-        ]);
-      }}
-      onOpenEntry={(id) => console.log('Open entry', id)}
-    />
-  );
-}
-
-/* ─── Profile + Settings routes ───────────────────────────────────────── */
-
-function buildRealUser(authUser) {
-  if (!authUser) return null;
-  const meta = authUser.user_metadata || {};
-  // Prefer explicit first_name/last_name (set by ProfileEditor) over the
-  // legacy single `full_name` field. Never fabricate "A" / "User".
-  const first = (meta.first_name || '').trim();
-  const last  = (meta.last_name  || '').trim();
-  const derivedName =
-    [first, last].filter(Boolean).join(' ')
-    || authUser.full_name
-    || (authUser.email ? authUser.email.split('@')[0] : '');
-  return {
-    name: derivedName,
-    firstName: first || null,
-    lastName:  last  || null,
-    email: authUser.email || '',
-    avatar: meta.avatar_url || null,
-    bio: meta.bio || '',
-    location: meta.location || '',
-    memberSince: authUser.raw_user?.created_at || null,
-    tier: meta.tier || (authUser.atlas_role === 'coach' ? 'Coach' : authUser.atlas_role === 'admin' ? 'Admin' : 'Free'),
-    twoFactorEnabled: !!authUser.raw_user?.factors?.length,
-    providers: (authUser.raw_user?.identities || [])
-      .map((i) => i.provider)
-      .filter((p) => p && p !== 'email'),
-  };
-}
-
-/**
- * Derive Profile's `physical` prop from real `user_metadata` keys written by
- * the ProfileEditor. Returns null only if the user has set NOTHING — that way
- * partial info still renders (e.g., height set but weight not yet logged).
- *
- * Source-of-truth keys (see /docs/BACKEND_TODO.md "Profile / user_metadata"):
- *   height_cm        → physical.heightCm
- *   date_of_birth    → physical.ageYears (computed)
- *   weight_kg / bf_pct / lean_mass_kg currently live in body_weight_log
- *   table (not user_metadata) — null here until that table is wired.
- */
-function buildPhysicalFromMetadata(meta) {
-  if (!meta) return null;
-  const heightCm = typeof meta.height_cm === 'number' ? meta.height_cm : null;
-  let ageYears = null;
-  if (meta.date_of_birth) {
-    try {
-      const dob = new Date(meta.date_of_birth);
-      if (!Number.isNaN(dob.getTime())) {
-        const ms = Date.now() - dob.getTime();
-        ageYears = Math.floor(ms / (365.25 * 24 * 3600 * 1000));
-      }
-    } catch {}
-  }
-  if (heightCm == null && ageYears == null) return null;
-  return { heightCm, ageYears, weightKg: null, bodyFatPct: null, leanMassKg: null };
-}
-
-const GOAL_LABELS = {
-  strength:    'Build strength',
-  hypertrophy: 'Build muscle',
-  endurance:   'Improve endurance',
-  weight_loss: 'Lose weight',
-  health:      'Improve health',
-  general:     'General fitness',
-};
-
-function buildGoalFromMetadata(meta) {
-  if (!meta?.primary_goal) return null;
-  return { primary: GOAL_LABELS[meta.primary_goal] || meta.primary_goal };
-}
-
-function AccountSettingsRoute() {
-  const navigate = useNavigate();
-  const t = useT();
-  const { user } = useAuth();
-  const realUser = buildRealUser(user);
-  return (
-    <AccountSettings
-      user={realUser}
-      onBack={() => navigate('/app/settings')}
-      onChangeEmail={() => todoToast(t('accountSettingsPage.actions.changeEmail'), t)}
-      onChangePassword={() => todoToast(t('accountSettingsPage.actions.resetPassword'), t)}
-      onEnable2FA={() => todoToast(t('accountSettingsPage.rows.twoFactor'), t)}
-      onManageSessions={() => todoToast(t('accountSettingsPage.rows.sessions'), t)}
-      onUnlinkProvider={(p) => todoToast(`${t('accountSettingsPage.actions.disconnect')} ${p}`, t)}
-      onDeleteAccount={() => navigate(WEBAPP_DANGER)}
-    />
-  );
-}
-
-function IntegrationsRoute() {
-  const navigate = useNavigate();
-  // TODO: fetch real connection status from Supabase `user_integrations` table.
-  const platform = Capacitor.isNativePlatform() ? Capacitor.getPlatform() : 'web';
-  return (
-    <Integrations
-      connections={{}}
-      platform={platform}
-      onBack={() => navigate('/app/settings')}
-      onConnect={async (id) => { integToast(id, await integConnect(id)); }}
-      onDisconnect={async (id) => { integToast(id, await integDisconnect(id)); }}
-      onRefresh={async (id) => { integToast(id, await integRefresh(id)); }}
-    />
-  );
-}
-
-function DangerZoneRoute() {
-  const navigate = useNavigate();
-  const t = useT();
-  const { user, logout } = useAuth();
-  return (
-    <DangerZone
-      userEmail={user?.email || ''}
-      onBack={() => navigate('/app/settings')}
-      onExportData={() => todoToast(t('dangerZone.export.action'), t)}
-      onResetData={async () => {
-        // TODO: invoke reset-user-data edge function
-        await new Promise((r) => setTimeout(r, 600));
-        toast.success(t('dangerZone.toasts.resetSuccess'));
-        navigate('/app/today');
-      }}
-      onDeleteAccount={async () => {
-        // TODO: invoke admin-delete-user for self, then logout
-        await new Promise((r) => setTimeout(r, 800));
-        try { await logout?.(); } catch {}
-        navigate('/', { replace: true });
-      }}
-    />
-  );
-}
-
-/* ─── Body routes ─────────────────────────────────────────────────────── */
-
-function WeightEntryRoute() {
-  const navigate = useNavigate();
-  const t = useT();
-  const { theme } = useTheme();
-  const { user } = useAuth();
-  return (
-    <S6_Weight_B
-      dark={theme === 'dark'}
-      onBack={() => navigate(-1)}
-      onSave={async (entry) => {
-        try {
-          await createMeasurement(user.id, {
-            weight: entry.weight,
-            date: entry.when || new Date().toISOString(),
-          });
-          toast.success(t('body.routeToasts.weightLoggedTitle'), {
-            description: t('body.routeToasts.weightLoggedBody'),
-            action: {
-              label: t('body.routeToasts.viewHistory'),
-              onClick: () => navigate('/app/body/composition'),
-            },
-          });
-          navigate('/app/body');
-        } catch (err) {
-          toast.error(t('body.routeToasts.weightSaveFailed'), {
-            description: err?.message || t('common.tryAgain'),
-          });
-        }
-      }}
-      onViewHistory={() => navigate('/app/body/composition')}
-    />
-  );
-}
-
-function MeasurementsRoute() {
-  const navigate = useNavigate();
-  const t = useT();
-  const { theme } = useTheme();
-  const { user } = useAuth();
-  return (
-    <S17_Measurements_Entry
-      dark={theme === 'dark'}
-      onClose={() => navigate(-1)}
-      onSave={async (measurements) => {
-        try {
-          await createMeasurement(user.id, measurements);
-          toast.success(t('body.routeToasts.measurementsSaved'));
-          navigate('/app/body');
-        } catch (err) {
-          toast.error(t('body.routeToasts.measurementsSaveFailed'), {
-            description: err?.message || t('common.tryAgain'),
-          });
-        }
-      }}
-    />
-  );
-}
-
-function BodyCheckInRoute() {
-  return <Navigate to="/app/body/measurements" replace />;
-}
-
-/* ─── Coach routes ────────────────────────────────────────────────────── */
-
-function CoachInsightDetailRoute() {
-  const navigate = useNavigate();
-  // TODO: fetch the real insight by :id from an insight service. Until then,
-  // we pass `null` explicitly so the screen renders its honest empty state
-  // instead of a fabricated "HRV rebounded" demo.
-  return (
-    <CoachInsightDetail
-      insight={null}
-      onBack={() => navigate(-1)}
-      onAsk={(prompt) => navigate(`/app/coach/chat?ask=${encodeURIComponent(prompt)}`)}
-      onNavigate={(route) => route && navigate(route)}
-    />
-  );
-}
-
-/**
- * AppPlaceholder — used for every /app/* route not yet redesigned.
- * Renders inside <AppShell /> so top bar + bottom nav stay consistent.
- */
-function AppPlaceholder({ name }) {
-  const navigate = useNavigate();
-  return (
-    <ComingSoon
-      routeName={name}
-      onGoHome={() => navigate('/app/today')}
-      onBack={() => navigate(-1)}
-    />
-  );
-}
-
 /**
  * NativeRootRedirect — on native (Capacitor), redirect / to the app.
  * On web, show the marketing landing page.
  */
 function RootRoute() {
   const { user } = useAuth();
+  if (user) {
+    return <Navigate to={user.onboarding_completed ? '/app/today' : '/onboarding'} replace />;
+  }
   if (Capacitor.isNativePlatform()) {
-    return <Navigate to={user ? '/app/today' : '/welcome'} replace />;
+    return <Navigate to="/welcome" replace />;
   }
   return <V3Landing />;
 }
@@ -740,18 +212,22 @@ function RootRoute() {
 function AppRoutes() {
   usePageViewTracking();
   const { user, isLoadingAuth } = useAuth();
+  usePushNotifications();
 
   if (isLoadingAuth) {
     return <V3LoadingSplash phase="boot" />;
   }
 
   const isAuthed = !!user;
+  const hasCompletedOnboarding = !!user?.onboarding_completed;
+  const postAuthRoute = hasCompletedOnboarding ? '/app/today' : '/onboarding';
 
   return (
     <Suspense fallback={<V3LoadingSplash phase="syncing" />}>
       <Routes>
         {/* ── v3 design preview (gallery of all 35 paper+ink+amber screens) ── */}
         <Route path="/v3"      element={<V3Gallery />} />
+        <Route path="/v3/handoff" element={<V3DesignHandoff />} />
         <Route path="/v3/*"    element={<V3Gallery />} />
 
         {/* ── v3 gallery preview (legacy sidecar namespace kept for review) ── */}
@@ -766,17 +242,17 @@ function AppRoutes() {
         </Route>
 
         {/* ── Desktop/webapp utility surface (full-width, no phone frame) ── */}
-        <Route path="/webapp" element={<V3WebAppEntry />} />
-        <Route path="/webapp/account" element={isAuthed ? <V3AccountHub /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/export" element={isAuthed ? <V3DataExport /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/billing" element={isAuthed ? <V3SubscriptionManage /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/billing/manage" element={isAuthed ? <V3SubscriptionManage /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/billing/plans" element={isAuthed ? <V3Paywall /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/billing/paywall" element={isAuthed ? <V3Paywall /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/billing/invoices" element={isAuthed ? <V3BillingHistory /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/settings" element={isAuthed ? <V3AccountSettings /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/settings/danger" element={isAuthed ? <V3DangerZone /> : <Navigate to="/auth/login" replace />} />
-        <Route path="/webapp/settings/diagnostics" element={isAuthed ? <V3Diagnostics /> : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp" element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3WebAppEntry />} />
+        <Route path="/webapp/account" element={isAuthed ? (hasCompletedOnboarding ? <V3AccountHub /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/export" element={isAuthed ? (hasCompletedOnboarding ? <V3DataExport /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing" element={isAuthed ? (hasCompletedOnboarding ? <V3SubscriptionManage /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/manage" element={isAuthed ? (hasCompletedOnboarding ? <V3SubscriptionManage /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/plans" element={isAuthed ? (hasCompletedOnboarding ? <V3Paywall /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/paywall" element={isAuthed ? (hasCompletedOnboarding ? <V3Paywall /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/billing/invoices" element={isAuthed ? (hasCompletedOnboarding ? <V3BillingHistory /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/settings" element={isAuthed ? (hasCompletedOnboarding ? <V3AccountSettings /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/settings/danger" element={isAuthed ? (hasCompletedOnboarding ? <V3DangerZone /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/webapp/settings/diagnostics" element={isAuthed ? (hasCompletedOnboarding ? <V3Diagnostics /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
 
         {/* Legacy mixed paths now redirect into the desktop utility surface. */}
         <Route path="/app/account" element={<Navigate to="/webapp/account" replace />} />
@@ -793,29 +269,29 @@ function AppRoutes() {
         {/* ── Fullscreen flows (no shell chrome, MUST come before /app) ──
              Wrapped in <PlatformGate> so public web users are redirected to
              /download-app (CLAUDE.md §13–16). Native + dev mode bypass. */}
-        <Route path="/app/nutrition/search" element={isAuthed ? <PlatformGate><V3NutritionSearch /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/food/new" element={isAuthed ? <PlatformGate><V3FoodDetail /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/food/:id" element={isAuthed ? <PlatformGate><FoodDetailRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/meal/:id" element={isAuthed ? <PlatformGate><V3MealDetail /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/photo" element={isAuthed ? <PlatformGate><PhotoScanRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/photo/confirm" element={isAuthed ? <PlatformGate><PhotoScanConfirmRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/nutrition/voice" element={isAuthed ? <PlatformGate><VoiceLogRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/workouts/active" element={isAuthed ? <PlatformGate><ActiveWorkoutRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/workouts/manual-plan" element={isAuthed ? <PlatformGate><ManualWorkoutPlanRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/exercises" element={isAuthed ? <PlatformGate><V3ExerciseLibrary /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/exercises/:id" element={isAuthed ? <PlatformGate><V3ExerciseDetail /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/coach/chat" element={isAuthed ? <PlatformGate><V3CoachChat /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/body/weight" element={isAuthed ? <PlatformGate><WeightEntryRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/body/checkin" element={isAuthed ? <PlatformGate><BodyCheckInRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/body/measurements" element={isAuthed ? <PlatformGate><MeasurementsRoute /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/body/compare" element={isAuthed ? <PlatformGate><V3Body /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/labs/upload" element={isAuthed ? <PlatformGate><V3LabUpload /></PlatformGate> : <Navigate to="/auth/login" replace />} />
-        <Route path="/app/social/share" element={isAuthed ? <PlatformGate><V3SharePR /></PlatformGate> : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/search" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3NutritionSearch /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/food/new" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3FoodDetail /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/food/:id" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3FoodDetail /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/meal/:id" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3MealDetail /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/photo" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3Capture /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/photo/confirm" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3Capture /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/nutrition/voice" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3Capture /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/workouts/active" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3ActiveWorkout /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/workouts/manual-plan" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3RoutinePresets /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/exercises" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3ExerciseLibrary /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/exercises/:id" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3ExerciseDetail /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/coach/chat" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3CoachChat /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/body/weight" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><WeightEntryRoute /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/body/checkin" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><BodyCheckInRoute /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/body/measurements" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><MeasurementsRoute /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/body/compare" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3Body /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/labs/upload" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3LabUpload /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
+        <Route path="/app/social/share" element={isAuthed ? (hasCompletedOnboarding ? <PlatformGate><V3SharePR /></PlatformGate> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />} />
 
         {/* ── v3 live app core (mounted on the real athlete routes) ───── */}
         <Route
           path="/app"
-          element={isAuthed ? <V3AppShell /> : <Navigate to="/auth/login" replace />}
+          element={isAuthed ? (hasCompletedOnboarding ? <V3AppShell /> : <Navigate to="/onboarding" replace />) : <Navigate to="/auth/login" replace />}
         >
           <Route index element={<Navigate to="/app/today" replace />} />
           <Route path="today" element={<V3Today />} />
@@ -900,56 +376,58 @@ function AppRoutes() {
           <Route path="protocols/log" element={<V3LogDose />} />
           <Route path="protocols/timeline" element={<V3ProtocolTimeline />} />
           <Route path="protocols/today" element={<V3TodayDose />} />
+          <Route path="protocols/:id/edit" element={<V3ProtocolForm />} />
           <Route path="protocols/:id" element={<V3ProtocolDetail />} />
 
           {/* Paywall + Weight + Utility */}
           <Route path="paywall" element={<V3MobilePaywall />} />
           <Route path="pr-moment" element={<V3PRMoment />} />
           <Route path="body/weight/trend" element={<V3WeightTrend />} />
-          <Route path="empty-states" element={<V3EmptyStates />} />
-          <Route path="errors" element={<V3Errors />} />
         </Route>
 
         {/* ── Marketing (public web) — root is now the landing page ── */}
         <Route path="/"        element={<RootRoute />} />
-        <Route path="/landing" element={<V3Landing />} />
+        <Route path="/landing" element={<Navigate to="/" replace />} />
         <Route path="/download-app" element={<V3DownloadApp />} />
         <Route path="/webapp/success" element={<V3WebPurchaseSuccess />} />
-        <Route path="/the-app" element={<V3AppPage />} />
+        <Route path="/the-app" element={<Navigate to="/#what-it-does" replace />} />
         <Route path="/method"  element={<V3MethodPage />} />
-        <Route path="/labs"    element={<V3LabsPage />} />
+        <Route path="/labs"    element={<Navigate to="/science" replace />} />
+        <Route path="/science" element={<V3LabsPage />} />
         <Route path="/pricing" element={<V3PricingPage />} />
         <Route path="/terms"   element={<V3Terms />} />
         <Route path="/privacy" element={<V3Privacy />} />
         <Route path="/faq"     element={<V3PricingPage />} />
 
         {/* ── Welcome (auth-flow entry, kept for the mobile app) ────── */}
-        <Route path="/welcome" element={<V3Welcome />} />
-        <Route path="/welcome/manifesto" element={<V3Manifesto />} />
+        <Route path="/welcome" element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3Welcome />} />
+        <Route path="/welcome/manifesto" element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3Manifesto />} />
 
         {/* ── Auth ────────────────────────────────────────────────── */}
         <Route path="/auth"          element={<Navigate to="/auth/login" replace />} />
-        <Route path="/auth/login"    element={<V3AuthLogin />} />
-        <Route path="/auth/signup"   element={<V3AuthSignup />} />
-        <Route path="/auth/forgot"   element={<V3ForgotPassword />} />
+        <Route path="/auth/login"    element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3AuthLogin />} />
+        <Route path="/auth/signup"   element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3AuthSignup />} />
+        <Route path="/auth/forgot"   element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3ForgotPassword />} />
         <Route path="/auth/reset"    element={<V3ResetPassword />} />
         <Route path="/auth/update-password" element={<Navigate to="/auth/reset" replace />} />
-        <Route path="/auth/magic"    element={<V3MagicLinkSent />} />
+        <Route path="/auth/magic"    element={isAuthed ? <Navigate to={postAuthRoute} replace /> : <V3MagicLinkSent />} />
         <Route path="/auth/callback" element={<V3AuthCallback />} />
 
         {/* ── Onboarding ─────────────────────────────────────────── */}
-        <Route path="/onboarding" element={<V3OnboardingIdentity />} />
-        <Route path="/onboarding/goal" element={<V3OnboardingGoal />} />
-        <Route path="/onboarding/activity" element={<V3OnboardingActivity />} />
-        <Route path="/onboarding/stats" element={<V3OnboardingPlan />} />
-        <Route path="/onboarding/diet" element={<V3OnboardingPermissions />} />
-        <Route path="/onboarding/workout" element={<V3OnboardingWorkout />} />
-        <Route path="/onboarding/habits" element={<V3OnboardingHabits />} />
-        <Route path="/onboarding/constraints" element={<V3OnboardingConstraints />} />
-        <Route path="/onboarding/summary" element={<V3OnboardingSummary />} />
-        <Route path="/onboarding/paywall" element={<OnboardingPaywallRoute />} />
-        <Route path="/onboarding/tour" element={<V3OnboardingTour />} />
-        <Route path="/onboarding/smart" element={<SmartOnboarding onContinue={() => {}} />} />
+        <Route path="/onboarding" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingIdentity />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/nutrition" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingDietPreferences />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/goal" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingGoal />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/activity" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingActivity />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/stats" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPlan />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/diet" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingPermissions />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/workout" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingWorkout />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/habits" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingHabits />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/constraints" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingConstraints />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/summary" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingSummary />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/coach-match" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingCoachMatch />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/paywall" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <Navigate to="/onboarding/tour" replace />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/tour" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <V3OnboardingTour />) : <Navigate to="/auth/signup" replace />} />
+        <Route path="/onboarding/smart" element={isAuthed ? (hasCompletedOnboarding ? <Navigate to="/app/today" replace /> : <SmartOnboarding onContinue={() => {}} />) : <Navigate to="/auth/signup" replace />} />
 
         {/* Public profile lives outside the shell (no auth guard on view) */}
         <Route path="/app/u/:username" element={<V3PublicProfile />} />
@@ -992,6 +470,11 @@ function ComingSoonNav({ name }) {
 
 // ─── Provider tree (preserved from legacy App.jsx) ───────────────────────────
 function App() {
+  const shouldRenderVercelTelemetry =
+    !Capacitor.isNativePlatform()
+    && typeof window !== 'undefined'
+    && !['localhost', '127.0.0.1'].includes(window.location.hostname);
+
   // Clear chunk-reload guard on every clean boot.
   React.useEffect(() => {
     try { sessionStorage.removeItem('atlas_chunk_reload'); } catch {}
@@ -1006,21 +489,36 @@ function App() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     let listener;
-    CapApp.addListener('appUrlOpen', async ({ url }) => {
-      if (!url.includes('atlascore://auth/callback')) return;
-      try { await Browser.close(); } catch {}
-      const urlObj = new URL(url.replace('atlascore://', 'https://x.com/'));
-      const code = urlObj.searchParams.get('code');
-      const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      if (code) {
-        await supabase.auth.exchangeCodeForSession(code);
-      } else if (accessToken) {
-        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-      }
-    }).then((h) => { listener = h; });
-    return () => { listener?.remove(); };
+    let disposed = false;
+
+    import('@capacitor/app')
+      .then(({ App }) => App.addListener('appUrlOpen', async ({ url }) => {
+        if (!url.includes('atlascore://auth/callback')) return;
+        try { await Browser.close(); } catch {}
+        const urlObj = new URL(url.replace('atlascore://', 'https://x.com/'));
+        const code = urlObj.searchParams.get('code');
+        const hashParams = new URLSearchParams(urlObj.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(code);
+        } else if (accessToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        }
+      }))
+      .then((handle) => {
+        if (disposed) {
+          handle.remove();
+          return;
+        }
+        listener = handle;
+      })
+      .catch(() => null);
+
+    return () => {
+      disposed = true;
+      listener?.remove();
+    };
   }, []);
 
   return (
@@ -1037,8 +535,8 @@ function App() {
                     </I18nProvider>
                   </Router>
                   <Sonner />
-                  {!Capacitor.isNativePlatform() && <Analytics />}
-                  {!Capacitor.isNativePlatform() && <SpeedInsights />}
+                  {shouldRenderVercelTelemetry && <Analytics />}
+                  {shouldRenderVercelTelemetry && <SpeedInsights />}
                 </DailyStoreProvider>
               </SubscriptionProvider>
             </QueryClientProvider>

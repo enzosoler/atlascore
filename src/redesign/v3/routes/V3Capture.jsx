@@ -122,7 +122,15 @@ export default function V3Capture() {
         body: { query, language: 'English' },
       });
       if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) {
+        if (data?.safeFallback && data?.fallback?.mode === 'manual_entry') {
+          setResults([]);
+          setSelected([]);
+          toast.error(data.error);
+          return;
+        }
+        throw new Error(data.error);
+      }
 
       const foods = Array.isArray(data?.items) && data.items.length > 0
         ? data.items.map((item) => ({
@@ -196,7 +204,7 @@ export default function V3Capture() {
       if (error) throw error;
       daily.invalidateAfterAction?.('meal');
       toast.success(`Logged ${chosenFoods.length} item${chosenFoods.length !== 1 ? 's' : ''} to ${meal}`);
-      navigate('/app/eat', { replace: true });
+      navigate('/app/nutrition', { replace: true });
     } catch (error) {
       console.error('[V3Capture] save failed', error);
       toast.error(error?.message || 'Failed to save food log.');

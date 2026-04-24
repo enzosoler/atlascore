@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="72" viewBox="0 0 340 72" role="img" aria-label="atlas.core">
+  
+  <text x="0" y="56" class="wm" fill="#0a0a0a">atlas</text>
+  <rect x="162" y="48" width="10" height="10" fill="#e8b500"></rect>
+  <text x="178" y="56" class="wm" fill="#0a0a0a">core</text>
+</svg>

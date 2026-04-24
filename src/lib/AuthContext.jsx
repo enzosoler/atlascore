@@ -17,6 +17,18 @@ const AUTH_STATES = {
 
 const AUTH_CHECK_TIMEOUT = 5000;
 const REVALIDATION_TIMEOUT = 15000;
+const AUTH_BYPASS_STORAGE_KEY = 'atlas.authBypassUser';
+
+function hasSupabaseConfig() {
+  return Boolean(
+    import.meta.env.VITE_SUPABASE_URL &&
+    (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY)
+  );
+}
+
+function isAuthBypassEnabled() {
+  return import.meta.env.VITE_ENABLE_AUTH_BYPASS === 'true';
+}
 
 function withTimeout(promise, label) {
   return Promise.race([
@@ -82,6 +94,115 @@ function buildAuthError(type, message) {
   };
 }
 
+function parseRetryAfterSeconds(error) {
+  const candidates = [
+    error?.response?.headers?.get?.('retry-after'),
+    error?.headers?.get?.('retry-after'),
+    error?.headers?.['retry-after'],
+    error?.response?.headers?.['retry-after'],
+    error?.context?.retryAfter,
+    error?.retryAfter,
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate == null || candidate === '') continue;
+    const seconds = Number(candidate);
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.ceil(seconds);
+    }
+
+    const retryDate = Date.parse(String(candidate));
+    if (!Number.isNaN(retryDate)) {
+      const diffSeconds = Math.ceil((retryDate - Date.now()) / 1000);
+      if (diffSeconds > 0) {
+        return diffSeconds;
+      }
+    }
+  }
+
+  const rawMessage = String(error?.message || '');
+  const match = rawMessage.match(/(?:retry after|try again in|available in)\s+(\d+)\s*(seconds?|secs?|s|minutes?|mins?|m)/i);
+  if (match) {
+    const amount = Number(match[1]);
+    if (!Number.isFinite(amount) || amount <= 0) return null;
+    const unit = match[2].toLowerCase();
+    return unit.startsWith('m') ? amount * 60 : amount;
+  }
+
+  return null;
+}
+
+function normalizeAuthError(error, fallbackMessage) {
+  const rawMessage = error?.message || '';
+
+  if (error?.status === 429 || /rate limit|too many requests|too many attempts/i.test(rawMessage)) {
+    return {
+      ...buildAuthError('rate_limited', 'Too many attempts. Wait a moment and try again.'),
+      retryAfterSeconds: parseRetryAfterSeconds(error) ?? 60,
+      status: 429,
+    };
+  }
+
+  if (/hook within maximum time|timeout/i.test(rawMessage)) {
+    return buildAuthError('timeout', 'The auth service is taking too long to respond. Please try again.');
+  }
+
+  if (/network|failed to fetch/i.test(rawMessage)) {
+    return buildAuthError('network', 'Network issue while contacting auth. Check your connection and retry.');
+  }
+
+  return buildAuthError('auth_failed', rawMessage || fallbackMessage);
+}
+
+function readAuthBypassUser() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(AUTH_BYPASS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeAuthBypassUser(user) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(AUTH_BYPASS_STORAGE_KEY, JSON.stringify(user));
+  } catch {}
+}
+
+function clearAuthBypassUser() {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(AUTH_BYPASS_STORAGE_KEY);
+  } catch {}
+}
+
+function createAuthBypassUser(email, { onboardingCompleted = false } = {}) {
+  const normalizedEmail = String(email || 'dev-user@local.dev').trim().toLowerCase() || 'dev-user@local.dev';
+  const seed = normalizedEmail.replace(/[^a-z0-9]+/g, '-');
+  return {
+    id: `local-${seed || 'dev-user'}`,
+    email: normalizedEmail,
+    full_name: normalizedEmail.split('@')[0] || 'Developer',
+    atlas_role: 'athlete',
+    profile_role: 'athlete',
+    onboarding_completed: onboardingCompleted,
+    role: 'user',
+    phone: null,
+    user_metadata: {
+      full_name: normalizedEmail.split('@')[0] || 'Developer',
+      onboarding_completed: onboardingCompleted,
+      auth_bypass: true,
+    },
+    app_metadata: {},
+    raw_user: {
+      id: `local-${seed || 'dev-user'}`,
+      email: normalizedEmail,
+    },
+  };
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authState, setAuthState] = useState(AUTH_STATES.LOADING);
@@ -94,6 +215,7 @@ export const AuthProvider = ({ children }) => {
 
   const clearAuthState = useCallback(() => {
     setUser(null);
+    clearAuthBypassUser();
 
     try {
       const queryClient = window.__queryClient;
@@ -197,6 +319,20 @@ export const AuthProvider = ({ children }) => {
     return resolvedUser;
   }, []);
 
+  const applyLocalBypassUser = useCallback((mockUser) => {
+    if (!mountedRef.current) {
+      return mockUser;
+    }
+
+    writeAuthBypassUser(mockUser);
+    hadAuthenticatedSessionRef.current = true;
+    setUser(mockUser);
+    setAuthState(AUTH_STATES.AUTHENTICATED);
+    setAuthError(null);
+    setSentryUser(mockUser);
+    return mockUser;
+  }, []);
+
   const applyUnauthenticatedState = useCallback(
     ({ markAuthRequired = false, clearClientState = false } = {}) => {
       if (clearClientState) {
@@ -236,10 +372,18 @@ export const AuthProvider = ({ children }) => {
     setAuthState(AUTH_STATES.LOADING);
     setAuthError(null);
 
-    const isConfigured = import.meta.env.VITE_SUPABASE_URL && 
-                        (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+    const bypassUser = isAuthBypassEnabled() ? readAuthBypassUser() : null;
+    if (bypassUser) {
+      return applyLocalBypassUser(bypassUser);
+    }
+
+    const isConfigured = hasSupabaseConfig();
     
     if (!isConfigured) {
+      if (isAuthBypassEnabled()) {
+        applyUnauthenticatedState();
+        return null;
+      }
       setAuthState(AUTH_STATES.ERROR);
       setAuthError(buildAuthError('missing_config', 'Supabase configuration is missing.'));
       return null;
@@ -260,11 +404,15 @@ export const AuthProvider = ({ children }) => {
       handleAuthError(error);
       return null;
     }
-  }, [applyAuthenticatedUser, applyUnauthenticatedState, handleAuthError]);
+  }, [applyAuthenticatedUser, applyLocalBypassUser, applyUnauthenticatedState, handleAuthError]);
 
   const revalidateSession = useCallback(async () => {
-    const isConfigured = import.meta.env.VITE_SUPABASE_URL &&
-                        (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+    const bypassUser = isAuthBypassEnabled() ? readAuthBypassUser() : null;
+    if (bypassUser) {
+      return applyLocalBypassUser(bypassUser);
+    }
+
+    const isConfigured = hasSupabaseConfig();
     if (!isConfigured) return null;
 
     try {
@@ -291,7 +439,7 @@ export const AuthProvider = ({ children }) => {
       console.warn('[AuthContext] Session revalidation failed, keeping current state:', error?.message);
       return null;
     }
-  }, [applyAuthenticatedUser, applyUnauthenticatedState]);
+  }, [applyAuthenticatedUser, applyLocalBypassUser, applyUnauthenticatedState]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -335,6 +483,11 @@ export const AuthProvider = ({ children }) => {
   }, [checkAppState, revalidateSession]);
 
   const signIn = useCallback(async (email, password) => {
+    if (isAuthBypassEnabled()) {
+      const mockUser = createAuthBypassUser(email, { onboardingCompleted: true });
+      return applyLocalBypassUser(mockUser);
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
@@ -343,12 +496,19 @@ export const AuthProvider = ({ children }) => {
       }
       return null;
     } catch (error) {
-      handleAuthError(error);
-      throw error;
+      const authError = normalizeAuthError(error, 'Could not sign you in.');
+      setAuthState(AUTH_STATES.UNAUTHENTICATED);
+      setAuthError(authError);
+      throw authError;
     }
-  }, [applyAuthenticatedUser, handleAuthError]);
+  }, [applyAuthenticatedUser, applyLocalBypassUser]);
 
   const signUp = useCallback(async (email, password, metadata = {}) => {
+    if (isAuthBypassEnabled()) {
+      const mockUser = createAuthBypassUser(email, { onboardingCompleted: false });
+      return applyLocalBypassUser(mockUser);
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -364,10 +524,12 @@ export const AuthProvider = ({ children }) => {
 
       return { needsEmailConfirmation: true };
     } catch (error) {
-      handleAuthError(error);
-      throw error;
+      const authError = normalizeAuthError(error, 'Could not create your account.');
+      setAuthState(AUTH_STATES.UNAUTHENTICATED);
+      setAuthError(authError);
+      throw authError;
     }
-  }, [applyAuthenticatedUser, handleAuthError]);
+  }, [applyAuthenticatedUser, applyLocalBypassUser]);
 
   const logout = useCallback(async () => {
     logoutInProgressRef.current = true;

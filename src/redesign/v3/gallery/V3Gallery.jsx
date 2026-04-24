@@ -12,6 +12,37 @@ import IOSFrame from './IOSFrame.jsx';
 import { PaperThemeProvider, ACFonts } from '../lib/paper.jsx';
 import * as Screens from '../screens/index.js';
 
+// ── New screens added from the logo-handoff (S87–S107) ─────────────────────
+const PHASE_9 = {
+  n: 9,
+  title: 'auth · account · utility',
+  blurb:
+    'Twenty-one screens from the logo handoff: auth flows (magic link, signup, forgot, reset, callback), engagement (focus mode, streak ledger, celebrations, insights digest, coach home), nutrition & body detail (food search, meal plans, body check-in, weight entry + trend compare), and utility surfaces (404, account hub, subscription manage, data export, progress photo capture).',
+  rows: [
+    { idx: 87, title: 'auth · login',         subtitle: 'Email magic code + Apple/Google SSO.',                          variants: [{ label: 'login',    Comp: Screens.S87_Login }] },
+    { idx: 88, title: 'auth · magic sent',     subtitle: '6-digit code entry screen after email sent.',                   variants: [{ label: 'sent',     Comp: Screens.S88_Magic_Link_Sent }] },
+    { idx: 89, title: 'auth · callback',       subtitle: 'Verification in-progress — ink bg, pulsing squares, checklist.',variants: [{ label: 'callback', Comp: Screens.S89_Magic_Callback }] },
+    { idx: 90, title: 'auth · signup',         subtitle: 'Create account — name + email, trial feature highlights.',      variants: [{ label: 'signup',   Comp: Screens.S90_Signup }] },
+    { idx: 91, title: 'auth · forgot',         subtitle: '"No password to forget" — verify via SMS or Apple.',            variants: [{ label: 'forgot',   Comp: Screens.S91_Forgot }] },
+    { idx: 92, title: 'auth · reset email',    subtitle: 'Change login email — 2-step verify flow.',                      variants: [{ label: 'reset',    Comp: Screens.S92_Reset }] },
+    { idx: 93, title: 'focus mode',            subtitle: 'Minimal workout timer — giant 120px rest countdown, 3-button bar.', variants: [{ label: 'focus', Comp: Screens.S93_Focus_Mode }] },
+    { idx: 94, title: 'streak · ledger',       subtitle: 'Adherence ledger — 53×7 year heatmap grid.',                   variants: [{ label: 'ledger',   Comp: Screens.S94_Streak_Ledger }] },
+    { idx: 95, title: 'celebrations · PR',     subtitle: 'PR moment — 140px number, lift history path.',                  variants: [{ label: 'celebrate',Comp: Screens.S95_Celebrations }] },
+    { idx: 96, title: 'insights · digest',     subtitle: 'Weekly reads list with featured ink hero card.',                 variants: [{ label: 'digest',   Comp: Screens.S96_Insights_Digest }] },
+    { idx: 97, title: 'coach · home',          subtitle: 'Full coach surface with brand mark.',                            variants: [{ label: 'coach',    Comp: Screens.S97_Coach_Home }] },
+    { idx: 98, title: 'nutrition · search',    subtitle: 'Food search with USDA top-match hero + 42 results.',             variants: [{ label: 'search',   Comp: Screens.S98_Nutrition_Search }] },
+    { idx: 99, title: 'meal · plans',          subtitle: 'One-tap meal template picker — active plan + 8 alternatives.',  variants: [{ label: 'plans',    Comp: Screens.S99_Meal_Plans }] },
+    { idx: 100, title: 'body · check-in',      subtitle: 'Morning check-in — step progress, soreness multi-select.',       variants: [{ label: 'checkin',  Comp: Screens.S100_Body_Checkin }] },
+    { idx: 101, title: 'weight · entry',       subtitle: 'Weight entry — 120px number, ruler-tick slider.',                variants: [{ label: 'entry',    Comp: Screens.S101_Weight_Entry_Slider }] },
+    { idx: 102, title: 'weight · trend compare',subtitle: 'Two-quarter overlaid SVG chart comparison.',                   variants: [{ label: 'compare',  Comp: Screens.S102_Weight_Trend_Compare }] },
+    { idx: 103, title: '404 · not found',      subtitle: 'Giant 404 + ECG motif + "try instead" navigation.',             variants: [{ label: '404',      Comp: Screens.S103_NotFound }] },
+    { idx: 104, title: 'account · hub',        subtitle: 'Identity hero + 3-col grid + account/plan/data sections.',      variants: [{ label: 'account',  Comp: Screens.S104_Account_Hub }] },
+    { idx: 105, title: 'subscription · manage',subtitle: 'Ink plan hero, monthly/annual/lifetime toggle, cancel zone.',  variants: [{ label: 'manage',   Comp: Screens.S105_Subscription_Manage }] },
+    { idx: 106, title: 'data · export',        subtitle: 'Format picker (JSON/CSV/PDF), toggles, archive stats card.',    variants: [{ label: 'export',   Comp: Screens.S106_Data_Export }] },
+    { idx: 107, title: 'progress · photo capture',subtitle: 'Dark viewfinder, ghost silhouette, 3-angle strip, shutter.', variants: [{ label: 'capture',  Comp: Screens.S107_Progress_Photo_Capture }] },
+  ],
+};
+
 const PHASES = [
   {
     n: 1,
@@ -158,7 +189,7 @@ const PHASES = [
   },
   {
     n: 8,
-    title: 'protocols',
+    title: 'protocols (S43–S50)',
     blurb:
       'The hormones/supplements module — protocols home, empty+locked states, detail, form, substance picker, dose log, timeline, and today completion.',
     rows: [
@@ -375,9 +406,45 @@ export default function V3Gallery() {
             Archivo Black for brand moments, JetBrains Mono for data. Preview each screen
             in light and dark, device-framed, scrolling inside its own bezel.
           </p>
+          <div style={{ marginTop: 22, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[
+              ['design handoff', '/v3/handoff'],
+              ['app canvas', '/handoff/atlas-core-logo/project/index.html'],
+              ['design system', '/handoff/atlas-core-logo/project/design-system.html'],
+              ['motion spec', '/handoff/atlas-core-logo/project/Motion.html'],
+              ['spec pack', '/handoff/atlas-core-logo/project/Spec%20Pack.html'],
+            ].map(([label, href]) => {
+              const external = href.startsWith('/handoff/');
+              return (
+                <a
+                  key={href}
+                  href={href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noreferrer' : undefined}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 10px',
+                    background: 'rgba(15,10,5,0.92)',
+                    color: '#efe9da',
+                    fontFamily: ACFonts.mono,
+                    fontSize: 10,
+                    letterSpacing: 1.8,
+                    textTransform: 'uppercase',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  {label}
+                  <span style={{ color: '#e8b500' }}>{external ? '↗' : '→'}</span>
+                </a>
+              );
+            })}
+          </div>
         </div>
 
-        {PHASES.map((phase) => (
+        {[...PHASES, PHASE_9].map((phase) => (
           <React.Fragment key={phase.n}>
             <PhaseHeader phase={phase} />
             {phase.rows.map((row) => (
@@ -397,11 +464,11 @@ export default function V3Gallery() {
               marginBottom: 10,
             }}
           >
-            /// done · 50 screens
+            /// done · 71 screens (S1–S50 + S72–S86 + S87–S107)
           </div>
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.65, color: 'rgba(40,30,20,0.85)' }}>
-            Ready for review. Next pass: wire the v3 screens to real navigation + Supabase data and
-            flip production from v2 to v3 one route at a time.
+            S1–S50 (core product) + S72–S86 (social/states/errors) + S87–S107 (auth/account/utility/body).
+            Next pass: wire remaining screens to real navigation + Supabase data and flip production from v2 to v3 one route at a time.
           </p>
         </div>
       </div>

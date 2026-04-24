@@ -19,6 +19,18 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+function isTruthy(value: string | undefined | null): boolean {
+  return ['1', 'true', 'yes', 'on'].includes((value || '').trim().toLowerCase());
+}
+
+function resolveStripeSecretKey() {
+  const defaultSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
+  const testMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE')) || defaultSecretKey.startsWith('sk_test_');
+  return testMode
+    ? (Deno.env.get('STRIPE_TEST_SECRET_KEY') || defaultSecretKey)
+    : defaultSecretKey;
+}
+
 interface PortalRequest {
   user_id: string;
   email: string;
@@ -110,7 +122,7 @@ serve(async (req) => {
     });
   }
 
-  const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+  const stripeSecretKey = resolveStripeSecretKey();
   if (!stripeSecretKey) {
     return new Response(JSON.stringify({ error: 'Stripe not configured' }), {
       status: 503,

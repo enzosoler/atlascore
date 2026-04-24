@@ -4,16 +4,12 @@ import {
   ACLabel, ACMono, ACNum, ACBtn,
 } from '../lib/paper.jsx';
 
-/* ── demo result ──────────────────────────────────────────────── */
-
-const DEMO_RESULT = { examId: 'exam-demo-001', biomarkerCount: 42 };
-
 /* ── phase config ─────────────────────────────────────────────── */
 
 const PHASES = [
   { key: 'uploading', label: 'Uploading panel',       pct: 35 },
   { key: 'parsing',   label: 'Parsing biomarkers',    pct: 65 },
-  { key: 'analyzing', label: 'Analyzing results',     pct: 90 },
+  { key: 'analyzing', label: 'Saving results',        pct: 90 },
 ];
 
 /**
@@ -21,8 +17,8 @@ const PHASES = [
  *
  * Three states:
  *   1) idle     -- dashed drop-zone, tap to pick file, 20MB limit, privacy note
- *   2) working  -- staged progress (uploading, parsing, analyzing) with bar
- *   3) success  -- biomarker count reveal + "View results" CTA
+ *   2) working  -- staged progress (uploading, parsing, saving) with bar
+ *   3) success  -- parsed result or honest pending state
  *   4) error    -- inline error with retry
  *
  * This is a GIFT MOMENT (section 12: lab result parsing).
@@ -36,7 +32,7 @@ const PHASES = [
  *
  * @param {boolean}  dark           - light/dark variant
  * @param {Function} onCancel       - cancel / close handler
- * @param {Function} onSubmit       - (file) => Promise<{examId, biomarkerCount}>
+ * @param {Function} onSubmit       - (file) => Promise<{examId, biomarkerCount, status, pendingMessage}>
  * @param {Function} onViewResults  - (examId) => void
  */
 export default function S77_Lab_Upload({
@@ -83,19 +79,12 @@ export default function S77_Lab_Upload({
   const upload = async () => {
     if (!file) return;
     setError('');
-    setPhase('uploading');
     try {
-      // Staged progress simulation — real impl streams from edge function
-      await wait(900);
-      setPhase('parsing');
-      await wait(1200);
-      setPhase('analyzing');
-      await wait(1100);
-
-      const res = typeof onSubmit === 'function'
-        ? await onSubmit(file)
-        : DEMO_RESULT;
-      setResult(res || DEMO_RESULT);
+      if (typeof onSubmit !== 'function') {
+        throw new Error('Lab upload is not configured.');
+      }
+      const res = await onSubmit(file, { onPhaseChange: setPhase });
+      setResult(res || null);
       setPhase('success');
     } catch (err) {
       setError(err?.message || 'Upload failed. Check your connection and retry.');
@@ -114,6 +103,12 @@ export default function S77_Lab_Upload({
 
   const isWorking = phase === 'uploading' || phase === 'parsing' || phase === 'analyzing';
   const currentPhase = PHASES.find((p) => p.key === phase);
+  const isPending = result?.status === 'pending';
+  const successTitle = isPending ? 'Upload received' : 'Panel analyzed';
+  const successBody = isPending
+    ? result?.pendingMessage || 'Your lab report is uploaded. Parsing usually takes 1-2 minutes. We will notify you when biomarkers are ready.'
+    : 'Your biomarkers have been extracted and flagged.';
+  const ctaLabel = isPending ? 'Open upload record' : 'View results';
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
@@ -145,12 +140,12 @@ export default function S77_Lab_Upload({
           fontFamily: ACFonts.display, fontSize: 28, fontWeight: 700,
           letterSpacing: -0.8, lineHeight: 1.1, color: c.fg,
         }}>
-          {phase === 'success' ? 'Panel analyzed' : 'Add lab panel'}
+          {phase === 'success' ? successTitle : 'Add lab panel'}
         </div>
         <div style={{ marginTop: 6 }}>
           <ACLabel size={13} color={c.dim} style={{ lineHeight: 1.5 }}>
             {phase === 'success'
-              ? 'Your biomarkers have been extracted and flagged.'
+              ? successBody
               : 'Upload a blood panel PDF. Atlas reads every biomarker and explains what it means.'}
           </ACLabel>
         </div>
@@ -165,14 +160,27 @@ export default function S77_Lab_Upload({
               transition: 'opacity 0.45s ease, transform 0.45s ease',
               textAlign: 'center', padding: '28px 0 14px',
             }}>
-              <ACNum size={72} color={c.accent} weight={700}>
-                {result?.biomarkerCount ?? 0}
-              </ACNum>
-              <div style={{ marginTop: 8 }}>
-                <ACLabel size={14} color={c.fg} style={{ fontWeight: 600 }}>
-                  biomarkers extracted
-                </ACLabel>
-              </div>
+              {isPending ? (
+                <>
+                  <ACLabel size={12} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase' }}>
+                    Pending
+                  </ACLabel>
+                  <div style={{ marginTop: 10, fontSize: 18, fontWeight: 600, color: c.fg }}>
+                    Parsing has not completed yet
+                  </div>
+                </>
+              ) : (
+                <>
+                  <ACNum size={72} color={c.accent} weight={700}>
+                    {result?.biomarkerCount ?? 0}
+                  </ACNum>
+                  <div style={{ marginTop: 8 }}>
+                    <ACLabel size={14} color={c.fg} style={{ fontWeight: 600 }}>
+                      biomarkers extracted
+                    </ACLabel>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Stage 2: celebration — outcome + CTA */}
@@ -186,16 +194,18 @@ export default function S77_Lab_Upload({
                 borderLeft: `3px solid ${c.accent}`,
               }}>
                 <ACLabel size={11} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.3, textTransform: 'uppercase' }}>
-                  Ready for review
+                  {isPending ? 'Queued for parsing' : 'Ready for review'}
                 </ACLabel>
                 <div style={{ marginTop: 6, fontSize: 14, color: c.fg, lineHeight: 1.5 }}>
-                  Each marker has been flagged with status, range context, and coaching notes. Tap below to explore.
+                  {isPending
+                    ? 'The file is in storage and the panel record is created. Results will appear here once parsing finishes.'
+                    : 'Each marker has been flagged with status, range context, and coaching notes. Tap below to explore.'}
                 </div>
               </div>
 
               <div style={{ marginTop: 18, display: 'flex', gap: 10 }}>
                 <ACBtn primary dark={dark} block onClick={handleView} size="lg">
-                  View results
+                  {ctaLabel}
                 </ACBtn>
               </div>
               <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
@@ -315,7 +325,7 @@ export default function S77_Lab_Upload({
                       color={phase === p.key ? c.accent : (PHASES.indexOf(p) < PHASES.findIndex((x) => x.key === phase) ? c.fg : c.mute)}
                       style={{ fontWeight: phase === p.key ? 700 : 500 }}
                     >
-                      {p.key === 'uploading' ? 'Upload' : p.key === 'parsing' ? 'Parse' : 'Analyze'}
+                      {p.key === 'uploading' ? 'Upload' : p.key === 'parsing' ? 'Parse' : 'Save'}
                     </ACMono>
                   ))}
                 </div>
@@ -355,7 +365,7 @@ export default function S77_Lab_Upload({
                 onClick={upload}
                 style={{ opacity: (!file || isWorking) ? 0.45 : 1, pointerEvents: (!file || isWorking) ? 'none' : 'auto' }}
               >
-                {isWorking ? (currentPhase?.label || 'Processing') : 'Upload & analyze'}
+                {isWorking ? (currentPhase?.label || 'Processing') : 'Upload report'}
               </ACBtn>
             </div>
           </>
@@ -372,5 +382,3 @@ function formatBytes(b) {
   if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
   return `${(b / (1024 * 1024)).toFixed(1)} MB`;
 }
-
-function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }

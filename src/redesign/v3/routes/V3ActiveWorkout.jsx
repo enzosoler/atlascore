@@ -184,7 +184,7 @@ export default function V3ActiveWorkout() {
       initialSession={persistedSession}
       workoutHistory={history}
       personalRecords={personalRecords}
-      onCancel={() => navigate('/app/train')}
+      onCancel={() => navigate('/app/workouts')}
       onComplete={async (payload) => {
         if (!user?.id) {
           toast.error(t('workoutExecution.mustBeSignedIn'));

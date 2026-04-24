@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSubscription } from '@/lib/SubscriptionContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
 import { listBillingSubscriptions, openWebBillingPortal } from '@/services/billingService';
+import { getStripeBillingConfig } from '@/services/stripeBillingConfig';
 import { WEBAPP_BILLING, WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 import { toast } from 'sonner';
 import S40_Billing from '../screens/S40_Billing.jsx';
@@ -15,6 +16,7 @@ export default function V3Billing() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const { subscription } = useSubscription();
+  const stripeBilling = getStripeBillingConfig();
 
   const { data: rows = [] } = useQuery({
     queryKey: ['v3-billing-subscriptions', user?.id],
@@ -63,6 +65,7 @@ export default function V3Billing() {
       onOpenInvoice={openPortal}
       onBack={() => navigate(-1)}
       showTabBar={false}
+      qaBanner={stripeBilling.testMode ? 'Test mode — use card 4242 4242 4242 4242' : ''}
     />
   );
 }

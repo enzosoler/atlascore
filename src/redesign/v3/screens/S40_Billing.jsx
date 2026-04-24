@@ -50,6 +50,7 @@ function S40_Billing({
   onSwitchPlan,
   onCancel,
   onOpenInvoice,
+  qaBanner = '',
 }) {
   const c = useACT(dark);
   const _perks = perks || DEMO_PERKS;
@@ -117,6 +118,20 @@ function S40_Billing({
             </div>
           </div>
         </div>
+
+        {qaBanner ? (
+          <div style={{
+            marginTop: 14,
+            padding: 14,
+            borderRadius: ACRadii.card,
+            border: `1px solid ${c.accent}`,
+            background: c.card,
+          }}>
+            <ACLabel size={10} color={c.accent} style={{ fontFamily: ACFonts.mono, fontWeight: 700, letterSpacing: 0.7, textTransform: 'uppercase' }}>
+              {qaBanner}
+            </ACLabel>
+          </div>
+        ) : null}
 
         {/* Perks */}
         <div style={{ marginTop: 14 }}>

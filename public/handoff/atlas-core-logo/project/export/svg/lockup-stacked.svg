@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="180" viewBox="0 0 220 180" role="img" aria-label="atlas.core">
+  
+  <g transform="translate(62 0)">
+    <path d="M48 82 C 34 72, 10 58, 10 36 C 10 22, 22 12, 32 12 C 40 12, 44 18, 48 24 C 52 18, 56 12, 64 12 C 74 12, 86 22, 86 36 C 86 58, 62 72, 48 82 Z" fill="#0a0a0a"></path>
+    <path d="M10 50 L32 50 L38 50 L44 28 L52 72 L58 28 L64 50 L86 50" fill="none" stroke="#e8b500" stroke-width="3.2" stroke-linejoin="miter" stroke-linecap="square"></path>
+  </g>
+  <g transform="translate(40 120)">
+    <text x="0" y="36" class="wm" fill="#0a0a0a">atlas</text>
+    <rect x="104" y="30" width="7" height="7" fill="#e8b500"></rect>
+    <text x="114" y="36" class="wm" fill="#0a0a0a">core</text>
+  </g>
+</svg>

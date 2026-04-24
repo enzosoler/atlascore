@@ -7,6 +7,6 @@ export default function V3RoutinePresets(){
   const navigate = useNavigate();
   const { theme } = useTheme();
   return (
-    <S80_Routine_Presets dark={theme === 'dark'} onOpen={(id)=>navigate(`/routines/presets/${id}`)} />
+    <S80_Routine_Presets dark={theme === 'dark'} onOpen={(id)=>navigate(`/app/routines/presets/${id}`)} />
   );
 }

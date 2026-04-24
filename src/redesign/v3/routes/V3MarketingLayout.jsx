@@ -177,16 +177,16 @@ export default function V3MarketingLayout({ eyebrow, title, intro, children, hid
         </Link>
 
         <div className="mkt-nav-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          <NavItem to="/the-app">{t('marketing.nav.theApp')}</NavItem>
+          <NavItem to="/#what-it-does">{t('marketing.nav.theApp')}</NavItem>
           <NavItem to="/method">{t('marketing.nav.method')}</NavItem>
-          <NavItem to="/labs">{t('marketing.nav.labs')}</NavItem>
+          <NavItem to="/science">{t('marketing.nav.labs')}</NavItem>
           <NavItem to="/pricing">{t('marketing.nav.pricing')}</NavItem>
         </div>
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <LocaleToggle />
-          <CTA to="/webapp">{t('marketing.cta.signIn')}</CTA>
-          <CTA to="/download-app" primary>{t('marketing.cta.getApp')}</CTA>
+          <CTA to="/auth/login?mode=password">{t('marketing.cta.signIn')}</CTA>
+          <CTA to="/?quiz=start" primary>{t('welcome.createAccount')}</CTA>
         </div>
       </div>
 
@@ -213,8 +213,8 @@ export default function V3MarketingLayout({ eyebrow, title, intro, children, hid
 
         {!hideCTAs && (
           <div style={{ marginTop: 28, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <CTA to="/download-app" primary>{t('marketing.cta.downloadApp')}</CTA>
-            <CTA to="/webapp">{t('marketing.cta.startWeb')}</CTA>
+            <CTA to="/?quiz=start" primary>{t('welcome.createAccount')}</CTA>
+            <CTA to="/auth/login?mode=password">{t('marketing.cta.signIn')}</CTA>
           </div>
         )}
 

@@ -20,6 +20,8 @@ interface CheckoutResponse {
   success: boolean;
   url?: string;
   sessionId?: string;
+  publishableKey?: string;
+  testMode?: boolean;
   error?: string;
 }
 
@@ -29,6 +31,38 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+function isTruthy(value: string | undefined | null): boolean {
+  return ['1', 'true', 'yes', 'on'].includes((value || '').trim().toLowerCase());
+}
+
+function resolveStripeMode() {
+  const configuredTestMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE'));
+  const defaultSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
+  const defaultPublishableKey = Deno.env.get('STRIPE_PUBLISHABLE_KEY') || '';
+  const derivedTestMode = defaultSecretKey.startsWith('sk_test_');
+  const testMode = configuredTestMode || derivedTestMode;
+
+  const secretKey = testMode
+    ? (Deno.env.get('STRIPE_TEST_SECRET_KEY') || defaultSecretKey)
+    : defaultSecretKey;
+  const publishableKey = testMode
+    ? (Deno.env.get('STRIPE_TEST_PUBLISHABLE_KEY') || defaultPublishableKey)
+    : defaultPublishableKey;
+
+  return { testMode, secretKey, publishableKey };
+}
+
+function resolvePriceId(plan: string, billing: 'monthly' | 'yearly', region: 'us' | 'br', testMode: boolean): string {
+  if (testMode) {
+    return billing === 'yearly'
+      ? (Deno.env.get('STRIPE_TEST_PRICE_ANNUAL') || '')
+      : (Deno.env.get('STRIPE_TEST_PRICE_MONTHLY') || '');
+  }
+
+  const priceKey = `${region}_${billing}`;
+  return PRICE_MAP[priceKey]?.[plan] || '';
+}
 
 // ── MAPA DE PREÇOS ────────────────────────────────────────────────
 const PRICE_MAP: Record<string, Record<string, string>> = {
@@ -247,14 +281,19 @@ serve(async (req: Request) => {
   }
 
   // ── 6. VERIFICAR CONFIG STRIPE ────────────────────────────────
-  const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
-  
-  if (!stripeSecretKey) {
-    log('CONFIG', 'Missing STRIPE_SECRET_KEY');
+  const { testMode, secretKey: resolvedStripeSecretKey, publishableKey } = resolveStripeMode();
+
+  if (!resolvedStripeSecretKey) {
+    log('CONFIG', 'Missing Stripe secret key', { testMode });
     return errorResponse('Server configuration error: Stripe not configured', 500);
   }
 
-  const stripe = new Stripe(stripeSecretKey, { 
+  if (!publishableKey) {
+    log('CONFIG', 'Missing Stripe publishable key', { testMode });
+    return errorResponse('Server configuration error: Stripe publishable key missing', 500);
+  }
+
+  const stripe = new Stripe(resolvedStripeSecretKey, {
     apiVersion: '2023-10-16',
     httpClient: Stripe.createFetchHttpClient(),
   });
@@ -262,20 +301,19 @@ serve(async (req: Request) => {
   // ── 7. RESOLVER PRICE ID ────────────────────────────────────────
   const region = (body.region || 'US').toLowerCase() === 'us' ? 'us' : 'br';
   const billing = body.billing === 'yearly' ? 'yearly' : 'monthly';
-  const priceKey = `${region}_${billing}`;
-  const priceId = PRICE_MAP[priceKey]?.[body.plan];
+  const priceId = resolvePriceId(body.plan, billing, region, testMode);
 
   log('PRICE', 'Resolved price', { 
     region, 
     billing, 
-    priceKey, 
+    testMode,
     plan: body.plan,
     priceId: priceId ? `${priceId.substring(0, 15)}...` : 'NOT FOUND'
   });
 
   if (!priceId) {
     return errorResponse(
-      `Price not configured for plan: ${body.plan}, region: ${region}, billing: ${billing}`,
+      `Price not configured for plan: ${body.plan}, billing: ${billing}, mode: ${testMode ? 'test' : 'live'}`,
       500
     );
   }
@@ -381,5 +419,7 @@ serve(async (req: Request) => {
   return successResponse({
     url: checkoutSession.url!,
     sessionId: checkoutSession.id,
+    publishableKey,
+    testMode,
   });
 });

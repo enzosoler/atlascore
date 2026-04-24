@@ -156,7 +156,15 @@ serve(async (req) => {
     .eq('platform', 'ios');
 
   if (dbError || !tokens?.length) {
-    return new Response(JSON.stringify({ sent: 0, errors: dbError?.message || 'No tokens found' }), {
+    return new Response(JSON.stringify({
+      sent: 0,
+      failed: 0,
+      cleaned: 0,
+      code: 'NO_TOKENS',
+      safeFallback: true,
+      message: 'Push skipped because the user has no registered iOS device token.',
+      errors: dbError?.message || 'No tokens found',
+    }), {
       status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   }

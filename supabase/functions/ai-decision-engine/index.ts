@@ -25,43 +25,14 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-// ─── CORS ─────────────────────────────────────────────────────────────────────
-
-function getAllowedOrigin(requestOrigin: string): string {
-  const appUrls = Deno.env.get('APP_URLS') || '';
-  const extraAllowed = appUrls.split(',').map((u) => u.trim()).filter(Boolean);
-
-  if (requestOrigin?.endsWith('useatlascore.com')) return requestOrigin;
-
-  const allowedList = [
-    ...extraAllowed,
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:8080',
-    'capacitor://localhost',
-    'atlascore://localhost',
-  ];
-  if (allowedList.includes(requestOrigin)) return requestOrigin;
-
-  console.warn('[ai-decision-engine] CORS blocked origin:', requestOrigin);
-  return 'https://useatlascore.com';
-}
-
-function getCorsHeaders(req: Request) {
-  const origin = req.headers.get('origin') ?? '';
-  return {
-    'Access-Control-Allow-Origin': getAllowedOrigin(origin),
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
-}
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const MODEL = 'gpt-4o-mini';
 const ENGINE_VERSION = '1.0';
 const TTL_SECONDS = 4 * 60 * 60; // 4 hours
+const RETRYABLE_OPENAI_STATUS = new Set([408, 409, 429, 500, 502, 503, 504]);
 
 const CONFIDENCE_THRESHOLD = 0.6;
 const MAX_RECOMMENDATIONS = 3;
@@ -353,6 +324,144 @@ function todayDateString(): string {
   return new Date().toISOString().split('T')[0];
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function callOpenAIWithRetry(messages: Array<{ role: string; content: string }>, openaiKey: string) {
+  const attempts = [0, 750, 1500];
+  let lastStatus = 0;
+  let lastErrorText = 'Unknown error';
+
+  for (let attempt = 0; attempt < attempts.length; attempt += 1) {
+    if (attempts[attempt] > 0) await sleep(attempts[attempt]);
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        temperature: 0.3,
+        max_tokens: 1024,
+        messages,
+        response_format: { type: 'json_object' },
+      }),
+    });
+
+    if (response.ok) {
+      return { ok: true as const, payload: await response.json() };
+    }
+
+    lastStatus = response.status;
+    lastErrorText = await response.text();
+    console.error(`[ai-decision-engine] OpenAI error ${response.status} attempt ${attempt + 1}:`, lastErrorText);
+
+    if (!RETRYABLE_OPENAI_STATUS.has(response.status)) break;
+  }
+
+  return { ok: false as const, status: lastStatus, errorText: lastErrorText };
+}
+
+function buildDeterministicEngineOutput(ctx: EngineContext, locale: string) {
+  const pt = locale.toLowerCase().startsWith('pt');
+  const proteinTarget = ctx.profile.protein_target ?? 150;
+  const caloriesTarget = ctx.profile.calories_target ?? 2000;
+  const proteinRemaining = Math.max(0, Math.round(proteinTarget - ctx.today.nutrition.total_protein));
+  const caloriesRemaining = Math.max(0, Math.round(caloriesTarget - ctx.today.nutrition.total_kcal));
+  const workoutLogged = ctx.today.workout_logged_today;
+  const protocolsPending = Math.max(0, (ctx.today as any).protocols_due - (ctx.today as any).protocols_completed);
+
+  const recommendation = workoutLogged
+    ? {
+        id: 'fallback-protein',
+        type: 'nutrition',
+        title: pt ? 'Feche a proteína' : 'Close protein gap',
+        reason: pt ? 'A aderência melhora quando você fecha o básico.' : 'Adherence improves when you close the basics.',
+        confidence: 0.81,
+        action: 'open_quick_meal',
+        actionPath: '/app/nutrition/capture',
+        actionLabel: pt ? 'Registrar' : 'Log meal',
+      }
+    : {
+        id: 'fallback-train',
+        type: 'workout',
+        title: pt ? 'Faça a sessão' : 'Do the session',
+        reason: pt ? 'O treino de hoje ainda é a principal alavanca.' : 'Today’s session is still the highest-leverage action.',
+        confidence: 0.84,
+        action: 'start_workout',
+        actionPath: '/app/workouts/active',
+        actionLabel: pt ? 'Treinar' : 'Train',
+      };
+
+  return {
+    briefing: {
+      title: pt ? 'Foque no básico' : 'Focus on the basics',
+      body: workoutLogged
+        ? (pt ? `Treino feito. Agora feche cerca de ${proteinRemaining}g de proteína.` : `Workout done. Now close about ${proteinRemaining}g of protein.`)
+        : (pt ? 'Você ainda não treinou hoje. Resolva isso primeiro.' : 'You have not trained today. Solve that first.'),
+      reason: pt ? 'O sistema entrou em modo de segurança.' : 'The system entered safe mode.',
+      focus: workoutLogged ? 'nutrition' : 'training',
+      tone: workoutLogged ? 'encouraging' : 'warning',
+    },
+    priorities: [
+      {
+        type: workoutLogged ? 'nutrition' : 'workout',
+        title: workoutLogged ? (pt ? 'Bata proteína' : 'Hit protein') : (pt ? 'Inicie o treino' : 'Start training'),
+        reason: workoutLogged
+          ? (pt ? `${proteinRemaining}g ainda faltando.` : `${proteinRemaining}g still missing.`)
+          : (pt ? 'Nada substitui a sessão de hoje.' : 'Nothing replaces today’s session.'),
+        action: workoutLogged ? 'open_quick_meal' : 'start_workout',
+      },
+      {
+        type: 'nutrition',
+        title: pt ? 'Registre comida' : 'Log food',
+        reason: pt ? `${caloriesRemaining} kcal restantes.` : `${caloriesRemaining} kcal remaining.`,
+        action: 'open_quick_meal',
+      },
+      ...(protocolsPending > 0
+        ? [{
+            type: 'protocol',
+            title: pt ? 'Feche protocolos' : 'Close protocols',
+            reason: pt ? `${protocolsPending} pendente(s) hoje.` : `${protocolsPending} pending today.`,
+            action: 'log_dose',
+          }]
+        : []),
+    ],
+    train: {
+      status: workoutLogged ? 'completed' : 'not_started',
+      message: workoutLogged
+        ? (pt ? 'Treino registrado hoje.' : 'Workout logged today.')
+        : (pt ? 'A sessão de hoje está aberta.' : 'Today’s session is still open.'),
+      adjustment: '',
+    },
+    nutrition: {
+      status: ctx.today.nutrition.meal_count === 0 ? 'not_started' : proteinRemaining > 30 ? 'behind_protein' : 'on_track',
+      nextMeal: proteinRemaining > 30
+        ? (pt ? 'Uma refeição rica em proteína resolve.' : 'One protein-heavy meal fixes it.')
+        : '',
+      macroFocus: proteinRemaining > 30 ? 'protein' : '',
+    },
+    protocols: {
+      status: protocolsPending > 0 ? 'pending' : 'all_done',
+      message: protocolsPending > 0
+        ? (pt ? 'Ainda há protocolos pendentes hoje.' : 'There are still pending protocols today.')
+        : (pt ? 'Protocolos sob controle hoje.' : 'Protocols are under control today.'),
+      adherenceNote: '',
+    },
+    progress: {
+      headline: pt ? 'Modo seguro ativo' : 'Safe mode active',
+      interpretation: pt
+        ? 'O coach de hoje foi montado sem o modelo externo, usando seus dados recentes.'
+        : 'Today’s coach was built without the external model, using your recent data.',
+      action: workoutLogged ? (pt ? 'Feche a nutrição.' : 'Close nutrition.') : (pt ? 'Faça a sessão.' : 'Do the session.'),
+    },
+    recommendations: [recommendation],
+  };
+}
+
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 
 serve(async (req) => {
@@ -360,7 +469,7 @@ serve(async (req) => {
   const json = makeJson(corsHeaders);
 
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
@@ -453,6 +562,16 @@ serve(async (req) => {
       },
     });
   }
+
+  const { data: staleCached } = await supabase
+    .from('ai_recommendations')
+    .select('recommendation, created_at, expires_at')
+    .eq('user_id', userId)
+    .eq('type', 'daily_context')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
 
   // ── 4. Load user context ──────────────────────────────────────────────────
 
@@ -690,31 +809,39 @@ serve(async (req) => {
   let outputTokens = 0;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiKey}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.3,
-        max_tokens: 1024,
-        messages: [
-          { role: 'system', content: buildSystemPrompt(ctx, userLocale) },
-          { role: 'user', content: 'Generate my coaching output for today.' },
-        ],
-        response_format: { type: 'json_object' },
-      }),
-    });
+    const aiResult = await callOpenAIWithRetry([
+      { role: 'system', content: buildSystemPrompt(ctx, userLocale) },
+      { role: 'user', content: 'Generate my coaching output for today.' },
+    ], openaiKey);
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`[ai-decision-engine] OpenAI error ${response.status}:`, errText);
-      return json({ error: 'AI service error. Please try again.', code: 'AI_ERROR' }, 502);
+    if (!aiResult.ok) {
+      if (staleCached?.recommendation) {
+        return json({
+          ...staleCached.recommendation,
+          meta: {
+            source: 'stale_cache',
+            generated_at: staleCached.created_at,
+            expires_at: staleCached.expires_at,
+            engine_version: ENGINE_VERSION,
+            ttl_seconds: TTL_SECONDS,
+          },
+        });
+      }
+
+      engineOutput = buildDeterministicEngineOutput(ctx, userLocale);
+      return json({
+        ...engineOutput,
+        meta: {
+          source: 'deterministic_fallback',
+          generated_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + TTL_SECONDS * 1000).toISOString(),
+          engine_version: ENGINE_VERSION,
+          ttl_seconds: TTL_SECONDS,
+        },
+      });
     }
 
-    const data = await response.json();
+    const data = aiResult.payload;
     const content = data.choices?.[0]?.message?.content ?? '';
     inputTokens = data.usage?.prompt_tokens ?? 0;
     outputTokens = data.usage?.completion_tokens ?? 0;
@@ -727,7 +854,28 @@ serve(async (req) => {
     }
   } catch (err) {
     console.error('[ai-decision-engine] Fetch error:', err);
-    return json({ error: 'AI service unavailable' }, 503);
+    if (staleCached?.recommendation) {
+      return json({
+        ...staleCached.recommendation,
+        meta: {
+          source: 'stale_cache',
+          generated_at: staleCached.created_at,
+          expires_at: staleCached.expires_at,
+          engine_version: ENGINE_VERSION,
+          ttl_seconds: TTL_SECONDS,
+        },
+      });
+    }
+    return json({
+      ...buildDeterministicEngineOutput(ctx, userLocale),
+      meta: {
+        source: 'deterministic_fallback',
+        generated_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + TTL_SECONDS * 1000).toISOString(),
+        engine_version: ENGINE_VERSION,
+        ttl_seconds: TTL_SECONDS,
+      },
+    });
   }
 
   // ── 6. Filter low-confidence recommendations ──────────────────────────────

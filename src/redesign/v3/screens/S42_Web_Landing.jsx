@@ -117,9 +117,9 @@ function ECGDivider({ dark = false, spikes = [180, 520, 860], delayOffset = 0 })
 export default function S42_Web_Landing() {
   const t = useT();
   const NAV_ITEMS = [
-    { label: t('marketing.nav.theApp'), href: '/the-app' },
+    { label: t('marketing.nav.theApp'), href: '/#what-it-does' },
     { label: t('marketing.nav.method'), href: '/method' },
-    { label: t('marketing.nav.labs'), href: '/labs' },
+    { label: t('marketing.nav.labs'), href: '/science' },
     { label: t('marketing.nav.pricing'), href: '/pricing' },
     { label: t('marketing.nav.terms'), href: '/terms' },
   ];
@@ -278,7 +278,7 @@ export default function S42_Web_Landing() {
         }}
       >
         <Link
-          to="/welcome"
+          to="/"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -310,8 +310,8 @@ export default function S42_Web_Landing() {
 
         <div className="ac-land-header-ctas" style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <LocaleToggle />
-          <CTAButton to="/webapp">{t('marketing.cta.signIn')}</CTAButton>
-          <CTAButton to="/download-app" primary>{t('marketing.cta.downloadApp')}</CTAButton>
+          <CTAButton to="/auth/login?mode=password">{t('marketing.cta.signIn')}</CTAButton>
+          <CTAButton to="/?quiz=start" primary>{t('welcome.createAccount')}</CTAButton>
         </div>
       </div>
 
@@ -367,8 +367,8 @@ export default function S42_Web_Landing() {
             <span style={{ color: ACBrand.accent, fontWeight: 700 }}> {t('marketing.landingPage.subtitleAccent')}</span>
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <CTAButton to="/welcome" primary>
-              {t('marketing.cta.downloadApp')}
+            <CTAButton to="/?quiz=start" primary>
+              {t('welcome.createAccount')}
             </CTAButton>
             <div
               style={{
@@ -390,7 +390,7 @@ export default function S42_Web_Landing() {
         <ECGDivider />
       </div>
 
-      <div className="ac-land-pad" style={{ padding: '0 56px 100px', maxWidth: 1280, margin: '0 auto' }}>
+      <div id="what-it-does" className="ac-land-pad" style={{ padding: '0 56px 100px', maxWidth: 1280, margin: '0 auto' }}>
         <div
           style={{
             fontFamily: ACFonts.mono,

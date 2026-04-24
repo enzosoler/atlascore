@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { signInWithOAuth } from '@/lib/googleSignIn';
@@ -12,23 +12,33 @@ function friendlyOAuthError(provider, err, t) {
   return err?.message || t(provider === 'apple' ? 'auth.login.appleStartFailed' : 'auth.login.googleStartFailed');
 }
 
+function formatCountdown(totalSeconds) {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
 export default function V3AuthLogin() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { theme } = useTheme();
-  const { signIn } = useAuth();
+  const { signIn, authState, user } = useAuth();
   const t = useT();
   const [email, setEmail] = useState(params.get('email') || '');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState(params.get('mode') === 'password' ? 'password' : 'magic');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rateLimitRemaining, setRateLimitRemaining] = useState(0);
+  const submitLockRef = useRef(false);
+  const isAuthBypassEnabled = import.meta.env.VITE_ENABLE_AUTH_BYPASS === 'true';
 
   // Show a clear message when the production build lacks Supabase env vars
   const isConfigured = import.meta.env.VITE_SUPABASE_URL &&
     (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
-  if (!isConfigured) {
+  if (!isConfigured && !isAuthBypassEnabled) {
     return (
       <V3StandaloneLayout>
         <div style={{ padding: 24, maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
@@ -39,10 +49,33 @@ export default function V3AuthLogin() {
     );
   }
 
+  useEffect(() => {
+    if (authState !== 'authenticated' || !user) return;
+    navigate(user.onboarding_completed ? '/app/today' : '/onboarding', { replace: true });
+  }, [authState, user, navigate]);
+
+  useEffect(() => {
+    if (rateLimitRemaining <= 0) return undefined;
+    const timerId = window.setInterval(() => {
+      setRateLimitRemaining((current) => {
+        if (current <= 1) {
+          window.clearInterval(timerId);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [rateLimitRemaining]);
+
   const onSubmit = async (e) => {
     // Accept being called without a DOM event (some child components call onSubmit())
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
+    }
+    if (submitLockRef.current || loading || rateLimitRemaining > 0) {
+      return;
     }
     const em = email.trim().toLowerCase();
     setError('');
@@ -55,6 +88,7 @@ export default function V3AuthLogin() {
       return;
     }
 
+    submitLockRef.current = true;
     setLoading(true);
     try {
       if (mode === 'password') {
@@ -69,10 +103,14 @@ export default function V3AuthLogin() {
         navigate(`/auth/magic?email=${encodeURIComponent(em)}`);
       }
     } catch (err) {
+      if (err?.type === 'rate_limited' || err?.status === 429) {
+        setRateLimitRemaining(err?.retryAfterSeconds ?? 60);
+      }
       setError(
         err?.message || (mode === 'password' ? t('auth.login.signInFailed') : t('auth.login.magicLinkFailed'))
       );
     } finally {
+      submitLockRef.current = false;
       setLoading(false);
     }
   };
@@ -104,7 +142,8 @@ export default function V3AuthLogin() {
           setError('');
         }}
         loading={loading}
-        error={error}
+        error={rateLimitRemaining > 0 ? `Too many attempts. Try again in ${formatCountdown(rateLimitRemaining)}` : error}
+        submitDisabled={loading || rateLimitRemaining > 0}
       />
     </V3StandaloneLayout>
   );

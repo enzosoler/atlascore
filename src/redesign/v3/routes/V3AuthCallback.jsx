@@ -5,6 +5,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import { ACFonts, useACT } from '../lib/paper.jsx';
 import { HeartMark } from '../lib/brandMarks.jsx';
+import { seedOnboardingDraftFromIntent } from '@/services/onboardingService';
 
 function CallbackState() {
   const { theme } = useTheme();
@@ -21,6 +22,9 @@ function CallbackState() {
       if (isResetMode) {
         navigate('/auth/reset', { replace: true });
         return;
+      }
+      if (!user.onboarding_completed) {
+        seedOnboardingDraftFromIntent();
       }
       navigate(user.onboarding_completed ? '/app/today' : '/onboarding', { replace: true });
     }

@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { saveBMRSnapshot } from '@/services/bodyProgressService';
 
 export const ONBOARDING_V3_STORAGE_KEY = 'atlas_onboarding_v3';
+export const ONBOARDING_INTENT_STORAGE_KEY = 'atlas_onboarding_intent_v1';
 
 function readJsonStorage(key) {
   if (typeof window === 'undefined') return {};
@@ -36,6 +37,48 @@ export function clearOnboardingDraft() {
   try {
     window.localStorage.removeItem(ONBOARDING_V3_STORAGE_KEY);
   } catch {}
+}
+
+export function readOnboardingIntentDraft() {
+  return readJsonStorage(ONBOARDING_INTENT_STORAGE_KEY);
+}
+
+export function writeOnboardingIntentDraft(value) {
+  writeJsonStorage(ONBOARDING_INTENT_STORAGE_KEY, value || {});
+}
+
+export function clearOnboardingIntentDraft() {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.localStorage.removeItem(ONBOARDING_INTENT_STORAGE_KEY);
+  } catch {}
+}
+
+export function seedOnboardingDraftFromIntent(intent = null) {
+  const source = intent || readOnboardingIntentDraft();
+  if (!source || typeof source !== 'object') return {};
+
+  const seeded = {
+    goal: source.goal || null,
+    experience: source.experience || null,
+    equipment: cleanArray(source.equipment),
+    intent_started_at: source.startedAt || new Date().toISOString(),
+  };
+
+  const current = readOnboardingDraft();
+  const next = {
+    ...current,
+    ...Object.fromEntries(
+      Object.entries(seeded).filter(([, value]) => {
+        if (Array.isArray(value)) return value.length > 0;
+        return value !== null && value !== '';
+      }),
+    ),
+  };
+
+  writeOnboardingDraft(next);
+  return next;
 }
 
 export function computeOnboardingPlan(data = {}) {
@@ -143,6 +186,15 @@ export function buildProfileDataFromOnboarding(data = {}) {
       medical: cleanArray(data?.medical),
       notes: cleanString(data?.notes) || null,
     },
+    dietary_preferences: {
+      style: data?.dietaryStyle || null,
+      restrictions: cleanArray(data?.dietaryRestrictions),
+      avoided_foods: cleanString(data?.avoidFoods) || null,
+    },
+    coach_matching: {
+      tone: data?.coachTone || null,
+      focus: data?.coachFocus || null,
+    },
     onboarding_v3: {
       completed_at: new Date().toISOString(),
       answers: {
@@ -160,6 +212,11 @@ export function buildProfileDataFromOnboarding(data = {}) {
         injuries: cleanArray(data?.injuries),
         medical: cleanArray(data?.medical),
         notes: cleanString(data?.notes) || null,
+        dietaryStyle: data?.dietaryStyle || null,
+        dietaryRestrictions: cleanArray(data?.dietaryRestrictions),
+        avoidFoods: cleanString(data?.avoidFoods) || null,
+        coachTone: data?.coachTone || null,
+        coachFocus: data?.coachFocus || null,
       },
       computed_plan: plan,
     },
@@ -185,6 +242,9 @@ function buildAuthMetadataFromOnboarding(data = {}, profileData = {}) {
     daily_protein_target: profileData.protein_target ?? null,
     daily_carbs_target: profileData.carbs_target ?? null,
     daily_fat_target: profileData.fat_target ?? null,
+    dietary_style: data?.dietaryStyle || null,
+    coach_tone: data?.coachTone || null,
+    coach_focus: data?.coachFocus || null,
   };
 }
 
@@ -223,5 +283,6 @@ export async function finalizeOnboarding(userId, onboardingData = null) {
   } catch {}
 
   clearOnboardingDraft();
+  clearOnboardingIntentDraft();
   return profileData;
 }

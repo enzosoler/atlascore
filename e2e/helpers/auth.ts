@@ -11,9 +11,27 @@ import { Page } from '@playwright/test';
  *   });
  */
 export async function loginAs(page: Page, email: string, password: string) {
-  await page.goto('/auth?mode=login');
+  await page.goto('/auth/login?mode=password');
+  const emailInput = page.getByPlaceholder(/you@email\.com/i);
+  const crashHeading = page.getByRole('heading', { name: /system interruption/i });
+
+  // The login route can either render the form, redirect an existing session, or crash.
+  await Promise.race([
+    emailInput.waitFor({ state: 'visible', timeout: 15_000 }),
+    page.waitForURL(/\/app\/today|\/onboarding/i, { timeout: 15_000 }),
+    crashHeading.waitFor({ state: 'visible', timeout: 15_000 }),
+  ]);
+
+  if (/\/app\/today|\/onboarding/i.test(page.url())) {
+    return;
+  }
+
+  if (await crashHeading.isVisible().catch(() => false)) {
+    throw new Error('Login screen crashed before the auth form rendered.');
+  }
+
   await page.getByRole('button', { name: /password/i }).click();
-  await page.getByPlaceholder(/you@email\.com/i).fill(email);
+  await emailInput.fill(email);
   await page.getByPlaceholder(/•+|\*+/i).fill(password);
   await page.getByRole('button', { name: /sign in|log in|entrar/i }).click();
   await page.waitForURL(/\/app\/today|\/onboarding/i, { timeout: 15_000 });

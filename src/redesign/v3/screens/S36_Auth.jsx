@@ -22,6 +22,7 @@ export default function S36_Auth({
   loading = false,
   error = '',
   hint,
+  submitDisabled = false,
 }) {
   const c = useACT(dark);
   const t = useT();
@@ -233,7 +234,16 @@ export default function S36_Auth({
         ) : null}
 
         <div style={{ marginTop: 22 }}>
-          <ACBtn primary dark={dark} size="lg" pill block type="submit" style={{ opacity: loading ? 0.6 : 1 }}>
+          <ACBtn
+            primary
+            dark={dark}
+            size="lg"
+            pill
+            block
+            type="submit"
+            disabled={submitDisabled}
+            style={{ opacity: submitDisabled ? 0.6 : 1 }}
+          >
             {loading ? t('auth.form.working') : submitLabel || (mode === 'magic' ? t('auth.form.sendMagic') : t('auth.form.signIn'))}
           </ACBtn>
         </div>

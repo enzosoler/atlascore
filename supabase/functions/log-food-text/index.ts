@@ -19,16 +19,12 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildPreflightResponse, getCorsHeaders } from '../_shared/cors.ts';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
 const MODEL = 'gpt-4.1-nano';
+const RETRYABLE_OPENAI_STATUS = new Set([408, 409, 429, 500, 502, 503, 504]);
 
 // Pricing per 1M tokens (USD) — update if OpenAI changes pricing
 const PRICING = {
@@ -75,11 +71,159 @@ Respond ONLY with valid JSON in this exact format:
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function json(payload: unknown, status = 200) {
+function json(payload: unknown, corsHeaders: Record<string, string>, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+function buildManualFallback(query: string, message: string, code: string) {
+  return {
+    error: message,
+    code,
+    safeFallback: true,
+    fallback: {
+      mode: 'manual_entry',
+      query,
+      message: 'Use food search or add foods manually while AI is unavailable.',
+    },
+  };
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function parseQuantity(text: string, fallback = 1) {
+  const numberMatch = text.match(/\b(\d+)\b/);
+  if (numberMatch) return Number(numberMatch[1]);
+  if (/\bone\b|\bum\b|\buma\b/i.test(text)) return 1;
+  if (/\btwo\b|\bdois\b|\bduas\b/i.test(text)) return 2;
+  if (/\bthree\b|\btr[eê]s\b/i.test(text)) return 3;
+  return fallback;
+}
+
+function buildHeuristicFallback(rawQuery: string) {
+  const q = rawQuery.toLowerCase();
+  const items: Array<{ name: string; estimated_grams: number; unit_weight_g: number; unit_type: string; calories: number; protein: number; carbs: number; fat: number }> = [];
+
+  if (q.includes('egg') || q.includes('ovo')) {
+    const count = parseQuantity(q, 1);
+    items.push({
+      name: count > 1 ? 'eggs' : 'egg',
+      estimated_grams: count * 50,
+      unit_weight_g: 50,
+      unit_type: 'unit',
+      calories: count * 78,
+      protein: count * 6.3,
+      carbs: count * 0.6,
+      fat: count * 5.3,
+    });
+  }
+
+  if (q.includes('toast') || q.includes('bread') || q.includes('pao') || q.includes('pão')) {
+    const count = q.includes('toast') ? Math.max(1, parseQuantity(q, 2) - (items.length > 0 ? parseQuantity(q, 2) - 1 : 0)) : 2;
+    items.push({
+      name: q.includes('toast') ? 'toast' : 'bread',
+      estimated_grams: count * 28,
+      unit_weight_g: 28,
+      unit_type: 'slice',
+      calories: count * 80,
+      protein: count * 3,
+      carbs: count * 14,
+      fat: count * 1,
+    });
+  }
+
+  if (q.includes('banana')) {
+    items.push({
+      name: 'banana',
+      estimated_grams: 120,
+      unit_weight_g: 120,
+      unit_type: 'unit',
+      calories: 105,
+      protein: 1.3,
+      carbs: 27,
+      fat: 0.3,
+    });
+  }
+
+  if (q.includes('protein shake') || q.includes('whey') || q.includes('shake')) {
+    items.push({
+      name: 'protein shake',
+      estimated_grams: 35,
+      unit_weight_g: 35,
+      unit_type: 'serving',
+      calories: 140,
+      protein: 25,
+      carbs: 4,
+      fat: 3,
+    });
+  }
+
+  if (items.length === 0) return null;
+
+  const totals = items.reduce((acc, item) => ({
+    calories: acc.calories + item.calories,
+    protein: acc.protein + item.protein,
+    carbs: acc.carbs + item.carbs,
+    fat: acc.fat + item.fat,
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+  return {
+    success: true,
+    source: 'heuristic',
+    food_name: rawQuery,
+    serving_description: 'Estimated from common food defaults',
+    calories: Math.round(totals.calories),
+    protein: Math.round(totals.protein * 10) / 10,
+    carbs: Math.round(totals.carbs * 10) / 10,
+    fat: Math.round(totals.fat * 10) / 10,
+    fiber: 0,
+    confidence: 0.45,
+    items,
+  };
+}
+
+async function callOpenAIWithRetry(rawQuery: string, responseLang: string, openaiKey: string) {
+  const attempts = [0, 750, 1500];
+  let lastStatus = 0;
+  let lastErrorText = 'Unknown error';
+
+  for (let attempt = 0; attempt < attempts.length; attempt += 1) {
+    if (attempts[attempt] > 0) await sleep(attempts[attempt]);
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        temperature: 0.1,
+        max_tokens: 1024,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: responseLang ? `[Response language: ${responseLang}]\n${rawQuery}` : rawQuery },
+        ],
+        response_format: { type: 'json_object' },
+      }),
+    });
+
+    if (response.ok) {
+      return { ok: true as const, payload: await response.json() };
+    }
+
+    lastStatus = response.status;
+    lastErrorText = await response.text();
+    console.error(`[log-food-text] OpenAI error: ${response.status} attempt ${attempt + 1}`, lastErrorText);
+
+    if (!RETRYABLE_OPENAI_STATUS.has(response.status)) break;
+  }
+
+  return { ok: false as const, status: lastStatus, errorText: lastErrorText };
 }
 
 /**
@@ -128,19 +272,22 @@ function estimateCost(inputTokens: number, outputTokens: number): number {
 // ─── Main Handler ────────────────────────────────────────────────────────────
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+  const reply = (payload: unknown, status = 200) => json(payload, corsHeaders, status);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+    return buildPreflightResponse(req);
   }
 
   if (req.method !== 'POST') {
-    return json({ error: 'Method not allowed' }, 405);
+    return reply({ error: 'Method not allowed' }, 405);
   }
 
   // ── 1. Authenticate ──────────────────────────────────────────────────────
 
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return json({ error: 'Missing authorization header' }, 401);
+    return reply({ error: 'Missing authorization header' }, 401);
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -155,7 +302,7 @@ serve(async (req) => {
 
   if (authError || !user) {
     console.error('[log-food-text] Auth failed:', authError?.message);
-    return json({ error: 'Unauthorized', detail: authError?.message }, 401);
+    return reply({ error: 'Unauthorized', detail: authError?.message }, 401);
   }
 
   // ── 2. Parse request ─────────────────────────────────────────────────────
@@ -164,16 +311,16 @@ serve(async (req) => {
   try {
     body = await req.json();
   } catch {
-    return json({ error: 'Invalid JSON' }, 400);
+    return reply({ error: 'Invalid JSON' }, 400);
   }
 
   const rawQuery = String(body.query || '').trim();
   const responseLang = body.language || '';
   if (rawQuery.length < 3) {
-    return json({ error: 'Query too short (minimum 3 characters)' }, 400);
+    return reply({ error: 'Query too short (minimum 3 characters)' }, 400);
   }
   if (rawQuery.length > 500) {
-    return json({ error: 'Query too long (maximum 500 characters)' }, 400);
+    return reply({ error: 'Query too long (maximum 500 characters)' }, 400);
   }
 
   const normalizedQuery = normalizeQuery(rawQuery);
@@ -203,7 +350,7 @@ serve(async (req) => {
       success: true,
     }).then(() => {});
 
-    return json({
+    return reply({
       success: true,
       source: 'cache',
       food_name: cacheHit.original_query,
@@ -227,12 +374,12 @@ serve(async (req) => {
 
   if (!config) {
     console.error('[log-food-text] ai_spending_config not found');
-    return json({ error: 'Service configuration error' }, 503);
+    return reply({ error: 'Service configuration error' }, 503);
   }
 
   // Kill switch
   if (config.kill_switch) {
-    return json({
+    return reply({
       error: 'AI nutrition analysis is temporarily unavailable. Please try again later.',
       code: 'KILL_SWITCH',
     }, 503);
@@ -242,7 +389,7 @@ serve(async (req) => {
   const { data: monthlySpend } = await supabase.rpc('get_ai_spend_current_month');
   if (typeof monthlySpend === 'number' && monthlySpend >= config.monthly_cap_usd) {
     console.error(`[log-food-text] Monthly cap reached: $${monthlySpend} >= $${config.monthly_cap_usd}`);
-    return json({
+    return reply({
       error: 'AI nutrition analysis has reached its monthly limit. Please try again next month or use the food search feature.',
       code: 'MONTHLY_CAP',
     }, 429);
@@ -252,7 +399,7 @@ serve(async (req) => {
   const { data: dailySpend } = await supabase.rpc('get_ai_spend_today');
   if (typeof dailySpend === 'number' && dailySpend >= config.daily_cap_usd) {
     console.error(`[log-food-text] Daily cap reached: $${dailySpend} >= $${config.daily_cap_usd}`);
-    return json({
+    return reply({
       error: 'AI nutrition analysis has reached its daily limit. Please try again tomorrow or use the food search feature.',
       code: 'DAILY_CAP',
     }, 429);
@@ -326,9 +473,12 @@ serve(async (req) => {
     const upgradeHint = tier === 'free'
       ? ' Upgrade to Pro or Premium for more daily analyses.'
       : '';
-    return json({
-      error: `You've reached your daily limit of ${maxTextCallsPerDay} AI food analyses.${upgradeHint}`,
-      code: 'USER_DAILY_LIMIT',
+    return reply({
+      ...buildManualFallback(
+        rawQuery,
+        `You've reached your daily limit of ${maxTextCallsPerDay} AI food analyses.${upgradeHint}`,
+        'USER_DAILY_LIMIT',
+      ),
       limit: maxTextCallsPerDay,
       used: quota.text_calls_today,
     }, 429);
@@ -338,7 +488,7 @@ serve(async (req) => {
 
   const openaiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openaiKey) {
-    return json({ error: 'AI service not configured' }, 503);
+    return reply({ error: 'AI service not configured' }, 503);
   }
 
   let aiResult: any;
@@ -346,27 +496,9 @@ serve(async (req) => {
   let outputTokens = 0;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiKey}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.1,
-        max_tokens: 1024,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: responseLang ? `[Response language: ${responseLang}]\n${rawQuery}` : rawQuery },
-        ],
-        response_format: { type: 'json_object' },
-      }),
-    });
+    const response = await callOpenAIWithRetry(rawQuery, responseLang, openaiKey);
 
     if (!response.ok) {
-      const errText = await response.text();
-      console.error(`[log-food-text] OpenAI error: ${response.status}`, errText);
 
       // Log the failed attempt
       await supabase.from('ai_usage_log').insert({
@@ -382,16 +514,28 @@ serve(async (req) => {
         error_message: `OpenAI ${response.status}`,
       });
 
+      const heuristic = buildHeuristicFallback(rawQuery);
+      if (heuristic) {
+        return reply(heuristic);
+      }
+
       if (response.status === 429) {
-        return json({ error: 'AI service is busy. Please try again in a moment.', code: 'RATE_LIMIT' }, 429);
+        return reply(
+          buildManualFallback(
+            rawQuery,
+            'AI service is busy. Please try again in a moment or use food search instead.',
+            'RATE_LIMIT',
+          ),
+          429,
+        );
       }
       if (response.status === 401 || response.status === 403) {
-        return json({ error: 'AI service configuration error. Please contact support.', code: 'AUTH_ERROR' }, 502);
+        return reply({ error: 'AI service configuration error. Please contact support.', code: 'AUTH_ERROR' }, 502);
       }
-      return json({ error: 'AI analysis failed. Please try again.', code: 'AI_ERROR' }, 502);
+      return reply({ error: 'AI analysis failed. Please try again.', code: 'AI_ERROR' }, 502);
     }
 
-    const data = await response.json();
+    const data = response.payload;
     const content = data.choices?.[0]?.message?.content ?? '';
     inputTokens = data.usage?.prompt_tokens ?? 0;
     outputTokens = data.usage?.completion_tokens ?? 0;
@@ -417,7 +561,7 @@ serve(async (req) => {
         query: rawQuery,
         model: MODEL,
       });
-      return json({ 
+      return reply({ 
         error: 'AI returned invalid data format. Please try again.', 
         code: 'PARSE_ERROR',
         detail: 'The AI response could not be parsed as JSON'
@@ -425,7 +569,7 @@ serve(async (req) => {
     }
   } catch (err) {
     console.error('[log-food-text] Fetch error:', err);
-    return json({ error: 'AI service unavailable. Please try again.' }, 503);
+    return reply({ error: 'AI service unavailable. Please try again.' }, 503);
   }
 
   // ── 7. Calculate cost & log usage ────────────────────────────────────────
@@ -488,7 +632,7 @@ serve(async (req) => {
 
   // ── 9. Return result ─────────────────────────────────────────────────────
 
-  return json({
+  return reply({
     success: true,
     source: 'ai',
     food_name: aiResult.food_name || rawQuery,

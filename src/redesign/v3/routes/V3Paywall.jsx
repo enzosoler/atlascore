@@ -25,6 +25,7 @@ import {
 } from '@/lib/revenueCat';
 import { Capacitor } from '@capacitor/core';
 import { startWebCheckout } from '@/services/billingService';
+import { getStripeBillingConfig } from '@/services/stripeBillingConfig';
 import { WEBAPP_BILLING, WEBAPP_EXPORT, WEBAPP_HOME } from '@/lib/platformRoutes';
 
 const BILLING_TO_PACKAGE = {
@@ -75,19 +76,20 @@ export default function V3Paywall() {
   const [plan, setPlan] = useState('yearly');
   const [loading, setLoading] = useState(false);
   const isNative = Capacitor.isNativePlatform();
+  const stripeBilling = getStripeBillingConfig();
 
   async function handlePurchase() {
     setLoading(true);
     try {
       if (!isNative) {
-        const checkoutUrl = await startWebCheckout({
+        const checkout = await startWebCheckout({
           userId: user?.id,
           email: user?.email,
           billing: plan === 'yearly' ? 'yearly' : 'monthly',
           region: 'us',
           plan: 'athlete_pro',
         });
-        window.location.href = checkoutUrl;
+        window.location.href = checkout.url;
         return;
       }
 
@@ -217,6 +219,23 @@ export default function V3Paywall() {
         <p style={{ margin: '16px 0 0', fontSize: 18, lineHeight: 1.55, color: MC.body, maxWidth: 520 }}>
           {t('paywall.subtitle')}
         </p>
+        {stripeBilling.testMode && !isNative && (
+          <div style={{
+            marginTop: 20,
+            maxWidth: 520,
+            padding: '12px 14px',
+            border: `1px solid ${ACBrand.accent}`,
+            borderRadius: ACRadii.card,
+            background: 'rgba(232,181,0,0.12)',
+            fontFamily: ACFonts.mono,
+            fontSize: 11,
+            letterSpacing: 0.4,
+            textTransform: 'uppercase',
+            color: ACBrand.ink,
+          }}>
+            Test mode — use card 4242 4242 4242 4242
+          </div>
+        )}
 
         {/* Plan cards — 3-column grid */}
         <div className="pw-plans-grid" style={{

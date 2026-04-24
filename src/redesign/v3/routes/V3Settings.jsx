@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { openSubscriptionManagement } from '@/lib/revenueCat';
+import { getDefaultUserPreferences, loadUserPreferences, updateUserPreferences } from '@/services/userPreferencesService';
 import {
   WEBAPP_BILLING,
   WEBAPP_DANGER,
@@ -46,12 +47,51 @@ export default function V3Settings() {
   const t = useT();
   const { user, logout } = useAuth();
   const realUser = buildRealUser(user);
+  const [preferences, setPreferences] = useState(getDefaultUserPreferences);
+  const [prefsLoading, setPrefsLoading] = useState(true);
+  const [prefsSaving, setPrefsSaving] = useState(false);
   const currentLanguageLabel = locale === 'pt-BR'
     ? t('settings.v3.labels.languagePortugueseBrazil')
     : t('settings.v3.labels.languageEnglish');
   const currentThemeLabel = theme === 'dark'
     ? t('settings.v3.labels.themeDark')
     : t('settings.v3.labels.themeLight');
+  const dailyCheckinRequired = preferences.dailyCheckinRequired !== false;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncPreferences() {
+      setPrefsLoading(true);
+      const next = await loadUserPreferences(user?.id);
+      if (!cancelled) {
+        setPreferences(next);
+        setPrefsLoading(false);
+      }
+    }
+
+    syncPreferences();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  async function setDailyCheckinRequired(nextValue) {
+    if (prefsSaving) return;
+    const optimistic = { ...preferences, dailyCheckinRequired: nextValue };
+    setPreferences(optimistic);
+    setPrefsSaving(true);
+    try {
+      const persisted = await updateUserPreferences(user?.id, { dailyCheckinRequired: nextValue });
+      setPreferences(persisted);
+      toast(nextValue ? 'Daily check-in is now required by default.' : 'Daily check-in is now optional on Today.');
+    } catch (error) {
+      setPreferences(preferences);
+      toast.error(error?.message || 'Could not update your daily check-in preference.');
+    } finally {
+      setPrefsSaving(false);
+    }
+  }
 
   const groups = [
     {
@@ -92,6 +132,18 @@ export default function V3Settings() {
     {
       l: t('settings.v3.sections.preferences'),
       rows: [
+        {
+          k: 'daily-checkin-required',
+          t: 'Daily check-in required',
+          d: dailyCheckinRequired
+            ? 'Today stays gated until you finish the daily check-in.'
+            : 'Today shows your readiness first and leaves check-in optional.',
+          toggle: {
+            checked: dailyCheckinRequired,
+            disabled: prefsLoading || prefsSaving,
+            ariaLabel: 'Toggle daily check-in requirement',
+          },
+        },
         { k: 'theme',    t: t('settings.v3.rows.appearance'),    d: t('settings.v3.rows.appearanceDesc', { theme: currentThemeLabel }), chevron: true },
         { k: 'language', t: t('settings.v3.rows.language'),      d: t('settings.v3.rows.languageDesc', { language: currentLanguageLabel }), chevron: true },
         { k: 'notifs',   t: t('settings.v3.rows.notifications'), d: t('settings.v3.rows.notificationsDesc'), chevron: false, muted: true },
@@ -125,6 +177,10 @@ export default function V3Settings() {
       versionLabel={typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_VERSION ? `v ${import.meta.env.VITE_APP_VERSION}` : 'v current'}
       groups={groups}
       onOpenRow={async (key) => {
+        if (key === 'daily-checkin-required') {
+          await setDailyCheckinRequired(!dailyCheckinRequired);
+          return;
+        }
         // Theme toggle works directly — no sub-screen needed
         if (key === 'theme') {
           const nextTheme = theme === 'dark' ? 'light' : 'dark';
@@ -157,6 +213,11 @@ export default function V3Settings() {
           navigate(next);
         } else {
           toast(t('settings.v3.toasts.comingSoon'));
+        }
+      }}
+      onToggleRow={async (key, checked) => {
+        if (key === 'daily-checkin-required') {
+          await setDailyCheckinRequired(checked);
         }
       }}
       onSignOut={async () => {

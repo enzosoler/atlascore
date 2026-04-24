@@ -181,6 +181,50 @@ export default function V3You() {
     total: 1,
     current: 1,
   };
+  const quickLinks = [
+    {
+      key: 'body',
+      label: 'Body',
+      meta: 'Track',
+      description: 'Measurements, photos, and weight trend.',
+      onClick: () => navigate('/app/body'),
+    },
+    {
+      key: 'labs',
+      label: 'Labs',
+      meta: 'Premium',
+      description: 'Panels, biomarkers, and analysis.',
+      onClick: () => navigate('/app/labs'),
+    },
+    {
+      key: 'protocols',
+      label: 'Protocols',
+      meta: 'Advanced',
+      description: 'Stacks, schedules, and dose logging.',
+      onClick: () => navigate('/app/protocols'),
+    },
+    {
+      key: 'social',
+      label: 'Social',
+      meta: 'Community',
+      description: 'Crew, friends, and accountability.',
+      onClick: () => navigate('/app/social'),
+    },
+    {
+      key: 'settings',
+      label: 'Settings',
+      meta: 'Account',
+      description: 'Preferences, integrations, and exports.',
+      onClick: () => navigate('/app/settings'),
+    },
+    {
+      key: 'billing',
+      label: 'Billing',
+      meta: 'Manage',
+      description: 'Subscription status and payment details.',
+      onClick: () => navigate('/webapp/billing'),
+    },
+  ];
 
   return (
     <S33_Profile
@@ -210,6 +254,7 @@ export default function V3You() {
       } : null}
       recent={safeRecent}
       badges={safeBadges}
+      quickLinks={quickLinks}
       onGoBack={() => navigate('/app/today')}
       onOpenSettings={() => navigate('/app/settings')}
       onOpenProgram={() => navigate(program ? '/app/workouts' : '/app/routines')}

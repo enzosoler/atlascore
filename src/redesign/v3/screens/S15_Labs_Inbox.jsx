@@ -26,46 +26,10 @@ function S15_Labs_Inbox({
 }) {
   const c = useACT(dark);
   const [activeFilter, setActiveFilter] = React.useState('all');
-  const [localPanels, setLocalPanels] = React.useState(panels || [
-    {
-      id: 'p1',
-      date: 'Apr 18', lab: 'Function Health', n: 'Q2 Panel',
-      flagged: 3, total: 42, isNew: true,
-      markers: [
-        { t: 'ApoB',          v: '82',  u: 'mg/dL', flag: 'high', d: '↑ 4' },
-        { t: 'hs-CRP',        v: '0.6', u: 'mg/L',  flag: 'ok',   d: 'stable' },
-        { t: 'HbA1c',         v: '5.2', u: '%',     flag: 'ok',   d: 'stable' },
-        { t: 'Vitamin D',     v: '28',  u: 'ng/mL', flag: 'low',  d: '↓ 6' },
-        { t: 'Testosterone',  v: '642', u: 'ng/dL', flag: 'high', d: '↑ 38' },
-      ],
-    },
-    {
-      id: 'p2',
-      date: 'Jan 14', lab: 'Function Health', n: 'Q1 Panel',
-      flagged: 5, total: 42, isNew: false,
-      markers: [
-        { t: 'ApoB',          v: '78',  u: 'mg/dL', flag: 'ok',  d: 'baseline' },
-        { t: 'Vitamin D',     v: '34',  u: 'ng/mL', flag: 'ok',  d: 'baseline' },
-      ],
-    },
-  ]);
+  const localPanels = Array.isArray(panels) ? panels : [];
 
   function handleUpload() {
-    if (onUpload) {
-      onUpload();
-      return;
-    }
-    // Demo behavior: add a new panel
-    const newPanel = {
-      id: `p${localPanels.length + 1}`,
-      date: 'Today', lab: 'LabCorp', n: 'Quick Panel',
-      flagged: 1, total: 12, isNew: true,
-      markers: [
-        { t: 'Glucose', v: '92', u: 'mg/dL', flag: 'ok', d: 'optimal' },
-        { t: 'Ferritin', v: '18', u: 'ng/mL', flag: 'low', d: '↓ 4' },
-      ],
-    };
-    setLocalPanels([newPanel, ...localPanels]);
+    if (onUpload) onUpload();
   }
 
   const summaryRow = summary || { 

@@ -4,6 +4,28 @@ import {
   ACLabel, ACNum, ACBtn, ACLine,
 } from '../lib/paper.jsx';
 
+function normalizeLinePoints(points) {
+  if (!Array.isArray(points)) return [];
+
+  return points
+    .map((point, index) => {
+      if (typeof point === 'number' && Number.isFinite(point)) {
+        return { k: index, v: point };
+      }
+
+      if (point && typeof point === 'object') {
+        const rawX = typeof point.k === 'number' && Number.isFinite(point.k) ? point.k : index;
+        const rawY = Number(point.v);
+        if (Number.isFinite(rawY)) {
+          return { k: rawX, v: rawY };
+        }
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+}
+
 function S13_Coach_Brief({
   dark = false,
   timestampLabel = 'SAT · 18 APR · 07:42',
@@ -52,7 +74,10 @@ function S13_Coach_Brief({
     onToggleMove?.(m, next[key]);
   }
 
-  const signalRows = signals || [];
+  const signalRows = (signals || []).map((signal) => ({
+    ...signal,
+    data: normalizeLinePoints(signal?.data),
+  }));
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: c.fg, color: c.bg }}>
       {/* ── DARK HERO BLOCK ── */}
@@ -222,8 +247,8 @@ function S13_Coach_Brief({
                     </div>
                   </div>
                   <div style={{ flex: 1 }}>
-                    {Array.isArray(m.data) && m.data.length > 0 && (
-                      <ACLine w={150} h={26} dark={dark} data={m.data.map((v,k)=>({k,v}))} />
+                    {m.data.length > 0 && (
+                      <ACLine w={150} h={26} dark={dark} data={m.data} />
                     )}
                   </div>
                   <div style={{

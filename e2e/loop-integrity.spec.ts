@@ -127,6 +127,10 @@ async function completeOnboarding(page: Page) {
   await numericInputs.nth(1).fill('182');
   await page.getByRole('button', { name: /continue/i }).click();
 
+  // Identity now flows through a dedicated nutrition-preferences step first.
+  await expect(page).toHaveURL(/\/onboarding\/nutrition$/);
+  await page.getByRole('button', { name: /continue/i }).click();
+
   await expect(page).toHaveURL(/\/onboarding\/goal$/);
   await page.getByRole('button', { name: /build muscle/i }).click();
   await page.getByRole('button', { name: /continue/i }).click();
@@ -159,8 +163,11 @@ async function completeOnboarding(page: Page) {
   await expect(page.getByText(/your system/i)).toBeVisible();
   await page.getByRole('button', { name: /activate system|continue/i }).click();
 
-  await expect(page).toHaveURL(/\/onboarding\/paywall$/);
-  await page.getByRole('button', { name: /not now/i }).click();
+  await expect(page).toHaveURL(/\/onboarding\/coach-match$/);
+  await page.getByRole('button', { name: /continue/i }).click();
+
+  await expect(page).toHaveURL(/\/onboarding\/tour$/);
+  await page.getByRole('button', { name: /skip tour/i }).click();
 }
 
 async function queryOwnProfile(client: SupabaseClient, userId: string) {
@@ -254,14 +261,26 @@ test.describe('Real user loop integrity', () => {
     await page.getByRole('button', { name: /create account/i }).click();
 
     try {
-      await expect(page).toHaveURL(/\/onboarding/, { timeout: 5000 });
+      // Signup now holds the CTA in a locked "Working…" state while Supabase resolves, so allow that pending state to settle.
+      await Promise.race([
+        page.waitForURL(/\/onboarding/, { timeout: 20000 }),
+        page.getByText(/check your inbox and confirm your email/i).waitFor({ state: 'visible', timeout: 20000 }),
+        page.getByText(/email rate limit exceeded/i).waitFor({ state: 'visible', timeout: 20000 }),
+        page.getByText(/too many attempts\. try again in/i).waitFor({ state: 'visible', timeout: 20000 }),
+      ]);
+      await expect(page).toHaveURL(/\/onboarding/, { timeout: 1000 });
     } catch {
       const inboxConfirmation = page.getByText(/check your inbox and confirm your email/i);
       const emailRateLimit = page.getByText(/email rate limit exceeded/i);
+      const uiRateLimit = page.getByText(/too many attempts\. try again in/i);
 
       if (await inboxConfirmation.isVisible().catch(() => false)) {
         await confirmUserEmail(email);
-      } else if (await emailRateLimit.isVisible().catch(() => false)) {
+      } else if (
+        await emailRateLimit.isVisible().catch(() => false) ||
+        await uiRateLimit.isVisible().catch(() => false)
+      ) {
+        // Signup now surfaces a countdown instead of the old raw Supabase message.
         await ensureConfirmedUser(email, password);
       } else {
         throw new Error('Signup did not advance and no known auth-policy state was visible.');

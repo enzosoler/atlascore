@@ -1,5 +1,9 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Heartbeat-to-Arrow Icon (Centered and Scaled) -->
-  <path d="M256 512H384L416 563.2L480 409.6L544 563.2L576 512H640L768 435.2" stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M742.4 435.2H768V460.8" stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="atlas.core">
+  <!-- background -->
+  <rect width="96" height="96" rx="20" fill="#efe9da"/>
+  <!-- heart silhouette — classical two-lobe, ink -->
+  <path d="M48 82 C 34 72, 10 58, 10 36 C 10 22, 22 12, 32 12 C 40 12, 44 18, 48 24 C 52 18, 56 12, 64 12 C 74 12, 86 22, 86 36 C 86 58, 62 72, 48 82 Z" fill="#0a0a0a"/>
+  <!-- ECG trace — amber, sharp variant -->
+  <path d="M10 50 L32 50 L38 50 L44 28 L52 72 L58 28 L64 50 L86 50" fill="none" stroke="#e8b500" stroke-width="3.2" stroke-linejoin="miter" stroke-linecap="square"/>
 </svg>

@@ -1,12 +1,16 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { useAuth } from '@/lib/AuthContext';
-import { WEBAPP_PAYWALL } from '@/lib/platformRoutes';
 import { ACBrand, ACFonts } from '@/redesign/v3/lib/paper.jsx';
+import {
+  CONTEXTUAL_PAYWALL_ROUTE,
+  createPaywallState,
+} from '@/redesign/v3/components/paywall/paywallRouteGuard.js';
 
 export default function V3Insights() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme } = useTheme();
   const { user } = useAuth();
   const tier = user?.user_metadata?.tier;
@@ -81,7 +85,9 @@ export default function V3Insights() {
           {!isPremium ? (
             <button
               type="button"
-              onClick={() => navigate(WEBAPP_PAYWALL)}
+              onClick={() => navigate(CONTEXTUAL_PAYWALL_ROUTE, {
+                state: createPaywallState('coach_locked', location.pathname),
+              })}
               style={{
                 borderRadius: 999,
                 padding: '13px 18px',

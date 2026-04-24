@@ -1,4 +1,5 @@
 import React from 'react';
+import { Switch } from '@/components/ui/switch';
 import {
   ACFonts, ACRadii, useACT,
   ACLabel, ACBrandMark, ACTabBar,
@@ -10,6 +11,7 @@ function S19_Settings({
   versionLabel = 'v 2.4.1',
   groups,
   onOpenRow,
+  onToggleRow,
   onSignOut,
 }) {
   const c = useACT(dark);
@@ -69,54 +71,96 @@ function S19_Settings({
             <div style={{
               marginTop: 10, background: c.card, borderRadius: ACRadii.card, overflow: 'hidden',
             }}>
-              {g.rows.map((r, i) => (
-                <button key={r.k} type="button" onClick={() => { if (!r.muted) onOpenRow?.(r.k); }} style={{
+              {g.rows.map((r, i) => {
+                const content = (
+                  <>
+                    {r.avatar && (
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 999,
+                        background: c.fg, color: c.bg, flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: ACFonts.display, fontSize: 15, fontWeight: 700,
+                      }}>MK</div>
+                    )}
+                    {r.dot && (
+                      <div style={{
+                        width: 8, height: 8, borderRadius: 2,
+                        background: r.dot === 'on' ? c.accent : c.mute,
+                        flexShrink: 0,
+                      }} />
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        fontSize: 15, fontWeight: 500,
+                        color: r.danger ? '#e85a2f' : c.fg,
+                      }}>
+                        {r.t}
+                        {r.chip && (
+                          <span style={{
+                            padding: '2px 7px', fontSize: 9, fontWeight: 700,
+                            letterSpacing: 0.5, textTransform: 'uppercase',
+                            background: c.accent, color: c.ink, borderRadius: 4,
+                          }}>{r.chip}</span>
+                        )}
+                      </div>
+                      <ACLabel size={12} color={c.dim} style={{ marginTop: 2 }}>{r.d}</ACLabel>
+                    </div>
+                  </>
+                );
+
+                const baseStyle = {
                   display: 'flex', alignItems: 'center', gap: 14,
                   padding: '14px 16px',
                   borderTop: i === 0 ? 'none' : `1px solid ${c.hair}`,
                   width: '100%', textAlign: 'left', background: 'transparent', borderLeft: 'none', borderRight: 'none', borderBottom: 'none',
-                  cursor: r.muted ? 'default' : 'pointer',
                   opacity: r.muted ? 0.45 : 1,
-                }}>
-                  {r.avatar && (
-                    <div style={{
-                      width: 36, height: 36, borderRadius: 999,
-                      background: c.fg, color: c.bg, flexShrink: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: ACFonts.display, fontSize: 15, fontWeight: 700,
-                    }}>MK</div>
-                  )}
-                  {r.dot && (
-                    <div style={{
-                      width: 8, height: 8, borderRadius: 2,
-                      background: r.dot === 'on' ? c.accent : c.mute,
-                      flexShrink: 0,
-                    }} />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      fontSize: 15, fontWeight: 500,
-                      color: r.danger ? '#e85a2f' : c.fg,
-                    }}>
-                      {r.t}
-                      {r.chip && (
-                        <span style={{
-                          padding: '2px 7px', fontSize: 9, fontWeight: 700,
-                          letterSpacing: 0.5, textTransform: 'uppercase',
-                          background: c.accent, color: c.ink, borderRadius: 4,
-                        }}>{r.chip}</span>
-                      )}
+                };
+
+                if (r.toggle) {
+                  return (
+                    <div key={r.k} style={baseStyle}>
+                      <button
+                        type="button"
+                        onClick={() => { if (!r.muted) onOpenRow?.(r.k); }}
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 14,
+                          padding: 0,
+                          background: 'transparent',
+                          border: 'none',
+                          textAlign: 'left',
+                          cursor: r.muted ? 'default' : 'pointer',
+                        }}
+                      >
+                        {content}
+                      </button>
+                      <Switch
+                        checked={!!r.toggle.checked}
+                        disabled={!!r.toggle.disabled}
+                        onCheckedChange={(checked) => onToggleRow?.(r.k, checked)}
+                        aria-label={r.toggle.ariaLabel || r.t}
+                      />
                     </div>
-                    <ACLabel size={12} color={c.dim} style={{ marginTop: 2 }}>{r.d}</ACLabel>
-                  </div>
-                  {r.chevron && (
-                    <svg width="10" height="12" viewBox="0 0 10 12" style={{ flexShrink: 0 }}>
-                      <path d="M2 1l5 5-5 5" stroke={c.mute} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </button>
-              ))}
+                  );
+                }
+
+                return (
+                  <button key={r.k} type="button" onClick={() => { if (!r.muted) onOpenRow?.(r.k); }} style={{
+                    ...baseStyle,
+                    cursor: r.muted ? 'default' : 'pointer',
+                  }}>
+                    {content}
+                    {r.chevron && (
+                      <svg width="10" height="12" viewBox="0 0 10 12" style={{ flexShrink: 0 }}>
+                        <path d="M2 1l5 5-5 5" stroke={c.mute} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}

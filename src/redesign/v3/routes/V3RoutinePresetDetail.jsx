@@ -8,6 +8,6 @@ export default function V3RoutinePresetDetail(){
   const { theme } = useTheme();
   const { id } = useParams();
   return (
-    <S81_Routine_Preset_Detail dark={theme === 'dark'} id={id} onBack={() => navigate('/routines/presets')} />
+    <S81_Routine_Preset_Detail dark={theme === 'dark'} id={id} onBack={() => navigate('/app/routines/presets')} />
   );
 }

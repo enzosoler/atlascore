@@ -1,69 +1,48 @@
 import { test, expect } from '@playwright/test';
 import { getRuntimeContext } from './helpers/runtime-context';
+import { loginAs } from './helpers/auth';
 
 /**
  * Nutrition page — critical mobile flows
- * Key regression: overflow-x-hidden fix + ResponsiveModal (Drawer on mobile)
+ * Key regression: capture actions must remain reachable on the current /app/nutrition route.
  */
 
+const email = process.env.E2E_USER_EMAIL;
+const password = process.env.E2E_USER_PASSWORD;
+
 test.describe('Nutrition page', () => {
+  test.skip(!email || !password, 'Set E2E_USER_EMAIL + E2E_USER_PASSWORD to run nutrition flow');
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/Nutrition');
+    await loginAs(page, email!, password!);
+    await page.goto('/app/nutrition');
   });
 
-  test('page scrolls vertically', async ({ page }) => {
-    // Regression: overflow-x-clip was forcing overflow-y-clip, blocking scroll
-    await expect(page.locator('main')).toBeVisible({ timeout: 10_000 });
-
-    const initialScrollY = await page.evaluate(() => {
-      const main = document.querySelector('main');
-      return main ? main.scrollTop : window.scrollY;
-    });
-
-    // Simulate scroll down
-    await page.evaluate(() => {
-      const main = document.querySelector('main');
-      if (main) main.scrollTop = 200;
-    });
-
-    const afterScrollY = await page.evaluate(() => {
-      const main = document.querySelector('main');
-      return main ? main.scrollTop : window.scrollY;
-    });
-
-    // If scroll is still 0, the page is unscrollable (the regression)
-    expect(afterScrollY).toBeGreaterThan(0);
+  test('page loads the current nutrition hub', async ({ page }) => {
+    await expect(page.getByText(/today's plate/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('button', { name: /scan/i })).toBeVisible();
   });
 
-  test('Add Meal button is visible and clickable', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /add meal|adicionar refeição/i });
-    await expect(addBtn).toBeVisible({ timeout: 10_000 });
-    await addBtn.click({ trial: true });
+  test('capture buttons are visible and clickable', async ({ page }) => {
+    const scanBtn = page.getByRole('button', { name: /scan/i });
+    const recentsBtn = page.getByRole('button', { name: /recents/i });
+    await expect(scanBtn).toBeVisible({ timeout: 10_000 });
+    await expect(recentsBtn).toBeVisible();
+    await scanBtn.click({ trial: true });
+    await recentsBtn.click({ trial: true });
   });
 
-  test('Add Meal opens a modal/drawer', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /add meal|adicionar refeição/i });
-    await addBtn.click();
+  test('Recents capture routes to the diary screen', async ({ page }) => {
+    await page.getByRole('button', { name: /recents/i }).click();
 
-    // On desktop: Dialog; on mobile: Drawer — both render the form title
-    await expect(
-      page.getByText(/add meal|adicionar refeição/i).nth(1)
-    ).toBeVisible({ timeout: 8_000 });
+    // The nutrition flow is route-based now, not a modal/drawer.
+    await expect(page).toHaveURL(/\/app\/nutrition\/diary/i, { timeout: 8_000 });
   });
 
-  test('modal is scrollable on mobile', async ({ page }) => {
-    const addBtn = page.getByRole('button', { name: /add meal|adicionar refeição/i });
-    await addBtn.click();
+  test('Scan capture routes to the capture screen', async ({ page }) => {
+    await page.getByRole('button', { name: /scan/i }).click();
 
-    // The form container should be a scroll container, not clipped
-    const scrollable = await page.evaluate(() => {
-      const dialog = document.querySelector('[role="dialog"], [vaul-drawer]');
-      if (!dialog) return false;
-      const el = dialog.querySelector('[class*="overflow-y-auto"]');
-      return !!el;
-    });
-
-    expect(scrollable).toBe(true);
+    await expect(page).toHaveURL(/\/app\/nutrition\/capture/i, { timeout: 8_000 });
   });
 
   test('page interactions are not blocked by OnboardingTour backdrop', async ({ page }) => {

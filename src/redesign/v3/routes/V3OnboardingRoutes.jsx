@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { ACBtn, ACFonts, ACLabel, ACRadii, useACT } from '../lib/paper.jsx';
 import V3StandaloneLayout from '../layouts/V3StandaloneLayout.jsx';
 import S7_Onboard_Identity from '../screens/S7_Onboard_Identity.jsx';
 import S8_Onboard_Goal from '../screens/S8_Onboard_Goal.jsx';
@@ -14,6 +17,7 @@ import S61_Onboard_Summary from '../screens/S61_Onboard_Summary.jsx';
 import S62_Onboard_Tour from '../screens/S62_Onboard_Tour.jsx';
 import {
   buildProfileDataFromOnboarding,
+  finalizeOnboarding,
   readOnboardingDraft,
   writeOnboardingDraft,
 } from '@/services/onboardingService';
@@ -37,6 +41,271 @@ function Wrap({ children }) {
   return <V3StandaloneLayout>{children}</V3StandaloneLayout>;
 }
 
+function SplitOnboardingCard({ dark = false, stepLabel, title, body, children, footer }) {
+  const c = useACT(dark);
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: c.bg, color: c.fg }}>
+      <div style={{ padding: '18px 28px 0' }}>
+        <ACLabel size={11} color={c.accent} style={{ fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase' }}>
+          {stepLabel}
+        </ACLabel>
+        <div style={{ marginTop: 12, fontFamily: ACFonts.display, fontSize: 34, lineHeight: 1, letterSpacing: -1.2 }}>
+          {title}
+        </div>
+        <div style={{ marginTop: 10, fontSize: 14, lineHeight: 1.55, color: c.dim, maxWidth: 320 }}>
+          {body}
+        </div>
+      </div>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '24px 28px 16px' }}>
+        {children}
+      </div>
+      <div style={{ padding: '14px 28px 26px', background: c.bg }}>
+        {footer}
+      </div>
+    </div>
+  );
+}
+
+export function V3OnboardingDietPreferences() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { data, update } = useOnboardingState();
+  const c = useACT(theme === 'dark');
+  const [dietaryStyle, setDietaryStyle] = useState(data?.dietaryStyle || 'high_protein');
+  const [restrictions, setRestrictions] = useState(() => new Set(data?.dietaryRestrictions || []));
+  const [avoidFoods, setAvoidFoods] = useState(data?.avoidFoods || '');
+  const styles = [
+    ['high_protein', 'High protein'],
+    ['balanced', 'Balanced'],
+    ['low_carb', 'Lower carb'],
+    ['plant_forward', 'Plant-forward'],
+  ];
+  const restrictionOptions = ['Dairy-free', 'Gluten-free', 'Vegetarian', 'Vegan', 'No pork', 'No shellfish'];
+
+  function emit(nextPatch = {}) {
+    update({
+      dietaryStyle,
+      dietaryRestrictions: Array.from(restrictions),
+      avoidFoods,
+      ...nextPatch,
+    });
+  }
+
+  return (
+    <Wrap>
+      <SplitOnboardingCard
+        dark={theme === 'dark'}
+        stepLabel="Setup · nutrition"
+        title="How should food feel?"
+        body="Set the eating pattern, hard restrictions, and foods coach should avoid when building meals and reminders."
+        footer={(
+          <ACBtn primary block dark={theme === 'dark'} size="lg" pill onClick={() => {
+            emit();
+            navigate('/onboarding/goal');
+          }}
+          >
+            Continue →
+          </ACBtn>
+        )}
+      >
+        <div style={{ display: 'grid', gap: 10 }}>
+          {styles.map(([id, label]) => {
+            const active = dietaryStyle === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  setDietaryStyle(id);
+                  emit({ dietaryStyle: id });
+                }}
+                style={{
+                  padding: '16px 18px',
+                  borderRadius: ACRadii.input,
+                  border: active ? '1px solid transparent' : `1px solid ${c.hair}`,
+                  background: active ? c.fg : 'transparent',
+                  color: active ? c.bg : c.fg,
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
+            Restrictions
+          </ACLabel>
+          <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {restrictionOptions.map((item) => {
+              const active = restrictions.has(item);
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    const next = new Set(restrictions);
+                    next.has(item) ? next.delete(item) : next.add(item);
+                    setRestrictions(next);
+                    emit({ dietaryRestrictions: Array.from(next) });
+                  }}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 999,
+                    border: active ? '1px solid transparent' : `1px solid ${c.hair}`,
+                    background: active ? c.accent : 'transparent',
+                    color: active ? c.ink : c.fg,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {item}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
+            Foods to avoid
+          </ACLabel>
+          <textarea
+            value={avoidFoods}
+            onChange={(event) => {
+              setAvoidFoods(event.target.value);
+              emit({ avoidFoods: event.target.value });
+            }}
+            placeholder="Anything coach should keep out of your meal ideas?"
+            style={{
+              marginTop: 12,
+              width: '100%',
+              minHeight: 110,
+              borderRadius: ACRadii.card,
+              border: `1px solid ${c.hair}`,
+              background: c.card,
+              color: c.fg,
+              padding: 14,
+              fontSize: 14,
+              fontFamily: ACFonts.body,
+              resize: 'vertical',
+            }}
+          />
+        </div>
+      </SplitOnboardingCard>
+    </Wrap>
+  );
+}
+
+export function V3OnboardingCoachMatch() {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { data, update } = useOnboardingState();
+  const c = useACT(theme === 'dark');
+  const [coachTone, setCoachTone] = useState(data?.coachTone || 'direct');
+  const [coachFocus, setCoachFocus] = useState(data?.coachFocus || 'consistency');
+  const tones = [
+    ['direct', 'Direct and concise'],
+    ['supportive', 'Supportive and steady'],
+    ['analytical', 'Analytical and data-first'],
+  ];
+  const focuses = [
+    ['consistency', 'Daily consistency'],
+    ['performance', 'Performance and PRs'],
+    ['body_comp', 'Body composition'],
+    ['recovery', 'Recovery and readiness'],
+  ];
+
+  return (
+    <Wrap>
+      <SplitOnboardingCard
+        dark={theme === 'dark'}
+        stepLabel="Setup · coach matching"
+        title="Match the coach to the athlete."
+        body="Set the tone and primary coaching lens so chat, reminders, and plan nudges feel intentional instead of generic."
+        footer={(
+          <ACBtn
+            primary
+            block
+            dark={theme === 'dark'}
+            size="lg"
+            pill
+            onClick={() => {
+              update({ coachTone, coachFocus });
+              navigate('/onboarding/tour');
+            }}
+          >
+            Continue →
+          </ACBtn>
+        )}
+      >
+        <div>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
+            Tone
+          </ACLabel>
+          <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
+            {tones.map(([id, label]) => {
+              const active = coachTone === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setCoachTone(id)}
+                  style={{
+                    padding: '16px 18px',
+                    borderRadius: ACRadii.input,
+                    border: active ? '1px solid transparent' : `1px solid ${c.hair}`,
+                    background: active ? c.fg : 'transparent',
+                    color: active ? c.bg : c.fg,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 24 }}>
+          <ACLabel size={11} color={c.dim} style={{ textTransform: 'uppercase', fontWeight: 700, letterSpacing: 0.6 }}>
+            Primary focus
+          </ACLabel>
+          <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
+            {focuses.map(([id, label]) => {
+              const active = coachFocus === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setCoachFocus(id)}
+                  style={{
+                    padding: '16px 18px',
+                    borderRadius: ACRadii.input,
+                    border: active ? '1px solid transparent' : `1px solid ${c.hair}`,
+                    background: active ? c.accent : 'transparent',
+                    color: active ? c.ink : c.fg,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </SplitOnboardingCard>
+    </Wrap>
+  );
+}
+
 export function V3OnboardingIdentity() {
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -47,7 +316,7 @@ export function V3OnboardingIdentity() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
-        onContinue={() => navigate('/onboarding/goal')}
+        onContinue={() => navigate('/onboarding/nutrition')}
       />
     </Wrap>
   );
@@ -63,7 +332,7 @@ export function V3OnboardingGoal() {
         dark={theme === 'dark'}
         value={data}
         onChange={update}
-        onBack={() => navigate('/onboarding')}
+        onBack={() => navigate('/onboarding/nutrition')}
         onContinue={() => navigate('/onboarding/activity')}
       />
     </Wrap>
@@ -110,10 +379,13 @@ export function V3OnboardingPlan() {
 export function V3OnboardingPermissions() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { data, update } = useOnboardingState();
   return (
     <Wrap>
       <S11_Onboard_Permissions
         dark={theme === 'dark'}
+        value={data}
+        onChange={update}
         onBack={() => navigate('/onboarding/stats')}
         onContinue={() => navigate('/onboarding/workout')}
         onSkip={() => navigate('/onboarding/workout')}
@@ -198,7 +470,7 @@ export function V3OnboardingSummary() {
         targets={summaryTargets}
         constraints={summaryConstraints}
         onBack={() => navigate('/onboarding/constraints')}
-        onContinue={() => navigate('/onboarding/paywall')}
+        onContinue={() => navigate('/onboarding/coach-match')}
       />
     </Wrap>
   );
@@ -207,12 +479,30 @@ export function V3OnboardingSummary() {
 export function V3OnboardingTour() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { user } = useAuth();
+
+  async function completeOnboarding() {
+    if (!user?.id) {
+      navigate('/auth/signup', { replace: true });
+      return;
+    }
+
+    try {
+      await finalizeOnboarding(user.id);
+      navigate('/app/today', { replace: true });
+    } catch (error) {
+      toast.error('Could not finish onboarding', {
+        description: error?.message || 'Please try again.',
+      });
+    }
+  }
+
   return (
     <Wrap>
       <S62_Onboard_Tour
         dark={theme === 'dark'}
-        onFinish={() => navigate('/app/today')}
-        onSkip={() => navigate('/app/today')}
+        onFinish={completeOnboarding}
+        onSkip={completeOnboarding}
       />
     </Wrap>
   );

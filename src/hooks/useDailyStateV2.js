@@ -106,7 +106,7 @@ export function useDailyStateV2() {
     enabled: !!uid, staleTime: 30_000,
   });
 
-  const { data: rawProfile } = useQuery({
+  const { data: rawProfile, isLoading: l4 } = useQuery({
     queryKey: DAILY_KEYS.profile(uid),
     queryFn: () => sq(async () => {
       const { data } = await supabase.from('profiles').select('profile_data, full_name').eq('id', uid).single();
@@ -148,6 +148,9 @@ export function useDailyStateV2() {
   // ── Derived sections ──────────────────────────────────────────────────────
 
   const profileData = rawProfile?.profile_data ?? {};
+  const preferences = profileData?.preferences && typeof profileData.preferences === 'object'
+    ? profileData.preferences
+    : {};
   const targets = profileData?.targets ?? {
     calories: profileData.calories_target,
     protein: profileData.protein_target,
@@ -255,6 +258,7 @@ export function useDailyStateV2() {
   }, [uid, qc, today]);
 
   const nutritionMode = profileData?.nutrition_mode || 'macros_only';
+  const dailyCheckinRequired = preferences.dailyCheckinRequired !== false;
 
   return {
     // Structured sections
@@ -263,7 +267,9 @@ export function useDailyStateV2() {
     protocols,
     plan,
     profile: profileData,
+    preferences,
     nutritionMode,
+    dailyCheckinRequired,
     preferredName: rawProfile?.full_name || user?.email?.split('@')[0] || 'Athlete',
 
     // Raw data
@@ -289,7 +295,8 @@ export function useDailyStateV2() {
     checkinHydrationLiters: rawCheckin?.hydration_liters ?? null,
 
     // State
-    isLoading: l1 || l2 || l3,
+    isLoading: l1 || l2 || l3 || l4,
+    profileLoading: l4,
 
     // Actions
     invalidateAfterAction,

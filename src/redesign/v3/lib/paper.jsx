@@ -156,7 +156,7 @@ export function ACNum({ children, size = 48, color, weight = 700, style }) {
 
 /** Standard button — primary fills with amber, default is a flat panel. */
 export function ACBtn({
-  children, primary, dark, block, style, size = 'md', pill, onClick, type = 'button',
+  children, primary, dark, block, style, size = 'md', pill, onClick, type = 'button', disabled = false,
 }) {
   const c = useACT(dark);
   const pads = { sm: '10px 16px', md: '14px 20px', lg: '18px 24px' };
@@ -167,6 +167,7 @@ export function ACBtn({
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       style={{
         display: block ? 'flex' : 'inline-flex',
         width: block ? '100%' : undefined,
@@ -182,7 +183,7 @@ export function ACBtn({
         fontWeight: 600,
         letterSpacing: -0.2,
         borderRadius: pill ? 999 : ACRadii.button,
-        cursor: 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer',
         WebkitAppearance: 'none',
         ...style,
       }}
@@ -292,30 +293,94 @@ export function ACBars({ data, w = 320, h = 120, dark, labelFmt = (x) => x }) {
 // ── line chart for weight trend (raw points + 7-day MA) ───────
 export function ACLine({ data, w = 340, h = 140, dark, highlightLast = true }) {
   const c = useACT(dark);
-  const vs = data.map((d) => d.v);
+  const safeWidth = Number.isFinite(w) && w > 0 ? w : 340;
+  const safeHeight = Number.isFinite(h) && h > 0 ? h : 140;
+  const innerHeight = Math.max(1, safeHeight - 20);
+  const sanitizedData = Array.isArray(data)
+    ? data
+      .map((point, index) => {
+        const value = Number(point?.v);
+        if (!Number.isFinite(value)) return null;
+        return { ...point, v: value, k: point?.k ?? index };
+      })
+      .filter(Boolean)
+    : [];
+
+  const gridYs = [0, 0.5, 1]
+    .map((v) => safeHeight * (1 - v) - 5)
+    .filter((value) => Number.isFinite(value));
+
+  if (sanitizedData.length === 0) {
+    return (
+      <svg width={safeWidth} height={safeHeight} style={{ display: 'block' }}>
+        {gridYs.map((y, i) => (
+          <line
+            key={i}
+            x1="0"
+            x2={safeWidth}
+            y1={y}
+            y2={y}
+            stroke={c.hair}
+            strokeDasharray="2 4"
+          />
+        ))}
+      </svg>
+    );
+  }
+
+  const vs = sanitizedData.map((d) => d.v);
   const min = Math.min(...vs);
   const max = Math.max(...vs);
   const span = max - min || 1;
-  const step = w / (data.length - 1);
-  const pts = data.map((d, i) => [i * step, h - ((d.v - min) / span) * (h - 20) - 10]);
-  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
-  const ma = data.map((_, i) => {
-    const slice = data.slice(Math.max(0, i - 6), i + 1);
+  const step = sanitizedData.length > 1 ? safeWidth / (sanitizedData.length - 1) : 0;
+  const toY = (value) => safeHeight - ((value - min) / span) * innerHeight - 10;
+  const pts = sanitizedData
+    .map((d, i) => [i * step, toY(d.v)])
+    .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  const path = pts.length > 1
+    ? pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ')
+    : '';
+  const ma = sanitizedData.map((_, i) => {
+    const slice = sanitizedData.slice(Math.max(0, i - 6), i + 1);
     return slice.reduce((s, d) => s + d.v, 0) / slice.length;
   });
-  const maPts = ma.map((v, i) => [i * step, h - ((v - min) / span) * (h - 20) - 10]);
-  const maPath = maPts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+  const maPts = ma
+    .map((v, i) => [i * step, toY(v)])
+    .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  const maPath = maPts.length > 1
+    ? maPts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ')
+    : '';
+
+  const hasRenderablePoints = pts.length > 0 || maPts.length > 0;
+  if (!hasRenderablePoints) {
+    return (
+      <svg width={safeWidth} height={safeHeight} style={{ display: 'block' }}>
+        {gridYs.map((y, i) => (
+          <line
+            key={i}
+            x1="0"
+            x2={safeWidth}
+            y1={y}
+            y2={y}
+            stroke={c.hair}
+            strokeDasharray="2 4"
+          />
+        ))}
+      </svg>
+    );
+  }
+
   return (
-    <svg width={w} height={h} style={{ display: 'block' }}>
-      {[0, 0.5, 1].map((v, i) => (
+    <svg width={safeWidth} height={safeHeight} style={{ display: 'block' }}>
+      {gridYs.map((y, i) => (
         <line
-          key={i} x1="0" x2={w}
-          y1={h * (1 - v) - 5} y2={h * (1 - v) - 5}
+          key={i} x1="0" x2={safeWidth}
+          y1={y} y2={y}
           stroke={c.hair} strokeDasharray="2 4"
         />
       ))}
-      <path d={path} fill="none" stroke={c.dim} strokeWidth="1.5" strokeDasharray="2 2" />
-      <path d={maPath} fill="none" stroke={c.fg} strokeWidth="2.5" strokeLinejoin="miter" />
+      {path ? <path d={path} fill="none" stroke={c.dim} strokeWidth="1.5" strokeDasharray="2 2" /> : null}
+      {maPath ? <path d={maPath} fill="none" stroke={c.fg} strokeWidth="2.5" strokeLinejoin="miter" /> : null}
       {pts.map((p, i) => {
         const last = i === pts.length - 1;
         return (
@@ -486,12 +551,21 @@ export function ACBrandMark({ size = 18, dark, HeartMarkComp }) {
  */
 export function ACTabBar({ active = 'today', dark, onChange, HeartMarkComp }) {
   const c = useACT(dark);
+  const normalizedActive = (
+    {
+      workout: 'workouts',
+      train: 'workouts',
+      eat: 'nutrition',
+      body: 'profile',
+      you: 'profile',
+    }[active] || active
+  );
   const tabs = [
     { k: 'today', label: 'Today', icon: 'home' },
-    { k: 'train', label: 'Train', icon: 'bars' },
-    { k: 'eat',   label: 'Eat',   icon: 'plate' },
-    { k: 'body',  label: 'Body',  icon: 'heart' },
-    { k: 'you',   label: 'You',   icon: 'face' },
+    { k: 'workouts', label: 'Workouts', icon: 'bars' },
+    { k: 'nutrition', label: 'Nutrition', icon: 'plate' },
+    { k: 'coach', label: 'Coach', icon: 'heart' },
+    { k: 'profile', label: 'Profile', icon: 'face' },
   ];
   const Icon = ({ k, on }) => {
     const col = on ? c.accent : c.dim;
@@ -547,7 +621,7 @@ export function ACTabBar({ active = 'today', dark, onChange, HeartMarkComp }) {
       }}
     >
       {tabs.map((tab) => {
-        const on = tab.k === active;
+        const on = tab.k === normalizedActive;
         return (
           <button
             key={tab.k}

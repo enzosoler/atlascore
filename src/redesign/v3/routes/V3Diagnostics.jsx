@@ -1,16 +1,20 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { Capacitor } from '@capacitor/core';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { useI18n, useT } from '@/lib/i18nContext';
 import { WebAccountRow, WebAccountScaffold, WebAccountSection } from './WebAccountScaffold.jsx';
+import { notificationService } from '@/services/notificationService';
 
 export default function V3Diagnostics() {
   const { user } = useAuth();
   const { theme } = useTheme();
   const { locale } = useI18n();
   const t = useT();
+  const [pushPermission, setPushPermission] = useState('loading');
+  const [pushToken, setPushToken] = useState('');
 
   const appVersion = typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_VERSION
     ? import.meta.env.VITE_APP_VERSION
@@ -25,7 +29,40 @@ export default function V3Diagnostics() {
     userId: user?.id || null,
     email: user?.email || null,
     userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+    pushPermission,
+    pushToken: pushToken || null,
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPushState() {
+      if (!Capacitor.isNativePlatform()) {
+        if (!cancelled) {
+          setPushPermission('web');
+          setPushToken('');
+        }
+        return;
+      }
+
+      try {
+        const permission = await notificationService.checkPermissions();
+        if (!cancelled) {
+          setPushPermission(permission);
+          setPushToken(notificationService.pushToken || '');
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setPushPermission(`error: ${error?.message || 'unknown'}`);
+        }
+      }
+    }
+
+    loadPushState();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleCopyDiagnostics() {
     try {
@@ -53,6 +90,8 @@ export default function V3Diagnostics() {
         <WebAccountRow title={t('diagnosticsPage.rows.platform')} description={diagnosticsPayload.platform} />
         <WebAccountRow title={t('diagnosticsPage.rows.locale')} description={locale} />
         <WebAccountRow title={t('diagnosticsPage.rows.theme')} description={theme} />
+        <WebAccountRow title="Push permission" description={pushPermission} />
+        <WebAccountRow title="Push token" description={pushToken || '—'} />
       </WebAccountSection>
 
       <WebAccountSection title={t('diagnosticsPage.sections.session')}>

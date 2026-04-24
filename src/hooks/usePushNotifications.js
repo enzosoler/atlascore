@@ -67,10 +67,29 @@ export function usePushNotifications() {
       }
     };
 
-    notificationService.init({
-      userId: user.id,
-      onForegroundPush,
-      onTap,
+    let cancelled = false;
+
+    (async () => {
+      const status = await notificationService.checkPermissions();
+      const finalStatus =
+        status === 'prompt'
+          ? await notificationService.requestPermissions()
+          : status;
+
+      if (cancelled) return;
+
+      if (finalStatus !== 'granted') {
+        console.warn('[usePushNotifications] push permission not granted:', finalStatus);
+        return;
+      }
+
+      await notificationService.init({
+        userId: user.id,
+        onForegroundPush,
+        onTap,
+      });
+    })().catch((error) => {
+      console.warn('[usePushNotifications] init failed:', error?.message || error);
     });
 
     // Schedule smart reminders (context-aware, not generic)
@@ -78,8 +97,7 @@ export function usePushNotifications() {
 
     // Cleanup runs when user changes (e.g. logout) or component unmounts.
     return () => {
-      // Only destroy when the user actually logs out (user becomes null),
-      // not on every re-render.
+      cancelled = true;
     };
   }, [isAuthenticated, user?.id, navigate]);
 

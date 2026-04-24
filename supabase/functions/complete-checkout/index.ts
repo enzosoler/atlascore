@@ -7,6 +7,7 @@
  * signature is misconfigured.
  *
  * Requires: STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ * Optional for QA: STRIPE_TEST_MODE, STRIPE_TEST_SECRET_KEY
  */
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
@@ -18,6 +19,20 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+function isTruthy(value: string | undefined | null): boolean {
+  return ['1', 'true', 'yes', 'on'].includes((value || '').trim().toLowerCase());
+}
+
+function resolveStripeSecretKey() {
+  const defaultSecretKey = Deno.env.get('STRIPE_SECRET_KEY') ?? '';
+  const testMode = isTruthy(Deno.env.get('STRIPE_TEST_MODE')) || defaultSecretKey.startsWith('sk_test_');
+  const stripeKey = testMode
+    ? (Deno.env.get('STRIPE_TEST_SECRET_KEY') || defaultSecretKey)
+    : defaultSecretKey;
+
+  return { stripeKey, testMode };
+}
 
 // Mirror the same plan normalization used in stripe-webhook
 function normalizePlanCode(plan: string | null | undefined): string | null {
@@ -46,7 +61,7 @@ serve(async (req: Request) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') ?? '';
+  const { stripeKey } = resolveStripeSecretKey();
 
   if (!stripeKey) {
     return new Response(JSON.stringify({ error: 'Stripe not configured' }), {

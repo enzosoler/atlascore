@@ -3,6 +3,86 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+function manualChunks(id) {
+  if (!id.includes('node_modules')) return
+
+  if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/')) {
+    return 'vendor-react'
+  }
+
+  if (id.includes('/react-router/') || id.includes('/react-router-dom/')) {
+    return 'vendor-router'
+  }
+
+  if (id.includes('/@supabase/')) {
+    return 'vendor-supabase'
+  }
+
+  if (
+    id.includes('/@capacitor/') ||
+    id.includes('/@revenuecat/')
+  ) {
+    return 'vendor-native'
+  }
+
+  if (
+    id.includes('/recharts/') ||
+    id.includes('/d3-')
+  ) {
+    return 'vendor-charts'
+  }
+
+  if (
+    id.includes('/html2canvas/') ||
+    id.includes('/jspdf/')
+  ) {
+    return 'vendor-export'
+  }
+
+  if (id.includes('/react-markdown/')) {
+    return 'vendor-markdown'
+  }
+
+  if (id.includes('/posthog-js/')) {
+    return 'vendor-posthog'
+  }
+
+  if (id.includes('/@sentry/')) {
+    return 'vendor-sentry'
+  }
+
+  if (id.includes('/@tanstack/')) {
+    return 'vendor-query'
+  }
+
+  if (id.includes('/sonner/')) {
+    return 'vendor-sonner'
+  }
+
+  if (id.includes('/lucide-react/')) {
+    return 'vendor-icons'
+  }
+
+  if (id.includes('/zod/')) {
+    return 'vendor-zod'
+  }
+
+  if (id.includes('/tailwind-merge/')) {
+    return 'vendor-tailwind'
+  }
+
+  if (id.includes('/@radix-ui/')) {
+    return 'vendor-radix'
+  }
+
+  if (
+    id.includes('/framer-motion/') ||
+    id.includes('/embla-carousel-react/')
+  ) {
+    return 'vendor-motion'
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -101,7 +181,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        manualChunks,
       },
     },
   },
