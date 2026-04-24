@@ -78,12 +78,26 @@ async function hydrateStoredAuthState(page: Page, storageState: PlaywrightStorag
   }
 
   await gotoForStorageAccess(page);
-  await page.evaluate((entries) => {
-    window.localStorage.clear();
-    for (const entry of entries) {
-      window.localStorage.setItem(entry.name, entry.value);
+  try {
+    await page.evaluate((entries) => {
+      window.localStorage.clear();
+      for (const entry of entries) {
+        window.localStorage.setItem(entry.name, entry.value);
+      }
+    }, matchingOrigin.localStorage);
+  } catch (error) {
+    if (/context was destroyed|frame was detached/i.test(String(error))) {
+      await page.waitForLoadState('domcontentloaded').catch(() => null);
+      await page.evaluate((entries) => {
+        window.localStorage.clear();
+        for (const entry of entries) {
+          window.localStorage.setItem(entry.name, entry.value);
+        }
+      }, matchingOrigin.localStorage);
+    } else {
+      throw error;
     }
-  }, matchingOrigin.localStorage);
+  }
 }
 
 async function persistStoredAuthState(page: Page) {
@@ -123,7 +137,12 @@ async function tryReuseStoredAuthState(page: Page) {
 
   await clearBrowserAuthState(page);
   await hydrateStoredAuthState(page, storageState);
-  await page.goto('/app/today');
+  try {
+    await page.goto('/app/today');
+  } catch (error) {
+    if (!/interrupted|frame.*load/i.test(String(error))) throw error;
+    await page.waitForLoadState('domcontentloaded').catch(() => null);
+  }
 
   if (!isAuthedUrl(page.url())) {
     await clearBrowserAuthState(page);
